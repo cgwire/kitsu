@@ -484,7 +484,8 @@ export default {
     },
 
     nbShotsCastedIn() {
-      return this.currentAsset.castInShotsBySequence.reduce((acc, shots) => {
+      const castIn = this.currentAsset?.castInShotsBySequence || []
+      return castIn.reduce((acc, shots) => {
         return acc + shots.length
       }, 0)
     },

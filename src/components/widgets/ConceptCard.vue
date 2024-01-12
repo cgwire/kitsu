@@ -113,7 +113,6 @@ export default {
 <style scoped>
 .concept-item {
   border-radius: 1em;
-  border: 5px solid transparent;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
 }
 

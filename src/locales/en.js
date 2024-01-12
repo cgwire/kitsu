@@ -150,6 +150,7 @@ export default {
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
     empty: 'There are no concepts',
     multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
+    no_concept_selected: 'No concept selected',
     title: 'Concepts',
     fields: {
       entity_type: 'Entity type',
@@ -1312,6 +1313,7 @@ export default {
     bigger: 'Widen task panel',
     big_thumbnails: 'Show big thumbnails',
     build_playlist: 'Build playlist from list',
+    calendar: 'Calendar',
     confirm_attachments: 'Add files as attachments',
     change_status_to: 'Change task status to:',
     change_status: 'Post comment',

@@ -310,7 +310,6 @@ export default {
           name: 'timesheets'
         }
       ]
->>>>>>> wiptodo
     },
 
     loggableTodos() {
@@ -411,6 +410,7 @@ export default {
     ]),
 
     isTabActive(tab) {
+      console.log(this.currentSection, tab)
       return this.currentSection === tab
     },
 
@@ -422,7 +422,7 @@ export default {
     },
 
     selectTab(tab) {
-      this.activeTab = tab
+      this.currentSection = tab
       this.resizeHeaders()
       setTimeout(() => {
         if (this.$refs['todos-search-field']) {
@@ -432,11 +432,13 @@ export default {
     },
 
     updateActiveTab() {
-      const tab = this.$route.params.tab
-      if (['board', 'done', 'timesheets'].includes(tab)) {
-        this.activeTab = this.$route.params.tab
-
-        if (tab === 'board') {
+      if (
+        ['board', 'calendar', 'done', 'pending', 'timesheets'].includes(
+          this.$route.query.section
+        )
+      ) {
+        this.currentSection = this.$route.query.section
+        if (this.currentSection === 'board') {
           const currentProduction = this.openProductions.find(
             ({ id }) => id === this.$route.query.productionId
           )
@@ -452,7 +454,7 @@ export default {
           }
         }
       } else {
-        this.activeTab = 'todos'
+        this.currentSection = 'todos'
       }
       this.clearSelectedTasks()
     },

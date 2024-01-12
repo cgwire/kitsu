@@ -252,7 +252,7 @@
           v-else
         >
           <div
-            class="day"
+            class="day week"
             :class="{
               'without-milestones': !withMilestones
             }"
@@ -1290,6 +1290,7 @@ export default {
       const movementY =
         event.movementY || this.getClientY(event) - this.initialClientY
       const newTop = previousTop - movementY
+      console.log('ok', newTop, movementY)
       this.initialClientY = this.getClientY(event)
       this.timelineContentWrapper.scrollTop = newTop
       this.entityList.scrollTop = newTop
@@ -1891,6 +1892,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         margin-top: 17px;
       }
 
+      &.week {
+        margin-top: 20px;
+      }
+
       .week-number {
         color: $grey;
         display: inline-block;
@@ -1918,6 +1923,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         padding-top: 0.5em;
       }
 
+      .weekday-number {
+        color: var(--text);
+      }
+
       .month-name {
         border-left: 2px solid black;
         bottom: 0;
@@ -1941,7 +1950,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     .timeline-content {
       position: relative;
       overflow: hidden;
-      height: 100%;
 
       .timeline-position {
         visibility: hidden;
@@ -2280,6 +2288,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     }
 
     .day-name {
+      display: none;
+    }
+
+    .week-number {
       display: none;
     }
   }

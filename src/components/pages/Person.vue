@@ -88,7 +88,7 @@
           />
           <span class="filler"></span>
           <combobox-number
-            class="flexrow-item zoom-level"
+            class="flexrow-item zoom-level mb0"
             :label="$t('schedule.zoom_level')"
             :options="zoomOptions"
             v-model="zoomLevel"
@@ -510,7 +510,7 @@ export default {
         expanded: false,
         loading: false,
         man_days: estimation,
-        editable: this.isCurrentUserManager,
+        editable: false,
         unresizable: false,
         parentElement,
         color: taskType.color,
@@ -673,6 +673,11 @@ export default {
 
     activeTab() {
       this.resetScheduleHeight()
+      this.$nextTick(() => {
+        if (this.$refs['schedule-widget']) {
+          this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
+        }
+      })
     },
 
     zoomLevel() {
@@ -707,7 +712,8 @@ export default {
 }
 
 .query-list {
-  margin-top: 1em;
+  margin: 0;
+  margin-bottom: 1em;
 }
 
 .task-tabs {
@@ -744,5 +750,13 @@ export default {
 
 .main-column {
   border-right: 3px solid $light-grey;
+}
+
+.zoom-level {
+  margin-top: -0.5em;
+}
+
+.field {
+  margin-bottom: 0;
 }
 </style>

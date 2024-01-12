@@ -39,7 +39,7 @@ export default {
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,dayGridWeek,dayGridDay'
+          right: 'dayGridMonth,dayGridWeek'
         },
         initialView: 'dayGridMonth'
       }
@@ -106,10 +106,26 @@ export default {
   .fc-button-primary:not(:disabled).fc-button-active,
   .fc-button {
     background: transparent;
-    color: var(--text);
     border: 1px solid var(--border);
-    &:hover {
+    color: var(--text);
+    outline: none;
+
+    &:not(:disabled):active,
+    &:not(:disabled):focus {
+      outline: none;
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+
+    &:not(:disabled):active:focus {
+      box-shadow: none;
       background: var(--background-selectable);
+    }
+
+    &:hover {
+      color: var(--text);
+      background: var(--background-selectable);
+      border: 1px solid var(--border);
     }
   }
 
@@ -120,6 +136,7 @@ export default {
   .fc-button-primary:disabled {
     background: transparent;
     border: 1px solid var(--border);
+    color: var(--text);
   }
 }
 </style>

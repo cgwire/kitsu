@@ -32,8 +32,6 @@
             <th class="end-cell"></th>
           </tr>
         </thead>
-      </table>
-      <table class="datatable" style="overflow: auto">
         <tbody class="datatable-body">
           <tr
             :key="previewFile.id"
@@ -188,12 +186,21 @@ export default {
   overflow-y: auto;
 }
 
-.thumbnail {
+table.datatable {
+  table-layout: fixed;
+}
+
+th.thumbnail {
   padding-top: 10px;
   width: 80px;
 }
-.type {
-  width: 150px;
+
+td.thumbnail {
+  width: 80px;
+}
+
+td.type {
+  width: 100px;
 }
 .revision {
   width: 80px;
@@ -209,6 +216,10 @@ export default {
 }
 .download {
   width: 40px;
+}
+
+.original-name {
+  width: 250px;
 }
 .person {
   width: 250px;

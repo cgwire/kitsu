@@ -20,7 +20,6 @@ export const entityMixin = {
       zoomLevel: 1,
       entityNavOptions: [
         { label: 'Infos', value: 'infos' },
-        { label: 'Activity', value: 'activity' },
         { label: 'Casting', value: 'casting' },
         { label: 'Schedule', value: 'schedule' },
         { label: 'Preview Files', value: 'preview-files' },
@@ -42,6 +41,15 @@ export const entityMixin = {
 
   computed: {
     ...mapGetters(['organisation']),
+
+    entityTabs() {
+      return this.entityNavOptions.map(option => {
+        return {
+          label: option.label,
+          name: option.value
+        }
+      })
+    },
 
     thumbnailPath() {
       const previewId = this.currentEntity.preview_file_id
