@@ -437,6 +437,12 @@ Kitsu will automatically switch to the **Publish Revision** tab when you use sta
 You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`),
 or an `.glb` file. You can review all the previews from the browser or mix everything.
 
+For the `.glb` file you can also review it as wireframe, or add a `.HDR` file to check the lighting. 
+
+See the **Customization** section for more details.
+[Pipeline Customization](../customization-pipeline/README.md)
+
+
 Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb`, however, need to be
 downloaded to be reviewed.
 

@@ -300,10 +300,54 @@ On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
 
 On the **Status Automation** tab, you can choose which Automation you want to add or remove on this production,
 
-![Setting Status automation](../img/getting-started/setting_auto_add.png)
 
 Validate your choice with the **add** button.
 
-![Setting Add Asset](../img/getting-started/setting_asset_add.png)
+![Setting Status automation](../img/getting-started/setting_auto_add.png)
 
 You can see your Status updating thanks to the Automation.
+
+
+## Preview backgrounds
+
+### Create your global library of HDR file
+
+The Preview Backgrounds are here to help to better review your 3D preview file (`.glb`).
+
+On this section, you can create your `.HDR`library file that you can use in your different production.
+
+Go to the main menu, and select **Preview Backgrounds**.
+
+![Main menu preview background](../img/getting-started/main_menu_preview_backgrounds.png)
+
+
+Once on the new page, you can add a **HDR Preview Background** by clicking the **+Add a new background** button.
+
+![add preview background](../img/getting-started/preview_background_empty.png)
+
+
+From here; you need to select your HDR preview background, name it and choose if you want this HDR to be the default background.
+
+![Main menu preview background](../img/getting-started/preview_background_new.png)
+
+Once you have uplaoded all your HDR file, Kitsu will display them as a list.
+
+![Preview background filled](../img/getting-started/preview_background_filled.png)
+
+
+Now your new **Preview Background** is created on your **Global Library**.
+You need to add it to your **production Library** to be able to use it.
+
+You need to return to your production with the **Return To Production** button on top of the screen.
+
+On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+
+![Setting Status automation new](../img/getting-started/preview_background_setting)
+
+On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
+
+Validate your choice with the **add** button.
+
+![Setting Add Asset](../img/getting-started/preview_background_setting_filled.png)
+
+You can review your 3D file with an HDR background.
