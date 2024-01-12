@@ -129,6 +129,25 @@ export default {
         document.documentElement.style.background = '#FFF'
         document.body.style.background = '#FFF'
       }
+    },
+
+    currentProduction: {
+      immediate: true,
+      handler() {
+        const userLocale = this.user?.locale.substring(0, 2)
+        const variant = this.currentProduction?.production_style
+        console.log(userLocale, variant, this.$i18n.locale)
+        if (userLocale !== 'en') {
+          return
+        }
+        if (['nft', 'video-game'].includes(variant)) {
+          this.$i18n.silentFallbackWarn = true
+          this.$i18n.locale = `en_${variant}`
+        } else {
+          this.$i18n.silentFallbackWarn = false
+          this.$i18n.locale = 'en'
+        }
+      }
     }
   },
 

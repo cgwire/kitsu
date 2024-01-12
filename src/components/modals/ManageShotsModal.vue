@@ -118,7 +118,7 @@
             <div class="field">
               <input
                 class="input"
-                placeholder="SH01"
+                :placeholder="$t('shots.fields.placeholder')"
                 ref="addShotInput"
                 type="text"
                 @keyup.enter="addShot"
