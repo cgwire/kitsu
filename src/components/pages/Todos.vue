@@ -92,7 +92,11 @@
         </div>
         <div
           class="query-list"
-          v-if="isTabActive('todos') || isTabActive('timesheets')"
+          v-if="
+            isTabActive('todos') ||
+            isTabActive('timesheets') ||
+            isTabActive('board')
+          "
         >
           <search-query-list
             :queries="todoSearchQueries"
@@ -413,7 +417,7 @@ export default {
               this.productionId = currentProduction.id
             } else {
               if (!this.productionId) {
-                this.productionId = this.openProductions?.[0].id
+                this.productionId = this.openProductions?.[0]?.id
               }
               this.$router.push({
                 query: { productionId: this.productionId }
