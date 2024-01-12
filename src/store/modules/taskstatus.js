@@ -100,6 +100,13 @@ const actions = {
     })
   },
 
+  updateTaskStatusPriority({ commit, state }, form) {
+    return taskStatusApi.updateTaskStatusPriority(form).then(taskStatus => {
+      commit(EDIT_TASK_STATUS_END, taskStatus)
+      Promise.resolve(taskStatus)
+    })
+  },
+
   editTaskStatusLink({ commit, state }, data) {
     return taskStatusApi.updateTaskStatusLink(data)
   },
