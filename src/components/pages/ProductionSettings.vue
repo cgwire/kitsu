@@ -433,4 +433,12 @@ th {
 .box {
   max-width: 400px;
 }
+
+.task-status {
+  cursor: grab;
+}
+
+.task-status[draggable='true'] {
+  cursor: grabbing;
+}
 </style>

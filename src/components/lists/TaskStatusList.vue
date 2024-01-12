@@ -169,4 +169,12 @@ export default {
   width: 140px;
   min-width: 140px;
 }
+
+.task-status {
+  cursor: grab;
+}
+
+.task-status[draggable='true'] {
+  cursor: grabbing;
+}
 </style>

@@ -411,4 +411,12 @@ h2 {
 .empty {
   font-style: italic;
 }
+
+.task-type {
+  cursor: grab;
+}
+
+.task-type[draggable='true'] {
+  cursor: grabbing;
+}
 </style>
