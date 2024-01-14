@@ -70,7 +70,11 @@ export default {
   },
 
   board: {
-    title: 'Board'
+    title: 'Board',
+    settings: {
+      title: 'Board Status',
+      visible: 'Displayed on kanban board of...'
+    }
   },
 
   breakdown: {

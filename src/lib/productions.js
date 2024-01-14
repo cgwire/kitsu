@@ -56,6 +56,7 @@ export function getTaskStatusPriorityOfProd(taskStatus, production) {
   if (!taskStatus) {
     return 1
   }
-  const productionPriority = production?.task_statuses_priority?.[taskStatus.id]
+  const productionPriority =
+    production?.task_statuses_link?.[taskStatus.id]?.priority
   return productionPriority || taskStatus.priority
 }

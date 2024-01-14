@@ -43,9 +43,10 @@ export default {
 
   async updateTaskStatusLink(taskStatusLink) {
     const data = {
-      project_id: taskStatusLink.projectId,
-      task_status_id: taskStatusLink.taskStatusId,
-      priority: taskStatusLink.priority
+      project_id: taskStatusLink.project_id,
+      task_status_id: taskStatusLink.task_status_id,
+      priority: taskStatusLink.priority,
+      roles_for_board: taskStatusLink.roles_for_board
     }
     return await client.ppost('/api/data/task-status-links', data)
   },
