@@ -307,6 +307,7 @@ export default {
   user-select: none;
   flex: 1;
   display: flex;
+  max-height: 80%;
 }
 
 .board-columns,
