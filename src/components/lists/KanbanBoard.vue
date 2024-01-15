@@ -41,7 +41,7 @@
             draggable
             :key="task.id"
             @click="onSelectTask(task, $event.ctrlKey || $event.metaKey)"
-            @dragstart="onCardDragStart($event, task)"
+            @dragstart="onCardDragStart($event, task, column.status)"
             @drag="onCardDrag"
             @dragend="onCardDragEnd"
             @mouseenter="onCardMouseEnter"
@@ -252,12 +252,13 @@ export default {
       this.isScrollingX = false
     },
 
-    onCardDragStart(event, task) {
+    onCardDragStart(event, task, taskStatus) {
       event.stopPropagation()
       event.target.classList.add('drag')
       event.dataTransfer.dropEffect = 'move'
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('taskId', task.id)
+      event.dataTransfer.setData('taskStatusId', taskStatus.id)
     },
 
     onCardDrag(event) {
@@ -284,6 +285,10 @@ export default {
 
     onCardDrop(event, taskStatusId) {
       event.currentTarget.classList.remove('droppable')
+      const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
+      if (previousTaskStatusId === taskStatusId) {
+        return
+      }
       const taskId = event.dataTransfer.getData('taskId')
       this.commentTask({
         taskId,
@@ -306,6 +311,7 @@ export default {
 .board {
   user-select: none;
   flex: 1;
+  flex-direction: column;
   display: flex;
   max-height: 80%;
 }
