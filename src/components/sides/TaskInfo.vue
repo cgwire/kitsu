@@ -266,8 +266,8 @@
         </div>
       </div>
 
-      <div class="side task-info mt1" v-else>
-        <div class="has-text-centered">
+      <div class="side task-info empty" v-else>
+        <div class="has-text-centered mb0">
           <template v-if="entityType === 'Concept'">
             {{ $t('concepts.no_concept_selected') }}
           </template>
@@ -275,7 +275,8 @@
             {{ $t('tasks.no_task_selected') }}
           </template>
         </div>
-        <div class="mt1">
+        <div class="empty-section">
+          <hr />
           <slot />
         </div>
       </div>
@@ -1638,5 +1639,17 @@ export default {
     top: 0;
     width: 14px;
   }
+}
+
+.empty {
+  padding-top: 1em;
+}
+
+.empty-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1em 1em 1em;
+  position: absolute;
+  height: 100%;
 }
 </style>
