@@ -136,7 +136,6 @@ export default {
       handler() {
         const userLocale = this.user?.locale.substring(0, 2)
         const variant = this.currentProduction?.production_style
-        console.log(userLocale, variant, this.$i18n.locale)
         if (userLocale !== 'en') {
           return
         }
