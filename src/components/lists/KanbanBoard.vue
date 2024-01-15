@@ -311,6 +311,7 @@ export default {
 .board {
   user-select: none;
   flex: 1;
+  flex-direction: column;
   display: flex;
   max-height: 80%;
 }
