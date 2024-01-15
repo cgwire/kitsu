@@ -136,12 +136,6 @@
           </div>
         </div>
 
-        <entity-news
-          class="news-column"
-          :entity="currentAsset"
-          v-show="currentSection === 'activity'"
-        />
-
         <div class="asset-casted-in" v-show="currentSection === 'casting'">
           <div v-if="currentAsset">
             <div
@@ -322,31 +316,7 @@
 
     <div class="column side-column" v-show="currentSection === 'infos'">
       <task-info :task="currentTask" entity-type="Asset" with-actions>
-        <div class="entity-stats">
-          <hr />
-          <p>
-            <span class="entry-label"> {{ $t('tasks.tasks') }} amount: </span>
-            {{ localTasks.length }}
-          </p>
-          <p>
-            <span class="entry-label"> {{ $t('estimation.title') }}: </span>
-            {{ allTasksEstimation }}
-          </p>
-          <p>
-            <span class="entry-label">
-              {{ $t('tasks.fields.duration') }}:
-            </span>
-            {{ allTasksDuration }}
-          </p>
-          <p>
-            <span class="entry-label"> Concepts: </span>
-            {{ linkedConcepts.length }}
-          </p>
-          <p>
-            <span class="entry-label"> Casted in: </span>
-            {{ nbShotsCastedIn }} shots
-          </p>
-        </div>
+        <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
     </div>
 
@@ -1017,10 +987,6 @@ h2.subtitle {
   overflow-y: auto;
 }
 
-.news-column {
-  max-height: 85%;
-}
-
 .infos .entity-infos {
   flex: 1.5;
 }
@@ -1033,5 +999,9 @@ h2.subtitle {
     display: inline-block;
     width: 120px;
   }
+}
+
+.news-column {
+  max-height: 85%;
 }
 </style>
