@@ -1,6 +1,16 @@
 <template>
   <div class="board">
-    <ol class="board-columns">
+    <ol
+      class="board-columns"
+      @mousedown="onBoardScrollStart"
+      @touchstart="onBoardScrollStart"
+      @mousemove="onBoardScrolling"
+      @touchmove="onBoardScrolling"
+      @mouseup="onBoardScrollEnd"
+      @touchend="onBoardScrollEnd"
+      @mouseleave="onBoardScrollEnd"
+      @touchcancel="onBoardScrollEnd"
+    >
       <li
         class="board-column"
         :key="column.id"
@@ -92,8 +102,10 @@ import { mapActions, mapGetters } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
+
+import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
@@ -101,7 +113,7 @@ import TaskTypeName from '@/components/widgets/TaskTypeName'
 export default {
   name: 'kanban-board',
 
-  mixins: [formatListMixin],
+  mixins: [domMixin, formatListMixin],
 
   components: {
     EntityThumbnail,
@@ -126,6 +138,13 @@ export default {
     tasks: {
       type: Array,
       default: () => []
+    }
+  },
+
+  data() {
+    return {
+      isScrollingX: false,
+      initialClientX: null
     }
   },
 
@@ -208,6 +227,31 @@ export default {
       )
     },
 
+    onBoardScrollStart(event) {
+      event.currentTarget.style.cursor = 'grabbing'
+      this.isScrollingX = !event.target.closest('.board-card')
+      this.initialClientX = this.getClientX(event)
+    },
+
+    onBoardScrolling(event) {
+      event.preventDefault()
+      if (!this.isScrollingX) {
+        return
+      }
+      const clientX = this.getClientX(event)
+      const diffX = clientX - this.initialClientX
+      event.currentTarget.scrollLeft -= diffX
+      this.initialClientX = clientX
+    },
+
+    onBoardScrollEnd(event) {
+      if (!this.isScrollingX) {
+        return
+      }
+      event.currentTarget.style.cursor = 'default'
+      this.isScrollingX = false
+    },
+
     onCardDragStart(event, task) {
       event.stopPropagation()
       event.target.classList.add('drag')
@@ -260,6 +304,7 @@ export default {
 
 <style lang="scss" scoped>
 .board {
+  user-select: none;
 }
 
 .board-columns,
