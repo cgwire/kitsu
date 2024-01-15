@@ -128,7 +128,7 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="nbSelectedTasks >= 1">
+    <div class="column side-column" v-if="nbSelectedTasks > 0">
       <task-info :task="selectedTasks.values().next().value" with-actions />
     </div>
   </div>
@@ -281,12 +281,16 @@ export default {
     todoTabs() {
       return [
         {
-          label: this.$t('board.title'),
+          label: this.$t('main.tasks'),
           name: 'todos'
         },
         {
-          label: this.$t('tasks.board'),
+          label: this.$t('board.title'),
           name: 'board'
+        },
+        {
+          label: this.$t('tasks.calendar'),
+          name: 'calendar'
         },
         {
           label:
@@ -300,10 +304,6 @@ export default {
             this.displayedDoneTasks.length +
             ')',
           name: 'done'
-        },
-        {
-          label: this.$t('tasks.calendar'),
-          name: 'calendar'
         },
         {
           label: this.$t('timesheets.title'),
@@ -410,7 +410,6 @@ export default {
     ]),
 
     isTabActive(tab) {
-      console.log(this.currentSection, tab)
       return this.currentSection === tab
     },
 
@@ -449,7 +448,10 @@ export default {
               this.productionId = this.openProductions?.[0]?.id
             }
             this.$router.push({
-              query: { productionId: this.productionId }
+              query: {
+                productionId: this.productionId,
+                section: this.currentSection
+              }
             })
           }
         }
@@ -554,7 +556,10 @@ export default {
   watch: {
     productionId() {
       this.$router.push({
-        query: { productionId: this.productionId }
+        query: {
+          productionId: this.productionId,
+          section: this.currentSection
+        }
       })
     },
 
