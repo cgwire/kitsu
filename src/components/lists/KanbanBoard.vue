@@ -52,8 +52,8 @@
             <div class="ui-droppable">
               <div class="flexrow">
                 <entity-thumbnail
-                  :empty-width="60"
-                  :empty-height="40"
+                  :empty-width="80"
+                  :empty-height="60"
                   :entity="{ preview_file_id: task.entity_preview_file_id }"
                 />
                 <div class="pa1 ellipsis">
@@ -305,6 +305,8 @@ export default {
 <style lang="scss" scoped>
 .board {
   user-select: none;
+  flex: 1;
+  display: flex;
 }
 
 .board-columns,
@@ -316,6 +318,7 @@ export default {
 
 .board-columns {
   display: flex;
+  flex: 1;
   flex-direction: row;
   gap: 20px;
   overflow-x: auto;
@@ -330,7 +333,6 @@ export default {
   max-width: 300px;
   align-items: center;
   overflow-y: auto;
-  max-height: 60vh;
   border: 2px solid var(--border-alt);
   border-radius: 0.5em;
 
