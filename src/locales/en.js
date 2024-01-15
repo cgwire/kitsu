@@ -1264,6 +1264,7 @@ export default {
       max_retakes: 'Max Rtks',
       name: 'Name',
       person: 'Modifier',
+      placeholder: "SH01",
       production: 'Prod',
       resolution: 'Resolution',
       sequence: 'Sequence',
