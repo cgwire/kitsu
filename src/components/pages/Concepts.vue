@@ -487,6 +487,7 @@ export default {
 }
 
 .concept-list {
+  flex: 1;
   margin: 0 auto;
   position: relative;
   overflow-y: auto;
@@ -503,10 +504,8 @@ export default {
   .item {
     display: flex;
     flex-direction: column;
-    width: 310px;
     background-color: var(--background);
     border-radius: 1em;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 
     border: 5px solid transparent;
     transition: border-color 0.2s ease-in-out;

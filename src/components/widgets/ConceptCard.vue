@@ -124,6 +124,7 @@ export default {
   margin: 0;
   padding: 0.3em;
   row-gap: 10px;
+  min-height: 70px;
 }
 
 .tags {
