@@ -275,10 +275,17 @@ export default {
     },
 
     boardStatuses() {
-      const statuses = this.getProductionTaskStatuses(this.productionId).filter(
-        status => !status.for_concept
-      )
       const production = this.productionMap.get(this.productionId)
+      const statuses = this.getProductionTaskStatuses(this.productionId).filter(
+        status => {
+          if (status.for_concept) {
+            return false
+          }
+          const roles_for_board =
+            production.task_statuses_link?.[status.id]?.roles_for_board
+          return roles_for_board?.includes(this.user.role)
+        }
+      )
       return sortTaskStatuses(statuses, production)
     },
 

@@ -18,6 +18,11 @@
               {{ $t('task_status.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('board') }">
+            <a @click="activeTab = 'board'">
+              {{ $t('board.settings.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('taskTypes') }">
             <a @click="activeTab = 'taskTypes'">
               {{ $t('task_types.title') }}
@@ -159,6 +164,10 @@
         </table>
       </div>
 
+      <div class="tab" v-show="isActiveTab('board')">
+        <production-board />
+      </div>
+
       <div class="tab" v-show="isActiveTab('statusAutomations')">
         <production-status-automations />
       </div>
@@ -180,6 +189,7 @@ import BooleanCell from '@/components/cells/BooleanCell'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds'
+import ProductionBoard from '@/components/pages/production/ProductionBoard'
 import ProductionBrief from '@/components/pages/production/ProductionBrief'
 import ProductionParameters from '@/components/pages/production/ProductionParameters'
 import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations'
@@ -194,6 +204,7 @@ export default {
     ComboboxStatus,
     draggable,
     ProductionBackgrounds,
+    ProductionBoard,
     ProductionBrief,
     ProductionParameters,
     ProductionStatusAutomations,
@@ -321,9 +332,10 @@ export default {
 
     async updateTaskStatusPriorities(taskStatuses) {
       const taskStatusLinks = taskStatuses.map((taskStatus, index) => ({
-        projectId: this.currentProduction.id,
-        taskStatusId: taskStatus.id,
-        priority: index + 1
+        ...this.currentProduction.task_statuses_link[taskStatus.id],
+        priority: index + 1,
+        project_id: this.currentProduction.id,
+        task_status_id: taskStatus.id
       }))
       for (const taskStatusLink of taskStatusLinks) {
         await this.editTaskStatusLink(taskStatusLink)
