@@ -73,7 +73,7 @@ export default {
 
     sortedProductionTaskStatuses() {
       return sortTaskStatuses(
-        this.productionTaskStatuses,
+        [...this.productionTaskStatuses],
         this.currentProduction
       )
     }
@@ -94,7 +94,7 @@ export default {
     },
 
     async updateRolesForBoard(taskStatus, role) {
-      const roles = this.getActiveRoles(taskStatus)
+      const roles = [...this.getActiveRoles(taskStatus)]
       if (this.isActiveRole(taskStatus, role)) {
         roles.splice(roles.indexOf(role), 1)
       } else {
