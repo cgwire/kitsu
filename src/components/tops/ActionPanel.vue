@@ -732,7 +732,7 @@
       v-if="selectedBar === 'edit-concepts'"
     >
       <div ref="asset-list" class="concept-links">
-        <h2 class="subtitle">Add links to assets</h2>
+        <h2 class="subtitle">{{ $t('concepts.add_links') }}</h2>
         <div class="flexrow mb2">
           <search-field
             ref="entity-search-field"

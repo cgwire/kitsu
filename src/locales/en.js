@@ -144,6 +144,7 @@ export default {
   },
 
   concepts: {
+    add_links: 'Add links to assets',
     add_new_concept: 'Add new concepts',
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concept.',
