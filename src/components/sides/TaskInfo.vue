@@ -8,7 +8,7 @@
     ></div>
     <div class="side task-info">
       <action-panel
-        v-if="withActions"
+        v-if="withActions && (nbSelectedTasks > 0 || nbSelectedEntities > 0)"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
@@ -266,8 +266,19 @@
         </div>
       </div>
 
-      <div class="side task-info has-text-centered" v-else>
-        {{ $t('tasks.no_task_selected') }}
+      <div class="side task-info empty" v-else>
+        <div class="has-text-centered mb0">
+          <template v-if="entityType === 'Concept'">
+            {{ $t('concepts.no_concept_selected') }}
+          </template>
+          <template v-else>
+            {{ $t('tasks.no_task_selected') }}
+          </template>
+        </div>
+        <div class="empty-section">
+          <hr />
+          <slot />
+        </div>
       </div>
     </div>
   </div>
@@ -1628,5 +1639,17 @@ export default {
     top: 0;
     width: 14px;
   }
+}
+
+.empty {
+  padding-top: 1em;
+}
+
+.empty-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1em 1em 1em;
+  position: absolute;
+  height: 100%;
 }
 </style>

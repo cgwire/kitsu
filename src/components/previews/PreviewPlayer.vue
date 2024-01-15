@@ -498,9 +498,6 @@
         >
           <router-link :to="entityPath(entity, 'asset')">
             {{ entity.name }}
-            <button class="action" @click.prevent="onRemoveLink(entity)">
-              <trash2-icon size="0.6x" />
-            </button>
           </router-link>
         </li>
       </ul>
@@ -552,7 +549,7 @@ import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import { ArrowUpRightIcon, DownloadIcon, Trash2Icon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import BrowsingBar from '@/components/previews/BrowsingBar'
 import ColorPicker from '@/components/widgets/ColorPicker'
@@ -583,7 +580,6 @@ export default {
     PreviewViewer,
     RevisionPreview,
     TaskInfo,
-    Trash2Icon,
     VideoProgress
   },
 
@@ -645,7 +641,7 @@ export default {
       fullScreen: false,
       color: '#ff3860',
       currentBackground: null,
-      currentTime: '00:00:00.00',
+      currentTime: '00:00:00:00',
       currentTimeRaw: 0,
       isObjectBackground: false,
       isAnnotationsDisplayed: true,
@@ -661,7 +657,7 @@ export default {
       isRepeating: false,
       isTyping: false,
       isWireframe: false,
-      maxDuration: '00:00.000',
+      maxDuration: '00:00:00:00',
       movieDimensions: {
         width: 1920,
         height: 1080
@@ -1036,7 +1032,7 @@ export default {
         const time = frame * this.frameDuration
         this.currentFrame = frame
         this.currentTimeRaw = time
-        this.currentTime = this.formatTime(time)
+        this.currentTime = this.formatTime(time, this.fps)
         this.progress.updateProgressBar(frame)
         this.$emit('frame-updated', frame)
 
@@ -1102,10 +1098,11 @@ export default {
         duration = floorToFrame(duration, this.fps)
         this.videoDuration = duration
         this.maxDuration = this.formatTime(
-          this.videoDuration - this.frameDuration
+          this.videoDuration - this.frameDuration,
+          this.fps
         )
       } else {
-        this.maxDuration = '00:00:00.00'
+        this.maxDuration = '00:00:00:00'
         this.videoDuration = 0
       }
     },
@@ -1972,7 +1969,7 @@ export default {
       if (this.isMovie) {
         this.configureVideo()
         this.pause()
-        this.maxDuration = '00:00.000'
+        this.maxDuration = '00:00:00:00'
         this.isDrawing = false
         setTimeout(() => {
           this.movieDimensions = this.previewViewer.getNaturalDimensions()
@@ -2369,6 +2366,8 @@ export default {
   letter-spacing: 1px;
 
   .tag {
+    transition: transform 0.1s linear;
+
     a {
       display: inline-flex;
       gap: 1em;

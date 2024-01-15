@@ -941,7 +941,7 @@ export const playerMixin = {
       this.currentTimeRaw = Number(
         (frame * this.frameDuration + change).toPrecision(4)
       )
-      this.currentTime = this.formatTime(this.currentTimeRaw)
+      this.currentTime = this.formatTime(this.currentTimeRaw, this.fps)
       this.updateProgressBar()
       const actions = this.onNextTimeUpdateActions
       actions.forEach(action => action())
@@ -975,7 +975,7 @@ export const playerMixin = {
       if (duration) {
         duration = floorToFrame(duration, this.fps)
         this.maxDurationRaw = duration
-        this.maxDuration = this.formatTime(duration)
+        this.maxDuration = this.formatTime(duration, this.fps)
         this.resetHandles()
       } else {
         this.maxDurationRaw = 0

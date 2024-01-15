@@ -1602,7 +1602,9 @@ export default {
         }
         this.pictureDefaultHeight = height
 
-        this.$refs['full-playlist-player'].style.height = height + 'px'
+        if (this.$refs['full-playlist-player']) {
+          this.$refs['full-playlist-player'].style.height = height + 'px'
+        }
 
         if (this.rawPlayer) this.rawPlayer.resetHeight(height)
         if (this.isComparing && this.$refs['raw-player-comparison']) {

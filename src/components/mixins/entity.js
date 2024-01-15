@@ -1,15 +1,17 @@
+import moment from 'moment'
+import { mapGetters, mapActions } from 'vuex'
+
 import {
+  daysToMinutes,
+  getBusinessDays,
   getFirstStartDate,
   getLastEndDate,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
-import { mapActions } from 'vuex'
-
-import moment from 'moment'
 
 /*
- * Common functions to shot, asset and edit pages.
+ * Common functions for shot, asset, edit, sequncen and edit pages.
  */
 export const entityMixin = {
   data() {
@@ -17,14 +19,13 @@ export const entityMixin = {
       currentSection: 'Casting',
       zoomLevel: 1,
       entityNavOptions: [
+        { label: 'Infos', value: 'infos' },
         { label: 'Casting', value: 'casting' },
         { label: 'Schedule', value: 'schedule' },
         { label: 'Preview Files', value: 'preview-files' },
-        { label: 'Activity', value: 'activity' },
         { label: 'Timelog', value: 'time-logs' }
       ],
       zoomOptions: [
-        { label: 'Week', value: 0 },
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
@@ -39,6 +40,17 @@ export const entityMixin = {
   beforeDestroy() {},
 
   computed: {
+    ...mapGetters(['organisation']),
+
+    entityTabs() {
+      return this.entityNavOptions.map(option => {
+        return {
+          label: option.label,
+          name: option.value
+        }
+      })
+    },
+
     thumbnailPath() {
       const previewId = this.currentEntity.preview_file_id
       return `/api/pictures/originals/preview-files/${previewId}.png`
@@ -109,7 +121,7 @@ export const entityMixin = {
         expanded: true,
         loading: false,
         children: [],
-        editable: false
+        editable: true
       }
       const limitStartDate = moment()
       const children = this.currentTasks
@@ -154,7 +166,7 @@ export const entityMixin = {
             expanded: false,
             loading: false,
             man_days: estimation,
-            editable: false,
+            editable: true,
             unresizable: false,
             parentElement: rootElement,
             color: taskType.color,
@@ -179,7 +191,7 @@ export const entityMixin = {
   },
 
   methods: {
-    ...mapActions(['addSelectedTask', 'clearSelectedTasks']),
+    ...mapActions(['addSelectedTask', 'clearSelectedTasks', 'updateTask']),
 
     changeTab(tab) {
       this.selectedTab = tab
@@ -196,6 +208,22 @@ export const entityMixin = {
         this.currentTask = task
       } else {
         this.currentTask = null
+      }
+    },
+
+    saveTaskScheduleItem(item) {
+      const daysLength = getBusinessDays(item.startDate, item.endDate)
+      const estimation = daysToMinutes(this.organisation, daysLength)
+      item.man_days = estimation
+      if (item.startDate && item.endDate) {
+        this.updateTask({
+          taskId: item.id,
+          data: {
+            estimation,
+            start_date: item.startDate.format('YYYY-MM-DD'),
+            due_date: item.endDate.format('YYYY-MM-DD')
+          }
+        })
       }
     }
   },

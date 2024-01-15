@@ -61,7 +61,7 @@ export default {
     number: 'background | backgrounds',
     edit_background: 'Edit background',
     new_background: 'Add a new background',
-    title: 'Preview Backgrounds',
+    title: '3D Backgrounds',
     fields: {
       is_default: 'Is default',
       name: 'Name',
@@ -144,12 +144,14 @@ export default {
   },
 
   concepts: {
-    add_new_concept: 'Add a new reference to concepts',
+    add_links: 'Add links to assets',
+    add_new_concept: 'Add new concepts',
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concept.',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
     empty: 'There are no concepts',
     multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
+    no_concept_selected: 'No concept selected',
     title: 'Concepts',
     fields: {
       entity_type: 'Entity type',
@@ -199,7 +201,7 @@ export default {
     out_title: 'The change that will be applied on trigger firing',
     new_status_automation: 'Add status automation',
     run_for_selection: 'Run status automation for selected tasks:',
-    title: 'Status Automations',
+    title: 'Automations',
     wrong_automation: 'This automation applies to a backward task type. It is not permitted by Kitsu (to avoid cycles). It will have no effect.',
     fields: {
       entity_type: 'Entity Type',
@@ -443,6 +445,7 @@ export default {
   main: {
     about: 'About',
     active: 'Active',
+    activity: 'Activity',
     add: 'add',
     after: 'After',
     admin: 'Admin',
@@ -534,6 +537,7 @@ export default {
     stick: 'Stick',
     studio: 'Studio',
     status: 'Status',
+    tasks: 'Tasks',
     to: 'To',
     timeSpent: 'Time Spent',
     tutorials: 'Tutorials',
@@ -1310,6 +1314,7 @@ export default {
     bigger: 'Widen task panel',
     big_thumbnails: 'Show big thumbnails',
     build_playlist: 'Build playlist from list',
+    calendar: 'Calendar',
     confirm_attachments: 'Add files as attachments',
     change_status_to: 'Change task status to:',
     change_status: 'Post comment',
@@ -1338,7 +1343,7 @@ export default {
     create_tasks_sequence: 'Add tasks for current sequences',
     create_tasks_sequence_explaination: 'You are going to create a new task for each sequence of the current project for the given task type. Do you want to continue?',
     create_tasks_sequence_failed: 'A server error occurred while proceeding creations.',
-    current: 'Task to do',
+    current: 'Tasks',
     current_status: 'Current status:',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
@@ -1381,6 +1386,7 @@ export default {
     no_preview: 'There is currently no preview for this task.',
     no_task_selected: 'No task selected',
     number: 'task | tasks',
+    pending: 'Pending',
     post: 'Post',
     publish: 'Publish',
     publish_revision: 'Publish revision',
@@ -1407,6 +1413,7 @@ export default {
     tasks: 'Tasks',
     to_myself: 'To myself',
     use_current_frame: 'Use current frame',
+    validated: 'Validated',
     validation: 'Validation',
     with_comment: 'With a comment...',
     fields: {

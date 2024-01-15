@@ -53,66 +53,15 @@
         </div>
       </div>
 
-      <div class="flexrow infos">
-        <div class="flexrow-item block flexcolumn">
-          <page-subtitle :text="$t('assets.tasks')" />
-          <entity-task-list
-            class="task-list"
-            :entries="currentAsset ? currentAsset.tasks : []"
-            :is-loading="!currentAsset"
-            :is-error="false"
-            @task-selected="onTaskSelected"
-          />
-        </div>
-        <div class="flexrow-item block flexcolumn">
-          <div class="flexrow">
-            <page-subtitle :text="$t('main.info')" />
-            <div class="filler"></div>
-            <div class="flexrow-item has-text-right">
-              <button-simple
-                icon="edit"
-                @click="modals.edit = true"
-                v-if="isCurrentUserManager"
-              />
-            </div>
-          </div>
-
-          <div class="table-body">
-            <table class="datatable no-header" v-if="currentAsset">
-              <tbody class="table-body">
-                <tr class="datatable-row">
-                  <td class="field-label">
-                    {{ $t('assets.fields.description') }}
-                  </td>
-                  <description-cell :entry="currentAsset" :full="true" />
-                </tr>
-                <tr
-                  :key="descriptor.id"
-                  class="datatable-row"
-                  v-for="descriptor in assetMetadataDescriptors"
-                >
-                  <td class="field-label">{{ descriptor.name }}</td>
-                  <td>
-                    {{
-                      currentAsset.data
-                        ? currentAsset.data[descriptor.field_name]
-                        : ''
-                    }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <div class="asset-data block">
-        <div class="flexrow">
-          <combobox-styled
-            class="section-combo flexrow-item"
-            :options="assetNavOptions"
-            v-model="currentSection"
-          />
+        <route-section-tabs
+          class="section-tabs"
+          :activeTab="currentSection"
+          :route="$route"
+          :tabs="assetTabs"
+        />
+
+        <div class="flexrow mt1">
           <span
             class="tag tag-standby"
             v-show="
@@ -121,7 +70,6 @@
           >
             {{ $t('breakdown.fields.standby') }}
           </span>
-          <div class="filler"></div>
           <span
             class="flexrow-item mt05"
             v-show="currentSection === 'schedule'"
@@ -137,6 +85,57 @@
           />
         </div>
 
+        <div class="flexrow infos" v-show="currentSection === 'infos'">
+          <div class="flexrow-item flexcolumn entity-infos">
+            <page-subtitle :text="$t('main.tasks')" />
+            <entity-task-list
+              class="task-list"
+              :entries="localTasks"
+              :is-loading="!currentAsset"
+              :is-error="false"
+              @task-selected="onTaskSelected"
+            />
+            <div class="flexrow">
+              <page-subtitle :text="$t('main.info')" />
+              <div class="filler"></div>
+              <div class="flexrow-item has-text-right">
+                <button-simple
+                  icon="edit"
+                  @click="modals.edit = true"
+                  v-if="isCurrentUserManager"
+                />
+              </div>
+            </div>
+
+            <div class="table-body">
+              <table class="datatable no-header" v-if="currentAsset">
+                <tbody class="table-body">
+                  <tr class="datatable-row">
+                    <td class="field-label">
+                      {{ $t('assets.fields.description') }}
+                    </td>
+                    <description-cell :entry="currentAsset" :full="true" />
+                  </tr>
+                  <tr
+                    :key="descriptor.id"
+                    class="datatable-row"
+                    v-for="descriptor in assetMetadataDescriptors"
+                  >
+                    <td class="field-label">{{ descriptor.name }}</td>
+                    <td>
+                      {{
+                        currentAsset.data
+                          ? currentAsset.data[descriptor.field_name]
+                          : ''
+                      }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div class="asset-casted-in" v-show="currentSection === 'casting'">
           <div v-if="currentAsset">
             <div
@@ -145,6 +144,7 @@
                 currentAsset.castInShotsBySequence[0].length > 0
               "
             >
+              <em>Casted in {{ nbShotsCastedIn }} shots</em>
               <div
                 class="sequence-shots"
                 :key="
@@ -266,35 +266,13 @@
             :task-status-list="taskStatusList"
             v-model="currentConceptStatus"
           />
-          <div class="concept-type">
-            {{ $t('concepts.title') }} ({{ filteredLinkedConcepts.length }})
-          </div>
           <div class="concept-list mt1">
             <template v-if="filteredLinkedConcepts.length">
-              <router-link
-                class="concept-link"
-                :key="concept.id"
-                :to="conceptPath(concept)"
+              <concept-card
+                :key="'concept-' + concept.id"
+                :concept="concept"
                 v-for="concept in filteredLinkedConcepts"
-              >
-                <entity-thumbnail
-                  class="entity-thumbnail"
-                  :entity="concept"
-                  :square="true"
-                  :empty-width="103"
-                  :empty-height="103"
-                  :with-link="false"
-                />
-                <span
-                  class="tag"
-                  :style="{
-                    backgroundColor: getConceptTaskStatus(concept).color,
-                    color: 'white'
-                  }"
-                >
-                  {{ getConceptTaskStatus(concept).short_name }}
-                </span>
-              </router-link>
+              />
             </template>
             <div v-else>
               {{ $t('assets.no_concept') }}
@@ -318,6 +296,8 @@
               :is-estimation-linked="true"
               :hide-root="true"
               :with-milestones="false"
+              @item-changed="saveTaskScheduleItem"
+              @estimation-changed="event => saveTaskScheduleItem(event.item)"
             />
           </div>
         </div>
@@ -327,11 +307,6 @@
           v-if="currentSection === 'preview-files'"
         />
 
-        <entity-news
-          :entity="currentAsset"
-          v-if="currentSection === 'activity'"
-        />
-
         <entity-time-logs
           :entity="currentAsset"
           v-if="currentSection === 'time-logs'"
@@ -339,8 +314,10 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" entity-type="Asset" with-actions />
+    <div class="column side-column" v-show="currentSection === 'infos'">
+      <task-info :task="currentTask" entity-type="Asset" with-actions>
+        <entity-news class="news-column" :entity="currentAsset" />
+      </task-info>
     </div>
 
     <edit-asset-modal
@@ -360,14 +337,13 @@ import { mapGetters, mapActions } from 'vuex'
 import { CornerLeftUpIcon } from 'vue-feather-icons'
 
 import { sortByName } from '@/lib/sorting'
-
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ConceptCard from '@/components/widgets/ConceptCard'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditAssetModal from '@/components/modals/EditAssetModal'
 import EntityNews from '@/components/pages/entities/EntityNews'
@@ -376,6 +352,7 @@ import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityTaskList from '@/components/lists/EntityTaskList'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
@@ -386,9 +363,9 @@ export default {
   mixins: [entityMixin, formatListMixin],
   components: {
     ButtonSimple,
+    ConceptCard,
     ComboboxNumber,
     CornerLeftUpIcon,
-    ComboboxStyled,
     ComboboxStatus,
     DescriptionCell,
     EditAssetModal,
@@ -398,6 +375,7 @@ export default {
     EntityTaskList,
     EntityTimeLogs,
     PageSubtitle,
+    RouteSectionTabs,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -409,6 +387,7 @@ export default {
       currentAsset: null,
       currentTask: null,
       currentConceptStatus: null,
+      localTasks: [],
       castIn: {
         isLoading: false,
         isError: false
@@ -472,6 +451,13 @@ export default {
         this.currentAsset.preview_file_id &&
         this.currentAsset.preview_file_id.length > 0
       )
+    },
+
+    nbShotsCastedIn() {
+      const castIn = this.currentAsset?.castInShotsBySequence || []
+      return castIn.reduce((acc, shots) => {
+        return acc + shots.length
+      }, 0)
     },
 
     previousAssetPath() {
@@ -544,9 +530,20 @@ export default {
     },
 
     assetNavOptions() {
-      return [{ label: 'Concepts', value: 'concepts' }].concat(
-        this.entityNavOptions
-      )
+      return [
+        ...this.entityNavOptions.slice(0, 2),
+        { label: 'Concepts', value: 'concepts' },
+        ...this.entityNavOptions.slice(2)
+      ]
+    },
+
+    assetTabs() {
+      return this.assetNavOptions.map(option => {
+        return {
+          label: option.label,
+          name: option.value
+        }
+      })
     },
 
     taskStatusList() {
@@ -571,6 +568,22 @@ export default {
               concept.tasks[0].task_status_id === this.currentConceptStatus
           )
         : this.linkedConcepts
+    },
+
+    allTasksEstimation() {
+      return this.formatDuration(
+        this.localTasks.reduce((acc, task) => {
+          return acc + task.estimation
+        }, 0)
+      )
+    },
+
+    allTasksDuration() {
+      return this.formatDuration(
+        this.localTasks.reduce((acc, task) => {
+          return acc + task.duration
+        }, 0)
+      )
     }
   },
 
@@ -594,13 +607,21 @@ export default {
     getCurrentAsset() {
       return new Promise((resolve, reject) => {
         const assetId = this.route.params.asset_id
+        this.currentAssetId = assetId
         if (!assetId) resolve(null)
-        const asset = this.assetMap.get(assetId) || null
+        let asset = this.assetMap.get(assetId) || null
         if (!asset) {
           if (assetId) {
-            return this.loadAsset(assetId).then(resolve)
+            return this.loadAsset(assetId).then(() => {
+              asset = this.assetMap.get(assetId)
+              this.localTasks = asset.tasks.map(taskId =>
+                this.taskMap.get(taskId)
+              )
+              return resolve(asset)
+            })
           }
         } else {
+          this.localTasks = asset.tasks.map(taskId => this.taskMap.get(taskId))
           return resolve(asset)
         }
       })
@@ -676,10 +697,10 @@ export default {
     },
 
     init() {
-      this.getCurrentAsset()
+      return this.getCurrentAsset()
         .then(asset => {
           this.currentAsset = asset
-          this.currentSection = this.route.query.section || 'casting'
+          this.currentSection = this.route.query.section || 'infos'
           this.castIn.isLoading = true
           this.castIn.isError = false
           if (this.currentAsset) {
@@ -698,13 +719,44 @@ export default {
             this.resetData()
           }
         })
+        .then(() => {
+          setTimeout(() => {
+            if (this.$refs['schedule-widget']) {
+              this.$refs['schedule-widget'].scrollToDate(
+                this.scheduleItems[0].startDate
+              )
+            }
+          }, 100)
+        })
         .catch(console.error)
     }
   },
 
   watch: {
     $route() {
-      this.init()
+      const assetId = this.route.params.asset_id
+      if (this.currentAsset && this.currentAsset.id !== assetId) {
+        this.init()
+      }
+      this.currentSection = this.route.query.section || 'infos'
+    },
+
+    currentSection() {
+      if (this.currentSection === 'schedule' && this.scheduleItems.length > 0) {
+        if (this.$refs['schedule-widget']) {
+          this.$refs['schedule-widget'].scrollToDate(
+            this.scheduleItems[0].startDate
+          )
+        }
+      }
+    },
+
+    zoomLevel() {
+      if (this.$refs['schedule-widget']) {
+        this.$refs['schedule-widget'].scrollToDate(
+          this.scheduleItems[0].startDate
+        )
+      }
     }
   },
 
@@ -757,10 +809,9 @@ h2.subtitle {
 }
 
 .infos {
-  height: 300px;
+  margin-top: 1em;
   margin-bottom: 1em;
-  margin-left: 1em;
-  margin-right: 1em;
+  max-height: 100%;
 
   .flexrow-item {
     align-self: flex-start;
@@ -782,7 +833,6 @@ h2.subtitle {
 .asset-casted-in,
 .concepts {
   overflow-y: auto;
-  margin-top: 1em;
 }
 
 .thumbnail-picture {
@@ -812,6 +862,7 @@ h2.subtitle {
 }
 
 .concept-list {
+  padding-bottom: 1em;
   gap: 10px;
 }
 
@@ -857,7 +908,10 @@ h2.subtitle {
 }
 
 .task-list {
-  max-width: 100%;
+  flex: unset;
+  margin-bottom: 3em;
+  min-width: 100%;
+  overflow: auto;
 }
 
 .datatable-row {
@@ -867,6 +921,7 @@ h2.subtitle {
 .schedule {
   position: relative;
   height: 100%;
+  overflow: hidden;
 
   .timelien-wrapper,
   .timeline {
@@ -893,6 +948,7 @@ h2.subtitle {
 
 .entity-thumbnail {
   margin-bottom: 0;
+  border-radius: 10px;
 }
 
 @media screen and (max-width: 768px) {
@@ -919,5 +975,33 @@ h2.subtitle {
 
 .dark .tag-standby {
   background: $dark-red;
+}
+
+.section-tabs {
+  min-height: 36px;
+  margin-bottom: 0;
+}
+
+.flexcolumn {
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.infos .entity-infos {
+  flex: 1.5;
+}
+
+.entity-stats {
+  padding: 1em;
+  font-size: 1.2em;
+
+  .entry-label {
+    display: inline-block;
+    width: 120px;
+  }
+}
+
+.news-column {
+  max-height: 85%;
 }
 </style>

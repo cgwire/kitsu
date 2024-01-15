@@ -526,6 +526,12 @@ a.secondary:hover {
   justify-content: center;
 }
 
+.info {
+  img {
+    width: 800px;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .title {
     margin-top: 1em;

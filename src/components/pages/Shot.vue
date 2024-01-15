@@ -23,18 +23,53 @@
         </div>
       </div>
 
-      <div class="flexrow infos">
-        <div class="flexrow-item block flexcolumn">
+      <div class="entity-data block">
+        <route-section-tabs
+          class="section-tabs"
+          :activeTab="currentSection"
+          :route="$route"
+          :tabs="entityTabs"
+        />
+
+        <div class="flexrow mt1">
+          <span v-show="currentSection === 'casting'">
+            {{ nbAssets }} {{ $tc('assets.number', nbAssets) }}
+          </span>
+          <span
+            class="tag tag-standby"
+            v-show="
+              currentSection === 'casting' &&
+              currentShot &&
+              currentShot.is_casting_standby
+            "
+          >
+            {{ $t('breakdown.fields.standby') }}
+          </span>
+          <div class="filler"></div>
+          <span
+            class="flexrow-item mt05"
+            v-show="currentSection === 'schedule'"
+          >
+            {{ $t('schedule.zoom_level') }}:
+          </span>
+          <combobox-number
+            class="zoom-level flexrow-item"
+            :options="zoomOptions"
+            is-simple
+            v-model="zoomLevel"
+            v-show="currentSection === 'schedule'"
+          />
+        </div>
+
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
           <page-subtitle :text="$t('shots.tasks')" />
           <entity-task-list
             class="task-list"
-            :entries="currentTasks.map(t => t.id)"
+            :entries="currentTasks"
             :is-loading="!currentShot"
             :is-error="false"
             @task-selected="onTaskSelected"
           />
-        </div>
-        <div class="flexrow-item block flexcolumn">
           <div class="flexrow">
             <page-subtitle :text="$t('main.info')" />
             <div class="filler"></div>
@@ -73,7 +108,9 @@
                     currentShot.data.frame_in != null
                   "
                 >
-                  <td class="field-label">{{ $t('shots.fields.frame_in') }}</td>
+                  <td class="field-label">
+                    {{ $t('shots.fields.frame_in') }}
+                  </td>
                   <td>
                     {{ currentShot ? currentShot.data.frame_in : '' }}
                   </td>
@@ -154,43 +191,6 @@
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-
-      <div class="shot-data block">
-        <div class="flexrow">
-          <combobox-styled
-            class="section-combo flexrow-item"
-            :options="entityNavOptions"
-            v-model="currentSection"
-          />
-          <span v-show="currentSection === 'casting'">
-            {{ nbAssets }} {{ $tc('assets.number', nbAssets) }}
-          </span>
-          <span
-            class="tag tag-standby"
-            v-show="
-              currentSection === 'casting' &&
-              currentShot &&
-              currentShot.is_casting_standby
-            "
-          >
-            {{ $t('breakdown.fields.standby') }}
-          </span>
-          <div class="filler"></div>
-          <span
-            class="flexrow-item mt05"
-            v-show="currentSection === 'schedule'"
-          >
-            {{ $t('schedule.zoom_level') }}:
-          </span>
-          <combobox-number
-            class="zoom-level flexrow-item"
-            :options="zoomOptions"
-            is-simple
-            v-model="zoomLevel"
-            v-show="currentSection === 'schedule'"
-          />
         </div>
 
         <div class="shot-casting" v-show="currentSection === 'casting'">
@@ -278,6 +278,8 @@
               :is-estimation-linked="true"
               :hide-root="true"
               :with-milestones="false"
+              @item-changed="saveTaskScheduleItem"
+              @estimation-changed="event => saveTaskScheduleItem(event.item)"
             />
           </div>
         </div>
@@ -287,11 +289,6 @@
           v-if="currentSection === 'preview-files'"
         />
 
-        <entity-news
-          :entity="currentShot"
-          v-if="currentSection === 'activity'"
-        />
-
         <entity-time-logs
           :entity="currentShot"
           v-if="currentSection === 'time-logs'"
@@ -299,8 +296,10 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" entity-type="Shot" with-actions />
+    <div class="column side-column" v-show="currentSection === 'infos'">
+      <task-info :task="currentTask" entity-type="Shot" with-actions>
+        <entity-news class="news-column" :entity="currentShot" />
+      </task-info>
     </div>
 
     <edit-shot-modal
@@ -325,7 +324,6 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditShotModal from '@/components/modals/EditShotModal'
 import EntityNews from '@/components/pages/entities/EntityNews'
@@ -334,6 +332,7 @@ import EntityTaskList from '@/components/lists/EntityTaskList'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -345,7 +344,6 @@ export default {
   components: {
     ButtonSimple,
     ComboboxNumber,
-    ComboboxStyled,
     CornerLeftUpIcon,
     DescriptionCell,
     EditShotModal,
@@ -355,6 +353,7 @@ export default {
     EntityTimeLogs,
     EntityThumbnail,
     PageSubtitle,
+    RouteSectionTabs,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -560,6 +559,7 @@ export default {
             this.loadShotCasting(this.currentShot)
               .then(() => {
                 this.casting.isLoading = false
+                setTimeout(this.initSchedule, 100)
               })
               .catch(err => {
                 this.casting.isLoading = false
@@ -568,15 +568,26 @@ export default {
               })
           } else {
             this.resetData()
+            setTimeout(this.initSchedule, 100)
           }
         })
         .catch(console.error)
+    },
+
+    initSchedule() {
+      this.$refs['schedule-widget'].scrollToDate(
+        this.scheduleItems[0].startDate
+      )
     }
   },
 
   watch: {
     $route() {
-      this.init()
+      const shotId = this.route.params.shot_id
+      if (this.currentAsset && this.currentShot.id !== shotId) {
+        this.init()
+      }
+      this.currentSection = this.route.query.section || 'infos'
     }
   },
 
@@ -625,10 +636,7 @@ h2.subtitle {
 }
 
 .infos {
-  height: 350px;
-  margin-bottom: 1em;
-  margin-left: 1em;
-  margin-right: 1em;
+  margin-top: 1em;
 
   .flexrow-item {
     align-self: flex-start;
@@ -704,6 +712,8 @@ h2.subtitle {
 
 .task-list {
   width: 100%;
+  flex: none;
+  margin-bottom: 2em;
 }
 
 .datatable-row {
@@ -711,6 +721,7 @@ h2.subtitle {
 }
 
 .schedule {
+  overflow: hidden;
   position: relative;
   height: 100%;
 
@@ -762,5 +773,40 @@ h2.subtitle {
 
 .dark .tag-standby {
   background: $dark-red;
+}
+
+.section-tabs {
+  min-height: 36px;
+  margin-bottom: 0;
+}
+
+.flexcolumn {
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.news-column {
+  max-height: 85%;
+}
+
+.infos {
+  flex: 1;
+
+  .entity-infos {
+    flex: 1;
+  }
+}
+
+.entity-data {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 0 1em 0 1em;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.news-column {
+  max-height: 85%;
 }
 </style>

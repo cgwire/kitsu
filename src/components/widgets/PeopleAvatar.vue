@@ -37,6 +37,8 @@
       background: person.color,
       width: size + 'px',
       height: size + 'px',
+      'min-width': size + 'px',
+      'min-height': size + 'px',
       'font-size': fontSize + 'px'
     }"
     v-else

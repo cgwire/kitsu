@@ -352,8 +352,7 @@ export const routes = [
       {
         path: 'my-tasks',
         component: Todos,
-        name: 'todos',
-        children: [{ path: ':tab', component: Todos, name: 'todos-tab' }]
+        name: 'todos'
       },
 
       {

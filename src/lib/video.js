@@ -38,15 +38,21 @@ export const frameToSeconds = (nbFrames, production, shot) => {
 /*
  * Display time at this format.
  */
-export const formatTime = seconds => {
-  if (seconds < 0) seconds = 0
-  let centiseconds = `${Math.round((seconds % 1) * 100)}`.padStart(2, '0')
-  centiseconds = '.' + centiseconds
+export const formatTime = (rawTime, fps) => {
+  if (rawTime < 0) rawTime = 0
+
+  const time = new Date(1000 * rawTime).toISOString()
+  const milliseconds = parseInt(time.substring(20, 23))
+  const frameDuration = Math.round((1 / fps) * 10000) / 10000
+  const frame = `${Math.round(milliseconds / (1000 * frameDuration))}`.padStart(
+    2,
+    '0'
+  )
   try {
-    return new Date(1000 * seconds).toISOString().substr(11, 8) + centiseconds
+    return `${time.substr(11, 8)}:${frame}`
   } catch (err) {
     console.error(err)
-    return '00:00:00.00'
+    return '00:00:00:00'
   }
 }
 

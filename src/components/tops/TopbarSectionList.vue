@@ -7,8 +7,11 @@
   >
     <div class="section-menu">
       <div class="flexrow unselectable root-menu" @click="toggleSectionList">
-        <div class="selected-section-line flexrow-item">
-          {{ currentSectionLabel }}
+        <div class="selected-section-line flexrow-item flexrow">
+          <kitsu-icon class="section-icon" :name="currentSectionValue" />
+          <span>
+            {{ currentSectionLabel }}
+          </span>
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
@@ -20,10 +23,14 @@
           :key="section.value + '-' + index"
         >
           <router-link
+            class="flexrow"
             :to="getSectionPath(section)"
             v-if="section.value !== 'separator'"
           >
-            {{ section.label }}
+            <kitsu-icon class="section-icon" :name="section.value" />
+            <span class="flexrow-item">
+              {{ section.label }}
+            </span>
           </router-link>
           <hr v-else />
         </div>
@@ -40,13 +47,15 @@ import { ChevronDownIcon } from 'vue-feather-icons'
 import { getProductionPath } from '@/lib/path'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask'
+import KitsuIcon from '@/components/widgets/KitsuIcon'
 
 export default {
   name: 'topbar-section-list',
 
   components: {
     ChevronDownIcon,
-    ComboboxMask
+    ComboboxMask,
+    KitsuIcon
   },
 
   data() {
@@ -82,6 +91,13 @@ export default {
       const section = this.localSection
       const sectionOption = this.sectionList.find(s => s.value === section)
       if (sectionOption) return sectionOption.label
+      return null
+    },
+
+    currentSectionValue() {
+      const section = this.localSection
+      const sectionOption = this.sectionList.find(s => s.value === section)
+      if (sectionOption) return sectionOption.value
       return null
     }
   },
@@ -164,9 +180,8 @@ export default {
 
   a {
     color: $black;
-    padding: 0.4em;
+    padding: 0.2em 0.4em;
     padding-right: 0.8em;
-    display: inline-block;
     width: 100%;
   }
 
@@ -191,7 +206,7 @@ export default {
   border-bottom-right-radius: 5px;
   margin-left: -6px;
   max-height: 460px;
-  min-width: 180px;
+  min-width: 200px;
   overflow-y: auto;
   padding: 5px;
   padding-bottom: 10px;
@@ -222,5 +237,11 @@ hr {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
   }
+}
+
+.section-icon {
+  cursor: pointer;
+  margin-right: 0.8em;
+  width: 20px;
 }
 </style>

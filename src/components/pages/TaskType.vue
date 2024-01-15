@@ -147,6 +147,7 @@
             </div>
             <div class="flexrow-item zoom-level" v-if="isActiveTab('schedule')">
               <combobox-number
+                class="mt0"
                 :label="$t('schedule.zoom_level')"
                 :options="schedule.zoomOptions"
                 no-field
@@ -1573,7 +1574,7 @@ export default {
 }
 
 .zoom-level {
-  margin-top: -8px;
+  margin-bottom: 6px;
 }
 
 .task-type-estimation {

@@ -185,6 +185,19 @@ export const getDatesFromEndDate = (startDate, dueDate, estimation) => {
   }
 }
 
+export const getBusinessDays = (startDate, endDate) => {
+  const Sunday = 0
+  const Saturday = 6
+  const newDate = startDate.clone()
+  let nbDays = 1
+  while (newDate.isBefore(endDate)) {
+    newDate.add(1, 'days')
+    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+      nbDays++
+    }
+  }
+  return nbDays
+}
 export const addBusinessDays = (originalDate, numDaysToAdd) => {
   const Sunday = 0
   const Saturday = 6

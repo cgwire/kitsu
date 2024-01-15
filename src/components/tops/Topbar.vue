@@ -82,8 +82,8 @@
         <router-link
           class="nav-item"
           :to="{
-            name: 'todos-tab',
-            params: { tab: 'todos' }
+            name: 'todos',
+            query: { section: 'todos' }
           }"
           v-if="!isCurrentUserAdmin && !isCurrentUserClient"
         >
@@ -93,8 +93,8 @@
         <router-link
           class="nav-item mr05"
           :to="{
-            name: 'todos-tab',
-            params: { tab: 'timesheets' }
+            name: 'todos',
+            query: { section: 'timesheets' }
           }"
           v-if="!isCurrentUserAdmin && !isCurrentUserClient"
         >

@@ -33,13 +33,14 @@ const ALL_EXTENSIONS = [
   'avi',
   'clip'
 ]
+const ALL_EXTENSIONS_STRING = ALL_EXTENSIONS.map(e => `.${e}`).join(',')
 
-const ALL_EXTENSIONS_STRING = ALL_EXTENSIONS.map(
-  extension => '.' + extension
-).join(',')
+const IMG_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'svg']
+const IMG_EXTENSIONS_STRING = IMG_EXTENSIONS.map(e => `.${e}`).join(',')
 
 export default {
-  IMG_EXTENSIONS: ['png', 'jpg', 'jpeg', 'gif', 'svg'],
+  ALL_EXTENSIONS,
   ALL_EXTENSIONS_STRING,
-  ALL_EXTENSIONS
+  IMG_EXTENSIONS,
+  IMG_EXTENSIONS_STRING
 }

@@ -534,10 +534,6 @@ export default {
     background: $dark-grey-lighter;
     color: $white-grey;
     box-shadow: 0px 1px 1px 1px $dark-grey;
-
-    &.selected {
-      border-left: 6px solid $dark-purple;
-    }
   }
 
   .icon,
@@ -560,17 +556,22 @@ a {
 }
 
 .notification {
-  margin-bottom: 0.5em;
   align-items: flex-start;
   background: white;
+  border: 5px solid transparent;
+  border-radius: 1em;
   box-shadow: 0 0 4px $light-grey;
   cursor: pointer;
-  border-left: 6px solid transparent;
+  margin-bottom: 0.5em;
   padding-left: 0.7em;
+
+  &:hover {
+    background: var(--background-selectable);
+  }
 }
 
 .unread {
-  border-left: 6px solid $orange;
+  border-left: 5px solid $orange;
 }
 
 .person-name {
@@ -622,6 +623,7 @@ a {
 }
 
 .notification-line {
+  border-radius: 1em;
   align-items: start;
 }
 
@@ -637,7 +639,8 @@ a {
 }
 
 .selected {
-  border-left: 6px solid $purple;
+  border: 5px solid var(--background-selected);
+  transform: scale(1.01);
 }
 
 .columns {
