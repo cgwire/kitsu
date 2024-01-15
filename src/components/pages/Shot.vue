@@ -61,6 +61,138 @@
           />
         </div>
 
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
+          <page-subtitle :text="$t('shots.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="currentTasks"
+            :is-loading="!currentShot"
+            :is-error="false"
+            @task-selected="onTaskSelected"
+          />
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
+            </div>
+          </div>
+          <div class="table-body">
+            <table class="datatable no-header" v-if="currentShot">
+              <tbody class="datatable-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('shots.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentShot" :full="true" />
+                </tr>
+
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('shots.fields.nb_frames') }}
+                  </td>
+                  <td>
+                    {{ currentShot ? currentShot.nb_frames : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="
+                    currentShot &&
+                    currentShot.data &&
+                    currentShot.data.frame_in != null
+                  "
+                >
+                  <td class="field-label">
+                    {{ $t('shots.fields.frame_in') }}
+                  </td>
+                  <td>
+                    {{ currentShot ? currentShot.data.frame_in : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="
+                    currentShot &&
+                    currentShot.data &&
+                    currentShot.data.frame_out
+                  "
+                >
+                  <td class="field-label">
+                    {{ $t('shots.fields.frame_out') }}
+                  </td>
+                  <td>
+                    {{ currentShot ? currentShot.data.frame_out : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="currentShot && currentShot.data && currentShot.data.fps"
+                >
+                  <td class="field-label">{{ $t('shots.fields.fps') }}</td>
+                  <td>
+                    {{ currentShot ? currentShot.data.fps : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="
+                    currentShot &&
+                    currentShot.data &&
+                    currentShot.data.resolution
+                  "
+                >
+                  <td class="field-label">
+                    {{ $t('shots.fields.resolution') }}
+                  </td>
+                  <td>
+                    {{ currentShot ? currentShot.data.resolution : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="
+                    currentShot &&
+                    currentShot.data &&
+                    currentShot.data.max_retakes
+                  "
+                >
+                  <td class="field-label">
+                    {{ $t('shots.fields.max_retakes') }}
+                  </td>
+                  <td>
+                    {{ currentShot ? currentShot.data.max_retakes : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in shotMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    {{
+                      currentShot && currentShot.data
+                        ? currentShot.data[descriptor.field_name]
+                        : ''
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <div class="shot-casting" v-show="currentSection === 'casting'">
           <div v-if="currentShot">
             <div
@@ -130,142 +262,6 @@
           />
         </div>
 
-        <div class="flexrow infos" v-show="currentSection === 'infos'">
-          <div class="flexrow-item flexcolumn entity-infos mt1">
-            <page-subtitle :text="$t('shots.tasks')" />
-            <entity-task-list
-              class="task-list"
-              :entries="currentTasks"
-              :is-loading="!currentShot"
-              :is-error="false"
-              @task-selected="onTaskSelected"
-            />
-            <div class="flexrow">
-              <page-subtitle :text="$t('main.info')" />
-              <div class="filler"></div>
-              <div class="flexrow-item has-text-right">
-                <button-simple
-                  icon="edit"
-                  @click="modals.edit = true"
-                  v-if="isCurrentUserManager"
-                />
-              </div>
-            </div>
-            <div class="table-body">
-              <table class="datatable no-header" v-if="currentShot">
-                <tbody class="datatable-body">
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('shots.fields.description') }}
-                    </td>
-                    <description-cell :entry="currentShot" :full="true" />
-                  </tr>
-
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('shots.fields.nb_frames') }}
-                    </td>
-                    <td>
-                      {{ currentShot ? currentShot.nb_frames : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentShot &&
-                      currentShot.data &&
-                      currentShot.data.frame_in != null
-                    "
-                  >
-                    <td class="field-label">
-                      {{ $t('shots.fields.frame_in') }}
-                    </td>
-                    <td>
-                      {{ currentShot ? currentShot.data.frame_in : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentShot &&
-                      currentShot.data &&
-                      currentShot.data.frame_out
-                    "
-                  >
-                    <td class="field-label">
-                      {{ $t('shots.fields.frame_out') }}
-                    </td>
-                    <td>
-                      {{ currentShot ? currentShot.data.frame_out : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentShot && currentShot.data && currentShot.data.fps
-                    "
-                  >
-                    <td class="field-label">{{ $t('shots.fields.fps') }}</td>
-                    <td>
-                      {{ currentShot ? currentShot.data.fps : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentShot &&
-                      currentShot.data &&
-                      currentShot.data.resolution
-                    "
-                  >
-                    <td class="field-label">
-                      {{ $t('shots.fields.resolution') }}
-                    </td>
-                    <td>
-                      {{ currentShot ? currentShot.data.resolution : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentShot &&
-                      currentShot.data &&
-                      currentShot.data.max_retakes
-                    "
-                  >
-                    <td class="field-label">
-                      {{ $t('shots.fields.max_retakes') }}
-                    </td>
-                    <td>
-                      {{ currentShot ? currentShot.data.max_retakes : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    :key="descriptor.id"
-                    class="datatable-row"
-                    v-for="descriptor in shotMetadataDescriptors"
-                  >
-                    <td class="field-label">{{ descriptor.name }}</td>
-                    <td>
-                      {{
-                        currentShot && currentShot.data
-                          ? currentShot.data[descriptor.field_name]
-                          : ''
-                      }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
         <div
           class="schedule mt1"
           v-if="scheduleItems[0].children.length > 0"
@@ -282,6 +278,8 @@
               :is-estimation-linked="true"
               :hide-root="true"
               :with-milestones="false"
+              @item-changed="saveTaskScheduleItem"
+              @estimation-changed="event => saveTaskScheduleItem(event.item)"
             />
           </div>
         </div>
@@ -300,12 +298,7 @@
 
     <div class="column side-column" v-show="currentSection === 'infos'">
       <task-info :task="currentTask" entity-type="Shot" with-actions>
-        <div class="">
-          <hr />
-        </div>
-        <div class="flexrow entity-news-wrapper">
-          <entity-news class="pa1 entity-news" :entity="currentShot" />
-        </div>
+        <entity-news class="news-column" :entity="currentShot" />
       </task-info>
     </div>
 
@@ -566,6 +559,7 @@ export default {
             this.loadShotCasting(this.currentShot)
               .then(() => {
                 this.casting.isLoading = false
+                setTimeout(this.initSchedule, 100)
               })
               .catch(err => {
                 this.casting.isLoading = false
@@ -574,9 +568,16 @@ export default {
               })
           } else {
             this.resetData()
+            setTimeout(this.initSchedule, 100)
           }
         })
         .catch(console.error)
+    },
+
+    initSchedule() {
+      this.$refs['schedule-widget'].scrollToDate(
+        this.scheduleItems[0].startDate
+      )
     }
   },
 
@@ -711,6 +712,8 @@ h2.subtitle {
 
 .task-list {
   width: 100%;
+  flex: none;
+  margin-bottom: 2em;
 }
 
 .datatable-row {
@@ -786,9 +789,14 @@ h2.subtitle {
   max-height: 85%;
 }
 
-.infos .entity-infos {
-  flex: 1.5;
+.infos {
+  flex: 1;
+
+  .entity-infos {
+    flex: 1;
+  }
 }
+
 .entity-data {
   display: flex;
   flex: 1;
@@ -798,10 +806,7 @@ h2.subtitle {
   overflow: hidden;
 }
 
-.entity-news-wrapper {
-  max-height: 80%;
-}
-.entity-news {
-  overflow-y: auto;
+.news-column {
+  max-height: 85%;
 }
 </style>
