@@ -215,7 +215,11 @@ export default {
     },
 
     selectTask(task) {
-      this.currentTask = task
+      if (task.id === this.currentTask?.id) {
+        this.currentTask = null
+      } else {
+        this.currentTask = task
+      }
       this.$emit('task-selected', task)
     }
   }
