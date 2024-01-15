@@ -1,12 +1,9 @@
 <template>
-  <div class="mt1 news flexcolumn">
+  <div class="news flexcolumn">
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
     <div class="news" v-else-if="newsList.length > 0">
-      <div>
-        <em> {{ newsList.length }} modifications occured </em>
-      </div>
       <div class="timeline mt1">
         <div :key="'news-' + news.id" v-for="news in newsList">
           <div class="news-line timeline-entry flexrow">
@@ -18,7 +15,7 @@
               }"
             ></span>
             <span class="date flexrow-item">
-              {{ formatFullDate(news.created_at) }}
+              {{ formatFullDate(news.created_at).substring(10, 0) }}
             </span>
 
             <people-avatar
@@ -44,6 +41,7 @@
                 :task="taskMap.get(news.task_id)"
                 :is-static="true"
                 :thin="!news.change"
+                :is-priority="false"
               />
             </div>
           </div>
@@ -173,7 +171,6 @@ export default {
           (!this.taskStatusId || this.taskStatusId === eventData.task_status_id)
         ) {
           this.reset()
-          console.log(eventData)
         }
       }
     }
