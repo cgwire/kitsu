@@ -641,7 +641,6 @@ export default {
       const daysLength = getBusinessDays(item.startDate, item.endDate)
       const estimation = daysToMinutes(this.organisation, daysLength)
       item.man_days = estimation
-      console.log('saveTask', item)
       if (item.startDate && item.endDate) {
         this.updateTask({
           taskId: item.id,

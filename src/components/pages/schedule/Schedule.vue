@@ -936,12 +936,6 @@ export default {
             childElement.startDate,
             estimation - 1
           )
-          console.log(
-            'childElement.endDate',
-            estimation,
-            estimation + 1,
-            childElement.endDate
-          )
         }
       }
       this.$emit('estimation-changed', {
@@ -1290,7 +1284,6 @@ export default {
       const movementY =
         event.movementY || this.getClientY(event) - this.initialClientY
       const newTop = previousTop - movementY
-      console.log('ok', newTop, movementY)
       this.initialClientY = this.getClientY(event)
       this.timelineContentWrapper.scrollTop = newTop
       this.entityList.scrollTop = newTop
