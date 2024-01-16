@@ -317,7 +317,7 @@ export default {
   flex: 1;
   flex-direction: column;
   display: flex;
-  max-height: 80%;
+  overflow-y: auto;
 }
 
 .board-columns,

@@ -587,18 +587,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.task-tabs {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  font-size: 1.1em;
-
-  ul {
-    margin-left: 0;
-  }
+.columns {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
 }
 
-.data-list {
-  margin-top: 0;
+.column {
+  padding: 0;
+  overflow-y: auto;
+}
+
+.todos {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-tabs {
+  min-height: 36px;
 }
 
 .search-field {
@@ -609,29 +615,12 @@ export default {
   margin-top: 0.5em;
 }
 
+.data-list {
+  margin-top: 0;
+}
+
 .done-list {
   margin-top: 2em;
-}
-
-.todos {
-  display: flex;
-  flex-direction: column;
-}
-
-.columns {
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-}
-
-.column {
-  overflow-y: auto;
-  padding: 0;
-}
-
-.push-right {
-  flex: 1;
-  text-align: right;
 }
 
 .field {
