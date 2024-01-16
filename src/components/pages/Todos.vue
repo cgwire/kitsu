@@ -253,17 +253,7 @@ export default {
 
     boardStatuses() {
       const production = this.productionMap.get(this.productionId)
-      const statuses = this.getProductionTaskStatuses(this.productionId).filter(
-        status => {
-          if (status.for_concept) {
-            return false
-          }
-          const roles_for_board =
-            production.task_statuses_link?.[status.id]?.roles_for_board
-          return roles_for_board?.includes(this.user.role)
-        }
-      )
-      return sortTaskStatuses(statuses, production)
+      return this.getBoardStatusesByProduction(production)
     },
 
     pendingTasks() {
@@ -279,37 +269,39 @@ export default {
     },
 
     todoTabs() {
+      const hasAvailableBoard = this.openProductions.some(
+        production => this.getBoardStatusesByProduction(production).length
+      )
       return [
         {
           label: this.$t('main.tasks'),
           name: 'todos'
         },
-        {
-          label: this.$t('board.title'),
-          name: 'board'
-        },
+        hasAvailableBoard
+          ? {
+              label: this.$t('board.title'),
+              name: 'board'
+            }
+          : undefined,
         {
           label: this.$t('tasks.calendar'),
           name: 'calendar'
         },
         {
-          label:
-            this.$t('tasks.pending') + ' (' + this.pendingTasks.length + ')',
+          label: `${this.$t('tasks.pending')} (${this.pendingTasks.length})`,
           name: 'pending'
         },
         {
-          label:
-            this.$t('tasks.validated') +
-            ' (' +
-            this.displayedDoneTasks.length +
-            ')',
+          label: `${this.$t('tasks.validated')} (${
+            this.displayedDoneTasks.length
+          })`,
           name: 'done'
         },
         {
           label: this.$t('timesheets.title'),
           name: 'timesheets'
         }
-      ]
+      ].filter(Boolean)
     },
 
     loggableTodos() {
@@ -538,6 +530,20 @@ export default {
           }
         })
       }
+    },
+
+    getBoardStatusesByProduction(production) {
+      const statuses = this.getProductionTaskStatuses(production.id).filter(
+        status => {
+          if (status.for_concept) {
+            return false
+          }
+          const roles_for_board =
+            production.task_statuses_link?.[status.id]?.roles_for_board
+          return roles_for_board?.includes(this.user.role)
+        }
+      )
+      return sortTaskStatuses(statuses, production)
     }
   },
 
