@@ -297,7 +297,7 @@ const actions = {
               .then(timeSpents => {
                 commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
                 commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
-                commit(REGISTER_USER_TASKS, { tasks })
+                commit(REGISTER_USER_TASKS, { tasks: tasks.concat(doneTasks) })
                 return peopleApi.getDayOff(state.user.id, date)
               })
               .then(dayOff => {

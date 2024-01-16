@@ -10,7 +10,8 @@ const options = {
 }
 marked.use(markedEmoji(options))
 
-export const TIME_CODE_REGEX = /v(\d+) (\d+):(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
+export const TIME_CODE_REGEX =
+  /v(\d+) ((\d+):)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
 
 export const sanitize = html => {
   return sanitizeHTML(html, {
@@ -62,10 +63,9 @@ export const renderComment = (
     (match, version, hours, minutes, seconds, sep, subframes, frame) => {
       return `<span
         class="timecode ${className}"
-        href="#"
         data-version-revision="${version}"
         data-frame="${frame}"
-      >${match}</a>`
+      >${match}</span>`
     }
   )
 }

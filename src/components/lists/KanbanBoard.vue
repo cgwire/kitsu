@@ -1,5 +1,8 @@
 <template>
   <div class="board">
+    <div class="box" v-if="!columns.length && !isLoading">
+      {{ $t('board.empty') }}
+    </div>
     <ol
       class="board-columns"
       @mousedown="onBoardScrollStart"
@@ -10,6 +13,7 @@
       @touchend="onBoardScrollEnd"
       @mouseleave="onBoardScrollEnd"
       @touchcancel="onBoardScrollEnd"
+      v-else
     >
       <li
         class="board-column"
@@ -313,7 +317,7 @@ export default {
   flex: 1;
   flex-direction: column;
   display: flex;
-  max-height: 80%;
+  overflow-y: auto;
 }
 
 .board-columns,

@@ -717,7 +717,7 @@ export default {
       if (this.isSelectableMap[key] === undefined) {
         const taskType = this.taskTypeMap.get(columnId)
         const assetType = this.assetTypeMap.get(asset.asset_type_id)
-        let taskTypes = assetType.task_types || []
+        let taskTypes = assetType?.task_types || []
         if (taskTypes.length === 0) {
           taskTypes = this.productionAssetTaskTypes.map(t => t.id)
         }

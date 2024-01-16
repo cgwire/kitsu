@@ -71,6 +71,7 @@ export default {
 
   board: {
     title: 'Board',
+    empty: 'Your kanban board is currently empty. It means no task status is configured for your user role in the production settings.',
     settings: {
       title: 'Board Status',
       visible: 'Displayed on kanban board of...'
