@@ -73,7 +73,7 @@ import BooleanField from '@/components/widgets/BooleanField'
 import Combobox from '@/components/widgets/Combobox'
 
 export default {
-  name: 'production-settings',
+  name: 'production-backgrounds',
 
   components: {
     BooleanField,
