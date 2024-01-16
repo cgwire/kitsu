@@ -171,7 +171,7 @@
                         replyComment.department_mentions || [],
                         personMap,
                         departmentMap,
-                        ''
+                        uniqueClassName
                       )
                     "
                     class="comment-text"
