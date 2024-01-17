@@ -18,10 +18,10 @@
       <li
         class="board-column"
         :key="column.id"
-        @dragenter="onCardDragEnter"
+        @dragenter="onCardDragEnter($event, column.status)"
         @dragover="onCardDragOver"
         @dragleave="onCardDragLeave"
-        @drop="onCardDrop($event, column.status.id)"
+        @drop="onCardDrop($event, column.status)"
         v-for="column in columns"
       >
         <h2 class="board-column-title">
@@ -142,6 +142,10 @@ export default {
     tasks: {
       type: Array,
       default: () => []
+    },
+    user: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -178,6 +182,14 @@ export default {
 
   methods: {
     ...mapActions(['addSelectedTasks', 'clearSelectedTasks', 'commentTask']),
+
+    checkUserIsAllowed(taskStatus, user) {
+      const role = user.role
+      return !(
+        (role === 'user' && !taskStatus.is_artist_allowed) ||
+        (role === 'client' && !taskStatus.is_client_allowed)
+      )
+    },
 
     getSortedPeople(personIds) {
       const people = personIds.map(id => this.personMap.get(id))
@@ -275,8 +287,11 @@ export default {
       event.target.classList.remove('dragging')
     },
 
-    onCardDragEnter(event) {
-      event.currentTarget.classList.add('droppable')
+    onCardDragEnter(event, taskStatus) {
+      this.isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (this.isAllowed) {
+        event.currentTarget.classList.add('droppable')
+      }
     },
 
     onCardDragOver(event) {
@@ -287,16 +302,20 @@ export default {
       event.target.classList.remove('droppable')
     },
 
-    onCardDrop(event, taskStatusId) {
+    onCardDrop(event, taskStatus) {
+      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (!isAllowed) {
+        return
+      }
       event.currentTarget.classList.remove('droppable')
       const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
-      if (previousTaskStatusId === taskStatusId) {
+      if (previousTaskStatusId === taskStatus.id) {
         return
       }
       const taskId = event.dataTransfer.getData('taskId')
       this.commentTask({
         taskId,
-        taskStatusId
+        taskStatusId: taskStatus.id
       })
     },
 

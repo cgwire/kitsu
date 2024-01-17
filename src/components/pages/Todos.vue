@@ -100,6 +100,7 @@
           :is-error="isTodosLoadingError"
           :statuses="boardStatuses"
           :tasks="boardTasks"
+          :user="user"
           v-if="isTabActive('board')"
         />
 
