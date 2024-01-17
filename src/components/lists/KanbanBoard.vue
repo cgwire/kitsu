@@ -318,6 +318,10 @@ export default {
   flex-direction: column;
   display: flex;
   overflow-y: auto;
+
+  > .box {
+    margin: 2px; // avoid the overflow from hiding the box-shadow
+  }
 }
 
 .board-columns,
