@@ -29,15 +29,32 @@
                 :task="{ task_status_id: taskStatus.id }"
               />
             </td>
-            <td class="role">
+            <td class="roles">
               <boolean-field
                 class="role-field"
                 :key="`${taskStatus.id}-${role}`"
                 :label="$t(`people.role.${role}`)"
                 :value="String(isActiveRole(taskStatus, role))"
-                @click="updateRolesForBoard(taskStatus, role)"
+                @click="
+                  value =>
+                    updateRolesForBoard(taskStatus, [role], value === 'true')
+                "
                 v-for="role in availableRoles"
               />
+              <button
+                class="button"
+                @click="updateRolesForBoard(taskStatus, availableRoles)"
+                v-if="getActiveRoles(taskStatus).length < availableRoles.length"
+              >
+                {{ $t('board.settings.select_all') }}
+              </button>
+              <button
+                class="button"
+                @click="updateRolesForBoard(taskStatus, availableRoles, false)"
+                v-else
+              >
+                {{ $t('board.settings.unselect_all') }}
+              </button>
             </td>
           </tr>
         </template>
@@ -93,13 +110,16 @@ export default {
       return this.getActiveRoles(taskStatus).includes(role)
     },
 
-    async updateRolesForBoard(taskStatus, role) {
+    async updateRolesForBoard(taskStatus, rolesToUpdate, addition = true) {
       const roles = [...this.getActiveRoles(taskStatus)]
-      if (this.isActiveRole(taskStatus, role)) {
-        roles.splice(roles.indexOf(role), 1)
-      } else {
-        roles.push(role)
-      }
+
+      rolesToUpdate.forEach(role => {
+        if (addition && !this.isActiveRole(taskStatus, role)) {
+          roles.push(role)
+        } else if (!addition && this.isActiveRole(taskStatus, role)) {
+          roles.splice(roles.indexOf(role), 1)
+        }
+      })
 
       const taskStatusLink = {
         ...this.currentProduction.task_statuses_link[taskStatus.id],
@@ -129,13 +149,31 @@ export default {
   width: 120px;
 }
 
-.role {
+.roles {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
+  align-items: center;
 
   .role-field {
     margin: 0;
+  }
+
+  .button {
+    border: 2px dashed transparent;
+    border-radius: 25px;
+    color: $grey;
+    background: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    height: 100%;
+    padding: 0.5em 1.2em;
+    transition: 0.3s ease all;
+
+    &:hover {
+      color: $light-green;
+      border-color: $light-green;
+    }
   }
 }
 </style>

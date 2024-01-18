@@ -18,10 +18,10 @@
       <li
         class="board-column"
         :key="column.id"
-        @dragenter="onCardDragEnter"
+        @dragenter="onCardDragEnter($event, column.status)"
         @dragover="onCardDragOver"
         @dragleave="onCardDragLeave"
-        @drop="onCardDrop($event, column.status.id)"
+        @drop="onCardDrop($event, column.status)"
         v-for="column in columns"
       >
         <h2 class="board-column-title">
@@ -98,6 +98,13 @@
       </li>
     </ol>
     <table-info :is-loading="isLoading" :is-error="isError" />
+    <confirm-modal
+      :active="modals.confirmFeedbackPublish"
+      :text="$t('board.confirm_publish')"
+      :confirm-button-text="$t('board.confirm_publish_button')"
+      @cancel="cancelFeedbackPublish"
+      @confirm="confirmFeedbackPublish"
+    />
   </div>
 </template>
 
@@ -109,6 +116,7 @@ import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
+import ConfirmModal from '@/components/modals/ConfirmModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -120,6 +128,7 @@ export default {
   mixins: [domMixin, formatListMixin],
 
   components: {
+    ConfirmModal,
     EntityThumbnail,
     PeopleAvatar,
     TableInfo,
@@ -142,19 +151,31 @@ export default {
     tasks: {
       type: Array,
       default: () => []
+    },
+    user: {
+      type: Object,
+      default: () => {}
     }
   },
 
   data() {
     return {
       isScrollingX: false,
-      initialClientX: null
+      initialClientX: null,
+      form: {
+        taskId: null,
+        taskStatusId: null
+      },
+      modals: {
+        confirmFeedbackPublish: false
+      }
     }
   },
 
   computed: {
     ...mapGetters([
       'isDarkTheme',
+      'getTaskPreviews',
       'personMap',
       'productionMap',
       'selectedTasks',
@@ -178,6 +199,14 @@ export default {
 
   methods: {
     ...mapActions(['addSelectedTasks', 'clearSelectedTasks', 'commentTask']),
+
+    checkUserIsAllowed(taskStatus, user) {
+      const role = user.role
+      return !(
+        (role === 'user' && !taskStatus.is_artist_allowed) ||
+        (role === 'client' && !taskStatus.is_client_allowed)
+      )
+    },
 
     getSortedPeople(personIds) {
       const people = personIds.map(id => this.personMap.get(id))
@@ -238,10 +267,10 @@ export default {
     },
 
     onBoardScrolling(event) {
-      event.preventDefault()
       if (!this.isScrollingX) {
         return
       }
+      event.preventDefault()
       const clientX = this.getClientX(event)
       const diffX = clientX - this.initialClientX
       event.currentTarget.scrollLeft -= diffX
@@ -275,8 +304,11 @@ export default {
       event.target.classList.remove('dragging')
     },
 
-    onCardDragEnter(event) {
-      event.currentTarget.classList.add('droppable')
+    onCardDragEnter(event, taskStatus) {
+      this.isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (this.isAllowed) {
+        event.currentTarget.classList.add('droppable')
+      }
     },
 
     onCardDragOver(event) {
@@ -287,16 +319,30 @@ export default {
       event.target.classList.remove('droppable')
     },
 
-    onCardDrop(event, taskStatusId) {
+    onCardDrop(event, taskStatus) {
       event.currentTarget.classList.remove('droppable')
-      const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
-      if (previousTaskStatusId === taskStatusId) {
+
+      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (!isAllowed) {
         return
       }
       const taskId = event.dataTransfer.getData('taskId')
+      if (taskStatus.is_feedback_request) {
+        const taskPreviews = this.getTaskPreviews(taskId)
+        if (!taskPreviews?.length) {
+          this.form.taskId = taskId
+          this.form.taskStatusId = taskStatus.id
+          this.modals.confirmFeedbackPublish = true
+          return
+        }
+      }
+      const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
+      if (previousTaskStatusId === taskStatus.id) {
+        return
+      }
       this.commentTask({
         taskId,
-        taskStatusId
+        taskStatusId: taskStatus.id
       })
     },
 
@@ -306,6 +352,18 @@ export default {
 
     onCardMouseLeave(event) {
       event.currentTarget.blur()
+    },
+
+    cancelFeedbackPublish() {
+      this.modals.confirmFeedbackPublish = false
+    },
+
+    confirmFeedbackPublish() {
+      this.modals.confirmFeedbackPublish = false
+      this.commentTask({
+        taskId: this.form.taskId,
+        taskStatusId: this.form.taskStatusId
+      })
     }
   }
 }
@@ -318,6 +376,10 @@ export default {
   flex-direction: column;
   display: flex;
   overflow-y: auto;
+
+  > .box {
+    margin: 2px; // avoid the overflow from hiding the box-shadow
+  }
 }
 
 .board-columns,
