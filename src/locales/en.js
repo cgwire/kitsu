@@ -978,7 +978,6 @@ export default {
       commercial: 'Commercial',
       catalog: 'Catalog',
       immersive: 'Immersive Experience',
-      metaverse: 'Metaverse',
       motion_design: 'Motion Design',
       nft: 'NFT collection',
       stop_motion: 'Stop Motion',

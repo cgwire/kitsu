@@ -44,11 +44,15 @@
               />
             </th>
             <td class="type">
-              {{ $t('productions.type.' + (entry.production_type || 'short')) }}
+              {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
             </td>
             <td class="style">
               {{
-                $t('productions.style.' + (entry.production_style || '2d3d'))
+                $t(
+                  `productions.style.${
+                    getProductionStyleLabel(entry.production_style) || '2d3d'
+                  }`
+                )
               }}
             </td>
             <td class="fps">
@@ -89,11 +93,15 @@
               />
             </th>
             <td class="type">
-              {{ $t('productions.type.' + (entry.production_type || 'short')) }}
+              {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
             </td>
             <td class="style">
               {{
-                $t('productions.style.' + (entry.production_style || '2d3d'))
+                $t(
+                  `productions.style.${
+                    getProductionStyleLabel(entry.production_style) || '2d3d'
+                  }`
+                )
               }}
             </td>
             <td class="fps">
@@ -125,9 +133,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
+
+import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
 
 export default {
   name: 'production-list',
@@ -176,6 +187,11 @@ export default {
         Closed: 'productions.status.closed'
       }
       return statusMap[originalStatus]
+    },
+
+    getProductionStyleLabel(value) {
+      return PRODUCTION_STYLE_OPTIONS.find(style => style.value === value)
+        ?.label
     }
   }
 }
