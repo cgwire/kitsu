@@ -438,7 +438,7 @@ export default {
       }
 
       if (this.isTVShow && !this.isCurrentUserClient) {
-        options.push({ label: 'Episodes', value: 'episodes' })
+        options.push({ label: this.$t('episodes.title'), value: 'episodes' })
       }
 
       options = options.concat([{ label: 'separator', value: 'separator' }])
