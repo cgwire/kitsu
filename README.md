@@ -23,22 +23,22 @@ You will find all the information you are looking for!
 
 ## Sponsors
 
-<a href="http://www.les-fees-speciales.coop">
+* <a href="http://www.les-fees-speciales.coop">
 <img alt="Les Fées Spéciales" src="https://www.cg-wire.com/images/logo-les-fees-speciales.png" width=100 />
 </a>
-<a href="https://www.cube-creative.com">
+* <a href="https://www.cube-creative.com">
 <img alt="Cube Creative" src="https://www.cg-wire.com/images/logo-cube.png" width=100 />
 </a>
-<a href="https://cloud.blender.org">
+* <a href="https://cloud.blender.org">
 <img alt="Blender Studio" src="https://www.cg-wire.com/images/logo-blender.png" width=100 />
 </a>
-<a href="http://nousvoir.com/en/home">
+* <a href="http://nousvoir.com/en/home">
 <img alt="TNZPV" src="https://www.cg-wire.com/images/logo-tnzpv.png" width=100 />
 </a>
-<a href="http://leefilm.se">
+* <a href="http://leefilm.se">
 <img alt="Lee Film" src="https://www.cg-wire.com/images/logo-lee.png" width=100 />
 </a>
-<a href="http://miyu.fr">
+* <a href="http://miyu.fr">
 <img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu.png" width=100 />
 </a>
 
