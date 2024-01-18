@@ -267,10 +267,10 @@ export default {
     },
 
     onBoardScrolling(event) {
-      event.preventDefault()
       if (!this.isScrollingX) {
         return
       }
+      event.preventDefault()
       const clientX = this.getClientX(event)
       const diffX = clientX - this.initialClientX
       event.currentTarget.scrollLeft -= diffX
