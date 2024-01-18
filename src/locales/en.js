@@ -76,7 +76,9 @@ export default {
     confirm_publish_button: 'Change status without publishing files',
     settings: {
       title: 'Board Status',
-      visible: 'Displayed on kanban board of...'
+      visible: 'Displayed on kanban board of...',
+      select_all: "Select all",
+      unselect_all: "Unselect all"
     }
   },
 
