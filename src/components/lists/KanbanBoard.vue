@@ -98,6 +98,13 @@
       </li>
     </ol>
     <table-info :is-loading="isLoading" :is-error="isError" />
+    <confirm-modal
+      :active="modals.confirmFeedbackPublish"
+      :text="$t('board.confirm_publish')"
+      :confirm-button-text="$t('board.confirm_publish_button')"
+      @cancel="cancelFeedbackPublish"
+      @confirm="confirmFeedbackPublish"
+    />
   </div>
 </template>
 
@@ -109,6 +116,7 @@ import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
+import ConfirmModal from '@/components/modals/ConfirmModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -120,6 +128,7 @@ export default {
   mixins: [domMixin, formatListMixin],
 
   components: {
+    ConfirmModal,
     EntityThumbnail,
     PeopleAvatar,
     TableInfo,
@@ -152,13 +161,21 @@ export default {
   data() {
     return {
       isScrollingX: false,
-      initialClientX: null
+      initialClientX: null,
+      form: {
+        taskId: null,
+        taskStatusId: null
+      },
+      modals: {
+        confirmFeedbackPublish: false
+      }
     }
   },
 
   computed: {
     ...mapGetters([
       'isDarkTheme',
+      'getTaskPreviews',
       'personMap',
       'productionMap',
       'selectedTasks',
@@ -303,16 +320,26 @@ export default {
     },
 
     onCardDrop(event, taskStatus) {
+      event.currentTarget.classList.remove('droppable')
+
       const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
       if (!isAllowed) {
         return
       }
-      event.currentTarget.classList.remove('droppable')
+      const taskId = event.dataTransfer.getData('taskId')
+      if (taskStatus.is_feedback_request) {
+        const taskPreviews = this.getTaskPreviews(taskId)
+        if (!taskPreviews?.length) {
+          this.form.taskId = taskId
+          this.form.taskStatusId = taskStatus.id
+          this.modals.confirmFeedbackPublish = true
+          return
+        }
+      }
       const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
       if (previousTaskStatusId === taskStatus.id) {
         return
       }
-      const taskId = event.dataTransfer.getData('taskId')
       this.commentTask({
         taskId,
         taskStatusId: taskStatus.id
@@ -325,6 +352,18 @@ export default {
 
     onCardMouseLeave(event) {
       event.currentTarget.blur()
+    },
+
+    cancelFeedbackPublish() {
+      this.modals.confirmFeedbackPublish = false
+    },
+
+    confirmFeedbackPublish() {
+      this.modals.confirmFeedbackPublish = false
+      this.commentTask({
+        taskId: this.form.taskId,
+        taskStatusId: this.form.taskStatusId
+      })
     }
   }
 }
