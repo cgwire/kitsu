@@ -10,8 +10,7 @@ const options = {
 }
 marked.use(markedEmoji(options))
 
-export const TIME_CODE_REGEX =
-  /v(\d+) ((\d+):)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
+export const TIME_CODE_REGEX = /v(\d+) (\d+:)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
 
 export const sanitize = html => {
   return sanitizeHTML(html, {
