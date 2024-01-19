@@ -98,12 +98,20 @@
       </li>
     </ol>
     <table-info :is-loading="isLoading" :is-error="isError" />
-    <confirm-modal
-      :active="modals.confirmFeedbackPublish"
-      :text="$t('board.confirm_publish')"
-      :confirm-button-text="$t('board.confirm_publish_button')"
-      @cancel="cancelFeedbackPublish"
-      @confirm="confirmFeedbackPublish"
+    <add-preview-modal
+      ref="add-preview-modal"
+      :active="modals.addPreview"
+      :confirmLabel="$t('main.confirmation')"
+      :is-loading="loading.addPreview"
+      :is-error="errors.addPreview"
+      :form-data="addPreviewFormData"
+      :title="
+        task
+          ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+          : ''
+      "
+      @cancel="closeAddPreviewModal"
+      @confirm="confirmAddPreviewModal"
     />
   </div>
 </template>
@@ -116,7 +124,7 @@ import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
-import ConfirmModal from '@/components/modals/ConfirmModal'
+import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import TableInfo from '@/components/widgets/TableInfo'
@@ -128,7 +136,7 @@ export default {
   mixins: [domMixin, formatListMixin],
 
   components: {
-    ConfirmModal,
+    AddPreviewModal,
     EntityThumbnail,
     PeopleAvatar,
     TableInfo,
@@ -160,15 +168,23 @@ export default {
 
   data() {
     return {
+      addPreviewFormData: null,
       isScrollingX: false,
       initialClientX: null,
+      errors: {
+        addPreview: null
+      },
       form: {
         taskId: null,
         taskStatusId: null
       },
+      loading: {
+        addPreview: false
+      },
       modals: {
-        confirmFeedbackPublish: false
-      }
+        addPreview: false
+      },
+      task: null
     }
   },
 
@@ -198,7 +214,13 @@ export default {
   },
 
   methods: {
-    ...mapActions(['addSelectedTasks', 'clearSelectedTasks', 'commentTask']),
+    ...mapActions([
+      'addSelectedTasks',
+      'clearSelectedTasks',
+      'commentTask',
+      'commentTaskWithPreview',
+      'loadPreviewFileFormData'
+    ]),
 
     checkUserIsAllowed(taskStatus, user) {
       const role = user.role
@@ -332,7 +354,8 @@ export default {
         if (!taskPreviews?.length) {
           this.form.taskId = taskId
           this.form.taskStatusId = taskStatus.id
-          this.modals.confirmFeedbackPublish = true
+          this.task = this.tasks.find(({ id }) => id === taskId)
+          this.modals.addPreview = true
           return
         }
       }
@@ -354,16 +377,18 @@ export default {
       event.currentTarget.blur()
     },
 
-    cancelFeedbackPublish() {
-      this.modals.confirmFeedbackPublish = false
+    closeAddPreviewModal() {
+      this.modals.addPreview = false
     },
 
-    confirmFeedbackPublish() {
-      this.modals.confirmFeedbackPublish = false
-      this.commentTask({
+    confirmAddPreviewModal(forms) {
+      this.loadPreviewFileFormData(forms)
+      this.commentTaskWithPreview({
+        comment: '',
         taskId: this.form.taskId,
         taskStatusId: this.form.taskStatusId
       })
+      this.closeAddPreviewModal()
     }
   }
 }

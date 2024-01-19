@@ -94,9 +94,11 @@
             @click="$emit('confirm', forms)"
           >
             {{
-              isConcept
-                ? $t('main.confirmation')
-                : $t('tasks.add_revision_confirm')
+              confirmLabel?.length
+                ? confirmLabel
+                : isConcept
+                  ? $t('main.confirmation')
+                  : $t('tasks.add_revision_confirm')
             }}
           </a>
           <button @click="$emit('cancel')" class="button is-link">
@@ -128,6 +130,14 @@ export default {
       type: Boolean,
       default: false
     },
+    confirmLabel: {
+      type: String,
+      default: ''
+    },
+    extensions: {
+      type: String,
+      default: files.ALL_EXTENSIONS_STRING
+    },
     isConcept: {
       type: Boolean,
       default: false
@@ -147,10 +157,6 @@ export default {
     isMultiple: {
       type: Boolean,
       default: true
-    },
-    extensions: {
-      type: String,
-      default: files.ALL_EXTENSIONS_STRING
     },
     message: {
       type: String,

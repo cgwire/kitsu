@@ -72,8 +72,6 @@ export default {
   board: {
     title: 'Board',
     empty: 'Your kanban board is currently empty. It means no task status is configured for your user role in the production settings.',
-    confirm_publish: 'There is no preview files set for publishing. Are you sure you want to change the status of this task?',
-    confirm_publish_button: 'Change status without publishing files',
     settings: {
       title: 'Board Status',
       visible: 'Displayed on kanban board of...',
