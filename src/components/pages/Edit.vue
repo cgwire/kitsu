@@ -480,7 +480,7 @@
                 <page-subtitle class="flerow-item" :text="$t('edits.tasks')" />
                 <entity-task-list
                   class="task-list flexrow-item"
-                  :entries="currentEdit ? currentEdit.tasks : []"
+                  :entries="currentTasks"
                   :is-loading="!currentEdit"
                   :is-error="false"
                 />

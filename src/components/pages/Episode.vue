@@ -28,7 +28,7 @@
           <page-subtitle :text="$t('episodes.tasks')" />
           <entity-task-list
             class="task-list"
-            :entries="currentTasks.map(t => t.id)"
+            :entries="currentTasks"
             :is-loading="!currentEpisode"
             :is-error="false"
             @task-selected="onTaskSelected"
