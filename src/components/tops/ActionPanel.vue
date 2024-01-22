@@ -339,7 +339,7 @@
           </div>
           <div class="flexrow mb05">
             <people-field
-              class="flexrow-item is-wide"
+              class="flexrow-item is-wide assignation-field"
               ref="assignation-field"
               :people="currentTeam"
               :placeholder="$t('tasks.assign_explaination')"
@@ -1838,6 +1838,10 @@ div.assignation {
 
 .change-status-item {
   margin-right: 0.5em;
+}
+
+.assignation-field ::v-deep .v-autocomplete {
+  z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
 .status-item {
