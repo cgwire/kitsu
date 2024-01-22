@@ -44,7 +44,7 @@
               <input
                 class="input"
                 ref="addEpisodeInput"
-                placeholder="EP01"
+                :placeholder="$t('episodes.fields.placeholder')"
                 type="text"
                 @keyup.tab="focusAddSequence"
                 @keyup.enter="addEpisode"
@@ -85,7 +85,7 @@
               <input
                 class="input"
                 ref="addSequenceInput"
-                placeholder="SQ01"
+                :placeholder="$t('sequences.fields.placeholder')"
                 type="text"
                 @keyup.enter="addSequence"
                 v-model="names.sequence"
