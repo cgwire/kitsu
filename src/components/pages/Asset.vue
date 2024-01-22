@@ -808,18 +808,6 @@ h2.subtitle {
   }
 }
 
-.infos {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  max-height: 100%;
-
-  .flexrow-item {
-    align-self: flex-start;
-    height: 100%;
-    flex: 1;
-  }
-}
-
 .asset-data {
   display: flex;
   flex: 1;
@@ -987,8 +975,16 @@ h2.subtitle {
   overflow-y: auto;
 }
 
-.infos .entity-infos {
-  flex: 1.5;
+.infos {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  max-height: 100%;
+  overflow-y: auto;
+
+  .entity-infos {
+    align-self: flex-start;
+    flex: 1.5;
+  }
 }
 
 .entity-stats {

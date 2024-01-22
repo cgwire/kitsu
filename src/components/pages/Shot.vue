@@ -634,17 +634,6 @@ h2.subtitle {
     font-weight: 500;
   }
 }
-
-.infos {
-  margin-top: 1em;
-
-  .flexrow-item {
-    align-self: flex-start;
-    height: 100%;
-    flex: 1;
-  }
-}
-
 .shot-data {
   display: flex;
   flex: 1;
@@ -791,8 +780,11 @@ h2.subtitle {
 
 .infos {
   flex: 1;
+  margin-top: 1em;
+  overflow-y: auto;
 
   .entity-infos {
+    align-self: flex-start;
     flex: 1;
   }
 }
