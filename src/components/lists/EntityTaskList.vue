@@ -271,6 +271,7 @@ export default {
 }
 
 .task-list-body {
+  overflow-y: auto;
 }
 
 .datatable-row-header::after {
