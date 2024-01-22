@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
-import eslintPlugin from 'vite-plugin-eslint'
+// import eslintPlugin from 'vite-plugin-eslint'
 import vue from '@vitejs/plugin-vue2'
 import path from 'path'
 
