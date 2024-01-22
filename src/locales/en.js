@@ -65,7 +65,7 @@ export default {
     fields: {
       is_default: 'Is default',
       name: 'Name',
-      file: 'HDRi File',
+      file: 'HDRi File'
     }
   },
 
@@ -75,8 +75,8 @@ export default {
     settings: {
       title: 'Board Status',
       visible: 'Displayed on kanban board of...',
-      select_all: "Select all",
-      unselect_all: "Unselect all"
+      select_all: 'Select all',
+      unselect_all: 'Unselect all'
     }
   },
 
@@ -161,7 +161,7 @@ export default {
       created_at: 'Creation date',
       updated_at: 'Update date',
       last_comment_date: 'Last comment',
-      publisher: 'Publish by',
+      publisher: 'Publish by'
     },
     actions: {
       title: 'Links to Concept',
@@ -329,7 +329,8 @@ export default {
     stats_title: 'Episodes Stats',
     fields: {
       name: 'name',
-      description: 'description'
+      description: 'description',
+      placeholder: 'E01'
     },
     status: {
       'canceled': 'Canceled',
@@ -460,7 +461,7 @@ export default {
     attach_snapshots: 'Attach snapshots from your annotation',
     avatar: {
       open_page: 'Open {personName} page',
-      unassign: 'Unassign {personName}',
+      unassign: 'Unassign {personName}'
     },
     before: 'Before',
     cancel: 'Cancel',
@@ -613,16 +614,16 @@ export default {
     delete_edits: 'Delete edits',
     delete_shots: 'Delete shots',
     delete_tasks: 'Delete tasks',
-    edit_concepts: "Edit concept links",
+    edit_concepts: 'Edit concept links',
     generate_playlist: 'Generate a playlist',
     run_custom_action: 'Run custom action',
     set_estimations: 'Set estimations',
     set_thumbnails: 'Set thumbnails from last preview',
-    subscribe: 'Subscribe to notifications',
+    subscribe: 'Subscribe to notifications'
   },
 
   my_checks : {
-    title: 'Task to check | Tasks to check',
+    title: 'Task to check | Tasks to check'
   },
 
   news: {
@@ -840,7 +841,7 @@ export default {
       toggle_environment_skybox: 'Show/Hide skybox background',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
       toggle_waveform: 'Show/Hide movie waveform',
-      toggle_wireframe: 'Enable/Disable wireframe rendering',
+      toggle_wireframe: 'Enable/Disable wireframe rendering'
     }
   },
 
@@ -954,7 +955,7 @@ export default {
     homepage: {
       'assets': 'Assets',
       'shots': 'Shots',
-      'sequences': 'Sequences',
+      'sequences': 'Sequences'
     },
 
     parameters: {
@@ -1154,6 +1155,7 @@ export default {
       name: 'Name',
       description: 'description',
       person: 'Person',
+      placeholder: 'SQ01'
     }
   },
 
@@ -1178,7 +1180,7 @@ export default {
       name: 'Name',
       episode: 'Ep.',
       description: 'Description',
-      person: 'Modifier',
+      person: 'Modifier'
     }
   },
 
@@ -1274,7 +1276,7 @@ export default {
       max_retakes: 'Max Rtks',
       name: 'Name',
       person: 'Modifier',
-      placeholder: "SH01",
+      placeholder: 'SH01',
       production: 'Prod',
       resolution: 'Resolution',
       sequence: 'Sequence',
@@ -1472,7 +1474,7 @@ export default {
     limit: 'Max number of results:',
     match_details: 'match found in {target}',
     placeholder: 'Search for an entity in the database...',
-    title: 'Entity Search',
+    title: 'Entity Search'
   },
 
   timesheets: {
