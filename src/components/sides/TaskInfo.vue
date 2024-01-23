@@ -275,8 +275,8 @@
             {{ $t('tasks.no_task_selected') }}
           </template>
         </div>
+        <hr />
         <div class="empty-section">
-          <hr />
           <slot />
         </div>
       </div>
