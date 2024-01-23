@@ -3,48 +3,48 @@
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <div class="news" v-else-if="newsList.length > 0">
-      <div class="timeline mt1">
-        <div :key="'news-' + news.id" v-for="news in newsList">
-          <div class="news-line timeline-entry flexrow">
-            <span
-              :class="{
-                dot: true,
-                red: hasRetakeValue(news),
-                green: hasDoneValue(news)
-              }"
-            ></span>
-            <span class="date flexrow-item">
-              {{ formatFullDate(news.created_at).substring(10, 0) }}
-            </span>
+    <div class="timeline mt1" v-else-if="newsList.length">
+      <div
+        class="timeline-entry flexrow"
+        :key="`news-${news.id}`"
+        v-for="news in newsList"
+      >
+        <span
+          :class="{
+            dot: true,
+            red: hasRetakeValue(news),
+            green: hasDoneValue(news)
+          }"
+        ></span>
+        <span class="date flexrow-item">
+          {{ formatFullDate(news.created_at).substring(10, 0) }}
+        </span>
 
-            <people-avatar
-              class="flexrow-item"
-              :person="personMap.get(news.author_id)"
-              :size="30"
-              :font-size="14"
-              :is-link="false"
-              v-if="personMap.get(news.author_id)"
-            />
+        <people-avatar
+          class="flexrow-item"
+          :font-size="14"
+          :is-link="false"
+          :person="personMap.get(news.author_id)"
+          :size="30"
+          v-if="personMap.get(news.author_id)"
+        />
 
-            <div class="flexrow-item task-type-wrapper ml1">
-              <task-type-name
-                class="task-type-name"
-                :task-type="buildTaskTypeFromNews(news)"
-                :production-id="currentProduction.id"
-                :is-static="true"
-              />
-            </div>
+        <div class="flexrow-item task-type-wrapper ml1">
+          <task-type-name
+            class="task-type-name"
+            :is-static="true"
+            :production-id="currentProduction.id"
+            :task-type="buildTaskTypeFromNews(news)"
+          />
+        </div>
 
-            <div class="flexrow-item validation-wrapper">
-              <validation-tag
-                :task="taskMap.get(news.task_id)"
-                :is-static="true"
-                :thin="!news.change"
-                :is-priority="false"
-              />
-            </div>
-          </div>
+        <div class="flexrow-item validation-wrapper">
+          <validation-tag
+            :is-priority="false"
+            :is-static="true"
+            :task="buildTaskFromNews(news)"
+            :thin="!news.change"
+          />
         </div>
       </div>
     </div>
@@ -57,9 +57,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import moment from 'moment-timezone'
 import { formatListMixin } from '@/components/mixins/format'
-import { timeMixin } from '@/components/mixins/time'
 
 import Spinner from '@/components/widgets/Spinner'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -68,7 +66,7 @@ import ValidationTag from '@/components/widgets/ValidationTag'
 
 export default {
   name: 'entity-news',
-  mixins: [formatListMixin, timeMixin],
+  mixins: [formatListMixin],
   components: {
     PeopleAvatar,
     Spinner,
@@ -91,7 +89,6 @@ export default {
   },
 
   mounted() {
-    if (!this.entity) return
     this.reset()
   },
 
@@ -99,26 +96,25 @@ export default {
     ...mapGetters([
       'currentProduction',
       'personMap',
-      'taskMap',
       'taskTypeMap',
-      'taskStatusMap',
-      'timezone'
+      'taskStatusMap'
     ])
   },
 
   methods: {
     ...mapActions(['getEntityNews']),
 
+    buildTaskFromNews(news) {
+      return {
+        task_status_id: news.task_status_id
+      }
+    },
+
     buildTaskTypeFromNews(news) {
       return {
         ...this.taskTypeMap.get(news.task_type_id),
         episode_id: news.episode_id
       }
-    },
-
-    getTaskType(news) {
-      const task = this.taskMap.get(news.task_id)
-      return this.taskTypeMap.get(task.task_type_id)
     },
 
     hasRetakeValue(news) {
@@ -131,26 +127,20 @@ export default {
       return taskStatus ? news.change && taskStatus.is_done : false
     },
 
-    formatTime(date) {
-      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
-      return utcDate.format('HH:mm')
-    },
-
-    personName(news) {
-      const person = this.personMap.get(news.author_id)
-      return person ? person.full_name : ''
-    },
-
     reset() {
+      if (!this.entity) {
+        return
+      }
       this.isLoading = true
       this.getEntityNews(this.entity.id)
         .then(data => {
           this.newsList = data.data
-          this.isLoading = false
         })
         .catch(err => {
           console.error(err)
           this.newsList = []
+        })
+        .finally(() => {
           this.isLoading = false
         })
     }
@@ -158,7 +148,7 @@ export default {
 
   watch: {
     entity() {
-      if (this.entity) this.reset()
+      this.reset()
     }
   },
 
@@ -183,27 +173,14 @@ export default {
   overflow: auto;
 }
 
-.timeline-wrapper {
-  margin: auto;
-  max-width: 875px;
-  padding-top: 25px;
-  padding-left: 25px;
-  padding-right: 25px;
-  background: $white;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
-}
-
 .timeline {
   border-left: 4px solid $blue-light;
   margin-left: 8px;
   padding-bottom: 1em;
   margin-bottom: 1em;
 
-  .subtitle {
-    margin-top: 2em;
-  }
-
   .timeline-entry {
+    padding: 0.5em;
     position: relative;
 
     .dot {
@@ -226,6 +203,14 @@ export default {
     }
   }
 
+  .date {
+    min-width: 30px;
+    margin-left: 0.5em;
+    margin-right: 3em;
+    font-size: 0.8em;
+    color: $grey;
+  }
+
   .task-type-wrapper {
     min-width: 100px;
   }
@@ -233,44 +218,5 @@ export default {
   .validation-wrapper {
     min-width: 60px;
   }
-
-  .date {
-    min-width: 30px;
-  }
-
-  .selected .date {
-    color: $dark-grey;
-  }
-
-  .explaination,
-  .explaination span {
-    display: inline;
-
-    &.entity-thumbnail {
-      display: inline-block;
-    }
-  }
-}
-
-.date {
-  margin-left: 0.5em;
-  margin-right: 3em;
-  font-size: 0.8em;
-  color: $grey;
-}
-
-.news-info {
-  vertical-align: middle;
-
-  span,
-  a {
-    vertical-align: middle;
-    display: inline-flex;
-    align-items: center;
-  }
-}
-
-.news-line {
-  padding: 0.5em;
 }
 </style>
