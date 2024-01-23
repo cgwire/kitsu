@@ -1,6 +1,6 @@
 <template>
   <span>
-    <span v-if="!minimized">
+    <template v-if="!minimized">
       <router-link
         class="tag dynamic"
         :to="taskPath(task)"
@@ -32,8 +32,8 @@
       >
         {{ priority }}
       </span>
-    </span>
-    <span v-else>
+    </template>
+    <template v-else>
       <router-link
         :to="taskPath(task)"
         class="tag dynamic"
@@ -44,7 +44,7 @@
         &nbsp;
       </router-link>
       <span class="tag" v-else> &nbsp; </span>
-    </span>
+    </template>
   </span>
 </template>
 
@@ -86,11 +86,11 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isCurrentUserClient',
       'isDarkTheme',
       'isTVShow',
       'taskStatusMap',
-      'taskTypeMap',
-      'isCurrentUserClient'
+      'taskTypeMap'
     ]),
 
     cursor() {
@@ -98,12 +98,8 @@ export default {
     },
 
     taskStatus() {
-      if (this.task) {
-        const taskStatusId = this.task.task_status_id
-        return this.taskStatusMap ? this.taskStatusMap.get(taskStatusId) : {}
-      } else {
-        return {}
-      }
+      const taskStatusId = this.task?.task_status_id
+      return this.taskStatusMap?.get(taskStatusId) || {}
     },
 
     backgroundColor() {
