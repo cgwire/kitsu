@@ -105,9 +105,13 @@
           v-if="mainConfig.indexer_configured"
         />
         <div class="nav-item">
-          <button data-canny-changelog class="changelog-button">
+          <a
+            class="changelog-button"
+            target="_blank"
+            href="https://cgwire.canny.io/changelog"
+          >
             <zap-icon />
-          </button>
+          </a>
         </div>
         <notification-bell />
         <div class="nav-item">
@@ -263,11 +267,6 @@ export default {
   },
 
   mounted() {
-    Canny('initChangelog', {
-      appID: '5db968118d1a9c132c168d54',
-      position: 'bottom',
-      align: 'right'
-    })
     this.currentProjectSection = this.getCurrentSectionFromRoute()
     this.setProductionFromRoute()
   },
