@@ -26,6 +26,5 @@ module.exports = {
     'vue/prop-name-casing': ['error', 'camelCase']
   },
   globals: {
-    Canny: true
   }
 }
