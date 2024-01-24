@@ -8,7 +8,7 @@
     ></div>
     <div class="side task-info">
       <action-panel
-        v-if="withActions && (nbSelectedTasks > 0 || nbSelectedEntities > 0)"
+        v-if="withActions && (!isConceptTask || selectedConcepts.size > 0)"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
