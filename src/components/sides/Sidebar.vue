@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <aside :class="{ 'hidden-bar': isSidebarHidden }">
+    <aside>
       <div>
         <router-link class="home-link" to="/" @click="toggleSidebar()">
           <div class="company-logo has-text-centered" :title="title">
@@ -238,19 +238,24 @@ export default {
     background: $dark-grey-light;
   }
 }
+.sideBarOpen {
+  aside {
+    left: 0;
+  }
+}
 
 aside {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 0;
+  left: -230px;
   width: 230px;
   background-color: white;
   padding: 15px;
   overflow-y: auto;
   z-index: 205;
   box-shadow: 1px 0px 6px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  transition: left 0.3s ease;
 
   h2 {
     border: 0;
@@ -258,11 +263,6 @@ aside {
     font-size: 1em;
     color: $grey;
   }
-}
-
-aside.hidden-bar {
-  left: -250px;
-  transition: all 0.3s ease;
 }
 
 aside p a {

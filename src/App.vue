@@ -1,5 +1,7 @@
 <template>
-  <div :class="{ theme: true, dark: isDarkTheme }">
+  <div
+    :class="{ theme: true, dark: isDarkTheme, sideBarOpen: !isSidebarHidden }"
+  >
     <div
       class="has-text-centered mt2 loading-info xyz-in"
       xyz="fade"
@@ -47,6 +49,7 @@ export default {
       'isDarkTheme',
       'isLoginLoading',
       'isSavingCommentPreview',
+      'isSidebarHidden',
       'isTVShow',
       'previewFileIdToShow',
       'route',
@@ -747,6 +750,7 @@ body {
   padding-top: 70px;
   background: white;
   height: 100vh;
+  transition: padding-left 0.3s ease;
 }
 
 th.actions {
@@ -1213,6 +1217,18 @@ textarea.input:focus {
   padding-top: 60px;
 
   min-height: 0;
+  transition: padding-left 0.3s ease;
+}
+
+.sideBarOpen .modal,
+.sideBarOpen .main > .fixed-page,
+.sideBarOpen .main > .page,
+.sideBarOpen .topbar .nav {
+  padding-left: calc(230px + 2em);
+  .page {
+    // Prevent .page childs paddings of .page parents
+    padding-left: 0;
+  }
 }
 
 .page-header,
@@ -1790,6 +1806,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .modal {
+  transition: padding-left 0.3s ease;
 }
 
 .modal-content {

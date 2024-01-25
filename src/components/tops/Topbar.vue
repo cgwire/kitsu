@@ -878,6 +878,7 @@ export default {
   position: fixed;
   right: 0;
   z-index: 204;
+  transition: padding-left 0.3s ease;
 }
 
 .avatar {
