@@ -245,7 +245,11 @@ export default {
 
   mounted() {
     window.addEventListener('keydown', event => {
-      if (event.ctrlKey && event.altKey && event.keyCode === 70) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.altKey &&
+        event.keyCode === 70
+      ) {
         this.searchField.focus()
       } else if (event.keyCode === 40) {
         this.selectNext()

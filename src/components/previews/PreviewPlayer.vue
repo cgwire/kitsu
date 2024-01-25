@@ -1738,7 +1738,7 @@ export default {
           this.container.focus()
           this.pauseEvent(event)
           this.onPencilAnnotateClicked()
-        } else if (event.ctrlKey && event.keyCode === 90) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
           // ctrl + z
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) {
@@ -1750,10 +1750,10 @@ export default {
         } else if (event.altKey && event.keyCode === 75) {
           // alt+k
           this.onNextClicked()
-        } else if (event.ctrlKey && event.keyCode === 67) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) {
           // ctrl + c
           this.copyAnnotations()
-        } else if (event.ctrlKey && event.keyCode === 86) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteAnnotations()
         } else if (event.keyCode === 27) {
