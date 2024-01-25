@@ -190,7 +190,11 @@ export default {
 
   mounted() {
     window.addEventListener('keydown', event => {
-      if (event.ctrlKey && event.altKey && event.keyCode === 70) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.altKey &&
+        event.keyCode === 70
+      ) {
         if (this.$refs['global-search-field']) {
           this.$refs['global-search-field'].focus()
         }
