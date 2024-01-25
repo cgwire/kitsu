@@ -1,48 +1,56 @@
 <template>
   <div class="open-productions page">
-    <div class="social-contributions flexrow" v-if="isContributions">
-      <img
-        class="flexrow-item kitsu-with-body"
-        src="../../assets/illustrations/kitsu-band.png"
-      />
-      <div class="filler">
-        <span class="close-contributions" @click="hideContributions">
-          <x-icon size="0.9x" />
-        </span>
-        <p>
-          {{ $t('intro.main') }}
-        </p>
-        <ul>
-          <li>
-            {{ $t('intro.first') }}
-            <a href="https://github.com/cgwire/kitsu">Github</a>
-          </li>
-          <li>
-            {{ $t('intro.second') }}
-            <a href="https://twitter.com/cgwirekitsu">X</a>
-            {{ $t('main.or') }}
-            <a href="https://www.linkedin.com/company/cgwire/">Linkedin</a>
-          </li>
-          <li>
-            {{ $t('intro.third') }}
-            <a href="https://discord.gg/VbCxtKN">Discord</a>
-          </li>
-          <li>
-            {{ $t('intro.four') }}
-            <a href="https://cgwire.canny.io">Canny</a>
-          </li>
-          <li>
-            {{ $t('intro.five') }}
-            <a href="https://liberapay.com/CGWire/donate">Liberapay</a>
-          </li>
-          <li>
-            {{ $t('intro.six') }}
-            <a href="https://cg-wire.com/pricing">offers</a>
-          </li>
-        </ul>
-        <p>
-          {{ $t('intro.seven') }}
-        </p>
+    <div class="social-contributions flexcolumn" v-if="isContributions">
+      <h1 class="subtitle has-text-centered">
+        {{ $t('intro.title') }}
+      </h1>
+      <div class="flexrow">
+        <img
+          class="flexrow-item kitsu-with-body"
+          src="../../assets/illustrations/kitsu-band.png"
+        />
+        <div class="filler">
+          <span class="close-contributions" @click="hideContributions">
+            <x-icon size="0.9x" />
+          </span>
+          <p>
+            {{ $t('intro.main') }}
+          </p>
+          <ul>
+            <li>
+              {{ $t('intro.first') }}
+              <a href="https://github.com/cgwire/kitsu">Github</a>
+            </li>
+            <li>
+              {{ $t('intro.second') }}
+              <a href="https://twitter.com/cgwirekitsu">X</a>
+              {{ $t('main.or') }}
+              <a href="https://www.linkedin.com/company/cgwire/">Linkedin</a>
+            </li>
+            <li>
+              {{ $t('intro.third') }}
+              <a href="https://discord.gg/VbCxtKN">Discord</a>
+            </li>
+            <li>
+              {{ $t('intro.four') }}
+              <a href="https://cgwire.canny.io">Canny</a>
+            </li>
+            <li>
+              {{ $t('intro.five') }}
+              <a href="https://liberapay.com/CGWire/donate">Liberapay</a>
+            </li>
+            <li>
+              {{ $t('intro.six') }}
+              <a href="https://cg-wire.com/pricing">offers</a>
+            </li>
+            <li>
+              {{ $t('intro.seven') }}
+            </li>
+          </ul>
+          <p>
+            {{ $t('intro.eight') }}
+          </p>
+        </div>
       </div>
     </div>
     <div class="has-text-centered" v-if="isOpenProductionsLoading">
@@ -174,7 +182,7 @@ export default {
 
   data() {
     return {
-      isContributions: false,
+      isContributions: true,
       filteredProductions: [],
       search: '',
       errors: {
@@ -194,8 +202,8 @@ export default {
     this.filteredProductions = this.openProductions
     this.productionIndex = buildNameIndex(this.openProductions)
     this.isContributions =
-      preferences.getPreference('open-productions:contributions') === 'true'
-    this.isContributions = false
+      this.mainConfig.is_self_hosted &&
+      !preferences.getPreference('open-productions:contributions') === 'false'
   },
 
   computed: {
@@ -205,6 +213,7 @@ export default {
       'isCurrentUserClient',
       'isOpenProductionsLoading',
       'lastProductionScreen',
+      'mainConfig',
       'openProductions'
     ])
   },
@@ -467,11 +476,11 @@ a.secondary:hover {
 }
 
 .social-contributions {
-  background: $white;
-  border: 3px solid $purple;
-  box-shadow: 0 0 3px 3px #eee;
+  background: var(--background);
+  border: 3px solid var(--selected);
+  box-shadow: 0 0 3px 3px var(--box-shadow-alt);
+  color: var(--text);
   border-radius: 1em;
-  color: $dark-purple;
   font-size: 1.1rem;
   max-width: 800px;
   margin-bottom: 0em;
