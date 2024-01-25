@@ -786,7 +786,7 @@ export const playerMixin = {
           event.stopPropagation()
           // ctrl + shift + left
           if (
-            event.ctrlKey &&
+            (event.ctrlKey || event.metaKey) &&
             event.shiftKey &&
             this.moveSelectedEntityToLeft
           ) {
@@ -799,7 +799,7 @@ export const playerMixin = {
           event.stopPropagation()
           // ctrl + shift + right
           if (
-            event.ctrlKey &&
+            (event.ctrlKey || event.metaKey) &&
             event.shiftKey &&
             this.moveSelectedEntityToLeft
           ) {
@@ -821,15 +821,19 @@ export const playerMixin = {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayNextEntityClicked()
-        } else if (event.ctrlKey && event.keyCode === 67) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) {
           // ctrl + c
           this.copyAnnotations()
-        } else if (event.ctrlKey && event.keyCode === 86) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteAnnotations()
-        } else if (event.ctrlKey && event.altKey && event.keyCode === 68) {
+        } else if (
+          (event.ctrlKey || event.metaKey) &&
+          event.altKey &&
+          event.keyCode === 68
+        ) {
           this.onAnnotateClicked()
-        } else if (event.ctrlKey && event.keyCode === 90) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) {
           this.redoLastAction()

@@ -1102,10 +1102,10 @@ export default {
 
     onKeyDown(event) {
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.ctrlKey && event.keyCode === 67) {
+        if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) {
           // ctrl + c
           this.copyCasting()
-        } else if (event.ctrlKey && event.keyCode === 86) {
+        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteCasting()
         }
