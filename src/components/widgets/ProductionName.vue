@@ -1,28 +1,26 @@
 <template>
   <div class="production-name flexrow">
-    <div
+    <span
       class="flexrow-item avatar has-text-centered"
-      v-if="withAvatar"
       :style="{
-        background: getAvatarColor(production),
-        width: size + 'px',
-        height: size + 'px',
-        'font-size': size - 15 + 'px',
-        'line-height': size + 'px'
+        background: avatarColor,
+        width: `${size}px`,
+        height: `${size}px`,
+        fontSize: `${size - 15}px`,
+        lineHeight: `${size}px`
       }"
+      v-if="withAvatar"
     >
-      <span v-if="!production.has_avatar">
-        {{ generateAvatar(production) }}
-      </span>
+      <template v-if="!production.has_avatar">{{ avatar }}</template>
       <img
-        :src="getThumbnailPath(production)"
+        :src="thumbnailPath"
         :style="{
-          width: size + 'px',
-          height: size + 'px'
+          width: `${size}px`,
+          height: `${size}px`
         }"
         v-else
       />
-    </div>
+    </span>
     <span class="flexrow-item avatar-name" v-if="!onlyAvatar">
       {{ production.name }}
     </span>
@@ -31,12 +29,15 @@
 
 <script>
 import colors from '@/lib/colors.js'
-import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'production-name',
 
   props: {
+    onlyAvatar: {
+      default: false,
+      type: Boolean
+    },
     production: {
       default: () => {},
       type: Object
@@ -45,49 +46,24 @@ export default {
       default: 40,
       type: Number
     },
-    onlyAvatar: {
-      default: false,
-      type: Boolean
-    },
     withAvatar: {
       default: true,
       type: Boolean
-    },
-    lastProductionScreen: {
-      default: 'assets',
-      type: String
     }
   },
 
   computed: {
-    ...mapGetters([]),
-
-    productionInfo() {
-      const fps = this.production.fps
-      const ratio = this.production.ratio
-      const resolution = this.production.resolution
-      if (fps || ratio || resolution) {
-        return `fps: ${fps}\nratio: ${ratio}\nresolution: ${resolution}`
-      } else {
-        return ''
-      }
-    }
-  },
-
-  methods: {
-    ...mapActions([]),
-
-    generateAvatar(production) {
-      const firstLetter = production.name.length > 0 ? production.name[0] : 'P'
+    avatar() {
+      const firstLetter = this.production.name[0] || 'P'
       return firstLetter.toUpperCase()
     },
 
-    getAvatarColor(production) {
-      return colors.fromString(production.name)
+    avatarColor() {
+      return colors.fromString(this.production.name)
     },
 
-    getThumbnailPath(production) {
-      return `/api/pictures/thumbnails/projects/${production.id}.png`
+    thumbnailPath() {
+      return `/api/pictures/thumbnails/projects/${this.production.id}.png`
     }
   }
 }
