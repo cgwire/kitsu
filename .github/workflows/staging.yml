@@ -21,6 +21,7 @@ jobs:
           script_stop: true
           script: |
             cd /opt/kitsu
+            git pull
             npm ci
             npm run build
             GIT_COMMIT="$(git rev-parse HEAD)"
