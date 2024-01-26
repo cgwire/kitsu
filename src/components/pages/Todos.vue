@@ -22,7 +22,7 @@
             v-if="isTabActive('board')"
             class="flexrow-item production-field"
             :label="$t('main.production')"
-            :production-list="openProductions"
+            :production-list="productionList"
             v-model="productionId"
           />
 
@@ -101,6 +101,7 @@
           :statuses="boardStatuses"
           :tasks="boardTasks"
           :user="user"
+          :production="selectedProduction"
           v-if="isTabActive('board')"
         />
 
@@ -182,7 +183,7 @@ export default {
       loading: {
         savingSearch: false
       },
-      productionId: null,
+      productionId: undefined,
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -249,12 +250,45 @@ export default {
 
     boardTasks() {
       const tasks = this.sortedTasks.concat(this.displayedDoneTasks)
-      return tasks.filter(task => task.project_id === this.productionId)
+      if (this.selectedProduction) {
+        return tasks.filter(
+          task => task.project_id === this.selectedProduction.id
+        )
+      }
+      return tasks
     },
 
     boardStatuses() {
-      const production = this.productionMap.get(this.productionId)
-      return this.getBoardStatusesByProduction(production)
+      if (this.selectedProduction) {
+        return this.getBoardStatusesByProduction(this.selectedProduction)
+      }
+
+      const productionsByStatus = {}
+      this.openProductions.forEach(production => {
+        const statuses = this.getBoardStatusesByProduction(production)
+        statuses.forEach(status => {
+          if (!productionsByStatus[status.id]) {
+            productionsByStatus[status.id] = []
+          }
+          productionsByStatus[status.id].push(production.id)
+        })
+      })
+
+      return this.taskStatuses
+        .filter(status => !status.for_concept)
+        .map(status => ({
+          ...status,
+          productions: productionsByStatus[status.id] || []
+        }))
+        .sort((a, b) => a.priority - b.priority)
+    },
+
+    productionList() {
+      return [{ name: this.$t('main.all') }, ...this.openProductions]
+    },
+
+    selectedProduction() {
+      return this.productionMap.get(this.productionId)
     },
 
     pendingTasks() {
@@ -437,9 +471,6 @@ export default {
           if (currentProduction) {
             this.productionId = currentProduction.id
           } else {
-            if (!this.productionId) {
-              this.productionId = this.openProductions?.[0]?.id
-            }
             this.$router.push({
               query: {
                 productionId: this.productionId,
