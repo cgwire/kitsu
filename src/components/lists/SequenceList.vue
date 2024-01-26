@@ -375,7 +375,7 @@
 
     <div
       class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
     >
       <p class="info">
         <img src="../../assets/illustrations/empty_shot.png" />
@@ -522,8 +522,8 @@ export default {
 
     isEmptyList() {
       return (
-        this.displayedSequences.length &&
-        this.displayedSequences[0].length === 0 &&
+        this.displayedSequences &&
+        this.displayedSequences.length === 0 &&
         !this.isLoading &&
         !this.isError &&
         (!this.sequenceSearchText || this.sequenceSearchText.length === 0)

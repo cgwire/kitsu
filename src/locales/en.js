@@ -152,7 +152,7 @@ export default {
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concept.',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
-    empty: 'There are no concepts',
+    empty: 'There are no concept for this production',
     multiple_delete_error: 'An error occurred while deleting a concept. There is probably some data linked to a concept. Are you sure there is no task linked to a selected concept?',
     no_concept_selected: 'No concept selected',
     title: 'Concepts',
@@ -362,14 +362,16 @@ export default {
   },
 
   intro: {
-    main: 'Welcome to Kitsu! To make our project thrives, we need your support. To help us, we propose you simple contributions:',
+    main: 'To make our project thrive, we need your support. To help us, we propose you simple contributions:',
     first: 'Star our repository on ',
     second: 'Follow us on ',
     third: 'Join our',
-    four: 'You can suggest new features on ',
+    four: 'Suggest new features on ',
     five: 'Donate to our ',
     six: 'Have a look at our cloud and on-premise ',
-    seven: 'Finally, you can help us by sharing Kitsu with your friends and colleagues. The more we are, the more we can improve Kitsu.'
+    seven: 'Share Kitsu with your friends and colleagues',
+    eight: 'Thank you for your help!',
+    title: 'How to support Kitsu'
   },
 
   login: {

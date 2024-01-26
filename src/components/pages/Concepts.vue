@@ -87,8 +87,10 @@
             </li>
           </ul>
         </div>
-        <div v-else>
-          {{ $t('concepts.empty') }}
+        <div class="has-text-centered mb1 mt1 empty-concepts" v-else>
+          <strong>
+            {{ $t('concepts.empty') }}
+          </strong>
         </div>
         <div class="footer mb2">
           <button-simple
@@ -560,5 +562,9 @@ export default {
   align-items: center;
   justify-content: center;
   z-index: 100;
+}
+
+.empty-concepts {
+  flex: 1;
 }
 </style>
