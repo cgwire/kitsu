@@ -17,6 +17,9 @@
     >
       <li
         class="board-column"
+        :class="{
+          disabled: !checkStatusIsAllowed(column.status, draggedTask)
+        }"
         :key="column.id"
         @dragenter="onCardDragEnter($event, column.status)"
         @dragover="onCardDragOver"
@@ -54,6 +57,14 @@
             v-for="task in column.tasks"
           >
             <div class="ui-droppable">
+              <production-name
+                :production="{
+                  id: task.project_id,
+                  name: task.project_name
+                }"
+                :size="25"
+                v-if="!production"
+              />
               <div class="flexrow">
                 <entity-thumbnail
                   :empty-width="80"
@@ -106,8 +117,8 @@
       :is-error="errors.addPreview"
       :form-data="addPreviewFormData"
       :title="
-        task
-          ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+        modals.task
+          ? `${modals.task.entity_name} / ${taskTypeMap.get(modals.task.task_type_id).name}`
           : ''
       "
       @cancel="closeAddPreviewModal"
@@ -127,6 +138,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ProductionName from '@/components/widgets/ProductionName'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
@@ -139,6 +151,7 @@ export default {
     AddPreviewModal,
     EntityThumbnail,
     PeopleAvatar,
+    ProductionName,
     TableInfo,
     TaskTypeName
   },
@@ -151,6 +164,10 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    production: {
+      type: Object,
+      default: () => {}
     },
     statuses: {
       type: Array,
@@ -169,8 +186,9 @@ export default {
   data() {
     return {
       addPreviewFormData: null,
-      isScrollingX: false,
+      draggedTask: null,
       initialClientX: null,
+      isScrollingX: false,
       errors: {
         addPreview: null
       },
@@ -182,16 +200,16 @@ export default {
         addPreview: false
       },
       modals: {
-        addPreview: false
-      },
-      task: null
+        addPreview: false,
+        task: null
+      }
     }
   },
 
   computed: {
     ...mapGetters([
-      'isDarkTheme',
       'getTaskPreviews',
+      'isDarkTheme',
       'personMap',
       'productionMap',
       'selectedTasks',
@@ -227,6 +245,14 @@ export default {
       return !(
         (role === 'user' && !taskStatus.is_artist_allowed) ||
         (role === 'client' && !taskStatus.is_client_allowed)
+      )
+    },
+
+    checkStatusIsAllowed(taskStatus, task) {
+      return (
+        this.production ||
+        !task ||
+        taskStatus.productions.includes(task.project_id)
       )
     },
 
@@ -314,6 +340,7 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('taskId', task.id)
       event.dataTransfer.setData('taskStatusId', taskStatus.id)
+      this.draggedTask = task
     },
 
     onCardDrag(event) {
@@ -324,6 +351,7 @@ export default {
     onCardDragEnd(event) {
       event.target.classList.remove('drag')
       event.target.classList.remove('dragging')
+      this.draggedTask = null
     },
 
     onCardDragEnter(event, taskStatus) {
@@ -344,7 +372,9 @@ export default {
     onCardDrop(event, taskStatus) {
       event.currentTarget.classList.remove('droppable')
 
-      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      const isAllowed =
+        this.checkUserIsAllowed(taskStatus, this.user) &&
+        this.checkStatusIsAllowed(taskStatus, this.draggedTask)
       if (!isAllowed) {
         return
       }
@@ -354,7 +384,7 @@ export default {
         if (!taskPreviews?.length) {
           this.form.taskId = taskId
           this.form.taskStatusId = taskStatus.id
-          this.task = this.tasks.find(({ id }) => id === taskId)
+          this.modals.task = this.tasks.find(({ id }) => id === taskId)
           this.modals.addPreview = true
           return
         }
@@ -379,6 +409,7 @@ export default {
 
     closeAddPreviewModal() {
       this.modals.addPreview = false
+      this.modals.task = null
     },
 
     confirmAddPreviewModal(forms) {
@@ -434,7 +465,12 @@ export default {
   border: 2px solid var(--border-alt);
   border-radius: 0.5em;
 
-  &.droppable {
+  &.disabled {
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+
+  &.droppable:not(.disabled) {
     background: var(--background-selectable);
 
     * {
@@ -515,6 +551,13 @@ export default {
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+
+.production-name {
+  color: var(--text);
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
 }
 
 .thumbnail-picture {
