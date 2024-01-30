@@ -19,13 +19,13 @@
           <ul>
             <li>
               {{ $t('intro.first') }}
-              <a href="https://github.com/cgwire/kitsu">Github</a>
+              <a href="https://github.com/cgwire/kitsu">GitHub</a>
             </li>
             <li>
               {{ $t('intro.second') }}
               <a href="https://twitter.com/cgwirekitsu">X</a>
               {{ $t('main.or') }}
-              <a href="https://www.linkedin.com/company/cgwire/">Linkedin</a>
+              <a href="https://www.linkedin.com/company/cgwire/">LinkedIn</a>
             </li>
             <li>
               {{ $t('intro.third') }}
