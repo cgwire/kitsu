@@ -1,14 +1,10 @@
 import { defineConfig } from 'vite'
-// import eslintPlugin from 'vite-plugin-eslint'
 import vue from '@vitejs/plugin-vue2'
 import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue()
-    //, eslintPlugin()
-  ],
+  plugins: [vue()],
   build: {
     minify: true,
     sourcemap: true

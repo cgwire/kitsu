@@ -20,10 +20,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import PreviewModal from '@/components/modals/PreviewModal'
 import Spinner from '@/components/widgets/Spinner'
+
 import crisp from '@/lib/crisp'
 import localPreferences from '@/lib/preferences'
+import sentry from '@/lib/sentry'
 
 export default {
   name: 'app',
@@ -79,6 +82,13 @@ export default {
       )
       this.setSupportChat(supportChat)
       crisp.init(config.crisp_token)
+    }
+    // Setup Sentry
+    if (config.sentry?.dsn?.length) {
+      sentry.init(this.$router, {
+        dsn: config.sentry.dsn,
+        sampleRate: config.sentry.sampleRate
+      })
     }
   },
 
