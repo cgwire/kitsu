@@ -185,7 +185,7 @@
           <li>Discord</li>
         </a>
         <a href="https://linkedin.com/company/cgwire/" target="_blank">
-          <li>Linkedin</li>
+          <li>LinkedIn</li>
         </a>
         <a href="https://twitter.com/cgwirekitsu" target="_blank">
           <li>X</li>
