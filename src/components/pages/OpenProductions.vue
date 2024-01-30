@@ -203,7 +203,7 @@ export default {
     this.productionIndex = buildNameIndex(this.openProductions)
     this.isContributions =
       this.mainConfig.is_self_hosted &&
-      !preferences.getPreference('open-productions:contributions') === 'false'
+      preferences.getPreference('open-productions:contributions') !== 'false'
   },
 
   computed: {
