@@ -61,7 +61,7 @@ export default {
     ])
   },
 
-  mounted() {
+  async mounted() {
     if (localStorage.getItem('dark-theme') === 'true' && !this.isDarkTheme) {
       this.$store.commit('TOGGLE_DARK_THEME')
       document.documentElement.style.background = '#36393F'
@@ -70,10 +70,16 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
-    const supportChat = localPreferences.getBoolPreference('support:show', true)
-    this.setSupportChat(supportChat)
-    crisp.init(supportChat)
-    this.setMainConfig()
+    const config = await this.setMainConfig()
+    // Setup Crisp
+    if (config.crisp_token?.length) {
+      const supportChat = localPreferences.getBoolPreference(
+        'support:show',
+        true
+      )
+      this.setSupportChat(supportChat)
+      crisp.init(config.crisp_token)
+    }
   },
 
   methods: {
