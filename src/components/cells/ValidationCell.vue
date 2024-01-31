@@ -7,7 +7,7 @@
       validation: selectable
     }"
     :style="cellStyle"
-    @click="onSelect"
+    @click="onClick"
   >
     <div class="wrapper" v-if="!minimized">
       <template v-if="task">
@@ -231,8 +231,14 @@ export default {
   },
 
   methods: {
-    onSelect(event) {
-      if (!this.clickable || !this.selectable) {
+    onClick(event) {
+      if (this.clickable) {
+        this.select(event)
+      }
+    },
+
+    select(event) {
+      if (!this.selectable) {
         return
       }
       this.$emit(!this.selected ? 'select' : 'unselect', {
