@@ -1653,7 +1653,9 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 0 1em 1em 1em;
-  position: absolute;
-  height: 100%;
+  position: relative;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 </style>

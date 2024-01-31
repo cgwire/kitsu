@@ -1427,10 +1427,6 @@ export default {
     box-shadow: 0px 0px 6px #333;
     border-color: $dark-grey;
     color: $white-grey;
-
-    &.selected {
-      border-right: 3px solid $dark-green;
-    }
   }
 
   .playlist-list-column {
@@ -1501,7 +1497,7 @@ export default {
 .playlist-item {
   display: block;
   background: white;
-  border: 1px solid $white-grey;
+  border: 2px solid $white-grey;
   border-radius: 3px;
   box-shadow: 0px 0px 6px #ddd;
   color: $grey-strong;
@@ -1514,13 +1510,14 @@ export default {
   }
 
   &:hover {
-    transform: scale(1.03);
-    border-right: 2px solid $dark-purple;
+    transform: scale(1.02);
+    border: 2px solid var(--background-selectable-selectable);
   }
 }
 
 .playlist-item.selected {
-  border-right: 3px solid $light-green;
+  border: 2px solid var(--background-selected);
+  transform: scale(1.02);
 }
 
 .playlist-list-column .button {
@@ -1677,7 +1674,6 @@ h2 {
 
     &:hover {
       transform: scale(1.03);
-      border: 2px solid $dark-purple;
     }
 
     .playlist-infos {

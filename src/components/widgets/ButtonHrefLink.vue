@@ -4,6 +4,9 @@
     <download-icon class="icon is-small" v-if="icon === 'download'" />
     <upload-icon class="icon is-small" v-if="icon === 'upload'" />
     <list-icon class="icon is-small" v-if="icon === 'list'" />
+    <kitsu-icon :name="icon" class="icon is-small" v-if="[
+      'export'
+    ].includes(icon)" />
     <span class="text is-hidden-touch" v-if="text">
       {{ text }}
     </span>
@@ -12,14 +15,17 @@
 
 <script>
 import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'vue-feather-icons'
+import KitsuIcon from '@/components/widgets/KitsuIcon'
 
 export default {
   name: 'button-href-link',
   components: {
     DownloadIcon,
+    KitsuIcon,
     ListIcon,
     PlusIcon,
     UploadIcon
+
   },
   props: {
     text: {

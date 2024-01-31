@@ -949,6 +949,7 @@ export default {
     },
 
     onChangeSortClicked(sortInfo) {
+      console.log(sortInfo)
       this.changeAssetSort(sortInfo)
     },
 

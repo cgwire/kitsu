@@ -6,7 +6,7 @@
     <div class="level-right">
       <button-simple
         class="flexrow-item"
-        icon="download"
+        icon="export"
         :title="$t('main.csv.export_file')"
         @click="$emit('export-clicked')"
         v-if="isExportable"

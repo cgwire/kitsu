@@ -1606,7 +1606,7 @@ tbody:last-child .empty-line:last-child {
 
     &:hover,
     &:hover .datatable-row-header {
-      background: var(--background-selectable);
+      background: var(--background-selectable-selectable);
     }
   }
 
@@ -2079,7 +2079,7 @@ th.validation-cell {
   .cell.year:not(.blank):not(.disabled):hover,
   .cell.month:not(.blank):not(.disabled):hover,
   .cell.day:not(.blank):not(.disabled):hover {
-    background: var(--background-selectable);
+    background: var(--background-selectable-selectable);
     border: 1px solid transparent;
   }
 
@@ -2103,7 +2103,7 @@ th.validation-cell {
   }
 
   header span:not(.disabled):hover {
-    background: var(--background-selectable);
+    background: var(--background-selectable-selectable);
   }
 }
 

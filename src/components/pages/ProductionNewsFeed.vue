@@ -4,24 +4,12 @@
       <div class="news page" ref="body" v-scroll="onBodyScroll">
         <div class="timeline-wrapper">
           <div class="has-text-right filler filter-button">
-            <span @click="toggleFilters">
-              <template v-if="isFiltersDisplayed">
-                {{ $t('main.less_filters') }}
-              </template>
-              <template v-else>
-                {{ $t('main.more_filters') }}
-              </template>
-            </span>
-            &bull;
-
-            <span @click="toggleStats">
-              <template v-if="isStatsDisplayed">
-                {{ $t('news.hide_stats') }}
-              </template>
-              <template v-else>
-                {{ $t('news.show_stats') }}
-              </template>
-            </span>
+            <button-simple
+              icon="filter"
+              :active="isFiltersDisplayed"
+              :title="$t('main.more_filters')"
+              @click="toggleFilters"
+            />
           </div>
 
           <div class="filters flexrow">
@@ -73,25 +61,6 @@
               :options="previewOptions"
               v-model="previewMode"
             />
-          </div>
-
-          <div class="stats mt1" v-if="isStatsDisplayed">
-            <span class="news-number">
-              {{ newsTotal }} {{ $t('news.news') }}
-            </span>
-            <template v-for="stat in renderedStats">
-              <span
-                :key="'stat-value-' + stat.name.toLowerCase()"
-                class="tag stat-tag"
-                :title="stat.name + ': ' + stat.value"
-                :style="{
-                  background: stat.color,
-                  color: stat.is_default ? '#666' : 'white'
-                }"
-              >
-                {{ stat.name }} : {{ stat.value }}
-              </span>
-            </template>
           </div>
 
           <div class="timeline">
@@ -300,12 +269,32 @@
       </div>
     </div>
 
-    <div id="side-column" class="column side-column" v-if="currentTask">
+    <div id="side-column" class="column side-column">
       <task-info
         :task="currentTask"
         :is-loading="loading.currentTask"
         with-actions
-      />
+      >
+        <div class="stats mt1">
+          <span class="news-number mb1">
+            {{ newsTotal }} {{ $t('news.news') }}
+          </span>
+          <div class="mt1"></div>
+          <div v-for="stat in renderedStats">
+            <span
+              :key="'stat-value-' + stat.name.toLowerCase()"
+              class="tag stat-tag"
+              :title="stat.name + ': ' + stat.value"
+              :style="{
+                background: stat.color,
+                color: stat.is_default ? '#666' : 'white'
+              }"
+            >
+              {{ stat.name }} : {{ stat.value }}
+            </span>
+          </div>
+        </div>
+      </task-info>
     </div>
   </div>
 </template>
@@ -323,6 +312,7 @@ import { sortByName, sortPeople } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -341,6 +331,7 @@ export default {
   name: 'production-news-feed',
   mixins: [timeMixin],
   components: {
+    ButtonSimple,
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
@@ -805,13 +796,6 @@ export default {
     color: $light-grey-light;
   }
 
-  .stats {
-    .news-number {
-      border: 2px solid $light-grey;
-      color: $light-grey;
-    }
-  }
-
   .timeline-wrapper {
     background: $dark-grey;
   }
@@ -923,10 +907,6 @@ export default {
     min-width: 30px;
   }
 
-  .selected .date {
-    color: $dark-grey;
-  }
-
   .explaination,
   .explaination span {
     display: inline;
@@ -956,17 +936,21 @@ export default {
 .news-line {
   padding-left: 1em;
   align-items: middle;
+  border: 3px solid transparent;
   cursor: pointer;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
   border-radius: 0.5em;
+  transition: all 0.1s linear;
 
   &:hover {
-    background: var(--background-hover);
+    transform: scale(1.01);
+    border: 3px solid var(--background-selectable-selectable);
   }
 
   &.selected {
-    background: var(--background-selected);
+    transform: scale(1.01);
+    border: 3px solid var(--background-selected);
   }
 }
 
@@ -1001,19 +985,22 @@ export default {
 .stats {
   text-align: left;
   margin-top: 2em;
+  width: 100%;
+  flex: 1;
 
   .news-number {
     font-weight: bold;
-    border: 2px solid $grey-strong;
+    border: 2px solid var(--text);
     border-radius: 1em;
-    padding: 0.3em;
-    margin-right: 0.8em;
+    padding: 0.6em;
   }
 
   .stat-tag {
     margin-right: 1em;
     margin-top: 0;
     margin-bottom: 1em;
+    font-size: 0.8em;
+    font-weight: bold;
   }
 }
 </style>

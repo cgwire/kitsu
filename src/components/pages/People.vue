@@ -7,14 +7,14 @@
         class="flexrow-item"
         :title="$t('main.csv.import_file')"
         :is-responsive="true"
-        icon="upload"
+        icon="import"
         @click="showImportModal"
         v-if="isCurrentUserAdmin"
       />
       <button-href-link
         class="flexrow-item"
         :title="$t('main.csv.export_file')"
-        icon="download"
+        icon="export"
         path="/api/export/csv/persons.csv"
       />
       <button-simple

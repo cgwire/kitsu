@@ -145,13 +145,7 @@ export default {
     }
 
     &.selected .name-wrapper {
-      background: $dark-grey-light;
-    }
-
-    &:hover {
-      .name-wrapper {
-        background: $dark-purple;
-      }
+      background: var(--background-selected);
     }
   }
 }
@@ -188,7 +182,7 @@ export default {
 
   &:hover {
     .name-wrapper {
-      background: #eee;
+      background: var(--background-selectable-selectable);
     }
   }
 }

@@ -25,7 +25,6 @@
     <download-icon :class="iconClass" v-if="icon === 'download'" />
     <upload-icon :class="iconClass" v-if="icon === 'upload'" />
     <film-icon :class="iconClass" v-if="icon === 'film'" />
-    <play-icon :class="iconClass" v-if="icon === 'play'" />
     <pause-icon :class="iconClass" v-if="icon === 'pause'" />
     <edit-icon :class="iconClass" v-if="icon === 'edit'" />
     <image-icon :class="iconClass" v-if="icon === 'image'" />
@@ -37,26 +36,33 @@
     <chevron-down-icon :class="iconClass" v-if="icon === 'down'" />
     <chevron-left-icon :class="iconClass" v-if="icon === 'left'" />
     <chevron-right-icon :class="iconClass" v-if="icon === 'right'" />
-    <copy-icon :class="iconClass" v-if="icon === 'compare'" />
     <x-icon :class="iconClass" v-if="icon === 'remove'" />
     <edit2-icon :class="iconClass" v-if="icon === 'pencil'" />
     <layers-icon :class="iconClass" v-if="icon === 'layers'" />
-    <type-icon :class="iconClass" v-if="icon === 'type'" />
     <list-icon :class="iconClass" v-if="icon === 'list'" />
     <filter-icon :class="iconClass" v-if="icon === 'funnel'" />
     <refresh-cw-icon :class="iconClass" v-if="icon === 'refresh'" />
-    <repeat-icon :class="iconClass" v-if="icon === 'repeat'" />
-    <volume-x-icon :class="iconClass" v-if="icon === 'soundoff'" />
-    <volume-2-icon :class="iconClass" v-if="icon === 'soundon'" />
     <triangle-icon :class="iconClass" v-if="icon === 'triangle'" />
     <music-icon :class="iconClass" v-if="icon === 'music'" />
-    <pen-tool-icon :class="iconClass" v-if="icon === 'pen'" />
     <square-icon :class="iconClass" v-if="icon === 'eraser'" />
     <key-icon :class="iconClass" v-if="icon == 'key'" />
     <zoom-in-icon :class="iconClass" v-if="icon == 'loupe'" />
     <globe-icon :class="iconClass" v-if="icon == 'globe'" />
     <codepen-icon :class="iconClass" v-if="icon == 'codepen'" />
-    <span :class="iconClass" v-if="icon === 'laser'"> ⦿ </span>
+    <kitsu-icon :name="icon" :class="iconClass" v-if="[
+      'compare',
+      'export',
+      'export-lines',
+      'filter',
+      'import',
+      'laser',
+      'pen',
+      'play',
+      'repeat',
+      'soundon',
+      'soundoff',
+      'type'
+    ].includes(icon)" />
     <span
       :class="{
         text: true,
@@ -116,6 +122,8 @@ import {
   ZoomInIcon
 } from 'vue-feather-icons'
 
+import KitsuIcon from '@/components/widgets/KitsuIcon'
+
 export default {
   name: 'button-simple',
   components: {
@@ -135,6 +143,7 @@ export default {
     GridIcon,
     ImageIcon,
     KeyIcon,
+    KitsuIcon,
     LayersIcon,
     ListIcon,
     ZoomInIcon,
@@ -228,6 +237,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.button {
+  border-radius: 10px;
+}
+
 .icon.is-small.only-icon {
   margin-right: 0;
 }
