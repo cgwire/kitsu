@@ -6,7 +6,7 @@ export default {
     if (episode) {
       path += `/episodes/${episode.id}/playlists?sort_by=${sortBy}&page=${page}`
       if (taskTypeId && taskTypeId.length > 0) {
-        path += `?task_type_id=${taskTypeId}`
+        path += `&task_type_id=${taskTypeId}`
       }
     } else {
       path += `/playlists?sort_by=${sortBy}&page=${page}`
@@ -14,6 +14,7 @@ export default {
         path += `&task_type_id=${taskTypeId}`
       }
     }
+    console.log(path)
     return client.pget(path)
   },
 
