@@ -23,16 +23,15 @@
           />
         </div>
 
-        <div class="entity-title">
-          <span
-            :style="{
-              color: taskStatus.color
-            }"
-            :title="taskStatus.name"
-          >
-            &bullet;
-          </span>
-          <span>{{ entity.parent_name }} / {{ entity.name }}</span>
+        <div
+          class="entity-title"
+          :title="taskStatus.name"
+          :style="{
+            'border-bottom': '2px solid ' + taskStatus.color,
+            'padding-bottom': '5px'
+          }"
+        >
+          {{ entity.parent_name }} / {{ entity.name }}
         </div>
 
         <div class="preview-choice" v-if="taskTypeOptions.length > 0">
