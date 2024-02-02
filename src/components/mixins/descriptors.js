@@ -100,7 +100,8 @@ export const descriptorMixin = {
       this.$emit('change-sort', {
         type: 'metadata',
         column: column.field_name,
-        name: column.name
+        name: column.name,
+        data_type: column.data_type
       })
       this.showMetadataHeaderMenu()
     },

@@ -294,12 +294,59 @@ export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
   return result
 }
 
-const sortByMetadata = sortInfo => (a, b) => {
+const getMetadataValues = (sortInfo, a, b) => {
   const dataA = a.data && a.data[sortInfo.column] ? a.data[sortInfo.column] : ''
   const dataB = b.data && b.data[sortInfo.column] ? b.data[sortInfo.column] : ''
-  if (!dataA) return 1
-  if (!dataB) return -1
-  return dataA.localeCompare(dataB)
+  return { dataA, dataB }
+}
+
+const sortByMetadata = sortInfo => {
+  if (sortInfo.data_type === 'number') {
+    return (a, b) => {
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (!dataB) return -1
+      if (!dataA) return 1
+      return dataA > dataB
+    }
+  } else if (sortInfo.data_type === 'boolean') {
+    return (a, b) => {
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (!dataB) return -1
+      if (!dataA) return 1
+      return dataA ? 1 : -1
+    }
+  } else if (sortInfo.data_type === 'checklist') {
+    return (a, b) => {
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (!dataB) return -1
+      if (!dataA) return 1
+      const checklistA = JSON.parse(dataA)
+      const checklistB = JSON.parse(dataB)
+      let resultA = 0
+      let resultB = 0
+      const length = Object.keys(checklistA).length
+      Object.keys(checklistA).forEach((key, index) => {
+        const points = length - index
+        resultA += checklistA[key] ? points : 0
+        resultB += checklistB[key] ? points : 0
+      })
+      return resultA <= resultB ? 1 : -1
+    }
+  } else if (sortInfo.data_type === 'taglist') {
+    return (a, b) => {
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (!dataB) return -1
+      if (!dataA) return 1
+      return dataA.localeCompare(dataB)
+    }
+  } else {
+    return (a, b) => {
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (!dataB) return -1
+      if (!dataA) return 1
+      return dataA.localeCompare(dataB)
+    }
+  }
 }
 
 const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
