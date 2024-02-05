@@ -60,7 +60,8 @@ export default {
           center: 'title',
           right: 'dayGridMonth,dayGridWeek,multiMonthYear'
         },
-        initialView: 'dayGridMonth'
+        initialView: 'dayGridMonth',
+        firstDay: 1
       }
     }
   },
