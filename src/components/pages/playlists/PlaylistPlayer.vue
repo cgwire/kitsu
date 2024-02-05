@@ -1106,7 +1106,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTaskTypes',
       'currentEpisode',
       'currentProduction',
       'isCurrentUserArtist',
@@ -1118,10 +1117,12 @@ export default {
       'previewFileMap',
       'productionBackgrounds',
       'shotMap',
+      'productionAssetTaskTypes',
+      'productionSequenceTaskTypes',
+      'productionShotTaskTypes',
       'taskMap',
       'taskStatusMap',
       'taskTypeMap',
-      'shotTaskTypes',
       'user'
     ]),
 
@@ -1245,9 +1246,11 @@ export default {
 
     entityTaskTypes() {
       if (this.playlist.for_entity === 'asset') {
-        return this.assetTaskTypes
+        return this.productionAssetTaskTypes
+      } else if (this.playlist.for_entity === 'shot') {
+        return this.productionShotTaskTypes
       } else {
-        return this.shotTaskTypes
+        return this.productionSequenceTaskTypes
       }
     },
 

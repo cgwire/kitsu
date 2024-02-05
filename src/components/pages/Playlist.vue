@@ -689,9 +689,10 @@ export default {
     },
 
     getTaskStatus(entity) {
-      entity = this.shotMap.get(entity.id)
-      if (!entity) entity = this.assetMap.get(entity.id)
-      if (!entity) return {}
+      let entityWithTasks = this.shotMap.get(entity.id)
+      if (!entityWithTasks) entityWithTasks = this.assetMap.get(entity.id)
+      if (!entityWithTasks) entityWithTasks = this.sequenceMap.get(entity.id)
+      if (!entityWithTasks) return {}
 
       const taskId = entity.validations.get(this.currentPlaylist.task_type_id)
       if (taskId) {

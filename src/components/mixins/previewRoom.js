@@ -57,7 +57,7 @@ export const previewRoomMixin = {
 
     leaveRoom() {
       if (!this.previewRoom()) return
-
+      if (!this.user) return
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id,
         playlist_id: this.previewRoom().roomId
