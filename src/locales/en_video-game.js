@@ -72,13 +72,11 @@ export default {
     add_shots: 'Add maps',
     add_sequence: 'Add the whole level',
     add_episode: 'Add the whole chapter',
-    apply_task_type_change: 'This will set the last revision for the given task type on all maps.',
     comparing_missing_plan: 'Map missing for current type',
     no_playlist: 'There is currently no playlist for this project or chapter.',
     no_sequence_for_episode: 'There is no level for this chapter',
     no_shot_for_production: 'There is no map for this production',
-    select_shot: 'Please select a map in the right column',
-    select_task_type: 'Change task type for all maps'
+    select_shot: 'Please select a map in the right column'
   },
 
   productions: {

@@ -5,16 +5,12 @@ export default {
     let path = `/api/data/projects/${production.id}`
     if (episode) {
       path += `/episodes/${episode.id}/playlists?sort_by=${sortBy}&page=${page}`
-      if (taskTypeId && taskTypeId.length > 0) {
-        path += `&task_type_id=${taskTypeId}`
-      }
     } else {
       path += `/playlists?sort_by=${sortBy}&page=${page}`
-      if (taskTypeId && taskTypeId.length > 0) {
-        path += `&task_type_id=${taskTypeId}`
-      }
     }
-    console.log(path)
+    if (taskTypeId?.length) {
+      path += `&task_type_id=${taskTypeId}`
+    }
     return client.pget(path)
   },
 
