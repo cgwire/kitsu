@@ -20,10 +20,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import PreviewModal from '@/components/modals/PreviewModal'
 import Spinner from '@/components/widgets/Spinner'
+
 import crisp from '@/lib/crisp'
 import localPreferences from '@/lib/preferences'
+import sentry from '@/lib/sentry'
 
 export default {
   name: 'app',
@@ -61,7 +64,7 @@ export default {
     ])
   },
 
-  mounted() {
+  async mounted() {
     if (localStorage.getItem('dark-theme') === 'true' && !this.isDarkTheme) {
       this.$store.commit('TOGGLE_DARK_THEME')
       document.documentElement.style.background = '#36393F'
@@ -70,10 +73,23 @@ export default {
       document.documentElement.style.background = '#FFF'
       document.body.style.background = '#FFF'
     }
-    const supportChat = localPreferences.getBoolPreference('support:show', true)
-    this.setSupportChat(supportChat)
-    crisp.init(supportChat)
-    this.setMainConfig()
+    const config = await this.setMainConfig()
+    // Setup Crisp
+    if (config.crisp_token?.length) {
+      const supportChat = localPreferences.getBoolPreference(
+        'support:show',
+        true
+      )
+      this.setSupportChat(supportChat)
+      crisp.init(config.crisp_token)
+    }
+    // Setup Sentry
+    if (config.sentry?.dsn?.length) {
+      sentry.init(this.$router, {
+        dsn: config.sentry.dsn,
+        sampleRate: config.sentry.sampleRate
+      })
+    }
   },
 
   methods: {

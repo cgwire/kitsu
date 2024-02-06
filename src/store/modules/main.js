@@ -50,7 +50,7 @@ const actions = {
 
   setSupportChat({ commit, state }, isSupportChat) {
     commit(TOGGLE_SUPPORT_CHAT, isSupportChat)
-    crisp.setChatVisibilty(isSupportChat)
+    crisp.setChatVisibility(isSupportChat)
   },
 
   toggleSidebar({ commit, state }) {
@@ -69,10 +69,15 @@ const actions = {
     return client.getEvents(after, before)
   },
 
-  setMainConfig({ commit, state }) {
-    return client.getConfig().then(config => {
-      commit(SET_CONFIG, config)
-    })
+  async setMainConfig({ commit }) {
+    let config = {}
+    try {
+      config = await client.getConfig()
+    } catch (error) {
+      console.log(error)
+    }
+    commit(SET_CONFIG, config)
+    return config
   },
 
   searchData(_, { query, limit = 3, offset = 0, productionId, index_names }) {
