@@ -110,7 +110,7 @@
         startProgressDrag()
         isFrameNumberVisible = true
       "
-      v-show="entityList.length > 1"
+      v-show="entityList.length > 1 && playlistDuration > 0"
     >
       <div
         class="entity-status"
