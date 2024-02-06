@@ -99,7 +99,7 @@ export default {
               borderColor: '#666',
               backgroundColor: taskType.color,
               preview_file_id: task.entity_preview_file_id,
-              selected: false,
+              // selected: false,
               task_status_id: task.task_status_id,
               task_id: task.id
             }
@@ -116,12 +116,12 @@ export default {
       if (task === this.currentTask) {
         this.currentTask = {}
         this.clearSelectedTasks()
-        event.setExtendedProp('selected', false)
+        // event.setExtendedProp('selected', false)
       } else {
         this.currentTask = task
         this.clearSelectedTasks()
         this.addSelectedTasks([{ task }])
-        event.setExtendedProp('selected', true)
+        // event.setExtendedProp('selected', true)
       }
     }
   },
