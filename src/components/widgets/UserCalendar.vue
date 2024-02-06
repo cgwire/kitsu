@@ -116,12 +116,12 @@ export default {
       if (task === this.currentTask) {
         this.currentTask = {}
         this.clearSelectedTasks()
-        event.setProp('selected', false)
+        event.setExtendedProp('selected', false)
       } else {
         this.currentTask = task
         this.clearSelectedTasks()
         this.addSelectedTasks([{ task }])
-        event.setProp('extendedProps.selected', true)
+        event.setExtendedProp('selected', true)
       }
     }
   },
