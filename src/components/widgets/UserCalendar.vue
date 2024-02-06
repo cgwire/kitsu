@@ -38,6 +38,7 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 
 export default {
   name: 'user-calendar',
+
   components: {
     EntityThumbnail,
     FullCalendar
@@ -86,10 +87,14 @@ export default {
           .filter(task => task.start_date && task.due_date)
           .map(task => {
             const taskType = this.taskTypeMap.get(task.task_type_id)
+            const start = task.start_date
+            const end = new Date(task.due_date)
+            end.setDate(end.getDate() + 1) // end date is exclusive
             return {
               title: task.full_entity_name,
-              start: task.start_date.substring(0, 10),
-              end: task.due_date.substring(0, 10),
+              allDay: true,
+              start,
+              end,
               color: '#666',
               borderColor: '#666',
               backgroundColor: taskType.color,
