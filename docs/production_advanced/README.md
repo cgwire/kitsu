@@ -20,7 +20,7 @@ Once you have created your **Task Types**  on your **Global Library**, add them 
 ![Navigation Episodes](../img/getting-started/drop_down_menu_episodes.png)
 
 
-This new page behaves like the asset and shot global page. You can add your tasks with the
+This new page behaves like the asset and shot global page. You can add your tasks to the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
 You can add a custom metadata column, fill in the description, etc.
@@ -60,7 +60,7 @@ Once you have created your **Task Types**  on your **Global Library**, add them 
 ![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page.png)
 
 
-This new page behaves like the asset and shot global page. You can add your tasks with the
+This new page behaves like the asset and shot global page. You can add your tasks to the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
 You can add a metadata column, fill in the description, etc.
@@ -97,7 +97,7 @@ Once you have created your **Task Types**  on your **Global Library**, add them 
 ![Navigation Edit](../img/getting-started/drop_down_menu_edit.png)
 
 
-This new page behaves like the asset and shot global page. You can add your tasks with the
+This new page behaves like the asset and shot global page. You can add your tasks to the
 ![Add Tasks](../img/getting-started/add_task_button.png) button.
 
 You can add a metadata column, fill in the description, etc.
@@ -149,7 +149,7 @@ You can also modify the information with the edit button ![Edit button](../img/g
 You now see a new line on the edit pop-up. You can select the information from the list,
 alternatively, enter the free text or number, check a box, or use the checklist, depending on your previous choice.
 
-Don't forget to press the **Confirm** button when you are done.
+Remember to press the **Confirm** button when you are done.
 
 ![Metadata Column detail](../img/getting-started/edit_asset_custom.png)
 
@@ -160,7 +160,7 @@ You can now **sort** your global page with this new column. For example, let's c
 
 ![Metadata Column example](../img/getting-started/custom_column_exemple.png)
 
-Then click the arrow on the right of the column name to open his menu. Then click on **Sort By**
+Then, click the arrow on the right of the column name to open his menu. Then click on **Sort By**
 
 ![Metadata Column Sort By](../img/getting-started/custom_column_sortby.png)
 
@@ -170,7 +170,7 @@ The shots are not sorted by name but by the metadata column information.
 
 You can also select in the menu if you want to edit the name of the metadata column and its information or if you want to delete it.
 
-You can also use the **CSV Import** to quickly fill your custom metadata column.
+You can also use the **CSV Import** to fill your custom metadata column quickly.
 First, you must create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
@@ -186,7 +186,7 @@ The **Add preview** pop-up asks you to choose a file.
 
 You can navigate through the pictures uploaded.
 
-You can change the preview order by clicking the number, then drag and drop them.
+You can change the preview order by clicking the number and then dragging and dropping them.
 
 ![preview drag drop](../img/getting-started/multiple_preview.png)
 
@@ -203,17 +203,17 @@ And then click on the ![delete button](../img/getting-started/delete_button.png)
 
 To see an asset's detail, click on its name.
 
-![Shot detail](../img/getting-started/asset_detail.png)
+![Asset detail](../img/getting-started/asset_detail.png)
 
 A new page opens with the list of the tasks, the assignation, and the status newsfeed on the right.
 
 
-![Shot detail page](../img/getting-started/asset_detail_page.png)
+![Asset detail page](../img/getting-started/asset_detail_page.png)
 
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
 
 
-![Shot detail page](../img/getting-started/asset_detail_page_panel.png)
+![Asset detail page](../img/getting-started/asset_detail_page_panel.png)
 
 
 
@@ -225,15 +225,15 @@ You can also access the **Casting**,
 
 ![Asset detail casting](../img/getting-started/asset_detail_page_concept.png)
 
-the **Schedule** if you have previously filled the task type page data. If the data are already first filled, then you will be able to modify them directly here. 
+The **Schedule** if you have previously filled the task type page data. If the data are already first filled, then you will be able to modify them directly here. 
 
 ![Asset detail casting](../img/getting-started/asset_detail_page_schedule.png)
 
-the **Preview Files** uploaded at various task type, 
+the **Preview Files** uploaded at various task types, 
 
 ![Asset detail casting](../img/getting-started/asset_detail_page_file.png)
 
-and the **Timelog** if people have filled their timesheet on the tasks of this asset.
+And the **Timelog** if people have filled out their timesheet on the tasks of this asset.
 
 ![Asset detail casting](../img/getting-started/asset_detail_page_timelog.png)
 
@@ -242,13 +242,11 @@ and the **Timelog** if people have filled their timesheet on the tasks of this a
 
 ## See the Details of a Shot
 
-If you want to see a detail of a shot, click on its name.
+If you want to see the details of a shot, click on its name.
 
 ![Shot detail](../img/getting-started/shot_detail.png)
 
 A new page opens with the list of the tasks, the assignation, and the status newsfeed on the right.
-You can also access the **Casting**, **concept** linked to this asset, the **Schedule** if you have previously filled the task type page data, the **Preview Files** uploaded at various task type, and the **Timelog** if people have filled their timesheet on the tasks of this asset.
-
 You can navigate through each by clicking on the name of the tabs.
 
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
@@ -259,9 +257,27 @@ You can click on the status of each task to open the comment panel and see the h
 ![Shot detail page](../img/getting-started/shot_detail_page_panel.png)
 
 
+You can also access the **Casting**, 
+
+![Asset detail casting](../img/getting-started/shot_detail_page_casting.png)
+
+
+The **Schedule** if you have previously filled the task type page data. If the data are already first filled, then you will be able to modify them directly here. 
+
+![Asset detail casting](../img/getting-started/shot_detail_page_schedule.png)
+
+the **Preview Files** uploaded at various task types, 
+
+![Asset detail casting](../img/getting-started/shot_detail_page_file.png)
+
+And the **Timelog** if people have filled out their timesheet on the tasks of this asset.
+
+![Asset detail casting](../img/getting-started/shot_detail_page_timelog.png)
+
+
 ## Change Priorities
 
-At some point in the production, you may want to prioritize some tasks, and
+At some point in the production, you may want to prioritize some tasks and
 pinpoint these urgent tasks to your team.
 
 For this, we use the same technique as before. Click on the space
@@ -305,7 +321,7 @@ Alternatively, you can do it per **batch**.
 You can select multiple shots or assets by pressing the **ctrl** or
 **shift** key.
 
-Then go to the **Change status** section on the action menu.
+Then, go to the **Change status** section on the action menu.
 
 ![action menu status](../img/getting-started/blue_menu_status.png)
 
