@@ -205,8 +205,8 @@ To see an asset's detail, click on its name.
 
 ![Shot detail](../img/getting-started/asset_detail.png)
 
-A new page opens with the list of the tasks, the assignation, and the list
-of shots where this asset appears on this shot (**Casting**).
+A new page opens with the list of the tasks, the assignation, and the status newsfeed on the right.
+
 
 ![Shot detail page](../img/getting-started/asset_detail_page.png)
 
@@ -215,14 +215,40 @@ You can click on the status of each task to open the comment panel and see the h
 
 ![Shot detail page](../img/getting-started/asset_detail_page_panel.png)
 
+
+
+You can also access the **Casting**, 
+
+![Asset detail casting](../img/getting-started/asset_detail_page_casting.png)
+
+**concept** linked to this asset, 
+
+![Asset detail casting](../img/getting-started/asset_detail_page_concept.png)
+
+the **Schedule** if you have previously filled the task type page data. If the data are already first filled, then you will be able to modify them directly here. 
+
+![Asset detail casting](../img/getting-started/asset_detail_page_schedule.png)
+
+the **Preview Files** uploaded at various task type, 
+
+![Asset detail casting](../img/getting-started/asset_detail_page_file.png)
+
+and the **Timelog** if people have filled their timesheet on the tasks of this asset.
+
+![Asset detail casting](../img/getting-started/asset_detail_page_timelog.png)
+
+
+
 ## See the Details of a Shot
 
 If you want to see a detail of a shot, click on its name.
 
 ![Shot detail](../img/getting-started/shot_detail.png)
 
-A new page opens with the list of the tasks, the assignation, and the list
-of assets that appear in this shot (**Shot casting**).
+A new page opens with the list of the tasks, the assignation, and the status newsfeed on the right.
+You can also access the **Casting**, **concept** linked to this asset, the **Schedule** if you have previously filled the task type page data, the **Preview Files** uploaded at various task type, and the **Timelog** if people have filled their timesheet on the tasks of this asset.
+
+You can navigate through each by clicking on the name of the tabs.
 
 ![Shot detail page](../img/getting-started/shot_detail_page.png)
 
