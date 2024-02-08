@@ -239,6 +239,7 @@ and the **Timelog** if people have filled their timesheet on the tasks of this a
 
 
 
+
 ## See the Details of a Shot
 
 If you want to see a detail of a shot, click on its name.
