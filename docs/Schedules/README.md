@@ -120,7 +120,7 @@ To help you to set a correct estimation, you can use the **Estimation** Tab.
 
 On the left part of the screen is the list of the shots with the assignation and the number of frames (1).
 Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
-(See how to set your production fps [Create your first production]((../getting-started-production/README.md#create-your-first-production) )
+(See how to set your production fps [Create your first production]((../first-production/README.md#create-your-first-production) )
 
 
  On the right part of the screen, you can see the full team of the department (depending on the assignations you made), the number of shots they have to do, the number of frames, seconds, and the average quota.
@@ -202,6 +202,17 @@ But you can also see the **Due date** and **Estimation** days on the **Todo Page
 ![Task type page schedule artist due date](../img/getting-started/my_task_page.png)
 
 Everybody has access to this page, but only the **Studio Manager** can modify it.
+
+
+## Asset and Shot Schedule
+
+on the detail page of an asset or a shot you have acces to the **Schedule** tab.
+
+![Asset detail schedule](../img/getting-started/masset_detail_page_schedule.png)
+
+The Gantt bar will be displayed if you have enter a start and due date on the **Task Type** schedule.
+
+From this page you can modify the lenght end and start and end date of each task of the asset or shot.
 
 ## Studio Schedule
 
