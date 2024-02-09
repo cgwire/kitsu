@@ -161,10 +161,6 @@ You can sort your page by **name**, **priority**, **Status**, **estimation** or 
 
 You can also filter your tasks.
 
-![My tasks page](../img/getting-started/mytask_filter.png)
-
-
-
 
 Besides the shortcut **My Tasks** at the top of the screen, you can also find it on the main menu ![Main menu](../img/getting-started/main_button.png),
 under the **User** section of **MY TASKS**. The Kitsu logo is a shortcut 
@@ -195,7 +191,7 @@ one you want.
 Validate your comment and the new Status by clicking on
 **Post**  button.
 
-![Changing status](../img/getting-started/changing_status.png)
+
 
 You can edit your last comment by clicking on the "history" button and then
 using the **edit** button
