@@ -84,9 +84,8 @@ You can also receive your notification via Email or Slack on your profile page.
 
 ![notification](../img/getting-started/profil_pannel_notif.png)
 
-(see [Chat Integration](../slack/README.md#create-a-kitsu-application-in-slack
-Create an Application)
-)
+See [Chat Integration](../slack/README.md#create-a-kitsu-application-in-slack)
+
 
 ## How to Not be Notified Anymore?
 
