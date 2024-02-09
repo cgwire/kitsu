@@ -15,14 +15,31 @@
       route-name="task-status"
     />
 
-    <task-status-list
-      :entries="taskStatusList"
-      :is-loading="loading.list"
-      :is-error="errors.list"
-      @edit-clicked="onEditClicked"
-      @delete-clicked="onDeleteClicked"
-      @update-priorities="updatePriorities"
-    />
+    <div class="column">
+      <h2>
+        {{ $t('task_status.title_entities') }}
+        <span class="help-tooltip" :title="$t('task_status.help.entities')">
+          <help-circle-icon class="icon is-small" />
+        </span>
+      </h2>
+      <task-status-list
+        :entries="taskStatusList.filter(taskStatus => !taskStatus.for_concept)"
+        :is-loading="loading.list"
+        :is-error="errors.list"
+        @edit-clicked="onEditClicked"
+        @delete-clicked="onDeleteClicked"
+        @update-priorities="updatePriorities"
+      />
+      <h2>{{ $t('task_status.title_concepts') }}</h2>
+      <task-status-list
+        :entries="taskStatusList.filter(taskStatus => !!taskStatus.for_concept)"
+        :is-loading="loading.list"
+        :is-error="errors.list"
+        @edit-clicked="onEditClicked"
+        @delete-clicked="onDeleteClicked"
+        @update-priorities="updatePriorities"
+      />
+    </div>
 
     <edit-task-status-modal
       :active="modals.edit"
@@ -47,6 +64,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { HelpCircleIcon } from 'vue-feather-icons'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
@@ -63,6 +81,7 @@ export default {
   components: {
     DeleteModal,
     EditTaskStatusModal,
+    HelpCircleIcon,
     ListPageHeader,
     RouteTabs,
     TaskStatusList
@@ -235,3 +254,18 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.help-tooltip {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+  margin-left: 0.25rem;
+
+  &:hover {
+    opacity: 1;
+  }
+  .icon.is-small {
+    vertical-align: baseline;
+  }
+}
+</style>
