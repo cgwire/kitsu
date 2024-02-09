@@ -145,7 +145,7 @@
             </p>
             <p @click="toggleSidebar()">
               <router-link :to="{ name: 'bots' }">
-                <key-icon class="nav-icon" size="0.9x" />
+                <kitsu-icon class="nav-icon" name="bot" />
                 {{ $t('bots.title') }}
               </router-link>
             </p>
@@ -175,7 +175,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { GlobeIcon, KeyIcon } from 'vue-feather-icons'
+import { GlobeIcon } from 'vue-feather-icons'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon'
 
@@ -183,7 +183,6 @@ export default {
   name: 'sidebar',
   components: {
     GlobeIcon,
-    KeyIcon,
     KitsuIcon
   },
 
