@@ -59,6 +59,16 @@
     >
       <trash-icon class="icon is-small only-icon" />
     </button>
+
+    <button
+      class="button"
+      data-test="button-refresh"
+      tabindex="-1"
+      @click="$emit('refresh-clicked')"
+      v-else-if="!hideRefresh"
+    >
+      <refresh-cw-icon class="icon is-small only-icon" />
+    </button>
   </td>
 </template>
 
@@ -68,6 +78,7 @@ import {
   ClockIcon,
   EditIcon,
   KeyIcon,
+  RefreshCwIcon,
   RotateCcwIcon,
   TrashIcon
 } from 'vue-feather-icons'
@@ -78,6 +89,7 @@ export default {
     ClockIcon,
     EditIcon,
     KeyIcon,
+    RefreshCwIcon,
     RotateCcwIcon,
     TrashIcon
   },
@@ -102,6 +114,10 @@ export default {
       default: true
     },
     hideChangePassword: {
+      type: Boolean,
+      default: true
+    },
+    hideRefresh: {
       type: Boolean,
       default: true
     }

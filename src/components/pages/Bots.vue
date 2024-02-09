@@ -1,0 +1,329 @@
+<template>
+  <div class="people page fixed-page">
+    <div class="flexrow page-header">
+      <page-title class="flexrow-item filler" :text="$t('bots.title')" />
+      <button-simple
+        class="flexrow-item"
+        :text="$t('bots.new_bot')"
+        :is-responsive="true"
+        icon="plus"
+        @click="onNewClicked"
+        v-if="isCurrentUserAdmin"
+      />
+    </div>
+
+    <div class="flexrow search-options">
+      <search-field
+        ref="search-field"
+        class="search flexrow-item"
+        @change="onSearchChange"
+        placeholder="ex: gazu bot"
+      />
+      <combobox-department
+        class="combobox-department flexrow-item"
+        :label="$t('main.department')"
+        v-model="selectedDepartment"
+      />
+      <combobox-styled
+        class="flexrow-item"
+        :label="$t('people.fields.role')"
+        :options="roleOptions"
+        locale-key-prefix="people.role."
+        no-margin
+        v-model="role"
+      />
+    </div>
+
+    <div class="query-list"></div>
+
+    <people-list
+      :entries="currentPeople"
+      :is-bots="true"
+      :is-loading="isPeopleLoading"
+      :is-error="isPeopleLoadingError"
+      @edit-clicked="onEditClicked"
+      @delete-clicked="onDeleteClicked"
+      @refresh-clicked="onRefreshClicked"
+    />
+
+    <edit-person-modal
+      :active="modals.edit"
+      :is-bot="true"
+      :is-error="errors.edit"
+      :is-loading="loading.edit"
+      :is-user-limit-error="errors.userLimit"
+      :person-to-edit="personToEdit"
+      @cancel="modals.edit = false"
+      @confirm="confirmEditPeople"
+    />
+
+    <new-token-modal
+      :active="modals.newToken"
+      :person="personToEdit"
+      @cancel="modals.newToken = false"
+      @close="modals.newToken = false"
+      @generate-token="confirmGenerateToken"
+    />
+
+    <hard-delete-modal
+      :active="modals.del"
+      :error-text="$t('people.delete_error')"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :lock-text="personToDelete ? personToDelete.full_name : ''"
+      :text="deleteText"
+      @cancel="modals.del = false"
+      @confirm="confirmDeletePeople"
+    />
+  </div>
+</template>
+
+<script>
+import { mapGetters, mapActions } from 'vuex'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditPersonModal from '@/components/modals/EditPersonModal'
+import HardDeleteModal from '@/components/modals/HardDeleteModal'
+import NewTokenModal from '@/components/modals/NewTokenModal'
+import PageTitle from '@/components/widgets/PageTitle'
+import PeopleList from '@/components/lists/PeopleList'
+import SearchField from '@/components/widgets/SearchField'
+import { searchMixin } from '@/components/mixins/search'
+
+export default {
+  name: 'people',
+
+  mixins: [searchMixin],
+
+  components: {
+    ButtonSimple,
+    ComboboxDepartment,
+    ComboboxStyled,
+    EditPersonModal,
+    HardDeleteModal,
+    NewTokenModal,
+    PageTitle,
+    PeopleList,
+    SearchField
+  },
+
+  data() {
+    return {
+      role: 'all',
+      roleOptions: [
+        { label: 'all', value: 'all' },
+        { label: 'admin', value: 'admin' },
+        { label: 'client', value: 'client' },
+        { label: 'manager', value: 'manager' },
+        { label: 'supervisor', value: 'supervisor' },
+        { label: 'user', value: 'user' },
+        { label: 'vendor', value: 'vendor' }
+      ],
+      errors: {
+        del: false,
+        edit: false
+      },
+      loading: {
+        edit: false,
+        del: false
+      },
+      modals: {
+        edit: false,
+        del: false,
+        newToken: false
+      },
+      personToDelete: {},
+      personToEdit: { role: 'user' },
+      selectedDepartment: ''
+    }
+  },
+
+  mounted() {
+    this.role = this.$route.query.role || 'all'
+    this.selectedDepartment = this.$route.query.department || ''
+    this.loadPeople(() => {
+      this.setSearchFromUrl()
+      this.onSearchChange()
+    }) // Needed to show department informations
+  },
+
+  watch: {
+    'modals.edit'() {
+      if (this.modals.edit) {
+        this.errors.edit = false
+        this.errors.userLimit = false
+        this.loading.edit = false
+      }
+    },
+
+    selectedDepartment() {
+      this.updateRoute()
+    },
+
+    role() {
+      this.updateRoute()
+    }
+  },
+
+  computed: {
+    ...mapGetters([
+      'displayedPeople',
+      'isCurrentUserAdmin',
+      'isPeopleLoading',
+      'isPeopleLoadingError'
+    ]),
+
+    currentPeople() {
+      let people = this.displayedPeople.filter(person => person.is_bot)
+      if (this.role !== 'all') {
+        people = people.filter(person => person.role === this.role)
+      }
+      if (this.selectedDepartment) {
+        people = people.filter(person =>
+          person.departments.includes(this.selectedDepartment)
+        )
+      }
+      return people
+    },
+
+    deleteText() {
+      const personName = this.personToDelete?.full_name
+      return personName ? this.$t('people.delete_text', { personName }) : ''
+    },
+
+    searchField() {
+      return this.$refs['search-field']
+    }
+  },
+
+  methods: {
+    ...mapActions([
+      'editPerson',
+      'deletePeople',
+      'generateToken',
+      'loadPeople',
+      'loadDepartments',
+      'newPerson',
+      'setPeopleSearch'
+    ]),
+
+    confirmGenerateToken(form) {
+      this.generateToken(form)
+        .then(person => {
+          this.updatePersonToEdit(person)
+        })
+        .catch(console.error)
+    },
+
+    confirmEditPeople(form) {
+      let action = 'editPerson'
+      if (this.personToEdit.id === undefined) action = 'newPerson'
+      else form.id = this.personToEdit.id
+      this.loading.edit = true
+      this.errors.edit = false
+      this.errors.userLimit = false
+      this[action](form)
+        .then(person => {
+          this.loading.edit = false
+          this.modals.edit = false
+          this.updatePersonToEdit(person)
+          this.modals.newToken = Boolean(this.personToEdit.access_token?.length)
+        })
+        .catch(err => {
+          const message = err.body?.message
+          const isUserLimitReached =
+            typeof message === 'string' && message.includes('limit')
+          if (isUserLimitReached) {
+            this.errors.userLimit = true
+          } else {
+            this.errors.edit = true
+          }
+          this.loading.edit = false
+        })
+    },
+
+    confirmDeletePeople() {
+      this.loading.del = true
+      this.errors.del = false
+      this.deletePeople(this.personToDelete)
+        .then(() => {
+          this.loading.del = false
+          this.modals.del = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.del = false
+          this.errors.del = true
+        })
+    },
+
+    onSearchChange() {
+      if (!this.searchField) return
+      const searchQuery = this.searchField.getValue()
+      if (searchQuery.length !== 1) {
+        this.setPeopleSearch(searchQuery)
+        this.updateRoute()
+      }
+    },
+
+    onDeleteClicked(person) {
+      this.personToDelete = person
+      this.modals.del = true
+    },
+
+    onEditClicked(person) {
+      this.updatePersonToEdit(person)
+      this.modals.edit = true
+    },
+
+    onRefreshClicked(person) {
+      this.updatePersonToEdit(person)
+      this.modals.newToken = true
+    },
+
+    onNewClicked() {
+      this.updatePersonToEdit({ role: 'user' })
+      this.modals.edit = true
+    },
+
+    updatePersonToEdit(person) {
+      this.personToEdit = {
+        ...person,
+        expiration_date: person.expiration_date
+          ? new Date(person.expiration_date)
+          : null
+      }
+    },
+
+    updateRoute() {
+      const search = this.searchField.getValue()
+      const department = this.selectedDepartment
+      const role = this.role
+      this.$router.push({ query: { search, department, role } })
+    }
+  },
+
+  metaInfo() {
+    return {
+      title: `${this.$t('people.title')} - Kitsu`
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.search {
+  margin-top: 2em;
+}
+.query-list {
+  margin-top: 1.5rem;
+}
+.search-options {
+  align-items: flex-end;
+}
+.filter-button {
+  margin-top: 0.3em;
+}
+</style>

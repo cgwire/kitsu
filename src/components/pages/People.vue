@@ -129,13 +129,6 @@
       @cancel="modals.del = false"
       @confirm="confirmDeletePeople"
     />
-
-    <build-people-filter-modal
-      ref="build-filter-modal"
-      :active="modals.isBuildFilterDisplayed"
-      @cancel="modals.isBuildFilterDisplayed = false"
-      @confirm="confirmBuildFilter"
-    />
   </div>
 </template>
 
@@ -145,7 +138,6 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
-import BuildPeopleFilterModal from '@/components/modals/BuildPeopleFilterModal'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
@@ -163,7 +155,6 @@ export default {
   name: 'people',
   mixins: [searchMixin],
   components: {
-    BuildPeopleFilterModal,
     ButtonHrefLink,
     ButtonSimple,
     ChangePasswordModal,
@@ -172,9 +163,9 @@ export default {
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
+    ImportRenderModal,
     PageTitle,
     PeopleList,
-    ImportRenderModal,
     SearchField,
     SearchQueryList
   },
@@ -211,8 +202,7 @@ export default {
         del: false,
         changePassword: false,
         importModal: false,
-        isImportRenderDisplayed: false,
-        isBuildFilterDisplayed: false
+        isImportRenderDisplayed: false
       },
       parsedCSV: [],
       personToDelete: {},
@@ -260,26 +250,23 @@ export default {
     ...mapGetters([
       'displayedPeople',
       'isCurrentUserAdmin',
-
       'isPeopleLoading',
       'isPeopleLoadingError',
-
       'isImportPeopleModalShown',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
-
       'peopleSearchQueries',
       'personCsvFormData'
     ]),
 
     currentPeople() {
-      let people =
-        this.role === 'all'
-          ? this.displayedPeople
-          : this.displayedPeople.filter(p => p.role === this.role)
+      let people = this.displayedPeople.filter(person => !person.is_bot)
+      if (this.role !== 'all') {
+        people = people.filter(person => person.role === this.role)
+      }
       if (this.selectedDepartment) {
-        people = people.filter(p =>
-          p.departments.includes(this.selectedDepartment)
+        people = people.filter(person =>
+          person.departments.includes(this.selectedDepartment)
         )
       }
       return people
@@ -378,10 +365,9 @@ export default {
           this.modals.edit = false
         })
         .catch(err => {
+          const message = err.body?.message
           const isUserLimitReached =
-            err.body &&
-            err.body.message &&
-            err.body.message.indexOf('limit') > 0
+            typeof message === 'string' && message.includes('limit')
           if (isUserLimitReached) {
             this.errors.userLimit = true
           } else {
@@ -512,12 +498,6 @@ export default {
 
     removeSearchQuery(searchQuery) {
       this.removePeopleSearch(searchQuery).catch(console.error)
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.searchField.setValue(query)
-      this.onSearchChange()
     },
 
     updateRoute() {

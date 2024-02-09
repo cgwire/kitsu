@@ -68,13 +68,22 @@ export default {
       phone: person.phone,
       role: person.role,
       active: person.active,
-      departments: person.departments
+      departments: person.departments,
+      is_bot: person.is_bot,
+      expiration_date: person.expiration_date?.toJSON().slice(0, 10)
     }
     return client.ppost('/api/data/persons/new', data)
   },
 
   invitePerson(person) {
     return client.pget(`/api/actions/persons/${person.id}/invite`)
+  },
+
+  generateToken(person) {
+    const data = {
+      expiration_date: person.expiration_date?.toJSON().slice(0, 10) || null
+    }
+    return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
   updatePerson(person) {

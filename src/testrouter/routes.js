@@ -24,6 +24,7 @@ import Edits from '@/components/pages/Edits'
 import Asset from '@/components/pages/Asset'
 import AssetTypes from '@/components/pages/AssetTypes'
 import Backgrounds from '@/components/pages/Backgrounds'
+import Bots from '@/components/pages/Bots'
 import Breakdown from '@/components/pages/Breakdown'
 import Concepts from '@/components/pages/Concepts'
 import CustomActions from '@/components/pages/CustomActions'
@@ -190,6 +191,12 @@ export const routes = [
         path: 'backgrounds',
         component: Backgrounds,
         name: 'backgrounds'
+      },
+
+      {
+        path: 'bots',
+        component: Bots,
+        name: 'bots'
       },
 
       {

@@ -272,38 +272,36 @@ const actions = {
     commit(EDIT_PEOPLE_END, person)
   },
 
-  newPerson({ commit, state }, data) {
-    return peopleApi.createPerson(data).then(person => {
-      commit(EDIT_PEOPLE_END, person)
-    })
+  async newPerson({ commit, state }, data) {
+    const person = await peopleApi.createPerson(data)
+    commit(EDIT_PEOPLE_END, person)
+    return person
   },
 
-  newPersonAndInvite({ commit, state }, data) {
-    return peopleApi
-      .createPerson(data)
-      .then(peopleApi.invitePerson)
-      .then(person => {
-        commit(EDIT_PEOPLE_END, person)
-        Promise.resolve()
-      })
+  async newPersonAndInvite({ commit, state }, data) {
+    let person = await peopleApi.createPerson(data)
+    person = await peopleApi.invitePerson(person)
+    commit(EDIT_PEOPLE_END, person)
+    return person
   },
 
   invitePerson({ commit, state }, person) {
     return peopleApi.invitePerson(person)
   },
 
-  editPerson({ commit, state }, data) {
-    return peopleApi.updatePerson(data).then(person => {
-      commit(EDIT_PEOPLE_END, person)
-      Promise.resolve()
-    })
+  generateToken({ commit, state }, person) {
+    return peopleApi.generateToken(person)
   },
 
-  deletePeople({ commit, state }, person) {
-    return peopleApi.deletePerson(person).then(() => {
-      commit(DELETE_PEOPLE_END)
-      Promise.resolve()
-    })
+  async editPerson({ commit, state }, data) {
+    const person = await peopleApi.updatePerson(data)
+    commit(EDIT_PEOPLE_END, person)
+    return person
+  },
+
+  async deletePeople({ commit, state }, person) {
+    await peopleApi.deletePerson(person)
+    commit(DELETE_PEOPLE_END)
   },
 
   changePasswordPerson({ commit, state }, { person, form }) {
