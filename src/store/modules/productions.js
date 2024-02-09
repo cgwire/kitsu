@@ -657,9 +657,11 @@ const mutations = {
     // update states
     if (previousProduction) {
       Object.assign(previousProduction, production)
+      Object.assign(production, previousProduction)
     }
     if (openProduction) {
       Object.assign(openProduction, production)
+      Object.assign(production, openProduction)
     }
     if (isStatusChanged) {
       if (production.project_status_name === 'Open') {
