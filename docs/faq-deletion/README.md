@@ -46,7 +46,7 @@ The shot is removed from the database and won't appear anymore on Kitsu.
 
 
 
-## How to Selete a Sequence
+## How to Delete a Sequence
 
 To delete a sequence, use the drop-down menu to
 go to the **Sequence** page.

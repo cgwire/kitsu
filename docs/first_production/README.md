@@ -72,7 +72,7 @@ Click on **Confirm and stay** if you have multiple assets to create.
 You can change the asset type and keep adding assets.
 
 You can also customize the asset type list and their tasks pipeline.
-[Customization of the workflow](../customization/README.md#modify-an-existing-asset-types) )
+[Customization of the workflow](../customization-pipeline/README.md#modify-an-existing-asset-types) )
 
 
 The newly created asset appears in the background whenever you click on **Confirm and stay**.
@@ -243,7 +243,7 @@ Then, click on the **+ Add a new user** button.
 A creation window opens. You can enter the first (1) and last name (2), the email (which is **mandatory** to create the account) (3), and the phone number (4).
 
 You can add the new user to a **Department** (or several) (5).
-See [Department Documentation](department/README.md)
+See [Department Documentation](../department/README.md)
 
 Then you need to define the role of the user: ** Artist**, **Supervisor**, **Production Manager**,
 **Studio Manager**, **Vendor** or **Client** (6).  If the Artist is working right now, keep
@@ -865,8 +865,7 @@ Depending on the **FPS** you have set for the production, the number of **Second
 
 
  For more information about the **Schedule** tab, go to the
- [Task Type Schedule](#task-type-schedule)
-
+ [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation)
 
 
 ## The Timesheets
