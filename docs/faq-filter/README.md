@@ -30,7 +30,7 @@ When you click on it a pop up opened, and gives you several choices for your fil
 ![Filter Builder option](../img/getting-started/filter_builder_option.png)
 
 You can filter per **Status** on a **Task Type**, you can also filter through the custom metadata column,
-see [Filter Builder option](../getting-started-advanced/#add-custom-metadata-columns).
+
 
 You can also filter the global page through the assignation, per artist or per the lack of assignation.
 
