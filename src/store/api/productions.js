@@ -40,6 +40,7 @@ export default {
       is_clients_isolated: production.is_clients_isolated === 'true',
       is_preview_download_allowed:
         production.is_preview_download_allowed === 'true',
+      is_set_preview_automated: production.is_set_preview_automated === 'true',
       homepage: production.homepage
     }
     return client.pput(`/api/data/projects/${production.id}`, data)
