@@ -208,7 +208,7 @@ Everybody has access to this page, but only the **Studio Manager** can modify it
 
 on the detail page of an asset or a shot you have acces to the **Schedule** tab.
 
-![Asset detail schedule](../img/getting-started/masset_detail_page_schedule.png)
+![Asset detail schedule](../img/getting-started/asset_detail_page_schedule.png)
 
 The Gantt bar will be displayed if you have enter a start and due date on the **Task Type** schedule.
 
