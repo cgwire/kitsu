@@ -324,6 +324,34 @@ he's assigned.
 Now, everybody knows what to do and who is doing what!
 
 
+## Select the status for the Artist board page
+
+When you assign a task to an artist, they will see the task on their todo page when they log in.
+
+But they can also choose to display their task as a board view. Each **Status** will be a column, and the assigned task is a card that can be move from status to status depending on the progress of the task.
+
+To setup the board view, you need to go to the setting page of your production.
+
+![Setting page](../img/getting-started/drop_down_menu_setting.png)
+
+Then go to the **Task Status** tab. You see the list of the status used on your production.
+
+It will be the same status used as column on the board page. You can drag and move the satus to change the order as they will appear on the board view.
+
+
+![Setting page status order](../img/getting-started/setting_status_order.png)
+
+The next step is with the **Board Status** page.
+
+![Setting page status board](../img/getting-started/setting_status_board.png)
+
+Here you can choose which status will be displayed on the **Board** page depending on the permission.
+
+Once it's done you artist should have a page like this.
+
+![Artist board page](../img/getting-started/artist_board_page.png)
+
+
 ## Add the Frameranges
 
 At this stage of the production, the animatic should be done. This means you have
