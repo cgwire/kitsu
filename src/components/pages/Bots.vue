@@ -228,10 +228,14 @@ export default {
         .then(person => {
           this.loading.edit = false
           this.modals.edit = false
-          this.updatePersonToEdit(person)
-          this.modals.newToken = Boolean(this.personToEdit.access_token?.length)
+          const access_token = person.access_token
+          if (access_token?.length) {
+            this.updatePersonToEdit(person)
+            this.modals.newToken = true
+          }
         })
         .catch(err => {
+          console.error(err)
           const message = err.body?.message
           const isUserLimitReached =
             typeof message === 'string' && message.includes('limit')

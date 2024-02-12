@@ -1,114 +1,112 @@
 <template>
   <div
+    class="modal"
     :class="{
-      modal: true,
       'is-active': active
     }"
   >
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
-      <div class="box">
+      <form @submit.prevent="confirmClicked" class="box">
         <h1 class="title" v-if="personToEdit.id !== undefined">
           {{ $t('people.edit_title') }} {{ personToEdit.full_name }}
         </h1>
         <h1 class="title" v-else>
           {{ $t(isBot ? 'bots.new_bot' : 'people.new_person') }}
         </h1>
-
-        <form @submit.prevent="confirmClicked">
-          <text-field
-            :errored="form.first_name && !isValidName"
-            :label="$t(isBot ? 'bots.fields.name' : 'people.fields.first_name')"
-            :disabled="personToEdit.is_generated_from_ldap"
-            ref="name-field"
-            v-model="form.first_name"
-          />
-          <text-field
-            :label="$t('people.fields.last_name')"
-            :disabled="personToEdit.is_generated_from_ldap"
-            v-model="form.last_name"
-            v-if="!isBot"
-          />
-          <text-field
-            type="email"
-            :errored="form.email && !isValidEmail"
-            :label="$t('people.fields.email')"
-            :disabled="personToEdit.is_generated_from_ldap"
-            v-model="form.email"
-          />
-          <text-field
-            :label="$t('people.fields.phone')"
-            v-model="form.phone"
-            v-if="!isBot"
-          />
-          <date-field
-            :label="$t('bots.fields.expiration_date')"
-            :disabled-dates="{ to: new Date() }"
-            :disabled="isEditing"
-            v-model="form.expiration_date"
-            v-if="isBot"
-          />
-          <div class="departments field">
-            <label class="label">{{ $t('people.fields.departments') }}</label>
-            <p
-              class="empty mb1"
-              v-if="form.departments && form.departments.length === 0"
-            >
-              {{ $t('people.departments_empty') }}
-            </p>
-            <div
-              class="department-element mb1 mt05"
-              :key="departmentId"
-              @click="removeDepartment(departmentId)"
-              v-for="departmentId in form.departments"
-            >
-              <department-name
-                :department="departmentMap.get(departmentId)"
-                v-if="departmentId"
-              />
-            </div>
-            <div class="flexrow">
-              <combobox-department
-                class="flexrow-item"
-                :selectable-departments="selectableDepartments"
-                v-model="selectedDepartment"
-                v-if="selectableDepartments.length > 0"
-              />
-              <button
-                class="button is-success flexrow-item"
-                :class="{
-                  'is-disabled': selectedDepartment === null
-                }"
-                @click="addDepartment"
-                v-if="selectableDepartments.length > 0"
-              >
-                {{ $t('main.add') }}
-              </button>
-            </div>
+        <text-field
+          :errored="form.first_name && !isValidName"
+          :label="$t(isBot ? 'bots.fields.name' : 'people.fields.first_name')"
+          :disabled="personToEdit.is_generated_from_ldap"
+          ref="name-field"
+          v-model.trim="form.first_name"
+        />
+        <text-field
+          :label="$t('people.fields.last_name')"
+          :disabled="personToEdit.is_generated_from_ldap"
+          v-model.trim="form.last_name"
+          v-if="!isBot"
+        />
+        <text-field
+          type="email"
+          :errored="form.email && !isValidEmail"
+          :label="$t('people.fields.email')"
+          :disabled="personToEdit.is_generated_from_ldap"
+          v-model.trim="form.email"
+        />
+        <text-field
+          :label="$t('people.fields.phone')"
+          v-model.trim="form.phone"
+          v-if="!isBot"
+        />
+        <date-field
+          :label="$t('bots.fields.expiration_date')"
+          :disabled-dates="{ to: new Date() }"
+          :disabled="isEditing"
+          v-model="form.expiration_date"
+          v-if="isBot"
+        />
+        <div class="departments field">
+          <label class="label">{{ $t('people.fields.departments') }}</label>
+          <p
+            class="empty mb1"
+            v-if="form.departments && form.departments.length === 0"
+          >
+            {{ $t('people.departments_empty') }}
+          </p>
+          <div
+            class="department-element mb1 mt05"
+            :key="departmentId"
+            @click="removeDepartment(departmentId)"
+            v-for="departmentId in form.departments"
+          >
+            <department-name
+              :department="departmentMap.get(departmentId)"
+              v-if="departmentId"
+            />
           </div>
-          <combobox
-            :label="$t('people.fields.role')"
-            :options="roleOptions"
-            localeKeyPrefix="people.role."
-            v-model="form.role"
-          />
-          <combobox
-            :label="$t('people.fields.active')"
-            :options="activeOptions"
-            :disabled="personToEdit.is_generated_from_ldap"
-            v-model="form.active"
-          />
-        </form>
+          <div class="flexrow">
+            <combobox-department
+              class="flexrow-item"
+              :selectable-departments="selectableDepartments"
+              v-model="selectedDepartment"
+              v-if="selectableDepartments.length > 0"
+            />
+            <button
+              class="button is-success flexrow-item"
+              :class="{
+                'is-disabled': selectedDepartment === null
+              }"
+              type="button"
+              @click="addDepartment"
+              v-if="selectableDepartments.length > 0"
+            >
+              {{ $t('main.add') }}
+            </button>
+          </div>
+        </div>
+        <combobox
+          :label="$t('people.fields.role')"
+          :options="roleOptions"
+          localeKeyPrefix="people.role."
+          v-model="form.role"
+        />
+        <combobox
+          :label="$t('people.fields.active')"
+          :options="activeOptions"
+          :disabled="personToEdit.is_generated_from_ldap"
+          v-model="form.active"
+        />
 
         <div class="flexrow">
           <button
+            class="button flexrow-item"
             :class="{
-              button: true,
-              'flexrow-item': true,
               'is-loading': isInviteLoading
             }"
             :disabled="!isValidEmail"
+            type="button"
             @click="invite"
             v-if="isEditing && isCurrentUserAdmin && !isBot"
           >
@@ -117,31 +115,32 @@
           <div class="filler"></div>
 
           <button
+            class="button is-primary flexrow-item"
             :class="{
-              button: true,
-              'is-primary': true,
-              'flexrow-item': true,
               'is-loading': isCreateInviteLoading
             }"
             :disabled="!isValidForm"
+            type="button"
             @click="createAndInvite"
             v-if="!isEditing && isCurrentUserAdmin && !isBot"
           >
             {{ $t('people.create_invite') }}
           </button>
-          <a
+          <button
+            class="button is-primary flexrow-item"
             :class="{
-              button: true,
-              'is-primary': true,
-              'flexrow-item': true,
               'is-loading': isLoading
             }"
             :disabled="!isValidForm"
-            @click="confirmClicked"
+            type="submit"
           >
             {{ !isEditing ? $t('people.create') : $t('people.confirm_edit') }}
-          </a>
-          <button class="button is-link flexrow-item" @click="$emit('cancel')">
+          </button>
+          <button
+            class="button is-link flexrow-item"
+            type="button"
+            @click="$emit('cancel')"
+          >
             {{ $t('main.cancel') }}
           </button>
         </div>
@@ -158,7 +157,7 @@
         <div class="error has-text-right mt1" v-if="isError">
           {{ $t('people.create_error') }}
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </template>
@@ -292,8 +291,13 @@ export default {
         return false
       }
 
+      if (this.form.is_bot) {
+        return true
+      }
+
       const isExist = this.people.some(
         person =>
+          !person.is_bot &&
           person.email === this.form.email &&
           (!this.personToEdit || this.personToEdit.email !== person.email)
       )
@@ -315,6 +319,7 @@ export default {
     },
 
     confirmClicked() {
+      console.log('confirmClicked')
       if (!this.isValidForm) {
         return
       }

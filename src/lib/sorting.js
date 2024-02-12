@@ -161,7 +161,7 @@ export const sortPlaylists = playlists => {
 }
 
 export const sortPeople = people => {
-  return people.sort(
+  return [...people].sort(
     firstBy('active', -1)
       .thenBy((a, b) =>
         a.first_name ? a.first_name.localeCompare(b.first_name) : -1
