@@ -21,14 +21,16 @@ export default {
     const data = {
       name: taskType.name,
       color: taskType.color,
-      department_id: taskType.department_id,
-      archived: taskType.archived === 'true'
+      department_id: taskType.department_id
     }
     if (taskType.priority && taskType.priority > 0) {
       data.priority = Number(taskType.priority)
     }
     if (taskType.allow_timelog !== undefined) {
-      data.allow_timelog = Boolean(taskType.allow_timelog === 'true')
+      data.allow_timelog = taskType.allow_timelog === 'true'
+    }
+    if (taskType.archived !== undefined) {
+      data.archived = taskType.archived === 'true'
     }
     return client.pput(`/api/data/task-types/${taskType.id}`, data)
   },
