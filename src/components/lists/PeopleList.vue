@@ -47,15 +47,13 @@
             <td
               class="expiration"
               :class="{
-                error: isExpired(entry.expiration_date)
+                error: isExpired(entry.expiration_date),
+                warning: isSoonExpired(entry.expiration_date)
               }"
               v-if="isBots"
             >
               {{ entry.expiration_date }}
-              <alert-triangle-icon
-                class="icon ml05"
-                v-if="isExpired(entry.expiration_date)"
-              />
+              <alert-triangle-icon class="icon" />
             </td>
             <td class="role">{{ $t('people.role.' + entry.role) }}</td>
             <department-names-cell
@@ -117,15 +115,7 @@
     <table-info :is-loading="isLoading" :is-error="isError" />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
-      {{ entries.length }}
-      {{ $tc(isBots ? 'bots.bots' : 'people.persons', entries.length) }}
-      ({{ activePeople.length }}
-      {{
-        $tc(
-          isBots ? 'bots.active_bots' : 'people.active_persons',
-          activePeople.length
-        )
-      }})
+      {{ nbUsersDetails }}
     </p>
   </div>
 </template>
@@ -180,14 +170,38 @@ export default {
       return new Date().toJSON().slice(0, 10)
     },
 
+    nextWeek() {
+      const date = new Date()
+      date.setDate(date.getDate() + 7)
+      return date.toJSON().slice(0, 10)
+    },
+
     unactivePeople() {
       return this.entries.filter(person => !person.active)
+    },
+
+    nbUsersDetails() {
+      const nbUsers = this.entries.length
+      const nbActiveUsers = this.activePeople.length
+      const labelUsers = this.$tc(
+        this.isBots ? 'bots.bots' : 'people.persons',
+        nbUsers
+      )
+      const labelActiveUsers = this.$tc(
+        this.isBots ? 'bots.active_bots' : 'people.active_persons',
+        nbActiveUsers
+      )
+      return `${nbUsers} ${labelUsers} (${nbActiveUsers} ${labelActiveUsers})`
     }
   },
 
   methods: {
     isExpired(expirationDate) {
-      return expirationDate <= this.today
+      return expirationDate < this.today
+    },
+
+    isSoonExpired(expirationDate) {
+      return !this.isExpired(expirationDate) && expirationDate < this.nextWeek
     },
 
     onBodyScroll(event, position) {
@@ -217,8 +231,23 @@ export default {
   width: 200px;
   min-width: 200px;
 
+  .icon {
+    display: none;
+  }
+
+  &.error,
+  &.warning {
+    .icon {
+      display: inline;
+      margin-left: 0.5rem;
+    }
+  }
+
   &.error {
     color: $red;
+  }
+  &.warning {
+    color: $yellow;
   }
 }
 .role {
