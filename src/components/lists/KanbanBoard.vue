@@ -208,7 +208,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'getTaskPreviews',
       'isDarkTheme',
       'personMap',
       'productionMap',
@@ -378,21 +377,22 @@ export default {
       if (!isAllowed) {
         return
       }
-      const taskId = event.dataTransfer.getData('taskId')
-      if (taskStatus.is_feedback_request) {
-        const taskPreviews = this.getTaskPreviews(taskId)
-        if (!taskPreviews?.length) {
-          this.form.taskId = taskId
-          this.form.taskStatusId = taskStatus.id
-          this.modals.task = this.tasks.find(({ id }) => id === taskId)
-          this.modals.addPreview = true
-          return
-        }
-      }
+
       const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
       if (previousTaskStatusId === taskStatus.id) {
         return
       }
+
+      const taskId = event.dataTransfer.getData('taskId')
+
+      if (taskStatus.is_feedback_request) {
+        this.form.taskId = taskId
+        this.form.taskStatusId = taskStatus.id
+        this.modals.task = this.tasks.find(({ id }) => id === taskId)
+        this.modals.addPreview = true
+        return
+      }
+
       this.commentTask({
         taskId,
         taskStatusId: taskStatus.id
