@@ -2,13 +2,9 @@
   <div class="avatar-wrapper">
     <span
       class="avatar has-text-centered"
+      :class="{ bot: person.is_bot }"
       :title="person.full_name"
-      :style="{
-        background: person.color,
-        width: size + 'px',
-        height: size + 'px',
-        'font-size': fontSize + 'px'
-      }"
+      :style="style"
     >
       <img
         :loading="this.isLazy ? 'lazy' : undefined"
@@ -78,30 +74,38 @@ export default {
       type: Boolean,
       default: false
     }
+  },
+
+  computed: {
+    style() {
+      return {
+        width: `${this.size}px`,
+        height: `${this.size}px`,
+        fontSize: `${this.fontSize}px`,
+        backgroundColor: this.person.color
+      }
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.avatar img {
-  max-height: 100%;
-  height: 100%;
-  width: 100%;
-}
-
 .avatar {
   position: relative;
-  border-radius: 50%;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-}
 
-.avatar a {
-  padding: 0;
-  margin: 0;
-  color: white;
+  a {
+    padding: 0;
+    margin: 0;
+  }
+
+  img {
+    max-height: 100%;
+    height: 100%;
+    width: 100%;
+  }
 }
 
 .flexrow-item {

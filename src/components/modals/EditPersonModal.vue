@@ -319,7 +319,6 @@ export default {
     },
 
     confirmClicked() {
-      console.log('confirmClicked')
       if (!this.isValidForm) {
         return
       }
