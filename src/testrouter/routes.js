@@ -61,6 +61,7 @@ import WrongBrowser from '@/components/pages/WrongBrowser'
 const ADMIN_PAGES = [
   'asset-types',
   'backgrounds',
+  'bots',
   'custom-actions',
   'departments',
   'logs',

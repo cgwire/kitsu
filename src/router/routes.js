@@ -73,6 +73,7 @@ const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const ADMIN_PAGES = [
   'asset-types',
   'backgrounds',
+  'bots',
   'custom-actions',
   'departments',
   'logs',
