@@ -24,6 +24,7 @@
 
         <file-upload
           ref="preview-field"
+          class="preview-files-field"
           :accept="extensions"
           :is-primary="false"
           :label="$t('main.select_file')"
@@ -43,7 +44,7 @@
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           Selected Files
         </h3>
-        <p class="upload-previews mt2" v-if="forms.length > 0">
+        <p class="upload-previews" v-if="forms.length > 0">
           <template v-for="(form, i) in forms">
             <p class="preview-name" :key="'name-' + i">
               {{ form.get('file').name }}
@@ -280,9 +281,11 @@ export default {
   text-transform: uppercase;
 }
 
-h1.title {
+.modal-content .box h1.title {
   font-weight: 350;
+  font-size: 2.2em;
   line-height: 1.2em;
+  margin-bottom: 0.5em;
 }
 
 h3 {
@@ -293,7 +296,7 @@ h3 {
 }
 
 h3.subtitle {
-  margin-top: 2em;
+  margin-top: 1em;
   font-weight: 400;
 }
 
@@ -304,5 +307,9 @@ h3.subtitle {
 
 .message-body {
   border-width: 0 0 0 4px;
+}
+
+.preview-files-field {
+  margin: auto;
 }
 </style>

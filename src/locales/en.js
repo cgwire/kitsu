@@ -919,6 +919,7 @@ export default {
       fps: 'FPS',
       is_clients_isolated: 'Isolate client comments (not visible to each others)',
       is_preview_download_allowed: 'Allow artists to download previews',
+      is_set_preview_automated: 'Set new preview as entity thumbnail automatically',
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',
@@ -1085,7 +1086,7 @@ export default {
       discord_token: 'Discord Token (Optional)',
       timesheets_locked: 'Lock artist timesheets older than 1 week',
       use_original_name: 'Use original file name for downloads',
-      show_hd_default: 'Show picture with HD quality by default'
+      show_hd_default: 'Show movies with HD quality by default (slower)'
     },
     production: {
       empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.',

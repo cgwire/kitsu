@@ -52,7 +52,7 @@
           v-if="currentProduction && currentProduction.id"
         />
 
-        <text-field
+        <!--text-field
           ref="nbEpisodesField"
           type="number"
           :step="1"
@@ -60,7 +60,7 @@
           @enter="runConfirmation"
           v-model="form.nb_episodes"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
-        />
+        /-->
         <!--text-field
           ref="episodesSpanField"
           :label="$t('productions.fields.episode_span')"
@@ -106,6 +106,13 @@
           :label="$t('productions.fields.is_preview_download_allowed')"
           @enter="runConfirmation"
           v-model="form.is_preview_download_allowed"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <combobox-boolean
+          ref="isSetPreviewAutomated"
+          :label="$t('productions.fields.is_set_preview_automated')"
+          @enter="runConfirmation"
+          v-model="form.is_set_preview_automated"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
@@ -185,6 +192,7 @@ export default {
         max_retakes: 0,
         is_clients_isolated: 'false',
         is_preview_download_allowed: 'false',
+        is_set_preview_automated: 'false',
         ratio: '',
         resolution: '',
         production_type: 'short'
@@ -266,6 +274,10 @@ export default {
             .is_preview_download_allowed
             ? 'true'
             : 'false',
+          is_set_preview_automated: this.currentProduction
+            .is_set_preview_automated
+            ? 'true'
+            : 'false',
           ratio: this.currentProduction.ratio,
           resolution: this.currentProduction.resolution,
           homepage: this.currentProduction.homepage
@@ -281,6 +293,7 @@ export default {
           max_retakes: 0,
           is_clients_isolated: 'false',
           is_preview_download_allowed: 'false',
+          is_set_preview_automated: 'false',
           fps: '',
           ratio: '',
           resolution: '',
