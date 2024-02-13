@@ -113,6 +113,7 @@ export default {
   transition: 0.3s ease all;
 
   &[disabled] {
+    opacity: 0.5;
     pointer-events: none;
   }
 

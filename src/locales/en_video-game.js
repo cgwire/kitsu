@@ -105,6 +105,12 @@ export default {
     }
   },
 
+  task_status: {
+    help: {
+      entities: 'Assets, maps, levels, ...'
+    }
+  },
+
   sequences: {
     all_sequences: 'All levels',
     edit_error: 'An error occurred while saving this level. Are you sure there is no level with a similar name?',

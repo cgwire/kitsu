@@ -65,6 +65,12 @@ export default {
     }
   },
 
+  task_status: {
+    help: {
+      entities: 'Assets, NFTs, Sequences, ...'
+    }
+  },
+
   sequences: {
     delete_text: 'Are you sure you want to remove {name} from your database? All related NFTs and previews will be deleted. Please confirm by typing the sequence name below.',
     delete_error: 'An error occurred while deleting this sequence. There are probably data linked to it. Are you sure this sequence has no NFT linked to it?'

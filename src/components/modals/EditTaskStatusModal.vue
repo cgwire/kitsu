@@ -40,6 +40,7 @@
             :label="$t('task_status.fields.is_default')"
             @enter="confirmClicked"
             v-model="form.is_default"
+            :disabled="form.for_concept === 'true'"
           />
           <boolean-field
             :label="$t('task_status.fields.is_done')"
@@ -69,13 +70,14 @@
             v-model="form.is_feedback_request"
             v-if="form.is_default === 'false'"
           />
+          <!--
           <boolean-field
             :label="$t('task_status.fields.for_concept')"
             @enter="confirmClicked"
             v-model="form.for_concept"
             v-if="form.is_default === 'false'"
           />
-
+          -->
           <color-field
             ref="colorField"
             :label="$t('task_status.fields.color')"
@@ -83,7 +85,6 @@
             v-model="form.color"
             v-if="taskStatusToEdit.short_name !== 'todo'"
           />
-
           <combobox-boolean
             :label="$t('main.archived')"
             @enter="confirmClicked"

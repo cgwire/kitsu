@@ -1106,6 +1106,11 @@ export default {
     number: 'task status | task status',
     new_task_status: 'Add a task status',
     title: 'Task Status',
+    title_entities: 'Status for entities',
+    title_concepts: 'Status for concepts',
+    help: {
+      entities: 'Assets, shots, sequences, ...'
+    },
     fields: {
       color: 'Color',
       for_concept: 'For concept',
