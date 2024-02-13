@@ -1,5 +1,5 @@
 <template>
-  <div class="people page fixed-page">
+  <div class="bots page fixed-page">
     <div class="flexrow page-header">
       <page-title class="flexrow-item filler" :text="$t('bots.title')" />
       <button-simple
@@ -93,7 +93,7 @@ import SearchField from '@/components/widgets/SearchField'
 import { searchMixin } from '@/components/mixins/search'
 
 export default {
-  name: 'people',
+  name: 'bots',
 
   mixins: [searchMixin],
 
@@ -311,7 +311,7 @@ export default {
 
   metaInfo() {
     return {
-      title: `${this.$t('people.title')} - Kitsu`
+      title: `${this.$t('bots.title')} - Kitsu`
     }
   }
 }
