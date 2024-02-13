@@ -618,6 +618,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserManager',
+      'isDarkTheme',
       'organisation',
       'milestones',
       'taskMap'
@@ -1419,7 +1420,7 @@ export default {
       let color = timeElement.color
       if (root && timeElement.full_name) {
         // is a person
-        color = '#CCC'
+        color = this.isDarkTheme ? '#222' : '#CCC'
       }
       if (root) {
         style['border-left'] = '1px solid ' + color
@@ -1525,7 +1526,7 @@ export default {
       let color = rootElement.color
       if (rootElement.full_name) {
         // is a person
-        color = '#CCC'
+        color = this.isDarkTheme ? '#222' : '#CCC'
       }
       const style = {
         'border-bottom': `1px solid ${color}`
