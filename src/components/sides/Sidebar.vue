@@ -27,7 +27,10 @@
                 {{ $t('tasks.my_tasks') }}
               </router-link>
             </p>
-            <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
+            <p
+              @click="toggleSidebar()"
+              v-if="isCurrentUserSupervisor || isCurrentUserManager"
+            >
               <router-link :to="{ name: 'checks' }">
                 <kitsu-icon class="nav-icon" name="my-checks" />
                 {{ $t('tasks.my_checks') }}
@@ -72,7 +75,7 @@
               </router-link>
             </p>
 
-            <p @click="toggleSidebar()" v-if="isCurrentUserAdmin">
+            <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
               <router-link
                 style="position: relative"
                 :to="{ name: 'team-schedule' }"
@@ -337,7 +340,7 @@ p:hover {
 
 .nav-icon {
   margin-left: 0em;
-  margin-right: 0.4em;
+  margin-right: 0.5em;
   width: 20px;
 }
 
