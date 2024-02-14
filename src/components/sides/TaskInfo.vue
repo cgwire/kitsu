@@ -4,7 +4,7 @@
       class="extend-bar"
       @mousedown.prevent="onExtendDown"
       @touchstart.prevent="onExtendDown"
-      v-if="withActions"
+      v-if="extendable"
     ></div>
     <div class="side task-info">
       <action-panel
@@ -334,13 +334,21 @@ export default {
   },
 
   props: {
-    task: {
-      type: Object,
-      default: () => {}
-    },
     currentFrame: {
       type: Number,
       default: 0
+    },
+    currentParentPreview: {
+      type: Object,
+      default: null
+    },
+    entityType: {
+      type: String,
+      default: 'Asset'
+    },
+    extendable: {
+      type: Boolean,
+      default: true
     },
     isLoading: {
       type: Boolean,
@@ -350,21 +358,17 @@ export default {
       type: Boolean,
       default: true
     },
-    currentParentPreview: {
-      type: Object,
-      default: null
-    },
     silent: {
       type: Boolean,
       default: false
     },
+    task: {
+      type: Object,
+      default: () => {}
+    },
     withActions: {
       type: Boolean,
       default: false
-    },
-    entityType: {
-      type: String,
-      default: 'Asset'
     }
   },
 

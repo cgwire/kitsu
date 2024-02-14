@@ -727,10 +727,6 @@ export default {
   margin-top: 0;
 }
 
-.dark .main-column {
-  border-right: 3px solid $grey-strong;
-}
-
 .person {
   display: flex;
   flex-direction: column;
@@ -745,10 +741,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.main-column {
-  border-right: 3px solid $light-grey;
 }
 
 .zoom-level {
