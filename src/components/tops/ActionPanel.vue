@@ -855,7 +855,6 @@ export default {
   data() {
     return {
       availableTaskStatuses: [],
-      currentTeam: [],
       customAction: {},
       customActions: [],
       isUseCurrentFrame: false,
@@ -915,7 +914,6 @@ export default {
 
   mounted() {
     this.customAction = this.defaultCustomAction
-    this.setCurrentTeam()
   },
 
   beforeDestroy() {
@@ -929,7 +927,6 @@ export default {
       'assetCustomActions',
       'assetsByType',
       'currentProduction',
-      'getPersonOptions',
       'isCurrentUserArtist',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -937,7 +934,7 @@ export default {
       'nbSelectedTasks',
       'nbSelectedValidations',
       'organisation',
-      'people',
+      'peopleWithoutBot',
       'personMap',
       'productionMap',
       'selectedAssets',
@@ -977,6 +974,25 @@ export default {
 
     conceptLinkedEntities() {
       return this.getLinkedEntities(this.currentConcept)
+    },
+
+    currentTeam() {
+      let team = this.currentProduction
+        ? sortPeople(
+            this.currentProductionTeam
+              .map(personId => this.personMap.get(personId))
+              .filter(person => !person.is_bot)
+          )
+        : [...this.peopleWithoutBot]
+
+      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
+        team = team.filter(person =>
+          person.departments.some(department =>
+            this.user.departments.includes(department)
+          )
+        )
+      }
+      return team
     },
 
     defaultCustomAction() {
@@ -1457,26 +1473,6 @@ export default {
       }
     },
 
-    setCurrentTeam() {
-      if (this.people.length > 10 && this.currentProduction) {
-        this.currentTeam = sortPeople(
-          this.currentProductionTeam.map(personId => {
-            return this.personMap.get(personId)
-          })
-        )
-      } else {
-        this.currentTeam = [...this.people]
-      }
-      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
-        this.currentTeam = this.currentTeam.filter(person =>
-          person.departments.some(department =>
-            this.user.departments.includes(department)
-          )
-        )
-      }
-      return this.currentTeam
-    },
-
     runCustomAction() {
       this.postCustomAction({
         data: {
@@ -1685,18 +1681,6 @@ export default {
 
     selectedTasks() {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
-    },
-
-    currentProduction() {
-      this.setCurrentTeam()
-    },
-
-    currentProductionTeam() {
-      this.setCurrentTeam()
-    },
-
-    people() {
-      this.setCurrentTeam()
     },
 
     $route() {

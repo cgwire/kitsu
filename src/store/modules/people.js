@@ -167,6 +167,7 @@ const getters = {
   organisation: state => state.organisation,
 
   people: state => state.people,
+  peopleWithoutBot: state => state.people.filter(person => !person.is_bot),
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
@@ -203,14 +204,7 @@ const getters = {
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
   personTasksScrollPosition: state => state.personTasksScrollPosition,
 
-  getPerson: (state, getters) => id => state.personMap.get(id),
-  getPersonOptions: state =>
-    state.people.map(person => {
-      return {
-        label: person.full_name,
-        value: person.id
-      }
-    }),
+  getPerson: state => id => state.personMap.get(id),
 
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
