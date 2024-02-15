@@ -150,12 +150,15 @@ export default {
     },
 
     selectablePeople() {
+      const displayedPeople = this.displayedPeople.filter(
+        person => !person.is_bot
+      )
       if (this.selectedDepartment) {
-        return this.displayedPeople.filter(person =>
+        return displayedPeople.filter(person =>
           person.departments.includes(this.selectedDepartment)
         )
       }
-      return this.displayedPeople
+      return displayedPeople
     }
   },
 
