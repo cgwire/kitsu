@@ -17,7 +17,7 @@ export const entitiesMixin = {
 
   mounted() {
     const departmentId = preferences.getPreference(
-      this.pageName + ':departement'
+      this.pageName + ':department'
     )
     if (departmentId) {
       this.selectedDepartment = departmentId
@@ -115,7 +115,7 @@ export const entitiesMixin = {
       } else {
         this.departmentFilter = [departmentId]
       }
-      preferences.setPreference(this.pageName + ':departement', departmentId)
+      preferences.setPreference(this.pageName + ':department', departmentId)
     },
 
     selectableDepartments(forEntity) {

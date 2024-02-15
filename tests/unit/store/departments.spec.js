@@ -53,14 +53,14 @@ describe('Productions store', () => {
     }),
 
     test('EDIT_DEPARTMENTS_END', () => {
-      const newDepartement = {
+      const newDepartment = {
         name: 'NEW DEPARTMENT',
         id: 'newId',
         color: '#eeeeee'
       }
-      store.mutations.EDIT_DEPARTMENTS_END(rootState, newDepartement)
+      store.mutations.EDIT_DEPARTMENTS_END(rootState, newDepartment)
       const result = departments
-      result.push(newDepartement)
+      result.push(newDepartment)
       expect(rootState.departments).toEqual(result)
     }),
 

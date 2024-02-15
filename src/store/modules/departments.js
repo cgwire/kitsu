@@ -39,17 +39,17 @@ const actions = {
     })
   },
 
-  async newDepartement({ commit }, data) {
+  async newDepartment({ commit }, data) {
     commit(EDIT_DEPARTMENTS_START)
-    return departmentsApi.newDepartement(data).then(department => {
+    return departmentsApi.newDepartment(data).then(department => {
       commit(EDIT_DEPARTMENTS_END, department)
       return Promise.resolve(department)
     })
   },
 
-  async editDepartement({ commit }, data) {
+  async editDepartment({ commit }, data) {
     commit(EDIT_DEPARTMENTS_START)
-    return departmentsApi.editDepartement(data).then(department => {
+    return departmentsApi.editDepartment(data).then(department => {
       commit(EDIT_DEPARTMENTS_END, department)
       return Promise.resolve(department)
     })
