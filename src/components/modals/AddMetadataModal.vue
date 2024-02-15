@@ -38,7 +38,7 @@
 
           <div
             ref="valueList"
-            class="choice-value-wrapper"
+            class="choice-value-wrapper mb1"
             v-if="form.values.length"
           >
             <p class="choice-value" :key="value" v-for="value in form.values">
@@ -87,7 +87,7 @@
         </div>
 
         <div
-          class="departments"
+          class="departments mb2"
           v-if="form.departments.length || selectableDepartments.length"
         >
           <label class="label">
@@ -109,7 +109,7 @@
               v-model="selectedDepartment"
             />
             <button
-              class="button is-success flexrow-item mb2"
+              class="button is-success flexrow-item"
               :class="{
                 'is-disabled': selectedDepartment === null
               }"
@@ -412,10 +412,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .content .choice-value {
-  border-color: $grey-strong;
-}
-
 .dark .remove-button:hover {
   background: $grey-strong;
 }
@@ -438,14 +434,14 @@ export default {
 }
 
 .content .choice-value {
-  border: 1px solid $light-grey;
+  border: 1px solid var(--border);
   border-bottom: 0;
   margin: 0;
   padding: 0.5em;
 }
 
 .content .choice-value:last-child {
-  border-bottom: 1px solid $light-grey;
+  border-bottom: 1px solid var(--border);
 }
 
 .remove-button {
