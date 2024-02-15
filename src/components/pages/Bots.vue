@@ -41,9 +41,22 @@
       :is-bots="true"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
-      @edit-clicked="onEditClicked"
+      @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
       @refresh-clicked="onRefreshClicked"
+    />
+
+    <edit-avatar-modal
+      :active="modals.avatar"
+      :error-text="$t('bots.edit_avatar_error')"
+      :is-deleting="loading.deletingAvatar"
+      :is-error="errors.avatar"
+      :is-updating="loading.updatingAvatar"
+      :person="personToEdit"
+      @close="modals.avatar = false"
+      @delete="deleteAvatar"
+      @update="updateAvatar"
     />
 
     <edit-person-modal
@@ -84,6 +97,7 @@ import { mapGetters, mapActions } from 'vuex'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditAvatarModal from '@/components/modals/EditAvatarModal'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import NewTokenModal from '@/components/modals/NewTokenModal'
@@ -101,6 +115,7 @@ export default {
     ButtonSimple,
     ComboboxDepartment,
     ComboboxStyled,
+    EditAvatarModal,
     EditPersonModal,
     HardDeleteModal,
     NewTokenModal,
@@ -122,16 +137,21 @@ export default {
         { label: 'vendor', value: 'vendor' }
       ],
       errors: {
+        avatar: false,
         del: false,
-        edit: false
+        edit: false,
+        userLimit: false
       },
       loading: {
+        del: false,
+        deletingAvatar: false,
         edit: false,
-        del: false
+        updatingAvatar: false
       },
       modals: {
-        edit: false,
+        avatar: false,
         del: false,
+        edit: false,
         newToken: false
       },
       personToDelete: {},
@@ -200,14 +220,38 @@ export default {
 
   methods: {
     ...mapActions([
-      'editPerson',
+      'clearPersonAvatar',
       'deletePeople',
+      'editPerson',
       'generateToken',
-      'loadPeople',
       'loadDepartments',
+      'loadPeople',
       'newPerson',
-      'setPeopleSearch'
+      'setPeopleSearch',
+      'uploadPersonAvatar'
     ]),
+
+    async deleteAvatar() {
+      this.loading.deletingAvatar = true
+      try {
+        await this.clearPersonAvatar(this.personToEdit)
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.deletingAvatar = false
+    },
+
+    async updateAvatar(formData) {
+      this.loading.updatingAvatar = true
+      try {
+        await this.uploadPersonAvatar({ person: this.personToEdit, formData })
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.updatingAvatar = false
+    },
 
     confirmGenerateToken(form) {
       this.generateToken(form)
@@ -270,6 +314,12 @@ export default {
         this.setPeopleSearch(searchQuery)
         this.updateRoute()
       }
+    },
+
+    onAvatarClicked(person) {
+      this.updatePersonToEdit(person)
+      this.errors.avatar = false
+      this.modals.avatar = true
     },
 
     onDeleteClicked(person) {

@@ -63,11 +63,13 @@
             <row-actions-cell
               v-if="isCurrentUserAdmin"
               :entry-id="entry.id"
-              :hide-delete="true"
+              :hide-avatar="false"
               :hide-change-password="isBots"
+              :hide-delete="true"
               :hide-refresh="!isBots"
-              @edit-clicked="$emit('edit-clicked', entry)"
+              @avatar-clicked="$emit('avatar-clicked', entry)"
               @change-password-clicked="$emit('change-password-clicked', entry)"
+              @edit-clicked="$emit('edit-clicked', entry)"
               @refresh-clicked="$emit('refresh-clicked', entry)"
             />
             <td class="actions" v-else></td>

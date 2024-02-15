@@ -22,6 +22,16 @@
 
     <button
       class="button"
+      data-test="button-avatar"
+      tabindex="-1"
+      @click="$emit('avatar-clicked')"
+      v-if="!hideAvatar"
+    >
+      <camera-icon class="icon is-small only-icon" />
+    </button>
+
+    <button
+      class="button"
       data-test="button-change-password"
       tabindex="-1"
       @click="$emit('change-password-clicked')"
@@ -75,6 +85,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import {
+  CameraIcon,
   ClockIcon,
   EditIcon,
   KeyIcon,
@@ -86,6 +97,7 @@ import {
 export default {
   name: 'row-actions-cell',
   components: {
+    CameraIcon,
     ClockIcon,
     EditIcon,
     KeyIcon,
@@ -101,19 +113,23 @@ export default {
         return {}
       }
     },
-    hideEdit: {
+    hideAvatar: {
       type: Boolean,
-      default: false
+      default: true
+    },
+    hideChangePassword: {
+      type: Boolean,
+      default: true
     },
     hideDelete: {
       type: Boolean,
       default: false
     },
-    hideHistory: {
+    hideEdit: {
       type: Boolean,
-      default: true
+      default: false
     },
-    hideChangePassword: {
+    hideHistory: {
       type: Boolean,
       default: true
     },

@@ -786,8 +786,10 @@ const mutations = {
 
   [REMOVE_ASSET_SEARCH_END](state) {},
 
-  [CLEAR_AVATAR](state) {
-    state.user.has_avatar = false
+  [CLEAR_AVATAR](state, userId) {
+    if (state.user.id === userId) {
+      state.user.has_avatar = false
+    }
   },
 
   [RESET_ALL](state) {

@@ -86,6 +86,7 @@ export default {
     active_bots: 'active bot | active bots',
     new_bot: 'Add a new bot',
     edit_title: 'Edit bot',
+    edit_avatar_error: 'An error occurred while updating the bot avatar.',
     new_token_title: 'New API token for {name}',
     new_token_warning: 'If you generate a new token, the old one will be disabled.',
     generate: 'Generate a new token',
@@ -697,6 +698,7 @@ export default {
     delete_error: 'An error occurred while deleting this user. There are probably data linked to it. Are you sure this user has no assignments or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comment and preview will be deleted. Please confirm by typing the full user name below.',
     departments_empty: 'This user isn\'t linked to any department.',
+    edit_avatar_error: 'An error occurred while updating the user avatar.',
     edit_title: 'Edit user',
     empty_team: 'There is no one listed in the project team.',
     invite: 'Send an invitation',
@@ -1039,7 +1041,9 @@ export default {
     webhook_error: 'the webhook mattermost does not correspond to a hook',
     avatar: {
       title: 'Change avatar',
-      error_upload: 'There was an error while uploading picture.'
+      error_upload: 'There was an error while uploading picture.',
+      updating: 'Updating...',
+      removing: 'Removing...'
     },
     change_password: {
       button: 'Change password',

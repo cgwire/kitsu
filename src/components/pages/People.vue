@@ -65,8 +65,9 @@
       :entries="currentPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
-      @edit-clicked="onEditClicked"
+      @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
       @change-password-clicked="onChangePasswordClicked"
     />
 
@@ -94,6 +95,18 @@
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
       @confirm="renderImport"
+    />
+
+    <edit-avatar-modal
+      :active="modals.avatar"
+      :error-text="$t('people.edit_avatar_error')"
+      :is-deleting="loading.deletingAvatar"
+      :is-error="errors.avatar"
+      :is-updating="loading.updatingAvatar"
+      :person="personToEdit"
+      @close="modals.avatar = false"
+      @delete="deleteAvatar"
+      @update="updateAvatar"
     />
 
     <edit-person-modal
@@ -141,6 +154,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditAvatarModal from '@/components/modals/EditAvatarModal'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ImportModal from '@/components/modals/ImportModal'
@@ -160,6 +174,7 @@ export default {
     ChangePasswordModal,
     ComboboxStyled,
     ComboboxDepartment,
+    EditAvatarModal,
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
@@ -186,21 +201,26 @@ export default {
         { label: 'vendor', value: 'vendor' }
       ],
       errors: {
+        avatar: false,
         del: false,
         edit: false,
-        invite: false
+        invite: false,
+        userLimit: false
       },
       loading: {
         createAndInvite: false,
-        edit: false,
         del: false,
+        deletingAvatar: false,
+        edit: false,
         invite: false,
-        savingSearch: false
+        savingSearch: false,
+        updatingAvatar: false
       },
       modals: {
-        edit: false,
-        del: false,
+        avatar: false,
         changePassword: false,
+        del: false,
+        edit: false,
         importModal: false,
         isImportRenderDisplayed: false
       },
@@ -293,17 +313,20 @@ export default {
 
   methods: {
     ...mapActions([
-      'editPerson',
+      'clearPersonAvatar',
       'deletePeople',
+      'editPerson',
       'invitePerson',
-      'loadPeople',
       'loadDepartments',
+      'loadPeople',
       'newPerson',
       'newPersonAndInvite',
       'removePeopleSearch',
       'savePeopleSearch',
       'setPeopleSearch',
-      'uploadPersonFile'
+      'uploadPersonAvatar',
+      'uploadPersonFile',
+      'updatePersonToEdit'
     ]),
 
     renderImport(data, mode) {
@@ -350,6 +373,28 @@ export default {
       this.$store.commit('PERSON_CSV_FILE_SELECTED', null)
       this.$refs['import-modal'].reset()
       this.showImportModal()
+    },
+
+    async deleteAvatar() {
+      this.loading.deletingAvatar = true
+      try {
+        await this.clearPersonAvatar(this.personToEdit)
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.deletingAvatar = false
+    },
+
+    async updateAvatar(formData) {
+      this.loading.updatingAvatar = true
+      try {
+        await this.uploadPersonAvatar({ person: this.personToEdit, formData })
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.updatingAvatar = false
     },
 
     confirmEditPeople(form) {
@@ -442,6 +487,12 @@ export default {
         this.setPeopleSearch(searchQuery)
         this.updateRoute()
       }
+    },
+
+    onAvatarClicked(person) {
+      this.personToEdit = person
+      this.errors.avatar = false
+      this.modals.avatar = true
     },
 
     onDeleteClicked(person) {

@@ -442,5 +442,9 @@ export default {
 
   clearAvatar() {
     return client.pdel('/api/actions/user/clear-avatar')
+  },
+
+  clearPersonAvatar(person) {
+    return client.pdel(`/api/actions/persons/${person.id}/clear-avatar`)
   }
 }

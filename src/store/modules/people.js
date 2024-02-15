@@ -293,6 +293,16 @@ const actions = {
     return peopleApi.generateToken(person)
   },
 
+  async uploadPersonAvatar({ commit, state }, { person, formData }) {
+    await peopleApi.postAvatar(person.id, formData)
+    commit(UPLOAD_AVATAR_END, person.id)
+  },
+
+  async clearPersonAvatar({ commit, state }, person) {
+    await peopleApi.clearPersonAvatar(person)
+    commit(CLEAR_AVATAR, person.id)
+  },
+
   async editPerson({ commit, state }, data) {
     const person = await peopleApi.updatePerson(data)
     commit(EDIT_PEOPLE_END, person)
