@@ -596,7 +596,7 @@ const mutations = {
   [DELETE_PEOPLE_END](state, person) {
     if (person) {
       const personToDeleteIndex = state.people.findIndex(
-        p => p.id === person.id
+        ({ id }) => id === person.id
       )
       if (personToDeleteIndex >= 0) {
         state.people.splice(personToDeleteIndex, 1)
@@ -612,21 +612,18 @@ const mutations = {
     }
   },
 
-  [EDIT_PEOPLE_END](state, form) {
-    let personToAdd = { ...form }
-    personToAdd = helpers.addAdditionalInformation(personToAdd)
-
-    const personToEditIndex = state.people.findIndex(
-      person => person.id === personToAdd.id
-    )
-    if (personToAdd.name) {
+  [EDIT_PEOPLE_END](state, person) {
+    person = helpers.addAdditionalInformation(person)
+    if (person.name) {
+      const personToEditIndex = state.people.findIndex(
+        ({ id }) => id === person.id
+      )
       if (personToEditIndex >= 0) {
-        state.personMap.set(personToAdd.id, personToAdd)
-        state.people[personToEditIndex] = state.personMap.get(personToAdd.id)
-      } else if (!state.personMap.get(personToAdd.id)) {
-        state.people.push(personToAdd)
-        state.personMap.set(personToAdd.id, personToAdd)
+        state.people[personToEditIndex] = person
+      } else if (!state.personMap.has(person.id)) {
+        state.people.push(person)
       }
+      state.personMap.set(person.id, person)
       state.people = sortPeople(state.people)
       cache.peopleIndex = buildNameIndex(state.people)
       if (state.peopleSearchText) {
@@ -645,12 +642,12 @@ const mutations = {
     person.preferred_two_factor_authentication = null
   },
 
-  [IMPORT_PEOPLE_START](state, data) {
+  [IMPORT_PEOPLE_START](state) {
     state.isImportPeopleLoading = true
     state.isImportPeopleLoadingError = false
   },
 
-  [IMPORT_PEOPLE_END](state, personId) {
+  [IMPORT_PEOPLE_END](state) {
     state.isImportPeopleLoading = false
     state.isImportPeopleLoadingError = false
   },
