@@ -69,6 +69,10 @@ export default {
     &.white {
       color: $white-grey;
     }
+
+    &:hover {
+      color: $white;
+    }
   }
 
   .has-notifications {
@@ -88,8 +92,8 @@ export default {
   margin-top: 5px;
   color: $light-grey;
 
-  &.white {
-    color: $white-grey;
+  &:hover {
+    color: var(--text);
   }
 }
 

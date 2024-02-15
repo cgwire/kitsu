@@ -4,9 +4,11 @@
     <download-icon class="icon is-small" v-if="icon === 'download'" />
     <upload-icon class="icon is-small" v-if="icon === 'upload'" />
     <list-icon class="icon is-small" v-if="icon === 'list'" />
-    <kitsu-icon :name="icon" class="icon is-small" v-if="[
-      'export'
-    ].includes(icon)" />
+    <kitsu-icon
+      :name="icon"
+      class="icon is-small"
+      v-if="['export', 'export-lines'].includes(icon)"
+    />
     <span class="text is-hidden-touch" v-if="text">
       {{ text }}
     </span>
@@ -25,7 +27,6 @@ export default {
     ListIcon,
     PlusIcon,
     UploadIcon
-
   },
   props: {
     text: {
@@ -59,5 +60,9 @@ export default {
 <style lang="scss" scoped>
 .button .icon.is-small {
   margin: 0;
+}
+
+.button {
+  border-radius: 10px;
 }
 </style>

@@ -3,7 +3,6 @@
     :class="{
       button: true,
       active: active,
-      small: isSmall,
       'is-on': isOn,
       'is-loading': isLoading,
       'is-primary': isPrimary
@@ -29,7 +28,6 @@
     <edit-icon :class="iconClass" v-if="icon === 'edit'" />
     <image-icon :class="iconClass" v-if="icon === 'image'" />
     <maximize-icon :class="iconClass" v-if="icon === 'maximize'" />
-    <trash-icon :class="iconClass" v-if="icon === 'delete'" />
     <rotate-ccw-icon :class="iconClass" v-if="icon === 'restore'" />
     <skip-back-icon :class="iconClass" v-if="icon === 'back'" />
     <skip-forward-icon :class="iconClass" v-if="icon === 'forward'" />
@@ -49,20 +47,36 @@
     <zoom-in-icon :class="iconClass" v-if="icon == 'loupe'" />
     <globe-icon :class="iconClass" v-if="icon == 'globe'" />
     <codepen-icon :class="iconClass" v-if="icon == 'codepen'" />
-    <kitsu-icon :name="icon" :class="iconClass" v-if="[
-      'compare',
-      'export',
-      'export-lines',
-      'filter',
-      'import',
-      'laser',
-      'pen',
-      'play',
-      'repeat',
-      'soundon',
-      'soundoff',
-      'type'
-    ].includes(icon)" />
+    <kitsu-icon
+      :name="icon"
+      :class="iconClass"
+      :title="title"
+      v-if="
+        [
+          'big-thumbnail',
+          'box',
+          'compare',
+          'check',
+          'delete',
+          'export',
+          'export-lines',
+          'filter',
+          'import',
+          'import-edl',
+          'import-files',
+          'laser',
+          'pen',
+          'play',
+          'repeat',
+          'soundon',
+          'soundoff',
+          'type',
+          'trash',
+          'user',
+          'waveform'
+        ].includes(icon)
+      "
+    />
     <span
       :class="{
         text: true,
@@ -83,7 +97,6 @@ import {
   CodepenIcon,
   CornerLeftDownIcon,
   CornerRightDownIcon,
-  CopyIcon,
   DownloadIcon,
   EditIcon,
   Edit2Icon,
@@ -101,23 +114,16 @@ import {
   MusicIcon,
   PaperclipIcon,
   PauseIcon,
-  PenToolIcon,
-  PlayIcon,
   PlusIcon,
   RefreshCwIcon,
-  RepeatIcon,
   RotateCcwIcon,
   SaveIcon,
   SendIcon,
   SkipBackIcon,
   SkipForwardIcon,
   SquareIcon,
-  TrashIcon,
-  TypeIcon,
   TriangleIcon,
   UploadIcon,
-  VolumeXIcon,
-  Volume2Icon,
   XIcon,
   ZoomInIcon
 } from 'vue-feather-icons'
@@ -133,7 +139,6 @@ export default {
     CodepenIcon,
     CornerLeftDownIcon,
     CornerRightDownIcon,
-    CopyIcon,
     DownloadIcon,
     EditIcon,
     Edit2Icon,
@@ -153,23 +158,16 @@ export default {
     MusicIcon,
     PaperclipIcon,
     PauseIcon,
-    PenToolIcon,
-    PlayIcon,
     PlusIcon,
     RefreshCwIcon,
-    RepeatIcon,
     RotateCcwIcon,
     SaveIcon,
     SendIcon,
     SkipBackIcon,
     SkipForwardIcon,
     SquareIcon,
-    TrashIcon,
-    TypeIcon,
     UploadIcon,
     TriangleIcon,
-    VolumeXIcon,
-    Volume2Icon,
     XIcon
   },
 
@@ -228,7 +226,6 @@ export default {
     iconClass() {
       return {
         icon: true,
-        'is-small': true,
         'only-icon': !this.isText
       }
     }
@@ -239,10 +236,14 @@ export default {
 <style lang="scss" scoped>
 .button {
   border-radius: 10px;
+  padding: 0 10px;
 }
 
-.icon.is-small.only-icon {
-  margin-right: 0;
+.button .icon {
+  min-height: 16px;
+  min-width: 16px;
+  max-height: 16px;
+  min-width: 16px;
 }
 
 .is-primary {
@@ -251,10 +252,5 @@ export default {
 
 .active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow);
-}
-
-.small {
-  font-size: 0.8em;
-  padding: 0.4em;
 }
 </style>

@@ -170,8 +170,9 @@ input.input.thin {
   margin: 0;
 }
 
-button {
+.button {
   font-size: 1.2em;
+  margin-left: 0.5rem;
 }
 
 .input:invalid,

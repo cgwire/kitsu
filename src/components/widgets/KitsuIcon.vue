@@ -1,20 +1,25 @@
 <template>
-  <img :src="imgUrl" :title="title" :alt="alt" />
+  <img :class="{ active }" :src="imgUrl" :title="title" :alt="alt" />
 </template>
 
 <script>
 import assets from '@/assets/icons/fi-assets.svg'
 import assetTypeStats from '@/assets/icons/fi-asset-stats.svg'
+import addThumbnail from '@/assets/icons/fi-add-thumbnail.svg'
 import automations from '@/assets/icons/fi-automations.svg'
 import bot from '@/assets/icons/fi_user-bot.svg'
+import bigThumbnail from '@/assets/icons/fi-big-thumbnail.svg'
 import breakdown from '@/assets/icons/fi-breakdown.svg'
 import concepts from '@/assets/icons/fi-image.svg'
 import custom from '@/assets/icons/fi-sliders.svg'
 import departments from '@/assets/icons/fi-departments.svg'
+import importEdl from '@/assets/icons/fi-import-edl.svg'
+import importFiles from '@/assets/icons/fi-import-files.svg'
 import episodes from '@/assets/icons/fi-episodes.svg'
 import edits from '@/assets/icons/fi-edits.svg'
 import episodeStats from '@/assets/icons/fi-episode-stats.svg'
 import filter from '@/assets/icons/fi-filter.svg'
+import infos from '@/assets/icons/fi-info.svg'
 import myChecks from '@/assets/icons/fi-check-circle.svg'
 import myProductions from '@/assets/icons/fi-my-productions.svg'
 import myTasks from '@/assets/icons/fi-my-tasks.svg'
@@ -24,6 +29,7 @@ import productions from '@/assets/icons/fi-productions.svg'
 import productionSettings from '@/assets/icons/fi-settings.svg'
 import quota from '@/assets/icons/fi-quotas.svg'
 import logs from '@/assets/icons/fi-logs.svg'
+import priority from '@/assets/icons/fi-alert-circle.svg'
 import schedule from '@/assets/icons/fi-calendar.svg'
 import search from '@/assets/icons/fi-entity-search.svg'
 import shots from '@/assets/icons/fi-shots.svg'
@@ -34,38 +40,45 @@ import taskTypes from '@/assets/icons/fi-task-types.svg'
 import team from '@/assets/icons/fi-users.svg'
 import teamSchedule from '@/assets/icons/fi-team-schedule.svg'
 import timesheets from '@/assets/icons/fi-timesheets.svg'
+import trash from '@/assets/icons/fi-trash-2.svg'
+import user from '@/assets/icons/fi-user.svg'
+import userCheck from '@/assets/icons/fi-user-check.svg'
+import watch from '@/assets/icons/fi-eye.svg'
 
+// Player icons
 
-import importIcon from '@/assets/icons/fi-import-csv.svg'
-import compare from '@/assets/icons/fi-compare.svg'
+// import addPreview from '@/assets/icons/fi-add-preview.svg'
+import annotations from '@/assets/icons/fi-annotations.svg'
 import box from '@/assets/icons/fi-box.svg'
-import play from '@/assets/icons/fi-play.svg'
-import skybox from '@/assets/icons/fi-skybox.svg'
-import download from '@/assets/icons/fi-download.svg'
+import compare from '@/assets/icons/fi-compare.svg'
+import check from '@/assets/icons/fi-check-square.svg'
+import deleteIcon from '@/assets/icons/fi-delete.svg'
 import exportIcon from '@/assets/icons/fi-export-csv.svg'
 import exportLines from '@/assets/icons/fi-export-lines.svg'
-import zoomIn from '@/assets/icons/fi-zoom-in.svg'
+import importIcon from '@/assets/icons/fi-import-csv.svg'
 import repeat from '@/assets/icons/fi-repeat.svg'
 import textIcon from '@/assets/icons/fi-text.svg'
-import skyboxDesactive from '@/assets/icons/fi-skybox-desactive.svg'
-import zoomOut from '@/assets/icons/fi-zoom-out.svg'
-import addPreview from '@/assets/icons/fi-add-preview.svg'
-import maximize from '@/assets/icons/fi-maximize.svg'
+import play from '@/assets/icons/fi-play.svg'
 import soundOn from '@/assets/icons/fi-sound-on.svg'
 import soundOff from '@/assets/icons/fi-sound-off.svg'
 import laser from '@/assets/icons/fi-laser.svg'
-import annotations from '@/assets/icons/fi-annotations.svg'
+import waveform from '@/assets/icons/fi-waveform.svg'
 
 const icons = {
+  'add-thumbnail': addThumbnail,
   assets,
   assetTypes: assetTypeStats,
   'asset-types': assets,
   automations,
   bot,
+  'big-thumbnail': bigThumbnail,
+  box,
   breakdown,
   compare,
   concepts,
   custom,
+  check,
+  delete: deleteIcon,
   departments,
   filter,
   episodes,
@@ -74,6 +87,9 @@ const icons = {
   export: exportIcon,
   'export-lines': exportLines,
   import: importIcon,
+  'import-edl': importEdl,
+  'import-files': importFiles,
+  infos,
   laser,
   logs,
   'my-checks': myChecks,
@@ -86,6 +102,7 @@ const icons = {
   quota,
   pen: annotations,
   play,
+  priority,
   repeat,
   'sequence-stats': sequenceStats,
   search,
@@ -98,9 +115,14 @@ const icons = {
   'task-status': taskStatus,
   'task-types': taskTypes,
   'team-schedule': teamSchedule,
+  trash,
   type: textIcon,
   timesheets,
-  team
+  user,
+  'user-check': userCheck,
+  team,
+  watch,
+  waveform
 }
 
 export default {
@@ -118,6 +140,10 @@ export default {
     alt: {
       default: '',
       type: String
+    },
+    active: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -138,5 +164,10 @@ export default {
 
 img {
   filter: brightness(1.5);
+}
+
+img.active {
+  filter: invert(67%) sepia(26%) saturate(847%) hue-rotate(100deg)
+    brightness(87%) contrast(88%);
 }
 </style>

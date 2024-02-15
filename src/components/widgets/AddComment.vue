@@ -761,6 +761,7 @@ article.add-comment {
     border-radius: 0px;
 
     &:focus,
+    &:hover,
     &:active {
       border-color: var(--border-alt);
     }
