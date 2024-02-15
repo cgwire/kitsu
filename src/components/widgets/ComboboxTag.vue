@@ -271,12 +271,13 @@ export default {
   overflow-x: hidden;
   overflow-y: auto;
   position: absolute;
-  width: inherit;
+  min-width: 150px;
   top: 38px;
   z-index: 2000;
 
   .option-line {
     padding-right: 27px;
+    white-space: nowrap;
   }
 }
 

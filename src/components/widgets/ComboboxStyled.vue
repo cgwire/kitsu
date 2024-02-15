@@ -267,7 +267,6 @@ export default {
   margin: 0;
   padding: 0.5em;
   min-width: 150px;
-  width: inherit;
 
   &:hover {
     background: $purple;
@@ -305,6 +304,7 @@ export default {
 
   .option-line {
     padding-right: 27px;
+    white-space: nowrap;
   }
 }
 
