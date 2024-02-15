@@ -511,7 +511,7 @@ a:hover {
 }
 
 .duration:hover {
-  background: var(--background-selectable-selectable);
+  background: var(--background-selectable);
 }
 
 .selected .duration {

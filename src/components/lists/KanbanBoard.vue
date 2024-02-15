@@ -516,13 +516,18 @@ export default {
     cursor: grab;
 
     .ui-droppable {
-      background: var(--background-selected);
+      outline: 3px solid var(--background-selected);
     }
   }
 
   &:focus-within {
     .ui-droppable {
-      outline: 2px solid var(--background-selected);
+      outline: 3px solid var(--background-selectable);
+    }
+    &.selected {
+      .ui-droppable {
+        outline: 3px solid var(--background-selected);
+      }
     }
   }
 
