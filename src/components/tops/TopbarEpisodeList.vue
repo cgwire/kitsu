@@ -196,7 +196,7 @@ export default {
   }
 
   &:hover {
-    background: var(--background-selectable-selectable);
+    background: var(--background-hover);
   }
 }
 

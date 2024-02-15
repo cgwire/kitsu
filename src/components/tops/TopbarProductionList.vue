@@ -143,10 +143,6 @@ export default {
     .link {
       color: $white;
     }
-
-    &.selected .name-wrapper {
-      background: var(--background-selected);
-    }
   }
 }
 
@@ -182,7 +178,7 @@ export default {
 
   &:hover {
     .name-wrapper {
-      background: var(--background-selectable-selectable);
+      background: var(--background-hover);
     }
   }
 }
