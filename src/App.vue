@@ -654,24 +654,6 @@ body {
     background-color: #ccc;
   }
 
-  .tabs a {
-    color: $white-grey;
-  }
-
-  .tabs a:hover {
-    border-color: $white-grey;
-  }
-
-  .tabs li.is-active a:hover {
-    border-color: #00c252;
-    color: #00c252;
-  }
-
-  .tabs li.is-active a:hover {
-    border-color: #00c252;
-    color: #00c252;
-  }
-
   .search-queries .tag {
     color: #eee;
     background-color: #5e6169;
@@ -1122,6 +1104,14 @@ textarea.input:focus {
   color: #4a4a4a;
 }
 
+.button {
+  border-radius: 10px;
+
+  &:hover {
+    border: 1px solid var(--text);
+  }
+}
+
 .main-button {
   border-radius: 5px;
   min-height: 2.6em;
@@ -1168,7 +1158,7 @@ textarea.input:focus {
     }
 
     .button {
-      border-radius: 2em;
+      border-radius: 10px;
     }
   }
 }
@@ -1606,7 +1596,7 @@ tbody:last-child .empty-line:last-child {
 
     &:hover,
     &:hover .datatable-row-header {
-      background: var(--background-selectable-selectable);
+      background: var(--background-selectable);
     }
   }
 
@@ -1668,6 +1658,11 @@ tbody:last-child .empty-line:last-child {
   &:nth-child(even),
   &:nth-child(even) .datatable-row-header {
     background-color: var(--background);
+  }
+
+  &:hover,
+  &:hover .datatable-row-header {
+    background: var(--background-hover);
   }
 }
 
@@ -1901,9 +1896,20 @@ tbody:last-child .empty-line:last-child {
   margin: auto;
 }
 
+.tabs li a {
+  color: var(--text);
+
+  &:hover {
+    color: var(--text-selectable);
+    border-color: var(--text-selectable);
+  }
+}
+
 .tabs li.is-active a {
-  border-color: #00b242;
-  color: #00b242;
+  font-weight: bold;
+
+  color: var(--text-selected);
+  border-color: var(--text-selected);
 }
 
 .page .columns:last-child {
@@ -2079,7 +2085,7 @@ th.validation-cell {
   .cell.year:not(.blank):not(.disabled):hover,
   .cell.month:not(.blank):not(.disabled):hover,
   .cell.day:not(.blank):not(.disabled):hover {
-    background: var(--background-selectable-selectable);
+    background: var(--background-selectable);
     border: 1px solid transparent;
   }
 
@@ -2103,7 +2109,7 @@ th.validation-cell {
   }
 
   header span:not(.disabled):hover {
-    background: var(--background-selectable-selectable);
+    background: var(--background-selectable);
   }
 }
 
