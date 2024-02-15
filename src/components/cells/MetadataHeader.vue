@@ -9,8 +9,8 @@
       <department-name
         :key="department.id"
         :department="department"
-        :only-dot="true"
-        :style="{ padding: '0px 0px' }"
+        no-padding
+        only-dot
         v-for="department in currentDepartments"
       />
       <span

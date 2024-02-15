@@ -1,70 +1,56 @@
 <template>
-  <div>
-    <span class="dot" :style="{ border: '5px solid ' + color }" v-if="!onlyDot">
-    </span>
+  <span class="department-name" :class="{ 'no-padding': noPadding }">
     <span
       class="dot"
-      :style="{ border: '5px solid ' + color }"
-      :title="department.name"
-      v-if="onlyDot"
-    >
-    </span>
-    <span v-if="!onlyDot">
+      :style="{ borderColor: department.color }"
+      :title="onlyDot ? department.name : undefined"
+    ></span>
+    <span class="name" v-if="!onlyDot">
       {{ department.name }}
     </span>
-  </div>
+  </span>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'department-name',
-  components: {},
 
   props: {
     department: {
       type: Object,
-      default: null
+      required: true
+    },
+    noPadding: {
+      type: Boolean,
+      default: false
     },
     onlyDot: {
       type: Boolean,
       default: false
     }
-  },
-
-  computed: {
-    ...mapGetters([]),
-
-    color() {
-      return this.department.color
-    }
-  },
-
-  methods: {
-    ...mapActions([])
   }
 }
 </script>
 
 <style lang="scss" scoped>
-div {
-  border-radius: 5px;
+.department-name {
   display: inline-block;
-  padding: 0.2em 0.6em;
-}
-
-span.dot {
-  border-radius: 20px;
-  font-weight: 500;
-  display: inline-block;
-  height: 8px;
-  margin-right: 0.3em;
-  padding: 0em;
-  width: 8px;
-}
-
-span {
   color: var(--text);
+  padding: 0.2em 0.6em;
+  white-space: nowrap;
+
+  &.no-padding {
+    padding: 0;
+  }
+}
+
+.dot {
+  display: inline-block;
+  border: 5px solid;
+  border-radius: 50%;
+}
+
+.name {
+  margin-left: 0.3em;
 }
 </style>
