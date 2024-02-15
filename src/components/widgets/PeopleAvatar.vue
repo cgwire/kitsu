@@ -3,7 +3,7 @@
     class="avatar has-text-centered"
     :class="{ bot: person.is_bot }"
     :style="style"
-    v-if="isLink"
+    v-if="isLink && person.id"
   >
     <router-link
       :to="{
@@ -48,10 +48,7 @@ export default {
   props: {
     person: {
       type: Object,
-      default: () => ({
-        id: 'empty',
-        color: '#FFF'
-      })
+      required: true
     },
     size: {
       type: Number,

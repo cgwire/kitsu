@@ -101,7 +101,7 @@ export default {
     },
     person: {
       type: Object,
-      default: () => {}
+      required: true
     }
   },
 
