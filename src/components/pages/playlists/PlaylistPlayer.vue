@@ -296,6 +296,7 @@
         :current-frame="parseInt(currentFrame) - 1"
         :current-parent-preview="currentPreview"
         :fps="fps"
+        :extendable="false"
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
