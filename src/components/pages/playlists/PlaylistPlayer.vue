@@ -1909,7 +1909,6 @@ export default {
           this.onFrameUpdate(frame)
         })
       } else {
-        // this.onFrameUpdate(frame)
         this.setCurrentTimeRaw(frame / this.fps)
       }
     },

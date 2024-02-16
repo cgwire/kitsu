@@ -1274,7 +1274,7 @@ export const playerMixin = {
 
     onCanvasMouseMoved(event) {
       if (this.isCurrentPreviewMovie && this.$options.scrubbing) {
-        const x = this.getClientX(event)
+        const x = this.getClientX(event.e)
         if (x - this.$options.scrubStartX < 0) {
           this.goPreviousFrame()
         } else {

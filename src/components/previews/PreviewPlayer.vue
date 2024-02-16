@@ -1896,7 +1896,7 @@ export default {
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
       } else if (this.isMovie && this.$options.scrubbing) {
-        const x = this.getClientX(event)
+        const x = this.getClientX(event.e)
         if (x - this.$options.scrubStartX < 0) {
           this.goPreviousFrame()
         } else {
