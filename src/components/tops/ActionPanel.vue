@@ -764,7 +764,7 @@
           <button-simple
             class="flexrow-item"
             :title="$t('entities.build_filter.title')"
-            icon="funnel"
+            icon="filter"
             @click="modals.buildFilter = true"
           />
         </div>

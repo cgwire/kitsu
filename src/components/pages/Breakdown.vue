@@ -28,7 +28,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
-          <show-infos-button :is-breakdown="true" class="flexrow-item" />
+          <show-infos-button class="flexrow-item" :is-breakdown="true" />
           <button-simple
             class="flexrow-item"
             :title="
@@ -43,7 +43,7 @@
           />
           <button-simple
             class="flexrow-item"
-            icon="grid"
+            icon="big-thumbnail"
             :is-on="isBigMode"
             :title="$t('tasks.big_thumbnails')"
             @click="isBigMode = !isBigMode"
@@ -51,14 +51,14 @@
           <button-simple
             class="flexrow-item"
             :title="$t('main.csv.import_file')"
-            icon="upload"
+            icon="import"
             :is-responsive="true"
             @click="showImportModal"
             v-if="isCurrentUserManager"
           />
           <button-simple
             class="flexrow-item"
-            icon="download"
+            icon="export"
             :is-responsive="true"
             :title="$t('main.csv.export_current_view')"
             @click="exportViewToCsv"
@@ -66,7 +66,7 @@
           <button-href-link
             class="flexrow-item"
             :title="$t('main.csv.export_file')"
-            icon="download"
+            icon="export-lines"
             :is-responsive="true"
             :path="exportUrlPath"
             v-if="isCurrentUserManager"
@@ -213,7 +213,7 @@
           <button-simple
             class="flexrow-item"
             :title="$t('entities.build_filter.title')"
-            icon="funnel"
+            icon="filter"
             @click="modals.isBuildFilterDisplayed = true"
           />
         </div>

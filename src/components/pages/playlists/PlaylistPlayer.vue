@@ -83,7 +83,7 @@
         @click="showDeleteModal"
         class="delete-button playlist-button flexrow-item"
         :title="$t('playlists.actions.delete')"
-        icon="delete"
+        icon="trash"
         v-if="isCurrentUserManager || isCurrentUserSupervisor"
       />
     </div>
@@ -519,17 +519,16 @@
           class="button playlist-button flexrow-item"
           :active="isWaveformDisplayed"
           :title="$t('playlists.actions.toggle_waveform')"
-          icon="music"
+          icon="waveform"
           @click="isWaveformDisplayed = !isWaveformDisplayed"
         />
-        <div class="separator"></div>
       </div>
 
       <div class="separator" v-if="!isFullMode"></div>
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.change_task_type')"
-        icon="layers"
+        icon="check"
         @click="showTaskTypeModal"
         v-if="!tempMode && !isFullMode"
       />
@@ -750,7 +749,7 @@
         />
         <button-simple
           class="playlist-button flexrow-item"
-          icon="remove"
+          icon="delete"
           :title="$t('playlists.actions.annotation_delete')"
           @click="onDeleteClicked"
         />
