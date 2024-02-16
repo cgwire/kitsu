@@ -22,13 +22,11 @@
     <minus-icon :class="iconClass" v-if="icon === 'minus'" />
     <message-square-icon :class="iconClass" v-if="icon === 'comment'" />
     <download-icon :class="iconClass" v-if="icon === 'download'" />
-    <upload-icon :class="iconClass" v-if="icon === 'upload'" />
     <film-icon :class="iconClass" v-if="icon === 'film'" />
     <pause-icon :class="iconClass" v-if="icon === 'pause'" />
     <edit-icon :class="iconClass" v-if="icon === 'edit'" />
     <image-icon :class="iconClass" v-if="icon === 'image'" />
     <maximize-icon :class="iconClass" v-if="icon === 'maximize'" />
-    <rotate-ccw-icon :class="iconClass" v-if="icon === 'restore'" />
     <skip-back-icon :class="iconClass" v-if="icon === 'back'" />
     <skip-forward-icon :class="iconClass" v-if="icon === 'forward'" />
     <chevron-down-icon :class="iconClass" v-if="icon === 'down'" />
@@ -38,8 +36,6 @@
     <edit2-icon :class="iconClass" v-if="icon === 'pencil'" />
     <layers-icon :class="iconClass" v-if="icon === 'layers'" />
     <list-icon :class="iconClass" v-if="icon === 'list'" />
-    <filter-icon :class="iconClass" v-if="icon === 'funnel'" />
-    <refresh-cw-icon :class="iconClass" v-if="icon === 'refresh'" />
     <triangle-icon :class="iconClass" v-if="icon === 'triangle'" />
     <music-icon :class="iconClass" v-if="icon === 'music'" />
     <square-icon :class="iconClass" v-if="icon === 'eraser'" />
@@ -68,6 +64,8 @@
           'pen',
           'play',
           'repeat',
+          'refresh',
+          'restore',
           'soundon',
           'soundoff',
           'type',
@@ -103,7 +101,6 @@ import {
   GlobeIcon,
   GridIcon,
   FilmIcon,
-  FilterIcon,
   ImageIcon,
   KeyIcon,
   LayersIcon,
@@ -115,15 +112,12 @@ import {
   PaperclipIcon,
   PauseIcon,
   PlusIcon,
-  RefreshCwIcon,
-  RotateCcwIcon,
   SaveIcon,
   SendIcon,
   SkipBackIcon,
   SkipForwardIcon,
   SquareIcon,
   TriangleIcon,
-  UploadIcon,
   XIcon,
   ZoomInIcon
 } from 'vue-feather-icons'
@@ -143,7 +137,6 @@ export default {
     EditIcon,
     Edit2Icon,
     FilmIcon,
-    FilterIcon,
     GlobeIcon,
     GridIcon,
     ImageIcon,
@@ -151,7 +144,6 @@ export default {
     KitsuIcon,
     LayersIcon,
     ListIcon,
-    ZoomInIcon,
     MaximizeIcon,
     MessageSquareIcon,
     MinusIcon,
@@ -159,16 +151,14 @@ export default {
     PaperclipIcon,
     PauseIcon,
     PlusIcon,
-    RefreshCwIcon,
-    RotateCcwIcon,
     SaveIcon,
     SendIcon,
     SkipBackIcon,
     SkipForwardIcon,
     SquareIcon,
-    UploadIcon,
     TriangleIcon,
-    XIcon
+    XIcon,
+    ZoomInIcon
   },
 
   props: {
@@ -234,23 +224,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.button {
-  border-radius: 10px;
-  padding: 0 10px;
-}
-
-.button .icon {
-  min-height: 16px;
-  min-width: 16px;
-  max-height: 16px;
-  min-width: 16px;
-}
-
 .is-primary {
   border-radius: 2em;
 }
 
 .active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow);
+}
+
+.icon {
 }
 </style>
