@@ -33,25 +33,24 @@
 
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="onPlayPreviousEntityClicked"
-        :title="$t('playlists.actions.previous_shot')"
         icon="back"
+        :title="$t('playlists.actions.previous_shot')"
+        @click="onPlayPreviousEntityClicked"
         v-if="!isFullMode"
       />
       <button-simple
         class="playlist-button flexrow-item"
-        @click="onPlayNextEntityClicked"
-        :title="$t('playlists.actions.next_shot')"
         icon="forward"
+        :title="$t('playlists.actions.next_shot')"
+        @click="onPlayNextEntityClicked"
         v-if="!isFullMode"
       />
 
       <div class="filler"></div>
       <button-simple
         class="playlist-button topbar-button flexrow-item"
-        @click="isFullMode = false"
         :title="$t('playlists.actions.next_shot')"
-        text="Exit build play"
+        @click="isFullMode = false"
         v-if="isFullMode"
       />
 
@@ -63,10 +62,10 @@
         v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
-        @click="$emit('show-add-entities')"
-        class="playlist-button topbar-button flexrow-item"
+        class="playlist-button topbar-button flexrow-item full-button"
         icon="plus"
         :text="addEntitiesText"
+        @click="$emit('show-add-entities')"
         v-if="
           (isCurrentUserManager || isCurrentUserSupervisor) &&
           !isAddingEntity &&
@@ -2204,10 +2203,14 @@ export default {
     padding: 10px 0 10px 1em;
   }
 
-  .edit-button,
-  .delete-button {
-    height: 50px;
-    width: 50px;
+  .playlist-button.edit-button,
+  .playlist-button.delete-button {
+    margin-left: 5px;
+    margin-right: 0px;
+  }
+
+  .playlist-button.delete-button {
+    margin-right: 10px;
   }
 }
 
@@ -2230,18 +2233,10 @@ export default {
       // transform: scale(1.2);
     }
 
-    &.active {
-      color: $green;
-    }
-
     &.topbar-button {
       border: 1px solid var(--border);
       border-radius: 10px;
       margin-right: 0.5em;
-
-      &.active {
-        color: $light-green;
-      }
     }
   }
 }
@@ -2291,10 +2286,6 @@ export default {
 .icon {
   margin-top: -4px;
   height: 20px;
-}
-
-.smaller {
-  height: 16px;
 }
 
 .right {
@@ -2357,9 +2348,7 @@ export default {
 }
 
 .playlist-footer .button.active,
-.playlist-footer .button:hover,
 .playlist-footer .background-combo.active .icon {
-  color: #43b581;
 }
 
 progress::-moz-progress-bar {
@@ -2617,6 +2606,12 @@ input[type='number'] {
   top: 0;
   left: 0;
   z-index: 100000;
+}
+
+.full-button {
+  &:hover {
+    border: 1px solid var(--text);
+  }
 }
 
 @media only screen and (min-width: 1600px) {

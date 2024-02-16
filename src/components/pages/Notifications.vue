@@ -172,7 +172,9 @@
               <div v-if="isReply(notification) || isReplyMention(notification)">
                 ...
               </div>
-              <div v-if="notification.preview_file_id && !isReply(notification)">
+              <div
+                v-if="notification.preview_file_id && !isReply(notification)"
+              >
                 <h3>
                   {{ $t('notifications.new_revision') }}
                 </h3>
@@ -217,9 +219,7 @@
       </div>
     </div>
 
-    <div
-      class="column side-column is-hidden-mobile hide-small-screen"
-    >
+    <div class="column side-column is-hidden-mobile hide-small-screen">
       <task-info :task="currentTask" :is-loading="loading.currentTask" />
     </div>
   </div>
@@ -241,7 +241,6 @@ import { renderComment } from '@/lib/render'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageTitle from '@/components/widgets/PageTitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
@@ -257,7 +256,6 @@ export default {
     ComboboxStatus,
     ComboboxStyled,
     CornerUpLeftIcon,
-    EntityThumbnail,
     MessageSquareIcon,
     PeopleAvatar,
     PageTitle,
@@ -566,7 +564,7 @@ a {
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    border: 5px solid var(--background-selectable-selectable);
+    border: 5px solid var(--background-selectable);
     transform: scale(1.01);
   }
 }

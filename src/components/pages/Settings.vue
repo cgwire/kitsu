@@ -329,7 +329,7 @@ h2:first-child {
 
 .save-button {
   background: $green;
-  border-radius: 2em;
+  border-radius: 10px;
   border-color: $green;
   color: white;
   width: 100%;

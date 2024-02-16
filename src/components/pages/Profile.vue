@@ -1376,4 +1376,8 @@ select {
   float: right;
   cursor: pointer;
 }
+
+.button {
+  border-radius: 10px;
+}
 </style>

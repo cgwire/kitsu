@@ -499,9 +499,9 @@ export default {
 }
 
 .shot:hover {
-  background: var(--background-selectable-selectable);
+  background: var(--background-selectable);
   .sticky {
-    background: var(--background-selectable-selectable);
+    background: var(--background-selectable);
   }
 }
 

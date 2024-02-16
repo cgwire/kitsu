@@ -156,7 +156,7 @@
                               {{ $t('news.commented_on') }}
                             </span>
                             <entity-thumbnail
-                              class="ml05"
+                              class="ml1 entity-thumbnail"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
@@ -224,7 +224,7 @@
                               {{ $t('news.set_preview_on') }}
                             </span>
                             <entity-thumbnail
-                              class="ml05"
+                              class="ml1"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
@@ -280,7 +280,7 @@
             {{ newsTotal }} {{ $t('news.news') }}
           </span>
           <div class="mt1"></div>
-          <div v-for="stat in renderedStats">
+          <div :key="'stat-' + stat.name" v-for="stat in renderedStats">
             <span
               :key="'stat-value-' + stat.name.toLowerCase()"
               class="tag stat-tag"
@@ -308,6 +308,7 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+
 import { sortByName, sortPeople } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
@@ -845,7 +846,7 @@ export default {
 
 .timeline-wrapper {
   margin: auto;
-  max-width: 875px;
+  max-width: 920px;
   padding-top: 25px;
   padding-left: 25px;
   padding-right: 25px;

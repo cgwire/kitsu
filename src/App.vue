@@ -1112,6 +1112,26 @@ textarea.input:focus {
   }
 }
 
+.button {
+  border-radius: 10px;
+  padding: 0 10px;
+}
+
+.button .icon {
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  min-width: 18px;
+}
+
+.preview-player .button .icon,
+.playlist-player .button .icon {
+  min-height: 14px;
+  min-width: 14px;
+  max-height: 14px;
+  min-width: 14px;
+}
+
 .main-button {
   border-radius: 5px;
   min-height: 2.6em;

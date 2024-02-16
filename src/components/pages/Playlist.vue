@@ -65,30 +65,34 @@
               'for-client': playlist.for_client || false,
               selected: playlist.id === currentPlaylist.id
             }"
-            :style="playlistElementStyle(playlist)"
             v-for="playlist in playlists"
           >
-            <div v-if="!isListToggled">
-              <span>
-                {{ playlist.name }}
-              </span>
-              <span class="playlist-date" title="last modified">
-                {{ $t('playlists.updated_at') }}
-                {{ formatDate(playlist.updated_at) }}
-              </span>
-            </div>
-            <div class="has-text-centered" v-else>
-              <light-entity-thumbnail
-                :preview-file-id="playlist.first_preview_file_id"
-                type="previews"
-                width="38px"
-                height="30px"
-                max-width="38px"
-                max-height="30px"
-                empty-width="38px"
-                empty-height="30px"
-                :title="playlist.name"
-              />
+            <div
+              class="playlist-item-content"
+              :style="playlistElementStyle(playlist)"
+            >
+              <div v-if="!isListToggled">
+                <span>
+                  {{ playlist.name }}
+                </span>
+                <span class="playlist-date" title="last modified">
+                  {{ $t('playlists.updated_at') }}
+                  {{ formatDate(playlist.updated_at) }}
+                </span>
+              </div>
+              <div class="has-text-centered" v-else>
+                <light-entity-thumbnail
+                  :preview-file-id="playlist.first_preview_file_id"
+                  type="previews"
+                  width="38px"
+                  height="30px"
+                  max-width="38px"
+                  max-height="30px"
+                  empty-width="38px"
+                  empty-height="30px"
+                  :title="playlist.name"
+                />
+              </div>
             </div>
           </router-link>
         </div>
@@ -684,7 +688,7 @@ export default {
       const taskType = this.taskTypeMap.get(playlist.task_type_id)
       const color = taskType ? taskType.color : 'transparent'
       return {
-        'border-left': '2px solid ' + color
+        'border-left': '4px solid ' + color
       }
     },
 
@@ -1511,7 +1515,7 @@ export default {
 
   &:hover {
     transform: scale(1.02);
-    border: 2px solid var(--background-selectable-selectable);
+    border: 2px solid var(--background-selectable);
   }
 }
 
@@ -1714,5 +1718,9 @@ h2 {
 
 .top-section {
   align-items: flex-start;
+}
+
+.playlist-item-content {
+  padding-left: 0.5em;
 }
 </style>

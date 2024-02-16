@@ -242,10 +242,6 @@ export default {
   a {
     color: $white-grey;
   }
-
-  p:hover {
-    background: $dark-grey-light;
-  }
 }
 
 aside {
@@ -332,7 +328,7 @@ p {
 
 p:hover {
   cursor: pointer;
-  background: $white-grey;
+  background: var(--background-hover);
   border-radius: 5px;
   transform: scale(1.05);
   transition: 0.2s ease transform;

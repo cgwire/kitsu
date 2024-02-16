@@ -30,6 +30,7 @@
             'border-bottom': '2px solid ' + taskStatus.color,
             'padding-bottom': '5px'
           }"
+          @click.prevent="onPlayClick"
         >
           {{ entity.parent_name }} / {{ entity.name }}
         </div>
@@ -308,6 +309,10 @@ export default {
   min-width: 150px;
   padding: 4px 4px;
 
+  &:hover {
+    border: 3px solid var(--background-selectable);
+  }
+
   &.playing {
     border: 3px solid $green;
   }
@@ -315,6 +320,7 @@ export default {
 
 .entity-title {
   color: $white;
+  cursor: pointer;
   font-size: 0.9em;
   margin-bottom: 0.6em;
   max-width: 150px;

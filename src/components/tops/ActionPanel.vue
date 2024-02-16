@@ -40,7 +40,11 @@
               !isCurrentUserArtist
             "
           >
-            <kitsu-icon name="user-check" :title="$t('menu.assign_tasks')" />
+            <kitsu-icon
+              name="user-check"
+              :active="selectedBar === 'assignation'"
+              :title="$t('menu.assign_tasks')"
+            />
           </div>
 
           <div
@@ -60,7 +64,11 @@
             "
             @click="selectBar('priorities')"
           >
-            <kitsu-icon name="priority" :title="$t('menu.change_priority')" />
+            <kitsu-icon
+              name="priority"
+              :active="selectedBar === 'priorities'"
+              :title="$t('menu.change_priority')"
+            />
           </div>
 
           <div
@@ -78,6 +86,7 @@
           >
             <kitsu-icon
               name="add-thumbnail"
+              :active="selectedBar === 'thumbnails'"
               :title="$t('menu.set_thumbnails')"
             />
           </div>
@@ -96,7 +105,11 @@
             "
             @click="selectBar('subscribe')"
           >
-            <kitsu-icon name="watch" :title="$t('menu.subscribe')" />
+            <kitsu-icon
+              name="watch"
+              :active="selectedBar === 'subscribe'"
+              :title="$t('menu.subscribe')"
+            />
           </div>
 
           <div
@@ -141,6 +154,7 @@
           >
             <kitsu-icon
               name="playlists"
+              :active="selectedBar === 'playlists'"
               :title="$t('menu.generate_playlist')"
             />
           </div>
@@ -191,7 +205,11 @@
               isTaskSelection
             "
           >
-            <kitsu-icon name="trash" :title="$t('menu.create_tasks')" />
+            <kitsu-icon
+              name="trash"
+              :active="selectedBar === 'delete-tasks'"
+              :title="$t('menu.create_tasks')"
+            />
           </div>
 
           <div
@@ -1687,19 +1705,6 @@ export default {
   .action-topbar {
     background: $dark-grey-light;
 
-    .menu-item {
-      color: $light-grey-light;
-
-      &.active {
-        color: $green;
-      }
-
-      &.status-item.active {
-        color: $green;
-        border-color: $green;
-      }
-    }
-
     .menu {
       background: $black;
       border-bottom: 1px solid $dark-grey-light;
@@ -1744,7 +1749,7 @@ div.assignation {
 
 .menu {
   background: var(--background);
-  color: $grey;
+  color: var(--text);
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   background: #fcfcff;
@@ -1757,16 +1762,15 @@ div.assignation {
   padding: 0.2em 0.6em 0.4em 0.6em;
 
   &:hover {
-    color: var(--text);
     transform: scale(1.1);
     transition: transform ease 0.3s;
   }
 
   &.active {
-    color: $light-green;
+    color: var(--text-selected);
 
     &:hover {
-      color: $light-green;
+      color: var(--text-selected);
     }
   }
 }
@@ -1832,18 +1836,9 @@ div.assignation {
   padding-top: 0.3em;
   text-transform: uppercase;
 
-  &:hover {
-    border: 2px solid var(--text);
-  }
-
   &.active {
-    border: 2px solid $light-green;
-    color: $light-green;
-
-    &:hover {
-      border: 2px solid $light-green;
-      color: $light-green;
-    }
+    border: 2px solid var(--text-selected);
+    color: var(--text-selected);
   }
 }
 

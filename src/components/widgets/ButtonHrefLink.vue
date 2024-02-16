@@ -65,4 +65,11 @@ export default {
 .button {
   border-radius: 10px;
 }
+
+.button .icon {
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  min-width: 18px;
+}
 </style>

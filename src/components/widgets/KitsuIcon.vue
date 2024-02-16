@@ -30,6 +30,7 @@ import productionSettings from '@/assets/icons/fi-settings.svg'
 import quota from '@/assets/icons/fi-quotas.svg'
 import logs from '@/assets/icons/fi-logs.svg'
 import priority from '@/assets/icons/fi-alert-circle.svg'
+import refresh from '@/assets/icons/fi-rotate-ccw.svg'
 import schedule from '@/assets/icons/fi-calendar.svg'
 import search from '@/assets/icons/fi-entity-search.svg'
 import shots from '@/assets/icons/fi-shots.svg'
@@ -103,6 +104,8 @@ const icons = {
   pen: annotations,
   play,
   priority,
+  refresh,
+  restore: refresh,
   repeat,
   'sequence-stats': sequenceStats,
   search,
@@ -167,7 +170,7 @@ img {
 }
 
 img.active {
-  filter: invert(67%) sepia(26%) saturate(847%) hue-rotate(100deg)
-    brightness(87%) contrast(88%);
+  filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)
+    brightness(95%) contrast(93%);
 }
 </style>
