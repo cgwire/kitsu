@@ -119,6 +119,15 @@
                       />
                     </div>
 
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(news.author_id)"
+                      :size="30"
+                      :font-size="14"
+                      :is-link="false"
+                      v-if="personMap.get(news.author_id)"
+                    />
+
                     <div class="flexrow-item task-type-wrapper">
                       <task-type-name
                         class="task-type-name"
@@ -140,31 +149,17 @@
                     <div class="flexrow-item comment-content">
                       <div>
                         <div class="news-info flexrow">
-                          <people-avatar
-                            class="flexrow-item"
-                            :person="personMap.get(news.author_id)"
-                            :size="30"
-                            :font-size="14"
-                            :is-link="false"
-                            v-if="personMap.get(news.author_id)"
-                          />
-                          <span class="explaination flexrow-item">
-                            <span class="strong person-name">
-                              {{ personName(news) }}
-                            </span>
-                            <span>
-                              {{ $t('news.commented_on') }}
-                            </span>
+                          <span class="explaination flexrow-item flexrow">
                             <entity-thumbnail
-                              class="ml1 entity-thumbnail"
+                              class="ml1 entity-thumbnail mr1 flexrow-item"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
                               }"
-                              v-if="news.entity_preview_file_id"
+                              :with-link="false"
                             />
 
-                            <span class="strong">
+                            <span class="strong ml05">
                               {{ news.full_entity_name }}
                             </span>
                           </span>
@@ -198,6 +193,14 @@
                       {{ formatTime(news.created_at) }}
                     </span>
 
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(news.author_id)"
+                      :size="30"
+                      :no-link="true"
+                      v-if="personMap.get(news.author_id)"
+                    />
+
                     <div class="flexrow-item task-type-wrapper">
                       <task-type-name
                         class="task-type-name"
@@ -209,29 +212,17 @@
                     <div class="flexrow-item comment-content">
                       <div>
                         <div class="news-info flexrow">
-                          <people-avatar
-                            class="flexrow-item"
-                            :person="personMap.get(news.author_id)"
-                            :size="30"
-                            :no-link="true"
-                            v-if="personMap.get(news.author_id)"
-                          />
-                          <span class="explaination flexrow-item">
-                            <span class="strong person-name">
-                              {{ personName(news) }}
-                            </span>
-                            <span>
-                              {{ $t('news.set_preview_on') }}
-                            </span>
+                          <span class="explaination flexrow-item flexrow">
                             <entity-thumbnail
                               class="ml1"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
                               }"
+                              :with-link="false"
                               v-if="news.entity_preview_file_id"
                             />
-                            <span class="strong">
+                            <span class="strong ml05 flexrow-item">
                               {{ news.full_entity_name }}
                             </span>
                           </span>
@@ -275,22 +266,25 @@
         :is-loading="loading.currentTask"
         with-actions
       >
-        <div class="stats mt1">
-          <span class="news-number mb1">
+        <div class="stats">
+          <div class="news-number mb1">
             {{ newsTotal }} {{ $t('news.news') }}
-          </span>
-          <div class="mt1"></div>
-          <div :key="'stat-' + stat.name" v-for="stat in renderedStats">
+          </div>
+          <div
+            :key="'stat-' + stat.name"
+            class="stat-wrapper"
+            v-for="stat in renderedStats"
+          >
+            <div>{{ stat.name }} : {{ stat.value }}</div>
             <span
               :key="'stat-value-' + stat.name.toLowerCase()"
-              class="tag stat-tag"
+              class="stat-tag"
               :title="stat.name + ': ' + stat.value"
               :style="{
                 background: stat.color,
-                color: stat.is_default ? '#666' : 'white'
+                width: (stat.value / statMax) * 100 + '%'
               }"
             >
-              {{ stat.name }} : {{ stat.value }}
             </span>
           </div>
         </div>
@@ -434,6 +428,17 @@ export default {
       'user'
     ]),
 
+    statMax() {
+      if (this.newsStats) {
+        return Object.keys(this.newsStats).reduce((max, stat) => {
+          console.log(stat, this.newsStats[stat], max)
+          return Math.max(this.newsStats[stat], max)
+        }, 0)
+      } else {
+        return 0
+      }
+    },
+
     isStudio() {
       return this.$route.path.indexOf('productions') < 0
     },
@@ -511,7 +516,7 @@ export default {
               value: this.newsStats[taskStatusId]
             }
           })
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => a.value < b.value)
       } else {
         return ''
       }
@@ -880,10 +885,10 @@ export default {
     .dot {
       position: absolute;
       display: block;
-      left: -31px;
+      left: -34px;
       background: $blue-light;
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 4px;
 
       &.red {
@@ -901,20 +906,11 @@ export default {
   }
 
   .validation-wrapper {
-    min-width: 60px;
+    min-width: 80px;
   }
 
   .date {
     min-width: 30px;
-  }
-
-  .explaination,
-  .explaination span {
-    display: inline;
-
-    &.entity-thumbnail {
-      display: inline-block;
-    }
   }
 }
 
@@ -939,18 +935,17 @@ export default {
   align-items: middle;
   border: 3px solid transparent;
   cursor: pointer;
+  margin-bottom: 1px;
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   border-radius: 0.5em;
   transition: all 0.1s linear;
 
   &:hover {
-    transform: scale(1.01);
-    border: 3px solid var(--background-selectable-selectable);
+    border: 3px solid var(--background-selectable);
   }
 
   &.selected {
-    transform: scale(1.01);
     border: 3px solid var(--background-selected);
   }
 }
@@ -985,23 +980,29 @@ export default {
 
 .stats {
   text-align: left;
-  margin-top: 2em;
   width: 100%;
   flex: 1;
 
   .news-number {
     font-weight: bold;
-    border: 2px solid var(--text);
-    border-radius: 1em;
+    border-bottom: 1px solid var(--border-alt);
     padding: 0.6em;
   }
 
   .stat-tag {
+    display: inline-block;
     margin-right: 1em;
     margin-top: 0;
-    margin-bottom: 1em;
+    margin-bottom: 0.4em;
     font-size: 0.8em;
     font-weight: bold;
+    width: 100%;
+    height: 12px;
+    border-radius: 2px;
   }
+}
+
+.preview .news-line .dot {
+  left: -54px;
 }
 </style>
