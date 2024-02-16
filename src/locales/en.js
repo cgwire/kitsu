@@ -860,7 +860,7 @@ export default {
       split_screen: 'Compare with other task types',
       switch_ld: 'Switch to low definition',
       switch_hd: 'Switch to high definition',
-      toggle_annotations: 'Show/Hide annotations while playing movies',
+      toggle_annotations: 'Show/Hide annotations when the movie is paused',
       toggle_laser: 'Enable/Disable drawing laser mode',
       toggle_environment_skybox: 'Show/Hide skybox background',
       toggle_playing_annotations: 'Show/Hide annotations while playing movies',
