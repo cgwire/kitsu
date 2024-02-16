@@ -285,7 +285,9 @@ export default {
 
     slugifyFilename(form) {
       const filename = form.get('file').name
-      return stringHelpers.slugify(filename.substring(0, filename.length - 3))
+      return stringHelpers.slugify(
+        stringHelpers.filenameWithoutExtension(filename)
+      )
     },
 
     prepareImagePreview(form) {
