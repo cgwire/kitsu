@@ -57,7 +57,7 @@ export default {
   },
 
   getPerson(personId) {
-    return client.pget(`/api/data/persons/${personId}`)
+    return client.pget(`/api/data/persons/${personId}?relations=true`)
   },
 
   createPerson(person) {
@@ -68,13 +68,22 @@ export default {
       phone: person.phone,
       role: person.role,
       active: person.active,
-      departments: person.departments
+      departments: person.departments,
+      is_bot: person.is_bot,
+      expiration_date: person.expiration_date?.toJSON().slice(0, 10)
     }
     return client.ppost('/api/data/persons/new', data)
   },
 
   invitePerson(person) {
     return client.pget(`/api/actions/persons/${person.id}/invite`)
+  },
+
+  generateToken(person) {
+    const data = {
+      expiration_date: person.expiration_date?.toJSON().slice(0, 10) || null
+    }
+    return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
   updatePerson(person) {
@@ -433,5 +442,9 @@ export default {
 
   clearAvatar() {
     return client.pdel('/api/actions/user/clear-avatar')
+  },
+
+  clearPersonAvatar(person) {
+    return client.pdel(`/api/actions/persons/${person.id}/clear-avatar`)
   }
 }

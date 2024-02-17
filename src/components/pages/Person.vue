@@ -537,6 +537,10 @@ export default {
 
     loadPerson(personId) {
       this.person = this.personMap.get(personId)
+      if (!this.person || this.person.is_bot) {
+        return
+      }
+
       this.isTasksLoading = true
       this.loadPersonTasks({
         personId: this.person.id,

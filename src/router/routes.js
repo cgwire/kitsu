@@ -24,6 +24,7 @@ import Edits from '@/components/pages/Edits'
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
+const Bots = () => import('@/components/pages/Bots.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const Concepts = () => import('@/components/pages/Concepts.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
@@ -72,12 +73,13 @@ const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 const ADMIN_PAGES = [
   'asset-types',
   'backgrounds',
+  'bots',
   'custom-actions',
   'departments',
   'logs',
   'main-schedule',
-  'people',
   'newsfeed',
+  'people',
   'productions',
   'task-status',
   'task-types',
@@ -190,6 +192,12 @@ export const routes = [
         path: 'backgrounds',
         component: Backgrounds,
         name: 'backgrounds'
+      },
+
+      {
+        path: 'bots',
+        component: Bots,
+        name: 'bots'
       },
 
       {

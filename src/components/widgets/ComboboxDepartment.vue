@@ -35,7 +35,7 @@
         <div
           class="department-line"
           v-for="department in departmentList.filter(
-            departement => departement.id !== this.value
+            ({ id }) => id !== this.value
           )"
           @click="selectDepartment(department)"
           :key="department.id"

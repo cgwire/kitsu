@@ -65,8 +65,9 @@
       :entries="currentPeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
-      @edit-clicked="onEditClicked"
+      @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
+      @edit-clicked="onEditClicked"
       @change-password-clicked="onChangePasswordClicked"
     />
 
@@ -94,6 +95,18 @@
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
       @confirm="renderImport"
+    />
+
+    <edit-avatar-modal
+      :active="modals.avatar"
+      :error-text="$t('people.edit_avatar_error')"
+      :is-deleting="loading.deletingAvatar"
+      :is-error="errors.avatar"
+      :is-updating="loading.updatingAvatar"
+      :person="personToEdit"
+      @close="modals.avatar = false"
+      @delete="deleteAvatar"
+      @update="updateAvatar"
     />
 
     <edit-person-modal
@@ -129,13 +142,6 @@
       @cancel="modals.del = false"
       @confirm="confirmDeletePeople"
     />
-
-    <build-people-filter-modal
-      ref="build-filter-modal"
-      :active="modals.isBuildFilterDisplayed"
-      @cancel="modals.isBuildFilterDisplayed = false"
-      @confirm="confirmBuildFilter"
-    />
   </div>
 </template>
 
@@ -145,10 +151,10 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
-import BuildPeopleFilterModal from '@/components/modals/BuildPeopleFilterModal'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
+import EditAvatarModal from '@/components/modals/EditAvatarModal'
 import EditPersonModal from '@/components/modals/EditPersonModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ImportModal from '@/components/modals/ImportModal'
@@ -163,18 +169,18 @@ export default {
   name: 'people',
   mixins: [searchMixin],
   components: {
-    BuildPeopleFilterModal,
     ButtonHrefLink,
     ButtonSimple,
     ChangePasswordModal,
     ComboboxStyled,
     ComboboxDepartment,
+    EditAvatarModal,
     EditPersonModal,
     HardDeleteModal,
     ImportModal,
+    ImportRenderModal,
     PageTitle,
     PeopleList,
-    ImportRenderModal,
     SearchField,
     SearchQueryList
   },
@@ -195,24 +201,28 @@ export default {
         { label: 'vendor', value: 'vendor' }
       ],
       errors: {
+        avatar: false,
         del: false,
         edit: false,
-        invite: false
+        invite: false,
+        userLimit: false
       },
       loading: {
         createAndInvite: false,
-        edit: false,
         del: false,
+        deletingAvatar: false,
+        edit: false,
         invite: false,
-        savingSearch: false
+        savingSearch: false,
+        updatingAvatar: false
       },
       modals: {
-        edit: false,
-        del: false,
+        avatar: false,
         changePassword: false,
+        del: false,
+        edit: false,
         importModal: false,
-        isImportRenderDisplayed: false,
-        isBuildFilterDisplayed: false
+        isImportRenderDisplayed: false
       },
       parsedCSV: [],
       personToDelete: {},
@@ -260,26 +270,23 @@ export default {
     ...mapGetters([
       'displayedPeople',
       'isCurrentUserAdmin',
-
       'isPeopleLoading',
       'isPeopleLoadingError',
-
       'isImportPeopleModalShown',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
-
       'peopleSearchQueries',
       'personCsvFormData'
     ]),
 
     currentPeople() {
-      let people =
-        this.role === 'all'
-          ? this.displayedPeople
-          : this.displayedPeople.filter(p => p.role === this.role)
+      let people = this.displayedPeople.filter(person => !person.is_bot)
+      if (this.role !== 'all') {
+        people = people.filter(person => person.role === this.role)
+      }
       if (this.selectedDepartment) {
-        people = people.filter(p =>
-          p.departments.includes(this.selectedDepartment)
+        people = people.filter(person =>
+          person.departments.includes(this.selectedDepartment)
         )
       }
       return people
@@ -306,17 +313,20 @@ export default {
 
   methods: {
     ...mapActions([
-      'editPerson',
+      'clearPersonAvatar',
       'deletePeople',
+      'editPerson',
       'invitePerson',
-      'loadPeople',
       'loadDepartments',
+      'loadPeople',
       'newPerson',
       'newPersonAndInvite',
       'removePeopleSearch',
       'savePeopleSearch',
       'setPeopleSearch',
-      'uploadPersonFile'
+      'uploadPersonAvatar',
+      'uploadPersonFile',
+      'updatePersonToEdit'
     ]),
 
     renderImport(data, mode) {
@@ -365,6 +375,28 @@ export default {
       this.showImportModal()
     },
 
+    async deleteAvatar() {
+      this.loading.deletingAvatar = true
+      try {
+        await this.clearPersonAvatar(this.personToEdit)
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.deletingAvatar = false
+    },
+
+    async updateAvatar(formData) {
+      this.loading.updatingAvatar = true
+      try {
+        await this.uploadPersonAvatar({ person: this.personToEdit, formData })
+        this.modals.avatar = false
+      } catch (err) {
+        this.errors.avatar = true
+      }
+      this.loading.updatingAvatar = false
+    },
+
     confirmEditPeople(form) {
       let action = 'editPerson'
       if (this.personToEdit.id === undefined) action = 'newPerson'
@@ -378,10 +410,9 @@ export default {
           this.modals.edit = false
         })
         .catch(err => {
+          const message = err.body?.message
           const isUserLimitReached =
-            err.body &&
-            err.body.message &&
-            err.body.message.indexOf('limit') > 0
+            typeof message === 'string' && message.includes('limit')
           if (isUserLimitReached) {
             this.errors.userLimit = true
           } else {
@@ -458,6 +489,12 @@ export default {
       }
     },
 
+    onAvatarClicked(person) {
+      this.personToEdit = person
+      this.errors.avatar = false
+      this.modals.avatar = true
+    },
+
     onDeleteClicked(person) {
       this.personToDelete = person
       this.modals.del = true
@@ -512,12 +549,6 @@ export default {
 
     removeSearchQuery(searchQuery) {
       this.removePeopleSearch(searchQuery).catch(console.error)
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.searchField.setValue(query)
-      this.onSearchChange()
     },
 
     updateRoute() {

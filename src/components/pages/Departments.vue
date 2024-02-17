@@ -138,7 +138,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['deleteDepartment', 'loadDepartments', 'newDepartement']),
+    ...mapActions(['deleteDepartment', 'loadDepartments', 'newDepartment']),
 
     onExportClicked() {
       const name = stringHelpers.slugify(this.$t('departments.title'))
@@ -168,9 +168,9 @@ export default {
     },
 
     confirmEditDepartment(form) {
-      let action = 'newDepartement'
+      let action = 'newDepartment'
       if (this.departmentToEdit && this.departmentToEdit.id) {
-        action = 'editDepartement'
+        action = 'editDepartment'
         form.id = this.departmentToEdit.id
       }
       this.loading.edit = true

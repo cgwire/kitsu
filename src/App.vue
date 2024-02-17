@@ -794,14 +794,32 @@ h2 {
 
 .avatar {
   border-radius: 50%;
-  color: white;
-}
+  color: $white;
 
-.avatar img {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  margin-right: 0px;
+  a,
+  a:hover {
+    color: inherit;
+  }
+
+  img {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin-right: 0;
+  }
+
+  &.bot::after {
+    content: 'bot';
+    position: absolute;
+    bottom: -4px;
+    font-size: 10px;
+    line-height: 10px;
+    padding: 1px 2px;
+    background-color: $grey-strong;
+    border: 1px solid $white;
+    border-radius: 3px;
+    box-shadow: 0 0 6px 0 $white;
+  }
 }
 
 .mention,

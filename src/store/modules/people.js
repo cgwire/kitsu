@@ -167,6 +167,7 @@ const getters = {
   organisation: state => state.organisation,
 
   people: state => state.people,
+  peopleWithoutBot: state => state.people.filter(person => !person.is_bot),
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
@@ -203,14 +204,7 @@ const getters = {
   personTaskSelectionGrid: state => state.personTaskSelectionGrid,
   personTasksScrollPosition: state => state.personTasksScrollPosition,
 
-  getPerson: (state, getters) => id => state.personMap.get(id),
-  getPersonOptions: state =>
-    state.people.map(person => {
-      return {
-        label: person.full_name,
-        value: person.id
-      }
-    }),
+  getPerson: state => id => state.personMap.get(id),
 
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
@@ -272,38 +266,46 @@ const actions = {
     commit(EDIT_PEOPLE_END, person)
   },
 
-  newPerson({ commit, state }, data) {
-    return peopleApi.createPerson(data).then(person => {
-      commit(EDIT_PEOPLE_END, person)
-    })
+  async newPerson({ commit, state }, data) {
+    const person = await peopleApi.createPerson(data)
+    commit(EDIT_PEOPLE_END, person)
+    return person
   },
 
-  newPersonAndInvite({ commit, state }, data) {
-    return peopleApi
-      .createPerson(data)
-      .then(peopleApi.invitePerson)
-      .then(person => {
-        commit(EDIT_PEOPLE_END, person)
-        Promise.resolve()
-      })
+  async newPersonAndInvite({ commit, state }, data) {
+    let person = await peopleApi.createPerson(data)
+    person = await peopleApi.invitePerson(person)
+    commit(EDIT_PEOPLE_END, person)
+    return person
   },
 
   invitePerson({ commit, state }, person) {
     return peopleApi.invitePerson(person)
   },
 
-  editPerson({ commit, state }, data) {
-    return peopleApi.updatePerson(data).then(person => {
-      commit(EDIT_PEOPLE_END, person)
-      Promise.resolve()
-    })
+  generateToken({ commit, state }, person) {
+    return peopleApi.generateToken(person)
   },
 
-  deletePeople({ commit, state }, person) {
-    return peopleApi.deletePerson(person).then(() => {
-      commit(DELETE_PEOPLE_END)
-      Promise.resolve()
-    })
+  async uploadPersonAvatar({ commit, state }, { person, formData }) {
+    await peopleApi.postAvatar(person.id, formData)
+    commit(UPLOAD_AVATAR_END, person.id)
+  },
+
+  async clearPersonAvatar({ commit, state }, person) {
+    await peopleApi.clearPersonAvatar(person)
+    commit(CLEAR_AVATAR, person.id)
+  },
+
+  async editPerson({ commit, state }, data) {
+    const person = await peopleApi.updatePerson(data)
+    commit(EDIT_PEOPLE_END, person)
+    return person
+  },
+
+  async deletePeople({ commit, state }, person) {
+    await peopleApi.deletePerson(person)
+    commit(DELETE_PEOPLE_END)
   },
 
   changePasswordPerson({ commit, state }, { person, form }) {
@@ -594,7 +596,7 @@ const mutations = {
   [DELETE_PEOPLE_END](state, person) {
     if (person) {
       const personToDeleteIndex = state.people.findIndex(
-        p => p.id === person.id
+        ({ id }) => id === person.id
       )
       if (personToDeleteIndex >= 0) {
         state.people.splice(personToDeleteIndex, 1)
@@ -610,21 +612,18 @@ const mutations = {
     }
   },
 
-  [EDIT_PEOPLE_END](state, form) {
-    let personToAdd = { ...form }
-    personToAdd = helpers.addAdditionalInformation(personToAdd)
-
-    const personToEditIndex = state.people.findIndex(
-      person => person.id === personToAdd.id
-    )
-    if (personToAdd.name) {
+  [EDIT_PEOPLE_END](state, person) {
+    person = helpers.addAdditionalInformation(person)
+    if (person.name) {
+      const personToEditIndex = state.people.findIndex(
+        ({ id }) => id === person.id
+      )
       if (personToEditIndex >= 0) {
-        state.personMap.set(personToAdd.id, personToAdd)
-        state.people[personToEditIndex] = state.personMap.get(personToAdd.id)
-      } else if (!state.personMap.get(personToAdd.id)) {
-        state.people.push(personToAdd)
-        state.personMap.set(personToAdd.id, personToAdd)
+        state.people[personToEditIndex] = person
+      } else if (!state.personMap.has(person.id)) {
+        state.people.push(person)
       }
+      state.personMap.set(person.id, person)
       state.people = sortPeople(state.people)
       cache.peopleIndex = buildNameIndex(state.people)
       if (state.peopleSearchText) {
@@ -643,12 +642,12 @@ const mutations = {
     person.preferred_two_factor_authentication = null
   },
 
-  [IMPORT_PEOPLE_START](state, data) {
+  [IMPORT_PEOPLE_START](state) {
     state.isImportPeopleLoading = true
     state.isImportPeopleLoadingError = false
   },
 
-  [IMPORT_PEOPLE_END](state, personId) {
+  [IMPORT_PEOPLE_END](state) {
     state.isImportPeopleLoading = false
     state.isImportPeopleLoadingError = false
   },

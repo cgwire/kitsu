@@ -1,15 +1,9 @@
 <template>
   <span
     class="avatar has-text-centered"
-    :style="{
-      background: person.color,
-      width: size + 'px',
-      height: size + 'px',
-      'min-width': size + 'px',
-      'min-height': size + 'px',
-      'font-size': person.has_avatar ? 0 : fontSize + 'px'
-    }"
-    v-if="isLink"
+    :class="{ bot: person.is_bot }"
+    :style="style"
+    v-if="isLink && person.id"
   >
     <router-link
       :to="{
@@ -32,15 +26,9 @@
 
   <span
     class="avatar has-text-centered"
+    :class="{ bot: person.is_bot }"
     :title="person.full_name"
-    :style="{
-      background: person.color,
-      width: size + 'px',
-      height: size + 'px',
-      'min-width': size + 'px',
-      'min-height': size + 'px',
-      'font-size': fontSize + 'px'
-    }"
+    :style="style"
     v-else
   >
     <img
@@ -60,10 +48,7 @@ export default {
   props: {
     person: {
       type: Object,
-      default: () => ({
-        id: 'empty',
-        color: '#FFF'
-      })
+      required: true
     },
     size: {
       type: Number,
@@ -81,28 +66,37 @@ export default {
       type: Boolean,
       default: true
     }
+  },
+
+  computed: {
+    style() {
+      return {
+        width: `${this.size}px`,
+        height: `${this.size}px`,
+        fontSize: this.person.has_avatar ? 0 : `${this.fontSize}px`,
+        backgroundColor: this.person.color
+      }
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.avatar img {
-  max-height: 100%;
-  height: 100%;
-  width: 100%;
-}
-
 .avatar {
-  border-radius: 50%;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-}
+  position: relative;
 
-.avatar a {
-  margin: 0;
-  color: white;
+  a {
+    margin: 0;
+  }
+
+  img {
+    max-height: 100%;
+    height: 100%;
+    width: 100%;
+  }
 }
 
 .flexrow-item {

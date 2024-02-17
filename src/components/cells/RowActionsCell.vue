@@ -22,6 +22,16 @@
 
     <button
       class="button"
+      data-test="button-avatar"
+      tabindex="-1"
+      @click="$emit('avatar-clicked')"
+      v-if="!hideAvatar"
+    >
+      <camera-icon class="icon is-small only-icon" />
+    </button>
+
+    <button
+      class="button"
       data-test="button-change-password"
       tabindex="-1"
       @click="$emit('change-password-clicked')"
@@ -59,15 +69,27 @@
     >
       <trash-icon class="icon is-small only-icon" />
     </button>
+
+    <button
+      class="button"
+      data-test="button-refresh"
+      tabindex="-1"
+      @click="$emit('refresh-clicked')"
+      v-else-if="!hideRefresh"
+    >
+      <refresh-cw-icon class="icon is-small only-icon" />
+    </button>
   </td>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import {
+  CameraIcon,
   ClockIcon,
   EditIcon,
   KeyIcon,
+  RefreshCwIcon,
   RotateCcwIcon,
   TrashIcon
 } from 'vue-feather-icons'
@@ -75,9 +97,11 @@ import {
 export default {
   name: 'row-actions-cell',
   components: {
+    CameraIcon,
     ClockIcon,
     EditIcon,
     KeyIcon,
+    RefreshCwIcon,
     RotateCcwIcon,
     TrashIcon
   },
@@ -89,11 +113,19 @@ export default {
         return {}
       }
     },
-    hideEdit: {
+    hideAvatar: {
+      type: Boolean,
+      default: true
+    },
+    hideChangePassword: {
+      type: Boolean,
+      default: true
+    },
+    hideDelete: {
       type: Boolean,
       default: false
     },
-    hideDelete: {
+    hideEdit: {
       type: Boolean,
       default: false
     },
@@ -101,7 +133,7 @@ export default {
       type: Boolean,
       default: true
     },
-    hideChangePassword: {
+    hideRefresh: {
       type: Boolean,
       default: true
     }

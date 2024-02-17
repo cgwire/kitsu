@@ -6,6 +6,7 @@
 import assets from '@/assets/icons/fi_assets.svg'
 import assetTypeStats from '@/assets/icons/fi_asset_stats.svg'
 import automations from '@/assets/icons/fi-automations.svg'
+import bot from '@/assets/icons/fi_user-bot.svg'
 import breakdown from '@/assets/icons/fi_breakdown.svg'
 import concepts from '@/assets/icons/fi_image.svg'
 import custom from '@/assets/icons/fi_sliders.svg'
@@ -38,6 +39,7 @@ const icons = {
   assetTypes: assetTypeStats,
   'asset-types': assets,
   automations,
+  bot,
   breakdown,
   concepts,
   custom,

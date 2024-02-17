@@ -144,6 +144,12 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'bots' }">
+                <kitsu-icon class="nav-icon" name="bot" />
+                {{ $t('bots.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
               <router-link :to="{ name: 'settings' }">
                 <kitsu-icon class="nav-icon" name="settings" />
                 {{ $t('settings.title') }}

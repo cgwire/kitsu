@@ -1,22 +1,22 @@
 <template>
-  <td scope="row" class="name">
-    <div class="people-name">
-      <people-avatar class="avatar" :person="person" />
-      <people-name class="people-name" with-link :person="person" />
+  <td scope="row">
+    <div class="flexrow">
+      <people-avatar :person="person" />
+      <people-name with-link :person="person" />
     </div>
   </td>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleName from '@/components/widgets/PeopleName'
 
 export default {
   name: 'people-name-cell',
+
   components: {
-    PeopleName,
-    PeopleAvatar
+    PeopleAvatar,
+    PeopleName
   },
 
   props: {
@@ -24,25 +24,12 @@ export default {
       type: Object,
       required: true
     }
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.people-name {
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-}
-
-.people-name {
-  margin-left: 0.6em;
+.flexrow {
+  gap: 0.6em;
 }
 </style>

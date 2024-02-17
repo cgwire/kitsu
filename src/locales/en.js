@@ -80,6 +80,25 @@ export default {
     }
   },
 
+  bots: {
+    title: 'Bots',
+    bots: 'bot | bots',
+    active_bots: 'active bot | active bots',
+    new_bot: 'Add a new bot',
+    edit_title: 'Edit bot',
+    edit_avatar_error: 'An error occurred while updating the bot avatar.',
+    new_token_title: 'New API token for {name}',
+    new_token_warning: 'If you generate a new token, the old one will be disabled.',
+    generate: 'Generate a new token',
+    copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    token_copied: 'Token copied to clipboard!',
+    fields: {
+      name: 'Name',
+      expiration_date: 'Expiration date',
+      token: 'token',
+    }
+  },
+
   breakdown: {
     all_assets: 'All available assets',
     edit_label: 'Change the asset\'s label',
@@ -470,6 +489,7 @@ export default {
     clear_selection: 'Clear current selection',
     close: 'Close',
     color: 'Color',
+    copy: 'Copy',
     column_visibility: 'Visible columns',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
@@ -677,7 +697,8 @@ export default {
     create_error: 'A server error occurred while creating or updating this user. Please contact our support team for more information.',
     delete_error: 'An error occurred while deleting this user. There are probably data linked to it. Are you sure this user has no assignments or wrote no comment?',
     delete_text: 'Are you sure you want to remove {personName} from your database? Every related comment and preview will be deleted. Please confirm by typing the full user name below.',
-    departments_empty: 'This is user isn\'t linked to any department.',
+    departments_empty: 'This user isn\'t linked to any department.',
+    edit_avatar_error: 'An error occurred while updating the user avatar.',
     edit_title: 'Edit user',
     empty_team: 'There is no one listed in the project team.',
     invite: 'Send an invitation',
@@ -712,6 +733,7 @@ export default {
       active: 'Active',
       departments: 'Departments',
       email: 'Email',
+      expiration: 'Expiration',
       name: 'Name',
       phone: 'Phone',
       role: 'Role'
@@ -1019,7 +1041,9 @@ export default {
     webhook_error: 'the webhook mattermost does not correspond to a hook',
     avatar: {
       title: 'Change avatar',
-      error_upload: 'There was an error while uploading picture.'
+      error_upload: 'There was an error while uploading picture.',
+      updating: 'Updating...',
+      removing: 'Removing...'
     },
     change_password: {
       button: 'Change password',

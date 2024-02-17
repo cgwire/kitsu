@@ -12,8 +12,8 @@
       <department-name
         class="department-dot"
         :department="currentDepartment"
-        :only-dot="true"
-        :style="{ padding: '0px 0px' }"
+        no-padding
+        only-dot
         v-if="currentDepartment"
       />
       <router-link

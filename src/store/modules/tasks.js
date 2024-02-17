@@ -111,10 +111,7 @@ const state = {
 
 const helpers = {
   getPerson(personId) {
-    return personStore.getters.getPerson(
-      personStore.state,
-      personStore.getters
-    )(personId)
+    return personStore.getters.getPerson(personStore.state)(personId)
   },
 
   getTaskType(taskTypeId) {
@@ -976,10 +973,7 @@ const mutations = {
     }
 
     if (comment.person === undefined) {
-      const getPerson = personStore.getters.getPerson(
-        personStore.state,
-        personStore.getters
-      )
+      const getPerson = personStore.getters.getPerson(personStore.state)
       comment.person = getPerson(comment.person_id)
     }
 

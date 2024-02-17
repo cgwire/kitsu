@@ -10,8 +10,11 @@
             <th scope="col" class="email">
               {{ $t('people.list.email') }}
             </th>
-            <th scope="col" class="phone">
+            <th scope="col" class="phone" v-if="!isBots">
               {{ $t('people.list.phone') }}
+            </th>
+            <th scope="col" class="expiration" v-if="isBots">
+              {{ $t('people.list.expiration') }}
             </th>
             <th scope="col" class="role">
               {{ $t('people.list.role') }}
@@ -40,7 +43,18 @@
               :person="entry"
             />
             <td class="email">{{ entry.email }}</td>
-            <td class="phone">{{ entry.phone }}</td>
+            <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
+            <td
+              class="expiration"
+              :class="{
+                error: isExpired(entry.expiration_date),
+                warning: isSoonExpired(entry.expiration_date)
+              }"
+              v-if="isBots"
+            >
+              {{ entry.expiration_date }}
+              <alert-triangle-icon class="icon" />
+            </td>
             <td class="role">{{ $t('people.role.' + entry.role) }}</td>
             <department-names-cell
               class="departments"
@@ -49,10 +63,14 @@
             <row-actions-cell
               v-if="isCurrentUserAdmin"
               :entry-id="entry.id"
+              :hide-avatar="false"
+              :hide-change-password="isBots"
               :hide-delete="true"
-              :hide-change-password="false"
-              @edit-clicked="$emit('edit-clicked', entry)"
+              :hide-refresh="!isBots"
+              @avatar-clicked="$emit('avatar-clicked', entry)"
               @change-password-clicked="$emit('change-password-clicked', entry)"
+              @edit-clicked="$emit('edit-clicked', entry)"
+              @refresh-clicked="$emit('refresh-clicked', entry)"
             />
             <td class="actions" v-else></td>
           </tr>
@@ -75,7 +93,10 @@
               :person="entry"
             />
             <td class="email">{{ entry.email }}</td>
-            <td class="phone">{{ entry.phone }}</td>
+            <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
+            <td class="expiration" v-if="isBots">
+              {{ entry.expiration_date }}
+            </td>
             <td class="role">{{ $t('people.role.' + entry.role) }}</td>
             <department-names-cell
               class="departments"
@@ -84,7 +105,6 @@
             <row-actions-cell
               v-if="isCurrentUserAdmin"
               :entry-id="entry.id"
-              :hide-change-password="true"
               @edit-clicked="$emit('edit-clicked', entry)"
               @delete-clicked="$emit('delete-clicked', entry)"
             />
@@ -97,16 +117,14 @@
     <table-info :is-loading="isLoading" :is-error="isError" />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
-      {{ entries.length }} {{ $tc('people.persons', entries.length) }} ({{
-        activePeople.length
-      }}
-      {{ $tc('people.active_persons', activePeople.length) }})
+      {{ nbUsersDetails }}
     </p>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+import { AlertTriangleIcon } from 'vue-feather-icons'
 
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
 import PeopleNameCell from '@/components/cells/PeopleNameCell'
@@ -115,7 +133,9 @@ import TableInfo from '@/components/widgets/TableInfo'
 
 export default {
   name: 'people-list',
+
   components: {
+    AlertTriangleIcon,
     DepartmentNamesCell,
     PeopleNameCell,
     RowActionsCell,
@@ -126,6 +146,10 @@ export default {
     entries: {
       type: Array,
       default: () => []
+    },
+    isBots: {
+      type: Boolean,
+      default: false
     },
     isError: {
       type: Boolean,
@@ -144,20 +168,42 @@ export default {
       return this.entries.filter(person => person.active)
     },
 
+    today() {
+      return new Date().toJSON().slice(0, 10)
+    },
+
+    nextWeek() {
+      const date = new Date()
+      date.setDate(date.getDate() + 7)
+      return date.toJSON().slice(0, 10)
+    },
+
     unactivePeople() {
       return this.entries.filter(person => !person.active)
+    },
+
+    nbUsersDetails() {
+      const nbUsers = this.entries.length
+      const nbActiveUsers = this.activePeople.length
+      const labelUsers = this.$tc(
+        this.isBots ? 'bots.bots' : 'people.persons',
+        nbUsers
+      )
+      const labelActiveUsers = this.$tc(
+        this.isBots ? 'bots.active_bots' : 'people.active_persons',
+        nbActiveUsers
+      )
+      return `${nbUsers} ${labelUsers} (${nbActiveUsers} ${labelActiveUsers})`
     }
   },
 
   methods: {
-    ...mapActions([]),
+    isExpired(expirationDate) {
+      return expirationDate < this.today
+    },
 
-    taskColor(nbTasks) {
-      if (nbTasks < 1 || nbTasks > 4) {
-        return 'red'
-      } else {
-        return ''
-      }
+    isSoonExpired(expirationDate) {
+      return !this.isExpired(expirationDate) && expirationDate < this.nextWeek
     },
 
     onBodyScroll(event, position) {
@@ -182,6 +228,29 @@ export default {
   width: 200px;
   min-width: 200px;
   user-select: text;
+}
+.expiration {
+  width: 200px;
+  min-width: 200px;
+
+  .icon {
+    display: none;
+  }
+
+  &.error,
+  &.warning {
+    .icon {
+      display: inline;
+      margin-left: 0.5rem;
+    }
+  }
+
+  &.error {
+    color: $red;
+  }
+  &.warning {
+    color: $yellow;
+  }
 }
 .role {
   width: 200px;

@@ -5,7 +5,7 @@ export default {
     client.get('/api/data/departments', callback)
   },
 
-  newDepartement(department) {
+  newDepartment(department) {
     const data = {
       name: department.name,
       color: department.color,
@@ -14,7 +14,7 @@ export default {
     return client.ppost('/api/data/departments', data)
   },
 
-  editDepartement(department) {
+  editDepartment(department) {
     const data = {
       name: department.name,
       color: department.color,
