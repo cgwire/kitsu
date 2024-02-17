@@ -28,4 +28,11 @@ describe('lib/string', () => {
   it('slugify', () => {
     expect(stringHelpers.slugify('text spécial', 0)).toEqual('text_special')
   })
+
+  it('filenameWithoutExtension', () => {
+    expect(stringHelpers.filenameWithoutExtension('test')).toEqual('test')
+    expect(stringHelpers.filenameWithoutExtension('test.jpg')).toEqual('test')
+    expect(stringHelpers.filenameWithoutExtension('test.jpeg')).toEqual('test')
+    expect(stringHelpers.filenameWithoutExtension('test.test.jpg')).toEqual('test.test')
+  })
 })
