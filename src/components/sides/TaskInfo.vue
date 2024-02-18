@@ -8,7 +8,7 @@
     ></div>
     <div class="side task-info">
       <action-panel
-        v-if="withActions && (!isConceptTask || selectedConcepts.size > 0)"
+        v-if="extendable && (!isConceptTask || selectedConcepts.size > 0)"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
@@ -275,7 +275,7 @@
             {{ $t('tasks.no_task_selected') }}
           </template>
         </div>
-        <hr />
+        <hr class="no-selection-separator" />
         <div class="empty-section">
           <slot />
         </div>
@@ -1657,5 +1657,10 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
+}
+
+.no-selection-separator {
+  background-color: var(--border-alt);
+  margin: 1em 1em;
 }
 </style>
