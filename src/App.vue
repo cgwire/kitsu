@@ -800,7 +800,6 @@ h2 {
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
-    box-shadow: 0 0 6px 0 $white;
   }
 }
 

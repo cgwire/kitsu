@@ -1554,9 +1554,11 @@ export default {
       if (this.currentPreview.annotations) {
         const annotations = []
         if (this.currentPreview.annotations.forEach) {
-          this.currentPreview.annotations.forEach(a =>
-            annotations.push({ ...a })
-          )
+          this.currentPreview.annotations.forEach(a => {
+            if (a.time >= 0) {
+              annotations.push({ ...a })
+            }
+          })
         }
         this.annotations =
           annotations.sort((a, b) => {
@@ -2160,7 +2162,7 @@ export default {
 
 .buttons .button.active,
 .buttons .background-combo.active .icon {
-  color: #43b581;
+  color: var(--background-selectable);
 }
 
 .buttons .button:hover {

@@ -43,7 +43,13 @@
     <zoom-in-icon :class="iconClass" v-else-if="icon == 'loupe'" />
     <globe-icon :class="iconClass" v-else-if="icon == 'globe'" />
     <codepen-icon :class="iconClass" v-else-if="icon == 'codepen'" />
-    <kitsu-icon :name="icon" :class="iconClass" :title="title" v-else />
+    <kitsu-icon
+      :name="icon"
+      :class="iconClass"
+      :title="title"
+      :active="active"
+      v-else-if="icon !== ''"
+    />
     <span
       :class="{
         text: true,

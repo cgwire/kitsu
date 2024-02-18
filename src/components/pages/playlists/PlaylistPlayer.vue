@@ -540,9 +540,9 @@
           :class="{
             'comparison-button': true,
             'flexrow-item': true,
-            'playlist-button': true,
-            active: isComparing
+            'playlist-button': true
           }"
+          :active="isComparing"
           :title="$t('playlists.actions.split_screen')"
           icon="compare"
           @click="onCompareClicked"
@@ -662,17 +662,17 @@
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
         ></div>
         <button-simple
-          @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
           :class="{
             'playlist-button': true,
-            'flexrow-item': true,
-            active: isAnnotationsDisplayed
+            'flexrow-item': true
           }"
+          :active="isAnnotationsDisplayed"
           icon="pen"
           :title="$t('playlists.actions.toggle_annotations')"
           v-if="
             (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
           "
+          @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
         />
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
@@ -687,9 +687,9 @@
         <button-simple
           :class="{
             'playlist-button': true,
-            'flexrow-item': true,
-            active: isTyping
+            'flexrow-item': true
           }"
+          :active="isTyping"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
           icon="type"
@@ -727,9 +727,9 @@
           @click="isLaserModeOn = !isLaserModeOn"
           :class="{
             'playlist-button': true,
-            'flexrow-item': true,
-            active: isLaserModeOn
+            'flexrow-item': true
           }"
+          :active="isLaserModeOn"
           icon="laser"
           :title="$t('playlists.actions.toggle_laser')"
           v-if="
@@ -1831,6 +1831,7 @@ export default {
     },
 
     configureFullPlayer() {
+      if (!this.fullPlayer) return
       this.fullPlayer.addEventListener('loadedmetadata', () => {
         this.playlistDuration = this.fullPlayer.duration
       })
@@ -2223,7 +2224,6 @@ export default {
     background: none;
     border: 0;
     border-radius: 0;
-    color: var(--text);
     transition: all 0.3s ease;
 
     &:hover {
@@ -2610,6 +2610,17 @@ input[type='number'] {
 .full-button {
   &:hover {
     border: 1px solid var(--text);
+  }
+}
+
+.playlist-button.button.active,
+.buttons .background-combo.active .icon {
+  color: var(--background-selectable);
+
+  img.active {
+    filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)
+      brightness(95%) contrast(93%);
+    box-shadow: none;
   }
 }
 

@@ -172,5 +172,6 @@ img {
 img.active {
   filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)
     brightness(95%) contrast(93%);
+  box-shadow: none;
 }
 </style>
