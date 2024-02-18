@@ -312,10 +312,10 @@
           v-if="currentSection === 'time-logs'"
         />
 
-        <entity-output-files
+        <!--entity-output-files
           :entity="currentAsset"
           v-if="currentSection === 'output-files'"
-        />
+        /-->
       </div>
     </div>
 
@@ -352,7 +352,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditAssetModal from '@/components/modals/EditAssetModal'
 import EntityNews from '@/components/pages/entities/EntityNews'
-import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles'
+// import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityTaskList from '@/components/lists/EntityTaskList'
@@ -376,7 +376,7 @@ export default {
     DescriptionCell,
     EditAssetModal,
     EntityNews,
-    EntityOutputFiles,
+    // EntityOutputFiles,
     EntityPreviewFiles,
     EntityThumbnail,
     EntityTaskList,
@@ -540,8 +540,8 @@ export default {
       return [
         ...this.entityNavOptions.slice(0, 2),
         { label: 'Concepts', value: 'concepts' },
-        ...this.entityNavOptions.slice(2),
-        { label: 'Output Files', value: 'output-files' }
+        ...this.entityNavOptions.slice(2)
+        // { label: 'Output Files', value: 'output-files' }
       ]
     },
 
