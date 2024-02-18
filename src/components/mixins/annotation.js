@@ -453,7 +453,7 @@ export const annotationMixin = {
       } else {
         if (!this.annotations || !this.annotations.push) this.annotations = []
         this.annotations.push({
-          time: currentTime,
+          time: Math.max(currentTime, 0),
           drawing: {
             objects: this.fabricCanvas._objects.map(obj => obj.serialize())
           }
