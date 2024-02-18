@@ -71,14 +71,29 @@
               class="playlist-item-content"
               :style="playlistElementStyle(playlist)"
             >
-              <div v-if="!isListToggled">
-                <span>
-                  {{ playlist.name }}
-                </span>
-                <span class="playlist-date" title="last modified">
-                  {{ $t('playlists.updated_at') }}
-                  {{ formatDate(playlist.updated_at) }}
-                </span>
+              <div class="flexrow" v-if="!isListToggled">
+                <light-entity-thumbnail
+                  class="flerxow-item playlist-thumbnail"
+                  :preview-file-id="playlist.first_preview_file_id"
+                  type="previews"
+                  width="38px"
+                  height="30px"
+                  max-width="38px"
+                  max-height="30px"
+                  empty-width="38px"
+                  empty-height="30px"
+                  :title="playlist.name"
+                  with-link="false"
+                />
+                <div class="flerxow-item ml05">
+                  <span>
+                    {{ playlist.name }}
+                  </span>
+                  <span class="playlist-date" title="last modified">
+                    {{ $t('playlists.updated_at') }}
+                    {{ formatDate(playlist.updated_at) }}
+                  </span>
+                </div>
               </div>
               <div class="has-text-centered" v-else>
                 <light-entity-thumbnail
@@ -91,6 +106,7 @@
                   empty-width="38px"
                   empty-height="30px"
                   :title="playlist.name"
+                  v-if="playlist.first_preview_file_id"
                 />
               </div>
             </div>
@@ -687,8 +703,14 @@ export default {
     playlistElementStyle(playlist) {
       const taskType = this.taskTypeMap.get(playlist.task_type_id)
       const color = taskType ? taskType.color : 'transparent'
-      return {
-        'border-left': '4px solid ' + color
+      if (!this.isListToggled) {
+        return {
+          'border-left': '4px solid ' + color
+        }
+      } else {
+        return {
+          'border-left': 0
+        }
       }
     },
 
@@ -1643,6 +1665,11 @@ h2 {
   .playlist-item {
     padding: 0;
   }
+  .playlist-item-content {
+    height: 30px;
+    padding: 0;
+    border: 0;
+  }
 }
 
 .playlist-column.no-selection {
@@ -1720,7 +1747,19 @@ h2 {
   align-items: flex-start;
 }
 
+.thumbnail-picture,
+.playlist-thumbnail {
+  border-radius: 4px;
+}
+
 .playlist-item-content {
   padding-left: 0.5em;
+
+  .flexrow {
+    align-items: flex-start;
+    .thumbnail-picture {
+      margin-top: 3px;
+    }
+  }
 }
 </style>
