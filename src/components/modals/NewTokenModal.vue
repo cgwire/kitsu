@@ -14,13 +14,15 @@
             }}
           </p>
           <date-field
-            :label="$t('bots.fields.expiration_date')"
             :disabled-dates="{ to: new Date() }"
+            :invalid="!isValidExpirationDate"
+            :label="$t('bots.fields.expiration_date')"
             v-model="form.expiration_date"
           />
           <div class="flexrow right">
             <button
               class="button flexrow-item is-primary"
+              :disabled="!isValidExpirationDate"
               @click="generateToken"
             >
               {{ $t('bots.generate') }}
@@ -117,6 +119,15 @@ export default {
       },
       message: null,
       visible: false
+    }
+  },
+
+  computed: {
+    isValidExpirationDate() {
+      return (
+        !this.form.expiration_date ||
+        new Date(this.form.expiration_date) > new Date()
+      )
     }
   },
 

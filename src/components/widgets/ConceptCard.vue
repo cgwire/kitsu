@@ -110,7 +110,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .concept-item {
   border-radius: 1em;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);

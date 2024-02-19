@@ -106,13 +106,13 @@
           <router-link :to="getPath(production)">
             <div
               class="avatar has-text-centered"
-              v-bind:style="{
+              :style="{
                 background: getAvatarColor(production)
               }"
             >
-              <span v-if="!production.has_avatar">
+              <template v-if="!production.has_avatar">
                 {{ generateAvatar(production) }}
-              </span>
+              </template>
               <img :src="getThumbnailPath(production)" v-else />
             </div>
             <div class="production-name">
@@ -159,13 +159,13 @@
 </template>
 
 <script>
+import { XIcon } from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
-import { XIcon } from 'vue-feather-icons'
 import { buildNameIndex } from '@/lib/indexing'
+import colors from '@/lib/colors'
 import preferences from '@/lib/preferences'
 
-import colors from '@/lib/colors'
 import EditProductionModal from '@/components/modals/EditProductionModal'
 import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
@@ -250,6 +250,16 @@ export default {
         } else {
           route.params.episode_id = 'all'
         }
+      } else if (
+        production.production_type === 'shots' &&
+        routeName === 'assets'
+      ) {
+        route.name = 'shots'
+      } else if (
+        production.production_type === 'assets' &&
+        ['shots', 'sequences'].includes(routeName)
+      ) {
+        route.name = 'assets'
       }
       const isEntityPage = [
         'assets',

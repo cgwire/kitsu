@@ -7,6 +7,7 @@
         :input-class="{
           'date-input': true,
           input: true,
+          invalid,
           short: shortDate
         }"
         :language="locale"
@@ -56,6 +57,10 @@ export default {
     disabledDates: {
       default: () => {},
       type: Object
+    },
+    invalid: {
+      default: false,
+      type: Boolean
     },
     label: {
       default: '',

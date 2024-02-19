@@ -18,7 +18,7 @@
               :label="$t('shots.fields.episode')"
               :options="runningEpisodeOptions"
               v-model="episodeId"
-              v-show="isTVShow"
+              v-if="isTVShow"
             />
             <combobox-status
               class="flexrow-item selector"
@@ -32,15 +32,20 @@
               :task-type-list="taskTypeList"
               v-model="taskTypeId"
             />
-            <div class="field flexrow-item selector small">
+            <div class="flexrow-item selector">
               <label class="label person-label">
                 {{ $t('main.person') }}
               </label>
-              <people-field :people="team" :big="true" v-model="person" />
+              <people-field
+                class="person-field small"
+                big
+                :people="team"
+                v-model="person"
+              />
             </div>
           </div>
 
-          <div class="filters flexrow mt1" v-show="isFiltersDisplayed">
+          <div class="filters flexrow mt1" v-if="isFiltersDisplayed">
             <date-field
               class="flexrow-item"
               :disabled-dates="{ from: today }"
@@ -968,6 +973,10 @@ export default {
 .person-label {
   margin-top: 5px;
   margin-bottom: 4px;
+}
+
+.person-field ::v-deep .v-autocomplete {
+  z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
 .filter-button {

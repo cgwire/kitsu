@@ -1029,12 +1029,25 @@ input.input:focus {
   border-radius: 2em;
 }
 
-.datepicker .input.is-small {
-  font-size: 1em;
-  padding: 0.5em;
-  height: 2.3em;
-  width: 100px;
-  border-radius: 10px;
+.datepicker {
+  .input {
+    border-radius: 10px;
+
+    &::placeholder {
+      color: $light-grey;
+    }
+
+    &.is-small {
+      font-size: 1em;
+      padding: 0.5em;
+      height: 2.3em;
+      width: 100px;
+    }
+
+    &.invalid {
+      border-color: $red;
+    }
+  }
 }
 
 .button:focus {
@@ -2012,15 +2025,6 @@ th.validation-cell {
   ul {
     margin-bottom: 1em;
   }
-}
-
-.input.date-input {
-  border-radius: 10px;
-}
-
-.date-input::placeholder {
-  border-radius: 10px;
-  color: $light-grey;
 }
 
 .project-dates .date-input {

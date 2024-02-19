@@ -121,7 +121,7 @@
             <div class="date-picker-wrapper">
               <datepicker
                 wrapper-class="datepicker"
-                input-class=" is-small date-input input"
+                input-class="is-small date-input input"
                 label="Start date"
                 :placeholder="startDatePlaceholder"
                 :language="locale"
@@ -883,6 +883,8 @@ export default {
       if (this.isTVShow) {
         params.episode_id = 'all'
         routeName = 'episode-assets'
+      } else if (this.productionToCreate.settings.type === 'shots') {
+        routeName = 'shots'
       }
       return {
         name: routeName,
