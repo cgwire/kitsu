@@ -16,7 +16,8 @@
                 isInDepartment ||
                 isCurrentViewTodos) &&
               !isEntitySelection &&
-              isTaskSelection
+              isTaskSelection &&
+              nbSelectedTasks > 1
             "
           >
             {{ $t('main.status') }}
