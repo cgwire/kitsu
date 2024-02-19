@@ -883,6 +883,8 @@ export default {
       if (this.isTVShow) {
         params.episode_id = 'all'
         routeName = 'episode-assets'
+      } else if (this.productionToCreate.settings.type === 'shots') {
+        routeName = 'shots'
       }
       return {
         name: routeName,
