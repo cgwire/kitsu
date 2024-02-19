@@ -7,18 +7,20 @@
       <table class="datatable">
         <thead class="datatable-head">
           <tr class="datatable-row-header">
-            <th class="thumbnail"></th>
-            <th class="type">
+            <th class="tasktype">
               {{ $t('entities.output_files.task_type') }}
             </th>
-            <th class="original-name">
-              {{ $t('entities.output_files.original_file_name') }}
+            <th class="type">
+              {{ $t('entities.output_files.type') }}
             </th>
-            <th class="revision">
-              {{ $t('entities.output_files.revision') }}
+            <th class="name">
+              {{ $t('entities.output_files.name') }}
             </th>
             <th class="extension">
               {{ $t('entities.output_files.extension') }}
+            </th>
+            <th class="revision">
+              {{ $t('entities.output_files.revision') }}
             </th>
             <th class="size">
               {{ $t('entities.output_files.size') }}
@@ -27,66 +29,57 @@
               {{ $t('entities.output_files.status') }}
             </th>
             <th class="person">
-              {{ $t('entities.output_files.uploader') }}
+              {{ $t('entities.output_files.person') }}
             </th>
             <th class="end-cell"></th>
           </tr>
         </thead>
         <tbody class="datatable-body">
-          <tr
-            :key="outputFile.id"
-            class="datatable-row"
-            v-for="outputFile in outputFiles"
-          >
-            <td class="thumbnail">
-              <entity-thumbnail
-                class="output-thumbnail"
-                :output-file-id="outputFile.id"
-                :empty-width="60"
-                :width="60"
+          <template v-for="outputFile in outputFiles">
+            <tr :key="outputFile.id" class="datatable-row">
+              <task-type-cell
+                class="type"
+                :task-type="getTaskType(outputFile)"
+                :production-id="currentProduction.id"
               />
-            </td>
-
-            <task-type-cell
-              class="type"
-              :task-type="getTaskType(outputFile)"
-              :production-id="currentProduction.id"
-            />
-            <td class="original-name">
-              {{ outputFile.original_name }}
-            </td>
-            <td class="revision">
-              {{ outputFile.revision }}
-            </td>
-            <td class="extension">
-              {{ outputFile.extension }}
-            </td>
-            <td class="size">
-              {{ renderFileSize(outputFile.file_size) }}
-            </td>
-            <td class="status">
-              {{ outputFile.validation_status }}
-            </td>
-            <people-name-cell
-              class="person"
-              :person="personMap.get(outputFile.person_id)"
-            />
-
-            <td class="download">
-              <a
-                class="button flexrow-item"
-                :href="getDownloadPath(outputFile.id)"
-                :title="$t('playlists.actions.download_file')"
-                v-if="!isCurrentUserArtist"
-              >
-                <download-icon class="icon is-small" />
-              </a>
-            </td>
-          </tr>
+              <td class="type">
+                {{ getOutputType(outputFile).name }}
+              </td>
+              <td class="name">
+                {{ outputFile.name }}
+              </td>
+              <td class="extension">
+                {{ outputFile.extension }}
+              </td>
+              <td class="revision">
+                {{ outputFile.revision }}
+              </td>
+              <td class="size">
+                {{ renderFileSize(outputFile.file_size) }}
+              </td>
+              <td class="status">
+                {{ getFileStatus(outputFile).name }}
+              </td>
+              <people-name-cell
+                class="person"
+                :person="personMap.get(outputFile.person_id)"
+              />
+              <td class="end-cell"></td>
+            </tr>
+            <tr
+              :key="'path-' + outputFile.id"
+              class="datatable-row"
+              v-if="outputFile.path"
+            >
+              <td colspan="10">
+                {{ outputFile.path }}
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
-    <div v-else>
+    <div class="empty" v-else>
       {{ $t('entities.output_files.no_output_files') }}
     </div>
   </div>
@@ -94,20 +87,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-
-import { DownloadIcon } from 'vue-feather-icons'
 import { renderFileSize } from '@/lib/render'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
+
 import Spinner from '@/components/widgets/Spinner'
 import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 export default {
   name: 'entity-output-files',
   components: {
-    DownloadIcon,
-    EntityThumbnail,
-    PeopleNameCell,
     Spinner,
     TaskTypeCell
   },
@@ -136,17 +123,30 @@ export default {
       'currentProduction',
       'isCurrentUserArtist',
       'personMap',
+      'fileStatusMap',
+      'outputFileTypeMap',
       'taskMap',
       'taskTypeMap'
     ])
   },
 
   methods: {
-    ...mapActions(['getEntityPreviewFiles']),
+    ...mapActions([
+      'loadEntityOutputFiles',
+      'loadFileStatuses',
+      'loadOutputTypes'
+    ]),
 
     getTaskType(outputFile) {
-      const task = this.taskMap.get(outputFile.task_id)
-      return this.taskTypeMap.get(task.task_type_id)
+      return this.taskTypeMap.get(outputFile.task_type_id)
+    },
+
+    getFileStatus(outputFile) {
+      return this.fileStatusMap.get(outputFile.file_status_id)
+    },
+
+    getOutputType(outputFile) {
+      return this.outputFileTypeMap.get(outputFile.output_type_id)
     },
 
     getDownloadPath(outputFileId) {
@@ -156,18 +156,12 @@ export default {
 
     renderFileSize,
 
-    reset() {
+    async reset() {
       this.isLoading = true
-      this.getEntityPreviewFiles(this.entity.id)
-        .then(outputFiles => {
-          this.outputFiles = outputFiles
-          this.isLoading = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.outputFiles = []
-          this.isLoading = false
-        })
+      if (this.fileStatusMap.size === 0) await this.loadFileStatuses()
+      if (this.outputFileTypeMap.size === 0) await this.loadOutputTypes()
+      this.outputFiles = await this.loadEntityOutputFiles(this.entity.id)
+      this.isLoading = false
     }
   },
 
@@ -183,18 +177,8 @@ export default {
 .datatable-body {
   overflow-y: auto;
 }
-
 table.datatable {
   table-layout: fixed;
-}
-
-th.thumbnail {
-  padding-top: 10px;
-  width: 80px;
-}
-
-td.thumbnail {
-  width: 80px;
 }
 
 td.type {
@@ -210,13 +194,9 @@ td.type {
   width: 50px;
 }
 .status {
-  width: 80px;
+  width: 120px;
 }
-.download {
-  width: 40px;
-}
-
-.original-name {
+.name {
   width: 250px;
 }
 .person {
@@ -226,9 +206,6 @@ td.type {
 .output-files {
   overflow-y: auto;
 }
-.dark .output-files.wrapper {
-  background: transparent;
-}
 
 .output-thumbnail {
   cursor: pointer;
@@ -237,5 +214,9 @@ td.type {
 
 .datatable-row-header::after {
   display: none;
+}
+
+.empty {
+  font-style: italic;
 }
 </style>

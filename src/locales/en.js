@@ -297,6 +297,18 @@ export default {
     nb_selected_shots: '{nbSelectedShots} shot selected | {nbSelectedShots} shots selected',
     nb_selected_edits: '{nbSelectedEdits} edit selected | {nbSelectedEdits} edits selected',
 
+    output_files: {
+      extension: 'Extension',
+      name: 'Name',
+      no_output_files: 'There are no output files for this entity.',
+      person: 'Owner',
+      revision: 'Revision',
+      size: 'Size',
+      status: 'Status',
+      task_type: 'Task type',
+      type: 'Type',
+    },
+
     preview_files: {
       extension: 'Extension',
       no_preview_files: 'There are no preview files for this entity.',

@@ -1,4 +1,4 @@
-import client from '@/store/api/client'
+import filesApi from '@/store/api/files'
 
 import { RESET_ALL } from '@/store/mutation-types'
 
@@ -11,7 +11,8 @@ const initialState = {
   fileStatuses: [],
   fileStatusMap: new Map(),
   outputFileTypes: [],
-  outputFileTypeMap: new Map()
+  outputFileTypeMap: new Map(),
+  entitiyOutputFiles: []
 }
 
 const state = { ...initialState }
@@ -23,13 +24,23 @@ const getters = {
 
 const actions = {
   async loadFileStatuses({ commit }) {
-    const fileStatuses = await client.getFileStatuses()
+    const fileStatuses = await filesApi.getFileStatuses()
     commit(SET_FILE_STATUSES, fileStatuses)
   },
 
-  async loadOutputFileTypes({ commit }) {
-    const outputFileTypes = await client.getOutputFileTypes()
+  async loadOutputTypes({ commit }) {
+    const outputFileTypes = await filesApi.getOutputTypes()
     commit(SET_OUTPUT_FILE_TYPES, outputFileTypes)
+  },
+
+  async loadEntityOutputFiles({ commit }, entityId) {
+    try {
+      const entityOutputFiles = await filesApi.getEntityOutputFiles(entityId)
+      return entityOutputFiles
+    } catch (error) {
+      console.error('Error loading entity output files', error)
+      return []
+    }
   }
 }
 
