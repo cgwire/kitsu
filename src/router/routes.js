@@ -7,7 +7,7 @@ import init from '@/lib/init'
 
 import userStore from '@/store/modules/user'
 import taskTypeStore from '@/store/modules/tasktypes'
-import store from '@/store/'
+import store from '@/store'
 
 import Assets from '@/components/pages/Assets'
 import Login from '@/components/pages/Login'
