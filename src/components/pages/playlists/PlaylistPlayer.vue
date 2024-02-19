@@ -537,11 +537,7 @@
         v-if="(isCurrentPreviewMovie || isCurrentPreviewPicture) && !isFullMode"
       >
         <button-simple
-          :class="{
-            'comparison-button': true,
-            'flexrow-item': true,
-            'playlist-button': true
-          }"
+          class="comparison-button flexrow-item playlist-button"
           :active="isComparing"
           :title="$t('playlists.actions.split_screen')"
           icon="compare"
@@ -662,10 +658,7 @@
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
         ></div>
         <button-simple
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true
-          }"
+          class="playlst-button flexrow-item"
           :active="isAnnotationsDisplayed"
           icon="pen"
           :title="$t('playlists.actions.toggle_annotations')"
@@ -685,10 +678,7 @@
           </div>
         </transition>
         <button-simple
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true
-          }"
+          class="playlst-button flexrow-item"
           :active="isTyping"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
@@ -725,10 +715,7 @@
         />
         <button-simple
           @click="isLaserModeOn = !isLaserModeOn"
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true
-          }"
+          class="playlist-button flexrow-item"
           :active="isLaserModeOn"
           icon="laser"
           :title="$t('playlists.actions.toggle_laser')"

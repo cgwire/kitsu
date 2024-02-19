@@ -1,7 +1,7 @@
 <template functional>
   <div class="" v-if="props.sorting.length > 0">
     <div @click="listeners['clear-sorting']()" class="sort-tag">
-    {{ props.label }} {{ props.sorting[0].name }}
+      {{ props.label }} {{ props.sorting[0].name }}
     </div>
   </div>
 </template>

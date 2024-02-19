@@ -1105,15 +1105,11 @@ textarea.input:focus {
 
 .button {
   border-radius: 10px;
+  padding: 0 10px;
 
   &:hover {
     border: 1px solid var(--text);
   }
-}
-
-.button {
-  border-radius: 10px;
-  padding: 0 10px;
 }
 
 .button .icon {

@@ -1494,6 +1494,7 @@ export default {
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
+
       if (!this.readOnly) {
         const preview = this.currentPreview
         if (!this.notSaved) {

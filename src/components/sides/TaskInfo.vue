@@ -8,7 +8,7 @@
     ></div>
     <div class="side task-info">
       <action-panel
-        v-if="extendable && (!isConceptTask || selectedConcepts.size > 0)"
+        v-if="withActions && (!isConceptTask || selectedConcepts.size > 0)"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
@@ -1661,6 +1661,6 @@ export default {
 
 .no-selection-separator {
   background-color: var(--border-alt);
-  margin: 1em 1em;
+  margin: 1em;
 }
 </style>

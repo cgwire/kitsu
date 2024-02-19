@@ -151,7 +151,7 @@ export default {
 
     getDownloadPath(outputFileId) {
       const type = this.isMovie ? 'movies' : 'pictures'
-      return `/api/${type}/originals/output-files/` + `${outputFileId}/download`
+      return `/api/${type}/originals/output-files/${outputFileId}/download`
     },
 
     renderFileSize,

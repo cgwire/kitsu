@@ -431,7 +431,6 @@ export default {
     statMax() {
       if (this.newsStats) {
         return Object.keys(this.newsStats).reduce((max, stat) => {
-          console.log(stat, this.newsStats[stat], max)
           return Math.max(this.newsStats[stat], max)
         }, 0)
       } else {
@@ -939,7 +938,7 @@ export default {
   padding-top: 0.3em;
   padding-bottom: 0.3em;
   border-radius: 0.5em;
-  transition: all 0.1s linear;
+  transition: border 0.1s linear;
 
   &:hover {
     border: 3px solid var(--background-selectable);

@@ -403,11 +403,8 @@ export default {
         return 0
       }
       let frame = Math.ceil(currentTimeRaw / this.frameDuration) + 1
-      console.log('frame bf', frame)
       frame = Number(frame.toPrecision(4))
-      console.log('frame bf2', frame)
       frame = Math.min(frame, this.nbFrames)
-      console.log('frame after', frame)
       return frame
     },
 
