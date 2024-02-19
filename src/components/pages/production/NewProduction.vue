@@ -121,7 +121,7 @@
             <div class="date-picker-wrapper">
               <datepicker
                 wrapper-class="datepicker"
-                input-class=" is-small date-input input"
+                input-class="is-small date-input input"
                 label="Start date"
                 :placeholder="startDatePlaceholder"
                 :language="locale"
