@@ -2,6 +2,11 @@ import client from '@/store/api/client'
 
 import { RESET_ALL } from '@/store/mutation-types'
 
+import {
+  SET_FILE_STATUSES,
+  SET_OUTPUT_FILE_TYPES
+} from '@/store/mutation-types'
+
 const initialState = {
   fileStatuses: [],
   fileStatusMap: new Map(),
@@ -19,20 +24,30 @@ const getters = {
 const actions = {
   async loadFileStatuses({ commit }) {
     const fileStatuses = await client.getFileStatuses()
-    commit('SET_FILE_STATUSES', fileStatuses)
+    commit(SET_FILE_STATUSES, fileStatuses)
   },
 
   async loadOutputFileTypes({ commit }) {
     const outputFileTypes = await client.getOutputFileTypes()
-    commit('SET_OUTPUT_FILE_TYPES', outputFileTypes)
+    commit(SET_OUTPUT_FILE_TYPES, outputFileTypes)
   }
 }
 
 const mutations = {
   [RESET_ALL](state) {
-    const isDarkTheme = state.isDarkTheme
     Object.assign(state, { ...initialState })
-    state.isDarkTheme = isDarkTheme
+  },
+
+  [SET_FILE_STATUSES](state, fileStatuses) {
+    state.fileStatuses = fileStatuses
+    state.fileStatusMap = new Map(
+      fileStatuses.map(status => [status.id, status])
+    )
+  },
+
+  [SET_OUTPUT_FILE_TYPES](state, outputFileTypes) {
+    state.outputFileTypes = outputFileTypes
+    state.outputFileTypeMap = new Map(outputFileTypes.map(oft => [oft.id, oft]))
   }
 }
 
