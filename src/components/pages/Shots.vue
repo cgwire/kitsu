@@ -16,7 +16,7 @@
             <button-simple
               class="flexrow-item"
               :title="$t('entities.build_filter.title')"
-              icon="funnel"
+              icon="filter"
               @click="() => (modals.isBuildFilterDisplayed = true)"
             />
             <info-question-mark
@@ -42,24 +42,24 @@
               <button-simple
                 class="flexrow-item"
                 :title="$t('entities.thumbnails.title')"
-                icon="image"
+                icon="import-files"
                 @click="showAddThumbnailsModal"
               />
               <button-simple
                 class="flexrow-item"
                 :title="$t('main.edl.import_file')"
-                icon="upload"
+                icon="import-edl"
                 @click="showEDLImportModal"
               />
               <button-simple
                 class="flexrow-item"
                 :title="$t('main.csv.import_file')"
-                icon="upload"
+                icon="import"
                 @click="showImportModal"
               />
               <button-simple
                 class="flexrow-item"
-                icon="download"
+                icon="export"
                 :title="$t('main.csv.export_file')"
                 @click="onExportClick"
               />

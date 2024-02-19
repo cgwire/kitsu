@@ -275,7 +275,7 @@
             {{ $t('tasks.no_task_selected') }}
           </template>
         </div>
-        <hr />
+        <hr class="no-selection-separator" />
         <div class="empty-section">
           <slot />
         </div>
@@ -1653,7 +1653,14 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 0 1em 1em 1em;
-  position: absolute;
-  height: 100%;
+  position: relative;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.no-selection-separator {
+  background-color: var(--border-alt);
+  margin: 1em;
 }
 </style>

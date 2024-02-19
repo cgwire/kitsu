@@ -654,24 +654,6 @@ body {
     background-color: #ccc;
   }
 
-  .tabs a {
-    color: $white-grey;
-  }
-
-  .tabs a:hover {
-    border-color: $white-grey;
-  }
-
-  .tabs li.is-active a:hover {
-    border-color: #00c252;
-    color: #00c252;
-  }
-
-  .tabs li.is-active a:hover {
-    border-color: #00c252;
-    color: #00c252;
-  }
-
   .search-queries .tag {
     color: #eee;
     background-color: #5e6169;
@@ -818,7 +800,6 @@ h2 {
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
-    box-shadow: 0 0 6px 0 $white;
   }
 }
 
@@ -1122,6 +1103,30 @@ textarea.input:focus {
   color: #4a4a4a;
 }
 
+.button {
+  border-radius: 10px;
+  padding: 0 10px;
+
+  &:hover {
+    border: 1px solid var(--text);
+  }
+}
+
+.button .icon {
+  min-height: 18px;
+  min-width: 18px;
+  max-height: 18px;
+  min-width: 18px;
+}
+
+.preview-player .button .icon,
+.playlist-player .button .icon {
+  min-height: 14px;
+  min-width: 14px;
+  max-height: 14px;
+  min-width: 14px;
+}
+
 .main-button {
   border-radius: 5px;
   min-height: 2.6em;
@@ -1168,7 +1173,7 @@ textarea.input:focus {
     }
 
     .button {
-      border-radius: 2em;
+      border-radius: 10px;
     }
   }
 }
@@ -1669,6 +1674,11 @@ tbody:last-child .empty-line:last-child {
   &:nth-child(even) .datatable-row-header {
     background-color: var(--background);
   }
+
+  &:hover,
+  &:hover .datatable-row-header {
+    background: var(--background-hover);
+  }
 }
 
 .datatable-row-header {
@@ -1901,9 +1911,20 @@ tbody:last-child .empty-line:last-child {
   margin: auto;
 }
 
+.tabs li a {
+  color: var(--text);
+
+  &:hover {
+    color: var(--text-selectable);
+    border-color: var(--text-selectable);
+  }
+}
+
 .tabs li.is-active a {
-  border-color: #00b242;
-  color: #00b242;
+  font-weight: bold;
+
+  color: var(--text-selected);
+  border-color: var(--text-selected);
 }
 
 .page .columns:last-child {

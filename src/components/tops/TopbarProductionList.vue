@@ -143,16 +143,6 @@ export default {
     .link {
       color: $white;
     }
-
-    &.selected .name-wrapper {
-      background: $dark-grey-light;
-    }
-
-    &:hover {
-      .name-wrapper {
-        background: $dark-purple;
-      }
-    }
   }
 }
 
@@ -188,7 +178,7 @@ export default {
 
   &:hover {
     .name-wrapper {
-      background: #eee;
+      background: var(--background-hover);
     }
   }
 }

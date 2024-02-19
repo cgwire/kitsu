@@ -153,10 +153,6 @@ export default {
       color: $white;
     }
   }
-
-  .section-line:hover {
-    background: $dark-purple;
-  }
 }
 
 .selected-section-line {
@@ -186,7 +182,7 @@ export default {
   }
 
   &:hover {
-    background: #eee;
+    background: var(--background-hover);
   }
 }
 

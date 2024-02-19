@@ -55,6 +55,8 @@
             v-model="selectedPerson"
           />
         </div>
+        <div class="filler"></div>
+        <div class="button" @click="$refs.schedule.scrollToToday()">today</div>
       </div>
 
       <schedule

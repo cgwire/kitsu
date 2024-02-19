@@ -742,14 +742,14 @@ progress {
   border-bottom: 1px solid $dark-grey-light;
   border-top: 1px solid $dark-grey-light;
   cursor: pointer;
-  height: 12px;
+  height: 18px;
   width: 100%;
   position: relative; /* Relative positioning for pseudo-element placement */
   overflow: visible;
   transition: height 0.2s ease-in-out;
 
   &:hover {
-    height: 12px;
+    height: 18px;
   }
 }
 
@@ -768,7 +768,7 @@ progress {
   position: absolute;
   bottom: 0;
   transition: height 0.3s ease-in-out;
-  height: 10px;
+  height: 16px;
   z-index: 2;
   opacity: 0.4;
 

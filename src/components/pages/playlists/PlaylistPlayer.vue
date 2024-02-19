@@ -33,25 +33,24 @@
 
       <button-simple
         class="button playlist-button flexrow-item"
-        @click="onPlayPreviousEntityClicked"
-        :title="$t('playlists.actions.previous_shot')"
         icon="back"
+        :title="$t('playlists.actions.previous_shot')"
+        @click="onPlayPreviousEntityClicked"
         v-if="!isFullMode"
       />
       <button-simple
         class="playlist-button flexrow-item"
-        @click="onPlayNextEntityClicked"
-        :title="$t('playlists.actions.next_shot')"
         icon="forward"
+        :title="$t('playlists.actions.next_shot')"
+        @click="onPlayNextEntityClicked"
         v-if="!isFullMode"
       />
 
       <div class="filler"></div>
       <button-simple
         class="playlist-button topbar-button flexrow-item"
-        @click="isFullMode = false"
         :title="$t('playlists.actions.next_shot')"
-        text="Exit build play"
+        @click="isFullMode = false"
         v-if="isFullMode"
       />
 
@@ -63,10 +62,10 @@
         v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
-        @click="$emit('show-add-entities')"
-        class="playlist-button topbar-button flexrow-item"
+        class="playlist-button topbar-button flexrow-item full-button"
         icon="plus"
         :text="addEntitiesText"
+        @click="$emit('show-add-entities')"
         v-if="
           (isCurrentUserManager || isCurrentUserSupervisor) &&
           !isAddingEntity &&
@@ -84,7 +83,7 @@
         @click="showDeleteModal"
         class="delete-button playlist-button flexrow-item"
         :title="$t('playlists.actions.delete')"
-        icon="delete"
+        icon="trash"
         v-if="isCurrentUserManager || isCurrentUserSupervisor"
       />
     </div>
@@ -520,17 +519,16 @@
           class="button playlist-button flexrow-item"
           :active="isWaveformDisplayed"
           :title="$t('playlists.actions.toggle_waveform')"
-          icon="music"
+          icon="waveform"
           @click="isWaveformDisplayed = !isWaveformDisplayed"
         />
-        <div class="separator"></div>
       </div>
 
       <div class="separator" v-if="!isFullMode"></div>
       <button-simple
         class="playlist-button flexrow-item"
         :title="$t('playlists.actions.change_task_type')"
-        icon="layers"
+        icon="check"
         @click="showTaskTypeModal"
         v-if="!tempMode && !isFullMode"
       />
@@ -539,12 +537,8 @@
         v-if="(isCurrentPreviewMovie || isCurrentPreviewPicture) && !isFullMode"
       >
         <button-simple
-          :class="{
-            'comparison-button': true,
-            'flexrow-item': true,
-            'playlist-button': true,
-            active: isComparing
-          }"
+          class="comparison-button flexrow-item playlist-button"
+          :active="isComparing"
           :title="$t('playlists.actions.split_screen')"
           icon="compare"
           @click="onCompareClicked"
@@ -664,17 +658,14 @@
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
         ></div>
         <button-simple
-          @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true,
-            active: isAnnotationsDisplayed
-          }"
+          class="playlst-button flexrow-item"
+          :active="isAnnotationsDisplayed"
           icon="pen"
           :title="$t('playlists.actions.toggle_annotations')"
           v-if="
             (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
           "
+          @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
         />
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
@@ -687,11 +678,8 @@
           </div>
         </transition>
         <button-simple
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true,
-            active: isTyping
-          }"
+          class="playlst-button flexrow-item"
+          :active="isTyping"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
           icon="type"
@@ -727,11 +715,8 @@
         />
         <button-simple
           @click="isLaserModeOn = !isLaserModeOn"
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true,
-            active: isLaserModeOn
-          }"
+          class="playlist-button flexrow-item"
+          :active="isLaserModeOn"
           icon="laser"
           :title="$t('playlists.actions.toggle_laser')"
           v-if="
@@ -751,7 +736,7 @@
         />
         <button-simple
           class="playlist-button flexrow-item"
-          icon="remove"
+          icon="delete"
           :title="$t('playlists.actions.annotation_delete')"
           @click="onDeleteClicked"
         />
@@ -1833,6 +1818,7 @@ export default {
     },
 
     configureFullPlayer() {
+      if (!this.fullPlayer) return
       this.fullPlayer.addEventListener('loadedmetadata', () => {
         this.playlistDuration = this.fullPlayer.duration
       })
@@ -1909,7 +1895,6 @@ export default {
           this.onFrameUpdate(frame)
         })
       } else {
-        // this.onFrameUpdate(frame)
         this.setCurrentTimeRaw(frame / this.fps)
       }
     },
@@ -2205,10 +2190,14 @@ export default {
     padding: 10px 0 10px 1em;
   }
 
-  .edit-button,
-  .delete-button {
-    height: 50px;
-    width: 50px;
+  .playlist-button.edit-button,
+  .playlist-button.delete-button {
+    margin-left: 5px;
+    margin-right: 0px;
+  }
+
+  .playlist-button.delete-button {
+    margin-right: 10px;
   }
 }
 
@@ -2222,7 +2211,6 @@ export default {
     background: none;
     border: 0;
     border-radius: 0;
-    color: var(--text);
     transition: all 0.3s ease;
 
     &:hover {
@@ -2231,18 +2219,10 @@ export default {
       // transform: scale(1.2);
     }
 
-    &.active {
-      color: $green;
-    }
-
     &.topbar-button {
       border: 1px solid var(--border);
       border-radius: 10px;
       margin-right: 0.5em;
-
-      &.active {
-        color: $light-green;
-      }
     }
   }
 }
@@ -2292,10 +2272,6 @@ export default {
 .icon {
   margin-top: -4px;
   height: 20px;
-}
-
-.smaller {
-  height: 16px;
 }
 
 .right {
@@ -2358,9 +2334,7 @@ export default {
 }
 
 .playlist-footer .button.active,
-.playlist-footer .button:hover,
 .playlist-footer .background-combo.active .icon {
-  color: #43b581;
 }
 
 progress::-moz-progress-bar {
@@ -2618,6 +2592,23 @@ input[type='number'] {
   top: 0;
   left: 0;
   z-index: 100000;
+}
+
+.full-button {
+  &:hover {
+    border: 1px solid var(--text);
+  }
+}
+
+.playlist-button.button.active,
+.buttons .background-combo.active .icon {
+  color: var(--background-selectable);
+
+  img.active {
+    filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)
+      brightness(95%) contrast(93%);
+    box-shadow: none;
+  }
 }
 
 @media only screen and (min-width: 1600px) {

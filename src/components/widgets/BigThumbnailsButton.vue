@@ -11,18 +11,25 @@
     "
     @click="toggleBigThumbnails"
   >
-    <grid-icon class="icon is-small" />
+    <kitsu-icon
+      class="icon is-small"
+      :title="
+        $t(isBigThumbnails ? 'tasks.small_thumbnails' : 'tasks.big_thumbnails')
+      "
+      name="big-thumbnail"
+    />
   </button>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { GridIcon } from 'vue-feather-icons'
+
+import KitsuIcon from '@/components/widgets/KitsuIcon'
 
 export default {
   name: 'big-thumbnails-button',
   components: {
-    GridIcon
+    KitsuIcon
   },
 
   props: {},
@@ -60,3 +67,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.button {
+  border-radius: 10px;
+}
+</style>

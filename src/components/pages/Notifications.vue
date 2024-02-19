@@ -172,11 +172,13 @@
               <div v-if="isReply(notification) || isReplyMention(notification)">
                 ...
               </div>
-              <div v-if="notification.preview_file_id">
+              <div
+                v-if="notification.preview_file_id && !isReply(notification)"
+              >
                 <h3>
                   {{ $t('notifications.new_revision') }}
                 </h3>
-                <div
+                <!--div
                   class="thumbnail-picture-wrapper"
                   v-if="notification.preview_file_id"
                 >
@@ -184,9 +186,9 @@
                     :entity="{ preview_file_id: notification.preview_file_id }"
                     :height="40"
                   />
-                </div>
+                </div-->
               </div>
-              <div
+              <!--div
                 class="comment-text"
                 v-if="
                   (isComment(notification) ||
@@ -196,7 +198,7 @@
                 "
               >
                 {{ $t('comments.empty_text') }}
-              </div>
+              </div-->
 
               <div
                 class="comment-text reply-text"
@@ -217,10 +219,7 @@
       </div>
     </div>
 
-    <div
-      class="column side-column is-hidden-mobile hide-small-screen"
-      v-if="currentTask"
-    >
+    <div class="column side-column is-hidden-mobile hide-small-screen">
       <task-info :task="currentTask" :is-loading="loading.currentTask" />
     </div>
   </div>
@@ -242,7 +241,6 @@ import { renderComment } from '@/lib/render'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageTitle from '@/components/widgets/PageTitle'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import Spinner from '@/components/widgets/Spinner'
@@ -258,7 +256,6 @@ export default {
     ComboboxStatus,
     ComboboxStyled,
     CornerUpLeftIcon,
-    EntityThumbnail,
     MessageSquareIcon,
     PeopleAvatar,
     PageTitle,
@@ -563,10 +560,12 @@ a {
   box-shadow: 0 0 4px $light-grey;
   cursor: pointer;
   margin-bottom: 0.5em;
-  padding-left: 0.7em;
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    background: var(--background-selectable);
+    border: 5px solid var(--background-selectable);
+    transform: scale(1.01);
   }
 }
 
@@ -638,7 +637,8 @@ a {
   }
 }
 
-.selected {
+.selected,
+.selected:hover {
   border: 5px solid var(--background-selected);
   transform: scale(1.01);
 }

@@ -24,7 +24,7 @@
             />
             <div class="flexrow-item">
               <button-simple
-                icon="upload"
+                icon="import"
                 :title="$t('main.csv.import_file')"
                 @click="showImportModal"
                 v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
@@ -32,7 +32,7 @@
             </div>
             <div class="flexrow-item">
               <button-simple
-                icon="download"
+                icon="export"
                 :title="$t('main.csv.export_file')"
                 @click="onExportClick"
                 v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"

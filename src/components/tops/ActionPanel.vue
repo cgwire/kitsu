@@ -16,8 +16,7 @@
                 isInDepartment ||
                 isCurrentViewTodos) &&
               !isEntitySelection &&
-              isTaskSelection &&
-              nbSelectedTasks > 1
+              isTaskSelection
             "
           >
             {{ $t('main.status') }}
@@ -41,7 +40,11 @@
               !isCurrentUserArtist
             "
           >
-            <user-icon />
+            <kitsu-icon
+              name="user-check"
+              :active="selectedBar === 'assignation'"
+              :title="$t('menu.assign_tasks')"
+            />
           </div>
 
           <div
@@ -61,7 +64,11 @@
             "
             @click="selectBar('priorities')"
           >
-            <alert-circle-icon />
+            <kitsu-icon
+              name="priority"
+              :active="selectedBar === 'priorities'"
+              :title="$t('menu.change_priority')"
+            />
           </div>
 
           <div
@@ -77,7 +84,11 @@
             "
             @click="selectBar('thumbnails')"
           >
-            <image-icon />
+            <kitsu-icon
+              name="add-thumbnail"
+              :active="selectedBar === 'thumbnails'"
+              :title="$t('menu.set_thumbnails')"
+            />
           </div>
 
           <div
@@ -94,7 +105,11 @@
             "
             @click="selectBar('subscribe')"
           >
-            <eye-icon />
+            <kitsu-icon
+              name="watch"
+              :active="selectedBar === 'subscribe'"
+              :title="$t('menu.subscribe')"
+            />
           </div>
 
           <div
@@ -137,7 +152,11 @@
             "
             @click="selectBar('playlists')"
           >
-            <film-icon />
+            <kitsu-icon
+              name="playlists"
+              :active="selectedBar === 'playlists'"
+              :title="$t('menu.generate_playlist')"
+            />
           </div>
 
           <div
@@ -186,7 +205,11 @@
               isTaskSelection
             "
           >
-            <trash-icon />
+            <kitsu-icon
+              name="trash"
+              :active="selectedBar === 'delete-tasks'"
+              :title="$t('menu.create_tasks')"
+            />
           </div>
 
           <div
@@ -232,7 +255,7 @@
               isCurrentViewAsset && isCurrentUserManager && !isTaskSelection
             "
           >
-            <trash-icon />
+            <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
           </div>
 
           <div
@@ -244,7 +267,7 @@
             @click="selectBar('delete-shots')"
             v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
           >
-            <trash-icon />
+            <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
           </div>
 
           <div
@@ -256,7 +279,7 @@
             @click="selectBar('delete-edits')"
             v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
           >
-            <trash-icon />
+            <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
           </div>
 
           <div
@@ -271,7 +294,7 @@
               (isCurrentUserManager || isConceptPublisher)
             "
           >
-            <trash-icon />
+            <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
           </div>
 
           <div class="filler"></div>
@@ -284,7 +307,7 @@
               isTaskSelection && !isEntitySelection && nbSelectedTasks === 1
             "
           >
-            <download-icon />
+            <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
           </div>
         </div>
       </div>
@@ -741,7 +764,7 @@
           <button-simple
             class="flexrow-item"
             :title="$t('entities.build_filter.title')"
-            icon="funnel"
+            icon="filter"
             @click="modals.buildFilter = true"
           />
         </div>
@@ -791,18 +814,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import {
-  AlertCircleIcon,
-  CheckSquareIcon,
-  DownloadIcon,
-  EyeIcon,
-  FilmIcon,
-  ImageIcon,
-  LinkIcon,
-  PlayCircleIcon,
-  TrashIcon,
-  UserIcon
-} from 'vue-feather-icons'
+import { CheckSquareIcon, LinkIcon, PlayCircleIcon } from 'vue-feather-icons'
 
 import { intersection } from '@/lib/array'
 import { sortPeople } from '@/lib/sorting'
@@ -814,6 +826,7 @@ import ComboboxModel from '@/components/widgets/ComboboxModel'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities'
+import KitsuIcon from '@/components/widgets/KitsuIcon'
 import PeopleField from '@/components/widgets/PeopleField'
 import SearchField from '@/components/widgets/SearchField'
 import Spinner from '@/components/widgets/Spinner'
@@ -830,7 +843,6 @@ export default {
   },
 
   components: {
-    AlertCircleIcon,
     BuildFilterModal,
     ButtonSimple,
     CheckSquareIcon,
@@ -838,17 +850,12 @@ export default {
     ComboboxStatus,
     ComboboxStyled,
     DeleteEntities,
-    DownloadIcon,
-    EyeIcon,
-    FilmIcon,
-    ImageIcon,
+    KitsuIcon,
     LinkIcon,
     PeopleField,
     PlayCircleIcon,
     SearchField,
     Spinner,
-    UserIcon,
-    TrashIcon,
     ViewPlaylistModal
   },
 
@@ -1698,19 +1705,6 @@ export default {
   .action-topbar {
     background: $dark-grey-light;
 
-    .menu-item {
-      color: $light-grey-light;
-
-      &.active {
-        color: $green;
-      }
-
-      &.status-item.active {
-        color: $green;
-        border-color: $green;
-      }
-    }
-
     .menu {
       background: $black;
       border-bottom: 1px solid $dark-grey-light;
@@ -1755,7 +1749,7 @@ div.assignation {
 
 .menu {
   background: var(--background);
-  color: $grey;
+  color: var(--text);
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   background: #fcfcff;
@@ -1768,16 +1762,15 @@ div.assignation {
   padding: 0.2em 0.6em 0.4em 0.6em;
 
   &:hover {
-    color: var(--text);
-    transform: scale(1.2);
+    transform: scale(1.1);
     transition: transform ease 0.3s;
   }
 
   &.active {
-    color: $light-green;
+    color: var(--text-selected);
 
     &:hover {
-      color: $light-green;
+      color: var(--text-selected);
     }
   }
 }
@@ -1830,8 +1823,9 @@ div.assignation {
 
 .status-item {
   align-items: center;
-  border: 2px solid $light-grey;
+  border: 2px solid var(--text);
   border-radius: 15px;
+  color: var(--text);
   font-weight: bold;
   display: flex;
   font-size: 0.7em;
@@ -1839,20 +1833,12 @@ div.assignation {
   height: 100%;
   margin-left: 1em;
   margin-top: -1em;
+  padding-top: 0.3em;
   text-transform: uppercase;
 
-  &:hover {
-    border: 2px solid var(--text);
-  }
-
   &.active {
-    border: 2px solid $light-green;
-    color: $light-green;
-
-    &:hover {
-      border: 2px solid $light-green;
-      color: $light-green;
-    }
+    border: 2px solid var(--text-selected);
+    color: var(--text-selected);
   }
 }
 

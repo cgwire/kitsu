@@ -9,7 +9,7 @@
         v-model="currentDate"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item small"
         icon="refresh"
         @click="loadDayEvents"
       />

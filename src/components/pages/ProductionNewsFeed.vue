@@ -4,24 +4,12 @@
       <div class="news page" ref="body" v-scroll="onBodyScroll">
         <div class="timeline-wrapper">
           <div class="has-text-right filler filter-button">
-            <span @click="toggleFilters">
-              <template v-if="isFiltersDisplayed">
-                {{ $t('main.less_filters') }}
-              </template>
-              <template v-else>
-                {{ $t('main.more_filters') }}
-              </template>
-            </span>
-            &bull;
-
-            <span @click="toggleStats">
-              <template v-if="isStatsDisplayed">
-                {{ $t('news.hide_stats') }}
-              </template>
-              <template v-else>
-                {{ $t('news.show_stats') }}
-              </template>
-            </span>
+            <button-simple
+              icon="filter"
+              :active="isFiltersDisplayed"
+              :title="$t('main.more_filters')"
+              @click="toggleFilters"
+            />
           </div>
 
           <div class="filters flexrow">
@@ -73,25 +61,6 @@
               :options="previewOptions"
               v-model="previewMode"
             />
-          </div>
-
-          <div class="stats mt1" v-if="isStatsDisplayed">
-            <span class="news-number">
-              {{ newsTotal }} {{ $t('news.news') }}
-            </span>
-            <template v-for="stat in renderedStats">
-              <span
-                :key="'stat-value-' + stat.name.toLowerCase()"
-                class="tag stat-tag"
-                :title="stat.name + ': ' + stat.value"
-                :style="{
-                  background: stat.color,
-                  color: stat.is_default ? '#666' : 'white'
-                }"
-              >
-                {{ stat.name }} : {{ stat.value }}
-              </span>
-            </template>
           </div>
 
           <div class="timeline">
@@ -150,6 +119,15 @@
                       />
                     </div>
 
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(news.author_id)"
+                      :size="30"
+                      :font-size="14"
+                      :is-link="false"
+                      v-if="personMap.get(news.author_id)"
+                    />
+
                     <div class="flexrow-item task-type-wrapper">
                       <task-type-name
                         class="task-type-name"
@@ -171,31 +149,17 @@
                     <div class="flexrow-item comment-content">
                       <div>
                         <div class="news-info flexrow">
-                          <people-avatar
-                            class="flexrow-item"
-                            :person="personMap.get(news.author_id)"
-                            :size="30"
-                            :font-size="14"
-                            :is-link="false"
-                            v-if="personMap.get(news.author_id)"
-                          />
-                          <span class="explaination flexrow-item">
-                            <span class="strong person-name">
-                              {{ personName(news) }}
-                            </span>
-                            <span>
-                              {{ $t('news.commented_on') }}
-                            </span>
+                          <span class="explaination flexrow-item flexrow">
                             <entity-thumbnail
-                              class="ml05"
+                              class="ml1 entity-thumbnail mr1 flexrow-item"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
                               }"
-                              v-if="news.entity_preview_file_id"
+                              :with-link="false"
                             />
 
-                            <span class="strong">
+                            <span class="strong ml05">
                               {{ news.full_entity_name }}
                             </span>
                           </span>
@@ -229,6 +193,14 @@
                       {{ formatTime(news.created_at) }}
                     </span>
 
+                    <people-avatar
+                      class="flexrow-item"
+                      :person="personMap.get(news.author_id)"
+                      :size="30"
+                      :no-link="true"
+                      v-if="personMap.get(news.author_id)"
+                    />
+
                     <div class="flexrow-item task-type-wrapper">
                       <task-type-name
                         class="task-type-name"
@@ -240,29 +212,17 @@
                     <div class="flexrow-item comment-content">
                       <div>
                         <div class="news-info flexrow">
-                          <people-avatar
-                            class="flexrow-item"
-                            :person="personMap.get(news.author_id)"
-                            :size="30"
-                            :no-link="true"
-                            v-if="personMap.get(news.author_id)"
-                          />
-                          <span class="explaination flexrow-item">
-                            <span class="strong person-name">
-                              {{ personName(news) }}
-                            </span>
-                            <span>
-                              {{ $t('news.set_preview_on') }}
-                            </span>
+                          <span class="explaination flexrow-item flexrow">
                             <entity-thumbnail
-                              class="ml05"
+                              class="ml1"
                               :entity="{
                                 id: news.task_entity_id,
                                 preview_file_id: news.entity_preview_file_id
                               }"
+                              :with-link="false"
                               v-if="news.entity_preview_file_id"
                             />
-                            <span class="strong">
+                            <span class="strong ml05 flexrow-item">
                               {{ news.full_entity_name }}
                             </span>
                           </span>
@@ -300,12 +260,35 @@
       </div>
     </div>
 
-    <div id="side-column" class="column side-column" v-if="currentTask">
+    <div id="side-column" class="column side-column">
       <task-info
         :task="currentTask"
         :is-loading="loading.currentTask"
         with-actions
-      />
+      >
+        <div class="stats">
+          <div class="news-number mb1">
+            {{ newsTotal }} {{ $t('news.news') }}
+          </div>
+          <div
+            :key="'stat-' + stat.name"
+            class="stat-wrapper"
+            v-for="stat in renderedStats"
+          >
+            <div>{{ stat.name }} : {{ stat.value }}</div>
+            <span
+              :key="'stat-value-' + stat.name.toLowerCase()"
+              class="stat-tag"
+              :title="stat.name + ': ' + stat.value"
+              :style="{
+                background: stat.color,
+                width: (stat.value / statMax) * 100 + '%'
+              }"
+            >
+            </span>
+          </div>
+        </div>
+      </task-info>
     </div>
   </div>
 </template>
@@ -319,10 +302,12 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+
 import { sortByName, sortPeople } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
@@ -341,6 +326,7 @@ export default {
   name: 'production-news-feed',
   mixins: [timeMixin],
   components: {
+    ButtonSimple,
     Combobox,
     ComboboxStatus,
     ComboboxTaskType,
@@ -442,6 +428,16 @@ export default {
       'user'
     ]),
 
+    statMax() {
+      if (this.newsStats) {
+        return Object.keys(this.newsStats).reduce((max, stat) => {
+          return Math.max(this.newsStats[stat], max)
+        }, 0)
+      } else {
+        return 0
+      }
+    },
+
     isStudio() {
       return this.$route.path.indexOf('productions') < 0
     },
@@ -519,7 +515,7 @@ export default {
               value: this.newsStats[taskStatusId]
             }
           })
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => a.value < b.value)
       } else {
         return ''
       }
@@ -805,13 +801,6 @@ export default {
     color: $light-grey-light;
   }
 
-  .stats {
-    .news-number {
-      border: 2px solid $light-grey;
-      color: $light-grey;
-    }
-  }
-
   .timeline-wrapper {
     background: $dark-grey;
   }
@@ -861,7 +850,7 @@ export default {
 
 .timeline-wrapper {
   margin: auto;
-  max-width: 875px;
+  max-width: 920px;
   padding-top: 25px;
   padding-left: 25px;
   padding-right: 25px;
@@ -895,10 +884,10 @@ export default {
     .dot {
       position: absolute;
       display: block;
-      left: -31px;
+      left: -34px;
       background: $blue-light;
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 4px;
 
       &.red {
@@ -916,24 +905,11 @@ export default {
   }
 
   .validation-wrapper {
-    min-width: 60px;
+    min-width: 80px;
   }
 
   .date {
     min-width: 30px;
-  }
-
-  .selected .date {
-    color: $dark-grey;
-  }
-
-  .explaination,
-  .explaination span {
-    display: inline;
-
-    &.entity-thumbnail {
-      display: inline-block;
-    }
   }
 }
 
@@ -956,17 +932,20 @@ export default {
 .news-line {
   padding-left: 1em;
   align-items: middle;
+  border: 3px solid transparent;
   cursor: pointer;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
+  margin-bottom: 1px;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
   border-radius: 0.5em;
+  transition: border 0.1s linear;
 
   &:hover {
-    background: var(--background-hover);
+    border: 3px solid var(--background-selectable);
   }
 
   &.selected {
-    background: var(--background-selected);
+    border: 3px solid var(--background-selected);
   }
 }
 
@@ -1000,20 +979,29 @@ export default {
 
 .stats {
   text-align: left;
-  margin-top: 2em;
+  width: 100%;
+  flex: 1;
 
   .news-number {
     font-weight: bold;
-    border: 2px solid $grey-strong;
-    border-radius: 1em;
-    padding: 0.3em;
-    margin-right: 0.8em;
+    border-bottom: 1px solid var(--border-alt);
+    padding: 0.6em;
   }
 
   .stat-tag {
+    display: inline-block;
     margin-right: 1em;
     margin-top: 0;
-    margin-bottom: 1em;
+    margin-bottom: 0.4em;
+    font-size: 0.8em;
+    font-weight: bold;
+    width: 100%;
+    height: 12px;
+    border-radius: 2px;
   }
+}
+
+.preview .news-line .dot {
+  left: -54px;
 }
 </style>

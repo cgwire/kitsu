@@ -372,28 +372,14 @@
               keep-order
               thin
               :options="backgroundOptions"
-              v-model="currentBackground"
               @change="onObjectBackgroundSelected()"
+              v-if="backgroundOptions.length > 0"
+              v-model="currentBackground"
             >
               <template #icon>
                 <globe-icon class="icon is-small mr05" />
               </template>
             </combobox-styled>
-            <!--
-            <button-simple
-              class="flexrow-item"
-              icon="upload"
-              :title="$t('playlists.actions.object_background')"
-              @click="onObjectBackgroundClicked"
-            />
-            <input
-              ref="object-background-input-file"
-              accept=".hdr"
-              class="visuallyhidden"
-              type="file"
-              @change="onObjectBackgroundUploaded"
-            />
-            -->
             <button-simple
               class="flexrow-item"
               :active="isObjectBackground && isEnvironmentSkybox"
@@ -401,12 +387,12 @@
               icon="image"
               :title="$t('playlists.actions.toggle_environment_skybox')"
               @click="isEnvironmentSkybox = !isEnvironmentSkybox"
-              v-if="!light || fullScreen"
+              v-if="!light || (fullScreen && backgroundOptions.length > 0)"
             />
             <button-simple
               class="flexrow-item"
               :active="isWireframe"
-              icon="codepen"
+              icon="box"
               :title="$t('playlists.actions.toggle_wireframe')"
               @click="isWireframe = !isWireframe"
             />
@@ -1420,27 +1406,6 @@ export default {
       }
     },
 
-    /*
-    onObjectBackgroundClicked() {
-      if (this.isObjectBackground) {
-        this.$refs['object-background-input-file'].value = ''
-        URL.revokeObjectURL(this.objectBackgroundUrl.replace('#.hdr', ''))
-        this.$refs['object-background-input-file'].click()
-      } else {
-        this.$refs['object-background-input-file'].click()
-      }
-    },
-
-    onObjectBackgroundUploaded(event) {
-      const file = event.target.files[0]
-      const blobURL = URL.createObjectURL(file)
-      this.objectBackgroundUrl = `${blobURL}#.hdr`
-      this.isObjectBackground = true
-      this.isEnvironmentSkybox = true
-      this.currentBackground = ''
-    },
-    */
-
     onObjectBackgroundSelected() {
       this.objectBackgroundUrl = this.currentBackground?.url
       const enabled = Boolean(this.objectBackgroundUrl)
@@ -1529,6 +1494,7 @@ export default {
       }
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(currentTime, annotation)
+
       if (!this.readOnly) {
         const preview = this.currentPreview
         if (!this.notSaved) {
@@ -1589,9 +1555,11 @@ export default {
       if (this.currentPreview.annotations) {
         const annotations = []
         if (this.currentPreview.annotations.forEach) {
-          this.currentPreview.annotations.forEach(a =>
-            annotations.push({ ...a })
-          )
+          this.currentPreview.annotations.forEach(a => {
+            if (a.time >= 0) {
+              annotations.push({ ...a })
+            }
+          })
         }
         this.annotations =
           annotations.sort((a, b) => {
@@ -1896,7 +1864,7 @@ export default {
         const height = this.canvasWrapper.style.height
         this.previewViewer.updateLoupePosition(event, { width, height })
       } else if (this.isMovie && this.$options.scrubbing) {
-        const x = this.getClientX(event)
+        const x = this.getClientX(event.e)
         if (x - this.$options.scrubStartX < 0) {
           this.goPreviousFrame()
         } else {
@@ -2194,9 +2162,8 @@ export default {
 }
 
 .buttons .button.active,
-.buttons .button:hover,
 .buttons .background-combo.active .icon {
-  color: #43b581;
+  color: var(--background-selectable);
 }
 
 .buttons .button:hover {

@@ -258,7 +258,7 @@ export default {
 }
 
 .rounded {
-  border-radius: 20px;
+  border-radius: 10px;
 
   &.opened {
     border-bottom-left-radius: 0px;

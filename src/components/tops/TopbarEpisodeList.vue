@@ -155,10 +155,6 @@ export default {
       color: $white;
     }
   }
-
-  .episode-line:hover {
-    background: $dark-purple;
-  }
 }
 
 .episode-combo {
@@ -200,7 +196,7 @@ export default {
   }
 
   &:hover {
-    background: #eee;
+    background: var(--background-hover);
   }
 }
 

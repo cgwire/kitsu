@@ -13,6 +13,7 @@ import departments from '@/store/modules/departments'
 import edits from '@/store/modules/edits'
 import entities from '@/store/modules/entities'
 import episodes from '@/store/modules/episodes'
+import files from '@/store/modules/files'
 import login from '@/store/modules/login'
 import main from '@/store/modules/main'
 import news from '@/store/modules/news'
@@ -42,6 +43,7 @@ const modules = {
   edits,
   entities,
   episodes,
+  files,
   login,
   main,
   people,

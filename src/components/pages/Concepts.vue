@@ -513,7 +513,7 @@ export default {
     transition: border-color 0.2s ease-in-out;
 
     &:hover {
-      border-color: var(--background-hover);
+      border-color: var(--background-selectable);
     }
 
     &.selected-item {

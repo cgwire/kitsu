@@ -133,7 +133,7 @@ export default {
 
 .buttons .button.active,
 .buttons .button:hover {
-  color: #43b581;
+  color: var(--background-selectable);
 }
 
 .bar-element {

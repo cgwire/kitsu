@@ -856,16 +856,14 @@ export default {
 
   .changelog-button {
     color: $grey;
+
+    &:hover {
+      color: white;
+    }
   }
 
   hr {
     background-color: $grey-strong;
-  }
-
-  .user-menu li {
-    &:not(.version):hover {
-      background: $dark-grey-light;
-    }
   }
 }
 
@@ -919,7 +917,7 @@ export default {
 
   &:not(.version):hover {
     cursor: pointer;
-    background: $white-grey;
+    background: var(--background-hover);
     border-radius: 5px;
   }
 }
@@ -975,6 +973,10 @@ strong {
   background: transparent;
   color: $light-grey;
   cursor: pointer;
+
+  &:hover {
+    color: var(--text);
+  }
 }
 
 .help-button {
@@ -984,7 +986,7 @@ strong {
   margin-top: 3px;
 
   &:hover {
-    color: $light-grey;
+    color: var(--text);
   }
 }
 

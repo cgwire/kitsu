@@ -173,7 +173,9 @@ export default {
 
         this.video.addEventListener('error', err => {
           console.error('An error occurred while loading a video', err)
-          this.$refs.movie.style.height = this.defaultHeight + 'px'
+          if (this.$refs.movie) {
+            this.$refs.movie.style.height = this.defaultHeight + 'px'
+          }
           this.isLoading = false
         })
 
@@ -397,6 +399,9 @@ export default {
       } else {
         currentTimeRaw = 0
       }
+      if (currentTimeRaw === 0) {
+        return 0
+      }
       let frame = Math.ceil(currentTimeRaw / this.frameDuration) + 1
       frame = Number(frame.toPrecision(4))
       frame = Math.min(frame, this.nbFrames)
@@ -421,7 +426,7 @@ export default {
       clearInterval(this.$options.playLoop)
       this.$options.playLoop = setInterval(
         this.emitFrameChange,
-        Math.round(1000000 / (this.fps * 1000))
+        this.frameDuration
       )
     },
 
@@ -433,9 +438,8 @@ export default {
     pause() {
       this.video.pause()
       clearInterval(this.$options.playLoop)
-      const frame = this.getFrameFromPlayer()
-      this.video.currentTime = frame * this.frameDuration
-      this.$emit('frame-update', frame)
+      this.video.currentTime = this.currentFrame * this.frameDuration
+      this.$emit('frame-update', this.currentFrame)
     },
 
     toggleMute() {

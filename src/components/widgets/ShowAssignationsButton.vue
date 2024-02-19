@@ -15,18 +15,28 @@
     "
     @click="toggleAssignations"
   >
-    <users-icon class="icon is-small" />
+    <kitsu-icon
+      class="icon is-small"
+      name="user"
+      :title="
+        $t(
+          isShowAssignations
+            ? 'tasks.hide_assignations'
+            : 'tasks.show_assignations'
+        )
+      "
+    />
   </button>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { UsersIcon } from 'vue-feather-icons'
+import KitsuIcon from '@/components/widgets/KitsuIcon'
 
 export default {
   name: 'show-assignations-button',
   components: {
-    UsersIcon
+    KitsuIcon
   },
 
   props: {},
@@ -64,3 +74,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.button {
+  border-radius: 10px;
+  padding: 0 10px;
+}
+
+.button .icon {
+  height: 18px;
+  width: 18px;
+}
+</style>

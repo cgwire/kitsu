@@ -1049,4 +1049,8 @@ input[type='number']::-webkit-inner-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+
+.datatable-row:hover {
+  background: var(--background-selectable);
+}
 </style>
