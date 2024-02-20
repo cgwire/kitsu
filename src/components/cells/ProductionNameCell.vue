@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import colors from '@/lib/colors.js'
 
 export default {
@@ -75,6 +77,8 @@ export default {
   },
 
   computed: {
+    ...mapGetters(['isCurrentUserClient']),
+
     generatedAvatar() {
       const firstLetter = this.entry.name?.[0] || 'P'
       return firstLetter.toUpperCase()
@@ -121,7 +125,9 @@ export default {
 
   methods: {
     sectionPath(production, section) {
-      const routeName = production.homepage || section
+      const routeName = this.isCurrentUserClient
+        ? 'playlists'
+        : production.homepage || section
       const route = {
         name: routeName,
         params: {
