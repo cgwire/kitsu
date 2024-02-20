@@ -94,6 +94,7 @@ export const replaceTimeWithTimecode = (
 }
 
 export const renderFileSize = size => {
+  if (!size) return ''
   let renderedSize = ''
   if (size > 1000000000) {
     renderedSize = (size / 1000000000).toFixed(1) + 'G'

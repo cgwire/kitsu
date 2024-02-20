@@ -36,7 +36,7 @@
 
     <button-simple
       class="flexrow-item"
-      icon="delete"
+      icon="trash"
       :title="$t('playlists.actions.files_delete')"
       @click="$emit('remove-preview-clicked')"
       v-if="!readOnly && !fullScreen && !light"
