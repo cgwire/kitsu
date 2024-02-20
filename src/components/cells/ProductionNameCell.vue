@@ -81,17 +81,7 @@ export default {
     },
 
     productionRoute() {
-      const route = {
-        name: this.lastProductionScreen,
-        params: {
-          production_id: this.entry.id
-        }
-      }
-      if (this.entry.first_episode_id) {
-        route.name = `episode-${this.lastProductionScreen}`
-        route.params.episode_id = this.entry.first_episode_id
-      }
-      return route
+      return this.sectionPath(this.entry, this.lastProductionScreen)
     },
 
     productionInfo() {
@@ -126,6 +116,48 @@ export default {
 
     thumbnailPath() {
       return `/api/pictures/thumbnails/projects/${this.entry.id}.png`
+    }
+  },
+
+  methods: {
+    sectionPath(production, section) {
+      const routeName = production.homepage || section
+      const route = {
+        name: routeName,
+        params: {
+          production_id: production.id
+        },
+        query: {}
+      }
+      if (production.production_type === 'tvshow') {
+        route.name = `episode-${routeName}`
+        if (section !== 'edits') {
+          route.params.episode_id = production.first_episode_id
+        } else {
+          route.params.episode_id = 'all'
+        }
+      } else if (
+        production.production_type === 'shots' &&
+        routeName === 'assets'
+      ) {
+        route.name = 'shots'
+      } else if (
+        production.production_type === 'assets' &&
+        ['shots', 'sequences'].includes(routeName)
+      ) {
+        route.name = 'assets'
+      }
+      const isEntityPage = [
+        'assets',
+        'shots',
+        'edits',
+        'sequences',
+        'episodes'
+      ].includes(routeName)
+      if (isEntityPage) {
+        route.query.search = ''
+      }
+      return route
     }
   }
 }
