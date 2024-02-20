@@ -112,12 +112,22 @@ const getProductionRoute = (name, productionId) => {
 
 export const getProductionPath = (
   production,
-  section = 'assets',
+  section = production.homepage || 'assets',
   episodeId
 ) => {
   if (section === 'assetTypes') section = 'production-asset-types'
   if (section === 'newsFeed') section = 'news-feed'
   let route = getProductionRoute(section, production.id)
+
+  if (production.production_type === 'shots' && route.name === 'assets') {
+    route.name = 'shots'
+  } else if (
+    production.production_type === 'assets' &&
+    ['shots', 'sequences'].includes(route.name)
+  ) {
+    route.name = 'assets'
+  }
+
   if (
     production.production_type === 'tvshow' &&
     ![
@@ -134,7 +144,11 @@ export const getProductionPath = (
     route = episodifyRoute(route, episodeId || 'all')
   }
 
-  if (['assets', 'shots', 'edits', 'breakdown'].includes(section)) {
+  if (
+    ['assets', 'shots', 'edits', 'sequences', 'episodes', 'breakdown'].includes(
+      section
+    )
+  ) {
     route.query = { search: '' }
   }
 
