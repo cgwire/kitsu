@@ -235,7 +235,9 @@ export default {
     },
 
     sectionPath(production, section) {
-      const routeName = production.homepage || section
+      const routeName = this.isCurrentUserClient
+        ? 'playlists'
+        : production.homepage || section
       const route = {
         name: routeName,
         params: {
