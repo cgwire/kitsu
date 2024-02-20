@@ -164,6 +164,7 @@ export default {
 
   mounted() {
     this.isLoading = true
+    this.clearSelectedTasks()
     this.loadTasksToCheck()
       .then(tasks => {
         if (tasks) {
@@ -313,6 +314,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'clearSelectedTasks',
       'loadTasksToCheck',
       'removeTodoSearch',
       'saveTodoSearch',
