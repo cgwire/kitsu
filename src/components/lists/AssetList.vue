@@ -888,6 +888,10 @@ export default {
       this.updateOffsets()
     },
 
+    isBigThumbnails() {
+      this.updateOffsets()
+    },
+
     currentProduction() {
       // Map used for performance reasons, to avoid array traversals
       this.isSelectableMap = {}

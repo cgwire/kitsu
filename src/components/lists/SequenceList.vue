@@ -617,6 +617,10 @@ export default {
 
     isLoading() {
       this.updateOffsets()
+    },
+
+    isBigThumbnails() {
+      this.updateOffsets()
     }
   }
 }
