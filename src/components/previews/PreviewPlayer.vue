@@ -271,7 +271,7 @@
 
             <button-simple
               class="flexrow-item"
-              icon="remove"
+              icon="delete"
               :title="$t('playlists.actions.annotation_delete')"
               @click="onDeleteClicked"
               v-if="!readOnly && fullScreen && !isConcept"
