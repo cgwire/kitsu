@@ -34,6 +34,7 @@
           :label="$t('people.fields.email')"
           :disabled="personToEdit.is_generated_from_ldap"
           v-model.trim="form.email"
+          v-if="!isBot"
         />
         <text-field
           :label="$t('people.fields.phone')"
@@ -262,7 +263,8 @@ export default {
       'departments',
       'departmentMap',
       'isCurrentUserAdmin',
-      'people'
+      'people',
+      'user'
     ]),
 
     selectableDepartments() {
@@ -360,7 +362,8 @@ export default {
           active: 'true',
           departments: [],
           expiration_date: null,
-          is_bot: this.isBot
+          is_bot: this.isBot,
+          email: this.isBot ? this.user.email : null
         }
       }
     }

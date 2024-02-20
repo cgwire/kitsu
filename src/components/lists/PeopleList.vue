@@ -7,7 +7,7 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('people.list.name') }}
             </th>
-            <th scope="col" class="email">
+            <th scope="col" class="email" v-if="!isBots">
               {{ $t('people.list.email') }}
             </th>
             <th scope="col" class="phone" v-if="!isBots">
@@ -42,7 +42,7 @@
               class="name datatable-row-header"
               :person="entry"
             />
-            <td class="email">{{ entry.email }}</td>
+            <td class="email" v-if="!isBots">{{ entry.email }}</td>
             <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
             <td
               class="expiration"
@@ -92,7 +92,7 @@
               class="name datatable-row-header"
               :person="entry"
             />
-            <td class="email">{{ entry.email }}</td>
+            <td class="email" v-if="!isBots">{{ entry.email }}</td>
             <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
             <td class="expiration" v-if="isBots">
               {{ entry.expiration_date }}

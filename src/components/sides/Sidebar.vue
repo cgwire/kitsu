@@ -75,7 +75,10 @@
               </router-link>
             </p>
 
-            <p @click="toggleSidebar()" v-if="isCurrentUserSupervisor">
+            <p
+              @click="toggleSidebar()"
+              v-if="isCurrentUserSupervisor || isCurrentUserManager"
+            >
               <router-link
                 style="position: relative"
                 :to="{ name: 'team-schedule' }"
