@@ -60,6 +60,7 @@
       </div>
 
       <schedule
+        ref="schedule"
         :end-date="endDate"
         :hide-man-days="true"
         :hierarchy="scheduleItems"
