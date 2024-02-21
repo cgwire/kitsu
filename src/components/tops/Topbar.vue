@@ -613,10 +613,24 @@ export default {
 
     configureProduction(routeProductionId) {
       this.setProduction(routeProductionId)
+      this.currentProductionId = routeProductionId
       if (this.isTVShow) {
         this.loadEpisodes()
           .then(episodes => {
-            this.updateCombosFromRoute()
+            if (this.currentProjectSection === 'assets') {
+              this.currentEpisodeId = 'all'
+            } else {
+              this.currentEpisodeId = episodes.find(
+                e => (e.status = 'running')
+              ).id
+            }
+            this.$router.push({
+              params: {
+                production_id: routeProductionId,
+                section: this.currentProjectSection,
+                episode_id: this.currentEpisodeId
+              }
+            })
           })
           .catch(console.error)
       } else {
