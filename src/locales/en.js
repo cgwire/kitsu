@@ -1233,6 +1233,7 @@ export default {
     title_main: 'Main Schedule',
     overall_man_days: 'Person-days',
     md: 'md',
+    today: 'Today',
     zoom_level: 'Zoom level',
     milestone: {
       add_milestone: 'Add milestone for',
