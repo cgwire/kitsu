@@ -575,7 +575,7 @@ export default {
     },
 
     initSchedule() {
-      this.$refs['schedule-widget'].scrollToDate(
+      this.$refs['schedule-widget']?.scrollToDate(
         this.scheduleItems[0].startDate
       )
     }
