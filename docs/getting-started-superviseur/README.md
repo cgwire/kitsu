@@ -2,13 +2,13 @@
 
 ## Check your Tasks
 
-As Supervisor, most of the time, you also have tasks assigned on top of supervising your department.
+As a Supervisor, most of the time, you also have tasks assigned on top of supervising your department.
 
-So it means splitting your time between your work and supervising your team.
+So, it means splitting your time between your work and supervising your team.
 
 Let's start with how to check what you have to do.
 
-When you login into Kitsu, you will notice the button on top of the screen **My Tasks**. 
+When you log into Kitsu, you will notice the button on top of the screen **My Tasks**. 
 It's direct access to your **to-do list**. Per default, it's sorted by priority, so you don't have to think twice about what to do first; it's the one on top of the list.
 
 On the **My Tasks** page, you can filter the tasks list by **Production**, **Task Type**, **Status**, etc. 
@@ -16,14 +16,14 @@ On the **My Tasks** page, you can filter the tasks list by **Production**, **Tas
 ![Supervisor Todo Page](../img/getting-started/supervisor_todo_page.png)
 
 
-Then you must click on the **Status** to open the comment panel. From here, you can comment and publish a new revision.
+Then, you must click on the **Status** to open the comment panel. From here, you can comment and publish a new revision.
 
 ![Supervisor Todo Detailed Page](../img/getting-started/supervisor_todo_page_detail.png)
 
 
 ## Assign and Estimate Tasks to your Department
 
-Now it's time to focus on your team. The first thing to do is to assign tasks.
+Now, it's time to focus on your team. The first thing to do is to assign tasks.
 
 Your view is automatically filtered on the global shot/asset page as **My Department**. You only see your **Task Type** and the **Custom Columns** linked to your department.
 
@@ -62,7 +62,7 @@ As soon as you fill in an **Estimation** for a task, you will see the artist lin
 
 You know if the distribution of the tasks is fair between your team member and what are their estimated quotas for production. 
 
-You need to do it accordingly to their experience and the difficulty of each task.
+You need to do it according to their experience and the difficulty of each task.
 
 
 ## Check the Previews of your Department
@@ -70,16 +70,16 @@ You need to do it accordingly to their experience and the difficulty of each tas
 Now that everyone in your team knows what to do, you must check their work.
 
 Usually, when an artist has finished a task, he will call you and ask for your review.
-So it means that you have to stop what your doing, lose your focus, open their preview, focus on it, make your comments, and try to get back where you're stopped.
+So it means that you have to stop what you're doing, lose your focus, open their preview, focus on it, make your comments, and try to get back where you're stopped.
 
 It's a lot of wasted energy here, and you are not as productive as you could be, no thanks to all the intrusion.
 
 And the more you are interrupted, the longer it takes to regain focus.
 
-That's why we suggest defining a specific timeframe for your checking. The first advantage is to help your team to be better organized because the Artists will know when it's a good time to speak with you, and they can post their work and start a new task, knowing you will check it.
+That's why we suggest you set a specific timeframe for your checking. The first advantage is to help your team be better organized because the artists will know when it's a good time to speak with you, and they can post their work and start a new task, knowing you will check it.
 The second advantage is that you can focus on your work! You know when the checking is and when to do your tasks. 
 
-If you click on the **My Checks** button on top of the screen, you will have the list of all your department's **WFA** tasks.
+If you click the **My Checks** button on top of the screen, you will have the list of all your department's **WFA** tasks.
 
 ![Supervisor My Chceck Page](../img/getting-started/supervisor_mycheck.png)
 
@@ -150,14 +150,14 @@ When you need to check on their **Actual Quotas**, you need to go to the **Quota
 ![Quotas](../img/getting-started/supervisor_quotas.png)
 
 
-Kitsu has two ways to calculate the quotas. The first is based on the daily Timesheets filled by the Artists.
+Kitsu has two ways to calculate the quotas. The first is based on the daily timesheets filled out by the artists.
 
 The calculation of the quotas will start as soon as the Artist fills out his first timesheet on this task, and it will end when he stops.
 
 
 The second way is based on the status. The calculation starts with the **WIP** status and ends with the **WFA** status.
 
-It's **First take** quotas, meaning that the back-and-forth of comments won't enter in the calculation.
+It's **First take** quotas, meaning that the back-and-forth of comments won't be entered in the calculation.
 
 ![Weekly Quotas](../img/getting-started/supervisor_quotas_week.png)
 
@@ -167,7 +167,7 @@ This page's most important element is the first column, **Average**. Kitsu will 
 
 ## Supervise the Timesheets of your Department
 
-As a Supervisor, you also have to keep an eye on the hours of your team. The **Timesheet** page shows how many hours they do every day, week, and month. 
+As a Supervisor, you also have to keep an eye on your team's hours. The **Timesheet** page shows how many hours they do every day, week, and month. 
 
 ![Timesheet](../img/getting-started/supervisor_timesheet_team.png)
 
