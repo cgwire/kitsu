@@ -2,23 +2,23 @@
 
 ## First Connection
 
-On your first connection, we encourage you to fill your contact information
+On your first connection, we encourage you to fill in your contact information
 into your profile.
-Click on your name on the top right of the screen (1) then on **Profile** (2).
+Click on your name on the top right of the screen (1), then on **Profile** (2).
 
 NB: A link to this **Documentation** is available (4),
-and you can switch to the **Dark Theme**  in this menu, too (3). You can also jump on our slack (5), or look at our roadmap (6).
+and you can switch to the **Dark Theme**  in this menu, too (3). You can also jump on our Slack (5) or look at our roadmap (6).
 
 ![User profile](../img/getting-started/user_profil.png)
 
-On this new page, you can check your name (1) (2), your email (3), fill your phone
+On this new page, you can check your name (1) (2), your email (3), fill in your phone
 number (4), change the timezone (5), the language of the website (6), and
 post a pic of yourself as your avatar (7). It helps to recognize who is
 doing what!
 
 ![User detail](../img/getting-started/user_profil1.png)
 
-You can also define what kind of notification you want, email or slack.
+You can also define what kind of notification you want: email or Slack.
 
 ![User detail](../img/getting-started/user_profil2.png)
 
@@ -36,17 +36,17 @@ You can access it by clicking on the production avatar.
 
 ![Client Landing page](../img/getting-started/client_landing.png)
 
-Once you have click on the production avatar, you will go to the **Playlist** page.
+Once you have clicked on the production avatar, you will go to the **Playlist** page.
 
-The playlists will gather all the assets and shots you have to comment.
+The playlists will gather all the assets and shots you have to comment on.
 
 ![Client playlist global page](../img/getting-started/client_playlist_global.png)
 
-On the left part, you can sort the playlist per **Task Type**, **date** or per **name** (1), then the list of the playlists created for you (2). On the center part, you have fast access to the recent playlist (3).
+On the left part, you can sort the playlist per **Task Type**, **date**, or per **name** (1), then the list of the playlists created for you (2). On the center part, you have fast access to the recent playlist (3).
 
 ### Detail of the Playlist
 
-On the left part, you keep access to the different playlists. On the center part, you see the different elements of the selected playlist. It can be assets or shots. On the right part, you have access to the comment section.
+On the left part, you keep access to the different playlists. In the center part, you see the different elements of the selected playlist. It can be assets or shots. On the right part, you have access to the comment section.
 
 ![Client playlist global page](../img/getting-started/client_playlist_detaill.png)
 
@@ -54,7 +54,7 @@ With the comment panel, you will be able to write a comment to validate the prev
 
 ![Client playlist global page](../img/getting-started/client_playlist_detail_comment.png)
 
-On top of the elements (assets or shots) you have access to different options:
+On top of the elements (assets or shots), you have access to different options:
 
 ![Client playlist option](../img/getting-started/client_playlist_option.png)
 
@@ -76,9 +76,9 @@ On top of the elements (assets or shots) you have access to different options:
 * (16) Select the drawing and click on the cross to delete it
 * (17) Change the task type of all the elements in the playlist
 * (18) Open the panel section to post a comment and change the status
-* (19) hide the list of the elements
+* (19) Hide the list of the elements
 * (20) Download the playlist
-* (21) fullscreen
+* (21) Fullscreen
 
 
 
@@ -96,7 +96,7 @@ You need to click on the **Add checklist** button, and the first item of the che
 
 ![client add checklist](../img/getting-started/client_checklist_retake.png)
 
-Type your comments, and hit **Enter** key to add another line on your checklist or click again on **Add Checklist** button.
+Type your comments, and hit **Enter** key to add another line to your checklist, or click again on **Add Checklist** button.
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
@@ -106,7 +106,7 @@ As a client, you can go to the global page of the assets with the drop-down menu
 
 ![Client dropdown menu Asset](../img/getting-started/client_dropdown_asset.png)
 
-On the global page, you will be able to see all the status of the different steps of the assets.
+On the global page, you will be able to see all the statuses of the different steps of the assets.
 
 ![Client global page Asset](../img/getting-started/client_global_asset.png)
 
@@ -117,7 +117,7 @@ As a client, you can go to the global page of the shots with the drop-down menu 
 
 ![Client dropdown menu Shot](../img/getting-started/client_dropdown_shot.png)
 
-On the global page, you will be able to see all the status of the different steps of the shots.
+On the global page, you will be able to see all the statuses of the different steps of the shots.
 
 ![Client global page Shot](../img/getting-started/client_global_shot.png)
 
@@ -133,7 +133,7 @@ The **Sequence Stats** page is updated in real-time. Every time you look at this
 
 You can choose to display the stats per number of shots or number of frames.
 
-You can also change the **Display Mode**; you can switch from the **Pie charts** view
+You can also change the **Display Mode**; you can switch from the **Pie charts** View
 to the **Counts** view.
 
 ![Client sequence stat count](../img/getting-started/client_sequence_stat_count.png)
