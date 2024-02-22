@@ -1,8 +1,8 @@
-# Build a Studio Report as Producer
+# Build a Studio Report as a Producer
 
 ## Know Everything that is Happening in the Studio
 
-As Producer, you need to know everything.
+As a Producer, you need to know everything.
 
 Usually, it's done by knowing everything by heart all the time. You need to double the number of meetings with your production team or double-check everything yourself all the time.
 
@@ -29,14 +29,14 @@ With the **More Filters** button, you can define the time frame to display the i
 ![Newsfeed Studio dEtailed Page](../img/getting-started/newsfeed_studio_detail.png)
 
 
-For example, if you want to focus on a supervisor, for example, for a specific month, you can select its name, then pick a date on the **From** box.
+For example, if you want to focus on a supervisor, for example, for a specific month, you can select its name and then pick a date on the **From** box.
 
 
 ## Know the Current State of the Productions 
 
 As a Producer, the important thing is to know the status of your Production anytime, anywhere.
 
-So once again, you can learn everything by heart or look at the **statistic pages**.
+So once again, you can learn everything by heart or look at the **statistics pages**.
 
 With the **Sequence Stats** page, you have access to the pie charts of the whole production on a single page,
  sequence per sequence.
@@ -64,7 +64,7 @@ You can also display data as **Counts**. This way, you'll see the exact number o
 Export this page as a `.csv`text file and import it into spreadsheet software.
 
 
-You can navigate from Production to Production with the **Navigation** menu on top of the screen. You will stay on the same page, so you can check all the Production's stats by selecting Production by Production.
+You can navigate from Production to Production with the **Navigation** menu at the top of the screen. You will stay on the same page, so you can check all the Production's stats by selecting Production by Production.
 
 ![Sequence Stat Nvaigation](../img/getting-started/global_sequence_navigation.png)
 
@@ -104,5 +104,5 @@ If you unfold a production, you will have the detail of each **Task Type** used 
 
 You can move each **Task Type Bar** to adjust the schedule and fit the studio needs. 
 
-Each change you will make will be applied to the Production.
+Each change you make will be applied to the Production.
 
