@@ -1,4 +1,4 @@
-Now you are into your production, in the asset page.
+Now, you are into your production on the asset page.
 
 ![Main page production](../img/getting-started/first_production.png)
 
@@ -13,7 +13,7 @@ Use the navigation menu and go to the **Settings** page.
 ### Add a Brief
 
 On the first tab of the **Settings** page, Kitsu asks you about a brief. It's a good way to keep track of the first 
-brief of the production, and being able to get back to it later.
+brief of the production and being able to get back to it later.
 
 /!\ **Only Studio manager permission have access to the Settings page** /!\
 
@@ -34,7 +34,7 @@ The second tab is the more **important**. You need to define your production's p
 
 - 4/ You can add the number of episodes of your TV Show for information
 
-- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default Kitsu will encode everything at 24 FPS**
+- 5/ You need to set the FPS of the video preview. Kitsu will use this FPS to encode them. **Per default, Kitsu will encode everything at 24 FPS**
 
 - 6/ You can enter the ratio for information only
 
@@ -47,7 +47,7 @@ Validate everything with the **Save** button.
 
 
 
-### Select specific Task Status for a production
+### Select a specific Task Status for a production
 
 
 Per default, Kitsu will load all the Task Status of your status library into your production.
@@ -64,7 +64,7 @@ validate your choice with the "Add" button.
 
 You can also see the sum up of the parameters of each status.
 
-(To add new Task Status see [Customization of the workflow](../customization/README.md#create-a-new-task-status) )
+(To add new Task Status, see [Customization of the workflow](../customization/README.md#create-a-new-task-status) )
 
 
 ### Select specific Task Types for a production
@@ -75,7 +75,7 @@ Per default, Kitsu will load all the Task Types of your Task Types library into 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
 But you can choose to use only specific Task Types, depending on the type of your production.
-(To add new Task Type see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
+(To add a new Task Type, see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
 
 For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
 
@@ -83,9 +83,9 @@ For example, you can create a 2D and A CGI workflow on your library and add the 
 On the "Task Types" tab, you can choose which Task Types you want to use on this production, 
 validate your choice with the "Add" button.
 
-You can also enter start date and due date for each task type.
+You can also enter the start date and the due date for each task type.
 
-Once you will add assets and shots on your production; your schedule will be set automatically.
+Once you add assets and shots to your production; your schedule will be set automatically.
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
 
