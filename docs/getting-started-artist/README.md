@@ -32,7 +32,7 @@ encourage you to change the default password with one of your own.
 
 ## See your Assignments - Todo tab
 
-You have 3 ways of seeing your Assignments; the first is with the **TODO** tab.
+You have three ways of seeing your Assignments; the first is with the **TODO** tab.
 
 The central part for you, on **Kitsu**, is the **My tasks** page.
 It's the first landing page when you log in.
@@ -228,13 +228,13 @@ Click on the status part of the concept; it will open the comment panel on the r
 
 ![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
 
-On the comment panel, you have 2 options on top of the panel: Link a concept to an asset and delete the concept.
+On the comment panel, you have two options on top of the panel: Link a concept to an asset and delete the concept.
 
 To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
 
 Kitsu will display all the **Assets** available to link with the concept uploaded.
 
-On top of the comment panel, Kitsu will list the already linked assets. For now, there are **No Links**.
+On top of the comment panel, Kitsu will list the assets that are already linked. For now, there are **No Links**.
 
 
 ![Concept link](../img/getting-started/concept_link.png)
@@ -296,7 +296,7 @@ on the **Done** tab.
 
 ## Fill your Timesheet
 
-Daily, you can declare how much time you spent on each task. On your **My Tasks**
+Daily, you can declare how much time you spend on each task. On your **My Tasks**
 page, go to the **Timesheets** tab (1). Or click on the shortcut on top of the screen.
 
 ![Timesheets](../img/getting-started/timesheets.png)
@@ -306,7 +306,7 @@ hours spent. You can also go quicker and click on the **1**, **4**, or **8**
 hours buttons (4).
 
 If you miss your declaration one day, you can click on the today date (2) 
-Go back in time and select the day you missed. If you didn't work, you could tag the day as a **Day Off** (5).
+You can go back in time and select the day you missed. If you didn't work, you could tag the day as a **Day Off** (5).
 
 ![Timesheets change the date](../img/getting-started/timesheet_change_date.png)
 
