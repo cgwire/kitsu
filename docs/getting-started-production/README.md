@@ -1,4 +1,4 @@
-# Build your Production Report as Production Manager
+# Build your Production Report as a Production Manager
 
 ## Know Everything that is Happening in the Production
 
@@ -17,7 +17,7 @@ Welcome to the New Feed page.
 
 ![Newsfeed Page](../img/getting-started/newsfeed_comment_all.png)
 
-Here you can see all the status changes minute by minute.
+Here, you can see all the status changes minute by minute.
 
 You can filter the list per **Task Status**, **Task Type**, and per **Person**.
 
@@ -32,7 +32,7 @@ With the **Filters Builder** button, you can define the time frame to display th
 ![Newsfeed Page Detail](../img/getting-started/newsfeed_details.png)
 
 
-For example, if you want to focus on a supervisor, for example, for a specific month, you can select its name, then pick a date on the **From** box.
+For example, if you want to focus on a supervisor, for example, for a specific month, you can select its name and then pick a date on the **From** box.
 
 
 ## Know the Current State of the Production - Short / Feature
@@ -44,7 +44,7 @@ So once again, you can learn everything by heart or look at the statistic pages.
 With the **Sequence Stats** page, you have access to the pie charts of the whole production on a single page,
  sequence per sequence.
  
- The **color scheme** of the pie charts is the same as **the status**. So with a glance, you know immediately what is
+ The **color scheme** of the pie charts is the same as **the status**. So, with a glance, you know immediately what is
 the state of your production.
 
 ![Global View Sequence](../img/getting-started/global_view_sequence.png)
@@ -58,7 +58,7 @@ You have the same level of information for the asset with the **Asset Types Stat
 ![Global View Asset](../img/getting-started/global_view_asset.png)
 
 
-You can also display data as **Counts**. This way, you'll see the exact number of assets / shots / frames with the percentage per status.
+You can also display data as **Counts**. This way, you'll see the exact number of assets/shots / frames with the percentage per status.
 
 ![Global View Sequence Counts](../img/getting-started/global_view_sequence_detail_count_stat.png)
 
@@ -76,14 +76,14 @@ on each task type. Only three colors are displayed: the **validated as Green**, 
  
 ![Global View Episode](../img/getting-started/global_view_episode_retake.png)
 
- If you unfold an episode, you will see the percentage of each take and the evolution of the retakes VS validattion.
+ If you unfold an episode, you will see the percentage of each take and the evolution of the retakes VS validation.
  
  It helps you to see the progress of each episode task per task.
 
 ![Global View Episode Unfold](../img/getting-started/global_view_episode_retake_detail.png)
 
  Usually, the first episodes have many retakes, but it should get better then.
- Something is wrong if you notice that a late episode still has many retakes. And you can speak about the issue with the director and the supervisor.
+ But, if late episodes still have many retakes, something must be fixed. It's time to discuss the issue with the director and the supervisor.
  
 The second option on the display of data is the **Status**.
  
@@ -122,7 +122,7 @@ On the **Tasks** tab, the first filter you see is **Due Date Status**.
 
 Set it to **Due before today**. Kitsu will display all the tasks with a **Due date** set **Due Before Today**.
 
-Once this filter is applied, you must sort out what is finished and what is not yet.
+Once this filter is applied, you must sort out what is finished and what still needs to be finished.
 
 You can use the filter **-Done** to filter all the tasks except those finished.
 
@@ -130,9 +130,9 @@ You can use the filter **-Done** to filter all the tasks except those finished.
 ![Task Type Due Before Today](../img/getting-started/task_type_due_before.png)
 
 
-You can now see all the late tasks with the two filters applied, meaning they are not validated before the **Estimated Due Date**.
+You can now see all the late tasks with the two filters applied, meaning they are only validated after the **Estimated Due Date**.
 
-You can see the sum-up at the bottom of the page, which update in real time depending on the applied filter.
+You can see the sum-up at the bottom of the page, which updates in real time depending on the applied filter.
 
  
 You can export this page as a `.CSV` file and open it on spreadsheet software.
@@ -163,12 +163,12 @@ know if you are too soon or too late.
 
 The final step is to change the **Coloring**. Per default, it's set on **Status color**, meaning all the bars will be colored as their actual status (blue = wip, green = done, etc.).
 
-You will only see two colors with the **Late in Red**: **Grey** if the Task is still on time, and **Red** if the Task is late.
+You will only see two colors with the **Late in Red**: **Grey** if the Task is still on time and **Red** if the Task is late.
 
 ![Task Type Schedule Late](../img/getting-started/task_type_schedule_coloring_late.png)
 
 
-You can return to the **Tasks** tab for more details. Kitsu will keep your filterd from tab to tab.
+You can return to the **Tasks** tab for more details. Kitsu will keep your filtered from tab to tab.
 
   
 ## How to Know if a Task Type may be late
@@ -202,7 +202,7 @@ On the **Estimation** tab, on the right part of the screen, you will see the sum
 
 The first line is the total number of tasks assigned to the Artist since the beginning of the Production. The second line, **Remaining** is what the Artist has left to do. 
 
-If the artist still have plenty task to do, he may miss the deadline, if he only have the not started to do, there is still a chance. But you need to keep an eye on thoses tasks.
+If the artist still has plenty of tasks to do, he may miss the deadline. If he only has not started to do it, there is still a chance. But you need to keep an eye on those tasks.
 
 
 ## How to Know Why a Task is Late
@@ -212,7 +212,7 @@ Now that you know which tasks are late or will be late, you need to understand *
 There are several reasons why a task is late: 
 - The Artist is overwhelmed and has too many tasks to do at the same time
 - There is too much back-and-forth on this Task
-- The Task is underestimated and too difficult to finish on time.
+- The Task needs to be more underestimated and easier to finish on time.
 - The previous Task was already late
 
 To check how many tasks an artist has, you can filter the **Task Type** page with the name of the Artist under the **Task** tab.
@@ -232,7 +232,7 @@ To identify the number of **Back-and-forth**, look at the **Retakes** column on 
 
 Each **Red Dot** is a **retake**. Click on the line to open the **Comment panel** and read the whole task history. 
 
-It's the best way to understand what is happening. The Artist misunderstood the brief, or maybe the brief is changing with each version.
+It's the best way to understand what is happening. The artist misunderstood the brief, or maybe the brief changed with each version.
 
 ![Task Type Retake](../img/getting-started/task_type_retake.png)
 
@@ -290,12 +290,12 @@ You can get the global view or focus on a **specific status** or **Artist's name
 
 To go deeper into the details, you can display **Estimation** vs. **Time** (duration) for each asset and shot in Kitsu.
 
-You can now see the sum-up of each Task for this specific asset or shot. And if something looks not right, you can click on the asset's name or shot and go to the detail page.
+You can now see the sum-up of each Task for this specific asset or shot. If something looks not right, you can click on the asset's name or shot and go to the detail page.
 
 ![Global Shot Estimation](../img/getting-started/global_shot_est.png)
 
 
-On the detail page, on the top left of the screen, you have the sum-up of the asset/shot life. You have the detail of each **Status**, **Estimation**, **duration**, **Start and due date**, and assignation.
+On the detail page, on the top left of the screen, you have the sum-up of the asset/shot life. You have the details of each **Status**, **Estimation**, **duration**, **Start and due date**, and assignation.
 
 ![Detail Shot Estimation](../img/getting-started/shot_detail_casting.png)
 
@@ -320,12 +320,12 @@ The task was started at the first status change to WIP.
 
 The task was done the day the feedback request was made.
 
-Kitsu will splits the done frames among all business days between the start and the end and grabs the number of frames (or seconds, or tasks) submitted per day/week/month per Artist.
+Kitsu will split the done frames among all business days between the start and the end and grab the number of frames (or seconds, or tasks) submitted per day/week/month per Artist.
 
 ![Quotas stat page day weighted](../img/getting-started/quotas_day_status.png)
 
 
-You can click on a number and see its detail on the right panel anytime.
+You can click on a number and see its details on the right panel anytime.
 
 
 ## Check the Timesheet of the Team
@@ -339,7 +339,7 @@ You can go to the main menu and see the Timesheet page.
 ![Timesheet Global Day](../img/getting-started/timesheet_day.png)
 
 
-On this page, you can see per day the timesheet of each team member, if they fill it every day, if they took a day off, and, more important, if they are doing extra time.
+On this page, you can see per day the timesheet of each team member, if they fill it every day, if they took a day off, and, more importantly, if they are doing extra time.
 
 If you have a question about a timesheet, click on it and see the details of the Production, task type, and task.
 
@@ -351,6 +351,6 @@ Once everything is good at the day level, you can change the **Detail Level** fr
 ![Timesheet Global Weekd](../img/getting-started/timesheet_week.png)
 
 
-You can also see all the Production you manage at once or view Production per Production.
+You can also see all the Productions you manage at once or view Production per Production.
 
-And as with all other pages in Kitsu, you can export this page as a `.CSV` file and open it on spreadsheet software.
+As with all other pages in Kitsu, you can export this page as a `.CSV` file and open it on spreadsheet software.
