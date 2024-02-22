@@ -27,7 +27,7 @@ If you click into a line, the comment panel will open on the right and give you 
 
 If you click on **Show Stats**, you will see the sum-up of the number of news, the total number, and the per status number.
 
-With the **More Filters** button, you can define the time frame to display the information.
+With the **Filters Builder** button, you can define the time frame to display the information.
 
 ![Newsfeed Page Detail](../img/getting-started/newsfeed_details.png)
 
