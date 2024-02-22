@@ -359,10 +359,10 @@ You can also hide all the non-essential columns, like **Description**, **Metadat
 even the minimized columns.
 
 Just click on the **Hide additional information**
-![minimize button](../img/getting-started/minimize.png) button on the top right of the page.
+![minimize button](../img/getting-started/maximize.png) button on the top right of the page.
 
 To make the information reappear, click on the same button,
-![maximize button](../img/getting-started/maximize.png) it won't have the grey highlight.
+![maximize button](../img/getting-started/minimize.png) it won't have the grey highlight.
 
 
 ## Sticky Columns
