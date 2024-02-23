@@ -353,3 +353,5 @@ Validate your choice with the **add** button.
 You can review your 3D file with an HDR background.
 
 ![Preview background example](../img/getting-started/preview_background_example.png)
+
+
