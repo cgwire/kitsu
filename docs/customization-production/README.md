@@ -98,3 +98,33 @@ Validate your choice with the **add** button.
 You can review your 3D file with an HDR background.
 
 ![Preview background example](../img/getting-started/preview_background_example.png)
+
+
+## Select which Status is seen on the Board View
+
+On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+
+On the **Task Status** tab, you can reorder the status for the **Board** view.
+
+![Setting status new](../img/getting-started/setting_status_new.png)
+
+![Setting status order](../img/getting-started/setting_status_order.png)
+
+Once it's done, go the the **Board Status** tab.
+
+![Setting board status order](../img/getting-started/setting_board_status.png)
+
+Here you can choose who can see which status on the **Board view**
+
+If you don't select the status properly, it can be overwhelming for the artists if they have too much choice.
+
+![board status artist](../img/getting-started/board_all_status.png)
+
+If you select properly the **Status** if will be easier for the artist.
+
+
+![Setting board status order](../img/getting-started/setting_board_status_selection.png)
+
+
+![Setting board status order](../img/getting-started/setting_board_status_selection_artist.png)
+
