@@ -19,6 +19,7 @@
           :is-completed="hasValidName"
         >
           <text-field
+            ref="nameField"
             input-class="w600 is-inline"
             :placeholder="$t('productions.creation.placeholder_name')"
             v-model="productionToCreate.name"
@@ -534,6 +535,10 @@ export default {
     }
   },
 
+  mounted() {
+    this.$refs.nameField.focus()
+  },
+
   computed: {
     ...mapGetters([
       'assetsCsvFormData',
@@ -1026,9 +1031,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark .tag {
-}
-
 .new-production {
   font-family: 'Lato';
 }
@@ -1118,9 +1120,6 @@ span.input-separator {
 
 .flexrow-item.mr05 {
   margin-right: 0.25em;
-}
-
-.import-button {
 }
 
 .asset-type-name {

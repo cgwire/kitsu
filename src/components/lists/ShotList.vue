@@ -916,6 +916,9 @@ export default {
     },
 
     isCastingReady(shot, columnId) {
+      if (!shot.nb_entities_out) {
+        return false
+      }
       const task = this.taskMap.get(shot.validations.get(columnId))
       return (
         task &&
@@ -925,6 +928,9 @@ export default {
     },
 
     castingTitle(shot, columnId) {
+      if (!shot.nb_entities_out) {
+        return ''
+      }
       const task = this.taskMap.get(shot.validations.get(columnId))
       return task
         ? task.nb_assets_ready + ' / ' + shot.nb_entities_out + ' assets ready'

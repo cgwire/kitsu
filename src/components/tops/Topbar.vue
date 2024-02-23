@@ -452,7 +452,7 @@ export default {
         ])
       }
 
-      if (!this.isCurrentUserClient) {
+      if (!this.isCurrentUserClient && isNotOnlyShots) {
         options = options.concat([
           { label: this.$t('breakdown.title'), value: 'breakdown' }
         ])

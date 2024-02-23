@@ -29,14 +29,10 @@
         <span
           class="casting-status"
           :title="castingTitle"
-          v-if="!isCurrentUserClient"
+          v-if="!isCurrentUserClient && castingTitle"
         >
-          <img
-            src="@/assets/icons/casting-ready.png"
-            width="20"
-            v-if="isCastingReady"
-          />
-          <template v-else>&nbsp; &nbsp; &nbsp; &nbsp;</template>
+          <img src="@/assets/icons/casting-ready.png" v-if="isCastingReady" />
+          <img src="@/assets/icons/casting-not-ready.png" v-else />
         </span>
       </template>
       <template v-if="isAssignees && !isCurrentUserClient && !disabled">
