@@ -87,6 +87,7 @@ export default {
   align-items: center;
   justify-content: center;
   position: relative;
+  flex-shrink: 0;
 
   a {
     margin: 0;
