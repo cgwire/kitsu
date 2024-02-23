@@ -118,13 +118,13 @@ Here you can choose who can see which status on the **Board view**
 
 If you don't select the status properly, it can be overwhelming for the artists if they have too much choice.
 
-![board status artist](../img/getting-started/board_all_status.png)
+![Board status bad example](../img/getting-started/board_all_status.png)
 
-If you select properly the **Status** if will be easier for the artist.
+If you select properly the **Status**, it will be easier for the artists.
 
 
 ![Setting board status order](../img/getting-started/setting_board_status_selection.png)
 
 
-![Setting board status order](../img/getting-started/setting_board_status_selection_artist.png)
+![Board status good example](../img/getting-started/setting_board_status_selection_artist.png)
 
