@@ -28,6 +28,16 @@ module.exports = {
 		 '/customization-studio/'
 	 ]
    },
+   	{
+     title: 'FAQ',
+     collapsable: false,
+     children: [
+       '/faq-deletion/',
+	     '/faq-filter/',
+	     '/faq-notification/',
+	     '/faq-production-report/'
+     ]
+	},
    {
      title: 'Modules',
      collapsable: false,
@@ -58,16 +68,6 @@ module.exports = {
 	   '/using_publisher/'
      ]
 	},	
-	{
-     title: 'FAQ',
-     collapsable: false,
-     children: [
-       '/faq-deletion/',
-	     '/faq-filter/',
-	     '/faq-notification/',
-	     '/faq-production-report/'
-     ]
-	},
     {
      title: 'Open Source Setup',
      collapsable: false,
