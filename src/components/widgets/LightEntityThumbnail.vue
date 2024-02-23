@@ -17,7 +17,7 @@
   <span
     class="thumbnail-picture thumbnail-empty"
     :style="{
-      width: props.width,
+      width: props.emptyWidth ? props.emptyWidth : props.width,
       height: props.emptyHeight ? props.emptyHeight : props.height
     }"
     v-bind="data.attrs"
@@ -55,6 +55,9 @@ export default {
     emptyHeight: {
       type: String
     },
+    emptyWidth: {
+      type: String
+    },
     type: {
       default: 'thumbnails',
       type: String
@@ -72,6 +75,7 @@ export default {
 span.thumbnail-empty {
   background: $white-grey;
   display: block;
+  flex-shrink: 0;
   margin: 0;
 }
 </style>

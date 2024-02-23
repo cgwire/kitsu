@@ -86,10 +86,8 @@
                   with-link="false"
                 />
                 <div class="flerxow-item ml05">
-                  <span>
-                    {{ playlist.name }}
-                  </span>
-                  <span class="playlist-date" title="last modified">
+                  {{ playlist.name }}
+                  <span class="playlist-date">
                     {{ $t('playlists.updated_at') }}
                     {{ formatDate(playlist.updated_at) }}
                   </span>
@@ -701,16 +699,13 @@ export default {
     },
 
     playlistElementStyle(playlist) {
+      if (this.isListToggled) {
+        return
+      }
       const taskType = this.taskTypeMap.get(playlist.task_type_id)
-      const color = taskType ? taskType.color : 'transparent'
-      if (!this.isListToggled) {
-        return {
-          'border-left': '4px solid ' + color
-        }
-      } else {
-        return {
-          'border-left': 0
-        }
+      const color = taskType?.color || 'transparent'
+      return {
+        'border-left': `4px solid ${color}`
       }
     },
 
@@ -1450,7 +1445,7 @@ export default {
 .dark {
   .playlist-item {
     background: $dark-grey-lightmore;
-    box-shadow: 0px 0px 6px #333;
+    box-shadow: 0 0 6px #333;
     border-color: $dark-grey;
     color: $white-grey;
   }
@@ -1458,7 +1453,7 @@ export default {
   .playlist-list-column {
     background: $dark-grey-light;
     border-color: $dark-grey;
-    box-shadow: 0px 0px 6px #333;
+    box-shadow: 0 0 6px #333;
   }
 
   .playlist-column {
@@ -1482,7 +1477,7 @@ export default {
       overflow: hidden;
       background: $dark-grey-lightmore;
       border: 2px solid $dark-grey;
-      box-shadow: 0px 0px 6px #333;
+      box-shadow: 0 0 6px #333;
       margin-bottom: 1em;
 
       h3 {
@@ -1492,7 +1487,7 @@ export default {
   }
 
   span.thumbnail-picture {
-    box-shadow: 0px 0px 6px #333;
+    box-shadow: 0 0 6px #333;
   }
 }
 
@@ -1504,7 +1499,7 @@ export default {
 }
 
 .page .columns {
-  margin-top: 0px;
+  margin-top: 0;
   margin-bottom: 0;
   overflow-y: auto;
   flex: 1;
@@ -1516,7 +1511,7 @@ export default {
   overflow-y: auto;
   padding: 1em 1em 1em 2em;
   border-right: 1px solid #ddd;
-  box-shadow: 0px 0px 6px #f0f0f0;
+  box-shadow: 0 0 6px #f0f0f0;
   z-index: 201;
 }
 
@@ -1525,7 +1520,7 @@ export default {
   background: white;
   border: 2px solid $white-grey;
   border-radius: 3px;
-  box-shadow: 0px 0px 6px #ddd;
+  box-shadow: 0 0 6px #ddd;
   color: $grey-strong;
   margin: 0.2em;
   padding: 0.4em;
@@ -1568,7 +1563,6 @@ export default {
   width: 170px;
   display: flex;
   flex-direction: column;
-  border: 0px solid transparent;
 
   a {
     margin: auto;
@@ -1590,7 +1584,7 @@ export default {
 }
 
 span.thumbnail-picture {
-  box-shadow: 0px 0px 6px #ddd;
+  box-shadow: 0 0 6px #ddd;
   margin-bottom: 2px;
 }
 
@@ -1692,7 +1686,7 @@ h2 {
     height: 320px;
     background: white;
     border: 2px solid $light-grey-light;
-    box-shadow: 0px 0px 6px #ddd;
+    box-shadow: 0 0 6px #ddd;
     border-radius: 1em;
     padding: 0;
     width: 100%;
@@ -1754,6 +1748,7 @@ h2 {
 
 .playlist-item-content {
   padding-left: 0.5em;
+  overflow-wrap: anywhere;
 
   .flexrow {
     align-items: flex-start;
