@@ -481,9 +481,9 @@ export default {
 
     team() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
+        this.currentProduction.team
+          .map(personId => this.personMap.get(personId))
+          .filter(person => !person.is_bot)
       )
     },
 
