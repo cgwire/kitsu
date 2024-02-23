@@ -1211,10 +1211,13 @@ export default {
           task_type_id: form.task_type_id
         },
         callback: (err, playlist) => {
-          if (err) this.errors.editPlaylist = true
+          if (err) {
+            this.errors.editPlaylist = true
+          } else {
+            this.modals.isEditDisplayed = false
+            Object.assign(this.currentPlaylist, playlist)
+          }
           this.loading.editPlaylist = false
-          this.modals.isEditDisplayed = false
-          Object.assign(this.currentPlaylist, playlist)
         }
       })
     },
@@ -1282,12 +1285,13 @@ export default {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
         for_client: false
       }
-      this.$refs['edit-playlist-modal'] = true
+      this.errors.editPlaylist = false
       this.modals.isEditDisplayed = true
     },
 
     showEditModal() {
       this.playlistToEdit = this.currentPlaylist
+      this.errors.editPlaylist = false
       this.modals.isEditDisplayed = true
     },
 

@@ -20,6 +20,7 @@
           <text-field
             ref="nameField"
             :label="$t('playlists.fields.name')"
+            :maxlength="80"
             @enter="runConfirmation"
             v-model.trim="form.name"
             v-focus
