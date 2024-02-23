@@ -20,6 +20,10 @@ Then, you must click on the **Status** to open the comment panel. From here, you
 
 ![Supervisor Todo Detailed Page](../img/getting-started/supervisor_todo_page_detail.png)
 
+You can also use the **Board** view, to drag and drop your task on the new **status column**.
+
+
+![Supervisor Todo Detailed Page board](../img/getting-started/supervisor_todo_page_detail_board.png)
 
 ## Assign and Estimate Tasks to your Department
 
