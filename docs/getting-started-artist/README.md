@@ -294,6 +294,10 @@ on the **Done** tab.
 
 ![My done tasks page](../img/getting-started/done_page.png)
 
+And the **Pending** tasks
+
+![My pending tasks page](../img/getting-started/pending_page.png)
+
 ## Fill your Timesheet
 
 Daily, you can declare how much time you spend on each task. On your **My Tasks**
