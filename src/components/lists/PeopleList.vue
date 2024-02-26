@@ -19,6 +19,9 @@
             <th scope="col" class="role">
               {{ $t('people.list.role') }}
             </th>
+            <th scope="col" class="contract" v-if="!isBots">
+              {{ $t('people.list.contract') }}
+            </th>
             <th scope="col" class="departments">
               {{ $t('people.list.departments') }}
             </th>
@@ -56,6 +59,9 @@
               <alert-triangle-icon class="icon" />
             </td>
             <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+            <td class="contract" v-if="!isBots">
+              {{ $t('people.contract.' + entry.contract_type) }}
+            </td>
             <department-names-cell
               class="departments"
               :departments="entry.departments"
@@ -98,6 +104,9 @@
               {{ entry.expiration_date }}
             </td>
             <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+            <td class="contract" v-if="!isBots">
+              {{ $t('people.contract.' + entry.contract_type) }}
+            </td>
             <department-names-cell
               class="departments"
               :departments="entry.departments"
@@ -253,6 +262,10 @@ export default {
   }
 }
 .role {
+  width: 200px;
+  min-width: 200px;
+}
+.contract {
   width: 200px;
   min-width: 200px;
 }

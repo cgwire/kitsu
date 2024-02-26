@@ -67,12 +67,13 @@ export default {
       email: person.email,
       phone: person.phone,
       role: person.role,
+      contract_type: person.contract_type,
       active: person.active,
       departments: person.departments,
       is_bot: person.is_bot,
       expiration_date: person.expiration_date?.toJSON().slice(0, 10)
     }
-    return client.ppost('/api/data/persons/new', data)
+    return client.ppost('/api/data/persons', data)
   },
 
   invitePerson(person) {
@@ -95,6 +96,7 @@ export default {
       timezone: person.timezone,
       locale: person.locale,
       role: person.role,
+      contract_type: person.contract_type,
       active: person.active,
       notifications_enabled: person.notifications_enabled === 'true',
       notifications_slack_enabled:
