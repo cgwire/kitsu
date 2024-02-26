@@ -276,13 +276,12 @@
             {{ newsTotal }} {{ $t('news.news') }}
           </div>
           <div
-            :key="'stat-' + stat.name"
+            :key="'stat-' + stat.id"
             class="stat-wrapper"
             v-for="stat in renderedStats"
           >
             <div>{{ stat.name }} : {{ stat.value }}</div>
             <span
-              :key="'stat-value-' + stat.name.toLowerCase()"
               class="stat-tag"
               :title="stat.name + ': ' + stat.value"
               :style="{
@@ -510,17 +509,15 @@ export default {
       if (this.newsStats) {
         return Object.keys(this.newsStats)
           .map(taskStatusId => {
-            const name = this.taskStatusMap
-              .get(taskStatusId)
-              .short_name.toUpperCase()
-            const color = this.taskStatusMap.get(taskStatusId).color
+            const { color, short_name } = this.taskStatusMap.get(taskStatusId)
             return {
-              name,
+              id: taskStatusId,
+              name: short_name.toUpperCase(),
               color,
               value: this.newsStats[taskStatusId]
             }
           })
-          .sort((a, b) => a.value < b.value)
+          .sort((a, b) => b.value - a.value)
       } else {
         return ''
       }
@@ -955,7 +952,7 @@ export default {
 }
 
 .preview {
-  margin: 0em auto 2em auto;
+  margin: 0 auto 2em auto;
   max-width: 800px;
 }
 
@@ -1007,6 +1004,8 @@ export default {
     width: 100%;
     height: 12px;
     border-radius: 2px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 0 2px var(--box-shadow);
   }
 }
 
