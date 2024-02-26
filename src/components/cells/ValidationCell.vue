@@ -28,6 +28,7 @@
         </span>
         <span
           class="casting-status"
+          :class="{ 'casting-status-not-ready': !isCastingReady }"
           :title="castingTitle"
           v-if="!isCurrentUserClient && castingTitle"
         >
@@ -327,6 +328,10 @@ export default {
   position: absolute;
   right: -5px;
   top: -8px;
+
+  &.casting-status-not-ready {
+    opacity: 0.5;
+  }
 
   img {
     width: 12px;
