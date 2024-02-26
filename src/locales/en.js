@@ -731,6 +731,7 @@ export default {
     disable_2FA_error: 'An error occurred while disabling two-factor authentication.',
     fields: {
       active: 'Active',
+      contract: 'Contract',
       departments: 'Departments',
       email: 'Email',
       first_name: 'First name',
@@ -743,6 +744,7 @@ export default {
     },
     list: {
       active: 'Active',
+      contract: 'Contract',
       departments: 'Departments',
       email: 'Email',
       expiration: 'Expiration',
@@ -759,6 +761,14 @@ export default {
       user: 'Artist',
       undefined: '',
       vendor: 'Vendor'
+    },
+    contract: {
+      'open-ended': 'Open-ended',
+      'fixed-term': 'Fixed-term',
+      'short-term': 'Short-term',
+      freelance: 'Freelance',
+      apprentice: 'Apprentice',
+      internship: 'Internship'
     }
   },
 

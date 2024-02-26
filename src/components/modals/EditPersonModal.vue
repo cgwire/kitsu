@@ -94,6 +94,13 @@
           v-model="form.role"
         />
         <combobox
+          :label="$t('people.fields.contract')"
+          :options="contractOptions"
+          localeKeyPrefix="people.contract."
+          v-model="form.contract_type"
+          v-if="!isBot"
+        />
+        <combobox
           :label="$t('people.fields.active')"
           :options="activeOptions"
           :disabled="personToEdit.is_generated_from_ldap"
@@ -235,12 +242,21 @@ export default {
         { label: this.$t('main.yes'), value: 'true' },
         { label: this.$t('main.no'), value: 'false' }
       ],
+      contractOptions: [
+        { label: 'open-ended', value: 'open-ended' },
+        { label: 'fixed-term', value: 'fixed-term' },
+        { label: 'short-term', value: 'short-term' },
+        { label: 'freelance', value: 'freelance' },
+        { label: 'apprentice', value: 'apprentice' },
+        { label: 'internship', value: 'internship' }
+      ],
       form: {
         first_name: '',
         last_name: '',
         email: '',
         phone: '',
         role: 'user',
+        contract_type: 'permanent',
         active: 'true',
         departments: [],
         expiration_date: null,
@@ -351,6 +367,7 @@ export default {
           email: this.personToEdit.email,
           phone: this.personToEdit.phone,
           role: this.personToEdit.role,
+          contract_type: this.personToEdit.contract_type,
           active: this.personToEdit.active ? 'true' : 'false',
           departments: [...(this.personToEdit.departments || [])],
           expiration_date: this.personToEdit.expiration_date,
@@ -359,6 +376,7 @@ export default {
       } else {
         this.form = {
           role: 'user',
+          contract_type: 'permanent',
           active: 'true',
           departments: [],
           expiration_date: null,
