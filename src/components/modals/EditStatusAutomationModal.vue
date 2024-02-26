@@ -16,7 +16,7 @@
           {{ $t('status_automations.new_status_automation') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <h3 class="subtitle">{{ $t('status_automations.entity_title') }}</h3>
           <combobox
             :label="$t('status_automations.fields.entity_type')"
@@ -42,7 +42,7 @@
             <combobox-status
               class="flexrow-item"
               :label="$t('status_automations.fields.in_task_status')"
-              :task-status-list="taskStatusList || []"
+              :task-status-list="taskStatusList"
               v-model="form.inTaskStatusId"
               @enter="confirmClicked"
             />
@@ -58,13 +58,13 @@
               locale-key-prefix="status_automations.field_types."
               @enter="confirmClicked"
               v-model="form.outFieldType"
-              v-if="!isEditing && form.entityType == 'asset'"
+              v-if="!isEditing && form.entityType === 'asset'"
             />
             <span
               class="flexrow-item"
-              v-if="isEditing && form.outFieldType == 'ready_for'"
+              v-if="isEditing && form.outFieldType === 'ready_for'"
             >
-              Ready For
+              {{ $t('status_automations.field_types.ready_for') }}
             </span>
 
             <combobox-task-type
@@ -79,11 +79,11 @@
             <combobox-status
               class="flexrow-item"
               :label="$t('status_automations.fields.out_task_status')"
-              :task-status-list="taskStatusList || []"
+              :task-status-list="taskStatusList"
               :open-top="true"
               @enter="confirmClicked"
               v-model="form.outTaskStatusId"
-              v-if="form.outFieldType == 'status'"
+              v-if="form.outFieldType === 'status'"
             />
           </div>
 
@@ -107,22 +107,25 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 import Combobox from '@/components/widgets/Combobox'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ModalFooter from '@/components/modals/ModalFooter'
 
 export default {
   name: 'edit-status-automation-modal',
+
   mixins: [modalMixin],
+
   components: {
     Combobox,
     ComboboxBoolean,
-    ComboboxTaskType,
     ComboboxStatus,
+    ComboboxTaskType,
     ModalFooter
   },
 
@@ -194,17 +197,15 @@ export default {
     ]),
 
     taskStatusList() {
-      return this.taskStatuses || []
+      return this.taskStatuses.filter(status => !status.for_concept)
     },
 
     isEditing() {
-      return this.statusAutomationToEdit && this.statusAutomationToEdit.id
+      return this.statusAutomationToEdit?.id
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     confirmClicked() {
       this.$emit('confirm', this.form)
     },
@@ -219,6 +220,7 @@ export default {
         }
       } else if (fieldType === 'shot') {
         this.form.inEntityTaskTypes = this.shotTaskTypes
+        this.form.outFieldType = 'status'
         this.form.outEntityTaskTypes = this.shotTaskTypes
       }
     }
