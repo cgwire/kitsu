@@ -209,7 +209,7 @@
             <kitsu-icon
               name="trash"
               :active="selectedBar === 'delete-tasks'"
-              :title="$t('menu.create_tasks')"
+              :title="$t('menu.delete_tasks')"
             />
           </div>
 
