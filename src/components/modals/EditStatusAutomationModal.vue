@@ -246,7 +246,7 @@ export default {
             : entityTaskTypes[0].id,
           inTaskStatusId: this.isEditing
             ? this.statusAutomationToEdit.in_task_status_id
-            : this.taskStatuses[0].id,
+            : this.taskStatusList[0].id,
           outFieldType: this.isEditing
             ? this.statusAutomationToEdit.out_field_type
             : 'status',
@@ -255,7 +255,7 @@ export default {
             : entityTaskTypes[1].id,
           outTaskStatusId: this.isEditing
             ? this.statusAutomationToEdit.out_task_status_id
-            : this.taskStatuses[1].id,
+            : this.taskStatusList[1].id,
           archived: this.isEditing
             ? String(this.statusAutomationToEdit.archived === true)
             : 'false'
@@ -268,9 +268,9 @@ export default {
       this.setTaskTypes(entityType)
       if (!this.isEditing) {
         this.form.inTaskTypeId = this.form.inEntityTaskTypes[0].id
-        this.form.inTaskStatusId = this.taskStatuses[0].id
+        this.form.inTaskStatusId = this.taskStatusList[0].id
         this.form.outTaskTypeId = this.form.outEntityTaskTypes[1].id
-        this.form.outTaskStatusId = this.taskStatuses[1].id
+        this.form.outTaskStatusId = this.taskStatusList[1].id
       }
     },
 

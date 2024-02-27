@@ -156,7 +156,7 @@
           "
           :step="3"
           :is-completed="hasValidAssetTaskTypes"
-          v-if="productionToCreate.settings.type !== 'shots'"
+          v-if="!isShotsOnly"
         >
           <draggable
             v-model="productionToCreate.assetTaskTypes"
@@ -188,12 +188,9 @@
           :subtitle="
             $t('productions.creation.select_shot_task_type_description')
           "
-          :step="4"
-          :is-completed="
-            hasValidShotTaskTypes ||
-            productionToCreate.settings.type === 'assets'
-          "
-          v-if="productionToCreate.settings.type !== 'assets'"
+          :step="isShotsOnly ? 3 : 4"
+          :is-completed="hasValidShotTaskTypes"
+          v-if="!isAssetsOnly"
         >
           <draggable
             v-model="productionToCreate.shotTaskTypes"
@@ -222,7 +219,7 @@
         <timeline-item
           :title="$t('productions.creation.select_task_status')"
           :subtitle="$t('productions.creation.select_task_status_description')"
-          :step="5"
+          :step="isShotsOnly || isAssetsOnly ? 4 : 5"
           :is-completed="hasValidTaskStatuses"
         >
           <div class="flexrow">
@@ -252,9 +249,9 @@
         <timeline-item
           :title="$t('productions.creation.add_asset_types')"
           :subtitle="$t('productions.creation.add_asset_types_description')"
-          :step="6"
+          :step="isAssetsOnly ? 5 : 6"
           :is-completed="hasValidAssetTypes"
-          v-if="productionToCreate.settings.type !== 'shots'"
+          v-if="!isShotsOnly"
         >
           <div class="flexrow asset-types mb1">
             <span
@@ -282,9 +279,11 @@
         <timeline-item
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
-          :step="7"
+          :step="isAssetsOnly ? 6 : 7"
           :is-completed="hasValidAssets"
           :optional="true"
+          :is-last="isAssetsOnly"
+          v-if="!isShotsOnly"
         >
           <div class="import-content">
             <span class="tag mr1" v-if="nbAssetsToImport > 0">
@@ -302,10 +301,11 @@
         <timeline-item
           :title="$t('productions.creation.add_shots')"
           :subtitle="$t('productions.creation.add_shots_description')"
-          :step="8"
+          :step="isShotsOnly ? 5 : 8"
           :is-completed="hasValidShots"
           :optional="true"
           is-last
+          v-if="!isAssetsOnly"
         >
           <div class="import-content">
             <span class="tag mr1" v-if="nbShotsToImport > 0">
@@ -559,6 +559,14 @@ export default {
       return this.productionToCreate.settings.type === 'tvshow'
     },
 
+    isAssetsOnly() {
+      return this.productionToCreate.settings.type === 'assets'
+    },
+
+    isShotsOnly() {
+      return this.productionToCreate.settings.type === 'shots'
+    },
+
     assetsDataMatchers() {
       return this.isTVShow ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
     },
@@ -672,10 +680,8 @@ export default {
     },
 
     hasValidType() {
-      return (
-        this.allowedProductionTypes.indexOf(
-          this.productionToCreate.settings.type
-        ) !== -1
+      return this.allowedProductionTypes.includes(
+        this.productionToCreate.settings.type
       )
     },
 
@@ -695,28 +701,25 @@ export default {
       return (
         this.hasValidName &&
         this.hasValidSettings &&
-        (this.hasValidAssetTaskTypes ||
-          this.productionToCreate.settings.type === 'shots') &&
-        (this.hasValidShotTaskTypes ||
-          this.productionToCreate.settings.type === 'assets') &&
+        (this.hasValidAssetTaskTypes || this.isShotsOnly) &&
+        (this.hasValidShotTaskTypes || this.isAssetsOnly) &&
         this.hasValidTaskStatuses &&
-        (this.hasValidAssetTypes ||
-          this.productionToCreate.settings.type === 'shots')
+        (this.hasValidAssetTypes || this.isShotsOnly)
       )
     },
 
     availableAssetTaskTypes() {
       return this.assetTaskTypes.filter(
         assetTaskType =>
-          this.productionToCreate.assetTaskTypes.indexOf(assetTaskType) === -1
+          !this.productionToCreate.assetTaskTypes.includes(assetTaskType)
       )
     },
 
     availableAssetTypes() {
       const assetTypes = sortByName(
-        this.assetTypes.filter(assetType => {
-          return this.productionToCreate.assetTypes.indexOf(assetType) === -1
-        })
+        this.assetTypes.filter(
+          assetType => !this.productionToCreate.assetTypes.includes(assetType)
+        )
       )
       return [
         {
@@ -735,14 +738,14 @@ export default {
     availableShotTaskTypes() {
       return this.shotTaskTypes.filter(
         shotTaskType =>
-          this.productionToCreate.shotTaskTypes.indexOf(shotTaskType) === -1
+          !this.productionToCreate.shotTaskTypes.includes(shotTaskType)
       )
     },
 
     availableTaskStatuses() {
       return this.taskStatus.filter(
         status =>
-          this.productionToCreate.taskStatuses.indexOf(status) === -1 &&
+          !this.productionToCreate.taskStatuses.includes(status) &&
           !status.is_default &&
           !status.for_concept
       )
@@ -888,7 +891,7 @@ export default {
       if (this.isTVShow) {
         params.episode_id = 'all'
         routeName = 'episode-assets'
-      } else if (this.productionToCreate.settings.type === 'shots') {
+      } else if (this.isShotsOnly) {
         routeName = 'shots'
       }
       return {
@@ -1115,7 +1118,7 @@ span.input-separator {
 }
 
 .flexrow-item.mr0 {
-  margin-right: 0em;
+  margin-right: 0;
 }
 
 .flexrow-item.mr05 {
