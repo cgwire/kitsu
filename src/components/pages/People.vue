@@ -188,7 +188,7 @@ export default {
   data() {
     return {
       csvColumns: ['First Name', 'Last Name'],
-      optionalCsvColumns: ['Phone', 'Role'],
+      optionalCsvColumns: ['Phone', 'Role', 'Contract Type', 'Active'],
       dataMatchers: ['Email'],
       role: 'all',
       roleOptions: [
