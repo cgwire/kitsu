@@ -903,11 +903,11 @@ export default {
     onSearchChange() {
       if (!this.searchField) return
       this.isSearchActive = false
-      const searchQuery = this.searchField.getValue()
-      if (searchQuery && searchQuery.length !== 1 && !this.isLongShotList) {
+      const searchQuery = this.searchField.getValue() || ''
+      if (searchQuery.length !== 1 && !this.isLongShotList) {
         this.applySearch(searchQuery)
       }
-      if (searchQuery && searchQuery.length === 0 && this.isLongShotList) {
+      if (searchQuery.length === 0 && this.isLongShotList) {
         this.applySearch('')
       }
     },
