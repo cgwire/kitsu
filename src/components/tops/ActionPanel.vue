@@ -496,17 +496,10 @@
             >
               {{ $t('tasks.set_preview') }}
             </button>
-            <input
-              class="flexrow-item mr02"
-              type="checkbox"
-              v-model="isUseCurrentFrame"
-            />
-            <span
-              class="flexrow-item pointer"
-              @click="isUseCurrentFrame = !isUseCurrentFrame"
-            >
+            <label class="is-inline-block mt05 pointer" v-if="isMoviePreview">
+              <input class="mr02" type="checkbox" v-model="isUseCurrentFrame" />
               {{ $t('tasks.use_current_frame') }}
-            </span>
+            </label>
           </div>
         </div>
 
@@ -837,6 +830,10 @@ export default {
   name: 'action-panel',
 
   props: {
+    isMoviePreview: {
+      type: Boolean,
+      default: false
+    },
     isSetFrameThumbnailLoading: {
       type: Boolean,
       default: false
@@ -1466,7 +1463,10 @@ export default {
     confirmSetThumbnailsFromTasks() {
       this.loading.setThumbnails = true
       if (this.nbSelectedTasks === 1) {
-        this.$emit('set-frame-thumbnail', this.isUseCurrentFrame)
+        this.$emit(
+          'set-frame-thumbnail',
+          this.isMoviePreview && this.isUseCurrentFrame
+        )
         this.loading.setThumbnails = false
       } else {
         func
