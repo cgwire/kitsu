@@ -15,11 +15,12 @@
             : 'v-autocomplete-input'
       }"
       :keep-open="keepOpen"
-      :min-len="1"
+      :min-len="0"
       :wait="100"
       @focus="keepOpen = true"
       @input="onChange"
       @item-clicked="keepOpen = false"
+      @keyup.enter.native="onEnter"
       @update-items="update"
       v-model="item"
     />
@@ -45,8 +46,7 @@ export default {
       assignationItem: AssignationItem,
       item: null,
       items: [],
-      keepOpen: false,
-      searchText: ''
+      keepOpen: false
     }
   },
 
@@ -58,20 +58,6 @@ export default {
 
   mounted() {
     this.items = this.people
-    this.$refs.autocomplete.$el.children[0].children[0].addEventListener(
-      'keyup',
-      event => {
-        if (event.keyCode === 13 && this.item) {
-          this.$emit('enter')
-        }
-
-        this.searchText =
-          this.$refs.autocomplete.$el.children[0].children[0].value
-        if (!this.item && this.searchText.length === 0) {
-          this.items = []
-        }
-      }
-    )
   },
 
   props: {
@@ -113,6 +99,13 @@ export default {
       this.$emit('input', this.item)
     },
 
+    onEnter() {
+      if (this.item) {
+        this.$emit('enter')
+        this.$refs.autocomplete.focus()
+      }
+    },
+
     clear() {
       this.item = null
     },
@@ -123,16 +116,10 @@ export default {
   },
 
   watch: {
-    item() {
-      if (!this.item) {
-        this.items = this.people
-      }
-    },
-
     people() {
       this.item = this.item
         ? this.people.find(person => person.id === this.item.id)
-        : undefined
+        : null
       this.items = this.people
       this.index = buildNameIndex(this.people)
     }
