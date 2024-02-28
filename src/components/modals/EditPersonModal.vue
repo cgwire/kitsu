@@ -342,6 +342,7 @@ export default {
       }
       const form = {
         ...this.form,
+        last_name: this.form.last_name || '',
         active: this.form.active === 'true' || this.form.active === true
       }
       this.$emit('confirm', form)
