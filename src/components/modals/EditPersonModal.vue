@@ -256,7 +256,7 @@ export default {
         email: '',
         phone: '',
         role: 'user',
-        contract_type: 'permanent',
+        contract_type: 'open-ended',
         active: 'true',
         departments: [],
         expiration_date: null,
@@ -376,7 +376,7 @@ export default {
       } else {
         this.form = {
           role: 'user',
-          contract_type: 'permanent',
+          contract_type: 'open-ended',
           active: 'true',
           departments: [],
           expiration_date: null,
