@@ -9,6 +9,7 @@
     <div class="side task-info">
       <action-panel
         v-if="withActions && (!isConceptTask || selectedConcepts.size > 0)"
+        :is-movie-preview="isMoviePreview"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
