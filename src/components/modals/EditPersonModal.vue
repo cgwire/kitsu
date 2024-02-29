@@ -8,7 +8,7 @@
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
-      <form @submit.prevent="confirmClicked" class="box">
+      <form @submit.prevent="emitForm('confirm')" class="box">
         <h1 class="title" v-if="personToEdit.id !== undefined">
           {{ $t('people.edit_title') }} {{ personToEdit.full_name }}
         </h1>
@@ -115,7 +115,7 @@
             }"
             :disabled="!isValidEmail"
             type="button"
-            @click="invite"
+            @click="emitForm('invite')"
             v-if="isEditing && isCurrentUserAdmin && !isBot"
           >
             {{ $t('people.invite') }}
@@ -129,7 +129,7 @@
             }"
             :disabled="!isValidForm"
             type="button"
-            @click="createAndInvite"
+            @click="emitForm('confirm-invite')"
             v-if="!isEditing && isCurrentUserAdmin && !isBot"
           >
             {{ $t('people.create_invite') }}
@@ -328,15 +328,7 @@ export default {
   },
 
   methods: {
-    createAndInvite() {
-      this.$emit('confirm-invite', this.form)
-    },
-
-    invite() {
-      this.$emit('invite', this.form)
-    },
-
-    confirmClicked() {
+    emitForm(event) {
       if (!this.isValidForm) {
         return
       }
@@ -345,7 +337,7 @@ export default {
         last_name: this.form.last_name || '',
         active: this.form.active === 'true' || this.form.active === true
       }
-      this.$emit('confirm', form)
+      this.$emit(event, form)
     },
 
     addDepartment() {
