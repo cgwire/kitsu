@@ -57,7 +57,7 @@ export default {
   },
 
   getPerson(personId) {
-    return client.pget(`/api/data/persons/${personId}?relations=true`)
+    return client.pget(`/api/data/persons/${personId}`)
   },
 
   createPerson(person) {
