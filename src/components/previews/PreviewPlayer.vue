@@ -1107,7 +1107,7 @@ export default {
         this.clearCanvas()
         if (this.currentFrame >= this.nbFrames - 1) {
           this.previewViewer.setCurrentFrame(0)
-          this.syncComparisonViewer()
+          this.comparisonViewer.setCurrentFrame(0)
         }
         this.previewViewer.play()
         if (this.comparisonViewer && this.isComparing) {
