@@ -168,6 +168,7 @@ const getters = {
 
   people: state => state.people,
   peopleWithoutBot: state => state.people.filter(person => !person.is_bot),
+  activePeople: state => state.people.filter(person => person.active),
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => state.peopleIndex,
   personMap: state => state.personMap,
