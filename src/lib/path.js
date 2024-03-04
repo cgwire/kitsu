@@ -43,7 +43,7 @@ export const getTaskEntityPath = (task, episodeId) => {
     }
     route.params[`${route.name}_id`] = entityId
 
-    if (episodeId) {
+    if (episodeId && route.name !== 'episode') {
       route.name = `episode-${route.name}`
       route.params.episode_id = episodeId
     }
