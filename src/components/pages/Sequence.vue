@@ -566,6 +566,10 @@ h2.subtitle {
   flex-direction: column;
   align-items: center;
   font-size: 0.8em;
+
+  .ready-for .no-link {
+    cursor: inherit;
+  }
 }
 
 .asset-link div {
