@@ -1462,9 +1462,11 @@ export default {
     },
 
     onVideoLoaded() {
-      this.movieDimensions = {
-        width: this.currentPreview.width,
-        height: this.currentPreview.height
+      if (this.currentPreview) {
+        this.movieDimensions = {
+          width: this.currentPreview.width,
+          height: this.currentPreview.height
+        }
       }
     },
 
@@ -2006,9 +2008,11 @@ export default {
           this.resetCanvas()
         }
       })
-      this.movieDimensions = {
-        width: this.currentPreview.width,
-        height: this.currentPreview.height
+      if (this.currentPreview) {
+        this.movieDimensions = {
+          width: this.currentPreview.width,
+          height: this.currentPreview.height
+        }
       }
     },
 

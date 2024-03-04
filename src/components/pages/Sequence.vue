@@ -337,10 +337,11 @@ export default {
       'currentEpisode',
       'currentProduction',
       'getTaskTypePriority',
+      'isCurrentUserManager',
+      'isTVShow',
       'sequenceMap',
       'sequenceMetadataDescriptors',
       'sequenceSearchText',
-      'isCurrentUserManager',
       'route',
       'taskMap',
       'taskTypeMap'
@@ -364,7 +365,7 @@ export default {
 
     getSequencesRoute() {
       const productionId = this.currentProduction.id
-      const episodeId = this.currentEpisode ? this.currentEpisode.id : null
+      const episodeId = this.currentEpisode?.id
       const route = getEntitiesPath(productionId, 'sequences', episodeId)
       route.query = { search: this.sequenceSearchText }
       return route
@@ -431,8 +432,7 @@ export default {
     },
 
     buildAssetRoute(asset) {
-      let sequenceId = asset.sequence_id
-      if (!sequenceId) sequenceId = 'main'
+      const episodeId = this.isTVShow ? this.currentEpisode?.id || 'main' : null
       const route = {
         name: 'asset',
         params: {
@@ -440,7 +440,7 @@ export default {
           asset_id: asset.asset_id
         }
       }
-      return episodifyRoute(route, sequenceId)
+      return episodifyRoute(route, episodeId)
     },
 
     resetData() {
@@ -566,6 +566,10 @@ h2.subtitle {
   flex-direction: column;
   align-items: center;
   font-size: 0.8em;
+
+  .ready-for .no-link {
+    cursor: inherit;
+  }
 }
 
 .asset-link div {
