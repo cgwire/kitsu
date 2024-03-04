@@ -596,6 +596,7 @@ const mutations = {
       const validations = new Map()
       let timeSpent = 0
       let estimation = 0
+      episode.project_id = production.id
       episode.project_name = production.name
       episode.production_id = production.id
       episode.full_name = episode.name

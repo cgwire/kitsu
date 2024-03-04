@@ -426,8 +426,7 @@ export default {
     },
 
     buildAssetRoute(asset) {
-      let episodeId = asset.episode_id
-      if (!episodeId) episodeId = 'main'
+      const episodeId = this.currentEpisode.id
       const route = {
         name: 'asset',
         params: {
@@ -443,7 +442,7 @@ export default {
 
       // Next tick is needed to wait for the episode change.
       this.$nextTick(() => {
-        this.getCurrentEpisode()
+        this.loadCurrentEpisode()
           .then(episode => {
             this.currentEpisode = episode
             return this.loadEpisodeCasting(this.currentEpisode)
