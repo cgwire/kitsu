@@ -410,10 +410,10 @@ export default {
         if (section !== 'episodes') {
           route.name = `episode-${section}`
         }
-        if (section !== 'edits' && production.first_episode_id) {
-          if (section === 'episodes') {
-            route.name = 'episode'
-          }
+        if (
+          !['edits', 'episodes'].includes(section) &&
+          production.first_episode_id
+        ) {
           route.params.episode_id = production.first_episode_id
         } else {
           route.params.episode_id = 'all'

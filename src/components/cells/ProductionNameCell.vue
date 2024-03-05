@@ -136,8 +136,13 @@ export default {
         query: {}
       }
       if (production.production_type === 'tvshow') {
-        route.name = `episode-${routeName}`
-        if (section !== 'edits' && production.first_episode_id) {
+        if (routeName !== 'episodes') {
+          route.name = `episode-${routeName}`
+        }
+        if (
+          !['edits', 'episodes'].includes(routeName) &&
+          production.first_episode_id
+        ) {
           route.params.episode_id = production.first_episode_id
         } else {
           route.params.episode_id = 'all'
