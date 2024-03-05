@@ -1,8 +1,15 @@
 import client from '@/store/api/client'
 
+import { buildQueryString } from '../../lib/query'
+
 export default {
   getTask(taskId, callback) {
     return client.pget(`/api/data/tasks/${taskId}/full`)
+  },
+
+  getOpenTasks(filters) {
+    const path = '/api/data/tasks/open-tasks'
+    return client.pget(buildQueryString(path, filters))
   },
 
   updateTask(taskId, data, callback) {

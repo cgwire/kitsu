@@ -39,6 +39,7 @@ const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
 const NotFound = () => import('@/components/pages/NotFound.vue')
+const AllTasks = () => import('@/components/pages/AllTasks.vue')
 const People = () => import('@/components/pages/People.vue')
 const Person = () => import('@/components/pages/Person.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
@@ -222,6 +223,12 @@ export const routes = [
         name: 'notifications',
         path: 'notifications',
         component: Notifications
+      },
+
+      {
+        path: 'all-tasks',
+        component: AllTasks,
+        name: 'all-tasks'
       },
 
       {

@@ -1,0 +1,279 @@
+<template>
+  <page-layout>
+    <template v-slot:main>
+      <div class="all-tasks">
+        <page-title
+          class="flexrow-item title mt1"
+          :text="$t('tasks.all_tasks')"
+        />
+
+        <div class="filters flexrow">
+          <combobox-production
+            class="flexrow-item"
+            :label="$t('main.production')"
+            :production-list="productionList"
+            v-model="filters.productionId"
+          />
+          <combobox-status
+            class="flexrow-item selector"
+            :label="$t('news.task_status')"
+            :task-status-list="taskStatusList"
+            v-model="filters.taskStatusId"
+          />
+          <combobox-task-type
+            class="flexrow-item selector"
+            :label="$t('news.task_type')"
+            :task-type-list="taskTypeList"
+            v-model="filters.taskTypeId"
+          />
+          <div class="flexrow-item selector">
+            <label class="label person-label">
+              {{ $t('main.person') }}
+            </label>
+            <people-field
+              class="person-field"
+              big
+              :people="activePeople"
+              v-model="filters.person"
+            />
+          </div>
+        </div>
+
+        <all-task-list
+          :tasks="tasks"
+          :stats="stats"
+          :is-loading="isLoading"
+          :is-error="isLoadingError"
+          :is-more="isMore"
+          :is-more-loading="isMoreLoading"
+          @task-clicked="taskClicked"
+          @more-clicked="loadMore"
+        />
+      </div>
+    </template>
+    <template v-slot:side>
+      <task-info :task="selectedTasks.values().next().value">
+        <status-stats :stats="statusStats" />
+      </task-info>
+    </template>
+  </page-layout>
+</template>
+
+<script>
+import { mapGetters, mapActions } from 'vuex'
+
+import AllTaskList from '@/components/lists/AllTaskList.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import PageLayout from '@/components/layouts/PageLayout.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import StatusStats from '@/components/widgets/StatusStats.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+
+export default {
+  name: 'AllTasks',
+
+  components: {
+    AllTaskList,
+    ComboboxProduction,
+    ComboboxTaskType,
+    ComboboxStatus,
+    PageLayout,
+    PageTitle,
+    PeopleField,
+    StatusStats,
+    TaskInfo
+  },
+
+  data() {
+    return {
+      filters: {
+        productionId: null,
+        taskStatusId: null,
+        taskTypeId: null,
+        person: null
+      },
+      isMore: false,
+      isMoreLoading: false,
+      isLoading: false,
+      isLoadingError: false,
+      tasks: [],
+      stats: {
+        status: []
+      }
+    }
+  },
+
+  async mounted() {
+    const routeQuery = this.$route.query
+    if (routeQuery.project_id) {
+      this.filters.productionId = routeQuery.project_id
+    }
+    if (routeQuery.task_status_id) {
+      this.filters.taskStatusId = routeQuery.task_status_id
+    }
+    if (routeQuery.task_type_id) {
+      this.filters.taskTypeId = routeQuery.task_type_id
+    }
+    if (routeQuery.person_id) {
+      this.filters.person = this.activePeople.find(
+        p => p.id === parseInt(routeQuery.person_id)
+      )
+    }
+    this.reload()
+  },
+
+  computed: {
+    ...mapGetters([
+      'nbSelectedTasks',
+      'openProductions',
+      'productionTaskTypes',
+      'productionTaskStatuses',
+      'taskTypes',
+      'taskStatus',
+      'activePeople',
+      'selectedTasks',
+      'taskStatusMap'
+    ]),
+
+    taskStatusList() {
+      return this.addAllValue(this.productionTaskStatuses)
+    },
+
+    taskTypeList() {
+      return this.addAllValue(this.productionTaskTypes)
+    },
+
+    productionList() {
+      return this.addAllValue(this.openProductions)
+    },
+
+    params() {
+      return {
+        project_id: this.filters.productionId,
+        task_status_id: this.filters.taskStatusId,
+        task_type_id: this.filters.taskTypeId,
+        person_id: this.filters.person ? this.filters.person.id : null
+      }
+    },
+
+    statusStats() {
+      return [...this.stats.status]
+        .sort((a, b) => b.amount - a.amount)
+        .map(stat => {
+          const taskStatus = this.taskStatusMap.get(stat.task_status_id)
+          return {
+            name: taskStatus.short_name.toUpperCase(),
+            color: taskStatus.color,
+            value: stat.amount
+          }
+        })
+    }
+  },
+
+  methods: {
+    ...mapActions(['clearSelectedTasks', 'loadOpenTasks', 'loadTask']),
+
+    addAllValue(list, label) {
+      return [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('main.all'),
+          short_name: this.$t('main.all')
+        }
+      ].concat([...list])
+    },
+
+    async reload() {
+      this.isLoading = true
+      this.page = 1
+      this.clearSelectedTasks()
+      try {
+        const routeQuery = {}
+        Object.keys(this.params).forEach(key => {
+          if (this.params[key]) {
+            routeQuery[key] = this.params[key]
+          }
+        })
+        this.$router.push({ query: routeQuery })
+        const taskInfos = await this.loadOpenTasks(this.params)
+        this.tasks = taskInfos.data
+        this.stats = taskInfos.stats
+        this.isMore = taskInfos.is_more
+      } catch (error) {
+        this.isLoading = false
+        this.isLoadingError = true
+        console.error(error)
+      }
+      this.isLoading = false
+    },
+
+    loadMore() {
+      this.isMoreLoading = true
+      this.page = (this.page || 1) + 1
+      const params = {
+        ...this.params,
+        page: this.page
+      }
+      this.loadOpenTasks(params)
+        .then(taskInfos => {
+          this.tasks = this.tasks.concat(taskInfos.data)
+          this.isMore = taskInfos.is_more
+          this.isMoreLoading = false
+        })
+        .catch(error => {
+          this.isMoreLoading = false
+          this.isMoreLoadingError = true
+          console.error(error)
+        })
+    },
+
+    taskClicked(task) {
+      this.$router.push({ name: 'Task', params: { id: task.id } })
+    }
+  },
+
+  watch: {
+    filters: {
+      handler() {
+        this.reload()
+      },
+      deep: true
+    }
+  },
+
+  socket: {
+    events: {
+      'task:update'(eventData) {
+        const task = this.tasks.find(t => t.id === eventData.task_id)
+        if (task) {
+          this.loadTask({ taskId: task.id }).then(updatedTask => {
+            Object.assign(task, updatedTask)
+          })
+        }
+      }
+    }
+  },
+
+  metaInfo() {
+    ;`${this.$t('tasks.all_tasks')} - Kitsu`
+  }
+}
+</script>
+
+<style scoped>
+.all-tasks {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  padding: 4em 1em 1em 1em;
+  color: var(--text);
+}
+
+.person-label {
+  margin-top: -23px;
+}
+</style>

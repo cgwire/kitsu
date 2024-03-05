@@ -87,7 +87,15 @@
                 {{ $t('team_schedule.title_main') }}
               </router-link>
             </p>
-
+            <p
+              @click="toggleSidebar()"
+              v-if="isCurrentUserSupervisor || isCurrentUserManager"
+            >
+              <router-link :to="{ name: 'all-tasks' }">
+                <kitsu-icon class="nav-icon" name="check" />
+                {{ $t('tasks.all_tasks') }}
+              </router-link>
+            </p>
             <p @click="toggleSidebar()">
               <router-link
                 :to="{ name: 'newsfeed' }"
