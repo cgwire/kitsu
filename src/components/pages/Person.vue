@@ -16,7 +16,7 @@
           </div>
         </div>
 
-        <template v-if="!person.is_bot">
+        <template v-if="!person.is_bot && isCurrentUserAllowed">
           <div ref="tabs" class="task-tabs tabs">
             <ul>
               <li :class="{ 'is-active': isActiveTab('todos') }">
@@ -147,7 +147,7 @@
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"
             @unset-day-off="onUnsetDayOff"
-            v-if="isActiveTab('timesheets')"
+            v-if="isActiveTab('timesheets') && isCurrentUserManager"
           />
 
           <div v-if="isActiveTab('schedule')">
@@ -279,6 +279,7 @@ export default {
       'displayedPersonDoneTasks',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'nbSelectedTasks',
       'personMap',
       'personTasksScrollPosition',
@@ -292,6 +293,19 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    isCurrentUserAllowed() {
+      if (this.isCurrentUserManager || this.user.id === this.person.id) {
+        return true
+      }
+      if (this.isCurrentUserSupervisor) {
+        const isSupervisorInDepartments = this.user.departments.some(
+          department => this.person.departments.includes(department)
+        )
+        return isSupervisorInDepartments
+      }
+      return false
+    },
 
     loggablePersonTasks() {
       return this.displayedPersonTasks.filter(task => {
@@ -542,7 +556,7 @@ export default {
         return
       }
 
-      if (this.person.is_bot) {
+      if (this.person.is_bot || !this.isCurrentUserAllowed) {
         return
       }
 
