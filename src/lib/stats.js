@@ -21,7 +21,7 @@ export const getChartData = (
 
 const _sortData = (a, b) => {
   if (a[0] && b[0]) {
-    return a[0].localeCompare(b[0])
+    return a[0].localeCompare(b[0], undefined, { numeric: true })
   } else if (!a[0] && b[0]) {
     return -1
   } else if (a[0] && !b[0]) {

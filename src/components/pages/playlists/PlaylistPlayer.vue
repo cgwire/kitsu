@@ -1621,7 +1621,12 @@ export default {
             value: this.taskTypeMap.get(taskTypeId).id
           }
         })
-        .sort((a, b) => -a.label.localeCompare(b.label))
+        .sort(
+          (a, b) =>
+            -a.label.localeCompare(b.label, undefined, {
+              numeric: true
+            })
+        )
       return taskTypeOptions
     },
 
@@ -2335,10 +2340,6 @@ export default {
     height: 1rem;
     margin-top: 0;
   }
-}
-
-.playlist-footer .button.active,
-.playlist-footer .background-combo.active .icon {
 }
 
 progress::-moz-progress-bar {

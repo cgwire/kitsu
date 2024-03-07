@@ -228,7 +228,9 @@ const csv = {
 
       entries = entries.concat(
         Object.values(lineMap).sort((a, b) => {
-          return a[1].localeCompare(b[1])
+          return a[1].localeCompare(b[1], undefined, {
+            numeric: true
+          })
         })
       )
       entries.push([''])
@@ -431,7 +433,9 @@ const getStatsEntryIds = (mainStats, entryMap) => {
   return Object.keys(mainStats).sort((a, b) => {
     if (a === 'all') return -1
     if (b === 'all') return 1
-    return entryMap.get(a).name.localeCompare(entryMap.get(b).name)
+    return entryMap.get(a).name.localeCompare(entryMap.get(b).name, undefined, {
+      numeric: true
+    })
   })
 }
 
