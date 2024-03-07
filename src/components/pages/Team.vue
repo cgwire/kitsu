@@ -1,6 +1,6 @@
 <template>
   <div class="people page fixed-page">
-    <div class="flexrow mt2 add-people">
+    <div class="flexrow mt2 add-people" v-if="isCurrentUserManager">
       <people-field
         ref="people-field"
         class="flexrow-item add-people-field"
@@ -10,7 +10,11 @@
         @enter="addPerson"
         v-model="person"
       />
-      <button class="button flexrow-item" @click="addPerson">
+      <button
+        class="button flexrow-item"
+        @click="addPerson"
+        :disabled="!person"
+      >
         {{ $t('main.add') }}
       </button>
     </div>
@@ -29,11 +33,12 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
-import ProductionTeamList from '@/components/lists/ProductionTeamList'
 import PeopleField from '@/components/widgets/PeopleField'
+import ProductionTeamList from '@/components/lists/ProductionTeamList'
 
 export default {
   name: 'team',
+
   components: {
     PeopleField,
     ProductionTeamList
@@ -50,10 +55,10 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
-      'productionMap',
+      'isCurrentUserManager',
       'openProductions',
-      'personMap',
-      'people'
+      'people',
+      'personMap'
     ]),
 
     teamPersons() {
@@ -65,9 +70,10 @@ export default {
     },
 
     unlistedPeople() {
-      return this.people.filter(person => {
-        return !this.currentProduction.team.includes(person.id) && person.active
-      })
+      return this.people.filter(
+        person =>
+          !this.currentProduction.team.includes(person.id) && person.active
+      )
     }
   },
 
