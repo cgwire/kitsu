@@ -27,7 +27,9 @@ export const buildNameIndex = (entries, split = true) => {
  */
 export const buildTaskTypeIndex = taskTypes => {
   const sortedTaskTypes = [...taskTypes].sort((a, b) =>
-    a.name.localeCompare(b.name)
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true
+    })
   )
   return buildNameIndex(sortedTaskTypes, false)
 }

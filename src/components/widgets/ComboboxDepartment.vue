@@ -118,7 +118,11 @@ export default {
       const departments = this.selectableDepartments
         ? [...this.selectableDepartments]
         : [...this.departments]
-      return departments.sort((a, b) => a.name.localeCompare(b.name))
+      return departments.sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, {
+          numeric: true
+        })
+      )
     },
 
     departmentList() {
@@ -195,9 +199,6 @@ export default {
   .department-line:hover {
     background: $dark-purple;
   }
-}
-
-.department-line {
 }
 
 .department-combo {

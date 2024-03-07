@@ -8,8 +8,14 @@ import {
 export const sortAssets = assets => {
   return assets.sort(
     firstBy('canceled')
-      .thenBy((a, b) => a.asset_type_name.localeCompare(b.asset_type_name))
-      .thenBy((a, b) => a.name.localeCompare(b.name))
+      .thenBy((a, b) =>
+        a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
+          numeric: true
+        })
+      )
+      .thenBy((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      )
   )
 }
 
@@ -17,8 +23,14 @@ export const sortShots = shots => {
   return shots.sort(
     firstBy('canceled')
       .thenBy(sortByEpisode)
-      .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
-      .thenBy((a, b) => a.name.localeCompare(b.name))
+      .thenBy((a, b) =>
+        a.sequence_name.localeCompare(b.sequence_name, undefined, {
+          numeric: true
+        })
+      )
+      .thenBy((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      )
   )
 }
 
@@ -26,7 +38,9 @@ export const sortEdits = shots => {
   return shots.sort(
     firstBy('canceled')
       .thenBy(sortByEpisode)
-      .thenBy((a, b) => a.name.localeCompare(b.name))
+      .thenBy((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      )
   )
 }
 
@@ -34,11 +48,13 @@ export const sortSequences = sequences => {
   return sequences.sort(
     firstBy((a, b) => {
       if (a.episode_name) {
-        return a.episode_name.localeCompare(b.episode_name)
+        return a.episode_name.localeCompare(b.episode_name, undefined, {
+          numeric: true
+        })
       }
       return 0
     }).thenBy((a, b) => {
-      return a.name.localeCompare(b.name)
+      return a.name.localeCompare(b.name, undefined, { numeric: true })
     })
   )
 }
@@ -46,9 +62,14 @@ export const sortSequences = sequences => {
 export const sortProductions = productions => {
   return productions.sort((a, b) => {
     if (a.project_status_name === b.project_status_name) {
-      return a.name.localeCompare(b.name)
+      return a.name.localeCompare(b.name, undefined, { numeric: true })
     }
-    return -1 * a.project_status_name.localeCompare(b.project_status_name)
+    return (
+      -1 *
+      a.project_status_name.localeCompare(b.project_status_name, undefined, {
+        numeric: true
+      })
+    )
   })
 }
 
@@ -57,12 +78,18 @@ export const sortTaskNames = (tasks, taskTypeMap) => {
     firstBy((a, b) => {
       const taskTypeA = taskTypeMap.get(a.task_type_id)
       const taskTypeB = taskTypeMap.get(b.task_type_id)
-      return taskTypeA.name.localeCompare(taskTypeB.name)
+      return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
+        numeric: true
+      })
     }).thenBy((a, b) => {
       if (a.full_entity_name) {
-        return a.full_entity_name.localeCompare(b.full_entity_name)
+        return a.full_entity_name.localeCompare(b.full_entity_name, undefined, {
+          numeric: true
+        })
       }
-      return a.entity_name.localeCompare(b.entity_name)
+      return a.entity_name.localeCompare(b.entity_name, undefined, {
+        numeric: true
+      })
     })
   )
 }
@@ -71,20 +98,30 @@ export const sortTasks = (tasks, taskTypeMap) => {
     firstBy('priority', -1)
       .thenBy((a, b) => {
         if (a.project_name) {
-          return a.project_name.localeCompare(b.project_name)
+          return a.project_name.localeCompare(b.project_name, undefined, {
+            numeric: true
+          })
         }
         return 0
       })
       .thenBy((a, b) => {
         const taskTypeA = taskTypeMap.get(a.task_type_id)
         const taskTypeB = taskTypeMap.get(b.task_type_id)
-        return taskTypeA.name.localeCompare(taskTypeB.name)
+        return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
+          numeric: true
+        })
       })
       .thenBy((a, b) => {
         if (a.full_entity_name) {
-          return a.full_entity_name.localeCompare(b.full_entity_name)
+          return a.full_entity_name.localeCompare(
+            b.full_entity_name,
+            undefined,
+            { numeric: true }
+          )
         }
-        return a.entity_name.localeCompare(b.entity_name)
+        return a.entity_name.localeCompare(b.entity_name, undefined, {
+          numeric: true
+        })
       })
   )
 }
@@ -156,7 +193,9 @@ export const sortTaskTypeScheduleItems = (
 
 export const sortPlaylists = playlists => {
   return playlists.sort(
-    firstBy('created_at', -1).thenBy((a, b) => a.name.localeCompare(b.name))
+    firstBy('created_at', -1).thenBy((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true })
+    )
   )
 }
 
@@ -173,11 +212,15 @@ export const sortPeople = people => {
 }
 
 export const sortByName = entries => {
-  return entries.sort((a, b) => a.name.localeCompare(b.name))
+  return entries.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true })
+  )
 }
 
 export const sortByValue = entries => {
-  return entries.sort((a, b) => a.value.localeCompare(b.value))
+  return entries.sort((a, b) =>
+    a.value.localeCompare(b.value, undefined, { numeric: true })
+  )
 }
 
 export const sortByDate = entries => {
@@ -201,7 +244,9 @@ export const sortValidationColumns = (
       currentProduction
     )
     if (taskTypeAPriority === taskTypeBPriority) {
-      return taskTypeA.name.localeCompare(taskTypeB.name)
+      return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
+        numeric: true
+      })
     } else if (taskTypeAPriority > taskTypeBPriority) {
       return 1
     }
@@ -221,8 +266,14 @@ export const sortAssetResult = (result, sorting, taskTypeMap, taskMap) => {
     result = result.sort(
       firstBy('canceled')
         .thenBy(sortEntities)
-        .thenBy((a, b) => a.asset_type_name.localeCompare(b.asset_type_name))
-        .thenBy((a, b) => a.name.localeCompare(b.name))
+        .thenBy((a, b) =>
+          a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
+            numeric: true
+          })
+        )
+        .thenBy((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true })
+        )
     )
   } else {
     result = sortAssets(result)
@@ -239,8 +290,14 @@ export const sortShotResult = (result, sorting, taskTypeMap, taskMap) => {
       firstBy('canceled')
         .thenBy(sortEntities)
         .thenBy(sortByEpisode)
-        .thenBy((a, b) => a.sequence_name.localeCompare(b.sequence_name))
-        .thenBy((a, b) => a.name.localeCompare(b.name))
+        .thenBy((a, b) =>
+          a.sequence_name.localeCompare(b.sequence_name, undefined, {
+            numeric: true
+          })
+        )
+        .thenBy((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true })
+        )
     )
   } else {
     result = sortShots(result)
@@ -257,7 +314,9 @@ export const sortSequenceResult = (result, sorting, taskTypeMap, taskMap) => {
       firstBy('canceled')
         .thenBy(sortEntities)
         .thenBy(sortByEpisode)
-        .thenBy((a, b) => a.name.localeCompare(b.name))
+        .thenBy((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true })
+        )
     )
   } else {
     result = sortByName(result)
@@ -273,7 +332,9 @@ export const sortEpisodeResult = (result, sorting, taskTypeMap, taskMap) => {
     result = result.sort(
       firstBy('canceled')
         .thenBy(sortEntities)
-        .thenBy((a, b) => a.name.localeCompare(b.name))
+        .thenBy((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true })
+        )
     )
   } else {
     result = sortByName(result)
@@ -290,7 +351,9 @@ export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
       firstBy('canceled')
         .thenBy(sortEntities)
         .thenBy(sortByEpisode)
-        .thenBy((a, b) => a.name.localeCompare(b.name))
+        .thenBy((a, b) =>
+          a.name.localeCompare(b.name, undefined, { numeric: true })
+        )
     )
   } else {
     result = sortEdits(result)
@@ -341,14 +404,14 @@ const sortByMetadata = sortInfo => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
       if (!dataB) return -1
       if (!dataA) return 1
-      return dataA.localeCompare(dataB)
+      return dataA.localeCompare(dataB, undefined, { numeric: true })
     }
   } else {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
       if (!dataB) return -1
       if (!dataA) return 1
-      return dataA.localeCompare(dataB)
+      return dataA.localeCompare(dataB, undefined, { numeric: true })
     }
   }
 }
@@ -360,12 +423,14 @@ const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
   if (!taskB) return 1
   const taskStatusA = taskMap.get(taskA).task_status_short_name
   const taskStatusB = taskMap.get(taskB).task_status_short_name
-  return taskStatusA.localeCompare(taskStatusB)
+  return taskStatusA.localeCompare(taskStatusB, undefined, { numeric: true })
 }
 
 const sortByEpisode = (a, b) => {
   if (a.episode_name) {
-    return a.episode_name.localeCompare(b.episode_name)
+    return a.episode_name.localeCompare(b.episode_name, undefined, {
+      numeric: true
+    })
   }
   return 0
 }

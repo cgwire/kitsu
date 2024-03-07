@@ -565,17 +565,21 @@ export default {
     },
 
     pictureAttachments() {
-      return [...this.comment.attachment_files]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .filter(attachment => {
-          return files.IMG_EXTENSIONS.includes(attachment.extension)
-        })
+      return this.comment.attachment_files
+        .filter(attachment =>
+          files.IMG_EXTENSIONS.includes(attachment.extension)
+        )
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, {
+            numeric: true
+          })
+        )
     },
 
     fileAttachments() {
-      return this.comment.attachment_files.filter(attachment => {
-        return !files.IMG_EXTENSIONS.includes(attachment.extension)
-      })
+      return this.comment.attachment_files.filter(
+        attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
+      )
     },
 
     commentDate() {
@@ -885,7 +889,7 @@ article.comment {
 .content {
   .comment-text {
     margin-top: 0.5rem;
-    margin-bottom: 0rem;
+    margin-bottom: 0;
     padding: 0.2em 0.1em;
     word-break: break-word;
     hyphens: auto;
@@ -995,7 +999,7 @@ article.comment {
 }
 
 .comment-content {
-  padding: 0em;
+  padding: 0;
 }
 
 .infos {
@@ -1107,7 +1111,7 @@ textarea.reply {
   color: $grey;
   cursor: pointer;
   margin-top: -2px;
-  margin-right: 0px;
+  margin-right: 0;
   opacity: 0;
 }
 

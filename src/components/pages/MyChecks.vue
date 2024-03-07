@@ -238,7 +238,13 @@ export default {
           label: this.$t('main.all'),
           value: 'all'
         }
-      ].concat(episodeOptions.sort((a, b) => a.label.localeCompare(b.label)))
+      ].concat(
+        episodeOptions.sort((a, b) =>
+          a.label.localeCompare(b.label, undefined, {
+            numeric: true
+          })
+        )
+      )
     },
 
     filteredTasks() {

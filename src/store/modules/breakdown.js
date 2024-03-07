@@ -64,7 +64,7 @@ const actions = {
     const production = rootState.productions.currentProduction
     const assetMap = rootState.assets.assetMap
     const episodes = Array.from(rootState.episodes.episodeMap.values()).sort(
-      (a, b) => a.name.localeCompare(b.name)
+      (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })
     )
     commit(CASTING_SET_FOR_EPISODES, episodes)
     return breakdownApi
@@ -105,7 +105,9 @@ const actions = {
     const assetMap = rootState.assets.assetMap
     const assets = Array.from(rootState.assets.assetMap.values())
       .filter(asset => asset.asset_type_id === assetTypeId)
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      )
     commit(CASTING_SET_ASSET_TYPE, assetTypeId)
     commit(CASTING_SET_ASSETS, assets)
     return breakdownApi

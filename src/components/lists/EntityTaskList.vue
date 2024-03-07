@@ -165,7 +165,9 @@ export default {
         const taskTypeAPriority = this.getTaskTypePriority(taskA.task_type_id)
         const taskTypeBPriority = this.getTaskTypePriority(taskB.task_type_id)
         if (taskTypeAPriority === taskTypeBPriority) {
-          return taskTypeA.name.localeCompare(taskTypeB.name)
+          return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
+            numeric: true
+          })
         } else {
           return taskTypeAPriority - taskTypeBPriority
         }
