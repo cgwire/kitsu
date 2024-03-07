@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="people-field">
     <v-autocomplete
       ref="autocomplete"
       :auto-select-one-item="false"
@@ -24,6 +24,10 @@
       @update-items="update"
       v-model="item"
     />
+    <span class="clear-button" @click="item = null" v-show="item !== null">
+      <x-icon size="0.8x" />
+    </span>
+
     <div
       @click="keepOpen = false"
       :class="{
@@ -38,8 +42,14 @@
 import AssignationItem from '@/components/widgets/AssignationItem'
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
+import { XIcon } from 'vue-feather-icons'
+
 export default {
   name: 'people-field',
+
+  components: {
+    XIcon
+  },
 
   data() {
     return {
@@ -140,6 +150,19 @@ export default {
 
   &:focus {
     border-color: $green;
+  }
+}
+
+.people-field {
+  position: relative;
+
+  .clear-button {
+    color: var(--text);
+    cursor: pointer;
+    position: absolute;
+    right: 4px;
+    top: 0;
+    z-index: 3001;
   }
 }
 

@@ -177,6 +177,10 @@ const actions = {
     })
   },
 
+  loadOpenTasks({ commit }, filters) {
+    return tasksApi.getOpenTasks(filters)
+  },
+
   subscribeToTask({ commit, state }, taskId) {
     return tasksApi.subscribeToTask(taskId).then(() => {
       commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed: true })
