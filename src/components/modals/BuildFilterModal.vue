@@ -291,6 +291,7 @@ import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'build-filter-modal',
+
   mixins: [modalMixin, descriptorMixin],
 
   components: {
@@ -514,10 +515,10 @@ export default {
       query = this.applyDescriptorChoice(query)
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
-      query = this.applyUnionChoice(query)
       query = this.applyPriorityChoice(query)
       query = this.applyReadyForChoice(query)
       query = this.applyAssetsReadyChoice(query)
+      query = this.applyUnionChoice(query)
       return query.trim()
     },
 
@@ -592,18 +593,11 @@ export default {
       return query
     },
 
-    applyUnionChoice(query) {
-      if (this.union === 'or') {
-        query = ` +(${query.trim()})`
-      }
-      return query
-    },
-
     applyPriorityChoice(query) {
       if (this.priority.taskTypeId !== '' && this.priority.value !== '-1') {
         const taskType = this.taskTypeMap.get(this.priority.taskTypeId)
         const value = this.priority.value
-        query = ` priority-[${taskType.name.toLowerCase()}]=${value}`
+        query += ` priority-[${taskType.name.toLowerCase()}]=${value}`
       }
       return query
     },
@@ -611,7 +605,7 @@ export default {
     applyReadyForChoice(query) {
       if (this.readyFor.taskTypeId !== '') {
         const taskType = this.taskTypeMap.get(this.readyFor.taskTypeId)
-        query = ` readyfor=[${taskType.name.toLowerCase()}]`
+        query += ` readyfor=[${taskType.name.toLowerCase()}]`
       }
       return query
     },
@@ -624,6 +618,13 @@ export default {
         const taskType = this.taskTypeMap.get(this.isAssetsReady.taskTypeId)
         const operator = this.isAssetsReady.value === 'assetsready' ? '' : '-'
         query += ` assetsready=[${operator}${taskType.name}]`
+      }
+      return query
+    },
+
+    applyUnionChoice(query) {
+      if (this.union === 'or') {
+        query = `+(${query.trim()})`
       }
       return query
     },
