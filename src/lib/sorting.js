@@ -361,9 +361,13 @@ export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
   return result
 }
 
-const getMetadataValues = (sortInfo, a, b) => {
-  const dataA = a.data && a.data[sortInfo.column] ? a.data[sortInfo.column] : ''
-  const dataB = b.data && b.data[sortInfo.column] ? b.data[sortInfo.column] : ''
+const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
+  let dataA = a.data?.[sortInfo.column] ?? defaultValue
+  let dataB = b.data?.[sortInfo.column] ?? defaultValue
+
+  if (typeof dataA === 'number') dataA = String(dataA)
+  if (typeof dataB === 'number') dataB = String(dataB)
+
   return { dataA, dataB }
 }
 
@@ -371,20 +375,21 @@ const sortByMetadata = sortInfo => {
   if (sortInfo.data_type === 'number') {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
-      if (!dataB) return -1
-      if (!dataA) return 1
-      return dataA > dataB
+      if (dataA === dataB) return 0
+      if (dataB === '') return -1
+      if (dataA === '') return 1
+      return dataA.localeCompare(dataB, undefined, { numeric: true })
     }
   } else if (sortInfo.data_type === 'boolean') {
     return (a, b) => {
-      const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
-      if (!dataB) return -1
-      if (!dataA) return 1
-      return dataA ? 1 : -1
+      const { dataA, dataB } = getMetadataValues(sortInfo, a, b, 'false')
+      if (dataA === dataB) return 0
+      return dataA === 'true' ? 1 : -1
     }
   } else if (sortInfo.data_type === 'checklist') {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
       const checklistA = JSON.parse(dataA)
@@ -402,6 +407,7 @@ const sortByMetadata = sortInfo => {
   } else if (sortInfo.data_type === 'taglist') {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
       return dataA.localeCompare(dataB, undefined, { numeric: true })
@@ -409,6 +415,7 @@ const sortByMetadata = sortInfo => {
   } else {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)
+      if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
       return dataA.localeCompare(dataB, undefined, { numeric: true })
