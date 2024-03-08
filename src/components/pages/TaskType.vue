@@ -881,7 +881,9 @@ export default {
       if (query && query.length !== 1) {
         query = query.toLowerCase().trim()
         const descriptors = (this.currentProduction.descriptors || []).filter(
-          d => d.entityType === this.entityType
+          d => {
+            return d.entity_type === this.entityType
+          }
         )
         const keywords = getKeyWords(query) || []
         const excludingKeyWords = getExcludingKeyWords(query) || []
