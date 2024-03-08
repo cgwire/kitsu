@@ -81,7 +81,9 @@ const applyFiltersFunctions = {
       filter.values
     ) {
       let dataValue = entry.data[filter.descriptor.field_name]
-      dataValue = dataValue.toLowerCase()
+      if (typeof dataValue === 'string') dataValue = dataValue.toLowerCase()
+
+      // Boolean case
       if (
         filter.values.length === 1 &&
         filter.values[0].match(new RegExp('(:true)|(:false)$'))
@@ -95,14 +97,26 @@ const applyFiltersFunctions = {
         try {
           dataValue = JSON.parse(dataValue)
           isOk =
-            isOk ||
             (dataValue[value] === undefined && !isTrue) ||
             dataValue[value] === isTrue
         } catch {
           isOk = false
         }
+      } else if (filter.descriptor.data_type === 'number') {
+        try {
+          dataValue = parseFloat(dataValue)
+          filter.values.forEach(value => {
+            const val = parseFloat(value)
+            isOk = isOk || dataValue === val
+          })
+        } catch {
+          isOk = false
+        }
+
+        // String case
       } else {
         filter.values.forEach(value => {
+          dataValue = `${dataValue}`
           isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
         })
       }
