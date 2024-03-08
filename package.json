@@ -24,7 +24,7 @@
     "@fullcalendar/multimonth": "^6.1.10",
     "@fullcalendar/vue": "^6.1.10",
     "@google/model-viewer": "3.4.0",
-    "@sentry/vue": "7.105.0",
+    "@sentry/vue": "7.106.0",
     "async": "3.2.5",
     "bowser": "2.11.0",
     "chart.js": "2.9.4",
@@ -82,7 +82,7 @@
     "sass": "1.71.1",
     "vite": "5.1.5",
     "vitest": "0.34.6",
-    "vitest-localstorage-mock": "0.0.1",
+    "vitest-localstorage-mock": "0.1.2",
     "vue-template-compiler": "2.7.16"
   },
   "engines": {
