@@ -362,8 +362,12 @@ export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
 }
 
 const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
-  const dataA = a.data?.[sortInfo.column] ?? defaultValue
-  const dataB = b.data?.[sortInfo.column] ?? defaultValue
+  let dataA = a.data?.[sortInfo.column] ?? defaultValue
+  let dataB = b.data?.[sortInfo.column] ?? defaultValue
+
+  if (typeof dataA === 'number') dataA = String(dataA)
+  if (typeof dataB === 'number') dataB = String(dataB)
+
   return { dataA, dataB }
 }
 
@@ -374,7 +378,7 @@ const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (dataB === '') return -1
       if (dataA === '') return 1
-      return Number(dataA) - Number(dataB)
+      return dataA.localeCompare(dataB, undefined, { numeric: true })
     }
   } else if (sortInfo.data_type === 'boolean') {
     return (a, b) => {
