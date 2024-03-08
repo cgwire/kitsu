@@ -207,4 +207,8 @@ export default {
 .field .label {
   padding-top: 5px;
 }
+
+.task-type-name.no-link {
+  cursor: inherit;
+}
 </style>
