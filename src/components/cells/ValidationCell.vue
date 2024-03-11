@@ -270,10 +270,6 @@ export default {
   cursor: pointer;
   margin-bottom: 3px;
 
-  &.disabled {
-    background-color: rgba(0, 0, 0, 0.15) !important;
-  }
-
   &.selected {
     background-color: #bfc1ff !important;
 
@@ -320,8 +316,12 @@ export default {
   text-transform: uppercase;
 }
 
-.disabled .tag {
-  opacity: 0;
+.disabled {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+
+  .tag {
+    opacity: 0;
+  }
 }
 
 .casting-status {

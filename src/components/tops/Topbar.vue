@@ -630,7 +630,7 @@ export default {
               this.currentEpisodeId = 'all'
             } else {
               this.currentEpisodeId = episodes.find(
-                e => (e.status = 'running')
+                episode => episode.status === 'running'
               ).id
             }
             this.$router.push({
@@ -891,7 +891,7 @@ export default {
 }
 
 .nav {
-  box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
   left: 0;
   max-height: 60px;
   min-height: 60px;
@@ -907,9 +907,6 @@ export default {
 
 .user-nav {
   cursor: pointer;
-}
-
-.user-nav.active {
 }
 
 .user-menu {

@@ -307,13 +307,12 @@ export default {
 
   setTimeSpent(taskId, personId, date, hours) {
     // Date is a string with following format: YYYYY-MM-DD.
-    const data = {
-      duration: hours * 60
+    const url = `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`
+    if (hours > 0) {
+      return client.ppost(url, { duration: hours * 60 })
+    } else {
+      return client.pdel(url)
     }
-    return client.ppost(
-      `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`,
-      data
-    )
   },
 
   getDayOff(personId, date) {

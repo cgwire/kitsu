@@ -63,7 +63,7 @@
             <combobox-status
               class="flexrow-item"
               :key="'task-type-value-' + index"
-              :task-status-list="productionTaskStatuses"
+              :task-status-list="taskStatuses"
               v-model="taskTypeFilter.values[index]"
               v-for="(statusId, index) in taskTypeFilter.values"
             />
@@ -220,7 +220,7 @@
         <div class="flexrow">
           <combobox-task-type
             class="flexrow-item"
-            :task-type-list="taskTypeList"
+            :task-type-list="taskTypeListWithAll"
             open-top
             v-model="priority.taskTypeId"
           />
@@ -291,6 +291,7 @@ import TextField from '@/components/widgets/TextField'
 
 export default {
   name: 'build-filter-modal',
+
   mixins: [modalMixin, descriptorMixin],
 
   components: {
@@ -444,13 +445,15 @@ export default {
         { label: this.$t('entities.build_filter.all_types'), value: '-' },
         ...this.productionAssetTypes
           .filter(assetType => assetType !== undefined)
-          .map(assetType => {
-            return {
-              label: assetType.name,
-              value: assetType.id
-            }
-          })
+          .map(assetType => ({
+            label: assetType.name,
+            value: assetType.id
+          }))
       ]
+    },
+
+    taskStatuses() {
+      return this.productionTaskStatuses.filter(status => !status.for_concept)
     },
 
     taskTypeListWithAll() {
@@ -514,10 +517,10 @@ export default {
       query = this.applyDescriptorChoice(query)
       query = this.applyAssignationChoice(query)
       query = this.applyThumbnailChoice(query)
-      query = this.applyUnionChoice(query)
       query = this.applyPriorityChoice(query)
       query = this.applyReadyForChoice(query)
       query = this.applyAssetsReadyChoice(query)
+      query = this.applyUnionChoice(query)
       return query.trim()
     },
 
@@ -592,18 +595,11 @@ export default {
       return query
     },
 
-    applyUnionChoice(query) {
-      if (this.union === 'or') {
-        query = ` +(${query.trim()})`
-      }
-      return query
-    },
-
     applyPriorityChoice(query) {
       if (this.priority.taskTypeId !== '' && this.priority.value !== '-1') {
         const taskType = this.taskTypeMap.get(this.priority.taskTypeId)
         const value = this.priority.value
-        query = ` priority-[${taskType.name.toLowerCase()}]=${value}`
+        query += ` priority-[${taskType.name.toLowerCase()}]=${value}`
       }
       return query
     },
@@ -611,7 +607,7 @@ export default {
     applyReadyForChoice(query) {
       if (this.readyFor.taskTypeId !== '') {
         const taskType = this.taskTypeMap.get(this.readyFor.taskTypeId)
-        query = ` readyfor=[${taskType.name.toLowerCase()}]`
+        query += ` readyfor=[${taskType.name.toLowerCase()}]`
       }
       return query
     },
@@ -628,20 +624,27 @@ export default {
       return query
     },
 
+    applyUnionChoice(query) {
+      if (this.union === 'or') {
+        query = `+(${query.trim()})`
+      }
+      return query
+    },
+
     // Task types
 
     addTaskTypeFilter() {
       const filter = {
         id: this.taskTypeList[0].id,
         operator: '=',
-        values: [this.productionTaskStatuses[0].id]
+        values: [this.taskStatuses[0].id]
       }
       this.taskTypeFilters.values.push(filter)
       return filter
     },
 
     addInTaskTypeFilter(taskTypeFilter) {
-      taskTypeFilter.values.push(this.productionTaskStatuses[0].id)
+      taskTypeFilter.values.push(this.taskStatuses[0].id)
     },
 
     removeTaskTypeFilter(taskTypeFilter) {
@@ -736,7 +739,7 @@ export default {
           entryIndex: [], // entry list is not needed,
           assetTypes: this.productionAssetTypes,
           taskTypes: this.productionTaskTypes,
-          taskStatuses: this.productionTaskStatuses,
+          taskStatuses: this.taskStatuses,
           descriptors: this.metadataDescriptors,
           persons: this.people,
           query: searchQuery

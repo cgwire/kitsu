@@ -369,6 +369,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.datatable-head th {
+  z-index: 6; // over the .vue-slider (z-index: 5)
+}
+
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
@@ -411,6 +415,10 @@ export default {
 
 .time-spent {
   width: 100%;
+
+  :deep(.vue-slider:hover) {
+    z-index: 6; // hover the ".datatable-head th" (z-index: 6)
+  }
 }
 
 td.name {
@@ -437,9 +445,5 @@ td.name {
 .time-spent-total {
   font-size: 1.6em;
   line-height: 1.7em;
-}
-
-.vue-slider {
-  z-index: 0;
 }
 </style>
