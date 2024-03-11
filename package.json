@@ -80,7 +80,7 @@
     "localStorage": "1.0.4",
     "prettier": "3.2.5",
     "sass": "1.71.1",
-    "vite": "5.1.5",
+    "vite": "5.1.6",
     "vitest": "0.34.6",
     "vitest-localstorage-mock": "0.1.2",
     "vue-template-compiler": "2.7.16"
