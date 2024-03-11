@@ -658,7 +658,7 @@
           v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
         ></div>
         <button-simple
-          class="playlst-button flexrow-item"
+          class="playlist-button flexrow-item"
           :active="isAnnotationsDisplayed"
           icon="pen"
           :title="$t('playlists.actions.toggle_annotations')"
@@ -678,7 +678,7 @@
           </div>
         </transition>
         <button-simple
-          class="playlst-button flexrow-item"
+          class="playlist-button flexrow-item"
           :active="isTyping"
           :title="$t('playlists.actions.annotation_text')"
           @click="onTypeClicked"
