@@ -33,7 +33,7 @@
             <people-field
               class="person-field"
               big
-              :people="activePeople"
+              :people="activePeopleWithoutBot"
               v-model="filters.person"
             />
           </div>
@@ -127,15 +127,15 @@ export default {
 
   computed: {
     ...mapGetters([
+      'activePeopleWithoutBot',
       'nbSelectedTasks',
       'openProductions',
-      'productionTaskTypes',
       'productionTaskStatuses',
-      'taskTypes',
-      'taskStatus',
-      'activePeople',
+      'productionTaskTypes',
       'selectedTasks',
-      'taskStatusMap'
+      'taskStatus',
+      'taskStatusMap',
+      'taskTypes'
     ]),
 
     taskStatusList() {
