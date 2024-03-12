@@ -1424,7 +1424,7 @@ export default {
     due_this_month: 'Due this month',
     due_this_week: 'Due this week',
     edit_comment: 'Edit comment',
-    estimation_over: 'Estimation over Duration',
+    estimation_over: 'Duration over Estimation',
     estimation_approval_late: 'Due date is late (feedback)',
     estimation_done_late: 'Due date is late (done)',
     empty_cells_selected: 'empty cell selected | empty cells selected',
