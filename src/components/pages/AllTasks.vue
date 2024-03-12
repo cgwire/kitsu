@@ -33,7 +33,7 @@
             <people-field
               class="person-field"
               big
-              :people="activePeopleWithoutBot"
+              :people="personList"
               v-model="filters.person"
             />
           </div>
@@ -61,6 +61,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { sortPeople } from '@/lib/sorting'
 
 import AllTaskList from '@/components/lists/AllTaskList.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
@@ -128,10 +130,12 @@ export default {
   computed: {
     ...mapGetters([
       'activePeopleWithoutBot',
+      'getProductionTaskStatuses',
+      'getProductionTaskTypes',
       'nbSelectedTasks',
       'openProductions',
-      'productionTaskStatuses',
-      'productionTaskTypes',
+      'personMap',
+      'productionMap',
       'selectedTasks',
       'taskStatus',
       'taskStatusMap',
@@ -139,11 +143,33 @@ export default {
     ]),
 
     taskStatusList() {
-      return this.addAllValue(this.productionTaskStatuses)
+      const productionId = this.filters.productionId
+      const statuses = this.getProductionTaskStatuses(productionId).filter(
+        status => !status.for_concept
+      )
+      return this.addAllValue(statuses)
     },
 
     taskTypeList() {
-      return this.addAllValue(this.productionTaskTypes)
+      const productionId = this.filters.productionId
+      const types = this.getProductionTaskTypes(productionId).filter(
+        type => type.for_entity !== 'Concept'
+      )
+      return this.addAllValue(types)
+    },
+
+    personList() {
+      const productionId = this.filters.productionId
+      const production = this.productionMap.get(productionId)
+      if (production) {
+        return sortPeople(
+          production.team
+            .map(personId => this.personMap.get(personId))
+            .filter(person => !person.is_bot)
+        )
+      } else {
+        return this.activePeopleWithoutBot
+      }
     },
 
     productionList() {
@@ -176,7 +202,7 @@ export default {
   methods: {
     ...mapActions(['clearSelectedTasks', 'loadOpenTasks', 'loadTask']),
 
-    addAllValue(list, label) {
+    addAllValue(list) {
       return [
         {
           id: '',
@@ -204,7 +230,6 @@ export default {
         this.stats = taskInfos.stats
         this.isMore = taskInfos.is_more
       } catch (error) {
-        this.isLoading = false
         this.isLoadingError = true
         console.error(error)
       }

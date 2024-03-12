@@ -234,6 +234,17 @@ const getters = {
     }
   },
 
+  getProductionTaskTypes: (state, getters, rootState) => id => {
+    const production = state.productionMap.get(id)
+    if (helpers.isEmptyArray(production, 'task_types')) {
+      return rootState.taskTypes.taskTypes
+    } else {
+      return sortByName(
+        production.task_types.map(id => rootState.taskTypes.taskTypeMap.get(id))
+      )
+    }
+  },
+
   productionAssetTaskTypeIds: productionEntityTaskTypeIds('Asset'),
   productionShotTaskTypeIds: productionEntityTaskTypeIds('Shot'),
   productionEditTaskTypeIds: productionEntityTaskTypeIds('Edit'),
