@@ -259,7 +259,7 @@ export default {
   },
 
   metaInfo() {
-    ;`${this.$t('tasks.all_tasks')} - Kitsu`
+    return { title: `${this.$t('tasks.all_tasks')} - Kitsu` }
   }
 }
 </script>
