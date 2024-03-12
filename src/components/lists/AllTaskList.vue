@@ -5,7 +5,7 @@
         <thead ref="thead" class="datatable-head">
           <tr class="row-header">
             <th class="project" ref="th-name">
-              {{ $t('tasks.fields.project') }}
+              {{ $t('tasks.fields.production') }}
             </th>
             <th class="thumbnail" ref="th-thumbnail"></th>
             <th class="asset-type" ref="th-type">

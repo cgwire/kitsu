@@ -1489,6 +1489,7 @@ export default {
       frames: 'Fram.',
       last_comment: 'Last comment',
       last_comment_date: 'Last comment',
+      parent: 'Parent',
       priority: 'Priority',
       production: 'Prod',
       real_end_date: 'Feedback date',
