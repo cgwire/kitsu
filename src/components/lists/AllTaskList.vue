@@ -5,7 +5,7 @@
         <thead ref="thead" class="datatable-head">
           <tr class="row-header">
             <th class="project" ref="th-name">
-              {{ $t('tasks.fields.project') }}
+              {{ $t('tasks.fields.production') }}
             </th>
             <th class="thumbnail" ref="th-thumbnail"></th>
             <th class="asset-type" ref="th-type">
@@ -63,7 +63,7 @@
                 :is-link="false"
               />
             </td>
-            <td class="thumbnail flexrow">
+            <td class="thumbnail">
               <entity-thumbnail
                 class="flexrow-item"
                 :preview-file-id="task.last_preview_file_id"
@@ -117,14 +117,10 @@
               {{ formatDuration(task.duration) }}
             </td>
             <td class="start-date">
-              <span>
-                {{ formatDate(task.start_date) }}
-              </span>
+              {{ formatDate(task.start_date) }}
             </td>
             <td class="due-date">
-              <span>
-                {{ formatDate(task.due_date) }}
-              </span>
+              {{ formatDate(task.due_date) }}
             </td>
             <td class="empty"></td>
           </tr>
