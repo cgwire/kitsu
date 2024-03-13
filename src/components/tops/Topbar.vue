@@ -612,7 +612,7 @@ export default {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isProductionChanged(routeProductionId)) {
-        this.configureProduction(routeProductionId)
+        this.configureProduction(routeProductionId, routeEpisodeId)
       } else if (this.isEpisodeChanged(routeEpisodeId)) {
         this.configureEpisode(routeEpisodeId)
       } else {
@@ -620,25 +620,30 @@ export default {
       }
     },
 
-    configureProduction(routeProductionId) {
+    configureProduction(routeProductionId, routeEpisodeId = undefined) {
       this.setProduction(routeProductionId)
       this.currentProductionId = routeProductionId
       if (this.isTVShow) {
         this.loadEpisodes()
           .then(episodes => {
+            const query = this.$route.query
             if (this.currentProjectSection === 'assets') {
               this.currentEpisodeId = 'all'
             } else {
-              this.currentEpisodeId = episodes.find(
-                episode => episode.status === 'running'
-              ).id
+              let episode = episodes.find(({ id }) => id === routeEpisodeId)
+              if (!episode) {
+                episode = episodes.find(({ status }) => status === 'running')
+                query.search = ''
+              }
+              this.currentEpisodeId = episode?.id || 'all'
             }
             this.$router.push({
               params: {
                 production_id: routeProductionId,
                 section: this.currentProjectSection,
                 episode_id: this.currentEpisodeId
-              }
+              },
+              query
             })
           })
           .catch(console.error)
