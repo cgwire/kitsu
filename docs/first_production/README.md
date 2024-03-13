@@ -11,8 +11,8 @@ Enter your production name, and choose **TV Show** if you need more than one epi
 
 Then, you have to fill in technical information, such as the number of FPS, the Ration, and the Resolution.
 
-> [!IMPORTANT]
-> All these data will be used when Kitsu re-encodes the video previews uploaded.
+[!IMPORTANT]
+All these data will be used when Kitsu re-encodes the video previews uploaded.
 
 
 Then, you need to define your production's start and end dates.
