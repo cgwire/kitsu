@@ -7,20 +7,35 @@
     >
       <template v-slot:eventContent="arg">
         <div
-          class="flexrow pl1 calendar-event"
+          class="calendar-event"
           :style="{
             background: arg.event.backgroundColor
           }"
           :title="arg.event.title"
-          @click="onEventClicked(arg.event, arg.event.extendedProps.task_id)"
+          @click="onEventClicked(arg.event)"
         >
           <entity-thumbnail
-            class="flexrow-item mr1"
-            :preview-file-id="arg.event.extendedProps.preview_file_id"
+            :preview-file-id="arg.event.extendedProps.previewFileId"
           />
-          <span class="flexrow-item event-title">
-            {{ arg.event.title }}
+          <span
+            class="tag"
+            :style="{
+              background: getStatusColor(arg.event.extendedProps.taskStatus),
+              color: getStatusTextColor(arg.event.extendedProps.taskStatus)
+            }"
+            :title="arg.event.extendedProps.taskStatus.name"
+          >
+            {{ arg.event.extendedProps.taskStatus.short_name }}
           </span>
+          <div class="event-title">
+            <span class="ellipsis">{{ arg.event.extendedProps.title[0] }}</span>
+            <span class="ellipsis" v-if="arg.event.extendedProps.title[1]">
+              / {{ arg.event.extendedProps.title[1] }}
+            </span>
+            <span class="ellipsis" v-if="arg.event.extendedProps.title[2]">
+              / {{ arg.event.extendedProps.title[2] }}
+            </span>
+          </div>
         </div>
       </template>
     </full-calendar>
@@ -34,7 +49,7 @@ import FullCalendar from '@fullcalendar/vue'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
 export default {
   name: 'user-calendar',
@@ -53,7 +68,7 @@ export default {
 
   data() {
     return {
-      currentTask: {},
+      currentTask: null,
       calendarOptions: {
         plugins: [dayGridPlugin, multiMonthPlugin],
         headerToolbar: {
@@ -72,7 +87,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskMap', 'taskTypeMap'])
+    ...mapGetters(['taskMap', 'taskStatusMap', 'taskTypeMap'])
   },
 
   methods: {
@@ -80,48 +95,66 @@ export default {
 
     resetEvents() {
       this.calendarEvents = []
-      if (this.$refs.calendar) {
-        const calendarApi = this.$refs.calendar.getApi()
-        calendarApi.removeAllEvents()
-        this.tasks
-          .filter(task => task.start_date && task.due_date)
-          .map(task => {
-            const taskType = this.taskTypeMap.get(task.task_type_id)
-            const start = task.start_date
-            const end = new Date(task.due_date)
-            end.setDate(end.getDate() + 1) // end date is exclusive
-            return {
-              title: task.full_entity_name,
-              allDay: true,
-              start,
-              end,
-              color: '#666',
-              borderColor: '#666',
-              backgroundColor: taskType.color,
-              preview_file_id: task.entity_preview_file_id,
-              // selected: false,
-              task_status_id: task.task_status_id,
-              task_id: task.id
-            }
-          })
-          .forEach(event => {
-            const ev = calendarApi.addEvent(event)
-            this.calendarEvents.push(ev)
-          })
+      if (!this.$refs.calendar) {
+        return
       }
+      const calendarApi = this.$refs.calendar.getApi()
+      calendarApi.removeAllEvents()
+      this.tasks
+        .filter(task => task.start_date && task.due_date)
+        .map(task => {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+          const taskStatus = this.taskStatusMap.get(task.task_status_id)
+          const start = task.start_date
+          const end = new Date(task.due_date)
+          end.setDate(end.getDate() + 1) // end date is exclusive
+          return {
+            title: task.full_entity_name,
+            allDay: true,
+            start,
+            end,
+            color: '#666',
+            borderColor: '#666',
+            backgroundColor: taskType.color,
+            extendedProps: {
+              previewFileId: task.entity_preview_file_id,
+              taskStatus,
+              taskId: task.id,
+              title: task.full_entity_name.split(' / ')
+            }
+          }
+        })
+        .forEach(event => {
+          const calendarEvent = calendarApi.addEvent(event)
+          this.calendarEvents.push(calendarEvent)
+        })
     },
 
-    onEventClicked(event, taskId) {
-      const task = this.taskMap.get(taskId)
-      if (task === this.currentTask) {
-        this.currentTask = {}
+    onEventClicked(event) {
+      const task = this.taskMap.get(event.extendedProps.taskId)
+      if (!task || task === this.currentTask) {
+        this.currentTask = null
         this.clearSelectedTasks()
-        // event.setExtendedProp('selected', false)
       } else {
         this.currentTask = task
         this.clearSelectedTasks()
         this.addSelectedTasks([{ task }])
-        // event.setExtendedProp('selected', true)
+      }
+    },
+
+    getStatusColor(status) {
+      if (status.name === 'Todo' && this.isDarkTheme) {
+        return '#5F626A'
+      } else {
+        return status.color
+      }
+    },
+
+    getStatusTextColor(status) {
+      if (status.name === 'Todo' && !this.isDarkTheme) {
+        return '#333'
+      } else {
+        return 'white'
       }
     }
   },
@@ -134,7 +167,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .user-calendar {
   width: 100%;
   max-height: 80%;
@@ -145,7 +178,34 @@ export default {
   height: 100%;
 }
 
-.fc-toolbar-chunk {
+.calendar-event {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  overflow-x: auto;
+  padding: 0.25em;
+}
+
+.tag {
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.event-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.25em;
+  overflow: hidden;
+
+  > .ellipsis {
+    white-space: nowrap;
+  }
+}
+
+// Customize style of FullCalendar
+:deep(.fc-toolbar-chunk) {
   h2 {
     text-decoration: none;
     border-bottom: none;
@@ -187,14 +247,5 @@ export default {
     border: 1px solid var(--border);
     color: var(--text);
   }
-}
-
-.calendar-event {
-  overflow: auto;
-  padding: 0.2em;
-}
-
-.event-title {
-  padding-left: 0.6em;
 }
 </style>
