@@ -774,13 +774,18 @@ export const playerMixin = {
 
     onKeyDown(event) {
       this.displayBars()
+      const HOMEKEY = 36
+      const ENDKEY = 35
+      const LEFTKEY = 37
+      const RIGHTKEY = 39
+
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (
           (event.keyCode === 46 || event.keyCode === 8) &&
           this.fabricCanvas
         ) {
           this.deleteSelection()
-        } else if (event.keyCode === 37) {
+        } else if (event.keyCode === LEFTKEY) {
           // left
           event.preventDefault()
           event.stopPropagation()
@@ -791,10 +796,27 @@ export const playerMixin = {
             this.moveSelectedEntityToLeft
           ) {
             this.moveSelectedEntityToLeft()
+          } else if (event.altKey) {
+            this.onPlayPreviousEntityClicked()
+            this.$nextTick(() => {
+              this.rawPlayer.setCurrentFrame(this.nbFrames - 1)
+              if (this.isFullMode) {
+                const time =
+                  this.currentEntity.start_duration +
+                  this.currentEntity.preview_file_duration -
+                  this.frameDuration
+                this.fullPlayer.currentTime = time
+                this.playlistProgress = time
+                this.setCurrentTimeRaw(
+                  this.currentEntity.preview_file_duration - this.frameDuration
+                )
+                this.updateProgressBar()
+              }
+            })
           } else {
             this.onPreviousFrameClicked()
           }
-        } else if (event.keyCode === 39) {
+        } else if (event.keyCode === RIGHTKEY) {
           event.preventDefault()
           event.stopPropagation()
           // ctrl + shift + right
@@ -804,6 +826,11 @@ export const playerMixin = {
             this.moveSelectedEntityToLeft
           ) {
             this.moveSelectedEntityToRight()
+          } else if (event.altKey) {
+            this.onPlayNextEntityClicked()
+            this.$nextTick(() => {
+              this.rawPlayer.setCurrentFrame(0)
+            })
           } else {
             this.onNextFrameClicked()
           }
@@ -837,6 +864,12 @@ export const playerMixin = {
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) {
           this.redoLastAction()
+        } else if (event.keyCode === HOMEKEY) {
+          if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
+        } else if (event.keyCode === ENDKEY) {
+          if (this.rawPlayer) {
+            this.rawPlayer.setCurrentFrame(this.nbFrames - 1)
+          }
         }
       }
     },
