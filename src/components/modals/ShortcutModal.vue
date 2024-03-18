@@ -121,6 +121,22 @@ export default {
             {
               keys: ['Alt', 'k'],
               text: this.$t('keyboard.altk')
+            },
+            {
+              keys: ['Home'],
+              text: this.$t('keyboard.plhome')
+            },
+            {
+              keys: ['End'],
+              text: this.$t('keyboard.plend')
+            },
+            {
+              keys: ['Alt', '→'],
+              text: this.$t('keyboard.plaltright')
+            },
+            {
+              keys: ['Alt', '←'],
+              text: this.$t('keyboard.plaltleft')
             }
           ]
         },

@@ -1,12 +1,5 @@
 <template>
-  <div
-    class="unselectable"
-    @mouseenter="isFrameNumberVisible = true"
-    @mouseout="isFrameNumberVisible = false"
-    @touchstart="isFrameNumberVisible = true"
-    @touchend="isFrameNumberVisible = false"
-    @touchcancel="isFrameNumberVisible = false"
-  >
+  <div class="unselectable">
     <div
       class="progress-wrapper"
       :style="{
@@ -83,10 +76,17 @@
         v-for="(annotation, index) in comparisonAnnotations"
       >
       </span>
+    </div>
+    <div class="frame-number-rail">
       <span
         class="frame-number"
         :style="frameNumberStyle"
-        v-show="isFrameNumberVisible && hoverFrame > 0 && !progressDragging"
+        v-show="
+          isFrameNumberVisible &&
+          hoverFrame > 0 &&
+          !progressDragging &&
+          !playlistProgressDragging
+        "
       >
         {{ hoverFrame }}
         <span
@@ -305,10 +305,12 @@ export default {
         this.width - frameWidth - 10
       )
       const top = this.isFullScreen
-        ? `-${height}px`
+        ? this.isPlaylist
+          ? `-${height + 30}px`
+          : `-${height}px`
         : this.isPlaylist
-          ? '42px'
-          : '30px'
+          ? '16px'
+          : '0px'
 
       return {
         height: `${height}px`,
@@ -364,6 +366,7 @@ export default {
     },
 
     startProgressDrag(event) {
+      if (this.playlistProgressDragging) return
       this.progressDragging = true
       this.$emit('start-scrub')
     },
@@ -374,6 +377,7 @@ export default {
     },
 
     startPlaylistProgressDrag(event) {
+      if (this.progressDragging) return
       this.playlistProgressDragging = true
       this.$emit('start-scrub')
     },
@@ -418,7 +422,8 @@ export default {
       ) {
         if (
           this.playlistProgressDragging ||
-          (event.target.classList &&
+          (!this.progressDragging &&
+            event.target.classList &&
             (event.target.classList.contains('playlilst-progress') ||
               event.target.classList.contains('entity-status') ||
               event.target.classList.contains('playlist-progress-position')))
@@ -441,14 +446,11 @@ export default {
         const { frameNumber } = this.currentMouseFrame
         if (this.progressDragging) {
           this.$emit('progress-changed', frameNumber)
-        }
-        if (this.playlistProgressDragging) {
+        } else if (this.playlistProgressDragging) {
           this.$emit('progress-playlist-changed', frameNumber)
-        }
-        if (this.handleInDragging) {
+        } else if (this.handleInDragging) {
           this.$emit('handle-in-changed', { frameNumber, save: false })
-        }
-        if (this.handleOutDragging) {
+        } else if (this.handleOutDragging) {
           let { frameNumber, position } = this.currentMouseFrame
           if (this.width - position < 4) frameNumber += 1
           this.$emit('handle-out-changed', { frameNumber, save: false })
@@ -551,7 +553,9 @@ export default {
         this.width - frameWidth - 10
       )
       const top = this.isFullScreen
-        ? `-${height}px`
+        ? this.isPlaylist
+          ? `-${height + 32}px`
+          : `-${height}px`
         : this.isPlaylist
           ? '42px'
           : '30px'
@@ -673,7 +677,7 @@ progress {
   position: absolute;
   padding: 0.3em;
   text-align: center;
-  top: 30px;
+  top: -300px;
   width: 110px;
   z-index: 800;
 
@@ -762,6 +766,10 @@ progress {
   top: -2px;
 }
 
+.frame-number-rail {
+  position: relative;
+}
+
 .entity-status {
   border-left: 0;
   border-right: 3px solid $dark-grey;
@@ -783,7 +791,6 @@ progress {
   }
 
   &:hover {
-    height: 12px;
     opacity: 1;
     span {
       display: block;
