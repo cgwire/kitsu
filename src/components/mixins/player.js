@@ -888,14 +888,10 @@ export const playerMixin = {
 
     reloadAnnotations(current = true) {
       if (!this.annotations) return
-      const annotations = this.annotations.map(a => ({ ...a }))
-      this.annotations = []
-      setTimeout(() => {
-        this.annotations = annotations
-        if (current) {
-          this.reloadCurrentAnnotation()
-        }
-      }, 200)
+      this.annotations = this.annotations.map(a => ({ ...a }))
+      if (current) {
+        this.reloadCurrentAnnotation()
+      }
     },
 
     onFilmClicked() {
@@ -903,7 +899,6 @@ export const playerMixin = {
       window.dispatchEvent(new Event('resize'))
       this.$nextTick(() => {
         this.resetHeight()
-        this.reloadAnnotations()
         this.scrollToEntity(this.playingEntityIndex)
       })
     },
@@ -944,7 +939,6 @@ export const playerMixin = {
       this.$nextTick(() => {
         this.$refs['task-info'].focusCommentTextarea()
         this.resetHeight()
-        this.reloadAnnotations()
       })
     },
 
