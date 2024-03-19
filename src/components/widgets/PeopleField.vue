@@ -187,6 +187,11 @@ export default {
 .v-autocomplete {
   z-index: 205; // +1 relative to the z-index of c-mask
   position: relative;
+
+  // Hide native clear button for Webkit browsers (Chrome, Safari)
+  input[type='search']::-webkit-search-cancel-button {
+    display: none;
+  }
 }
 
 .v-autocomplete .v-autocomplete-list-item {
