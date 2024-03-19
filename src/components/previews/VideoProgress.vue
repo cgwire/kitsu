@@ -305,9 +305,7 @@ export default {
         this.width - frameWidth - 10
       )
       const top = this.isFullScreen
-        ? this.isPlaylist
-          ? `-${height + 30}px`
-          : `-${height}px`
+        ? `-${height + 30}px`
         : this.isPlaylist
           ? '16px'
           : '0px'
