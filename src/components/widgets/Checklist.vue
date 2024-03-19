@@ -6,8 +6,8 @@
         flexrow: true,
         checked: entry.checked
       }"
-      :key="'comment-checklist-' + '-' + index"
-      v-for="(entry, index) in checklist"
+      :key="`comment-checklist-${index}`"
+      v-for="(entry, index) in filteredChecklist"
     >
       <span class="flexrow-item" @click="toggleEntryChecked(entry)">
         <check-square-icon class="icon" v-if="entry.checked" />
@@ -21,15 +21,11 @@
             revision: entry.revision
           })
         "
-        v-show="entry.frame >= 0"
+        v-if="entry.frame >= 0"
       >
         v{{ entry.revision }} - {{ formatFrame(entry.frame) }}
       </span>
-      <span
-        class="flexrow-item"
-        @click="setFrame(entry)"
-        v-show="isMoviePreview"
-      >
+      <span class="flexrow-item" @click="setFrame(entry)" v-if="isMoviePreview">
         <clock-icon class="icon clock" />
       </span>
       <textarea-autosize
@@ -82,6 +78,12 @@ export default {
     revision: {
       default: -1,
       type: Number
+    }
+  },
+
+  computed: {
+    filteredChecklist() {
+      return this.checklist.filter(Boolean) // remove empty entries
     }
   },
 
