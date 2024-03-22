@@ -133,10 +133,12 @@
           />
 
           <timesheet-list
+            ref="timesheet-list"
             :tasks="loggablePersonTasks"
             :done-tasks="loggableDoneTasks"
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
+            :day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
             :hide-done="personTasksSearchText.length === 0"
@@ -193,15 +195,15 @@ import {
   parseDate
 } from '@/lib/time'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import Schedule from '@/components/pages/schedule/Schedule'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
-import TimesheetList from '@/components/lists/TimesheetList'
-import TodosList from '@/components/lists/TodosList'
-import TaskInfo from '@/components/sides/TaskInfo'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import Schedule from '@/components/pages/schedule/Schedule.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
+import TimesheetList from '@/components/lists/TimesheetList.vue'
+import TodosList from '@/components/lists/TodosList.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'person',
@@ -222,6 +224,7 @@ export default {
     return {
       activeTab: 'todos',
       currentSort: 'entity_name',
+      dayOffError: false,
       isTasksLoading: false,
       isTasksLoadingError: false,
       loading: {
@@ -561,13 +564,13 @@ export default {
       }
 
       this.isTasksLoading = true
+      this.isTasksLoadingError = false
+
       this.loadPersonTasks({
         personId: this.person.id,
-        date: this.selectedDate,
-        callback: err => {
-          if (err) console.error(err)
-          this.isTasksLoading = false
-          this.isTasksLoadingError = false
+        date: this.selectedDate
+      })
+        .then(() => {
           setTimeout(() => {
             if (this.taskList) {
               this.$nextTick(() => {
@@ -576,8 +579,14 @@ export default {
             }
             this.resizeHeaders()
           }, 0)
-        }
-      })
+        })
+        .catch(err => {
+          console.error(err)
+          this.isTasksLoadingError = true
+        })
+        .finally(() => {
+          this.isTasksLoading = false
+        })
     },
 
     resizeHeaders() {
@@ -644,20 +653,27 @@ export default {
       this.loadPerson(this.person.id)
     },
 
-    onSetDayOff() {
-      const dayOff = {
-        personId: this.person.id,
-        date: this.selectedDate
+    async onSetDayOff(dayOff) {
+      this.dayOffError = false
+      try {
+        await this.setDayOff({
+          ...dayOff,
+          personId: this.user.id
+        })
+        this.$refs['timesheet-list']?.closeSetDayOffModal()
+      } catch (error) {
+        this.dayOffError = error.body?.message || true
       }
-      this.setDayOff(dayOff)
     },
 
-    onUnsetDayOff() {
-      const dayOff = {
-        personId: this.person.id,
-        date: this.selectedDate
+    async onUnsetDayOff() {
+      this.dayOffError = false
+      try {
+        await this.unsetDayOff()
+        this.$refs['timesheet-list']?.closeUnsetDayOffModal()
+      } catch (error) {
+        this.dayOffError = error.body?.message || true
       }
-      this.unsetDayOff(dayOff)
     },
 
     saveTaskScheduleItem(item) {

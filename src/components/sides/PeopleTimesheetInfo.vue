@@ -18,10 +18,14 @@
     <div class="info-date" v-if="isMonthInfo">{{ monthString }} {{ year }}</div>
 
     <div class="info-date" v-else-if="isWeekInfo">
-      week {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
+      {{ $t('main.week') }}
+      {{ week }}, {{ startDay }} - {{ endDay }} {{ weekMonth }} {{ year }}
     </div>
 
-    <div class="info-day-off" v-if="!isDayInfo">{{ dayOffCount }} days off</div>
+    <div class="info-day-off" v-if="!isDayInfo">
+      {{ dayOffCount }}
+      {{ $tc('timesheets.nb_days_off', dayOffCount) }}
+    </div>
 
     <div class="info-date" v-else-if="isDayInfo">
       {{ day }} {{ monthString }} {{ year }}
@@ -38,22 +42,22 @@
 
 <script>
 import moment from 'moment-timezone'
-
-import { mapGetters, mapActions } from 'vuex'
 import { XIcon } from 'vue-feather-icons'
-import PageTitle from '@/components/widgets/PageTitle'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import TimeSpentTaskList from '@/components/lists/TimeSpentTaskList'
+
 import { monthToString } from '@/lib/time'
+
+import PageTitle from '@/components/widgets/PageTitle.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TimeSpentTaskList from '@/components/lists/TimeSpentTaskList.vue'
 
 export default {
   name: 'people-timesheet-info',
 
   components: {
-    XIcon,
     PageTitle,
     PeopleAvatar,
-    TimeSpentTaskList
+    TimeSpentTaskList,
+    XIcon
   },
 
   props: {
@@ -96,8 +100,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     startDay() {
       return moment().day('Monday').year(this.year).week(this.week).date()
     },
@@ -169,8 +171,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     onCloseClicked() {
       this.$emit('close')
     }
@@ -191,9 +191,6 @@ export default {
   font-size: 1.5em;
   margin-top: 1em;
   text-transform: capitalize;
-}
-
-.info-day-off {
 }
 
 .close {

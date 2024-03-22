@@ -1,12 +1,17 @@
 <template>
   <div class="question-mark">
     <help-circle-icon :size="small ? '0.5x' : '1x'" />
-    <div class="question-text" v-html="renderMarkdown(text)"></div>
+    <div
+      class="question-text"
+      :class="position"
+      v-html="renderMarkdown(text)"
+    ></div>
   </div>
 </template>
 
 <script>
 import { HelpCircleIcon } from 'vue-feather-icons'
+
 import { renderMarkdown } from '@/lib/render'
 
 export default {
@@ -23,10 +28,12 @@ export default {
     small: {
       type: Boolean,
       default: false
+    },
+    position: {
+      type: String,
+      validator: value => ['left', 'right'].includes(value)
     }
   },
-
-  computed: {},
 
   methods: {
     renderMarkdown
@@ -42,13 +49,20 @@ export default {
     background: var(--background-alt);
     border-radius: 5px;
     box-shadow: 0 2px 6px var(--box-shadow);
+    display: none;
     font-size: 1em;
     font-weight: normal;
-    display: none;
-    min-width: 300px;
     padding: 0.5em;
     position: absolute;
+    width: max-content;
     z-index: 300;
+
+    &.left {
+      left: 0;
+    }
+    &.right {
+      right: 0;
+    }
   }
 
   &:hover {

@@ -12,6 +12,7 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
     'no-unused-vars': ['error', { args: 'none' }],
     'no-var': 'error',
     'prefer-const': [
@@ -25,6 +26,5 @@ module.exports = {
     'vue/no-use-v-if-with-v-for': 'off',
     'vue/prop-name-casing': ['error', 'camelCase']
   },
-  globals: {
-  }
+  globals: {}
 }

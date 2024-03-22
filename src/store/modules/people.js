@@ -155,7 +155,7 @@ const initialState = {
   timesheet: {},
   personTimeSpentMap: {},
   personTimeSpentTotal: 0,
-  personIsDayOff: false,
+  personDayOff: {},
   dayOffMap: {}
 }
 
@@ -212,40 +212,38 @@ const getters = {
   timesheet: state => state.timesheet,
   personTimeSpentMap: state => state.personTimeSpentMap,
   personTimeSpentTotal: state => state.personTimeSpentTotal,
-  personIsDayOff: state => state.personIsDayOff,
+  personDayOff: state => state.personDayOff,
+  personIsDayOff: state => Boolean(state.personDayOff?.id),
   dayOffMap: state => state.dayOffMap
 }
 
 const actions = {
-  getOrganisation({ commit }) {
-    return peopleApi.getOrganisation().then(organisation => {
-      commit(SET_ORGANISATION, organisation)
-    })
+  async getOrganisation({ commit }) {
+    const organisation = await peopleApi.getOrganisation()
+    commit(SET_ORGANISATION, organisation)
   },
 
-  saveOrganisation({ commit }, form) {
+  async saveOrganisation({ commit }, form) {
     form.id = state.organisation.id
-    return peopleApi.updateOrganisation(form).then(organisation => {
-      commit(SET_ORGANISATION, organisation)
-      return organisation
-    })
+    const organisation = await peopleApi.updateOrganisation(form)
+    commit(SET_ORGANISATION, organisation)
+    return organisation
   },
 
-  uploadOrganisationLogo({ commit, state }, formData) {
+  async uploadOrganisationLogo({ commit, state }, formData) {
     const organisationId = state.organisation.id
-    return peopleApi.postOrganisationLogo(organisationId, formData).then(() => {
-      commit(SET_ORGANISATION, { has_avatar: true })
-    })
+    await peopleApi.postOrganisationLogo(organisationId, formData)
+    commit(SET_ORGANISATION, { has_avatar: true })
   },
 
-  deleteOrganisationLogo({ commit, state }) {
+  async deleteOrganisationLogo({ commit, state }) {
     const organisationId = state.organisation.id
-    return peopleApi.deleteOrganisationLogo(organisationId).then(() => {
-      commit(SET_ORGANISATION, { has_avatar: false })
-    })
+    await peopleApi.deleteOrganisationLogo(organisationId)
+    commit(SET_ORGANISATION, { has_avatar: false })
   },
 
-  loadPeople({ commit, state, rootGetters }, callback) {
+  // FIXME: refactor callback to async/await
+  loadPeople({ commit, rootGetters }, callback) {
     commit(LOAD_PEOPLE_START)
     peopleApi.getPeople((err, people) => {
       if (err) {
@@ -264,87 +262,77 @@ const actions = {
     })
   },
 
-  async loadPerson({ commit, state }, personId) {
+  async loadPerson({ commit }, personId) {
     const person = await peopleApi.getPerson(personId)
     commit(EDIT_PEOPLE_END, person)
   },
 
-  async newPerson({ commit, state }, data) {
+  async newPerson({ commit }, data) {
     const person = await peopleApi.createPerson(data)
     commit(EDIT_PEOPLE_END, person)
     return person
   },
 
-  async newPersonAndInvite({ commit, state }, data) {
+  async newPersonAndInvite({ commit }, data) {
     let person = await peopleApi.createPerson(data)
     person = await peopleApi.invitePerson(person)
     commit(EDIT_PEOPLE_END, person)
     return person
   },
 
-  invitePerson({ commit, state }, person) {
+  invitePerson({}, person) {
     return peopleApi.invitePerson(person)
   },
 
-  generateToken({ commit, state }, person) {
+  generateToken({}, person) {
     return peopleApi.generateToken(person)
   },
 
-  async uploadPersonAvatar({ commit, state }, { person, formData }) {
+  async uploadPersonAvatar({ commit }, { person, formData }) {
     await peopleApi.postAvatar(person.id, formData)
     commit(UPLOAD_AVATAR_END, person.id)
   },
 
-  async clearPersonAvatar({ commit, state }, person) {
+  async clearPersonAvatar({ commit }, person) {
     await peopleApi.clearPersonAvatar(person)
     commit(CLEAR_AVATAR, person.id)
   },
 
-  async editPerson({ commit, state }, data) {
+  async editPerson({ commit }, data) {
     const person = await peopleApi.updatePerson(data)
     commit(EDIT_PEOPLE_END, person)
     return person
   },
 
-  async deletePeople({ commit, state }, person) {
+  async deletePeople({ commit }, person) {
     await peopleApi.deletePerson(person)
     commit(DELETE_PEOPLE_END)
   },
 
-  changePasswordPerson({ commit, state }, { person, form }) {
-    return new Promise((resolve, reject) => {
-      if (auth.isPasswordValid(form.password, form.password2)) {
-        return peopleApi
-          .changePasswordPerson(person, form)
-          .then(() => resolve())
-          .catch(err => reject(err))
-      } else {
-        const err = new Error('Password is not valid')
-        err.isValidPassword = false
-        return reject(err)
-      }
-    })
+  async changePasswordPerson({}, { person, form }) {
+    if (auth.isPasswordValid(form.password, form.password2)) {
+      await peopleApi.changePasswordPerson(person, form)
+    } else {
+      const err = new Error('Password is not valid')
+      err.isValidPassword = false
+      throw err
+    }
   },
 
-  disableTwoFactorAuthenticationPerson({ commit, state }, person) {
-    return peopleApi.disableTwoFactorAuthenticationPerson(person).then(() => {
-      commit(DISABLE_TWO_FACTOR_AUTHENTICATION_END, person.id)
-      Promise.resolve()
-    })
+  async disableTwoFactorAuthenticationPerson({ commit }, person) {
+    await peopleApi.disableTwoFactorAuthenticationPerson(person)
+    commit(DISABLE_TWO_FACTOR_AUTHENTICATION_END, person.id)
   },
 
-  uploadPersonFile({ commit, state }, toUpdate) {
+  async uploadPersonFile({ commit, state }, toUpdate) {
     commit(IMPORT_PEOPLE_START)
-    return peopleApi
-      .postCsv(state.personCsvFormData, toUpdate)
-      .then(() => {
-        commit(IMPORT_PEOPLE_END)
-        Promise.resolve()
-      })
-      .catch(err => {
-        commit(IMPORT_PEOPLE_ERROR)
-        Promise.reject(err)
-      })
+    try {
+      await peopleApi.postCsv(state.personCsvFormData, toUpdate)
+      commit(IMPORT_PEOPLE_END)
+    } catch (err) {
+      commit(IMPORT_PEOPLE_ERROR)
+      throw err
+    }
   },
 
   async fetchPersonTasks({ commit, rootGetters }, personId) {
@@ -369,10 +357,7 @@ const actions = {
     return tasks
   },
 
-  loadPersonTasks(
-    { commit, state, rootGetters },
-    { personId, forced, date, callback }
-  ) {
+  async loadPersonTasks({ commit, rootGetters }, { personId, date }) {
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
     commit(LOAD_PERSON_TASKS_END, {
@@ -382,33 +367,27 @@ const actions = {
       taskTypeMap
     })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
-    peopleApi.getPersonTasks(personId, (err, tasks) => {
-      if (err) tasks = []
-      peopleApi.getPersonDoneTasks(personId, (err, doneTasks) => {
-        if (err) doneTasks = []
-        commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-        peopleApi
-          .getTimeSpents(personId, date)
-          .then(timeSpents => {
-            commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-            return peopleApi.getDayOff(personId, date)
-          })
-          .then(dayOff => {
-            commit(PERSON_SET_DAY_OFF, dayOff)
-            commit(LOAD_PERSON_TASKS_END, {
-              personId,
-              tasks,
-              userFilters,
-              taskTypeMap
-            })
-            if (callback) callback(err)
-          })
-      })
+
+    const [tasks, doneTasks, timeSpents, dayOff] = await Promise.all([
+      peopleApi.getPersonTasks(personId).catch(() => []),
+      peopleApi.getPersonDoneTasks(personId).catch(() => []),
+      peopleApi.getTimeSpents(personId, date),
+      peopleApi.getDayOff(personId, date)
+    ])
+
+    commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
+    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+    commit(PERSON_SET_DAY_OFF, dayOff)
+    commit(LOAD_PERSON_TASKS_END, {
+      personId,
+      tasks,
+      userFilters,
+      taskTypeMap
     })
   },
 
   loadAggregatedPersonTimeSpents(
-    { commit, state, rootGetters },
+    {},
     { personId, detailLevel, year, month, week, day, productionId }
   ) {
     return peopleApi.getAggregatedPersonTimeSpents(
@@ -423,7 +402,7 @@ const actions = {
   },
 
   loadAggregatedPersonDaysOff(
-    { commit, state, rootGetters },
+    {},
     { personId, detailLevel, year, month, week }
   ) {
     if (detailLevel === 'day') {
@@ -439,90 +418,95 @@ const actions = {
     }
   },
 
-  showPersonImportModal({ commit, state }, personId) {
+  // FIXME: remove this action (never used)
+  showPersonImportModal({ commit }, personId) {
     commit(SHOW_IMPORT_PEOPLE_MODAL)
   },
 
-  hidePersonImportModal({ commit, state }, personId) {
+  // FIXME: remove this action (never used)
+  hidePersonImportModal({ commit }, personId) {
     commit(HIDE_IMPORT_PEOPLE_MODAL)
   },
 
-  setPersonTasksSearch({ commit, state }, searchText) {
+  setPersonTasksSearch({ commit }, searchText) {
     commit(SET_PERSON_TASKS_SEARCH, searchText)
   },
 
-  savePersonTasksSearch({ commit, rootGetters }, searchQuery) {
+  async avePersonTasksSearch({ commit }, searchQuery) {
     if (
       state.personTaskSearchQueries.some(query => query.name === searchQuery)
     ) {
       return
     }
-    return peopleApi
-      .createFilter('persontasks', searchQuery, searchQuery, null, null)
-      .then(searchQuery => {
-        commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-        return searchQuery
-      })
+    searchQuery = await peopleApi.createFilter(
+      'persontasks',
+      searchQuery,
+      searchQuery,
+      null,
+      null
+    )
+    commit(SAVE_PERSON_TASKS_SEARCH_END, { searchQuery })
   },
 
-  removePersonTasksSearch({ commit }, searchQuery) {
-    return peopleApi.removeFilter(searchQuery).then(() => {
-      commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
-    })
+  async removePersonTasksSearch({ commit }, searchQuery) {
+    await peopleApi.removeFilter(searchQuery)
+    commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
   },
 
-  setTimeSpent({ commit }, { personId, taskId, date, duration }) {
-    return peopleApi
-      .setTimeSpent(taskId, personId, date, duration)
-      .then(timeSpent => {
-        commit(SET_TIME_SPENT, timeSpent)
-        Promise.resolve(timeSpent)
-      })
+  async setTimeSpent({ commit }, { personId, taskId, date, duration }) {
+    const timeSpent = await peopleApi.setTimeSpent(
+      taskId,
+      personId,
+      date,
+      duration
+    )
+    commit(SET_TIME_SPENT, timeSpent)
   },
 
-  setDayOff({ commit }, { personId, date }) {
-    return peopleApi.setDayOff(personId, date).then(dayOff => {
-      commit(PERSON_SET_DAY_OFF, dayOff)
-      Promise.resolve(dayOff)
-    })
+  async setDayOff({ commit }, { personId, date, end_date, description }) {
+    const dayOff = await peopleApi.setDayOff(
+      personId,
+      date,
+      end_date,
+      description
+    )
+    commit(PERSON_SET_DAY_OFF, dayOff)
   },
 
-  unsetDayOff({ commit, state }, dayOff) {
-    return peopleApi.unsetDayOff(state.personDayOff).then(dayOff => {
-      commit(PERSON_SET_DAY_OFF, {})
-      Promise.resolve()
-    })
+  async unsetDayOff({ commit }) {
+    const dayOff = state.personDayOff
+    await peopleApi.unsetDayOff(dayOff)
+    commit(PERSON_SET_DAY_OFF, {})
   },
 
   setPersonTasksScrollPosition({ commit }, scrollPosition) {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
-  loadTimesheets({ commit }, { detailLevel, year, month, productionId }) {
-    const monthString =
-      month.length === 1 ? `0${parseInt(month) + 1}` : `${month}`
-    let mainFunc = peopleApi.getMonthTable
+  async loadTimesheets({ commit }, { detailLevel, year, month, productionId }) {
+    const monthString = String(month).padStart(2, '0')
+    let getTableFn
+    switch (detailLevel) {
+      case 'day':
+        getTableFn = peopleApi.getDayTable
+        break
+      case 'week':
+        getTableFn = peopleApi.getWeekTable
+        break
+      case 'year':
+        getTableFn = peopleApi.getYearTable
+        break
+      default:
+        getTableFn = peopleApi.getMonthTable
+    }
+    const table = await getTableFn(year, monthString, productionId)
     if (detailLevel === 'day') {
-      mainFunc = peopleApi.getDayTable
+      const dayOffs = await peopleApi.getDayOffs(year, monthString)
+      commit(PEOPLE_SET_DAY_OFFS, dayOffs)
+      commit(PEOPLE_TIMESHEET_LOADED, table)
+    } else {
+      commit(PEOPLE_TIMESHEET_LOADED, table)
     }
-    if (detailLevel === 'week') {
-      mainFunc = peopleApi.getWeekTable
-    }
-    if (detailLevel === 'year') {
-      mainFunc = peopleApi.getYearTable
-    }
-    return mainFunc(year, monthString, productionId).then(table => {
-      if (detailLevel === 'day') {
-        peopleApi.getDayOffs(year, monthString).then(dayOffs => {
-          commit(PEOPLE_SET_DAY_OFFS, dayOffs)
-          commit(PEOPLE_TIMESHEET_LOADED, table)
-          Promise.resolve(table)
-        })
-      } else {
-        commit(PEOPLE_TIMESHEET_LOADED, table)
-        Promise.resolve(table)
-      }
-    })
   },
 
   setPeopleSearch({ commit, rootGetters }, peopleSearch) {
@@ -533,26 +517,27 @@ const actions = {
     })
   },
 
-  savePeopleSearch({ commit }, searchQuery) {
+  async savePeopleSearch({ commit }, searchQuery) {
     if (state.peopleSearchQueries.some(query => query.name === searchQuery)) {
       return
     }
-    return peopleApi
-      .createFilter('people', searchQuery, searchQuery, null, null)
-      .then(searchQuery => {
-        commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
-        return searchQuery
-      })
+    searchQuery = await peopleApi.createFilter(
+      'people',
+      searchQuery,
+      searchQuery,
+      null,
+      null
+    )
+    commit(SAVE_PEOPLE_SEARCH_END, { searchQuery })
   },
 
-  removePeopleSearch({ commit }, searchQuery) {
-    return peopleApi.removeFilter(searchQuery).then(() => {
-      commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
-    })
+  async removePeopleSearch({ commit }, searchQuery) {
+    await peopleApi.removeFilter(searchQuery)
+    commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
   },
 
   getPersonQuotaShots(
-    { commit, state, rootGetters },
+    { rootGetters },
     { taskTypeId, detailLevel, personId, year, month, week, day, computeMode }
   ) {
     const production = rootGetters.currentProduction
@@ -819,7 +804,6 @@ const mutations = {
 
   [PERSON_SET_DAY_OFF](state, dayOff) {
     state.personDayOff = dayOff
-    state.personIsDayOff = dayOff !== null && dayOff.id !== undefined
   },
 
   [PEOPLE_SET_DAY_OFFS](state, dayOffs) {
