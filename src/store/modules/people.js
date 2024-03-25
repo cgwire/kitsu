@@ -12,8 +12,6 @@ import {
   LOAD_PEOPLE_START,
   LOAD_PEOPLE_ERROR,
   LOAD_PEOPLE_END,
-  SHOW_IMPORT_PEOPLE_MODAL,
-  HIDE_IMPORT_PEOPLE_MODAL,
   PERSON_CSV_FILE_SELECTED,
   IMPORT_PEOPLE_START,
   IMPORT_PEOPLE_ERROR,
@@ -129,7 +127,6 @@ const initialState = {
   isPeopleLoading: false,
   isPeopleLoadingError: true,
 
-  isImportPeopleModalShown: false,
   isImportPeopleLoading: false,
   isImportPeopleLoadingError: false,
 
@@ -186,7 +183,6 @@ const getters = {
   peopleSearchQueries: state => state.peopleSearchQueries,
   peopleSearchText: state => state.peopleSearchText,
 
-  isImportPeopleModalShown: state => state.isImportPeopleModalShown,
   isImportPeopleLoading: state => state.isImportPeopleLoading,
   isImportPeopleLoadingError: state => state.isImportPeopleLoadingError,
 
@@ -418,16 +414,6 @@ const actions = {
     }
   },
 
-  // FIXME: remove this action (never used)
-  showPersonImportModal({ commit }, personId) {
-    commit(SHOW_IMPORT_PEOPLE_MODAL)
-  },
-
-  // FIXME: remove this action (never used)
-  hidePersonImportModal({ commit }, personId) {
-    commit(HIDE_IMPORT_PEOPLE_MODAL)
-  },
-
   setPersonTasksSearch({ commit }, searchText) {
     commit(SET_PERSON_TASKS_SEARCH, searchText)
   },
@@ -643,16 +629,6 @@ const mutations = {
   [IMPORT_PEOPLE_ERROR](state) {
     state.isImportPeopleLoading = false
     state.isImportPeopleLoadingError = true
-  },
-
-  [SHOW_IMPORT_PEOPLE_MODAL](state) {
-    state.isImportPeopleModalShown = true
-    state.isImportPeopleLoading = false
-    state.isImportPeopleLoadingError = false
-  },
-
-  [HIDE_IMPORT_PEOPLE_MODAL](state) {
-    state.isImportPeopleModalShown = false
   },
 
   [PERSON_CSV_FILE_SELECTED](state, formData) {

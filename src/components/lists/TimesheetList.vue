@@ -268,8 +268,6 @@ export default {
     dayOffError: {
       default: false,
       type: [String, Boolean]
-      // default: null,
-      // type: String
     },
     timeSpentMap: {
       default: () => {},
