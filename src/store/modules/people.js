@@ -489,10 +489,8 @@ const actions = {
     if (detailLevel === 'day') {
       const dayOffs = await peopleApi.getDayOffs(year, monthString)
       commit(PEOPLE_SET_DAY_OFFS, dayOffs)
-      commit(PEOPLE_TIMESHEET_LOADED, table)
-    } else {
-      commit(PEOPLE_TIMESHEET_LOADED, table)
     }
+    commit(PEOPLE_TIMESHEET_LOADED, table)
   },
 
   setPeopleSearch({ commit, rootGetters }, peopleSearch) {
@@ -786,9 +784,17 @@ const mutations = {
     const dayOffMap = {}
     // Build a map that tells if a day is off. It uses two keys: the person id
     // and the day number.
-    dayOffs.forEach(dayOff => {
-      if (!dayOffMap[dayOff.person_id]) dayOffMap[dayOff.person_id] = {}
-      dayOffMap[dayOff.person_id][dayOff.date.substring(8, 10)] = true
+    dayOffs.forEach(({ person_id, date, end_date }) => {
+      if (!dayOffMap[person_id]) {
+        dayOffMap[person_id] = {}
+      }
+      const currentDate = new Date(date)
+      const endDate = new Date(end_date)
+      while (currentDate <= endDate) {
+        const day = currentDate.toISOString().substring(8, 10)
+        dayOffMap[person_id][day] = true
+        currentDate.setDate(currentDate.getDate() + 1)
+      }
     })
     state.dayOffMap = dayOffMap
   },

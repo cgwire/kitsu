@@ -1555,6 +1555,7 @@ export default {
     export_timespents: 'Export time spent entries for open projects as a list',
     hours: 'hours',
     month: 'Month',
+    off: 'Off',
     time_spents: 'Time Spent (hours)',
     title: 'Timesheets',
     unit: 'Unit',
