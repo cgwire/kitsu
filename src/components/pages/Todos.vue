@@ -117,6 +117,7 @@
           :done-tasks="loggableDoneTasks"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
+          :day-off-error="dayOffError"
           :time-spent-map="timeSpentMap"
           :time-spent-total="timeSpentTotal"
           :hide-done="loggableDoneTasks.length === 0"
@@ -144,16 +145,16 @@ import firstBy from 'thenby'
 import { sortTaskStatuses } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction'
-import KanbanBoard from '@/components/lists/KanbanBoard'
-import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
-import TaskInfo from '@/components/sides/TaskInfo'
-import TimesheetList from '@/components/lists/TimesheetList'
-import TodosList from '@/components/lists/TodosList'
-import UserCalendar from '@/components/widgets/UserCalendar'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import KanbanBoard from '@/components/lists/KanbanBoard.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import TimesheetList from '@/components/lists/TimesheetList.vue'
+import TodosList from '@/components/lists/TodosList.vue'
+import UserCalendar from '@/components/widgets/UserCalendar.vue'
 
 export default {
   name: 'todos',
@@ -176,6 +177,7 @@ export default {
       currentFilter: 'all_tasks',
       currentSort: 'priority',
       currentSection: 'todos',
+      dayOffError: false,
       filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
         label: name,
         value: name
@@ -520,23 +522,30 @@ export default {
       })
     },
 
-    onSetDayOff() {
-      const dayOff = {
-        personId: this.user.id,
-        date: this.selectedDate
+    async onSetDayOff(dayOff) {
+      this.dayOffError = false
+      try {
+        await this.setDayOff({
+          ...dayOff,
+          personId: this.user.id
+        })
+        this.$refs['timesheet-list']?.closeSetDayOffModal()
+      } catch (error) {
+        this.dayOffError = error.body?.message || true
       }
-      this.setDayOff(dayOff)
     },
 
-    onUnsetDayOff() {
-      const dayOff = {
-        personId: this.user.id,
-        date: this.selectedDate
+    async onUnsetDayOff() {
+      this.dayOffError = false
+      try {
+        await this.unsetDayOff()
+        this.$refs['timesheet-list']?.closeUnsetDayOffModal()
+      } catch (error) {
+        this.dayOffError = error.body?.message || true
       }
-      this.unsetDayOff(dayOff)
-      this.loadTodos({
-        forced: true,
-        date: this.selectedDate
+      await this.loadTodos({
+        date: this.selectedDate,
+        forced: true
       })
     },
 

@@ -272,7 +272,6 @@ export default {
       'isCurrentUserAdmin',
       'isPeopleLoading',
       'isPeopleLoadingError',
-      'isImportPeopleModalShown',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
       'peopleSearchQueries',

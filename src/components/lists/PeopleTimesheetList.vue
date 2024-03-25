@@ -11,7 +11,7 @@
             <th
               scope="col"
               class="time year"
-              :key="'year-' + year"
+              :key="`year-${year}`"
               v-for="year in yearRange"
               v-if="detailLevel === 'year'"
             >
@@ -21,7 +21,7 @@
             <th
               scope="col"
               class="time month"
-              :key="'month-' + month"
+              :key="`month-${month}`"
               v-for="month in monthRange"
               v-if="detailLevel === 'month'"
             >
@@ -32,7 +32,7 @@
               scope="col"
               class="daytime"
               :title="getWeekTitle(week)"
-              :key="'week-' + week"
+              :key="`week-${week}`"
               v-for="week in weekRange"
               v-if="detailLevel === 'week'"
             >
@@ -42,7 +42,7 @@
             <th
               scope="col"
               class="daytime"
-              :key="'day-' + day"
+              :key="`day-${day}`"
               v-for="day in dayRange"
               v-if="detailLevel === 'day'"
             >
@@ -61,12 +61,11 @@
             </th>
 
             <td
+              class="time year"
               :class="{
-                time: true,
-                year: true,
                 selected: isYearSelected(person.id, year)
               }"
-              :key="'year-' + year + '-' + person.id"
+              :key="`year-${year}-${person.id}`"
               v-for="year in yearRange"
               v-if="detailLevel === 'year'"
             >
@@ -77,16 +76,15 @@
               >
                 {{ yearDuration(year, person.id) }}
               </router-link>
-              <span v-else> - </span>
+              <template v-else> - </template>
             </td>
 
             <td
+              class="time month"
               :class="{
-                time: true,
-                month: true,
                 selected: isMonthSelected(person.id, year, month)
               }"
-              :key="'month-' + month + '-' + person.id"
+              :key="`month-${month}-${person.id}`"
               v-for="month in monthRange"
               v-if="detailLevel === 'month'"
             >
@@ -97,21 +95,21 @@
               >
                 {{ monthDuration(month, person.id) }}
               </router-link>
-              <span v-else> - </span>
+              <template v-else> - </template>
             </td>
 
             <td
+              class="daytime"
               :class="{
-                daytime: true,
                 selected: isWeekSelected(person.id, year, week)
               }"
-              :key="'week-' + week + '-' + person.id"
+              :key="`week-${week}-${person.id}`"
               v-for="week in weekRange"
               v-if="detailLevel === 'week'"
             >
               <router-link
+                class="duration"
                 :class="{
-                  duration: true,
                   warning:
                     weekDuration(week, person.id) >
                     5 * organisation.hours_by_day
@@ -121,17 +119,16 @@
               >
                 {{ weekDuration(week, person.id) }}
               </router-link>
-              <span v-else> - </span>
+              <template v-else> - </template>
             </td>
 
             <td
               class="daytime"
               :class="{
-                daytime: true,
                 weekend: isWeekend(year, month, day),
                 selected: isDaySelected(person.id, year, month, day)
               }"
-              :key="'day-' + day + '-' + person.id"
+              :key="`day-${day}-${person.id}`"
               v-for="day in dayRange"
               v-if="detailLevel === 'day'"
             >
@@ -142,8 +139,10 @@
               >
                 {{ dayDuration(day, person.id) }}
               </router-link>
-              <span v-else-if="isDayOff(person.id, day)"> OFF </span>
-              <span v-else> - </span>
+              <template v-else-if="isDayOff(person.id, day)">
+                {{ $t('timesheets.off').toUpperCase() }}
+              </template>
+              <template v-else> - </template>
             </td>
             <td class="actions"></td>
           </tr>
@@ -161,19 +160,20 @@
 
 <script>
 import moment from 'moment-timezone'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import {
-  monthToString,
   getMonthRange,
   getWeekRange,
   getDayRange,
   hoursToDays,
+  monthToString,
   range
 } from '@/lib/time'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
-import TableInfo from '@/components/widgets/TableInfo'
+
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'people-timesheet-list',
@@ -235,12 +235,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'dayOffMap',
-      'isCurrentUserManager',
-      'organisation',
-      'route'
-    ]),
+    ...mapGetters(['dayOffMap', 'organisation', 'route']),
 
     yearRange() {
       return range(2018, moment().year())
@@ -269,8 +264,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     monthToString,
 
     yearDuration(year, personId) {
@@ -297,11 +290,8 @@ export default {
     },
 
     dayDuration(day, personId) {
-      if (
-        this.dayOffMap[personId] &&
-        this.dayOffMap[personId][`${day}`] === true
-      ) {
-        return 'OFF'
+      if (this.dayOffMap[personId]?.[`${day}`] === true) {
+        return this.$t('timesheets.off').toUpperCase()
       } else {
         const duration = this.getDuration(day, personId)
         return this.isHours

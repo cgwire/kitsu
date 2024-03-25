@@ -21,8 +21,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import PreviewModal from '@/components/modals/PreviewModal'
-import Spinner from '@/components/widgets/Spinner'
+import PreviewModal from '@/components/modals/PreviewModal.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 import crisp from '@/lib/crisp'
 import localPreferences from '@/lib/preferences'
@@ -127,11 +127,8 @@ export default {
       }
 
       // for todo lists
-      if (this.route.path.indexOf(eventData.person_id) > 0) {
-        this.loadPersonTasks({
-          personId: eventData.person_id,
-          forced: true
-        })
+      if (this.route.path.includes(eventData.person_id)) {
+        this.loadPersonTasks({ personId: eventData.person_id })
       }
     }
   },

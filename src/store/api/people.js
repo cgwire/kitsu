@@ -231,18 +231,12 @@ export default {
     return client.pget(`/api/data/user/time-spents/${date}`)
   },
 
-  getPersonTasks(personId, callback) {
-    if (!callback) {
-      return client.pget(`/api/data/persons/${personId}/tasks`)
-    }
-    client.get(`/api/data/persons/${personId}/tasks`, callback)
+  getPersonTasks(personId) {
+    return client.pget(`/api/data/persons/${personId}/tasks`)
   },
 
-  getPersonDoneTasks(personId, callback) {
-    if (!callback) {
-      return client.pget(`/api/data/persons/${personId}/done-tasks`)
-    }
-    client.get(`/api/data/persons/${personId}/done-tasks`, callback)
+  getPersonDoneTasks(personId) {
+    return client.pget(`/api/data/persons/${personId}/done-tasks`)
   },
 
   getUserSearchFilterGroups() {
@@ -320,9 +314,15 @@ export default {
     return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
   },
 
-  setDayOff(personId, date) {
+  setDayOff(personId, startDate, endDate, description) {
     // Date is a string with following format: YYYYY-MM-DD.
-    return client.ppost('/api/data/day-offs', { person_id: personId, date })
+    const data = {
+      person_id: personId,
+      date: startDate,
+      end_date: endDate || startDate,
+      description
+    }
+    return client.ppost('/api/data/day-offs', data)
   },
 
   getDayOffs(year, month) {

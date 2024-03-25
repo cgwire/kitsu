@@ -24,6 +24,12 @@
         @click="toggleDayOff"
         v-if="!hideDayOff"
       />
+      <info-question-mark
+        class="flexrow-item mt05"
+        position="right"
+        :text="dayOffInfo"
+        v-if="personIsDayOff"
+      />
     </div>
 
     <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
@@ -172,14 +178,33 @@
       {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}
     </p>
 
-    <delete-modal
-      :text="$t('timesheets.confirm_day_off')"
+    <day-off-modal
+      :active="modals.setDayOff"
+      :day-off-to-edit="{
+        date: selectedDate
+      }"
+      :is-error="isDayOffError"
+      :error-text="dayOffTextError"
       @confirm="
-        modals.dayOff = false
-        $emit('set-day-off')
+        dayOff => {
+          $emit('set-day-off', dayOff)
+        }
       "
-      @cancel="modals.dayOff = false"
-      :active="modals.dayOff"
+      @cancel="closeSetDayOffModal"
+    />
+
+    <delete-modal
+      :active="modals.unsetDayOff"
+      :text="
+        $t('timesheets.confirm_unset_day_offs', {
+          start: personDayOff?.date,
+          end: personDayOff?.end_date
+        })
+      "
+      :is-error="isDayOffError"
+      :error-text="dayOffTextError"
+      @confirm="$emit('unset-day-off')"
+      @cancel="closeUnsetDayOffModal"
     />
   </div>
 </template>
@@ -191,14 +216,16 @@ import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 
 import { PAGE_SIZE } from '@/lib/pagination'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PageSubtitle from '@/components/widgets/PageSubtitle'
-import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
-import TimeSliderCell from '@/components/cells/TimeSliderCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DayOffModal from '@/components/modals/DayOffModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
+import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import TimeSliderCell from '@/components/cells/TimeSliderCell.vue'
 
 export default {
   name: 'timesheet-list',
@@ -206,8 +233,10 @@ export default {
   components: {
     ButtonSimple,
     Datepicker,
+    DayOffModal,
     DeleteModal,
     EntityThumbnail,
+    InfoQuestionMark,
     ProductionNameCell,
     PageSubtitle,
     TableInfo,
@@ -236,6 +265,10 @@ export default {
       default: false,
       type: Boolean
     },
+    dayOffError: {
+      default: false,
+      type: [String, Boolean]
+    },
     timeSpentMap: {
       default: () => {},
       type: Object
@@ -255,14 +288,16 @@ export default {
   },
 
   data() {
+    const today = new Date()
     return {
       colNamePosX: '',
       colTypePosX: '',
       disabledDates: {},
       page: 1,
-      selectedDate: moment().toDate(), // By default current day.
+      selectedDate: today,
       modals: {
-        dayOff: false
+        setDayOff: false,
+        unsetDayOff: false
       }
     }
   },
@@ -290,6 +325,7 @@ export default {
       'isCurrentUserAdmin',
       'nbSelectedTasks',
       'organisation',
+      'personDayOff',
       'personIsDayOff',
       'productionMap',
       'taskTypeMap',
@@ -306,6 +342,21 @@ export default {
 
     displayedTasks() {
       return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
+    },
+
+    dayOffInfo() {
+      const { description, date, end_date } = this.personDayOff
+      const period =
+        end_date && date !== end_date ? `${date} - ${end_date}` : date
+      return `${description || this.$t('timesheets.day_off')} (${period})`
+    },
+
+    isDayOffError() {
+      return Boolean(this.dayOffError)
+    },
+
+    dayOffTextError() {
+      return this.dayOffError?.length ? this.dayOffError : null
     }
   },
 
@@ -353,10 +404,18 @@ export default {
 
     toggleDayOff() {
       if (this.personIsDayOff) {
-        this.$emit('unset-day-off')
+        this.modals.unsetDayOff = true
       } else {
-        this.modals.dayOff = true
+        this.modals.setDayOff = true
       }
+    },
+
+    closeSetDayOffModal() {
+      this.modals.setDayOff = false
+    },
+
+    closeUnsetDayOffModal() {
+      this.modals.unsetDayOff = false
     }
   },
 
