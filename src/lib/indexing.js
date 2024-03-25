@@ -85,7 +85,7 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
     const words = stringToIndex
       .toLowerCase()
       .split(' ')
-      .concat([taskStatus.short_name])
+      .concat([task.entity_name, taskStatus.short_name])
     task.assignees.forEach(personId => {
       const person = personMap.get(personId)
       if (person) words.push(person.first_name, person.last_name)
