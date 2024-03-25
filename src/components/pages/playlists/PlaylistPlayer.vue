@@ -49,7 +49,8 @@
       <div class="filler"></div>
       <button-simple
         class="playlist-button topbar-button flexrow-item"
-        :title="$t('playlists.actions.next_shot')"
+        :text="$t('playlists.actions.exit_play_full')"
+        :title="$t('playlists.actions.exit_play_full')"
         @click="isFullMode = false"
         v-if="isFullMode"
       />
@@ -312,7 +313,7 @@
       :frame-duration="frameDuration"
       :is-playlist="true"
       :is-full-mode="isFullMode"
-      :is-full-screen="fullScreen"
+      :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
       :nb-frames="nbFrames"
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
@@ -1827,7 +1828,10 @@ export default {
     configureFullPlayer() {
       if (!this.fullPlayer) return
       this.fullPlayer.addEventListener('loadedmetadata', () => {
-        this.playlistDuration = this.fullPlayer.duration
+        this.playlistDuration = this.entityList.reduce(
+          (acc, entity) => acc + entity.preview_file_duration,
+          0
+        )
       })
       this.fullPlayer.addEventListener('ended', () => {
         this.pause()
@@ -2070,7 +2074,6 @@ export default {
         this.resetPictureCanvas()
         this.resetCanvas()
         this.syncComparisonPlayer()
-        this.reloadAnnotations()
       })
     },
 

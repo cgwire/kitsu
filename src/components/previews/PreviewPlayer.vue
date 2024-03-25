@@ -1745,7 +1745,6 @@ export default {
       this.$nextTick(() => {
         this.previewViewer.resize()
         this.comparisonViewer.resize()
-        this.reloadAnnotations()
         this.loadAnnotation()
       })
     },
