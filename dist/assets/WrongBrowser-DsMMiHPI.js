@@ -1,2 +1,0 @@
-import{n}from"./index-DYcCZdHH.js";const s={name:"wrong-browser"};var t=function(){var r=this,e=r._self._c;return e("div",{staticClass:"server-down page"},[e("h1",{staticClass:"title"},[r._v(r._s(r.$t("wrong_browser.title")))]),e("p",[r._v(" "+r._s(r.$t("wrong_browser.text"))+" ")])])},o=[],_=n(s,t,o,!1,null,null,null,null);const c=_.exports;export{c as default};
-//# sourceMappingURL=WrongBrowser-DsMMiHPI.js.map
