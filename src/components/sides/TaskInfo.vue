@@ -162,26 +162,27 @@
                     <comment
                       :key="'comment' + comment.id"
                       :comment="comment"
-                      :task="task"
-                      :team="currentTeam"
-                      :light="true"
-                      :add-preview="onAddPreviewClicked"
-                      :is-first="index === 0"
-                      :is-last="index === pinnedCount"
+                      :fps="parseInt(currentFps)"
+                      :frame="currentFrame || currentFrameRaw"
                       :is-change="isStatusChange(index)"
-                      :editable="
+                      :is-editable="
                         (comment.person && user.id === comment.person.id) ||
                         isCurrentUserAdmin
                       "
-                      :fps="parseInt(currentFps)"
-                      :frame="currentFrame || currentFrameRaw"
+                      :is-first="index === 0"
+                      :is-last="index === pinnedCount"
+                      :is-pinnable="
+                        isCurrentUserManager || isCurrentUserSupervisor
+                      "
                       :revision="currentRevision"
+                      :task="task"
+                      :team="currentTeam"
+                      @ack-comment="onAckComment"
                       @duplicate-comment="onDuplicateComment"
                       @pin-comment="onPinComment"
                       @edit-comment="onEditComment"
                       @delete-comment="onDeleteComment"
                       @checklist-updated="saveComment"
-                      @ack-comment="onAckComment"
                       @time-code-clicked="timeCodeClicked"
                       v-for="(comment, index) in taskComments"
                     />
@@ -286,8 +287,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
+import { CornerRightUpIcon } from 'vue-feather-icons'
+import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
@@ -301,23 +303,22 @@ import { formatDate } from '@/lib/time'
 import { taskMixin } from '@/components/mixins/task'
 import { domMixin } from '@/components/mixins/dom'
 
-import { CornerRightUpIcon } from 'vue-feather-icons'
-
-import ActionPanel from '@/components/tops/ActionPanel'
-import AddComment from '@/components/widgets/AddComment'
-import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import Comment from '@/components/widgets/Comment'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditCommentModal from '@/components/modals/EditCommentModal'
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import PreviewPlayer from '@/components/previews/PreviewPlayer'
+import ActionPanel from '@/components/tops/ActionPanel.vue'
+import AddComment from '@/components/widgets/AddComment.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import Comment from '@/components/widgets/Comment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 
 const DEFAULT_PANEL_WIDTH = 400
 
 export default {
   name: 'task-info',
+
   mixins: [domMixin, taskMixin],
 
   components: {

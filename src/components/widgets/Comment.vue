@@ -1,10 +1,9 @@
 <template>
   <div>
     <article
+      class="comment"
       :class="{
-        comment: true,
-        pinned: comment.pinned,
-        highlighted: highlighted
+        pinned: comment.pinned
       }"
       :style="{
         'box-shadow': boxShadowStyle
@@ -36,12 +35,19 @@
           <span class="flexrow-item date" :title="fullDate">
             {{ shortDate }}
           </span>
-          <div class="flexrow-item menu-wrapper">
+          <div
+            class="flexrow-item menu-wrapper"
+            v-if="isPinnable || isEditable"
+          >
             <chevron-down-icon class="menu-icon" @click="toggleCommentMenu" />
             <comment-menu
+              :is-pinnable="isPinnable"
               :is-pinned="comment.pinned"
-              :is-editable="editable"
-              @pin-clicked="$emit('pin-comment', comment)"
+              :is-editable="isEditable"
+              @pin-clicked="
+                $emit('pin-comment', comment)
+                toggleCommentMenu()
+              "
               @edit-clicked="
                 $emit('edit-comment', comment)
                 toggleCommentMenu()
@@ -50,7 +56,7 @@
                 $emit('delete-comment', comment)
                 toggleCommentMenu()
               "
-              ref="menu"
+              v-if="menuVisible"
             />
           </div>
         </div>
@@ -315,12 +321,16 @@
         <span class="flexrow-item date" :title="fullDate">
           {{ shortDate }}
         </span>
-        <div class="flexrow-item menu-wrapper">
+        <div class="flexrow-item menu-wrapper" v-if="isPinnable || isEditable">
           <chevron-down-icon class="menu-icon" @click="toggleCommentMenu" />
           <comment-menu
-            :is-editable="editable"
+            :is-pinnable="isPinnable"
+            :is-editable="isEditable"
             :is-empty="true"
-            @pin-clicked="$emit('pin-comment', comment)"
+            @pin-clicked="
+              $emit('pin-comment', comment)
+              toggleCommentMenu()
+            "
             @edit-clicked="
               $emit('edit-comment', comment)
               toggleCommentMenu()
@@ -329,7 +339,7 @@
               $emit('delete-comment', comment)
               toggleCommentMenu()
             "
-            ref="menu"
+            v-if="menuVisible"
           />
         </div>
       </div>
@@ -341,31 +351,35 @@
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import moment from 'moment'
 import { mapActions, mapGetters } from 'vuex'
-import { remove } from '@/lib/models'
-import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
-import { sortByName } from '@/lib/sorting'
-import { formatDate, parseDate } from '@/lib/time'
-import colors from '@/lib/colors'
-import files from '@/lib/files'
-import { pluralizeEntityType } from '@/lib/path'
-import { domMixin } from '@/components/mixins/dom'
-
 import {
   ChevronDownIcon,
   CopyIcon,
   PaperclipIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import CommentMenu from '@/components/widgets/CommentMenu'
-import Checklist from '@/components/widgets/Checklist'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
-import ValidationTag from '@/components/widgets/ValidationTag'
+
+import colors from '@/lib/colors'
+import files from '@/lib/files'
+import { remove } from '@/lib/models'
+import { pluralizeEntityType } from '@/lib/path'
+import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
+import { sortByName } from '@/lib/sorting'
+import { formatDate, parseDate } from '@/lib/time'
+
+import { domMixin } from '@/components/mixins/dom'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import CommentMenu from '@/components/widgets/CommentMenu.vue'
+import Checklist from '@/components/widgets/Checklist.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'comment',
+
   mixins: [domMixin],
+
   components: {
     AtTa,
     ButtonSimple,
@@ -385,6 +399,7 @@ export default {
       atOptions: [],
       checklist: [],
       isReplyLoading: false,
+      menuVisible: false,
       replyText: '',
       showReply: false,
       uniqueClassName: (Math.random() + 1).toString(36).substring(2)
@@ -396,27 +411,19 @@ export default {
       type: Object,
       default: () => {}
     },
-    team: {
-      type: Array,
-      default: () => []
-    },
-    task: {
-      type: Object,
-      default: null
-    },
-    highlighted: {
-      type: Boolean,
-      default: false
-    },
-    editable: {
-      type: Boolean,
-      default: false
-    },
     frame: {
       type: Number,
       default: 0
     },
-    light: {
+    fps: {
+      type: Number,
+      default: 25
+    },
+    isChange: {
+      type: Boolean,
+      default: false
+    },
+    isEditable: {
       type: Boolean,
       default: false
     },
@@ -428,13 +435,17 @@ export default {
       type: Boolean,
       default: false
     },
-    isChange: {
+    isPinnable: {
       type: Boolean,
       default: false
     },
-    fps: {
-      type: Number,
-      default: 25
+    team: {
+      type: Array,
+      default: () => []
+    },
+    task: {
+      type: Object,
+      default: null
     },
     revision: {
       type: Number,
@@ -473,11 +484,11 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isDarkTheme',
-      'user',
       'personMap',
       'productionDepartmentIds',
+      'taskStatusMap',
       'taskTypeMap',
-      'taskStatusMap'
+      'user'
     ]),
 
     isConcept() {
@@ -661,14 +672,11 @@ export default {
     },
 
     getAttachmentPath(attachment) {
-      return (
-        `/api/data/attachment-files/${attachment.id}/` +
-        `file/${attachment.name}`
-      )
+      return `/api/data/attachment-files/${attachment.id}/file/${attachment.name}`
     },
 
     toggleCommentMenu() {
-      this.$refs.menu.toggle()
+      this.menuVisible = !this.menuVisible
     },
 
     addChecklistEntry() {
@@ -869,10 +877,6 @@ article.comment {
 
 .media {
   padding: 0.6em;
-}
-
-.comment.highlighted {
-  background: #f1eeff;
 }
 
 .content .comment-person {
