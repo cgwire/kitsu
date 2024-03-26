@@ -205,20 +205,21 @@
                   <comment
                     :key="comment.id"
                     :comment="comment"
-                    :current-user="user"
+                    :fps="parseInt(currentFps)"
                     :frame="currentFrame"
-                    :editable="
+                    :is-editable="
                       (comment.person && user.id === comment.person.id) ||
                       isCurrentUserAdmin
                     "
-                    :fps="parseInt(currentFps)"
-                    :highlighted="false"
                     :is-first="index === 0"
                     :is-last="index === pinnedCount"
+                    :is-pinnable="
+                      isCurrentUserManager || isCurrentUserSupervisor
+                    "
                     :is-change="isStatusChange(index)"
                     :revision="currentRevision"
-                    :team="currentTeam"
                     :task="task"
+                    :team="currentTeam"
                     @ack-comment="ackComment"
                     @duplicate-comment="onDuplicateComment"
                     @pin-comment="onPinComment"
@@ -312,33 +313,36 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { ImageIcon } from 'vue-feather-icons'
+import { mapGetters, mapActions } from 'vuex'
 
-import { getTaskEntityPath } from '@/lib/path'
 import drafts from '@/lib/drafts'
+import { getTaskEntityPath } from '@/lib/path'
 import { sortPeople } from '@/lib/sorting'
+
 import { formatListMixin } from '@/components/mixins/format'
 import { taskMixin } from '@/components/mixins/task'
 
-import AddComment from '@/components/widgets/AddComment'
-import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import Comment from '@/components/widgets/Comment'
+import AddComment from '@/components/widgets/AddComment.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import Comment from '@/components/widgets/Comment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditCommentModal from '@/components/modals/EditCommentModal'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import Spinner from '@/components/widgets/Spinner'
-import SubscribeButton from '@/components/widgets/SubscribeButton'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import ValidationTag from '@/components/widgets/ValidationTag'
-import PreviewPlayer from '@/components/previews/PreviewPlayer'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
+import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 
 export default {
   name: 'task',
+
   mixins: [formatListMixin, taskMixin],
+
   components: {
     AddComment,
     AddPreviewModal,

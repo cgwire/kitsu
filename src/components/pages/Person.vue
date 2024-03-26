@@ -658,7 +658,7 @@ export default {
       try {
         await this.setDayOff({
           ...dayOff,
-          personId: this.user.id
+          personId: this.person.id
         })
         this.$refs['timesheet-list']?.closeSetDayOffModal()
       } catch (error) {

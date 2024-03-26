@@ -1,10 +1,7 @@
 <template>
-  <div class="comment-menu hidden" ref="main">
-    <div @click="onPinClicked" v-show="!isEmpty">
-      <span v-if="isPinned">
-        {{ $t('comments.unpin') }}
-      </span>
-      <span v-else>{{ $t('comments.pin') }}</span>
+  <div class="comment-menu">
+    <div @click="$emit('pin-clicked')" v-if="isPinnable && !isEmpty">
+      {{ isPinned ? $t('comments.unpin') : $t('comments.pin') }}
     </div>
     <div @click="$emit('edit-clicked')" v-if="isEditable">
       {{ $t('main.edit') }}
@@ -16,20 +13,10 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'comment-menu',
 
   props: {
-    isPinned: {
-      type: Boolean,
-      default: false
-    },
-    isCurrentUserAdmin: {
-      type: Boolean,
-      default: false
-    },
     isEditable: {
       type: Boolean,
       default: true
@@ -37,32 +24,14 @@ export default {
     isEmpty: {
       type: Boolean,
       default: false
-    }
-  },
-
-  data() {
-    return {}
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {
-    ...mapActions([]),
-
-    toggle() {
-      const mainEl = this.$refs.main
-      if (mainEl.className === 'comment-menu') {
-        mainEl.className = 'comment-menu hidden'
-      } else {
-        mainEl.className = 'comment-menu'
-      }
     },
-
-    onPinClicked() {
-      this.$emit('pin-clicked')
-      this.toggle()
+    isPinnable: {
+      type: Boolean,
+      default: true
+    },
+    isPinned: {
+      type: Boolean,
+      default: false
     }
   }
 }
@@ -71,7 +40,7 @@ export default {
 <style lang="scss" scoped>
 .dark .comment-menu {
   background-color: $dark-grey-light;
-  box-shadow: 0px 2px 6px $dark-grey-light;
+  box-shadow: 0 2px 6px $dark-grey-light;
   color: $light-grey-light;
 }
 
@@ -80,21 +49,19 @@ export default {
   position: absolute;
   background: white;
   width: 118px;
-  box-shadow: 0px 2px 6px $light-grey;
+  box-shadow: 0 2px 6px $light-grey;
   top: 20px;
   left: -90px;
   z-index: 100;
-}
+  overflow: hidden;
 
-.comment-menu div {
-  cursor: pointer;
+  div {
+    cursor: pointer;
+    padding: 0.5em;
 
-  &:hover {
-    background-color: var(--background-alt);
+    &:hover {
+      background-color: var(--background-alt);
+    }
   }
-}
-
-.comment-menu div {
-  padding: 0.5em;
 }
 </style>
