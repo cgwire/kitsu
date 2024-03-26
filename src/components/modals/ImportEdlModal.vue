@@ -14,12 +14,16 @@
         </h1>
 
         <p>
+          {{ $t('main.edl.explanation') }}
+        </p>
+
+        <p>
           {{ $t('main.edl.select_file') }}
         </p>
         <file-upload
           @fileselected="onFileSelected"
           :label="$t('main.edl.upload_file')"
-          accept=".edl"
+          accept=".edl, .xml, .otio, .fcpxml"
           ref="inputFile"
         />
 

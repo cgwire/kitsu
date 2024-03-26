@@ -1079,10 +1079,7 @@ export default {
       this.modals.isEDLImportDisplayed = false
     },
 
-    uploadEDLFile(data, namingConvention, matchCase) {
-      const filename = 'import.edl'
-      const edl_file = new File([data], filename, { type: 'text/plain' })
-
+    uploadEDLFile(edl_file, namingConvention, matchCase) {
       this.loading.importing = true
       this.errors.importing = false
       this.errors.importingError = null
