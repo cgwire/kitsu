@@ -636,6 +636,7 @@ export default {
     edl: {
       import_file: 'Import EDL',
       import_title: 'Import frames / in / out from edit decision list',
+      explanation: 'It\'s possible to import every OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). Shots will be created or updated with the given frames, frame in and frame out. Frame in start at 0.',
       select_file: 'Please select a file from one of your folder:',
       upload_file: 'Browse local files',
       error_upload: 'An error occurred while uploading your EDL.',
