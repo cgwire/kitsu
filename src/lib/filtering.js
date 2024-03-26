@@ -171,19 +171,19 @@ const applyFiltersFunctions = {
   },
 
   assetsready(entry, filter, taskMap) {
-    let isOk = false
-    if (entry.tasks) {
-      entry.tasks.forEach(taskId => {
-        const task = taskMap.get(taskId)
-        if (task.task_type_id === filter.value) {
-          isOk =
-            entry.nb_entities_out > 0 &&
-            entry.nb_entities_out === task.nb_assets_ready
-        }
-      })
+    if (entry.nb_entities_out <= 0) {
+      return filter.excluding
     }
-    if (filter.excluding) isOk = !isOk
-    return isOk
+    const isOk =
+      entry.tasks?.some(taskId => {
+        const task = taskMap.get(taskId)
+        return (
+          task &&
+          task.task_type_id === filter.value &&
+          entry.nb_entities_out === task.nb_assets_ready
+        )
+      }) ?? false
+    return filter.excluding ? !isOk : isOk
   }
 }
 
