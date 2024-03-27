@@ -255,13 +255,11 @@ export default {
   mounted() {
     this.updateActiveTab()
     if (this.personTasksSearchText.length > 0) {
-      this.searchField.setValue(this.personTasksSearchText)
+      this.searchField?.setValue(this.personTasksSearchText)
     }
     setTimeout(() => {
-      if (this.searchField) this.searchField.focus()
-      if (this.$refs['schedule-widget']) {
-        this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
-      }
+      this.searchField?.focus()
+      this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
     }, 300)
     this.loadPerson(this.$route.params.person_id)
     window.addEventListener('resize', this.resetScheduleHeight)
