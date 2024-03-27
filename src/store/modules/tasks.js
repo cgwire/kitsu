@@ -122,32 +122,27 @@ const helpers = {
 const getters = {
   taskMap: state => state.taskMap,
   taskComments: state => state.taskComments,
-  getTaskComments: (state, getters) => id => state.taskComments[id],
-  getTaskPreviews: (state, getters) => id => state.taskPreviews[id],
+  getTaskComments: state => id => state.taskComments[id] ?? [],
+  getTaskPreviews: state => id => state.taskPreviews[id] ?? [],
 
-  getTaskComment: (state, getters) => (taskId, commentId) => {
-    if (state.taskComments[taskId]) {
-      return state.taskComments[taskId].find(
-        comment => comment.id === commentId
-      )
-    } else {
-      return []
-    }
+  getTaskComment: state => (taskId, commentId) => {
+    return (
+      state.taskComments[taskId]?.find(comment => comment.id === commentId) ??
+      []
+    )
   },
 
-  getTaskStatus: (state, getters) => id => {
+  getTaskStatus: state => id => {
     return state.taskStatuses.find(taskStatus => taskStatus.id === id)
   },
 
   taskStatusOptions: state =>
-    state.taskStatuses.map(status => {
-      return {
-        label: status.short_name,
-        value: status.id,
-        color: status.color,
-        isArtistAllowed: status.is_artist_allowed
-      }
-    }),
+    state.taskStatuses.map(status => ({
+      label: status.short_name,
+      value: status.id,
+      color: status.color,
+      isArtistAllowed: status.is_artist_allowed
+    })),
 
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,

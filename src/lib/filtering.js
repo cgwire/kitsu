@@ -61,16 +61,17 @@ const applyFiltersFunctions = {
   assignedto(entry, filter, taskMap) {
     let isOk = false
     if (filter.taskType) {
-      const task = taskMap.get(entry.validations.get(filter.taskType.id))
-      isOk = isOk || (task && task.assignees.includes(filter.personId))
-    } else if (entry.tasks) {
-      entry.tasks.forEach(taskId => {
-        const task = taskMap.get(taskId)
-        isOk = isOk || task.assignees.includes(filter.personId)
-      })
+      const taskId = entry.validations.get(filter.taskType.id)
+      const task = taskMap.get(taskId)
+      isOk = task?.assignees.includes(filter.personId)
+    } else {
+      isOk =
+        entry.tasks?.some(taskId => {
+          const task = taskMap.get(taskId)
+          return task?.assignees.includes(filter.personId)
+        }) ?? false
     }
-    if (filter.excluding) isOk = !isOk
-    return isOk
+    return filter.excluding ? !isOk : isOk
   },
 
   descriptor(entry, filter, taskMap) {

@@ -418,7 +418,7 @@ const actions = {
     commit(SET_PERSON_TASKS_SEARCH, searchText)
   },
 
-  async avePersonTasksSearch({ commit }, searchQuery) {
+  async savePersonTasksSearch({ commit }, searchQuery) {
     if (
       state.personTaskSearchQueries.some(query => query.name === searchQuery)
     ) {

@@ -2247,6 +2247,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 .root-element-name {
   padding-left: 10px;
   color: $white;
+  white-space: nowrap;
 }
 
 .child-element-name {
