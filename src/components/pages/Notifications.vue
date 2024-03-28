@@ -96,18 +96,13 @@
                     class="flexrow-item"
                     :person="personMap.get(notification.author_id)"
                     :size="30"
+                    :is-link="false"
                     v-if="personMap.get(notification.author_id)"
                   />
 
-                  <router-link
-                    class="person-name flexrow-item"
-                    :to="{
-                      name: 'person',
-                      params: { person_id: notification.author_id }
-                    }"
-                  >
+                  <span class="person-name flexrow-item">
                     {{ personName(notification) }}
-                  </router-link>
+                  </span>
 
                   <span
                     class="explaination flexrow-item"
@@ -570,10 +565,11 @@ a {
 }
 
 .unread {
-  border-left: 5px solid $orange;
+  border: 5px solid $orange;
 }
 
 .person-name {
+  font-weight: bold;
   margin-left: 0.5em;
   margin-right: 0.5em;
 }
