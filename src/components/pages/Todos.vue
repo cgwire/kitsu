@@ -282,6 +282,7 @@ export default {
           ...status,
           productions: productionsByStatus[status.id] || []
         }))
+        .filter(status => status.productions.length > 0)
         .sort((a, b) => a.priority - b.priority)
     },
 
