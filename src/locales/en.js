@@ -123,6 +123,14 @@ export default {
     }
   },
 
+  chats: {
+    join: 'Join chat',
+    leave: 'Leave chat',
+    no_message_yet: 'No message',
+    no_chat: 'You don\'t participate in any entity chat for the moment. Search an entity and join a chat from its page.',
+    title: 'Entity Chats',
+  },
+
   comments: {
     add_attachment: 'Add attachment',
     add_checklist: 'Add checklist',

@@ -18,6 +18,38 @@ const actions = {
 
   async getEntityTimeLogs({ commit }, entityId) {
     return entitiesApi.getEntityTimeLogs(entityId)
+  },
+
+  async getEntityChats({ commit }) {
+    return entitiesApi.getEntityChats()
+  },
+
+  async getEntityChat({ commit }, entityId) {
+    return entitiesApi.getChat(entityId)
+  },
+
+  async joinEntityChat({ commit }, entityId) {
+    return entitiesApi.joinChat(entityId)
+  },
+
+  async leaveEntityChat({ commit }, entityId) {
+    return entitiesApi.leaveChat(entityId)
+  },
+
+  async sendChatMessage({ commit }, { entityId, message }) {
+    return entitiesApi.sendMessage(entityId, message)
+  },
+
+  async getChatMessage({ commit }, { entityId, messageId }) {
+    return entitiesApi.getChatMessage(entityId, messageId)
+  },
+
+  async deleteChatMessage({ commit }, { entityId, messageId }) {
+    return entitiesApi.deleteMessage(entityId, messageId)
+  },
+
+  async getEntityChatMessages({ commit }, entityId) {
+    return entitiesApi.getChatMessages(entityId)
   }
 }
 

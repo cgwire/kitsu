@@ -1948,6 +1948,11 @@ tbody:last-child .empty-line:last-child {
   width: 400px;
 }
 
+.left-side-column {
+  width: 300px;
+  max-width: 300px;
+}
+
 .empty-list {
   margin-top: 2em;
   font-size: 1.5em;

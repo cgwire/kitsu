@@ -20,6 +20,7 @@ import edits from '@/assets/icons/fi-edits.svg'
 import episodeStats from '@/assets/icons/fi-episode-stats.svg'
 import filter from '@/assets/icons/fi-filter.svg'
 import infos from '@/assets/icons/fi-info.svg'
+import message from '@/assets/icons/fi-message-square.svg'
 import myChecks from '@/assets/icons/fi-check-circle.svg'
 import myProductions from '@/assets/icons/fi-my-productions.svg'
 import myTasks from '@/assets/icons/fi-my-tasks.svg'
@@ -65,6 +66,7 @@ import soundOff from '@/assets/icons/fi-sound-off.svg'
 import laser from '@/assets/icons/fi-laser.svg'
 import waveform from '@/assets/icons/fi-waveform.svg'
 
+
 const icons = {
   'add-thumbnail': addThumbnail,
   assets,
@@ -93,6 +95,7 @@ const icons = {
   infos,
   laser,
   logs,
+  message,
   'my-checks': myChecks,
   'my-productions': myProductions,
   'my-tasks': myTasks,
