@@ -460,30 +460,34 @@ export default {
     },
 
     updateActiveTab() {
-      if (
-        ['board', 'calendar', 'done', 'pending', 'timesheets'].includes(
-          this.$route.query.section
+      const availableSections = [
+        'board',
+        'calendar',
+        'done',
+        'pending',
+        'timesheets'
+      ]
+      const currentSection = this.$route.query.section
+      this.currentSection = availableSections.includes(currentSection)
+        ? currentSection
+        : 'todos'
+
+      if (this.currentSection === 'board') {
+        const currentProduction = this.openProductions.find(
+          ({ id }) => id === this.$route.query.productionId
         )
-      ) {
-        this.currentSection = this.$route.query.section
-        if (this.currentSection === 'board') {
-          const currentProduction = this.openProductions.find(
-            ({ id }) => id === this.$route.query.productionId
-          )
-          if (currentProduction) {
-            this.productionId = currentProduction.id
-          } else {
-            this.$router.push({
-              query: {
-                productionId: this.productionId,
-                section: this.currentSection
-              }
-            })
-          }
+        if (currentProduction) {
+          this.productionId = currentProduction.id
+        } else {
+          this.$router.push({
+            query: {
+              productionId: this.productionId,
+              section: this.currentSection
+            }
+          })
         }
-      } else {
-        this.currentSection = 'todos'
       }
+
       this.clearSelectedTasks()
     },
 
