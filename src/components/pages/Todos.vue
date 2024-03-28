@@ -450,16 +450,6 @@ export default {
       })
     },
 
-    selectTab(tab) {
-      this.currentSection = tab
-      this.resizeHeaders()
-      setTimeout(() => {
-        if (this.$refs['todos-search-field']) {
-          this.$refs['todos-search-field'].focus()
-        }
-      }, 300)
-    },
-
     updateActiveTab() {
       const availableSections = [
         'board',
