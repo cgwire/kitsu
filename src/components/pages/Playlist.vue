@@ -1513,7 +1513,7 @@ export default {
   max-width: 300px;
   background: #f4f5f9;
   overflow-y: auto;
-  padding: 1em 1em 1em 2em;
+  padding: 1em;
   border-right: 1px solid #ddd;
   box-shadow: 0 0 6px #f0f0f0;
   z-index: 201;
