@@ -299,27 +299,16 @@ export default {
       this.removeAssetTypeFromProduction(assetTypeId)
     },
 
-    addTaskStatus() {
-      this.addTaskStatusToProduction(this.taskStatusId)
-      if (this.remainingTaskStatuses.length > 0) {
-        this.taskStatusId = this.remainingTaskStatuses[0].id
-      } else {
-        // Clean data to avoid duplicated data in combobox
-        this.taskStatusId = ''
-      }
+    async addTaskStatus() {
+      await this.addTaskStatusToProduction(this.taskStatusId)
+      await this.loadContext()
+      this.taskStatusId = this.remainingTaskStatuses[0]?.id
     },
 
     async removeTaskStatus(taskStatusId) {
       await this.removeTaskStatusFromProduction(taskStatusId)
-      await this.$nextTick()
-      // Reselect the remainingTaskStatuses to avoid empty taskStatusId
-      if (this.remainingTaskStatuses.length > 0) {
-        this.taskStatusId = this.remainingTaskStatuses[0].id
-      }
-    },
-
-    getBooleanTranslation(bool) {
-      return bool ? this.$t('main.yes') : this.$t('main.no')
+      await this.loadContext()
+      this.taskStatusId = this.remainingTaskStatuses[0]?.id
     },
 
     async updateTaskStatusPriority(oldIndex, newIndex) {

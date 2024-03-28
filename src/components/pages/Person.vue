@@ -31,6 +31,19 @@
                   {{ $t('tasks.current') }}
                 </router-link>
               </li>
+              <li :class="{ 'is-active': isActiveTab('board') }">
+                <router-link
+                  :to="{
+                    name: 'person-tab',
+                    params: {
+                      tab: 'board',
+                      person_id: person.id
+                    }
+                  }"
+                >
+                  {{ $t('board.title') }}
+                </router-link>
+              </li>
               <li :class="{ 'is-active': isActiveTab('done') }">
                 <router-link
                   :to="{
@@ -84,6 +97,13 @@
               @change="onSearchChange"
               @save="saveSearchQuery"
             />
+            <combobox-production
+              v-if="isActiveTab('board')"
+              class="flexrow-item production-field"
+              :label="$t('main.production')"
+              :production-list="productionList"
+              v-model="productionId"
+            />
             <span class="filler"></span>
             <combobox-number
               class="flexrow-item zoom-level mb0"
@@ -101,15 +121,13 @@
             />
           </div>
 
-          <div ref="query">
-            <div class="query-list">
-              <search-query-list
-                :queries="personTaskSearchQueries"
-                type="person"
-                @change-search="changeSearch"
-                @remove-search="removeSearchQuery"
-              />
-            </div>
+          <div ref="query" class="query-list">
+            <search-query-list
+              :queries="personTaskSearchQueries"
+              type="person"
+              @change-search="changeSearch"
+              @remove-search="removeSearchQuery"
+            />
           </div>
 
           <todos-list
@@ -129,7 +147,17 @@
             :is-error="isTasksLoadingError"
             :done="true"
             :selectionGrid="personTaskSelectionGrid"
-            v-if="isActiveTab('done')"
+            v-else-if="isActiveTab('done')"
+          />
+
+          <kanban-board
+            :is-loading="isTasksLoading"
+            :is-error="isTasksLoadingError"
+            :statuses="boardStatuses"
+            :tasks="boardTasks"
+            :user="user"
+            :production="selectedProduction"
+            v-else-if="isActiveTab('board')"
           />
 
           <timesheet-list
@@ -149,10 +177,10 @@
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"
             @unset-day-off="onUnsetDayOff"
-            v-if="isActiveTab('timesheets') && isCurrentUserManager"
+            v-else-if="isActiveTab('timesheets') && isCurrentUserManager"
           />
 
-          <div v-if="isActiveTab('schedule')">
+          <div v-else-if="isActiveTab('schedule')">
             <schedule
               ref="schedule-widget"
               :start-date="tasksStartDate.clone().add(-3, 'months')"
@@ -185,8 +213,8 @@ import moment from 'moment-timezone'
 import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
-import { formatListMixin } from '@/components/mixins/format'
 import colors from '@/lib/colors'
+import { sortTaskStatuses } from '@/lib/sorting'
 import {
   daysToMinutes,
   getBusinessDays,
@@ -195,8 +223,12 @@ import {
   parseDate
 } from '@/lib/time'
 
+import { formatListMixin } from '@/components/mixins/format'
+
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import Schedule from '@/components/pages/schedule/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
@@ -207,10 +239,14 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'person',
+
   mixins: [formatListMixin],
+
   components: {
     Combobox,
     ComboboxNumber,
+    ComboboxProduction,
+    KanbanBoard,
     PeopleAvatar,
     Schedule,
     SearchField,
@@ -231,6 +267,7 @@ export default {
         savingSearch: false
       },
       person: null,
+      productionId: undefined,
       scheduleHeight: 0,
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
@@ -278,6 +315,7 @@ export default {
     ...mapGetters([
       'displayedPersonTasks',
       'displayedPersonDoneTasks',
+      'getProductionTaskStatuses',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -289,8 +327,10 @@ export default {
       'personTaskSelectionGrid',
       'personTimeSpentMap',
       'personTimeSpentTotal',
+      'openProductions',
       'productionMap',
       'selectedTasks',
+      'taskStatuses',
       'taskTypeMap',
       'user'
     ]),
@@ -441,6 +481,50 @@ export default {
         })
       })
       return rootElements
+    },
+
+    boardTasks() {
+      const tasks = this.sortedTasks.concat(this.displayedPersonDoneTasks)
+      if (this.selectedProduction) {
+        return tasks.filter(
+          task => task.project_id === this.selectedProduction.id
+        )
+      }
+      return tasks
+    },
+
+    boardStatuses() {
+      if (this.selectedProduction) {
+        return this.getBoardStatusesByProduction(this.selectedProduction)
+      }
+
+      const productionsByStatus = {}
+      this.openProductions.forEach(production => {
+        const statuses = this.getBoardStatusesByProduction(production)
+        statuses.forEach(status => {
+          if (!productionsByStatus[status.id]) {
+            productionsByStatus[status.id] = []
+          }
+          productionsByStatus[status.id].push(production.id)
+        })
+      })
+
+      return this.taskStatuses
+        .filter(status => !status.for_concept)
+        .map(status => ({
+          ...status,
+          productions: productionsByStatus[status.id] || []
+        }))
+        .filter(status => status.productions.length > 0)
+        .sort((a, b) => a.priority - b.priority)
+    },
+
+    productionList() {
+      return [{ name: this.$t('main.all') }, ...this.openProductions]
+    },
+
+    selectedProduction() {
+      return this.productionMap.get(this.productionId)
     }
   },
 
@@ -494,8 +578,9 @@ export default {
         !task.real_start_date &&
         !task.due_date &&
         !task.end_date
-      )
+      ) {
         return null
+      }
 
       if (task.start_date) {
         startDate = parseDate(task.start_date)
@@ -511,14 +596,14 @@ export default {
       } else if (task.estimation) {
         endDate = startDate.clone().add(estimation, 'days')
       }
-
       if (!endDate || endDate.isBefore(startDate)) {
         endDate = startDate.clone().add(1, 'days')
       }
+
       const taskType = this.taskTypeMap.get(task.task_type_id)
       return {
         ...task,
-        name: task.full_entity_name + ' / ' + taskType.name,
+        name: `${task.full_entity_name} / ${taskType.name}`,
         startDate,
         endDate,
         expanded: false,
@@ -534,15 +619,6 @@ export default {
 
     isActiveTab(tab) {
       return this.activeTab === tab
-    },
-
-    selectTab(tab) {
-      this.activeTab = tab
-      if (this.isActiveTab('todos')) {
-        setTimeout(() => {
-          if (this.searchField) this.searchField.focus()
-        }, 100)
-      }
     },
 
     onSearchChange(text) {
@@ -570,11 +646,9 @@ export default {
       })
         .then(() => {
           setTimeout(() => {
-            if (this.taskList) {
-              this.$nextTick(() => {
-                this.taskList.setScrollPosition(this.personTasksScrollPosition)
-              })
-            }
+            this.$nextTick(() => {
+              this.taskList?.setScrollPosition(this.personTasksScrollPosition)
+            })
             this.resizeHeaders()
           }, 0)
         })
@@ -589,28 +663,14 @@ export default {
 
     resizeHeaders() {
       this.$nextTick(() => {
-        if (this.taskList) this.taskList.resizeHeaders()
-        if (this.haveDoneList) this.haveDoneList.resizeHeaders()
+        this.taskList?.resizeHeaders()
+        this.haveDoneList?.resizeHeaders()
       })
     },
 
-    selectCurrent() {
-      this.activeTab = 'current'
-      setTimeout(() => {
-        this.$refs['person-tasks-search-field'].focus()
-      }, 100)
-    },
-
-    selectDone() {
-      this.activeTab = 'done'
-    },
-
     changeSearch(searchQuery) {
-      this.$refs['person-tasks-search-field'].setValue(searchQuery.search_query)
-      this.$refs['person-tasks-search-field'].$emit(
-        'change',
-        searchQuery.search_query
-      )
+      this.searchField?.setValue(searchQuery.search_query)
+      this.onSearchChange(searchQuery.search_query)
     },
 
     saveSearchQuery(searchQuery) {
@@ -632,11 +692,24 @@ export default {
     },
 
     updateActiveTab() {
-      const availableTabs = ['done', 'timesheets', 'schedule']
-      if (availableTabs.includes(this.$route.params.tab)) {
-        this.activeTab = this.$route.params.tab
-      } else {
-        this.activeTab = 'todos'
+      const availableTabs = ['board', 'done', 'timesheets', 'schedule']
+      const currentTab = this.$route.params.tab
+      this.activeTab = availableTabs.includes(currentTab) ? currentTab : 'todos'
+
+      if (this.activeTab === 'board') {
+        const currentProduction = this.openProductions.find(
+          ({ id }) => id === this.$route.query.productionId
+        )
+        if (currentProduction) {
+          this.productionId = currentProduction.id
+        } else {
+          this.$router.push({
+            query: {
+              productionId: this.productionId,
+              section: this.activeTab
+            }
+          })
+        }
       }
     },
 
@@ -688,12 +761,26 @@ export default {
           }
         })
       }
+    },
+
+    getBoardStatusesByProduction(production) {
+      const statuses = this.getProductionTaskStatuses(production.id).filter(
+        status => {
+          if (status.for_concept) {
+            return false
+          }
+          const roles_for_board =
+            production.task_statuses_link?.[status.id]?.roles_for_board
+          return roles_for_board?.includes(this.user.role)
+        }
+      )
+      return sortTaskStatuses(statuses, production)
     }
   },
 
   metaInfo() {
     return {
-      title: this.person ? `${this.person.name} - Kitsu` : '... - Kitsu'
+      title: `${this.person?.name || '...'} - Kitsu`
     }
   },
 
@@ -710,16 +797,21 @@ export default {
     activeTab() {
       this.resetScheduleHeight()
       this.$nextTick(() => {
-        if (this.$refs['schedule-widget']) {
-          this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
+        this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
+      })
+    },
+
+    productionId() {
+      this.$router.push({
+        query: {
+          productionId: this.productionId,
+          tab: this.activeTab
         }
       })
     },
 
     zoomLevel() {
-      if (this.$refs['schedule-widget']) {
-        this.$refs['schedule-widget'].scrollToDate(this.tasksStartDate)
-      }
+      this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
     }
   }
 }
@@ -747,9 +839,12 @@ export default {
   width: 250px;
 }
 
+.search-field {
+  margin: 25px 2em 5px 0;
+}
+
 .query-list {
-  margin: 0;
-  margin-bottom: 1em;
+  margin-top: 0.5em;
 }
 
 .task-tabs {
