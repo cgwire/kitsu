@@ -5,35 +5,40 @@
       class="app-calendar"
       :options="calendarOptions"
     >
-      <template v-slot:eventContent="arg">
+      <template #eventContent="{ event }">
         <div
           class="calendar-event"
           :style="{
-            background: arg.event.backgroundColor
+            background: event.backgroundColor
           }"
-          :title="arg.event.title"
-          @click="onEventClicked(arg.event)"
+          :title="event.title"
+          @click="onEventClicked(event)"
         >
+          <production-name
+            only-avatar
+            :production="event.extendedProps.production"
+            :size="25"
+          />
           <entity-thumbnail
-            :preview-file-id="arg.event.extendedProps.previewFileId"
+            :preview-file-id="event.extendedProps.previewFileId"
           />
           <span
             class="tag"
             :style="{
-              background: getStatusColor(arg.event.extendedProps.taskStatus),
-              color: getStatusTextColor(arg.event.extendedProps.taskStatus)
+              background: getStatusColor(event.extendedProps.taskStatus),
+              color: getStatusTextColor(event.extendedProps.taskStatus)
             }"
-            :title="arg.event.extendedProps.taskStatus.name"
+            :title="event.extendedProps.taskStatus.name"
           >
-            {{ arg.event.extendedProps.taskStatus.short_name }}
+            {{ event.extendedProps.taskStatus.short_name }}
           </span>
           <div class="event-title">
-            <span class="ellipsis">{{ arg.event.extendedProps.title[0] }}</span>
-            <span class="ellipsis" v-if="arg.event.extendedProps.title[1]">
-              / {{ arg.event.extendedProps.title[1] }}
+            <span class="ellipsis">{{ event.extendedProps.title[0] }}</span>
+            <span class="ellipsis" v-if="event.extendedProps.title[1]">
+              / {{ event.extendedProps.title[1] }}
             </span>
-            <span class="ellipsis" v-if="arg.event.extendedProps.title[2]">
-              / {{ arg.event.extendedProps.title[2] }}
+            <span class="ellipsis" v-if="event.extendedProps.title[2]">
+              / {{ event.extendedProps.title[2] }}
             </span>
           </div>
         </div>
@@ -50,13 +55,15 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
 
 export default {
   name: 'user-calendar',
 
   components: {
     EntityThumbnail,
-    FullCalendar
+    FullCalendar,
+    ProductionName
   },
 
   props: {
@@ -87,7 +94,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskMap', 'taskStatusMap', 'taskTypeMap'])
+    ...mapGetters(['productionMap', 'taskMap', 'taskStatusMap', 'taskTypeMap'])
   },
 
   methods: {
@@ -102,6 +109,7 @@ export default {
       this.tasks
         .filter(task => task.start_date && task.due_date)
         .forEach(task => {
+          const production = this.productionMap.get(task.project_id)
           const taskType = this.taskTypeMap.get(task.task_type_id)
           const taskStatus = this.taskStatusMap.get(task.task_status_id)
           const start = task.start_date
@@ -119,7 +127,8 @@ export default {
               previewFileId: task.entity_preview_file_id,
               taskStatus,
               taskId: task.id,
-              title: task.full_entity_name.split(' / ')
+              title: task.full_entity_name.split(' / '),
+              production
             }
           }
           calendarApi.addEvent(event)
@@ -197,6 +206,7 @@ export default {
   flex-wrap: wrap;
   gap: 0 0.25em;
   overflow: hidden;
+  font-weight: 500;
 
   > .ellipsis {
     white-space: nowrap;
