@@ -94,7 +94,6 @@ export default {
     ...mapActions(['addSelectedTasks', 'clearSelectedTasks']),
 
     resetEvents() {
-      this.calendarEvents = []
       if (!this.$refs.calendar) {
         return
       }
@@ -102,13 +101,13 @@ export default {
       calendarApi.removeAllEvents()
       this.tasks
         .filter(task => task.start_date && task.due_date)
-        .map(task => {
+        .forEach(task => {
           const taskType = this.taskTypeMap.get(task.task_type_id)
           const taskStatus = this.taskStatusMap.get(task.task_status_id)
           const start = task.start_date
           const end = new Date(task.due_date)
           end.setDate(end.getDate() + 1) // end date is exclusive
-          return {
+          const event = {
             title: task.full_entity_name,
             allDay: true,
             start,
@@ -123,10 +122,7 @@ export default {
               title: task.full_entity_name.split(' / ')
             }
           }
-        })
-        .forEach(event => {
-          const calendarEvent = calendarApi.addEvent(event)
-          this.calendarEvents.push(calendarEvent)
+          calendarApi.addEvent(event)
         })
     },
 
@@ -160,8 +156,11 @@ export default {
   },
 
   watch: {
-    tasks() {
-      this.resetEvents()
+    tasks: {
+      deep: true,
+      handler() {
+        this.resetEvents()
+      }
     }
   }
 }
