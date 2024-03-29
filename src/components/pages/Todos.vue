@@ -282,6 +282,7 @@ export default {
           ...status,
           productions: productionsByStatus[status.id] || []
         }))
+        .filter(status => status.productions.length > 0)
         .sort((a, b) => a.priority - b.priority)
     },
 
@@ -449,41 +450,35 @@ export default {
       })
     },
 
-    selectTab(tab) {
-      this.currentSection = tab
-      this.resizeHeaders()
-      setTimeout(() => {
-        if (this.$refs['todos-search-field']) {
-          this.$refs['todos-search-field'].focus()
-        }
-      }, 300)
-    },
-
     updateActiveTab() {
-      if (
-        ['board', 'calendar', 'done', 'pending', 'timesheets'].includes(
-          this.$route.query.section
+      const availableSections = [
+        'board',
+        'calendar',
+        'done',
+        'pending',
+        'timesheets'
+      ]
+      const currentSection = this.$route.query.section
+      this.currentSection = availableSections.includes(currentSection)
+        ? currentSection
+        : 'todos'
+
+      if (this.currentSection === 'board') {
+        const currentProduction = this.openProductions.find(
+          ({ id }) => id === this.$route.query.productionId
         )
-      ) {
-        this.currentSection = this.$route.query.section
-        if (this.currentSection === 'board') {
-          const currentProduction = this.openProductions.find(
-            ({ id }) => id === this.$route.query.productionId
-          )
-          if (currentProduction) {
-            this.productionId = currentProduction.id
-          } else {
-            this.$router.push({
-              query: {
-                productionId: this.productionId,
-                section: this.currentSection
-              }
-            })
-          }
+        if (currentProduction) {
+          this.productionId = currentProduction.id
+        } else {
+          this.$router.push({
+            query: {
+              productionId: this.productionId,
+              section: this.currentSection
+            }
+          })
         }
-      } else {
-        this.currentSection = 'todos'
       }
+
       this.clearSelectedTasks()
     },
 
