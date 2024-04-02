@@ -23,7 +23,7 @@ export const sanitize = (html, options) => {
     allowedTags = allowedTags.filter(tag => tag !== 'a')
   }
   if (options.allowedImageTag) {
-    allowedTags = allowedTags.push('img')
+    allowedTags.push('img')
   }
   return sanitizeHTML(html, {
     allowedTags,
