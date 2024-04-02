@@ -1,12 +1,12 @@
 <template>
   <div
+    class="topbar-menuitem"
     :class="{
-      'topbar-menuitem': true,
       'topbar-menuitem-open': showProductionList
     }"
   >
     <div class="production-menu">
-      <div class="flexrow root-menu" @click="toggleProductionList">
+      <div class="flexrow" @click="toggleProductionList">
         <div class="selected-production-line flexrow-item unselectable">
           <production-name
             :production="currentProduction"
@@ -19,15 +19,13 @@
       </div>
       <div class="select-input" ref="select" v-show="showProductionList">
         <div
-          :ref="'prod-' + production.id"
-          :id="'prod-' + production.id"
+          class="production-line"
           :class="{
-            'production-line': true,
             selected: production.id === currentProduction.id
           }"
-          v-for="production in productionList"
-          @click="selectProduction(production)"
           :key="production.id"
+          @click="selectProduction(production)"
+          v-for="production in productionList"
         >
           <router-link :to="getProductionPath(production)">
             <span class="name-wrapper">
@@ -53,10 +51,10 @@
 import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import ProductionName from '@/components/widgets/ProductionName'
-
 import { getProductionPath } from '@/lib/path'
+
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
 
 export default {
   name: 'topbar-production-list',
@@ -89,10 +87,8 @@ export default {
     }
   },
 
-  mounted() {},
-
   computed: {
-    ...mapGetters(['currentProduction', 'openProductions'])
+    ...mapGetters(['currentProduction'])
   },
 
   methods: {
@@ -213,9 +209,6 @@ export default {
   cursor: pointer;
 }
 
-.root-menu {
-}
-
 .topbar-menuitem {
   border: 1px solid $light-grey-light;
   padding-left: 5px;
@@ -223,8 +216,8 @@ export default {
   border-radius: 10px;
 
   &.topbar-menuitem-open {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 </style>

@@ -226,13 +226,14 @@ import {
 } from 'vue-feather-icons'
 
 import localPreferences from '@/lib/preferences'
-import GlobalSearchField from '@/components/tops/GlobalSearchField'
-import NotificationBell from '@/components/widgets/NotificationBell'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ShortcutModal from '@/components/modals/ShortcutModal'
-import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList'
-import TopbarProductionList from '@/components/tops/TopbarProductionList'
-import TopbarSectionList from '@/components/tops/TopbarSectionList'
+
+import GlobalSearchField from '@/components/tops/GlobalSearchField.vue'
+import NotificationBell from '@/components/widgets/NotificationBell.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import ShortcutModal from '@/components/modals/ShortcutModal.vue'
+import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList.vue'
+import TopbarProductionList from '@/components/tops/TopbarProductionList.vue'
+import TopbarSectionList from '@/components/tops/TopbarSectionList.vue'
 
 import { version } from '@/../package.json'
 
