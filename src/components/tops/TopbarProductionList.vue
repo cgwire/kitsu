@@ -193,7 +193,7 @@ export default {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   margin-left: -6px;
-  max-height: 210px;
+  max-height: 50vh;
   overflow-y: auto;
   position: absolute;
   top: 48px;
