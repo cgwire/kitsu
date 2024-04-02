@@ -51,9 +51,6 @@
 </template>
 
 <script>
-/*
- * Page to allow wide search on every entities stored in the open projects.
- */
 import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'

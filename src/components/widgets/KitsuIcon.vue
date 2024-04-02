@@ -66,7 +66,6 @@ import soundOff from '@/assets/icons/fi-sound-off.svg'
 import laser from '@/assets/icons/fi-laser.svg'
 import waveform from '@/assets/icons/fi-waveform.svg'
 
-
 const icons = {
   'add-thumbnail': addThumbnail,
   assets,
