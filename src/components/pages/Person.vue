@@ -499,7 +499,7 @@ export default {
       }
 
       const productionsByStatus = {}
-      this.openProductions.forEach(production => {
+      this.userOpenProductions.forEach(production => {
         const statuses = this.getBoardStatusesByProduction(production)
         statuses.forEach(status => {
           if (!productionsByStatus[status.id]) {
@@ -520,11 +520,20 @@ export default {
     },
 
     productionList() {
-      return [{ name: this.$t('main.all') }, ...this.openProductions]
+      return [{ name: this.$t('main.all') }, ...this.userOpenProductions]
     },
 
     selectedProduction() {
       return this.productionMap.get(this.productionId)
+    },
+
+    userOpenProductions() {
+      if (!this.person) {
+        return []
+      }
+      return this.openProductions.filter(production =>
+        production.team.includes(this.person.id)
+      )
     }
   },
 
@@ -697,7 +706,7 @@ export default {
       this.activeTab = availableTabs.includes(currentTab) ? currentTab : 'todos'
 
       if (this.activeTab === 'board') {
-        const currentProduction = this.openProductions.find(
+        const currentProduction = this.userOpenProductions.find(
           ({ id }) => id === this.$route.query.productionId
         )
         if (currentProduction) {
