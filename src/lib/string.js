@@ -20,11 +20,10 @@ export default {
 
   shortenText(text, maxLength) {
     let result = text || ''
-    if (text !== undefined && text.length > maxLength) {
+    if (text?.length > maxLength) {
       result = text.slice(0, maxLength) + '...'
       result = result.replace(/\n/g, ' ')
     }
-
     return result
   },
 
