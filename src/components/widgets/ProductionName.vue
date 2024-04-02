@@ -1,5 +1,5 @@
 <template>
-  <div class="production-name flexrow">
+  <div class="production-name flexrow" v-if="production">
     <span
       class="flexrow-item avatar has-text-centered"
       :style="{
@@ -9,6 +9,7 @@
         fontSize: `${size - 15}px`,
         lineHeight: `${size}px`
       }"
+      :title="production.name"
       v-if="withAvatar"
     >
       <template v-if="!production.has_avatar">{{ avatar }}</template>
