@@ -262,8 +262,8 @@
       </div>
     </div>
 
-    <add-comment-image-modal
-      ref="add-comment-image-modal"
+    <add-attachment-modal
+      ref="add-attachment-modal"
       :active="modals.addCommentAttachment"
       :is-loading="loading.addCommentAttachment"
       :is-error="errors.addCommentAttachment"
@@ -305,7 +305,7 @@ import strings from '@/lib/string'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import AddCommentImageModal from '@/components/modals/AddCommentImageModal'
+import AddAttachmentModal from '@/components/modals/AddAttachmentModal'
 import ConfirmModal from '@/components/modals/ConfirmModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
@@ -319,7 +319,7 @@ export default {
 
   components: {
     AtTa,
-    AddCommentImageModal,
+    AddAttachmentModal,
     ButtonSimple,
     ConfirmModal,
     Checklist,
@@ -448,7 +448,7 @@ export default {
     ]),
 
     attachmentModal() {
-      return this.$refs['add-comment-image-modal']
+      return this.$refs['add-attachment-modal']
     },
 
     isAddChecklistAllowed() {

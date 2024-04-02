@@ -2,10 +2,13 @@
   <div class="mt1 entity-chat">
     <template v-if="!entity">
       <p>
-        {{ $t('chat.no_chats') }}
+        {{ $t('chats.no_chat') }}
       </p>
       <div class="has-text-centered">
-        <button-simple text="Search for entity" @click="$router.push('entity-search')"/>
+        <button-simple
+          text="Search for entity"
+          @click="$router.push('entity-search')"
+        />
       </div>
     </template>
     <template v-else>
@@ -27,49 +30,92 @@
           v-if="isInChat"
         />
       </div>
-        <div class="has-text-centered" v-if="loading.chat">
-          <spinner class="mt1" />
-        </div>
-        <entity-chat-days
-          :messages="messages"
-          @delete-message="deleteMessage"
-          v-else
-        />
-        <div class="join-chat" v-if="!isInChat">
-          <button
-            class="button"
-            :is-loading="loading.join"
-            @click="joinChat"
-          >
-            {{ $t('chats.join') }}
-          </button>
-        </div>
-        <div class="message-box" v-else>
+      <div class="has-text-centered filler" v-if="loading.chat">
+        <spinner class="mt1" />
+      </div>
+      <entity-chat-days
+        ref="messages"
+        :messages="messages"
+        @delete-message="showConfirmDeleteMessage"
+        v-else
+      />
+      <div class="join-chat" v-if="!isInChat">
+        <button class="button" :is-loading="loading.join" @click="joinChat">
+          {{ $t('chats.join') }}
+        </button>
+      </div>
+      <div class="message-box" v-else>
+        <div>
           <textarea
+            id="message-box"
             ref="messageBox"
-            @keyup.enter="sendMessage"
+            :disabled="loading.send"
+            @keydown.enter.prevent="sendMessage"
             v-focus
             v-model="currentMessage"
           >
           </textarea>
-          <button-simple
-            class="send-button"
-            icon="send"
-            @click="sendMessage"
-          />
+          <div class="buttons">
+            <button-simple
+              class="attach-button"
+              icon="attach"
+              @click="modals.addAttachment = true"
+            />
+            <div class="filler"></div>
+            <button-simple
+              class="send-button"
+              icon="send"
+              :is-loading="loading.send"
+              @click="sendMessage"
+            />
+          </div>
         </div>
-      </template>
+        <div class="attachments" v-if="attachments.length > 0">
+          <div
+            class="attachment-name"
+            :key="attachment.name"
+            v-for="attachment in attachments"
+          >
+            {{ attachment.get('file').name }}
+            <span @click="removeAttachment(attachment)">
+              <x-icon size="0.7x" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <add-attachment-modal
+      ref="add-attachment-modal"
+      :active="modals.addAttachment"
+      :is-loading="loading.addAttachment"
+      :is-error="errors.addAttachment"
+      :title="name"
+      @cancel="closeAttachmentModal"
+      @confirm="addAttachment"
+    />
+
+    <confirm-modal
+      :active="modals.deleteMessage"
+      :confirm-button-text="$t('chats.delete_message_confirm')"
+      :text="$t('chats.delete_message')"
+      :is-loading="loading.deleteMessage"
+      :is-error="errors.deleteMessage"
+      @cancel="modals.deleteMessage = false"
+      @confirm="deleteMessage"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import moment from 'moment'
 import { XIcon } from 'vue-feather-icons'
 
 import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 
+import AddAttachmentModal from '@/components/modals/AddAttachmentModal'
+import ConfirmModal from '@/components/modals/ConfirmModal'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import EntityChatDays from '@/components/pages/entities/EntityChatDays'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
@@ -80,6 +126,8 @@ export default {
   mixins: [domMixin],
 
   components: {
+    AddAttachmentModal,
+    ConfirmModal,
     ButtonSimple,
     EntityChatDays,
     PeopleAvatar,
@@ -89,12 +137,27 @@ export default {
 
   data() {
     return {
+      attachments: [],
       chat: {},
-      loading: {
+      errors: {
+        addAttachment: false,
         chat: false,
+        deleteMessage: false,
         join: false,
         leave: false,
         send: false
+      },
+      loading: {
+        addAttachment: false,
+        chat: false,
+        deleteMessage: false,
+        join: false,
+        leave: false,
+        send: false
+      },
+      modals: {
+        addAttachment: false,
+        deleteMessage: false
       },
       participants: [],
       currentMessage: '',
@@ -107,6 +170,10 @@ export default {
     entity: {
       type: Object,
       default: () => {}
+    },
+    name: {
+      type: String,
+      default: ''
     }
   },
 
@@ -130,55 +197,7 @@ export default {
     },
 
     participantList() {
-      return sortPeople(this.participants.map(
-        pid => this.personMap.get(pid)
-      ))
-    },
-
-    messageList() {
-      const messages = [...this.messages]
-        .sort((a, b) => moment(a.created_at).isAfter(moment(b.created_at)))
-      const dayList = []
-      let lastMessage = { data: null }
-      let lastDay = null
-
-      messages.forEach(message => {
-        const messageDate = moment(message.created_at)
-          .tz(this.user.timezone)
-        if (
-          lastDay
-          && messageDate.format('YYYY-MM-DD') === lastDay.date
-        ){
-          if (
-            lastMessage && lastMessage.data &&
-            message.person_id === lastMessage.data.person_id &&
-            moment(message.created_at).diff(lastMessage.data.created_at, 'm') < 60
-          ) {
-            lastMessage.texts.push(message.text)
-          } else {
-            const element = {
-              data: message,
-              texts: [message.text]
-            }
-            lastMessage = element
-            lastDay.messages.push(element)
-          }
-        } else {
-          const element = {
-            data: message,
-            texts: [message.text]
-          }
-          lastDay = {
-            title: messageDate.format('LL'),
-            date: messageDate.format('YYYY-MM-DD'),
-            messages: [element]
-          }
-          lastMessage = element
-          dayList.push(lastDay)
-        }
-      })
-
-      return dayList.reverse()
+      return sortPeople(this.participants.map(pid => this.personMap.get(pid)))
     }
   },
 
@@ -195,12 +214,14 @@ export default {
 
     async reset() {
       this.loading.chat = true
+      this.errors.chat = false
       try {
         this.chat = await this.getEntityChat(this.entity.id)
         this.messages = await this.getEntityChatMessages(this.entity.id)
         this.messages.forEach(m => this.messageMap.set(m.id, m))
         this.participants = this.chat.participants || []
       } catch (e) {
+        this.errors.chat = true
         console.error(e)
       } finally {
         this.loading.chat = false
@@ -209,9 +230,11 @@ export default {
 
     async joinChat() {
       this.loading.join = true
+      this.errors.join = false
       try {
         await this.joinEntityChat(this.entity.id)
       } catch (e) {
+        this.errors.join = true
         console.error(e)
       } finally {
         this.loading.join = false
@@ -220,9 +243,11 @@ export default {
 
     async leaveChat() {
       this.loading.leave = true
+      this.errors.leave = false
       try {
         await this.leaveEntityChat(this.entity.id)
       } catch (e) {
+        this.errors.leave = true
         console.error(e)
       } finally {
         this.loading.leave = false
@@ -230,45 +255,84 @@ export default {
     },
 
     async sendMessage(event) {
-      if (event) event.preventDefault()
-      this.pauseEvent(event)
+      if (event && event.keyCode === 13 && event.shiftKey) {
+        this.currentMessage += '\n'
+        return
+      }
+      this.errors.send = false
       this.loading.send = true
       try {
         const message = await this.sendChatMessage({
           entityId: this.entity.id,
-          message: this.currentMessage
+          message: this.currentMessage,
+          attachments: this.attachments
         })
         this.currentMessage = ''
+        this.attachments = []
         this.messages.push(message)
         this.messageMap.set(message.id, message)
+        this.$refs.messages.scrollToBottom()
+        this.$nextTick(() => {
+          this.$refs.messageBox.focus()
+        })
       } catch (e) {
+        this.errors.send = true
         console.error(e)
       } finally {
         this.loading.send = false
       }
     },
 
-    async deleteMessage(messageId) {
+    showConfirmDeleteMessage(messageId) {
+      this.modals.deleteMessage = true
+      this.errors.deleteMessage = false
+      this.loading.deleteMessage = false
+      this.messageToDeleteId = messageId
+    },
+
+    async deleteMessage() {
+      const messageId = this.messageToDeleteId
+      this.errors.deleteMessage = false
       try {
+        this.loading.deleteMessage = true
         this.messages = this.messages.filter(m => m.id !== messageId)
+        this.messageMap.delete(messageId)
         await this.deleteChatMessage({
           entityId: this.entity.id,
           messageId
         })
-        this.messageMap.delete(messageId)
+        this.modals.deleteMessage = false
+        this.messageToDeleteId = null
       } catch (e) {
+        this.errors.deleteMessage = true
         console.error(e)
+      } finally {
+        this.loading.deleteMessage = false
       }
     },
 
     focusMessageBox() {
-      this.$refs.messageBox.focus()
+      const messageBox = this.$refs.messageBox
+      if (messageBox) messageBox.focus()
+    },
+
+    addAttachment(forms) {
+      this.attachments = this.attachments.concat(forms)
+      this.closeAttachmentModal()
+    },
+
+    closeAttachmentModal() {
+      this.modals.addAttachment = false
+    },
+
+    removeAttachment(form) {
+      this.attachments = this.attachments.filter(f => f !== form)
     }
   },
 
   socket: {
     events: {
-      async 'chat:joined' (eventData) {
+      async 'chat:joined'(eventData) {
         if (
           eventData.chat_id === this.chat.id &&
           !this.participants.includes(eventData.person_id)
@@ -277,7 +341,7 @@ export default {
         }
       },
 
-      async 'chat:left' (eventData) {
+      async 'chat:left'(eventData) {
         if (
           eventData.chat_id === this.chat.id &&
           this.participants.includes(eventData.person_id)
@@ -288,10 +352,8 @@ export default {
         }
       },
 
-      async 'chat:new-message' (eventData) {
-        if (
-          eventData.chat_id === this.chat.id
-        ) {
+      async 'chat:new-message'(eventData) {
+        if (eventData.chat_id === this.chat.id) {
           const message = await this.getChatMessage({
             entityId: this.entity.id,
             messageId: eventData.chat_message_id
@@ -299,11 +361,12 @@ export default {
           if (!this.messageMap.has(eventData.chat_message_id)) {
             this.messageMap.set(message.id, message)
             this.messages.push(message)
+            this.focusMessageBox()
           }
         }
       },
 
-      async 'chat:deleted-message' (eventData) {
+      async 'chat:deleted-message'(eventData) {
         if (eventData.chat_id === this.chat.id) {
           this.messages = this.messages.filter(
             m => m.id !== eventData.message_id
@@ -322,7 +385,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .dark {
   .entity-chat {
     .participants {
@@ -385,9 +447,6 @@ export default {
     textarea {
       background: var(--background);
       box-shadow: inset 0px 0px 5px 0 rgba(0, 0, 0, 0.1);
-      border: 1px solid var(--border-alt);
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
       font-size: 14px;
       margin-bottom: -5px;
       height: 60px;
@@ -395,11 +454,31 @@ export default {
       width: 100%;
     }
 
-    .send-button {
-      bottom: 0px;
-      position: absolute;
-      right: 3px;
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      margin-top: 5px;
+      padding-left: 5px;
+      padding-right: 5px;
     }
+  }
+}
+
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  padding: 5px;
+
+  .attachment-name {
+    background: var(--background-alt);
+    border-radius: 10px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 5px;
+    padding: 5px;
   }
 }
 </style>

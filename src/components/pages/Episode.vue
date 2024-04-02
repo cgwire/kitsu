@@ -31,7 +31,6 @@
           :tabs="entityNavOptions"
         />
 
-
         <div class="flexrow infos" v-show="currentSection === 'infos'">
           <div class="flexrow-item flexcolumn entity-infos">
             <page-subtitle :text="$t('main.tasks')" />
@@ -205,6 +204,7 @@
 
         <entity-chat
           :entity="currentEpisode"
+          :name="currentEpisode?.name"
           v-if="currentSection === 'chat'"
         />
 
@@ -248,7 +248,6 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal'
 import EntityChat from '@/components/pages/entities/EntityChat'
@@ -271,7 +270,6 @@ export default {
   components: {
     ButtonSimple,
     ComboboxNumber,
-    ComboboxStyled,
     CornerLeftUpIcon,
     DescriptionCell,
     EditEpisodeModal,
@@ -383,26 +381,26 @@ export default {
 
     init() {
       this.loadCurrentEpisode()
-      .then(episode => {
-        this.currentEpisode = episode
-        this.currentSection = this.route.query.section || 'infos'
-        this.casting.isLoading = true
-        this.casting.isError = false
-        if (this.currentEpisode) {
-          this.loadEpisodeCasting(this.currentEpisode)
-            .then(() => {
-              this.casting.isLoading = false
-            })
-            .catch(err => {
-              this.casting.isLoading = false
-              this.casting.isError = true
-              console.error(err)
-            })
-        } else {
-          this.resetData()
-        }
-      })
-      .catch(console.error)
+        .then(episode => {
+          this.currentEpisode = episode
+          this.currentSection = this.route.query.section || 'infos'
+          this.casting.isLoading = true
+          this.casting.isError = false
+          if (this.currentEpisode) {
+            this.loadEpisodeCasting(this.currentEpisode)
+              .then(() => {
+                this.casting.isLoading = false
+              })
+              .catch(err => {
+                this.casting.isLoading = false
+                this.casting.isError = true
+                console.error(err)
+              })
+          } else {
+            this.resetData()
+          }
+        })
+        .catch(console.error)
     },
 
     loadCurrentEpisode() {
@@ -660,7 +658,6 @@ h2.subtitle {
 .news-column {
   max-height: 85%;
 }
-
 
 @media screen and (max-width: 768px) {
   .task-column {

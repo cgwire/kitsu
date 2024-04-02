@@ -31,10 +31,7 @@
           :tabs="entityNavOptions"
         />
 
-        <div
-          class="flexrow infos"
-          v-show="currentSection === 'infos'"
-        >
+        <div class="flexrow infos" v-show="currentSection === 'infos'">
           <div class="flexrow-item flexcolumn entity-infos">
             <page-subtitle :text="$t('main.tasks')" />
             <entity-task-list
@@ -89,7 +86,10 @@
           <div class="filler"></div>
           <span
             class="flexrow-item mt05"
-            v-show="currentSection === 'schedule' && scheduleItems[0].children.length > 0"
+            v-show="
+              currentSection === 'schedule' &&
+              scheduleItems[0].children.length > 0
+            "
           >
             {{ $t('schedule.zoom_level') }}:
           </span>
@@ -98,7 +98,10 @@
             :options="zoomOptions"
             is-simple
             v-model="zoomLevel"
-            v-show="currentSection === 'schedule' && scheduleItems[0].children.length > 0"
+            v-show="
+              currentSection === 'schedule' &&
+              scheduleItems[0].children.length > 0
+            "
           />
         </div>
 
@@ -211,6 +214,7 @@
 
         <entity-chat
           :entity="currentSequence"
+          :name="currentSequence?.full_name"
           v-if="currentSection === 'chat'"
         />
 
@@ -254,7 +258,6 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditSequenceModal from '@/components/modals/EditSequenceModal'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
@@ -277,7 +280,6 @@ export default {
   components: {
     ButtonSimple,
     ComboboxNumber,
-    ComboboxStyled,
     CornerLeftUpIcon,
     DescriptionCell,
     EditSequenceModal,
@@ -389,26 +391,26 @@ export default {
 
     init() {
       this.loadCurrentSequence()
-      .then(sequence => {
-        this.currentSequence = sequence
-        this.currentSection = this.route.query.section || 'infos'
-        this.casting.isLoading = true
-        this.casting.isError = false
-        if (this.currentSequence) {
-          this.loadSequenceCasting(this.currentSequence)
-            .then(() => {
-              this.casting.isLoading = false
-            })
-            .catch(err => {
-              this.casting.isLoading = false
-              this.casting.isError = true
-              console.error(err)
-            })
-        } else {
-          this.resetData()
-        }
-      })
-      .catch(console.error)
+        .then(sequence => {
+          this.currentSequence = sequence
+          this.currentSection = this.route.query.section || 'infos'
+          this.casting.isLoading = true
+          this.casting.isError = false
+          if (this.currentSequence) {
+            this.loadSequenceCasting(this.currentSequence)
+              .then(() => {
+                this.casting.isLoading = false
+              })
+              .catch(err => {
+                this.casting.isLoading = false
+                this.casting.isError = true
+                console.error(err)
+              })
+          } else {
+            this.resetData()
+          }
+        })
+        .catch(console.error)
     },
 
     loadCurrentSequence() {

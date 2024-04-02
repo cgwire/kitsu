@@ -36,8 +36,8 @@ const actions = {
     return entitiesApi.leaveChat(entityId)
   },
 
-  async sendChatMessage({ commit }, { entityId, message }) {
-    return entitiesApi.sendMessage(entityId, message)
+  async sendChatMessage({ commit }, { entityId, message, attachments }) {
+    return entitiesApi.sendMessage(entityId, message, attachments)
   },
 
   async getChatMessage({ commit }, { entityId, messageId }) {

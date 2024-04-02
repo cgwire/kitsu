@@ -138,6 +138,7 @@
 
         <entity-chat
           :entity="currentAsset"
+          :name="currentAsset?.full_name"
           v-if="currentSection === 'chat'"
         />
 

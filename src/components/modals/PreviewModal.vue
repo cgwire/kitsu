@@ -22,6 +22,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
+import { getDownloadAttachmentPath } from '@/lib/path'
+
 import { ArrowUpRightIcon } from 'vue-feather-icons'
 
 export default {
@@ -40,6 +42,10 @@ export default {
     previewFileId: {
       type: String,
       default: ''
+    },
+    attachment: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -53,10 +59,15 @@ export default {
     ...mapGetters([]),
 
     previewPath() {
-      const id = this.previewFileId
-      return this.active && this.previewFileId
-        ? '/api/pictures/originals/preview-files/' + id + '.png'
-        : ''
+      if (this.previewFileId) {
+        const id = this.previewFileId
+        return this.active && this.previewFileId
+          ? '/api/pictures/originals/preview-files/' + id + '.png'
+          : ''
+      } else if (this.attachment) {
+        return getDownloadAttachmentPath(this.attachment)
+      }
+      return ''
     }
   },
 

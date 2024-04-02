@@ -1,6 +1,5 @@
 <template>
   <page-left-side-layout>
-
     <template v-slot:side>
       <div class="chat-column">
         <spinner class="mt1" v-if="loading.list" />
@@ -44,10 +43,10 @@
         <entity-chat
           ref="entityChat"
           :entity="entity"
+          :name="chatList.find(c => c.object_id === entity.id)?.entity_name"
         />
       </div>
     </template>
-
   </page-left-side-layout>
 </template>
 
@@ -77,10 +76,10 @@ export default {
 
   data() {
     return {
-      chats: [],
+      chats: [],
       entity: null,
       loading: {
-        list: false,
+        list: false
       }
     }
   },
@@ -90,27 +89,26 @@ export default {
   async mounted() {
     this.loading.list = true
     this.chats = await this.getEntityChats()
-    this.selectFirstChat()
+    if (this.$route.query.entity_id) {
+      this.selectFromQuery()
+    } else {
+      this.selectFirstChat()
+    }
     this.loading.list = false
   },
 
   computed: {
-    ...mapGetters([
-      'productionMap',
-      'user'
-    ]),
+    ...mapGetters(['productionMap', 'user']),
 
     chatList() {
-      return [...this.chats].sort(
-        (a, b) => {
-          if (!a.last_message) return 1
-          if (!b.last_message) return -1
-          if (a.last_message === b.last_message) {
-            return a.entity_name.localeCompare(b.entity_name)
-          }
-          return a.last_message < b.last_message
+      return [...this.chats].sort((a, b) => {
+        if (!a.last_message) return 1
+        if (!b.last_message) return -1
+        if (a.last_message === b.last_message) {
+          return a.entity_name.localeCompare(b.entity_name)
         }
-      )
+        return a.last_message < b.last_message
+      })
     }
   },
 
@@ -119,7 +117,19 @@ export default {
 
     selectFirstChat() {
       if (this.chats.length > 0) {
-        this.entity = { id: this.chats[0].object_id }
+        const chat = this.chats[this.chats.length - 1]
+        this.entity = { id: chat.object_id }
+      }
+    },
+
+    selectFromQuery() {
+      const chat = this.chats.find(
+        c => c.object_id === this.$route.query.entity_id
+      )
+      if (chat) {
+        this.entity = { id: chat.object_id }
+      } else {
+        this.selectFirstChat()
       }
     },
 
@@ -128,12 +138,13 @@ export default {
       this.$nextTick(() => {
         this.$refs.entityChat.focusMessageBox()
       })
+      this.$router.push({ query: { entity_id: chat.object_id } })
     },
 
     chatClass(chat) {
       return {
         'chat-item': true,
-        'selected': this.entity && this.entity.id === chat.object_id
+        selected: this.entity && this.entity.id === chat.object_id
       }
     },
 
@@ -147,12 +158,11 @@ export default {
     }
   },
 
-  watch: {
-  },
+  watch: {},
 
   socket: {
     events: {
-      async 'chat:joined' (eventData) {
+      async 'chat:joined'(eventData) {
         if (
           !this.chats.some(c => c.id === eventData.chat_id) &&
           this.user.id === eventData.person_id
@@ -161,7 +171,7 @@ export default {
         }
       },
 
-      async 'chat:left' (eventData) {
+      async 'chat:left'(eventData) {
         if (
           this.chats.some(c => c.id === eventData.chat_id) &&
           this.user.id === eventData.person_id
@@ -170,8 +180,8 @@ export default {
         }
       },
 
-      async 'chat:new-message' (eventData) {
-        this.chats.find(c => c.id === eventData.chat_id)
+      async 'chat:new-message'(eventData) {
+        const chat = this.chats.find(c => c.id === eventData.chat_id)
         if (chat) {
           chat.last_message = eventData.last_message
         }
@@ -188,7 +198,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .chat-column {
   border: 1px solid var(--border);
   height: 100%;

@@ -1,9 +1,6 @@
 <template>
-  <div class="messages">
-    <div
-      class="day-messages"
-      v-for="day in messageList"
-    >
+  <div class="messages" ref="messages">
+    <div class="day-messages" :key="day.title" v-for="day in messageList">
       <div class="day-title">
         <span>
           {{ day.title }}
@@ -29,14 +26,16 @@
               {{ renderDate(chatMessage.data.created_at) }}
             </div>
           </div>
+
           <div
             class="message-text"
-            v-for="text in chatMessage.texts"
+            :key="'submessage-' + messageText.id"
+            v-for="messageText in chatMessage.texts"
           >
             <div
               v-html="
                 renderComment(
-                  text,
+                  messageText ? messageText.text : '',
                   [],
                   [],
                   personMap,
@@ -44,7 +43,28 @@
                   ''
                 )
               "
-            >
+            ></div>
+            <div class="attachments" v-if="messageText">
+              <img
+                class="attachment-thumbnail"
+                :key="attachment.id"
+                :src="getAttachmentThumbnailPath(attachment)"
+                @click="currentAttachment = attachment"
+                v-for="attachment in pictureAttachments(
+                  messageText.attachment_files
+                )"
+              />
+              <a
+                class="attachment"
+                target="_blank"
+                :key="attachment.id"
+                :href="getDownloadAttachmentPath(attachment)"
+                v-for="attachment in fileAttachments(
+                  messageText.attachment_files
+                )"
+              >
+                {{ attachment.name }}
+              </a>
             </div>
             <div
               class="delete-message-button"
@@ -57,6 +77,12 @@
         </div>
       </div>
     </div>
+
+    <preview-modal
+      :active="currentAttachment != null"
+      :attachment="currentAttachment"
+      @cancel="currentAttachment = null"
+    />
   </div>
 </template>
 
@@ -65,12 +91,17 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import { XIcon } from 'vue-feather-icons'
 
-import { renderComment } from '@/lib/render'
-import { parseDate } from '@/lib/time'
 import { domMixin } from '@/components/mixins/dom'
+import {
+  getAttachmentThumbnailPath,
+  getDownloadAttachmentPath
+} from '@/lib/path'
+import { parseDate } from '@/lib/time'
+import { renderComment } from '@/lib/render'
+import files from '@/lib/files'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-
+import PreviewModal from '@/components/modals/PreviewModal.vue'
 
 export default {
   name: 'entity-chat-days',
@@ -78,11 +109,13 @@ export default {
 
   components: {
     PeopleAvatar,
+    PreviewModal,
     XIcon
   },
 
   data() {
     return {
+      currentAttachment: null
     }
   },
 
@@ -93,40 +126,34 @@ export default {
     }
   },
 
-  mounted() {
-  },
+  mounted() {},
 
   computed: {
-    ...mapGetters([
-      'departmentMap',
-      'personMap',
-      'user'
-    ]),
+    ...mapGetters(['departmentMap', 'personMap', 'user']),
 
     messageList() {
-      const messages = [...this.messages]
-        .sort((a, b) => moment(a.created_at).isAfter(moment(b.created_at)))
+      const messages = [...this.messages].sort((a, b) =>
+        moment(a.created_at).isAfter(moment(b.created_at))
+      )
       const dayList = []
       let lastMessage = { data: null }
       let lastDay = null
 
       messages.forEach(message => {
-        const messageDate = moment(message.created_at)
-          .tz(this.user.timezone)
-        if (
-          lastDay
-          && messageDate.format('YYYY-MM-DD') === lastDay.date
-        ){
+        const messageDate = moment(message.created_at).tz(this.user.timezone)
+        if (lastDay && messageDate.format('YYYY-MM-DD') === lastDay.date) {
           if (
-            lastMessage && lastMessage.data &&
+            lastMessage &&
+            lastMessage.data &&
             message.person_id === lastMessage.data.person_id &&
-            moment(message.created_at).diff(lastMessage.data.created_at, 'm') < 60
+            moment(message.created_at).diff(lastMessage.data.created_at, 'm') <
+              5
           ) {
-            lastMessage.texts.push(message.text)
+            lastMessage.texts.push(message)
           } else {
             const element = {
               data: message,
-              texts: [message.text]
+              texts: [message ? message : '']
             }
             lastMessage = element
             lastDay.messages.push(element)
@@ -134,7 +161,7 @@ export default {
         } else {
           const element = {
             data: message,
-            texts: [message.text]
+            texts: [message ? message : '']
           }
           lastDay = {
             title: messageDate.format('LL'),
@@ -151,19 +178,51 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-    ]),
+    ...mapActions([]),
 
     renderComment,
 
     renderDate(date) {
       date = moment(parseDate(date)).tz(this.user.timezone)
       return date.tz(this.user.timezone).format('HH:mm')
+    },
+
+    getAttachmentThumbnailPath,
+
+    getDownloadAttachmentPath,
+
+    pictureAttachments(attachments) {
+      if (!attachments) return []
+      return attachments
+        .filter(attachment =>
+          files.IMG_EXTENSIONS.includes(attachment.extension)
+        )
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, {
+            numeric: true
+          })
+        )
+    },
+
+    fileAttachments(attachments) {
+      if (!attachments) return []
+      return attachments
+        .filter(
+          attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
+        )
+        .sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, {
+            numeric: true
+          })
+        )
+    },
+
+    scrollToBottom() {
+      this.$refs.messages.scrollTop = this.$refs.messages.offsetHeight
     }
   },
 
-  watch: {
-  }
+  watch: {}
 }
 </script>
 
@@ -178,7 +237,6 @@ export default {
     }
   }
 }
-
 
 .day-messages {
   width: 100%;
@@ -201,7 +259,6 @@ export default {
   }
 }
 
-
 .messages {
   align-items: flex-end;
   color: var(--text);
@@ -223,15 +280,15 @@ export default {
       margin-top: 6px;
 
       &.flexrow-item {
-        margin-right: .2rem;
+        margin-right: 0.2rem;
       }
     }
 
     .message-header-wrapper {
       align-items: flex-end;
       display: flex;
-      margin-left: .5rem;
-      margin-top: .2rem;
+      margin-left: 0.5rem;
+      margin-top: 0.2rem;
 
       .message-date {
         font-size: 10px;
@@ -244,14 +301,23 @@ export default {
     }
 
     .message-content {
-      margin-left: .2rem;
+      margin-left: 0.2rem;
       width: 100%;
+    }
+
+    .attachment-thumbnail {
+      border-radius: 10px;
+      cursor: pointer;
+      height: 100px;
+      margin-right: 5px;
+      margin-top: 10px;
+      width: 100px;
     }
 
     .message-text {
       border-radius: 4px;
       margin-right: 10px;
-      padding: .1em .5em;
+      padding: 0.1em 0.5em;
       position: relative;
 
       .delete-message-button {

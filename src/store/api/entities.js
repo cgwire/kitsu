@@ -26,7 +26,9 @@ export default {
   },
 
   getChatMessage(entityId, messageId) {
-    return client.pget(`/api/data/entities/${entityId}/chat/messages/${messageId}`)
+    return client.pget(
+      `/api/data/entities/${entityId}/chat/messages/${messageId}`
+    )
   },
 
   joinChat(entityId) {
@@ -37,10 +39,16 @@ export default {
     return client.pdel(`/api/actions/user/chats/${entityId}/join`)
   },
 
-  sendMessage(entityId, message) {
-    return client.ppost(`/api/data/entities/${entityId}/chat/messages`, {
-      message
-    })
+  sendMessage(entityId, message, attachments) {
+    let data = { message }
+    if (attachments?.length) {
+      data = new FormData()
+      attachments.forEach((attachment, index) => {
+        data.append(`file-${index}`, attachment.get('file'))
+      })
+      data.set('message', message)
+    }
+    return client.ppost(`/api/data/entities/${entityId}/chat/messages`, data)
   },
 
   deleteMessage(entityId, messageId) {

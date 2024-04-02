@@ -195,6 +195,7 @@
 
         <entity-chat
           :entity="currentShot"
+          :name="currentShot ? currentShot.full_name : ''"
           v-if="currentSection === 'chat'"
         />
 
