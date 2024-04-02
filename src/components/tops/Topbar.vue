@@ -9,10 +9,8 @@
     <nav class="nav">
       <div class="nav-left">
         <a
-          id="toggle-menu-button"
+          class="studio-logo-wrapper nav-item"
           :class="{
-            'studio-logo-wrapper': true,
-            'nav-item': true,
             selected: !isSidebarHidden
           }"
           @click="toggleSidebar()"
@@ -21,10 +19,18 @@
           <img
             class="studio-logo"
             :src="logoPath"
-            v-if="organisation && organisation.has_avatar"
+            v-if="organisation?.has_avatar"
           />
-          <img class="studio-logo" src="../../assets/kitsu.png" v-else />
+          <img class="studio-logo" src="@/assets/kitsu.png" v-else />
         </a>
+        <span class="studio-logo-wrapper nav-item" v-else>
+          <img
+            class="studio-logo"
+            :src="logoPath"
+            v-if="organisation?.has_avatar"
+          />
+          <img class="studio-logo" src="@/assets/kitsu.png" v-else />
+        </span>
 
         <div class="flexrow topbar-menu" v-if="isProductionContext">
           <div class="flexrow-item subitem">
@@ -226,13 +232,14 @@ import {
 } from 'vue-feather-icons'
 
 import localPreferences from '@/lib/preferences'
-import GlobalSearchField from '@/components/tops/GlobalSearchField'
-import NotificationBell from '@/components/widgets/NotificationBell'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ShortcutModal from '@/components/modals/ShortcutModal'
-import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList'
-import TopbarProductionList from '@/components/tops/TopbarProductionList'
-import TopbarSectionList from '@/components/tops/TopbarSectionList'
+
+import GlobalSearchField from '@/components/tops/GlobalSearchField.vue'
+import NotificationBell from '@/components/widgets/NotificationBell.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import ShortcutModal from '@/components/modals/ShortcutModal.vue'
+import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList.vue'
+import TopbarProductionList from '@/components/tops/TopbarProductionList.vue'
+import TopbarSectionList from '@/components/tops/TopbarSectionList.vue'
 
 import { version } from '@/../package.json'
 

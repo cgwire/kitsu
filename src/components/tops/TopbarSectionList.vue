@@ -1,17 +1,15 @@
 <template>
   <div
+    class="topbar-menuitem"
     :class="{
-      'topbar-menuitem': true,
       'topbar-menuitem-open': showSectionList
     }"
   >
     <div class="section-menu">
-      <div class="flexrow unselectable root-menu" @click="toggleSectionList">
+      <div class="flexrow unselectable" @click="toggleSectionList">
         <div class="selected-section-line flexrow-item flexrow">
           <kitsu-icon class="section-icon" :name="currentSectionValue" />
-          <span>
-            {{ currentSectionLabel }}
-          </span>
+          {{ currentSectionLabel }}
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
@@ -46,8 +44,8 @@ import { ChevronDownIcon } from 'vue-feather-icons'
 
 import { getProductionPath } from '@/lib/path'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import KitsuIcon from '@/components/widgets/KitsuIcon'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'topbar-section-list',
@@ -212,9 +210,6 @@ export default {
   z-index: 300;
 }
 
-.root-menu {
-}
-
 hr {
   margin: 8px 8px 8px 6px;
   height: 1px;
@@ -230,8 +225,8 @@ hr {
   border-radius: 10px;
 
   &.topbar-menuitem-open {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 

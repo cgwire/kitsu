@@ -1,12 +1,12 @@
 <template>
   <div
+    class="topbar-menuitem"
     :class="{
-      'topbar-menuitem': true,
       'topbar-menuitem-open': showEpisodeList
     }"
   >
     <div class="episode-menu">
-      <div class="flexrow unselectable root-menu" @click="toggleEpisodeList">
+      <div class="flexrow unselectable" @click="toggleEpisodeList">
         <div class="selected-production-line flexrow-item">
           {{ episodeLabel }}
         </div>
@@ -60,7 +60,7 @@ import { ChevronDownIcon } from 'vue-feather-icons'
 
 import { getProductionPath } from '@/lib/path'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 
 export default {
   name: 'topbar-episode-list',
@@ -237,9 +237,6 @@ export default {
   z-index: 300;
 }
 
-.root-menu {
-}
-
 .topbar-menuitem {
   height: 42px;
   border: 1px solid $light-grey-light;
@@ -249,8 +246,8 @@ export default {
   border-radius: 10px;
 
   &.topbar-menuitem-open {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 
