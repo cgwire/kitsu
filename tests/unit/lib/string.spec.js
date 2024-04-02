@@ -23,6 +23,7 @@ describe('lib/string', () => {
     expect(stringHelpers.shortenText('long text', 0)).toEqual('...')
     expect(stringHelpers.shortenText('short text', 10)).toEqual('short text')
     expect(stringHelpers.shortenText('long text', 4)).toEqual('long...')
+    expect(stringHelpers.shortenText(null, 4)).toEqual('')
   })
 
   it('slugify', () => {
