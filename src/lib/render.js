@@ -12,9 +12,21 @@ marked.use(markedEmoji(options))
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+:)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
 
-export const sanitize = html => {
+export const sanitize = (html, options) => {
+  options = {
+    allowedLinkTag: true,
+    allowedImageTag: true,
+    ...options
+  }
+  let allowedTags = sanitizeHTML.defaults.allowedTags
+  if (!options.allowedLinkTag) {
+    allowedTags = allowedTags.filter(tag => tag !== 'a')
+  }
+  if (options.allowedImageTag) {
+    allowedTags = allowedTags.push('img')
+  }
   return sanitizeHTML(html, {
-    allowedTags: sanitizeHTML.defaults.allowedTags.concat(['img']),
+    allowedTags,
     allowedAttributes: {
       a: ['class', 'href'],
       img: ['src']
@@ -69,9 +81,9 @@ export const renderComment = (
   )
 }
 
-export const renderMarkdown = input => {
+export const renderMarkdown = (input, options) => {
   const compiled = marked.parse(input || '')
-  return sanitize(compiled)
+  return sanitize(compiled, options)
 }
 
 export const replaceTimeWithTimecode = (
