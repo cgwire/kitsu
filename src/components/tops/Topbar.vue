@@ -9,10 +9,8 @@
     <nav class="nav">
       <div class="nav-left">
         <a
-          id="toggle-menu-button"
+          class="studio-logo-wrapper nav-item"
           :class="{
-            'studio-logo-wrapper': true,
-            'nav-item': true,
             selected: !isSidebarHidden
           }"
           @click="toggleSidebar()"
@@ -21,10 +19,18 @@
           <img
             class="studio-logo"
             :src="logoPath"
-            v-if="organisation && organisation.has_avatar"
+            v-if="organisation?.has_avatar"
           />
-          <img class="studio-logo" src="../../assets/kitsu.png" v-else />
+          <img class="studio-logo" src="@/assets/kitsu.png" v-else />
         </a>
+        <span class="studio-logo-wrapper nav-item" v-else>
+          <img
+            class="studio-logo"
+            :src="logoPath"
+            v-if="organisation?.has_avatar"
+          />
+          <img class="studio-logo" src="@/assets/kitsu.png" v-else />
+        </span>
 
         <div class="flexrow topbar-menu" v-if="isProductionContext">
           <div class="flexrow-item subitem">
