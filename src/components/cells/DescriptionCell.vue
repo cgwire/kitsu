@@ -3,14 +3,18 @@
     <template v-if="full">
       <div
         class="description-shorten-text"
-        v-html="compileMarkdown(entry.description || '')"
+        v-html="compileMarkdown(entry.description)"
       ></div>
     </template>
     <template v-else>
       <div class="c-mask" v-if="isOpen"></div>
       <span
         class="description-shorten-text selectable"
-        v-html="compileMarkdown(shortenText(entry.description || '', 20))"
+        v-html="
+          compileMarkdown(shortenText(entry.description, 20), {
+            allowedLinkTag: false
+          })
+        "
       >
       </span>
       <div
@@ -41,11 +45,11 @@
 
 <script>
 import { renderMarkdown } from '@/lib/render'
-import { mapGetters, mapActions } from 'vuex'
 import stringHelpers from '@/lib/string'
 
 export default {
   name: 'description-cell',
+
   data() {
     return {
       isEditing: false,
@@ -53,8 +57,6 @@ export default {
       timeout: null
     }
   },
-
-  components: {},
 
   props: {
     editable: {
@@ -71,19 +73,9 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters([]),
-
-    content() {
-      return this.compileMarkdown(this.entry.description)
-    }
-  },
-
   methods: {
-    ...mapActions([]),
-
-    compileMarkdown(input) {
-      return renderMarkdown(input)
+    compileMarkdown(input, options) {
+      return renderMarkdown(input, options)
     },
 
     shortenText: stringHelpers.shortenText,
@@ -169,7 +161,7 @@ td {
   }
 
   textarea {
-    box-shadow: inset 0 0 3px 0px $grey;
+    box-shadow: inset 0 0 3px 0 $grey;
     padding: 0.5em;
     color: inherit;
     font-size: 0.95em;
