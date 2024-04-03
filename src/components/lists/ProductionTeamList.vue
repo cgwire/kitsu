@@ -10,8 +10,8 @@
             <th scope="col" class="email">
               {{ $t('people.list.email') }}
             </th>
-            <th scope="col" class="phone">
-              {{ $t('people.list.phone') }}
+            <th scope="col" class="contract">
+              {{ $t('people.list.contract') }}
             </th>
             <th scope="col" class="role">
               {{ $t('people.list.role') }}
@@ -29,10 +29,12 @@
               :person="person"
             />
             <td class="email">{{ person.email }}</td>
-            <td class="phone">{{ person.phone }}</td>
+            <td class="contract">
+              {{ $t('people.contract.' + person.contract_type) }}
+            </td>
             <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
             <department-names-cell :departments="person.departments" />
-            <td class="actions">
+            <td class="actions has-text-right">
               <button
                 class="button"
                 @click="removePerson(person)"

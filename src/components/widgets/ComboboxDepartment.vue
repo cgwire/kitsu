@@ -73,32 +73,36 @@ export default {
   },
 
   props: {
+    dispayAllAndMyDepartments: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
-    },
-    value: {
-      default: '',
-      type: String
-    },
-    selectableDepartments: {
-      type: Array,
-      required: false
     },
     maxHeightSelectInput: {
       default: 200,
       type: Number
     },
+    rounded: {
+      default: false,
+      type: Boolean
+    },
+    selectableDepartments: {
+      type: Array,
+      required: false
+    },
+    value: {
+      default: '',
+      type: String
+    },
     width: {
       default: 250,
       type: Number
     },
-    dispayAllAndMyDepartments: {
-      default: false,
-      type: Boolean
-    },
-    rounded: {
-      default: false,
+    withEmptyChoice: {
+      default: true,
       type: Boolean
     }
   },
@@ -147,7 +151,7 @@ export default {
         this.user.departments.length > 0
       ) {
         return [...this.departmentsToTakeAccount]
-      } else {
+      } else if (this.withEmptyChoice) {
         return [
           {
             color: '#AAA',
@@ -156,6 +160,8 @@ export default {
           },
           ...this.departmentsToTakeAccount
         ]
+      } else {
+        return [...this.departmentsToTakeAccount]
       }
     },
 
