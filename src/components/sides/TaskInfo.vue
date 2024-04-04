@@ -1051,12 +1051,17 @@ export default {
       this.modals.deleteComment = false
     },
 
-    saveComment(comment, checklist) {
-      this.editTaskComment({
-        taskId: this.task.id,
-        comment,
-        checklist
-      })
+    async saveComment(comment, checklist) {
+      try {
+        await this.editTaskComment({
+          taskId: this.task.id,
+          comment,
+          checklist
+        })
+      } catch (err) {
+        console.error(err)
+        await this.loadTaskData()
+      }
     },
 
     confirmDeleteTaskComment() {

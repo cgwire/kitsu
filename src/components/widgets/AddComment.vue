@@ -580,7 +580,7 @@ export default {
       ) {
         this.task_status_id = this.task.task_status_id
       } else {
-        this.task_status_id = this.taskStatusForCurrentUser[0].id
+        this.task_status_id = this.taskStatusForCurrentUser[0]?.id
       }
     },
 
