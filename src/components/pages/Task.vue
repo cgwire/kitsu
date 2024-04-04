@@ -220,7 +220,7 @@
                     :revision="currentRevision"
                     :task="task"
                     :team="currentTeam"
-                    @ack-comment="ackComment"
+                    @ack-comment="onAckComment"
                     @duplicate-comment="onDuplicateComment"
                     @pin-comment="onPinComment"
                     @edit-comment="onEditComment"
@@ -1164,6 +1164,10 @@ export default {
     confirmAddPreviewModal(forms) {
       this.selectFile(forms)
       this.closeAddPreviewModal()
+    },
+
+    onAckComment(comment) {
+      this.ackComment(comment)
     },
 
     onDuplicateComment(comment) {

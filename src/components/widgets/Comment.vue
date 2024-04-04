@@ -248,19 +248,17 @@
               v-if="comment.text.length > 0 || comment.previews.length > 0"
             >
               <button
+                class="like-button flexrow-item"
                 :class="{
-                  'like-button': true,
-                  'like-button--empty':
-                    comment.like === undefined ? true : false,
-                  'flexrow-item': true
+                  'like-button--empty': comment.like === undefined
                 }"
-                @click="acknowledgeComment(comment)"
                 type="button"
+                @click="acknowledgeComment(comment)"
               >
                 <thumbs-up-icon size="1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
               </button>
-              <span class="filler"> </span>
+              <span class="filler"></span>
               <span
                 class="flexrow-item reply-button"
                 @click="showReplyWidget"
@@ -549,7 +547,7 @@ export default {
     },
 
     taskStatus() {
-      const status = this.taskStatusMap.get(this.comment.task_status.id)
+      const status = this.taskStatusMap.get(this.comment?.task_status.id)
       return status || this.comment.task_status
     },
 
