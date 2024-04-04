@@ -987,12 +987,17 @@ export default {
         })
     },
 
-    saveComment(comment, checklist) {
-      this.editTaskComment({
-        taskId: this.task.id,
-        comment,
-        checklist
-      })
+    async saveComment(comment, checklist) {
+      try {
+        await this.editTaskComment({
+          taskId: this.task.id,
+          comment,
+          checklist
+        })
+      } catch (err) {
+        console.error(err)
+        await this.loadTaskData()
+      }
     },
 
     confirmDeleteTaskComment() {
@@ -1529,9 +1534,6 @@ video {
 .preview-column {
   overflow: auto;
   flex: 2;
-}
-
-.preview-column-content {
 }
 
 .preview-list {
