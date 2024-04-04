@@ -837,15 +837,6 @@ export default {
       return this.taskMap.get(this.route.params.task_id)
     },
 
-    getCurrentComment() {
-      if (this.route.params.comment_id) {
-        return this.getTaskComment(
-          this.route.params.task_id,
-          this.route.params.comment_id
-        )
-      }
-    },
-
     getCurrentTaskComments() {
       return this.getTaskComments(this.route.params.task_id)
     },
