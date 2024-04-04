@@ -1,31 +1,93 @@
 <template>
-  <div class="people page fixed-page">
-    <div class="flexrow mt2 add-people" v-if="isCurrentUserManager">
-      <people-field
-        ref="people-field"
-        class="flexrow-item add-people-field"
-        :people="unlistedPeople"
-        :placeholder="$t('people.add_member_to_team')"
-        big
-        @enter="addPerson"
-        v-model="person"
-      />
-      <button
-        class="button flexrow-item"
-        @click="addPerson"
-        :disabled="!person"
-      >
-        {{ $t('main.add') }}
-      </button>
-    </div>
-
-    <production-team-list
-      :entries="teamPersons"
-      :is-loading="isTeamLoading"
-      :is-error="isTeamLoadingError"
-      @remove="removePerson"
-    />
-  </div>
+  <page-layout>
+    <template v-slot:main>
+      <div class="people flexcolumn">
+        <div class="flexrow mt2 add-people" v-if="isCurrentUserManager">
+          <people-field
+            ref="people-field"
+            class="flexrow-item add-people-field"
+            :people="unlistedPeople"
+            :placeholder="$t('people.add_member_to_team')"
+            big
+            @enter="addPerson"
+            v-model="person"
+          />
+          <button
+            class="button flexrow-item"
+            @click="addPerson"
+            :disabled="!person"
+          >
+            {{ $t('main.add') }}
+          </button>
+        </div>
+        <production-team-list
+          :entries="teamPersons"
+          :is-loading="isTeamLoading"
+          :is-error="isTeamLoadingError"
+          @remove="removePerson"
+        />
+      </div>
+    </template>
+    <template v-slot:side>
+      <div class="importers flexcolumn">
+        <div class="project-import flexcolumn">
+          <combobox-production
+            class="flexrow-item"
+            :label="$t('people.import_from_production')"
+            :production-list="availableProductions"
+            :with-margin="false"
+            v-model="importProductionId"
+          />
+          <button-simple
+            class="flexrow-item mt05"
+            :disabled="!importProductionId"
+            :text="$t('main.import')"
+            @click="importTeamFromProduction"
+          />
+        </div>
+        <div class="department-import flexcolumn mt2">
+          <combobox-department
+            class="flexrow-item"
+            :label="$t('people.import_from_department')"
+            :department-list="departments"
+            :with-empty-choice="false"
+            v-model="importDepartmentId"
+          />
+          <button-simple
+            class="flexrow-item mt05"
+            :disabled="!importDepartmentId"
+            :text="$t('main.import')"
+            @click="importTeamFromDepartment"
+          />
+        </div>
+        <p class="label mt2">
+          {{ $t('people.import_from_unlisted') }}
+        </p>
+        <div class="import-list">
+          <div
+            :key="`unlisted-person-${person.id}`"
+            class="flexrow person-to-add mb05"
+            @click="addPersonToTeam(person)"
+            v-for="person in unlistedPeople"
+          >
+            <people-avatar
+              class="flexrow-item"
+              :font-size="14"
+              :key="person.id"
+              :person="person"
+              :size="30"
+              :with-link="false"
+            />
+            <people-name
+              class="flexrow-item"
+              :person="person"
+              :with-link="false"
+            />
+          </div>
+        </div>
+      </div>
+    </template>
+  </page-layout>
 </template>
 
 <script>
@@ -33,33 +95,65 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import PageLayout from '@/components/layouts/PageLayout'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar'
 import PeopleField from '@/components/widgets/PeopleField'
+import PeopleName from '@/components/widgets/PeopleName'
 import ProductionTeamList from '@/components/lists/ProductionTeamList'
 
 export default {
   name: 'team',
 
   components: {
+    ButtonSimple,
+    ComboboxDepartment,
+    ComboboxProduction,
+    PageLayout,
+    PeopleAvatar,
     PeopleField,
+    PeopleName,
     ProductionTeamList
   },
 
   data() {
     return {
+      importDepartmentId: null,
+      importProductionId: null,
       person: null,
       isTeamLoading: false,
       isTeamLoadingError: false
     }
   },
 
+  mounted() {
+    if (this.availableProductions.length > 0) {
+      this.importProductionId = this.availableProductions[0]?.id
+      this.importDepartmentId = this.departments.sort((a, b) =>
+        a.name.localeCompare(b.name)
+      )[0]?.id
+    }
+  },
+
   computed: {
     ...mapGetters([
       'currentProduction',
+      'departments',
+      'departmentMap',
       'isCurrentUserManager',
       'openProductions',
-      'people',
-      'personMap'
+      'activePeople',
+      'personMap',
+      'productionMap'
     ]),
+
+    availableProductions() {
+      return this.openProductions.filter(
+        production => production.id !== this.currentProduction.id
+      )
+    },
 
     teamPersons() {
       return sortPeople(
@@ -70,7 +164,7 @@ export default {
     },
 
     unlistedPeople() {
-      return this.people.filter(
+      return this.activePeople.filter(
         person =>
           !this.currentProduction.team.includes(person.id) && person.active
       )
@@ -91,6 +185,22 @@ export default {
 
     removePerson(person) {
       this.removePersonFromTeam(person)
+    },
+
+    importTeamFromProduction() {
+      const production = this.productionMap.get(this.importProductionId)
+      production.team.forEach(personId => {
+        this.addPersonToTeam(this.personMap.get(personId))
+      })
+    },
+
+    importTeamFromDepartment() {
+      const departmentId = this.importDepartmentId
+      this.activePeople
+        .filter(person => person.departments.includes(departmentId))
+        .forEach(person => {
+          this.addPersonToTeam(person)
+        })
     }
   },
 
@@ -104,4 +214,41 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.people {
+  max-height: 100%;
+}
+
+.label {
+  color: var(--text-alt);
+  font-size: 0.8em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+.importers {
+  border-left: 1px solid var(--border);
+  height: 100%;
+  max-height: 100%;
+  padding: 1em;
+}
+
+.people {
+  padding: 1em;
+  padding-top: 60px;
+}
+
+.import-list {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  margin-top: 0.5em;
+  padding: 0.5em;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.person-to-add {
+  cursor: pointer;
+}
+</style>

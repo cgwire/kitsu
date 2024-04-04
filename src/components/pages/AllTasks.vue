@@ -217,6 +217,7 @@ export default {
       this.isLoading = true
       this.page = 1
       this.clearSelectedTasks()
+      this.tasks = []
       try {
         const routeQuery = {}
         Object.keys(this.params).forEach(key => {
