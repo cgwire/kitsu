@@ -92,11 +92,12 @@
             <checklist
               class="checklist"
               :checklist="checklist"
+              :disabled="true"
+              :is-editable="isEditable"
               @remove-task="removeTask"
-              @keyup.native="emitChangeEvent($event)"
+              @keyup.native="emitChangeEvent"
               @emit-change="emitChangeEvent"
               @time-code-clicked="onChecklistTimecodeClicked"
-              :disabled="true"
               v-if="checklist.length > 0"
             />
             <p class="has-text-centered" v-if="taskStatus.is_done && isLast">
@@ -694,7 +695,7 @@ export default {
       this.checklist = remove(this.checklist, entry)
     },
 
-    emitChangeEvent(event) {
+    emitChangeEvent() {
       const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 1000) {
