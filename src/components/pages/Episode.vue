@@ -23,66 +23,66 @@
         </div>
       </div>
 
-      <div class="flexrow infos">
-        <div class="flexrow-item block flexcolumn">
-          <page-subtitle :text="$t('episodes.tasks')" />
-          <entity-task-list
-            class="task-list"
-            :entries="currentTasks"
-            :is-loading="!currentEpisode"
-            :is-error="false"
-            @task-selected="onTaskSelected"
-          />
-        </div>
-        <div class="flexrow-item block flexcolumn">
-          <div class="flexrow">
-            <page-subtitle :text="$t('main.info')" />
-            <div class="filler"></div>
-            <div class="flexrow-item has-text-right">
-              <button-simple
-                icon="edit"
-                @click="modals.edit = true"
-                v-if="isCurrentUserManager"
-              />
+      <div class="episode-data block">
+        <route-section-tabs
+          class="section-tabs"
+          :activeTab="currentSection"
+          :route="$route"
+          :tabs="entityNavOptions"
+        />
+
+        <div class="flexrow infos" v-show="currentSection === 'infos'">
+          <div class="flexrow-item flexcolumn entity-infos">
+            <page-subtitle :text="$t('main.tasks')" />
+            <entity-task-list
+              class="task-list"
+              :entries="currentTasks"
+              :is-loading="!currentEpisode"
+              :is-error="false"
+              @task-selected="onTaskSelected"
+            />
+            <div class="flexrow">
+              <page-subtitle :text="$t('main.info')" />
+              <div class="filler"></div>
+              <div class="flexrow-item has-text-right">
+                <button-simple
+                  icon="edit"
+                  @click="modals.edit = true"
+                  v-if="isCurrentUserManager"
+                />
+              </div>
+            </div>
+
+            <div class="table-body">
+              <table class="datatable no-header" v-if="currentEpisode">
+                <tbody class="table-body">
+                  <tr class="datatable-row">
+                    <td class="field-label">
+                      {{ $t('shots.fields.description') }}
+                    </td>
+                    <description-cell :entry="currentEpisode" :full="true" />
+                  </tr>
+                  <tr
+                    :key="descriptor.id"
+                    class="datatable-row"
+                    v-for="descriptor in episodeMetadataDescriptors"
+                  >
+                    <td class="field-label">{{ descriptor.name }}</td>
+                    <td>
+                      {{
+                        currentEpisode.data
+                          ? currentEpisode.data[descriptor.field_name]
+                          : ''
+                      }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="table-body">
-            <table class="datatable no-header" v-if="currentEpisode">
-              <tbody class="datatable-body">
-                <tr class="datatable-row">
-                  <td class="field-label">
-                    {{ $t('shots.fields.description') }}
-                  </td>
-                  <description-cell :entry="currentEpisode" :full="true" />
-                </tr>
-
-                <tr
-                  :key="descriptor.id"
-                  class="datatable-row"
-                  v-for="descriptor in episodeMetadataDescriptors"
-                >
-                  <td class="field-label">{{ descriptor.name }}</td>
-                  <td>
-                    {{
-                      currentEpisode && currentEpisode.data
-                        ? currentEpisode.data[descriptor.field_name]
-                        : ''
-                    }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
-      </div>
 
-      <div class="episode-data block">
         <div class="flexrow">
-          <combobox-styled
-            class="section-combo flexrow-item"
-            :options="entityNavOptions"
-            v-model="currentSection"
-          />
           <span v-show="currentSection === 'casting'">
             {{ nbAssets }} {{ $tc('assets.number', nbAssets) }}
           </span>
@@ -202,14 +202,15 @@
           {{ $t('main.empty_schedule') }}
         </div>
 
+        <entity-chat
+          :entity="currentEpisode"
+          :name="currentEpisode?.name"
+          v-if="currentSection === 'chat'"
+        />
+
         <entity-preview-files
           :entity="currentEpisode"
           v-if="currentSection === 'preview-files'"
-        />
-
-        <entity-news
-          :entity="currentEpisode"
-          v-if="currentSection === 'activity'"
         />
 
         <entity-time-logs
@@ -219,8 +220,10 @@
       </div>
     </div>
 
-    <div class="column side-column" v-if="currentTask">
-      <task-info :task="currentTask" entity-type="Episode" with-actions />
+    <div class="column side-column" v-show="currentSection === 'infos'">
+      <task-info :task="currentTask" entity-type="Episode" with-actions>
+        <entity-news class="news-column" :entity="currentEpisode" />
+      </task-info>
     </div>
 
     <edit-episode-modal
@@ -245,9 +248,9 @@ import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal'
+import EntityChat from '@/components/pages/entities/EntityChat'
 import EntityNews from '@/components/pages/entities/EntityNews'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
 import EntityTaskList from '@/components/lists/EntityTaskList'
@@ -255,6 +258,7 @@ import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail'
 import PageTitle from '@/components/widgets/PageTitle'
 import PageSubtitle from '@/components/widgets/PageSubtitle'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
 import Schedule from '@/components/pages/schedule/Schedule'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskInfo from '@/components/sides/TaskInfo'
@@ -266,10 +270,10 @@ export default {
   components: {
     ButtonSimple,
     ComboboxNumber,
-    ComboboxStyled,
     CornerLeftUpIcon,
     DescriptionCell,
     EditEpisodeModal,
+    EntityChat,
     EntityNews,
     EntityPreviewFiles,
     EntityTaskList,
@@ -277,6 +281,7 @@ export default {
     EntityThumbnail,
     PageSubtitle,
     PageTitle,
+    RouteSectionTabs,
     Schedule,
     TableInfo,
     TaskInfo,
@@ -307,27 +312,7 @@ export default {
 
   mounted() {
     this.clearSelectedTasks()
-    this.loadCurrentEpisode()
-      .then(episode => {
-        this.currentEpisode = episode
-        this.currentSection = this.route.query.section || 'casting'
-        this.casting.isLoading = true
-        this.casting.isError = false
-        if (this.currentEpisode) {
-          this.loadEpisodeCasting(this.currentEpisode)
-            .then(() => {
-              this.casting.isLoading = false
-            })
-            .catch(err => {
-              this.casting.isLoading = false
-              this.casting.isError = true
-              console.error(err)
-            })
-        } else {
-          this.resetData()
-        }
-      })
-      .catch(console.error)
+    this.init()
   },
 
   computed: {
@@ -393,6 +378,30 @@ export default {
       'loadEpisodesWithTasks',
       'loadEpisodeCasting'
     ]),
+
+    init() {
+      this.loadCurrentEpisode()
+        .then(episode => {
+          this.currentEpisode = episode
+          this.currentSection = this.route.query.section || 'infos'
+          this.casting.isLoading = true
+          this.casting.isError = false
+          if (this.currentEpisode) {
+            this.loadEpisodeCasting(this.currentEpisode)
+              .then(() => {
+                this.casting.isLoading = false
+              })
+              .catch(err => {
+                this.casting.isLoading = false
+                this.casting.isError = true
+                console.error(err)
+              })
+          } else {
+            this.resetData()
+          }
+        })
+        .catch(console.error)
+    },
 
     loadCurrentEpisode() {
       return new Promise((resolve, reject) => {
@@ -619,12 +628,35 @@ h2.subtitle {
   }
 }
 
-.section-combo {
-  width: 150px;
+.section-tabs {
+  min-height: 36px;
+  margin-bottom: 1em;
+}
 
-  .option-line {
-    width: 150px;
+.infos {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  max-height: 100%;
+  overflow-y: auto;
+
+  .entity-infos {
+    align-self: flex-start;
+    flex: 1.5;
   }
+}
+
+.entity-stats {
+  padding: 1em;
+  font-size: 1.2em;
+
+  .entry-label {
+    display: inline-block;
+    width: 120px;
+  }
+}
+
+.news-column {
+  max-height: 85%;
 }
 
 @media screen and (max-width: 768px) {

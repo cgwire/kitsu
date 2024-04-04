@@ -136,6 +136,12 @@
           </div>
         </div>
 
+        <entity-chat
+          :entity="currentAsset"
+          :name="currentAsset?.full_name"
+          v-if="currentSection === 'chat'"
+        />
+
         <div class="asset-casted-in" v-show="currentSection === 'casting'">
           <div v-if="currentAsset">
             <div
@@ -351,6 +357,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus'
 import DescriptionCell from '@/components/cells/DescriptionCell'
 import EditAssetModal from '@/components/modals/EditAssetModal'
+import EntityChat from '@/components/pages/entities/EntityChat'
 import EntityNews from '@/components/pages/entities/EntityNews'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles'
@@ -375,6 +382,7 @@ export default {
     ComboboxStatus,
     DescriptionCell,
     EditAssetModal,
+    EntityChat,
     EntityNews,
     EntityOutputFiles,
     EntityPreviewFiles,
@@ -391,6 +399,7 @@ export default {
 
   data() {
     return {
+      type: 'asset',
       currentAsset: null,
       currentTask: null,
       currentConceptStatus: null,
@@ -576,22 +585,6 @@ export default {
               concept.tasks[0].task_status_id === this.currentConceptStatus
           )
         : this.linkedConcepts
-    },
-
-    allTasksEstimation() {
-      return this.formatDuration(
-        this.localTasks.reduce((acc, task) => {
-          return acc + task.estimation
-        }, 0)
-      )
-    },
-
-    allTasksDuration() {
-      return this.formatDuration(
-        this.localTasks.reduce((acc, task) => {
-          return acc + task.duration
-        }, 0)
-      )
     }
   },
 

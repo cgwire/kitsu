@@ -81,6 +81,7 @@ const mutations = {
   },
 
   [LOAD_BACKGROUNDS_END](state, backgrounds) {
+    if (!backgrounds) return
     backgrounds.forEach(background => {
       background.url = `/api/pictures/preview-background-files/${background.id}.${background.extension}`
       background.thumbnail = `/api/pictures/thumbnails/preview-background-files/${background.id}.png`

@@ -104,7 +104,7 @@ import files from '@/lib/files'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
 export default {
-  name: 'add-comment-image-modal',
+  name: 'add-attachment-modal',
   mixins: [modalMixin],
 
   components: {

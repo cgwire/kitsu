@@ -123,6 +123,16 @@ export default {
     }
   },
 
+  chats: {
+    delete_message: 'Are you sure you want to delete this message?',
+    delete_message_confirm: 'Delete message',
+    join: 'Join chat',
+    leave: 'Leave chat',
+    no_message_yet: 'No message',
+    no_chat: 'You don\'t participate in any entity chat for the moment. Search an entity and join a chat from its page.',
+    title: 'Entity Chats',
+  },
+
   comments: {
     add_attachment: 'Add attachment',
     add_checklist: 'Add checklist',
@@ -1393,7 +1403,7 @@ export default {
     clear_all_assignations: 'unassign all',
     clear_assignations: 'unassign from selection',
     clear_own_assignations: 'clear your assignments',
-    comment_image: 'Attach files to your comment',
+    comment_image: 'Attach files',
     create_for_selection: 'Create a task for each empty cell',
     create_tasks: 'Add tasks',
     create_tasks_shot: 'Add tasks for current shots',
@@ -1473,7 +1483,7 @@ export default {
     show_infos: 'Show additional information',
     small_thumbnails: 'Show small thumbnails',
     smaller: 'Reduce task panel',
-    select_file: 'Please select the file from your hard drive you want to attach to your comment:',
+    select_file: 'Please select the file from your hard drive you want to attach to your comment or message:',
     show_contact_sheet: 'Display tasks as a contact sheet',
     subscribe_notifications: 'Subscribe to notifications',
     subscribe_to_tasks: 'Subscribe to selected task notifications | Subscribe to the {nbSelectedTasks} selected tasks notifications',
