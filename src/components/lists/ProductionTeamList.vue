@@ -7,10 +7,10 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('people.list.name') }}
             </th>
-            <th scope="col" class="email">
+            <th scope="col" class="email" v-if="isCurrentUserManager">
               {{ $t('people.list.email') }}
             </th>
-            <th scope="col" class="contract">
+            <th scope="col" class="contract" v-if="isCurrentUserManager">
               {{ $t('people.list.contract') }}
             </th>
             <th scope="col" class="role">
@@ -19,7 +19,7 @@
             <th scope="col">
               {{ $t('people.list.departments') }}
             </th>
-            <th scope="col" class="actions"></th>
+            <th scope="col" class="actions" v-if="isCurrentUserManager"></th>
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isEmpty">
@@ -28,13 +28,15 @@
               class="name datatable-row-header"
               :person="person"
             />
-            <td class="email">{{ person.email }}</td>
-            <td class="contract">
+            <td class="email" v-if="isCurrentUserManager">
+              {{ person.email }}
+            </td>
+            <td class="contract" v-if="isCurrentUserManager">
               {{ $t('people.contract.' + person.contract_type) }}
             </td>
             <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
             <department-names-cell :departments="person.departments" />
-            <td class="actions has-text-right">
+            <td class="actions has-text-right" v-if="isCurrentUserManager">
               <button
                 class="button"
                 @click="removePerson(person)"
@@ -78,7 +80,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserAdmin']),
+    ...mapGetters(['isCurrentUserAdmin', 'isCurrentUserManager']),
 
     isEmpty() {
       return !this.entries?.length
@@ -122,5 +124,9 @@ export default {
 
 .data-list {
   margin-top: 2em;
+}
+
+.footer-info {
+  color: var(--text);
 }
 </style>
