@@ -287,6 +287,11 @@ export default {
           this.$refs.nameField.focus()
         }, 100)
       }
+    },
+
+    currentProduction() {
+      this.form.entity_type_id = null
+      this.resetForm()
     }
   }
 }
