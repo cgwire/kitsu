@@ -28,7 +28,7 @@
         />
       </div>
     </template>
-    <template v-slot:side>
+    <template v-slot:side v-if="isCurrentUserManager">
       <div class="importers flexcolumn">
         <div class="project-import flexcolumn">
           <combobox-production
