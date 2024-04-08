@@ -550,6 +550,12 @@ export default {
       'updateTask'
     ]),
 
+    onAssignation(eventData) {
+      if (this.person.id === eventData.person_id) {
+        this.loadPerson(this.person.id)
+      }
+    },
+
     resetScheduleHeight() {
       this.$nextTick(() => {
         if (this.isActiveTab('schedule')) {
@@ -821,6 +827,18 @@ export default {
 
     zoomLevel() {
       this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
+    }
+  },
+
+  socket: {
+    events: {
+      'task:assign'(eventData) {
+        this.onAssignation(eventData)
+      },
+
+      'task:unassign'(eventData) {
+        this.onAssignation(eventData)
+      }
     }
   }
 }

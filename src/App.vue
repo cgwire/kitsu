@@ -103,7 +103,6 @@ export default {
       'loadEpisode',
       'loadOpenProductions',
       'loadPerson',
-      'loadPersonTasks',
       'loadProduction',
       'loadSequence',
       'loadShot',
@@ -124,11 +123,6 @@ export default {
         this.$store.commit('ASSIGN_TASKS', { selectedTaskIds, personId })
       } else {
         this.$store.commit('UNASSIGN_TASKS', selectedTaskIds)
-      }
-
-      // for todo lists
-      if (this.route.path.includes(eventData.person_id)) {
-        this.loadPersonTasks({ personId: eventData.person_id })
       }
     }
   },
@@ -1814,9 +1808,6 @@ tbody:last-child .empty-line:last-child {
   cursor: pointer;
 }
 
-.side {
-}
-
 .menu-mask {
   position: fixed;
   background: blue;
@@ -1841,9 +1832,6 @@ tbody:last-child .empty-line:last-child {
 
 .thumbnail-picture {
   border: 1px solid #ccc;
-}
-
-.modal {
 }
 
 .modal-content {
@@ -1912,9 +1900,6 @@ tbody:last-child .empty-line:last-child {
     background: var(--background-tag);
     border-left: 0.4em solid var(--background-hover);
   }
-}
-
-.main-column {
 }
 
 .playlist-column .video-player-box .video-js {
