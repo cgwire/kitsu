@@ -207,14 +207,19 @@
                     :comment="comment"
                     :fps="parseInt(currentFps)"
                     :frame="currentFrame"
+                    :is-checkable="
+                      user.id === comment.person?.id ||
+                      (isCurrentUserArtist && isAssigned) ||
+                      isDepartmentSupervisor ||
+                      isCurrentUserManager
+                    "
                     :is-editable="
-                      (comment.person && user.id === comment.person.id) ||
-                      isCurrentUserAdmin
+                      user.id === comment.person?.id || isCurrentUserAdmin
                     "
                     :is-first="index === 0"
                     :is-last="index === pinnedCount"
                     :is-pinnable="
-                      isCurrentUserManager || isCurrentUserSupervisor
+                      isDepartmentSupervisor || isCurrentUserManager
                     "
                     :is-change="isStatusChange(index)"
                     :revision="currentRevision"
@@ -433,9 +438,10 @@ export default {
       'getTaskPreviews',
       'getTaskComment',
       'isCurrentUserAdmin',
-      'isCurrentUserSupervisor',
+      'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isSingleEpisode',
       'isTVShow',
       'personMap',
@@ -484,11 +490,7 @@ export default {
           if (this.user.departments.length === 0) {
             return false
           } else {
-            const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return !(
-              taskType.department_id &&
-              this.user.departments.includes(taskType.department_id)
-            )
+            return !this.user.departments.includes(this.taskType?.department_id)
           }
         }
       }
@@ -524,14 +526,6 @@ export default {
 
     currentRevision() {
       return this.currentPreview?.revision || 0
-    },
-
-    isCommentingAllowed() {
-      return (
-        this.isCurrentUserManager ||
-        this.isCurrentUserClient ||
-        this.task.assignees.some(personId => personId === this.user.id)
-      )
     },
 
     taskTypeBorder() {
@@ -712,19 +706,33 @@ export default {
     },
 
     isAssigned() {
-      if (this.task) {
-        return this.task.assignees.some(personId => personId === this.user.id)
-      } else {
+      return (
+        this.task?.assignees.some(personId => personId === this.user.id) ??
+        false
+      )
+    },
+
+    isCommentingAllowed() {
+      return (
+        this.isAssigned ||
+        this.isCurrentUserClient ||
+        this.isDepartmentSupervisor ||
+        this.isCurrentUserManager
+      )
+    },
+
+    isDepartmentSupervisor() {
+      if (!this.isCurrentUserSupervisor) {
         return false
       }
+      if (this.user.departments.length === 0) {
+        return true
+      }
+      return this.user.departments.includes(this.taskType?.department_id)
     },
 
     taskType() {
-      if (this.task) {
-        return this.taskTypeMap.get(this.task.task_type_id)
-      } else {
-        return null
-      }
+      return this.taskTypeMap.get(this.task?.task_type_id)
     },
 
     currentTeam() {
@@ -978,12 +986,11 @@ export default {
         })
     },
 
-    async saveComment(comment, checklist) {
+    async saveComment(comment) {
       try {
         await this.editTaskComment({
           taskId: this.task.id,
-          comment,
-          checklist
+          comment
         })
       } catch (err) {
         console.error(err)
