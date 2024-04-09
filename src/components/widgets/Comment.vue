@@ -93,7 +93,7 @@
               class="checklist"
               :checklist="checklist"
               :disabled="true"
-              :is-editable="isEditable"
+              :is-editable="isCheckable"
               @remove-task="removeTask"
               @keyup.native="emitChangeEvent"
               @emit-change="emitChangeEvent"
@@ -419,6 +419,10 @@ export default {
       default: 25
     },
     isChange: {
+      type: Boolean,
+      default: false
+    },
+    isCheckable: {
       type: Boolean,
       default: false
     },

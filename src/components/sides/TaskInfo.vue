@@ -152,7 +152,7 @@
                   @clear-files="clearPreviewFiles"
                   @remove-preview="onPreviewFormRemoved"
                   @annotation-snapshots-requested="extractAnnotationSnapshots"
-                  v-show="isCommentingAllowed"
+                  v-if="isCommentingAllowed"
                 />
 
                 <div
@@ -166,19 +166,24 @@
                     v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
                   >
                     <comment
-                      :key="'comment' + comment.id"
+                      :key="`comment-${comment.id}`"
                       :comment="comment"
                       :fps="parseInt(currentFps)"
                       :frame="currentFrame || currentFrameRaw"
                       :is-change="isStatusChange(index)"
+                      :is-checkable="
+                        user.id === comment.person?.id ||
+                        (isCurrentUserArtist && isAssigned) ||
+                        isDepartmentSupervisor ||
+                        isCurrentUserManager
+                      "
                       :is-editable="
-                        (comment.person && user.id === comment.person.id) ||
-                        isCurrentUserAdmin
+                        user.id === comment.person?.id || isCurrentUserAdmin
                       "
                       :is-first="index === 0"
                       :is-last="index === pinnedCount"
                       :is-pinnable="
-                        isCurrentUserManager || isCurrentUserSupervisor
+                        isDepartmentSupervisor || isCurrentUserManager
                       "
                       :revision="currentRevision"
                       :task="task"
@@ -456,9 +461,10 @@ export default {
       'getTaskPreviews',
       'getTaskStatusForCurrentUser',
       'isCurrentUserAdmin',
+      'isCurrentUserArtist',
       'isCurrentUserClient',
-      'isCurrentUserSupervisor',
       'isCurrentUserManager',
+      'isCurrentUserSupervisor',
       'isSingleEpisode',
       'isTVShow',
       'lastCommentDraft',
@@ -510,42 +516,34 @@ export default {
     },
 
     isAssigned() {
-      if (this.task) {
-        return this.task.assignees.some(assigneeId => {
-          return assigneeId === this.user.id
-        })
-      } else {
-        return false
-      }
+      return (
+        this.task?.assignees.some(personId => personId === this.user.id) ??
+        false
+      )
     },
 
     isCommentingAllowed() {
-      if (this.task) {
-        if (this.isCurrentUserManager) {
-          return true
-        } else if (this.isCurrentUserSupervisor) {
-          if (this.user.departments.length === 0) {
-            return true
-          } else {
-            const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return (
-              taskType.department_id &&
-              this.user.departments.includes(taskType.department_id)
-            )
-          }
-        } else if (this.isCurrentUserClient) {
-          return true
-        } else if (
-          this.task.assignees.find(personId => personId === this.user.id)
-        ) {
-          return true
-        }
-      }
-      return false
+      return (
+        this.task &&
+        (this.isAssigned ||
+          this.isCurrentUserClient ||
+          this.isDepartmentSupervisor ||
+          this.isCurrentUserManager)
+      )
     },
 
     isConceptTask() {
       return this.entityType === 'Concept'
+    },
+
+    isDepartmentSupervisor() {
+      if (!this.isCurrentUserSupervisor) {
+        return false
+      }
+      if (this.user.departments.length === 0) {
+        return true
+      }
+      return this.user.departments.includes(this.currentTaskType?.department_id)
     },
 
     isPreviewPlayerReadOnly() {
@@ -556,10 +554,8 @@ export default {
           if (this.user.departments.length === 0) {
             return false
           } else {
-            const taskType = this.taskTypeMap.get(this.task.task_type_id)
-            return !(
-              taskType.department_id &&
-              this.user.departments.includes(taskType.department_id)
+            return !this.user.departments.includes(
+              this.currentTaskType?.department_id
             )
           }
         }
@@ -578,7 +574,7 @@ export default {
     },
 
     currentTaskType() {
-      return this.task ? this.taskTypeMap.get(this.task.task_type_id) : null
+      return this.taskTypeMap.get(this.task?.task_type_id)
     },
 
     currentPreview() {
