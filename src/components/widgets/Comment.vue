@@ -95,8 +95,8 @@
               :disabled="true"
               :is-editable="isCheckable"
               @remove-task="removeTask"
-              @keyup.native="emitChangeEvent"
-              @emit-change="emitChangeEvent"
+              @keyup.native="onChecklistChanged"
+              @emit-change="onChecklistChanged"
               @time-code-clicked="onChecklistTimecodeClicked"
               v-if="checklist.length > 0"
             />
@@ -697,16 +697,16 @@ export default {
       this.checklist = remove(this.checklist, entry)
     },
 
-    emitChangeEvent() {
+    onChecklistChanged() {
       const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
       if (now - this.lastCall > 1000) {
         this.lastCall = now
-        this.$emit(
-          'checklist-updated',
-          this.comment,
-          this.checklist.filter(item => item.text && item.text.length > 0)
-        )
+        const comment = {
+          id: this.comment.id,
+          checklist: this.checklist.filter(item => item.text?.length)
+        }
+        this.$emit('checklist-updated', comment)
       }
     },
 
@@ -809,7 +809,7 @@ export default {
 
     checklist() {
       if (!this.$options.silent) {
-        this.emitChangeEvent()
+        this.onChecklistChanged()
       }
     },
 

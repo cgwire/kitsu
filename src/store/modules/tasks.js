@@ -470,11 +470,10 @@ const actions = {
     })
   },
 
-  editTaskComment({ commit }, { taskId, comment, checklist }) {
-    checklist = checklist || comment.checklist
+  editTaskComment({ commit }, { taskId, comment }) {
     return tasksApi.editTaskComment(comment).then(comment => {
-      commit(EDIT_COMMENT_END, { taskId, comment, checklist })
-      return Promise.resolve(comment)
+      commit(EDIT_COMMENT_END, { taskId, comment })
+      return comment
     })
   },
 
@@ -1047,13 +1046,13 @@ const mutations = {
     }
   },
 
-  [EDIT_COMMENT_END](state, { taskId, comment, checklist }) {
+  [EDIT_COMMENT_END](state, { taskId, comment }) {
     const oldComment = state.taskComments[taskId].find(c => c.id === comment.id)
     Object.assign(oldComment, {
       text: comment.text,
       task_status_id: comment.task_status_id,
       task_status: state.taskStatusMap.get(comment.task_status_id),
-      checklist: checklist || []
+      checklist: comment.checklist || []
     })
   },
 

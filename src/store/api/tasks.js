@@ -89,13 +89,13 @@ export default {
     return client.pget(`/api/data/comments/${data.id}`)
   },
 
-  editTaskComment(comment, callback) {
-    const commentData = {
+  editTaskComment(comment) {
+    const data = {
       text: comment.text,
       task_status_id: comment.task_status_id,
       checklist: comment.checklist
     }
-    return client.pput(`/api/data/comments/${comment.id}`, commentData)
+    return client.pput(`/api/data/comments/${comment.id}`, data)
   },
 
   deleteTaskComment(taskId, commentId, callback) {

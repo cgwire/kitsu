@@ -986,12 +986,11 @@ export default {
         })
     },
 
-    async saveComment(comment, checklist) {
+    async saveComment(comment) {
       try {
         await this.editTaskComment({
           taskId: this.task.id,
-          comment,
-          checklist
+          comment
         })
       } catch (err) {
         console.error(err)
