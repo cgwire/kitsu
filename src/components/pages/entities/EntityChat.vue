@@ -4,7 +4,7 @@
       <p>
         {{ $t('chats.no_chat') }}
       </p>
-      <div class="has-text-centered">
+      <div class="has-text-centered" v-if="mainConfig.indexer_configured">
         <button-simple
           :text="$t('chats.search_entity')"
           @click="$router.push('entity-search')"
@@ -186,6 +186,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'departmentMap',
+      'mainConfig',
       'personMap',
       'taskStatusMap',
       'taskTypeMap',
