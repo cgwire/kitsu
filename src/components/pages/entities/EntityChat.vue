@@ -6,7 +6,7 @@
       </p>
       <div class="has-text-centered">
         <button-simple
-          text="Search for entity"
+          :text="$t('chats.search_entity')"
           @click="$router.push('entity-search')"
         />
       </div>
