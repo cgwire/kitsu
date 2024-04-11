@@ -370,6 +370,7 @@ export default {
 
   data() {
     return {
+      type: 'shot',
       currentShot: null,
       currentTask: null,
       casting: {
