@@ -114,15 +114,16 @@ import { XIcon } from 'vue-feather-icons'
 import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 
-import AddAttachmentModal from '@/components/modals/AddAttachmentModal'
-import ConfirmModal from '@/components/modals/ConfirmModal'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import EntityChatDays from '@/components/pages/entities/EntityChatDays'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import Spinner from '@/components/widgets/Spinner'
+import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import EntityChatDays from '@/components/pages/entities/EntityChatDays.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'entity-chat',
+
   mixins: [domMixin],
 
   components: {
@@ -333,7 +334,7 @@ export default {
 
   socket: {
     events: {
-      async 'chat:joined'(eventData) {
+      'chat:joined'(eventData) {
         if (
           eventData.chat_id === this.chat.id &&
           !this.participants.includes(eventData.person_id)
@@ -342,7 +343,7 @@ export default {
         }
       },
 
-      async 'chat:left'(eventData) {
+      'chat:left'(eventData) {
         if (
           eventData.chat_id === this.chat.id &&
           this.participants.includes(eventData.person_id)
@@ -367,7 +368,7 @@ export default {
         }
       },
 
-      async 'chat:deleted-message'(eventData) {
+      'chat:deleted-message'(eventData) {
         if (eventData.chat_id === this.chat.id) {
           this.messages = this.messages.filter(
             m => m.id !== eventData.message_id
