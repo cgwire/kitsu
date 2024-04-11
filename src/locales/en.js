@@ -130,6 +130,7 @@ export default {
     leave: 'Leave chat',
     no_message_yet: 'No message',
     no_chat: 'You don\'t participate in any entity chat for the moment. Search an entity and join a chat from its page.',
+    search_entity: 'Search for entity',
     title: 'Entity Chats',
   },
 
