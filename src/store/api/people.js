@@ -309,6 +309,17 @@ export default {
     }
   },
 
+  getDaysOff(year, month) {
+    let path = '/api/data/day-offs'
+    if (year) {
+      path = `/api/data/persons/day-offs/${year}`
+      if (month) {
+        path += `/${month}`
+      }
+    }
+    return client.pget(path)
+  },
+
   getDayOff(personId, date) {
     // Date is a string with following format: YYYYY-MM-DD.
     return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
@@ -323,11 +334,6 @@ export default {
       description
     }
     return client.ppost('/api/data/day-offs', data)
-  },
-
-  getDayOffs(year, month) {
-    const path = `/api/data/persons/day-offs/${year}/${month}`
-    return client.pget(path)
   },
 
   unsetDayOff(dayOff) {
