@@ -19,7 +19,7 @@
           />
 
           <combobox-production
-            v-if="isTabActive('board')"
+            v-if="isActiveTab('board')"
             class="flexrow-item production-field"
             :label="$t('main.production')"
             :production-list="productionList"
@@ -47,9 +47,9 @@
         <div
           class="query-list"
           v-if="
-            isTabActive('todos') ||
-            isTabActive('timesheets') ||
-            isTabActive('board')
+            isActiveTab('todos') ||
+            isActiveTab('timesheets') ||
+            isActiveTab('board')
           "
         >
           <search-query-list
@@ -68,10 +68,10 @@
           :tasks="notPendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
-          v-if="isTabActive('todos')"
+          v-if="isActiveTab('todos')"
         />
 
-        <div v-if="isTabActive('pending')">&nbsp;</div>
+        <div v-if="isActiveTab('pending')">&nbsp;</div>
         <todos-list
           ref="pending-list"
           :empty-text="$t('people.no_task_assigned')"
@@ -80,10 +80,10 @@
           :tasks="pendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
-          v-if="isTabActive('pending')"
+          v-if="isActiveTab('pending')"
         />
 
-        <div v-if="isTabActive('done')">&nbsp;</div>
+        <div v-if="isActiveTab('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
           class="done-list"
@@ -92,7 +92,7 @@
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
           :done="true"
-          v-if="isTabActive('done')"
+          v-if="isActiveTab('done')"
         />
 
         <kanban-board
@@ -102,14 +102,14 @@
           :tasks="boardTasks"
           :user="user"
           :production="selectedProduction"
-          v-if="isTabActive('board')"
+          v-if="isActiveTab('board')"
         />
 
         <user-calendar
           ref="user-calendar"
           :days-off="daysOff"
           :tasks="sortedTasks"
-          v-if="isTabActive('calendar')"
+          v-if="isActiveTab('calendar')"
         />
 
         <timesheet-list
@@ -127,7 +127,7 @@
           @time-spent-change="onTimeSpentChange"
           @set-day-off="onSetDayOff"
           @unset-day-off="onUnsetDayOff"
-          v-if="isTabActive('timesheets')"
+          v-if="isActiveTab('timesheets')"
         />
       </div>
     </div>
@@ -432,7 +432,7 @@ export default {
       'unsetDayOff'
     ]),
 
-    isTabActive(tab) {
+    isActiveTab(tab) {
       return this.currentSection === tab
     },
 
