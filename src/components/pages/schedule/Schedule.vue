@@ -236,6 +236,11 @@
                 <div :class="dayClass(day, index)">
                   <span v-if="zoomLevel > 2"> {{ day.dayText }} / </span>
                   <span class="day-number">
+                    <briefcase-icon
+                      class="day-off-icon"
+                      size="14"
+                      v-if="day.off"
+                    />
                     {{ day.dayNumber }}
                   </span>
                 </div>
@@ -556,6 +561,10 @@ export default {
   },
 
   props: {
+    daysOff: {
+      type: Array,
+      default: () => []
+    },
     endDate: {
       type: Object,
       required: true
@@ -661,6 +670,10 @@ export default {
       dayDate.isoweekday = day.isoWeekday()
       dayDate.monthday = day.month()
 
+      const daysOff = this.getDayOffRange(this.daysOff).map(
+        dayOff => dayOff.date
+      )
+
       while (dayDate < endDayDate) {
         const nextDay = new Date(Number(dayDate))
         nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
@@ -675,9 +688,15 @@ export default {
           nextDay.newMonth = true
           nextDay.monthday = 1
         }
-        if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
+        if ([6, 7].includes(nextDay.isoweekday)) {
+          nextDay.weekend = true
+        }
+        if (daysOff.includes(nextDay.toISOString().slice(0, 10))) {
+          nextDay.off = true
+        }
 
         const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
+        momentDay.off = nextDay.off
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
@@ -1439,7 +1458,8 @@ export default {
         'day-name': true,
         'new-week': day.newWeek || false,
         'new-month': day.newMonth || index === 0 || false,
-        weekend: day.weekend || false
+        weekend: day.weekend || false,
+        'day-name-off': day.off || false
       }
     },
 
@@ -1956,6 +1976,12 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       .day-number {
         color: black;
         padding-top: 0.5em;
+      }
+
+      .day-off-icon {
+        position: absolute;
+        top: -1px;
+        opacity: 0.25;
       }
 
       .weekday-number {
