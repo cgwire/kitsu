@@ -107,6 +107,7 @@
 
         <user-calendar
           ref="user-calendar"
+          :days-off="daysOff"
           :tasks="sortedTasks"
           v-if="isTabActive('calendar')"
         />
@@ -177,6 +178,7 @@ export default {
       currentFilter: 'all_tasks',
       currentSort: 'priority',
       currentSection: 'todos',
+      daysOff: [],
       dayOffError: false,
       filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
         label: name,
@@ -205,17 +207,7 @@ export default {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
     }
     this.$nextTick(() => {
-      this.loadTodos({
-        date: this.selectedDate,
-        callback: () => {
-          if (this.todoList) {
-            this.$nextTick(() => {
-              this.todoList.setScrollPosition(this.todoListScrollPosition)
-            })
-          }
-          this.resizeHeaders()
-        }
-      })
+      this.loadData()
     })
   },
 
@@ -428,14 +420,15 @@ export default {
   methods: {
     ...mapActions([
       'clearSelectedTasks',
-      'loadTodos',
+      'loadAggregatedPersonDaysOff',
       'loadOpenProductions',
+      'loadTodos',
       'removeTodoSearch',
       'saveTodoSearch',
       'setDayOff',
+      'setTimeSpent',
       'setTodoListScrollPosition',
       'setTodosSearch',
-      'setTimeSpent',
       'unsetDayOff'
     ]),
 
@@ -443,10 +436,26 @@ export default {
       return this.currentSection === tab
     },
 
+    async loadData(forced = false) {
+      await this.loadTodos({
+        forced,
+        date: this.selectedDate,
+        callback: () => {
+          this.$nextTick(() => {
+            this.todoList?.setScrollPosition(this.todoListScrollPosition)
+          })
+          this.resizeHeaders()
+        }
+      })
+      this.daysOff = await this.loadAggregatedPersonDaysOff({
+        personId: this.user.id
+      })
+    },
+
     resizeHeaders() {
       this.$nextTick(() => {
-        if (this.todoList) this.todoList.resizeHeaders()
-        if (this.haveDoneList) this.haveDoneList.resizeHeaders()
+        this.todoList?.resizeHeaders()
+        this.haveDoneList?.resizeHeaders()
       })
     },
 
@@ -478,7 +487,6 @@ export default {
           })
         }
       }
-
       this.clearSelectedTasks()
     },
 
@@ -503,18 +511,17 @@ export default {
         })
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeTodoSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
+    async removeSearchQuery(searchQuery) {
+      try {
+        await this.removeTodoSearch(searchQuery)
+      } catch (error) {
+        console.error(error)
+      }
     },
 
-    onDateChanged(date) {
+    async onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
-      this.loadTodos({
-        date: this.selectedDate,
-        forced: true
-      })
+      await this.loadData(true)
     },
 
     async onSetDayOff(dayOff) {
@@ -528,6 +535,7 @@ export default {
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
+      await this.loadData(true)
     },
 
     async onUnsetDayOff() {
@@ -538,10 +546,7 @@ export default {
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
-      await this.loadTodos({
-        date: this.selectedDate,
-        forced: true
-      })
+      await this.loadData(true)
     },
 
     onTimeSpentChange(timeSpentInfo) {
@@ -553,18 +558,7 @@ export default {
     async onAssignation(eventData) {
       if (this.user.id === eventData.person_id) {
         await this.loadOpenProductions()
-        this.loadTodos({
-          forced: true,
-          date: this.selectedDate,
-          callback: () => {
-            if (this.todoList) {
-              this.$nextTick(() => {
-                this.todoList.setScrollPosition(this.todoListScrollPosition)
-              })
-            }
-            this.resizeHeaders()
-          }
-        })
+        await this.loadData(true)
       }
     },
 
