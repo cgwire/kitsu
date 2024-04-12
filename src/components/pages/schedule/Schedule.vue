@@ -325,11 +325,20 @@
               v-if="!isWeekMode"
             ></div>
             <div
-              class="root-drop"
+              class="timeline-element root-drop"
               :data-id="rootElement.id"
               :key="'entity-line-' + rootElement.id"
               v-for="rootElement in hierarchy"
             >
+              <div
+                class="day-off"
+                :key="`dayoff-${dayOff.id}-${index}`"
+                :style="dayOffStyle(dayOff)"
+                :title="dayOff.description"
+                v-for="(dayOff, index) in getDayOffRange(rootElement.daysOff)"
+              >
+                <briefcase-icon size="14" />
+              </div>
               <div
                 class="entity-line root-element"
                 :style="entityLineStyle(rootElement, true)"
@@ -470,8 +479,15 @@
 /*
  * Component to facilitate the build of schedule pages.
  */
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import {
+  BriefcaseIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  EditIcon,
+  PlusIcon
+} from 'vue-feather-icons'
+import { mapGetters, mapActions } from 'vuex'
 
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
@@ -484,27 +500,24 @@ import {
   parseDate
 } from '@/lib/time'
 
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EditIcon,
-  PlusIcon
-} from 'vue-feather-icons'
-import EditMilestoneModal from '@/components/modals/EditMilestoneModal'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ProductionName from '@/components/widgets/ProductionName'
-import Spinner from '@/components/widgets/Spinner'
+import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'schedule',
+
   mixins: [domMixin, formatListMixin],
+
   components: {
+    BriefcaseIcon,
     ChevronDownIcon,
     ChevronRightIcon,
     EditIcon,
-    PlusIcon,
     EditMilestoneModal,
     PeopleAvatar,
+    PlusIcon,
     ProductionName,
     Spinner
   },
@@ -869,6 +882,21 @@ export default {
 
   methods: {
     ...mapActions(['deleteMilestone', 'saveMilestone']),
+
+    getDayOffRange(daysOff = []) {
+      return daysOff.reduce((range, dayOff) => {
+        const startDate = new Date(dayOff.date)
+        const endDate = new Date(dayOff.end_date)
+        while (startDate <= endDate) {
+          range.push({
+            ...dayOff,
+            date: startDate.toISOString().slice(0, 10)
+          })
+          startDate.setDate(startDate.getDate() + 1)
+        }
+        return range
+      }, [])
+    },
 
     getNbLines(element) {
       const values = element.children.map(item => item.line || 0)
@@ -1413,6 +1441,19 @@ export default {
         'new-month': day.newMonth || index === 0 || false,
         weekend: day.weekend || false
       }
+    },
+
+    dayOffStyle(dayOff) {
+      return {
+        left: `${this.getDayOffLeft(dayOff)}px`
+      }
+    },
+
+    getDayOffLeft(dayOff) {
+      const startDate = moment(dayOff.date)
+      let startDiff = this.dateDiff(this.startDate, startDate) || 0
+      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      return startDiff * this.cellWidth + 1
     },
 
     entityLineStyle(timeElement, root = false, header = false) {
@@ -1960,6 +2001,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         }
       }
 
+      .timeline-element {
+        position: relative;
+      }
+
       .milestone-vertical-line {
         position: absolute;
         left: 0;
@@ -2310,6 +2355,22 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   &.thinner {
     height: 14px;
     top: 14px;
+  }
+}
+
+.day-off {
+  position: absolute;
+  z-index: 0;
+  width: 19px;
+  height: 100%;
+  line-height: 40px;
+  text-align: center;
+  color: $light-grey;
+  background-color: #f0f0f0;
+
+  .dark & {
+    color: $dark-grey;
+    background-color: #43474d;
   }
 }
 
