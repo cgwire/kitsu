@@ -419,6 +419,7 @@ export default {
   data() {
     return {
       activeTab: 'tasks',
+      daysOffByPerson: [],
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
@@ -740,6 +741,7 @@ export default {
     ...mapActions([
       'clearSelectedTasks',
       'initTaskType',
+      'loadAggregatedPersonDaysOff',
       'loadEpisodeScheduleItems',
       'loadScheduleItems',
       'removeTaskSearch',
@@ -752,9 +754,10 @@ export default {
       'uploadTaskTypeEstimations'
     ]),
 
-    initData(force) {
+    async initData(force) {
       this.resetTasks()
       this.focusSearchField({ preventScroll: true })
+      await this.loadDaysOff()
       if (this.tasks.length < 2) {
         this.loading.entities = true
         this.errors.entities = false
@@ -803,6 +806,20 @@ export default {
           }
         })
       }
+    },
+
+    async loadDaysOff() {
+      this.daysOffByPerson = []
+      await Promise.all(
+        this.scheduleTeam.map(async person => {
+          const daysOff = await this.loadAggregatedPersonDaysOff({
+            personId: person.id
+          }).catch(
+            () => [] // fallback if not allowed to fetch days off
+          )
+          this.daysOffByPerson[person.id] = daysOff
+        })
+      )
     },
 
     setCurrentScheduleItem() {
@@ -1227,7 +1244,8 @@ export default {
         children,
         startDate: minStartDate,
         endDate: maxEndDate,
-        man_days: manDays
+        man_days: manDays,
+        daysOff: this.daysOffByPerson[person.id]
       })
       return personElement
     },
