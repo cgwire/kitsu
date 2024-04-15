@@ -809,16 +809,15 @@ export default {
 
     async loadDaysOff() {
       this.daysOffByPerson = []
-      await Promise.all(
-        this.scheduleTeam.map(async person => {
-          const daysOff = await this.loadAggregatedPersonDaysOff({
-            personId: person.id
-          }).catch(
-            () => [] // fallback if not allowed to fetch days off
-          )
-          this.daysOffByPerson[person.id] = daysOff
-        })
-      )
+      for (const person of this.scheduleTeam) {
+        // load sequentially to avoid too many requests
+        const daysOff = await this.loadAggregatedPersonDaysOff({
+          personId: person.id
+        }).catch(
+          () => [] // fallback if not allowed to fetch days off
+        )
+        this.daysOffByPerson[person.id] = daysOff
+      }
     },
 
     setCurrentScheduleItem() {

@@ -190,11 +190,9 @@ export default {
 
     async init() {
       this.loading.schedule = true
-      await Promise.all([
-        this.loadPeople(),
-        this.loadPersonDates(),
-        this.loadDaysOff()
-      ])
+      await this.loadPeople()
+      await this.loadPersonDates()
+      await this.loadDaysOff()
 
       this.refreshSchedule()
 
