@@ -2400,6 +2400,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 }
 
+.day-name-off,
 .weekend {
   background: rgba(200, 200, 200, 0.3);
 }
