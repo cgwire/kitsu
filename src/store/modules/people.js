@@ -37,6 +37,7 @@ import {
   SET_ORGANISATION,
   SET_PERSON_TASKS_SCROLL_POSITION,
   PEOPLE_SET_DAY_OFFS,
+  PEOPLE_SET_DAYS_OFF,
   PEOPLE_SEARCH_CHANGE,
   RESET_ALL,
   REMOVE_PEOPLE_SEARCH_END,
@@ -153,6 +154,7 @@ const initialState = {
   personTimeSpentMap: {},
   personTimeSpentTotal: 0,
   personDayOff: {},
+  daysOff: [],
   dayOffMap: {}
 }
 
@@ -210,7 +212,8 @@ const getters = {
   personTimeSpentTotal: state => state.personTimeSpentTotal,
   personDayOff: state => state.personDayOff,
   personIsDayOff: state => Boolean(state.personDayOff?.id),
-  dayOffMap: state => state.dayOffMap
+  dayOffMap: state => state.dayOffMap,
+  daysOff: state => state.daysOff
 }
 
 const actions = {
@@ -487,10 +490,16 @@ const actions = {
     }
     const table = await getTableFn(year, monthString, productionId)
     if (detailLevel === 'day') {
-      const dayOffs = await peopleApi.getDayOffs(year, monthString)
+      const dayOffs = await peopleApi.getDaysOff(year, monthString)
       commit(PEOPLE_SET_DAY_OFFS, dayOffs)
     }
     commit(PEOPLE_TIMESHEET_LOADED, table)
+  },
+
+  async loadDaysOff({ commit }, { year, month } = {}) {
+    month = year && month ? String(month).padStart(2, '0') : undefined
+    const daysOff = await peopleApi.getDaysOff(year, month)
+    commit(PEOPLE_SET_DAYS_OFF, daysOff)
   },
 
   setPeopleSearch({ commit, rootGetters }, peopleSearch) {
@@ -778,6 +787,10 @@ const mutations = {
 
   [PERSON_SET_DAY_OFF](state, dayOff) {
     state.personDayOff = dayOff
+  },
+
+  [PEOPLE_SET_DAYS_OFF](state, daysOff) {
+    state.daysOff = daysOff
   },
 
   [PEOPLE_SET_DAY_OFFS](state, dayOffs) {

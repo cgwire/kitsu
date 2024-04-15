@@ -236,6 +236,11 @@
                 <div :class="dayClass(day, index)">
                   <span v-if="zoomLevel > 2"> {{ day.dayText }} / </span>
                   <span class="day-number">
+                    <briefcase-icon
+                      class="day-off-icon"
+                      size="14"
+                      v-if="day.off"
+                    />
                     {{ day.dayNumber }}
                   </span>
                 </div>
@@ -325,11 +330,20 @@
               v-if="!isWeekMode"
             ></div>
             <div
-              class="root-drop"
+              class="timeline-element root-drop"
               :data-id="rootElement.id"
               :key="'entity-line-' + rootElement.id"
               v-for="rootElement in hierarchy"
             >
+              <div
+                class="day-off"
+                :key="`dayoff-${dayOff.id}-${index}`"
+                :style="dayOffStyle(dayOff)"
+                :title="dayOff.description"
+                v-for="(dayOff, index) in getDayOffRange(rootElement.daysOff)"
+              >
+                <briefcase-icon size="14" />
+              </div>
               <div
                 class="entity-line root-element"
                 :style="entityLineStyle(rootElement, true)"
@@ -470,8 +484,15 @@
 /*
  * Component to facilitate the build of schedule pages.
  */
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
+import {
+  BriefcaseIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  EditIcon,
+  PlusIcon
+} from 'vue-feather-icons'
+import { mapGetters, mapActions } from 'vuex'
 
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
@@ -484,27 +505,24 @@ import {
   parseDate
 } from '@/lib/time'
 
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EditIcon,
-  PlusIcon
-} from 'vue-feather-icons'
-import EditMilestoneModal from '@/components/modals/EditMilestoneModal'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ProductionName from '@/components/widgets/ProductionName'
-import Spinner from '@/components/widgets/Spinner'
+import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'schedule',
+
   mixins: [domMixin, formatListMixin],
+
   components: {
+    BriefcaseIcon,
     ChevronDownIcon,
     ChevronRightIcon,
     EditIcon,
-    PlusIcon,
     EditMilestoneModal,
     PeopleAvatar,
+    PlusIcon,
     ProductionName,
     Spinner
   },
@@ -543,6 +561,10 @@ export default {
   },
 
   props: {
+    daysOff: {
+      type: Array,
+      default: () => []
+    },
     endDate: {
       type: Object,
       required: true
@@ -648,6 +670,10 @@ export default {
       dayDate.isoweekday = day.isoWeekday()
       dayDate.monthday = day.month()
 
+      const daysOff = this.getDayOffRange(this.daysOff).map(
+        dayOff => dayOff.date
+      )
+
       while (dayDate < endDayDate) {
         const nextDay = new Date(Number(dayDate))
         nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
@@ -662,9 +688,15 @@ export default {
           nextDay.newMonth = true
           nextDay.monthday = 1
         }
-        if ([6, 7].includes(nextDay.isoweekday)) nextDay.weekend = true
+        if ([6, 7].includes(nextDay.isoweekday)) {
+          nextDay.weekend = true
+        }
+        if (daysOff.includes(nextDay.toISOString().slice(0, 10))) {
+          nextDay.off = true
+        }
 
         const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
+        momentDay.off = nextDay.off
         momentDay.newWeek = nextDay.newWeek
         momentDay.newMonth = nextDay.newMonth
         momentDay.weekend = nextDay.weekend
@@ -869,6 +901,21 @@ export default {
 
   methods: {
     ...mapActions(['deleteMilestone', 'saveMilestone']),
+
+    getDayOffRange(daysOff = []) {
+      return daysOff.reduce((range, dayOff) => {
+        const startDate = new Date(dayOff.date)
+        const endDate = new Date(dayOff.end_date || dayOff.date)
+        while (startDate <= endDate) {
+          range.push({
+            ...dayOff,
+            date: startDate.toISOString().slice(0, 10)
+          })
+          startDate.setDate(startDate.getDate() + 1)
+        }
+        return range
+      }, [])
+    },
 
     getNbLines(element) {
       const values = element.children.map(item => item.line || 0)
@@ -1411,8 +1458,22 @@ export default {
         'day-name': true,
         'new-week': day.newWeek || false,
         'new-month': day.newMonth || index === 0 || false,
-        weekend: day.weekend || false
+        weekend: day.weekend || false,
+        'day-name-off': day.off || false
       }
+    },
+
+    dayOffStyle(dayOff) {
+      return {
+        left: `${this.getDayOffLeft(dayOff)}px`
+      }
+    },
+
+    getDayOffLeft(dayOff) {
+      const startDate = moment(dayOff.date)
+      let startDiff = this.dateDiff(this.startDate, startDate) || 0
+      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      return startDiff * this.cellWidth + 1
     },
 
     entityLineStyle(timeElement, root = false, header = false) {
@@ -1917,6 +1978,12 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         padding-top: 0.5em;
       }
 
+      .day-off-icon {
+        position: absolute;
+        top: -1px;
+        opacity: 0.25;
+      }
+
       .weekday-number {
         color: var(--text);
       }
@@ -1958,6 +2025,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
           visibility: visible;
           background: rgba(255, 200, 255, 0.3);
         }
+      }
+
+      .timeline-element {
+        position: relative;
       }
 
       .milestone-vertical-line {
@@ -2313,6 +2384,23 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 }
 
+.day-off {
+  position: absolute;
+  z-index: 0;
+  width: 19px;
+  height: 100%;
+  line-height: 40px;
+  text-align: center;
+  color: $light-grey;
+  background-color: #f0f0f0;
+
+  .dark & {
+    color: $dark-grey;
+    background-color: #43474d;
+  }
+}
+
+.day-name-off,
 .weekend {
   background: rgba(200, 200, 200, 0.3);
 }

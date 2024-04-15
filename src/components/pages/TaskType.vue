@@ -250,11 +250,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import firstBy from 'thenby'
 import moment from 'moment'
-import { searchMixin } from '@/components/mixins/search'
+import firstBy from 'thenby'
+import { CornerLeftUpIcon } from 'vue-feather-icons'
+import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
@@ -277,22 +277,21 @@ import {
 } from '@/lib/filtering'
 
 import { formatListMixin } from '@/components/mixins/format'
+import { searchMixin } from '@/components/mixins/search'
 
-import { CornerLeftUpIcon } from 'vue-feather-icons'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import DateField from '@/components/widgets/DateField'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import EstimationHelper from '@/components/pages/tasktype/EstimationHelper'
-import ImportModal from '@/components/modals/ImportModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
-import Schedule from '@/components/pages/schedule/Schedule'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
-import TaskInfo from '@/components/sides/TaskInfo'
-import TaskList from '@/components/lists/TaskList'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import Schedule from '@/components/pages/schedule/Schedule.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import TaskList from '@/components/lists/TaskList.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const filters = {
   all(tasks) {
@@ -396,7 +395,9 @@ const filters = {
 
 export default {
   name: 'task-type',
+
   mixins: [formatListMixin, searchMixin],
+
   components: {
     ButtonSimple,
     CornerLeftUpIcon,
@@ -414,11 +415,10 @@ export default {
     TaskTypeName
   },
 
-  entityListCache: [],
-
   data() {
     return {
       activeTab: 'tasks',
+      daysOffByPerson: [],
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
@@ -624,11 +624,11 @@ export default {
       }
     },
 
-    // Meta
-
     entityTasks() {
       return this.getTasks(Array.from(this.entityMap.values()))
     },
+
+    // Meta
 
     title() {
       if (this.currentProduction) {
@@ -740,6 +740,7 @@ export default {
     ...mapActions([
       'clearSelectedTasks',
       'initTaskType',
+      'loadAggregatedPersonDaysOff',
       'loadEpisodeScheduleItems',
       'loadScheduleItems',
       'removeTaskSearch',
@@ -752,9 +753,10 @@ export default {
       'uploadTaskTypeEstimations'
     ]),
 
-    initData(force) {
+    async initData(force) {
       this.resetTasks()
       this.focusSearchField({ preventScroll: true })
+      await this.loadDaysOff()
       if (this.tasks.length < 2) {
         this.loading.entities = true
         this.errors.entities = false
@@ -805,6 +807,19 @@ export default {
       }
     },
 
+    async loadDaysOff() {
+      this.daysOffByPerson = []
+      for (const person of this.scheduleTeam) {
+        // load sequentially to avoid too many requests
+        const daysOff = await this.loadAggregatedPersonDaysOff({
+          personId: person.id
+        }).catch(
+          () => [] // fallback if not allowed to fetch days off
+        )
+        this.daysOffByPerson[person.id] = daysOff
+      }
+    },
+
     setCurrentScheduleItem() {
       const isShots = this.$route.path.includes('shots')
       if (this.isTVShow && isShots) {
@@ -813,27 +828,24 @@ export default {
           taskType: this.currentTaskType
         }).then(items => {
           if (!items) {
-            Promise.resolve([])
-          } else {
-            this.currentScheduleItem = items.find(item => {
-              return (
-                item.task_type_id === this.currentTaskType.id &&
-                item.object_id === this.currentEpisode.id
-              )
-            })
-            Promise.resolve(this.currentScheduleItem)
+            return []
           }
+          this.currentScheduleItem = items.find(
+            item =>
+              item.task_type_id === this.currentTaskType.id &&
+              item.object_id === this.currentEpisode.id
+          )
+          return this.currentScheduleItem
         })
       }
       return this.loadScheduleItems(this.currentProduction).then(items => {
         if (!items) {
-          Promise.resolve([])
-        } else {
-          this.currentScheduleItem = items.find(item => {
-            return item.task_type_id === this.currentTaskType.id
-          })
-          Promise.resolve(this.currentScheduleItem)
+          return []
         }
+        this.currentScheduleItem = items.find(
+          item => item.task_type_id === this.currentTaskType.id
+        )
+        return this.currentScheduleItem
       })
     },
 
@@ -946,9 +958,7 @@ export default {
     },
 
     removeSearchQuery(searchQuery) {
-      this.removeTaskSearch(searchQuery).catch(err => {
-        console.error(err)
-      })
+      this.removeTaskSearch(searchQuery).catch(console.error)
     },
 
     updateUrlParams() {
@@ -1227,7 +1237,8 @@ export default {
         children,
         startDate: minStartDate,
         endDate: maxEndDate,
-        man_days: manDays
+        man_days: manDays,
+        daysOff: this.daysOffByPerson[person.id]
       })
       return personElement
     },
