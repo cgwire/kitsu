@@ -905,7 +905,7 @@ export default {
     getDayOffRange(daysOff = []) {
       return daysOff.reduce((range, dayOff) => {
         const startDate = new Date(dayOff.date)
-        const endDate = new Date(dayOff.end_date)
+        const endDate = new Date(dayOff.end_date || dayOff.date)
         while (startDate <= endDate) {
           range.push({
             ...dayOff,
