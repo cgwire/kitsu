@@ -215,12 +215,12 @@ export default {
       .then(body => Promise.resolve(body.otp_recovery_codes))
   },
 
-  loadTodos(callback) {
-    client.get('/api/data/user/tasks', callback)
+  loadTodos() {
+    return client.pget('/api/data/user/tasks')
   },
 
-  loadDone(callback) {
-    client.get('/api/data/user/done-tasks', callback)
+  loadDone() {
+    return client.pget('/api/data/user/done-tasks')
   },
 
   loadTasksToCheck() {

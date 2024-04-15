@@ -438,15 +438,14 @@ export default {
 
     async loadData(forced = false) {
       await this.loadTodos({
-        forced,
         date: this.selectedDate,
-        callback: () => {
-          this.$nextTick(() => {
-            this.todoList?.setScrollPosition(this.todoListScrollPosition)
-          })
-          this.resizeHeaders()
-        }
+        forced
       })
+      this.$nextTick(() => {
+        this.todoList?.setScrollPosition(this.todoListScrollPosition)
+      })
+      this.resizeHeaders()
+
       this.daysOff = await this.loadAggregatedPersonDaysOff({
         personId: this.user.id
       })
