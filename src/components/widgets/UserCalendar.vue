@@ -175,7 +175,7 @@ export default {
             title: this.$t('timesheets.day_off'),
             display: 'background',
             start: startDate.toISOString().slice(0, 10),
-            backgroundColor: '#ffffe0', // #ddd
+            backgroundColor: '#ffffe0',
             extendedProps: {
               isOff: true,
               description
