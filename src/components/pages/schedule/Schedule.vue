@@ -1418,8 +1418,8 @@ export default {
 
     dateDiff(startDate, endDate) {
       if (startDate.isSame(endDate)) return 0
-      const first = startDate.clone()
-      const last = endDate.clone()
+      const first = startDate.clone().startOf('day')
+      const last = endDate.clone().endOf('day')
       const diff = last.diff(first, 'days')
       return diff
     },
