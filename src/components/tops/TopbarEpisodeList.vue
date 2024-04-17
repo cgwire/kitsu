@@ -228,7 +228,7 @@ export default {
   border-bottom-right-radius: 5px;
   text-align: left;
   margin-left: -11px;
-  max-height: 400px;
+  max-height: 600px;
   min-width: 120px;
   overflow-y: auto;
   padding: 5px;
