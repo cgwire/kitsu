@@ -292,7 +292,7 @@ export default {
         loading: false,
         man_days: estimation,
         editable: true,
-        unresizable: true,
+        unresizable: false,
         color: taskType.color,
         parentElement
       }

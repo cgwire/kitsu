@@ -359,8 +359,8 @@
                 v-show="!hideRoot"
               >
                 <div
+                  class="timebar-wrapper"
                   :class="{
-                    'timebar-wrapper': true,
                     thinner: multiline
                   }"
                   :title="
@@ -373,11 +373,13 @@
                   "
                   :style="timebarStyle(rootElement, true)"
                 >
-                  <div class="timebar" v-show="isVisible(rootElement)">
+                  <div
+                    class="timebar"
+                    v-show="isVisible(rootElement)"
+                    v-if="rootElement.editable"
+                  >
                     <div
-                      :class="{
-                        'timebar-left-hand': rootElement.editable
-                      }"
+                      class="timebar-left-hand"
                       @mousedown="moveTimebarLeftSide(rootElement, $event)"
                       @touchstart="moveTimebarLeftSide(rootElement, $event)"
                     ></div>
@@ -387,9 +389,7 @@
                       @touchstart="moveTimebar(rootElement, $event)"
                     ></div>
                     <div
-                      :class="{
-                        'timebar-right-hand': rootElement.editable
-                      }"
+                      class="timebar-right-hand"
                       @mousedown="moveTimebarRightSide(rootElement, $event)"
                       @touchstart="moveTimebarRightSide(rootElement, $event)"
                     ></div>
@@ -414,9 +414,8 @@
                   :class="{ multiline }"
                   :key="'entity-line-' + childElement.id"
                   :style="
-                    multiline
-                      ? timelineMultilineStyle(childElement, rootElement)
-                      : {}
+                    multiline &&
+                    timelineMultilineStyle(childElement, rootElement)
                   "
                   v-for="childElement in rootElement.children"
                 >
@@ -434,39 +433,46 @@
                       childElement.endDate.format('DD-MM') +
                       ')'
                     "
-                    :style="timebarChildStyle(childElement, rootElement)"
+                    :style="
+                      timebarChildStyle(childElement, rootElement, multiline)
+                    "
                     v-show="isVisible(childElement)"
                   >
                     <div
-                      :class="{
-                        'timebar-left-hand':
-                          childElement.editable && !childElement.unresizable
-                      }"
+                      class="timebar-left-hand"
                       @mousedown="moveTimebarLeftSide(childElement, $event)"
                       @touchstart="moveTimebarLeftSide(childElement, $event)"
+                      v-if="
+                        !isChangeDates &&
+                        selection.length === 1 &&
+                        selection.includes(childElement) &&
+                        childElement.editable &&
+                        !childElement.unresizable
+                      "
                     ></div>
                     <div
-                      class="filler"
+                      class="timebar-center"
+                      :class="{ ellipsis: multiline }"
                       @mousedown="moveTimebar(childElement, $event)"
                       @touchstart="moveTimebar(childElement, $event)"
                     >
-                      <div
-                        class="ellipsis"
-                        :style="{ width: `${getTimebarWidth(childElement)}px` }"
-                        v-if="multiline"
-                      >
+                      <template v-if="multiline">
                         <b>{{ childElement.project_name }}</b>
                         <br />
                         {{ childElement.name }}
-                      </div>
+                      </template>
                     </div>
                     <div
-                      :class="{
-                        'timebar-right-hand':
-                          childElement.editable && !childElement.unresizable
-                      }"
+                      class="timebar-right-hand"
                       @mousedown="moveTimebarRightSide(childElement, $event)"
                       @touchstart="moveTimebarRightSide(childElement, $event)"
+                      v-if="
+                        !isChangeDates &&
+                        selection.length === 1 &&
+                        selection.includes(childElement) &&
+                        childElement.editable &&
+                        !childElement.unresizable
+                      "
                     ></div>
                   </div>
                 </div>
@@ -543,7 +549,8 @@ export default {
       isBrowsingX: false,
       isBrowsingY: false,
       isChangeDates: false,
-      isChangeSize: false,
+      isChangeStartDate: false,
+      isChangeEndDate: false,
       milestoneToEdit: {
         date: moment()
       },
@@ -932,7 +939,9 @@ export default {
     },
 
     refreshItemPositions(rootElement) {
-      setItemPositions(rootElement.children, 'line')
+      if (rootElement?.children?.length) {
+        setItemPositions(rootElement.children, 'line')
+      }
     },
 
     isVisible(timeElement) {
@@ -1163,8 +1172,13 @@ export default {
       const newStartDate = this.isWeekMode
         ? this.weeksAvailable[currentIndex]
         : this.displayedDays[currentIndex]
-      if (this.isValidItemDates(newStartDate, this.currentElement.endDate)) {
-        this.currentElement.startDate = newStartDate
+
+      if (
+        !newStartDate.isSame(this.currentElement.startDate) &&
+        this.isValidItemDates(newStartDate, this.currentElement.endDate)
+      ) {
+        this.currentElement.startDate = newStartDate.clone()
+        this.refreshItemPositions(this.currentElement.parentElement)
         this.resetSelection([this.currentElement])
       }
     },
@@ -1212,8 +1226,13 @@ export default {
       const newEndDate = this.isWeekMode
         ? this.weeksAvailable[currentIndex]
         : this.displayedDays[currentIndex]
-      if (this.isValidItemDates(this.currentElement.startDate, newEndDate)) {
-        this.currentElement.endDate = newEndDate
+
+      if (
+        !newEndDate.isSame(this.currentElement.endDate) &&
+        this.isValidItemDates(this.currentElement.startDate, newEndDate)
+      ) {
+        this.currentElement.endDate = newEndDate.clone()
+        this.refreshItemPositions(this.currentElement.parentElement)
         this.resetSelection([this.currentElement])
       }
     },
@@ -1399,12 +1418,23 @@ export default {
       document.body.style.cursor = 'default'
       if (this.currentElement) {
         if (this.initialClientX !== this.getClientX(event)) {
+          // on moving or resizing selected items
           this.selection.forEach(item => {
             this.$emit('item-changed', item)
           })
+          // clear selection after moving a single item
+          if (this.isChangeDates && this.selection.length === 1) {
+            this.resetSelection()
+          }
+        } else {
+          // reset multi-selection when clicking on a single item
+          const isCtrlKey = event.ctrlKey || event.metaKey
+          if (this.isChangeDates && this.selection.length > 1 && !isCtrlKey) {
+            this.resetSelection([this.currentElement])
+          }
         }
       } else {
-        // reset selection if click on timeline only
+        // clear the selection when clicking outside an item
         let target = event.target
         while (target && target !== this.timeline) {
           target = target.parentNode
@@ -1529,13 +1559,14 @@ export default {
 
     timelineMultilineStyle(timeElement) {
       return {
-        top: `${timeElement.line * 40 + 5}px`
+        top: `${timeElement.line * 40 + 5}px`,
+        left: `${this.getTimebarLeft(timeElement)}px`
       }
     },
 
-    timebarChildStyle(timeElement, rootElement) {
+    timebarChildStyle(timeElement, rootElement, multiline = false) {
       return {
-        left: this.getTimebarLeft(timeElement) + 'px',
+        left: !multiline && `${this.getTimebarLeft(timeElement)}px`,
         width: this.getTimebarWidth(timeElement) + 'px',
         cursor: timeElement.editable
           ? this.reassignable
@@ -1932,12 +1963,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     margin-bottom: 0;
     font-size: 1em;
 
-    &:nth-child(even) {
-      background: transparent;
-    }
-
-    &:nth-child(odd) {
-      background: rgba(200, 200, 200, 0.2);
+    &:not(.multiline) {
+      &:nth-child(odd) {
+        background: rgba(200, 200, 200, 0.2);
+      }
     }
   }
 }
@@ -2067,7 +2096,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
           width: auto;
 
           .timebar {
-            height: calc(100% - 2px);
+            height: calc(100% - 3px);
             padding: 2px;
             overflow: hidden;
             white-space: nowrap;
@@ -2084,7 +2113,11 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
           z-index: 101;
 
           &.selected {
-            box-shadow: 0 0 2px 1px rgb(255 0 0 / 60%);
+            box-shadow: 0 0 0 3px var(--background-selected);
+          }
+
+          .timebar-center {
+            width: 100%;
           }
 
           .timebar-left-hand {
@@ -2100,7 +2133,8 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
         .timebar-wrapper {
           .timebar {
-            height: 30px;
+            width: 100%;
+            height: 100%;
           }
         }
         &.child-line {
@@ -2112,9 +2146,25 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
           }
 
           .timebar {
+            position: relative;
+            overflow: initial;
             background: rgba(0, 0, 50, 0.2);
             top: 13px;
             font-size: 0.6em;
+          }
+
+          .timebar-left-hand,
+          .timebar-right-hand {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+          }
+          .timebar-left-hand {
+            left: -12px;
+          }
+          .timebar-right-hand {
+            right: -12px;
           }
         }
       }
@@ -2393,10 +2443,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   top: 4px;
   padding: 0;
   border-radius: 4px;
-
-  .timebar {
-    width: calc(100% - 0.2em);
-  }
 
   &.thinner {
     height: 14px;
