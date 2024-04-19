@@ -84,9 +84,9 @@ import { sortTaskTypeScheduleItems } from '@/lib/sorting'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import { daysToMinutes, parseDate } from '@/lib/time'
 
-import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import TaskInfo from '@/components/sides/TaskInfo'
-import Schedule from '@/components/pages/schedule/Schedule'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import Schedule from '@/components/widgets/Schedule.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'production-schedule',

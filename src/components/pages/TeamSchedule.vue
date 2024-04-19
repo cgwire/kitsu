@@ -97,10 +97,11 @@ import { parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import PeopleField from '@/components/widgets/PeopleField'
-import Schedule from '@/components/pages/schedule/Schedule'
+
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import Schedule from '@/components/widgets/Schedule.vue'
 
 export default {
   name: 'team-schedule',
