@@ -1,20 +1,6 @@
 <template>
   <tr class="datatable-row" :key="taskType.id">
     <task-type-cell :task-type="taskType" />
-    <!--td class="start-date">
-   <date-field
-      :disabled-dates="productionTimeRange"
-      :can-delete="false"
-      v-model="startDate"
-   />
-  </td>
-  <td class="end-date">
-   <date-field
-      :disabled-dates="endDateTimeRange"
-      :can-delete="false"
-      v-model="endDate"
-   />
-  </td-->
     <td class="remove">
       <button
         class="button"
@@ -30,7 +16,6 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
-// import DateField from '@/components/widgets/DateField'
 import TaskTypeCell from '@/components/cells/TaskTypeCell'
 
 import { parseDate } from '@/lib/time'
@@ -39,7 +24,6 @@ export default {
   name: 'production-task-type',
 
   components: {
-    // DateField,
     TaskTypeCell
   },
 
