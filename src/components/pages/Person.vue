@@ -17,79 +17,14 @@
         </div>
 
         <template v-if="!person.is_bot && isCurrentUserAllowed">
-          <div ref="tabs" class="task-tabs tabs">
-            <ul>
-              <li :class="{ 'is-active': isActiveTab('todos') }">
-                <router-link
-                  :to="{
-                    name: 'person',
-                    params: {
-                      person_id: person.id
-                    }
-                  }"
-                >
-                  {{ $t('tasks.current') }}
-                </router-link>
-              </li>
-              <li :class="{ 'is-active': isActiveTab('board') }">
-                <router-link
-                  :to="{
-                    name: 'person-tab',
-                    params: {
-                      tab: 'board',
-                      person_id: person.id
-                    }
-                  }"
-                >
-                  {{ $t('board.title') }}
-                </router-link>
-              </li>
-              <li :class="{ 'is-active': isActiveTab('done') }">
-                <router-link
-                  :to="{
-                    name: 'person-tab',
-                    params: {
-                      tab: 'done',
-                      person_id: person.id
-                    }
-                  }"
-                >
-                  {{ $t('tasks.done') }} ({{ displayedPersonDoneTasks.length }})
-                </router-link>
-              </li>
-              <li
-                :class="{ 'is-active': isActiveTab('timesheets') }"
-                v-if="isCurrentUserManager"
-              >
-                <router-link
-                  :to="{
-                    name: 'person-tab',
-                    params: {
-                      tab: 'timesheets',
-                      person_id: person.id
-                    }
-                  }"
-                >
-                  {{ $t('timesheets.title') }}
-                </router-link>
-              </li>
-              <li :class="{ 'is-active': isActiveTab('schedule') }">
-                <router-link
-                  :to="{
-                    name: 'person-tab',
-                    params: {
-                      tab: 'schedule',
-                      person_id: person.id
-                    }
-                  }"
-                >
-                  {{ $t('schedule.title') }}
-                </router-link>
-              </li>
-            </ul>
-          </div>
+          <route-section-tabs
+            class="section-tabs mt1"
+            :activeTab="activeTab"
+            :route="$route"
+            :tabs="todoTabs"
+          />
 
-          <div ref="search" class="flexrow">
+          <div ref="search" class="flexrow" v-if="!isActiveTab('calendar')">
             <search-field
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
@@ -121,7 +56,7 @@
             />
           </div>
 
-          <div ref="query" class="query-list">
+          <div ref="query" class="query-list" v-if="!isActiveTab('calendar')">
             <search-query-list
               :queries="personTaskSearchQueries"
               type="person"
@@ -132,12 +67,25 @@
 
           <todos-list
             ref="task-list"
-            :tasks="sortedTasks"
+            :empty-text="$t('people.no_task_assigned')"
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
             :selection-grid="personTaskSelectionGrid"
+            :tasks="notPendingTasks"
             @scroll="setPersonTasksScrollPosition"
             v-if="isActiveTab('todos')"
+          />
+
+          <div v-if="isActiveTab('pending')">&nbsp;</div>
+          <todos-list
+            ref="pending-list"
+            :empty-text="$t('people.no_task_assigned')"
+            :is-loading="isTasksLoading"
+            :is-error="isTasksLoadingError"
+            :selection-grid="personTaskSelectionGrid"
+            :tasks="pendingTasks"
+            @scroll="setPersonTasksScrollPosition"
+            v-if="isActiveTab('pending')"
           />
 
           <todos-list
@@ -158,6 +106,13 @@
             :user="user"
             :production="selectedProduction"
             v-else-if="isActiveTab('board')"
+          />
+
+          <user-calendar
+            ref="user-calendar"
+            class="calendar"
+            :tasks="sortedTasks"
+            v-if="isActiveTab('calendar')"
           />
 
           <timesheet-list
@@ -231,12 +186,14 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/pages/schedule/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import UserCalendar from '@/components/widgets/UserCalendar.vue'
 
 export default {
   name: 'person',
@@ -249,12 +206,14 @@ export default {
     ComboboxProduction,
     KanbanBoard,
     PeopleAvatar,
+    RouteSectionTabs,
     Schedule,
     SearchField,
     SearchQueryList,
     TaskInfo,
     TodosList,
-    TimesheetList
+    TimesheetList,
+    UserCalendar
   },
 
   data() {
@@ -430,6 +389,18 @@ export default {
       }
     },
 
+    pendingTasks() {
+      return this.sortedTasks.filter(
+        task => task.taskStatus.is_feedback_request
+      )
+    },
+
+    notPendingTasks() {
+      return this.sortedTasks.filter(
+        task => !task.taskStatus.is_feedback_request
+      )
+    },
+
     tasksStartDate() {
       if (this.scheduleTasks.length) {
         return getFirstStartDate(this.scheduleTasks)
@@ -537,11 +508,58 @@ export default {
       return this.openProductions.filter(production =>
         production.team.includes(this.person.id)
       )
+    },
+
+    pendingTasks() {
+      return this.sortedTasks.filter(
+        task => task.taskStatus.is_feedback_request
+      )
+    },
+
+    todoTabs() {
+      const hasAvailableBoard = this.openProductions.some(
+        production => this.getBoardStatusesByProduction(production).length
+      )
+      return [
+        {
+          label: this.$t('main.tasks'),
+          name: 'todos'
+        },
+        hasAvailableBoard
+          ? {
+              label: this.$t('board.title'),
+              name: 'board'
+            }
+          : undefined,
+        {
+          label: this.$t('tasks.calendar'),
+          name: 'calendar'
+        },
+        {
+          label: this.$t('tasks.schedule'),
+          name: 'schedule'
+        },
+        {
+          label: `${this.$t('tasks.pending')} (${this.pendingTasks.length})`,
+          name: 'pending'
+        },
+        {
+          label: `${this.$t('tasks.validated')} (${
+            this.displayedPersonDoneTasks.length
+          })`,
+          name: 'done'
+        },
+        {
+          label: this.$t('timesheets.title'),
+          name: 'timesheets'
+        }
+      ].filter(Boolean)
     }
   },
 
   methods: {
     ...mapActions([
+      'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
       'loadPersonTasks',
       'setPersonTasksSearch',
@@ -717,9 +735,18 @@ export default {
     },
 
     updateActiveTab() {
-      const availableTabs = ['board', 'done', 'timesheets', 'schedule']
-      const currentTab = this.$route.params.tab
-      this.activeTab = availableTabs.includes(currentTab) ? currentTab : 'todos'
+      const availableSections = [
+        'board',
+        'calendar',
+        'done',
+        'pending',
+        'schedule',
+        'timesheets'
+      ]
+      const currentSection = this.$route.query.section
+      this.activeTab = availableSections.includes(currentSection)
+        ? currentSection
+        : 'todos'
 
       if (this.activeTab === 'board') {
         const currentProduction = this.userOpenProductions.find(
@@ -736,6 +763,8 @@ export default {
           })
         }
       }
+
+      this.clearSelectedTasks()
     },
 
     onTimeSpentChange(timeSpentInfo) {
@@ -824,6 +853,10 @@ export default {
       this.$nextTick(() => {
         this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
       })
+    },
+
+    '$route.query.section'() {
+      this.updateActiveTab()
     },
 
     productionId() {
@@ -918,5 +951,18 @@ export default {
 
 .field {
   margin-bottom: 0;
+}
+
+.tabs {
+  min-height: 30px;
+}
+
+.page-header {
+  margin-top: .5em;
+}
+
+.calendar {
+  flex: 1;
+  overflow: auto;
 }
 </style>

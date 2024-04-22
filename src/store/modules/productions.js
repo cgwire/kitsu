@@ -114,7 +114,7 @@ const productionEntityTaskTypeIds = entityType => (state, getters) => {
 
 const productionEntityTaskTypes = entityType => (state, getters) => {
   return getters.productionTaskTypes.filter(
-    taskType => taskType.for_entity === entityType
+    taskType => taskType && taskType.for_entity === entityType
   )
 }
 

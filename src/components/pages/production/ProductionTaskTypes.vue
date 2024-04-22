@@ -1,64 +1,102 @@
 <template>
-  <div class="columns">
-    <div class="column">
-      <template v-if="remainingTaskTypes.length > 0">
-        <div class="flexrow mt1 mb1 add-task-type">
-          <combobox-task-type
-            class="flexrow-item selector"
-            :task-type-list="remainingTaskTypes"
-            v-model="taskTypeId"
-          />
-          <button
-            class="button flexrow-item"
-            :disabled="loading.scheduleTimeDelete"
-            @click="addTaskType"
+  <div>
+    <div>
+
+      <route-section-tabs
+        class="section-tabs"
+        :activeTab="activeTab"
+        :route="$route"
+        :tabs="taskTypeTabs"
+      />
+      <div class="columns">
+        <div class="column">
+          <template v-if="remainingTaskTypes.length > 0">
+            <div class="flexrow mt1 mb1 add-task-type">
+              <combobox-task-type
+                class="flexrow-item selector"
+                :task-type-list="remainingTaskTypesForEntity"
+                v-model="taskTypeId"
+              />
+              <button
+                class="button flexrow-item"
+                :disabled="loading.scheduleTimeDelete"
+                @click="addTaskType"
+              >
+                {{ $t('main.add') }}
+              </button>
+            </div>
+          </template>
+
+          <p
+            v-if="errors.delete || errors.scheduleTimeUpdate"
+            class="error mt1 mb1"
           >
-            {{ $t('main.add') }}
-          </button>
+            {{ $t('productions.edit_error') }}
+          </p>
+          <div
+            class="box"
+            v-if="isEmpty(currentProduction.task_types)"
+          >
+            {{ $t('settings.production.empty_list') }}
+          </div>
+
+          <div
+            v-else
+            v-for="(taskListObject, index) in taskTypeGroups"
+            :key="index"
+          >
+            <table
+              class="datatable list"
+              v-if="
+                taskListObject.list.length > 0 &&
+                taskListObject.entity === activeTab
+              "
+            >
+              <draggable
+                v-model="taskListObject.list"
+                draggable=".task-type"
+                class="datatable-body"
+                tag="tbody"
+                @end="updatePriorities(taskListObject.list)"
+              >
+                <production-task-type
+                  class="task-type"
+                  :key="taskTypeData.taskType.id"
+                  :task-type="taskTypeData.taskType"
+                  :schedule-item="taskTypeData.scheduleItem"
+                  @date-changed="onDateChanged"
+                  @remove="removeTaskType"
+                  v-for="taskTypeData in taskListObject.list"
+                />
+              </draggable>
+            </table>
+            <p
+              class="empty"
+              v-if="
+                taskListObject.list.length === 0 &&
+                taskListObject.entity === activeTab
+              "
+            >
+              {{ $t('task_types.no_task_types') }}
+            </p>
+          </div>
         </div>
-      </template>
-
-      <p
-        v-if="errors.delete || errors.scheduleTimeUpdate"
-        class="error mt1 mb1"
-      >
-        {{ $t('productions.edit_error') }}
-      </p>
-
-      <div class="box" v-if="isEmpty(currentProduction.task_types)">
-        {{ $t('settings.production.empty_list') }}
-      </div>
-
-      <div
-        v-else
-        v-for="(taskListObject, index) in taskTypeGroups"
-        :key="index"
-      >
-        <h2 class="section-title">
-          {{ taskListObject.title }}
-        </h2>
-        <table class="datatable list" v-if="taskListObject.list.length > 0">
-          <draggable
-            v-model="taskListObject.list"
-            draggable=".task-type"
-            class="datatable-body"
-            tag="tbody"
-            @end="updatePriorities(taskListObject.list)"
+        <div class="column">
+          <setting-importer
+            :is-import-loading="loading.import"
+            :items="remainingTaskTypesForEntity"
+            :loading-import="loading.import"
+            @import-from-production="importTaskTypesFromProduction"
+            @import-item="addTaskType"
           >
-            <production-task-type
-              class="task-type"
-              :key="taskTypeData.taskType.id"
-              :task-type="taskTypeData.taskType"
-              :schedule-item="taskTypeData.scheduleItem"
-              @date-changed="onDateChanged"
-              @remove="removeTaskType"
-              v-for="taskTypeData in taskListObject.list"
-            />
-          </draggable>
-        </table>
-        <p class="empty" v-if="taskListObject.list.length === 0">
-          {{ $t('task_types.no_task_types') }}
-        </p>
+            <template v-slot:item-line="{ item }">
+              <task-type-name
+                class="pointer"
+                :task-type="item"
+              />
+            </template>
+          </setting-importer>
+        </div>
       </div>
     </div>
   </div>
@@ -70,9 +108,13 @@ import { mapGetters, mapActions } from 'vuex'
 import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
+import stringHelper from '@/lib/string'
 
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
+import SettingImporter from '@/components/widgets/SettingImporter'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'production-task-types',
@@ -80,11 +122,15 @@ export default {
   components: {
     ComboboxTaskType,
     draggable,
-    ProductionTaskType
+    ProductionTaskType,
+    RouteSectionTabs,
+    SettingImporter,
+    TaskTypeName
   },
 
   data() {
     return {
+      activeTab: 'assets',
       assetTaskTypes: { list: [] },
       editTaskTypes: { list: [] },
       episode_span: 0,
@@ -93,6 +139,7 @@ export default {
       shotTaskTypes: { list: [] },
       taskTypeId: '',
       loading: {
+        import: false,
         episode_span: false,
         scheduleTimeUpdate: false,
         scheduleTimeDelete: false
@@ -106,8 +153,20 @@ export default {
   },
 
   mounted() {
-    if (this.remainingTaskTypes.length > 0) {
-      this.taskTypeId = this.remainingTaskTypes[0].id
+    if (this.remainingTaskTypesForEntity.length > 0) {
+      this.taskTypeId = this.remainingTaskTypesForEntity[0].id
+    } else {
+      this.taskTypeId = null
+    }
+
+    if (this.$route.query.section) {
+      this.activeTab = this.$route.query.section
+    } else {
+      if (this.isShotsOnly) {
+        this.activeTab = 'shots'
+      } else {
+        this.activeTab = 'assets'
+      }
     }
 
     this.resetDisplayedTaskTypes()
@@ -127,6 +186,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'currentScheduleItems',
+      'getProductionTaskTypes',
       'productionTaskTypes',
       'productionAssetTaskTypes',
       'productionShotTaskTypes',
@@ -143,6 +203,15 @@ export default {
       return sortByName(
         this.taskTypes.filter(
           t => !this.currentProduction.task_types.includes(t.id)
+        )
+      )
+    },
+
+    remainingTaskTypesForEntity() {
+      console.log(this.remainingTaskTypes)
+      return sortByName(
+        this.remainingTaskTypes.filter(
+          t => `${t.for_entity.toLowerCase()}s` === this.activeTab
         )
       )
     },
@@ -169,6 +238,31 @@ export default {
         ])
       }
       return groups
+    },
+
+    taskTypeTabs() {
+      return [
+        {
+          label: this.$t('assets.title'),
+          name: 'assets'
+        },
+        {
+          label: this.$t('shots.title'),
+          name: 'shots'
+        },
+        {
+          label: this.$t('sequences.title'),
+          name: 'sequences'
+        },
+        {
+          label: this.$t('episodes.title'),
+          name: 'episodes'
+        },
+        {
+          label: this.$t('edits.title'),
+          name: 'edits'
+        }
+      ]
     }
   },
 
@@ -209,6 +303,7 @@ export default {
           }
         })
         this[`${type.toLowerCase()}TaskTypes`] = {
+          entity: `${type.toLowerCase()}s`,
           title: this.$t(`${type.toLowerCase()}s.title`),
           list
         }
@@ -225,22 +320,29 @@ export default {
       return item
     },
 
-    async addTaskType() {
+    async addTaskType(taskType) {
+      const taskTypeId = taskType && taskType.id ? taskType.id : this.taskTypeId
       await this.addTaskTypeToProduction({
-        taskTypeId: this.taskTypeId,
+        taskTypeId: taskTypeId,
         priority: this.assetTaskTypes.length
       })
-      await this.createScheduleItem({
-        startDate: moment(),
-        endDate: moment(),
-        project_id: this.currentProduction.id,
-        task_type_id: this.taskTypeId
-      })
-      if (this.remainingTaskTypes.length > 0) {
-        this.taskTypeId = this.remainingTaskTypes[0].id
-      } else {
-        this.taskTypeId = ''
+      try {
+        await this.createScheduleItem({
+          startDate: moment(),
+          endDate: moment(),
+          project_id: this.currentProduction.id,
+          task_type_id: taskTypeId
+        })
+      } catch (err) {
+        console.error(err)
       }
+
+      if (this.remainingTaskTypesForEntity.length > 0) {
+        this.taskTypeId = this.remainingTaskTypesForEntity[0].id
+      } else {
+        this.taskTypeId = null
+      }
+
       this.resetDisplayedTaskTypes()
     },
 
@@ -259,8 +361,10 @@ export default {
         return
       }
       await this.$nextTick()
-      if (this.remainingTaskTypes.length > 0) {
-        this.taskTypeId = this.remainingTaskTypes[0].id
+      if (this.remainingTaskTypesForEntity.length > 0) {
+        this.taskTypeId = this.remainingTaskTypesForEntity[0].id
+      } else {
+        this.taskTypeId = null
       }
       this.resetDisplayedTaskTypes()
     },
@@ -326,6 +430,26 @@ export default {
       })
       await this.savePriorities(forms)
       await this.loadContext()
+    },
+
+    async importTaskTypesFromProduction(production) {
+      this.loading.import = true
+      const taskTypes = this.getProductionTaskTypes(production.id)
+        .filter(t => `${t.for_entity.toLowerCase()}s` === this.activeTab)
+      const entityName = stringHelper.capitalize(this.activeTab).slice(0, -1)
+      await this[`production${entityName}TaskTypes`].forEach(async taskType => {
+        const scheduleItem = this.getScheduleItemForTaskType(taskTypes[0])
+        await this.removeTaskType({
+          taskType,
+          scheduleItem
+        })
+      })
+      setTimeout(async () => {
+        await taskTypes.forEach(async taskType => {
+          await this.addTaskType(taskType)
+        })
+        this.loading.import = false
+      }, 500)
     }
   },
 
@@ -337,6 +461,19 @@ export default {
         this.resetDisplayedTaskTypes()
       },
       deep: true
+    },
+
+    $route() {
+      if (this.$route.query.section) {
+        this.activeTab = this.$route.query.section
+        this.$nextTick(() => {
+          if (this.remainingTaskTypesForEntity.length > 0) {
+            this.taskTypeId = this.remainingTaskTypesForEntity[0].id
+          } else {
+            this.taskTypeId = null
+          }
+        })
+      }
     }
   }
 }
@@ -418,5 +555,13 @@ h2 {
 
 .task-type[draggable='true'] {
   cursor: grabbing;
+}
+
+.column:last-child {
+  padding: 1em;
+}
+
+.pointer {
+  cursor: pointer;
 }
 </style>
