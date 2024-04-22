@@ -199,7 +199,7 @@ export default {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   margin-left: -6px;
-  max-height: 600px;
+  max-height: min(80vh, 600px);
   min-width: 200px;
   overflow-y: auto;
   padding: 5px;
