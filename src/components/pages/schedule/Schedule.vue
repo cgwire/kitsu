@@ -43,7 +43,11 @@
               v-show="!hideRoot"
             >
               <span
-                class="expand flexrow-item mr1"
+                class="expand flexrow-item"
+                :style="{
+                  color: isDarkTheme ? '#EEE' : '#999',
+                  'margin-top': '4px'
+                }"
                 @click="expandRootElement(rootElement)"
               >
                 <chevron-right-icon v-if="!rootElement.expanded" />
@@ -74,6 +78,9 @@
               <router-link
                 class="filler flexrow-item root-element-name ellipsis"
                 :title="rootElement.name"
+                :style="{
+                  'border-left': rootElement.avatar ? null : '4px solid ' + rootElement.color,
+                }"
                 :to="rootElement.route"
                 v-else
               >
@@ -1479,9 +1486,9 @@ export default {
     entityLineStyle(timeElement, root = false, header = false) {
       const style = {}
       let color = timeElement.color
-      if (root && timeElement.full_name) {
+      if (root) {
         // is a person
-        color = this.isDarkTheme ? '#222' : '#CCC'
+        color = this.isDarkTheme ? '#222' : '#EEF'
       }
       if (root) {
         style['border-left'] = '1px solid ' + color
@@ -1493,6 +1500,11 @@ export default {
       }
       if (timeElement.expanded) {
         style['margin-bottom'] = '0'
+      }
+      style['border-left'] = '1px solid ' + color
+      style.color = this.isDarkTheme ? '#EEE' : '#111'
+      if (!this.isDarkTheme) {
+        style['border-color'] = '#BBE'
       }
       return style
     },
@@ -1587,10 +1599,11 @@ export default {
       let color = rootElement.color
       if (rootElement.full_name) {
         // is a person
-        color = this.isDarkTheme ? '#222' : '#CCC'
+        // color = this.isDarkTheme ? '#222' : '#CCC'
       }
       const style = {
-        'border-bottom': `1px solid ${color}`
+        'border-bottom': `1px solid ${color}`,
+        'border-left': `1px solid ${color}`
       }
       if (isMultiline) {
         const nbLines = this.getNbLines(rootElement)
@@ -1907,6 +1920,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   .expand {
+    color: white;
     cursor: pointer;
     margin-right: 0.5em;
   }
@@ -2190,7 +2204,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   .avatar {
-    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.3);
     margin: 0;
     padding: 0;
   }
@@ -2317,8 +2330,13 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .root-element-name {
   padding-left: 10px;
-  color: $white;
   white-space: nowrap;
+
+  color: #222;
+
+  .dark & {
+    color: $white;
+  }
 }
 
 .child-element-name {

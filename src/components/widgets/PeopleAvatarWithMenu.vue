@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { UserIcon, UserMinusIcon } from 'vue-feather-icons'
 
 export default {
@@ -77,8 +78,14 @@ export default {
   },
 
   computed: {
+    ...mapGetters([
+      'isDarkTheme',
+    ]),
+
     style() {
       return {
+        color: this.isDarkTheme ? '#333' : '#FFF',
+        'font-weight': this.isDarkTheme ? 'bold' : 'normal',
         width: `${this.size}px`,
         height: `${this.size}px`,
         fontSize: `${this.fontSize}px`,
