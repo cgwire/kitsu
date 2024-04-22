@@ -274,53 +274,33 @@ const actions = {
     return peopleApi.newRecoveryCodes(coerceTwoFactorPayload(twoFactorPayload))
   },
 
-  loadTodos({ commit, state, rootGetters }, { callback, forced, date }) {
+  async loadTodos({ commit, state, rootGetters }, { date, forced = false }) {
     const userFilters = rootGetters.userFilters
     const taskTypeMap = rootGetters.taskTypeMap
 
     if (state.todos.length === 0 || forced) {
       commit(USER_LOAD_TODOS_START)
-      peopleApi.loadTodos((err, tasks) => {
-        if (err) {
-          commit(USER_LOAD_TODOS_ERROR)
-          if (callback) callback(err)
-        } else {
-          peopleApi.loadDone((err, doneTasks) => {
-            if (err) {
-              commit(USER_LOAD_TODOS_ERROR)
-            } else {
-              commit(USER_LOAD_DONE_TASKS_END, doneTasks)
-            }
-
-            return peopleApi
-              .loadTimeSpents(date)
-              .then(timeSpents => {
-                commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
-                commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
-                commit(REGISTER_USER_TASKS, { tasks: tasks.concat(doneTasks) })
-                return peopleApi.getDayOff(state.user.id, date)
-              })
-              .then(dayOff => {
-                commit(PERSON_SET_DAY_OFF, dayOff)
-                if (callback) callback()
-              })
-              .catch(err => {
-                console.error(err)
-                commit(USER_LOAD_TODOS_ERROR)
-              })
-          })
-        }
-      })
-    } else {
-      if (callback) callback()
+      try {
+        const tasks = await peopleApi.loadTodos()
+        const doneTasks = await peopleApi.loadDone()
+        const timeSpents = await peopleApi.loadTimeSpents(date)
+        const dayOff = await peopleApi.getDayOff(state.user.id, date)
+        commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
+        commit(REGISTER_USER_TASKS, { tasks: tasks.concat(doneTasks) })
+        commit(USER_LOAD_DONE_TASKS_END, doneTasks)
+        commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
+        commit(PERSON_SET_DAY_OFF, dayOff)
+      } catch (err) {
+        console.error(err)
+        commit(USER_LOAD_TODOS_ERROR)
+      }
     }
   },
 
-  loadTasksToCheck({ commit }) {
-    return peopleApi.loadTasksToCheck().then(tasks => {
-      commit(REGISTER_USER_TASKS, { tasks })
-      return Promise.resolve(tasks)
-    })
+  async loadTasksToCheck({ commit }) {
+    const tasks = await peopleApi.loadTasksToCheck()
+    commit(REGISTER_USER_TASKS, { tasks })
+    return tasks
   },
 
   async uploadAvatar({ commit, state }) {

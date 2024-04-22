@@ -138,6 +138,7 @@
           <div v-else-if="isActiveTab('schedule')">
             <schedule
               ref="schedule-widget"
+              :days-off="daysOff"
               :start-date="tasksStartDate.clone().add(-3, 'months')"
               :end-date="tasksEndDate.clone().add(3, 'months')"
               :hierarchy="scheduleItems"
@@ -219,6 +220,7 @@ export default {
     return {
       activeTab: 'todos',
       currentSort: 'entity_name',
+      daysOff: [],
       dayOffError: false,
       isTasksLoading: false,
       isTasksLoadingError: false,
@@ -448,7 +450,8 @@ export default {
         Object.assign(rootElement, {
           startDate: rootStartDate,
           endDate: rootEndDate,
-          man_days: manDays
+          man_days: manDays,
+          daysOff: this.daysOff
         })
       })
       return rootElements
@@ -557,6 +560,7 @@ export default {
   methods: {
     ...mapActions([
       'clearSelectedTasks',
+      'loadAggregatedPersonDaysOff',
       'loadPersonTasks',
       'setPersonTasksSearch',
       'savePersonTasksSearch',
@@ -567,6 +571,12 @@ export default {
       'unsetDayOff',
       'updateTask'
     ]),
+
+    onAssignation(eventData) {
+      if (this.person.id === eventData.person_id) {
+        this.loadPerson(this.person.id)
+      }
+    },
 
     resetScheduleHeight() {
       this.$nextTick(() => {
@@ -652,7 +662,7 @@ export default {
       this.setPersonTasksSearch(text)
     },
 
-    loadPerson(personId) {
+    async loadPerson(personId) {
       this.person = this.personMap.get(personId)
 
       if (!this.person) {
@@ -686,6 +696,12 @@ export default {
         .finally(() => {
           this.isTasksLoading = false
         })
+
+      try {
+        this.daysOff = await this.loadAggregatedPersonDaysOff({ personId })
+      } catch (error) {
+        console.error(error)
+      }
     },
 
     resizeHeaders() {
@@ -854,6 +870,18 @@ export default {
 
     zoomLevel() {
       this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
+    }
+  },
+
+  socket: {
+    events: {
+      'task:assign'(eventData) {
+        this.onAssignation(eventData)
+      },
+
+      'task:unassign'(eventData) {
+        this.onAssignation(eventData)
+      }
     }
   }
 }

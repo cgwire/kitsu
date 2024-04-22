@@ -19,7 +19,7 @@
           />
 
           <combobox-production
-            v-if="isTabActive('board')"
+            v-if="isActiveTab('board')"
             class="flexrow-item production-field"
             :label="$t('main.production')"
             :production-list="productionList"
@@ -47,9 +47,9 @@
         <div
           class="query-list"
           v-if="
-            isTabActive('todos') ||
-            isTabActive('timesheets') ||
-            isTabActive('board')
+            isActiveTab('todos') ||
+            isActiveTab('timesheets') ||
+            isActiveTab('board')
           "
         >
           <search-query-list
@@ -68,10 +68,10 @@
           :tasks="notPendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
-          v-if="isTabActive('todos')"
+          v-if="isActiveTab('todos')"
         />
 
-        <div v-if="isTabActive('pending')">&nbsp;</div>
+        <div v-if="isActiveTab('pending')">&nbsp;</div>
         <todos-list
           ref="pending-list"
           :empty-text="$t('people.no_task_assigned')"
@@ -80,10 +80,10 @@
           :tasks="pendingTasks"
           :selection-grid="todoSelectionGrid"
           @scroll="setTodoListScrollPosition"
-          v-if="isTabActive('pending')"
+          v-if="isActiveTab('pending')"
         />
 
-        <div v-if="isTabActive('done')">&nbsp;</div>
+        <div v-if="isActiveTab('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
           class="done-list"
@@ -92,7 +92,7 @@
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
           :done="true"
-          v-if="isTabActive('done')"
+          v-if="isActiveTab('done')"
         />
 
         <kanban-board
@@ -102,13 +102,14 @@
           :tasks="boardTasks"
           :user="user"
           :production="selectedProduction"
-          v-if="isTabActive('board')"
+          v-if="isActiveTab('board')"
         />
 
         <user-calendar
           ref="user-calendar"
+          :days-off="daysOff"
           :tasks="sortedTasks"
-          v-if="isTabActive('calendar')"
+          v-if="isActiveTab('calendar')"
         />
 
         <timesheet-list
@@ -126,7 +127,7 @@
           @time-spent-change="onTimeSpentChange"
           @set-day-off="onSetDayOff"
           @unset-day-off="onUnsetDayOff"
-          v-if="isTabActive('timesheets')"
+          v-if="isActiveTab('timesheets')"
         />
       </div>
     </div>
@@ -177,6 +178,7 @@ export default {
       currentFilter: 'all_tasks',
       currentSort: 'priority',
       currentSection: 'todos',
+      daysOff: [],
       dayOffError: false,
       filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
         label: name,
@@ -205,17 +207,7 @@ export default {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
     }
     this.$nextTick(() => {
-      this.loadTodos({
-        date: this.selectedDate,
-        callback: () => {
-          if (this.todoList) {
-            this.$nextTick(() => {
-              this.todoList.setScrollPosition(this.todoListScrollPosition)
-            })
-          }
-          this.resizeHeaders()
-        }
-      })
+      this.loadData()
     })
   },
 
@@ -428,25 +420,41 @@ export default {
   methods: {
     ...mapActions([
       'clearSelectedTasks',
-      'loadTodos',
+      'loadAggregatedPersonDaysOff',
       'loadOpenProductions',
+      'loadTodos',
       'removeTodoSearch',
       'saveTodoSearch',
       'setDayOff',
+      'setTimeSpent',
       'setTodoListScrollPosition',
       'setTodosSearch',
-      'setTimeSpent',
       'unsetDayOff'
     ]),
 
-    isTabActive(tab) {
+    isActiveTab(tab) {
       return this.currentSection === tab
+    },
+
+    async loadData(forced = false) {
+      await this.loadTodos({
+        date: this.selectedDate,
+        forced
+      })
+      this.$nextTick(() => {
+        this.todoList?.setScrollPosition(this.todoListScrollPosition)
+      })
+      this.resizeHeaders()
+
+      this.daysOff = await this.loadAggregatedPersonDaysOff({
+        personId: this.user.id
+      })
     },
 
     resizeHeaders() {
       this.$nextTick(() => {
-        if (this.todoList) this.todoList.resizeHeaders()
-        if (this.haveDoneList) this.haveDoneList.resizeHeaders()
+        this.todoList?.resizeHeaders()
+        this.haveDoneList?.resizeHeaders()
       })
     },
 
@@ -478,7 +486,6 @@ export default {
           })
         }
       }
-
       this.clearSelectedTasks()
     },
 
@@ -503,18 +510,17 @@ export default {
         })
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeTodoSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
+    async removeSearchQuery(searchQuery) {
+      try {
+        await this.removeTodoSearch(searchQuery)
+      } catch (error) {
+        console.error(error)
+      }
     },
 
-    onDateChanged(date) {
+    async onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
-      this.loadTodos({
-        date: this.selectedDate,
-        forced: true
-      })
+      await this.loadData(true)
     },
 
     async onSetDayOff(dayOff) {
@@ -528,6 +534,7 @@ export default {
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
+      await this.loadData(true)
     },
 
     async onUnsetDayOff() {
@@ -538,10 +545,7 @@ export default {
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
-      await this.loadTodos({
-        date: this.selectedDate,
-        forced: true
-      })
+      await this.loadData(true)
     },
 
     onTimeSpentChange(timeSpentInfo) {
@@ -553,18 +557,7 @@ export default {
     async onAssignation(eventData) {
       if (this.user.id === eventData.person_id) {
         await this.loadOpenProductions()
-        this.loadTodos({
-          forced: true,
-          date: this.selectedDate,
-          callback: () => {
-            if (this.todoList) {
-              this.$nextTick(() => {
-                this.todoList.setScrollPosition(this.todoListScrollPosition)
-              })
-            }
-            this.resizeHeaders()
-          }
-        })
+        await this.loadData(true)
       }
     },
 

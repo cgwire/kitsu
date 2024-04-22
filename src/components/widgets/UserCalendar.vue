@@ -7,12 +7,23 @@
     >
       <template #eventContent="{ event }">
         <div
+          class="calendar-day-off"
+          v-if="event.extendedProps.isOff"
+          :title="event.extendedProps.description"
+        >
+          <span class="calendar-day-off-title" v-if="event.title">
+            <briefcase-icon size="14" />
+            {{ event.title }}
+          </span>
+        </div>
+        <div
           class="calendar-event"
           :style="{
             background: event.backgroundColor
           }"
           :title="event.title"
           @click="onEventClicked(event)"
+          v-else
         >
           <production-name
             only-avatar
@@ -48,6 +59,7 @@
 </template>
 
 <script>
+import { BriefcaseIcon } from 'vue-feather-icons'
 import { mapActions, mapGetters } from 'vuex'
 
 import FullCalendar from '@fullcalendar/vue'
@@ -61,6 +73,7 @@ export default {
   name: 'user-calendar',
 
   components: {
+    BriefcaseIcon,
     EntityThumbnail,
     FullCalendar,
     ProductionName
@@ -68,6 +81,10 @@ export default {
 
   props: {
     tasks: {
+      type: Array,
+      default: () => []
+    },
+    daysOff: {
       type: Array,
       default: () => []
     }
@@ -94,7 +111,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['productionMap', 'taskMap', 'taskStatusMap', 'taskTypeMap'])
+    ...mapGetters([
+      'productionMap',
+      'taskMap',
+      'taskStatusMap',
+      'taskTypeMap',
+      'user'
+    ])
   },
 
   methods: {
@@ -106,6 +129,16 @@ export default {
       }
       const calendarApi = this.$refs.calendar.getApi()
       calendarApi.removeAllEvents()
+
+      calendarApi.addEvent({
+        display: 'background',
+        daysOfWeek: [0, 6], // Sunday + Saturday
+        backgroundColor: '#ddd',
+        extendedProps: {
+          isOff: true
+        }
+      })
+
       this.tasks
         .filter(task => task.start_date && task.due_date)
         .forEach(task => {
@@ -120,7 +153,6 @@ export default {
             allDay: true,
             start,
             end,
-            color: '#666',
             borderColor: '#666',
             backgroundColor: taskType.color,
             extendedProps: {
@@ -133,6 +165,25 @@ export default {
           }
           calendarApi.addEvent(event)
         })
+
+      this.daysOff.forEach(dayOff => {
+        const description = this.getDayOffInfo(dayOff)
+        const startDate = new Date(dayOff.date)
+        const endDate = new Date(dayOff.end_date)
+        while (startDate <= endDate) {
+          calendarApi.addEvent({
+            title: this.$t('timesheets.day_off'),
+            display: 'background',
+            start: startDate.toISOString().slice(0, 10),
+            backgroundColor: '#ffffe0',
+            extendedProps: {
+              isOff: true,
+              description
+            }
+          })
+          startDate.setDate(startDate.getDate() + 1)
+        }
+      })
     },
 
     onEventClicked(event) {
@@ -161,12 +212,24 @@ export default {
       } else {
         return 'white'
       }
+    },
+
+    getDayOffInfo(dayOff) {
+      const { description, date, end_date } = dayOff
+      const period =
+        end_date && date !== end_date ? `${date} - ${end_date}` : date
+      return `${description || this.$t('timesheets.day_off')} (${period})`
     }
   },
 
   watch: {
     tasks: {
       deep: true,
+      handler() {
+        this.resetEvents()
+      }
+    },
+    daysOff: {
       handler() {
         this.resetEvents()
       }
@@ -184,6 +247,26 @@ export default {
 .app-calendar {
   width: 100%;
   height: 100%;
+}
+
+.calendar-day-off {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 4px;
+  color: $black;
+  font-weight: 500;
+  cursor: default;
+
+  .calendar-day-off-title {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
 }
 
 .calendar-event {

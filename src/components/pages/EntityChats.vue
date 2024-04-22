@@ -62,6 +62,7 @@ import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'entity-chats',
+
   mixins: [formatListMixin],
 
   components: {
@@ -168,7 +169,7 @@ export default {
         }
       },
 
-      async 'chat:left'(eventData) {
+      'chat:left'(eventData) {
         if (
           this.chats.some(c => c.id === eventData.chat_id) &&
           this.user.id === eventData.person_id
@@ -177,7 +178,7 @@ export default {
         }
       },
 
-      async 'chat:new-message'(eventData) {
+      'chat:new-message'(eventData) {
         const chat = this.chats.find(c => c.id === eventData.chat_id)
         if (chat) {
           chat.last_message = eventData.last_message

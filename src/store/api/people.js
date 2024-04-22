@@ -215,12 +215,12 @@ export default {
       .then(body => Promise.resolve(body.otp_recovery_codes))
   },
 
-  loadTodos(callback) {
-    client.get('/api/data/user/tasks', callback)
+  loadTodos() {
+    return client.pget('/api/data/user/tasks')
   },
 
-  loadDone(callback) {
-    client.get('/api/data/user/done-tasks', callback)
+  loadDone() {
+    return client.pget('/api/data/user/done-tasks')
   },
 
   loadTasksToCheck() {
@@ -309,6 +309,17 @@ export default {
     }
   },
 
+  getDaysOff(year, month) {
+    let path = '/api/data/day-offs'
+    if (year) {
+      path = `/api/data/persons/day-offs/${year}`
+      if (month) {
+        path += `/${month}`
+      }
+    }
+    return client.pget(path)
+  },
+
   getDayOff(personId, date) {
     // Date is a string with following format: YYYYY-MM-DD.
     return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
@@ -323,11 +334,6 @@ export default {
       description
     }
     return client.ppost('/api/data/day-offs', data)
-  },
-
-  getDayOffs(year, month) {
-    const path = `/api/data/persons/day-offs/${year}/${month}`
-    return client.pget(path)
   },
 
   unsetDayOff(dayOff) {

@@ -144,7 +144,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['displayedPeople', 'taskTypeMap', 'user']),
+    ...mapGetters(['daysOff', 'displayedPeople', 'taskTypeMap', 'user']),
 
     locale() {
       if (this.user.locale === 'fr_FR') {
@@ -152,6 +152,16 @@ export default {
       } else {
         return en
       }
+    },
+
+    daysOffByPerson() {
+      return this.daysOff.reduce((acc, dayOff) => {
+        if (!acc[dayOff.person_id]) {
+          acc[dayOff.person_id] = []
+        }
+        acc[dayOff.person_id].push(dayOff)
+        return acc
+      }, {})
     },
 
     selectablePeople() {
@@ -172,6 +182,7 @@ export default {
       'assignSelectedTasks',
       'fetchPersonTasks',
       'getPersonsTasksDates',
+      'loadDaysOff',
       'loadPeople',
       'unassignPersonFromTask',
       'updateTask'
@@ -179,7 +190,9 @@ export default {
 
     async init() {
       this.loading.schedule = true
-      await Promise.all([this.loadPeople(), this.loadPersonDates()])
+      await this.loadPeople()
+      await this.loadPersonDates()
+      await this.loadDaysOff()
 
       this.refreshSchedule()
 
@@ -245,7 +258,8 @@ export default {
           loading: false,
           editable: false,
           route: getPersonTabPath(item.id, 'schedule'),
-          children: []
+          children: [],
+          daysOff: this.daysOffByPerson[item.id]
         }
       })
     },
@@ -298,6 +312,7 @@ export default {
       if (item.type === 'Task') {
         await this.saveTaskScheduleItem(item)
         await this.loadPersonDates(true)
+        await this.loadDaysOff()
       }
     },
 
