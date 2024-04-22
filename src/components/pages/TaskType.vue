@@ -719,11 +719,11 @@ export default {
       )
     },
 
-    scheduleTeam() {
+    team() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
+        this.currentProduction.team
+          .map(personId => this.personMap.get(personId))
+          .filter(person => !person.is_bot)
       )
     },
 
@@ -753,10 +753,9 @@ export default {
       'uploadTaskTypeEstimations'
     ]),
 
-    async initData(force) {
+    initData(force) {
       this.resetTasks()
       this.focusSearchField({ preventScroll: true })
-      await this.loadDaysOff()
       if (this.tasks.length < 2) {
         this.loading.entities = true
         this.errors.entities = false
@@ -804,19 +803,6 @@ export default {
             this.resetScheduleScroll()
           }
         })
-      }
-    },
-
-    async loadDaysOff() {
-      this.daysOffByPerson = []
-      for (const person of this.scheduleTeam) {
-        // load sequentially to avoid too many requests
-        const daysOff = await this.loadAggregatedPersonDaysOff({
-          personId: person.id
-        }).catch(
-          () => [] // fallback if not allowed to fetch days off
-        )
-        this.daysOffByPerson[person.id] = daysOff
       }
     },
 
@@ -1088,24 +1074,30 @@ export default {
 
     // Schedule
 
-    resetScheduleItems() {
+    async resetScheduleItems() {
       const taskAssignationMap = this.buildAssignationMap()
-      let scheduleItems = this.scheduleTeam
+
+      const assignees = Object.keys(taskAssignationMap).filter(
+        id => id !== 'unassigned' && taskAssignationMap[id].length > 0
+      )
+      await this.loadDaysOff(assignees)
+
+      const scheduleItems = this.team
         .map(person => this.buildPersonElement(person, taskAssignationMap))
-        .filter(item => item)
+        .filter(Boolean)
         .filter(item => item.children.length > 0)
 
-      if (taskAssignationMap.unassigned.length !== 0) {
-        scheduleItems = scheduleItems.concat([
+      if (taskAssignationMap.unassigned.length > 0) {
+        scheduleItems.push(
           this.buildPersonElement({ id: 'unassigned' }, taskAssignationMap)
-        ])
+        )
       }
       this.schedule.scheduleItems = scheduleItems
     },
 
     buildAssignationMap() {
       const taskAssignationMap = { unassigned: [] }
-      this.scheduleTeam.forEach(person => {
+      this.team.forEach(person => {
         if (person) taskAssignationMap[person.id] = []
       })
       this.tasks.forEach(task => {
@@ -1121,6 +1113,19 @@ export default {
         }
       })
       return taskAssignationMap
+    },
+
+    async loadDaysOff(personIds) {
+      this.daysOffByPerson = []
+      for (const personId of personIds) {
+        // load sequentially to avoid too many requests
+        const daysOff = await this.loadAggregatedPersonDaysOff({
+          personId: personId
+        }).catch(
+          () => [] // fallback if not allowed to fetch days off
+        )
+        this.daysOffByPerson[personId] = daysOff
+      }
     },
 
     buildPersonElement(person, taskAssignationMap) {
