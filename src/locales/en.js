@@ -1140,7 +1140,7 @@ export default {
   },
 
   settings: {
-    available_items: 'Available items',
+    available_items: 'Available items',
     change_logo: 'Change logo',
     integrations: 'Integrations',
     import_from_production: 'Import from another production',

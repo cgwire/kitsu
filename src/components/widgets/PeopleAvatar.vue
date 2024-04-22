@@ -43,7 +43,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import colors from '@/lib/colors'
 
 export default {
   name: 'people-avatar',
@@ -72,20 +71,15 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isDarkTheme',
-    ]),
+    ...mapGetters(['isDarkTheme']),
 
     style() {
-      const backgroundColor = this.isDarkTheme
-        ? this.person.color
-        : this.person.color
       return {
         color: this.isDarkTheme ? '#333' : '#FFF',
         width: `${this.size}px`,
         height: `${this.size}px`,
         fontSize: this.person.has_avatar ? 0 : `${this.fontSize}px`,
-        backgroundColor
+        backgroundColor: this.person.color
       }
     }
   }

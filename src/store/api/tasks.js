@@ -208,12 +208,10 @@ export default {
     return client.pget(`/api/data/preview-files/${previewId}`)
   },
 
-  assignTasks(personId, selectedTaskIds, callback) {
-    client.put(
-      `/api/actions/persons/${personId}/assign`,
-      { task_ids: selectedTaskIds },
-      callback
-    )
+  assignTasks(personId, selectedTaskIds) {
+    return client.pput(`/api/actions/persons/${personId}/assign`, {
+      task_ids: selectedTaskIds
+    })
   },
 
   unassignTasks(selectedTaskIds) {

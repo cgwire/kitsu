@@ -13,7 +13,6 @@
         :disabled="!importProductionId"
         :is-loading="loadingImport"
         :text="$t('main.import')"
-
         @click="$emit('import-from-production', importProductionId)"
       />
     </div>
@@ -66,7 +65,7 @@ export default {
     loadingImport: {
       type: Boolean,
       default: true
-    },
+    }
   },
 
   mounted() {
@@ -76,10 +75,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'openProductions',
-    ]),
+    ...mapGetters(['currentProduction', 'openProductions']),
 
     availableProductions() {
       return this.openProductions.filter(

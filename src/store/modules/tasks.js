@@ -449,18 +449,6 @@ const actions = {
     })
   },
 
-  /*
-  getTask ({ commit, rootGetters }, { taskId, callback }) {
-    tasksApi.getTask(taskId, (err, task) => {
-      if (!err) {
-        const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
-        commit(EDIT_TASK_END, { task, taskType })
-      }
-      if (callback) callback(err)
-    })
-  },
-  */
-
   deleteTask({ commit }, { task, callback }) {
     tasksApi.deleteTask(task, err => {
       if (!err) {
@@ -705,11 +693,10 @@ const actions = {
     })
   },
 
-  assignSelectedTasks({ commit, state }, { personId, taskIds, callback }) {
+  assignSelectedTasks({ commit, state }, { personId, taskIds }) {
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    tasksApi.assignTasks(personId, selectedTaskIds, err => {
-      if (!err) commit(ASSIGN_TASKS, { selectedTaskIds, personId })
-      if (callback) callback(err)
+    return tasksApi.assignTasks(personId, selectedTaskIds).then(() => {
+      commit(ASSIGN_TASKS, { selectedTaskIds, personId })
     })
   },
 

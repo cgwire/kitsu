@@ -323,6 +323,7 @@ export default {
       descriptorToEdit: {},
       departmentFilter: [],
       selectedDepartment: 'ALL',
+      taskTypeForTaskDeletion: null,
       errors: {
         addMetadata: false,
         addThumbnails: false,
@@ -430,6 +431,7 @@ export default {
       'assetSearchText',
       'assetSearchFilterGroups',
       'assetSearchQueries',
+      'assetSorting',
       'assetTypes',
       'assetValidationColumns',
       'currentEpisode',
@@ -438,19 +440,17 @@ export default {
       'departments',
       'displayedAssetsByType',
       'episodeMap',
-      'openProductions',
+      'isAssetEstimation',
+      'isAssetTime',
       'isAssetsLoading',
       'isAssetsLoadingError',
       'isCurrentUserClient',
       'isCurrentUserManager',
-      'isAssetEstimation',
-      'isAssetTime',
       'isTVShow',
+      'openProductions',
       'productionAssetTaskTypes',
       'selectedAssets',
-      'assetSorting',
       'taskTypeMap',
-      'taskTypes',
       'user'
     ]),
 
@@ -672,9 +672,7 @@ export default {
     },
 
     confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypes.find(
-        t => t.name === this.deleteAllTasksLockText
-      ).id
+      const taskTypeId = this.taskTypeForTaskDeletion.id
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
@@ -741,9 +739,11 @@ export default {
     },
 
     deleteAllTasksText() {
-      return this.$t('tasks.delete_all_text', {
-        name: this.deleteAllTasksLockText
-      })
+      const taskType = this.taskTypeForTaskDeletion
+      if (taskType) {
+        return this.$t('tasks.delete_all_text', { name: taskType.name })
+      }
+      return ''
     },
 
     restoreText() {
@@ -840,6 +840,7 @@ export default {
 
     onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
+      this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
     },

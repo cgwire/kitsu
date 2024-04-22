@@ -1,7 +1,6 @@
 <template>
   <div>
     <div>
-
       <route-section-tabs
         class="section-tabs"
         :activeTab="activeTab"
@@ -33,10 +32,7 @@
           >
             {{ $t('productions.edit_error') }}
           </p>
-          <div
-            class="box"
-            v-if="isEmpty(currentProduction.task_types)"
-          >
+          <div class="box" v-if="isEmpty(currentProduction.task_types)">
             {{ $t('settings.production.empty_list') }}
           </div>
 
@@ -90,10 +86,7 @@
             @import-item="addTaskType"
           >
             <template v-slot:item-line="{ item }">
-              <task-type-name
-                class="pointer"
-                :task-type="item"
-              />
+              <task-type-name class="pointer" :task-type="item" />
             </template>
           </setting-importer>
         </div>
@@ -434,8 +427,9 @@ export default {
 
     async importTaskTypesFromProduction(production) {
       this.loading.import = true
-      const taskTypes = this.getProductionTaskTypes(production.id)
-        .filter(t => `${t.for_entity.toLowerCase()}s` === this.activeTab)
+      const taskTypes = this.getProductionTaskTypes(production.id).filter(
+        t => `${t.for_entity.toLowerCase()}s` === this.activeTab
+      )
       const entityName = stringHelper.capitalize(this.activeTab).slice(0, -1)
       await this[`production${entityName}TaskTypes`].forEach(async taskType => {
         const scheduleItem = this.getScheduleItemForTaskType(taskTypes[0])

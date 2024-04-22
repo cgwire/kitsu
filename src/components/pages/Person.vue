@@ -510,12 +510,6 @@ export default {
       )
     },
 
-    pendingTasks() {
-      return this.sortedTasks.filter(
-        task => task.taskStatus.is_feedback_request
-      )
-    },
-
     todoTabs() {
       const hasAvailableBoard = this.openProductions.some(
         production => this.getBoardStatusesByProduction(production).length
@@ -958,7 +952,7 @@ export default {
 }
 
 .page-header {
-  margin-top: .5em;
+  margin-top: 0.5em;
 }
 
 .calendar {

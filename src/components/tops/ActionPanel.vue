@@ -1266,20 +1266,21 @@ export default {
         })
     },
 
-    confirmAssign() {
+    async confirmAssign() {
       if (this.selectedPersonId || this.isInDepartment) {
-        this.loading.assignation = true
         const personId =
           this.isCurrentUserManager || this.isCurrentUserSupervisor
             ? this.selectedPersonId
             : this.user.id
-        this.assignSelectedTasks({
-          personId,
-          callback: () => {
-            this.loading.assignation = false
-            this.$refs['assignation-field'].clear()
-          }
-        })
+        this.loading.assignation = true
+        try {
+          await this.assignSelectedTasks({ personId })
+          this.$refs['assignation-field']?.clear()
+        } catch (err) {
+          console.error(err)
+        } finally {
+          this.loading.assignation = false
+        }
       }
     },
 

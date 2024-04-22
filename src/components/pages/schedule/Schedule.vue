@@ -79,7 +79,9 @@
                 class="filler flexrow-item root-element-name ellipsis"
                 :title="rootElement.name"
                 :style="{
-                  'border-left': rootElement.avatar ? null : '4px solid ' + rootElement.color,
+                  'border-left': rootElement.avatar
+                    ? null
+                    : '4px solid ' + rootElement.color
                 }"
                 :to="rootElement.route"
                 v-else
@@ -1596,7 +1598,7 @@ export default {
     },
 
     childrenStyle(rootElement, isMultiline = false, setBackground = false) {
-      let color = rootElement.color
+      const color = rootElement.color
       if (rootElement.full_name) {
         // is a person
         // color = this.isDarkTheme ? '#222' : '#CCC'
