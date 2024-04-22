@@ -78,9 +78,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isDarkTheme',
-    ]),
+    ...mapGetters(['isDarkTheme']),
 
     style() {
       return {
