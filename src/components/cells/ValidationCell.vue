@@ -40,7 +40,11 @@
         <span
           class="avatar has-text-centered"
           :title="person.full_name"
-          :style="{ backgroundColor: person.color }"
+          :style="{
+            backgroundColor: person.color,
+            color: isDarkTheme ? '#333' : '#FFF',
+            'font-weight': isDarkTheme ? 'bold' : 'normal'
+          }"
           :key="`avatar-${person.id}`"
           v-for="person in assignees"
         >
