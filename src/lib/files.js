@@ -31,7 +31,8 @@ const ALL_EXTENSIONS = [
   'mp3',
   'webm',
   'avi',
-  'clip'
+  'clip',
+  'mkv'
 ]
 const ALL_EXTENSIONS_STRING = ALL_EXTENSIONS.map(e => `.${e}`).join(',')
 
