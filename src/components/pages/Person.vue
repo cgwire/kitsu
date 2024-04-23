@@ -530,7 +530,7 @@ export default {
           name: 'calendar'
         },
         {
-          label: this.$t('tasks.schedule'),
+          label: this.$t('schedule.title'),
           name: 'schedule'
         },
         {

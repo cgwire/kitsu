@@ -201,7 +201,6 @@ export default {
     },
 
     remainingTaskTypesForEntity() {
-      console.log(this.remainingTaskTypes)
       return sortByName(
         this.remainingTaskTypes.filter(
           t => `${t.for_entity.toLowerCase()}s` === this.activeTab
