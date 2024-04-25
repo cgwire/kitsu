@@ -422,7 +422,7 @@
                   <div
                     class="timebar"
                     :class="{
-                      selected: selection.includes(childElement)
+                      selected: isSelected(childElement)
                     }"
                     :title="
                       (multiline ? `${childElement.project_name} - ` : '') +
@@ -445,7 +445,7 @@
                       v-if="
                         !isChangeDates &&
                         selection.length === 1 &&
-                        selection.includes(childElement) &&
+                        isSelected(childElement) &&
                         childElement.editable &&
                         !childElement.unresizable
                       "
@@ -469,7 +469,7 @@
                       v-if="
                         !isChangeDates &&
                         selection.length === 1 &&
-                        selection.includes(childElement) &&
+                        isSelected(childElement) &&
                         childElement.editable &&
                         !childElement.unresizable
                       "
@@ -1253,7 +1253,7 @@ export default {
     },
 
     isSelected(item) {
-      return this.selection.includes(item)
+      return this.selection.some(({ id }) => id === item.id)
     },
 
     addToSelection(itemToAdd) {
