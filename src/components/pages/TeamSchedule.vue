@@ -67,6 +67,7 @@
         :hide-man-days="true"
         :hierarchy="scheduleItems"
         :is-error="errors.schedule"
+        :is-estimation-linked="true"
         :is-loading="loading.schedule"
         :multiline="true"
         :reassignable="true"
@@ -93,7 +94,7 @@ import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
 import { getPersonTabPath } from '@/lib/path'
-import { parseSimpleDate } from '@/lib/time'
+import { addBusinessDays, minutesToDays, parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
 
 import { formatListMixin } from '@/components/mixins/format'
@@ -276,9 +277,17 @@ export default {
       if (task.start_date) {
         startDate = parseSimpleDate(task.start_date)
       }
-      const estimation = this.formatDuration(task.estimation)
+
       if (task.due_date) {
         endDate = parseSimpleDate(task.due_date)
+      } else if (task.end_date) {
+        endDate = parseSimpleDate(task.end_date)
+      } else if (task.estimation) {
+        endDate = addBusinessDays(
+          task.startDate,
+          Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
+          task.parentElement.daysOff
+        )
       }
 
       if (!endDate || endDate.isBefore(startDate)) {
@@ -291,7 +300,7 @@ export default {
         startDate,
         endDate,
         loading: false,
-        man_days: estimation,
+        man_days: task.estimation,
         editable: true,
         unresizable: false,
         color: taskType.color,
@@ -304,13 +313,21 @@ export default {
         taskId: task.id,
         data: {
           start_date: task.startDate.format('YYYY-MM-DD'),
-          due_date: task.endDate.format('YYYY-MM-DD')
+          due_date: task.endDate.format('YYYY-MM-DD'),
+          estimation: task.estimation
         }
       })
     },
 
     async onScheduleItemChanged(item) {
       if (item.type === 'Task') {
+        if (item.estimation) {
+          item.endDate = addBusinessDays(
+            item.startDate,
+            Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
+            item.parentElement.daysOff
+          )
+        }
         await this.saveTaskScheduleItem(item)
         await this.loadPersonDates(true)
         await this.loadDaysOff()

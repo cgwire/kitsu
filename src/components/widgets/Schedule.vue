@@ -16,7 +16,7 @@
             'without-milestones': !withMilestones
           }"
         >
-          <span class="total-value" v-show="!hideManDays">
+          <span class="total-value" v-if="!hideManDays">
             {{ formatDuration(totalManDays) }} {{ $t('schedule.md') }}
           </span>
         </div>
@@ -96,7 +96,8 @@
                 @input="
                   $emit('estimation-changed', {
                     days: $event.target.value,
-                    item: rootElement
+                    item: rootElement,
+                    daysOff: rootElement.daysOff
                   })
                 "
                 v-if="
@@ -155,8 +156,7 @@
                   </span>
                   <span
                     class="flexrow flexrow-item man-days-unit-wrapper"
-                    v-if="childElement.editable"
-                    v-show="!hideManDays"
+                    v-if="childElement.editable && !hideManDays"
                   >
                     <input
                       class="flexrow-item man-days-unit"
@@ -173,7 +173,7 @@
                       "
                       :value="formatDuration(childElement.man_days, false)"
                     />
-                    <span>{{ $t('schedule.md') }}</span>
+                    {{ $t('schedule.md') }}
                   </span>
                   <span class="man-days-unit flexrow-item" v-else>
                     {{ formatDuration(childElement.man_days) }}
@@ -517,6 +517,8 @@ import {
   addBusinessDays,
   daysToMinutes,
   formatFullDate,
+  getBusinessDays,
+  getDayOffRange,
   parseDate
 } from '@/lib/time'
 
@@ -918,20 +920,7 @@ export default {
   methods: {
     ...mapActions(['deleteMilestone', 'saveMilestone']),
 
-    getDayOffRange(daysOff = []) {
-      return daysOff.reduce((range, dayOff) => {
-        const startDate = new Date(dayOff.date)
-        const endDate = new Date(dayOff.end_date || dayOff.date)
-        while (startDate <= endDate) {
-          range.push({
-            ...dayOff,
-            date: startDate.toISOString().slice(0, 10)
-          })
-          startDate.setDate(startDate.getDate() + 1)
-        }
-        return range
-      }, [])
-    },
+    getDayOffRange,
 
     getNbLines(element) {
       const values = element.children.map(item => item.line || 0)
@@ -939,7 +928,7 @@ export default {
     },
 
     refreshItemPositions(rootElement) {
-      if (rootElement?.children?.length) {
+      if (this.multiline && rootElement?.children?.length) {
         setItemPositions(rootElement.children, 'line')
       }
     },
@@ -988,6 +977,7 @@ export default {
       const estimation = Number(event.target.value)
       if (this.isEstimationLinked) {
         childElement.man_days = daysToMinutes(this.organisation, estimation)
+        childElement.estimation = childElement.man_days
         rootElement.man_days = rootElement.children.reduce((acc, child) => {
           let value = acc
           const manDays = child.man_days
@@ -1000,14 +990,16 @@ export default {
         if (estimation > 0) {
           childElement.endDate = addBusinessDays(
             childElement.startDate,
-            estimation - 1
+            estimation - 1,
+            rootElement.daysOff
           )
         }
       }
       this.$emit('estimation-changed', {
         taskId: childElement.id,
         days: estimation,
-        item: childElement
+        item: childElement,
+        daysOff: rootElement.daysOff
       })
     },
 
@@ -1178,6 +1170,7 @@ export default {
         this.isValidItemDates(newStartDate, this.currentElement.endDate)
       ) {
         this.currentElement.startDate = newStartDate.clone()
+        this.updateItemEstimation(this.currentElement)
         this.refreshItemPositions(this.currentElement.parentElement)
         this.resetSelection([this.currentElement])
       }
@@ -1232,8 +1225,20 @@ export default {
         this.isValidItemDates(this.currentElement.startDate, newEndDate)
       ) {
         this.currentElement.endDate = newEndDate.clone()
+        this.updateItemEstimation(this.currentElement)
         this.refreshItemPositions(this.currentElement.parentElement)
         this.resetSelection([this.currentElement])
+      }
+    },
+
+    updateItemEstimation(item) {
+      if (this.isEstimationLinked) {
+        const estimation = getBusinessDays(
+          item.startDate,
+          item.endDate,
+          item.parentElement.daysOff
+        )
+        item.estimation = daysToMinutes(this.organisation, estimation)
       }
     },
 
@@ -1421,6 +1426,7 @@ export default {
           // on moving or resizing selected items
           this.selection.forEach(item => {
             this.$emit('item-changed', item)
+            this.refreshItemPositions(item.parentElement)
           })
           // clear selection after moving a single item
           if (this.isChangeDates && this.selection.length === 1) {
@@ -1461,33 +1467,6 @@ export default {
       const last = endDate.clone().endOf('day')
       const diff = last.diff(first, 'days')
       return diff
-    },
-
-    businessDiff(startDate, endDate) {
-      if (startDate.isSame(endDate)) return 0
-      const first = startDate.clone().endOf('isoweek')
-      const last = endDate.clone().startOf('isoweek')
-      const diff = last.diff(first, 'days')
-
-      if (endDate.diff(startDate, 'days') > 6) {
-        const days = (diff * 5) / 7
-
-        let wfirst = first.isoWeekday() - startDate.isoWeekday()
-        if (startDate.isoWeekday() === 0) --wfirst
-
-        let wlast = endDate.isoWeekday() - last.isoWeekday()
-        if (endDate.day() === 6) --wlast
-
-        return Math.ceil(wfirst + days + wlast - 1)
-      } else {
-        const day = moment(startDate)
-        let businessDays = 0
-        while (day.isBefore(endDate, 'day')) {
-          if (day.day() !== 0 && day.day() !== 6) businessDays++
-          day.add(1, 'days')
-        }
-        return businessDays
-      }
     },
 
     // Styles
@@ -2237,7 +2216,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   &.root.expanded {
-    border-bottom-left-radius: 0em;
+    border-bottom-left-radius: 0;
   }
 
   input {
@@ -2265,9 +2244,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   padding-left: 0;
   width: 60px;
   text-align: right;
-}
-.child-name .entity-name span.man-days-unit-wrapper span {
-  padding-left: 0;
 }
 
 .children {
