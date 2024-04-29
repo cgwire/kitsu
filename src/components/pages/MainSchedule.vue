@@ -75,8 +75,8 @@ import {
 } from '@/lib/time'
 import colors from '@/lib/colors'
 
-import ComboboxNumber from '@/components/widgets/ComboboxNumber'
-import Schedule from '@/components/pages/schedule/Schedule'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import Schedule from '@/components/widgets/Schedule.vue'
 
 export default {
   name: 'main-schedule',

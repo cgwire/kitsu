@@ -135,9 +135,14 @@ export const getEndDateFromString = (startDate, endDateString) => {
   }
 }
 
-export const getDatesFromStartDate = (startDate, dueDate, estimation) => {
-  if (estimation && estimation > 0) {
-    dueDate = addBusinessDays(startDate, Math.ceil(estimation) - 1)
+export const getDatesFromStartDate = (
+  startDate,
+  dueDate,
+  estimation,
+  daysOff = []
+) => {
+  if (estimation > 0) {
+    dueDate = addBusinessDays(startDate, Math.ceil(estimation) - 1, daysOff)
   }
 
   if (!startDate || !dueDate) {
@@ -160,9 +165,14 @@ export const getDatesFromStartDate = (startDate, dueDate, estimation) => {
   }
 }
 
-export const getDatesFromEndDate = (startDate, dueDate, estimation) => {
-  if (estimation && estimation > 0) {
-    startDate = removeBusinessDays(dueDate, Math.ceil(estimation) - 1)
+export const getDatesFromEndDate = (
+  startDate,
+  dueDate,
+  estimation,
+  daysOff = []
+) => {
+  if (estimation > 0) {
+    startDate = removeBusinessDays(dueDate, Math.ceil(estimation) - 1, daysOff)
   }
 
   if (!startDate || !dueDate) {
@@ -185,49 +195,90 @@ export const getDatesFromEndDate = (startDate, dueDate, estimation) => {
   }
 }
 
-export const getBusinessDays = (startDate, endDate) => {
+export const getBusinessDays = (startDate, endDate, daysOff = []) => {
   const Sunday = 0
   const Saturday = 6
+  const datesOff = daysOff
+    ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
+    : []
   const newDate = startDate.clone()
-  let nbDays = 1
-  while (newDate.isBefore(endDate)) {
-    newDate.add(1, 'days')
-    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+  let nbDays = 0
+  while (newDate.isSameOrBefore(endDate)) {
+    if (
+      newDate.day() !== Sunday &&
+      newDate.day() !== Saturday &&
+      !datesOff.includes(newDate.format('YYYY-MM-DD'))
+    ) {
       nbDays++
     }
+    newDate.add(1, 'days')
   }
   return nbDays
 }
-export const addBusinessDays = (originalDate, numDaysToAdd) => {
+
+export const addBusinessDays = (originalDate, numDaysToAdd, daysOff = []) => {
   const Sunday = 0
   const Saturday = 6
-  let daysRemaining = numDaysToAdd
+  const datesOff = daysOff
+    ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
+    : []
   const newDate = originalDate.clone()
-
-  while (daysRemaining > 0) {
-    newDate.add(1, 'days')
-    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+  let daysRemaining = numDaysToAdd
+  while (daysRemaining >= 0) {
+    if (
+      newDate.day() !== Sunday &&
+      newDate.day() !== Saturday &&
+      !datesOff.includes(newDate.format('YYYY-MM-DD'))
+    ) {
       daysRemaining--
     }
+    if (daysRemaining >= 0) {
+      newDate.add(1, 'days')
+    }
   }
-
   return newDate
 }
 
-export const removeBusinessDays = (originalDate, numDaysToRemove) => {
+export const removeBusinessDays = (
+  originalDate,
+  numDaysToRemove,
+  daysOff = []
+) => {
   const Sunday = 0
   const Saturday = 6
-  let daysRemaining = numDaysToRemove
+  const datesOff = daysOff
+    ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
+    : []
   const newDate = originalDate.clone()
-
-  while (daysRemaining > 0) {
-    newDate.subtract(1, 'days')
-    if (newDate.day() !== Sunday && newDate.day() !== Saturday) {
+  let daysRemaining = numDaysToRemove
+  while (daysRemaining >= 0) {
+    if (
+      newDate.day() !== Sunday &&
+      newDate.day() !== Saturday &&
+      !datesOff.includes(newDate.format('YYYY-MM-DD'))
+    ) {
       daysRemaining--
     }
+    if (daysRemaining >= 0) {
+      newDate.subtract(1, 'days')
+    }
   }
-
   return newDate
+}
+
+export const getDayOffRange = (daysOff = []) => {
+  return daysOff.reduce((range, dayOff) => {
+    const startDate = new Date(dayOff.date)
+    const endDate = new Date(dayOff.end_date || dayOff.date)
+    while (startDate <= endDate) {
+      range.push({
+        ...dayOff,
+        date: startDate.toISOString().slice(0, 10)
+      })
+      startDate.setDate(startDate.getDate() + 1)
+    }
+    return range
+  }, [])
 }
 
 export const daysToMinutes = (organisation, days) => {

@@ -6,7 +6,7 @@ import i18n from '../../../src/lib/i18n'
 import store from '../../../src/store'
 
 class ColorHash {
-  constructor (colorData) {
+  constructor (colorData) {
   }
 
   hex (str) {

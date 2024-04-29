@@ -286,7 +286,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import Schedule from '@/components/pages/schedule/Schedule.vue'
+import Schedule from '@/components/widgets/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -1046,7 +1046,7 @@ export default {
       csv.buildCsvFile(name, taskLines)
     },
 
-    updateEstimation({ taskId, days, item }) {
+    updateEstimation({ taskId, days, item, daysOff }) {
       const estimation = daysToMinutes(this.organisation, days)
       const task = this.taskMap.get(taskId)
       let data = { estimation }
@@ -1056,7 +1056,8 @@ export default {
       data = getDatesFromStartDate(
         startDate,
         dueDate,
-        minutesToDays(this.organisation, estimation)
+        minutesToDays(this.organisation, estimation),
+        daysOff
       )
       data.estimation = estimation
       if (item) {
@@ -1196,7 +1197,11 @@ export default {
         } else if (task.end_date) {
           endDate = parseDate(task.end_date)
         } else if (task.estimation) {
-          endDate = startDate.clone().add(estimation, 'days')
+          endDate = addBusinessDays(
+            task.startDate,
+            Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
+            task.parentElement.daysOff
+          )
         }
 
         if (!endDate || endDate.isBefore(startDate)) {
@@ -1266,7 +1271,8 @@ export default {
       if (item.estimation) {
         item.endDate = addBusinessDays(
           item.startDate,
-          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1
+          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
+          item.parentElement.daysOff
         )
       }
       if (item.startDate && item.endDate) {
