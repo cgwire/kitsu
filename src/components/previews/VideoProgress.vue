@@ -524,8 +524,8 @@ export default {
       } else {
         frame = frame - 1
       }
-      if (this.nbFrames >= 1920) {
-        frame = Math.ceil(frame / Math.ceil(this.nbFrames / 1920))
+      if (this.nbFrames >= 3840) {
+        frame = Math.ceil(frame / Math.ceil(this.nbFrames / 3840))
       }
       const frameX = frame % 8
       const frameY = Math.floor(frame / 8)
