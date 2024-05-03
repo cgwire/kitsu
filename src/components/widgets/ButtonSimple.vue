@@ -43,6 +43,7 @@
     <zoom-in-icon :class="iconClass" v-else-if="icon == 'loupe'" />
     <globe-icon :class="iconClass" v-else-if="icon == 'globe'" />
     <codepen-icon :class="iconClass" v-else-if="icon == 'codepen'" />
+    <link-icon :class="iconClass" v-else-if="icon == 'link'" />
     <kitsu-icon
       :name="icon"
       :class="iconClass"
@@ -79,6 +80,7 @@ import {
   ImageIcon,
   KeyIcon,
   LayersIcon,
+  LinkIcon,
   ListIcon,
   MaximizeIcon,
   MessageSquareIcon,
@@ -97,7 +99,7 @@ import {
   ZoomInIcon
 } from 'vue-feather-icons'
 
-import KitsuIcon from '@/components/widgets/KitsuIcon'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'button-simple',
@@ -118,6 +120,7 @@ export default {
     KeyIcon,
     KitsuIcon,
     LayersIcon,
+    LinkIcon,
     ListIcon,
     MaximizeIcon,
     MessageSquareIcon,
@@ -205,8 +208,5 @@ export default {
 
 .active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow);
-}
-
-.icon {
 }
 </style>

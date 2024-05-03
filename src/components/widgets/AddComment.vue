@@ -90,7 +90,8 @@
               attachments,
               checklist,
               task_status_id,
-              nextRevision
+              nextRevision,
+              link
             )
           "
           @keyup.enter.meta.native="
@@ -99,13 +100,36 @@
               attachments,
               checklist,
               task_status_id,
-              nextRevision
+              nextRevision,
+              link
             )
           "
           v-model="text"
           v-focus
         />
       </at-ta>
+      <div
+        class="flexrow link-field"
+        v-if="mode === 'publish' && showLinkField"
+      >
+        <label class="flexrow-item has-text-right" for="input-link">
+          {{ $t('main.link') }}
+        </label>
+        <input
+          id="input-link"
+          ref="input-link"
+          class="input flexrow-item filler preview-link"
+          placeholder="https://..."
+          type="url"
+          v-model.trim="link"
+        />
+        <span
+          class="flexrow-item column preview-delete-link"
+          @click.prevent="toggleLinkField(true)"
+        >
+          x
+        </span>
+      </div>
       <div class="post-area">
         <checklist
           :checklist="checklist"
@@ -219,6 +243,16 @@
             @click="showCommentArea = !showCommentArea"
             v-if="mode === 'publish'"
           />
+          <button-simple
+            :class="{
+              'flexrow-item': true,
+              active: showLinkField
+            }"
+            icon="link"
+            :title="$t('comments.add_link')"
+            @click="toggleLinkField"
+            v-if="mode === 'publish'"
+          />
           <div class="filler"></div>
           <combobox-status
             class="flexrow-item status-selector"
@@ -247,7 +281,8 @@
                 attachments,
                 checklist,
                 task_status_id,
-                nextRevision
+                nextRevision,
+                link
               )
             "
           />
@@ -288,6 +323,7 @@
           checklist,
           task_status_id,
           nextRevision,
+          link,
           true
         )
       "
@@ -296,21 +332,21 @@
 </template>
 
 <script>
+import AtTa from 'vue-at/dist/vue-at-textarea'
 import { mapGetters } from 'vuex'
 
 import colors from '@/lib/colors'
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
-import strings from '@/lib/string'
 import { replaceTimeWithTimecode } from '@/lib/render'
+import strings from '@/lib/string'
 
-import AtTa from 'vue-at/dist/vue-at-textarea'
-import AddAttachmentModal from '@/components/modals/AddAttachmentModal'
-import ConfirmModal from '@/components/modals/ConfirmModal'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import Checklist from '@/components/widgets/Checklist'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checklist from '@/components/widgets/Checklist.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 const REVISION_NUMBER_REGEX = /v(\d+)/gi
 
@@ -321,8 +357,8 @@ export default {
     AtTa,
     AddAttachmentModal,
     ButtonSimple,
-    ConfirmModal,
     Checklist,
+    ConfirmModal,
     ComboboxStatus,
     PeopleAvatar
   },
@@ -333,8 +369,10 @@ export default {
       attachments: [],
       checklist: [],
       isDragging: false,
+      link: null,
       mode: 'status',
       showCommentArea: false,
+      showLinkField: false,
       nextRevision: undefined,
       text: '',
       task_status_id: null,
@@ -463,12 +501,15 @@ export default {
     },
 
     isValidForm() {
-      return (
+      return Boolean(
         this.mode === 'status' ||
-        (this.mode == 'publish' &&
-          this.previewForms.length &&
-          (this.nextRevision === undefined ||
-            this.nextRevision > this.revision))
+          (this.mode == 'publish' &&
+            this.previewForms.length &&
+            (this.nextRevision === undefined ||
+              this.nextRevision > this.revision) &&
+            (!this.showLinkField ||
+              !this.link ||
+              this.$refs['input-link']?.checkValidity()))
       )
     },
 
@@ -491,12 +532,26 @@ export default {
 
   methods: {
     shortenText: strings.shortenText,
+
+    toggleLinkField(reset = false) {
+      this.showLinkField = !this.showLinkField
+      if (this.showLinkField) {
+        this.$nextTick(() => {
+          this.$refs['input-link']?.focus()
+        })
+      }
+      if (reset) {
+        this.link = null
+      }
+    },
+
     runAddComment(
       text,
       attachments,
       checklist,
       taskStatusId,
       revision,
+      link,
       force = false
     ) {
       if (!this.isValidForm) {
@@ -527,15 +582,21 @@ export default {
         revision = undefined
       }
 
+      if (!this.showLinkField) {
+        link = null
+      }
+
       this.$emit(
         'add-comment',
         text,
         attachments,
         checklist,
         taskStatusId,
-        revision
+        revision,
+        link
       )
       this.text = ''
+      this.link = null
       this.attachments = []
       this.checklist = []
       this.nextRevision = undefined
@@ -783,6 +844,7 @@ article.add-comment {
   max-width: 30%;
 }
 
+.preview-delete-link,
 .preview-delete-revision {
   max-width: 10px;
   cursor: pointer;
@@ -902,6 +964,10 @@ article.add-comment {
     cursor: pointer;
     float: right;
   }
+}
+
+.link-field {
+  margin: 1em;
 }
 
 .post-area {

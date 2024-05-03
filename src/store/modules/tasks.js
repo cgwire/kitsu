@@ -187,10 +187,7 @@ const actions = {
     })
   },
 
-  loadTaskComments(
-    { commit, state, dispatch },
-    { taskId, entityId, callback }
-  ) {
+  loadTaskComments({ commit, dispatch }, { taskId, entityId }) {
     return tasksApi.getTaskComments(taskId).then(comments => {
       commit(LOAD_TASK_COMMENTS_END, { comments, taskId })
       return dispatch('loadTaskEntityPreviewFiles', entityId)
@@ -494,9 +491,18 @@ const actions = {
 
   commentTaskWithPreview(
     { commit, state },
-    { taskId, comment, revision, taskStatusId, form, attachment, checklist }
+    {
+      taskId,
+      taskStatusId,
+      attachment,
+      checklist,
+      comment,
+      form,
+      revision,
+      links
+    }
   ) {
-    const data = { taskId, taskStatusId, comment, attachment, checklist }
+    const data = { taskId, taskStatusId, comment, attachment, checklist, links }
     const previewForms = [...state.previewForms]
     commit(ADD_PREVIEW_START)
     let newComment

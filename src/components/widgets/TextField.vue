@@ -135,6 +135,10 @@ export default {
 
     focus() {
       this.$refs.input.focus()
+    },
+
+    checkValidity() {
+      return this.$refs.input.checkValidity()
     }
   }
 }

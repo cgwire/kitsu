@@ -40,7 +40,8 @@ export default {
     let commentData = {
       task_status_id: data.taskStatusId,
       comment: data.comment,
-      checklist: data.checklist || []
+      checklist: data.checklist || [],
+      links: data.links
     }
     if (data.attachment?.length) {
       commentData = new FormData()
@@ -93,7 +94,8 @@ export default {
     const data = {
       text: comment.text,
       task_status_id: comment.task_status_id,
-      checklist: comment.checklist
+      checklist: comment.checklist,
+      links: comment.links
     }
     return client.pput(`/api/data/comments/${comment.id}`, data)
   },
