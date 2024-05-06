@@ -6,70 +6,57 @@ module.exports = {
   ],
   themeConfig: {
    sidebar: [{
-     title: 'Guide',
-     collapsable: false,
+     title: 'Introductions to Kitsu Basics',
+     collapsable: true,
      children: [
-       ['/', 'Introduction'],
-       '/first_production/',
-       '/production_advanced/',
-	   '/getting-started-production/',
-	   '/getting-started-studio/',
-	   '/getting-started-superviseur/',
-       '/getting-started-artist/',
-	     '/getting-started-client/'
-     ]
+      ['/', 'Introduction'],
+       '/configure-kitsu/',
+       '/team/'
+       ]
    },
     {
-     title: 'Customization',
-     collapsable: false,
+     title: 'Create your production',
+     collapsable: true,
      children: [
-	    '/customization-pipeline/',
-        '/customization-production/',
-		 '/customization-studio/'
+	    '/short/',
+	    '/short-shot/',
+	    '/short-asset/',
+      '/tvshow/',
+      '/feature/',
+      '/videogame/',
+      '/nft/'
 	 ]
    },
    	{
-     title: 'FAQ',
+     title: 'Assignation, Estimation and schedule',
      collapsable: false,
      children: [
-       '/faq-deletion/',
-	     '/faq-filter/',
-	     '/faq-notification/',
-	     '/faq-production-report/'
+	    '/assignation/',
+	    '/estimation/',
+	    '/schedules/'
      ]
 	},
    {
-     title: 'Modules',
+     title: 'Status, Publish, Thumbnail and Review',
      collapsable: false,
      children: [
-	    '/department/',
-	    '/permissions/',
-	    '/playlist/',
-       '/Schedules/',
-       '/batch-action/',
-       '/custom-actions/'
+	    '/status/',
+	    '/publish/',
+	    '/review/'
      ]
    },
-   {
-     title: 'Chat Integrations',
-     collapsable: false,
-     children: [
-       '/discord/',
-       '/mattermost/',
-       '/slack/'
-     ]
-	},
 	{
-     title: 'Kitsu Publisher',
+     title: 'Developper',
      collapsable: false,
      children: [
-       '/publisher/',
-       '/dcc-plugin/',
-	   '/using_publisher/'
+      '/custom-actions/',
+      '/publisher/',
+	    '/chat-integration/',
+	    '/installation/'
      ]
 	},	
     {
-     title: 'Open Source Setup',
+     title: 'Producer',
      collapsable: false,
      children: [
        '/installation/',

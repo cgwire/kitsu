@@ -20,16 +20,21 @@ img[src$='#logo-kitsu'] {
 its clean UI and shared database it connects all the shareholders of the
 production: Artists, Production managers, Supervisors, Vendors, and Clients.
 
-## Getting Started
+### Kitsu Basic
 
 Depending on your role in the studio, we propose you several tutorials:
 
-* [Create your First Production](first_production/README.md): Set up a full production and dispatch tasks to your team
-* [Create a Production - Advanced](production_advanced/README.md): Prepare advanced project and go further with customization
-* [Getting Started as an artist](getting-started-artist/README.md): Access your task list, share your progress and upload your results
- * [Getting Started as a client](getting-started-client/README.md): Browse playlists and provide feedback on the deliveries
+* [Configure your Kitsu](configure-kitsu/README.md): Set up a full production and dispatch tasks to your team
+* [Preparation of your Team](team/README.md): Prepare advanced project and go further with customization
 
-## Customization
+### Create your production
+
+Depending on which kind of production you need to create, you will find the walkthrough
+
+* [Create your first SHORT production](short/README.md): Access your task list, share your progress and upload your results
+ * [Create your first TVSHOW production](tvshow/README.md) Browse playlists and provide feedback on the deliveries
+
+### Estimation and schedule
 
 In this section, we will give more information about Kitsu main customization:
 
@@ -37,7 +42,7 @@ In this section, we will give more information about Kitsu main customization:
 * [Production customization](customization-production/README.md): Adapt Kitsu to your production
 * [Studio customization](customization-studio/README.md): Adapt Kitsu to your studio
 
-## Modules
+### status and review
 
 In this section, we will give more information about Kitsu main modules:
 
@@ -47,7 +52,7 @@ In this section, we will give more information about Kitsu main modules:
 * [Department](department/README.md): Define your main departments and show lighter tables to your teams
 
 
-## Tutorials
+### Tutorials
 
 Video tutorials are available on Youtube. They cover the essential parts of
 Kitsu. You will find them via the link below:
@@ -55,7 +60,7 @@ Kitsu. You will find them via the link below:
 [Kitsu tutorials channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
 
 
-## Frequently Asked Questions
+### Frequently Asked Questions
 
 It's the place to find common questions asked by studios and their answers.
 Tutorials don't cover everything... This FAQ is here to add the missing part!
@@ -66,7 +71,7 @@ Tutorials don't cover everything... This FAQ is here to add the missing part!
 * [How to report...](faq-production-report): Build production reports in a glimpse
 
 
-## About authors
+### About authors
 
 Kitsu is written by CG Wire, a company based in France. We help animation studios to manage their production and build pipelines efficiently.
 
