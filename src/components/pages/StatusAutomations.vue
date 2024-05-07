@@ -197,7 +197,8 @@ export default {
         this.$t('status_automations.fields.in_task_status'),
         this.$t('status_automations.fields.out_field_type'),
         this.$t('status_automations.fields.out_task_type'),
-        this.$t('status_automations.fields.out_task_status')
+        this.$t('status_automations.fields.out_task_status'),
+        this.$t('status_automations.fields.import_last_revision')
       ]
       const entries = [headers].concat(
         this.statusAutomations.map(statusAutomation => [
@@ -213,7 +214,8 @@ export default {
           statusAutomation.out_field_type === 'status'
             ? this.taskStatusMap.get(statusAutomation.out_task_status_id)
                 ?.short_name
-            : undefined
+            : undefined,
+          statusAutomation.import_last_revision
         ])
       )
       csv.buildCsvFile(name, entries)
