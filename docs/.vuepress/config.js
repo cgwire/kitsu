@@ -18,11 +18,11 @@ module.exports = {
         title: 'Create your production',
         collapsable: true,
         children: [
+          '/tvshow/',
+          '/feature/',
           '/short/',
           '/short-shot/',
           '/short-asset/',
-          '/tvshow/',
-          '/feature/',
           '/videogame/',
           '/nft/'
         ]

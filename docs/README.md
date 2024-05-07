@@ -31,11 +31,11 @@ Kitsu the next generation production tracker, here is some link to familiarize y
 
 Depending on which kind of production you need to create, you will find the walkthrough
 
+  * [Create a TV Show Production](tvshow/README.md) Create a TV show production with assets, shots, sequences, episodes and edits
+  * [Create a Feature Film Production](feature/README.md) Create a Feauture Film production (about 1 000 entities) with assets, shots, sequences and edit.
 * [Create your SHORT production](short/README.md): Create a short production (about 500 assets and shots) with assets, shots, sequences and edit.
  * [Create a SHOTS only Production](short-shot/README.md) Create a short production (about 500 shots) with only shots, sequences and edit
   * [Create an ASSET only Production](short-asset/README.md) Create a short production (about 500 assets) with only assets.
-  * [Create a TV Show Production](tvshow/README.md) Create a TV show production with assets, shots, sequences, episodes and edits
-  * [Create a Feature Film Production](feature/README.md) Create a Feauture Film production (about 1 000 entities) with assets, shots, sequences and edit.
   * [Create a Video Game production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
   * [Create a NFT Collection](nft/README.md) Create a NFT Collection with assets, and NFT Collection.
 
