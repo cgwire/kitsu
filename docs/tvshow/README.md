@@ -12,7 +12,9 @@ Enter your production name, and choose **TV Show** as the **type**, then select 
 
 Then, you have to fill in technical information, such as the number of FPS, the Ration, and the Resolution.
 
+::: warning
 All these data will be used when Kitsu re-encodes the video previews uploaded.
+:::
 
 Then, you need to define your production's start and end dates.
 
@@ -31,17 +33,12 @@ You need to select your asset task type (3), shot task type (4), task status (5)
 To create your **Production Workflow**, you will select Task Types from the Global Library.
 
 If you realize you missed some Task Types, you will be able to create them later.
-
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
 See the **import CSV** section for more details.
 
-[Import asset](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
-
-[Import shot](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
@@ -58,7 +55,7 @@ Welcome to the global asset page of Kitsu.
 
 Let's take a look around.
 
-![Presentation of the global page](../img/getting-started/presentation_global.png)
+![Presentation of the global page](../img/getting-started/presentation_global_tv.png)
 
 On the top part (1), you have the **global navigation**, which is always visible throughout all the production pages.
 
@@ -110,7 +107,7 @@ Artist (and above) can also see their own **Timesheets**, and have access to the
 
 On the right if the main menu icon, you have the navigation dropdown menu.
 
-![Presentation of the global page](../img/getting-started/presentation_global_header.png)
+![Presentation of the global page](../img/getting-started/presentation_global_header_tv.png)
 
 
 You can choose between production. The name of the actual production and actual page are always displayed.
@@ -152,9 +149,7 @@ You start with the asset page, but you can change your production homepage to ot
 :::
 
 ::: warning 
-If you realized you need an extra level of navigation as **Episodes**, You need to change your production Type as a **TV Show**.
-
-If on the contrary, you realize you don't need the **assets** or the **shots**, you need to also switch your production type to **Only Assets** or **Only Shots**.
+If you realized you don't need an extra level of navigation as **Episodes**, You need to change your production Type as a **Short**.
 :::
 
 ### Global Search, News, Notification and Documentation
@@ -177,7 +172,7 @@ The last icon before your avatar is the documentation button.
 ### Personal Settings
 You can click on your avatar to open your menu (setting, documentation, etc.).
 
-![Profile enlarged](../img/getting-started/profil_enlarge.png).
+![Profile enlarged](../img/getting-started/profil_enlarge.png)
 
 ## The Tasks Spreadsheet
 
@@ -293,7 +288,7 @@ Then, go back to the asset page on Kitsu, and click on the **Import** icon.
 
 A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
 
-![Import csv file](../img/getting-started/import_csv_asset.png)
+![Import csv file](../img/getting-started/import_csv_asset_tv.png)
 
 To see the result, click on the **Preview** button.
   
@@ -321,11 +316,11 @@ Then, go back to the asset page on Kitsu, and click on the **Import** icon
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset_tv.png)
  
 You can paste your previously selected data and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset_tv.png)
   
 You can check and adjust the name of the columns with the preview of your data.
  
@@ -380,21 +375,8 @@ And the **Timelog** if people have filled out their timesheet on the tasks of th
 
 
 
-## Add more tasks after creating the assets
 
-
-If you realize **after** creating the assets that task are missing, you can still add them.
-
-First be sure that the missing task type is added in the setting page under the task type tab.
-
-Then go back to the asset page and click on **+ Add tasks**
-
-
-
-
-
-
- ### Update your assets
+## Update your assets
 At any point you can update your assets, change their name, asset type, modify their description and any custom information you added to the global page.
 
 You can edit assets by going to the asset page, hovering over the asset you want to modify, and then clicking on the **edit** button
@@ -425,27 +407,26 @@ will be highlighted in blue.
 
 Open your spreadsheet, select your data and copy them.
 
-![Import copy data](../img/getting-started/import_copypas_asset.png)
+![Import copy data](../img/getting-started/import_copypas_asset_tv.png)
 
 Then, go back to the asset page on Kitsu, and click on the **Import** icon 
 ![Import Icon](../img/getting-started/import.png).
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset.png)
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_asset_tv.png)
  
 You can paste your previously selected data and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset.png)
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_asset_tv.png)
   
 You can check and adjust the name of the columns with the preview of your data.
 
-NB: the **Episode** column is only mandatory for a **TV Show** production. 
- 
+
 You need to switch on the option **Update existing data**. Then the lines that will be updated
 will be highlighted in blue.
 
-![Import data copy paste data](../img/getting-started/import_update_asset.png)
+![Import data copy paste data](../img/getting-started/import_update_asset_tv.png)
 
 Now, you have all your assets imported into Kitsu and the task created according to your **Settings**.
 
@@ -453,12 +434,22 @@ Now, you have all your assets imported into Kitsu and the task created according
 :::
 
 
+
+## Add more tasks after creating the assets
+
+
+If you realize **after** creating the assets that task are missing, you can still add them.
+
+First be sure that the missing task type is added in the setting page under the task type tab.
+
+Then go back to the asset page and click on **+ Add tasks**
+
 ## Create a Concept
 ### Upload a Concept
 
 To create a **Concept**, go to the **Concept** page with the navigation menu.
 
-![Concept Menu](../img/getting-started/menu_concept.png)
+![Concept Menu](../img/getting-started/menu_concept_tv.png)
 
 To upload a concept, click the **Add a new reference to concepts** button.
 
@@ -540,7 +531,7 @@ Meaning you need to first create an episode, then a sequence, and populate this 
 You need to go to the **Shots** page: you can use the
 dropdown menu and click on the **SHOTS**.
 
-![Drop down menu shot](../img/getting-started/drop_down_menu_shot.png)
+![Drop down menu shot](../img/getting-started/drop_down_menu_shot_tv.png)
 
 Click on the **Add shots** button to start with the shot creation.
 
@@ -565,7 +556,7 @@ You can also define padding for your shots.
 If you want to name your shots 10 on 10 as SH0010, SH0020, SH0030 etc, set the **Shot Padding** as 10
 :::
 
-![Manage shots](../img/getting-started/manage_shot.png)
+![Manage shots](../img/getting-started/manage_shot_tv.png)
 
 You can now see that new shots are listed, linked by their sequence, themsleves linked to Episode.
 You have created the first shot of the first sequence of the first episode.
@@ -587,7 +578,10 @@ Once the sequence is created, it will be selected, and you can create shots on t
 ::: tip
 If a shot is misplaced on a sequence, you have to edit the shot
 ![Edit button](../img/getting-started/edit_button.png), and change the
-sequence.
+sequence. 
+
+**But you can't change the episode of a shot.**
+
 ![edit shot Change sequence](../img/getting-started/edit_shot.png)
 
 ![Change sequence](../img/getting-started/change_seq.png)
@@ -628,7 +622,7 @@ Then click on **Upload EDL**
 Then Kitsu will create the shots.
 
 ![EDL Shot creation](../img/getting-started/edl_shot_creation.png)
-:::
+
 
 ::: details Create Shots from a CSV Spreadsheet File
 You may already have your shots list ready in a spreadsheet file.
@@ -641,13 +635,13 @@ Then, go back to the shot page on Kitsu, and click on the **Import** icon.
 
 A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
 
-![Import csv file](../img/getting-started/import_csv_shot.png)
+![Import csv file](../img/getting-started/import_csv_shot_tv.png)
 
 To see the result, click on the **Preview** button.
   
 You can check and adjust the name of the columns with the preview of your data.
  
-NB: the **Episode** column is only mandatory for a **TV Show** production.
+NB: the **Episode** column is mandatory for a **TV Show** production.
  
 ![Import data copy paste data](../img/getting-started/import_preview_data_shot.png)
 
@@ -669,11 +663,11 @@ Then, go back to the shot page on Kitsu, and click on the **Import** icon
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot_tv.png)
  
 You can paste your previously selected data and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot_tv.png)
   
 You can check and adjust the name of the columns with the preview of your data.
  
@@ -697,43 +691,36 @@ If you want to see the details of a shot, click on its name.
 A new page opens with the list of the tasks, the assignation, and the status newsfeed on the right.
 You can navigate through each by clicking on the name of the tabs.
 
-![Shot detail page](../img/getting-started/shot_detail_page.png)
+![Shot detail page](../img/getting-started/shot_detail_page_tv.png)
 
 You can click on the status of each task to open the comment panel and see the history of the comments and the different versions.
 
 
-![Shot detail page](../img/getting-started/shot_detail_page_panel.png)
+![Shot detail page](../img/getting-started/shot_detail_page_panel_tv.png)
 
 
 You can also access the **Casting**, 
 
-![Asset detail casting](../img/getting-started/shot_detail_page_casting.png)
+![Asset detail casting](../img/getting-started/shot_detail_page_casting_tv.png)
 
 
 The **Schedule** if you have previously filled the task type page data. If the data are already first filled, then you will be able to modify them directly here. 
 
-![Asset detail casting](../img/getting-started/shot_detail_page_schedule.png)
+![Asset detail casting](../img/getting-started/shot_detail_page_schedule_tv.png)
 
 the **Preview Files** uploaded at various task types, 
 
-![Asset detail casting](../img/getting-started/shot_detail_page_file.png)
+![Asset detail casting](../img/getting-started/shot_detail_page_file_tv.png)
 
 And the **Timelog** if people have filled out their timesheet on the tasks of this asset.
 
-![Asset detail casting](../img/getting-started/shot_detail_page_timelog.png)
+![Asset detail casting](../img/getting-started/shot_detail_page_timelog_tv.png)
 
 
 
 
-## Add more tasks after creating the shots
-If you realize after creating the shots that task are missing, you can still add them.
 
-First be sure that the missing task type is added in the setting page under the task type tab.
-
-Then go back to the shot page and click on + Add tasks
-
-
-### Update your shots
+## Update your shots
 
 At any point you can update your shots, change their name, sequence, modify their description and any custom information you added to the global page.
 
@@ -759,11 +746,11 @@ Then, go back to the shot page on Kitsu, and click on the **Import** icon
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot.png)
+![Import data copy paste tab](../img/getting-started/import_pastcsvdata_shot_tv.png)
  
 You can paste your previously selected data and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot.png)
+![Import data copy paste data](../img/getting-started/import_pastcsvdata2_shot_tv.png)
   
 You need to switch on the **Option: Update existing data**.
 the updated shots will be in blue
@@ -781,6 +768,13 @@ Now, you have all your shots imported into Kitsu, and the task created according
 :::
 
 
+
+## Add more tasks after creating the shots
+If you realize after creating the shots that task are missing, you can still add them.
+
+First be sure that the missing task type is added in the setting page under the task type tab.
+
+Then go back to the shot page and click on + Add tasks
 
 ## Add the number of Frame and frameranges to the shots
 
@@ -929,17 +923,13 @@ you have macro tasks to track, like Story and color Board, Color Grading, etc.
 
 Use the navigation menu to go to the **Sequences** page.
 
-![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page.png)
+![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page_tv.png)
 
 ::: warning
 This new page behaves like the asset and shot global page.
 
 To use this page, You first need to create dedicated task types on your **Global Library**
  with the **Sequence** attribute.
-
-See **Pipeline customization** Section to create a new **Task Type**.
-
-[Pipeline customization](../customization-pipeline/README.md)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -958,7 +948,7 @@ You can add a metadata column, fill in the description, etc.
 
 
 ::: tip
-You can create a sequence directly from here (+New sequence button), or you can create a sequence linked to your shots from the global shot page.
+You can create a sequence directly from here (**+New sequence** button), or you can create a sequence linked to your shots from the global shot page.
 :::
 
 
@@ -966,7 +956,7 @@ You can **Rename** and **Delete** the Sequence entity on this page, as for the a
 
 If you click on the name of a sequence, you will see the detail page of this sequence.
 
-![Sequence detailed page](../img/getting-started/sequence_detail_page.png)
+![Sequence detailed page](../img/getting-started/sequence_detail_page_tv.png)
 
 On the detailed page, you have access to the casting of the sequence.
 You can see all the assets used in the whole sequence.
@@ -991,16 +981,11 @@ Per default **Edit** page will not be displayed until you have task types for it
 To use this page, you need to first create a dedicated task type on your **Global Library**
  with the **Edit** attribute.
 
-See **Pipeline customization** Section to create a new **Task Type**.
-
-[Pipeline customization](../customization-pipeline/README.md)
-
-
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
 
-![Navigation Edit](../img/getting-started/drop_down_menu_edit.png)
+![Navigation Edit](../img/getting-started/drop_down_menu_edit_tv.png)
 
 
 This new page behaves like the asset and shot global page. You can add your edits with the **+ New edit** button.
@@ -1035,7 +1020,7 @@ shot, and we are sure to omit nothing.
 
 On the dropdown menu, choose **BREAKDOWN**.
 
-![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown.png)
+![drop down Menu breakdown](../img/getting-started/drop_down_menu_breakdown_tv.png)
 
 On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
 the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
@@ -1121,7 +1106,7 @@ Click on the **import** button ![Import button](../img/getting-started/import.pn
 
 A pop-up window **Import data from a CSV** opens, click on **Browse** to pick your `.csv` file.
 
-![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file.png)
+![Breakdown import csv file](../img/getting-started/import_breakdown_csv_file_tv.png)
 
 To see the result, click on the **Preview** button.
 
@@ -1129,7 +1114,7 @@ You can check and adjust the name of the columns with the preview of your data.
 
 NB: the **Episode** column is only mandatory for a **TV Show** production.
 
-![Breakdown import Preview](../img/getting-started/import_breakdown_preview.png)
+![Breakdown import Preview](../img/getting-started/import_breakdown_preview_tv.png)
 
 Once everything is good, click on the **Confirm** button to import your data into Kitsu.
 
@@ -1142,24 +1127,23 @@ Now, you have your breakdown imported into Kitsu.
 
 Open your spreadsheet, select your data and copy them.
 
-![Import copy data](../img/getting-started/import_copypas_breakdown.png)
+![Import copy data](../img/getting-started/import_copypas_breakdown_tv.png)
 
 Then, go back to the breakdown page on Kitsu, and click on the **Import** icon 
 ![Import Icon](../img/getting-started/import.png).
 
 A pop-up window **Import data from a CSV** opens, click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](../img/getting-started//import_breakdown_csv_file.png)
+![Import data copy paste tab](../img/getting-started//import_breakdown_csv_file_tv.png)
  
 You can paste your previously selected data and see the result with the **Preview** button.
  
-![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
+![Import data copy paste data](../img/getting-started/import_breakdown_preview_tv.png)
   
 You can check and adjust the name of the columns with the preview of your data.
  
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](../img/getting-started/import_breakdown_preview.png)
+NB: the **Episode** column is mandatory for a **TV Show** production.
+
 
 Once everything is good, click on the **Confirm** button to import your data into Kitsu.
 
@@ -1193,11 +1177,11 @@ Now that we have change some asset state **Ready for**, we can see the result in
 
 You can notice that some of the white box are now **Green**: all the assets cast in this shot are ready for this specific task.
 
-![Asset Status](../img/getting-started/asset_status_box.png)
+![Asset Status](../img/getting-started/asset_status_box_tv.png)
 
 If you see the white box, Kitsu will display how many assets are ready for this task.
 
-![Asset Status](../img/getting-started/asset_status_empty.png)
+![Asset Status](../img/getting-started/asset_status_empty_tv.png)
 
  ::: tip
 If you don't see any boxes, it means no assets are casted for this shot.
@@ -1206,7 +1190,7 @@ If you don't see any boxes, it means no assets are casted for this shot.
 Then, you can click on the shot's name to go to its detail page.
 Then, you will see all the assets cast in this shot and their status.
 
-![Asset Status](../img/getting-started/asset_status_detail.png)
+![Asset Status](../img/getting-started/asset_status_detail_tv.png)
 
 It's the fastest way to know if you can start a shot for a specific task.
 
