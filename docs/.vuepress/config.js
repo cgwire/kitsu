@@ -25,24 +25,58 @@ module.exports = {
         ]
       },
       {
-        title: 'Assignation, Estimation and schedule',
-        collapsable: false,
-        children: ['/assignation/', '/estimation/', '/schedules/']
+        title: 'Assignation, Estimation and Schedule',
+        collapsable: true,
+        children: [
+          '/assignation/', 
+          '/estimation/', 
+          '/schedules/'
+        ]
       },
       {
-        title: 'Status, Publish, Thumbnail and Review',
-        collapsable: false,
-        children: ['/status/', '/publish/', '/review/']
+        title: 'Status, Publish, and Thumbnail',
+        collapsable: true,
+        children: [
+          '/status/',
+          '/publish/',
+          '/thumbnails/'
+          ]
       },
+      {
+        title: 'Internal Review and Client Playlist',
+        collapsable: true,
+        children: [
+         '/review/',
+         '/review-weekly/',
+         '/playlist-client/'
+          ]
+       },
+      {
+        title: 'Supervisor',
+        collapsable: true,
+        children: [
+          '/supervisor-team/',
+          '/supervisor-tasks/'
+           ]
+       },
       {
         title: 'Producer',
-        collapsable: false,
-        children: ['/custom-actions/', '/publisher/', '/chat-integration/']
+        collapsable: true,
+        children: [
+          '/production-report/',
+          '/studio-report/'
+        ]
       },
       {
         title: 'Developer',
-        collapsable: false,
-        children: ['/installation/']
+        collapsable: true,
+        children: [
+          '/custom-actions/',
+          '/bots/',
+          '/publisher/',
+          '/chat-integration/',
+          '/installation/'
+        ]
       }
     ]
   }

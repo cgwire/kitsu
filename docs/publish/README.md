@@ -1,4 +1,4 @@
-# Thumbnail and Publish
+# Publish
 
 
 ## Publish a Concept
