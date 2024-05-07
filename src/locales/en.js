@@ -243,7 +243,8 @@ export default {
       in_task_status: 'Task Status',
       out_field_type: 'Trigger',
       out_task_type: 'Applied Task Type',
-      out_task_status: 'Applied Task Status'
+      out_task_status: 'Applied Task Status',
+      import_last_revision: "Import Last Revision",
     },
     entity_types: {
       asset: 'Asset',

@@ -19,8 +19,11 @@
             <th scope="col" class="out-task-type">
               {{ $t('status_automations.fields.out_task_type') }}
             </th>
-            <th scope="col" class="in-task-status">
+            <th scope="col" class="out-task-status">
               {{ $t('status_automations.fields.out_task_status') }}
+            </th>
+            <th scope="col" class="import-last-revision">
+              {{ $t('status_automations.fields.import_last_revision') }}
             </th>
             <th scope="col" class="actions">&nbsp;</th>
           </tr>
@@ -70,6 +73,9 @@
               :entry="getTaskStatus(statusAutomation.out_task_status_id)"
             />
             <td class="name out-task-status" v-else></td>
+            <td class="import-last-revision">
+              {{ formatBoolean(statusAutomation.import_last_revision) }}
+            </td>
             <row-actions-cell
               :entry-id="statusAutomation.id"
               @edit-clicked="$emit('edit-clicked', statusAutomation)"

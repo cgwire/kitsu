@@ -88,6 +88,13 @@
           </div>
 
           <combobox-boolean
+            :label="$t('status_automations.fields.import_last_revision')"
+            @enter="confirmClicked"
+            v-model="form.importLastRevision"
+            v-if="isEditing"
+          />
+
+          <combobox-boolean
             :label="$t('main.archived')"
             @enter="confirmClicked"
             v-model="form.archived"
@@ -182,7 +189,9 @@ export default {
         inTaskTypeId: '',
         outTaskTypeId: '',
         inTaskStatusId: '',
-        outTaskStatusId: ''
+        outTaskStatusId: '',
+        importLastRevision: 'false',
+        archived: 'false'
       }
     }
   },
@@ -256,6 +265,9 @@ export default {
           outTaskStatusId: this.isEditing
             ? this.statusAutomationToEdit.out_task_status_id
             : this.taskStatusList[1].id,
+          importLastRevision: this.isEditing
+            ? String(this.statusAutomationToEdit.import_last_revision === true)
+            : 'false',
           archived: this.isEditing
             ? String(this.statusAutomationToEdit.archived === true)
             : 'false'
