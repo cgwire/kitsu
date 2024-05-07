@@ -8,8 +8,11 @@ module.exports = {
     sidebar: [
       {
         title: 'Introductions to Kitsu Basics',
-        collapsable: true,
-        children: [['/', 'Introduction'], '/configure-kitsu/', '/team/']
+        collapsable: false,
+        children: [['/', 'Introduction'],
+         '/configure-kitsu/',
+          '/team/'
+        ]
       },
       {
         title: 'Create your production',

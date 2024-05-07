@@ -22,73 +22,73 @@ production: Artists, Production managers, Supervisors, Vendors, and Clients.
 
 ### Introduction to Kitsu Basic
 
-Depending on your role in the studio, we propose you several tutorials:
+Kitsu the next generation production tracker, here is some link to familiarize yourself with our concepts
 
-* [Getting started with Kitsu](configure-kitsu/README.md): Set up a full production and dispatch tasks to your team
-* [Preparation of your Team](team/README.md): Prepare advanced project and go further with customization
+* [Getting started with Kitsu](configure-kitsu/README.md): learn the principle and vocabulary of Kitsu and better prepare your production workflow.
+* [Preparation of your Team](team/README.md): Prepare your team and define their departments and permissions.
 
 ### Create your production
 
 Depending on which kind of production you need to create, you will find the walkthrough
 
-* [Create your SHORT production](short/README.md): Access your task list, share your progress and upload your results
- * [Create a SHOTS only Production](short-shot/README.md) Browse playlists and provide feedback on the deliveries
-  * [Create an ASSET only Production](short-asset/README.md) Browse playlists and provide feedback on the deliveries
-  * [Create a TV Show Production](tvshow/README.md) Browse playlists and provide feedback on the deliveries
-  * [Create a Feature Film Production](feature/README.md) Browse playlists and provide feedback on the deliveries
-  * [Create a Video Game production](videogame/README.md) Browse playlists and provide feedback on the deliveries
-  * [Create a NFT Collection](nft/README.md) Browse playlists and provide feedback on the deliveries
+* [Create your SHORT production](short/README.md): Create a short production (about 500 assets and shots) with assets, shots, sequences and edit.
+ * [Create a SHOTS only Production](short-shot/README.md) Create a short production (about 500 shots) with only shots, sequences and edit
+  * [Create an ASSET only Production](short-asset/README.md) Create a short production (about 500 assets) with only assets.
+  * [Create a TV Show Production](tvshow/README.md) Create a TV show production with assets, shots, sequences, episodes and edits
+  * [Create a Feature Film Production](feature/README.md) Create a Feauture Film production (about 1 000 entities) with assets, shots, sequences and edit.
+  * [Create a Video Game production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
+  * [Create a NFT Collection](nft/README.md) Create a NFT Collection with assets, and NFT Collection.
 
 
 ### Assignation, Estimation and schedule
 
-In this section, we will give more information about Kitsu main customization:
+In this section, we will give more information about Kitsu main uses:
 
-* [Assign a task](assignation/README.md): Adapt Kitsu to your pipeline
-* [Estimation and Team speed](estimation/README.md): Adapt Kitsu to your production
-* [Schedules](schedules/README.md): Adapt Kitsu to your studio
+* [Assign a task](assignation/README.md): Learn how to add someone to a team and assign a task.
+* [Estimation and Team speed](estimation/README.md): Learn how to fill the number of days estimated to do a task (bids) and check your team speed.
+* [Schedules](schedules/README.md): Discover the different schedules in Kitsu, from the studio level to the task level.
 
 ### Status, Publish and Thumbnails
 
-In this section, we will give more information about Kitsu main modules:
+Learn the day-to-day use of Kitsu:
 
-* [Status](status/README.md): Everything you need to know to setup your schedules
-* [Publish](publish/README.md): Run several actions in a click, let Kitsu work for you
-* [Add a Thumbnail](thumbnails/README.md): Gather video versions in a glimpse and stay focus during the review
+* [Status](status/README.md): How to change a status and communicate with your team.
+* [Publish](publish/README.md): How to share your work with your team, supervisor and director.
+* [Add a Thumbnail](thumbnails/README.md): How to apply thumbnails to assets and shots.
 
 ### Internal Review and client Playlist
 
-In this section, we will give more information about Kitsu main modules:
+How to organize internal and external reviews:
 
-* [Review](review/README.md): Everything you need to know to setup your schedules
-* [Daily & Weekly review](review-weekly/README.md): Run several actions in a click, let Kitsu work for you
-* [Client Playlists](playlist-client/README.md): Gather video versions in a glimpse and stay focus during the review
+* [Review](review/README.md): Learn how to check all the review of one task.
+* [Daily & Weekly review](review-weekly/README.md): Gather video versions in a glimpse and stay focus during the review.
+* [Client Playlists](playlist-client/README.md): Gather and share your work with your client in a controlled environment.
 
 
 ### Supervisor
 
-In this section, we will give more information about Kitsu main modules:
+As a supervisor you have different expectations of kitsu:
 
-* [Manage your Department(s)](supervisor-team/README.md): Everything you need to know to setup your schedules
-* [Supervise your Tasks](supervisor-tasks/README.md): Run several tasks
+* [Manage your Department(s)](supervisor-team/README.md): Learn how you can manage and supervise your team
+* [Supervise your Tasks](supervisor-tasks/README.md): Don't forget any tasks!
 
 ### Producer
 
-In this section, we will give more information about Kitsu main modules:
+As a producer you need to move from the most detailed to the broadest view:
 
-* [Build your Production Report](production-report/README.md): Everything you need to know to setup your schedules
-* [Build a Studio Report](studio-report/README.md): Run several tasks
+* [Build your Production Report](production-report/README.md): Everything you need to know to create your production report.
+* [Build a Studio Report](studio-report/README.md): Stay ahead of your productions at the Studio's level.
 
 
 ### Developper
 
-In this section, we will give more information about Kitsu main modules:
+As a developper here is some detailled explanation about what you can do with kitsu
 
-* [Custom Actions](custom-actions/README.md): Everything you need to know to setup your schedules
-* [Bots](bots/README.md): Run several tasks
-* [Kitsu Publisher](publisher/README.md): Run several tasks
-* [Chat Integration](chat-integration/README.md): Run several tasks
-* [Open source Setup](installation/README.md): Run several tasks
+* [Custom Actions](custom-actions/README.md): A custom action is a simple HTTP request that sends information from your current Kitsu selection to a custom end.
+* [Bots](bots/README.md): The main use is for scripting with gazu, and anything else that can use our API.
+* [Kitsu Publisher](publisher/README.md): Kitsu is a web application to share the progress of your productions and validate your deliveries.
+* [Chat Integration](chat-integration/README.md): Get your notification on Discord, Slack or Mattermost.
+* [Open source Setup](installation/README.md): If your version of Kitsu is hosted and maintained by CGWire, you don't have anything to install.
 
 
 
