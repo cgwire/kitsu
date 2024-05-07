@@ -44,7 +44,7 @@ environment variables:
 
 In that case, you must run the development environment with (see below):
 
-```bash
+```shell
 KITSU_API_TARGET=http://localhost/api KITSU_EVENT_TARGET=http://localhost npm run dev
 ```
 
@@ -54,13 +54,13 @@ The credentials for the Docker image are: admin@example.com / mysecretpassword
 
 To start modifying Kitsu, you need the sources:
 
-```bash
+```shell
 git clone https://github.com/cgwire/kitsu.git
 ```
 
 Then download the dependencies:
 
-```bash
+```shell
 cd kitsu
 npm install
 ```
@@ -68,7 +68,7 @@ npm install
 Finally start the development environment and see the result on
 `http://localhost:8080`:
 
-```bash
+```shell
 npm run dev
 ```
 
@@ -78,7 +78,7 @@ Every changes will automatically update the page.
 
 If you want to build your code, simply run this command:
 
-```bash
+```shell
 npm run build
 ```
 
@@ -86,7 +86,7 @@ npm run build
 
 Run tests with the following command:
 
-```bash
+```shell
 npm run test:unit
 ```
 

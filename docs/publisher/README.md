@@ -35,7 +35,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - To install the package:
 
-    ```console
+    ```shell
     dpkg -i kitsu-publisher_{version}_amd64.deb
     ```
 
@@ -45,7 +45,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - To install the package:
 
-    ```console
+    ```shell
     rpm -i kitsu-publisher_{version}_x86_64.rpm
     ```
 
@@ -55,7 +55,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - To install the package:
 
-    ```console
+    ```shell
     snap install kitsu-publisher_{version}_amd64.snap --dangerous
     ```
 
@@ -65,13 +65,13 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - To extract the archive:
 
-    ```console
+    ```shell
     tar -xf kitsu-publisher-{version}.tar.gz
     ```
 
   - To run the app:
 
-    ```console
+    ```shell
     kitsu-publisher-{version}/kitsu-publisher
     ```
 
@@ -79,7 +79,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - to run the app:
 
-    ```console
+    ```shell
     ./Kitsu publisher-{version}.AppImage
     ```
 
@@ -119,7 +119,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - To install the package (you can also install the package by double-clicking on it and following the instructions):
 
-    ```console
+    ```shell
     sudo installer -package Kitsu-publisher-{version}.pkg -target /
     ```
 
@@ -140,7 +140,7 @@ To develop or to build the Electron app you need [Node.js](https://nodejs.org/en
 
 To install all the dependencies needed by the Electron app you have to run in the project folder:
 
-```console
+```shell
 npm install
 ```
 
@@ -148,7 +148,7 @@ npm install
 
 To run the Electron app in development mode you have to run an npm script:
 
-```console
+```shell
 npm run dev
 ```
 
@@ -162,14 +162,14 @@ It will spawn an electron instance and a Vite development server.
 
   - To install these packages:
 
-    ```console
+    ```shell
     apt-get install build-essential libcairo2-dev libpango1.0-dev \
     libjpeg-dev libgif-dev librsvg2-dev
     ```
 
   - If you want to build specific target like rpm you need to install:
 
-    ```console
+    ```shell
     apt-get install rpm
     ```
 
@@ -179,7 +179,7 @@ It will spawn an electron instance and a Vite development server.
 
 - On macOS you need (with [Homebrew](https://brew.sh/)):
 
-  ```console
+  ```shell
   brew install pkg-config cairo pango libpng jpeg giflib librsvg
   ```
 
@@ -189,13 +189,13 @@ You need to run npm scripts:
 
 - If you only want to build an unpackaged directory:
 
-  ```console
+  ```shell
   npm run build
   ```
 
 - If you want to build for all targets:
 
-  ```console
+  ```shell
   npm run build:all
   ```
 
@@ -215,7 +215,7 @@ You need to download the connectors-{version}.zip archive in the [releases](http
 
   - If you want to run the script with PowerShell command line it's possible, look at the help with:
 
-    ```console
+    ```shell
     .\install.ps1 -help
     ```
 
@@ -223,19 +223,19 @@ You need to download the connectors-{version}.zip archive in the [releases](http
 
   - If Blender is installed with a system package (for example: deb or rpm):
 
-    ```console
+    ```shell
     bash ./install.sh --system
     ```
 
   - If Blender is an unpacked directory (tar.xz archive):
 
-    ```console
+    ```shell
     bash ./install.sh --unpacked-directory=PATH_TO_YOUR_PORTABLE_BLENDER
     ```
 
   - If Blender is installed with a snap package:
 
-    ```console
+    ```shell
     bash ./install.sh --snap
     ```
 
@@ -243,7 +243,7 @@ You need to download the connectors-{version}.zip archive in the [releases](http
 
   - If Blender is installed with a dmg image or Homebrew:
 
-    ```console
+    ```shell
     bash ./install.sh --dmg
     ```
 
@@ -257,7 +257,7 @@ You need to download the connectors-{version}.zip archive in the [releases](http
 
   - If you want to run the script with PowerShell command line it's possible, look at the help with:
 
-    ```console
+    ```shell
     .\install.ps1 -help
     ```
 
@@ -275,7 +275,7 @@ You need to download the connectors-{version}.zip archive in the [releases](http
 
   - If you want to run the script with PowerShell command line it's possible, look at the help with:
 
-    ```console
+    ```shell
     .\install.ps1 -help
     ```
 
