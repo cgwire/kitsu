@@ -65,7 +65,13 @@ const csv = {
     } else if (detailLevel === 'day') {
       range = getDayRange(year, month, currentYear, currentMonth)
     }
-    for (const unit in range) headers.push(parseInt(unit) + 1)
+    for (const unit in range) {
+      let value = parseInt(unit) + 1
+      if (detailLevel === 'day') {
+        value = `${year}-${String(month).padStart(2, 0)}-${String(value).padStart(2, 0)}`
+      }
+      headers.push(value)
+    }
     return headers
   },
 
