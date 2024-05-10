@@ -3,7 +3,7 @@ import client from '@/store/api/client'
 import { buildQueryString } from '../../lib/query'
 
 export default {
-  getTask(taskId, callback) {
+  getTask(taskId) {
     return client.pget(`/api/data/tasks/${taskId}/full`)
   },
 
@@ -12,27 +12,27 @@ export default {
     return client.pget(buildQueryString(path, filters))
   },
 
-  updateTask(taskId, data, callback) {
-    return client.pput(`/api/data/tasks/${taskId}`, data, callback)
+  updateTask(taskId, data) {
+    return client.pput(`/api/data/tasks/${taskId}`, data)
   },
 
-  getTaskSubscribed(taskId, callback) {
+  getTaskSubscribed(taskId) {
     return client.pget(`/api/data/user/tasks/${taskId}/subscribed`)
   },
 
-  subscribeToTask(taskId, callback) {
+  subscribeToTask(taskId) {
     return client.ppost(`/api/actions/user/tasks/${taskId}/subscribe`, {})
   },
 
-  unsubscribeFromTask(taskId, callback) {
+  unsubscribeFromTask(taskId) {
     return client.pdel(`/api/actions/user/tasks/${taskId}/unsubscribe`)
   },
 
-  getTaskComments(taskId, callback) {
+  getTaskComments(taskId) {
     return client.pget(`/api/data/tasks/${taskId}/comments`)
   },
 
-  getTaskPreviews(taskId, callback) {
+  getTaskPreviews(taskId) {
     return client.pget(`/api/data/tasks/${taskId}/previews`)
   },
 
@@ -61,10 +61,8 @@ export default {
   addAttachmentToComment(comment, files) {
     const attachments = new FormData()
     const taskId = comment.object_id
-    let i = 0
-    files.forEach(attachment => {
-      attachments.append('file-' + i, attachment.get('file'))
-      i++
+    files.forEach((attachment, index) => {
+      attachments.append(`file-${index}`, attachment.get('file'))
     })
     return client.ppost(
       `/api/actions/tasks/${taskId}/comments/${comment.id}/add-attachment`,
@@ -74,8 +72,7 @@ export default {
 
   deleteAttachment(comment, attachment) {
     return client.pdel(
-      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/` +
-        `attachments/${attachment.id}`
+      `/api/data/tasks/${comment.object_id}/comments/${comment.id}/attachments/${attachment.id}`
     )
   },
 
@@ -100,7 +97,7 @@ export default {
     return client.pput(`/api/data/comments/${comment.id}`, data)
   },
 
-  deleteTaskComment(taskId, commentId, callback) {
+  deleteTaskComment(taskId, commentId) {
     return client.pdel(`/api/data/tasks/${taskId}/comments/${commentId}`)
   },
 
@@ -109,15 +106,9 @@ export default {
     const type = data.type
     const projectId = data.project_id
     const entityIds = data.entityIds
-    let url =
-      `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
-      'create-tasks'
-    if (['episodes', 'sequences'].includes(data.type)) {
-      url =
-        `/api/actions/projects/${projectId}/task-types/` +
-        `${taskTypeId}/create-tasks/` +
-        `${data.type.substring(0, data.type.length - 1)}`
-    }
+    const url = ['episodes', 'sequences'].includes(type)
+      ? `/api/actions/projects/${projectId}/task-types/${taskTypeId}/create-tasks/${type.slice(0, -1)}`
+      : `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/create-tasks`
     return client.ppost(url, entityIds)
   },
 
@@ -126,15 +117,9 @@ export default {
     const taskTypeId = data.task_type_id
     const type = data.type
     const projectId = data.project_id
-    let url =
-      `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/` +
-      `create-tasks?id=${entityId}`
-    if (['episodes', 'sequences'].includes(data.type)) {
-      url =
-        `/api/actions/projects/${projectId}/task-types/` +
-        `${taskTypeId}/create-tasks/` +
-        `${data.type.substring(0, data.type.length - 1)}`
-    }
+    const url = ['episodes', 'sequences'].includes(type)
+      ? `/api/actions/projects/${projectId}/task-types/${taskTypeId}/create-tasks/${type.slice(0, -1)}`
+      : `/api/actions/projects/${projectId}/task-types/${taskTypeId}/${type}/create-tasks?id=${entityId}`
     return client.ppost(url, {})
   },
 
@@ -167,16 +152,14 @@ export default {
 
   addExtraPreview(previewId, taskId, commentId) {
     return client.ppost(
-      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
-        `${previewId}`,
+      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/${previewId}`,
       {}
     )
   },
 
   deletePreview(taskId, commentId, previewId) {
     return client.pdel(
-      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/` +
-        `${previewId}`
+      `/api/actions/tasks/${taskId}/comments/${commentId}/preview-files/${previewId}`
     )
   },
 
@@ -247,9 +230,7 @@ export default {
   },
 
   deleteReply(comment, reply) {
-    const path =
-      `/api/data/tasks/${comment.object_id}` +
-      `/comments/${comment.id}/reply/${reply.id}`
+    const path = `/api/data/tasks/${comment.object_id}/comments/${comment.id}/reply/${reply.id}`
     return client.pdel(path)
   },
 
