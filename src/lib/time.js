@@ -217,6 +217,9 @@ export const getBusinessDays = (startDate, endDate, daysOff = []) => {
 }
 
 export const addBusinessDays = (originalDate, numDaysToAdd, daysOff = []) => {
+  if (!originalDate) {
+    return
+  }
   const Sunday = 0
   const Saturday = 6
   const datesOff = daysOff
