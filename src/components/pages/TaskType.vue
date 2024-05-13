@@ -322,7 +322,7 @@ const filters = {
     })
   },
 
-  duebeforetoday(tasks, taskStatusMap) {
+  duebeforetoday(tasks) {
     const today = moment()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
@@ -354,7 +354,7 @@ const filters = {
     })
   },
 
-  dueaftertoday(tasks, taskStatusMap) {
+  dueaftertoday(tasks) {
     const today = moment()
     return tasks.filter(t => {
       const dueDate = parseDate(t.due_date)
@@ -1164,6 +1164,7 @@ export default {
           loading: false,
           children: [],
           editable: false,
+          daysOff: this.daysOffByPerson[person.id],
           route: {
             name: 'person-tab',
             params: {
@@ -1200,7 +1201,7 @@ export default {
           endDate = addBusinessDays(
             task.startDate,
             Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
-            task.parentElement.daysOff
+            personElement.daysOff
           )
         }
 
@@ -1243,14 +1244,14 @@ export default {
           children: []
         }
       })
-      Object.assign(personElement, {
+
+      return {
+        ...personElement,
         children,
         startDate: minStartDate,
         endDate: maxEndDate,
-        man_days: manDays,
-        daysOff: this.daysOffByPerson[person.id]
-      })
-      return personElement
+        man_days: manDays
+      }
     },
 
     getTaskElementColor(task, endDate) {

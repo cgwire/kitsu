@@ -225,7 +225,9 @@ describe('time', () => {
     expect(getBusinessDays(startDate, startDate.clone().add(7, 'days'), daysOff)).toEqual(4) // next saturday + week-end + day off
   })
   test('addBusinessDays', () => {
-    let startDate = parseSimpleDate('2019-10-01') // tuesday
+    let startDate
+    expect(addBusinessDays(startDate, 0)).toBeUndefined() // no start date
+    startDate = parseSimpleDate('2019-10-01') // tuesday
     expect(formatSimpleDate(addBusinessDays(startDate, 0))).toEqual('2019-10-01') // tuesday
     expect(formatSimpleDate(addBusinessDays(startDate, 1))).toEqual('2019-10-02') // wednesday
     expect(formatSimpleDate(addBusinessDays(startDate, 2))).toEqual('2019-10-03') // thursday

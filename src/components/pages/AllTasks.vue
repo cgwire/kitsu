@@ -108,7 +108,7 @@ export default {
     }
   },
 
-  async mounted() {
+  mounted() {
     const routeQuery = this.$route.query
     if (routeQuery.project_id) {
       this.filters.productionId = routeQuery.project_id
@@ -120,8 +120,8 @@ export default {
       this.filters.taskTypeId = routeQuery.task_type_id
     }
     if (routeQuery.person_id) {
-      this.filters.person = this.activePeople.find(
-        p => p.id === parseInt(routeQuery.person_id)
+      this.filters.person = this.activePeopleWithoutBot.find(
+        person => person.id === routeQuery.person_id
       )
     }
     this.reload()
