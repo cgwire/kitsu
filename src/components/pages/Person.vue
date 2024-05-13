@@ -71,21 +71,9 @@
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
             :selection-grid="personTaskSelectionGrid"
-            :tasks="notPendingTasks"
+            :tasks="sortedTasks"
             @scroll="setPersonTasksScrollPosition"
             v-if="isActiveTab('todos')"
-          />
-
-          <div v-if="isActiveTab('pending')">&nbsp;</div>
-          <todos-list
-            ref="pending-list"
-            :empty-text="$t('people.no_task_assigned')"
-            :is-loading="isTasksLoading"
-            :is-error="isTasksLoadingError"
-            :selection-grid="personTaskSelectionGrid"
-            :tasks="pendingTasks"
-            @scroll="setPersonTasksScrollPosition"
-            v-if="isActiveTab('pending')"
           />
 
           <todos-list
@@ -389,18 +377,6 @@ export default {
       }
     },
 
-    pendingTasks() {
-      return this.sortedTasks.filter(
-        task => task.taskStatus.is_feedback_request
-      )
-    },
-
-    notPendingTasks() {
-      return this.sortedTasks.filter(
-        task => !task.taskStatus.is_feedback_request
-      )
-    },
-
     tasksStartDate() {
       if (this.scheduleTasks.length) {
         return getFirstStartDate(this.scheduleTasks)
@@ -532,10 +508,6 @@ export default {
         {
           label: this.$t('schedule.title'),
           name: 'schedule'
-        },
-        {
-          label: `${this.$t('tasks.pending')} (${this.pendingTasks.length})`,
-          name: 'pending'
         },
         {
           label: `${this.$t('tasks.validated')} (${
@@ -733,7 +705,6 @@ export default {
         'board',
         'calendar',
         'done',
-        'pending',
         'schedule',
         'timesheets'
       ]
