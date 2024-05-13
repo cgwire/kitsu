@@ -80,7 +80,7 @@
     "lint-staged": "15.2.2",
     "localStorage": "1.0.4",
     "prettier": "3.2.5",
-    "sass": "1.77.0",
+    "sass": "1.77.1",
     "vite": "5.2.11",
     "vitest": "0.34.6",
     "vitest-localstorage-mock": "0.1.2",
