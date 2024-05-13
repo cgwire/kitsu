@@ -568,6 +568,10 @@ const actions = {
     } catch (err) {
       console.error(err)
     }
+  },
+
+  loadProductionStats() {
+    return productionsApi.getProductionStats()
   }
 }
 

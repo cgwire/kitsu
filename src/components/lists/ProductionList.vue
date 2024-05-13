@@ -31,45 +31,52 @@
               </span>
             </th>
           </tr>
-          <tr
-            class="datatable-row"
-            v-for="entry in openProductions"
-            :key="entry.id"
-          >
-            <th class="name datatable-row-header" scope="row">
-              <production-name-cell
-                :with-avatar="true"
-                :entry="entry"
-                :last-production-screen="lastProductionScreen"
+          <template v-for="entry in openProductions">
+            <tr class="datatable-row" :key="entry.id">
+              <th class="name datatable-row-header" scope="row">
+                <production-name-cell
+                  :with-avatar="true"
+                  :entry="entry"
+                  :last-production-screen="lastProductionScreen"
+                />
+              </th>
+              <td class="type">
+                {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
+              </td>
+              <td class="style">
+                {{
+                  $t(
+                    `productions.style.${
+                      getProductionStyleLabel(entry.production_style) || '2d3d'
+                    }`
+                  )
+                }}
+              </td>
+              <td class="fps">
+                {{ entry.fps }}
+              </td>
+              <td class="ratio">
+                {{ entry.ratio }}
+              </td>
+              <td class="resolution">
+                {{ entry.resolution }}
+              </td>
+              <row-actions-cell
+                :entry-id="entry.id"
+                @edit-clicked="$emit('edit-clicked', entry)"
+                :hide-delete="true"
               />
-            </th>
-            <td class="type">
-              {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
-            </td>
-            <td class="style">
-              {{
-                $t(
-                  `productions.style.${
-                    getProductionStyleLabel(entry.production_style) || '2d3d'
-                  }`
-                )
-              }}
-            </td>
-            <td class="fps">
-              {{ entry.fps }}
-            </td>
-            <td class="ratio">
-              {{ entry.ratio }}
-            </td>
-            <td class="resolution">
-              {{ entry.resolution }}
-            </td>
-            <row-actions-cell
-              :entry-id="entry.id"
-              @edit-clicked="$emit('edit-clicked', entry)"
-              :hide-delete="true"
-            />
-          </tr>
+            </tr>
+            <tr
+              class="datatable-row"
+              :key="entry.id + '-stats'"
+              v-if="Object.keys(productionStats).length > 0"
+            >
+              <td :colspan="7" class="datatable-row-stats">
+                <production-stats :stats="productionStatsMap[entry.id] || {}" />
+              </td>
+            </tr>
+          </template>
         </tbody>
         <tbody v-if="closedProductions.length > 0">
           <tr class="datatable-type-header">
@@ -135,6 +142,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell'
+import ProductionStats from '@/components/pages/production/ProductionStats'
 import RowActionsCell from '@/components/cells/RowActionsCell'
 import TableInfo from '@/components/widgets/TableInfo'
 
@@ -147,6 +155,10 @@ export default {
     entries: {
       type: Array,
       default: () => []
+    },
+    productionStats: {
+      type: Object,
+      default: () => {}
     },
     isError: {
       type: Boolean,
@@ -164,6 +176,7 @@ export default {
 
   components: {
     ProductionNameCell,
+    ProductionStats,
     RowActionsCell,
     TableInfo
   },
@@ -173,6 +186,10 @@ export default {
 
     closedProductions() {
       return this.entries.filter(p => p.project_status_name === 'Closed')
+    },
+
+    productionStatsMap() {
+      return this.productionStats
     }
   },
 
