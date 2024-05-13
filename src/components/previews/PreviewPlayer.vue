@@ -455,6 +455,16 @@
 
           <a
             class="button flexrow-item"
+            :href="link"
+            :title="$t('playlists.actions.open_link')"
+            target="_blank"
+            v-if="!isCurrentUserArtist && link?.length"
+          >
+            <link-icon class="icon is-small" />
+          </a>
+
+          <a
+            class="button flexrow-item"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
             v-if="
@@ -521,7 +531,12 @@
 <script>
 import { fabric } from 'fabric'
 import { mapGetters, mapActions } from 'vuex'
-import { GlobeIcon } from 'vue-feather-icons'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  LinkIcon
+} from 'vue-feather-icons'
 
 import {
   formatFrame,
@@ -536,17 +551,16 @@ import { annotationMixin } from '@/components/mixins/annotation'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import { ArrowUpRightIcon, DownloadIcon } from 'vue-feather-icons'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import BrowsingBar from '@/components/previews/BrowsingBar'
-import ColorPicker from '@/components/widgets/ColorPicker'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import PencilPicker from '@/components/widgets/PencilPicker'
-import PreviewViewer from '@/components/previews/PreviewViewer'
-import RevisionPreview from '@/components/previews/RevisionPreview'
-import VideoProgress from '@/components/previews/VideoProgress'
-const TaskInfo = () => import('@/components/sides/TaskInfo')
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import BrowsingBar from '@/components/previews/BrowsingBar.vue'
+import ColorPicker from '@/components/widgets/ColorPicker.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import PencilPicker from '@/components/widgets/PencilPicker.vue'
+import PreviewViewer from '@/components/previews/PreviewViewer.vue'
+import RevisionPreview from '@/components/previews/RevisionPreview.vue'
+import VideoProgress from '@/components/previews/VideoProgress.vue'
+const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 
 let lastIndex = 1
 
@@ -563,6 +577,7 @@ export default {
     ComboboxStyled,
     DownloadIcon,
     GlobeIcon,
+    LinkIcon,
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
@@ -594,6 +609,9 @@ export default {
     light: {
       type: Boolean,
       default: false
+    },
+    link: {
+      type: String
     },
     readOnly: {
       type: Boolean,

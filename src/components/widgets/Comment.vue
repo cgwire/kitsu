@@ -283,6 +283,15 @@
         >
           Revision {{ comment.previews[0].revision }}
         </router-link>
+        <a
+          class="preview-link button flexrow-item"
+          :href="comment.links[0]"
+          :title="$t('playlists.actions.open_link')"
+          target="_blank"
+          v-if="!isCurrentUserArtist && comment.links?.[0]?.length"
+        >
+          <link-icon class="icon is-small" />
+        </a>
         <span
           class="flexrow-item preview-status"
           :title="comment.previews[0].validation_status"
@@ -353,6 +362,7 @@ import { mapActions, mapGetters } from 'vuex'
 import {
   ChevronDownIcon,
   CopyIcon,
+  LinkIcon,
   PaperclipIcon,
   ThumbsUpIcon
 } from 'vue-feather-icons'
@@ -386,6 +396,7 @@ export default {
     ChevronDownIcon,
     CopyIcon,
     CommentMenu,
+    LinkIcon,
     PaperclipIcon,
     PeopleAvatar,
     PeopleName,
@@ -484,6 +495,7 @@ export default {
       'currentProduction',
       'departmentMap',
       'isCurrentUserAdmin',
+      'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isDarkTheme',
@@ -1122,6 +1134,18 @@ textarea.reply {
   opacity: 0;
 }
 
+.preview-link {
+  border: 0;
+  margin: 0;
+  margin-right: 0.5em;
+  color: var(--text-alt);
+  padding: 0 10px;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
 .preview-status {
   border-radius: 50%;
   border: 2px solid $grey;
@@ -1129,6 +1153,7 @@ textarea.reply {
   height: 20px;
   transition: background 0.3s ease;
   width: 20px;
+  min-width: 20px;
 }
 
 @media screen and (max-width: 768px) {

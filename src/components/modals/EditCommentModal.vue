@@ -71,6 +71,15 @@
               </textarea>
             </at-ta>
           </div>
+          <text-field
+            ref="input-link"
+            :label="$t('main.link')"
+            placeholder="https://..."
+            type="url"
+            @enter="runConfirmation"
+            v-model.trim="form.link"
+            v-if="isPreviewsComment"
+          />
           <label class="label">
             {{ $t('comments.checklist') }}
           </label>
@@ -135,6 +144,7 @@
         </div>
         <modal-footer
           :error-text="$t('comments.edit_error')"
+          :is-disabled="!isValidForm"
           :is-error="isError"
           :is-loading="isLoading"
           @confirm="runConfirmation"
@@ -146,25 +156,27 @@
 </template>
 
 <script>
+import AtTa from 'vue-at/dist/vue-at-textarea'
+import { XIcon } from 'vue-feather-icons'
 import { mapGetters } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
 
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
-import { XIcon } from 'vue-feather-icons'
-
-import AtTa from 'vue-at/dist/vue-at-textarea'
-import Checklist from '@/components/widgets/Checklist'
+import { modalMixin } from '@/components/modals/base_modal'
+import Checklist from '@/components/widgets/Checklist.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
-import FileUpload from '@/components/widgets/FileUpload'
-import ModalFooter from '@/components/modals/ModalFooter'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import FileUpload from '@/components/widgets/FileUpload.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-comment-modal',
+
   mixins: [modalMixin],
+
   components: {
     AtTa,
     Checklist,
@@ -172,6 +184,7 @@ export default {
     FileUpload,
     ModalFooter,
     PeopleAvatar,
+    TextField,
     XIcon
   },
 
@@ -217,7 +230,8 @@ export default {
       form: {
         text: '',
         task_status_id: null,
-        checklist: [{ checked: false, text: '' }]
+        checklist: [{ checked: false, text: '' }],
+        link: null
       }
     }
   },
@@ -239,6 +253,18 @@ export default {
 
     isConceptTask() {
       return this.$route.path.includes('concept')
+    },
+
+    isPreviewsComment() {
+      return this.commentToEdit?.previews?.length > 0
+    },
+
+    isValidForm() {
+      return Boolean(
+        !this.isPreviewsComment ||
+          !this.form.link ||
+          this.$refs['input-link']?.checkValidity()
+      )
     }
   },
 
@@ -247,10 +273,12 @@ export default {
       if (!event || event.keyCode === 13 || !event.keyCode) {
         const result = {
           id: this.commentToEdit.id,
-          ...this.form,
+          text: this.form.text,
+          task_status_id: this.form.task_status_id,
           checklist: this.form.checklist.filter(item => item.text.length),
           newAttachmentFiles: this.attachmentFiles,
-          attachmentFilesToDelete: this.attachmentFilesToDelete
+          attachmentFilesToDelete: this.attachmentFilesToDelete,
+          links: this.form.link ? [this.form.link] : null
         }
         this.$emit('confirm', result)
       }
@@ -284,7 +312,8 @@ export default {
           text: this.commentToEdit.text,
           task_status_id: this.commentToEdit.task_status_id,
           checklist: [...this.commentToEdit.checklist],
-          attachment_files: [...this.commentToEdit.attachment_files]
+          attachment_files: [...this.commentToEdit.attachment_files],
+          link: this.commentToEdit.links?.[0]
         }
         if (this.form.checklist.length === 0) {
           this.form.checklist = [{ checked: false, text: '' }]
@@ -294,7 +323,8 @@ export default {
           text: '',
           task_status_id: null,
           checklist: [{ checked: false, text: '' }],
-          attachment_files: []
+          attachment_files: [],
+          link: null
         }
       }
     },

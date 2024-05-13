@@ -112,6 +112,7 @@
                   :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
                   :last-preview-files="taskPreviews || []"
+                  :link="currentPreviewComment?.links?.[0]"
                   :previews="currentPreview.previews"
                   :read-only="isPreviewPlayerReadOnly"
                   :task="task"
@@ -520,6 +521,14 @@ export default {
       }
     },
 
+    currentPreviewComment() {
+      return this.taskComments.find(comment =>
+        comment.previews?.some(
+          preview => preview.revision === this.currentRevision
+        )
+      )
+    },
+
     currentFps() {
       return this.productionMap.get(this.task?.project_id)?.fps || '25'
     },
@@ -858,18 +867,20 @@ export default {
       attachment,
       checklist,
       taskStatusId,
-      revision = undefined
+      revision = undefined,
+      link = undefined
     ) {
       const params = {
         taskId: this.task.id,
         taskStatusId: taskStatusId,
-        comment,
-        revision,
+        attachment,
         checklist,
-        attachment
+        comment,
+        links: link ? [link] : null,
+        revision
       }
-      let action = 'commentTask'
-      if (this.previewForms.length > 0) action = 'commentTaskWithPreview'
+      const action =
+        this.previewForms.length > 0 ? 'commentTaskWithPreview' : 'commentTask'
       this.loading.addComment = true
       this.errors.addComment = false
       this.errors.addCommentMaxRetakes = false
