@@ -91,7 +91,6 @@
             :label="$t('status_automations.fields.import_last_revision')"
             @enter="confirmClicked"
             v-model="form.importLastRevision"
-            v-if="isEditing"
           />
 
           <combobox-boolean
