@@ -19,7 +19,7 @@ export default {
       out_field_type: statusAutomation.outFieldType,
       out_task_type_id: statusAutomation.outTaskTypeId,
       out_task_status_id: statusAutomation.outTaskStatusId,
-      import_last_revision: statusAutomation.importLastRevision
+      import_last_revision: statusAutomation.importLastRevision === 'true'
     }
     return client.ppost('/api/data/status-automations/', data)
   },
