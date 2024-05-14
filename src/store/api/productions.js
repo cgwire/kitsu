@@ -17,6 +17,10 @@ export default {
     client.get('/api/data/project-status', callback)
   },
 
+  getProductionStats() {
+    return client.pget('/api/data/tasks/open-tasks/stats')
+  },
+
   newProduction(production) {
     return client.ppost('/api/data/projects/', production)
   },

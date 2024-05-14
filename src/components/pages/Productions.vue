@@ -1,23 +1,25 @@
 <template>
   <div class="productions page fixed-page">
-    <div class="level page-header">
-      <div class="level-left">
-        <page-title :text="$t('productions.title')" />
-      </div>
-      <div class="level-right">
-        <div class="level-item">
-          <button-link
-            class="level-item"
-            :text="$t('productions.new_production')"
-            icon="plus"
-            :path="{ name: 'new-production' }"
-          />
-        </div>
-      </div>
+    <div class="flexrow page-header">
+      <page-title :text="$t('productions.title')" />
+      <div class="filler"></div>
+      <button-simple
+        class="flexrow-item"
+        :text="$t('productions.load_stats')"
+        :is-loading="loading.stats"
+        @click="reloadStats"
+      />
+      <button-link
+        class="flexrow-item"
+        :text="$t('productions.new_production')"
+        icon="plus"
+        :path="{ name: 'new-production' }"
+      />
     </div>
 
     <production-list
       :entries="productions"
+      :production-stats="productionStats"
       :is-loading="isProductionsLoading"
       :is-error="isProductionsLoadingError"
       @delete-clicked="onDeleteClicked"
@@ -49,10 +51,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ProductionList from '@/components/lists/ProductionList'
+import ButtonLink from '@/components/widgets/ButtonLink'
+import ButtonSimple from '@/components/widgets/ButtonSimple'
 import EditProductionModal from '@/components/modals/EditProductionModal'
 import HardDeleteModal from '@/components/modals/HardDeleteModal'
-import ButtonLink from '@/components/widgets/ButtonLink'
+import ProductionList from '@/components/lists/ProductionList'
 import PageTitle from '@/components/widgets/PageTitle'
 
 export default {
@@ -60,6 +63,7 @@ export default {
 
   components: {
     ButtonLink,
+    ButtonSimple,
     HardDeleteModal,
     EditProductionModal,
     PageTitle,
@@ -74,12 +78,14 @@ export default {
       },
       loading: {
         del: false,
-        edit: false
+        edit: false,
+        stats: false
       },
       modals: {
         isNewDisplayed: false,
         isDeleteDisplayed: false
       },
+      productionStats: {},
       productionToDelete: null,
       productionToEdit: null,
       choices: []
@@ -99,14 +105,15 @@ export default {
     }
   },
 
-  created() {
-    this.loadProductions()
+  async created() {
+    await this.loadProductions()
   },
 
   methods: {
     ...mapActions([
       'deleteProduction',
       'loadProductions',
+      'loadProductionStats',
       'storeProductionPicture',
       'uploadProductionAvatar'
     ]),
@@ -186,6 +193,12 @@ export default {
 
     onProductionPictureSelected(formData) {
       this.storeProductionPicture(formData)
+    },
+
+    async reloadStats() {
+      this.loading.stats = true
+      this.productionStats = await this.loadProductionStats()
+      this.loading.stats = false
     }
   },
 
