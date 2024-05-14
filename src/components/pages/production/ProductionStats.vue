@@ -1,10 +1,10 @@
 <template>
-  <div class="project-stats" @click="expanded = !expanded">
+  <div class="project-stats" :class="{ expandable }" @click="expandStats">
     <div class="nb-tasks">
       <span class="tag">
-        {{ stats.amount_done }} {{ $t('tasks.done') }}
+        {{ stats.amount_done || 0 }} {{ $t('tasks.done') }}
         /
-        {{ stats.amount }} {{ $t('tasks.tasks') }}
+        {{ stats.amount || 0 }} {{ $t('tasks.tasks') }}
       </span>
       <span class="tag">
         {{ formatDuration(stats.total_duration) }}
@@ -81,7 +81,7 @@
 import { mapGetters } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'production-stats',
@@ -107,6 +107,10 @@ export default {
 
   computed: {
     ...mapGetters(['taskStatusMap', 'taskTypeMap']),
+
+    expandable() {
+      return this.stats.task_types?.length > 0
+    },
 
     statusIds() {
       return Object.keys(this.statsByStatus).sort((a, b) => {
@@ -141,7 +145,7 @@ export default {
 
     taskTypeStatsMap() {
       const taskTypeStatsMap = {}
-      this.stats.task_types.forEach(taskTypeStat => {
+      this.stats.task_types?.forEach(taskTypeStat => {
         if (!taskTypeStatsMap[taskTypeStat.task_type_id]) {
           taskTypeStatsMap[taskTypeStat.task_type_id] = {
             task_type_id: taskTypeStat.task_type_id,
@@ -169,7 +173,7 @@ export default {
 
     statsByStatus() {
       const statsByStatus = {}
-      this.stats.task_types.forEach(taskTypeStat => {
+      this.stats.task_types?.forEach(taskTypeStat => {
         if (!statsByStatus[taskTypeStat.task_status_id]) {
           statsByStatus[taskTypeStat.task_status_id] = 0
         }
@@ -180,6 +184,12 @@ export default {
   },
 
   methods: {
+    expandStats() {
+      if (this.expandable) {
+        this.expanded = !this.expanded
+      }
+    },
+
     sortStatuses(statuses) {
       return statuses.sort((a, b) => {
         return (
@@ -197,7 +207,10 @@ export default {
   background: var(--background);
   padding: 1em;
   border-radius: 5px;
-  cursor: pointer;
+
+  &.expandable {
+    cursor: pointer;
+  }
 }
 
 .color-wrapper {
@@ -206,6 +219,7 @@ export default {
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: 14px;
 
   .dark & {
     border: 1px solid var(--border);
@@ -213,8 +227,6 @@ export default {
 }
 
 .stat {
-  height: 12px;
-
   &:first-child {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
