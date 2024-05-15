@@ -4,7 +4,7 @@
     <div class="modal-content">
       <form class="box" @submit.prevent="confirm">
         <h1 class="title">
-          {{ $t('timesheets.edit_days_off') }}
+          {{ isEditing ? $t('days_off.edit') : $t('days_off.add') }}
         </h1>
         <div class="flexrow field">
           <div class="flexrow-item">
@@ -48,11 +48,11 @@
         />
         <p class="mb2">
           <alert-triangle-icon class="icon mr05 warning" />{{
-            $t('timesheets.confirm_day_offs')
+            $t('days_off.confirm_day_offs')
           }}
         </p>
         <p class="is-danger has-text-right" v-if="isError">
-          {{ errorText || $t('timesheets.error_days_off') }}
+          {{ errorText || $t('days_off.error_days_off') }}
         </p>
         <p class="has-text-right mt1 mb2">
           <button
@@ -126,6 +126,10 @@ export default {
 
   computed: {
     ...mapGetters(['user']),
+
+    isEditing() {
+      return Boolean(this.dayOffToEdit?.id)
+    },
 
     locale() {
       if (this.user.locale === 'fr_FR') {
