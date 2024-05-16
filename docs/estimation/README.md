@@ -1,12 +1,12 @@
 # Estimation and Team speed (quotas)
 
-Filling estimation for each tasks can feel a bit overwhelming, but the benefit is worst the time spent.
+Filling out an estimation for each task can feel overwhelming, but the benefit is worse than the time spent.
 
-If you fill each task estimation it will help you to:
-- always see the estimated days for any task, task type, sequence, asset type, entity etc.
-- With estimation and timesheet you are able to compare estimation vs reality
-- Once a task is filled with estimation, start and due date, you will be able to adjust it from the entity schedule, or the teamschedule
-- Help your artists to get better organize and selfaware of the time they should spend on a task.
+If you fill each task estimation, it will help you to:
+- always see the estimated days for any task, task type, sequence, asset type, entity, etc.
+- With estimation and timesheet, you can compare estimation vs reality
+- Once a task is filled with estimation, start, and due date, you will be able to adjust it from the entity schedule or the team schedule
+- Help your artists get better organized and be self-aware of the time they should spend on a task.
 - Better forecast your production and the next!
 
 
@@ -16,7 +16,7 @@ Click on the name of a task type.
 
 ![Task type](../img/getting-started/supervisor_tasktype.png)
 
-The new page is the **Detailed Task Type view**. You have more detailed information specific to this specific **task type**.
+The new page is the Detailed Task Type view. It provides more detailed information about this specific task type.
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
@@ -32,16 +32,16 @@ The **Due date** is automatically calculated with the **Estimation**.
 
 
 To go further in detail with the detailed Task type's view :
--  You can see and change the status of a task
--  You can assign people to tasks
+-  You can see and change the status of a task
+-  You can assign people to tasks
 
 
 
 - You can add an estimation for the task (in day unit)
--  Kitsu calculates the sum of the timesheet fed by the artists
+-  Kitsu calculates the sum of the timesheet fed by the artists
 - The number of back-and-forths with the retake status
 - You can add a start date for the task (with the calendar)
--  Kitsu calculates the due date with the Start Date and the estimation
+-  Kitsu calculates the due date with the Start Date and the estimation
 - the Wip and Feedback dates are automatically filled
 - The last comment section helps you keep an eye on the last activity of this task type.
 
@@ -51,40 +51,40 @@ To help you set a correct estimation, you can use the **Estimation** Tab.
 
 ![Estimation tab](../img/getting-started/tasktype_estimation_tab.png)
 
-The left part of the screen lists the shots with the assignation and the number of frames (1).
+The left part of the screen lists the shots with the assignment and the number of frames (1).
 Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
 
 ::: tip Definition
 **Quotas** is a way to visualize your **team speed**. 
 
-You can see in **average** how many shot/frame or second artist has to do per day to finish all the task with the **estimated number of days**.
+You can see in **average** how many shots/frames or seconds the artist has to do daily to finish all the tasks with the **estimated number of days**.
 :::
 
- On the right part of the screen, you can see the full team of the department (depending on the assignments you made), the number of shots they have to do, the number of frames and seconds, and the average Quota.
- You will also have the **Remaining** line, which gives you the actual situation of your team.
+ On the right part of the screen, you can see the full department team (depending on the assignments you made), the number of shots they have to do, the number of frames and seconds, and the average Quota.
+ You will also have the **Remaining** line, which gives you the actual situation of your team.
 
 
- And the last column is the **Estimation**. To modify the estimation, hover the line with your mouse and click the editing zone.
+ And the last column is the **Estimation**. To modify the estimation, hover the line with your mouse and click the editing zone.
 
- You can also select multiple shots simultaneously to edit them all at once.
+ You can also select multiple shots simultaneously to edit them all at once.
 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
+ ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
 
- Every time you change the **Estimation** (in the number of days) on the right part, you can see in real-time that the **Average Quota** is updated.
-
-
-
- For more information about the **Schedule** tab, go to the
- [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation)
+ Every time you change the **Estimation** (in the number of days) on the right part, you can see that the **Average Quota** is updated in real time.
 
 
-## Team real speed : Quotas
+
+ For more information about the **Schedule** tab, go to the
+ [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation)
+
+
+## Team real speed: Quotas
 
 
 Kitsu has two ways to calculate the quotas per **shot Task Type**.
 
 The first is linked to the timesheet :
-Shots are considered ended on the first feedback request. Then, quotas are weighted following the time spent on the task (when the Artist fills his timesheet).
+Shots are considered to have ended on the first feedback request. Then, quotas are weighted according to the time spent on the task (when the Artist fills out his timesheet).
 
 ![Quotas stat page day weighted](../img/getting-started/quotas_day_weighted.png)
 
@@ -95,7 +95,7 @@ In this example, Kitsu has weighted the daily quota linked to the timesheet.
 
 If no timesheet is filled, then Kitsu considers that:
 
-The task was started at the first status change to WIP.
+The task was started when the first status change was made to WIP.
 
 The task was done the day the feedback request was made.
 

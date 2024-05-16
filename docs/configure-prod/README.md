@@ -1,15 +1,44 @@
-# Production Customization
+#  Settings and Modify your Workflow
+
+
+
+## Define the Settings of your production
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
+
+![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
+
+The first tab, **Parameters** allows you to change the **Technical information** of the production.
+
+::: warning
+If you change the **FPS** or **RESOLUTION** after uploading previews, the changes won't be applied; you must reupload the first previews.
+:::
+
+![Setting Parameters](../img/getting-started/setting_parameters.png)
+
+Here, you can enable specific options for the production as
+
+- ISOLATE CLIENT COMMENTS (NOT VISIBLE TO EACH OTHER)
+
+- ALLOW ARTISTS TO DOWNLOAD PREVIEWS
+
+- SET NEW PREVIEW AS ENTITY THUMBNAIL AUTOMATICALLY
+
+You can also specify the MAXIMUM NUMBER OF RETAKES for this production.
+
+::: tip
+You can also change the avatar of the production on the **Parameters** tab.
+:::
 
 ## Select Specific Task Status for a Production
 
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**. 
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
 Per default, Kitsu will load the **Task Status** you have defined when creating the production.
 
-But you can choose to add or remove specific **statuses** during production if they are created on the **Global Library** first.
+However, you can add or remove specific statuses during production if they are created on the Global Library first.
 
 ![Setting status new](../img/getting-started/setting_status_new.png)
 
@@ -22,37 +51,53 @@ validate your choice with the **add** button.
 
 ## Select Specific Task Types for a Production
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
-By default, Kitsu will load the **Task Types** you must define when creating the production.
+By default, Kitsu will add the **Task Types** you have chosen when creating the production.
 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
-But you can choose to add or remove specific **Task Types**, if they are created on the **Global Library** first.
+However, you can add or remove specific **Task Types** if they are created on the Global Library first.
 
-For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
-
-
-On the **Task Types** tab, you can choose which status you want to add o remove on this production, 
-validate your choice with the **add** button.
-
+For example, you can import the task workflow from another production in your library.
 
 ![Setting Add Task Type](../img/getting-started/setting_task_add.png)
 
-You can go back to the global asset or shot page and add the new **task type column** to your production.
+On the **Task Types** tab, you can choose which production or task type you want to import  or remove on this production, 
+validate your choice with the **Import** button.
 
+
+
+::: warning
+If you had a new task type **AFTER** creating an asset or shot, here is the **DELIVERY** task type.
+
+![Setting Task Type add](../img/getting-started/setting_task_add2.png)
+
+You need to **add this task type** on the global page.
+
+![Add Task Type Global](../img/getting-started/global_add_task.png)
+
+A pop-in will appear, and you must select the new task type on the dropdown menu.
+
+![Add Task Type Global](../img/getting-started/add_task_current.png)
+
+Validate with **Confirm**.
+
+![Add Task Type example](../img/getting-started/add_task_example.png)
+
+:::
 
 ## Select Specific Asset Types for a Production
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
 Per default, Kitsu will load the **Asset Types** you have defined when creating the production.
 
-But you can choose to add or remove specific **Asset Types**, if they are created on the **Global Library** first.
+However, you can add or remove specific Asset Types if they are created on the Global Library first.
 
 ![Setting Asset type new](../img/getting-started/setting_asset_new.png)
 
@@ -64,7 +109,7 @@ validate your choice with the **add** button.
 
 ## Select Specific Status Automation for a Production
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
@@ -73,7 +118,7 @@ status automation **Global Library** into your **Production Library**.
 
 ![Setting Task Type new](../img/getting-started/setting_auto_new.png)
 
-But you can choose to use only specific **Status Automation**, depending on your production type.
+But you can use only specific **Status Automation**, depending on your production type.
 
 
 On the **Status Automation** tab, you can choose which automation you want to use on this production, 
@@ -85,11 +130,16 @@ validate your choice with the **add** button.
 
 ## Select Specific Preview Background for a Production
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
+
+
+![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
+
+On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
 
 ![Setting Status automation new](../img/getting-started/preview_background_setting.png)
 
-On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
+
 
 Validate your choice with the **add** button.
 
@@ -100,9 +150,9 @@ You can review your 3D file with an HDR background.
 ![Preview background example](../img/getting-started/preview_background_example.png)
 
 
-## Select which Status is seen on the Board View
+## Select which Status is seen on the Artist Board View
 
-On the **Navigation Menu**, choose on the drop-down menu the **Setting**.
+On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
 On the **Task Status** tab, you can reorder the status for the **Board** view.
 
@@ -110,17 +160,17 @@ On the **Task Status** tab, you can reorder the status for the **Board** view.
 
 ![Setting status order](../img/getting-started/setting_status_order.png)
 
-Once it's done, go the the **Board Status** tab.
+Once it's done, go to the **Board Status** tab.
 
 ![Setting board status order](../img/getting-started/setting_board_status.png)
 
-Here you can choose who can see which status on the **Board view**
+Here, you can choose who can see which status on the **Board view**
 
 If you don't select the status properly, it can be overwhelming for the artists if they have too much choice.
 
 ![Board status bad example](../img/getting-started/board_all_status.png)
 
-If you select properly the **Status**, it will be easier for the artists.
+Selecting the **Status** properly will make it easier for the artists.
 
 
 ![Setting board status order](../img/getting-started/setting_board_status_selection.png)
@@ -128,45 +178,3 @@ If you select properly the **Status**, it will be easier for the artists.
 
 ![Board status good example](../img/getting-started/setting_board_status_selection_artist.png)
 
-
-## Simplify the Global Page
-
-You may need to reduce a task type column on a global page. For example, you may be
-only interested in layout and animation but not so much in the shipment for the client.
-
-Close to each task type name, you can click on the arrow
-![arrow](../img/getting-started/arrow.png) to unfold a submenu.
-
-You can choose to **Minimize** **Sort by**, **Select column**, **Stick**, or **Delete All** the task type.
-
-![Tasktype submenu minimize](../img/getting-started/tasktype_minimize.png)
-
-Once the column is minimized, only colored dots show the status.
-
-![Tasktype submenu](../img/getting-started/tasktype_small.png)
-
-You can also choose which **Metadata column** you want to display.
-
-To hide your metadata column, click on the arrow on the right border of the global page.
-
-![Visible column](../img/getting-started/visible_column.png)
-
-You can choose which column you want to **hide** or **display**.
-
-You can also hide all the non-essential columns, like **Description**, **Metadata column**,
-even the minimized columns.
-
-Just click on the **Hide additional information**
-![minimize button](../img/getting-started/maximize.png) button on the top right of the page.
-
-To make the information reappear, click on the same button,
-![maximize button](../img/getting-started/minimize.png) it won't have the grey highlight.
-
-
-## Sticky Columns
-
-If a piece of information is very important to you, you can **Stick** this column next to the shot name.
-
-It can be a **Task Type** column or a **Meta Data** column.
-
-Click on the arrow on the left of the column to open the column menu, then choose **Stick**.

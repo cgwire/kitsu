@@ -1,6 +1,6 @@
 # Getting started with Kitsu
 
-With Kitsu, you can collaborate and track all kinds of productions: 2D, 3D Production, VFX, Video Games, etc.
+With Kitsu, you can collaborate on and track all kinds of productions, including 2D and 3D Production, VFX, Video Games, and more.
 
 It can be as short as a still-frame advertisement or as long as a 3h feature film, from one to thousands of elements.
 
@@ -13,11 +13,11 @@ The Workflow is the coordination of the tasks that make up the work of a product
 For example, you will do the modeling, rigging, and shading to complete an asset in a CGI production.
 
 ::: warning Definition
-Modeling, shading, etc., are called **Task Type** in Kitsu; an asset, shot, etc., are called **Entities**.
+In Kitsu, modeling, shading, etc., are called **Task Type**; an asset, shot, etc., are called **Entities**.
 A **task** intersects a **task type** and an **entities**.
 :::
 
-The chain of these 3 tasks is your **asset workflow**. Each task will be then **assigned to an artist**.
+The chain of these 3 tasks is your asset workflow. Each task will then be assigned to an artist.
 
 Once you have determined your assets workflow, you will do the same for the shots, sequences, etc.
 
@@ -38,7 +38,7 @@ Only the Studio manager has access to it.
 The idea is to keep each production separated with a specific workflow.
 
 
-You can create and modify the department, task type, task status, asset type, and status automation on the **Global Library**.
+You can create and modify the department, task type, task status, asset type, and status automation on the Global Library.
 
 You can create as many elements as needed, give the name you want, and choose the best color and options that fit your needs.
 
@@ -47,14 +47,14 @@ Once your **Global Library** is populated, you can fill the **Production Library
 ## Create Departments
 
 Departments are here to help the supervisors and artists to focus on their tasks.
-Once they are linked to one or several departments, supervisors, and artists will have direct access to their
- filtered view, and departments also act on the permissions.
+Once they are linked to one or several departments, supervisors and artists will have direct access to their
+ filtered view, and departments also act on the permissions.
 
 ::: tip 
 Per default, Kitsu provides some examples to help you get started.
 :::
 
-The department is the first element to set, as you will find multiple other elements linked to the department (such as people, task type, etc.). 
+The department is the first element to set, as multiple other elements (such as people, task type, etc.) are linked. 
 
 
 
@@ -83,7 +83,7 @@ Once you finish creating the department, the page should look like this.
 ## Studio Workflow: Create a New Task Type
 
 Let's create all the **Task Types** we need to do and track our production.
-It could be for the assets, shots, sequences, episode or edit.
+It could be for the assets, shots, sequences, episodes, or edits.
 
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select
@@ -99,7 +99,7 @@ You can notice these **Task Types** are already linked to a department.
 
 ![Task Type Empty](../img/getting-started/task_type_empty.png)
 
-You can click on it if you need to add more **Task Type** ![Add Task Type](../img/getting-started/add_tasktype.png)
+You can click on it to add more **Task Type** ![Add Task Type](../img/getting-started/add_tasktype.png)
 button.
 
 On the new pop-up, you can define your personalized task:
@@ -137,7 +137,7 @@ To change the order, grab the **Task Type** and move it to its rightful place.
 Now, your task is created on your **Global Library**. 
 
 ::: warning
-You need to add the **Sequence**, **Episode** and **Edit** task types to your **Production Library** once you have created your production.
+Once you have created your production, you need to add the **Sequence**, **Episode**, and **Edit** task types to your **Production Library**.
 :::
 
 ::: tip
@@ -173,14 +173,14 @@ On the new pop-up, you can define your personalized **Asset Type**:
 
 - You can define a specific workflow.
 
-All **Assets Types** won't behave the same way. For example, you may have fewer tasks for an **Environment** than a **Character**; you don't need the **Rigging** task.
- 
+All Asset Types will behave differently. For example, you may have fewer tasks for an Environment than a Character; you don't need the Rigging task.
+ 
 
 ![Add asset types name](../img/getting-started/add_asset_types_name.png)
 
 When you **create** or **edit** an **Asset Type**, you can add a specific **task type**; if you don't select a specific workflow for this asset type, your production asset workflow will be applied.
 
-But if you choose specific **Task types** for this **Asset type**, only these will be applied to the production.
+However, if you choose specific Task types for this Asset type, only these will be applied to production.
 
 
 
@@ -217,10 +217,10 @@ they need to start working, and shouldn't start their work without.
 **Wip** ![WIP status](../img/getting-started/wip_icon.png): Work in Progress status is used by the artists to let their team and producer 
 they are actively working on the task right now, so there is no need to assign it to someone else.
 
-**WFA**![WFA status](../img/getting-started/wfa_icon.png): Waiting for approval status is used by the artists to let their supervisors know that they have finished their work and they are waiting for a review.
+**WFA**![WFA status](../img/getting-started/wfa_icon.png): The waiting-for-approval Status is used by the artists to let their supervisors know that they have finished their work and are waiting for a review.
 The supervisor can also use an alternative to this Status to let the directors know that everything is ready for them.
 
-**Done** ![DONE Status](../img/getting-started/done_icon.png): Everything is validated. Congrats and the next step can begin.
+**Done** ![DONE Status](../img/getting-started/done_icon.png): Everything is validated. Congrats, and the next step can begin.
 
 **Retake** ![Retake status](../img/getting-started/retake_icon.png): A comment is made; the artists need to keep working on their work and publish a new version until validation.
 
@@ -240,7 +240,7 @@ On the new pop-up, you can define your personalized **Task Status**.
 - **IS DEFAULT**, the first Status Kitsu will display per default on all the tasks. You can have only **ONE** default status in Kitsu.
 - **IS DONE**: If this Status is used to validate a task (useful for the quota, to clean the todo list, and episode stat page)
 - **HAS RETAKE VALUE** If this Status is used to comment on a task (useful to keep track of the back and forth in the task type page and for the episode stats page)
-- **IS ARTIST ALLOWED**  Can the artist use this Status? If **No**, the artist won't see this Status on his list. But he can post on top of it.
+- **IS ARTIST ALLOWED**  Can the artist use this Status? If **No**, the artist won't see this Status on his list. But he can post on top of it.
 - **IS CLIENT ALLOWED** Can the client use this Status? If **No**, the client won't see this Status on his list
 - **IS FEEDBACK REQUEST** If this Status is used to ask for a review (useful to keep track of the quotas if you don't use a timesheet, it will appear in the Pending tab of the todo list, and all these statuses will be gathered on the **My Check** page. Kitsu will ask you to **publish a preview** each time you use this Status.
 - Choose a background **COLOR** you like for this status
@@ -249,7 +249,7 @@ On the new pop-up, you can define your personalized **Task Status**.
 
 Click on **Confirm** to save your changes.
 
-Now your **Status** is created on your **Global Library**; it will be available when you create your production.
+Your **Status** is now created on your **Global Library** and will be available when you create your production.
 
 ::: tip
 At any point during the production, you can return here and create more **Task Status** if needed, 
@@ -257,7 +257,7 @@ and then add them to your production.
 :::
 
 ::: warning
-Notice that you can modify Concept Status here but you can't create a new one.
+Notice that you can modify Concept Status here but can't create a new one.
 :::
 
 
@@ -275,7 +275,11 @@ For example, the modeling status must be ready when the Concept is validated.
 
 You can also create **Status Automation** that changes the **Asset Status** according to a task status; for example, when the Concept is validated, the asset is ready for the storyboard.
 
-Go to the main menu ![Main menu](../img/getting-started/main_button.png)  and select **Automation**.
+::: tip
+You can also ask Kitsu to **copy the latest preview** with the Automation.
+:::
+
+Go to the main menu ![Main menu](../img/getting-started/main_button.png)  and select **Automation**.
 
 ![Main menu Status Automation](../img/getting-started/main_menu_status_automation.png)
 
@@ -292,7 +296,7 @@ and choose the **Status** that will be changed.
 
 ![detail create status automation](../img/getting-started/add_status_automation.png)
 
-To trigger the change of **Ready For** Status, you need to change the trigger from Status to **Ready For**.
+You need to change the trigger from Status to **Ready For**to trigger the change in ** Ready For ** status.
 
 You will notice the **Applied task type** will now display **Shot task type**.
 
@@ -305,7 +309,7 @@ To create **Status Automation** for shots, you must change the **Entity Type** t
 Your new **Status Automation** is now created on your **Global Library**.
 
 ::: warning
-You need to add them to your **Production Library** once you have created your production.
+You must add them to your **Production Library** once you have created your production.
 :::
 
 ::: tip
@@ -317,7 +321,7 @@ and then add them to your production.
 
 ### Create your global library of HDR files
 
-The **3D Backgrounds** help to better review your 3D file (`.GLB`) by adding an `.HDR` background.
+The 3D Backgrounds help you review your 3D file (`.GLB`) better by adding an `.HDR` background.
 
 `.GLB` is a binary file format, essentially a container for various 3D assets and resources. These assets can include 3D models, textures, materials, and animations.
 
@@ -353,7 +357,7 @@ Once you have uploaded all your `.HDR` files, Kitsu will display them as a list.
 Your new **3D Background** is now created on your **Global Library**.
 
 ::: warning
-You need to add them to your **Production Library** once you have created your production.
+You must add them to your **Production Library** once you have created your production.
 :::
 
 
@@ -388,7 +392,7 @@ You can change settings at the Kitsu / Studio level, impacting your whole studio
 
 ![Kitsu Settings](../img/getting-started/kitsu_setting.png)
 
-Note that you will also find the settings linked to the chat integration. Please refer to the **DEV section** to know more.
+You will also find the settings linked to the chat integration. Please refer to the DEV section for more.
 
 ::: warning
 Remember to **Save Settings** at the end when you are done.

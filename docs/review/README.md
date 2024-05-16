@@ -10,9 +10,9 @@ You can watch the version from the right panel, enlarge it by grabbing the side 
 
 ![review on global page](../img/getting-started/review_global.png)
 
-For the 3D file (`.glb` file) you can also review it as wireframe, or add a `.HDR` file to check the lighting. 
+You can also review the 3D file (`.glb` file) as a wireframe or add a `.HDR` file to check the lighting. 
 
-You can move around the 3d file with a drag and move with your cursor, and zoom in or out with the scroll.
+You can move around the 3D file by dragging and dropping your cursor and zooming in or out with the scroll.
 
 ![review 3d wireframe](../img/getting-started/review_wireframe.png)
 
@@ -54,7 +54,7 @@ Once you click the button, Kitsu will grab all the frames with annotation and di
 ![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
 
 
-If you need to delete your line, click the **pencil** icon again, and the cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
+If you need to delete your line, click the pencil icon again. The cursor changes to a multi-directional cross![Pencil](../img/getting-started/direction_arrow.png), and then you can select your line and move it around.
 
 ![review drawing](../img/getting-started/review_edit.png)
 
@@ -80,7 +80,7 @@ To review the concept, you use the navigation menu at the top of the screen and 
 
 ![Menu concept](../img/getting-started/menu_concept.png)
 
-You can see all the concepts uploaded, the status, assignation, and linked assets.
+You can see all the concepts uploaded and the status, assignation, and linked assets.
 
 ![Ccncept filled status](../img/getting-started/concept_empty_prod_linked.png)
 
@@ -95,7 +95,7 @@ You can filter the page with the **Status** filter to display all the **Neutral*
 
 ![Ccncept status filter](../img/getting-started/concept_status_filter.png)
 
-You can also filter per artist and change the order sort.
+You can also filter by artist and change the order of sorts.
 
 
 ## Playlists
@@ -122,19 +122,19 @@ You can also add a **Task Type** tag to the playlist.
 
 ![Playlist add page](../img/getting-started/playlist_add_page.png)
 
-Once the playlist created, via the search/filter bar, you can select which shots to add
+Once the playlist is created, via the search/filter bar, you can select which shots to add
 to your playlist.
 
-You can also choose to **add whole movie**, and it will add all the shots of the movie.
+You can also choose to **add the whole movie**, and it will add all the shots of the movie.
 
 You can select **Daily pending**, which will add all the **WFA** tasks of the day.
 
 Otherwise, you can **Add the whole sequence** if you want to focus only on a particular sequence.
 
 You can use the same **filter** than on the global shot/asset page. For example, you can select all the
-WFA short for the animation stage.
+WFA is short for the animation stage.
 You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
-Kitsu will select the shots that have the **WFA** status at the **Animation** stage, but Kitsu will automatically load **the latest uploaded version**.
+Kitsu will select the shots with the **WFA** status at the **Animation** stage. Still, Kitsu will automatically load **the latest uploaded version**.
 
 The shots appear on the top part of the screen. Every change are
 automatically saved.
@@ -146,21 +146,21 @@ automatically saved.
 
 ## Review and Validations
 
-Once you have created a playlist; you have several options:
+Once you have created a playlist, you have several options:
 
 
 ![Playlist Global](../img/getting-started/playlist_global.png)
 
 * Play or Pause
 * Navigate from element to element
-* See the position of the selected element compare to the total number of elements
+* See the position of the selected element compared to the total number of elements
 * Mute or unmute the sound
 * Change the speed, double speed (x2), full speed (x1), half of the speed (x0.50), or a quarter of the speed (x0.25)
 * Loop on one element
 * Display the sound wave
 * Display annotations during the play
 * TC of the element compared to the TC of the whole playlist
-* Number of frame
+* Number of frames
 * Navigate frame per frame on the preview. You can also do it with the arrow on the Keyboard.
 * Compare tool
 
@@ -184,7 +184,7 @@ For each playlisted shot/asset, you can choose the **task** and the
 ![Playlist task selection](../img/getting-started/playlist_task_selection.png)
 ![Playlist version selection](../img/getting-started/playlist_version_selection.png)
 
-You can also play side by side two tasks of a shot.
+You can also play two tasks of a shot side by side.
 
 Click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
 
@@ -192,7 +192,7 @@ Click on the **Compare** button ![Compare button](../img/getting-started/compare
 
 
 
-The primary purpose of the playlist is to help you with the review of the shots and assets.
+The primary purpose of the playlist is to help you review the shots and assets.
 
 You can comment on the shots directly from the preview.
 
@@ -200,7 +200,7 @@ Click on the **comment** button.
 
 ![Playlist comment](../img/getting-started/playlist_comment_button.png)
 
-You now have access to the right panel, with all the history of the comments and status.
+You now have access to the right panel, which has a history of the comments and their status.
 
 You can see the drawing comment on the video (the red dot below the timeline).
 
@@ -212,9 +212,9 @@ You can draw or type on the video (same than
 
 ## Review Room
 
-On top of the playlist you have a button to **Join Review Room**. The review room will synchronize all the participants.
+You have a button to **Join Review Room** at the top of the playlist. The review room will synchronize all the participants.
 
-Everybody in the review room will see in real time the play and pause, the shots and frame selection.
+Everybody in the review room will see the play, pause, shots, and frame selection in real-time.
 
 The people in the review room will also see the drawing annotation synchronized.
 

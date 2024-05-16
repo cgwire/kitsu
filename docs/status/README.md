@@ -11,7 +11,7 @@ It makes a panel appear on the right, and here, you can write a comment, change 
 
 ![Comment Panel](../img/getting-started/comment_panel.png)
 
-The **Comment Panel** is split into 2 tabs : 
+The **Comment Panel** is split into two tabs : 
 - POST COMMENT
 - PUBLISH REVISION
 
@@ -38,7 +38,7 @@ Type your comments, hit the **Enter** key to add another line to your checklist,
 
 ![checklist](../img/getting-started/checklist_detailed.png)
 
-Besides your comment, you can also attach a file as a picture. Click on the **Add attachment** button.
+In addition to your comment, you can attach a file as a picture. Click on the **Add attachment** button.
 
 ![Add Attachment Simple](../img/getting-started/attachment_snapshot.png)
 
@@ -64,7 +64,7 @@ Alternatively, you can do it per **batch**.
 You can select multiple shots or assets by pressing the **ctrl** or
 **shift** key.
 
-Then, go to the **Change status** section on the action menu.
+Then, go to the action menu's **Change status** section.
 
 ![action menu status](../img/getting-started/blue_menu_status.png)
 
@@ -80,24 +80,24 @@ The shots are not sorted by name but by the metadata column information.
 
 You can also select in the menu if you want to edit the name of the metadata column and its information or if you want to delete it.
 
-You can also use the **CSV Import** to fill your custom metadata column quickly.
+You can also use the **CSV Import** to quickly fill your custom metadata column.
 First, you must create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
 [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
 
 ## Select the status for the Artist board page
 
-When you assign a task to an artist, they will see the task on their todo page when they log in.
+When you assign a task to an artist, they will see it on their to-do page when they log in.
 
-But they can also choose to display their task as a board view. Each **Status** will be a column, and the assigned task is a card that can be move from status to status depending on the progress of the task.
+But they can also choose to display their task as a board view. Each **Status** will be a column, and the assigned task is a card that can be moved from status to status depending on the task's progress.
 
-To setup the board view, you need to go to the setting page of your production.
+To setup the board view, you need to go to the settings page of your production.
 
 ![Setting page](../img/getting-started/drop_down_menu_setting.png)
 
-Then go to the **Task Status** tab. You see the list of the status used on your production.
+Then go to the Task Status tab. You will see a list of the statuses used in your production.
 
-It will be the same status used as column on the board page. You can drag and move the satus to change the order as they will appear on the board view.
+It will be the same status used as the column on the board page. You can drag and move the statuses to change their order as they appear on the board view.
 
 
 ![Setting page status order](../img/getting-started/setting_status_order.png)
@@ -106,9 +106,9 @@ The next step is with the **Board Status** page.
 
 ![Setting page status board](../img/getting-started/setting_status_board.png)
 
-Here you can choose which status will be displayed on the **Board** page depending on the permission.
+Depending on the permission, you can choose which status will be displayed on the **Board** page.
 
-Once it's done you artist should have a page like this.
+Once it's done, your artist should have a page like this.
 
 ![Artist board page](../img/getting-started/artist_board_page.png)
 

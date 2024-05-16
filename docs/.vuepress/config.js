@@ -28,6 +28,15 @@ module.exports = {
         ]
       },
       {
+        title: 'Meta Columns, Filters and Production Setting',
+        collapsable: true,
+        children: [
+          '/meta-column/',
+          '/filter/',
+          '/configure-prod/'
+        ]
+      },
+      {
         title: 'Assignation, Estimation and Schedule',
         collapsable: true,
         children: [

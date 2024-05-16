@@ -1,8 +1,8 @@
-# Supervise your Tasks
+# Check and Supervise your Tasks
 
 ## Check your Tasks
 
-As a Supervisor, most of the time, you also have tasks assigned on top of supervising your department.
+As a Supervisor, you usually have tasks assigned in addition to supervising your department.
 
 So, it means splitting your time between your work and supervising your team.
 
@@ -11,7 +11,7 @@ Let's start with how to check what you have to do.
 When you log into Kitsu, you will notice the button on top of the screen **My Tasks**. 
 It's direct access to your **to-do list**. Per default, it's sorted by priority, so you don't have to think twice about what to do first; it's the one on top of the list.
 
-On the **My Tasks** page, you can filter the tasks list by **Production**, **Task Type**, **Status**, etc. 
+On the My Tasks page, you can filter the tasks list by Production, Task Type, Status, etc. 
 
 ![Supervisor Todo Page](../img/getting-started/supervisor_todo_page.png)
 
@@ -20,53 +20,11 @@ Then, you must click on the **Status** to open the comment panel. From here, you
 
 ![Supervisor Todo Detailed Page](../img/getting-started/supervisor_todo_page_detail.png)
 
-You can also use the **Board** view, to drag and drop your task on the new **status column**.
+You can also use the Board view to drag and drop your task onto the new status column.
 
 
 ![Supervisor Todo Detailed Page board](../img/getting-started/supervisor_todo_page_detail_board.png)
 
-## Assign and Estimate Tasks to your Department
-
-Now, it's time to focus on your team. The first thing to do is to assign tasks.
-
-Your view is automatically filtered on the global shot/asset page as **My Department**. You only see your **Task Type** and the **Custom Columns** linked to your department.
-
-
-![Supervisor Global Page](../img/getting-started/supervisor_global_page.png)
-
-
-When you assign one or several tasks to someone, you will notice that you only have access to the people from your department. 
-
-It's faster for you to find the right Artist for the task.
-
-![Supervisor Assign Team](../img/getting-started/supervisor_assign_team.png)
-
-
-Now that you have assigned all your Artists, it's time to fill in the **Estimation** for each task.
-
-Click on the name of a **task Type** column to open its dedicated page.
-
-On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. We will focus on the last one.
-
-![Supervisor Estimation](../img/getting-started/supervisor_estimation.png)
-
-
-The **Estimation** page is split into two parts. On the left, you have all the tasks sorted by Artist, their number of frames, and seconds.
-
-On the right part of the screen, you have the sum-up of your team, one line per Artist. You will have the **Count** of the total number of assigned tasks, the total number of **Frames** and **Seconds**, and the updated total number of days **Estimated**.
-
-With all this information, Kitsu can calculate different estimated **Quotas**: **per Second**, **per Frame**, and **per Task**.
-
-You can now fill the **Estimation** column on the left and see the result on the right.
-
-As soon as you fill in an **Estimation** for a task, you will see the artist line updated on the right part.
-
-![Supervisor Estimation Filled](../img/getting-started/supervisor_estimation_filled.png)
-
-
-You know if the distribution of the tasks is fair between your team member and what are their estimated quotas for production. 
-
-You need to do it according to their experience and the difficulty of each task.
 
 
 ## Check the Previews of your Department
@@ -74,16 +32,16 @@ You need to do it according to their experience and the difficulty of each task.
 Now that everyone in your team knows what to do, you must check their work.
 
 Usually, when an artist has finished a task, he will call you and ask for your review.
-So it means that you have to stop what you're doing, lose your focus, open their preview, focus on it, make your comments, and try to get back where you're stopped.
+So it means you must stop what you're doing, lose your focus, open their preview, focus on it, comment, and try to get back where you're stopped.
 
-It's a lot of wasted energy here, and you are not as productive as you could be, no thanks to all the intrusion.
+It's a lot of wasted energy here, and you could be more productive, no thanks to all the intrusion.
 
 And the more you are interrupted, the longer it takes to regain focus.
 
-That's why we suggest you set a specific timeframe for your checking. The first advantage is to help your team be better organized because the artists will know when it's a good time to speak with you, and they can post their work and start a new task, knowing you will check it.
+That's why we suggest you set a specific timeframe for your checking. The first advantage is that it will help your team be better organized. The artists will know when it's a good time to speak with you, and they can post their work and start a new task, knowing you will check it.
 The second advantage is that you can focus on your work! You know when the checking is and when to do your tasks. 
 
-If you click the **My Checks** button on top of the screen, you will have the list of all your department's **WFA** tasks.
+If you click the **My Checks** button at the top of the screen, you will see the list of all your department's **WFA** tasks.
 
 ![Supervisor My Chceck Page](../img/getting-started/supervisor_mycheck.png)
 
@@ -119,9 +77,9 @@ To review the concept, you use the navigation menu at the top of the screen and 
 
 ![Menu concept](../img/getting-started/menu_concept.png)
 
-You can see all the concepts uploaded, the status, assignation, and linked assets.
+You can see all the concepts uploaded and the status, assignation, and linked assets.
 
-![Ccncept filled status](../img/getting-started/concept_empty_prod_linked.png)
+![Concept filled status](../img/getting-started/concept_empty_prod_linked.png)
 
 
 To review a concept, click the status part to open the comment panel. You can enlarge the comment panel or go fullscreen.
@@ -137,45 +95,3 @@ You can filter the page with the **Status** filter to display all the **Neutral*
 You can also filter per artist and change the order sort.
 
 
-
-## Supervise the Quotas of your Department
-
-At the beginning of the production, while you set estimation for each task, you also define estimated quotas for each of your Artists.
-
-Once a task is validated, the remaining line on the **Estimation** tab of the **Task Type** page will update and display the remaining number of tasks and the **updated estimated quotas**.
-
-You can keep an eye your every member of your team and see if their **estimated quotas** stay on the line with the first established.
-
-![Supervisor Estimated Quotas](../img/getting-started/supervisor_quotas_estimated.png)
-
-
-When you need to check on their **Actual Quotas**, you need to go to the **Quotas** page. 
-
-![Quotas](../img/getting-started/supervisor_quotas.png)
-
-
-Kitsu has two ways to calculate the quotas. The first is based on the daily timesheets filled out by the artists.
-
-The calculation of the quotas will start as soon as the Artist fills out his first timesheet on this task, and it will end when he stops.
-
-
-The second way is based on the status. The calculation starts with the **WIP** status and ends with the **WFA** status.
-
-It's **First take** quotas, meaning that the back-and-forth of comments won't be entered in the calculation.
-
-![Weekly Quotas](../img/getting-started/supervisor_quotas_week.png)
-
-
-This page's most important element is the first column, **Average**. Kitsu will calculate the average quotas for each Artist per **Day**, **Week**, or **Month**.
-
-
-## Supervise the Timesheets of your Department
-
-As a Supervisor, you also have to keep an eye on your team's hours. The **Timesheet** page shows how many hours they do every day, week, and month. 
-
-![Timesheet](../img/getting-started/supervisor_timesheet_team.png)
-
-
-It's time to notice a pattern of extra hours, sick days, or no vacation. It's also your job to take care of your team, speak with them, and see if everything is fine if they are not burning.
-
-![Timesheet Detailed](../img/getting-started/supervisor_timesheet_team_detail.png)

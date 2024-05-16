@@ -22,20 +22,20 @@ Your default name
 is the date and the hour. You can change it immediately. 
 
 
-You need to select the playlist has shared with **The Client** and if it's a  **Assets**, **Shots** or **Sequences** playlist.
+You need to select the playlist shared with **The Client** and whether it's an  **Assets**, **Shots**, or **Sequences** playlist.
 You can also add a **Task Type** tag to the playlist.
 
 ![Playlist add page](../img/getting-started/playlist_add_page_client.png)
 
-Once the playlist created, via the search/filter bar, you can select which shots to add
+Once the playlist is created, via the search/filter bar, you can select which shots to add
 to your playlist.
 
 ::: tip
- Kitsu will automatically load **the latest uploaded version** of the task type.
+ Kitsu will automatically load **the latest uploaded version** of the task type.
 :::
 
 
-You can also choose to **add whole movie**, and it will add all the shots of the movie.
+You can also choose to **add the whole movie**, and it will add all the shots of the movie.
 
 ![Playlist page](../img/getting-started/playlist_example_client.png)
 
@@ -48,7 +48,7 @@ You can type your research **render=done** in the search bar or use the filter b
 Valid your selection with the **Add selection** button.
 
 
-Kitsu will select the shots that have the **Done** status at the **Compositing** stage.
+Kitsu will select the shots with the **Done** status at the **Compositing** stage.
 
 
 The shots appear on the top part of the screen. Every change are
@@ -61,21 +61,21 @@ automatically saved.
 
 ## Presentation of the Client Playlist
 
-Once you have created a playlist; you can warn you client.
+Once you have created a playlist, you can warn your client.
 
 
 ![Playlist Global](../img/getting-started/playlist_global_client.png)
 
 ::: warning
-Your client will only access the production if the client is part of the team, and only see the **client playlist**.
+Your client will only access the production if the client is part of the team and only sees the **client playlist**.
 :::
 
-The client has several option to control the playlist.
+The client has several options to control the playlist.
 
 ::: danger Client Permission
-- Clients are able to see all the versions of all the taks type
-- Clients only see their own comment, and your replies. They are not able to see your internal commments
-- Client only see when a revision has been published, but can't see who puclish it
+- Clients can see all the versions of all the task type
+- Clients only see their comments and your replies. They are not able to see your internal comments
+- Client only sees when a revision has been published, but can't see who publish it
 - Client can only see and use the status with the **Is client Allowed** tag
 :::
 
@@ -100,23 +100,23 @@ Clients can (from left to right):
 * Fullscreen
 
 ::: tip
-Client can navigate frame per frame on the preview with the arrows **left** and **right** on the Keyboard.
+The client can navigate frame per frame on the preview with the arrows **left** and **right** on the Keyboard.
 :::
 
-Client can also:
+The client can also:
 * Navigate from element to element by clicking on it
-* See the color status and lenght of each element compare to the total
-* See the position of the selected element compare to the total with the green dot
+* See the color status and length of each element compared to the total
+* See the position of the selected element compared to the total with the green dot
 
 ## Client Review
 
 For each playlisted shot/asset, the client can choose the **task** and the
-**version** they want to see.
+**version** They want to see.
 
 ![Playlist task selection](../img/getting-started/playlist_task_selection.png)
 ![Playlist version selection](../img/getting-started/playlist_version_selection.png)
 
-They can also play side by side two tasks of a shot.
+They can also play two tasks of a shot side by side.
 
 They can click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
 
@@ -135,21 +135,21 @@ They need to click on the **comment** button.
 
 ![Playlist comment](../img/getting-started/playlist_comment_button_client.png)
 
-They now have access to the right panel, with the history of their comments and status, but no access to the internal comment and status
+They now have access to the right panel, with their comments and status history, but no access to the internal comment and status.
 
-They can draw or type on the video  with the **draw** button ![draw button](../img/getting-started/draw.png)
+They can draw or type on the video  with the **draw** button ![draw button](../img/getting-started/draw.png)
 
-and write a comment at the same time.
+And write a comment at the same time.
 
 ![Playlist comment](../img/getting-started/playlist_comment_client.png)
 
 You can see the drawing comment on the video (the red dot below the timeline).
 
 ::: warning 
-Only supervisor and production manager will be able to see the client comments.
+Only the supervisor and production manager can see the client's comments.
 Artists will only see the status.
 
-Supervisor and production manager, can copy the client comment and/or modify it and publish it for the team
+The supervisor and production manager can copy the client's comment and/or modify it and publish it for the team.
 
 ![Playlist client comment](../img/getting-started/client_comment.png)
 :::
@@ -159,9 +159,9 @@ Supervisor and production manager, can copy the client comment and/or modify it 
 
 ## Review Room
 
-On top of the playlist you have a button to **Join Review Room**. The review room will synchronize all the participants.
+You have a button to **Join Review Room** at the top of the playlist. The review room will synchronize all the participants.
 
-Everybody in the review room will see in real time the play and pause, the shots and frame selection.
+Everybody in the review room will see the play, pause, shots, and frame selection in real-time.
 
 The people in the review room will also see the drawing annotation synchronized.
 

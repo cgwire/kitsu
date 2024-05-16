@@ -1,6 +1,6 @@
 # Daily & Weekly review
 
-For your dialies or weeklies you can create a **Playlist**
+For your dailies or weeklies, you can create a **Playlist**
 
 ## Create a Playlist for your internal review
 
@@ -24,19 +24,19 @@ You can also add a **Task Type** tag to the playlist.
 
 ![Playlist add page](../img/getting-started/playlist_add_page.png)
 
-Once the playlist created, via the search/filter bar, you can select which shots to add
+Once the playlist is created, via the search/filter bar, you can select which shots to add
 to your playlist.
 
-You can also choose to **add whole movie**, and it will add all the shots of the movie.
+You can also choose to **add the whole movie**, and it will add all the shots of the movie.
 
 You can select **Daily pending**, which will add all the **WFA** tasks of the day.
 
 Otherwise, you can **Add the whole sequence** if you want to focus only on a particular sequence.
 
 You can use the same **filter** than on the global shot/asset page. For example, you can select all the
-WFA short for the animation stage.
+WFA is short for the animation stage.
 You have to type **animation=wfa** in the search bar. Valid your selection with the **Add selection** button.
-Kitsu will select the shots that have the **WFA** status at the **Animation** stage, but Kitsu will automatically load **the latest uploaded version**.
+Kitsu will select the shots with the **WFA** status at the **Animation** stage. Still, Kitsu will automatically load **the latest uploaded version**.
 
 The shots appear on the top part of the screen. Every change are
 automatically saved.
@@ -48,21 +48,21 @@ automatically saved.
 
 ## Review and Validations
 
-Once you have created a playlist; you have several options:
+Once you have created a playlist, you have several options:
 
 
 ![Playlist Global](../img/getting-started/playlist_global.png)
 
 * Play or Pause
 * Navigate from element to element
-* See the position of the selected element compare to the total number of elements
+* See the position of the selected element compared to the total number of elements
 * Mute or unmute the sound
 * Change the speed, double speed (x2), full speed (x1), half of the speed (x0.50), or a quarter of the speed (x0.25)
 * Loop on one element
 * Display the sound wave
 * Display annotations during the play
 * TC of the element compared to the TC of the whole playlist
-* Number of frame
+* Number of frames
 * Navigate frame per frame on the preview. You can also do it with the arrow on the Keyboard.
 * Compare tool
 
@@ -86,7 +86,7 @@ For each playlisted shot/asset, you can choose the **task** and the
 ![Playlist task selection](../img/getting-started/playlist_task_selection.png)
 ![Playlist version selection](../img/getting-started/playlist_version_selection.png)
 
-You can also play side by side two tasks of a shot.
+You can also play two tasks of a shot side by side.
 
 Click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
 
@@ -94,7 +94,7 @@ Click on the **Compare** button ![Compare button](../img/getting-started/compare
 
 
 
-The primary purpose of the playlist is to help you with the review of the shots and assets.
+The primary purpose of the playlist is to help you review the shots and assets.
 
 You can comment on the shots directly from the preview.
 
@@ -102,7 +102,7 @@ Click on the **comment** button.
 
 ![Playlist comment](../img/getting-started/playlist_comment_button.png)
 
-You now have access to the right panel, with all the history of the comments and status.
+You now have access to the right panel, which has a history of the comments and their status.
 
 You can see the drawing comment on the video (the red dot below the timeline).
 

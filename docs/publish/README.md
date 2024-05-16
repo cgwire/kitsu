@@ -24,7 +24,7 @@ The second is to click on the status part to open the **Comment Panel** on the r
 You have two options on the comment panel: link a concept with an existing asset or delete the concept.
 You can also comment and change the status of the asset.
 
-The idea is to have one version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
+The idea is to have one Version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
 
 One concept is one task.
 
@@ -42,23 +42,23 @@ Click on the status part of the concept; it will open the comment panel on the r
 
 ![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
 
-On the comment panel, you have two options on top of the panel: Link a concept to an asset and delete the concept.
+On the comment panel, you have two options at the top: Link a concept to an asset and delete the concept.
 
 To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
 
 Kitsu will display all the **Assets** available to link with the concept uploaded.
 
-On top of the comment panel, Kitsu will list the linked assets. For now, there are **No Links**.
+Kitsu will list the linked assets at the top of the comment panel. For now, there are No Links.
 
 
 ![Concept link](../img/getting-started/concept_link.png)
 
-To link an asset, you have to click on it. You will see the name of the assets linked on the top of the screen, but also under the preview of the concept.
+To link an asset, click on it. The linked assets' names will appear at the top of the screen under the preview of the concept.
 
 
 ![Concept asset linked](../img/getting-started/concept_asset_linked.png)
 
-Once a concept is linked to an asset, you can see the concepts on the detail page of an asset.
+Once a concept is linked to an asset, it can be seen on the asset's detail page.
 
 Return to the asset page, and click on the asset name you want to see the concept.
 
@@ -76,7 +76,7 @@ Once in the concept section, you will see all the concepts created for this asse
 
 ## Publish a Preview as a Version
 
-To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the comment panel of the task.
+To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the task's comment panel.
 
 Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
 
@@ -86,7 +86,7 @@ Kitsu will automatically switch to the **Publish Revision** tab when you use sta
 You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`),
 or an `.glb` file. You can review all the previews from the browser or mix everything.
 
-For the `.glb` file you can also review it as wireframe, or add a `.HDR` file to check the lighting. 
+You can also review the `.glb` file as a wireframe or add a `.HDR` file to check the lighting. 
 
 See the **Customization** section for more details.
 [Pipeline Customization](../customization-pipeline/README.md)
@@ -132,22 +132,22 @@ You can select your status and publish your preview with the **Post** Button.
 
 To define a preview as a thumbnail, the preview MUST have been uploaded as a revision. 
 
-To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the comment panel of the task.
+To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the task's comment panel.
 
 You can use the preview as a **thumbnail** on the asset or shot task. It
 helps to recognize the assets/shots on the main pages.
-On the list page, click on the status you want, then on the right panel, click the **Preview** button (1).
+On the list page, click on the status you want, then click the **Preview** button (1) on the right panel.
 
 ![Thumbnail Button](../img/getting-started/pannel_history.png)
 
-Once you have clicked on the button, you can choose if you want to pick the first or any frame; once the frame is selected, you see the thumbnail appear, and the button turns gray.
+Once you click on the button, you can choose to pick the first or any frame; once the frame is selected, the thumbnail appears, and the button turns gray.
 
 ![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
 
 
 ## Apply thumbnail automatically
 
-On the production, user the navigation menu to go to the setting page
+On the production, use the navigation menu to go to the settings page
 
 ![setting menu](../img/getting-started/drop_down_menu_setting.png)
 
@@ -155,7 +155,7 @@ On the **Parameters** tab, you can choose to **set new preview as entity thumbna
 
 ![setting preview auto](../img/getting-started/setting_preview_auto.png)
 
-Don't forget to **Save**, now as soon as you will upload a preview, it will be used automatically as a thumbnail.
+Don't forget to **Save**. Now, as soon as you upload a preview, it will be used automatically as a thumbnail.
 
 ## Add Multiple Previews as one Version
 
@@ -188,10 +188,10 @@ You can use the **Add Thumbnails** button ![Add thumbnails button](../img/gettin
 
 ![History](../img/getting-started/add_thumbnails_menu.png)
 
-A new pop-up opens and asks you to choose which task types the thumbnails are linked.
+A new pop-up opens and asks you to choose which task types the thumbnails are linked to.
 
-**Thumbnails batch import accept images files and video files**.
+**Thumbnails batch import accepts image files and video files**.
 
-For the video files, only the first frame is used as the thumbnail.
+Only the first frame is used as the thumbnail for the video files.
 
 You have to name your thumbnails as sequence_shot.
