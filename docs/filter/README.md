@@ -8,20 +8,39 @@ simple click.
 
 ![Search bar](../img/getting-started/filter_search_bar.png)
 
-You can find the **search bar** and the **save** option ![Search
-bar](../img/getting-started/filter_save_button.png). in the following pages:
+You can find the **Search Bar**, **Filter Builder** and the **Save** option ![Search
+bar](../img/getting-started/filter_save_button.png) in the following pages:
 
 * Assets
 * Shots
 * Sequences
-* Todo-lists
-
-NB: The **search bar** is available too in the people episodes list.
-
+* Edits
+* Episodes
 
 
-The **search bar** query is applied every time a new character is typed. You
-You don't need to type everything to get a quick result.
+NB: The **Search Bar** only and pre-build filters are available on the following page
+* My Production
+* My Tasks
+* People
+* Sequence Stats
+* Episodes Stats
+* Asset Types Stats
+* Quotas
+* Team
+* Detailed Task Type page
+
+::: tip
+On the other pages of Kitsu, you will find pre-build filters.
+:::
+
+
+
+The **search bar** query is applied every time a new character is typed. You don't need to type everything to get a quick result.
+
+::: warning
+The filter is instant except for the **Feature Film** type of production.
+Kitsu expects to have thousands of elements, so to speed up the process, you must type your Search and press **enter** to apply it.
+:::
 
 For example, on the assets page, type the letter `Ot`, and you get the
 result of all the assets starting with an `Ot`.
@@ -38,7 +57,7 @@ For example, let's search all the **FX** assets.
 Another example gets **shots page** of a specific **sequence**.
 For example, you can only see the shots of the second sequence of the first episode.
 
-Select the first episode on the drop-down menu, then search `sq002`, the result
+Select the first episode on the dropdown menu, then search `sq002`; the result
  gets all the shots of all the episodes from sequence SQ002.
 
 ![Search bar sequence episode](../img/getting-started/filter_ep_seq.png)
@@ -46,102 +65,156 @@ Select the first episode on the drop-down menu, then search `sq002`, the result
 In the same way, you can search **specific status** link to the task.
 
 ::: tip
-You can create **filters** about **entities**:
+You can create **filters** about **entities** on all the pages:
 
 * **Sequences** : `se01`, `se02` etc. or exclude : `-se01`, `-se02` etc.
-* **Asset Type** : `characters`, `environment`, `fx` etc., or exclude `-characters`, `-fx`, etc.
+* **Asset Type**: `characters`, `environment`, `fx` etc., or exclude `-characters`, `-fx`, etc.
 
 You can also create **filters** about **task status** by following this syntax:
-**task=status**.
+**task=status** on the global entities page
 
 Examples:
 
-* Layout is a work in progress (wip) : `layout=wip`
-* Concept is waiting for approval (wfa) only for the fx: `concept=wfa fx`
+* Layout is a work in progress (wip): `layout=wip.`
+* Concept is waiting for approval (wfa) only for the fx: `concept=wfa fx.`
 * On sequence 2, Layout is wip: `se02 layout=wip`
 * Animation is retaken, and Render is waiting for approval (wfa) `animation=retake render=wfa`.
+
+For the **Detailed task type page**, you can filter by typing only
+- Status: `wip` or exclude `-done`, several status `[wfa] [retake].`
+- Name of an artist: `Alicia` or exclude `-Paul`
+
+You can do a mix of all the filters:
+
+`[wfa] [retake] -alicia 020.`
 :::
 
 ## Filter Builder
 
-The easiest way will be to use the filter builder.
+The easiest way to achieve more advanced filtering is to use the filter builder.
 
 ![Filter build button](../img/getting-started/filter_builder.png)
 
-Under the **Task Status** click on the **+** and select the **Task Type** and the **Status** you want to filter.
+### Match all or one of the following filters
 
 ![Filter build button](../img/getting-started/filter_builder_example04.png)
 
-Valid with **Confirm**.
+::: warning 
+The first option, **Match all the following filters**, will use all the options you select on the filter builder for the filtering:
 
-![Search layout wfa](../img/getting-started/filter_lay_wfa.png)
+- Task Status
+- Metadata
+- Assignment
+- Thumbnail Presence
+- Priority
+- Ready for / Assets are Ready
 
-You can be even more specific. Let's focus on the shots that are still in retake at the animation stage and have already started at the render stage.
+The second option, **Match one of the following filters**, will skip the unavailable filter option.
 
-On the **Filter Builder**, Search for task type and status (add more task types with the **+** below the first task type) and a metadata column.
-
-![Search layout wfa](../img/getting-started/filter_builder_option.png)
-
-Valid with **Confirm**.
-
-![Search layout wfa seq2](../img/getting-started/filter_lay_wfa_s002.png)
-
-You can also search for an **assigned** or **unassigned** task for a specific type of task.
+:::
 
 
-![Search assignation](../img/getting-started/filter_builder_assignation.png)
+### Task Status filtering option
 
 
+**Task Status** helps you filter a task type by status.
+
+- **Equal** will report all the tasks with this status on this task type
+- **Not Equal** will report all the task **except** this status
+- **In** report all the tasks with all the statuses you've selected
 
 
+You can use the **-** button to remove one of the statuses selected.
+
+You can use the **+** below the status to add more status.
+
+![Filter build example 01](../img/getting-started/filter_builder_double_status.png)
 
 
-Next to the search bar, you have the icon of the **Filter Builder**
+::: tip
+If you want to filter the status of several task types, click on the **+** below the task status option on the left part of the screen.
 
-![Filter Builder](../img/getting-started/filter_builder.png)
+![Filter build example 01](../img/getting-started/filter_builder_double_status01.png)
 
-When you click on it, a pop up opened and gives you several choices for your filtering;
+:::
 
-![Filter Builder option](../img/getting-started/filter_builder_option.png)
+### Metadata filtering option
 
-You can filter per **Status** on a **Task Type**, you can also filter through the custom metadata column,
+The **Metadata** filter allows you to filter your page based on the information of the extra columns.
 
+- **Equal** will report all the tasks with this information on this Metadata column
+- **Not Equal** will report all the task **except** this information
+- **In** report all the tasks with all the information you've selected
 
-You can filter the global page by assignation, per artist, or lack thereof.
-
-Finally, you can filter by the presence of thumbnails.
-
-You can add several filters. Once done, validate your choice with the **Confirm** button.
-
-
-
-You may need to filter, for example, all the tasks that are in **WIP** and **Done** status
-
-When you click on it, a pop up opened and gives you several choices for your filtering;
-
-![Filter Builder option](../img/getting-started/filter_builder_option.png)
-
-Under the **Task Status**, choose the name of the task type you want to filter. Then, instead of **Equal**, choose **IN**.
-You can now add more status to this filtered task type.
-
-For example, we want to see the modeling tasks in WFA **AND** in RETAKE.
-
-![Filter Builder example 01](../img/getting-started/filter_builder_example01.png)
-
-Click on the filter builder and choose the task type Modeling, IN retake, and WFA
-
-![Filter Builder example 02](../img/getting-started/filter_builder_example02.png)
-
-Then validate with **Confirm**.
-
-You can now see the result.
-
-![Filter Builder example 03](../img/getting-started/filter_builder_example03.png)
-
-You can save your filter with the ![Save button](../img/getting-started/filter_save_button.png) save button.
+![Filter build MEtadata](../img/getting-started/filter_builder_metadata.png)
 
 
+::: tip
+If you want to filter elements on several Metadata, you can click on the **+** below the Metadata option on the left part of the screen.
 
+![Filter build example 01](../img/getting-started/filter_builder_metadata2.png)
+
+:::
+
+### Assignment filtering option
+
+This option is related to people and assignments.
+
+- No filter: you don't look for people
+- Assigned to: allows you to search for the task assigned to someone on a specific task type
+- Not assigned to: allows you to search for the task not assigned to someone on a specific task type
+- Assignments exist for: will report all the tasks of a specific task type with an assignation
+- No assignment exists for: will report all the tasks of a specific task type with no assignation
+
+::: warning
+You can only filter assignation on **ONE** Task type for **ONE** person.
+
+You can not add several assignment filters.
+:::
+
+### Thumbnail Presence
+
+By default, this filter is set to **No filter**, meaning Kitsu won't check whether a thumbnail is present.
+
+Then you have the choice between:
+- With thumbnail: display all the entities with a thumbnail
+- Without thumbnail: display all the entities without a thumbnail
+
+### Priority
+
+You can filter a task type with a specific level of priority.
+
+::: tip
+To learn more about priorities, see 
+[Change Priorities](../estimation/README.md#change-priorities)
+:::
+
+First, select your task type, then you can choose between 
+- **Normal** (the default level of priority)
+- **High**
+- **Very High**
+- **Emergency**
+
+::: warning
+You can only filter priority on **ONE** Task type for **ONE** level of priority.
+
+You can not add several priority filters.
+:::
+
+
+### Ready For / Assets are Ready
+
+Depending on whether you are filtering on the asset or shot global page, you can filter on the **Ready For** status.
+
+- On the asset page, you will search for the **Ready for** column.
+
+On the shot page, you will check whether all the assets for these tasks are ready (see Create your production).
+
+::: warning
+You can only filter **Ready for**** on **ONE** Task type 
+
+You can not add several **Ready For** filters.
+:::
 
 
 ## Save and Organize your Filter Queries
@@ -154,19 +227,24 @@ Now, under the **search bar**, you can see your saved queries as buttons.
 
 ![Search saved](../img/getting-started/filter_saved.png)
 
+::: tip
+Notice the first icon on the left and the colored buttons.
+
+It allows you to Create a Filter Group. This way, you can keep your saved filters organized under a colored Group.
+
+![Add A Filter Group](../img/getting-started/filter_group_new.png)
+
+:::
+
 The buttons are there every time you return to this page. They help you run common queries faster.
 
 
-::: details Rename a Saved Filter
 
 Once you have created your filter and saved it, it will appear as a button under the search bar.
 The Search can be complex and not easy to read.
 
 You can rename the filter with a more explicit choice of words.
 
-For example, you want to filter the tasks in RETAKE and WFA in modeling, making the difficulty easy and assigning them to Ann.
-
-![Search saved example](../img/getting-started/filter_rename_example.png)
 
 The saved filter is quite long and hard to read. Hover your mouse over the saved filter. You will see two icons, one to edit and the other to delete.
 
@@ -175,10 +253,10 @@ The saved filter is quite long and hard to read. Hover your mouse over the saved
 You can now change the name displayed in the **Name** section in the pop-up window.
 
 ![Edit filtered name](../img/getting-started/filter_edit_name.png)
-:::
 
+You can choose if you want to keep your saved queries in or out of a **Filtered Group**
 
-
+![Filtered Group Example](../img/getting-started/filter_group_example.png)
 
 
 ::: details Delete a Filter
@@ -191,4 +269,19 @@ cancel your research by deleting the text or use the cross next to the Search
 bar ![Search delete](../img/getting-started/filter_cross_delete.png)
 :::
 
-## Pre-build Filters
+### Pre-build Filters
+
+You can find pre-build Filters on the following page:
+
+- My Checks
+- Timesheets
+- Team Schedule
+- All Tasks
+- Newsfeeds
+- Concepts
+- Quotas
+- Task Type detailed page (+search bar)
+
+On this specific page, you can select the option we have created for you.
+
+You can select the option you want on the dropdown menu.
