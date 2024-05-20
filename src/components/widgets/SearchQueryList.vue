@@ -82,16 +82,27 @@
       </div>
     </span>
     <span
-      class="tag"
+      :class="{
+        tag: true,
+        'is-shared': searchQuery.is_shared
+      }"
       :key="searchQuery.id"
       @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
       {{ searchQuery.name }}
-      <button class="edit" @click.stop="editSearch(searchQuery)">
+      <button
+        class="edit"
+        @click.stop="editSearch(searchQuery)"
+        v-if="!searchQuery.is_shared || isCurrentUserManager"
+      >
         <edit2-icon size="0.6x" />
       </button>
-      <button class="del" @click.stop="removeSearch(searchQuery)">
+      <button
+        class="del"
+        @click.stop="removeSearch(searchQuery)"
+        v-if="!searchQuery.is_shared || isCurrentUserManager"
+      >
         <trash2-icon size="0.6x" />
       </button>
     </span>
@@ -121,7 +132,7 @@
  * This component displays a list of queries available to users to filter list
  * results. It allows to modify each query too.
  */
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -155,6 +166,7 @@ export default {
       required: true
     }
   },
+
   components: {
     ChevronDownIcon,
     ChevronUpIcon,
@@ -164,6 +176,7 @@ export default {
     FolderPlusIcon,
     Trash2Icon
   },
+
   data() {
     return {
       groupToEdit: {},
@@ -183,13 +196,28 @@ export default {
       toggleGroupId: null
     }
   },
+
   computed: {
+    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+
     sortedFilters() {
       return sortByName([...this.queries])
     },
+
     userFilters() {
-      return this.sortedFilters.filter(query => !query.search_filter_group_id)
+      return this.sortedFilters
+        .filter(query => !query.search_filter_group_id)
+        .sort((a, b) => {
+          if (a.is_shared && !b.is_shared) {
+            return -1
+          } else if (!a.is_shared && b.is_shared) {
+            return 1
+          } else {
+            return 0
+          }
+        })
     },
+
     userFilterGroups() {
       return sortByName([...this.groups]).map(group => {
         return {
@@ -200,6 +228,7 @@ export default {
         }
       })
     },
+
     groupOptions() {
       return [
         { label: '', value: null },
@@ -210,6 +239,7 @@ export default {
       ]
     }
   },
+
   methods: {
     ...mapActions([
       'removeAssetSearchFilterGroup',
@@ -259,6 +289,9 @@ export default {
       try {
         this.loading.edit = true
         this.errors.edit = false
+        searchFilter.project_id = this.currentProduction
+          ? this.currentProduction.id
+          : null
         await this.updateSearchFilter(searchFilter)
         this.modals.edit = false
       } catch (err) {
@@ -418,5 +451,9 @@ export default {
 
 .search-queries .del {
   margin-left: 0.5em;
+}
+
+.tag.is-shared {
+  border: 1px solid $blue;
 }
 </style>
