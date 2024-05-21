@@ -325,7 +325,7 @@ export default {
     return client.pget(`/api/data/persons/${personId}/day-offs/${date}`)
   },
 
-  setDayOff(personId, startDate, endDate, description) {
+  createDayOff(personId, startDate, endDate, description) {
     // Date is a string with following format: YYYYY-MM-DD.
     const data = {
       person_id: personId,
@@ -336,7 +336,18 @@ export default {
     return client.ppost('/api/data/day-offs', data)
   },
 
-  unsetDayOff(dayOff) {
+  updateDayOff(id, personId, startDate, endDate, description) {
+    // Date is a string with following format: YYYYY-MM-DD.
+    const data = {
+      person_id: personId,
+      date: startDate,
+      end_date: endDate || startDate,
+      description
+    }
+    return client.pput(`/api/data/day-offs/${id}`, data)
+  },
+
+  deleteDayOff(dayOff) {
     return client.pdel(`/api/data/day-offs/${dayOff.id}`)
   },
 

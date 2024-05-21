@@ -452,19 +452,29 @@ const actions = {
     commit(SET_TIME_SPENT, timeSpent)
   },
 
-  async setDayOff({ commit }, { personId, date, end_date, description }) {
-    const dayOff = await peopleApi.setDayOff(
-      personId,
-      date,
-      end_date,
-      description
-    )
+  async setDayOff({ commit }, { id, personId, date, end_date, description }) {
+    let dayOff
+    if (id) {
+      dayOff = await peopleApi.updateDayOff(
+        id,
+        personId,
+        date,
+        end_date,
+        description
+      )
+    } else {
+      dayOff = await peopleApi.createDayOff(
+        personId,
+        date,
+        end_date,
+        description
+      )
+    }
     commit(PERSON_SET_DAY_OFF, dayOff)
   },
 
-  async unsetDayOff({ commit }) {
-    const dayOff = state.personDayOff
-    await peopleApi.unsetDayOff(dayOff)
+  async unsetDayOff({ commit }, dayOff = null) {
+    await peopleApi.deleteDayOff(dayOff || state.personDayOff)
     commit(PERSON_SET_DAY_OFF, {})
   },
 

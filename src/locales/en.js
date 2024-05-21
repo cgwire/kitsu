@@ -1567,13 +1567,7 @@ export default {
   },
 
   timesheets: {
-    confirm_day_off: 'Setting this day as a day off will erase all time filled for the current day. Are you sure you want to continue?',
-    confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
-    confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
     day_off: 'Day Off',
-    nb_days_off: 'Day Off | Days Off',
-    edit_days_off: 'Edit Days Off',
-    error_days_off: 'An error occurred while updating days off.',
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
     export_timesheet: 'Export Timesheet',
@@ -1585,6 +1579,21 @@ export default {
     title: 'Timesheets',
     unit: 'Unit',
     year: 'Year'
+  },
+
+  days_off: {
+    title: 'Days Off',
+    period: 'Period',
+    description: 'Description',
+    updated_at: 'Update date',
+    nb_days_off: 'Day Off | Days Off',
+    no_day_off: 'No day off for the selected period.',
+    add: 'Add day off',
+    edit: 'Edit day off',
+    delete: 'Delete day off',
+    confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
+    confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
+    error_days_off: 'An error occurred while updating days off.',
   },
 
   wrong_browser: {
