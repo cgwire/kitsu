@@ -1,6 +1,6 @@
 # Kitsu Publisher
 
-Kitsu is a web application to share the progress of your productions and
+Kitsu is a web application used to share the progress of your productions and
 validate your deliveries. It improves the communication between all stakeholders.
 Which leads to better pictures, shipped faster.
 
