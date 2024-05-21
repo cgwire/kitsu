@@ -556,6 +556,7 @@ export default {
     history: 'history',
     info: 'Information',
     import: 'Import',
+    is_shared: 'Shared with the whole team',
     home: 'return to home page',
     or: 'or',
     no: 'No',

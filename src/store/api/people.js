@@ -274,7 +274,9 @@ export default {
     const data = {
       name: searchFilter.name,
       search_query: searchFilter.search_query,
-      search_filter_group_id: searchFilter.search_filter_group_id
+      search_filter_group_id: searchFilter.search_filter_group_id,
+      is_shared: searchFilter.is_shared,
+      project_id: searchFilter.project_id
     }
     return client.pput(`/api/data/user/filters/${searchFilter.id}`, data)
   },
