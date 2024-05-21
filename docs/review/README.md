@@ -2,7 +2,7 @@
 
 ## Perform a Review
 
-When an artist needs a **review**, he changes the status of his task, too ![wfa](../img/getting-started/wfa_icon.png).
+When an artist needs a **review**, he changes the status of their task, too ![wfa](../img/getting-started/wfa_icon.png).
 
 Click on status to open the right panel and start the review.
 
@@ -69,7 +69,7 @@ If you go into **Full-Screen**, you can compare two task types or versions side 
 From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want the Artist to perform some changes.
 
 
-Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is validated.
+Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that their work is validated.
 
 
 ## Review a Concept
