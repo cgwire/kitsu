@@ -23,7 +23,7 @@ img[src$='#logo-kitsu'] {
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
 * [Getting started with Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
-* [Preparation of your Team](team/README.md): Prepare your team members and define their departments and permissions.
+* [Prepare your Team](team/README.md): Prepare your team members and define their departments and permissions.
 
 ### Create your production
 
