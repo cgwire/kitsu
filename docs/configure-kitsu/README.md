@@ -44,7 +44,7 @@ Once your **Global Library** is populated, you can fill out the **Production Lib
 
 ## Create Departments
 
-Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all. Departments also manage permissions.
+Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all. Departments are also used to define what metadata columns appear for users within that department
 
 <!-- I'm not sure what this last sentence means. Does it mean permissions can be set on a department? I couldn't find anything in the UI to achieve this.-->
 

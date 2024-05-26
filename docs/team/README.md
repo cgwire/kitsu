@@ -107,7 +107,7 @@ assets, shots, tasks, assignments, statistics, breakdown, and playlists.
 * View the timesheets of their team department(s).
 
 **They cannot:**
-* Access the studio team, the main timesheets, and the
+* Access the studio team, the main timesheets, and the production list
 * Define task types, task statuses, and asset types.
 * Comment on other departments than theirs; they can't assign artists from other departments.
 :::
