@@ -1,97 +1,62 @@
-# Check and Supervise your Tasks
+# Check and Supervise Your Tasks
 
-## Check your Tasks
+## Check Your Tasks
 
-As a Supervisor, you usually have tasks assigned in addition to supervising your department.
+A supervisor will typically have tasks assigned to them in addition to supervising your department. This means you need to split your time between completing your work and managing your team. Here's how to effectively manage what tasks you need to do.
 
-So, it means splitting your time between your work and supervising your team.
+When you log into Kitsu, you'll notice the **My Tasks** button at the top of the screen. This provides direct access to your **to-do list**. By default, the list is sorted by priority, so the task at the top are the ones recommended address first.
 
-Let's start with how to check what you have to do.
-
-When you log into Kitsu, you will notice the button on top of the screen **My Tasks**. 
-It's direct access to your **to-do list**. Per default, it's sorted by priority, so you don't have to think twice about what to do first; it's the one on top of the list.
-
-On the My Tasks page, you can filter the tasks list by Production, Task Type, Status, etc. 
+On the My Tasks page, you can filter the task list by Production, Task Type, Status, and other criteria.
 
 ![Supervisor Todo Page](../img/getting-started/supervisor_todo_page.png)
 
-
-Then, you must click on the **Status** to open the comment panel. From here, you can comment and publish a new revision.
+To view more details about a task, click on its **Status** to open the comment panel. Here, you can comment on the task and publish a new revision if needed.
 
 ![Supervisor Todo Detailed Page](../img/getting-started/supervisor_todo_page_detail.png)
 
-You can also use the Board view to drag and drop your task onto the new status column.
-
+You can also use the Board to quickly update the status of multiple tasks by dragging and dropping into each status column.
 
 ![Supervisor Todo Detailed Page board](../img/getting-started/supervisor_todo_page_detail_board.png)
 
+## Check the Previews of Your Department
 
+Now that everyone in your team knows what to do, you need to review their work. Typically, when an artist finishes a task, they will call you for a review. Frequent interruptions can be unproductive and make it difficult to maintain focus. To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
 
-## Check the Previews of your Department
+<!-- Is this neccessary here, since it doesn't relate to Kitsu? -->
 
-Now that everyone in your team knows what to do, you must check their work.
+Click the **My Checks** button at the top of the screen to see a list of all your department's **WFA** tasks.
 
-Usually, when an artist has finished a task, he will call you and ask for your review.
-So it means you must stop what you're doing, lose your focus, open their preview, focus on it, comment, and try to get back where you're stopped.
+![Supervisor My Check Page](../img/getting-started/supervisor_mycheck.png)
 
-It's a lot of wasted energy here, and you could be more productive, no thanks to all the intrusion.
+This list covers all relevant **Productions**, **Task Types**, and **Task Statuses**. As with other pages in Kitsu, you can click on a **Status** to open the **Comment Panel** on the right and review tasks one by one.
 
-And the more you are interrupted, the longer it takes to regain focus.
+Alternatively, you can use the **Build playlist from list** button to create a playlist with all the tasks on the list. This playlist has the same options as other views, allowing you to open the comment panel, compare versions and task types, and add annotations.
 
-That's why we suggest you set a specific timeframe for your checking. The first advantage is that it will help your team be better organized. The artists will know when it's a good time to speak with you, and they can post their work and start a new task, knowing you will check it.
-The second advantage is that you can focus on your work! You know when the checking is and when to do your tasks. 
+![Supervisor My Check Playlist](../img/getting-started/supervisor_mycheck_playlist.png)
+![Supervisor My Check Playlist Option](../img/getting-started/supervisor_mycheck_playlist_option.png)
 
-If you click the **My Checks** button at the top of the screen, you will see the list of all your department's **WFA** tasks.
-
-![Supervisor My Chceck Page](../img/getting-started/supervisor_mycheck.png)
-
-
-This list covers all the **Productions**, **Task Type**, and **Task Status** relevant to you.
-
-As with any other page in Kitsu, you can click on a **Status**, open the **Comment Panel** on the right, and do your review task per task.
-
-Or you can also use the **Build playlist from list** button. Kitsu will create a playlist with all the tasks on the list displayed.
-
-![Supervisor My Chceck Playlist](../img/getting-started/supervisor_mycheck_playlist.png)
-
-
-This **playlist** has the same options as others; you can open the comment panel, compare version and task types, and draw and write text.
-
-![Supervisor My Chceck Playlist Option](../img/getting-started/supervisor_mycheck_playlist_option.png)
-
-
-Another solution is to go to the **Task Type Page** and change the **Display as contact sheet**.
-
-For example, You can filter per **Due Date Status** and select **Due this week**.
+Another option is to go to the **Task Type Page** and change the **Display as contact sheet**. For example, you can filter by **Due Date Status** and select **Due this week**.
 
 ![Supervisor Contact Sheet](../img/getting-started/supervisor_contactsheet.png)
 
-
-You can now click on the contact sheet to open the comment panel or select several tasks to create a playlist.
+From here, you can click on the contact sheet to open the comment panel or select several tasks to create a playlist.
 
 ## Check a Concept
 
-Once your artists upload the concept, you can review it.
-
-To review the concept, you use the navigation menu at the top of the screen and select the concept page.
+When your artists upload a concept, you can review it through the navigation menu at the top of the screen by selecting the **Concepts** page.
 
 ![Menu concept](../img/getting-started/menu_concept.png)
 
-You can see all the concepts uploaded and the status, assignation, and linked assets.
+On this page, you can see all uploaded concepts along with their status, assignment, and linked assets.
 
 ![Concept filled status](../img/getting-started/concept_empty_prod_linked.png)
 
+To review a concept, click on its status to open the comment panel. You can enlarge the comment panel or enter fullscreen. You can then write a comment, set the status as **Approved** or **Rejected**, and confirm your changes with the **Post** button.
 
-To review a concept, click the status part to open the comment panel. You can enlarge the comment panel or go fullscreen.
+![Concept status comment](../img/getting-started/concept_status_comment.png)
 
-Then, write a comment, select the status **Approved** or **Rejected**, and validate with the **Post** button.
+You can narrow down the page using the **Status** filter to display all concepts with a **Neutral** status.
 
-![Ccncept status comment](../img/getting-started/concept_status_comment.png)
+![Concept status filter](../img/getting-started/concept_status_filter.png)
 
-You can filter the page with the **Status** filter to display all the **Neutral** status concepts.
-
-![Ccncept status filter](../img/getting-started/concept_status_filter.png)
-
-You can also filter per artist and change the order sort.
-
-
+Additionally, you can filter by artist and change the sort order to better hone in on the data you need to review.
