@@ -124,14 +124,14 @@ The shots appear in the top part of the screen. Every change is automatically sa
 
 ![Playlist page](../img/getting-started/playlist_example.png)
 
-### Review and Validations
+## Review and Approval
 
 Once you have created a playlist, you have several options:
 
 ![Playlist Global](../img/getting-started/playlist_global.png)
 
 * Play or Pause
-* JUmp between elements in your playlist
+* Jump between elements in your playlist
 * See the position of the selected element compared to the total number of elements
 * Mute or unmute the audio
 * Change the speed: double speed (x2), full speed (x1), half speed (x0.50), or quarter speed (x0.25)
