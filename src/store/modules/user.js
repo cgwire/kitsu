@@ -704,6 +704,9 @@ const mutations = {
         )
         if (filterGroup) {
           Object.assign(filterGroup, userFilterGroup)
+          state.userFilters?.[typeName]?.[projectId].forEach(filter => {
+            filter.is_shared = userFilterGroup.is_shared
+          })
         }
       })
     })

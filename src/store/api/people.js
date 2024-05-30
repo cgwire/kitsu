@@ -257,7 +257,9 @@ export default {
   updateFilterGroup(filterGroup) {
     const data = {
       name: filterGroup.name,
-      color: filterGroup.color
+      color: filterGroup.color,
+      is_shared: filterGroup.is_shared,
+      project_id: filterGroup.project_id
     }
     return client.pput(`/api/data/user/filter-groups/${filterGroup.id}`, data)
   },
