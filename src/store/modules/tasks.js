@@ -434,9 +434,7 @@ const actions = {
 
   updateTask({ commit }, { taskId, data }) {
     commit(EDIT_TASK_DATES, { taskId, data })
-    return tasksApi.updateTask(taskId, data).then(task => {
-      commit(EDIT_TASK_DATES, { taskId, data })
-    })
+    return tasksApi.updateTask(taskId, data)
   },
 
   deleteTask({ commit }, { task, callback }) {

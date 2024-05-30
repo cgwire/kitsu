@@ -1506,6 +1506,7 @@ export default {
     tasks: 'Tasks',
     to_myself: 'To myself',
     use_current_frame: 'Use current frame',
+    unassigned_tasks: 'Unassigned tasks',
     validated: 'Validated',
     validation: 'Validation',
     with_comment: 'With a comment...',

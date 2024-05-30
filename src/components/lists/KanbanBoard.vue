@@ -354,8 +354,8 @@ export default {
     },
 
     onCardDragEnter(event, taskStatus) {
-      this.isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
-      if (this.isAllowed) {
+      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (isAllowed) {
         event.currentTarget.classList.add('droppable')
       }
     },
