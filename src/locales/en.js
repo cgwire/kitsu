@@ -560,6 +560,7 @@ export default {
     home: 'return to home page',
     or: 'or',
     no: 'No',
+    no_results: 'No results',
     less_filters: 'Fewer filters',
     link: 'Link',
     load_more: 'Load more',

@@ -68,7 +68,7 @@
             class="flexrow-item"
             icon="list"
             :text="$t('tasks.unassigned_tasks')"
-            @click="isTaskSidePanelOpen = !isTaskSidePanelOpen"
+            @click="toggleTaskSidePanel"
           />
         </div>
       </div>
@@ -81,7 +81,6 @@
         :hierarchy="scheduleItems"
         :is-error="errors.schedule"
         :is-estimation-linked="true"
-        :is-loading="loading.schedule"
         :multiline="true"
         :reassignable="true"
         :start-date="startDate"
@@ -97,10 +96,26 @@
 
     <div class="column side-column" v-if="isTaskSidePanelOpen">
       <task-info>
-        <a class="close-button" @click="isTaskSidePanelOpen = false">x</a>
+        <a class="close-button" @click="toggleTaskSidePanel">x</a>
         <h2 class="mt1">
           {{ $t('tasks.unassigned_tasks') }}
         </h2>
+        <div class="mb2">
+          <combobox-production
+            class="mb05"
+            :label="$t('main.production')"
+            :production-list="productionList"
+            v-model="filters.productionId"
+            @input="loadUnassignedTasks()"
+          />
+          <combobox-task-type
+            class="mb05"
+            :label="$t('news.task_type')"
+            :task-type-list="taskTypeList"
+            v-model="filters.taskTypeId"
+            @input="loadUnassignedTasks()"
+          />
+        </div>
         <template v-if="unassignedTasks.length > 0">
           <ul class="task-list">
             <li
@@ -143,8 +158,8 @@
             </button>
           </div>
         </template>
-        <div v-if="loading.unassignedTasks">
-          {{ $t('main.loading') }}
+        <div v-else-if="loading.unassignedTasks">
+          <spinner class="mt2" />
         </div>
         <div v-else-if="errors.unassignedTasks">
           <table-info is-error />
@@ -155,6 +170,9 @@
               @click="loadUnassignedTasks()"
             />
           </div>
+        </div>
+        <div class="has-text-centered" v-else>
+          <em>{{ $t('main.no_results') }}</em>
         </div>
       </task-info>
     </div>
@@ -180,6 +198,8 @@ import { formatListMixin } from '@/components/mixins/format'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
@@ -196,6 +216,8 @@ export default {
     ButtonSimple,
     ComboboxDepartment,
     ComboboxNumber,
+    ComboboxProduction,
+    ComboboxTaskType,
     Datepicker,
     DepartmentName,
     PeopleField,
@@ -226,12 +248,15 @@ export default {
       ],
       loading: {
         hasMoreUnassignedTasks: false,
-        tasks: false,
         unassignedTasks: false
       },
       errors: {
         unassignedTasks: false,
         schedule: false
+      },
+      filters: {
+        productionId: null,
+        taskTypeId: null
       },
       pagination: {
         unassignedTasks: 1
@@ -248,6 +273,8 @@ export default {
       'daysOff',
       'departmentMap',
       'displayedPeople',
+      'getProductionTaskTypes',
+      'openProductions',
       'organisation',
       'taskTypeMap',
       'user'
@@ -281,6 +308,18 @@ export default {
         )
       }
       return displayedPeople
+    },
+
+    productionList() {
+      return this.addAllValue(this.openProductions)
+    },
+
+    taskTypeList() {
+      const productionId = this.filters.productionId
+      const types = this.getProductionTaskTypes(productionId).filter(
+        type => type.for_entity !== 'Concept'
+      )
+      return this.addAllValue(types)
     }
   },
 
@@ -296,8 +335,19 @@ export default {
       'updateTask'
     ]),
 
+    addAllValue(list) {
+      return [
+        {
+          id: '',
+          color: '#999',
+          name: this.$t('main.all'),
+          short_name: this.$t('main.all')
+        },
+        ...list
+      ]
+    },
+
     async init() {
-      this.loading.schedule = true
       await this.loadPeople()
       await this.loadPersonDates()
       await this.loadDaysOff()
@@ -319,14 +369,26 @@ export default {
       this.selectedEndDate = this.endDate.toDate()
     },
 
+    toggleTaskSidePanel() {
+      this.isTaskSidePanelOpen = !this.isTaskSidePanelOpen
+
+      if (!this.isTaskSidePanelOpen) {
+        this.unassignedTasks = []
+        this.errors.unassignedTasks = false
+      }
+    },
+
     async loadUnassignedTasks(more = false) {
       this.loading.unassignedTasks = true
       this.errors.unassignedTasks = false
       const page = more ? this.pagination.unassignedTasks + 1 : 1
       try {
         const { data, is_more } = await this.loadOpenTasks({
+          limit: 20,
           page,
-          person_id: 'unassigned'
+          person_id: 'unassigned',
+          project_id: this.filters.productionId,
+          task_type_id: this.filters.taskTypeId
         })
         if (more) {
           this.pagination.unassignedTasks++
