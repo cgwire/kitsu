@@ -32,11 +32,12 @@
             :label="$t('main.is_shared')"
             v-model="form.is_shared"
             v-if="isCurrentUserManager && currentProduction"
+            @click="form.search_filter_group_id = null"
           />
 
           <combobox
             :label="$t('main.filter_group')"
-            :options="groupOptions"
+            :options="allowedGroups"
             v-model="form.search_filter_group_id"
             v-if="isGroupEnabled"
           />
@@ -111,14 +112,21 @@ export default {
         name: '',
         search_filter_group_id: null,
         search_query: '',
-        is_shared: 'false',
-        task_status_id: null
+        is_shared: 'false'
       }
     }
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager'])
+    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+
+    allowedGroups() {
+      return this.groupOptions.filter(
+        group =>
+          group.is_shared === (this.form.is_shared === 'true') ||
+          group.value === null
+      )
+    }
   },
 
   methods: {
@@ -142,22 +150,20 @@ export default {
   watch: {
     searchQueryToEdit() {
       if (this.searchQueryToEdit?.id) {
-        this.form.id = this.searchQueryToEdit.id
-        this.form.name = this.searchQueryToEdit.name
-        this.form.search_filter_group_id =
-          this.searchQueryToEdit.search_filter_group_id
-        this.form.search_query = this.searchQueryToEdit.search_query
-        this.form.is_shared = this.searchQueryToEdit.is_shared
-          ? 'true'
-          : 'false'
+        this.form = {
+          id: this.searchQueryToEdit.id,
+          name: this.searchQueryToEdit.name,
+          search_filter_group_id: this.searchQueryToEdit.search_filter_group_id,
+          search_query: this.searchQueryToEdit.search_query,
+          is_shared: this.searchQueryToEdit.is_shared ? 'true' : 'false'
+        }
       } else {
         this.form = {
           id: null,
           name: '',
           search_filter_group_id: null,
           search_query: '',
-          is_shared: 'false',
-          task_status_id: null
+          is_shared: 'false'
         }
       }
     },
