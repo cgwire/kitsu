@@ -378,7 +378,7 @@ export default {
     flex-direction: column;
     left: 0;
     max-height: 200px;
-    overflow: scroll;
+    overflow-y: auto;
     padding: 0.5rem 0;
     position: absolute;
     top: 100%;
