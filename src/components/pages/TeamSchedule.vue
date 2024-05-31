@@ -99,6 +99,9 @@
         <a class="close-button" @click="toggleTaskSidePanel">x</a>
         <h2 class="mt1">
           {{ $t('tasks.unassigned_tasks') }}
+          <template v-if="!loading.unassignedTasks">
+            ({{ totalUnassignedTasks }})
+          </template>
         </h2>
         <div class="mb2">
           <combobox-production
@@ -240,6 +243,7 @@ export default {
       selectedStartDate: null,
       startDate: moment(),
       unassignedTasks: [],
+      totalUnassignedTasks: 0,
       zoomLevel: 1,
       zoomOptions: [
         { label: '1', value: 1 },
@@ -383,7 +387,7 @@ export default {
       this.errors.unassignedTasks = false
       const page = more ? this.pagination.unassignedTasks + 1 : 1
       try {
-        const { data, is_more } = await this.loadOpenTasks({
+        const { data, is_more, stats } = await this.loadOpenTasks({
           limit: 20,
           page,
           person_id: 'unassigned',
@@ -406,6 +410,7 @@ export default {
             )
           }))
         )
+        this.totalUnassignedTasks = stats.total
         this.loading.hasMoreUnassignedTasks = is_more
       } catch (err) {
         this.errors.unassignedTasks = true
