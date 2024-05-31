@@ -904,8 +904,7 @@ export default {
     },
 
     timelineSubStartStyle() {
-      let diff = this.dateDiff(this.startDate, this.subStartDate)
-      if (diff < 0) diff = 0
+      const diff = Math.max(this.dateDiff(this.startDate, this.subStartDate), 0)
       return {
         left: 0,
         width: `${this.cellWidth * diff}px`
@@ -913,8 +912,10 @@ export default {
     },
 
     timelineSubEndStyle() {
-      let diff = this.dateDiff(this.subEndDate, this.endDate)
-      if (diff < 0) diff = 0
+      const diff = Math.max(
+        this.dateDiff(this.subEndDate, this.endDate) - 1, // end date must available
+        0
+      )
       return {
         right: 0,
         width: `${this.cellWidth * diff}px`
@@ -1479,7 +1480,13 @@ export default {
     // Helpers
 
     dateDiff(startDate, endDate) {
-      if (startDate.isSame(endDate)) return 0
+      if (
+        startDate.isSame(endDate) ||
+        !startDate.isValid() ||
+        !endDate.isValid()
+      ) {
+        return 0
+      }
       const first = startDate.clone().startOf('day')
       const last = endDate.clone().endOf('day')
       const diff = last.diff(first, 'days')
