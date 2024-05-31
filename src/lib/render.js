@@ -4,11 +4,11 @@ import sanitizeHTML from 'sanitize-html'
 import { formatTime } from '@/lib/video'
 import emojis from '@/lib/emojis'
 
-const options = {
+const markedEmojiOptions = {
   emojis,
-  unicode: true
+  renderer: token => token.emoji
 }
-marked.use(markedEmoji(options))
+marked.use(markedEmoji(markedEmojiOptions))
 
 export const TIME_CODE_REGEX = /v(\d+) (\d+:)?(\d+):(\d+)(\.|:)(\d+) \((\d+)\)/g
 
