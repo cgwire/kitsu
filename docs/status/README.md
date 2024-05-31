@@ -109,4 +109,3 @@ To access this view, select the **Board** tab from the **My Tasks** page. Your t
 ::: tip
 Customizing which statuses appear in the **Board** view is set per permission role. It cannot be customized on an individual user basis. 
 :::
-<!-- pretty sure this is correct but want to verify -->

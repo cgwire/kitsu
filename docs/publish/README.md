@@ -19,13 +19,9 @@ Click on the thumbnail to see an enlarged preview of your concept, or click on t
 With the comment panel open, you have two options: 
 
 1) You can link a concept with an existing asset / delete and existing link. 
-2) You can comment and change the status of the asset.
-<!-- do you mean status of the concet, or asset? -->
+2) You can comment and change the status of the concept.
 
 It is good practice to only have one version per **Concept**. If the concept is not approved and requires additional changes, then it's better to version-up that concept.
-
-One concept equals one task.
-<!-- need to double check this -->
 
 ![Concept options](../img/getting-started/concept_options.png)
 

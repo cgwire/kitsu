@@ -45,9 +45,7 @@ Click on the **Add attachment** button.
 
 ![attachment](../img/getting-started/attachment_retake.png)
 
-You can also choose to **Attach snapshots from your annotation** in the attachment options.
-
-<!-- This doesn't make sense, need to confirm what this is referring to -->
+You can also choose to **Attach snapshots from your annotation** in the attachment options. This lets you take annotated frames and add them as attachments of the comment, which can be useful if you want to highlight specific annotations in your feedback.
 
 ![Attachment snapshot](../img/getting-started/screenshot_attachment.png)
 

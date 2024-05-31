@@ -62,7 +62,7 @@ You can see on average how many shots, frames, or seconds the artist needs to co
 
 The right half shows the entire department team (based on the assignments you made), the number of shots they need to complete, the number of frames and seconds, and the average quota. You will also see the **Remaining** line, which gives you the current status of your team.
 
-The last column is the **Estimation**. To modify the estimation, hover over the line with your mouse and click the editing zone.
+The last column is the **Estimation**. To modify the estimate, hover over the row with your mouse and click the editable area.
 
 You can also select multiple tasks simultaneously to edit them all at once.
 

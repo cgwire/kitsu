@@ -22,8 +22,6 @@ You can also use the Board to quickly update the status of multiple tasks by dra
 
 Now that everyone in your team knows what to do, you need to review their work. Typically, when an artist finishes a task, they will call you for a review. Frequent interruptions can be unproductive and make it difficult to maintain focus. To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
 
-<!-- Is this neccessary here, since it doesn't relate to Kitsu? -->
-
 Click the **My Checks** button at the top of the screen to see a list of all your department's **WFA** tasks.
 
 ![Supervisor My Check Page](../img/getting-started/supervisor_mycheck.png)

@@ -81,14 +81,11 @@ With your assignments completed, everyone knows their tasks and responsibilities
 
 ## Assign tasks from the detailed Task Type page
 
-You have the option to assign tasks directly from the detailed task type page. This allows you to focus on a single task type and access more detailed information, such as the length of a shot or specific details about an asset type.
+You also have the option to assign tasks from the detailed task type page. To access this, click on the column header of the task type.
 
-On the Detailed Task Type page, simply click on a status to open the comment panel.
+Next simply click on a status to open the comment panel. From there, you'll have the same options available as on the global page. You can select one or multiple tasks simultaneously to assign a user.
 
-From there, you'll have the same options available as on the global page.
 
-You can select one or multiple tasks simultaneously to assign a user.
-<!-- This section needs re-writing as it is unclear. Is there referring to the page when you click on a specific shot or asset? There are multiple tabs (i.e info, chat, concepts, casting etc), and I'm assuming you are referring to all the tasks for said shot/asset on the info tab right? Good to also include a screenshot here-->
 
 
 
