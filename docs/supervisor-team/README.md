@@ -1,132 +1,95 @@
-# Manage your Department(s)
+# Manage Your Department(s)
 
-Now, it's time to focus on your team. The first step is to assign tasks.
+A supervisor's role is to oversee the creative and technical aspects of visual effects production, ensuring that the final output meets the project's artistic vision, quality standards, and deadlines. A key aspect of this is to ensure your team knows what they are working on.
 
+## Assign and Estimate Tasks for Your Department
 
-## Assign and Estimate Tasks to your Department
-Your view is automatically filtered on the global shot/asset page as **My Department**. You only see your **Task Type** and the **Custom Columns** linked to your department.
-
+From the global shots / asset page, your view is automatically filtered by **My Department**. This shows you tasks from your departments **Task Type** and the **Custom Columns** linked to your department.
 
 ![Supervisor Global Page](../img/getting-started/supervisor_global_page.png)
 
-
-When you assign one or several tasks to someone, you will notice that you only have access to the people from your department. 
-
-It's faster for you to find the right Artist for the Task.
+When you assign one or several tasks to someone, you will notice that you only have access to people from your department. This makes it faster to find the right artist for the task.
 
 ![Supervisor Assign Team](../img/getting-started/supervisor_assign_team.png)
 
+Now that you have assigned tasks to all your artists, it's time to fill in the **Estimates** for each task.
 
-Now that you have assigned all your Artists, it's time to fill in the **Estimation** for each Task.
-
-Click on the name of a **task Type** column to open its dedicated page.
-
-On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. We will focus on the last one.
+Click on the name of a **Task Type** column to open its dedicated page. On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. We will focus on the last one.
 
 ![Supervisor Estimation](../img/getting-started/supervisor_estimation.png)
 
+The **Estimation** page is split into two parts. On the left, you have all the tasks sorted by artist, along with their number of frames and seconds. On the right, you have a summary of your team, with one line per artist showing the total number of assigned tasks, total number of frames and seconds, and the updated total number of estimated days.
 
-The **Estimation** page is split into two parts. On the left, you have all the tasks sorted by Artist, their number of frames, and seconds.
+With this information, Kitsu can calculate different estimated **Quotas**: **per Second**, **per Frame**, and **per Task**.
 
-On the right part of the screen, you have the sum-up of your team, one line per Artist. You will have the **Count** of the total number of assigned tasks, the total number of **Frames** and **Seconds**, and the updated total number of days **Estimated**.
-
-With all this information, Kitsu can calculate different estimated **Quotas**: **per Second**, **per Frame**, and **per Task**.
-
-You can now fill the **Estimation** column on the left and see the result on the right.
-
-As soon as you fill in an **Estimation** for a task, you will see the artist line updated on the right part.
+You can now fill the **Estimation** column on the left and see the result on the right. As soon as you fill in an **Estimation** for a task, the artist's row will update on the right.
 
 ![Supervisor Estimation Filled](../img/getting-started/supervisor_estimation_filled.png)
 
+This allows you to ensure the distribution of tasks among your team members is equal and helps to understand their estimated quotas for production. You should consider artist's experience and the difficulty of each task when doing this.
 
-You know if the distribution of the tasks is fair between your team member and what are their estimated quotas for production. 
+## Daily Supervision Tasks
 
-You need to do it according to their experience and the difficulty of each Task.
+Once the assignments and estimates are done, you can focus on the day-to-day operations. To easily see an overview of tasks from your department, you can click on your task type name from any page.
 
-## Supervise Daily your Team
-
-Once the assignations and estimations are done, you can focus on managing your team daily.
-
-You can directly access the **Task type Page** by clicking its name from any page to ease your effort and focus only on important matters.
-
-Once you are on the detail page, your first action is to click on the **Display tasks as a contact sheet** ![Dispaly task as contact sheet](../img/getting-started/contact_sheet.png) button.
-
+Once on the detail page, your first action is to click on the **Display tasks as a contact sheet** ![Display task as contact sheet](../img/getting-started/contact_sheet.png) button.
 
 ![Task Type as contact sheet](../img/getting-started/task_type_contact_sheet.png)
 
-Now, you can easily focus your work on the build filters.
-
-For example, you might be looking for what you should have finished this week without seeing what you have already done.
-
-Use the **-done** filter, and with the **Due Date Status** filter, select **Due This Week**.
-
+Now, you can easily hone in on tasks that require your attention using the built-in filters. For example, say you want to see only the tasks that are yet not complete yet. In this case, you can filter our tasks with the **-done** status, along with adding a **Due Date Status** filter, to show tasks that are **Due This Week**.
 
 ![Task Type filtered as contact sheet](../img/getting-started/task_type_contact_sheet_filtered.png)
 
-You can navigate from filter to filter to ease your work and always have the right information.
+You can easily enable / disable filters to quickly hone in on the right information.
 
 ::: tip
-If you need more information about a task, click on it to open the comment panel on the right.
+If you need more information about a task, click on it's name to open the comment panel on the right.
 
 ![Task Type filtered as contact sheet](../img/getting-started/task_type_contact_sheet_panel.png)
 :::
 
-## Supervise the Schedule of your Department
+## Managing Your Department's Schedule
 
-As a Supervisor, you can access your team schedule on the main menu under the STUDIO section.
+As a Supervisor, you can access your team's schedule from the main menu under the **Studio > Team Schedule** section.
 
-From this schedule, you can see all the artists working with you unfold a person and the details of their tasks.
+From this page, you can see all the artists in your current department working on your project. You can expand a person's schedule to see the details of their tasks.
 
-From there, you can 
-- Move the Task to change the start and due date
+From there, you can:
+- Move tasks to change their start and due dates.
+- Adjust the length of tasks.
+- Drag and drop tasks to reassign them to different team members.
+- See days off.
 
-- Adjust the length of the Task
+<!-- Need to include screenshot here -->
 
-- Drag and drop the Task to someone else to change the assignation
+## Managing Department Quotas
 
-- See the days off
+A quota refers to the specific amount of work or number of tasks an artist is expected to complete within a given timeframe, ensuring that the project progresses according to schedule and meets production deadlines.
 
+At the beginning of production, while setting estimates for each task, you can also define estimated quotas for each of your artists. Once a task is approved, the remaining line on the Estimation tab of the Task Type page will update and display the remaining number of tasks and the updated estimated quotas.
 
-
-
-## Supervise the Quotas of your Department
-
-At the beginning of the production, while you set estimation for each Task, you also define estimated quotas for each of your Artists.
-
-Once a task is validated, the remaining line on the Estimation tab of the Task Type page will update and display the remaining number of tasks and the updated estimated quotas.
-
-You can monitor each team member and see if their estimated quotas stay within the first established range.
+You can monitor each team member to see if their estimated quotas stay within the initially established range.
 
 ![Supervisor Estimated Quotas](../img/getting-started/supervisor_quotas_estimated.png)
 
-
-When you need to check on their **Actual Quotas**, go to the **Quotas** page. 
+To check their **Actual Quotas**, go to the **Quotas** page.
 
 ![Quotas](../img/getting-started/supervisor_quotas.png)
 
+Kitsu has two ways to calculate quotas. The first is based on daily timesheets filled out by the artists. Quotas are calculated from when the artist fills out their first timesheet on a task until they stop.
 
-Kitsu has two ways to calculate the quotas. The first is based on the daily timesheets filled out by the artists.
-
-The quotas will be calculated as soon as the Artist fills out his first timesheet on this Task and will end when he stops.
-
-
-The second way is based on the status. The calculation starts with the **WIP** status and ends with the **WFA** status.
-
-It's **First take** quotas, meaning that the back-and-forth of comments won't be entered in the calculation.
+The second way is based on status. The calculation starts with the **WIP** status and ends with the **WFA** status. This is **First Take** quotas, meaning that back-and-forth comments are not included in the calculation.
 
 ![Weekly Quotas](../img/getting-started/supervisor_quotas_week.png)
 
+The first column, **Average**, is the most important. Kitsu calculates the average quotas for each artist per **Day**, **Week**, or **Month**.
 
-The first column, **Average**, is this page's most important element. Kitsu will calculate the average quotas for each Artist per **Day**, **Week**, or **Month**.
+## Supervise the Timesheets of Your Department
 
-
-## Supervise the Timesheets of your Department
-
-As a Supervisor, you also have to monitor your team's hours. The Timesheet page shows how many hours they work daily, week, and month. 
+As a Supervisor, you may also be responsible for monitoring your team's hours. The Timesheet page shows how many hours they work daily, weekly, and monthly.
 
 ![Timesheet](../img/getting-started/supervisor_timesheet_team.png)
 
-
-It's time to notice a pattern of extra hours, sick days, or no vacation. It's also your job to take care of your team, speak with them, and see if everything is fine if they are not burning.
+It's important to highlight abnormal patterns such as extra hours, sick days, or lack of vacation. The timesheet view can provide a high-level overview of where artists are spending their time, which can help you take care of your team to ensure they are not burning out.
 
 ![Timesheet Detailed](../img/getting-started/supervisor_timesheet_team_detail.png)

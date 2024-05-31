@@ -1,197 +1,115 @@
 # Publish
 
+## Publishing a Concept
 
-## Publish a Concept
-
-To publish a **Concept**, go to the **Concept** page with the navigation menu.
+To publish a **Concept**, navigate to the **Concepts** page from the project navigation menu.
 
 ![Concept Menu](../img/getting-started/menu_concept.png)
 
-To upload a concept, click the **Add a new reference to concepts** button.
-
-You can upload one or several concepts at the same time.
+To upload a concept, click the **Add a new reference to concepts** button. You can upload one or several concepts simultaneously.
 
 ![Concept empty page](../img/getting-started/concept_empty_prod.png)
 
-Once you upload your previews, the concept page will look like this.
+After the upload is complete, previews will be generated and visible from your concepts page.
 
 ![Concept filled page](../img/getting-started/concept_filled_prod.png)
 
+Click on the thumbnail to see an enlarged preview of your concept, or click on the status to open the **Comment Panel** on the right.
 
-You can interact with the concept in two ways: click on the picture to see an enlarged view.
-The second is to click on the status part to open the **Comment Panel** on the right.
+With the comment panel open, you have two options: 
 
-You have two options on the comment panel: link a concept with an existing asset or delete the concept.
-You can also comment and change the status of the asset.
+1) You can link a concept with an existing asset / delete and existing link. 
+2) You can comment and change the status of the concept.
 
-The idea is to have one Version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
-
-One concept is one task.
-
+It is good practice to only have one version per **Concept**. If the concept is not approved and requires additional changes, then it's better to version-up that concept.
 
 ![Concept options](../img/getting-started/concept_options.png)
 
+## Linking a Concept to an Asset
 
-## Link a Concept to an Asset
+Once concepts are uploaded, you can link them to assets.
 
-Once concepts are uploaded, you can link them to the assets.
+The name of the linked asset is displayed below the thumbnail of the concept, and above the status. If no asset is linked, this area will be blank.
 
-You can see the links on the status part of the assets.
-
-Click on the status part of the concept; it will open the comment panel on the right.
+Click on the status of the concept to open the comment panel on the right.
 
 ![Concept Comment Panel](../img/getting-started/concept_comment_panel.png)
 
-On the comment panel, you have two options at the top: Link a concept to an asset and delete the concept.
+From here you can adjust what the concept is linked to, or delete it. In our example below, the concept is not currently linked to an asset.
 
 To link an asset, click on the **Link** ![Link button](../img/getting-started/link_icon.png) button.
 
-Kitsu will display all the **Assets** available to link with the concept uploaded.
-
-Kitsu will list the linked assets at the top of the comment panel. For now, there are No Links.
-
+Kitsu will display all the **Assets** available to link with the uploaded concept.
 
 ![Concept link](../img/getting-started/concept_link.png)
 
-To link an asset, click on it. The linked assets' names will appear at the top of the screen under the preview of the concept.
-
+Select the assets from the list that you want to link to. The linked asset names will then appear at the top of the screen and will also display under the concept's thumbnail.
 
 ![Concept asset linked](../img/getting-started/concept_asset_linked.png)
 
-Once a concept is linked to an asset, it can be seen on the asset's detail page.
-
-Return to the asset page, and click on the asset name you want to see the concept.
+Once a concept is linked to an asset, it can be seen and referenced from the asset's detail page. Return to the asset page and click on the asset which you just linked to your concept.
 
 ![Detail asset page](../img/getting-started/asset_detail_page.png)
 
-Per default, the casting detail is displayed on the second part of the screen. 
-Use the dropdown menu to choose the concept.
+By default, the casting detail is displayed on the second part of the screen. Use the dropdown menu to choose the concept.
 
-![asset detail concept](../img/getting-started/asset_detail_concept.png)
+![Asset detail concept](../img/getting-started/asset_detail_concept.png)
 
-Once in the concept section, you will see all the concepts created for this asset. You can filter them per status.
+Once in the concept section, you will see all the concepts created for this asset. You can filter them by status.
 
-![asset detail concept list](../img/getting-started/asset_detail_concep_listt.png)
+![Asset detail concept list](../img/getting-started/asset_detail_concep_listt.png)
 
 
 ## Publish a Preview as a Version
+To publish a preview, picture, or video, access the task's comment panel and select the **PUBLISH REVISION** tab.
 
-To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the task's comment panel.
-
-Kitsu will automatically switch to the **Publish Revision** tab when you use status with the option **IS FEEDBACK REQUEST**, like the **WFA** Status.
+Kitsu automatically switches to the **Publish Revision** tab when using a status with the **IS FEEDBACK REQUEST** option, such as the **WFA** Status.
 
 ![Publish Revision](../img/getting-started/publish_revision.png)
 
+You can add one or several previews to any comments. These can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`), or a `.glb` file. Additionally, you can review all the previews from the browser or mix everything. 
+<!-- This is not clear, need to double check what this means -->
 
-You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`),
-or an `.glb` file. You can review all the previews from the browser or mix everything.
+You can also review a `.glb` file as a wireframe or add a `.HDR` file to check the lighting. See the **Customization** section for more details.
 
-You can also review the `.glb` file as a wireframe or add a `.HDR` file to check the lighting. 
-
-See the **Customization** section for more details.
 [Pipeline Customization](../customization-pipeline/README.md)
+<!-- Dead link, what should this point to?-->
 
+Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb` cannot be viewed in the browser and need to be downloaded to be reviewed.
 
-Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb`, however, need to be
-downloaded to be reviewed.
+Then, click on the **Add preview revision to publish** button. The explorer opens, allowing you to choose your file or several files.
 
+![Attach Preview](../img/getting-started/attach_preview.png)
 
-Then, click on the **Add preview revision to publish** button. The explorer opens and lets you choose your file or several files.
+You can also **copy-paste a screenshot** from your clipboard into this upload dialogue, without needing to download it first. Once your file is selected, you will see its name near the **Add files to publish** button.
 
-![attach preview](../img/getting-started/attach_preview.png)
+![Attach Preview Filled](../img/getting-started/attach_preview_filled.png)
 
-You can also **copy-paste a screenshot** to this screen.
+You can also **drag & drop** files that you wish to upload into the comment section to automatically start the upload process.
 
-You will see a preview of the attached files.
+![Attach Preview Drag Drop](../img/getting-started/drag_drop_preview.png)
 
-![attach preview filled](../img/getting-started/attach_preview_filled.png)
-
-
-Once your file is selected, you will see its name near the **Attach preview** button.
-
-![attach preview confirmed](../img/getting-started/attach_preview_confirm.png)
-
-You can also **drag & drop** the file in the comment section.
-
-![attach preview drag drop](../img/getting-started/drag_drop_preview.png)
-
-
-On top of your preview, you can add a **Comment**.
-
-Click the **Leave a Comment** button to unfold the comment section.
+On top of your preview, you can add a **Comment**. Click the **Leave a Comment** button to unfold the comment section.
 
 ![Add a comment to a Publish](../img/getting-started/publish_revision_comment.png)
 
+You can then select your status and publish your preview with the **Post** Button.
 
-You can select your status and publish your preview with the **Post** Button.
-
-
-
-
-## Add a Thumbnail by hand
-
-To define a preview as a thumbnail, the preview MUST have been uploaded as a revision. 
-
-To publish a preview, picture, or video, select the **PUBLISH REVISION** tab on the task's comment panel.
-
-You can use the preview as a **thumbnail** on the asset or shot task. It
-helps to recognize the assets/shots on the main pages.
-On the list page, click on the status you want, then click the **Preview** button (1) on the right panel.
-
-![Thumbnail Button](../img/getting-started/pannel_history.png)
-
-Once you click on the button, you can choose to pick the first or any frame; once the frame is selected, the thumbnail appears, and the button turns gray.
-
-![thumbnail applied](../img/getting-started/pannel_history_thumbnail.png)
+For more information on using publishes as thumbnails, [see this section here on thumbnails](../thumbnails/README.md).
 
 
-## Apply thumbnail automatically
-
-On the production, use the navigation menu to go to the settings page
-
-![setting menu](../img/getting-started/drop_down_menu_setting.png)
-
-On the **Parameters** tab, you can choose to **set new preview as entity thumbnail automatically**.
-
-![setting preview auto](../img/getting-started/setting_preview_auto.png)
-
-Don't forget to **Save**. Now, as soon as you upload a preview, it will be used automatically as a thumbnail.
-
-## Add Multiple Previews as one Version
+## Add Multiple Previews as One Version
 
 You can add multiple images simultaneously, or once you have uploaded an image, you can add another one.
 
-![attach preview drag drop](../img/getting-started/upload_several_pictures.png)
+![Upload Several Pictures](../img/getting-started/upload_several_pictures.png)
 
-The **Add preview** pop-up asks you to choose a file.
-
-You can navigate through the pictures uploaded.
+The **Add preview** pop-up asks you to choose a file. You can navigate through the pictures uploaded.
 
 You can change the preview order by clicking the number and then dragging and dropping them.
 
-![preview drag drop](../img/getting-started/multiple_preview.png)
+![Preview Drag Drop](../img/getting-started/multiple_preview.png)
 
+To delete an additional preview, enlarge the comment panel, click on the number of versions, and then click on the ![Delete Button](../img/getting-started/delete_button.png).
 
-To delete an additional preview, you need to enlarge the comment panel by dragging it and clicking on the number of versions.
-
-![enlarge comment section](../img/getting-started/enlarge_comment.png)
-
-And then click on the ![delete button](../img/getting-started/delete_button.png)
-
-![enlarge comment section delete](../img/getting-started/enlarge_comment_delete.png)
-
-
-## Batch Upload Previews (as Thumbnails)
-
-You can use the **Add Thumbnails** button ![Add thumbnails button](../img/getting-started/add_thumbnails.png) on the global page to massively import thumbnails.
-
-
-![History](../img/getting-started/add_thumbnails_menu.png)
-
-A new pop-up opens and asks you to choose which task types the thumbnails are linked to.
-
-**Thumbnails batch import accepts image files and video files**.
-
-Only the first frame is used as the thumbnail for the video files.
-
-You have to name your thumbnails as sequence_shot.
+![Enlarge Comment Section Delete](../img/getting-started/enlarge_comment_delete.png)

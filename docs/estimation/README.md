@@ -1,145 +1,129 @@
-# Estimation and Team speed (quotas)
+# Estimation and Team Speed (Quotas)
 
-Filling out an estimation for each task can feel overwhelming, but the benefit is worse than the time spent.
+Estimating the time for each task can feel overwhelming, but the benefits far outweigh the effort. By filling out task estimations, you can:
 
-If you fill each task estimation, it will help you to:
-- always see the estimated days for any task, task type, sequence, asset type, entity, etc.
-- With estimation and timesheet, you can compare estimation vs reality
-- Once a task is filled with estimation, start, and due date, you will be able to adjust it from the entity schedule or the team schedule
-- Help your artists get better organized and be self-aware of the time they should spend on a task.
-- Better forecast your production and the next!
+- Clearly see the estimated days for any task in your production.
+- Easily compare task estimates with actual time taken, allowing you to more accurately forcast tasks in the future.
+- Adjust tasks from the entity schedule or team schedule once they have estimations, start, and due dates.
+- Help your artists stay organized and be aware of the time they should spend on each task.
+- Improve forecasting for your current and future productions.
+
+Kitsu offers various features to help you easily track, review, and forecast task estimates. Let's look at some of the features that enable you to do this.
 
 
 ## Add an Estimation for a Task
 
-Click on the name of a task type.
+To get started, click on the name of a task type.
 
 ![Task type](../img/getting-started/supervisor_tasktype.png)
 
-The new page is the Detailed Task Type view. It provides more detailed information about this specific task type.
+You'll then be taken to the Detailed Task Type view. Here you can see a list of of every task of that specific task type, along with additional details.
 
 ![Supervisor page](../img/getting-started/supervisor_page.png)
 
+To add an estimate to a task, click on the **Estimate (Est.)** field and input the number of days. You can select multiple tasks with **ctrl / cmd** or **shift** and apply the same estimate across all selected tasks.
 
-To add an estimation to a task, click on the line and type the number of days you estimate. You can select multiple assets or shots at the same time.
+::: tip
+The duration represents how long your task actually took and is calculated automatically from logged time. We will cover this in more detail later.
+:::
 
-You can also define a **Start date** by clicking on it.
-A calendar will open and let you choose your start date.
+You can also define a **Start date** by clicking into the field, and choosing a data from the pop-up calendar.
 
-The **Due date** is automatically calculated with the **Estimation**.
+The **Due date** is automatically calculated based on **Estimate** and **Start Date** provided.
 
 ![start date](../img/getting-started/set_estimation.png)
 
+### Detailed Task Type View Features:
+Here is a summary of the cases and features you can leverage from the detailed task type view.
 
-To go further in detail with the detailed Task type's view :
--  You can see and change the status of a task
--  You can assign people to tasks
+- See and change the status of tasks
+- Assign people to tasks
+- Add an estimate for the task (in days)
+- View the cumulative sum of logged time from an artists timesheet
+- Track the number of back-and-forths with the retake status
+- Add a start date for the task using the calendar picker
+- View the auto-generated due date based on the start date and estimate
+- See the WIP and Feedback dates automatically filled in
+- Monitor the latest comment section to keep an eye on the latest activity for this task type
 
+## Forecast Your Team's Speed Using Estimated Quotas
 
-
-- You can add an estimation for the task (in day unit)
--  Kitsu calculates the sum of the timesheet fed by the artists
-- The number of back-and-forths with the retake status
-- You can add a start date for the task (with the calendar)
--  Kitsu calculates the due date with the Start Date and the estimation
-- the Wip and Feedback dates are automatically filled
-- The last comment section helps you keep an eye on the last activity of this task type.
-
-## Forecast your team speed - Estimated Quotas
-
-To help you set a correct estimation, you can use the **Estimation** Tab.
+To help you set accurate estimates, you can use the **Estimation** tab.
 
 ![Estimation tab](../img/getting-started/tasktype_estimation_tab.png)
 
-The left part of the screen lists the shots with the assignment and the number of frames (1).
-Depending on the **FPS** you have set for the production, the number of **Seconds** will be automatically calculated (2).
+The left half lists the tasks with their assignments and the number of frames (1). Based on the **FPS** you have set for the production, the number of **seconds** will be automatically calculated (2).
 
 ::: tip Definition
-**Quotas** is a way to visualize your **team speed**. 
+**Quotas** visualize your **team speed**. 
 
-You can see in **average** how many shots/frames or seconds the artist has to do daily to finish all the tasks with the **estimated number of days**.
+You can see on average how many shots, frames, or seconds the artist needs to complete daily to finish all tasks within the **estimated number of days**.
 :::
 
- On the right part of the screen, you can see the full department team (depending on the assignments you made), the number of shots they have to do, the number of frames and seconds, and the average Quota.
- You will also have the **Remaining** line, which gives you the actual situation of your team.
+The right half shows the entire department team (based on the assignments you made), the number of shots they need to complete, the number of frames and seconds, and the average quota. You will also see the **Remaining** line, which gives you the current status of your team.
 
+The last column is the **Estimation**. To modify the estimate, hover over the row with your mouse and click the editable area.
 
- And the last column is the **Estimation**. To modify the estimation, hover the line with your mouse and click the editing zone.
+You can also select multiple tasks simultaneously to edit them all at once.
 
- You can also select multiple shots simultaneously to edit them all at once.
+![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
 
- ![Estimation tab edit](../img/getting-started/tasktype_estimation_tab_edit.png)
+Every time you change the **Estimation** (in the number of days) on the right side, you will see that the **Average Quota** updates in real time.
 
- Every time you change the **Estimation** (in the number of days) on the right part, you can see that the **Average Quota** is updated in real time.
+For more information about the **Schedule** tab, refer to [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation).
 
+## Team Real Speed: Quotas
 
+Kitsu has two ways to calculate quotas per **task type**.
 
- For more information about the **Schedule** tab, go to the
- [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation)
-
-
-## Team real speed: Quotas
-
-
-Kitsu has two ways to calculate the quotas per **shot Task Type**.
-
-The first is linked to the timesheet :
-Shots are considered to have ended on the first feedback request. Then, quotas are weighted according to the time spent on the task (when the Artist fills out his timesheet).
+### Quotas Based on Timesheets
+The first method is linked to the timesheet:
+Shots are considered complete when the first feedback request is made. Quotas are then weighted according to the time spent on the task, as recorded in the timesheet by the artist.
 
 ![Quotas stat page day weighted](../img/getting-started/quotas_day_weighted.png)
 
-In this example, Kitsu has weighted the daily quota linked to the timesheet.
+In this example, Kitsu weights the daily quota based on the timesheet entries.
 
 ![Quotas stat page day weighted detail](../img/getting-started/quotas_day_weighted_detail.png)
 
+### Quotas Based on Status Changes
+If no timesheet is filled out, Kitsu uses status changes to estimate the duration:
+- The task is considered started when the first status change to WIP occurs.
+- The task is considered completed on the day the feedback request is made.
 
-If no timesheet is filled, then Kitsu considers that:
+Kitsu then distributes the completed frames across all business days between the start and end dates. It calculates the number of frames (or seconds, or tasks) completed per day/week/month per artist.
 
-The task was started when the first status change was made to WIP.
+![Quotas stat page day status](../img/getting-started/quotas_day_status.png)
 
-The task was done the day the feedback request was made.
-
-Kitsu will split the done frames among all business days between the start and the end and grab the number of frames (or seconds, or tasks) submitted per day/week/month per Artist.
-
-![Quotas stat page day weighted](../img/getting-started/quotas_day_status.png)
-
-
-You can click on a number and see its details on the right panel anytime.
+You can click on a number at any time to see its details in the right panel.
 
 ## Change Priorities
 
-At some point in the production, you may want to prioritize some tasks and
-pinpoint these urgent tasks to your team.
+Priorities are often changing during a production, and you may want to easily highlight this change in priority to your team.
 
-For this, we use the same technique as before. Click on the space
-near a status task (1).
+To do this, click on the space near a task's status (1).
 
 ![Task assigned](../img/getting-started/task_assigned.png)
 
-The action box appears.
+The action box will appear.
 
 ![Blue menu](../img/getting-started/blue_menu.png)
 
-Click on the icon of the action menu to choose
-**Change priority**.
+Click on the icon in the action menu to choose **Change Priority**.
 
 ![Change priority](../img/getting-started/change_priority.png)
 
-There are four levels of priority: **Normal**, which is the fundamental level of all the
-tasks **High**, **Very High**, or **Emergency**. Save the changes with the
-**Confirm** button.
+There are four levels of priority: **Normal**, which is the default value for all tasks, **High**, **Very High**, and **Emergency**. Save the changes with the **Confirm** button. 
 
-As we have done for the assignation or the status, select the shots (1), select
-the level of priority (2), and apply with **Confirm** (3).
+As with changing statuses or assignments, you can change the priority across multiple tasks at the same time by selecting the tasks, and choosing **Change priority of the selected tasks**.
 
 ![Priority selection](../img/getting-started/priority.png)
 
-You can now see next to the status of the task some **exclamation marks**. The
-more there are, the more urgent the task is.
+You will now see exclamation marks next to the task status. The more exclamation marks there are, the more urgent the task is.
 
-* (1) is **Normal**,
-* (2) is **High**,
+* (1) is **Normal**
+* (2) is **High**
 * (3) is **Very High**
-* (4) is for **Emergency**.
+* (4) is **Emergency**
 
 ![Priority level](../img/getting-started/priority_level.png)

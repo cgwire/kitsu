@@ -1,21 +1,17 @@
 # Kitsu Publisher
 
-Kitsu is a web application used to share the progress of your productions and
-validate your deliveries. It improves the communication between all stakeholders.
-Which leads to better pictures, shipped faster.
+Kitsu is a web application designed to streamline production progress sharing and delivery validation, enhancing communication among stakeholders for faster, higher-quality outputs. 
 
-The Kitsu Publisher is a desktop application that connects DCC Tools to Kitsu.
-Through it, your artists can see their todo list, comment tasks and send previews to Kitsu
-directly from their tools.
+The Kitsu Publisher is a desktop application that bridges DCC tools with Kitsu, allowing artists to manage their tasks, add comments, and send previews directly from their tools.
 
 ## DCC Integrations Status:
 
+Currently supported:
 - Blender
 - Toon Boom Harmony
 - Unreal Engine
 
 Work in progress:
-
 - Photoshop
 - Nuke
 
@@ -31,8 +27,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
 #### On Linux
 
-- deb package (for debian based distributions):
-
+- **deb package** (for Debian-based distributions):
   - To install the package:
 
     ```shell
@@ -41,8 +36,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - The package is now in your applications and in your $PATH.
 
-- rpm package (for RHEL based distributions):
-
+- **rpm package** (for RHEL-based distributions):
   - To install the package:
 
     ```shell
@@ -51,8 +45,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - The package is now in your applications and in your $PATH.
 
-- snap package:
-
+- **snap package**:
   - To install the package:
 
     ```shell
@@ -61,8 +54,7 @@ All commands have the keyword {version} in the filenames, you need to replace th
 
   - The package is now in your applications and in your $PATH.
 
-- tar.gz archive:
-
+- **tar.gz archive**:
   - To extract the archive:
 
     ```shell
@@ -75,59 +67,40 @@ All commands have the keyword {version} in the filenames, you need to replace th
     kitsu-publisher-{version}/kitsu-publisher
     ```
 
-- AppImage:
-
+- **AppImage**:
   - to run the app:
 
     ```shell
     ./Kitsu publisher-{version}.AppImage
     ```
 
+
 #### On Windows
 
-- NSIS Installer:
+- **NSIS Installer**:
+  Double-click the installer `Kitsu-publisher-Setup-{version}.exe` and follow the instructions.
 
-  - Double-click on the installer (Kitsu-publisher-Setup-{version}.exe) and follow the instructions.
+- **MSI Installer**:
+  Double-click the installer `Kitsu-publisher-{version}-ia32.msi` to install the app.
 
-  - The package is now in your applications.
+- **Portable application**:
+  Double-click the executable `Kitsu-publisher-{version}.exe`.
 
-- Msi installer:
-
-  - Double-click on the installer (Kitsu-publisher-{version}-ia32.msi) and it will install directly the app.
-
-  - The package is now in your applications.
-
-- Portable application:
-
-  - Double-click on the executable (Kitsu-publisher-{version}.exe) to run the app.
-
-- Zip portable application:
-
-  - Extract the zip (Kitsu-publisher-{version}-ia32-win.zip) by right-clicking and select "Extract All" and then follow the instructions.
-
-  - Double click on the executable (Kitsu publisher.exe) inside the extracted folder to run the app.
+- **Zip portable application**:
+  Extract the zip `Kitsu-publisher-{version}-ia32-win.zip`, and double-click `Kitsu publisher.exe`.
 
 #### On MacOS
 
-- DMG installer:
+- **DMG Installer**:
+  Double-click the installer `Kitsu-publisher-{version}.dmg`, drag the Kitsu logo to the "Applications" folder.
 
-  - Double-click on the installer (Kitsu-publisher-{version}.dmg), a window should open.
+- **PKG Installer**:
+  ```shell
+  sudo installer -package Kitsu-publisher-{version}.pkg -target /
+  ```
 
-  - Drag and drop the Kitsu logo on the "Applications" folder and it will install directly the app.
-
-- PKG installer:
-
-  - To install the package (you can also install the package by double-clicking on it and following the instructions):
-
-    ```shell
-    sudo installer -package Kitsu-publisher-{version}.pkg -target /
-    ```
-
-- Zip portable application:
-
-  - Double-click on the zip (Kitsu-publisher-{version}-mac.zip) to expand the zip.
-
-  - Double-click on the Kitsu publisher icon it will launch the app.
+- **Zip portable application**:
+  Double-click the zip `Kitsu-publisher-{version}-mac.zip`, then double-click the Kitsu Publisher icon.
 
 
 ## Development Environment
@@ -203,7 +176,7 @@ You need to run npm scripts:
 
 #### Pre-requisites
 
-You need to download the connectors-{version}.zip archive in the [releases](https://github.com/cgwire/kitsu-publisher-next/releases/latest). After that, you have to unzip the archive (with right-click "Extract All" on Windows or unzip on Linux/macOS for example).
+Download the `connectors-{version}.zip` from the [latest releases](https://github.com/cgwire/kitsu-publisher-next/releases/latest) and unzip it.
 
 #### Blender (version>2.80)
 
@@ -293,15 +266,11 @@ You must first have the Kitsu publisher and the plugin installed on your compute
 
 ## Consult your To-Do List
 
-First, you must log into the publisher using your kitsu address, login, and password, as you would with your usual Kitsu.
-
-You directly arrive on your to-do list and have access to the same option as on Kitsu.
-
-You can see your to-do list, the done list, and timesheets.
+Log in to the Kitsu Publisher using your Kitsu credentials. You will see your to-do list with similar options as in Kitsu.
 
 ![Kitsu Publisher todo list](../img/getting-started/publisher_todolist.png)
 
-If you want to comment or publish on a task, simply click on the status.
+To comment or publish on a task, click on the status.
 
 ![Kitsu Publisher todo list status](../img/getting-started/publisher_todolist_status.png)
 
@@ -316,19 +285,17 @@ When you are ready to publish your work, click on the **Add a review to publish*
 
 ## Publish a Preview from the Publisher
 
-You now have the choice between the traditional way of publishing by uploading the preview by yourself. Or you can let Kitsu Publisher do it for you.
-
-Kitsu Publisher will recognize your opened DCC and the project opened.
+You can either upload the preview manually or let the Kitsu Publisher do it for you. Kitsu Publisher will detect the open DCC and project.
 
 ![Kitsu Publisher DCC list](../img/getting-started/publisher_dcc_list.png)
 
-You can select your Camera and your render engine of choice. Then select if you want to take a screenshot or render the whole animation.
+Select your camera and render engine, and choose between a screenshot or full animation render.
 
 Here, for example, we select the **Screenshot** option. Kitsu publisher will ask your DCC to do the render for you and display the result.
 
 ![Kitsu Publisher DCC Screenshot](../img/getting-started/publisher_dcc_screenshot.png)
 
-Once satisfied with the result, you can click on **Confirm**. It will close the pop-up window, and you will be back in the comment panel. You can now type your comment, change the status and click on **Post Comment** to upload the preview into Kitsu and share it with your team.
+Once satisfied, click **Confirm**, add your comment, change the status, and click **Post Comment** to upload the preview.
 
 ![Kitsu Publisher comment](../img/getting-started/publisher_post_comment.png)
 
@@ -339,7 +306,7 @@ Now everybody logged in to Kitsu will see your comment and publish.
 
 ### Change the Save Directory and Add Scripts
 
-You can go to the setting menu when you click on your avatar.
+You can access settings via your avatar.
 
 ![Kitsu Publisher settings Menu](../img/getting-started/publisher_settings_menu.png)
 
@@ -380,10 +347,8 @@ Once your preview is rendered, you can check the directory and the scripts launc
 
 ![Kitsu Publisher settings result](../img/getting-started/publisher_settings_result.png)
 
-If you click on the option icon you will see the command launched before the import.
+Click on the options icon to see the command executed before the import.
 
 ![Kitsu Publisher settings result detailed](../img/getting-started/publisher_settings_resul_detailt.png)
 
-If everything is fine, click on **Confirm** to close the pop-up.
-
-And then post your comment as usual.
+Confirm if everything is correct, then post your comment as usual.

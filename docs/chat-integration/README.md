@@ -11,201 +11,173 @@
 
 ![Create application](../img/discord/create_application.png)
 
-5. Create a Bot User by navigating to the “Bot” tab and clicking “Add Bot”.
-    - Click “Yes, do it!” to continue.
+5. Create a Bot User by navigating to the "Bot" tab and clicking "Add Bot".
+    - Click "Yes, do it!" to continue.
 
 ![Create bot](../img/discord/create_bot_user.png)
 
-6. You can add an icon for the bot by clicking the icon next to "Username".
-It will be the same icon used when the bot chats.
+6. You can add an icon for the bot by clicking the icon next to "Username". This icon will be used when the bot chats.
 
-7. Make sure that Public Bot is ticked if you want others to invite your bot.
+7. Ensure that "Public Bot" is ticked if you want others to invite your bot.
 
 ![Public Bot ticked](../img/discord/public_bot.png)
 
-8. Make sure the server members' intent is ticked to allow the bot to see other members.
+8. Ensure the "Server Members Intent" is ticked to allow the bot to see other members.
 
 ![Server Members Intent ticked](../img/discord/server_members_intent.png)
 
 9. Copy the token using the "Copy" button. 
 
-10. Copy the token in Kitsu's "Settings" and enter it in the text field "Discord token (optional)" before clicking on "Save settings."
+10. Paste the token in Kitsu's "Settings" under the text field "Discord token (optional)" and click "Save settings".
 
 ![Add discord token to settings](../img/discord/add_discord_token_settings.png)
 
-### Inviting your Bot
+### Inviting Your Bot
 
-So you’ve made a Bot User, but it’s not on any server.
-
-To add the bot to a server, follow these steps:
+Now that you've created a Bot User, you need to add it to a server. Follow these steps:
 
 1. Ensure you're logged on to the [Discord website](https://discord.com/).
 2. Navigate to the [application page](https://discord.com/developers/applications).
 3. Click on your bot’s page.
-4. Go to the “OAuth2” tab and after "URL Generator".
-5. In "Scopes", tick only "bot".
+4. Go to the "OAuth2" tab and then to "URL Generator".
+5. In "Scopes", tick "bot" only.
 
 ![URL Generator Scopes](../img/discord/url_generator_scopes.png)
 
-6. In "Bot permissions," tick only "Send Messages".
+6. In "Bot Permissions", tick "Send Messages" only.
 
 ![URL Generator Bot permissions](../img/discord/bot_permissions.png)
 
-7. The resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click “Authorize”.
+7. Use the resulting URL to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to, and click "Authorize".
 
-> **_Note:_** To add the bot, the person needs “Manage Server” permissions.
+> **_Note:_** To add the bot, the person needs "Manage Server" permissions.
 
-> **_Note:_** The users who want notifications enabled have to be on the same server as the bot.
+> **_Note:_** Users who want notifications enabled must be on the same server as the bot.
 
 ### Enable Discord Notifications
 
-Each user can set in their Profile the notification push to
-Discord. They have to switch the "Discord notifications enabled". 
-Change the field to "Yes" and enter their "Discord username" (they're in the form username#number).
+Each user can set notifications to be pushed to Discord in their profile. They need to switch "Discord notifications enabled" to "Yes" and enter their "Discord username" (formatted as username#number).
 
 ![Add discord username in profile](../img/discord/add_discord_username_profile.png)
-
 
 You're done!
 
 ## Slack Integration
 
-The Slack integration is tedious because it requires that you create a
-dedicated application in your Slack space. But don't worry; we will explain the full
-process in the following section!
-
-
+The Slack integration requires creating a dedicated application in your Slack space. The following steps will guide you through the process.
 
 ### Create a Kitsu Application in Slack
 
+To start, connect to [https://api.slack.com/apps](https://api.slack.com/apps).
 
-To start with the integration, we need to create an application in Slack
-dedicated to sending messages on your Kitsu instance behalf.
+Click the "Create New App" button:
 
-For that, let's connect to [https://api.slack.com/apps](https://api.slack.com/apps)
+![Create new app](../img/slack/slack_create_app_01.png)
 
-From here, click on the Create New App button:
-![Application token](../img/slack/slack_create_app_01.png)
+Enter "Kitsu" as the name and choose the workspace you want to link with your Kitsu instance:
 
-
-
-Then enter Kitsu as the name and choose the workspace you want to link with your Kitsu instance:
-![Application token](../img/slack/slack_create_app_02.png)
+![Choose workspace](../img/slack/slack_create_app_02.png)
 
 
 ### Set the Right Permissions
 
-When the App is created, go to the app page by clicking on its name in the list
-and go to the *Basic information* section. Then click on the *Permissions*
-button on the bottom right:
-![Application token](../img/slack/slack_create_app_03.png)
+After creating the app, go to the app page by clicking on its name in the list. Go to the *Basic Information* section and click on the *Permissions* button at the bottom right:
 
+![Permissions button](../img/slack/slack_create_app_03.png)
 
-From there, go to the scopes section to add the required permission:
-![Application token](../img/slack/slack_create_app_04.png)
+In the scopes section, add the required permission:
+
+![Add scope](../img/slack/slack_create_app_04.png)
 
 The required permission scope is `chat:write:bot`:
-![Application token](../img/slack/slack_create_app_05.png)
+
+![Permission scope](../img/slack/slack_create_app_05.png)
 
 
-### Install the App in your Workspace
+### Install the App in Your Workspace
 
-We can now proceed to the app installation in the workspace. Go to the
-*Install App* section and proceed to installation by clicking on the big green
-button:
-![Application token](../img/slack/slack_create_app_06.png)
+Proceed to the app installation in the workspace. Go to the *Install App* section and click on **Install App To Workspace** button to install:
+
+![Install app](../img/slack/slack_create_app_06.png)
 
 Confirm the installation:
-![Application token](../img/slack/slack_create_app_07.png)
+
+![Confirm installation](../img/slack/slack_create_app_07.png)
 
 Your Kitsu Slack App is now up and running! You just need to link your Kitsu to the notifications sent to your Slack workspace.
 
-
 ### Get the Token
 
-Now, come back to the *Install app* section. You should see the token to use to
-link your Kitsu instance to Slack.
+Return to the *Install App* section. You should see the token needed to link your Kitsu instance to Slack:
 
-![Application token](../img/slack/slack_create_app_08.png)
+![Get token](../img/slack/slack_create_app_08.png)
 
+### Link Kitsu to Your New Slack Application
 
+With your valid token, go to the settings page in Kitsu and enter the token:
 
+![Add token in settings](../img/slack/slack_kitsu_settings.png)
 
-### Link Kitsu to your new Slack Application
+### Enable Slack Notifications in Your Profile
 
-Now that you have a valid token for your Slack application go to the settings
-page. There, you can give the token to your Kitsu instance.
+Finally, go to your profile section to turn on Slack notifications. Enter the Member ID you use on Slack, which you can find in your Slack profile by clicking on "More":
 
-![Application token](../img/slack/slack_kitsu_settings.png)
+![Find member ID](../img/slack/slack_display_name1.png)
 
-### Enable Slack Notifications in your Profile
+![Member ID](../img/slack/slack_display_name2.png)
 
-The final step requires you to go to your profile section. From there, you can turn on
-your Slack notifications. It requires a last parameter: the Member ID you use
-on your Slack.
+In your Kitsu profile, set the Slack notifications to "on" and enter your Slack nickname:
 
-You can find it in your Slack profile by clicking on More:
+![Configure Slack notifications](../img/slack/slack_configuration.png)
 
-![Application token](../img/slack/slack_display_name1.png)
+You can now enjoy notifications directly in your Slack workspace!
 
-![Application token](../img/slack/slack_display_name2.png)
-
-Then, In your Kitsu profile, set the Slack notifications on and the Slack
-nickname:
-![Application token](../img/slack/slack_configuration.png)
-
-You can now enjoy pretty notifications right in your Slack workspace!
-
-![Application token](../img/slack/slack_kitsu_notifications.png)
-
+![Slack notifications](../img/slack/slack_kitsu_notifications.png)
 
 ## Mattermost Integration
 
 ### Enable Incoming Webhooks, Custom Username, and Profile Picture for Webhooks
 
-1. Ensure you are logged as a system admin account in your Mattermost server.
-2. You need to check if your Mattermost installation can receive incoming webhooks and set a custom username and profile picture for webhooks. 
-   1. Go to the "System Console" --> "Integrations" --> "Integration Management".
+1. Ensure you are logged in as a system admin account on your Mattermost server.
+2. Check if your Mattermost installation can receive incoming webhooks and set a custom username and profile picture for webhooks. 
+   1. Go to "System Console" --> "Integrations" --> "Integration Management".
    
    ![Integration management](../img/mattermost/integration-management.png)
    
-   2. Check if the parameters "Enable incoming Webhooks", "Enable integrations to override usernames" and "Enable integrations to override profile picture icons" are set to true (if not, set them to true).
+   2. Ensure the parameters "Enable incoming Webhooks", "Enable integrations to override usernames", and "Enable integrations to override profile picture icons" are set to true.
 
    ![Enable incoming webhooks](../img/mattermost/enable-incoming-webhooks.png)
 
 ### Set a Webhook in Mattermost
 
-1. Ensure you are logged as a system admin account in your Mattermost server.
-2. Go to the "Integrations" --> "Incoming Webhooks" --> "Add incoming Webhook" section.
+1. Ensure you are logged in as a system admin account on your Mattermost server.
+2. Go to "Integrations" --> "Incoming Webhooks" --> "Add incoming Webhook".
 
    ![Add incoming webhook](../img/mattermost/add-incoming-webhook.png)
 
-3. Create the incoming webhook :
+3. Create the incoming webhook:
 
    ![Create incoming webhook](../img/mattermost/create-incoming-webhook.png)
 
 * **Title**: Kitsu
 * **Description**: Kitsu
-* **Channel**: You can create a channel or use any existing ones because the message will be sent to a user. 
-* **Lock to this channel**: It must be set to False.
-* **Username**: kitsu / Not important; it will be overridden by Kitsu.
+* **Channel**: You can create a new channel or use an existing one because the message will be sent to a user.
+* **Lock to this channel**: Set to False.
+* **Username**: Kitsu (this will be overridden by Kitsu).
 * **Profile Picture**: Not important; it will be overridden by Kitsu.
 
-4. After clicking "save", Mattermost proposes a new URL you must copy.
+4. After clicking "Save", Mattermost will generate a new URL. Copy this URL.
 
-5. Copy that URL in the "Settings" of Kitsu and the text field "Mattermost Webhooks (optional)" and click on "Save settings".
+5. Paste the URL in the "Settings" of Kitsu under the text field "Mattermost Webhooks (optional)" and click "Save settings".
 
    ![Add mattermost webhook settings](../img/mattermost/add_mattermost_webhook_settings.png)
 
-> **_Note:_** The users who want notifications enabled have to be on the same Mattermost server as the one you use in these steps.
+> **_Note:_** Users who want notifications enabled must be on the same Mattermost server used in these steps.
 
 ### Enable Mattermost Notifications
 
-Each user can set in their profile the notification push to
-Discord. They have to switch the "Mattermost notifications enabled" 
-field to "Yes" and enter their "Mattermost username".
+Each user can set notifications to be pushed to Mattermost in their profile. They need to switch "Mattermost notifications enabled" to "Yes" and enter their "Mattermost username".
 
 ![Add Mattermost username in profile](../img/mattermost/add_mattermost_username_profile.png)
-
 
 You're done!

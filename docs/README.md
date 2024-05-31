@@ -23,7 +23,7 @@ img[src$='#logo-kitsu'] {
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
 * [Getting started with Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
-* [Preparation of your Team](team/README.md): Prepare your team members and define their departments and permissions.
+* [Prepare your Team](team/README.md): Prepare your team members and define their departments and permissions.
 
 ### Create your production
 
@@ -43,7 +43,7 @@ Below you can find guides tailored to the specific type of production you are lo
 
 In this section, we will explain some of Kitsu's main use cases:
 
-* [Assign a task](assignation/README.md): Learn how to add someone to a team and assign them to a task.
+* [Assigning Tasks](assignation/README.md): Learn how to add someone to a team and assign them to a task.
 * [Estimation and Team speed](estimation/README.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
 * [Schedules](schedules/README.md): Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
 
