@@ -134,12 +134,25 @@
                 class="ui-droppable"
                 :style="{ borderColor: task.type_color }"
               >
-                <h3 class="strong ellipsis">{{ task.project_name }}</h3>
-                <div class="ellipsis">{{ task.full_name }}</div>
-                <em v-if="task.man_days">
-                  {{ $t('main.estimation') }}: {{ task.man_days }}
-                  {{ $tc('main.man_days', task.man_days) }}
-                </em>
+                <div class="flexrow">
+                  <div class="flexrow-item filler">
+                    <production-name
+                      class="strong mb05"
+                      :production="task.production"
+                      :size="25"
+                    />
+                    <div class="ellipsis">{{ task.full_name }}</div>
+                    <em v-if="task.man_days">
+                      {{ $t('main.estimation') }}: {{ task.man_days }}
+                      {{ $tc('main.man_days', task.man_days) }}
+                    </em>
+                  </div>
+                  <entity-thumbnail
+                    class="task-thumbnail flexrow-item"
+                    :preview-file-id="task.entity_preview_file_id"
+                    v-if="task.entity_preview_file_id"
+                  />
+                </div>
                 <department-name
                   class="task-department"
                   :department="task.department"
@@ -204,7 +217,9 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -223,7 +238,9 @@ export default {
     ComboboxTaskType,
     Datepicker,
     DepartmentName,
+    EntityThumbnail,
     PeopleField,
+    ProductionName,
     Schedule,
     Spinner,
     TableInfo,
@@ -280,6 +297,7 @@ export default {
       'getProductionTaskTypes',
       'openProductions',
       'organisation',
+      'productionMap',
       'taskTypeMap',
       'user'
     ]),
@@ -407,7 +425,8 @@ export default {
             man_days: minutesToDays(this.organisation, task.estimation),
             department: this.departmentMap.get(
               this.taskTypeMap.get(task.task_type_id)?.department_id
-            )
+            ),
+            production: this.productionMap.get(task.project_id)
           }))
         )
         this.totalUnassignedTasks = stats.total
