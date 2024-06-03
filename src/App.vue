@@ -783,11 +783,12 @@ h2 {
 
   &.bot::after {
     content: 'bot';
+    color: $white;
     position: absolute;
     bottom: -4px;
     font-size: 10px;
     line-height: 10px;
-    padding: 1px 2px;
+    padding: 1px 4px;
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
@@ -2209,6 +2210,18 @@ th.validation-cell {
     margin-bottom: 1em;
     max-width: 500px;
   }
+}
+
+.warning {
+  color: $orange;
+}
+
+.warning-text {
+  background-color: rgba($orange, 0.2);
+  border-left: 4px solid $orange;
+  border-bottom-right-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+  padding: 0.5em;
 }
 
 @media screen and (max-width: 1000px) {

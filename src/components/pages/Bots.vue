@@ -45,7 +45,18 @@
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
       @refresh-clicked="onRefreshClicked"
+      v-if="isPeopleLoading || currentPeople.length > 0"
     />
+    <div class="has-text-centered strong" v-else>
+      <p>{{ $t('bots.no_bots') }}</p>
+      <button-simple
+        class="mt1"
+        :text="$t('bots.new_bot')"
+        :is-responsive="true"
+        @click="onNewClicked"
+        v-if="isCurrentUserAdmin"
+      />
+    </div>
 
     <edit-avatar-modal
       :active="modals.avatar"

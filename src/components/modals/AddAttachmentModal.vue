@@ -8,7 +8,7 @@
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
-      <div class="box content">
+      <div class="box content" @drop="onDrop">
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title">
           {{ $t('tasks.comment_image') }}
@@ -209,6 +209,13 @@ export default {
 
     removeAttachment(form) {
       this.forms = this.forms.filter(f => f !== form)
+    },
+
+    onDrop(event) {
+      console.log('onDrop')
+
+      this.fileField.onDrop(event)
+      event.preventDefault()
     }
   },
 

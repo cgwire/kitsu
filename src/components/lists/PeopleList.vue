@@ -59,7 +59,7 @@
               v-if="isBots"
             >
               {{ person.expiration_date }}
-              <alert-triangle-icon class="icon" />
+              <alert-triangle-icon class="icon mr05" />
             </td>
             <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
             <td class="contract" v-if="!isBots">

@@ -8,8 +8,22 @@
   >
     <div class="modal-background" @click="$emit('cancel')"></div>
 
-    <div class="modal-content">
-      <div class="box content">
+    <div class="modal-content" @drop="onDrop" @dragleave="onFileDragLeave">
+      <div
+        class="box content"
+        :class="{ dragging: true }"
+        @drop="onDrop"
+        @drag="onDrag"
+        @dragover="onFileDragover"
+      >
+        <div
+          class="drop-mask"
+          @dragover="onFileDragover"
+          @drop="onDrop"
+          v-if="isDraggingFile"
+        >
+          Drop new files here
+        </div>
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title" v-if="isEditing">
           {{ $t('tasks.change_preview') }}
@@ -171,7 +185,8 @@ export default {
 
   data() {
     return {
-      forms: []
+      forms: [],
+      isDraggingFile: false
     }
   },
 
@@ -224,6 +239,26 @@ export default {
 
     removePreview(form) {
       this.forms = this.forms.filter(f => f !== form)
+    },
+
+    onFileDragover(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.isDraggingFile = true
+    },
+
+    onFileDragLeave(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.isDraggingFile = false
+    },
+
+    onDrag(event) {},
+
+    onDrop(event) {
+      this.previewField.onDrop(event)
+      this.isDraggingFile = false
+      event.preventDefault()
     }
   },
 
@@ -311,5 +346,25 @@ h3.subtitle {
 
 .preview-files-field {
   margin: auto;
+}
+
+.box.content {
+  position: relative;
+}
+
+.drop-mask {
+  background: rgba(0.1, 0, 0, 0.5);
+  border-radius: 0.5em;
+  color: white;
+  font-size: 2em;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
 }
 </style>
