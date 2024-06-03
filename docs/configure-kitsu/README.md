@@ -16,7 +16,6 @@ For example, within a CGI production, tasks such as modeling, rigging, and shadi
 - Processes such as modeling, shading, etc., are referred to as a **Task Type**. 
 - An individual objects such as asset, shot, etc., are called **Entities**.
 - A **task** can be defined as a specific action or activity that needs to be done. Tasks can be attributed to **entities** and will usually be categorized with a **task type**.
-<!-- May want to redo this definition box with a graphic to more easily explain these concepts -->
 
 :::
 
@@ -40,13 +39,11 @@ Your **Global Library** is where you can create and modify departments, task typ
 
 Once your **Global Library** is populated, you can fill out the **Production Library** with the newly created elements from the **Global Library**.
 
-<!-- Adding a note to come back to this later, if this concept is not explained in later docs we should explain how to do this here -->
-
 ## Create Departments
 
-Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all. Departments are also used to define what metadata columns appear for users within that department
+Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all tasks associated with that task type. Departments are also used to define what metadata columns appear for users within that department.
 
-<!-- I'm not sure what this last sentence means. Does it mean permissions can be set on a department? I couldn't find anything in the UI to achieve this.-->
+If a metadata column is linked to a department, then they will only show up for users in that department. If a metadata column is not associated with a department, they will show up for everyone.
 
 ::: tip 
 By default, Kitsu provides some example departments to help you get started.
@@ -174,9 +171,6 @@ When you **create** or **edit** an **Asset Type**, you can add a specific **task
 
 However, if you choose specific Task types for this Asset type, only these will be applied to production.
 
-<!-- Need to revisit this later, this paragraph could do with re-writing-->
-
-
 Click on **Confirm** to save your changes.
 
 Your new **Asset Type** is now created in your **Global Library**. It will be available to use when you create your production.
@@ -269,7 +263,6 @@ Go to the main menu ![Main menu](../img/getting-started/main_button.png)  and s
 ![Main menu Status Automation](../img/getting-started/main_menu_status_automation.png)
 
 From this page, you can create **Status Automations** by clicking the **+Add status automation** button.
-<!-- Might need a screenshot here to stay consistent-->
 
 ![create Status Automation](../img/getting-started/status_automation_empy.png)
 
@@ -321,7 +314,6 @@ Go to the main menu ![Main menu](../img/getting-started/main_button.png), and se
 
 
 From here, you can add a `.HDR` Background by clicking the **+Add a new background** button.
-<!-- Might need a screenshot here to stay consistent-->
 
 ![add preview background](../img/getting-started/preview_background_empty.png)
 

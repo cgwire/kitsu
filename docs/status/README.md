@@ -66,20 +66,6 @@ Choose the new status for your selected tasks (1). You can also add a comment fo
 
 ![Metadata Column Sort By](../img/getting-started/custom_column_sortby.png)
 
-<!-- Everything from this point onward until the next comment doesn't make sense here. Previously we were talking about changing statuses in bulk, but now we're talking about sorting tasks and editing metadata columns. Is this supposed to be here? At the very least we should give it it's own heading or move it somewhere else -->
-
-The shots are sorted by the metadata column information instead of by name.
-
-![Metadata Column Sort By result](../img/getting-started/custom_column_sortby_result.png)
-
-In the menu, you can also choose to edit the name of the metadata column and its information or delete it.
-
-You can quickly fill your custom metadata column using the **CSV Import**. First, create your **Metadata column** in Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
-
-[Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
-
-<!-- . -->
-
 ## Customize Statuses on the Artist Board Page
 
 When you assign a task to an artist, it will appear on their to-do page when they log in.

@@ -17,10 +17,8 @@ Once you have created a playlist, you can notify your client that it is ready fo
 ![Playlist Global](../img/getting-started/playlist_global_client.png)
 
 ::: warning
-Your client will only have access to the production if they are part of the team, and they will only see the **client playlist**.
+Your client will only have access to the production if they are part of the team, and they will only see the **client playlist**. Please note there is currently no way to segregate clients within the same production, 
 :::
-
-<!-- is there a specific way to do this? Or when they log in they will see it? How Do you tell which playlist to use if there are multiple clients on the same project? -->
 
 The client has several options to control the playlist.
 
@@ -95,9 +93,13 @@ The supervisor and production manager can copy the client's comments, modify the
 
 ## Review Room
 
-Much like hosting internal reviews, the Review Room can be used to host collaborative review sessions with clients.
+The Review Room is a collaborative space designed for efficient and synchronized dailies review sessions. It ensures that all participants are viewing the same content simultaneously, facilitating real-time feedback and discussion.
 
-To learn more about the Review Room, [visit this section here](../review/README.md#review-room).
+You can join the **Review Room** by clicking the button at the top of the playlist. The review room will synchronize all the participants.
 
-<!-- Is this section necessary? Is there a difference between reviewing a client playlist normally, VS in the review room? -->
+Everyone in the review room will see the play, pause, shot, and frame selections in real-time.
+
+Additionally, the Review Room supports synchronized drawing annotations. This feature allows participants to draw directly on the frames being reviewed, with all annotations visible to everyone in the session. This capability enhances communication and clarity, making it easier to point out specific details, suggest changes, and highlight important aspects of the work.
+
+![Playlist review room](../img/getting-started/playlist_review_room.png)
 

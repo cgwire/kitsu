@@ -19,7 +19,6 @@ img[src$='#logo-kitsu'] {
 [Kitsu](https://cg-wire.com/kitsu) is a collaboration platform for animation and VFX productions. Through its clean UI and shared database, it connects all relevant stakeholders throughout the production process, including artists, production managers, supervisors, vendors, and clients.
 
 ### A Basic Introduction to Kitsu
-<!-- Removed this line "Kitsu is the next generation production tracker." It is mentioned above and not really relevant in this section -->
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
 * [Getting started with Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
@@ -36,7 +35,6 @@ Below you can find guides tailored to the specific type of production you are lo
   * [Create an ASSET only Production](short-asset/README.md) Create a short production (about 500 assets) with only assets.
   * [Create a Video Game production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
   * [Create a NFT Collection](nft/README.md) Create a NFT Collection with assets, and NFT Collection.
-  <!-- Adding note to revisit these sections later, some of the descriptions don't really make sense -->
 
 
 ### Assignments, Estimates and Scheduling

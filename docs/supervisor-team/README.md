@@ -60,7 +60,7 @@ From there, you can:
 - Drag and drop tasks to reassign them to different team members.
 - See days off.
 
-<!-- Need to include screenshot here -->
+![Team Schedule Global](../img/getting-started/team_schedule_global.png)
 
 ## Managing Department Quotas
 
