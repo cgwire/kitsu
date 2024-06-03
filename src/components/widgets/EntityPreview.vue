@@ -29,7 +29,7 @@
       'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
-    v-else
+    v-else-if="!cover"
   >
     <img
       class="thumbnail-picture"
@@ -47,6 +47,21 @@
     <span class="view-icon" @click.stop="onPictureClicked()">
       <eye-icon size="1.2x" />
     </span>
+  </a>
+  <a
+    class="preview-wrapper preview-picture"
+    target="_blank"
+    :style="{
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px',
+      'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
+      'border-top-right-radius': isRoundedTopBorder ? '10px' : '',
+      'background-image': `url(${thumbnailPath})`,
+      'background-size': 'cover'
+    }"
+    v-else
+  >
   </a>
 </template>
 
@@ -76,6 +91,10 @@ export default {
       type: Object
     },
     square: {
+      default: false,
+      type: Boolean
+    },
+    cover: {
       default: false,
       type: Boolean
     },
