@@ -1607,6 +1607,7 @@ export default {
     updated_at: 'Update date',
     nb_days_off: 'Day Off | Days Off',
     no_day_off: 'No day off for the selected period.',
+    no_days_off: 'You have registered no day off yet.',
     add: 'Add day off',
     edit: 'Edit day off',
     delete: 'Delete day off',
