@@ -57,30 +57,41 @@
             v-for="task in column.tasks"
           >
             <div class="ui-droppable">
-              <production-name
-                :production="{
-                  id: task.project_id,
-                  name: task.project_name
-                }"
-                :size="25"
-                v-if="!production"
+              <entity-preview
+                style="cursor: grab; margin-top: 1px; margin-left: 1px"
+                :empty-height="100"
+                :empty-width="266"
+                :entity="{ preview_file_id: task.entity_preview_file_id }"
+                cover
+                is-rounded-top-border
               />
-              <div class="flexrow">
-                <entity-thumbnail
-                  :empty-width="80"
-                  :empty-height="60"
-                  :entity="{ preview_file_id: task.entity_preview_file_id }"
-                />
-                <div class="pa1 ellipsis">
-                  {{ task.full_entity_name }}
+              <div class="infos flexrow">
+                <div>
+                  <div class="production-name mb0">
+                    {{ productionMap.get(task.project_id)?.name }}
+                  </div>
+                  <div class="entity-name ellipsis mt0">
+                    {{ task.full_entity_name }}
+                  </div>
                 </div>
-              </div>
-              <div class="level mt05">
-                <task-type-name
-                  :task-id="task.id"
-                  :task-type="getTaskType(task)"
-                />
+                <div class="filler"></div>
+                <div>
+                  <task-type-name
+                    style="cursor: grab"
+                    :task-id="task.id"
+                    :task-type="getTaskType(task)"
+                    :rounded="true"
+                  />
+                </div>
                 <div class="avatars">
+                  <people-avatar
+                    :is-link="false"
+                    :key="`${task.id}-${person.id}`"
+                    :person="person"
+                    :size="20"
+                    :font-size="12"
+                    v-for="person in getSortedPeople(task.assignees)"
+                  />
                   <span
                     class="priority"
                     :class="{
@@ -93,14 +104,6 @@
                   >
                     {{ formatPrioritySymbol(task.priority) }}
                   </span>
-                  <people-avatar
-                    :is-link="false"
-                    :key="`${task.id}-${person.id}`"
-                    :person="person"
-                    :size="20"
-                    :font-size="12"
-                    v-for="person in getSortedPeople(task.assignees)"
-                  />
                 </div>
               </div>
             </div>
@@ -136,9 +139,8 @@ import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import EntityPreview from '@/components/widgets/EntityPreview'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ProductionName from '@/components/widgets/ProductionName'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
@@ -149,9 +151,8 @@ export default {
 
   components: {
     AddPreviewModal,
-    EntityThumbnail,
+    EntityPreview,
     PeopleAvatar,
-    ProductionName,
     TableInfo,
     TaskTypeName
   },
@@ -503,10 +504,10 @@ export default {
 }
 
 .board-card {
-  cursor: pointer;
+  cursor: grab;
+  position: relative;
 
   .ui-droppable {
-    padding: 1em;
     border-radius: 1em;
     border: 1px solid var(--border-alt);
     background-color: var(--background-alt);
@@ -555,7 +556,6 @@ export default {
 .avatars {
   display: flex;
   flex-direction: row;
-  gap: 10px;
 }
 
 .production-name {
@@ -589,5 +589,26 @@ export default {
   &.emergency {
     background: $red;
   }
+}
+
+.infos {
+  padding: 0.5em;
+}
+
+.production-name {
+  font-weight: 400;
+  margin-bottom: 0em;
+  text-transform: uppercase;
+}
+
+.entity-name {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.avatars {
+  position: absolute;
+  right: 5px;
+  top: 75px;
 }
 </style>
