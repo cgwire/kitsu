@@ -1863,25 +1863,25 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
   .schedule.zoom-level-0 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-1.png');
+      background-image: url('@/assets/background/schedule-dark-1.svg');
     }
   }
 
   .schedule.zoom-level-1 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-1-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-1-weekend.svg');
     }
   }
 
   .schedule.zoom-level-2 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-2-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-2-weekend.svg');
     }
   }
 
   .schedule.zoom-level-3 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-3-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-3-weekend.svg');
     }
   }
 
@@ -2111,10 +2111,8 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   .timeline-content-wrapper {
-    background-repeat: repeat;
     margin-left: 2px;
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: auto;
 
     .timeline-content {
       position: relative;
@@ -2243,7 +2241,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .zoom-level-0 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-1.png');
+    background-image: url('@/assets/background/schedule-white-1.svg');
   }
   .day {
     width: 20px;
@@ -2255,7 +2253,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .zoom-level-1 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-1-weekend.png');
+    background-image: url('@/assets/background/schedule-white-1-weekend.svg');
   }
   .day {
     width: 20px;
@@ -2267,7 +2265,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .schedule.zoom-level-2 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-2-weekend.png');
+    background-image: url('@/assets/background/schedule-white-2-weekend.svg');
   }
   .day {
     width: 40px;
@@ -2279,7 +2277,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .schedule.zoom-level-3 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-3-weekend.png');
+    background-image: url('@/assets/background/schedule-white-3-weekend.svg');
   }
   .day {
     width: 60px;
@@ -2528,7 +2526,11 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .day-name-off,
 .weekend {
-  background: rgba(200, 200, 200, 0.3);
+  background-color: rgba(200, 200, 200, 0.3);
+
+  .dark & {
+    background-color: rgba(200, 200, 200, 0.1);
+  }
 }
 
 input::-webkit-outer-spin-button,
