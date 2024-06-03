@@ -44,6 +44,7 @@
     <globe-icon :class="iconClass" v-else-if="icon == 'globe'" />
     <codepen-icon :class="iconClass" v-else-if="icon == 'codepen'" />
     <link-icon :class="iconClass" v-else-if="icon == 'link'" />
+    <clock-icon :class="iconClass" v-else-if="icon == 'clock'" />
     <kitsu-icon
       :name="icon"
       :class="iconClass"
@@ -68,6 +69,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClockIcon,
   CodepenIcon,
   CornerLeftDownIcon,
   CornerRightDownIcon,
@@ -107,6 +109,7 @@ export default {
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    ClockIcon,
     CodepenIcon,
     CornerLeftDownIcon,
     CornerRightDownIcon,
