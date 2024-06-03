@@ -800,6 +800,10 @@ export default {
         }
       }
 
+      .task-thumbnail {
+        margin-right: 1em;
+      }
+
       .task-department {
         position: absolute;
         top: 5px;
