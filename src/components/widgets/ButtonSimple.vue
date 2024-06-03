@@ -171,10 +171,6 @@ export default {
       default: false,
       type: Boolean
     },
-    isSmall: {
-      default: false,
-      type: Boolean
-    },
     text: {
       default: '',
       type: String
