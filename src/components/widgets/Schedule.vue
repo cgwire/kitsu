@@ -688,7 +688,8 @@ export default {
     },
 
     cellWidth() {
-      return Math.max(this.zoomLevel, 1) * 20
+      const cellWidthByLevel = [20, 20, 40, 60, 120]
+      return cellWidthByLevel[this.zoomLevel] || 20
     },
 
     daysAvailable() {
@@ -1885,6 +1886,12 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     }
   }
 
+  .schedule.zoom-level-4 {
+    .timeline-content {
+      background-image: url('@/assets/background/schedule-dark-4-weekend.svg');
+    }
+  }
+
   .child-element-name {
     color: white;
   }
@@ -2284,6 +2291,18 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
   .milestone-tooltip {
     left: 30px;
+  }
+}
+
+.schedule.zoom-level-4 {
+  .timeline-content {
+    background-image: url('@/assets/background/schedule-white-4-weekend.svg');
+  }
+  .day {
+    width: 120px;
+  }
+  .milestone-tooltip {
+    left: 60px;
   }
 }
 
