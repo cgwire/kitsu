@@ -548,6 +548,7 @@ export default {
       event.stopPropagation()
       event.target.classList.add('drag')
       event.dataTransfer.dropEffect = 'move'
+      event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.setData('taskId', task.id)
       this.draggedTasks = [task]
     },
