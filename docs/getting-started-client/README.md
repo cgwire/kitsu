@@ -50,7 +50,7 @@ On the left part, you keep access to the different playlists. In the center part
 
 ![Client playlist global page](../img/getting-started/client_playlist_detaill.png)
 
-With the comment panel, you will be able to write a comment to validate the preview.
+With the comment panel, you will be able to write a comment to approve the preview.
 
 ![Client playlist global page](../img/getting-started/client_playlist_detail_comment.png)
 

@@ -202,7 +202,7 @@ For example, the **Ready** ![Ready status](../img/getting-started/ready_icon.png
 
 **WFA**![WFA status](../img/getting-started/wfa_icon.png): The **Waiting-For-Approval** status is used by artists to notify their supervisors that they have completed their work and are awaiting review. Supervisors can also use a similar status to inform directors that work is ready for review.
 
-**Done** ![DONE Status](../img/getting-started/done_icon.png): The **Done** status indicates that all work has been validated and approved. This indicates that the current task is complete and the next step in the process can commence.
+**Done** ![DONE Status](../img/getting-started/done_icon.png): The **Done** status indicates that all work has been completed & approved. This indicates that the current task is complete and the next step in the process can commence.
 
 **Retake** ![Retake status](../img/getting-started/retake_icon.png): The **Retake** status indicates that a comment has been made, prompting the artists to continue working on their task and publish a new version until validation is achieved.
 
