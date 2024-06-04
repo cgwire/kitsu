@@ -1,8 +1,8 @@
-# Manage Your Department(s)
+# Managing Your Department
 
 A supervisor's role is to oversee the creative and technical aspects of visual effects production, ensuring that the final output meets the project's artistic vision, quality standards, and deadlines. A key aspect of this is to ensure your team knows what they are working on.
 
-## Assign and Estimate Tasks for Your Department
+## Assigning Tasks & Bidding Estimates
 
 From the global shots / asset page, your view is automatically filtered by **My Department**. This shows you tasks from your departments **Task Type** and the **Custom Columns** linked to your department.
 
@@ -84,7 +84,7 @@ The second way is based on status. The calculation starts with the **WIP** statu
 
 The first column, **Average**, is the most important. Kitsu calculates the average quotas for each artist per **Day**, **Week**, or **Month**.
 
-## Supervise the Timesheets of Your Department
+## Department Timesheets
 
 As a Supervisor, you may also be responsible for monitoring your team's hours. The Timesheet page shows how many hours they work daily, weekly, and monthly.
 

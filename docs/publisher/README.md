@@ -260,11 +260,11 @@ Download the `connectors-{version}.zip` from the [latest releases](https://githu
 
   - coming soon
 
-## Publishing a Preview with the Kitsu Publisher
+## Publishing Previews with the Kitsu Publisher
 
 You must first have the Kitsu publisher and the plugin installed on your computer.
 
-## Consult your To-Do List
+## Consult Your To-Do List
 
 Log in to the Kitsu Publisher using your Kitsu credentials. You will see your to-do list with similar options as in Kitsu.
 
@@ -283,7 +283,7 @@ The first new element is that you have direct access to your timesheet. You can 
 When you are ready to publish your work, click on the **Add a review to publish** button.
 
 
-## Publish a Preview from the Publisher
+## Publish a Preview From the Publisher
 
 You can either upload the preview manually or let the Kitsu Publisher do it for you. Kitsu Publisher will detect the open DCC and project.
 

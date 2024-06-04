@@ -21,19 +21,19 @@ img[src$='#logo-kitsu'] {
 ### A Basic Introduction to Kitsu
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
-* [Getting started with Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
-* [Prepare your Team](team/README.md): Prepare your team members and define their departments and permissions.
+* [Getting Started With Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
+* [Prepare Your Team](team/README.md): Prepare your team members and define their departments and permissions.
 
-### Create your production
+### Create Your Production
 
 Below you can find guides tailored to the specific type of production you are looking to create.
 
   * [Create a TV Show Production](tvshow/README.md) Create a TV show production with assets, shots, sequences, episodes and edits
   * [Create a Feature Film Production](feature/README.md) Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
-* [Create a SHORT production](short/README.md): Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
- * [Create a SHOTS only Production](short-shot/README.md) Create a short production (about 500 shots) with only shots, sequences and edit
-  * [Create an ASSET only Production](short-asset/README.md) Create a short production (about 500 assets) with only assets.
-  * [Create a Video Game production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
+* [Create a SHORT Production](short/README.md): Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
+ * [Create a SHOTS Only Production](short-shot/README.md) Create a short production (about 500 shots) with only shots, sequences and edit
+  * [Create an ASSET Only Production](short-asset/README.md) Create a short production (about 500 assets) with only assets.
+  * [Create a Video Game Production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
   * [Create a NFT Collection](nft/README.md) Create a NFT Collection with assets, and NFT Collection.
 
 
@@ -42,42 +42,42 @@ Below you can find guides tailored to the specific type of production you are lo
 In this section, we will explain some of Kitsu's main use cases:
 
 * [Assigning Tasks](assignation/README.md): Learn how to add someone to a team and assign them to a task.
-* [Estimation and Team speed](estimation/README.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
+* [Estimation and Team Speed](estimation/README.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
 * [Schedules](schedules/README.md): Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
 
-### Statuses, Publishing and Thumbnails
+### Statuses, Publishes and Thumbnails
 
 How keep your work organized, and your team updated on it's progress
 
 * [Status](status/README.md): How to change statuses and keep your team updated on the progress of work.
 * [Publish](publish/README.md): How to publish and share work with your team. 
-* [Add a Thumbnail](thumbnails/README.md): How to apply thumbnails to assets and shots.
+* [Adding a Thumbnail](thumbnails/README.md): How to apply thumbnails to assets and shots.
 
 ### Internal Review and Client Playlists
 
 How to organize internal and external reviews:
 
 * [Review](review/README.md): Learn how to review all feedback on a task.
-* [Daily & Weekly review](review-weekly/README.md): Quickly gather video versions and stay focused during the review.
+* [Daily & Weekly Review](review-weekly/README.md): Quickly gather video versions and stay focused during the review.
 * [Client Playlists](playlist-client/README.md): Collect and share your work with your client in a managed environment.
 
 
-### Supervisor
+### Supervisor Workflows
 
 As a supervisor, your uses cases when using Kitsu may differ than your production team.
 
-* [Manage your Department(s)](supervisor-team/README.md): Discover methods for effectively managing and overseeing your team.
-* [Supervise your Tasks](supervisor-tasks/README.md): Learn how to stay on top of task assignments. 
+* [Manage Your Department(s)](supervisor-team/README.md): Discover methods for effectively managing and overseeing your team.
+* [Supervise Your Tasks](supervisor-tasks/README.md): Learn how to stay on top of task assignments. 
 
-### Producer
+### Producer Workflows
 
 As a producer, mastering the ability to zoom out from specifics to a holistic view is essential.
 
-* [Build your Production Report](production-report/README.md): Learn everything you need to know to create your production reports.
+* [Build Your Production Report](production-report/README.md): Learn everything you need to know to create your production reports.
 * [Build a Studio Report](studio-report/README.md): Ensure you're ahead of the game with your studio's productions.
 
 
-### Developer
+### Developer Workflows
 
 As a developer, explore some of the possibilities for extending and integrating Kitsu within your studio's pipeline.
 
@@ -85,7 +85,7 @@ As a developer, explore some of the possibilities for extending and integrating 
 * [Bots](bots/README.md): The main use is for scripting with gazu (Kitsu's Python Client), and anything else that can use our API.
 * [Kitsu Publisher](publisher/README.md): A web application used to share the progress of your productions and validate your deliveries.
 * [Chat Integration](chat-integration/README.md): Get Kitsu notifications sent directly to popular messaging apps like Discord, Slack or Mattermost.
-* [Open source Setup](installation/README.md): Learn about how you can self-deploy a host a local version of Kitsu within your studio's environment.
+* [Open Source Setup](installation/README.md): Learn about how you can self-deploy a host a local version of Kitsu within your studio's environment.
 
 
 
@@ -94,7 +94,7 @@ As a developer, explore some of the possibilities for extending and integrating 
 
 Access comprehensive video tutorials on YouTube, highlighting crucial functionalities of Kitsu. Click the link below to view.
 
-[Kitsu tutorials channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
+[Kitsu Tutorials Channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
 
 
 ### Frequently Asked Questions
@@ -107,7 +107,7 @@ Here, studios can find answers to their frequently asked questions, covering top
 * [How to report...](faq-production-report): Create production reports quickly and effortlessly
 
 
-### About the authors
+### About the Authors
 
 Kitsu is written by CG Wire, a company based in France. We help animation studios to manage their productions and build efficient pipelines.
 

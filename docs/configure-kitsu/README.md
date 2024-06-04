@@ -1,10 +1,13 @@
-# Getting started with Kitsu
+# Getting Started With Kitsu
 
 With Kitsu, users can track various production projects, encompassing 2D and 3D production, VFX, video games, and other related endeavors.
 
 The content tracked by Kitsu can be as simple as still-frame advertisements, to extensive 3-hour feature films, accommodating projects with varying numbers of elements
 
 But before jumping into our production, we must first configure our **Studio Workflow**.
+
+## Studio Workflows
+### Understanding Studio Workflows
 
 ::: warning Definition
 A workflow is defined as the structured coordination of tasks constituting the operational processes within a production.
@@ -25,6 +28,7 @@ Once the workflow for tasks is defined, the next step involves establishing an *
 
 The **Workflow** of your production is the sum of your Tasks and Status.
 
+### Global Library VS Production Library
 
 In Kitsu, you have two kinds of **libraries**:
 - The first is the **Global Library** at the studio level.
@@ -39,7 +43,8 @@ Your **Global Library** is where you can create and modify departments, task typ
 
 Once your **Global Library** is populated, you can fill out the **Production Library** with the newly created elements from the **Global Library**.
 
-## Create Departments
+## Departments
+### Creating Departments
 
 Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all tasks associated with that task type. Departments are also used to define what metadata columns appear for users within that department.
 
@@ -75,7 +80,8 @@ Once you finish creating the department, your page should look like this. Whereb
 ![Customized department](../img/getting-started/customized_department.png)
 
 
-## Studio Workflow: Create a New Task Type
+## Task Types
+### Creating a New Task Type
 
 Next, let's create all the **Task Types** needed to manage and track our production. Task types could be associated with multiple entities such as assets, shots, sequences, episodes, or edits.
 
@@ -136,8 +142,8 @@ Once you have created your production, you need to add the **Sequence**, **Episo
 At any point during production, you can revisit this section to create additional **Task Types** as necessary and add them into your workflow.
 :::
 
-## Specific Asset Types Workflow
-
+## Asset Types
+### Define Your Asset Workflow
 
 Once you have created your global Workflow, you can then define your **Asset Types**
 
@@ -179,7 +185,8 @@ Your new **Asset Type** is now created in your **Global Library**. It will be av
 At any point during production, you can revisit this section to create additional **Asset Types** as necessary and add them into your workflow.
 :::
 
-## Approval Workflow: Task Status
+## Task Statuses
+### Define Your Approval Workflow
 
 Next, let's create the statuses we intend to use during our **Approval Workflow**.
 
@@ -296,7 +303,7 @@ At any point during the production, you can return here and create more **Status
 
 ## 3D Backgrounds
 
-### Create your global library of HDR files
+### Create a Global Library of HDR Files
 
 The 3D Backgrounds feature enhances your review of 3D files (`.GLB`) by incorporating an `.HDR` background to make things easier to review.
 
@@ -341,6 +348,7 @@ You must add them to your **Production Library** once you have created your prod
 
 
 ## Settings
+### Configuring Kitsu
 
 Several global settings can be configured that apply to your studio, such as replacing the default Kitsu logo with your studio's logo.
 
@@ -349,6 +357,7 @@ To do this, click on the main menu button
 
 ![Main Menu Settings](../img/getting-started/menu_settings.png)
 
+### Studio Settings
 Click on the **Set studio logo** and select an image to use. This will replace the Kitsu logo on your site and in various places across the app. You can also change the **Studio Name** to be used in your Kitsu instance.
 
 

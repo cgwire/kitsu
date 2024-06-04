@@ -1,4 +1,4 @@
-# Assigning Tasks
+# Tasks Assignments
 
 In Kitsu, a task is a fundamental element used for planning, organizing, and tracking various aspects of your production. 
 
@@ -13,7 +13,7 @@ Assigning a task to a user offers several benefits:
 - You can track the actual performance of your team.
 
 
-## Add a User to the Team
+## Add Users to the Team
 
 In the [section on preparing your team](../team/README.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
 
@@ -34,7 +34,8 @@ Permissions and departments are set at the **Studio Level**. You can't adjust th
 :::
 
 
-## Assign Tasks from the global page
+## How to Assign Tasks
+### Assign Tasks From the Global Page
 
 Once you've added all your users to the production, it's now time to assign your first task!
 
@@ -76,7 +77,7 @@ Keep in mind that task assignments can determine what a user sees, depending on 
 
 With your assignments completed, everyone knows their tasks and responsibilities!
 
-## Assign tasks from the detailed Task Type page
+### Assign Tasks From the Detailed Task Type Page
 
 You also have the option to assign tasks from the detailed task type page. To access this, click on the column header of the task type.
 

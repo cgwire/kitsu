@@ -1,6 +1,6 @@
-# Review
+# Reviews
 
-## Perform a Review
+## Reviewing Tasks
 
 When an artist needs someone to **review** their work, they can change the status of their task to ![wfa](../img/getting-started/wfa_icon.png).
 
@@ -25,6 +25,8 @@ You can select a color to use and then draw directly on the preview with the **P
 
 ![review drawing](../img/getting-started/review_comment.png)
 
+### Drawing Annotations
+
 You can also annotate the frame with **text**.
 
 ![review drawing text](../img/getting-started/review_comment_text.png)
@@ -32,12 +34,14 @@ You can also annotate the frame with **text**.
 If you'd like to temporarily **hide annotations**, click the **Fountain Pen** button.
 ![Hide Annotation](../img/getting-started/hide_annotation.png)
 
+### Tagging Frames
 If you would like to refer back to a specific frame in your comments, you can easily tag a frame by typing `@`, which opens a sub-menu with the team list, and then start typing **frame**.
 
 This will then add a timestamp of the current frame to this comment, and clicking on that timestamp will jump to said frame.
 
 ![Tag a frame](../img/getting-started/tag_frame.png)
 
+### Exporting Annotations
 You can also export your drawings on each frame by attaching the **screenshots as attachments**.
 
 Click on the **Add attachment** button.
@@ -52,12 +56,14 @@ Once you click the button, Kitsu will grab all the frames with annotations and d
 
 ![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
 
+### Deleting Annotations
 If you need to delete a line, click the pencil icon again. The cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and you can then select your line and move it around.
 
 ![review drawing](../img/getting-started/review_edit.png)
 
 Select the line with the directional cross, then press the **delete** icon ![Delete line](../img/getting-started/delete_line.png).
 
+### Comparing Images
 By entering **Full-Screen**, you can compare two task types or versions side by side by clicking on the **Compare** button ![compare button](../img/getting-started/compare_button.png).
 
 ![compare button](../img/getting-started/compare_version.png)
@@ -66,7 +72,7 @@ From here, you can change the status to ![Retake](../img/getting-started/retake_
 
 Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the artist that their work is approved.
 
-## Review a Concept
+## Reviewing Concepts
 
 Once your artists upload a concept, you can review it with the supervisor or the director.
 
@@ -107,6 +113,8 @@ Start by creating a **Playlist** using the ![Playlist add button](../img/getting
 
 ![Playlist add page](../img/getting-started/playlist_add_page.png)
 
+### Populating a Playlist
+
 Once the playlist is created, use the search/filter bar to select which shots to add to your playlist.
 
 You will also see options for adding the an **entire episode** / **entire sequence** if you want to add large chunks of the project at once.
@@ -119,7 +127,7 @@ The shots appear in the top part of the screen. Every change is automatically sa
 
 ![Playlist page](../img/getting-started/playlist_example.png)
 
-## Review and Approval
+## Review Controls
 
 Once you have created a playlist, you have several options:
 

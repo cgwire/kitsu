@@ -34,7 +34,7 @@ To create your **Production Workflow**, you select Task Types from the Global Li
 
 If you realize you missed some Task Types, you can create them later.
 
-[See Getting started with Kitsu](../configure-kitsu/README.md)
+[See Getting Started With Kitsu](../configure-kitsu/README.md)
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
@@ -546,7 +546,7 @@ Click on the **Add shots** button to start with the shot creation.
 ::: warning
 When you create a shot, the task workflow you have designed will be applied, and all the tasks will be created at the same time as the shot.
 
-[See Getting started with Kitsu](../configure-kitsu/README.md)
+[See Getting Started With Kitsu](../configure-kitsu/README.md)
 :::
 
 A new pop-up opens for the creation of the shots.

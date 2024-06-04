@@ -1,6 +1,6 @@
-# Build a Studio Report
+# Building Studio Reports
 
-## Know Everything that is Happening in the Studio
+## Studio Resource Overview
 
 As a Producer, you need to know everything.
 
@@ -23,7 +23,7 @@ With the **Filters Builder** button, you can define a specific time frame.
 For example, if you want to focus on the workload a supervisor for a specific month, select their name and then pick a date in the **From** box.
 
 
-## Know the Current State of All Productions 
+## Current State of All Productions 
 
 To ensure your studio functions smoothly, you need to stay on top of all ongoing productions. This is where the **Productions** section can help. Access it from the global menu under the **Studio** section.
 
@@ -58,7 +58,7 @@ Navigate from production to production using the **Navigation** menu at the top 
 ![Sequence Stat Navigation](../img/getting-started/global_sequence_navigation.png)
 
 
-## Know the Occupancy Rate of the Studio - Team Schedule
+## Studio Occupancy Rate
 
 The **Team Schedule** allows you to see all artists with assigned tasks. Each row represents an artist, and unfolding an artist's row will show the details of their tasks.
 
@@ -79,7 +79,7 @@ You can move tasks around by grabbing them and placing them on another day. Any 
 If an artist has a break between two tasks, the sum-up line will not break to show it. Instead, it shows the first and last tasks assigned to the artist.
 
 
-## How to Check the Main Schedule
+## Utilize the Main Schedule
 
 With the **Main Schedule**, you can access all the **Production Schedules** at once.
 
