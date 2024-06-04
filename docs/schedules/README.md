@@ -106,7 +106,7 @@ purple for **WAITING FOR APPROVAL**, and green for **DONE**.
 
 You can quickly assess the status of your elements and team. From this view, you may want to visually identify tasks that are behind schedule.
 
-From the **Coloring** dropdown, select **late in red**. This view will highlight tasks where the due date has passed but that have not been validated yet. This indicates that they are behind schedule and will show on the Gantt chart as red.
+From the **Coloring** dropdown, select **late in red**. This view will highlight tasks where the due date has passed but that have not been approved yet. This indicates that they are behind schedule and will show on the Gantt chart as red.
 
 ![Task type page schedule coloring late in red](../img/getting-started/task_type_schedule_coloring_late.png)
 

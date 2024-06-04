@@ -473,7 +473,7 @@ The second is to click on the status part to open the **Comment Panel** on the r
 On the comment panel, you have two options: link a concept to an existing asset or delete it.
 You can also comment and change the status of the asset.
 
-The idea is to have one version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
+The idea is to have one version per **Concept**. If it's not approved, you need to upload a new concept, not to have multiple versions of the same concept.
 
 One concept is one task.
 
@@ -1159,10 +1159,10 @@ Now, all your assets have been imported into Kitsu.
 
 ## Introduction to Asset State: Ready For
 
-Most of the time, you don't need to wait for an asset's tasks to be validated to use it on a shot task.
+Most of the time, you don't need to wait for an asset's tasks to be approved to use it on a shot task.
 
-For example, when an asset is validated at the **Concept** stage, it can be used for the **Storyboard** stage.
-Then, when it's validated at the **Modeling** stage, you can use it for the **Layout** stage and so on.
+For example, when an asset is approved at the **Concept** stage, it can be used for the **Storyboard** stage.
+Then, when it's approved at the **Modeling** stage, you can use it for the **Layout** stage and so on.
 
 That's exactly what the asset state **Ready For** is doing: it lets you know the state of an asset's tasks and compares its usability for the shot tasks.
 

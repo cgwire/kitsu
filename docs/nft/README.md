@@ -913,10 +913,10 @@ Now, all your assets have been imported into Kitsu.
 
 ## Introduction to Asset State: Ready For
 
-Most of the time, you don't need to wait for an asset's tasks to be validated to use it on an NFT Collection task.
+Most of the time, you don't need to wait for an asset's tasks to be approved to use it on an NFT Collection task.
 
-For example, when an asset is validated at the **Concept** stage, it can be used for the **Storyboard** stage.
-Then, when it's validated at the **Modeling** stage, you can use it for the **Layout** stage and so on.
+For example, when an asset is approved at the **Concept** stage, it can be used for the **Storyboard** stage.
+Then, when it's approved at the **Modeling** stage, you can use it for the **Layout** stage and so on.
 
 That's exactly what the asset state **Ready For** is doing: let you know the state of the tasks of an asset and compare its usability for the NFT collection tasks.
 

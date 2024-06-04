@@ -19,8 +19,7 @@ You can move around the 3D file by dragging and dropping your cursor and zooming
 ![Preview background example](../img/getting-started/preview_background_example.png)
 
 See the **Customization** section for more details.
-[Pipeline Customization](../customization-pipeline/README.md)
-<!-- Dead link, need to confirm where this goes to -->
+[Pipeline Customization](../configure-kitsu/README.md#3d-backgrounds)
 
 You can select a color to use and then draw directly on the preview with the **Pencil** tool ![Pencil](../img/getting-started/draw.png).
 
@@ -54,8 +53,6 @@ Once you click the button, Kitsu will grab all the frames with annotations and d
 ![Attachment snapshot detail](../img/getting-started/attachment_snapshot_detail.png)
 
 If you need to delete a line, click the pencil icon again. The cursor changes to a multi-directional cross ![Pencil](../img/getting-started/direction_arrow.png), and you can then select your line and move it around.
-
-<!-- Need to test this, couldn't get this to work -->
 
 ![review drawing](../img/getting-started/review_edit.png)
 
@@ -182,11 +179,4 @@ You can draw or type on the video (similar to [Perform a review](../getting-star
 
 The Review Room is a collaborative space designed for efficient and synchronized dailies review sessions. It ensures that all participants are viewing the same content simultaneously, facilitating real-time feedback and discussion.
 
-You can join the **Review Room** by clicking the button at the top of the playlist. The review room will synchronize all the participants.
-
-Everyone in the review room will see the play, pause, shot, and frame selections in real-time.
-
-Additionally, the Review Room supports synchronized drawing annotations. This feature allows participants to draw directly on the frames being reviewed, with all annotations visible to everyone in the session. This capability enhances communication and clarity, making it easier to point out specific details, suggest changes, and highlight important aspects of the work.
-
-![Playlist review room](../img/getting-started/playlist_review_room.png)
-
+To learn more about the Review Room, [visit this section here](../playlist-client/README.md#review-room).

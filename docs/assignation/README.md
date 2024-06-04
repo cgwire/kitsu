@@ -66,9 +66,6 @@ You can also assign a user to multiple tasks simultaneously. First, you'll need 
 
 Once you have your tasks highlighted, select a user to assign and confirm your selection by clicking the **Confirm** button. Similarly, you can use the **unassign from selection** option to remove these assignments.
 
-When you have finished all the assignments, exit this mode by pressing the **Escape** key or clicking the cross on the top right corner of the action box.
-<!-- I could get this to work, escape doesn't seem to do anything and I don't see an X to close the dialogue-->
-
 Now, you can see the artist's avatar next to each of the task's status.
 
 ![Assigned people](../img/getting-started/assignation.png)

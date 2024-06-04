@@ -25,7 +25,7 @@ The second is to click on the status part to open the **Comment Panel** on the r
 You have two options on the comment panel: link a concept with an existing asset or delete the concept.
 You can also comment and change the status of the asset.
 
-The idea is to have one version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
+The idea is to have one version per **Concept**. If it's not approved, you need to upload a new concept, not to have multiple versions of the same concept.
 
 One concept is one task.
 
@@ -273,7 +273,7 @@ If you go into **Full-Screen**, you can compare two task types or versions side 
 From there, you can change the status too![Retake](../img/getting-started/retake_icon.png) if you want the Artist to perform some changes.
 
 
-Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is validated.
+Alternatively, you can change it to ![Done](../img/getting-started/done_icon.png) to notify the Artist that his work is approved.
 
 
 ## Review a Concept

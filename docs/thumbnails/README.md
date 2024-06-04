@@ -35,4 +35,5 @@ A new pop-up opens and asks you to choose which task types the thumbnails are li
 **Thumbnails batch import accepts image files and video files**. Only the first frame is used as the thumbnail for the video files.
 
 In order for the thumbnails to be automatically links to the correct shot, you have to name your thumbnails as sequence_shot.
-<!-- We should provide an example here -->
+
+For example, if you your sequence is named `SEQ_001` and your shot is named `SH_001`, then your thumbnail filename should be `SEQ_001_SH_001`.

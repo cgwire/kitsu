@@ -470,7 +470,7 @@ The second is to click on the status part to open the **Comment Panel** on the r
 On the comment panel, you have two options: link a concept to an existing asset or delete it.
 You can also comment and change the status of the Asset.
 
-The idea is to have one version per **Concept**. If it's not validated, you need to upload a new concept, not to have multiple versions of the same concept.
+The idea is to have one version per **Concept**. If it's not approved, you need to upload a new concept, not to have multiple versions of the same concept.
 
 One concept is one task.
 

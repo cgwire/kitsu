@@ -68,12 +68,10 @@ Kitsu automatically switches to the **Publish Revision** tab when using a status
 ![Publish Revision](../img/getting-started/publish_revision.png)
 
 You can add one or several previews to any comments. These can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`), or a `.glb` file. Additionally, you can review all the previews from the browser or mix everything. 
-<!-- This is not clear, need to double check what this means -->
 
 You can also review a `.glb` file as a wireframe or add a `.HDR` file to check the lighting. See the **Customization** section for more details.
 
-[Pipeline Customization](../customization-pipeline/README.md)
-<!-- Dead link, what should this point to?-->
+[Pipeline Customization](../configure-kitsu/README.md#3d-backgrounds)
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb` cannot be viewed in the browser and need to be downloaded to be reviewed.
 
