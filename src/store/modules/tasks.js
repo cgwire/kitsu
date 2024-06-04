@@ -1235,7 +1235,9 @@ const mutations = {
 
   [EDIT_TASK_DATES](state, { taskId, data }) {
     const task = state.taskMap.get(taskId)
-    Object.assign(task, data)
+    if (task) {
+      Object.assign(task, data)
+    }
   },
 
   [ASSIGN_TASKS](state, { selectedTaskIds, personId }) {
