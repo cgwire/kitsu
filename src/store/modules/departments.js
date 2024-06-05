@@ -1,15 +1,9 @@
 import departmentsApi from '@/store/api/departments'
 import {
-  LOAD_DEPARTMENTS_START,
-  LOAD_DEPARTMENTS_ERROR,
   LOAD_DEPARTMENTS_END,
   EDIT_DEPARTMENTS_END,
-  DELETE_DEPARTMENTS_START,
   DELETE_DEPARTMENTS_END,
-  DELETE_DEPARTMENTS_ERROR,
-  RESET_ALL,
-  EDIT_DEPARTMENTS_START,
-  EDIT_DEPARTMENTS_ERROR
+  RESET_ALL
 } from '@/store/mutation-types'
 
 const initialState = {
@@ -24,51 +18,38 @@ const getters = {
   archivedDepartments: state => state.departments.filter(d => d.archived),
   departmentMap: state => state.departmentMap,
 
-  getDepartments: state => id => {
+  getDepartment: state => id => {
     return state.departments.find(department => department.id === id)
   }
 }
 
 const actions = {
-  loadDepartments({ commit }, callback) {
-    commit(LOAD_DEPARTMENTS_START)
-    departmentsApi.getDepartments((err, departments) => {
-      if (err) commit(LOAD_DEPARTMENTS_ERROR)
-      else commit(LOAD_DEPARTMENTS_END, departments)
-      if (callback) callback(err)
-    })
+  async loadDepartments({ commit }) {
+    const departments = await departmentsApi.getDepartments()
+    commit(LOAD_DEPARTMENTS_END, departments)
+    return departments
   },
 
   async newDepartment({ commit }, data) {
-    commit(EDIT_DEPARTMENTS_START)
-    return departmentsApi.newDepartment(data).then(department => {
-      commit(EDIT_DEPARTMENTS_END, department)
-      return Promise.resolve(department)
-    })
+    const department = await departmentsApi.newDepartment(data)
+    commit(EDIT_DEPARTMENTS_END, department)
+    return department
   },
 
   async editDepartment({ commit }, data) {
-    commit(EDIT_DEPARTMENTS_START)
-    return departmentsApi.editDepartment(data).then(department => {
-      commit(EDIT_DEPARTMENTS_END, department)
-      return Promise.resolve(department)
-    })
+    const department = await departmentsApi.editDepartment(data)
+    commit(EDIT_DEPARTMENTS_END, department)
+    return department
   },
 
   async deleteDepartment({ commit }, department) {
-    commit(DELETE_DEPARTMENTS_START)
-    return departmentsApi.deleteDepartment(department).then(() => {
-      commit(DELETE_DEPARTMENTS_END, department)
-      return Promise.resolve(department)
-    })
+    await departmentsApi.deleteDepartment(department)
+    commit(DELETE_DEPARTMENTS_END, department)
+    return department
   }
 }
 
 const mutations = {
-  [LOAD_DEPARTMENTS_START]() {},
-
-  [LOAD_DEPARTMENTS_ERROR]() {},
-
   [LOAD_DEPARTMENTS_END](state, departments) {
     state.departments = departments
     departments.forEach(department => {
@@ -76,12 +57,8 @@ const mutations = {
     })
   },
 
-  [EDIT_DEPARTMENTS_START]() {},
-
-  [EDIT_DEPARTMENTS_ERROR]() {},
-
   [EDIT_DEPARTMENTS_END](state, newDepartment) {
-    const department = getters.getDepartments(state)(newDepartment.id)
+    const department = getters.getDepartment(state)(newDepartment.id)
     if (department && newDepartment.id) {
       Object.assign(department, newDepartment)
     } else {
@@ -89,9 +66,6 @@ const mutations = {
     }
     state.departmentMap.set(newDepartment.id, newDepartment)
   },
-
-  [DELETE_DEPARTMENTS_START]() {},
-  [DELETE_DEPARTMENTS_ERROR]() {},
 
   [DELETE_DEPARTMENTS_END](state, departmentToDelete) {
     const departmentToDeleteIndex = state.departments.findIndex(

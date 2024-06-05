@@ -273,6 +273,20 @@ export default {
     }
   },
 
+  studios: {
+    create_error: 'An error occurred while saving this studio. Are you sure there is no studio with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this studio.',
+    edit_title: 'Edit studio',
+    new_studios: 'Add a studio',
+    number: 'studio | studios',
+    title: 'Studios',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    }
+  },
+
   entities: {
     build_filter: {
       asset_type: 'Asset type',
@@ -769,7 +783,8 @@ export default {
       password: 'New password',
       password_2: 'New password (repeat)',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     list: {
       active: 'Active',
@@ -779,7 +794,8 @@ export default {
       expiration: 'Expiration',
       name: 'Name',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     role: {
       all: 'All',

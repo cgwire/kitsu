@@ -31,9 +31,9 @@ describe('Productions store', () => {
     test('departments', () => {
       expect(store.getters.departments(rootState)).toStrictEqual(departments)
     }),
-    test('getDepartments', () => {
+    test('getDepartment', () => {
       expect(
-        store.getters.getDepartments(rootState)(departments[0].id))
+        store.getters.getDepartment(rootState)(departments[0].id))
         .toStrictEqual(departments[0])
     })
   })

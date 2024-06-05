@@ -70,6 +70,7 @@ export default {
       contract_type: person.contract_type,
       active: person.active,
       departments: person.departments,
+      studio_id: person.studio_id,
       is_bot: person.is_bot,
       expiration_date: person.expiration_date?.toJSON().slice(0, 10)
     }
@@ -108,7 +109,8 @@ export default {
       notifications_discord_enabled:
         person.notifications_discord_enabled === 'true',
       notifications_discord_userid: person.notifications_discord_userid,
-      departments: person.departments
+      departments: person.departments,
+      studio_id: person.studio_id
     }
     return client.pput(`/api/data/persons/${person.id}`, data)
   },

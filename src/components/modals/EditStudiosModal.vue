@@ -4,22 +4,22 @@
     <div class="modal-content">
       <div class="box">
         <h1 class="title" v-if="isEditing">
-          {{ $t('departments.edit_title') }} {{ departmentToEdit.name }}
+          {{ $t('studios.edit_title') }} {{ studioToEdit.name }}
         </h1>
         <h1 class="title" v-else>
-          {{ $t('departments.new_departments') }}
+          {{ $t('studios.new_studios') }}
         </h1>
         <form v-on:submit.prevent>
           <text-field
             ref="nameField"
-            :label="$t('departments.fields.name')"
+            :label="$t('studios.fields.name')"
             :maxlength="30"
             v-model="form.name"
             v-focus
           />
           <color-field
             ref="colorField"
-            :label="$t('departments.fields.color')"
+            :label="$t('studios.fields.color')"
             v-model="form.color"
           />
           <combobox-boolean
@@ -30,7 +30,7 @@
           />
         </form>
         <modal-footer
-          :error-text="$t('departments.create_error')"
+          :error-text="$t('studios.create_error')"
           :is-error="isError"
           :is-loading="isLoading"
           @confirm="runConfirmation"
@@ -50,7 +50,7 @@ import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
-  name: 'edit-departments-modal',
+  name: 'edit-studios-modal',
 
   mixins: [modalMixin],
 
@@ -74,7 +74,7 @@ export default {
       type: Boolean,
       default: false
     },
-    departmentToEdit: {
+    studioToEdit: {
       type: Object,
       default: () => {}
     }
@@ -93,7 +93,7 @@ export default {
 
   computed: {
     isEditing() {
-      return this.departmentToEdit?.id
+      return this.studioToEdit?.id
     }
   },
 
@@ -112,13 +112,13 @@ export default {
       }
     },
 
-    departmentToEdit() {
+    studioToEdit() {
       if (this.isEditing) {
         this.form = {
-          id: this.departmentToEdit.id,
-          name: this.departmentToEdit.name,
-          color: this.departmentToEdit.color,
-          archived: String(this.departmentToEdit.archived === true)
+          id: this.studioToEdit.id,
+          name: this.studioToEdit.name,
+          color: this.studioToEdit.color,
+          archived: String(this.studioToEdit.archived === true)
         }
       } else {
         this.form = {

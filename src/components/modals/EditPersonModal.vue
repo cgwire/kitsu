@@ -1,10 +1,5 @@
 <template>
-  <div
-    class="modal"
-    :class="{
-      'is-active': active
-    }"
-  >
+  <div class="modal" :class="{ 'is-active': active }">
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
@@ -48,6 +43,19 @@
           v-model="form.expiration_date"
           v-if="isBot"
         />
+        <combobox
+          :label="$t('people.fields.role')"
+          :options="roleOptions"
+          localeKeyPrefix="people.role."
+          v-model="form.role"
+        />
+        <combobox
+          :label="$t('people.fields.contract')"
+          :options="contractOptions"
+          localeKeyPrefix="people.contract."
+          v-model="form.contract_type"
+          v-if="!isBot"
+        />
         <div class="departments field">
           <label class="label">{{ $t('people.fields.departments') }}</label>
           <p
@@ -88,16 +96,9 @@
           </div>
         </div>
         <combobox
-          :label="$t('people.fields.role')"
-          :options="roleOptions"
-          localeKeyPrefix="people.role."
-          v-model="form.role"
-        />
-        <combobox
-          :label="$t('people.fields.contract')"
-          :options="contractOptions"
-          localeKeyPrefix="people.contract."
-          v-model="form.contract_type"
+          :label="$t('people.fields.studio')"
+          :options="studioOptions"
+          v-model="form.studio_id"
           v-if="!isBot"
         />
         <combobox
@@ -174,11 +175,11 @@
 import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import DateField from '@/components/widgets/DateField.vue'
-import DepartmentName from '@/components/widgets/DepartmentName'
-import TextField from '@/components/widgets/TextField'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-person-modal',
@@ -259,6 +260,7 @@ export default {
         contract_type: 'open-ended',
         active: 'true',
         departments: [],
+        studio_id: null,
         expiration_date: null,
         is_bot: false
       },
@@ -280,6 +282,7 @@ export default {
       'departmentMap',
       'isCurrentUserAdmin',
       'people',
+      'studios',
       'user'
     ]),
 
@@ -287,6 +290,16 @@ export default {
       return this.departments.filter(
         department => !this.form.departments.includes(department.id)
       )
+    },
+
+    studioOptions() {
+      return [
+        { label: '', value: null },
+        ...this.studios.map(studio => ({
+          label: studio.name,
+          value: studio.id
+        }))
+      ]
     },
 
     isEditing() {
@@ -363,6 +376,7 @@ export default {
           contract_type: this.personToEdit.contract_type,
           active: this.personToEdit.active ? 'true' : 'false',
           departments: [...(this.personToEdit.departments || [])],
+          studio_id: this.personToEdit.studio_id,
           expiration_date: this.personToEdit.expiration_date,
           is_bot: this.personToEdit.is_bot
         }
@@ -372,6 +386,7 @@ export default {
           contract_type: 'open-ended',
           active: 'true',
           departments: [],
+          studio_id: null,
           expiration_date: null,
           is_bot: this.isBot,
           email: this.isBot ? this.user.email : null
@@ -407,6 +422,7 @@ export default {
 .modal-content .box p.text {
   margin-bottom: 1em;
 }
+
 .is-danger {
   color: #ff3860;
   font-style: italic;

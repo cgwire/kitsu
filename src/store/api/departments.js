@@ -1,8 +1,8 @@
 import client from '@/store/api/client'
 
 export default {
-  getDepartments(callback) {
-    client.get('/api/data/departments', callback)
+  getDepartments() {
+    return client.pget('/api/data/departments')
   },
 
   newDepartment(department) {
