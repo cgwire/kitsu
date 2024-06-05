@@ -188,7 +188,13 @@ export default {
   data() {
     return {
       csvColumns: ['First Name', 'Last Name'],
-      optionalCsvColumns: ['Phone', 'Role', 'Contract Type', 'Active'],
+      optionalCsvColumns: [
+        'Phone',
+        'Role',
+        'Contract Type',
+        'Studio',
+        'Active'
+      ],
       dataMatchers: ['Email'],
       role: 'all',
       roleOptions: [
@@ -235,13 +241,13 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
-    this.loadPeople(() => {
-      this.setSearchFromUrl()
-      this.onSearchChange()
-    }) // Needed to show department informations
+    await this.loadStudios()
+    await this.loadPeople()
+    this.setSearchFromUrl()
+    this.onSearchChange()
   },
 
   watch: {
@@ -316,16 +322,15 @@ export default {
       'deletePeople',
       'editPerson',
       'invitePerson',
-      'loadDepartments',
       'loadPeople',
+      'loadStudios',
       'newPerson',
       'newPersonAndInvite',
       'removePeopleSearch',
       'savePeopleSearch',
       'setPeopleSearch',
       'uploadPersonAvatar',
-      'uploadPersonFile',
-      'updatePersonToEdit'
+      'uploadPersonFile'
     ]),
 
     renderImport(data, mode) {

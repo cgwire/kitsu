@@ -9,18 +9,19 @@ import userStore from '@/store/modules/user'
 import taskTypeStore from '@/store/modules/tasktypes'
 import store from '@/store'
 
-import Assets from '@/components/pages/Assets'
-import Login from '@/components/pages/Login'
-import Main from '@/components/Main'
-import NewProduction from '@/components/pages/production/NewProduction'
-import Notifications from '@/components/pages/Notifications'
-import OpenProductions from '@/components/pages/OpenProductions'
-import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed'
-import Shots from '@/components/pages/Shots'
-import TaskType from '@/components/pages/TaskType'
-import Todos from '@/components/pages/Todos'
-import Edits from '@/components/pages/Edits'
+import Assets from '@/components/pages/Assets.vue'
+import Login from '@/components/pages/Login.vue'
+import Main from '@/components/Main.vue'
+import NewProduction from '@/components/pages/production/NewProduction.vue'
+import Notifications from '@/components/pages/Notifications.vue'
+import OpenProductions from '@/components/pages/OpenProductions.vue'
+import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed.vue'
+import Shots from '@/components/pages/Shots.vue'
+import TaskType from '@/components/pages/TaskType.vue'
+import Todos from '@/components/pages/Todos.vue'
+import Edits from '@/components/pages/Edits.vue'
 
+const AllTasks = () => import('@/components/pages/AllTasks.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
@@ -40,7 +41,6 @@ const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
 const NotFound = () => import('@/components/pages/NotFound.vue')
-const AllTasks = () => import('@/components/pages/AllTasks.vue')
 const People = () => import('@/components/pages/People.vue')
 const Person = () => import('@/components/pages/Person.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
@@ -65,6 +65,7 @@ const Shot = () => import('@/components/pages/Shot.vue')
 const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
 const Task = () => import('@/components/pages/Task.vue')
+const Studios = () => import('@/components/pages/Studios.vue')
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
 const Team = () => import('@/components/pages/Team.vue')
@@ -87,7 +88,8 @@ const ADMIN_PAGES = [
   'task-types',
   'team-schedule',
   'settings',
-  'status-automations'
+  'status-automations',
+  'studios'
 ]
 
 export const routes = [
@@ -206,6 +208,12 @@ export const routes = [
         path: 'departments',
         name: 'departments',
         component: Departments
+      },
+
+      {
+        path: 'studios',
+        name: 'studios',
+        component: Studios
       },
 
       {
@@ -874,6 +882,11 @@ export const routes = [
     path: '/wrong-browser',
     component: WrongBrowser,
     name: 'wrong-browser'
+  },
+  {
+    path: '/debug',
+    component: () => import('@/components/pages/Debug.vue'),
+    name: 'debug'
   },
 
   {

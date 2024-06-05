@@ -224,7 +224,6 @@ export default {
       'deletePeople',
       'editPerson',
       'generateToken',
-      'loadDepartments',
       'loadPeople',
       'newPerson',
       'setPeopleSearch',
