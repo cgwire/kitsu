@@ -21,7 +21,7 @@ In the [section on preparing your team](../team/README.md), we cover how to add 
 In order for a user to be assigned to a task, they must first be added to a production. Please note that you cannot assign tasks to users outside of the production.
 :::
 
-First, lets add some users to our production. Within your project, from the dropdown menu at the top of the page, select the **TEAM** page.
+First, lets add some users to our production. Within your project, from the dropdown menu at the top of the page, select the **Team** page.
 
 ![Drop down menu team](../img/getting-started/drop_down_menu_team.png)
 

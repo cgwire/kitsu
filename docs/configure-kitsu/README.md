@@ -59,7 +59,7 @@ Defining your studio's Departments is typically the first step in setup, as mult
 
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
-**DEPARTMENT** page under the **Admin** section.
+**Department** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/deparment_menu.png)
 
@@ -87,7 +87,7 @@ Next, let's create all the **Task Types** needed to manage and track our product
 
 
 From the main menu ![Main menu](../img/getting-started/main_button.png) select
-the **TASK TYPES** page under the **Admin** section.
+the **Task Types** page under the **Admin** section.
 
 ![Task Type](../img/getting-started/menu_tasktype.png)
 
@@ -151,7 +151,7 @@ Much like how shots can be organized by a sequence, an asset can be organised by
 
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
-**ASSET TYPES** page under the **Admin** section.
+**Asset Type** page under the **Admin** section.
 
 ![Asset type menu](../img/getting-started/menu_asset_type.png)
 
@@ -191,7 +191,7 @@ At any point during production, you can revisit this section to create additiona
 Next, let's create the statuses we intend to use during our **Approval Workflow**.
 
 On the main menu ![Main menu](../img/getting-started/main_button.png) select the
-**TASK STATUS** page under the **Admin** section.
+**Task Status** page under the **Admin** section.
 
 ![Task Status Menu](../img/getting-started/menu_status_type.png)
 
