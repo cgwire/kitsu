@@ -176,7 +176,7 @@ You can click on your avatar to open your menu (setting, documentation, etc.).
 
 ## The Tasks Spreadsheet
 
-### Entitie spreadsheet
+### Entity spreadsheet
 
 The second part of the screen is common to all the entities (Asset, shot, sequence, Edit). This is the global tasks spreadsheet.
 
