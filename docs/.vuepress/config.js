@@ -7,7 +7,7 @@ module.exports = {
   themeConfig: {
     sidebar: [
       {
-        title: 'Introductions to Kitsu Basics',
+        title: 'Introduction to Kitsu',
         collapsable: false,
         children: [['/', 'Introduction'],
          '/configure-kitsu/',
@@ -15,7 +15,7 @@ module.exports = {
         ]
       },
       {
-        title: 'Create your production',
+        title: 'Create Your Production',
         collapsable: true,
         children: [
           '/tvshow/',
@@ -28,7 +28,7 @@ module.exports = {
         ]
       },
       {
-        title: 'Meta Columns, Filters and Production Setting',
+        title: 'Meta Columns, Filters and Production Settings',
         collapsable: true,
         children: [
           '/meta-column/',
@@ -37,7 +37,7 @@ module.exports = {
         ]
       },
       {
-        title: 'Assignation, Estimation and Schedule',
+        title: 'Assignments, Estimates and Scheduling',
         collapsable: true,
         children: [
           '/assignation/', 
@@ -46,7 +46,7 @@ module.exports = {
         ]
       },
       {
-        title: 'Status, Publish, and Thumbnail',
+        title: 'Statuses, Publishes, and Thumbnails',
         collapsable: true,
         children: [
           '/status/',
@@ -55,7 +55,7 @@ module.exports = {
           ]
       },
       {
-        title: 'Internal Review and Client Playlist',
+        title: 'Internal Review and Client Playlists',
         collapsable: true,
         children: [
          '/review/',
@@ -64,7 +64,7 @@ module.exports = {
           ]
        },
       {
-        title: 'Supervisor',
+        title: 'Supervisor Workflows',
         collapsable: true,
         children: [
           '/supervisor-team/',
@@ -72,7 +72,7 @@ module.exports = {
            ]
        },
       {
-        title: 'Producer',
+        title: 'Producer Workflows',
         collapsable: true,
         children: [
           '/production-report/',
@@ -80,7 +80,7 @@ module.exports = {
         ]
       },
       {
-        title: 'Developer',
+        title: 'Developer Workflows',
         collapsable: true,
         children: [
           '/custom-actions/',

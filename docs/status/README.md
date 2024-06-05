@@ -1,6 +1,8 @@
-## Change Status and Add a Comment
+# Statuses and Feedback
 
 In Kitsu, statuses serve as indicators reflecting the current state or progress of a task. You can easily see the current status at a glance and add comments to update team members when a status changes.
+
+## The Comment Panel
 
 To change the status of a task and write a comment, click on the status of the task.
 
@@ -18,6 +20,8 @@ You can change the **Status**, from the **POST COMMENT** tab.
 
 Comments support the use of **Markdown**, which is a markup language used for formatting plain text in a simple, readable way. It allows users to add basic formatting elements such as headings, lists, bold and italic text, links and much more. For specific syntax, you can refer to the markdown guide website: [Markdown Guide](https://www.markdownguide.org/basic-syntax/).
 
+### Tagging Team Members
+
 You can also **tag** a team member in the comments to notify them directly. To do this, type `@`, which will open a submenu with a list of team members. Select the person you wish to notify, and upon submitting your comment, they will receive a notification.
 
 ![Tag someone](../img/getting-started/tag_team.png)
@@ -26,6 +30,8 @@ You can also **tag** an entire department by typing '@' followed by the departme
 
 ![Tag department](../img/getting-started/tag_department.png)
 
+### Adding Checklists
+
 You can also add checklist items to keep track of miscellaneous items that don't warrant their own task. To add a **checklist** to your comments, click the **Add checklist** button. The first item of the checklist will appear.
 
 ![Add checklist](../img/getting-started/add_checklist.png)
@@ -33,6 +39,8 @@ You can also add checklist items to keep track of miscellaneous items that don't
 Hit **Enter** or click the button again to add more checklist items, and give each one a name.
 
 ![Checklist](../img/getting-started/checklist_detailed.png)
+
+### Adding Attachments
 
 To attach a file as a picture, click on the **Add attachment** button.
 
@@ -51,7 +59,7 @@ Next, select the **Status** you wish to change the task to from the dropdown men
 Finally, click the **Post** button to submit your comment and status update.
 
 ## Changing Statuses In Bulk
-
+### Updating Multiple Statuses at Once
 You can also change the status for multiple tasks at once.
 
 Select multiple shots or assets by pressing **Ctrl / Cmd** or **Shift** and select the tasks you wish to include.
@@ -66,8 +74,8 @@ Choose the new status for your selected tasks (1). You can also add a comment fo
 
 ![Metadata Column Sort By](../img/getting-started/custom_column_sortby.png)
 
-## Customize Statuses on the Artist Board Page
-
+## Artist Board Statuses
+### Customizing Statuses Used on the Artist Board Page
 When you assign a task to an artist, it will appear on their to-do page when they log in.
 
 While the default view shows their tasks in a traditional list view, they can also choose to display their tasks in a board view. Each **Status** will be be represented by a column, and the assigned tasks will be cards that can be dragged from status to status as the tasks progress.

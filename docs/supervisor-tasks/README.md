@@ -1,4 +1,4 @@
-# Check and Supervise Your Tasks
+# Task Supervision
 
 ## Check Your Tasks
 
@@ -18,7 +18,7 @@ You can also use the Board to quickly update the status of multiple tasks by dra
 
 ![Supervisor Todo Detailed Page board](../img/getting-started/supervisor_todo_page_detail_board.png)
 
-## Check the Previews of Your Department
+## Reviewing Previews
 
 Now that everyone in your team knows what to do, you need to review their work. Typically, when an artist finishes a task, they will call you for a review. Frequent interruptions can be unproductive and make it difficult to maintain focus. To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
 
@@ -39,7 +39,7 @@ Another option is to go to the **Task Type Page** and change the **Display as co
 
 From here, you can click on the contact sheet to open the comment panel or select several tasks to create a playlist.
 
-## Check a Concept
+## Reviewing Concepts
 
 When your artists upload a concept, you can review it through the navigation menu at the top of the screen by selecting the **Concepts** page.
 

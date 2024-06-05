@@ -1,36 +1,34 @@
-#  Settings and Modify your Workflow
+# Production Specific Workflow Settings
 
-
-
-## Define the Settings of your production
-On the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
+## Configure Production-Specific Settings
+From the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
 
 ![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
 
 The first tab, **Parameters** allows you to change the **Technical information** of the production.
 
 ::: warning
-If you change the **FPS** or **RESOLUTION** after uploading previews, the changes won't be applied; you must reupload the first previews.
+If you change the **FPS** or **Resolution** after uploading previews, the changes won't be applied; you must reupload the first previews.
 :::
 
 ![Setting Parameters](../img/getting-started/setting_parameters.png)
 
 Here, you can enable specific options for the production as
 
-- ISOLATE CLIENT COMMENTS (NOT VISIBLE TO EACH OTHER)
+- Isolate Client Comments (Not Visible To Each Other)
 
-- ALLOW ARTISTS TO DOWNLOAD PREVIEWS
+- Allow Artists To Download Previews
 
-- SET NEW PREVIEW AS ENTITY THUMBNAIL AUTOMATICALLY
+- Set New Preview As Entity Thumbnail Automatically
 
-You can also specify the MAXIMUM NUMBER OF RETAKES for this production.
+You can also specify the **Maximum Number of Retakes** for this production.
 
 ::: tip
 You can also change the avatar of the production on the **Parameters** tab.
 :::
 
-## Select Specific Task Status for a Production
-
+## Task Statuses
+### Configuring Specific Task Types for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
 
@@ -48,8 +46,8 @@ validate your choice with the **add** button.
 
 ![Setting Add Status](../img/getting-started/setting_status_add.png)
 
-
-## Select Specific Task Types for a Production
+## Task Types
+### Enabling Specific Task Types for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -89,7 +87,8 @@ Validate with **Confirm**.
 
 :::
 
-## Select Specific Asset Types for a Production
+## Asset Types
+### Enabling Specific Asset Types for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -107,7 +106,8 @@ validate your choice with the **add** button.
 ![Setting Add Asset](../img/getting-started/setting_asset_add.png)
 
 
-## Select Specific Status Automation for a Production
+## Status Automation
+### Configuring Status Automation for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -128,7 +128,8 @@ validate your choice with the **add** button.
 ![Setting Add Task Type](../img/getting-started/setting_auto_add.png)
 
 
-## Select Specific Preview Background for a Production
+## Preview Backgrounds
+### Select Specific Preview Background for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -150,7 +151,8 @@ You can review your 3D file with an HDR background.
 ![Preview background example](../img/getting-started/preview_background_example.png)
 
 
-## Select which Status is seen on the Artist Board View
+## Artist Board
+### Artist Board Status Configuration
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 

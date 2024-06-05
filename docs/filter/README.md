@@ -1,8 +1,12 @@
 # Filters
 
-## The Search Bar
+Filtering involves selectively retrieving data based on specific criteria or conditions. It enables users to easily hone in information they want to focus on, or extract relevant subsets of data for analysis.
 
-In **Kitsu**, the filters are set through the **search bar**. It allows you to
+Kitsu provides a series of features that allow you to easily find what you are looking for.
+
+## The Search Bar
+### Using the Search Bar to Create Filters
+In **Kitsu**, filters are set through the **search bar**. It allows you to
 **save** your search query. Once done, you can rerun your query with a
 simple click.
 
@@ -42,6 +46,7 @@ The filter is instant except for the **Feature Film** type of production.
 Kitsu expects to have thousands of elements, so to speed up the process, you must type your Search and press **enter** to apply it.
 :::
 
+### Example Filters
 For example, on the assets page, type the letter `Ot`, and you get the
 result of all the assets starting with an `Ot`.
 
@@ -89,13 +94,14 @@ You can do a mix of all the filters:
 `[wfa] [retake] -alicia 020.`
 :::
 
-## Filter Builder
+## Creating Filters
+### Utilising the Filter Builder
 
-The easiest way to achieve more advanced filtering is to use the filter builder.
+The easiest way to achieve more advanced filtering is to use the filter builder. Click on the **Filter Builder** icon show below to get started.
 
 ![Filter build button](../img/getting-started/filter_builder.png)
 
-### Match all or one of the following filters
+You can then use the interactive filter builder dialogue to create your desired filter criteria.
 
 ![Filter build button](../img/getting-started/filter_builder_example04.png)
 
@@ -110,11 +116,10 @@ The first option, **Match all the following filters**, will use all the options 
 - Ready for / Assets are Ready
 
 The second option, **Match one of the following filters**, will skip the unavailable filter option.
-
 :::
 
 
-### Task Status filtering option
+### Task Status Filtering
 
 
 **Task Status** helps you filter a task type by status.
@@ -138,7 +143,7 @@ If you want to filter the status of several task types, click on the **+** below
 
 :::
 
-### Metadata filtering option
+### Metadata Filtering
 
 The **Metadata** filter allows you to filter your page based on the information of the extra columns.
 
@@ -156,7 +161,7 @@ If you want to filter elements on several Metadata, you can click on the **+** b
 
 :::
 
-### Assignment filtering option
+### Assignment Filtering
 
 This option is related to people and assignments.
 
@@ -172,7 +177,7 @@ You can only filter assignation on **ONE** Task type for **ONE** person.
 You can not add several assignment filters.
 :::
 
-### Thumbnail Presence
+### Thumbnail Filtering
 
 By default, this filter is set to **No filter**, meaning Kitsu won't check whether a thumbnail is present.
 
@@ -180,7 +185,7 @@ Then you have the choice between:
 - With thumbnail: display all the entities with a thumbnail
 - Without thumbnail: display all the entities without a thumbnail
 
-### Priority
+### Priority Filtering
 
 You can filter a task type with a specific level of priority.
 
@@ -202,7 +207,7 @@ You can not add several priority filters.
 :::
 
 
-### Ready For / Assets are Ready
+### Using the "Ready For" status
 
 Depending on whether you are filtering on the asset or shot global page, you can filter on the **Ready For** status.
 
@@ -217,9 +222,9 @@ You can not add several **Ready For** filters.
 :::
 
 
-## Save and Organize your Filter Queries
+## Managing Saved Filters
 
-Kitsu allows you to save your research. You can save them by pressing the
+Kitsu allows you to save any filter queries to be re-used later. You can save them by pressing the
 **Enter**, or click on the **Save** button
 ![Save button](../img/getting-started/filter_save_button.png).
 
@@ -241,7 +246,6 @@ The buttons are there every time you return to this page. They help you run comm
 
 
 Once you have created your filter and saved it, it will appear as a button under the search bar.
-The Search can be complex and not easy to read.
 
 You can rename the filter with a more explicit choice of words.
 
@@ -259,7 +263,7 @@ You can choose if you want to keep your saved queries in or out of a **Filtered 
 ![Filtered Group Example](../img/getting-started/filter_group_example.png)
 
 
-::: details Delete a Filter
+### Deleting a Filter
 
 If you have created a **filter button** by mistake, click on the cross next to
 it ![Filter delete](../img/getting-started/filter_delete.png).
@@ -267,11 +271,11 @@ it ![Filter delete](../img/getting-started/filter_delete.png).
 The result of the filter is displayed, but the button is not. Just
 cancel your research by deleting the text or use the cross next to the Search
 bar ![Search delete](../img/getting-started/filter_cross_delete.png)
-:::
 
-### Pre-build Filters
 
-You can find pre-build Filters on the following page:
+### Pre-built Filters
+
+You can find pre-built Filters on the following page:
 
 - My Checks
 - Timesheets

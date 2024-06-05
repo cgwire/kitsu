@@ -1,4 +1,4 @@
-# Publish
+# Publishes
 
 ## Publishing a Concept
 
@@ -96,7 +96,7 @@ You can then select your status and publish your preview with the **Post** Butto
 For more information on using publishes as thumbnails, [see this section here on thumbnails](../thumbnails/README.md).
 
 
-## Add Multiple Previews as One Version
+## Combining Previews Into a Version
 
 You can add multiple images simultaneously, or once you have uploaded an image, you can add another one.
 

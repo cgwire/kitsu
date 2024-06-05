@@ -1,5 +1,5 @@
-# Add a Thumbnail
-## Add a Thumbnail Manually
+# Thumbnails
+## Add Thumbnails Manually
 
 To define a preview as a thumbnail, the preview MUST have been uploaded as a revision.
 
@@ -12,7 +12,7 @@ Once you click on the button, you can choose to pick the first or any frame. Onc
 ![Thumbnail Applied](../img/getting-started/pannel_history_thumbnail.png)
 
 
-## Apply Thumbnails Automatically
+## Add Thumbnails Automatically
 
 If you prefer to have your thumbnails populate automatically, you can navigate to the settings page from the production using the navigation menu.
 

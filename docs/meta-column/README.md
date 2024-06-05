@@ -1,10 +1,9 @@
 # Meta Columns
-
-## Create Metadata Columns
-
 To add more information on the general spreadsheet pages, you can create a **Metadata Column**.
 
 Metadata columns alow you to track additional information related to your production. Some examples could include a metadata colum to track the percieved difficulty of a task, or a column to try custom tags that help you identify certain aspects of a task. Custom metadata columns can store data in a veriety of formats for easier data entry, filtering and validation.
+
+## Create Metadata Columns
 
 To add a new custom metadata column, click on the **+** icon next to the Name column.
 
@@ -42,20 +41,19 @@ However, when using the **List of value**, **List of tags**, and **Checklist**, 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 :::
 
-You can also link the **metadata column** to one or several **departments**.
+### Linking Metadata Columns to Departments
 
-::: tip
-Link a metadata column to a department. The artists/supervisors will see it on their to-do page and in the department-filtered view.
+You can also link the **metadata column** to one or several **departments**. The artists/supervisors will see it on their to-do page and in the department-filtered view.
 
 To create more departments, see [Create Departments](../configure-kitsu/README.md#create-departments).
 
-You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to make it effective.
+You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to confirm.
 
 Here, the VFX column is linked to two departments.
 
 ![Department metadata column filtered view](../img/getting-started/department_filtered_view_column.png)
 
-:::
+
 
 ::: details How to edit your metadata column
 On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column and click on **Edit**.
@@ -94,7 +92,8 @@ Additionally you can also **Stick** the metadata column, meaning that it will st
 :::
 
 
-## Display or Hide all Metadata Columns
+## Organizing Metadata Columns
+### Display or Hide All Metadata Columns
 
 To keep your global spreadsheet tidy, you can choose to hide any non-essential columns. Note that this action does not delete the column; it simply hides it from view but retains it in other areas where it is used.
 
@@ -110,7 +109,7 @@ To make the information reappear, click on the same button,
 
 ![All Information Displayed](../img/getting-started/hide_extra_information2.png) 
 
-## Display or Hide a single Metadata Column
+### Display or Hide a single Metadata Column
 
 You may need to hide or display a specific **Metadata Column** on a global page.
 

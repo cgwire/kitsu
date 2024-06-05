@@ -1,4 +1,4 @@
-# Estimation and Team Speed (Quotas)
+# Estimates & Team Quotas
 
 Estimating the time for each task can feel overwhelming, but the benefits far outweigh the effort. By filling out task estimations, you can:
 
@@ -11,7 +11,7 @@ Estimating the time for each task can feel overwhelming, but the benefits far ou
 Kitsu offers various features to help you easily track, review, and forecast task estimates. Let's look at some of the features that enable you to do this.
 
 
-## Add an Estimation for a Task
+## Add an Estimate for a Task
 
 To get started, click on the name of a task type.
 
@@ -46,7 +46,8 @@ Here is a summary of the cases and features you can leverage from the detailed t
 - See the WIP and Feedback dates automatically filled in
 - Monitor the latest comment section to keep an eye on the latest activity for this task type
 
-## Forecast Your Team's Speed Using Estimated Quotas
+## Forecasting Team Speed
+### Forecast Your Team's Speed Using Estimated Quotas
 
 To help you set accurate estimates, you can use the **Estimation** tab.
 
@@ -72,7 +73,8 @@ Every time you change the **Estimation** (in the number of days) on the right si
 
 For more information about the **Schedule** tab, refer to [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation).
 
-## Team Real Speed: Quotas
+## Quotas
+### Using Quotas to Understand Your Teams Speed
 
 Kitsu has two ways to calculate quotas per **task type**.
 
@@ -97,7 +99,7 @@ Kitsu then distributes the completed frames across all business days between the
 
 You can click on a number at any time to see its details in the right panel.
 
-## Change Priorities
+## Changing Priorities
 
 Priorities are often changing during a production, and you may want to easily highlight this change in priority to your team.
 

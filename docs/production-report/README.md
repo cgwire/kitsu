@@ -1,12 +1,13 @@
 # Building Production Reports
 
-## Get an Overview of the Production
+## Production Overview
 
 As a Producer, having a comprehensive overview of the entire production process is essential. 
 
 Kitsu offers various tools to help you stay informed and manage production efficiently without getting overwhelmed by notifications or losing focus.
 
-#### Features of the News Feed
+### News Feed Features
+The news feed section show real-time updates relating to your production, including:
 
 - **Real-Time Updates**: View all status changes as they happen, minute by minute.
 - **Summarized View**: The right part of the screen displays the total number of news items and a breakdown by status.
@@ -28,9 +29,12 @@ If you want to focus on a supervisor for a specific month, select their name and
 ![Newsfeed Page Comment](../img/getting-started/newsfeed_comment_panel.png)
 
 
-## Know the Current State of the Production - Short / Feature
-
+## Know the Current State of the Production
 Understanding the current state of your production is crucial. Kitsu provides detailed statistics and visualizations to help you track progress effectively.
+
+
+### Short / Feature Specific
+We're going to look at some features that are specific to Short / Feature Film workflows.
 
 #### Sequence Stats
 
@@ -62,7 +66,7 @@ You can export this page as a `.csv` text file and import it into spreadsheet so
 By leveraging these tools, you can stay on top of the production process, ensuring everything runs smoothly and on schedule.
 
 
-## Know the Current State of the Production - TV Show
+### TV Show Specific
 
 You can access an extra information level on a TV show through the **Episodes Stats Page**.
 
@@ -193,7 +197,7 @@ Lastly, you can check the previous task while viewing the asset/shot in detail. 
 
 
 
-## Duration over Estimation
+## Durations over Estimates
 
 To focus on the big picture and have a global view of the **Bid**, you can compare the estimated **Person days** versus the reality **Days Spent** on various pages.
 
@@ -228,11 +232,9 @@ You can get a global view or focus on a **specific status** or **Artist's name**
 This way, you can closely monitor the performance and efficiency of specific tasks and artists, ensuring that estimations align with actual durations and making adjustments as necessary.
 
 
-## Duration over Estimation for an Asset / Shot
+### Durations over Estimations for an Asset / Shot
 
 To closely examine the details, you can display **Estimation** and **Time Spent** columns (duration) for each asset and shot in Kitsu.
-
-### Viewing Estimations and Durations
 
 On the global page for shots or assets, you can see the sum-up of each task's **Estimation** and **Duration**. This allows you to quickly identify discrepancies or issues.
 
@@ -292,7 +294,7 @@ At any point, you can click on a number to see detailed information in the right
 This method ensures that even in the absence of detailed timesheet data, there is a reliable way to track task progress and calculate quotas accurately.
 
 
-## Checking Timesheets of the Team
+## Team Timesheets
 
 ::: warning
 All of the previous chapters are based on the fact that **Estimation** and **Duration** are filled for each task.

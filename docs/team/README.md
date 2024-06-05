@@ -1,10 +1,11 @@
-# Preparing your Team
+# Preparing Your Team
 
 Now that you have defined your workflow, it's time to organize your team so you have people to assign tasks to.
 
 We will learn how to add users to Kitsu, link them to departments, grant them permissions, and finally, add them to a production team so that they can begin working.
 
-## Add Users and Link them to Departments
+## Creating Users
+### Creating Users and Linking Them to Departments
 
 To assign tasks to people, you first need to create an account for them in Kitsu.
 
@@ -51,6 +52,8 @@ The department supervisor will be able to comment on all tasks within their depa
 ![Department filtered view](../img/getting-started/department_filtered_view.png)
 :::
 
+- 6) Role: This is where you will define the permission role of the user (this will be explained below).
+
 - 7) Active
 
 This section lets you choose whether to activate users immediately. If the user needs immediate access to Kitsu, set this to **yes**. However, there might be instances where you want to create a user but are not ready to give them access to Kitsu (for example, if you want to schedule tasks for an artist who is due to start work in two weeks). In this case, you can create and schedule the user, then simply enable them once they start.
@@ -60,8 +63,7 @@ Each user requires an individual account to log in to Kitsu.
 :::
 
 ## Permission Roles
-
-- 6) Role: This is where you will define the permission role of the user.
+### Understanding Permission Roles
 
 ::: warning Definition
 A permission role defines a set of access rights and privileges granted to a user within a system or application, dictating what actions they can perform and what resources they can access.
@@ -229,12 +231,14 @@ Now, you have all your people imported into Kitsu.
 :::
 
 ## Two-Factor Authentication
+### Add Additional Security to Your Studio
 
 **Two-Factor Authentication** provides an additional layer for security for users logging in to Kitsu. It can be enabled on a per-user basis, so you can decide for which users it is enforced.
 
 To enable this, click on their avatar at the top right of the screen, then select **Profile**.
 At the bottom of the page, they will find various **Two-Factor Authentication** options.
 
+### Available Two-Factor Authentication Methods
 - **TOTP**: This lets you use a Two-Factors Authentication app as a secondary password for your account. Selecting this option will present you with a QR, that once scanned into your 2FA app of choice, will prompt you for a one-time code each time you login.
 - **OTP Via Email** Similar to TOTP, but instead of using an app the 2FA code is sent to your email address
 - **FIDO Device** A FIDO device refers to a hardware security key that supports the FIDO (Fast IDentity Online) standard for two-factor authentication (2FA). If you own one of these devices, you can input it's name here to be used for Two-Factor-Authentication
@@ -243,7 +247,7 @@ At the bottom of the page, they will find various **Two-Factor Authentication** 
 
 
 
-## Add a User to the Team
+## Adding Users to the Team
 Once you have created your production, you need to add users to the production's team to allow them access. Being part of a team also allows tasks to be assigned to you.
 
 ::: tip

@@ -1,6 +1,5 @@
 # Schedules
 
-
 ## Production Schedule
 
 As the Studio Manager, you can use the global schedule as a reference for your production. The main purpose of this schedule is to track the milestones linked to your contract. This is referred to as your **Reference Schedule**.
@@ -11,6 +10,7 @@ In the drop-down menu, choose **SCHEDULE**.
 
 ![Menu Schedule](../img/getting-started/menu_schedule.png)
 
+### The Production Schedule Gantt Chart
 At the top of the schedule, you can see the project's start date (1) and the end date (2), which was defined when creating the production. You can modify these dates by clicking on the box to open the calendar and pick a date.
 
 ![Production Schedule](../img/getting-started/production_schedule.png)
@@ -41,6 +41,7 @@ You can do the same for the shot task types and determine the start and end date
 
 ![Production Schedule task type sequence](../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
+### Milestones
 A milestone is a significant point in a project that marks the completion of a major phase or task and serves as a checkpoint to assess progress. When hovering over a date in the schedule, you'll see ![Production Schedule add a milestone logo](../img/getting-started/production_schedule_add_milestone_plus.png) appears.
 
 ![Production Schedule add a milestone](../img/getting-started/production_schedule_add_milestone.png)
