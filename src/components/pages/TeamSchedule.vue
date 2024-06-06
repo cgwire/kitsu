@@ -43,6 +43,12 @@
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('main.studio')"
+          :options="studioOptions"
+          v-model="selectedStudio"
+        />
         <div class="flexrow-item people-filter">
           <label class="label">
             {{ $t('main.person') }}
@@ -215,6 +221,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -235,6 +242,7 @@ export default {
     ComboboxDepartment,
     ComboboxNumber,
     ComboboxProduction,
+    ComboboxStyled,
     ComboboxTaskType,
     Datepicker,
     DepartmentName,
@@ -258,6 +266,7 @@ export default {
       selectedEndDate: null,
       selectedPerson: null,
       selectedStartDate: null,
+      selectedStudio: null,
       startDate: moment(),
       unassignedTasks: [],
       totalUnassignedTasks: 0,
@@ -299,6 +308,7 @@ export default {
       'openProductions',
       'organisation',
       'productionMap',
+      'studios',
       'taskTypeMap',
       'user'
     ]),
@@ -322,19 +332,37 @@ export default {
     },
 
     selectablePeople() {
-      const displayedPeople = this.displayedPeople.filter(
+      let selectablePeople = this.displayedPeople.filter(
         person => !person.is_bot
       )
       if (this.selectedDepartment) {
-        return displayedPeople.filter(person =>
+        selectablePeople = selectablePeople.filter(person =>
           person.departments.includes(this.selectedDepartment)
         )
       }
-      return displayedPeople
+      if (this.selectedStudio) {
+        selectablePeople = selectablePeople.filter(
+          person => person.studio_id === this.selectedStudio
+        )
+      }
+      return selectablePeople
     },
 
     productionList() {
       return this.addAllValue(this.openProductions)
+    },
+
+    studioOptions() {
+      return [
+        {
+          label: this.$t('main.all'),
+          value: ''
+        },
+        ...this.studios.map(({ id, name }) => ({
+          label: name,
+          value: id
+        }))
+      ]
     },
 
     taskTypeList() {
@@ -657,6 +685,15 @@ export default {
 
   watch: {
     selectedDepartment() {
+      if (
+        this.selectedPerson &&
+        !this.selectablePeople.includes(this.selectedPerson)
+      ) {
+        this.$refs['people-field'].clear()
+      }
+      this.refreshSchedule()
+    },
+    selectedStudio() {
       if (
         this.selectedPerson &&
         !this.selectablePeople.includes(this.selectedPerson)
