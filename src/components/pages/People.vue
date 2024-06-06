@@ -37,16 +37,21 @@
         placeholder="ex: John Doe"
       />
       <combobox-department
-        class="combobox-department flexrow-item"
+        class="flexrow-item"
         :label="$t('main.department')"
         v-model="selectedDepartment"
       />
       <combobox-styled
         class="flexrow-item"
+        :label="$t('main.studio')"
+        :options="studioOptions"
+        v-model="selectedStudio"
+      />
+      <combobox-styled
+        class="flexrow-item"
         :label="$t('people.fields.role')"
-        :options="roleOptions"
         locale-key-prefix="people.role."
-        no-margin
+        :options="roleOptions"
         v-model="role"
       />
     </div>
@@ -149,6 +154,9 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
+
+import { searchMixin } from '@/components/mixins/search'
+
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
@@ -163,17 +171,18 @@ import PeopleList from '@/components/lists/PeopleList'
 import PageTitle from '@/components/widgets/PageTitle'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
-import { searchMixin } from '@/components/mixins/search'
 
 export default {
   name: 'people',
+
   mixins: [searchMixin],
+
   components: {
     ButtonHrefLink,
     ButtonSimple,
     ChangePasswordModal,
-    ComboboxStyled,
     ComboboxDepartment,
+    ComboboxStyled,
     EditAvatarModal,
     EditPersonModal,
     HardDeleteModal,
@@ -235,6 +244,7 @@ export default {
       personToEdit: { role: 'user' },
       personToChangePassword: {},
       selectedDepartment: '',
+      selectedStudio: '',
       success: {
         invite: false
       }
@@ -244,7 +254,7 @@ export default {
   async mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
-    await this.loadStudios()
+    this.selectedStudio = this.$route.query.studio || ''
     await this.loadPeople()
     this.setSearchFromUrl()
     this.onSearchChange()
@@ -267,6 +277,10 @@ export default {
       this.updateRoute()
     },
 
+    selectedStudio() {
+      this.updateRoute()
+    },
+
     role() {
       this.updateRoute()
     }
@@ -281,7 +295,8 @@ export default {
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
       'peopleSearchQueries',
-      'personCsvFormData'
+      'personCsvFormData',
+      'studios'
     ]),
 
     currentPeople() {
@@ -292,6 +307,11 @@ export default {
       if (this.selectedDepartment) {
         people = people.filter(person =>
           person.departments.includes(this.selectedDepartment)
+        )
+      }
+      if (this.selectedStudio) {
+        people = people.filter(
+          person => person.studio_id === this.selectedStudio
         )
       }
       return people
@@ -313,6 +333,19 @@ export default {
 
     searchField() {
       return this.$refs['people-search-field']
+    },
+
+    studioOptions() {
+      return [
+        {
+          label: this.$t('main.all'),
+          value: ''
+        },
+        ...this.studios.map(({ id, name }) => ({
+          label: name,
+          value: id
+        }))
+      ]
     }
   },
 
@@ -323,7 +356,6 @@ export default {
       'editPerson',
       'invitePerson',
       'loadPeople',
-      'loadStudios',
       'newPerson',
       'newPersonAndInvite',
       'removePeopleSearch',
@@ -558,8 +590,9 @@ export default {
     updateRoute() {
       const search = this.searchField.getValue()
       const department = this.selectedDepartment
+      const studio = this.selectedStudio
       const role = this.role
-      this.$router.push({ query: { search, department, role } })
+      this.$router.push({ query: { search, department, studio, role } })
     }
   },
 

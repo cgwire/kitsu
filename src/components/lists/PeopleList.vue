@@ -25,7 +25,7 @@
             <th scope="col" class="departments">
               {{ $t('people.list.departments') }}
             </th>
-            <th scope="col" class="studio">
+            <th scope="col" class="studio" v-if="!isBots">
               {{ $t('people.list.studio') }}
             </th>
             <th scope="col" class="actions"></th>

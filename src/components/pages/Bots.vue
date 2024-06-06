@@ -20,16 +20,15 @@
         placeholder="ex: gazu bot"
       />
       <combobox-department
-        class="combobox-department flexrow-item"
+        class="flexrow-item"
         :label="$t('main.department')"
         v-model="selectedDepartment"
       />
       <combobox-styled
         class="flexrow-item"
         :label="$t('people.fields.role')"
-        :options="roleOptions"
         locale-key-prefix="people.role."
-        no-margin
+        :options="roleOptions"
         v-model="role"
       />
     </div>
