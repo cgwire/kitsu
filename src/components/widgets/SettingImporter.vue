@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div class="project-import flexcolumn">
+    <div
+      class="project-import flexcolumn"
+      v-if="availableProductions.length > 0"
+    >
       <combobox-production
         class="flexrow-item"
         :label="$t('settings.import_from_production')"
@@ -17,7 +20,12 @@
       />
     </div>
     <div>
-      <p class="label mt2">
+      <p
+        :class="{
+          label: true,
+          mt2: availableProductions.length > 0
+        }"
+      >
         {{ $t('settings.available_items') }}
       </p>
       <div class="import-list" v-if="items.length > 0">

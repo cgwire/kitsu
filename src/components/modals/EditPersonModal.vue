@@ -11,10 +11,10 @@
           {{ $t(isBot ? 'bots.new_bot' : 'people.new_person') }}
         </h1>
         <text-field
+          ref="name-field"
           :errored="form.first_name && !isValidName"
           :label="$t(isBot ? 'bots.fields.name' : 'people.fields.first_name')"
           :disabled="personToEdit.is_generated_from_ldap"
-          ref="name-field"
           v-model.trim="form.first_name"
         />
         <text-field

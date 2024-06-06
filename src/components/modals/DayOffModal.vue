@@ -46,7 +46,7 @@
           :required="false"
           v-model.trim="form.description"
         />
-        <p class="mb2">
+        <p class="mb2 warning-text">
           <alert-triangle-icon class="icon mr05 warning" />{{
             $t('days_off.confirm_day_offs')
           }}
@@ -188,9 +188,5 @@ export default {
 }
 .modal-content .box p.text {
   margin-bottom: 1em;
-}
-
-.warning {
-  color: $orange;
 }
 </style>

@@ -259,6 +259,7 @@
             :narrow="true"
             :color-only="true"
             :task-status-list="taskStatus"
+            :production-id="task.project_id"
             v-model="task_status_id"
           />
           <button-simple
@@ -654,6 +655,9 @@ export default {
     },
 
     onDrop(event) {
+      if (event.target.id === 'drop-mask') return
+      if (event.target.parentElement?.className?.indexOf('box')) return
+      if (event.target.parentElement?.className?.indexOf('buttons')) return
       const forms = []
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const form = new FormData()

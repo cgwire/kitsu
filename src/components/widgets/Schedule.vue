@@ -356,7 +356,7 @@
                 :title="dayOff.description"
                 v-for="(dayOff, index) in getDayOffRange(rootElement.daysOff)"
               >
-                <briefcase-icon size="14" />
+                <briefcase-icon class="day-off-icon" size="14" />
               </div>
               <div
                 class="entity-line root-element"
@@ -2094,9 +2094,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       .day-off-icon {
+        color: white;
         position: absolute;
         top: -1px;
-        opacity: 0.25;
+        z-index: 10000;
       }
 
       .weekday-number {
@@ -2529,17 +2530,23 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .day-off {
   position: absolute;
-  z-index: 0;
   width: 19px;
   height: 100%;
   line-height: 40px;
   text-align: center;
-  color: $light-grey;
+  color: $dark-grey-light;
   background-color: #f0f0f0;
 
   .dark & {
-    color: $dark-grey;
+    color: $white;
     background-color: #43474d;
+  }
+
+  .day-off-icon {
+    position: absolute;
+    left: 3px;
+    top: 15px;
+    z-index: 100;
   }
 }
 
