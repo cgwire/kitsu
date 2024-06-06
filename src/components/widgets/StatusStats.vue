@@ -10,7 +10,7 @@
           width: (stat.value / statMax) * 100 + '%'
         }"
       >
-        <span class="stat-text">{{ stat.name }} : {{ stat.value }}</span>
+        <span class="stat-text">{{ stat.name }} : {{ stat.value }}</span>
       </div>
     </div>
   </div>
@@ -72,6 +72,7 @@ export default {
     margin-top: 3px;
     color: $black;
     border-radius: 6px;
+    white-space: nowrap;
   }
 }
 </style>

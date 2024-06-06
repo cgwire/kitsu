@@ -282,13 +282,13 @@
           >
             <span
               class="stat-tag"
-              :title="stat.name + ': ' + stat.value"
+              :title="stat.name + ': ' + stat.value"
               :style="{
                 background: stat.color,
                 width: (stat.value / statMax) * 100 + '%'
               }"
             >
-            <div class="stat-text">{{ stat.name }} : {{ stat.value }}</div>
+              <div class="stat-text">{{ stat.name }} : {{ stat.value }}</div>
             </span>
           </div>
         </div>
@@ -1017,6 +1017,7 @@ export default {
     margin-top: 3px;
     color: $black;
     border-radius: 6px;
+    white-space: nowrap;
   }
 }
 
