@@ -296,6 +296,11 @@ export default {
   },
 
   mounted() {
+    this.selectedDepartment = this.$route.query.department || undefined
+    this.selectedStudio = this.$route.query.studio || undefined
+    const zoom = parseInt(this.$route.query.zoom) || 1
+    this.zoomLevel = Math.min(Math.max(zoom, 1), 4)
+
     this.init()
   },
 
@@ -678,13 +683,32 @@ export default {
 
     onUpdateSelectedEndDate(date) {
       this.endDate = parseSimpleDate(date)
+    },
+
+    updateRoute({ department, studio, zoom }) {
+      const query = { ...this.$route.query }
+
+      if (department !== undefined) {
+        query.department = department || undefined
+      }
+      if (studio !== undefined) {
+        query.studio = studio || undefined
+      }
+      if (zoom !== undefined) {
+        query.zoom = String(zoom)
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
+        this.$router.push({ query })
+      }
     }
   },
 
   socket: {},
 
   watch: {
-    selectedDepartment() {
+    selectedDepartment(value) {
+      this.updateRoute({ department: value })
       if (
         this.selectedPerson &&
         !this.selectablePeople.includes(this.selectedPerson)
@@ -693,7 +717,9 @@ export default {
       }
       this.refreshSchedule()
     },
-    selectedStudio() {
+
+    selectedStudio(value) {
+      this.updateRoute({ studio: value })
       if (
         this.selectedPerson &&
         !this.selectablePeople.includes(this.selectedPerson)
@@ -702,9 +728,15 @@ export default {
       }
       this.refreshSchedule()
     },
+
     selectedPerson() {
       this.refreshSchedule()
     },
+
+    zoomLevel(value) {
+      this.updateRoute({ zoom: value })
+    },
+
     isTaskSidePanelOpen: {
       immediate: true,
       handler() {
