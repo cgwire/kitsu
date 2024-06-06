@@ -883,11 +883,6 @@ export const routes = [
     component: WrongBrowser,
     name: 'wrong-browser'
   },
-  {
-    path: '/debug',
-    component: () => import('@/components/pages/Debug.vue'),
-    name: 'debug'
-  },
 
   {
     path: '/*',
