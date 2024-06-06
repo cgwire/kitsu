@@ -251,13 +251,14 @@ export default {
     }
   },
 
-  async mounted() {
+  mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.selectedStudio = this.$route.query.studio || ''
-    await this.loadPeople()
     this.setSearchFromUrl()
-    this.onSearchChange()
+    this.loadPeople(() => {
+      this.onSearchChange()
+    })
   },
 
   watch: {

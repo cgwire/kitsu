@@ -173,10 +173,10 @@ export default {
   mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
+    this.setSearchFromUrl()
     this.loadPeople(() => {
-      this.setSearchFromUrl()
       this.onSearchChange()
-    }) // Needed to show department informations
+    })
   },
 
   watch: {
