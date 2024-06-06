@@ -70,7 +70,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              {{ getStudioName(person) }}
+              <studio-name :studio-id="person.studio_id" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
@@ -120,7 +120,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              {{ getStudioName(person) }}
+              <studio-name :studio-id="person.studio_id" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
@@ -149,6 +149,7 @@ import { AlertTriangleIcon } from 'vue-feather-icons'
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
 import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import StudioName from '@/components/widgets/StudioName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
@@ -159,6 +160,7 @@ export default {
     DepartmentNamesCell,
     PeopleNameCell,
     RowActionsCell,
+    StudioName,
     TableInfo
   },
 
