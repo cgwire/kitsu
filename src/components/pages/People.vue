@@ -41,10 +41,9 @@
         :label="$t('main.department')"
         v-model="selectedDepartment"
       />
-      <combobox-styled
+      <combobox-studio
         class="flexrow-item"
         :label="$t('main.studio')"
-        :options="studioOptions"
         v-model="selectedStudio"
       />
       <combobox-styled
@@ -157,20 +156,21 @@ import csv from '@/lib/csv'
 
 import { searchMixin } from '@/components/mixins/search'
 
-import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import EditAvatarModal from '@/components/modals/EditAvatarModal'
-import EditPersonModal from '@/components/modals/EditPersonModal'
-import HardDeleteModal from '@/components/modals/HardDeleteModal'
-import ImportModal from '@/components/modals/ImportModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
-import PeopleList from '@/components/lists/PeopleList'
-import PageTitle from '@/components/widgets/PageTitle'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ChangePasswordModal from '@/components/modals/ChangePasswordModal.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import EditAvatarModal from '@/components/modals/EditAvatarModal.vue'
+import EditPersonModal from '@/components/modals/EditPersonModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import PeopleList from '@/components/lists/PeopleList.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 export default {
   name: 'people',
@@ -182,6 +182,7 @@ export default {
     ButtonSimple,
     ChangePasswordModal,
     ComboboxDepartment,
+    ComboboxStudio,
     ComboboxStyled,
     EditAvatarModal,
     EditPersonModal,
@@ -297,7 +298,7 @@ export default {
       'isImportPeopleLoadingError',
       'peopleSearchQueries',
       'personCsvFormData',
-      'studios'
+      'studioMap'
     ]),
 
     currentPeople() {
@@ -315,7 +316,10 @@ export default {
           person => person.studio_id === this.selectedStudio
         )
       }
-      return people
+      return people.map(person => ({
+        ...person,
+        studio: this.studioMap.get(person.studio_id)
+      }))
     },
 
     deleteText() {
@@ -334,19 +338,6 @@ export default {
 
     searchField() {
       return this.$refs['people-search-field']
-    },
-
-    studioOptions() {
-      return [
-        {
-          label: this.$t('main.all'),
-          value: ''
-        },
-        ...this.studios.map(({ id, name }) => ({
-          label: name,
-          value: id
-        }))
-      ]
     }
   },
 

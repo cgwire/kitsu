@@ -70,7 +70,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              <studio-name :studio-id="person.studio_id" />
+              <studio-name :studio="person.studio" v-if="person.studio" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
@@ -120,7 +120,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              <studio-name :studio-id="person.studio_id" />
+              <studio-name :studio="person.studio" v-if="person.studio" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"

@@ -43,10 +43,9 @@
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />
-        <combobox-styled
+        <combobox-studio
           class="flexrow-item"
           :label="$t('main.studio')"
-          :options="studioOptions"
           v-model="selectedStudio"
         />
         <div class="flexrow-item people-filter">
@@ -221,7 +220,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -242,7 +241,7 @@ export default {
     ComboboxDepartment,
     ComboboxNumber,
     ComboboxProduction,
-    ComboboxStyled,
+    ComboboxStudio,
     ComboboxTaskType,
     Datepicker,
     DepartmentName,
@@ -355,19 +354,6 @@ export default {
 
     productionList() {
       return this.addAllValue(this.openProductions)
-    },
-
-    studioOptions() {
-      return [
-        {
-          label: this.$t('main.all'),
-          value: ''
-        },
-        ...this.studios.map(({ id, name }) => ({
-          label: name,
-          value: id
-        }))
-      ]
     },
 
     taskTypeList() {
