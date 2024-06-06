@@ -5,24 +5,28 @@
       modal: true,
       'is-active': active
     }"
+    ref="modal"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <div
+      ref="background"
+      class="modal-background"
+      @click="$emit('cancel')"
+    ></div>
 
-    <div class="modal-content" @drop="onDrop" @dragleave="onFileDragLeave">
-      <div
-        class="box content"
-        :class="{ dragging: true }"
-        @drop="onDrop"
-        @drag="onDrag"
-        @dragover="onFileDragover"
-      >
+    <div
+      class="modal-content"
+      @dragover="onFileDragover"
+      @dragleave="onFileDragLeave"
+    >
+      <div id="modal-content" class="box content" :class="{ dragging: true }">
         <div
+          ref="dropMask"
+          id="drop-mask"
           class="drop-mask"
-          @dragover="onFileDragover"
           @drop="onDrop"
           v-if="isDraggingFile"
         >
-          Drop new files here
+          {{ $t('main.drop_files_here') }}
         </div>
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title" v-if="isEditing">
@@ -250,7 +254,9 @@ export default {
     onFileDragLeave(event) {
       event.preventDefault()
       event.stopPropagation()
-      this.isDraggingFile = false
+      if (event.target.id === 'drop-mask') {
+        this.isDraggingFile = false
+      }
     },
 
     onDrag(event) {},
@@ -353,18 +359,18 @@ h3.subtitle {
 }
 
 .drop-mask {
-  background: rgba(0.1, 0, 0, 0.5);
-  border-radius: 0.5em;
-  color: white;
-  font-size: 2em;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
   align-items: center;
+  background: rgba(0.1, 0, 0, 0.5);
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  font-size: 2em;
   justify-content: center;
-  z-index: 100;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 1000;
 }
 </style>

@@ -8,7 +8,16 @@
     <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div class="modal-content">
-      <div class="box content" @drop="onDrop">
+      <div class="box content">
+        <!--div
+          ref="dropMask"
+          id="drop-mask"
+          class="drop-mask"
+          @drop="onDrop"
+          v-if="isDraggingFile"
+        >
+          {{ $t('main.drop_files_here') }}
+        </div-->
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title">
           {{ $t('tasks.comment_image') }}
@@ -145,7 +154,8 @@ export default {
   data() {
     return {
       forms: [],
-      isAnnotationLoading: false
+      isAnnotationLoading: false,
+      isDraggingFile: false
     }
   },
 
@@ -212,10 +222,23 @@ export default {
     },
 
     onDrop(event) {
-      console.log('onDrop')
-
+      this.isDraggingFile = false
       this.fileField.onDrop(event)
       event.preventDefault()
+    },
+
+    onFileDragover(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.isDraggingFile = true
+    },
+
+    onFileDragLeave(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.target.id === 'drop-mask') {
+        this.isDraggingFile = false
+      }
     }
   },
 
@@ -294,5 +317,21 @@ h3.subtitle {
 
 .buttons {
   flex-wrap: wrap;
+}
+
+.drop-mask {
+  align-items: center;
+  background: rgba(0.1, 0, 0, 0.5);
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  font-size: 2em;
+  justify-content: center;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 1000;
 }
 </style>
