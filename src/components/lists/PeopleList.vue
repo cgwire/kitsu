@@ -184,7 +184,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserAdmin', 'studioMap']),
+    ...mapGetters(['isCurrentUserAdmin']),
 
     activePeople() {
       return this.entries.filter(person => person.active)
@@ -220,10 +220,6 @@ export default {
   },
 
   methods: {
-    getStudioName(person) {
-      return this.studioMap.get(person.studio_id)?.name
-    },
-
     isExpired(expirationDate) {
       return expirationDate < this.today
     },
