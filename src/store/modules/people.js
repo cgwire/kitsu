@@ -387,7 +387,7 @@ const actions = {
 
   loadAggregatedPersonTimeSpents(
     {},
-    { personId, detailLevel, year, month, week, day, productionId }
+    { personId, detailLevel, year, month, week, day, productionId, studioId }
   ) {
     return peopleApi.getAggregatedPersonTimeSpents(
       personId,
@@ -396,7 +396,8 @@ const actions = {
       month,
       week,
       day,
-      productionId
+      productionId,
+      studioId
     )
   },
 
@@ -482,7 +483,10 @@ const actions = {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
-  async loadTimesheets({ commit }, { detailLevel, year, month, productionId }) {
+  async loadTimesheets(
+    { commit },
+    { detailLevel, year, month, productionId, studioId }
+  ) {
     const monthString = String(month).padStart(2, '0')
     let getTableFn
     switch (detailLevel) {
@@ -498,7 +502,7 @@ const actions = {
       default:
         getTableFn = peopleApi.getMonthTable
     }
-    const table = await getTableFn(year, monthString, productionId)
+    const table = await getTableFn(year, monthString, productionId, studioId)
     if (detailLevel === 'day') {
       const dayOffs = await peopleApi.getDaysOff(year, monthString)
       commit(PEOPLE_SET_DAY_OFFS, dayOffs)
