@@ -95,9 +95,9 @@
             </button>
           </div>
         </div>
-        <combobox
+        <combobox-studio
+          class="field"
           :label="$t('people.fields.studio')"
-          :options="studioOptions"
           v-model="form.studio_id"
           v-if="!isBot"
         />
@@ -177,6 +177,7 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -189,6 +190,7 @@ export default {
   components: {
     Combobox,
     ComboboxDepartment,
+    ComboboxStudio,
     DateField,
     DepartmentName,
     TextField
@@ -282,7 +284,6 @@ export default {
       'departmentMap',
       'isCurrentUserAdmin',
       'people',
-      'studios',
       'user'
     ]),
 
@@ -290,16 +291,6 @@ export default {
       return this.departments.filter(
         department => !this.form.departments.includes(department.id)
       )
-    },
-
-    studioOptions() {
-      return [
-        { label: '', value: null },
-        ...this.studios.map(studio => ({
-          label: studio.name,
-          value: studio.id
-        }))
-      ]
     },
 
     isEditing() {
