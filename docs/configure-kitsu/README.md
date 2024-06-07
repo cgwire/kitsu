@@ -259,7 +259,7 @@ A **Status Automation** defines rules or conditions that automatically trigger c
 
 For assets, you can establish **Status Automations** between tasks. For example, when the concept task status is set to `done`, the downstream modelling task status is automatically changed to `ready`.
 
-Additionally, you can create **Status Automations** that update the **Asset Status** based on task statuses. For example, when the concept task is set to `done` , then the linked asset status is set to ``ready``.
+Additionally, you can create **Status Automations** that update the **Asset Status** based on task statuses. For example, when the concept task is set to `done` , then the linked asset status is set to ``layout``.
 
 ::: tip
 You can also ask Kitsu to **copy the latest preview** with the Automation.
