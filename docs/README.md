@@ -18,11 +18,11 @@ img[src$='#logo-kitsu'] {
 
 [Kitsu](https://cg-wire.com/kitsu) is a collaboration platform for animation and VFX productions. Through its clean UI and shared database, it connects all relevant stakeholders throughout the production process, including artists, production managers, supervisors, vendors, and clients.
 
-### A Basic Introduction to Kitsu
+### Introduction to Kitsu
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
 * [Getting Started With Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
-* [Prepare Your Team](team/README.md): Prepare your team members and define their departments and permissions.
+* [Preparing Your Team](team/README.md): Prepare your team members and define their departments and permissions.
 
 ### Create Your Production
 
@@ -36,28 +36,33 @@ Below you can find guides tailored to the specific type of production you are lo
   * [Create a Video Game Production](videogame/README.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
   * [Create a NFT Collection](nft/README.md) Create a NFT Collection with assets, and NFT Collection.
 
+### Meta Columns, Filters & Production Settings
+
+* [Meta Columns](meta-column/README.md): Learn how to create and organize metadata from your production.
+* [Filters](filter/README.md): Hone in on key information with powerful search functionality
+* [Production Specific Workflow Settings](configure-prod/README.md): Tweak your specific production to your liking with various powerful settings.
 
 ### Assignments, Estimates and Scheduling
 
 In this section, we will explain some of Kitsu's main use cases:
 
-* [Assigning Tasks](assignation/README.md): Learn how to add someone to a team and assign them to a task.
-* [Estimation and Team Speed](estimation/README.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
+* [Task Assignments](assignation/README.md): Learn how to add someone to a team and assign them to a task.
+* [Estimates & Team Quotas](estimation/README.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
 * [Schedules](schedules/README.md): Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
 
 ### Statuses, Publishes and Thumbnails
 
 How keep your work organized, and your team updated on it's progress
 
-* [Status](status/README.md): How to change statuses and keep your team updated on the progress of work.
-* [Publish](publish/README.md): How to publish and share work with your team. 
-* [Adding a Thumbnail](thumbnails/README.md): How to apply thumbnails to assets and shots.
+* [Statuses & Feedback](status/README.md): How to change statuses and keep your team updated on the progress of work.
+* [Publishes](publish/README.md): How to publish and share work with your team. 
+* [Thumbnails](thumbnails/README.md): How to apply thumbnails to assets and shots.
 
 ### Internal Review and Client Playlists
 
 How to organize internal and external reviews:
 
-* [Review](review/README.md): Learn how to review all feedback on a task.
+* [Reviews](review/README.md): Learn how to review all feedback on a task.
 * [Daily & Weekly Review](review-weekly/README.md): Quickly gather video versions and stay focused during the review.
 * [Client Playlists](playlist-client/README.md): Collect and share your work with your client in a managed environment.
 
@@ -66,15 +71,15 @@ How to organize internal and external reviews:
 
 As a supervisor, your uses cases when using Kitsu may differ than your production team.
 
-* [Manage Your Department(s)](supervisor-team/README.md): Discover methods for effectively managing and overseeing your team.
-* [Supervise Your Tasks](supervisor-tasks/README.md): Learn how to stay on top of task assignments. 
+* [Managing Your Department](supervisor-team/README.md): Discover methods for effectively managing and overseeing your team.
+* [Task Supervision](supervisor-tasks/README.md): Learn how to stay on top of task assignments. 
 
 ### Producer Workflows
 
 As a producer, mastering the ability to zoom out from specifics to a holistic view is essential.
 
-* [Build Your Production Report](production-report/README.md): Learn everything you need to know to create your production reports.
-* [Build a Studio Report](studio-report/README.md): Ensure you're ahead of the game with your studio's productions.
+* [Building Production Reports](production-report/README.md): Learn everything you need to know to create your production reports.
+* [Building Studio Reports](studio-report/README.md): Ensure you're ahead of the game with your studio's productions.
 
 
 ### Developer Workflows
@@ -95,16 +100,6 @@ As a developer, explore some of the possibilities for extending and integrating 
 Access comprehensive video tutorials on YouTube, highlighting crucial functionalities of Kitsu. Click the link below to view.
 
 [Kitsu Tutorials Channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
-
-
-### Frequently Asked Questions
-
-Here, studios can find answers to their frequently asked questions, covering topics beyond what tutorials offer. These FAQs serves as a comprehensive resource for additional insights.
-
-* [How to delete...](faq-deletion): Learn how to safely remove data and keep your production organized.
-* [How to filter...](faq-filter): Explore how to quickly hone in on key data and find exactly what you're looking for.
-* [How to get notified...](faq-notification): Ensure you don't miss key events and stay updated on your production's progress.
-* [How to report...](faq-production-report): Create production reports quickly and effortlessly
 
 
 ### About the Authors
