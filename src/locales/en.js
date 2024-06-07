@@ -280,6 +280,7 @@ export default {
     delete_error: 'An error occurred while deleting this studio.',
     edit_title: 'Edit studio',
     new_studios: 'Add a studio',
+    no_studio: 'No studio',
     number: 'studio | studios',
     title: 'Studios',
     fields: {

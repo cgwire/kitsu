@@ -43,6 +43,11 @@
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />
+        <combobox-studio
+          class="flexrow-item"
+          :label="$t('main.studio')"
+          v-model="selectedStudio"
+        />
         <div class="flexrow-item people-filter">
           <label class="label">
             {{ $t('main.person') }}
@@ -215,6 +220,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -235,6 +241,7 @@ export default {
     ComboboxDepartment,
     ComboboxNumber,
     ComboboxProduction,
+    ComboboxStudio,
     ComboboxTaskType,
     Datepicker,
     DepartmentName,
@@ -258,6 +265,7 @@ export default {
       selectedEndDate: null,
       selectedPerson: null,
       selectedStartDate: null,
+      selectedStudio: null,
       startDate: moment(),
       unassignedTasks: [],
       totalUnassignedTasks: 0,
@@ -287,6 +295,11 @@ export default {
   },
 
   mounted() {
+    this.selectedDepartment = this.$route.query.department || undefined
+    this.selectedStudio = this.$route.query.studio || undefined
+    const zoom = parseInt(this.$route.query.zoom) || 1
+    this.zoomLevel = Math.min(Math.max(zoom, 1), 4)
+
     this.init()
   },
 
@@ -299,6 +312,7 @@ export default {
       'openProductions',
       'organisation',
       'productionMap',
+      'studios',
       'taskTypeMap',
       'user'
     ]),
@@ -322,15 +336,20 @@ export default {
     },
 
     selectablePeople() {
-      const displayedPeople = this.displayedPeople.filter(
+      let selectablePeople = this.displayedPeople.filter(
         person => !person.is_bot
       )
       if (this.selectedDepartment) {
-        return displayedPeople.filter(person =>
+        selectablePeople = selectablePeople.filter(person =>
           person.departments.includes(this.selectedDepartment)
         )
       }
-      return displayedPeople
+      if (this.selectedStudio) {
+        selectablePeople = selectablePeople.filter(
+          person => person.studio_id === this.selectedStudio
+        )
+      }
+      return selectablePeople
     },
 
     productionList() {
@@ -650,13 +669,32 @@ export default {
 
     onUpdateSelectedEndDate(date) {
       this.endDate = parseSimpleDate(date)
+    },
+
+    updateRoute({ department, studio, zoom }) {
+      const query = { ...this.$route.query }
+
+      if (department !== undefined) {
+        query.department = department || undefined
+      }
+      if (studio !== undefined) {
+        query.studio = studio || undefined
+      }
+      if (zoom !== undefined) {
+        query.zoom = String(zoom)
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
+        this.$router.push({ query })
+      }
     }
   },
 
   socket: {},
 
   watch: {
-    selectedDepartment() {
+    selectedDepartment(value) {
+      this.updateRoute({ department: value })
       if (
         this.selectedPerson &&
         !this.selectablePeople.includes(this.selectedPerson)
@@ -665,9 +703,26 @@ export default {
       }
       this.refreshSchedule()
     },
+
+    selectedStudio(value) {
+      this.updateRoute({ studio: value })
+      if (
+        this.selectedPerson &&
+        !this.selectablePeople.includes(this.selectedPerson)
+      ) {
+        this.$refs['people-field'].clear()
+      }
+      this.refreshSchedule()
+    },
+
     selectedPerson() {
       this.refreshSchedule()
     },
+
+    zoomLevel(value) {
+      this.updateRoute({ zoom: value })
+    },
+
     isTaskSidePanelOpen: {
       immediate: true,
       handler() {

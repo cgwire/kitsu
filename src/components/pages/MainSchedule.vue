@@ -80,6 +80,7 @@ import Schedule from '@/components/widgets/Schedule.vue'
 
 export default {
   name: 'main-schedule',
+
   components: {
     ComboboxNumber,
     Datepicker,
@@ -110,7 +111,11 @@ export default {
   },
 
   mounted() {
-    this.reset()
+    let zoom = parseInt(this.$route.query.zoom)
+    zoom = isNaN(zoom) ? 1 : zoom
+    this.zoomLevel = Math.min(Math.max(zoom, 0), 3)
+
+    this.init()
   },
 
   computed: {
@@ -128,7 +133,7 @@ export default {
   methods: {
     ...mapActions(['editProduction', 'loadScheduleItems', 'saveScheduleItem']),
 
-    reset() {
+    init() {
       if (!this.openProductions.length) {
         return
       }
@@ -202,12 +207,28 @@ export default {
           end_date: item.endDate.format('YYYY-MM-DD')
         })
       }
+    },
+
+    updateRoute({ zoom }) {
+      const query = { ...this.$route.query }
+
+      if (zoom !== undefined) {
+        query.zoom = String(zoom)
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
+        this.$router.push({ query })
+      }
     }
   },
 
   socket: {},
 
-  watch: {},
+  watch: {
+    zoomLevel(value) {
+      this.updateRoute({ zoom: value })
+    }
+  },
 
   metaInfo() {
     return {

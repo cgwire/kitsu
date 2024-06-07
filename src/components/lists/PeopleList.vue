@@ -25,7 +25,7 @@
             <th scope="col" class="departments">
               {{ $t('people.list.departments') }}
             </th>
-            <th scope="col" class="studio">
+            <th scope="col" class="studio" v-if="!isBots">
               {{ $t('people.list.studio') }}
             </th>
             <th scope="col" class="actions"></th>
@@ -70,7 +70,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              <studio-name :studio-id="person.studio_id" />
+              <studio-name :studio="person.studio" v-if="person.studio" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
@@ -120,7 +120,7 @@
               :departments="person.departments"
             />
             <td class="studio" v-if="!isBots">
-              <studio-name :studio-id="person.studio_id" />
+              <studio-name :studio="person.studio" v-if="person.studio" />
             </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
@@ -184,7 +184,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserAdmin', 'studioMap']),
+    ...mapGetters(['isCurrentUserAdmin']),
 
     activePeople() {
       return this.entries.filter(person => person.active)
@@ -220,10 +220,6 @@ export default {
   },
 
   methods: {
-    getStudioName(person) {
-      return this.studioMap.get(person.studio_id)?.name
-    },
-
     isExpired(expirationDate) {
       return expirationDate < this.today
     },

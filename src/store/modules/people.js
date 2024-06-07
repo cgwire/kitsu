@@ -843,7 +843,7 @@ const mutations = {
     state.organisation = { ...state.organisation, ...organisation }
   },
 
-  [RESET_ALL](state, people) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
     cache.peopleIndex = {}
     cache.personTasksIndex = {}
