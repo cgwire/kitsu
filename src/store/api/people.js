@@ -1,4 +1,5 @@
 import client from '@/store/api/client'
+import { buildQueryString } from '@/lib/query'
 
 export default {
   getOrganisation() {
@@ -370,28 +371,40 @@ export default {
     return client.pget(path)
   },
 
-  getDayTable(year, month, productionId) {
-    let path = `/api/data/persons/time-spents/day-table/${year}/${month}`
-    if (productionId) path += `?project_id=${productionId}`
-    return client.pget(path)
+  getDayTable(year, month, productionId, studioId) {
+    const path = `/api/data/persons/time-spents/day-table/${year}/${month}`
+    const params = {
+      project_id: productionId,
+      studio_id: studioId
+    }
+    return client.pget(buildQueryString(path, params))
   },
 
-  getWeekTable(year, month, productionId) {
-    let path = `/api/data/persons/time-spents/week-table/${year}`
-    if (productionId) path += `?project_id=${productionId}`
-    return client.pget(path)
+  getWeekTable(year, month, productionId, studioId) {
+    const path = `/api/data/persons/time-spents/week-table/${year}`
+    const params = {
+      project_id: productionId,
+      studio_id: studioId
+    }
+    return client.pget(buildQueryString(path, params))
   },
 
-  getMonthTable(year, month, productionId) {
-    let path = `/api/data/persons/time-spents/month-table/${year}`
-    if (productionId) path += `?project_id=${productionId}`
-    return client.pget(path)
+  getMonthTable(year, month, productionId, studioId) {
+    const path = `/api/data/persons/time-spents/month-table/${year}`
+    const params = {
+      project_id: productionId,
+      studio_id: studioId
+    }
+    return client.pget(buildQueryString(path, params))
   },
 
-  getYearTable(year, month, productionId) {
-    let path = '/api/data/persons/time-spents/year-table'
-    if (productionId) path += `?project_id=${productionId}`
-    return client.pget(path)
+  getYearTable(year, month, productionId, studioId) {
+    const path = '/api/data/persons/time-spents/year-table'
+    const params = {
+      project_id: productionId,
+      studio_id: studioId
+    }
+    return client.pget(buildQueryString(path, params))
   },
 
   getAggregatedPersonTimeSpents(
@@ -401,7 +414,8 @@ export default {
     month,
     week,
     day,
-    productionId
+    productionId,
+    studioId
   ) {
     let path = `/api/data/persons/${personId}/time-spents/`
 
@@ -415,11 +429,11 @@ export default {
       path += `day/${year}/${month}/${day}`
     }
 
-    if (productionId) {
-      path += `?project_id=${productionId}`
+    const params = {
+      project_id: productionId,
+      studio_id: studioId
     }
-
-    return client.pget(path)
+    return client.pget(buildQueryString(path, params))
   },
 
   getPersonQuotaShots(
