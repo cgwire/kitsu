@@ -704,12 +704,10 @@ export default {
 
     previewOptions() {
       if (!this.taskPreviews) return []
-      return this.taskPreviews.map((preview, index) => {
-        return {
-          value: preview.id,
-          label: 'v' + preview.revision
-        }
-      })
+      return this.taskPreviews.map(preview => ({
+        value: preview.id,
+        label: `v${preview.revision}`
+      }))
     },
 
     pinnedCount() {
@@ -1258,7 +1256,7 @@ export default {
       this.refreshPreviewPlay()
     },
 
-    onExtendUp(event) {
+    onExtendUp() {
       this.removeEvents(this.domEvents)
       this.refreshPreviewPlay()
       if (this.sideColumnParent) {
@@ -1453,7 +1451,7 @@ export default {
           this.refreshPreview({
             previewId: previewPlayer.currentPreview.id,
             taskId: previewPlayer.currentPreview.task_id
-          }).then(preview => {
+          }).then(() => {
             if (!previewPlayer.notSaved) {
               this.taskPreviews = this.getTaskPreviews(this.task.id)
               previewPlayer.reloadAnnotations()
