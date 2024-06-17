@@ -66,7 +66,7 @@
             class="flexrow-item"
             icon="clock"
             :text="$t('schedule.today')"
-            @click="$refs.schedule.scrollToToday()"
+            @click="scrollScheduleToToday"
           />
           <button-simple
             :active="isTaskSidePanelOpen"
@@ -395,6 +395,7 @@ export default {
       await this.loadDaysOff()
 
       this.refreshSchedule()
+      this.scrollScheduleToToday()
 
       this.startDate = moment()
       this.endDate = moment().add(3, 'months')
@@ -669,6 +670,10 @@ export default {
 
     onUpdateSelectedEndDate(date) {
       this.endDate = parseSimpleDate(date)
+    },
+
+    scrollScheduleToToday() {
+      this.$refs.schedule?.scrollToToday()
     },
 
     updateRoute({ department, studio, zoom }) {

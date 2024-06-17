@@ -58,53 +58,49 @@
           >
             <div class="ui-droppable">
               <entity-preview
-                style="cursor: grab; margin-top: 1px; margin-left: 1px"
+                class="entity-preview"
                 :empty-height="100"
-                :empty-width="266"
                 :entity="{ preview_file_id: task.entity_preview_file_id }"
                 cover
                 is-rounded-top-border
               />
+              <div class="avatars">
+                <people-avatar
+                  :is-link="false"
+                  :key="`${task.id}-${person.id}`"
+                  :person="person"
+                  :size="20"
+                  :font-size="12"
+                  v-for="person in getSortedPeople(task.assignees)"
+                />
+                <span
+                  class="priority"
+                  :class="{
+                    high: task.priority === 1,
+                    veryhigh: task.priority === 2,
+                    emergency: task.priority === 3
+                  }"
+                  :title="formatPriority(task.priority)"
+                  v-if="task.priority > 0"
+                >
+                  {{ formatPrioritySymbol(task.priority) }}
+                </span>
+              </div>
               <div class="infos flexrow">
-                <div>
-                  <div class="production-name mb0">
+                <div class="filler">
+                  <div class="production-name">
                     {{ productionMap.get(task.project_id)?.name }}
                   </div>
-                  <div class="entity-name ellipsis mt0">
+                  <div class="entity-name">
                     {{ task.full_entity_name }}
                   </div>
                 </div>
-                <div class="filler"></div>
-                <div>
-                  <task-type-name
-                    style="cursor: grab"
-                    :task-id="task.id"
-                    :task-type="getTaskType(task)"
-                    :rounded="true"
-                  />
-                </div>
-                <div class="avatars">
-                  <people-avatar
-                    :is-link="false"
-                    :key="`${task.id}-${person.id}`"
-                    :person="person"
-                    :size="20"
-                    :font-size="12"
-                    v-for="person in getSortedPeople(task.assignees)"
-                  />
-                  <span
-                    class="priority"
-                    :class="{
-                      high: task.priority === 1,
-                      veryhigh: task.priority === 2,
-                      emergency: task.priority === 3
-                    }"
-                    :title="formatPriority(task.priority)"
-                    v-if="task.priority > 0"
-                  >
-                    {{ formatPrioritySymbol(task.priority) }}
-                  </span>
-                </div>
+                <task-type-name
+                  class="task-type-name"
+                  rounded
+                  :task-id="task.id"
+                  :task-type="getTaskType(task)"
+                />
               </div>
             </div>
           </li>
@@ -489,6 +485,7 @@ export default {
   text-align: center;
   background: var(--border-alt);
   border: none;
+  z-index: 1;
 
   .tag {
     font-weight: bold;
@@ -508,7 +505,7 @@ export default {
   position: relative;
 
   .ui-droppable {
-    border-radius: 1em;
+    border-radius: 10px;
     border: 1px solid var(--border-alt);
     background-color: var(--background-alt);
   }
@@ -553,27 +550,24 @@ export default {
   }
 }
 
+.entity-preview {
+  cursor: inherit;
+}
+
 .avatars {
+  position: absolute;
+  right: 5px;
+  top: 75px;
   display: flex;
   flex-direction: row;
-}
-
-.production-name {
-  color: var(--text);
-  font-size: 0.9em;
-  font-weight: 600;
-  margin-bottom: 0.5em;
-}
-
-.thumbnail-picture {
-  background-color: black;
+  gap: 0.25em;
 }
 
 .priority {
   border-radius: 5px;
   display: inline-block;
-  color: white;
-  margin-left: 5px;
+  color: $white;
+  margin-left: 0.25em;
   font-weight: bold;
   min-width: 23px;
   text-align: center;
@@ -593,22 +587,21 @@ export default {
 
 .infos {
   padding: 0.5em;
-}
 
-.production-name {
-  font-weight: 400;
-  margin-bottom: 0em;
-  text-transform: uppercase;
-}
+  .production-name {
+    color: var(--text);
+    font-size: 0.9em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
 
-.entity-name {
-  font-size: 1.1em;
-  font-weight: 600;
-}
+  .entity-name {
+    font-size: 1.1em;
+    font-weight: 600;
+  }
 
-.avatars {
-  position: absolute;
-  right: 5px;
-  top: 75px;
+  .task-type-name {
+    cursor: inherit;
+  }
 }
 </style>
