@@ -252,6 +252,10 @@
                           annotations: news.preview_file_annotations
                         }
                       ]"
+                      :task="{
+                        id: news.task_id,
+                        project_id: news.project_id
+                      }"
                       :read-only="true"
                       :light="true"
                       :big="true"
