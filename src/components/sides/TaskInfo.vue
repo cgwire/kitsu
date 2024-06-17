@@ -1014,7 +1014,7 @@ export default {
       const previewId = previewPlayer.currentPreview.id
       this.setPreview({
         taskId: this.task.id,
-        entityId: this.task.entity.id,
+        entityId: this.task.entity_id,
         previewId,
         frame
       }).finally(() => {
