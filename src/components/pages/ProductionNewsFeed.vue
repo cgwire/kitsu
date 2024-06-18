@@ -254,7 +254,9 @@
                       ]"
                       :task="{
                         id: news.task_id,
-                        project_id: news.project_id
+                        project_id: news.project_id,
+                        task_type_id: news.task_type_id,
+                        assignees: []
                       }"
                       :read-only="true"
                       :light="true"
