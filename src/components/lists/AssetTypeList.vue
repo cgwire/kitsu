@@ -7,6 +7,9 @@
             <th scope="col" class="name">
               {{ $t('asset_types.fields.name') }}
             </th>
+            <th scope="col" class="short-name">
+              {{ $t('asset_types.fields.short_name') }}
+            </th>
             <th scope="col" class="task-types">
               {{ $t('asset_types.fields.task_types') }}
             </th>
@@ -17,6 +20,9 @@
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
             <td class="name">
               {{ entry.name }}
+            </td>
+            <td class="short-name">
+              {{ entry.short_name }}
             </td>
             <td class="task-types" v-if="(entry.task_types || []).length > 0">
               <span

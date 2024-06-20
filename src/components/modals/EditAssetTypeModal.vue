@@ -25,7 +25,14 @@
             @enter="runConfirmation"
             v-focus
           />
-
+          <text-field
+            ref="shortNameField"
+            :label="$t('asset_types.fields.short_name')"
+            :maxlength="30"
+            v-model="form.short_name"
+            @enter="runConfirmation"
+            v-focus
+          />
           <combobox-boolean
             :label="$t('main.archived')"
             @enter="runConfirmation"
