@@ -88,6 +88,14 @@
               >
                 {{ rootElement.name }}
               </router-link>
+              <department-name
+                class="ml05"
+                :department="departmentMap.get(departmentId)"
+                :key="departmentId"
+                no-padding
+                only-dot
+                v-for="departmentId in rootElement.departments"
+              />
               <input
                 class="flexrow-item mr1 man-day-input"
                 type="number"
@@ -129,10 +137,7 @@
               v-if="rootElement.expanded"
             >
               <div class="flexrow" v-if="rootElement.loading">
-                <spinner
-                  style="width: 20px; margin: 0 0 10px 10px"
-                  class="child-spinner flexrow-item"
-                />
+                <spinner class="child-spinner" :size="20" />
               </div>
               <div
                 class="child-name"
@@ -339,7 +344,7 @@
               v-if="!isWeekMode"
             ></div>
             <div
-              class="timeline-element root-drop"
+              class="timeline-element"
               :data-id="rootElement.id"
               :key="'entity-line-' + rootElement.id"
               v-for="rootElement in hierarchy"
@@ -351,7 +356,7 @@
                 :title="dayOff.description"
                 v-for="(dayOff, index) in getDayOffRange(rootElement.daysOff)"
               >
-                <briefcase-icon size="14" />
+                <briefcase-icon class="day-off-icon" size="14" />
               </div>
               <div
                 class="entity-line root-element"
@@ -398,17 +403,15 @@
               </div>
 
               <div
-                class="children"
+                class="children drop-item-target"
+                :data-root-element-id="rootElement.id"
                 :style="childrenStyle(rootElement, multiline)"
                 v-if="rootElement.expanded"
+                @dragenter="onTaskDragEnter($event, rootElement)"
+                @dragover="onTaskDragOver"
+                @dragleave="onTaskDragLeave"
+                @drop="onTaskDrop($event, rootElement)"
               >
-                <div class="flexrow" v-if="rootElement.loading">
-                  <spinner
-                    style="width: 20px; margin: 0 0 10px 10px; opacity: 0"
-                    class="child-spinner flexrow-item"
-                  />
-                </div>
-
                 <div
                   class="entity-line child-line"
                   :class="{ multiline }"
@@ -519,9 +522,11 @@ import {
   formatFullDate,
   getBusinessDays,
   getDayOffRange,
+  minutesToDays,
   parseDate
 } from '@/lib/time'
 
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -536,6 +541,7 @@ export default {
     BriefcaseIcon,
     ChevronDownIcon,
     ChevronRightIcon,
+    DepartmentName,
     EditIcon,
     EditMilestoneModal,
     PeopleAvatar,
@@ -580,6 +586,10 @@ export default {
 
   props: {
     daysOff: {
+      type: Array,
+      default: () => []
+    },
+    draggedItems: {
       type: Array,
       default: () => []
     },
@@ -657,11 +667,14 @@ export default {
 
   computed: {
     ...mapGetters([
+      'departmentMap',
       'isCurrentUserManager',
       'isDarkTheme',
+      'openProductions',
       'organisation',
       'milestones',
-      'taskMap'
+      'taskMap',
+      'taskTypeMap'
     ]),
 
     currentMilestones() {
@@ -675,7 +688,8 @@ export default {
     },
 
     cellWidth() {
-      return Math.max(this.zoomLevel, 1) * 20
+      const cellWidthByLevel = [20, 20, 40, 60, 120]
+      return cellWidthByLevel[this.zoomLevel] || 20
     },
 
     daysAvailable() {
@@ -891,8 +905,7 @@ export default {
     },
 
     timelineSubStartStyle() {
-      let diff = this.dateDiff(this.startDate, this.subStartDate)
-      if (diff < 0) diff = 0
+      const diff = Math.max(this.dateDiff(this.startDate, this.subStartDate), 0)
       return {
         left: 0,
         width: `${this.cellWidth * diff}px`
@@ -900,8 +913,10 @@ export default {
     },
 
     timelineSubEndStyle() {
-      let diff = this.dateDiff(this.subEndDate, this.endDate)
-      if (diff < 0) diff = 0
+      const diff = Math.max(
+        this.dateDiff(this.subEndDate, this.endDate) - 1, // end date must available
+        0
+      )
       return {
         right: 0,
         width: `${this.cellWidth * diff}px`
@@ -1038,6 +1053,12 @@ export default {
       return this.displayedWeeksIndex[dateString]
     },
 
+    resetDroppableTargets() {
+      this.schedule.querySelectorAll('.droppable').forEach(element => {
+        element.classList.remove('droppable')
+      })
+    },
+
     changeDates(event) {
       if (!this.isSelected(this.currentElement)) {
         // avoid side effect if item unselected
@@ -1050,40 +1071,37 @@ export default {
 
       if (this.reassignable) {
         let target = event.target
-        while (
-          target &&
-          (!target.classList || !target.classList.contains('root-drop'))
-        ) {
+        while (target && !target.classList?.contains('drop-item-target')) {
           target = target.parentNode
         }
+        if (!target) {
+          this.resetDroppableTargets()
+        }
         const currentRootElement = this.currentElement.parentElement
-
-        if (target && currentRootElement.id !== target.dataset.id) {
+        if (target && currentRootElement.id !== target.dataset.rootElementId) {
           const newRootElement = this.hierarchy.find(
-            rootElement => rootElement.id === target.dataset.id
+            rootElement => rootElement.id === target.dataset.rootElementId
           )
-          if (newRootElement.expanded) {
-            this.selection.forEach(item => {
-              const previousRootElement = item.parentElement
-              // update assignation in element hierarchy
-              item.parentElement = newRootElement
-              previousRootElement.children =
-                previousRootElement.children.filter(child => {
-                  if (child.id !== item.id) {
-                    this.$emit('item-unassign', item, previousRootElement)
-                    return true
-                  }
-                  return false
-                })
-              newRootElement.children = newRootElement.children.filter(
-                child => child.id !== item.id
-              )
-              newRootElement.children.push(item)
-              this.$emit('item-assign', item, newRootElement)
-              this.refreshItemPositions(previousRootElement)
-            })
-            this.refreshItemPositions(newRootElement)
-          }
+          this.selection.forEach(item => {
+            if (!this.checkUserIsAllowed(item, newRootElement)) {
+              return
+            }
+            target.classList.add('droppable')
+            // update assignation in element hierarchy
+            const previousRootElement = item.parentElement
+            item.parentElement = newRootElement
+            previousRootElement.children = previousRootElement.children.filter(
+              ({ id }) => id !== item.id
+            )
+            newRootElement.children = newRootElement.children.filter(
+              ({ id }) => id !== item.id
+            )
+            newRootElement.children.push(item)
+            this.$emit('item-unassign', item, previousRootElement)
+            this.$emit('item-assign', item, newRootElement)
+            this.refreshItemPositions(previousRootElement)
+          })
+          this.refreshItemPositions(newRootElement)
         }
       }
 
@@ -1449,6 +1467,7 @@ export default {
           this.resetSelection()
         }
       }
+      this.resetDroppableTargets()
       this.isChangeStartDate = false
       this.isChangeEndDate = false
       this.isChangeDates = false
@@ -1462,7 +1481,13 @@ export default {
     // Helpers
 
     dateDiff(startDate, endDate) {
-      if (startDate.isSame(endDate)) return 0
+      if (
+        startDate.isSame(endDate) ||
+        !startDate.isValid() ||
+        !endDate.isValid()
+      ) {
+        return 0
+      }
       const first = startDate.clone().startOf('day')
       const last = endDate.clone().endOf('day')
       const diff = last.diff(first, 'days')
@@ -1695,9 +1720,71 @@ export default {
     },
 
     addMilestoneTitle(day) {
-      return (
-        `${this.$t('schedule.milestone.add_milestone')} ` +
-        `${day.format('YYYY-MM-DD')}`
+      return `${this.$t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
+    },
+
+    checkUserIsAllowed(item, person) {
+      const production = this.openProductions.find(
+        ({ id }) => id === item.project_id
+      )
+      const isTeamMember = production.team.includes(person.id)
+      const isDepartmentMember =
+        !person.departments.length ||
+        !item.department ||
+        person.departments.includes(item.department.id)
+      return isTeamMember && isDepartmentMember
+    },
+
+    onTaskDragEnter(event, rootElement) {
+      const item = this.draggedItems[0]
+      const isAllowed = this.checkUserIsAllowed(item, rootElement)
+      if (isAllowed) {
+        event.currentTarget.classList.add('droppable')
+      }
+    },
+
+    onTaskDragOver(event) {
+      event.preventDefault()
+    },
+
+    onTaskDragLeave(event) {
+      event.target.classList.remove('droppable')
+    },
+
+    onTaskDrop(event, rootElement) {
+      event.target.classList.remove('droppable')
+      const item = this.draggedItems[0]
+
+      if (!this.checkUserIsAllowed(item, rootElement)) {
+        return
+      }
+      const position =
+        this.timelineContentWrapper.scrollLeft +
+        this.getClientX(event) -
+        300 -
+        this.cellWidth * 1.5
+      const dayPosition = Math.floor(position / this.cellWidth)
+      const dropDate = this.startDate.clone().add(dayPosition, 'days')
+      const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
+      const endDate = item.estimation
+        ? addBusinessDays(
+            startDate,
+            minutesToDays(this.organisation, item.estimation) - 1,
+            rootElement.daysOff
+          )
+        : startDate
+
+      // convert to schedule item
+      item.full_entity_name = `${item.entity_type_name} / ${item.entity_name}`
+      item.start_date = startDate.format('YYYY-MM-DD')
+      item.due_date = endDate.format('YYYY-MM-DD')
+      item.parentElement = rootElement
+
+      this.$emit(
+        'item-drop',
+        item,
+        rootElement,
+        this.multiline ? this.refreshItemPositions : undefined
       )
     }
   },
@@ -1705,7 +1792,6 @@ export default {
   watch: {
     startDate() {
       this.resetScheduleSize()
-      // this.scrollToToday()
     },
     endDate() {
       this.resetScheduleSize()
@@ -1759,7 +1845,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         // go to next line
         return getFreeLinePosition(value, start, end, matrix, line + 1)
       }
-
       // if no collision for the whole item
       if (index === end) {
         // save item in matrix
@@ -1779,25 +1864,31 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
   .schedule.zoom-level-0 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-1.png');
+      background-image: url('@/assets/background/schedule-dark-1.svg');
     }
   }
 
   .schedule.zoom-level-1 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-1-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-1-weekend.svg');
     }
   }
 
   .schedule.zoom-level-2 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-2-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-2-weekend.svg');
     }
   }
 
   .schedule.zoom-level-3 {
     .timeline-content {
-      background-image: url('@/assets/background/schedule-dark-3-weekend.png');
+      background-image: url('@/assets/background/schedule-dark-3-weekend.svg');
+    }
+  }
+
+  .schedule.zoom-level-4 {
+    .timeline-content {
+      background-image: url('@/assets/background/schedule-dark-4-weekend.svg');
     }
   }
 
@@ -2003,9 +2094,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       .day-off-icon {
+        color: white;
         position: absolute;
         top: -1px;
-        opacity: 0.25;
+        z-index: 10000;
       }
 
       .weekday-number {
@@ -2027,10 +2119,8 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   .timeline-content-wrapper {
-    background-repeat: repeat;
     margin-left: 2px;
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: auto;
 
     .timeline-content {
       position: relative;
@@ -2159,7 +2249,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .zoom-level-0 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-1.png');
+    background-image: url('@/assets/background/schedule-white-1.svg');
   }
   .day {
     width: 20px;
@@ -2171,7 +2261,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .zoom-level-1 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-1-weekend.png');
+    background-image: url('@/assets/background/schedule-white-1-weekend.svg');
   }
   .day {
     width: 20px;
@@ -2183,7 +2273,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .schedule.zoom-level-2 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-2-weekend.png');
+    background-image: url('@/assets/background/schedule-white-2-weekend.svg');
   }
   .day {
     width: 40px;
@@ -2195,13 +2285,25 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .schedule.zoom-level-3 {
   .timeline-content {
-    background-image: url('@/assets/background/schedule-white-3-weekend.png');
+    background-image: url('@/assets/background/schedule-white-3-weekend.svg');
   }
   .day {
     width: 60px;
   }
   .milestone-tooltip {
     left: 30px;
+  }
+}
+
+.schedule.zoom-level-4 {
+  .timeline-content {
+    background-image: url('@/assets/background/schedule-white-4-weekend.svg');
+  }
+  .day {
+    width: 120px;
+  }
+  .milestone-tooltip {
+    left: 60px;
   }
 }
 
@@ -2286,7 +2388,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .child-spinner {
   font-size: 10px;
-  padding-top: 20px;
+  margin: 15px 10px;
 }
 
 .milestone {
@@ -2428,23 +2530,33 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 
 .day-off {
   position: absolute;
-  z-index: 0;
   width: 19px;
   height: 100%;
   line-height: 40px;
   text-align: center;
-  color: $light-grey;
+  color: $dark-grey-light;
   background-color: #f0f0f0;
 
   .dark & {
-    color: $dark-grey;
+    color: $white;
     background-color: #43474d;
+  }
+
+  .day-off-icon {
+    position: absolute;
+    left: 3px;
+    top: 15px;
+    z-index: 100;
   }
 }
 
 .day-name-off,
 .weekend {
-  background: rgba(200, 200, 200, 0.3);
+  background-color: rgba(200, 200, 200, 0.3);
+
+  .dark & {
+    background-color: rgba(200, 200, 200, 0.1);
+  }
 }
 
 input::-webkit-outer-spin-button,
@@ -2468,5 +2580,13 @@ input[type='number'] {
   opacity: 0.4;
   top: 0;
   bottom: 0;
+}
+
+.droppable {
+  background-color: rgba(var(--background-selectable-rgb), 0.5);
+
+  * {
+    pointer-events: none;
+  }
 }
 </style>

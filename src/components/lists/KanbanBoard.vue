@@ -57,51 +57,50 @@
             v-for="task in column.tasks"
           >
             <div class="ui-droppable">
-              <production-name
-                :production="{
-                  id: task.project_id,
-                  name: task.project_name
-                }"
-                :size="25"
-                v-if="!production"
+              <entity-preview
+                class="entity-preview"
+                :empty-height="100"
+                :entity="{ preview_file_id: task.entity_preview_file_id }"
+                cover
+                is-rounded-top-border
               />
-              <div class="flexrow">
-                <entity-thumbnail
-                  :empty-width="80"
-                  :empty-height="60"
-                  :entity="{ preview_file_id: task.entity_preview_file_id }"
+              <div class="avatars">
+                <people-avatar
+                  :is-link="false"
+                  :key="`${task.id}-${person.id}`"
+                  :person="person"
+                  :size="20"
+                  :font-size="12"
+                  v-for="person in getSortedPeople(task.assignees)"
                 />
-                <div class="pa1 ellipsis">
-                  {{ task.full_entity_name }}
-                </div>
+                <span
+                  class="priority"
+                  :class="{
+                    high: task.priority === 1,
+                    veryhigh: task.priority === 2,
+                    emergency: task.priority === 3
+                  }"
+                  :title="formatPriority(task.priority)"
+                  v-if="task.priority > 0"
+                >
+                  {{ formatPrioritySymbol(task.priority) }}
+                </span>
               </div>
-              <div class="level mt05">
+              <div class="infos flexrow">
+                <div class="filler">
+                  <div class="production-name">
+                    {{ productionMap.get(task.project_id)?.name }}
+                  </div>
+                  <div class="entity-name">
+                    {{ task.full_entity_name }}
+                  </div>
+                </div>
                 <task-type-name
+                  class="task-type-name"
+                  rounded
                   :task-id="task.id"
                   :task-type="getTaskType(task)"
                 />
-                <div class="avatars">
-                  <span
-                    class="priority"
-                    :class="{
-                      high: task.priority === 1,
-                      veryhigh: task.priority === 2,
-                      emergency: task.priority === 3
-                    }"
-                    :title="formatPriority(task.priority)"
-                    v-if="task.priority > 0"
-                  >
-                    {{ formatPrioritySymbol(task.priority) }}
-                  </span>
-                  <people-avatar
-                    :is-link="false"
-                    :key="`${task.id}-${person.id}`"
-                    :person="person"
-                    :size="20"
-                    :font-size="12"
-                    v-for="person in getSortedPeople(task.assignees)"
-                  />
-                </div>
               </div>
             </div>
           </li>
@@ -136,9 +135,8 @@ import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import EntityPreview from '@/components/widgets/EntityPreview'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ProductionName from '@/components/widgets/ProductionName'
 import TableInfo from '@/components/widgets/TableInfo'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
@@ -149,9 +147,8 @@ export default {
 
   components: {
     AddPreviewModal,
-    EntityThumbnail,
+    EntityPreview,
     PeopleAvatar,
-    ProductionName,
     TableInfo,
     TaskTypeName
   },
@@ -354,8 +351,8 @@ export default {
     },
 
     onCardDragEnter(event, taskStatus) {
-      this.isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
-      if (this.isAllowed) {
+      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
+      if (isAllowed) {
         event.currentTarget.classList.add('droppable')
       }
     },
@@ -488,6 +485,7 @@ export default {
   text-align: center;
   background: var(--border-alt);
   border: none;
+  z-index: 1;
 
   .tag {
     font-weight: bold;
@@ -503,11 +501,11 @@ export default {
 }
 
 .board-card {
-  cursor: pointer;
+  cursor: grab;
+  position: relative;
 
   .ui-droppable {
-    padding: 1em;
-    border-radius: 1em;
+    border-radius: 10px;
     border: 1px solid var(--border-alt);
     background-color: var(--background-alt);
   }
@@ -552,28 +550,24 @@ export default {
   }
 }
 
+.entity-preview {
+  cursor: inherit;
+}
+
 .avatars {
+  position: absolute;
+  right: 5px;
+  top: 75px;
   display: flex;
   flex-direction: row;
-  gap: 10px;
-}
-
-.production-name {
-  color: var(--text);
-  font-size: 0.9em;
-  font-weight: 600;
-  margin-bottom: 0.5em;
-}
-
-.thumbnail-picture {
-  background-color: black;
+  gap: 0.25em;
 }
 
 .priority {
   border-radius: 5px;
   display: inline-block;
-  color: white;
-  margin-left: 5px;
+  color: $white;
+  margin-left: 0.25em;
   font-weight: bold;
   min-width: 23px;
   text-align: center;
@@ -588,6 +582,26 @@ export default {
 
   &.emergency {
     background: $red;
+  }
+}
+
+.infos {
+  padding: 0.5em;
+
+  .production-name {
+    color: var(--text);
+    font-size: 0.9em;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+
+  .entity-name {
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+
+  .task-type-name {
+    cursor: inherit;
   }
 }
 </style>

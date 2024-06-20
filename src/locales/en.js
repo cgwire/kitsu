@@ -81,16 +81,17 @@ export default {
   },
 
   bots: {
-    title: 'Bots',
-    bots: 'bot | bots',
     active_bots: 'active bot | active bots',
-    new_bot: 'Add a new bot',
-    edit_title: 'Edit bot',
+    bots: 'bot | bots',
+    copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
     edit_avatar_error: 'An error occurred while updating the bot avatar.',
+    edit_title: 'Edit bot',
+    new_bot: 'Add a new bot',
     new_token_title: 'New API token for {name}',
     new_token_warning: 'If you generate a new token, the old one will be disabled.',
+    no_bot: 'There is no bot. Do you want to create one?',
     generate: 'Generate a new token',
-    copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    title: 'Bots',
     token_copied: 'Token copied to clipboard!',
     fields: {
       name: 'Name',
@@ -267,6 +268,21 @@ export default {
     new_departments: 'Add a department',
     number: 'department | departments',
     title: 'Departments',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    }
+  },
+
+  studios: {
+    create_error: 'An error occurred while saving this studio. Are you sure there is no studio with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this studio.',
+    edit_title: 'Edit studio',
+    new_studios: 'Add a studio',
+    no_studio: 'No studio',
+    number: 'studio | studios',
+    title: 'Studios',
     fields: {
       name: 'Name',
       color: 'Color'
@@ -533,6 +549,7 @@ export default {
     department: 'Department',
     description: 'Description',
     documentation: 'Documentation',
+    drop_files_here: 'Drop files here',
     edit: 'Edit',
     empty_comment: 'Empty comment',
     empty_schedule: 'There are no tasks or they don\'t have start dates.',
@@ -560,6 +577,7 @@ export default {
     home: 'return to home page',
     or: 'or',
     no: 'No',
+    no_results: 'No results',
     less_filters: 'Fewer filters',
     link: 'Link',
     load_more: 'Load more',
@@ -768,7 +786,8 @@ export default {
       password: 'New password',
       password_2: 'New password (repeat)',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     list: {
       active: 'Active',
@@ -778,7 +797,8 @@ export default {
       expiration: 'Expiration',
       name: 'Name',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     role: {
       all: 'All',
@@ -1509,6 +1529,7 @@ export default {
     tasks: 'Tasks',
     to_myself: 'To myself',
     use_current_frame: 'Use current frame',
+    unassigned_tasks: 'Unassigned tasks',
     validated: 'Validated',
     validation: 'Validation',
     with_comment: 'With a comment...',
@@ -1592,6 +1613,7 @@ export default {
     updated_at: 'Update date',
     nb_days_off: 'Day Off | Days Off',
     no_day_off: 'No day off for the selected period.',
+    no_days_off: 'You have registered no day off yet.',
     add: 'Add day off',
     edit: 'Edit day off',
     delete: 'Delete day off',

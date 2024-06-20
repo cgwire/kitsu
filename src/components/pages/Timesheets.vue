@@ -7,21 +7,23 @@
             class="flexrow-item title"
             :text="$t('timesheets.title')"
           />
-
           <combobox-production
             class="flexrow-item"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="productionIdString"
           />
-
+          <combobox-studio
+            class="flexrow-item field"
+            :label="$t('main.studio')"
+            v-model="studioIdString"
+          />
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.detail_level')"
             :options="detailOptions"
             v-model="detailLevelString"
           />
-
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.year')"
@@ -29,7 +31,6 @@
             v-model="yearString"
             v-if="detailLevelString !== 'year'"
           />
-
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.month')"
@@ -37,14 +38,12 @@
             v-model="monthString"
             v-if="detailLevelString === 'day'"
           />
-
           <combobox
             class="flexrow-item"
             :label="$t('timesheets.unit')"
             :options="unitOptions"
             v-model="unit"
           />
-
           <div class="filler"></div>
           <button-simple
             class="flexrow-item"
@@ -102,21 +101,24 @@ import { monthToString, range } from '@/lib/time'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
-import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction'
-import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList'
-import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo'
-import PageTitle from '@/components/widgets/PageTitle'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
+import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
 
 export default {
   name: 'timesheets',
+
   components: {
     ButtonSimple,
     ButtonHrefLink,
     Combobox,
     ComboboxProduction,
+    ComboboxStudio,
     PageTitle,
     PeopleTimesheetList,
     PeopleTimesheetInfo
@@ -155,8 +157,10 @@ export default {
 
       detailLevelString: 'day',
       detailLevel: 'day',
-      productionIdString: '',
       productionId: '',
+      productionIdString: '',
+      studioId: '',
+      studioIdString: '',
       yearString: `${moment().year()}`,
       monthString: `${moment().month() + 1}`,
       unit: 'hour',
@@ -191,11 +195,15 @@ export default {
   },
 
   mounted() {
-    const productionId = this.$route.query.productionId
-    if (productionId) {
+    const productionId = this.$route.query.productionId || undefined
+    const studioId = this.$route.query.studioId || undefined
+
+    if (productionId || studioId) {
       this.silent = true
       this.productionId = productionId
       this.productionIdString = productionId
+      this.studioId = studioId
+      this.studioIdString = studioId
       this.reloadTimesheet().then(() => {
         this.silent = false
       })
@@ -288,7 +296,8 @@ export default {
         detailLevel: this.detailLevel,
         year: this.currentYear,
         month: this.currentMonth,
-        productionId: this.productionId
+        productionId: this.productionId,
+        studioId: this.studioId
       })
         .then(() => {
           this.isLoading = false
@@ -315,6 +324,7 @@ export default {
       this.$options.silent = true
       const { month, year, week, day } = this.$route.params
       const previousProduction = `${this.productionId}`
+      const previousStudio = `${this.studioId}`
       const previousDetailLevel = `${this.detailLevel}`
       const previousMonth = `${this.currentMonth}`
       const previousYear = `${this.currentYear}`
@@ -342,6 +352,7 @@ export default {
         this.currentDay = Number(day)
       }
       this.productionId = this.$route.query.productionId || ''
+      this.studioId = this.$route.query.studioId || ''
 
       const detailLevelHasChanged = previousDetailLevel !== this.detailLevel
       const monthHasChanged =
@@ -350,6 +361,8 @@ export default {
         previousYear.localeCompare(`${this.currentYear}`) !== 0
       const productionHasChanged =
         previousProduction.localeCompare(`${this.productionId}`) !== 0
+      const studioHasChanged =
+        previousStudio.localeCompare(`${this.studioId}`) !== 0
       this.$nextTick(() => {
         this.$options.silent = false
       })
@@ -366,7 +379,8 @@ export default {
         monthHasChanged ||
         yearHasChanged ||
         detailLevelHasChanged ||
-        productionHasChanged
+        productionHasChanged ||
+        studioHasChanged
       ) {
         this.reloadTimesheet()
       }
@@ -383,7 +397,8 @@ export default {
         month: this.$route.params.month,
         week: this.$route.params.week,
         day: this.$route.params.day,
-        productionId: this.productionId
+        productionId: this.productionId,
+        studioId: this.studioId
       })
         .then(tasks => {
           this.tasks = tasks.filter(task => task.duration > 0)
@@ -431,6 +446,21 @@ export default {
         moment().year(),
         moment().week()
       )
+    },
+
+    updateRoute({ productionId, studioId }) {
+      const query = { ...this.$route.query }
+
+      if (productionId !== undefined) {
+        query.productionId = productionId || undefined
+      }
+      if (studioId !== undefined) {
+        query.studioId = studioId || undefined
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
+        this.$router.push({ query })
+      }
     }
   },
 
@@ -519,13 +549,14 @@ export default {
       }
     },
 
-    productionIdString() {
+    productionIdString(value) {
       if (this.silent) return
-      this.$router.push({
-        query: {
-          productionId: this.productionIdString
-        }
-      })
+      this.updateRoute({ productionId: value })
+    },
+
+    studioIdString(value) {
+      if (this.silent) return
+      this.updateRoute({ studioId: value })
     },
 
     $route() {

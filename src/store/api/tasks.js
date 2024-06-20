@@ -84,7 +84,7 @@ export default {
   },
 
   getTaskComment(data) {
-    return client.pget(`/api/data/comments/${data.id}`)
+    return client.pget(`/api/data/comments/${data.id}?relations=true`)
   },
 
   editTaskComment(comment) {

@@ -30,7 +30,10 @@
     </template>
     <template v-slot:side v-if="isCurrentUserManager">
       <div class="importers flexcolumn">
-        <div class="project-import flexcolumn">
+        <div
+          class="project-import flexcolumn"
+          v-if="availableProductions.length > 0"
+        >
           <combobox-production
             class="flexrow-item"
             :label="$t('people.import_from_production')"
@@ -45,7 +48,13 @@
             @click="importTeamFromProduction"
           />
         </div>
-        <div class="department-import flexcolumn mt2">
+        <div
+          :class="{
+            'department-import': true,
+            flexcolumn: true,
+            mt2: availableProductions.length > 0
+          }"
+        >
           <combobox-department
             class="flexrow-item"
             :label="$t('people.import_from_department')"

@@ -42,7 +42,7 @@
           >
             <td class="department">
               <department-name
-                :department="getDepartments(taskType.department_id)"
+                :department="getDepartment(taskType.department_id)"
                 v-if="!isEmpty(taskType.department_id)"
               />
             </td>
@@ -90,7 +90,7 @@
           >
             <td class="department">
               <department-name
-                :department="getDepartments(taskType.department_id)"
+                :department="getDepartment(taskType.department_id)"
                 v-if="!isEmpty(taskType.department_id)"
               />
             </td>
@@ -138,7 +138,7 @@
           >
             <td class="department">
               <department-name
-                :department="getDepartments(taskType.department_id)"
+                :department="getDepartment(taskType.department_id)"
                 v-if="!isEmpty(taskType.department_id)"
               />
             </td>
@@ -186,7 +186,7 @@
           >
             <td class="department">
               <department-name
-                :department="getDepartments(taskType.department_id)"
+                :department="getDepartment(taskType.department_id)"
                 v-if="!isEmpty(taskType.department_id)"
               />
             </td>
@@ -234,7 +234,7 @@
           >
             <td class="department">
               <department-name
-                :department="getDepartments(taskType.department_id)"
+                :department="getDepartment(taskType.department_id)"
                 v-if="!isEmpty(taskType.department_id)"
               />
             </td>
@@ -274,11 +274,11 @@
 import { mapGetters } from 'vuex'
 import draggable from 'vuedraggable'
 
-import BooleanRep from '@/components/widgets/BooleanRep'
+import BooleanRep from '@/components/widgets/BooleanRep.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'task-type-list',
@@ -318,7 +318,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['getDepartments']),
+    ...mapGetters(['getDepartment']),
 
     assetTaskTypes() {
       return this.getTaskTypesForEntity('Asset')
