@@ -48,6 +48,7 @@
             "production_title": "资产类型统计",
             "fields": {
                 "name": "名称",
+                "short_name": "状态",
                 "task_types": "工作流程"
             },
             "include_all": "包括所有资产任务类型"

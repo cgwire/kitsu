@@ -39,7 +39,8 @@ export default {
     title: 'انواع منبع',
     production_title: 'آمار تمام منابع',
     fields: {
-      name: 'نام'
+      name: 'نام',
+      short_name: 'اسم کوتاه'
     }
   },
 
