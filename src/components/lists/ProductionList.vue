@@ -105,6 +105,9 @@
                 :is-link="false"
               />
             </th>
+            <td class="code">
+              {{ entry.code }}
+            </td>
             <td class="type">
               {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
             </td>
