@@ -8,10 +8,9 @@
         </h1>
 
         <form class="form" @submit.prevent v-if="!person.access_token">
-          <p class="mb2">
-            <alert-triangle-icon class="icon mr05 warning" />{{
-              $t('bots.new_token_warning')
-            }}
+          <p class="mb2 warning-text">
+            <alert-triangle-icon class="icon mr05 warning" />
+            {{ $t('bots.new_token_warning') }}
           </p>
           <date-field
             :disabled-dates="{ to: new Date() }"
@@ -37,7 +36,7 @@
         </form>
 
         <template v-else>
-          <p class="mb2 strong">
+          <p class="mb2 warning-text">
             <alert-triangle-icon class="icon mr05 warning" />{{
               $t('bots.copy_token_warning')
             }}

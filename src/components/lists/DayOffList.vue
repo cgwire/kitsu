@@ -9,7 +9,7 @@
         @click="openSetDayOffModal"
       />
     </div>
-    <div class="datatable-wrapper">
+    <div class="datatable-wrapper" v-if="sortedDaysOff.length > 0">
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -52,6 +52,13 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div
+      class="has-text-centered mt2 mb1 strong"
+      v-if="sortedDaysOff.length === 0 && !isLoading"
+    >
+      <p>{{ $t('days_off.no_days_off') }}</p>
     </div>
 
     <table-info :is-loading="isLoading" :is-error="isError" />

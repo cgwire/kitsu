@@ -434,9 +434,7 @@ const actions = {
 
   updateTask({ commit }, { taskId, data }) {
     commit(EDIT_TASK_DATES, { taskId, data })
-    return tasksApi.updateTask(taskId, data).then(task => {
-      commit(EDIT_TASK_DATES, { taskId, data })
-    })
+    return tasksApi.updateTask(taskId, data)
   },
 
   deleteTask({ commit }, { task, callback }) {
@@ -1237,7 +1235,9 @@ const mutations = {
 
   [EDIT_TASK_DATES](state, { taskId, data }) {
     const task = state.taskMap.get(taskId)
-    Object.assign(task, data)
+    if (task) {
+      Object.assign(task, data)
+    }
   },
 
   [ASSIGN_TASKS](state, { selectedTaskIds, personId }) {

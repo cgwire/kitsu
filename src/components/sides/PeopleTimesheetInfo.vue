@@ -142,30 +142,51 @@ export default {
     },
 
     closeRoute() {
-      if (this.isMonthInfo) {
+      const query = {
+        productionId: this.$route.query.productionId,
+        studioId: this.$route.query.studioId
+      }
+      if (this.isYearInfo) {
+        return {
+          name: 'timesheets-year',
+          params: {
+            year: this.year
+          },
+          query
+        }
+      } else if (this.isMonthInfo) {
         return {
           name: 'timesheets-month',
           params: {
-            year: this.year
-          }
+            year: this.year,
+            month: this.month
+          },
+          query
         }
       } else if (this.isWeekInfo) {
         return {
           name: 'timesheets-week',
           params: {
-            year: this.year
-          }
+            year: this.year,
+            week: this.week
+          },
+          query
         }
       } else if (this.isDayInfo) {
         return {
           name: 'timesheets-day',
           params: {
             year: this.year,
-            month: this.month
-          }
+            month: this.month,
+            day: this.day
+          },
+          query
         }
       } else {
-        return { name: 'timesheets' }
+        return {
+          name: 'timesheets',
+          query
+        }
       }
     }
   },

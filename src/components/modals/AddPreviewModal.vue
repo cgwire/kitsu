@@ -5,11 +5,29 @@
       modal: true,
       'is-active': active
     }"
+    ref="modal"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <div
+      ref="background"
+      class="modal-background"
+      @click="$emit('cancel')"
+    ></div>
 
-    <div class="modal-content">
-      <div class="box content">
+    <div
+      class="modal-content"
+      @dragover="onFileDragover"
+      @dragleave="onFileDragLeave"
+    >
+      <div id="modal-content" class="box content" :class="{ dragging: true }">
+        <div
+          ref="dropMask"
+          id="drop-mask"
+          class="drop-mask"
+          @drop="onDrop"
+          v-if="isDraggingFile"
+        >
+          {{ $t('main.drop_files_here') }}
+        </div>
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title" v-if="isEditing">
           {{ $t('tasks.change_preview') }}
@@ -171,7 +189,8 @@ export default {
 
   data() {
     return {
-      forms: []
+      forms: [],
+      isDraggingFile: false
     }
   },
 
@@ -224,6 +243,28 @@ export default {
 
     removePreview(form) {
       this.forms = this.forms.filter(f => f !== form)
+    },
+
+    onFileDragover(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.isDraggingFile = true
+    },
+
+    onFileDragLeave(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.target.id === 'drop-mask') {
+        this.isDraggingFile = false
+      }
+    },
+
+    onDrag(event) {},
+
+    onDrop(event) {
+      this.previewField.onDrop(event)
+      this.isDraggingFile = false
+      event.preventDefault()
     }
   },
 
@@ -311,5 +352,25 @@ h3.subtitle {
 
 .preview-files-field {
   margin: auto;
+}
+
+.box.content {
+  position: relative;
+}
+
+.drop-mask {
+  align-items: center;
+  background: rgba(0.1, 0, 0, 0.5);
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  font-size: 2em;
+  justify-content: center;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  z-index: 1000;
 }
 </style>

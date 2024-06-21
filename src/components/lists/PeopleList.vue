@@ -25,6 +25,9 @@
             <th scope="col" class="departments">
               {{ $t('people.list.departments') }}
             </th>
+            <th scope="col" class="studio" v-if="!isBots">
+              {{ $t('people.list.studio') }}
+            </th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -38,50 +41,55 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="entry in activePeople"
-            :key="entry.id"
+            v-for="person in activePeople"
+            :key="person.id"
           >
             <people-name-cell
               class="name datatable-row-header"
-              :person="entry"
+              :person="person"
             />
-            <td class="email" v-if="!isBots">{{ entry.email }}</td>
-            <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
+            <td class="email" v-if="!isBots">{{ person.email }}</td>
+            <td class="phone" v-if="!isBots">{{ person.phone }}</td>
             <td
               class="expiration"
               :class="{
-                error: isExpired(entry.expiration_date),
-                warning: isSoonExpired(entry.expiration_date)
+                error: isExpired(person.expiration_date),
+                warning: isSoonExpired(person.expiration_date)
               }"
               v-if="isBots"
             >
-              {{ entry.expiration_date }}
-              <alert-triangle-icon class="icon" />
+              {{ person.expiration_date }}
+              <alert-triangle-icon class="icon mr05" />
             </td>
-            <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+            <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
             <td class="contract" v-if="!isBots">
-              {{ $t('people.contract.' + entry.contract_type) }}
+              {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
             <department-names-cell
               class="departments"
-              :departments="entry.departments"
+              :departments="person.departments"
             />
+            <td class="studio" v-if="!isBots">
+              <studio-name :studio="person.studio" v-if="person.studio" />
+            </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
-              :entry-id="entry.id"
+              :entry-id="person.id"
               :hide-avatar="false"
               :hide-change-password="isBots"
               :hide-delete="true"
               :hide-refresh="!isBots"
-              @avatar-clicked="$emit('avatar-clicked', entry)"
-              @change-password-clicked="$emit('change-password-clicked', entry)"
-              @edit-clicked="$emit('edit-clicked', entry)"
-              @refresh-clicked="$emit('refresh-clicked', entry)"
+              @avatar-clicked="$emit('avatar-clicked', person)"
+              @change-password-clicked="
+                $emit('change-password-clicked', person)
+              "
+              @edit-clicked="$emit('edit-clicked', person)"
+              @refresh-clicked="$emit('refresh-clicked', person)"
             />
             <td class="actions" v-else></td>
           </tr>
         </tbody>
-        <tbody class="datatable-body" v-if="unactivePeople.length > 0">
+        <tbody class="datatable-body" v-if="inactivePeople.length > 0">
           <tr class="datatable-type-header">
             <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
@@ -91,31 +99,34 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="entry in unactivePeople"
-            :key="entry.id"
+            v-for="person in inactivePeople"
+            :key="person.id"
           >
             <people-name-cell
               class="name datatable-row-header"
-              :person="entry"
+              :person="person"
             />
-            <td class="email" v-if="!isBots">{{ entry.email }}</td>
-            <td class="phone" v-if="!isBots">{{ entry.phone }}</td>
+            <td class="email" v-if="!isBots">{{ person.email }}</td>
+            <td class="phone" v-if="!isBots">{{ person.phone }}</td>
             <td class="expiration" v-if="isBots">
-              {{ entry.expiration_date }}
+              {{ person.expiration_date }}
             </td>
-            <td class="role">{{ $t('people.role.' + entry.role) }}</td>
+            <td class="role">{{ $t('people.role.' + person.role) }}</td>
             <td class="contract" v-if="!isBots">
-              {{ $t('people.contract.' + entry.contract_type) }}
+              {{ $t('people.contract.' + person.contract_type) }}
             </td>
             <department-names-cell
               class="departments"
-              :departments="entry.departments"
+              :departments="person.departments"
             />
+            <td class="studio" v-if="!isBots">
+              <studio-name :studio="person.studio" v-if="person.studio" />
+            </td>
             <row-actions-cell
               v-if="isCurrentUserAdmin"
-              :entry-id="entry.id"
-              @edit-clicked="$emit('edit-clicked', entry)"
-              @delete-clicked="$emit('delete-clicked', entry)"
+              :entry-id="person.id"
+              @edit-clicked="$emit('edit-clicked', person)"
+              @delete-clicked="$emit('delete-clicked', person)"
             />
             <td class="actions" v-else></td>
           </tr>
@@ -136,9 +147,10 @@ import { mapGetters } from 'vuex'
 import { AlertTriangleIcon } from 'vue-feather-icons'
 
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import StudioName from '@/components/widgets/StudioName.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'people-list',
@@ -148,6 +160,7 @@ export default {
     DepartmentNamesCell,
     PeopleNameCell,
     RowActionsCell,
+    StudioName,
     TableInfo
   },
 
@@ -171,7 +184,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['departmentMap', 'isCurrentUserAdmin']),
+    ...mapGetters(['isCurrentUserAdmin']),
 
     activePeople() {
       return this.entries.filter(person => person.active)
@@ -187,7 +200,7 @@ export default {
       return date.toJSON().slice(0, 10)
     },
 
-    unactivePeople() {
+    inactivePeople() {
       return this.entries.filter(person => !person.active)
     },
 
@@ -228,16 +241,19 @@ export default {
   min-width: 230px;
   user-select: text;
 }
+
 .email {
   width: 340px;
   min-width: 340px;
   user-select: text;
 }
+
 .phone {
   width: 200px;
   min-width: 200px;
   user-select: text;
 }
+
 .expiration {
   width: 200px;
   min-width: 200px;
@@ -261,23 +277,31 @@ export default {
     color: $yellow;
   }
 }
+
 .role {
   width: 200px;
   min-width: 200px;
 }
+
 .contract {
   width: 200px;
   min-width: 200px;
 }
+
+.departments {
+  width: 200px;
+  min-width: 200px;
+
+  .departments-element {
+    padding: 5px;
+  }
+}
+
+.studio {
+  min-width: 200px;
+}
+
 .actions {
   min-width: 100px;
-}
-
-.data-list {
-  margin-top: 2em;
-}
-
-.departments-element {
-  padding: 5px;
 }
 </style>

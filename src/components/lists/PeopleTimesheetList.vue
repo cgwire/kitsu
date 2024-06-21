@@ -367,7 +367,8 @@ export default {
           year: year
         },
         query: {
-          productionId: this.$route.query.productionId
+          productionId: this.$route.query.productionId,
+          studioId: this.$route.query.studioId
         }
       }
     },
@@ -381,7 +382,8 @@ export default {
           month: month
         },
         query: {
-          productionId: this.$route.query.productionId
+          productionId: this.$route.query.productionId,
+          studioId: this.$route.query.studioId
         }
       }
     },
@@ -395,7 +397,8 @@ export default {
           week: week
         },
         query: {
-          productionId: this.$route.query.productionId
+          productionId: this.$route.query.productionId,
+          studioId: this.$route.query.studioId
         }
       }
     },
@@ -410,7 +413,8 @@ export default {
           day: day
         },
         query: {
-          productionId: this.$route.query.productionId
+          productionId: this.$route.query.productionId,
+          studioId: this.$route.query.studioId
         }
       }
     },

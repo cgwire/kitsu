@@ -37,16 +37,20 @@
         placeholder="ex: John Doe"
       />
       <combobox-department
-        class="combobox-department flexrow-item"
+        class="flexrow-item"
         :label="$t('main.department')"
         v-model="selectedDepartment"
+      />
+      <combobox-studio
+        class="flexrow-item"
+        :label="$t('main.studio')"
+        v-model="selectedStudio"
       />
       <combobox-styled
         class="flexrow-item"
         :label="$t('people.fields.role')"
-        :options="roleOptions"
         locale-key-prefix="people.role."
-        no-margin
+        :options="roleOptions"
         v-model="role"
       />
     </div>
@@ -149,31 +153,37 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ChangePasswordModal from '@/components/modals/ChangePasswordModal'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import EditAvatarModal from '@/components/modals/EditAvatarModal'
-import EditPersonModal from '@/components/modals/EditPersonModal'
-import HardDeleteModal from '@/components/modals/HardDeleteModal'
-import ImportModal from '@/components/modals/ImportModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
-import PeopleList from '@/components/lists/PeopleList'
-import PageTitle from '@/components/widgets/PageTitle'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
+
 import { searchMixin } from '@/components/mixins/search'
+
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ChangePasswordModal from '@/components/modals/ChangePasswordModal.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import EditAvatarModal from '@/components/modals/EditAvatarModal.vue'
+import EditPersonModal from '@/components/modals/EditPersonModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import PeopleList from '@/components/lists/PeopleList.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
 export default {
   name: 'people',
+
   mixins: [searchMixin],
+
   components: {
     ButtonHrefLink,
     ButtonSimple,
     ChangePasswordModal,
-    ComboboxStyled,
     ComboboxDepartment,
+    ComboboxStudio,
+    ComboboxStyled,
     EditAvatarModal,
     EditPersonModal,
     HardDeleteModal,
@@ -188,7 +198,13 @@ export default {
   data() {
     return {
       csvColumns: ['First Name', 'Last Name'],
-      optionalCsvColumns: ['Phone', 'Role', 'Contract Type', 'Active'],
+      optionalCsvColumns: [
+        'Phone',
+        'Role',
+        'Contract Type',
+        'Studio',
+        'Active'
+      ],
       dataMatchers: ['Email'],
       role: 'all',
       roleOptions: [
@@ -229,6 +245,7 @@ export default {
       personToEdit: { role: 'user' },
       personToChangePassword: {},
       selectedDepartment: '',
+      selectedStudio: '',
       success: {
         invite: false
       }
@@ -238,10 +255,11 @@ export default {
   mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
+    this.selectedStudio = this.$route.query.studio || ''
+    this.setSearchFromUrl()
     this.loadPeople(() => {
-      this.setSearchFromUrl()
       this.onSearchChange()
-    }) // Needed to show department informations
+    })
   },
 
   watch: {
@@ -261,6 +279,10 @@ export default {
       this.updateRoute()
     },
 
+    selectedStudio() {
+      this.updateRoute()
+    },
+
     role() {
       this.updateRoute()
     }
@@ -275,7 +297,8 @@ export default {
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
       'peopleSearchQueries',
-      'personCsvFormData'
+      'personCsvFormData',
+      'studioMap'
     ]),
 
     currentPeople() {
@@ -288,7 +311,15 @@ export default {
           person.departments.includes(this.selectedDepartment)
         )
       }
-      return people
+      if (this.selectedStudio) {
+        people = people.filter(
+          person => person.studio_id === this.selectedStudio
+        )
+      }
+      return people.map(person => ({
+        ...person,
+        studio: this.studioMap.get(person.studio_id)
+      }))
     },
 
     deleteText() {
@@ -316,7 +347,6 @@ export default {
       'deletePeople',
       'editPerson',
       'invitePerson',
-      'loadDepartments',
       'loadPeople',
       'newPerson',
       'newPersonAndInvite',
@@ -324,8 +354,7 @@ export default {
       'savePeopleSearch',
       'setPeopleSearch',
       'uploadPersonAvatar',
-      'uploadPersonFile',
-      'updatePersonToEdit'
+      'uploadPersonFile'
     ]),
 
     renderImport(data, mode) {
@@ -553,8 +582,9 @@ export default {
     updateRoute() {
       const search = this.searchField.getValue()
       const department = this.selectedDepartment
+      const studio = this.selectedStudio
       const role = this.role
-      this.$router.push({ query: { search, department, role } })
+      this.$router.push({ query: { search, department, studio, role } })
     }
   },
 

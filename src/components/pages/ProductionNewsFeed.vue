@@ -252,6 +252,10 @@
                           annotations: news.preview_file_annotations
                         }
                       ]"
+                      :task="{
+                        id: news.task_id,
+                        project_id: news.project_id
+                      }"
                       :read-only="true"
                       :light="true"
                       :big="true"
@@ -280,7 +284,6 @@
             class="stat-wrapper"
             v-for="stat in renderedStats"
           >
-            <div>{{ stat.name }} : {{ stat.value }}</div>
             <span
               class="stat-tag"
               :title="stat.name + ': ' + stat.value"
@@ -289,6 +292,7 @@
                 width: (stat.value / statMax) * 100 + '%'
               }"
             >
+              <div class="stat-text">{{ stat.name }} : {{ stat.value }}</div>
             </span>
           </div>
         </div>
@@ -995,17 +999,29 @@ export default {
   }
 
   .stat-tag {
+    border-radius: 6px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 0 2px var(--box-shadow);
     display: inline-block;
+    font-size: 0.8em;
+    height: 32px;
+    padding-left: 4px;
     margin-right: 1em;
     margin-top: 0;
     margin-bottom: 0.4em;
-    font-size: 0.8em;
     font-weight: bold;
     width: 100%;
-    height: 12px;
-    border-radius: 2px;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 0 2px var(--box-shadow);
+  }
+
+  .stat-text {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.8);
+    font-weight: bold;
+    padding: 4px 8px;
+    margin-top: 3px;
+    color: $black;
+    border-radius: 6px;
+    white-space: nowrap;
   }
 }
 

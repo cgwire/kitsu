@@ -100,19 +100,17 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.activeTab = this.$route.query.tab || 'active'
     this.loading.departments = true
     this.errors.departments = false
-    this.loadDepartments()
-      .then(() => {
-        this.loading.departments = false
-        this.errors.departments = false
-      })
-      .catch(() => {
-        this.loading.departments = false
-        this.errors.departments = true
-      })
+    try {
+      await this.loadDepartments()
+    } catch (error) {
+      console.log(error)
+      this.errors.departments = true
+    }
+    this.loading.departments = false
   },
 
   computed: {
@@ -127,13 +125,11 @@ export default {
     },
 
     deleteText() {
-      if (this.departmentToDelete) {
-        return this.$t('departments.delete_text', {
-          name: this.departmentToDelete.name
-        })
-      } else {
-        return ''
-      }
+      return this.departmentToDelete
+        ? this.$t('departments.delete_text', {
+            name: this.departmentToDelete.name
+          })
+        : ''
     }
   },
 

@@ -2,7 +2,11 @@
   <router-link :to="targetRoute" v-if="productionId && !isCurrentUserClient">
     <span
       class="tag task-type-name"
-      :style="{ 'border-left': '4px solid ' + color }"
+      :style="{
+        'border-left': '4px solid ' + color,
+        'border-top-right-radius': rounded ? '5px' : '0px',
+        'border-bottom-right-radius': rounded ? '5px' : '0px'
+      }"
     >
       {{ taskType.name }}
     </span>
@@ -15,7 +19,11 @@
       deletable,
       canceled: disable
     }"
-    :style="{ 'border-left': '4px solid ' + color }"
+    :style="{
+      'border-left': '4px solid ' + color,
+      'border-top-right-radius': rounded ? '5px' : '0px',
+      'border-bottom-right-radius': rounded ? '5px' : '0px'
+    }"
     v-else
   >
     {{ taskType.name }}
@@ -45,6 +53,10 @@ export default {
     productionId: {
       type: String,
       default: null
+    },
+    rounded: {
+      type: Boolean,
+      default: false
     },
     taskId: {
       type: String,

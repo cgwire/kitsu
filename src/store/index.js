@@ -25,6 +25,7 @@ import schedule from '@/store/modules/schedule'
 import sequences from '@/store/modules/sequences'
 import shots from '@/store/modules/shots'
 import statusAutomations from '@/store/modules/statusautomation'
+import studios from '@/store/modules/studios'
 import taskStatus from '@/store/modules/taskstatus'
 import taskTypes from '@/store/modules/tasktypes'
 import tasks from '@/store/modules/tasks'
@@ -55,6 +56,7 @@ const modules = {
   sequences,
   shots,
   statusAutomations,
+  studios,
   tasks,
   taskTypes,
   taskStatus,

@@ -9,7 +9,7 @@
           :tabs="todoTabs"
         />
 
-        <div class="flexrow" v-if="!isActiveTab('days_off')">
+        <div class="flexrow" v-if="!isActiveTab('daysoff')">
           <search-field
             class="flexrow-item search-field"
             ref="todos-search-field"
@@ -136,7 +136,7 @@
           :day-off-error="dayOffError"
           @set-day-off="onSetDayOff"
           @unset-day-off="onUnsetDayOff"
-          v-if="isActiveTab('days_off')"
+          v-if="isActiveTab('daysoff')"
         />
       </div>
     </div>
@@ -344,7 +344,7 @@ export default {
         },
         {
           label: this.$t('days_off.title'),
-          name: 'days_off'
+          name: 'daysoff'
         }
       ].filter(Boolean)
     },
@@ -477,7 +477,7 @@ export default {
       const availableSections = [
         'board',
         'calendar',
-        'days-off',
+        'daysoff',
         'done',
         'pending',
         'timesheets'

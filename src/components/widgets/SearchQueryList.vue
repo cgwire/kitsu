@@ -10,7 +10,10 @@
     </span>
     <span
       class="tag group"
-      :class="{ open: toggleGroupId === group.id }"
+      :class="{
+        open: toggleGroupId === group.id,
+        'is-shared': group.is_shared
+      }"
       :key="`group-${group.id}`"
       :style="{
         backgroundColor: `${group.color}23`
@@ -31,6 +34,7 @@
           class="edit"
           :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="editGroup(group)"
+          v-if="!group.is_shared || isCurrentUserManager"
         >
           <edit2-icon size="0.6x" />
         </button>
@@ -38,7 +42,9 @@
           class="del"
           :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="removeGroup(group)"
-          v-if="!group.queries.length"
+          v-if="
+            !group.queries.length && (!group.is_shared || isCurrentUserManager)
+          "
         >
           <trash2-icon size="0.6x" />
         </button>
@@ -53,6 +59,9 @@
         </span>
         <span
           class="tag"
+          :class="{
+            'is-shared': searchQuery.is_shared
+          }"
           :key="searchQuery.id"
           :style="{ backgroundColor: `${group.color}23` }"
           @click="changeSearch(searchQuery)"
@@ -68,6 +77,7 @@
               backgroundColor: `${group.color}53`
             }"
             @click.stop="editSearch(searchQuery)"
+            v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
             <edit2-icon size="0.6x" />
           </button>
@@ -75,6 +85,7 @@
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="removeSearch(searchQuery)"
+            v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
             <trash2-icon size="0.6x" />
           </button>
@@ -82,8 +93,8 @@
       </div>
     </span>
     <span
+      class="tag"
       :class="{
-        tag: true,
         'is-shared': searchQuery.is_shared
       }"
       :key="searchQuery.id"
@@ -234,7 +245,8 @@ export default {
         { label: '', value: null },
         ...this.userFilterGroups.map(group => ({
           label: group.name,
-          value: group.id
+          value: group.id,
+          is_shared: group.is_shared
         }))
       ]
     }
@@ -268,7 +280,9 @@ export default {
       try {
         this.loading.group = true
         this.errors.group = false
-
+        filterGroup.project_id = this.currentProduction
+          ? this.currentProduction.id
+          : null
         if (!filterGroup.id) {
           await this[
             `save${stringHelpers.capitalize(this.type)}SearchFilterGroup`
@@ -364,7 +378,7 @@ export default {
     flex-direction: column;
     left: 0;
     max-height: 200px;
-    overflow: scroll;
+    overflow-y: auto;
     padding: 0.5rem 0;
     position: absolute;
     top: 100%;
@@ -389,9 +403,6 @@ export default {
 
 .search-queries .tag:hover {
   transform: scale(1.1);
-}
-
-.search-queries .group.tag .group-header:hover {
 }
 
 .search-queries .group.tag.open .tag:hover {

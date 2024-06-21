@@ -1,14 +1,9 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
+  <div class="modal" :class="{ 'is-active': active }">
     <div class="modal-background" @click="$emit('cancel')"></div>
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="departmentToEdit && departmentToEdit.id">
+        <h1 class="title" v-if="isEditing">
           {{ $t('departments.edit_title') }} {{ departmentToEdit.name }}
         </h1>
         <h1 class="title" v-else>
@@ -47,17 +42,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import ColorField from '@/components/widgets/ColorField'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
+import ColorField from '@/components/widgets/ColorField.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-departments-modal',
+
   mixins: [modalMixin],
+
   components: {
     ColorField,
     ComboboxBoolean,
@@ -87,24 +83,21 @@ export default {
   data() {
     return {
       form: {
+        id: null,
         name: '',
         color: '',
-        id: null
+        archived: 'false'
       }
     }
   },
 
   computed: {
-    ...mapGetters(['assetTypes', 'assetTypeStatusOptions']),
-
     isEditing() {
-      return this.departmentToEdit && this.departmentToEdit.id
+      return this.departmentToEdit?.id
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     runConfirmation() {
       this.$emit('confirm', this.form)
     }
@@ -121,16 +114,18 @@ export default {
 
     departmentToEdit() {
       if (this.isEditing) {
-        this.form.name = this.departmentToEdit.name
-        this.form.color = this.departmentToEdit.color
-        this.form.id = this.departmentToEdit.id
-        this.form.archived = this.departmentToEdit.archive
+        this.form = {
+          id: this.departmentToEdit.id,
+          name: this.departmentToEdit.name,
+          color: this.departmentToEdit.color,
+          archived: String(this.departmentToEdit.archived === true)
+        }
       } else {
         this.form = {
+          id: null,
           name: '',
           color: '',
-          id: null,
-          archived: String(this.departmentToEdit.archive === true)
+          archived: 'false'
         }
       }
     }

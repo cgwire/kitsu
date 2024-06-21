@@ -21,32 +21,35 @@
   </div>
   <a
     class="preview-wrapper preview-picture"
+    :class="{ cover }"
     target="_blank"
     :style="{
-      width: emptyWidth + 'px',
-      'min-width': emptyWidth + 'px',
-      height: emptyHeight + 'px',
-      'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
-      'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
+      width: emptyWidth ? `${emptyWidth}px` : undefined,
+      'min-width': emptyWidth ? `${emptyWidth}px` : undefined,
+      height: emptyHeight ? `${emptyHeight}px` : undefined,
+      'border-top-left-radius': isRoundedTopBorder ? '10px' : undefined,
+      'border-top-right-radius': isRoundedTopBorder ? '10px' : undefined,
+      'background-image': cover ? `url(${thumbnailPath})` : undefined
     }"
     v-else
   >
-    <img
-      class="thumbnail-picture"
-      loading="lazy"
-      :key="thumbnailKey"
-      :src="thumbnailPath"
-      :style="{
-        width: 'auto',
-        'max-height': `${emptyHeight}px`
-      }"
-      :width="width || ''"
-      alt=""
-    />
-
-    <span class="view-icon" @click.stop="onPictureClicked()">
-      <eye-icon size="1.2x" />
-    </span>
+    <template v-if="!cover">
+      <img
+        class="thumbnail-picture"
+        loading="lazy"
+        :key="thumbnailKey"
+        :src="thumbnailPath"
+        :style="{
+          width: 'auto',
+          'max-height': `${emptyHeight}px`
+        }"
+        :width="width || ''"
+        alt=""
+      />
+      <span class="view-icon" @click.stop="onPictureClicked()">
+        <eye-icon size="1.2x" />
+      </span>
+    </template>
   </a>
 </template>
 
@@ -79,6 +82,10 @@ export default {
       default: false,
       type: Boolean
     },
+    cover: {
+      default: false,
+      type: Boolean
+    },
     width: {
       default: null,
       type: Number
@@ -96,11 +103,11 @@ export default {
       type: Number
     },
     emptyHeight: {
-      default: 30,
+      default: null,
       type: Number
     },
     emptyWidth: {
-      default: 50,
+      default: null,
       type: Number
     },
     previewFileId: {
@@ -233,5 +240,9 @@ span.view-icon {
       display: block;
     }
   }
+}
+
+.cover {
+  background-size: cover;
 }
 </style>

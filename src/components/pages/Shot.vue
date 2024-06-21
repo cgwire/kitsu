@@ -561,7 +561,7 @@ export default {
       this.getCurrentShot()
         .then(shot => {
           this.currentShot = shot
-          this.currentSection = this.route.query.section || 'casting'
+          this.currentSection = this.route.query.section || 'infos'
           this.casting.isLoading = true
           this.casting.isError = false
           if (this.currentShot) {

@@ -85,7 +85,6 @@ const actions = {
 
   async newConcept({ commit, dispatch, rootGetters }, form) {
     const production = rootGetters.currentProduction
-    console.log(form)
 
     // Create Entity
     const entity = {
