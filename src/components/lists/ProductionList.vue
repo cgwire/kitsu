@@ -7,6 +7,9 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('productions.fields.name') }}
             </th>
+            <th scope="col" class="code">
+              {{ $t('productions.fields.code') }}
+            </th>
             <th scope="col" class="type">
               {{ $t('productions.fields.type') }}
             </th>
@@ -40,6 +43,9 @@
                   :last-production-screen="lastProductionScreen"
                 />
               </th>
+              <td class="code">
+                {{ entry.code }}
+              </td>
               <td class="type">
                 {{ $t(`productions.type.${entry.production_type || 'short'}`) }}
               </td>

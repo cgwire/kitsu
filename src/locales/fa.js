@@ -472,7 +472,8 @@ export default {
       ratio: 'نسبت تصویر',
       resolution: 'ابعاد تصویر',
       status: 'وضعیت',
-      type: 'نوع'
+      type: 'نوع',   
+      code: 'اسم کوتاه'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',

@@ -93,6 +93,7 @@ export default {
       shots_to_import: 'maps to import'
     },
     fields: {
+      code: "Short Name",
       episode_span: 'Chapter spacing',
       nb_episodes: 'Number of chapters'
     },

@@ -1010,7 +1010,7 @@ export default {
     },
 
     fields: {
-      code: 'Code',
+      code: 'Short Name',
       end_date: 'End date',
       episode_span: 'Episode spacing',
       fps: 'FPS',
