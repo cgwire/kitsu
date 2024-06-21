@@ -593,6 +593,7 @@ export default {
       dedicated_to: 'Für',
       color: 'Farbe',
       name: 'Name',
+      description: 'Beschreibung',
       allow_timelog: 'Zeiterfassung',
       priority: 'Priorität'
     }

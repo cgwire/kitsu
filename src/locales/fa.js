@@ -580,6 +580,7 @@ export default {
       color: 'رنگ',
       name: 'نام',
       allow_timelog: 'ضبط زمان',
+      description: 'توضیحات',
       priority: 'اولویت'
     }
   },

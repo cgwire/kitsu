@@ -1241,6 +1241,7 @@ export default {
       department: 'Department',
       color: 'Color',
       name: 'Name',
+      description: 'Description',
       allow_timelog: 'Timelog',
       priority: 'Priority'
     }
