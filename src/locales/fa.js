@@ -563,7 +563,8 @@ export default {
       is_done: 'انجام شده',
       is_retake: 'بازنگری',
       name: 'نام',
-      short_name: 'اسم کوتاه'
+      short_name: 'اسم کوتاه', 
+      description: 'توضیحات'
     }
   },
 

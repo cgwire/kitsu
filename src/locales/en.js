@@ -1222,7 +1222,8 @@ export default {
       is_retake: 'Has retake value',
       is_default: 'Is default',
       name: 'Name',
-      short_name: 'Short name'
+      short_name: 'Short name',
+      description: 'Description'
     }
   },
 

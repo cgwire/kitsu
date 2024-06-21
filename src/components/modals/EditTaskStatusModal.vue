@@ -36,6 +36,14 @@
             v-focus
             v-if="taskStatusToEdit.short_name !== 'todo'"
           />
+          <textarea-field
+            ref="descriptionField"
+            input-class="task-status-description"
+            :label="$t('task_status.fields.description')"
+            @enter="confirmClicked"
+            v-model="form.description"
+            v-focus
+          />
           <boolean-field
             :label="$t('task_status.fields.is_default')"
             @enter="confirmClicked"
@@ -113,6 +121,7 @@ import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
+import TextareaField from '@/components/widgets/TextareaField'
 
 export default {
   name: 'edit-task-status-modal',
@@ -122,7 +131,8 @@ export default {
     ColorField,
     ComboboxBoolean,
     ModalFooter,
-    TextField
+    TextField,
+    TextareaField
   },
 
   props: {
@@ -149,6 +159,7 @@ export default {
       form: {
         name: '',
         short_name: '',
+        description: '',
         color: '$grey999',
         is_done: 'false',
         is_feedback_request: 'false',
@@ -216,6 +227,7 @@ export default {
         this.form = {
           name: this.taskStatusToEdit.name,
           short_name: this.taskStatusToEdit.short_name,
+          description: this.taskStatusToEdit.description,
           color: this.taskStatusToEdit.color,
           is_done: String(this.taskStatusToEdit.is_done),
           is_retake: String(this.taskStatusToEdit.is_retake || false),
