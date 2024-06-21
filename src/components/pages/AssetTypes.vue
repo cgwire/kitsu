@@ -180,12 +180,14 @@ export default {
       const headers = [
         this.$t('main.type'),
         this.$t('asset_types.fields.name'),
+        this.$t('asset_types.fields.description'),
         this.$t('asset_types.fields.task_types')
       ]
       const entries = [headers].concat(
         this.assetTypes.map(assetType => [
           assetType.type,
           assetType.name,
+          assetType.description,
           assetType.task_types.length
             ? assetType.task_types
                 .map(taskTypeId => this.taskTypeMap.get(taskTypeId)?.name)

@@ -49,6 +49,7 @@ export default {
     production_title: 'Asset Types Stats',
     fields: {
       name: 'Name',
+      description: 'Description',
       task_types: 'Workflow'
     }
   },
