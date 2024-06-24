@@ -1,0 +1,2 @@
+import{n as s}from"./index-D4X-Njdv.js";const e={name:"page-layout"};var t=function(){var n=this,a=n._self._c;return a("div",{ref:"page",staticClass:"columns fixed-page"},[a("div",{staticClass:"column main-column"},[n._t("main")],2),a("div",{staticClass:"column side-column"},[n._t("side")],2)])},l=[],o=s(e,t,l,!1,null,null,null,null);const r=o.exports;export{r as P};
+//# sourceMappingURL=PageLayout-pirN_kyV.js.map
