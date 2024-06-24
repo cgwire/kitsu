@@ -46,12 +46,10 @@
         </div>
 
         <sorting-info
-          :label="$t('main.sorted_by')"
           :sorting="sequenceSorting"
           @clear-sorting="onChangeSortClicked(null)"
-          v-if="sequenceSorting && sequenceSorting.length > 0"
+          v-if="sequenceSorting?.length"
         />
-
         <sequence-list
           ref="sequence-list"
           :displayed-sequences="displayedSequences"

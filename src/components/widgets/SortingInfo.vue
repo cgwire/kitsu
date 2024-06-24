@@ -1,37 +1,47 @@
-<template functional>
-  <div class="" v-if="props.sorting.length > 0">
-    <div @click="listeners['clear-sorting']()" class="sort-tag">
-      {{ props.label }} {{ props.sorting[0].name }}
-    </div>
-  </div>
+<template>
+  <button-simple
+    class="sorting-info mb05"
+    icon="remove"
+    is-small
+    :text="text"
+    :title="$t('main.clear_sorting')"
+    @click="$emit('clear-sorting')"
+  />
 </template>
 
 <script>
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+
 export default {
   name: 'sorting-info',
-  functional: true,
+
+  components: {
+    ButtonSimple
+  },
 
   props: {
     label: {
-      default: 'Sorted by',
-      type: String
+      type: String,
+      default: function () {
+        return this.$t('main.sorted_by')
+      }
     },
     sorting: {
-      default: () => [],
-      type: Array
+      type: Array,
+      required: true
+    }
+  },
+
+  computed: {
+    text() {
+      return `${this.label} ${this.sorting[0]?.name}`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.sort-tag {
-  border: 1px solid var(--border-alt);
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.75rem;
-  margin-bottom: 0.5rem;
-  float: right;
-  padding: 0.25rem 0.5rem;
+.sorting-info {
+  align-self: end;
 }
 </style>

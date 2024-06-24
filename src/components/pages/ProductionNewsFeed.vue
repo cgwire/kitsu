@@ -254,7 +254,9 @@
                       ]"
                       :task="{
                         id: news.task_id,
-                        project_id: news.project_id
+                        project_id: news.project_id,
+                        task_type_id: news.task_type_id,
+                        assignees: []
                       }"
                       :read-only="true"
                       :light="true"
@@ -976,7 +978,7 @@ export default {
   margin-bottom: 4px;
 }
 
-.person-field ::v-deep .v-autocomplete {
+.person-field :deep(.v-autocomplete) {
   z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 

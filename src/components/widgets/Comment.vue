@@ -637,7 +637,7 @@ export default {
     },
 
     isAuthorClient() {
-      return this.personMap.get(this.comment.person_id).role === 'client'
+      return this.personMap.get(this.comment.person_id)?.role === 'client'
     }
   },
 

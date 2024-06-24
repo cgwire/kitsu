@@ -1822,7 +1822,7 @@ div.assignation {
   margin-right: 0.5em;
 }
 
-.assignation-field ::v-deep .v-autocomplete {
+.assignation-field :deep(.v-autocomplete) {
   z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 

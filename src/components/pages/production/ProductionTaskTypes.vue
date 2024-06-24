@@ -514,10 +514,6 @@ td.name {
   width: 100px;
 }
 
-td ::v-deep p.control.flexrow {
-  width: 105px;
-}
-
 .episode-span-column {
   margin-left: 5rem;
 }

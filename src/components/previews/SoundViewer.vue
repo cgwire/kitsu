@@ -59,8 +59,7 @@ export default {
       container: '#waveform',
       waveColor: '#00B242', // green
       progressColor: '#008732', // dark-green,
-      height: this.defaultHeight,
-      responsive: true
+      height: this.defaultHeight
     })
     this.wavesurfer.on('ready', () => {
       this.isLoading = false

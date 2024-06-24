@@ -91,7 +91,7 @@ export const routes = [
         firefox: '>=78',
         edge: '>90',
         vivaldi: '>2.8',
-        opera: '>22',
+        opera: '>=50',
         safari: '>=14'
       })
       if (!isValidBrowser) {

@@ -532,6 +532,7 @@ export default {
     before: 'Before',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
+    clear_sorting: 'Clear current sorting',
     close: 'Close',
     color: 'Color',
     copy: 'Copy',
