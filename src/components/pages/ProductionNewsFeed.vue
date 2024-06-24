@@ -978,7 +978,7 @@ export default {
   margin-bottom: 4px;
 }
 
-.person-field ::v-deep .v-autocomplete {
+.person-field :deep(.v-autocomplete) {
   z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
