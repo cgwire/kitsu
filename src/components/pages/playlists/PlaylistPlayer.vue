@@ -1922,10 +1922,8 @@ export default {
           waveColor: '#00B242', // green
           progressColor: '#008732', // dark-green,
           height: 60,
-          responsive: true,
           fillParent: true,
-          minPxPerSec: 1,
-          backend: 'MediaElement'
+          minPxPerSec: 1
         })
         this.wavesurfer.on('seek', position => {
           this.setCurrentTimeRaw(this.maxDurationRaw * position)

@@ -62,7 +62,7 @@
     "vuejs-datepicker": "1.6.2",
     "vuex": "3.6.2",
     "vuex-router-sync": "5.0.0",
-    "wavesurfer.js": "6.6.4"
+    "wavesurfer.js": "7.8.0"
   },
   "devDependencies": {
     "@types/vue-feather-icons": "5.0.8",
