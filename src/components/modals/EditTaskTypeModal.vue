@@ -36,7 +36,6 @@
             v-model="form.allow_timelog"
           />
           <textarea-field
-            ref="descriptionField"
             :label="$t('task_types.fields.description')"
             v-model="form.description"
             @enter="confirmClicked"
