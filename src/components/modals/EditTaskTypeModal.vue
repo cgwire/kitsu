@@ -40,7 +40,6 @@
             :label="$t('task_types.fields.description')"
             v-model="form.description"
             @enter="confirmClicked"
-            v-focus
           />
           <combobox-simple
             class="field"
