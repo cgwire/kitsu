@@ -25,7 +25,13 @@
             @enter="runConfirmation"
             v-focus
           />
-
+          <text-field
+            ref="shortNameField"
+            :label="$t('asset_types.fields.short_name')"
+            :maxlength="30"
+            v-model="form.short_name"
+            @enter="runConfirmation"
+          />
           <combobox-boolean
             :label="$t('main.archived')"
             @enter="runConfirmation"
@@ -121,6 +127,7 @@ export default {
     return {
       form: {
         name: '',
+        short_name: '',
         task_types: []
       }
     }
@@ -191,12 +198,14 @@ export default {
         const types = this.assetTypeToEdit.task_types || []
         this.form = {
           name: this.assetTypeToEdit.name,
+          short_name: this.assetTypeToEdit.short_name,
           task_types: [...types],
           archived: String(this.assetTypeToEdit.archived === true)
         }
       } else {
         this.form = {
           name: '',
+          short_name: '',
           task_types: [],
           archived: 'false'
         }

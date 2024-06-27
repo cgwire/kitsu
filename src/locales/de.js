@@ -39,7 +39,8 @@ export default {
     title: 'Vermögensarten',
     production_title: 'Vermögensarten Statistiken',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      short_name: 'Kurzname'
     }
   },
 
@@ -455,6 +456,7 @@ export default {
       welcome: 'Willkommen bei Kitsu'
     },
     fields: {
+      code: 'Kurzname',
       fps: 'FPS',
       name: 'Name',
       ratio: 'Ratio',

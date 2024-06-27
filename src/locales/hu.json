@@ -43,7 +43,8 @@
             "title": "Asset típusok",
             "production_title": "Asset típus statiszika",
             "fields": {
-                "name": "Név"
+                "name": "Név",
+                "short_name": "Rövid név"
             }
         },
         "breakdown": {

@@ -10,6 +10,12 @@
           v-focus
           v-model="form.name"
         />
+        <text-field
+          ref="codeField"
+          :label="$t('productions.fields.code')"
+          @enter="runConfirmation"
+          v-model="form.code"
+        />
         <div class="columns">
           <div class="mr1">
             <date-field
@@ -184,6 +190,7 @@ export default {
       homepageOptions: HOME_PAGE_OPTIONS,
       form: {
         name: '',
+        code: '',
         start_date: new Date(),
         end_date: new Date(),
         nb_episodes: 0,
@@ -258,6 +265,7 @@ export default {
       if (this.currentProduction) {
         this.form = {
           name: this.currentProduction.name,
+          code: this.currentProduction.code,
           start_date: parseSimpleDate(
             this.currentProduction.start_date
           ).toDate(),
@@ -285,6 +293,7 @@ export default {
       } else {
         this.form = {
           name: '',
+          code: '',
           start_date: new Date(),
           end_date: new Date(),
           production_type: 'short',
