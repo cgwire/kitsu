@@ -31,7 +31,6 @@
             :maxlength="30"
             v-model="form.short_name"
             @enter="runConfirmation"
-            v-focus
           />
           <combobox-boolean
             :label="$t('main.archived')"
