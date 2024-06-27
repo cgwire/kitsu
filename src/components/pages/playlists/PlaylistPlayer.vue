@@ -1590,12 +1590,11 @@ export default {
         }
         if (this.$refs['picture-preview-wrapper']) {
           this.$refs['picture-preview-wrapper'].style.height = `${height}px`
-          this.pictureDefaultHeight = height
         }
         this.pictureDefaultHeight = height
 
         if (this.$refs['full-playlist-player']) {
-          this.$refs['full-playlist-player'].style.height = height + 'px'
+          this.$refs['full-playlist-player'].style.height = `${height}px`
         }
 
         if (this.rawPlayer) this.rawPlayer.resetHeight(height)
@@ -1922,10 +1921,8 @@ export default {
           waveColor: '#00B242', // green
           progressColor: '#008732', // dark-green,
           height: 60,
-          responsive: true,
           fillParent: true,
-          minPxPerSec: 1,
-          backend: 'MediaElement'
+          minPxPerSec: 1
         })
         this.wavesurfer.on('seek', position => {
           this.setCurrentTimeRaw(this.maxDurationRaw * position)

@@ -24,6 +24,12 @@
             @enter="confirmClicked"
             v-focus
           />
+          <text-field
+            ref="shortNameField"
+            :label="$t('task_types.fields.short_name')"
+            v-model="form.short_name"
+            @enter="confirmClicked"
+          />
           <boolean-field
             :label="$t('task_types.fields.allow_timelog')"
             @enter="confirmClicked"
@@ -126,6 +132,7 @@ export default {
       if (this.taskTypeToEdit) {
         this.form = {
           name: this.taskTypeToEdit.name,
+          short_name: this.taskTypeToEdit.short_name,
           color: this.taskTypeToEdit.color,
           for_entity: this.taskTypeToEdit.for_entity || 'Asset',
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
@@ -140,6 +147,7 @@ export default {
     return {
       form: {
         name: '',
+        short_name: '',
         color: '$grey',
         for_entity: 'Asset',
         allow_timelog: 'false',

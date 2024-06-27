@@ -45,6 +45,7 @@
             "production_title": "Estadísticas de Assets",
             "fields": {
                 "name": "Nombre",
+                "short_name": "Denominación breve",
                 "task_types": "Tipos de tarea"
             },
             "include_all": "Incluir todos los tipos de recurso"

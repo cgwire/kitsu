@@ -24,6 +24,12 @@
             @enter="runConfirmation"
             v-focus
           />
+          <text-field
+            ref="codeField"
+            :label="$t('productions.fields.code')"
+            v-model="form.code"
+            @enter="runConfirmation"
+          />
           <combobox-styled
             class="field"
             :label="$t('productions.fields.status')"
@@ -143,6 +149,7 @@ export default {
     if (this.productionToEdit && this.productionToEdit.id) {
       data.form = {
         name: this.productionToEdit.name,
+        code: this.productionToEdit.code,
         project_status_id: this.productionToEdit.project_status_id,
         fps: this.productionToEdit.fps,
         ratio: this.productionToEdit.ratio,
@@ -153,6 +160,7 @@ export default {
     } else {
       data.form = {
         name: '',
+        code: '',
         project_status_id: this.productionStatus
           ? this.productionStatus[0].id
           : null,
@@ -203,6 +211,7 @@ export default {
       if (this.productionToEdit && this.productionToEdit.id) {
         this.form = {
           name: this.productionToEdit.name,
+          code: this.productionToEdit.code,
           project_status_id: this.productionToEdit.project_status_id,
           fps: this.productionToEdit.fps,
           ratio: this.productionToEdit.ratio,

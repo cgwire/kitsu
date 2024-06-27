@@ -7,6 +7,9 @@
             <th scope="col" class="name">
               {{ $t('asset_types.fields.name') }}
             </th>
+            <th scope="col" class="short-name">
+              {{ $t('asset_types.fields.short_name') }}
+            </th>
             <th scope="col" class="task-types">
               {{ $t('asset_types.fields.task_types') }}
             </th>
@@ -24,6 +27,9 @@
               >
                 <help-circle-icon class="icon is-small" />
               </span>
+            </td>
+            <td class="short-name">
+              {{ entry.short_name }}
             </td>
             <td class="task-types" v-if="(entry.task_types || []).length > 0">
               <span

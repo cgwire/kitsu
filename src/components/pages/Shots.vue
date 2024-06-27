@@ -86,10 +86,9 @@
         </div>
 
         <sorting-info
-          :label="$t('main.sorted_by')"
           :sorting="shotSorting"
           @clear-sorting="onChangeSortClicked(null)"
-          v-if="shotSorting && shotSorting.length > 0"
+          v-if="shotSorting?.length"
         />
         <shot-list
           ref="shot-list"

@@ -45,6 +45,7 @@
             "production_title": "Stats types d'assets",
             "fields": {
                 "name": "Nom",
+                "short_name": "Nom court",
                 "task_types": "Workflow"
             },
             "include_all": "Inclure tous les types d'asset"

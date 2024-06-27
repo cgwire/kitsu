@@ -74,10 +74,9 @@
         </div>
 
         <sorting-info
-          :label="$t('main.sorted_by')"
           :sorting="editSorting"
           @clear-sorting="onChangeSortClicked(null)"
-          v-if="editSorting && editSorting.length > 0"
+          v-if="editSorting?.length"
         />
         <edit-list
           ref="edit-list"

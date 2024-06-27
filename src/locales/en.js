@@ -49,6 +49,7 @@ export default {
     production_title: 'Asset Types Stats',
     fields: {
       name: 'Name',
+      short_name: 'Short Name',
       description: 'Description',
       task_types: 'Workflow'
     }
@@ -533,6 +534,7 @@ export default {
     before: 'Before',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
+    clear_sorting: 'Clear current sorting',
     close: 'Close',
     color: 'Color',
     copy: 'Copy',
@@ -1010,6 +1012,7 @@ export default {
     },
 
     fields: {
+      code: 'Short Name',
       end_date: 'End date',
       episode_span: 'Episode spacing',
       fps: 'FPS',
@@ -1242,6 +1245,7 @@ export default {
       department: 'Department',
       color: 'Color',
       name: 'Name',
+      short_name: 'Short Name',
       description: 'Description',
       allow_timelog: 'Timelog',
       priority: 'Priority'

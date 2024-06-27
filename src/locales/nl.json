@@ -45,6 +45,7 @@
             "production_title": "Assettypes Statistieken",
             "fields": {
                 "name": "Naam",
+                "short_name": "Korte naam",
                 "task_types": "Taak types"
             },
             "include_all": "Omvat alle soorten elementtaken"

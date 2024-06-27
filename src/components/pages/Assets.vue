@@ -73,10 +73,9 @@
         </div>
 
         <sorting-info
-          :label="$t('main.sorted_by')"
           :sorting="assetSorting"
           @clear-sorting="onChangeSortClicked(null)"
-          v-if="assetSorting && assetSorting.length > 0"
+          v-if="assetSorting?.length"
         />
         <asset-list
           ref="asset-list"

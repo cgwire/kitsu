@@ -45,6 +45,7 @@
             "production_title": "어셋 유형 통계",
             "fields": {
                 "name": "이름",
+                "short_name": "짧은 이름",
                 "task_types": "작업 유형"
             },
             "include_all": "모든 자산 유형 포함"

@@ -123,10 +123,6 @@ td.name {
   width: 100px;
 }
 
-td ::v-deep p.control.flexrow {
-  width: 105px;
-}
-
 .field {
   margin-bottom: 0;
 }

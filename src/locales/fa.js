@@ -40,6 +40,7 @@ export default {
     production_title: 'آمار تمام منابع',
     fields: {
       name: 'نام',
+      short_name: 'اسم کوتاه',
       description: 'توضیحات'
     }
   },
@@ -472,7 +473,8 @@ export default {
       ratio: 'نسبت تصویر',
       resolution: 'ابعاد تصویر',
       status: 'وضعیت',
-      type: 'نوع'
+      type: 'نوع',   
+      code: 'اسم کوتاه'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',

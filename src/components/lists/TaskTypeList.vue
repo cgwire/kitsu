@@ -7,7 +7,12 @@
             <th scope="col" class="department">
               {{ $t('task_types.fields.department') }}
             </th>
-            <th scope="col" class="name">{{ $t('task_types.fields.name') }}</th>
+            <th scope="col" class="name">
+              {{ $t('task_types.fields.name') }}
+            </th>
+            <th scope="col" class="short_name">
+              {{ $t('task_types.fields.short_name') }}
+            </th>
             <th scope="col" class="allow-timelog">
               {{ $t('task_types.fields.allow_timelog') }}
             </th>
@@ -45,6 +50,9 @@
               />
             </td>
             <task-type-cell class="name" :task-type="taskType" />
+            <td class="short_name">
+              {{ taskType.short_name }}
+            </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
@@ -93,6 +101,9 @@
               />
             </td>
             <task-type-cell class="name" :task-type="taskType" />
+            <td class="short_name">
+              {{ taskType.short_name }}
+            </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
@@ -138,6 +149,9 @@
               />
             </td>
             <task-type-cell class="name" :task-type="taskType" />
+            <td class="short_name">
+              {{ taskType.short_name }}
+            </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
@@ -183,6 +197,9 @@
               />
             </td>
             <task-type-cell class="name" :task-type="taskType" />
+            <td class="short_name">
+              {{ taskType.short_name }}
+            </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
@@ -228,6 +245,9 @@
               />
             </td>
             <task-type-cell class="name" :task-type="taskType" />
+            <td class="short_name">
+              {{ taskType.short_name }}
+            </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
@@ -402,6 +422,10 @@ export default {
   min-width: 300px;
 }
 
+.short_name {
+  width: 200px;
+  min-width: 200px;
+}
 .priority {
   width: 80px;
   min-width: 80px;
