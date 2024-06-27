@@ -41,7 +41,6 @@
             :label="$t('task_status.fields.description')"
             @enter="confirmClicked"
             v-model="form.description"
-            v-focus
           />
           <boolean-field
             :label="$t('task_status.fields.is_default')"
