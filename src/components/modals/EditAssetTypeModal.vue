@@ -31,7 +31,7 @@
             :maxlength="30"
             v-model="form.short_name"
             @enter="runConfirmation"
-          >
+          />
           <textarea-field
             :label="$t('asset_types.fields.description')"
             v-model="form.description"
