@@ -36,7 +36,6 @@
             v-if="taskStatusToEdit.short_name !== 'todo'"
           />
           <textarea-field
-            ref="descriptionField"
             input-class="task-status-description"
             :label="$t('task_status.fields.description')"
             @enter="confirmClicked"
