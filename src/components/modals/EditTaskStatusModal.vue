@@ -33,7 +33,6 @@
             :maxlength="8"
             @enter="confirmClicked"
             v-model="form.short_name"
-            v-focus
             v-if="taskStatusToEdit.short_name !== 'todo'"
           />
           <textarea-field
