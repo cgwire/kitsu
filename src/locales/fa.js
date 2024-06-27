@@ -40,7 +40,8 @@ export default {
     production_title: 'آمار تمام منابع',
     fields: {
       name: 'نام',
-      short_name: 'اسم کوتاه'
+      short_name: 'اسم کوتاه',
+      description: 'توضیحات'
     }
   },
 
@@ -565,7 +566,8 @@ export default {
       is_done: 'انجام شده',
       is_retake: 'بازنگری',
       name: 'نام',
-      short_name: 'اسم کوتاه'
+      short_name: 'اسم کوتاه', 
+      description: 'توضیحات'
     }
   },
 
@@ -581,6 +583,7 @@ export default {
       color: 'رنگ',
       name: 'نام',
       allow_timelog: 'ضبط زمان',
+      description: 'توضیحات',
       priority: 'اولویت'
     }
   },

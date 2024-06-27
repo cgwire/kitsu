@@ -32,6 +32,11 @@
             v-model="form.short_name"
             @enter="runConfirmation"
           />
+          <textarea-field
+            :label="$t('asset_types.fields.description')"
+            v-model="form.description"
+            @enter="runConfirmation"
+          />
           <combobox-boolean
             :label="$t('main.archived')"
             @enter="runConfirmation"
@@ -91,6 +96,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
+import TextareaField from '@/components/widgets/TextareaField'
 import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
@@ -101,7 +107,8 @@ export default {
     ComboboxBoolean,
     TaskTypeName,
     ModalFooter,
-    TextField
+    TextField,
+    TextareaField
   },
 
   props: {

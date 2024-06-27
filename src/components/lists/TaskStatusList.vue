@@ -43,7 +43,16 @@
             v-for="entry in entries"
             :key="entry.id"
           >
-            <td class="name">{{ entry.name }}</td>
+            <td class="name">
+              {{ entry.name }}
+              <span
+                class="help-tooltip"
+                :title="entry.description"
+                v-if="entry.description"
+              >
+                <help-circle-icon class="icon is-small" />
+              </span>
+            </td>
             <task-status-cell class="short-name" :entry="entry" />
             <boolean-cell class="is-default" :value="entry.is_default" />
             <boolean-cell class="is-done" :value="entry.is_done" />
@@ -81,6 +90,7 @@
 
 <script>
 import draggable from 'vuedraggable'
+import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
@@ -110,6 +120,7 @@ export default {
   },
 
   components: {
+    HelpCircleIcon,
     BooleanCell,
     draggable,
     RowActionsCell,

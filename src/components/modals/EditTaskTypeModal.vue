@@ -35,6 +35,11 @@
             @enter="confirmClicked"
             v-model="form.allow_timelog"
           />
+          <textarea-field
+            :label="$t('task_types.fields.description')"
+            v-model="form.description"
+            @enter="confirmClicked"
+          />
           <combobox-simple
             class="field"
             :label="$t('task_types.fields.dedicated_to')"
@@ -85,6 +90,7 @@ import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
 import ColorField from '@/components/widgets/ColorField'
 import ModalFooter from '@/components/modals/ModalFooter'
 import TextField from '@/components/widgets/TextField'
+import TextareaField from '@/components/widgets/TextareaField'
 
 export default {
   name: 'edit-task-type-modal',
@@ -96,7 +102,8 @@ export default {
     ComboboxDepartment,
     ColorField,
     ModalFooter,
-    TextField
+    TextField,
+    TextareaField
   },
 
   props: {

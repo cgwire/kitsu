@@ -20,6 +20,13 @@
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
             <td class="name">
               {{ entry.name }}
+              <span
+                class="help-tooltip"
+                :title="entry.description"
+                v-if="entry.description"
+              >
+                <help-circle-icon class="icon is-small" />
+              </span>
             </td>
             <td class="short-name">
               {{ entry.short_name }}
@@ -56,6 +63,7 @@
 
 <script>
 import { sortTaskTypes } from '@/lib/sorting'
+import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { mapGetters, mapActions } from 'vuex'
 import RowActionsCell from '@/components/cells/RowActionsCell'
@@ -85,7 +93,8 @@ export default {
   components: {
     TaskTypeName,
     RowActionsCell,
-    TableInfo
+    TableInfo,
+    HelpCircleIcon
   },
   computed: {
     ...mapGetters(['taskTypeMap'])

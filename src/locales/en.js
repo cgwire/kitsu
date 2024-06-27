@@ -50,6 +50,7 @@ export default {
     fields: {
       name: 'Name',
       short_name: 'Short Name',
+      description: 'Description',
       task_types: 'Workflow'
     }
   },
@@ -1225,7 +1226,8 @@ export default {
       is_retake: 'Has retake value',
       is_default: 'Is default',
       name: 'Name',
-      short_name: 'Short Name'
+      short_name: 'Short name',
+      description: 'Description'
     }
   },
 
@@ -1244,6 +1246,7 @@ export default {
       color: 'Color',
       name: 'Name',
       short_name: 'Short Name',
+      description: 'Description',
       allow_timelog: 'Timelog',
       priority: 'Priority'
     }

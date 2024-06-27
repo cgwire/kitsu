@@ -40,7 +40,8 @@ export default {
     production_title: 'Vermögensarten Statistiken',
     fields: {
       name: 'Name',
-      short_name: 'Kurzname'
+      short_name: 'Kurzname',
+      description: 'Beschreibung'
     }
   },
 
@@ -579,7 +580,8 @@ export default {
       is_retake: 'Hat Wiederholungswert',
       is_default: 'Is default',
       name: 'Name',
-      short_name: 'Kurzname'
+      short_name: 'Kurzname',
+      description: 'Beschreibung'
     }
   },
 
@@ -594,6 +596,7 @@ export default {
       dedicated_to: 'Für',
       color: 'Farbe',
       name: 'Name',
+      description: 'Beschreibung',
       allow_timelog: 'Zeiterfassung',
       priority: 'Priorität'
     }

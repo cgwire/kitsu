@@ -16,6 +16,9 @@
             <th scope="col" class="allow-timelog">
               {{ $t('task_types.fields.allow_timelog') }}
             </th>
+            <th scope="col" class="description">
+              {{ $t('task_types.fields.description') }}
+            </th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -52,6 +55,9 @@
             </td>
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
+            </td>
+            <td>
+              {{ taskType.description }}
             </td>
             <row-actions-cell
               :taskType-id="taskType.id"

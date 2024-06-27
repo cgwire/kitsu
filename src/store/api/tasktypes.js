@@ -9,6 +9,7 @@ export default {
     const data = {
       name: taskType.name,
       short_name: taskType.short_name,
+      description: taskType.description,
       color: taskType.color,
       priority: Number(taskType.priority),
       for_entity: taskType.for_entity,
@@ -22,6 +23,7 @@ export default {
     const data = {
       name: taskType.name,
       short_name: taskType.short_name,
+      description: taskType.description,
       color: taskType.color,
       department_id: taskType.department_id
     }
