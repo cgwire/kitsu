@@ -29,7 +29,6 @@
             :label="$t('task_types.fields.short_name')"
             v-model="form.short_name"
             @enter="confirmClicked"
-            v-focus
           />
           <boolean-field
             :label="$t('task_types.fields.allow_timelog')"
