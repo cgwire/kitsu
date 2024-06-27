@@ -33,7 +33,6 @@
             @enter="runConfirmation"
           >
           <textarea-field
-            ref="descriptionField"
             :label="$t('asset_types.fields.description')"
             v-model="form.description"
             @enter="runConfirmation"
