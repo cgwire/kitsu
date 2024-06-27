@@ -1244,8 +1244,7 @@ export default {
       name: 'Name',
       short_name: 'Short Name',
       allow_timelog: 'Timelog',
-      priority: 'Priority',
-      short_name: 'Short Name'
+      priority: 'Priority'
     }
   },
 
