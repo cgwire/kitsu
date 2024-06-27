@@ -1,7 +1,7 @@
 <template>
   <tr class="datatable-row" :key="taskType.id">
     <task-type-cell :task-type="taskType" />
-    <td class="name">
+    <td class="short-name">
       {{ taskType.short_name }}
     </td>
     <td class="remove">
