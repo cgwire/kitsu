@@ -48,7 +48,7 @@
                 taskListObject.entity === activeTab
               "
             >
-              /*
+              <!--
               <thead>
                 <tr>
                   <th class="th-name">{{ $t('task_status.fields.name') }}</th>
@@ -57,7 +57,7 @@
                   </th>
                 </tr>
               </thead>
-              */
+              -->
               <draggable
                 v-model="taskListObject.list"
                 draggable=".task-type"
