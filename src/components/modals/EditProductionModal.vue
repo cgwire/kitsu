@@ -29,7 +29,6 @@
             :label="$t('productions.fields.code')"
             v-model="form.code"
             @enter="runConfirmation"
-            v-focus
           />
           <combobox-styled
             class="field"
