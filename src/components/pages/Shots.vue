@@ -47,6 +47,13 @@
               />
               <button-simple
                 class="flexrow-item"
+                icon="film"
+                :title="$t('shots.get_frames_from_previews')"
+                @click="() => (modals.isSetFramesDisplayed = true)"
+                v-if="isCurrentUserManager"
+              />
+              <button-simple
+                class="flexrow-item"
                 :title="$t('main.edl.import_file')"
                 icon="import-edl"
                 @click="showEDLImportModal"
@@ -257,6 +264,14 @@
       @confirm="confirmAddMetadata"
     />
 
+    <set-frames-from-task-type-previews-modal
+      :active="modals.isSetFramesDisplayed"
+      :is-loading="loading.getFrames"
+      :is-error="errors.getFrames"
+      @cancel="modals.isSetFramesDisplayed = false"
+      @confirm="confirmSetFrames"
+    />
+
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
       entity-type="Shot"
@@ -312,6 +327,7 @@ import HardDeleteModal from '@/components/modals/HardDeleteModal'
 import ManageShotsModal from '@/components/modals/ManageShotsModal'
 import SearchField from '@/components/widgets/SearchField'
 import SearchQueryList from '@/components/widgets/SearchQueryList'
+import SetFramesFromTaskTypePreviewsModal from '@/components/modals/SetFramesFromTaskTypePreviewsModal'
 import SortingInfo from '@/components/widgets/SortingInfo'
 import ShowAssignationsButton from '@/components/widgets/ShowAssignationsButton'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton'
@@ -341,6 +357,7 @@ export default {
     InfoQuestionMark,
     SearchField,
     SearchQueryList,
+    SetFramesFromTaskTypePreviewsModal,
     SortingInfo,
     ShotHistoryModal,
     ShowAssignationsButton,
@@ -384,6 +401,7 @@ export default {
         isDeleteDisplayed: false,
         isDeleteMetadataDisplayed: false,
         isDeleteAllTasksDisplayed: false,
+        isSetFramesDisplayed: false,
         isImportRenderDisplayed: false,
         isImportDisplayed: false,
         isEDLImportDisplayed: false,
@@ -401,6 +419,7 @@ export default {
         deleteMetadata: false,
         edit: false,
         del: false,
+        getFrames: false,
         importing: false,
         restore: false,
         savingSearch: false,
@@ -412,6 +431,7 @@ export default {
         deleteMetadata: false,
         creatingTasks: false,
         deleteAllTasks: false,
+        getFrames: false,
         importing: false,
         importingError: null
       }
@@ -564,6 +584,7 @@ export default {
       'hideAssignations',
       'loadEpisodes',
       'loadShots',
+      'setNbFramesFromTaskTypePreviews',
       'newEpisode',
       'newSequence',
       'newShot',
@@ -1097,6 +1118,23 @@ export default {
         .finally(() => {
           this.loading.importing = false
         })
+    },
+
+    async confirmSetFrames(taskTypeId) {
+      this.loading.getFrames = true
+      try {
+        await this.setNbFramesFromTaskTypePreviews({
+          taskTypeId,
+          productionId: this.currentProduction.id,
+          episodeId: this.currentEpisode ? this.currentEpisode.id : null
+        })
+        this.modals.isSetFramesDisplayed = false
+      } catch (err) {
+        console.error(err)
+        this.errors.getFrames = true
+      } finally {
+        this.loading.getFrames = false
+      }
     }
   },
 
