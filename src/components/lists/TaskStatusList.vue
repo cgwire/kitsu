@@ -71,7 +71,7 @@
             />
             <row-actions-cell
               :entry-id="entry.id"
-              :hide-delete="entry.is_default === true"
+              :hide-delete="entry.is_default === true || entry.for_concept"
               @edit-clicked="$emit('edit-clicked', entry)"
               @delete-clicked="$emit('delete-clicked', entry)"
             />
