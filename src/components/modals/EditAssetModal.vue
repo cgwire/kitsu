@@ -39,7 +39,6 @@
             ref="descriptionField"
             :label="$t('assets.fields.description')"
             v-model="form.description"
-            v-focus
           />
           <metadata-field
             :key="descriptor.id"
