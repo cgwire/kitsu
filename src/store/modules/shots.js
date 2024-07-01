@@ -759,6 +759,21 @@ const actions = {
         }
       )
     })
+  },
+
+  async setNbFramesFromTaskTypePreviews(
+    { commit, rootGetters },
+    { taskTypeId, productionId, episodeId }
+  ) {
+    const shotNbFrames = await shotsApi.setNbFramesFromTaskTypePreviews(
+      taskTypeId,
+      productionId,
+      episodeId
+    )
+    shotNbFrames.forEach(shot => {
+      commit(UPDATE_SHOT, shot)
+    })
+    return shotNbFrames
   }
 }
 
