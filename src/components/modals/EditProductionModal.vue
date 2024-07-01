@@ -55,7 +55,6 @@
             :step="0.001"
             @enter="runConfirmation"
             v-model="form.fps"
-            v-focus
           />
           <text-field
             v-if="productionToEdit && productionToEdit.id"
@@ -63,7 +62,6 @@
             :label="$t('productions.fields.ratio')"
             v-model="form.ratio"
             @enter="runConfirmation"
-            v-focus
           />
           <text-field
             v-if="productionToEdit && productionToEdit.id"
@@ -71,7 +69,6 @@
             :label="$t('productions.fields.resolution')"
             v-model="form.resolution"
             @enter="runConfirmation"
-            v-focus
           />
 
           <div v-if="productionToEdit && productionToEdit.id">
