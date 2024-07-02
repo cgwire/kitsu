@@ -255,8 +255,10 @@ export default {
   methods: {
     ...mapActions([
       'removeAssetSearchFilterGroup',
+      'removeBreakdownSearchFilterGroup',
       'removeShotSearchFilterGroup',
       'saveAssetSearchFilterGroup',
+      'saveBreakdownSearchFilterGroup',
       'saveShotSearchFilterGroup',
       'updateSearchFilter',
       'updateSearchFilterGroup'

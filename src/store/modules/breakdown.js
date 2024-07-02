@@ -1,6 +1,7 @@
 import Vue from 'vue/dist/vue'
 import breakdownApi from '@/store/api/breakdown'
-import { sortAssets, sortShots } from '@/lib/sorting'
+import peopleApi from '@/store/api/people'
+import { sortAssets, sortByName, sortShots } from '@/lib/sorting'
 import { groupEntitiesByParents } from '@/lib/models'
 
 import {
@@ -12,6 +13,7 @@ import {
   CASTING_SET_EPISODES,
   CASTING_SET_ENTITY_CASTING,
   CASTING_SET_FOR_EPISODES,
+  CASTING_SET_LINK_LABEL,
   CASTING_SET_SHOTS,
   CASTING_SET_SEQUENCE,
   CASTING_SET_SEQUENCES,
@@ -24,11 +26,18 @@ import {
   LOAD_SEQUENCE_CASTING_END,
   LOAD_ASSET_CASTING_END,
   LOAD_ASSET_CAST_IN_END,
-  CASTING_SET_LINK_LABEL,
+  REMOVE_BREAKDOWN_SEARCH_END,
+  REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
+  SAVE_BREAKDOWN_SEARCH_END,
+  SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
   RESET_ALL
 } from '@/store/mutation-types'
+import { LOAD_ASSETS_END } from '../mutation-types'
 
 const initialState = {
+  breakdownSearchFilterGroups: [],
+  breakdownSearchQueries: [],
+
   currentProduction: null,
   castingSequenceId: '',
   castingShotId: 0,
@@ -46,6 +55,9 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
+  breakdownSearchFilterGroups: state => state.breakdownSearchFilterGroups,
+  breakdownSearchQueries: state => state.breakdownSearchQueries,
+
   castingEpisodes: state => state.castingEpisodes,
   castingEpisodeSequences: state => state.castingEpisodeSequences,
   castingSequenceId: state => state.castingSequenceId,
@@ -227,6 +239,64 @@ const actions = {
     return breakdownApi.getAssetCastIn(asset).then(castIn => {
       commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
       return Promise.resolve(castIn)
+    })
+  },
+
+  saveBreakdownSearch({ commit, rootGetters }, searchQuery) {
+    if (
+      state.breakdownSearchQueries.some(query => query.name === searchQuery)
+    ) {
+      return
+    }
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilter('breakdown', searchQuery, searchQuery, production.id, null)
+      .then(searchQuery => {
+        commit(SAVE_BREAKDOWN_SEARCH_END, { searchQuery, production })
+        return searchQuery
+      })
+  },
+
+  saveBreakdownSearchFilterGroup({ commit, state, rootGetters }, filterGroup) {
+    const groupExist = state.breakdownSearchFilterGroups.some(
+      query => query.name === filterGroup.name
+    )
+    if (groupExist) {
+      return
+    }
+
+    const production = rootGetters.currentProduction
+    return peopleApi
+      .createFilterGroup(
+        'breakdown',
+        filterGroup.name,
+        filterGroup.color,
+        production.id,
+        null
+      )
+      .then(filterGroup => {
+        commit(SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END, {
+          filterGroup,
+          production
+        })
+        return filterGroup
+      })
+  },
+
+  removeBreakdownSearch({ commit, rootGetters }, searchQuery) {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilter(searchQuery).then(() => {
+      commit(REMOVE_BREAKDOWN_SEARCH_END, { searchQuery, production })
+    })
+  },
+
+  removeBreakdownSearchFilterGroup({ commit, rootGetters }, filterGroup) {
+    const production = rootGetters.currentProduction
+    return peopleApi.removeFilterGroup(filterGroup).then(() => {
+      commit(REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END, {
+        filterGroup,
+        production
+      })
     })
   }
 }
@@ -508,6 +578,44 @@ const mutations = {
       link => link.asset_id === asset.asset_id
     )
     link.label = label
+  },
+
+  [SAVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {
+    state.breakdownSearchQueries.push(searchQuery)
+    state.breakdownSearchQueries = sortByName(state.breakdownSearchQueries)
+  },
+
+  [SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    if (!state.breakdownSearchFilterGroups.includes(filterGroup)) {
+      state.breakdownSearchFilterGroups.push(filterGroup)
+      state.breakdownSearchFilterGroups = sortByName(
+        state.breakdownSearchFilterGroups
+      )
+    }
+  },
+
+  [REMOVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {
+    const queryIndex = state.breakdownSearchQueries.findIndex(
+      query => query.name === searchQuery.name
+    )
+    if (queryIndex >= 0) {
+      state.breakdownSearchQueries.splice(queryIndex, 1)
+    }
+  },
+
+  [REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END](state, { filterGroup }) {
+    const groupIndex = state.breakdownSearchFilterGroups.findIndex(
+      query => query.name === filterGroup.name
+    )
+    if (groupIndex >= 0) {
+      state.breakdownSearchFilterGroups.splice(groupIndex, 1)
+    }
+  },
+
+  [LOAD_ASSETS_END](state, { userFilters, userFilterGroups, production }) {
+    state.breakdownSearchQueries = userFilters.breakdown?.[production.id] || []
+    state.breakdownSearchFilterGroups =
+      userFilterGroups?.breakdown?.[production.id] || []
   },
 
   [RESET_ALL](state) {

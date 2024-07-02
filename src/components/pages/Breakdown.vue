@@ -206,8 +206,10 @@
 
         <div class="filters-area flexrow">
           <search-field
-            ref="search-field"
             class="flexrow-item"
+            ref="search-field"
+            :can-save="true"
+            @save="saveSearchQuery"
             @change="onSearchChange"
           />
           <button-simple
@@ -215,6 +217,16 @@
             :title="$t('entities.build_filter.title')"
             icon="filter"
             @click="modals.isBuildFilterDisplayed = true"
+          />
+        </div>
+        <div class="query-list">
+          <search-query-list
+            :groups="breakdownSearchFilterGroups"
+            :is-group-enabled="true"
+            :queries="breakdownSearchQueries"
+            type="breakdown"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
           />
         </div>
 
@@ -324,6 +336,7 @@ import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
 import stringHelpers from '@/lib/string'
+import { searchMixin } from '@/components/mixins/search'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
@@ -337,6 +350,7 @@ import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
 import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
@@ -344,7 +358,7 @@ import DepartmentName from '@/components/widgets/DepartmentName'
 
 export default {
   name: 'breakdown',
-  mixins: [entityListMixin],
+  mixins: [entityListMixin, searchMixin],
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -358,6 +372,7 @@ export default {
     ImportModal,
     ImportRenderModal,
     SearchField,
+    SearchQueryList,
     ShotLine,
     ShowInfosButton,
     Spinner
@@ -432,6 +447,8 @@ export default {
       'assetMetadataDescriptors',
       'assetTypeMap',
       'assetsByType',
+      'breakdownSearchQueries',
+      'breakdownSearchFilterGroups',
       'casting',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
@@ -459,6 +476,10 @@ export default {
       'shotMap',
       'shotMetadataDescriptors'
     ]),
+
+    searchField() {
+      return this.$refs['search-field']
+    },
 
     castingTypeOptions() {
       const isAssetsOnly = this.currentProduction.production_type === 'assets'
@@ -652,6 +673,9 @@ export default {
       'loadShots',
       'newAsset',
       'removeAssetFromCasting',
+      'removeBreakdownSearch',
+      'saveBreakdownSearch',
+      'saveBreakdownSearchFilterGroup',
       'saveCasting',
       'setAssetLinkLabel',
       'setAssetSearch',
@@ -1316,6 +1340,22 @@ export default {
       const name = this.getCsvFileName()
       const headers = this.getCsvFileHeaders()
       csv.buildCsvFile(name, [headers].concat(entries))
+    },
+
+    removeSearchQuery(searchQuery) {
+      this.removeBreakdownSearch(searchQuery).catch(console.error)
+    },
+
+    saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveBreakdownSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
     }
   },
 
@@ -1548,7 +1588,7 @@ export default {
 }
 
 .filters-area {
-  margin-bottom: 2em;
+  margin-bottom: 0.5em;
 
   .search-field-wrapper {
     margin-right: 0.5em;
