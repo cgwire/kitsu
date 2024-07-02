@@ -80,21 +80,24 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 
-import BooleanField from '@/components/widgets/BooleanField'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ComboboxSimple from '@/components/widgets/ComboboxSimple'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import ColorField from '@/components/widgets/ColorField'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import TextareaField from '@/components/widgets/TextareaField'
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ColorField from '@/components/widgets/ColorField.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 
 export default {
   name: 'edit-task-type-modal',
+
   mixins: [modalMixin],
+
   components: {
     BooleanField,
     ComboboxBoolean,
@@ -131,6 +134,7 @@ export default {
         this.form = {
           name: this.taskTypeToEdit.name,
           short_name: this.taskTypeToEdit.short_name,
+          description: this.taskTypeToEdit.description,
           color: this.taskTypeToEdit.color,
           for_entity: this.taskTypeToEdit.for_entity || 'Asset',
           allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
@@ -146,6 +150,7 @@ export default {
       form: {
         name: '',
         short_name: '',
+        description: '',
         color: '$grey',
         for_entity: 'Asset',
         allow_timelog: 'false',
@@ -170,8 +175,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     newPriority(forEntity) {
       return (
         this.taskTypes.filter(taskType => taskType.for_entity === forEntity)

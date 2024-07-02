@@ -94,10 +94,10 @@ import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import BooleanCell from '@/components/cells/BooleanCell'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskStatusCell from '@/components/cells/TaskStatusCell'
+import BooleanCell from '@/components/cells/BooleanCell.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 
 export default {
   name: 'task-status-list',
@@ -120,9 +120,9 @@ export default {
   },
 
   components: {
-    HelpCircleIcon,
     BooleanCell,
     draggable,
+    HelpCircleIcon,
     RowActionsCell,
     TableInfo,
     TaskStatusCell
