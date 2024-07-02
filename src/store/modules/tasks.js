@@ -873,6 +873,17 @@ const mutations = {
       state.taskMap.set(task.id, task)
     } else {
       Object.assign(state.taskMap.get(task.id), task)
+      if (
+        state.taskComments[task.id] &&
+        state.taskComments[task.id].length > 0 &&
+        !locks[task.id]
+      ) {
+        const comment = state.taskComments[task.id].find(c => !c.pinned)
+        Object.assign(comment, {
+          task_status_id: task.task_status_id,
+          task_status: state.taskStatusMap.get(task.task_status_id)
+        })
+      }
     }
   },
 

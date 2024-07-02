@@ -42,6 +42,7 @@
             type="number"
             v-model="form.nb_frames"
             @enter="runConfirmation"
+            v-focus
           />
           <text-field
             ref="frameInField"
