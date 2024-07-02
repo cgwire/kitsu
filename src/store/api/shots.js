@@ -191,5 +191,13 @@ export default {
       `/api/data/projects/${productionId}/quotas/` +
         `${taskTypeId}?detail=${detailLevel}&weighted=${weighted}`
     )
+  },
+
+  setNbFramesFromTaskTypePreviews(taskTypeId, productionId, episodeId) {
+    let path =
+      `/api/actions/projects/${productionId}/task-types/` +
+      `${taskTypeId}/set-shot-nb-frames`
+    if (episodeId) path += `?episode_id=${episodeId}`
+    return client.ppost(path)
   }
 }
