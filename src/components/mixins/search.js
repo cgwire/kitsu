@@ -11,6 +11,10 @@ export const searchMixin = {
       if (this.applySearch) this.applySearch(searchQuery.search_query)
     },
 
+    removeSearchQuery(searchQuery) {
+      this.removeShotSearch(searchQuery).catch(console.error)
+    },
+
     focusSearchField(options) {
       if (this.searchField) {
         this.searchField.focus(options)
