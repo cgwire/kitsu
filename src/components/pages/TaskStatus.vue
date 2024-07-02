@@ -23,7 +23,7 @@
         </span>
       </h2>
       <task-status-list
-        :entries="taskStatusList.filter(taskStatus => !taskStatus.for_concept)"
+        :entries="taskStatusList"
         :is-loading="loading.list"
         :is-error="errors.list"
         @edit-clicked="onEditClicked"
@@ -32,7 +32,7 @@
       />
       <h2>{{ $t('task_status.title_concepts') }}</h2>
       <task-status-list
-        :entries="taskStatusList.filter(taskStatus => !!taskStatus.for_concept)"
+        :entries="conceptStatusList"
         :is-loading="loading.list"
         :is-error="errors.list"
         @edit-clicked="onEditClicked"
@@ -69,11 +69,11 @@ import { HelpCircleIcon } from 'vue-feather-icons'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import RouteTabs from '@/components/widgets/RouteTabs'
-import TaskStatusList from '@/components/lists/TaskStatusList'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
+import TaskStatusList from '@/components/lists/TaskStatusList.vue'
 
 export default {
   name: 'task-status',
@@ -130,11 +130,20 @@ export default {
       return this.activeTab === 'active'
     },
 
+    activeTaskStatuses() {
+      return this.isActiveTab ? this.taskStatus : this.archivedTaskStatus
+    },
+
     taskStatusList() {
-      const taskStatusList = this.isActiveTab
-        ? this.taskStatus
-        : this.archivedTaskStatus
-      return [...taskStatusList].sort((a, b) => a.priority - b.priority)
+      return this.activeTaskStatuses
+        .filter(taskStatus => !taskStatus.for_concept)
+        .sort((a, b) => a.priority - b.priority)
+    },
+
+    conceptStatusList() {
+      return this.activeTaskStatuses
+        .filter(taskStatus => taskStatus.for_concept)
+        .sort((a, b) => a.priority - b.priority)
     }
   },
 

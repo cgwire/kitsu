@@ -32,7 +32,7 @@
           v-model="assetsItems"
         >
           <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
                 {{ $t('assets.title') }}
               </span>
@@ -66,7 +66,7 @@
             />
           </tr>
           <tr class="empty" v-if="assetsItems.length === 0">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -83,7 +83,7 @@
           @end="updatePriorityShots"
         >
           <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
                 {{ $t('shots.title') }}
               </span>
@@ -107,6 +107,9 @@
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
+            <td>
+              {{ taskType.description }}
+            </td>
             <row-actions-cell
               :taskType-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
@@ -114,7 +117,7 @@
             />
           </tr>
           <tr class="empty" v-if="shotsItems.length === 0">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -131,7 +134,7 @@
           @end="updatePriorityEdits"
         >
           <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
                 {{ $t('edits.title') }}
               </span>
@@ -155,6 +158,9 @@
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
+            <td>
+              {{ taskType.description }}
+            </td>
             <row-actions-cell
               :taskType-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
@@ -162,7 +168,7 @@
             />
           </tr>
           <tr class="empty" v-if="editsItems.length === 0">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -179,7 +185,7 @@
           @end="updatePrioritySequences"
         >
           <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
                 {{ $t('sequences.title') }}
               </span>
@@ -203,6 +209,9 @@
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
+            <td>
+              {{ taskType.description }}
+            </td>
             <row-actions-cell
               :taskType-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
@@ -210,7 +219,7 @@
             />
           </tr>
           <tr class="empty" v-if="sequencesItems.length === 0">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -227,7 +236,7 @@
           @end="updatePriorityEpisodes"
         >
           <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="4">
+            <th scope="rowgroup" colspan="5">
               <span class="datatable-row-header">
                 {{ $t('episodes.title') }}
               </span>
@@ -251,6 +260,9 @@
             <td class="allow-timelog">
               <boolean-rep :value="taskType.allow_timelog" />
             </td>
+            <td>
+              {{ taskType.description }}
+            </td>
             <row-actions-cell
               :taskType-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
@@ -259,7 +271,7 @@
           </tr>
         </draggable>
         <tr class="empty" v-if="episodesItems.length === 0">
-          <th scope="rowgroup" colspan="4">
+          <th scope="rowgroup" colspan="5">
             <span class="text">
               {{ $t('task_types.no_task_types') }}
             </span>
