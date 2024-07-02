@@ -94,23 +94,21 @@ import { sortByName } from '@/lib/sorting'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
-import TextareaField from '@/components/widgets/TextareaField.vue'
-import TextField from '@/components/widgets/TextField.vue'
+import ModalFooter from '@/components/modals/ModalFooter'
+import TextField from '@/components/widgets/TextField'
+import TextareaField from '@/components/widgets/TextareaField'
+import TaskTypeName from '@/components/widgets/TaskTypeName'
 
 export default {
   name: 'edit-asset-type-modal',
-
   mixins: [modalMixin],
-
   components: {
     Combobox,
     ComboboxBoolean,
-    ModalFooter,
     TaskTypeName,
-    TextareaField,
-    TextField
+    ModalFooter,
+    TextField,
+    TextareaField
   },
 
   props: {
@@ -137,7 +135,6 @@ export default {
       form: {
         name: '',
         short_name: '',
-        description: '',
         task_types: []
       }
     }
@@ -209,7 +206,6 @@ export default {
         this.form = {
           name: this.assetTypeToEdit.name,
           short_name: this.assetTypeToEdit.short_name,
-          description: this.assetTypeToEdit.description,
           task_types: [...types],
           archived: String(this.assetTypeToEdit.archived === true)
         }
@@ -217,7 +213,6 @@ export default {
         this.form = {
           name: '',
           short_name: '',
-          description: '',
           task_types: [],
           archived: 'false'
         }

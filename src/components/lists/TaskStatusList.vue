@@ -71,7 +71,7 @@
             />
             <row-actions-cell
               :entry-id="entry.id"
-              :hide-delete="entry.is_default === true || entry.for_concept"
+              :hide-delete="entry.is_default === true"
               @edit-clicked="$emit('edit-clicked', entry)"
               @delete-clicked="$emit('delete-clicked', entry)"
             />
@@ -94,10 +94,10 @@ import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import BooleanCell from '@/components/cells/BooleanCell.vue'
-import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
-import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
+import BooleanCell from '@/components/cells/BooleanCell'
+import RowActionsCell from '@/components/cells/RowActionsCell'
+import TableInfo from '@/components/widgets/TableInfo'
+import TaskStatusCell from '@/components/cells/TaskStatusCell'
 
 export default {
   name: 'task-status-list',
@@ -120,9 +120,9 @@ export default {
   },
 
   components: {
+    HelpCircleIcon,
     BooleanCell,
     draggable,
-    HelpCircleIcon,
     RowActionsCell,
     TableInfo,
     TaskStatusCell
