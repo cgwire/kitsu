@@ -31,7 +31,7 @@
         </div>
       </div>
     </div>
-    <div class="standby-column flexrow-item" v-if="!isShowInfosBreakdown">
+    <div class="standby-column flexrow-item" v-if="isShowInfosBreakdown">
       <input
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
@@ -44,7 +44,7 @@
     </div>
     <div
       class="description-column flexrow-item"
-      v-if="!isShowInfosBreakdown && isDescription"
+      v-if="isShowInfosBreakdown && isDescription"
     >
       <div
         class="tooltip-text"
@@ -62,7 +62,7 @@
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+      v-if="isFrames && isShowInfosBreakdown && metadataDisplayHeaders.frames"
     >
       <input
         class="input-editor"
@@ -79,9 +79,7 @@
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="
-        isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn
-      "
+      v-if="isFrameIn && isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
     >
       <input
         class="input-editor"
@@ -106,7 +104,7 @@
     <div
       class="frames-column flexrow-item"
       v-if="
-        isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut
+        isFrameOut && isShowInfosBreakdown && metadataDisplayHeaders.frameOut
       "
     >
       <input
@@ -134,7 +132,7 @@
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
       :key="'desc' + entity.id + '-' + descriptor.id"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
-      v-if="!isShowInfosBreakdown"
+      v-if="isShowInfosBreakdown"
     >
       <input
         class="input-editor"

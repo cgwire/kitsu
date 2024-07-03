@@ -80,12 +80,12 @@
               <div class="entity-header">
                 {{ $t('shots.fields.name') }}
               </div>
-              <div class="standby-header" v-if="!isShowInfosBreakdown">
+              <div class="standby-header" v-if="isShowInfosBreakdown">
                 {{ $t('breakdown.fields.standby') }}
               </div>
               <div
                 class="description-header"
-                v-if="!isShowInfosBreakdown && isDescription"
+                v-if="isShowInfosBreakdown && isDescription"
               >
                 {{ $t('shots.fields.description') }}
               </div>
@@ -94,7 +94,7 @@
                 v-if="
                   isShotCasting &&
                   isFrames &&
-                  !isShowInfosBreakdown &&
+                  isShowInfosBreakdown &&
                   metadataDisplayHeaders.frames
                 "
               >
@@ -105,7 +105,7 @@
                 v-if="
                   isShotCasting &&
                   isFrameIn &&
-                  !isShowInfosBreakdown &&
+                  isShowInfosBreakdown &&
                   metadataDisplayHeaders.frameIn
                 "
               >
@@ -116,7 +116,7 @@
                 v-if="
                   isShotCasting &&
                   isFrameOut &&
-                  !isShowInfosBreakdown &&
+                  isShowInfosBreakdown &&
                   metadataDisplayHeaders.frameOut
                 "
               >
@@ -126,7 +126,7 @@
                 class="descriptor-header"
                 :key="'descriptor-header-' + descriptor.id"
                 v-for="descriptor in visibleMetadataDescriptors"
-                v-if="!isShowInfosBreakdown"
+                v-if="isShowInfosBreakdown"
               >
                 <department-name
                   :key="department.id"
@@ -148,6 +148,30 @@
                 v-for="assetType in castingAssetTypes"
               >
                 {{ assetType }}
+              </div>
+
+              <div class="actions text-align-right" ref="actionsSection">
+                <table-metadata-selector-menu
+                  ref="headerMetadataSelectorMenu"
+                  namespace="breakdown"
+                  :descriptors="metadataDescriptors"
+                  :exclude="{
+                    fps: true,
+                    estimation: true,
+                    resolution: true,
+                    maxRetakes: true,
+                    timeSpent: true
+                  }"
+                  :metadata-display-headers.sync="metadataDisplayHeaders"
+                  v-if="isShowInfosBreakdown && columnSelectorDisplayed"
+                />
+
+                <button-simple
+                  class="is-small mr05"
+                  icon="down"
+                  @click="toggleColumnSelector"
+                  v-if="isShowInfosBreakdown"
+                />
               </div>
             </div>
             <shot-line
@@ -345,6 +369,7 @@ import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteModal from '@/components/modals/DeleteModal'
+import DepartmentName from '@/components/widgets/DepartmentName'
 import EditAssetModal from '@/components/modals/EditAssetModal'
 import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
@@ -354,7 +379,7 @@ import SearchQueryList from '@/components/widgets/SearchQueryList'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
-import DepartmentName from '@/components/widgets/DepartmentName'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 
 export default {
   name: 'breakdown',
@@ -375,13 +400,15 @@ export default {
     SearchQueryList,
     ShotLine,
     ShowInfosButton,
-    Spinner
+    Spinner,
+    TableMetadataSelectorMenu
   },
 
   data() {
     return {
       assetTypeId: '',
       castingType: 'shot',
+      columnSelectorDisplayed: false,
       editedAsset: null,
       editedEntityId: null,
       editedAssetLinkLabel: null,
@@ -413,6 +440,16 @@ export default {
         remove: false,
         stay: false
       },
+      metadataDisplayHeaders: {
+        fps: false,
+        frameIn: true,
+        frameOut: true,
+        frames: true,
+        estimation: false,
+        maxRetakes: false,
+        resolution: false,
+        timeSpent: false
+      },
       modals: {
         isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
@@ -435,6 +472,27 @@ export default {
     this.setLastProductionScreen('breakdown')
     this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
     window.addEventListener('keydown', this.onKeyDown, false)
+
+    if (this.isEpisodeCasting) {
+      this.metadataDisplayHeaders = {}
+    } else if (this.isShotCasting) {
+      this.metadataDisplayHeaders = {
+        fps: false,
+        frameIn: true,
+        frameOut: true,
+        frames: true,
+        estimation: false,
+        maxRetakes: false,
+        resolution: false,
+        timeSpent: false
+      }
+    } else {
+      this.metadataDisplayHeaders = {
+        estimation: false,
+        readyFor: false,
+        timeSpent: false
+      }
+    }
   },
 
   beforeDestroy() {
@@ -631,29 +689,6 @@ export default {
         return this.shotMetadataDescriptors
       } else {
         return this.assetMetadataDescriptors
-      }
-    },
-
-    metadataDisplayHeaders() {
-      if (this.isEpisodeCasting) {
-        return {}
-      } else if (this.isShotCasting) {
-        return {
-          fps: false,
-          frameIn: true,
-          frameOut: true,
-          frames: true,
-          estimation: false,
-          maxRetakes: false,
-          resolution: false,
-          timeSpent: false
-        }
-      } else {
-        return {
-          estimation: false,
-          readyFor: false,
-          timeSpent: false
-        }
       }
     }
   },
@@ -1078,6 +1113,10 @@ export default {
     toggleTextMode() {
       this.isTextMode = !this.isTextMode
       localStorage.setItem('breakdown:text-mode', this.isTextMode)
+    },
+
+    toggleColumnSelector() {
+      this.columnSelectorDisplayed = !this.columnSelectorDisplayed
     },
 
     confirmNewAssetStay(form) {
@@ -1621,8 +1660,8 @@ export default {
 .frames-header {
   min-width: 81px;
   max-width: 81px;
-  text-align: right;
-  padding-right: 0.5em;
+  justify-content: right;
+  padding-right: 0.6em;
 }
 
 .asset-type-header {
@@ -1675,6 +1714,11 @@ export default {
 
   .mt1 {
     flex: 1;
+  }
+
+  .actions {
+    width: 100%;
+    text-align: right;
   }
 }
 </style>

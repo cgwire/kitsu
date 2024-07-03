@@ -1,6 +1,11 @@
 z
 <template>
-  <div class="column-menu">
+  <div
+    class="column-menu"
+    :style="{
+      top: namespace === 'breakdown' ? '38px' : '40px'
+    }"
+  >
     <h2>{{ $t('main.column_visibility') }}</h2>
     <div
       class="field is-marginless"
@@ -143,10 +148,11 @@ export default {
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   box-shadow: 0 2px 6px $light-grey;
-  max-height: 300px;
+  max-height: 400px;
   overflow: auto;
   position: absolute;
   right: 0;
+  text-align: left;
   top: 40px;
   width: 200px;
   z-index: 100;
