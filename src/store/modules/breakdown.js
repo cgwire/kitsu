@@ -30,6 +30,7 @@ import {
   REMOVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
   SAVE_BREAKDOWN_SEARCH_END,
   SAVE_BREAKDOWN_SEARCH_FILTER_GROUP_END,
+  SET_IS_SHOW_INFOS_BREAKDOWN,
   RESET_ALL
 } from '@/store/mutation-types'
 import { LOAD_ASSETS_END } from '../mutation-types'
@@ -38,19 +39,19 @@ const initialState = {
   breakdownSearchFilterGroups: [],
   breakdownSearchQueries: [],
 
-  currentProduction: null,
-  castingSequenceId: '',
-  castingShotId: 0,
-  castingEpisodes: [],
-  castingSequenceShots: [],
+  casting: {},
   castingAssetTypeAssets: [],
+  castingAssetTypesOptions: [],
+  castingByType: [],
+  castingCurrentShot: null,
+  castingEpisodes: [],
   castingEpisodeSequences: [],
   castingSequencesOptions: [],
-  castingAssetTypesOptions: [],
+  castingSequenceId: '',
+  castingSequenceShots: [],
+  castingShotId: 0,
 
-  castingCurrentShot: null,
-  casting: {},
-  castingByType: []
+  isShowInfosBreakdown: false
 }
 const state = { ...initialState }
 
@@ -58,17 +59,18 @@ const getters = {
   breakdownSearchFilterGroups: state => state.breakdownSearchFilterGroups,
   breakdownSearchQueries: state => state.breakdownSearchQueries,
 
+  casting: state => state.casting,
+  castingAssetTypeAssets: state => state.castingAssetTypeAssets,
+  castingAssetTypesOptions: state => state.castingAssetTypesOptions,
+  castingByType: state => state.castingByType,
+  castingCurrentShot: state => state.castingCurrentShot,
   castingEpisodes: state => state.castingEpisodes,
   castingEpisodeSequences: state => state.castingEpisodeSequences,
   castingSequenceId: state => state.castingSequenceId,
   castingSequenceShots: state => state.castingSequenceShots,
-  castingAssetTypeAssets: state => state.castingAssetTypeAssets,
   castingSequencesOptions: state => state.castingSequencesOptions,
-  castingAssetTypesOptions: state => state.castingAssetTypesOptions,
 
-  casting: state => state.casting,
-  castingByType: state => state.castingByType,
-  castingCurrentShot: state => state.castingCurrentShot
+  isShowInfosBreakdown: state => state.isShowInfosBreakdown
 }
 
 const actions = {
@@ -303,11 +305,35 @@ const actions = {
 
 const mutations = {
   [LOAD_EPISODES_START](state) {
-    Object.assign(state, initialState)
+    Object.assign(state, {
+      casting: {},
+      castingAssetTypeAssets: [],
+      castingAssetTypesOptions: [],
+      castingByType: [],
+      castingCurrentShot: null,
+      castingEpisodes: [],
+      castingEpisodeSequences: [],
+      castingSequencesOptions: [],
+      castingSequenceId: '',
+      castingSequenceShots: [],
+      castingShotId: 0
+    })
   },
 
   [LOAD_SHOTS_START](state) {
-    Object.assign(state, initialState)
+    Object.assign(state, {
+      casting: {},
+      castingAssetTypeAssets: [],
+      castingAssetTypesOptions: [],
+      castingByType: [],
+      castingCurrentShot: null,
+      castingEpisodes: [],
+      castingEpisodeSequences: [],
+      castingSequencesOptions: [],
+      castingSequenceId: '',
+      castingSequenceShots: [],
+      castingShotId: 0
+    })
   },
 
   [CASTING_SET_FOR_EPISODES](state, episodes) {
@@ -616,6 +642,10 @@ const mutations = {
     state.breakdownSearchQueries = userFilters.breakdown?.[production.id] || []
     state.breakdownSearchFilterGroups =
       userFilterGroups?.breakdown?.[production.id] || []
+  },
+
+  [SET_IS_SHOW_INFOS_BREAKDOWN](state, isShowInfosBreakdown) {
+    state.isShowInfosBreakdown = isShowInfosBreakdown
   },
 
   [RESET_ALL](state) {

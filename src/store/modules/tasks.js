@@ -96,7 +96,6 @@ const initialState = {
   isBigThumbnails: false,
   isShowAssignations: true,
   isShowInfos: true,
-  isShowInfosBreakdown: false,
 
   isSavingCommentPreview: false,
   previewForms: [],
@@ -148,7 +147,6 @@ const getters = {
   isBigThumbnails: state => state.isBigThumbnails,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
-  isShowInfosBreakdown: state => state.isShowInfosBreakdown,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
@@ -1270,10 +1268,6 @@ const mutations = {
 
   [SET_IS_SHOW_INFOS](state, isShowInfos) {
     state.isShowInfos = isShowInfos
-  },
-
-  [SET_IS_SHOW_INFOS_BREAKDOWN](state, isShowInfosBreakdown) {
-    state.isShowInfosBreakdown = isShowInfosBreakdown
   },
 
   [LOAD_PERSON_TASKS_END](state, { tasks }) {
