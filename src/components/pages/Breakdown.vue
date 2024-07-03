@@ -191,7 +191,7 @@
               :is-save-error="saveErrors[entity.id]"
               @edit-label="onEditLabelClicked"
               @add-one="addOneAsset"
-              @remove-one="removeOneAsset"
+              @remove-one="removeOneAssetFromSelection"
               @click="selectEntity"
               @metadata-changed="onMetadataChanged"
               @description-changed="onDescriptionChanged"
@@ -931,6 +931,17 @@ export default {
         })
         .finally(() => {
           this.loading.remove = false
+        })
+    },
+
+    removeOneAssetFromSelection(assetId) {
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach(entityId => {
+          const nbOccurences = this.casting[entityId].find(
+            asset => asset.asset_id === assetId
+          ).nb_occurences
+          this.removeOneAsset(assetId, entityId, nbOccurences)
         })
     },
 
