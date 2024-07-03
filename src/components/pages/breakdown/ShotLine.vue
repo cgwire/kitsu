@@ -243,6 +243,7 @@
             class="flexrow-item"
             :key="asset.id"
             :asset="asset"
+            :active="selected"
             :nb-occurences="asset.nb_occurences"
             :read-only="readOnly"
             :text-mode="textMode"
