@@ -635,7 +635,7 @@ div .tooltip-editor {
 }
 
 .metadata-descriptor .select {
-  color: $grey-strong;
+  color: var(--text);
   margin: 0;
   height: 40px;
   width: 100%;
@@ -654,7 +654,7 @@ div .tooltip-editor {
   }
 
   select {
-    color: $grey-strong;
+    color: var(--text);
     height: 100%;
     width: 100%;
     background: transparent;
@@ -663,12 +663,12 @@ div .tooltip-editor {
 
     &:focus {
       border: 1px solid $green;
-      background: white;
+      background: var(--background);
+      color: var(--text);
     }
 
     &:hover {
-      background: transparent;
-      background: white;
+      background: var(--background);
       border: 1px solid $light-green;
     }
   }

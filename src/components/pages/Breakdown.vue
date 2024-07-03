@@ -1563,6 +1563,7 @@ export default {
 }
 
 .breakdown {
+  color: var(--text);
   position: fixed;
   left: 0;
   right: 0;
