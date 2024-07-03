@@ -710,6 +710,7 @@ export default {
       'removeAssetFromCasting',
       'removeBreakdownSearch',
       'saveBreakdownSearch',
+      'loadSequences',
       'saveBreakdownSearchFilterGroup',
       'saveCasting',
       'setAssetLinkLabel',
@@ -741,36 +742,36 @@ export default {
       }, 100)
     },
 
-    reloadEntities() {
+    async reloadEntities() {
       this.isLoading = true
-      this.loadShots(() => {
-        if (this.isTVShow) {
-          if (this.currentEpisode) {
-            this.episodeId = this.currentEpisode.id
-          }
-          this.setCastingEpisode(this.episodeId)
-          this.setCastingForProductionEpisodes()
-        } else {
-          this.setCastingEpisode(null)
+      await this.loadSequences()
+      await this.loadShots()
+      if (this.isTVShow) {
+        if (this.currentEpisode) {
+          this.episodeId = this.currentEpisode.id
         }
-        this.loadAssets(true).then(() => {
-          this.isLoading = false
-          this.displayMoreAssets()
-          this.setCastingAssetTypes()
-          if (this.assetTypeId) {
-            this.setCastingAssetType(this.assetTypeId)
-          } else {
-            this.setCastingSequence(this.sequenceId || 'all')
-          }
-          this.resetSequenceOption()
-          this.resetSelection()
-          if (
-            (this.currentEpisode && this.currentEpisode.id === 'main') ||
-            this.currentProduction.production_type === 'assets'
-          ) {
-            this.castingType = 'asset'
-          }
-        })
+        this.setCastingEpisode(this.episodeId)
+        this.setCastingForProductionEpisodes()
+      } else {
+        this.setCastingEpisode(null)
+      }
+      this.loadAssets(true).then(() => {
+        this.isLoading = false
+        this.displayMoreAssets()
+        this.setCastingAssetTypes()
+        if (this.assetTypeId) {
+          this.setCastingAssetType(this.assetTypeId)
+        } else {
+          this.setCastingSequence(this.sequenceId || 'all')
+        }
+        this.resetSequenceOption()
+        this.resetSelection()
+        if (
+          (this.currentEpisode && this.currentEpisode.id === 'main') ||
+          this.currentProduction.production_type === 'assets'
+        ) {
+          this.castingType = 'asset'
+        }
       })
     },
 
