@@ -166,9 +166,9 @@ import { buildNameIndex } from '@/lib/indexing'
 import colors from '@/lib/colors'
 import preferences from '@/lib/preferences'
 
-import EditProductionModal from '@/components/modals/EditProductionModal'
-import SearchField from '@/components/widgets/SearchField'
-import Spinner from '@/components/widgets/Spinner'
+import EditProductionModal from '@/components/modals/EditProductionModal.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'open-productions',

@@ -108,16 +108,17 @@
 import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+
 import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 import stringHelper from '@/lib/string'
 
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ProductionTaskType from '@/components/pages/production/ProductionTaskType'
-import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
-import SettingImporter from '@/components/widgets/SettingImporter'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
+import SettingImporter from '@/components/widgets/SettingImporter.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'production-task-types',

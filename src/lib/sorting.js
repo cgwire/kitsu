@@ -34,8 +34,8 @@ export const sortShots = shots => {
   )
 }
 
-export const sortEdits = shots => {
-  return shots.sort(
+export const sortEdits = edits => {
+  return edits.sort(
     firstBy('canceled')
       .thenBy(sortByEpisode)
       .thenBy((a, b) =>

@@ -14,7 +14,7 @@
       <span
         class="flexrow-item last-comment pointer"
         v-if="commentText && commentText.length > 0"
-        v-html="compileMarkdown(commentText)"
+        v-html="renderMarkdown(commentText)"
         @click="onClick"
       >
       </span>
@@ -30,11 +30,12 @@
 
 <script>
 import { renderMarkdown } from '@/lib/render'
-import { mapGetters, mapActions } from 'vuex'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
   name: 'last-comment-cell',
+
   components: {
     PeopleAvatar
   },
@@ -54,8 +55,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     commentText() {
       const text = this.task.last_comment.text
       const maxLength = 140
@@ -68,11 +67,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
-    compileMarkdown(input) {
-      return renderMarkdown(input)
-    },
+    renderMarkdown,
 
     onClick() {
       this.isOpen = !this.isOpen

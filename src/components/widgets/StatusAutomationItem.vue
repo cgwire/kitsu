@@ -44,13 +44,16 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { pluralizeEntityType } from '@/lib/path'
-import TaskStatusCell from '@/components/cells/TaskStatusCell'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+
+import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'status-automation-item',
+
   components: {
     TaskStatusCell,
     TaskTypeName
@@ -91,10 +94,6 @@ export default {
       }
       return route
     }
-  },
-
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

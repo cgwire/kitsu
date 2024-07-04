@@ -10,12 +10,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'task-type-cell',
+
   components: {
     TaskTypeName
   },
@@ -37,17 +36,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  computed: {
-    ...mapGetters([]),
-    color() {
-      if (this.entry.color.toUpperCase() === '#000000') return '$grey-strong'
-      else return this.entry.color
-    }
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>
