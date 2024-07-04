@@ -124,7 +124,7 @@
                   >
                     {{ $t('notifications.mention_you_on') }}
                     <template v-if="isReplyMention(notification)">
-                      (reply)
+                      ({{ $t('main.reply').toLowerCase() }})
                     </template>
                   </span>
 
