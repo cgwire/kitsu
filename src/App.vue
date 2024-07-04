@@ -1901,6 +1901,14 @@ tbody:last-child .empty-line:last-child {
     background: var(--background-tag);
     border-left: 0.4em solid var(--background-hover);
   }
+
+  table tr:hover {
+    background: var(--background-hover);
+  }
+
+  table thead th {
+    color: inherit;
+  }
 }
 
 .playlist-column .video-player-box .video-js {
