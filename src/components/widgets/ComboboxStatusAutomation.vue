@@ -44,8 +44,8 @@ import { mapGetters } from 'vuex'
 import { ChevronDownIcon } from 'vue-feather-icons'
 
 import colors from '@/lib/colors'
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import StatusAutomationItem from '@/components/widgets/StatusAutomationItem'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import StatusAutomationItem from '@/components/widgets/StatusAutomationItem.vue'
 
 export default {
   name: 'combobox-status-automation',

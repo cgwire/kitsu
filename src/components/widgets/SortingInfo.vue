@@ -1,8 +1,7 @@
 <template>
   <button-simple
-    class="sorting-info mb05"
+    class="sorting-info mb05 is-small"
     icon="remove"
-    is-small
     :text="text"
     :title="$t('main.clear_sorting')"
     @click="$emit('clear-sorting')"

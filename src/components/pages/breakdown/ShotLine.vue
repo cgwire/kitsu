@@ -48,7 +48,7 @@
     >
       <div
         class="tooltip-text"
-        v-html="compileMarkdown(entity.description)"
+        v-html="renderMarkdown(entity.description)"
         v-if="readOnly"
       ></div>
       <textarea
@@ -265,16 +265,19 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import { renderMarkdown } from '@/lib/render'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import AssetBlock from '@/components/pages/breakdown/AssetBlock'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
+import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
 export default {
   name: 'shot-line',
+
   mixins: [entityListMixin, descriptorMixin],
+
   components: {
     AssetBlock,
     EntityThumbnail
@@ -388,9 +391,7 @@ export default {
       this.$emit('standby-changed', entity, event.target.checked)
     },
 
-    compileMarkdown(input) {
-      return renderMarkdown(input)
-    },
+    renderMarkdown,
 
     nbAssetsForType(assetType) {
       return this.assetsByAssetTypesMap[assetType].reduce(
@@ -401,6 +402,7 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .dark {
   .asset-type-name {

@@ -20,7 +20,7 @@
         >
           <text-field
             ref="nameField"
-            input-class="w600 is-inline"
+            input-class="is-inline"
             :placeholder="$t('productions.creation.placeholder_name')"
             v-model="productionToCreate.name"
           />

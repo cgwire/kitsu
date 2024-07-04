@@ -222,7 +222,7 @@ import {
 import moment from 'moment-timezone'
 
 import { pluralizeEntityType } from '@/lib/path'
-import { renderComment, renderMarkdown } from '@/lib/render'
+import { renderComment } from '@/lib/render'
 
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -406,10 +406,6 @@ export default {
       const utcDate = moment.tz(date, 'UTC')
       date = moment(utcDate.format()).fromNow()
       return date[0].toUpperCase() + date.slice(1)
-    },
-
-    compileMarkdown(input) {
-      return renderMarkdown(input)
     },
 
     personName(notification) {
