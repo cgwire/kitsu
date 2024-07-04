@@ -104,29 +104,20 @@
                     {{ personName(notification) }}
                   </span>
 
-                  <span
-                    class="explaination flexrow-item"
-                    v-if="isComment(notification)"
-                  >
+                  <span class="flexrow-item" v-if="isComment(notification)">
                     {{ $t('notifications.commented_on') }}
                   </span>
 
-                  <span
-                    class="explaination flexrow-item"
-                    v-if="isReply(notification)"
-                  >
+                  <span class="flexrow-item" v-if="isReply(notification)">
                     {{ $t('notifications.replied_on') }}
                   </span>
 
-                  <span
-                    class="explaination flexrow-item"
-                    v-if="isAssignation(notification)"
-                  >
+                  <span class="flexrow-item" v-if="isAssignation(notification)">
                     {{ $t('notifications.assigned_you') }}
                   </span>
 
                   <span
-                    class="explaination flexrow-item"
+                    class="flexrow-item"
                     v-if="
                       isMention(notification) || isReplyMention(notification)
                     "
@@ -147,7 +138,7 @@
                 </div>
               </div>
               <div
-                class="comment-text"
+                class="comment-text content"
                 v-html="
                   renderComment(
                     notification.comment_text,
@@ -196,7 +187,7 @@
               </div-->
 
               <div
-                class="comment-text reply-text"
+                class="comment-text content reply-text"
                 v-html="
                   renderComment(
                     notification.reply_text,
@@ -228,32 +219,33 @@ import {
   MessageSquareIcon,
   UserIcon
 } from 'vue-feather-icons'
-import { marked } from 'marked'
 import moment from 'moment-timezone'
-import { pluralizeEntityType } from '@/lib/path'
-import { renderComment } from '@/lib/render'
 
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import PageTitle from '@/components/widgets/PageTitle'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import Spinner from '@/components/widgets/Spinner'
-import TaskInfo from '@/components/sides/TaskInfo'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import { pluralizeEntityType } from '@/lib/path'
+import { renderComment, renderMarkdown } from '@/lib/render'
+
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'notifications',
+
   components: {
     AtSignIcon,
-    ComboboxTaskType,
     ComboboxStatus,
     ComboboxStyled,
+    ComboboxTaskType,
     CornerUpLeftIcon,
     MessageSquareIcon,
-    PeopleAvatar,
     PageTitle,
+    PeopleAvatar,
     Spinner,
     TaskInfo,
     TaskTypeName,
@@ -417,7 +409,7 @@ export default {
     },
 
     compileMarkdown(input) {
-      return marked.parse(input || '')
+      return renderMarkdown(input)
     },
 
     personName(notification) {
