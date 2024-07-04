@@ -1,8 +1,9 @@
 import { marked } from 'marked'
 import { markedEmoji } from 'marked-emoji'
 import sanitizeHTML from 'sanitize-html'
-import { formatTime } from '@/lib/video'
+
 import emojis from '@/lib/emojis'
+import { formatTime } from '@/lib/video'
 
 const markedEmojiOptions = {
   emojis,
@@ -50,26 +51,26 @@ export const renderComment = (
   departmentMap,
   className = ''
 ) => {
-  let compiled = marked.parse(input || '')
-  compiled = sanitize(compiled)
+  let html = renderMarkdown(input)
+
   if (mentions) {
     mentions.forEach(personId => {
       const person = personMap.get(personId)
-      compiled = compiled.replaceAll(
+      html = html.replaceAll(
         `@${person.full_name}`,
         `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
       )
     })
     departmentMentions.forEach(departmentId => {
       const department = departmentMap.get(departmentId)
-      compiled = compiled.replaceAll(
+      html = html.replaceAll(
         `@${department.name}`,
         `<span style="color: ${department.color}">@${department.name}</span>`
       )
     })
   }
 
-  return compiled.replaceAll(
+  return html.replaceAll(
     TIME_CODE_REGEX,
     (match, version, hours, minutes, seconds, sep, subframes, frame) => {
       return `<span
@@ -81,9 +82,10 @@ export const renderComment = (
   )
 }
 
-export const renderMarkdown = (input, options) => {
-  const compiled = marked.parse(input || '')
-  return sanitize(compiled, options)
+export const renderMarkdown = (input, options = {}) => {
+  if (!input?.length) return ''
+  const html = marked.parse(input)
+  return sanitize(html, options)
 }
 
 export const replaceTimeWithTimecode = (
