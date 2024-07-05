@@ -16,7 +16,7 @@
           {{ $t('task_types.new_task_type') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('task_types.fields.name')"

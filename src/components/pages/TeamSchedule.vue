@@ -80,7 +80,7 @@
 
       <schedule
         ref="schedule"
-        :draggedItems="draggedTasks"
+        :dragged-items="draggedTasks"
         :end-date="endDate"
         :hide-man-days="true"
         :hierarchy="scheduleItems"

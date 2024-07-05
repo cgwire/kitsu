@@ -62,7 +62,7 @@
               {{ taskType.description }}
             </td>
             <row-actions-cell
-              :taskType-id="taskType.id"
+              :task-type-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
               @edit-clicked="$emit('edit-clicked', taskType)"
             />
@@ -115,7 +115,7 @@
               {{ taskType.description }}
             </td>
             <row-actions-cell
-              :taskType-id="taskType.id"
+              :task-type-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
               @edit-clicked="$emit('edit-clicked', taskType)"
             />
@@ -168,7 +168,7 @@
               {{ taskType.description }}
             </td>
             <row-actions-cell
-              :taskType-id="taskType.id"
+              :task-type-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
               @edit-clicked="$emit('edit-clicked', taskType)"
             />
@@ -221,7 +221,7 @@
               {{ taskType.description }}
             </td>
             <row-actions-cell
-              :taskType-id="taskType.id"
+              :task-type-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
               @edit-clicked="$emit('edit-clicked', taskType)"
             />
@@ -274,7 +274,7 @@
               {{ taskType.description }}
             </td>
             <row-actions-cell
-              :taskType-id="taskType.id"
+              :task-type-id="taskType.id"
               @delete-clicked="$emit('delete-clicked', taskType)"
               @edit-clicked="$emit('edit-clicked', taskType)"
             />

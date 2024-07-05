@@ -9,14 +9,14 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="editToEdit && this.editToEdit.id">
+        <h1 class="title" v-if="editToEdit && editToEdit.id">
           {{ $t('edits.edit_title') }} {{ editToEdit.name }}
         </h1>
         <h1 class="title" v-else>
           {{ $t('edits.new_edit') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combobox
             :label="$t('edits.fields.episode')"
             :options="episodeOptions"

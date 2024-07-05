@@ -140,7 +140,7 @@
                   :task-status="taskStatuses"
                   :light="true"
                   :is-loading="loading.addComment"
-                  :previewForms="previewForms"
+                  :preview-forms="previewForms"
                   :is-error="errors.addComment"
                   :is-max-retakes-error="errors.addCommentMaxRetakes"
                   :fps="parseInt(currentFps)"

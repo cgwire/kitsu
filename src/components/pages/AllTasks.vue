@@ -75,7 +75,7 @@ import StatusStats from '@/components/widgets/StatusStats.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
-  name: 'AllTasks',
+  name: 'all-tasks',
 
   components: {
     AllTaskList,

@@ -6,7 +6,7 @@
           <th>{{ $t('quota.details_name') }}</th>
           <th>
             {{
-              this.countMode === 'seconds'
+              countMode === 'seconds'
                 ? $t('quota.details_seconds')
                 : $t('quota.details_frames')
             }}

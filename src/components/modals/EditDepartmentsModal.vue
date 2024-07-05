@@ -9,7 +9,7 @@
         <h1 class="title" v-else>
           {{ $t('departments.new_departments') }}
         </h1>
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('departments.fields.name')"

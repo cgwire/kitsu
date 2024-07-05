@@ -48,7 +48,7 @@
           <task-type-name
             class="flexrow-item"
             :task-type="taskTypeMap.get(currentAsset.ready_for)"
-            :current-production-id="this.currentProduction.id"
+            :current-production-id="currentProduction.id"
           />
         </div>
       </div>
@@ -56,7 +56,7 @@
       <div class="asset-data block">
         <route-section-tabs
           class="section-tabs"
-          :activeTab="currentSection"
+          :active-tab="currentSection"
           :route="$route"
           :tabs="assetTabs"
         />

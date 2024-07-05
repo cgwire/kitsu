@@ -16,7 +16,7 @@
           {{ $t('backgrounds.new_background') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <div class="field" v-if="!isEditing">
             <label class="label"> {{ $t('backgrounds.fields.file') }}</label>
             <file-upload

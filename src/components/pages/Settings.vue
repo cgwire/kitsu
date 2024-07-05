@@ -83,7 +83,7 @@
           />
           <div
             class="error has-text-centered"
-            v-if="this.errors.webhook_error === true"
+            v-if="errors.webhook_error === true"
           >
             <em>{{ $t('settings.webhook_error') }}</em>
           </div>
@@ -93,7 +93,7 @@
           :class="{
             'is-loading': loading.save
           }"
-          :disabled="loading.save || !this.$refs.form?.checkValidity()"
+          :disabled="loading.save || !$refs.form?.checkValidity()"
         >
           {{ $t('settings.save.button') }}
         </button>

@@ -111,7 +111,7 @@
     <add-preview-modal
       ref="add-preview-modal"
       :active="modals.addPreview"
-      :confirmLabel="$t('main.confirmation')"
+      :confirm-label="$t('main.confirmation')"
       :is-loading="loading.addPreview"
       :is-error="errors.addPreview"
       :form-data="addPreviewFormData"

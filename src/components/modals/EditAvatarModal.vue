@@ -16,7 +16,7 @@
           />
           <people-avatar
             :is-lazy="false"
-            :person="this.person"
+            :person="person"
             :size="150"
             :font-size="60"
           />

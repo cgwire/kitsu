@@ -221,8 +221,8 @@
               :selected="
                 selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
               "
-              :rowX="i"
-              :columnY="0"
+              :row-x="i"
+              :column-y="0"
               :column="entry.taskStatus"
               @select="onTaskSelected"
               @unselect="onTaskUnselected"

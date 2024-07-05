@@ -79,9 +79,7 @@
             }"
             :title="$t('menu.set_thumbnails')"
             v-if="
-              isTaskSelection &&
-              !this.isCurrentUserArtist &&
-              !isCurrentViewConcept
+              isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
             "
             @click="selectBar('thumbnails')"
           >

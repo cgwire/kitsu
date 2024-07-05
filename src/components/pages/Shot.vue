@@ -26,7 +26,7 @@
       <div class="entity-data block">
         <route-section-tabs
           class="section-tabs"
-          :activeTab="currentSection"
+          :active-tab="currentSection"
           :route="$route"
           :tabs="entityTabs"
         />

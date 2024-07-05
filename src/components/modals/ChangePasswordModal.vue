@@ -13,7 +13,7 @@
           {{ $t('people.change_password_for') }} {{ person.name }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             :disabled="person.is_generated_from_ldap"
             :label="$t('people.fields.password')"

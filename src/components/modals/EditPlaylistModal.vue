@@ -16,7 +16,7 @@
           {{ $t('playlists.create_title') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('playlists.fields.name')"

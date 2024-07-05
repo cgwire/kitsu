@@ -252,7 +252,7 @@
       :parsed-csv="parsedCSV"
       :form-data="importCsvFormData"
       :columns="renderColumns"
-      :dataMatchers="dataMatchers"
+      :data-matchers="dataMatchers"
       :database="filteredCasting"
       :disable-update="true"
       @reupload="resetImport"

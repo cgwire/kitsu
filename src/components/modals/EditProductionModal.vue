@@ -16,7 +16,7 @@
           {{ $t('productions.new_production') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('productions.fields.name')"
@@ -34,7 +34,7 @@
             class="field"
             :label="$t('productions.fields.status')"
             :options="productionStatusOptions"
-            localeKeyPrefix="productions.status."
+            locale-key-prefix="productions.status."
             @enter="runConfirmation"
             v-model="form.project_status_id"
             v-if="productionToEdit && productionToEdit.id"
@@ -43,7 +43,7 @@
             class="field"
             :label="$t('productions.fields.style')"
             :options="productionStyleOptions"
-            localeKeyPrefix="productions.style."
+            locale-key-prefix="productions.style."
             v-model="form.production_style"
           />
           <text-field
