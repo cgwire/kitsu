@@ -6,7 +6,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:vue/essential',
+    'plugin:vue/recommended',
     'plugin:prettier/recommended'
   ],
   rules: {
@@ -21,10 +21,21 @@ module.exports = {
         destructuring: 'all'
       }
     ],
+
+    // additional rules for Vue
+    'vue/component-definition-name-casing': ['error', 'kebab-case'],
     'vue/component-name-in-template-casing': ['error', 'kebab-case'],
+    'vue/prop-name-casing': ['error', 'camelCase'],
+
+    // disabled vue/recommended rules
+    'vue/attributes-order': 'off',
     'vue/multi-word-component-names': 'off',
+    'vue/no-lone-template': 'off',
     'vue/no-use-v-if-with-v-for': 'off',
-    'vue/prop-name-casing': ['error', 'camelCase']
-  },
-  globals: {}
+    'vue/no-v-html': 'off',
+    'vue/order-in-components': 'off',
+    'vue/require-default-prop': 'off',
+    'vue/require-prop-types': 'off',
+    'vue/no-template-shadow': 'off'
+  }
 }
