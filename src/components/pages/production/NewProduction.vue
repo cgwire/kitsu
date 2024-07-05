@@ -711,7 +711,8 @@ export default {
     availableAssetTaskTypes() {
       return this.assetTaskTypes.filter(
         assetTaskType =>
-          !this.productionToCreate.assetTaskTypes.includes(assetTaskType)
+          !this.productionToCreate.assetTaskTypes.includes(assetTaskType) &&
+          !assetTaskType.archived
       )
     },
 
@@ -738,7 +739,8 @@ export default {
     availableShotTaskTypes() {
       return this.shotTaskTypes.filter(
         shotTaskType =>
-          !this.productionToCreate.shotTaskTypes.includes(shotTaskType)
+          !this.productionToCreate.shotTaskTypes.includes(shotTaskType) &&
+          !shotTaskType.archived
       )
     },
 
