@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src/",
+    "lint": "eslint --ext .js,.vue src/",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write --list-different src/**/*.{js,vue}",
     "test:unit": "vitest tests/unit",
@@ -90,6 +90,6 @@
     "node": ">=18.12"
   },
   "lint-staged": {
-    "*.{js,vue}": "eslint --cache --fix"
+    "*.{js,vue}": "eslint --cache"
   }
 }
