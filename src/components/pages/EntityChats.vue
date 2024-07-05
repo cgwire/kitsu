@@ -1,6 +1,6 @@
 <template>
   <page-left-side-layout>
-    <template v-slot:side>
+    <template #side>
       <div class="chat-column">
         <spinner class="mt1" v-if="loading.list" />
         <div class="chat-list" v-else>
@@ -38,7 +38,7 @@
       </div>
     </template>
 
-    <template v-slot:main>
+    <template #main>
       <div class="selected-entity-chat">
         <entity-chat
           ref="entityChat"

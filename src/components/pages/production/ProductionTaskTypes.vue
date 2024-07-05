@@ -95,7 +95,7 @@
             @import-from-production="importTaskTypesFromProduction"
             @import-item="addTaskType"
           >
-            <template v-slot:item-line="{ item }">
+            <template #item-line="{ item }">
               <task-type-name class="pointer" :task-type="item" />
             </template>
           </setting-importer>

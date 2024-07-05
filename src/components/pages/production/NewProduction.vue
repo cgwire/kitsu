@@ -170,17 +170,18 @@
               @delete="deleteFromList(taskType, 'assetTaskTypes')"
               v-for="taskType in productionToCreate.assetTaskTypes"
             />
-            <combobox-task-type
-              slot="footer"
-              class="is-inline inline-task-type-combo"
-              :task-type-list="availableAssetTaskTypes"
-              add-placeholder
-              @input="
-                id =>
-                  productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
-              "
-              v-if="availableAssetTaskTypes.length > 0"
-            />
+            <template #footer>
+              <combobox-task-type
+                class="is-inline inline-task-type-combo"
+                :task-type-list="availableAssetTaskTypes"
+                add-placeholder
+                @input="
+                  id =>
+                    productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
+                "
+                v-if="availableAssetTaskTypes.length > 0"
+              />
+            </template>
           </draggable>
         </timeline-item>
         <timeline-item
@@ -204,16 +205,18 @@
               deletable
               v-for="taskType in productionToCreate.shotTaskTypes"
             />
-            <combobox-task-type
-              slot="footer"
-              class="is-inline inline-task-type-combo"
-              :task-type-list="availableShotTaskTypes"
-              add-placeholder
-              @input="
-                id => productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
-              "
-              v-if="availableShotTaskTypes.length > 0"
-            />
+            <template #footer>
+              <combobox-task-type
+                class="is-inline inline-task-type-combo"
+                :task-type-list="availableShotTaskTypes"
+                add-placeholder
+                @input="
+                  id =>
+                    productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
+                "
+                v-if="availableShotTaskTypes.length > 0"
+              />
+            </template>
           </draggable>
         </timeline-item>
         <timeline-item
@@ -233,7 +236,6 @@
               v-for="taskStatus in productionToCreate.taskStatuses"
             />
             <combobox-status
-              slot="footer"
               class="flexrow-item"
               :task-status-list="availableTaskStatuses"
               :with-margin="false"
