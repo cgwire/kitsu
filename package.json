@@ -24,7 +24,7 @@
     "@fullcalendar/multimonth": "6.1.14",
     "@fullcalendar/vue": "6.1.14",
     "@google/model-viewer": "3.5.0",
-    "@sentry/vue": "8.14.0",
+    "@sentry/vue": "8.15.0",
     "async": "3.2.5",
     "bowser": "2.11.0",
     "chart.js": "2.9.4",
