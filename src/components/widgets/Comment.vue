@@ -191,13 +191,13 @@
                 :limit="2"
                 @input="onAtTextChanged"
               >
-                <template slot="item" slot-scope="team">
-                  <template v-if="team.item.isTime"> ⏱️ frame </template>
-                  <template v-else-if="team.item.isDepartment">
+                <template #item="{ item }">
+                  <template v-if="item.isTime"> ⏱️ frame </template>
+                  <template v-else-if="item.isDepartment">
                     <span
                       class="mr05"
                       :style="{
-                        background: team.item.color,
+                        background: item.color,
                         width: '10px',
                         height: '10px',
                         'border-radius': '50%'
@@ -205,20 +205,20 @@
                     >
                       &nbsp;
                     </span>
-                    {{ team.item.full_name }}
+                    {{ item.full_name }}
                   </template>
                   <template v-else>
                     <div class="flexrow">
                       <people-avatar
                         class="flexrow-item"
-                        :person="team.item"
+                        :person="item"
                         :size="20"
                         :font-size="11"
                         :is-lazy="false"
                         :is-link="false"
                       />
                       <span class="flexrow-item">
-                        {{ team.item.full_name }}
+                        {{ item.full_name }}
                       </span>
                     </div>
                   </template>

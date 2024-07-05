@@ -31,13 +31,15 @@
           @end="updatePriorityAssets"
           v-model="assetsItems"
         >
-          <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="5">
-              <span class="datatable-row-header">
-                {{ $t('assets.title') }}
-              </span>
-            </th>
-          </tr>
+          <template #header>
+            <tr class="datatable-type-header">
+              <th scope="rowgroup" colspan="6">
+                <span class="datatable-row-header">
+                  {{ $t('assets.title') }}
+                </span>
+              </th>
+            </tr>
+          </template>
           <tr
             class="datatable-row tasktype-item"
             :key="taskType.id"
@@ -66,7 +68,7 @@
             />
           </tr>
           <tr class="empty" v-if="assetsItems.length === 0">
-            <th scope="rowgroup" colspan="5">
+            <th scope="rowgroup" colspan="6">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -82,13 +84,15 @@
           :sort="true"
           @end="updatePriorityShots"
         >
-          <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="5">
-              <span class="datatable-row-header">
-                {{ $t('shots.title') }}
-              </span>
-            </th>
-          </tr>
+          <template #header>
+            <tr class="datatable-type-header">
+              <th scope="rowgroup" colspan="6">
+                <span class="datatable-row-header">
+                  {{ $t('shots.title') }}
+                </span>
+              </th>
+            </tr>
+          </template>
           <tr
             class="datatable-row tasktype-item"
             v-for="taskType in shotsItems"
@@ -117,7 +121,7 @@
             />
           </tr>
           <tr class="empty" v-if="shotsItems.length === 0">
-            <th scope="rowgroup" colspan="5">
+            <th scope="rowgroup" colspan="6">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -133,13 +137,15 @@
           :sort="true"
           @end="updatePriorityEdits"
         >
-          <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="5">
-              <span class="datatable-row-header">
-                {{ $t('edits.title') }}
-              </span>
-            </th>
-          </tr>
+          <template #header>
+            <tr class="datatable-type-header">
+              <th scope="rowgroup" colspan="6">
+                <span class="datatable-row-header">
+                  {{ $t('edits.title') }}
+                </span>
+              </th>
+            </tr>
+          </template>
           <tr
             class="datatable-row tasktype-item"
             v-for="taskType in editsItems"
@@ -168,7 +174,7 @@
             />
           </tr>
           <tr class="empty" v-if="editsItems.length === 0">
-            <th scope="rowgroup" colspan="5">
+            <th scope="rowgroup" colspan="6">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -184,13 +190,15 @@
           :sort="true"
           @end="updatePrioritySequences"
         >
-          <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="5">
-              <span class="datatable-row-header">
-                {{ $t('sequences.title') }}
-              </span>
-            </th>
-          </tr>
+          <template #header>
+            <tr class="datatable-type-header">
+              <th scope="rowgroup" colspan="6">
+                <span class="datatable-row-header">
+                  {{ $t('sequences.title') }}
+                </span>
+              </th>
+            </tr>
+          </template>
           <tr
             class="datatable-row tasktype-item"
             v-for="taskType in sequencesItems"
@@ -219,7 +227,7 @@
             />
           </tr>
           <tr class="empty" v-if="sequencesItems.length === 0">
-            <th scope="rowgroup" colspan="5">
+            <th scope="rowgroup" colspan="6">
               <span class="text">
                 {{ $t('task_types.no_task_types') }}
               </span>
@@ -235,13 +243,15 @@
           :sort="true"
           @end="updatePriorityEpisodes"
         >
-          <tr class="datatable-type-header" slot="header">
-            <th scope="rowgroup" colspan="5">
-              <span class="datatable-row-header">
-                {{ $t('episodes.title') }}
-              </span>
-            </th>
-          </tr>
+          <template #header>
+            <tr class="datatable-type-header">
+              <th scope="rowgroup" colspan="6">
+                <span class="datatable-row-header">
+                  {{ $t('episodes.title') }}
+                </span>
+              </th>
+            </tr>
+          </template>
           <tr
             class="datatable-row tasktype-item"
             v-for="taskType in episodesItems"
@@ -271,7 +281,7 @@
           </tr>
         </draggable>
         <tr class="empty" v-if="episodesItems.length === 0">
-          <th scope="rowgroup" colspan="5">
+          <th scope="rowgroup" colspan="6">
             <span class="text">
               {{ $t('task_types.no_task_types') }}
             </span>
@@ -468,10 +478,6 @@ export default {
 
 .tasktype-item[draggable='true'] {
   cursor: grabbing;
-}
-
-tr {
-  cursor: pointer;
 }
 
 .empty {
