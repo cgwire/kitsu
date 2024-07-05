@@ -3,7 +3,7 @@
     <div>
       <route-section-tabs
         class="section-tabs"
-        :activeTab="activeTab"
+        :active-tab="activeTab"
         :route="$route"
         :tabs="taskTypeTabs"
       />

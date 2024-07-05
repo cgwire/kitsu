@@ -260,7 +260,7 @@
                 :class="{
                   button: true,
                   'add-sequence': true,
-                  'is-loading': this.loading.addDaily
+                  'is-loading': loading.addDaily
                 }"
                 :disabled="isAdditionLoading"
                 @click="addDailyPending"
@@ -272,7 +272,7 @@
                 :class="{
                   button: true,
                   'add-sequence': true,
-                  'is-loading': this.loading.addEpisode
+                  'is-loading': loading.addEpisode
                 }"
                 :disabled="isAdditionLoading"
                 @click="addEpisodePending"
@@ -284,7 +284,7 @@
                 :class="{
                   button: true,
                   'add-sequence': true,
-                  'is-loading': this.loading.addMovie
+                  'is-loading': loading.addMovie
                 }"
                 :disabled="isAdditionLoading"
                 @click="addMovie"

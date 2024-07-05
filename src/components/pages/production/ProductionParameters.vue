@@ -1,8 +1,7 @@
 <template>
   <div class="columns">
     <div class="column is-one-third box">
-      <!-- Form -->
-      <form class="form" v-on:submit.prevent>
+      <form class="form" @submit.prevent>
         <text-field
           ref="nameField"
           :label="$t('productions.fields.name')"

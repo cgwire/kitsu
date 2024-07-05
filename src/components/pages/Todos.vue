@@ -4,7 +4,7 @@
       <div class="todos page">
         <route-section-tabs
           class="section-tabs"
-          :activeTab="currentSection"
+          :active-tab="currentSection"
           :route="$route"
           :tabs="todoTabs"
         />

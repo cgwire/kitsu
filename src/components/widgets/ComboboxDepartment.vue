@@ -9,7 +9,7 @@
         opened: showDepartmentList,
         rounded: rounded
       }"
-      v-bind:style="{
+      :style="{
         width: width + 'px'
       }"
     >
@@ -25,7 +25,7 @@
       <div
         class="select-input"
         ref="select"
-        v-bind:style="{
+        :style="{
           'max-height': maxHeightSelectInput + 'px',
           width: width + 'px',
           top: rounded ? '30px' : '37px'
@@ -34,9 +34,7 @@
       >
         <div
           class="department-line"
-          v-for="department in departmentList.filter(
-            ({ id }) => id !== this.value
-          )"
+          v-for="department in departmentList.filter(({ id }) => id !== value)"
           @click="selectDepartment(department)"
           :key="department.id"
         >

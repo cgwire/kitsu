@@ -82,7 +82,7 @@
       :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns, ...optionalCsvColumns]"
-      :dataMatchers="dataMatchers"
+      :data-matchers="dataMatchers"
       :database="filteredPeople"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"

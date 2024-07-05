@@ -9,14 +9,14 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="sequenceToEdit && this.sequenceToEdit.id">
+        <h1 class="title" v-if="sequenceToEdit && sequenceToEdit.id">
           {{ $t('sequences.edit_title') }} {{ sequenceToEdit.name }}
         </h1>
         <h1 class="title" v-else>
           {{ $t('sequences.new_sequence') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('sequences.fields.name')"

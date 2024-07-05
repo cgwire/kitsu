@@ -5,7 +5,7 @@
         <div class="profile-header-content has-text-centered">
           <people-avatar
             :is-lazy="false"
-            :person="this.user"
+            :person="user"
             :size="150"
             :font-size="60"
           />
@@ -38,17 +38,17 @@
         </h2>
         <text-field
           :label="$t('people.fields.first_name')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           v-model="form.first_name"
         />
         <text-field
           :label="$t('people.fields.last_name')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           v-model="form.last_name"
         />
         <text-field
           :label="$t('people.fields.email')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           v-model="form.email"
         />
         <text-field :label="$t('people.fields.phone')" v-model="form.phone" />
@@ -162,19 +162,19 @@
         </h2>
         <text-field
           :label="$t('people.fields.old_password')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           type="password"
           v-model="passwordForm.oldPassword"
         />
         <text-field
           :label="$t('people.fields.password')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           type="password"
           v-model="passwordForm.password"
         />
         <text-field
           :label="$t('people.fields.password_2')"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           type="password"
           v-model="passwordForm.password2"
         />
@@ -186,7 +186,7 @@
             'is-medium': true,
             'is-loading': changePassword.isLoading
           }"
-          :disabled="this.user.is_generated_from_ldap"
+          :disabled="user.is_generated_from_ldap"
           @click="passwordChangeRequested()"
         >
           {{ $t('profile.change_password.button') }}

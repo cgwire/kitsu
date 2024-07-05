@@ -46,8 +46,8 @@
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
-              :countMode="countMode"
-              :displayMode="displayMode"
+              :count-mode="countMode"
+              :display-mode="displayMode"
             />
 
             <stats-cell
@@ -56,8 +56,8 @@
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
-              :countMode="countMode"
-              :displayMode="displayMode"
+              :count-mode="countMode"
+              :display-mode="displayMode"
               v-for="columnId in validationColumns"
             />
 
@@ -83,8 +83,8 @@
                 :colors="chartColors(entry.id, 'all')"
                 :data="chartData(entry.id, 'all')"
                 :frames-data="chartData(entry.id, 'all', 'frames')"
-                :countMode="countMode"
-                :displayMode="displayMode"
+                :count-mode="countMode"
+                :display-mode="displayMode"
                 v-if="isStats(entry.id, 'all')"
               />
               <td v-else></td>
@@ -95,8 +95,8 @@
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
                 :frames-data="chartData(entry.id, columnId, 'frames')"
-                :countMode="countMode"
-                :displayMode="displayMode"
+                :count-mode="countMode"
+                :display-mode="displayMode"
                 :label="chartLabel(entry.id, columnId)"
                 :label-color="chartLabelColor(entry.id, columnId)"
                 v-for="columnId in validationColumns"
@@ -127,8 +127,8 @@
                     :frames-data="
                       chartTakeData(entry.id, columnId, takeNumber, 'frames')
                     "
-                    :countMode="countMode"
-                    :displayMode="displayMode"
+                    :count-mode="countMode"
+                    :display-mode="displayMode"
                     v-if="
                       chartRetakeMaxCount(entry.id, columnId) + 1 > takeNumber
                     "
@@ -140,8 +140,8 @@
                     :colors="chartColors(entry.id, columnId)"
                     :data="chartData(entry.id, columnId)"
                     :frames-data="chartData(entry.id, columnId, 'frames')"
-                    :countMode="countMode"
-                    :displayMode="displayMode"
+                    :count-mode="countMode"
+                    :display-mode="displayMode"
                     v-else-if="
                       isStats(entry.id, columnId) &&
                       chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber

@@ -13,7 +13,7 @@
           {{ $t('main.search_query_edit') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('assets.fields.name')"

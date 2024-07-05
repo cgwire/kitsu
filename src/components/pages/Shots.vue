@@ -210,7 +210,7 @@
       :parsed-csv="parsedCSV"
       :form-data="shotsCsvFormData"
       :columns="renderColumns"
-      :dataMatchers="dataMatchers"
+      :data-matchers="dataMatchers"
       :database="filteredShots"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"

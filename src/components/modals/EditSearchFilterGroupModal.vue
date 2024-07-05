@@ -16,7 +16,7 @@
           {{ $t('main.filter_group_add') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('assets.fields.name')"

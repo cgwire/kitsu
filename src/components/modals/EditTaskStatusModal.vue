@@ -16,7 +16,7 @@
           {{ $t('task_status.new_task_status') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             input-class="task-status-name"

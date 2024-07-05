@@ -188,7 +188,7 @@
     </div>
     <div
       class="list-wrapper"
-      v-else-if="tasksByParent && tasksByParent.length > 0 && this.isGrouped"
+      v-else-if="tasksByParent && tasksByParent.length > 0 && isGrouped"
     >
       <div :key="'task-section-' + i" v-for="(taskGroup, i) in tasksByParent">
         <h2>

@@ -20,7 +20,7 @@
         >
           <text-field
             ref="nameField"
-            input-class="is-inline"
+            input-class=" is-inline"
             :placeholder="$t('productions.creation.placeholder_name')"
             v-model="productionToCreate.name"
           />
@@ -36,7 +36,7 @@
               class="flexrow-item"
               :options="productionTypeOptions"
               :label="$t('productions.fields.type')"
-              localeKeyPrefix="productions.type."
+              locale-key-prefix="productions.type."
               v-model="productionToCreate.settings.type"
               thin
               is-inline
@@ -45,7 +45,7 @@
               class="flexrow-item"
               :options="productionStyleOptions"
               :label="$t('productions.fields.style')"
-              localeKeyPrefix="productions.style."
+              locale-key-prefix="productions.style."
               v-model="productionToCreate.settings.style"
               thin
               is-inline
@@ -139,7 +139,7 @@
                 :disabled-dates="{ days: [6, 0] }"
                 :placeholder="endDatePlaceholder"
                 :monday-first="true"
-                :disabledDates="{ to: productionToCreate.settings.dateStart }"
+                :disabled-dates="{ to: productionToCreate.settings.dateStart }"
                 format="yyyy-MM-dd"
                 v-model="productionToCreate.settings.dateEnd"
               />

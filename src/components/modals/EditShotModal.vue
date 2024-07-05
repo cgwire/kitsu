@@ -9,14 +9,14 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="shotToEdit && this.shotToEdit.id">
+        <h1 class="title" v-if="shotToEdit && shotToEdit.id">
           {{ $t('shots.edit_title') }} {{ shotToEdit.name }}
         </h1>
         <h1 class="title" v-else>
           {{ $t('shots.new_shot') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combobox
             :label="$t('shots.fields.sequence')"
             :options="sequenceOptions"

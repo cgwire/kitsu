@@ -16,7 +16,7 @@
           {{ $t('custom_actions.new_custom_action') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('custom_actions.fields.name')"

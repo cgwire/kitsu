@@ -10,7 +10,7 @@
       <div class="box content">
         <page-title :text="title" />
         <p>{{ text }}</p>
-        <form v-on:submit.prevent class="widden">
+        <form @submit.prevent class="widden">
           <combobox-task-type
             :task-type-list="getApplicableTaskTypes()"
             v-model="form.task_type_id"

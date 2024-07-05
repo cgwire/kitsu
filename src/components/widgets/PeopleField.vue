@@ -7,7 +7,7 @@
       :get-label="getAssignationLabel"
       :items="items"
       :input-attrs="{
-        placeholder: placeholder || this.$t('people.select_person'),
+        placeholder: placeholder || $t('people.select_person'),
         class: wide
           ? 'big wide v-autocomplete-input'
           : big
