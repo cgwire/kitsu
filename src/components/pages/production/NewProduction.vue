@@ -126,7 +126,10 @@
                 label="Start date"
                 :placeholder="startDatePlaceholder"
                 :language="locale"
-                :disabled-dates="{ days: [6, 0] }"
+                :disabled-dates="{
+                  days: [6, 0],
+                  from: productionToCreate.settings.dateEnd
+                }"
                 :monday-first="true"
                 format="yyyy-MM-dd"
                 v-model="productionToCreate.settings.dateStart"
@@ -136,10 +139,12 @@
                 wrapper-class="datepicker"
                 input-class="is-small date-input input"
                 :language="locale"
-                :disabled-dates="{ days: [6, 0] }"
+                :disabled-dates="{
+                  days: [6, 0],
+                  to: productionToCreate.settings.dateStart
+                }"
                 :placeholder="endDatePlaceholder"
                 :monday-first="true"
-                :disabled-dates="{ to: productionToCreate.settings.dateStart }"
                 format="yyyy-MM-dd"
                 v-model="productionToCreate.settings.dateEnd"
               />
