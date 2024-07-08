@@ -7,6 +7,9 @@
   >
     <div class="modal-background" @click="$emit('cancel')"></div>
     <div class="new-window">
+      <a class="mr1" :href="previewDlPath" v-if="previewFileId">
+        <arrow-down-icon />
+      </a>
       <a target="_blank" :href="previewPath">
         <arrow-up-right-icon />
       </a>
@@ -24,13 +27,14 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import { getDownloadAttachmentPath } from '@/lib/path'
 
-import { ArrowUpRightIcon } from 'vue-feather-icons'
+import { ArrowDownIcon, ArrowUpRightIcon } from 'vue-feather-icons'
 
 export default {
   name: 'preview-modal',
   mixins: [modalMixin],
 
   components: {
+    ArrowDownIcon,
     ArrowUpRightIcon
   },
 
@@ -68,6 +72,11 @@ export default {
         return getDownloadAttachmentPath(this.attachment)
       }
       return ''
+    },
+
+    previewDlPath() {
+      const previewId = this.previewFileId
+      return `/api/pictures/originals/preview-files/${previewId}/download`
     }
   },
 
