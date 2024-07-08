@@ -3,7 +3,7 @@ z
   <div
     class="column-menu"
     :style="{
-      top: namespace === 'breakdown' ? '38px' : '40px'
+      top: namespace === 'breakdown' ? '30px' : '40px'
     }"
   >
     <h2>{{ $t('main.column_visibility') }}</h2>
@@ -137,7 +137,7 @@ export default {
 <style lang="scss" scoped>
 .dark .column-menu {
   background-color: $dark-grey-light;
-  box-shadow: 0 2px 6px $dark-grey-light;
+  box-shadow: 0 2px 6px $dark-grey;
 
   .checkbox:hover {
     color: $white;
@@ -159,10 +159,13 @@ export default {
   z-index: 100;
 
   h2 {
+    border-bottom: 0;
     color: var(--text);
+    margin-bottom: 0;
     margin-top: 0;
     padding: 0.6em;
-    text-transform: uppercase;
+    text-align: center;
+    text-transform: capitalize;
   }
 
   div {
