@@ -74,11 +74,30 @@
         </div>
 
         <spinner class="mt1" v-if="isLoading" />
-        <div class="casting-list" v-else>
-          <div class="mt1">
+
             <div class="header flexrow">
-              <div class="entity-header">
-                {{ $t('shots.fields.name') }}
+              <div
+                class="entity-header"
+                ref="name-header"
+                :style="{
+                  'min-width': columnWidth.name
+                    ? columnWidth.name + 'px'
+                    : '250px'
+                }"
+              >
+                <div>
+                  {{ $t('shots.fields.name') }}
+                </div>
+                <div class="filler"></div>
+                <div
+                  ref="resizable-knob-name"
+                  class="resizable-knob"
+                  @mousedown.prevent="initResize(
+                    'resizable-knob-name',
+                    'name-header'
+                  )"
+                >
+                </div>
               </div>
               <div class="standby-header" v-if="isShowInfosBreakdown">
                 {{ $t('breakdown.fields.standby') }}
@@ -125,22 +144,43 @@
               <div
                 class="descriptor-header"
                 :key="'descriptor-header-' + descriptor.id"
+                :ref="'descriptor-header-' + descriptor.id"
+                :style="{
+                  'min-width': columnWidth[descriptor.id]
+                    ? columnWidth[descriptor.id] + 'px'
+                    : '110px'
+                }"
                 v-for="descriptor in visibleMetadataDescriptors"
-                v-if="isShowInfosBreakdown"
+                v-show="isShowInfosBreakdown"
               >
-                <department-name
-                  :key="department.id"
-                  :department="department"
-                  no-padding
-                  only-dot
-                  v-for="department in descriptorCurrentDepartments(descriptor)"
-                />
+                <div
+                  class="mr1"
+                  v-if="descriptorCurrentDepartments(descriptor).length"
+                >
+                  <department-name
+                    :key="department.id"
+                    :department="department"
+                    no-padding
+                    only-dot
+                    v-for="department in descriptorCurrentDepartments(descriptor)"
+                  />
+                </div>
                 <span
-                  class="flexrow-item ellipsis descriptor-name"
+                  class="flexrow-item ellipsis descriptor-name filler"
                   :title="descriptor.name"
                 >
                   {{ descriptor.name }}
                 </span>
+                <div
+                  :ref="'resizable-knob-descriptor-' + descriptor.id"
+                  class="resizable-knob"
+                  @mousedown.prevent="initResize(
+                    'resizable-knob-descriptor-',
+                    'descriptor-header-',
+                    descriptor.id
+                  )"
+                >
+                </div>
               </div>
               <div
                 :key="assetType"
@@ -150,7 +190,7 @@
                 {{ assetType }}
               </div>
 
-              <div class="actions text-align-right" ref="actionsSection">
+              <div class="actions filler" ref="actionsSection">
                 <table-metadata-selector-menu
                   ref="headerMetadataSelectorMenu"
                   namespace="breakdown"
@@ -174,6 +214,8 @@
                 />
               </div>
             </div>
+            <div class="casting-list">
+              <div class="mt1">
             <shot-line
               :key="entity.id"
               :entity="entity"
@@ -189,6 +231,7 @@
               :big-mode="isBigMode"
               :is-description="isDescription"
               :is-save-error="saveErrors[entity.id]"
+              :column-width="columnWidth"
               @edit-label="onEditLabelClicked"
               @add-one="addOneAsset"
               @remove-one="removeOneAssetFromSelection"
@@ -208,10 +251,10 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <h2 class="flexrow subtitle">
-          {{ $t('breakdown.all_assets') }}
-        </h2>
         <div class="flexrow mb1 mt0">
+          <h2 class="flexrow subtitle">
+            {{ $t('breakdown.all_assets') }}
+          </h2>
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
@@ -356,10 +399,11 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 
-import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
+import { range } from '@/lib/time'
 import { searchMixin } from '@/components/mixins/search'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
@@ -441,6 +485,7 @@ export default {
         stay: false
       },
       metadataDisplayHeaders: {
+        stdby: true,
         fps: false,
         frameIn: true,
         frameOut: true,
@@ -460,6 +505,8 @@ export default {
       },
       success: {
         edit: false
+      },
+      columnWidth: {
       }
     }
   },
@@ -470,29 +517,11 @@ export default {
     }
     this.resetSequenceOption()
     this.setLastProductionScreen('breakdown')
-    this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
+    this.isTextMode = preferences.getBoolPreference('breakdown:text-mode')
     window.addEventListener('keydown', this.onKeyDown, false)
 
-    if (this.isEpisodeCasting) {
-      this.metadataDisplayHeaders = {}
-    } else if (this.isShotCasting) {
-      this.metadataDisplayHeaders = {
-        fps: false,
-        frameIn: true,
-        frameOut: true,
-        frames: true,
-        estimation: false,
-        maxRetakes: false,
-        resolution: false,
-        timeSpent: false
-      }
-    } else {
-      this.metadataDisplayHeaders = {
-        estimation: false,
-        readyFor: false,
-        timeSpent: false
-      }
-    }
+    this.resetDispayHeaders()
+    this.resetColumnWidth()
   },
 
   beforeDestroy() {
@@ -1407,6 +1436,94 @@ export default {
         .finally(() => {
           this.loading.savingSearch = false
         })
+    },
+
+    initResize(knobRefName, refName, descriptorId) {
+      this.resizedKnobRefName = knobRefName + (descriptorId ? descriptorId : '')
+      this.resizedRefName = refName + (descriptorId ? descriptorId : '')
+      this.resizedDescriptorId = descriptorId
+      window.addEventListener('mousemove', this.startResizing)
+      window.addEventListener('mouseup', this.stopResizing)
+    },
+
+    startResizing(event) {
+      const knobRef = this.resizedKnobRefName
+      const headerRef = this.resizedRefName
+      const knob = this.$refs[knobRef][0] ? this.$refs[knobRef][0] : this.$refs[knobRef]
+      const header = this.$refs[headerRef][0] ? this.$refs[headerRef][0] : this.$refs[headerRef]
+      const diff =
+        event.clientX - knob.getBoundingClientRect().left
+      const actualWidth = header.getBoundingClientRect().width
+      this.columnWidth = { ...this.columnWidth }
+      if (this.resizedDescriptorId) {
+        const newWidth = Math.max(actualWidth + diff, 110)
+        this.columnWidth[this.resizedDescriptorId] = newWidth
+        const preferenceKey =
+          `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
+          console.log(preferenceKey)
+        preferences.setPreference(preferenceKey, newWidth)
+      } else {
+        const newWidth = Math.max(actualWidth + diff, 160)
+        this.columnWidth.name = newWidth
+        const preferenceKey =
+          'breakdown:column-width-name-' +
+          `${this.castingType}-${this.currentProduction.id}`
+        preferences.setPreference(preferenceKey, newWidth)
+      }
+    },
+
+    stopResizing() {
+      window.removeEventListener('mousemove', this.startResizing)
+      window.removeEventListener('mouseup', this.stopResizing)
+      this.resizedKnobRefName = null
+      this.resizedRefName = null
+      this.resizedDescriptorId = null
+    },
+
+    resetDispayHeaders() {
+      if (this.isEpisodeCasting) {
+        this.metadataDisplayHeaders = {}
+      } else if (this.isShotCasting) {
+        this.metadataDisplayHeaders = {
+          stdby: true,
+          fps: false,
+          frameIn: true,
+          frameOut: true,
+          frames: true,
+          estimation: false,
+          maxRetakes: false,
+          resolution: false,
+          timeSpent: false
+        }
+      } else {
+        this.metadataDisplayHeaders = {
+          estimation: false,
+          readyFor: false,
+          timeSpent: false
+        }
+      }
+    },
+
+    resetColumnWidth() {
+      const namePreferenceKey =
+          'breakdown:column-width-name-' +
+          `${this.castingType}-${this.currentProduction.id}`
+      const nameColumnWidth =
+        preferences.getPreference(namePreferenceKey)
+      if (nameColumnWidth) {
+        this.columnWidth.name = nameColumnWidth
+      }
+
+      this.metadataDescriptors.forEach(descriptor => {
+        const descriptorColumnWidth = preferences.getPreference(
+          `breakdown:column-width-descriptor-${descriptor.id}`
+        )
+        console.log(`mount breakdown:column-width-descriptor-${descriptor.id}`)
+        console.log(descriptorColumnWidth)
+        if (descriptorColumnWidth) {
+          this.columnWidth[descriptor.id] = descriptorColumnWidth
+        }
+      })
     }
   },
 
@@ -1428,6 +1545,8 @@ export default {
           this.assetTypeId = this.castingAssetTypesOptions[0].value
         }
       }
+      this.resetDispayHeaders()
+      this.resetColumnWidth()
     },
 
     sequenceId() {
@@ -1490,6 +1609,7 @@ export default {
     currentProduction() {
       if (!this.isLoading) {
         this.reset()
+        this.resetColumnWidth()
       }
     },
 
@@ -1636,7 +1756,8 @@ export default {
 
 .subtitle {
   border-bottom: 0;
-  margin-top: 0;
+  margin-top: 0.1em;
+  margin-bottom: 0;
 }
 
 .filters-area {
@@ -1684,14 +1805,15 @@ export default {
 }
 
 .standby-header {
-  max-width: 80px;
-  min-width: 80px;
+  max-width: 60px;
+  min-width: 60px;
   text-align: center;
   justify-content: center;
   padding-left: 0px;
 }
 
 .entity-header {
+  border-top-left-radius: 10px;
   border-right: 2px solid $light-grey;
   margin: 0;
   max-width: 301px;
@@ -1701,7 +1823,14 @@ export default {
   position: sticky;
 }
 
+.actions {
+  border-top-right-radius: 10px;
+  height: 45px;
+  text-align: right;
+}
+
 .header {
+  background: white;
   border-bottom: 2px solid $light-grey;
   font-size: 1.1em;
   color: var(--text-alt);
@@ -1719,6 +1848,20 @@ export default {
     padding-top: 0.5em;
     padding-bottom: 0.5em;
   }
+
+  .dark & {
+    background: $dark-grey-light;
+  }
+}
+
+.header div.resizable-knob {
+  cursor: col-resize;
+  height: 142%;
+  width: 5px;
+
+  &:hover {
+    background: $grey;
+  }
 }
 
 .casting-list {
@@ -1733,5 +1876,9 @@ export default {
     width: 100%;
     text-align: right;
   }
+}
+
+.query-list {
+  margin-bottom: 0.5em;
 }
 </style>
