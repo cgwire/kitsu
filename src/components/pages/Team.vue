@@ -1,6 +1,6 @@
 <template>
   <page-layout>
-    <template v-slot:main>
+    <template #main>
       <div class="people flexcolumn">
         <div class="flexrow mt2 add-people" v-if="isCurrentUserManager">
           <people-field
@@ -28,7 +28,7 @@
         />
       </div>
     </template>
-    <template v-slot:side v-if="isCurrentUserManager">
+    <template #side v-if="isCurrentUserManager">
       <div class="importers flexcolumn">
         <div
           class="project-import flexcolumn"

@@ -28,15 +28,15 @@
         </label>
         <span
           class="file-upload-status"
-          v-if="this.uploadedFiles.length > 1 && !hideFileNames"
+          v-if="uploadedFiles.length > 1 && !hideFileNames"
         >
-          {{ this.uploadedFiles.length }} {{ $tc('main.files_selected') }}
+          {{ uploadedFiles.length }} {{ $tc('main.files_selected') }}
         </span>
         <span
           class="file-upload-status"
-          v-if="this.uploadedFiles.length === 1 && !hideFileNames"
+          v-if="uploadedFiles.length === 1 && !hideFileNames"
         >
-          {{ this.uploadedFiles[0] }}
+          {{ uploadedFiles[0] }}
         </span>
       </div>
     </form>

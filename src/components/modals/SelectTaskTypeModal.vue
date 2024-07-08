@@ -13,7 +13,7 @@
           {{ $t('playlists.select_task_type') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combobox-task-type
             :task-type-list="taskTypeList"
             :value="taskTypeId"

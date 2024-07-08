@@ -283,8 +283,8 @@
                 v-show="isTyping && (!light || fullScreen)"
               >
                 <color-picker
-                  :isOpen="isShowingPalette"
-                  :color="this.textColor"
+                  :is-open="isShowingPalette"
+                  :color="textColor"
                   @TogglePalette="onPickColor"
                   @change="onChangeTextColor"
                 />
@@ -306,16 +306,16 @@
                 v-show="isDrawing && (!light || fullScreen)"
               >
                 <pencil-picker
-                  :isOpen="isShowingPencilPalette"
+                  :is-open="isShowingPencilPalette"
                   :pencil="pencil"
-                  :sizes="this.pencilPalette"
+                  :sizes="pencilPalette"
                   @toggle-palette="onPickPencil"
                   @change="onChangePencil"
                 />
 
                 <color-picker
-                  :isOpen="isShowingPalette"
-                  :color="this.color"
+                  :is-open="isShowingPalette"
+                  :color="color"
                   @TogglePalette="onPickColor"
                   @change="onChangeColor"
                 />
@@ -469,7 +469,7 @@
             :title="$t('playlists.actions.download_file')"
             v-if="
               !isCurrentUserArtist ||
-              this.currentProduction.is_preview_download_allowed
+              currentProduction.is_preview_download_allowed
             "
           >
             <download-icon class="icon is-small" />

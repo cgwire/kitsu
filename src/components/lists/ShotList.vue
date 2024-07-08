@@ -216,7 +216,7 @@
 
               <table-metadata-selector-menu
                 ref="headerMetadataSelectorMenu"
-                :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="shotMetadataDescriptors"
                 namespace="shots"
                 :exclude="{
@@ -336,7 +336,7 @@
               }"
               :canceled="shot.canceled"
               :column="taskTypeMap.get(columnId)"
-              :columnY="j"
+              :column-y="j"
               :entity="shot"
               :is-assignees="isShowAssignations"
               :is-casting-ready="isCastingReady(shot, columnId)"
@@ -347,7 +347,7 @@
                   : '0'
               "
               :minimized="hiddenColumns[columnId]"
-              :rowX="getIndex(i, k)"
+              :row-x="getIndex(i, k)"
               :selected="isSelected(i, k, j)"
               :sticked="true"
               :task-test="taskMap.get(shot.validations.get(columnId))"
@@ -608,8 +608,8 @@
               :selected="
                 isSelected(i, k, j + stickedDisplayedValidationColumns.length)
               "
-              :rowX="getIndex(i, k)"
-              :columnY="j"
+              :row-x="getIndex(i, k)"
+              :column-y="j"
               :is-assignees="isShowAssignations"
               :is-casting-ready="isCastingReady(shot, columnId)"
               :casting-title="castingTitle(shot, columnId)"

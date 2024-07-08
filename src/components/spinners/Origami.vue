@@ -1,6 +1,6 @@
 <template>
-  <div v-bind:style="styles" class="spinner spinner-origami">
-    <div v-bind:style="innerStyles" class="spinner-inner loading">
+  <div :style="styles" class="spinner spinner-origami">
+    <div :style="innerStyles" class="spinner-inner loading">
       <span class="slice"></span>
       <span class="slice"></span>
       <span class="slice"></span>

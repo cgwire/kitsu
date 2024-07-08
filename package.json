@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore src/",
+    "lint": "eslint --ext .js,.vue src/",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write --list-different src/**/*.{js,vue}",
     "test:unit": "vitest tests/unit",
@@ -24,7 +24,7 @@
     "@fullcalendar/multimonth": "6.1.14",
     "@fullcalendar/vue": "6.1.14",
     "@google/model-viewer": "3.5.0",
-    "@sentry/vue": "8.14.0",
+    "@sentry/vue": "8.15.0",
     "async": "3.2.5",
     "bowser": "2.11.0",
     "chart.js": "2.9.4",
@@ -90,6 +90,6 @@
     "node": ">=18.12"
   },
   "lint-staged": {
-    "*.{js,vue}": "eslint --cache --fix"
+    "*.{js,vue}": "eslint --cache"
   }
 }

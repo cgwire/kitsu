@@ -1,6 +1,6 @@
 <template>
   <page-layout>
-    <template v-slot:main>
+    <template #main>
       <div class="all-tasks">
         <page-title
           class="flexrow-item title mt1"
@@ -51,7 +51,7 @@
         />
       </div>
     </template>
-    <template v-slot:side>
+    <template #side>
       <task-info :task="selectedTasks.values().next().value">
         <status-stats :stats="statusStats" />
       </task-info>
@@ -75,7 +75,7 @@ import StatusStats from '@/components/widgets/StatusStats.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
-  name: 'AllTasks',
+  name: 'all-tasks',
 
   components: {
     AllTaskList,

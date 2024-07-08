@@ -189,7 +189,7 @@
 
               <table-metadata-selector-menu
                 ref="headerMetadataSelectorMenu"
-                :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="assetMetadataDescriptors"
                 :exclude="{
                   timeSpent: !isAssetTime,
@@ -307,8 +307,8 @@
               :entity="asset"
               :task-test="taskMap.get(asset.validations.get(columnId))"
               :selected="isSelected(i, k, j)"
-              :rowX="getIndex(i, k)"
-              :columnY="j"
+              :row-x="getIndex(i, k)"
+              :column-y="j"
               :minimized="hiddenColumns[columnId]"
               :is-static="true"
               :is-assignees="isShowAssignations"
@@ -406,8 +406,8 @@
               :selected="
                 isSelected(i, k, j + stickedDisplayedValidationColumns.length)
               "
-              :rowX="getIndex(i, k)"
-              :columnY="j"
+              :row-x="getIndex(i, k)"
+              :column-y="j"
               :minimized="hiddenColumns[columnId]"
               :is-static="true"
               :is-assignees="isShowAssignations"

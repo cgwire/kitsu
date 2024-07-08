@@ -46,13 +46,13 @@
         <combobox
           :label="$t('people.fields.role')"
           :options="roleOptions"
-          localeKeyPrefix="people.role."
+          locale-key-prefix="people.role."
           v-model="form.role"
         />
         <combobox
           :label="$t('people.fields.contract')"
           :options="contractOptions"
-          localeKeyPrefix="people.contract."
+          locale-key-prefix="people.contract."
           v-model="form.contract_type"
           v-if="!isBot"
         />
