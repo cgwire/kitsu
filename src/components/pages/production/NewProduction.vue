@@ -127,7 +127,6 @@
                 :placeholder="startDatePlaceholder"
                 :language="locale"
                 :disabled-dates="{
-                  days: [6, 0],
                   from: productionToCreate.settings.dateEnd
                 }"
                 :monday-first="true"
@@ -140,7 +139,6 @@
                 input-class="is-small date-input input"
                 :language="locale"
                 :disabled-dates="{
-                  days: [6, 0],
                   to: productionToCreate.settings.dateStart
                 }"
                 :placeholder="endDatePlaceholder"
