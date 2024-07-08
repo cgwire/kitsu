@@ -9,8 +9,8 @@ z
     <h2>{{ $t('main.column_visibility') }}</h2>
     <div
       class="field is-marginless"
-      v-for="descriptor in filteredMetadataDescriptors"
       :key="descriptor.field_name"
+      v-for="descriptor in filteredMetadataDescriptors"
     >
       <label class="checkbox" :for="descriptor.field_name">
         <input
@@ -66,6 +66,7 @@ export default {
         readyFor: this.$t('assets.fields.ready_for'),
         timeSpent: this.$t('main.timeSpent'),
         resolution: this.$t('shots.fields.resolution'),
+        stdby: this.$t('breakdown.fields.standby'),
         maxRetakes: this.$t('shots.fields.max_retakes')
       }
     }
@@ -98,16 +99,16 @@ export default {
     },
 
     metadataDescriptors() {
-      const descriptors = [...this.descriptors]
+      const fixedColumns = []
       for (const headerName in this.metadataDisplayHeaders) {
         if (this.fieldToName[headerName]) {
-          descriptors.push({
+          fixedColumns.push({
             field_name: headerName,
             name: this.fieldToName[headerName]
           })
         }
       }
-      return descriptors
+      return [...fixedColumns, ...this.descriptors]
     },
 
     filteredMetadataDescriptors() {
@@ -158,9 +159,9 @@ export default {
   z-index: 100;
 
   h2 {
-    color: $grey;
-    margin-top: 0.1em;
-    padding: 0.8em;
+    color: var(--text);
+    margin-top: 0;
+    padding: 0.6em;
     text-transform: uppercase;
   }
 
