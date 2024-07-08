@@ -20,6 +20,9 @@
             <date-field
               ref="startDateField"
               class="mb0"
+              :disabled-dates="{
+                from: form.end_date
+              }"
               :label="$t('productions.fields.start_date')"
               :short-date="true"
               v-model="form.start_date"
@@ -29,6 +32,9 @@
             <date-field
               ref="endDateField"
               class="mb0"
+              :disabled-dates="{
+                to: form.start_date
+              }"
               :label="$t('productions.fields.end_date')"
               :short-date="true"
               v-model="form.end_date"
