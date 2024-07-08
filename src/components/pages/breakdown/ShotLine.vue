@@ -264,6 +264,7 @@
             v-for="asset in assetsByAssetTypesMap[assetType]"
           />
         </div>
+        <div class="actions filler"></div>
       </div>
       <div class="asset-type-line flexrow empty mt05 mb05" v-else>
         {{ $t('breakdown.empty') }}

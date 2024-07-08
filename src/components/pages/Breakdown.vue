@@ -75,147 +75,163 @@
 
         <spinner class="mt1" v-if="isLoading" />
 
-            <div class="header flexrow">
-              <div
-                class="entity-header"
-                ref="name-header"
-                :style="{
-                  'min-width': columnWidth.name
-                    ? columnWidth.name + 'px'
-                    : '250px'
-                }"
-              >
-                <div>
-                  {{ $t('shots.fields.name') }}
-                </div>
-                <div class="filler"></div>
-                <div
-                  ref="resizable-knob-name"
-                  class="resizable-knob"
-                  @mousedown.prevent="initResize(
-                    'resizable-knob-name',
-                    'name-header'
-                  )"
-                >
-                </div>
-              </div>
-              <div class="standby-header" v-if="isShowInfosBreakdown">
-                {{ $t('breakdown.fields.standby') }}
-              </div>
-              <div
-                class="description-header"
-                v-if="isShowInfosBreakdown && isDescription"
-              >
-                {{ $t('shots.fields.description') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrames &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frames
-                "
-              >
-                {{ $t('shots.fields.nb_frames') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameIn &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameIn
-                "
-              >
-                {{ $t('shots.fields.frame_in') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameOut &&
-                  isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameOut
-                "
-              >
-                {{ $t('shots.fields.frame_out') }}
-              </div>
-              <div
-                class="descriptor-header"
-                :key="'descriptor-header-' + descriptor.id"
-                :ref="'descriptor-header-' + descriptor.id"
-                :style="{
-                  'min-width': columnWidth[descriptor.id]
-                    ? columnWidth[descriptor.id] + 'px'
-                    : '110px'
-                }"
-                v-for="descriptor in visibleMetadataDescriptors"
-                v-show="isShowInfosBreakdown"
-              >
-                <div
-                  class="mr1"
-                  v-if="descriptorCurrentDepartments(descriptor).length"
-                >
-                  <department-name
-                    :key="department.id"
-                    :department="department"
-                    no-padding
-                    only-dot
-                    v-for="department in descriptorCurrentDepartments(descriptor)"
-                  />
-                </div>
-                <span
-                  class="flexrow-item ellipsis descriptor-name filler"
-                  :title="descriptor.name"
-                >
-                  {{ descriptor.name }}
-                </span>
-                <div
-                  :ref="'resizable-knob-descriptor-' + descriptor.id"
-                  class="resizable-knob"
-                  @mousedown.prevent="initResize(
-                    'resizable-knob-descriptor-',
-                    'descriptor-header-',
-                    descriptor.id
-                  )"
-                >
-                </div>
-              </div>
-              <div
-                :key="assetType"
-                class="asset-type-header"
-                v-for="assetType in castingAssetTypes"
-              >
-                {{ assetType }}
-              </div>
+        <div class="flexrow mb05 list-options">
+          <table-metadata-selector-menu
+            ref="headerMetadataSelectorMenu"
+            namespace="breakdown"
+            :descriptors="metadataDescriptors"
+            :exclude="{
+              fps: true,
+              estimation: true,
+              resolution: true,
+              maxRetakes: true,
+              timeSpent: true
+            }"
+            :metadata-display-headers.sync="metadataDisplayHeaders"
+            v-if="isShowInfosBreakdown && columnSelectorDisplayed"
+          />
+          <span class="filler"></span>
 
-              <div class="actions filler" ref="actionsSection">
-                <table-metadata-selector-menu
-                  ref="headerMetadataSelectorMenu"
-                  namespace="breakdown"
-                  :descriptors="metadataDescriptors"
-                  :exclude="{
-                    fps: true,
-                    estimation: true,
-                    resolution: true,
-                    maxRetakes: true,
-                    timeSpent: true
-                  }"
-                  :metadata-display-headers.sync="metadataDisplayHeaders"
-                  v-if="isShowInfosBreakdown && columnSelectorDisplayed"
-                />
+          <button-simple
+            class="is-small mr05"
+            icon="down"
+            @click="toggleColumnSelector"
+            v-if="isShowInfosBreakdown"
+          />
+        </div>
 
-                <button-simple
-                  class="is-small mr05"
-                  icon="down"
-                  @click="toggleColumnSelector"
-                  v-if="isShowInfosBreakdown"
-                />
-              </div>
+        <div
+          ref="casting-header"
+          class="casting-header flexrow"
+          v-scroll="onCastingHeaderScroll"
+          v-if="!isLoading"
+        >
+          <div
+            class="entity-header"
+            ref="name-header"
+            :style="{
+              'min-width': columnWidth.name
+                ? columnWidth.name + 'px'
+                : '250px'
+            }"
+          >
+            <div>
+              {{ $t('shots.fields.name') }}
             </div>
-            <div class="casting-list">
-              <div class="mt1">
+            <div class="filler"></div>
+            <div
+              ref="resizable-knob-name"
+              class="resizable-knob"
+              @mousedown.prevent="initResize(
+                'resizable-knob-name',
+                'name-header'
+              )"
+            >
+            </div>
+          </div>
+          <div class="standby-header" v-if="isShowInfosBreakdown">
+            {{ $t('breakdown.fields.standby') }}
+          </div>
+          <div
+            class="description-header"
+            v-if="isShowInfosBreakdown && isDescription"
+          >
+            {{ $t('shots.fields.description') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrames &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frames
+            "
+          >
+            {{ $t('shots.fields.nb_frames') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrameIn &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frameIn
+            "
+          >
+            {{ $t('shots.fields.frame_in') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrameOut &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frameOut
+            "
+          >
+            {{ $t('shots.fields.frame_out') }}
+          </div>
+          <div
+            class="descriptor-header"
+            :key="'descriptor-header-' + descriptor.id"
+            :ref="'descriptor-header-' + descriptor.id"
+            :style="{
+              'min-width': columnWidth[descriptor.id]
+                ? columnWidth[descriptor.id] + 'px'
+                : '110px'
+            }"
+            v-for="descriptor in visibleMetadataDescriptors"
+            v-show="isShowInfosBreakdown"
+          >
+            <div
+              class="mr1"
+              v-if="descriptorCurrentDepartments(descriptor).length"
+            >
+              <department-name
+                :key="department.id"
+                :department="department"
+                no-padding
+                only-dot
+                v-for="department in descriptorCurrentDepartments(descriptor)"
+              />
+            </div>
+            <span
+              class="flexrow-item ellipsis descriptor-name filler"
+              :title="descriptor.name"
+            >
+              {{ descriptor.name }}
+            </span>
+            <div
+              :ref="'resizable-knob-descriptor-' + descriptor.id"
+              class="resizable-knob"
+              @mousedown.prevent="initResize(
+                'resizable-knob-descriptor-',
+                'descriptor-header-',
+                descriptor.id
+              )"
+            >
+            </div>
+          </div>
+          <div
+            :key="assetType"
+            class="asset-type-header"
+            v-for="assetType in castingAssetTypes"
+          >
+            {{ assetType }}
+          </div>
+
+          <div class="actions filler">
+
+          </div>
+        </div>
+
+        <div
+          ref="casting-list"
+          class="casting-list"
+          v-scroll="onCastingScroll"
+          v-if="!isLoading"
+        >
+          <div class="shot-lines">
             <shot-line
               :key="entity.id"
               :entity="entity"
@@ -232,12 +248,12 @@
               :is-description="isDescription"
               :is-save-error="saveErrors[entity.id]"
               :column-width="columnWidth"
-              @edit-label="onEditLabelClicked"
               @add-one="addOneAsset"
-              @remove-one="removeOneAssetFromSelection"
               @click="selectEntity"
-              @metadata-changed="onMetadataChanged"
               @description-changed="onDescriptionChanged"
+              @edit-label="onEditLabelClicked"
+              @metadata-changed="onMetadataChanged"
+              @remove-one="removeOneAssetFromSelection"
               @standby-changed="onStandbyChanged"
               v-for="entity in castingEntities"
             />
@@ -1460,7 +1476,6 @@ export default {
         this.columnWidth[this.resizedDescriptorId] = newWidth
         const preferenceKey =
           `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
-          console.log(preferenceKey)
         preferences.setPreference(preferenceKey, newWidth)
       } else {
         const newWidth = Math.max(actualWidth + diff, 160)
@@ -1518,12 +1533,18 @@ export default {
         const descriptorColumnWidth = preferences.getPreference(
           `breakdown:column-width-descriptor-${descriptor.id}`
         )
-        console.log(`mount breakdown:column-width-descriptor-${descriptor.id}`)
-        console.log(descriptorColumnWidth)
         if (descriptorColumnWidth) {
           this.columnWidth[descriptor.id] = descriptorColumnWidth
         }
       })
+    },
+
+    onCastingHeaderScroll(event, position) {
+      this.$refs['casting-list'].scrollLeft = position.scrollLeft
+    },
+
+    onCastingScroll(event, position) {
+      this.$refs['casting-header'].scrollLeft = position.scrollLeft
     }
   },
 
@@ -1829,7 +1850,7 @@ export default {
   text-align: right;
 }
 
-.header {
+.casting-header {
   background: white;
   border-bottom: 2px solid $light-grey;
   font-size: 1.1em;
@@ -1837,6 +1858,7 @@ export default {
   font-size: 0.9em;
   font-weight: 600;
   letter-spacing: 1px;
+  overflow-y: hidden;
   padding: 0;
   position: sticky;
   top: 0;
@@ -1849,12 +1871,20 @@ export default {
     padding-bottom: 0.5em;
   }
 
+  .actions {
+    height: 100%;
+  }
+
   .dark & {
     background: $dark-grey-light;
   }
 }
 
-.header div.resizable-knob {
+.list-options {
+  position: relative;
+}
+
+.casting-header div.resizable-knob {
   cursor: col-resize;
   height: 142%;
   width: 5px;
@@ -1868,7 +1898,7 @@ export default {
   overflow: auto;
   display: flex;
 
-  .mt1 {
+  .shot-lines {
     flex: 1;
   }
 
