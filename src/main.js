@@ -32,23 +32,12 @@ Vue.use(VueAnimXYZ)
 // Make the current route part of the main state.
 sync(store, router)
 
-// Global custom directive to enable automatic focus on field after page
-// loading.
+// Global custom directive to enable automatic focus on field after page loading.
 Vue.directive('focus', {
   inserted(el, binding) {
     el.focus(binding.value)
   }
 })
-
-// Allow access to i18n object from vue instance.
-Vue.prototype.$locale = {
-  change(locale) {
-    i18n.locale = locale
-  },
-  current() {
-    return i18n.locale
-  }
-}
 
 // Start application.
 new Vue({
