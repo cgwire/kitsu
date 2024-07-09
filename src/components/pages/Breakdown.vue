@@ -1853,6 +1853,7 @@ export default {
   font-size: 0.9em;
   font-weight: 600;
   letter-spacing: 1px;
+  min-height: 40px;
   overflow-y: hidden;
   padding: 0;
   position: sticky;
