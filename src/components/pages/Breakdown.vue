@@ -110,9 +110,7 @@
             class="entity-header"
             ref="name-header"
             :style="{
-              'min-width': columnWidth.name
-                ? columnWidth.name + 'px'
-                : '250px'
+              'min-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
             }"
           >
             <div>
@@ -122,12 +120,10 @@
             <div
               ref="resizable-knob-name"
               class="resizable-knob"
-              @mousedown.prevent="initResize(
-                'resizable-knob-name',
-                'name-header'
-              )"
-            >
-            </div>
+              @mousedown.prevent="
+                initResize('resizable-knob-name', 'name-header')
+              "
+            ></div>
           </div>
           <div class="standby-header" v-if="isShowInfosBreakdown">
             {{ $t('breakdown.fields.standby') }}
@@ -204,13 +200,14 @@
             <div
               :ref="'resizable-knob-descriptor-' + descriptor.id"
               class="resizable-knob"
-              @mousedown.prevent="initResize(
-                'resizable-knob-descriptor-',
-                'descriptor-header-',
-                descriptor.id
-              )"
-            >
-            </div>
+              @mousedown.prevent="
+                initResize(
+                  'resizable-knob-descriptor-',
+                  'descriptor-header-',
+                  descriptor.id
+                )
+              "
+            ></div>
           </div>
           <div
             :key="assetType"
@@ -220,9 +217,7 @@
             {{ assetType }}
           </div>
 
-          <div class="actions filler">
-
-          </div>
+          <div class="actions filler"></div>
         </div>
 
         <div
@@ -522,8 +517,7 @@ export default {
       success: {
         edit: false
       },
-      columnWidth: {
-      }
+      columnWidth: {}
     }
   },
 
@@ -1465,17 +1459,19 @@ export default {
     startResizing(event) {
       const knobRef = this.resizedKnobRefName
       const headerRef = this.resizedRefName
-      const knob = this.$refs[knobRef][0] ? this.$refs[knobRef][0] : this.$refs[knobRef]
-      const header = this.$refs[headerRef][0] ? this.$refs[headerRef][0] : this.$refs[headerRef]
-      const diff =
-        event.clientX - knob.getBoundingClientRect().left
+      const knob = this.$refs[knobRef][0]
+        ? this.$refs[knobRef][0]
+        : this.$refs[knobRef]
+      const header = this.$refs[headerRef][0]
+        ? this.$refs[headerRef][0]
+        : this.$refs[headerRef]
+      const diff = event.clientX - knob.getBoundingClientRect().left
       const actualWidth = header.getBoundingClientRect().width
       this.columnWidth = { ...this.columnWidth }
       if (this.resizedDescriptorId) {
         const newWidth = Math.max(actualWidth + diff, 110)
         this.columnWidth[this.resizedDescriptorId] = newWidth
-        const preferenceKey =
-          `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
+        const preferenceKey = `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
         preferences.setPreference(preferenceKey, newWidth)
       } else {
         const newWidth = Math.max(actualWidth + diff, 160)
@@ -1521,10 +1517,9 @@ export default {
 
     resetColumnWidth() {
       const namePreferenceKey =
-          'breakdown:column-width-name-' +
-          `${this.castingType}-${this.currentProduction.id}`
-      const nameColumnWidth =
-        preferences.getPreference(namePreferenceKey)
+        'breakdown:column-width-name-' +
+        `${this.castingType}-${this.currentProduction.id}`
+      const nameColumnWidth = preferences.getPreference(namePreferenceKey)
       if (nameColumnWidth) {
         this.columnWidth.name = nameColumnWidth
       }
