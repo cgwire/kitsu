@@ -10,7 +10,9 @@
             wrapper-class="datepicker"
             input-class="date-input input short"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
+            :disabled-dates="{
+              from: selectedEndDate
+            }"
             :monday-first="true"
             format="yyyy-MM-dd"
             v-model="selectedStartDate"
@@ -24,7 +26,9 @@
             wrapper-class="datepicker"
             input-class="date-input input short"
             :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
+            :disabled-dates="{
+              to: selectedStartDate
+            }"
             :monday-first="true"
             format="yyyy-MM-dd"
             v-model="selectedEndDate"
