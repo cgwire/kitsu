@@ -139,7 +139,7 @@
       :style="{
         'min-width': columnWidth[descriptor.id]
           ? columnWidth[descriptor.id] + 'px'
-          : '100px'
+          : '110px'
       }"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
       v-if="isShowInfosBreakdown"
