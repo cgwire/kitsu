@@ -74,82 +74,159 @@
         </div>
 
         <spinner class="mt1" v-if="isLoading" />
-        <div class="casting-list" v-else>
-          <div class="mt1">
-            <div class="header flexrow">
-              <div class="entity-header">
-                {{ $t('shots.fields.name') }}
-              </div>
-              <div class="standby-header" v-if="!isShowInfosBreakdown">
-                {{ $t('breakdown.fields.standby') }}
-              </div>
-              <div
-                class="description-header"
-                v-if="!isShowInfosBreakdown && isDescription"
-              >
-                {{ $t('shots.fields.description') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrames &&
-                  !isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frames
-                "
-              >
-                {{ $t('shots.fields.nb_frames') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameIn &&
-                  !isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameIn
-                "
-              >
-                {{ $t('shots.fields.frame_in') }}
-              </div>
-              <div
-                class="frames-header"
-                v-if="
-                  isShotCasting &&
-                  isFrameOut &&
-                  !isShowInfosBreakdown &&
-                  metadataDisplayHeaders.frameOut
-                "
-              >
-                {{ $t('shots.fields.frame_out') }}
-              </div>
-              <div
-                class="descriptor-header"
-                :key="'descriptor-header-' + descriptor.id"
-                v-for="descriptor in visibleMetadataDescriptors"
-                v-if="!isShowInfosBreakdown"
-              >
-                <department-name
-                  :key="department.id"
-                  :department="department"
-                  no-padding
-                  only-dot
-                  v-for="department in descriptorCurrentDepartments(descriptor)"
-                />
-                <span
-                  class="flexrow-item ellipsis descriptor-name"
-                  :title="descriptor.name"
-                >
-                  {{ descriptor.name }}
-                </span>
-              </div>
-              <div
-                :key="assetType"
-                class="asset-type-header"
-                v-for="assetType in castingAssetTypes"
-              >
-                {{ assetType }}
-              </div>
+
+        <div class="flexrow mb05 list-options">
+          <table-metadata-selector-menu
+            ref="headerMetadataSelectorMenu"
+            namespace="breakdown"
+            :descriptors="metadataDescriptors"
+            :exclude="{
+              fps: true,
+              estimation: true,
+              resolution: true,
+              maxRetakes: true,
+              timeSpent: true
+            }"
+            :metadata-display-headers.sync="metadataDisplayHeaders"
+            v-if="isShowInfosBreakdown && columnSelectorDisplayed"
+          />
+          <span class="filler"></span>
+
+          <button-simple
+            class="is-small mr05"
+            icon="down"
+            @click="toggleColumnSelector"
+            v-if="isShowInfosBreakdown"
+          />
+        </div>
+
+        <div
+          ref="casting-header"
+          class="casting-header flexrow"
+          v-scroll="onCastingHeaderScroll"
+          v-if="!isLoading"
+        >
+          <div
+            class="entity-header"
+            ref="name-header"
+            :style="{
+              'min-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
+            }"
+          >
+            <div>
+              {{ $t('shots.fields.name') }}
             </div>
+            <div class="filler"></div>
+            <div
+              ref="resizable-knob-name"
+              class="resizable-knob"
+              @mousedown.prevent="
+                initResize('resizable-knob-name', 'name-header')
+              "
+            ></div>
+          </div>
+          <div class="standby-header" v-if="isShowInfosBreakdown">
+            {{ $t('breakdown.fields.standby') }}
+          </div>
+          <div
+            class="description-header"
+            v-if="isShowInfosBreakdown && isDescription"
+          >
+            {{ $t('shots.fields.description') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrames &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frames
+            "
+          >
+            {{ $t('shots.fields.nb_frames') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrameIn &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frameIn
+            "
+          >
+            {{ $t('shots.fields.frame_in') }}
+          </div>
+          <div
+            class="frames-header"
+            v-if="
+              isShotCasting &&
+              isFrameOut &&
+              isShowInfosBreakdown &&
+              metadataDisplayHeaders.frameOut
+            "
+          >
+            {{ $t('shots.fields.frame_out') }}
+          </div>
+          <div
+            class="descriptor-header"
+            :key="'descriptor-header-' + descriptor.id"
+            :ref="'descriptor-header-' + descriptor.id"
+            :style="{
+              'min-width': columnWidth[descriptor.id]
+                ? columnWidth[descriptor.id] + 'px'
+                : '110px'
+            }"
+            v-for="descriptor in visibleMetadataDescriptors"
+            v-show="isShowInfosBreakdown"
+          >
+            <div
+              class="mr1"
+              v-if="descriptorCurrentDepartments(descriptor).length"
+            >
+              <department-name
+                :key="department.id"
+                :department="department"
+                no-padding
+                only-dot
+                v-for="department in descriptorCurrentDepartments(descriptor)"
+              />
+            </div>
+            <span
+              class="flexrow-item ellipsis descriptor-name filler"
+              :title="descriptor.name"
+            >
+              {{ descriptor.name }}
+            </span>
+            <div
+              :ref="'resizable-knob-descriptor-' + descriptor.id"
+              class="resizable-knob"
+              @mousedown.prevent="
+                initResize(
+                  'resizable-knob-descriptor-',
+                  'descriptor-header-',
+                  descriptor.id
+                )
+              "
+            ></div>
+          </div>
+          <div
+            :key="assetType"
+            class="asset-type-header"
+            v-for="assetType in castingAssetTypes"
+          >
+            {{ assetType }}
+          </div>
+
+          <div class="actions filler"></div>
+        </div>
+
+        <div
+          ref="casting-list"
+          class="casting-list"
+          v-scroll="onCastingScroll"
+          v-if="!isLoading"
+        >
+          <div class="shot-lines">
             <shot-line
               :key="entity.id"
               :entity="entity"
@@ -165,12 +242,13 @@
               :big-mode="isBigMode"
               :is-description="isDescription"
               :is-save-error="saveErrors[entity.id]"
-              @edit-label="onEditLabelClicked"
+              :column-width="columnWidth"
               @add-one="addOneAsset"
-              @remove-one="removeOneAsset"
               @click="selectEntity"
-              @metadata-changed="onMetadataChanged"
               @description-changed="onDescriptionChanged"
+              @edit-label="onEditLabelClicked"
+              @metadata-changed="onMetadataChanged"
+              @remove-one="removeOneAssetFromSelection"
               @standby-changed="onStandbyChanged"
               v-for="entity in castingEntities"
             />
@@ -184,10 +262,10 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <h2 class="flexrow subtitle">
-          {{ $t('breakdown.all_assets') }}
-        </h2>
         <div class="flexrow mb1 mt0">
+          <h2 class="flexrow subtitle">
+            {{ $t('breakdown.all_assets') }}
+          </h2>
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
@@ -206,8 +284,10 @@
 
         <div class="filters-area flexrow">
           <search-field
-            ref="search-field"
             class="flexrow-item"
+            ref="search-field"
+            :can-save="true"
+            @save="saveSearchQuery"
             @change="onSearchChange"
           />
           <button-simple
@@ -215,6 +295,16 @@
             :title="$t('entities.build_filter.title')"
             icon="filter"
             @click="modals.isBuildFilterDisplayed = true"
+          />
+        </div>
+        <div class="query-list">
+          <search-query-list
+            :groups="breakdownSearchFilterGroups"
+            :is-group-enabled="true"
+            :queries="breakdownSearchQueries"
+            type="breakdown"
+            @change-search="changeSearch"
+            @remove-search="removeSearchQuery"
           />
         </div>
 
@@ -320,10 +410,12 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 
-import { range } from '@/lib/time'
 import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
+import { range } from '@/lib/time'
+import { searchMixin } from '@/components/mixins/search'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
@@ -332,19 +424,21 @@ import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
 import ButtonSimple from '@/components/widgets/ButtonSimple'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled'
 import DeleteModal from '@/components/modals/DeleteModal'
+import DepartmentName from '@/components/widgets/DepartmentName'
 import EditAssetModal from '@/components/modals/EditAssetModal'
 import EditLabelModal from '@/components/modals/EditLabelModal'
 import ImportRenderModal from '@/components/modals/ImportRenderModal'
 import ImportModal from '@/components/modals/ImportModal'
 import SearchField from '@/components/widgets/SearchField'
+import SearchQueryList from '@/components/widgets/SearchQueryList'
 import ShotLine from '@/components/pages/breakdown/ShotLine'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton'
 import Spinner from '@/components/widgets/Spinner'
-import DepartmentName from '@/components/widgets/DepartmentName'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
 
 export default {
   name: 'breakdown',
-  mixins: [entityListMixin],
+  mixins: [entityListMixin, searchMixin],
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -358,15 +452,18 @@ export default {
     ImportModal,
     ImportRenderModal,
     SearchField,
+    SearchQueryList,
     ShotLine,
     ShowInfosButton,
-    Spinner
+    Spinner,
+    TableMetadataSelectorMenu
   },
 
   data() {
     return {
       assetTypeId: '',
       castingType: 'shot',
+      columnSelectorDisplayed: false,
       editedAsset: null,
       editedEntityId: null,
       editedAssetLinkLabel: null,
@@ -398,6 +495,17 @@ export default {
         remove: false,
         stay: false
       },
+      metadataDisplayHeaders: {
+        stdby: true,
+        fps: false,
+        frameIn: true,
+        frameOut: true,
+        frames: true,
+        estimation: false,
+        maxRetakes: false,
+        resolution: false,
+        timeSpent: false
+      },
       modals: {
         isBuildFilterDisplayed: false,
         isEditLabelDisplayed: false,
@@ -408,7 +516,8 @@ export default {
       },
       success: {
         edit: false
-      }
+      },
+      columnWidth: {}
     }
   },
 
@@ -418,8 +527,11 @@ export default {
     }
     this.resetSequenceOption()
     this.setLastProductionScreen('breakdown')
-    this.isTextMode = localStorage.getItem('breakdown:text-mode') === 'true'
+    this.isTextMode = preferences.getBoolPreference('breakdown:text-mode')
     window.addEventListener('keydown', this.onKeyDown, false)
+
+    this.resetDispayHeaders()
+    this.resetColumnWidth()
   },
 
   beforeDestroy() {
@@ -432,6 +544,8 @@ export default {
       'assetMetadataDescriptors',
       'assetTypeMap',
       'assetsByType',
+      'breakdownSearchQueries',
+      'breakdownSearchFilterGroups',
       'casting',
       'castingAssetTypeAssets',
       'castingAssetTypesOptions',
@@ -459,6 +573,10 @@ export default {
       'shotMap',
       'shotMetadataDescriptors'
     ]),
+
+    searchField() {
+      return this.$refs['search-field']
+    },
 
     castingTypeOptions() {
       const isAssetsOnly = this.currentProduction.production_type === 'assets'
@@ -611,29 +729,6 @@ export default {
       } else {
         return this.assetMetadataDescriptors
       }
-    },
-
-    metadataDisplayHeaders() {
-      if (this.isEpisodeCasting) {
-        return {}
-      } else if (this.isShotCasting) {
-        return {
-          fps: false,
-          frameIn: true,
-          frameOut: true,
-          frames: true,
-          estimation: false,
-          maxRetakes: false,
-          resolution: false,
-          timeSpent: false
-        }
-      } else {
-        return {
-          estimation: false,
-          readyFor: false,
-          timeSpent: false
-        }
-      }
     }
   },
 
@@ -652,6 +747,10 @@ export default {
       'loadShots',
       'newAsset',
       'removeAssetFromCasting',
+      'removeBreakdownSearch',
+      'saveBreakdownSearch',
+      'loadSequences',
+      'saveBreakdownSearchFilterGroup',
       'saveCasting',
       'setAssetLinkLabel',
       'setAssetSearch',
@@ -682,36 +781,36 @@ export default {
       }, 100)
     },
 
-    reloadEntities() {
+    async reloadEntities() {
       this.isLoading = true
-      this.loadShots(() => {
-        if (this.isTVShow) {
-          if (this.currentEpisode) {
-            this.episodeId = this.currentEpisode.id
-          }
-          this.setCastingEpisode(this.episodeId)
-          this.setCastingForProductionEpisodes()
-        } else {
-          this.setCastingEpisode(null)
+      await this.loadSequences()
+      await this.loadShots()
+      if (this.isTVShow) {
+        if (this.currentEpisode) {
+          this.episodeId = this.currentEpisode.id
         }
-        this.loadAssets(true).then(() => {
-          this.isLoading = false
-          this.displayMoreAssets()
-          this.setCastingAssetTypes()
-          if (this.assetTypeId) {
-            this.setCastingAssetType(this.assetTypeId)
-          } else {
-            this.setCastingSequence(this.sequenceId || 'all')
-          }
-          this.resetSequenceOption()
-          this.resetSelection()
-          if (
-            (this.currentEpisode && this.currentEpisode.id === 'main') ||
-            this.currentProduction.production_type === 'assets'
-          ) {
-            this.castingType = 'asset'
-          }
-        })
+        this.setCastingEpisode(this.episodeId)
+        this.setCastingForProductionEpisodes()
+      } else {
+        this.setCastingEpisode(null)
+      }
+      this.loadAssets(true).then(() => {
+        this.isLoading = false
+        this.displayMoreAssets()
+        this.setCastingAssetTypes()
+        if (this.assetTypeId) {
+          this.setCastingAssetType(this.assetTypeId)
+        } else {
+          this.setCastingSequence(this.sequenceId || 'all')
+        }
+        this.resetSequenceOption()
+        this.resetSelection()
+        if (
+          (this.currentEpisode && this.currentEpisode.id === 'main') ||
+          this.currentProduction.production_type === 'assets'
+        ) {
+          this.castingType = 'asset'
+        }
       })
     },
 
@@ -872,6 +971,17 @@ export default {
         })
         .finally(() => {
           this.loading.remove = false
+        })
+    },
+
+    removeOneAssetFromSelection(assetId) {
+      Object.keys(this.selection)
+        .filter(key => this.selection[key])
+        .forEach(entityId => {
+          const nbOccurences = this.casting[entityId].find(
+            asset => asset.asset_id === assetId
+          ).nb_occurences
+          this.removeOneAsset(assetId, entityId, nbOccurences)
         })
     },
 
@@ -1054,6 +1164,10 @@ export default {
     toggleTextMode() {
       this.isTextMode = !this.isTextMode
       localStorage.setItem('breakdown:text-mode', this.isTextMode)
+    },
+
+    toggleColumnSelector() {
+      this.columnSelectorDisplayed = !this.columnSelectorDisplayed
     },
 
     confirmNewAssetStay(form) {
@@ -1316,6 +1430,116 @@ export default {
       const name = this.getCsvFileName()
       const headers = this.getCsvFileHeaders()
       csv.buildCsvFile(name, [headers].concat(entries))
+    },
+
+    removeSearchQuery(searchQuery) {
+      this.removeBreakdownSearch(searchQuery).catch(console.error)
+    },
+
+    saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) {
+        return
+      }
+      this.loading.savingSearch = true
+      this.saveBreakdownSearch(searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
+    },
+
+    initResize(knobRefName, refName, descriptorId) {
+      this.resizedKnobRefName = knobRefName + (descriptorId ? descriptorId : '')
+      this.resizedRefName = refName + (descriptorId ? descriptorId : '')
+      this.resizedDescriptorId = descriptorId
+      window.addEventListener('mousemove', this.startResizing)
+      window.addEventListener('mouseup', this.stopResizing)
+    },
+
+    startResizing(event) {
+      const knobRef = this.resizedKnobRefName
+      const headerRef = this.resizedRefName
+      const knob = this.$refs[knobRef][0]
+        ? this.$refs[knobRef][0]
+        : this.$refs[knobRef]
+      const header = this.$refs[headerRef][0]
+        ? this.$refs[headerRef][0]
+        : this.$refs[headerRef]
+      const diff = event.clientX - knob.getBoundingClientRect().left
+      const actualWidth = header.getBoundingClientRect().width
+      this.columnWidth = { ...this.columnWidth }
+      if (this.resizedDescriptorId) {
+        const newWidth = Math.max(actualWidth + diff, 110)
+        this.columnWidth[this.resizedDescriptorId] = newWidth
+        const preferenceKey = `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
+        preferences.setPreference(preferenceKey, newWidth)
+      } else {
+        const newWidth = Math.max(actualWidth + diff, 160)
+        this.columnWidth.name = newWidth
+        const preferenceKey =
+          'breakdown:column-width-name-' +
+          `${this.castingType}-${this.currentProduction.id}`
+        preferences.setPreference(preferenceKey, newWidth)
+      }
+    },
+
+    stopResizing() {
+      window.removeEventListener('mousemove', this.startResizing)
+      window.removeEventListener('mouseup', this.stopResizing)
+      this.resizedKnobRefName = null
+      this.resizedRefName = null
+      this.resizedDescriptorId = null
+    },
+
+    resetDispayHeaders() {
+      if (this.isEpisodeCasting) {
+        this.metadataDisplayHeaders = {}
+      } else if (this.isShotCasting) {
+        this.metadataDisplayHeaders = {
+          stdby: true,
+          fps: false,
+          frameIn: true,
+          frameOut: true,
+          frames: true,
+          estimation: false,
+          maxRetakes: false,
+          resolution: false,
+          timeSpent: false
+        }
+      } else {
+        this.metadataDisplayHeaders = {
+          estimation: false,
+          readyFor: false,
+          timeSpent: false
+        }
+      }
+    },
+
+    resetColumnWidth() {
+      const namePreferenceKey =
+        'breakdown:column-width-name-' +
+        `${this.castingType}-${this.currentProduction.id}`
+      const nameColumnWidth = preferences.getPreference(namePreferenceKey)
+      if (nameColumnWidth) {
+        this.columnWidth.name = nameColumnWidth
+      }
+
+      this.metadataDescriptors.forEach(descriptor => {
+        const descriptorColumnWidth = preferences.getPreference(
+          `breakdown:column-width-descriptor-${descriptor.id}`
+        )
+        if (descriptorColumnWidth) {
+          this.columnWidth[descriptor.id] = descriptorColumnWidth
+        }
+      })
+    },
+
+    onCastingHeaderScroll(event, position) {
+      this.$refs['casting-list'].scrollLeft = position.scrollLeft
+    },
+
+    onCastingScroll(event, position) {
+      this.$refs['casting-header'].scrollLeft = position.scrollLeft
     }
   },
 
@@ -1337,6 +1561,8 @@ export default {
           this.assetTypeId = this.castingAssetTypesOptions[0].value
         }
       }
+      this.resetDispayHeaders()
+      this.resetColumnWidth()
     },
 
     sequenceId() {
@@ -1399,6 +1625,7 @@ export default {
     currentProduction() {
       if (!this.isLoading) {
         this.reset()
+        this.resetColumnWidth()
       }
     },
 
@@ -1472,6 +1699,7 @@ export default {
 }
 
 .breakdown {
+  color: var(--text);
   position: fixed;
   left: 0;
   right: 0;
@@ -1544,11 +1772,12 @@ export default {
 
 .subtitle {
   border-bottom: 0;
-  margin-top: 0;
+  margin-top: 0.1em;
+  margin-bottom: 0;
 }
 
 .filters-area {
-  margin-bottom: 2em;
+  margin-bottom: 0.5em;
 
   .search-field-wrapper {
     margin-right: 0.5em;
@@ -1581,8 +1810,8 @@ export default {
 .frames-header {
   min-width: 81px;
   max-width: 81px;
-  text-align: right;
-  padding-right: 0.5em;
+  justify-content: right;
+  padding-right: 0.6em;
 }
 
 .asset-type-header {
@@ -1592,14 +1821,15 @@ export default {
 }
 
 .standby-header {
-  max-width: 80px;
-  min-width: 80px;
+  max-width: 60px;
+  min-width: 60px;
   text-align: center;
   justify-content: center;
   padding-left: 0px;
 }
 
 .entity-header {
+  border-top-left-radius: 10px;
   border-right: 2px solid $light-grey;
   margin: 0;
   max-width: 301px;
@@ -1609,13 +1839,21 @@ export default {
   position: sticky;
 }
 
-.header {
+.actions {
+  border-top-right-radius: 10px;
+  height: 45px;
+  text-align: right;
+}
+
+.casting-header {
+  background: white;
   border-bottom: 2px solid $light-grey;
   font-size: 1.1em;
   color: var(--text-alt);
   font-size: 0.9em;
   font-weight: 600;
   letter-spacing: 1px;
+  overflow-y: hidden;
   padding: 0;
   position: sticky;
   top: 0;
@@ -1627,14 +1865,45 @@ export default {
     padding-top: 0.5em;
     padding-bottom: 0.5em;
   }
+
+  .actions {
+    height: 100%;
+  }
+
+  .dark & {
+    background: $dark-grey-light;
+  }
+}
+
+.list-options {
+  position: relative;
+}
+
+.casting-header div.resizable-knob {
+  cursor: col-resize;
+  height: 142%;
+  width: 5px;
+
+  &:hover {
+    background: $grey;
+  }
 }
 
 .casting-list {
   overflow: auto;
   display: flex;
 
-  .mt1 {
+  .shot-lines {
     flex: 1;
   }
+
+  .actions {
+    width: 100%;
+    text-align: right;
+  }
+}
+
+.query-list {
+  margin-bottom: 0.5em;
 }
 </style>

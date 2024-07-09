@@ -10,7 +10,12 @@
     }"
     @click="onClicked($event)"
   >
-    <div class="flexrow-item sticky">
+    <div
+      class="flexrow-item sticky"
+      :style="{
+        'max-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
+      }"
+    >
       <p class="error has-text-left info-message" v-if="isSaveError">
         {{ $t('breakdown.save_error') }}
       </p>
@@ -31,7 +36,7 @@
         </div>
       </div>
     </div>
-    <div class="standby-column flexrow-item" v-if="!isShowInfosBreakdown">
+    <div class="standby-column flexrow-item" v-if="isShowInfosBreakdown">
       <input
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
@@ -44,7 +49,7 @@
     </div>
     <div
       class="description-column flexrow-item"
-      v-if="!isShowInfosBreakdown && isDescription"
+      v-if="isShowInfosBreakdown && isDescription"
     >
       <div
         class="tooltip-text"
@@ -62,7 +67,7 @@
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="isFrames && !isShowInfosBreakdown && metadataDisplayHeaders.frames"
+      v-if="isFrames && isShowInfosBreakdown && metadataDisplayHeaders.frames"
     >
       <input
         class="input-editor"
@@ -79,9 +84,7 @@
     </div>
     <div
       class="frames-column flexrow-item"
-      v-if="
-        isFrameIn && !isShowInfosBreakdown && metadataDisplayHeaders.frameIn
-      "
+      v-if="isFrameIn && isShowInfosBreakdown && metadataDisplayHeaders.frameIn"
     >
       <input
         class="input-editor"
@@ -106,7 +109,7 @@
     <div
       class="frames-column flexrow-item"
       v-if="
-        isFrameOut && !isShowInfosBreakdown && metadataDisplayHeaders.frameOut
+        isFrameOut && isShowInfosBreakdown && metadataDisplayHeaders.frameOut
       "
     >
       <input
@@ -133,8 +136,13 @@
       class="metadata-descriptor flexrow-item"
       :title="entity.data ? entity.data[descriptor.field_name] : ''"
       :key="'desc' + entity.id + '-' + descriptor.id"
+      :style="{
+        'min-width': columnWidth[descriptor.id]
+          ? columnWidth[descriptor.id] + 'px'
+          : '100px'
+      }"
       v-for="(descriptor, j) in visibleMetadataDescriptors"
-      v-if="!isShowInfosBreakdown"
+      v-if="isShowInfosBreakdown"
     >
       <input
         class="input-editor"
@@ -245,6 +253,7 @@
             class="flexrow-item"
             :key="asset.id"
             :asset="asset"
+            :active="selected"
             :nb-occurences="asset.nb_occurences"
             :read-only="readOnly"
             :text-mode="textMode"
@@ -255,6 +264,7 @@
             v-for="asset in assetsByAssetTypesMap[assetType]"
           />
         </div>
+        <div class="actions filler"></div>
       </div>
       <div class="asset-type-line flexrow empty mt05 mb05" v-else>
         {{ $t('breakdown.empty') }}
@@ -335,6 +345,10 @@ export default {
     isSaveError: {
       default: false,
       type: Boolean
+    },
+    columnWidth: {
+      default: () => {},
+      type: Object
     }
   },
 
@@ -561,8 +575,8 @@ export default {
 
 .standby-column {
   padding-top: 1em;
-  min-width: 80px;
-  max-width: 80px;
+  min-width: 60px;
+  max-width: 60px;
   justify-content: center;
 }
 
@@ -636,7 +650,7 @@ div .tooltip-editor {
 }
 
 .metadata-descriptor .select {
-  color: $grey-strong;
+  color: var(--text);
   margin: 0;
   height: 40px;
   width: 100%;
@@ -655,7 +669,7 @@ div .tooltip-editor {
   }
 
   select {
-    color: $grey-strong;
+    color: var(--text);
     height: 100%;
     width: 100%;
     background: transparent;
@@ -664,12 +678,12 @@ div .tooltip-editor {
 
     &:focus {
       border: 1px solid $green;
-      background: white;
+      background: var(--background);
+      color: var(--text);
     }
 
     &:hover {
-      background: transparent;
-      background: white;
+      background: var(--background);
       border: 1px solid $light-green;
     }
   }

@@ -937,7 +937,6 @@ const mutations = {
     helpers.setListStats(state, shots)
 
     state.shotSearchQueries = userFilters.shot?.[production.id] || []
-
     state.shotSearchFilterGroups = userFilterGroups?.shot?.[production.id] || []
   },
 

@@ -25,7 +25,7 @@
           <text-field
             ref="nameField"
             :label="$t('shots.fields.name')"
-            v-model="form.name"
+            v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
           />

@@ -40,7 +40,7 @@ export default {
 
     buttonIsOn() {
       if (this.isBreakdown) {
-        return !this.isShowInfosBreakdown
+        return this.isShowInfosBreakdown
       } else {
         return this.isShowInfos
       }
@@ -92,9 +92,9 @@ export default {
     isShowInfos() {
       localStorage.setItem('show-infos', this.isShowInfos, { expires: '1M' })
     },
-
     isShowInfosBreakdown() {
-      localStorage.setItem('show-infos-breakdown', this.isShowInfosBreakdown, {
+      const value = this.isShowInfosBreakdown.toString()
+      localStorage.setItem('show-infos-breakdown', value, {
         expires: '1M'
       })
     }
