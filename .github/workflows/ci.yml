@@ -25,6 +25,7 @@ jobs:
           cache: 'npm'
       - name: Run tests
         env:
+          HUSKY: 0
           NODE_OPTIONS: '--max_old_space_size=8192'
         run: |
           echo "Node.js $(node -v)"

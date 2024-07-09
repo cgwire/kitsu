@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Update Kitsu on staging server
         uses: appleboy/ssh-action@v0.1.4
+        env:
+          HUSKY: 0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -30,4 +32,3 @@ jobs:
             echo "${KITSU_VERSION}" > dist/.version.txt
             echo "${GIT_COMMIT}"    > dist/.commit.txt
             echo "${GIT_TAG}"       > dist/.tag.txt
-
