@@ -1,6 +1,9 @@
 <template>
   <tr class="datatable-row" :key="taskType.id">
     <task-type-cell :task-type="taskType" />
+    <td class="short-name">
+      {{ taskType.short_name }}
+    </td>
     <td class="remove">
       <button
         class="button"
@@ -14,11 +17,11 @@
 
 <script>
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
-
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+import { mapGetters } from 'vuex'
 
 import { parseDate } from '@/lib/time'
+
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'production-task-type',
@@ -72,10 +75,6 @@ export default {
     this.$nextTick(() => {
       this.silent = false
     })
-  },
-
-  methods: {
-    ...mapActions([])
   },
 
   watch: {

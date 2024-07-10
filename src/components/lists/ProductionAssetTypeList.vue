@@ -43,7 +43,7 @@
             <stats-cell
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
-              :displayMode="displayMode"
+              :display-mode="displayMode"
             />
 
             <stats-cell
@@ -51,7 +51,7 @@
               :key="'all-' + columnId"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
-              :displayMode="displayMode"
+              :display-mode="displayMode"
               v-for="columnId in validationColumns"
             />
 
@@ -66,7 +66,7 @@
             <stats-cell
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
-              :displayMode="displayMode"
+              :display-mode="displayMode"
               v-if="isStats(entry.id, 'all')"
             />
             <td v-else></td>
@@ -76,7 +76,7 @@
               :style="getValidationStyle(columnId)"
               :colors="chartColors(entry.id, columnId)"
               :data="chartData(entry.id, columnId)"
-              :displayMode="displayMode"
+              :display-mode="displayMode"
               v-if="isStats(entry.id, columnId)"
               v-for="columnId in validationColumns"
             />

@@ -45,6 +45,7 @@
             "production_title": "Статистика по типам ассетов",
             "fields": {
                 "name": "Название",
+                "short_name": "Краткое название",
                 "task_types": "Workflow"
             },
             "include_all": "Включить все типы задач"

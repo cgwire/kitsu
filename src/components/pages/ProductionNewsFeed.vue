@@ -252,6 +252,12 @@
                           annotations: news.preview_file_annotations
                         }
                       ]"
+                      :task="{
+                        id: news.task_id,
+                        project_id: news.project_id,
+                        task_type_id: news.task_type_id,
+                        assignees: []
+                      }"
                       :read-only="true"
                       :light="true"
                       :big="true"
@@ -280,7 +286,6 @@
             class="stat-wrapper"
             v-for="stat in renderedStats"
           >
-            <div>{{ stat.name }} : {{ stat.value }}</div>
             <span
               class="stat-tag"
               :title="stat.name + ': ' + stat.value"
@@ -289,6 +294,7 @@
                 width: (stat.value / statMax) * 100 + '%'
               }"
             >
+              <div class="stat-text">{{ stat.name }} : {{ stat.value }}</div>
             </span>
           </div>
         </div>
@@ -311,24 +317,26 @@ import { sortByName, sortPeople } from '@/lib/sorting'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import DateField from '@/components/widgets/DateField'
-import PeopleField from '@/components/widgets/PeopleField'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import ProductionName from '@/components/widgets/ProductionName'
-import TaskInfo from '@/components/sides/TaskInfo'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import Spinner from '@/components/widgets/Spinner'
-import ValidationTag from '@/components/widgets/ValidationTag'
-import PreviewPlayer from '@/components/previews/PreviewPlayer'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'production-news-feed',
+
   mixins: [timeMixin],
+
   components: {
     ButtonSimple,
     Combobox,
@@ -972,7 +980,7 @@ export default {
   margin-bottom: 4px;
 }
 
-.person-field ::v-deep .v-autocomplete {
+.person-field :deep(.v-autocomplete) {
   z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
@@ -995,17 +1003,29 @@ export default {
   }
 
   .stat-tag {
+    border-radius: 6px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 0 2px var(--box-shadow);
     display: inline-block;
+    font-size: 0.8em;
+    height: 32px;
+    padding-left: 4px;
     margin-right: 1em;
     margin-top: 0;
     margin-bottom: 0.4em;
-    font-size: 0.8em;
     font-weight: bold;
     width: 100%;
-    height: 12px;
-    border-radius: 2px;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 0 2px var(--box-shadow);
+  }
+
+  .stat-text {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.8);
+    font-weight: bold;
+    padding: 4px 8px;
+    margin-top: 3px;
+    color: $black;
+    border-radius: 6px;
+    white-space: nowrap;
   }
 }
 

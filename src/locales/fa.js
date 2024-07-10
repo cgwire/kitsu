@@ -39,7 +39,9 @@ export default {
     title: 'انواع منبع',
     production_title: 'آمار تمام منابع',
     fields: {
-      name: 'نام'
+      name: 'نام',
+      short_name: 'اسم کوتاه',
+      description: 'توضیحات'
     }
   },
 
@@ -471,7 +473,8 @@ export default {
       ratio: 'نسبت تصویر',
       resolution: 'ابعاد تصویر',
       status: 'وضعیت',
-      type: 'نوع'
+      type: 'نوع',   
+      code: 'اسم کوتاه'
     },
     metadata: {
       add_explaination: 'Add specific data required by this project.',
@@ -563,7 +566,8 @@ export default {
       is_done: 'انجام شده',
       is_retake: 'بازنگری',
       name: 'نام',
-      short_name: 'اسم کوتاه'
+      short_name: 'اسم کوتاه', 
+      description: 'توضیحات'
     }
   },
 
@@ -579,6 +583,7 @@ export default {
       color: 'رنگ',
       name: 'نام',
       allow_timelog: 'ضبط زمان',
+      description: 'توضیحات',
       priority: 'اولویت'
     }
   },

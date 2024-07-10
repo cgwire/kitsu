@@ -19,7 +19,7 @@
         <template v-if="!person.is_bot && isCurrentUserAllowed">
           <route-section-tabs
             class="section-tabs mt1"
-            :activeTab="activeTab"
+            :active-tab="activeTab"
             :route="$route"
             :tabs="todoTabs"
           />
@@ -82,7 +82,7 @@
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
             :done="true"
-            :selectionGrid="personTaskSelectionGrid"
+            :selection-grid="personTaskSelectionGrid"
             v-else-if="isActiveTab('done')"
           />
 
@@ -113,9 +113,7 @@
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
             :hide-done="personTasksSearchText.length === 0"
-            :hide-day-off="
-              !(isCurrentUserAdmin || this.user.id == this.person.id)
-            "
+            :hide-day-off="!(isCurrentUserAdmin || user.id == person.id)"
             @date-changed="onDateChanged"
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"

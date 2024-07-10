@@ -16,7 +16,7 @@
           {{ $t('productions.new_production') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('productions.fields.name')"
@@ -24,11 +24,17 @@
             @enter="runConfirmation"
             v-focus
           />
+          <text-field
+            ref="codeField"
+            :label="$t('productions.fields.code')"
+            v-model="form.code"
+            @enter="runConfirmation"
+          />
           <combobox-styled
             class="field"
             :label="$t('productions.fields.status')"
             :options="productionStatusOptions"
-            localeKeyPrefix="productions.status."
+            locale-key-prefix="productions.status."
             @enter="runConfirmation"
             v-model="form.project_status_id"
             v-if="productionToEdit && productionToEdit.id"
@@ -37,7 +43,7 @@
             class="field"
             :label="$t('productions.fields.style')"
             :options="productionStyleOptions"
-            localeKeyPrefix="productions.style."
+            locale-key-prefix="productions.style."
             v-model="form.production_style"
           />
           <text-field
@@ -49,7 +55,6 @@
             :step="0.001"
             @enter="runConfirmation"
             v-model="form.fps"
-            v-focus
           />
           <text-field
             v-if="productionToEdit && productionToEdit.id"
@@ -57,7 +62,6 @@
             :label="$t('productions.fields.ratio')"
             v-model="form.ratio"
             @enter="runConfirmation"
-            v-focus
           />
           <text-field
             v-if="productionToEdit && productionToEdit.id"
@@ -65,7 +69,6 @@
             :label="$t('productions.fields.resolution')"
             v-model="form.resolution"
             @enter="runConfirmation"
-            v-focus
           />
 
           <div v-if="productionToEdit && productionToEdit.id">
@@ -143,6 +146,7 @@ export default {
     if (this.productionToEdit && this.productionToEdit.id) {
       data.form = {
         name: this.productionToEdit.name,
+        code: this.productionToEdit.code,
         project_status_id: this.productionToEdit.project_status_id,
         fps: this.productionToEdit.fps,
         ratio: this.productionToEdit.ratio,
@@ -153,6 +157,7 @@ export default {
     } else {
       data.form = {
         name: '',
+        code: '',
         project_status_id: this.productionStatus
           ? this.productionStatus[0].id
           : null,
@@ -203,6 +208,7 @@ export default {
       if (this.productionToEdit && this.productionToEdit.id) {
         this.form = {
           name: this.productionToEdit.name,
+          code: this.productionToEdit.code,
           project_status_id: this.productionToEdit.project_status_id,
           fps: this.productionToEdit.fps,
           ratio: this.productionToEdit.ratio,

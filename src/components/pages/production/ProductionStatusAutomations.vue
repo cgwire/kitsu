@@ -30,8 +30,9 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomation'
-import StatusAutomationList from '@/components/lists/StatusAutomationList'
+
+import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomation.vue'
+import StatusAutomationList from '@/components/lists/StatusAutomationList.vue'
 
 export default {
   name: 'production-status-automations',
@@ -79,9 +80,7 @@ export default {
         this.statusAutomationId = ''
       }
     }
-  },
-
-  watch: {}
+  }
 }
 </script>
 
@@ -121,10 +120,6 @@ td.name {
 
 .remove {
   width: 100px;
-}
-
-td ::v-deep p.control.flexrow {
-  width: 105px;
 }
 
 .field {

@@ -12,13 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update Kitsu on staging server
-        uses: appleboy/ssh-action@v0.1.4
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          HUSKY: 0
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script_stop: true
+          envs: HUSKY
           script: |
             cd /opt/kitsu
             git pull
@@ -30,4 +33,3 @@ jobs:
             echo "${KITSU_VERSION}" > dist/.version.txt
             echo "${GIT_COMMIT}"    > dist/.commit.txt
             echo "${GIT_TAG}"       > dist/.tag.txt
-

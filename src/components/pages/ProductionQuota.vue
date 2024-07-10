@@ -87,17 +87,17 @@
 
       <quota
         ref="quota-list"
-        :taskTypeId="taskTypeId"
-        :detailLevel="detailLevelString"
+        :task-type-id="taskTypeId"
+        :detail-level="detailLevelString"
         :year="currentYear"
         :month="currentMonth"
         :week="currentWeek"
         :day="currentDay"
-        :currentPerson="currentPerson"
-        :countMode="currentMode"
-        :computeMode="computeMode"
-        :searchText="searchText"
-        :maxQuota="maxQuota"
+        :current-person="currentPerson"
+        :count-mode="currentMode"
+        :compute-mode="computeMode"
+        :search-text="searchText"
+        :max-quota="maxQuota"
       />
     </div>
     <div class="column side-column" v-if="showInfo">

@@ -6,7 +6,7 @@
       </div>
       <div
         class="content"
-        v-html="compileMarkdown(currentProduction.description)"
+        v-html="renderMarkdown(currentProduction.description)"
         v-else
       ></div>
     </div>
@@ -38,15 +38,18 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { renderMarkdown } from '@/lib/render'
-import TextareaField from '@/components/widgets/TextareaField'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
+
+import TextareaField from '@/components/widgets/TextareaField.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 export default {
   name: 'production-brief',
+
   components: {
     ButtonSimple,
     TextareaField
   },
+
   data() {
     return {
       brief: '',
@@ -57,6 +60,7 @@ export default {
       }
     }
   },
+
   computed: {
     ...mapGetters(['currentProduction']),
 
@@ -64,11 +68,13 @@ export default {
       return this.$refs.textarea
     }
   },
+
   mounted() {
     if (this.currentProduction) {
       this.brief = this.currentProduction.description
     }
   },
+
   methods: {
     ...mapActions(['editProduction', 'setProduction']),
 
@@ -100,9 +106,7 @@ export default {
       this.isLoading = false
     },
 
-    compileMarkdown(input) {
-      return renderMarkdown(input)
-    }
+    renderMarkdown
   }
 }
 </script>

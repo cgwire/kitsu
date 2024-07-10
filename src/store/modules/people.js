@@ -387,7 +387,7 @@ const actions = {
 
   loadAggregatedPersonTimeSpents(
     {},
-    { personId, detailLevel, year, month, week, day, productionId }
+    { personId, detailLevel, year, month, week, day, productionId, studioId }
   ) {
     return peopleApi.getAggregatedPersonTimeSpents(
       personId,
@@ -396,7 +396,8 @@ const actions = {
       month,
       week,
       day,
-      productionId
+      productionId,
+      studioId
     )
   },
 
@@ -452,19 +453,29 @@ const actions = {
     commit(SET_TIME_SPENT, timeSpent)
   },
 
-  async setDayOff({ commit }, { personId, date, end_date, description }) {
-    const dayOff = await peopleApi.setDayOff(
-      personId,
-      date,
-      end_date,
-      description
-    )
+  async setDayOff({ commit }, { id, personId, date, end_date, description }) {
+    let dayOff
+    if (id) {
+      dayOff = await peopleApi.updateDayOff(
+        id,
+        personId,
+        date,
+        end_date,
+        description
+      )
+    } else {
+      dayOff = await peopleApi.createDayOff(
+        personId,
+        date,
+        end_date,
+        description
+      )
+    }
     commit(PERSON_SET_DAY_OFF, dayOff)
   },
 
-  async unsetDayOff({ commit }) {
-    const dayOff = state.personDayOff
-    await peopleApi.unsetDayOff(dayOff)
+  async unsetDayOff({ commit }, dayOff = null) {
+    await peopleApi.deleteDayOff(dayOff || state.personDayOff)
     commit(PERSON_SET_DAY_OFF, {})
   },
 
@@ -472,7 +483,10 @@ const actions = {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
-  async loadTimesheets({ commit }, { detailLevel, year, month, productionId }) {
+  async loadTimesheets(
+    { commit },
+    { detailLevel, year, month, productionId, studioId }
+  ) {
     const monthString = String(month).padStart(2, '0')
     let getTableFn
     switch (detailLevel) {
@@ -488,7 +502,7 @@ const actions = {
       default:
         getTableFn = peopleApi.getMonthTable
     }
-    const table = await getTableFn(year, monthString, productionId)
+    const table = await getTableFn(year, monthString, productionId, studioId)
     if (detailLevel === 'day') {
       const dayOffs = await peopleApi.getDaysOff(year, monthString)
       commit(PEOPLE_SET_DAY_OFFS, dayOffs)
@@ -833,7 +847,7 @@ const mutations = {
     state.organisation = { ...state.organisation, ...organisation }
   },
 
-  [RESET_ALL](state, people) {
+  [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
     cache.peopleIndex = {}
     cache.personTasksIndex = {}

@@ -13,7 +13,7 @@
           {{ $t('breakdown.edit_label') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combobox
             ref="typeField"
             :label="$t('breakdown.label')"

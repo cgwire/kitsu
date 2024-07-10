@@ -243,6 +243,7 @@ export default {
         this.$t('task_types.fields.dedicated_to'),
         this.$t('task_types.fields.department'),
         this.$t('task_types.fields.name'),
+        this.$t('task_types.fields.description'),
         this.$t('task_types.fields.color'),
         this.$t('task_types.fields.allow_timelog')
       ]
@@ -252,6 +253,7 @@ export default {
           taskType.for_entity,
           this.departmentMap.get(taskType.department_id)?.name,
           taskType.name,
+          taskType.description,
           taskType.color,
           taskType.allow_timelog
         ])

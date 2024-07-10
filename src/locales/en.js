@@ -49,6 +49,8 @@ export default {
     production_title: 'Asset Types Stats',
     fields: {
       name: 'Name',
+      short_name: 'Short Name',
+      description: 'Description',
       task_types: 'Workflow'
     }
   },
@@ -81,16 +83,17 @@ export default {
   },
 
   bots: {
-    title: 'Bots',
-    bots: 'bot | bots',
     active_bots: 'active bot | active bots',
-    new_bot: 'Add a new bot',
-    edit_title: 'Edit bot',
+    bots: 'bot | bots',
+    copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
     edit_avatar_error: 'An error occurred while updating the bot avatar.',
+    edit_title: 'Edit bot',
+    new_bot: 'Add a new bot',
     new_token_title: 'New API token for {name}',
     new_token_warning: 'If you generate a new token, the old one will be disabled.',
+    no_bot: 'There is no bot. Do you want to create one?',
     generate: 'Generate a new token',
-    copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    title: 'Bots',
     token_copied: 'Token copied to clipboard!',
     fields: {
       name: 'Name',
@@ -267,6 +270,21 @@ export default {
     new_departments: 'Add a department',
     number: 'department | departments',
     title: 'Departments',
+    fields: {
+      name: 'Name',
+      color: 'Color'
+    }
+  },
+
+  studios: {
+    create_error: 'An error occurred while saving this studio. Are you sure there is no studio with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this studio.',
+    edit_title: 'Edit studio',
+    new_studios: 'Add a studio',
+    no_studio: 'No studio',
+    number: 'studio | studios',
+    title: 'Studios',
     fields: {
       name: 'Name',
       color: 'Color'
@@ -516,6 +534,7 @@ export default {
     before: 'Before',
     cancel: 'Cancel',
     clear_selection: 'Clear current selection',
+    clear_sorting: 'Clear current sorting',
     close: 'Close',
     color: 'Color',
     copy: 'Copy',
@@ -533,6 +552,7 @@ export default {
     department: 'Department',
     description: 'Description',
     documentation: 'Documentation',
+    drop_files_here: 'Drop files here',
     edit: 'Edit',
     empty_comment: 'Empty comment',
     empty_schedule: 'There are no tasks or they don\'t have start dates.',
@@ -556,9 +576,11 @@ export default {
     history: 'history',
     info: 'Information',
     import: 'Import',
+    is_shared: 'Shared with the whole team',
     home: 'return to home page',
     or: 'or',
     no: 'No',
+    no_results: 'No results',
     less_filters: 'Fewer filters',
     link: 'Link',
     load_more: 'Load more',
@@ -767,7 +789,8 @@ export default {
       password: 'New password',
       password_2: 'New password (repeat)',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     list: {
       active: 'Active',
@@ -777,7 +800,8 @@ export default {
       expiration: 'Expiration',
       name: 'Name',
       phone: 'Phone',
-      role: 'Role'
+      role: 'Role',
+      studio: 'Studio'
     },
     role: {
       all: 'All',
@@ -988,6 +1012,7 @@ export default {
     },
 
     fields: {
+      code: 'Short Name',
       end_date: 'End date',
       episode_span: 'Episode spacing',
       fps: 'FPS',
@@ -1201,11 +1226,13 @@ export default {
       is_retake: 'Has retake value',
       is_default: 'Is default',
       name: 'Name',
-      short_name: 'Short name'
+      short_name: 'Short name',
+      description: 'Description'
     }
   },
 
   task_types: {
+    add_task_type_placeholder: '+ Task type',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this task type. There may be existing data currently linked to it. Are you sure this task type has no task linked to it?',
     edit_title: 'Edit task type',
@@ -1213,12 +1240,15 @@ export default {
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
+    select_task_type: 'Select a task type...',
     title: 'Task Types',
     fields: {
       dedicated_to: 'For',
       department: 'Department',
       color: 'Color',
       name: 'Name',
+      short_name: 'Short Name',
+      description: 'Description',
       allow_timelog: 'Timelog',
       priority: 'Priority'
     }
@@ -1338,6 +1368,9 @@ export default {
     empty_list: 'There are no shots in the production. How about creating some?',
     empty_list_client: 'There are no shots in this production.',
     episodes: 'Episodes',
+    get_frames_from_previews: 'Set frame numbers from previews',
+    get_frames_from_previews_description: 'Select a task type to extract the frame numbers from the latest published movie previews.',
+    get_frames_from_previews_error: 'There was an error while extracting the frame numbers from the task type previews. Please contact our support team.',
     history: 'Shot values history',
     multiple_delete_error: 'An error occurred while deleting a shot. There may be existing data currently linked to the shot. Are you sure there is no task linked to a selected shot?',
     new_shot: 'Add a shot',
@@ -1505,6 +1538,7 @@ export default {
     tasks: 'Tasks',
     to_myself: 'To myself',
     use_current_frame: 'Use current frame',
+    unassigned_tasks: 'Unassigned tasks',
     validated: 'Validated',
     validation: 'Validation',
     with_comment: 'With a comment...',
@@ -1571,9 +1605,6 @@ export default {
     confirm_day_offs: 'Setting these days as days off will erase all time logged for the affected days. Are you sure you want to continue?',
     confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
     day_off: 'Day Off',
-    nb_days_off: 'Day Off | Days Off',
-    edit_days_off: 'Edit Days Off',
-    error_days_off: 'An error occurred while updating days off.',
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
     export_timesheet: 'Export Timesheet',
@@ -1585,6 +1616,22 @@ export default {
     title: 'Timesheets',
     unit: 'Unit',
     year: 'Year'
+  },
+
+  days_off: {
+    title: 'Days Off',
+    period: 'Period',
+    description: 'Description',
+    updated_at: 'Update date',
+    nb_days_off: 'Day Off | Days Off',
+    no_day_off: 'No day off for the selected period.',
+    no_days_off: 'You have registered no day off yet.',
+    add: 'Add day off',
+    edit: 'Edit day off',
+    delete: 'Delete day off',
+    confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
+    confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
+    error_days_off: 'An error occurred while updating days off.',
   },
 
   wrong_browser: {

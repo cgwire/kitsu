@@ -43,7 +43,16 @@
             v-for="entry in entries"
             :key="entry.id"
           >
-            <td class="name">{{ entry.name }}</td>
+            <td class="name">
+              {{ entry.name }}
+              <span
+                class="help-tooltip"
+                :title="entry.description"
+                v-if="entry.description"
+              >
+                <help-circle-icon class="icon is-small" />
+              </span>
+            </td>
             <task-status-cell class="short-name" :entry="entry" />
             <boolean-cell class="is-default" :value="entry.is_default" />
             <boolean-cell class="is-done" :value="entry.is_done" />
@@ -62,7 +71,7 @@
             />
             <row-actions-cell
               :entry-id="entry.id"
-              :hide-delete="entry.is_default === true"
+              :hide-delete="entry.is_default === true || entry.for_concept"
               @edit-clicked="$emit('edit-clicked', entry)"
               @delete-clicked="$emit('delete-clicked', entry)"
             />
@@ -81,13 +90,14 @@
 
 <script>
 import draggable from 'vuedraggable'
+import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import BooleanCell from '@/components/cells/BooleanCell'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskStatusCell from '@/components/cells/TaskStatusCell'
+import BooleanCell from '@/components/cells/BooleanCell.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 
 export default {
   name: 'task-status-list',
@@ -112,6 +122,7 @@ export default {
   components: {
     BooleanCell,
     draggable,
+    HelpCircleIcon,
     RowActionsCell,
     TableInfo,
     TaskStatusCell

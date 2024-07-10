@@ -63,7 +63,8 @@ import {
   UNLOCK_EDIT,
   RESET_ALL,
   CLEAR_SELECTED_EDITS,
-  SET_EDIT_SELECTION
+  SET_EDIT_SELECTION,
+  CHANGE_EDIT_SORT
 } from '@/store/mutation-types'
 import async from 'async'
 
@@ -600,6 +601,23 @@ const actions = {
     return Promise.resolve(edits)
   },
 
+  changeEditSort({ commit, rootGetters }, sortInfo) {
+    const taskStatusMap = rootGetters.taskStatus
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskMap = rootGetters.taskMap
+    const persons = rootGetters.people
+    const production = rootGetters.currentProduction
+    const sorting = sortInfo ? [sortInfo] : []
+    commit(CHANGE_EDIT_SORT, {
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      persons,
+      production,
+      sorting
+    })
+  },
+
   deleteAllEditTasks(
     { commit, dispatch, state },
     { projectId, taskTypeId, selectionOnly }
@@ -1061,6 +1079,23 @@ const mutations = {
 
   [CANCEL_EDIT](state, edit) {
     edit.canceled = true
+  },
+
+  [CHANGE_EDIT_SORT](
+    state,
+    { taskStatusMap, taskTypeMap, taskMap, production, sorting, persons }
+  ) {
+    const editSearch = state.editSearchText
+    state.editSorting = sorting
+    helpers.buildResult(state, {
+      editSearch,
+      persons,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      taskMap
+    })
   },
 
   [UPDATE_METADATA_DESCRIPTOR_END](

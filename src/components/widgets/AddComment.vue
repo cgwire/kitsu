@@ -45,13 +45,13 @@
         @input="onAtTextChanged"
         v-if="mode === 'status' || showCommentArea"
       >
-        <template slot="item" slot-scope="team">
-          <template v-if="team.item.isTime"> ⏱️ frame </template>
-          <template v-else-if="team.item.isDepartment">
+        <template #item="{ item }">
+          <template v-if="item.isTime"> ⏱️ frame </template>
+          <template v-else-if="item.isDepartment">
             <span
               class="mr05"
               :style="{
-                background: team.item.color,
+                background: item.color,
                 width: '10px',
                 height: '10px',
                 'border-radius': '50%'
@@ -59,20 +59,20 @@
             >
               &nbsp;
             </span>
-            {{ team.item.full_name }}
+            {{ item.full_name }}
           </template>
           <template v-else>
             <div class="flexrow">
               <people-avatar
                 class="flexrow-item"
-                :person="team.item"
+                :person="item"
                 :size="20"
                 :font-size="11"
                 :is-lazy="false"
                 :is-link="false"
               />
               <span class="flexrow-item">
-                {{ team.item.full_name }}
+                {{ item.full_name }}
               </span>
             </div>
           </template>
@@ -259,6 +259,7 @@
             :narrow="true"
             :color-only="true"
             :task-status-list="taskStatus"
+            :production-id="task.project_id"
             v-model="task_status_id"
           />
           <button-simple
@@ -654,6 +655,11 @@ export default {
     },
 
     onDrop(event) {
+      if (event.target.id === 'drop-mask') return
+      /*
+      if (event.target.parentElement?.className?.indexOf('box')) return
+      if (event.target.parentElement?.className?.indexOf('buttons')) return
+      */
       const forms = []
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const form = new FormData()

@@ -45,7 +45,7 @@
             </th>
           </tr>
         </thead>
-        <tbody class="datatable-body" v-if="this.quotaLength > 0 && !isLoading">
+        <tbody class="datatable-body" v-if="quotaLength > 0 && !isLoading">
           <tr
             class="datatable-row"
             v-for="key in filteredPersonIds"
@@ -181,7 +181,7 @@
     </div>
     <div
       class="has-text-centered empty-quota"
-      v-if="this.quotaLength === 0 && !isLoading"
+      v-if="quotaLength === 0 && !isLoading"
     >
       <p class="info">{{ $t('quota.no_quota') }}</p>
     </div>

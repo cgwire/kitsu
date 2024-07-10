@@ -26,7 +26,7 @@
       <div class="entity-data block">
         <route-section-tabs
           class="section-tabs"
-          :activeTab="currentSection"
+          :active-tab="currentSection"
           :route="$route"
           :tabs="entityTabs"
         />
@@ -561,7 +561,7 @@ export default {
       this.getCurrentShot()
         .then(shot => {
           this.currentShot = shot
-          this.currentSection = this.route.query.section || 'casting'
+          this.currentSection = this.route.query.section || 'infos'
           this.casting.isLoading = true
           this.casting.isError = false
           if (this.currentShot) {

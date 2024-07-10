@@ -96,7 +96,6 @@ const initialState = {
   isBigThumbnails: false,
   isShowAssignations: true,
   isShowInfos: true,
-  isShowInfosBreakdown: false,
 
   isSavingCommentPreview: false,
   previewForms: [],
@@ -148,7 +147,6 @@ const getters = {
   isBigThumbnails: state => state.isBigThumbnails,
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
-  isShowInfosBreakdown: state => state.isShowInfosBreakdown,
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
@@ -434,9 +432,7 @@ const actions = {
 
   updateTask({ commit }, { taskId, data }) {
     commit(EDIT_TASK_DATES, { taskId, data })
-    return tasksApi.updateTask(taskId, data).then(task => {
-      commit(EDIT_TASK_DATES, { taskId, data })
-    })
+    return tasksApi.updateTask(taskId, data)
   },
 
   deleteTask({ commit }, { task, callback }) {
@@ -875,17 +871,6 @@ const mutations = {
       state.taskMap.set(task.id, task)
     } else {
       Object.assign(state.taskMap.get(task.id), task)
-      if (
-        state.taskComments[task.id] &&
-        state.taskComments[task.id].length > 0 &&
-        !locks[task.id]
-      ) {
-        const comment = state.taskComments[task.id].find(c => !c.pinned)
-        Object.assign(comment, {
-          task_status_id: task.task_status_id,
-          task_status: state.taskStatusMap.get(task.task_status_id)
-        })
-      }
     }
   },
 
@@ -1237,7 +1222,9 @@ const mutations = {
 
   [EDIT_TASK_DATES](state, { taskId, data }) {
     const task = state.taskMap.get(taskId)
-    Object.assign(task, data)
+    if (task) {
+      Object.assign(task, data)
+    }
   },
 
   [ASSIGN_TASKS](state, { selectedTaskIds, personId }) {
@@ -1281,10 +1268,6 @@ const mutations = {
 
   [SET_IS_SHOW_INFOS](state, isShowInfos) {
     state.isShowInfos = isShowInfos
-  },
-
-  [SET_IS_SHOW_INFOS_BREAKDOWN](state, isShowInfosBreakdown) {
-    state.isShowInfosBreakdown = isShowInfosBreakdown
   },
 
   [LOAD_PERSON_TASKS_END](state, { tasks }) {

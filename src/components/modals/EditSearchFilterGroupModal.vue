@@ -16,7 +16,7 @@
           {{ $t('main.filter_group_add') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('assets.fields.name')"
@@ -28,6 +28,12 @@
             ref="colorField"
             :label="$t('main.color')"
             v-model="form.color"
+          />
+
+          <boolean-field
+            :label="$t('main.is_shared')"
+            v-model="form.is_shared"
+            v-if="isCurrentUserManager && currentProduction"
           />
         </form>
 
@@ -47,15 +53,18 @@
 /*
  * Modal used to edit filter group information.
  */
+import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 import ModalFooter from '@/components/modals/ModalFooter'
 import ColorField from '@/components/widgets/ColorField'
 import TextField from '@/components/widgets/TextField'
+import BooleanField from '@/components/widgets/BooleanField'
 
 export default {
   name: 'edit-search-filter-group-modal',
   mixins: [modalMixin],
   components: {
+    BooleanField,
     ColorField,
     ModalFooter,
     TextField
@@ -84,9 +93,14 @@ export default {
     return {
       form: {
         color: '',
-        name: ''
+        name: '',
+        is_shared: 'false'
       }
     }
+  },
+
+  computed: {
+    ...mapGetters(['currentProduction', 'isCurrentUserManager'])
   },
 
   methods: {
@@ -97,7 +111,11 @@ export default {
       }
 
       if (!event || event.keyCode === 13 || !event.keyCode) {
-        this.$emit('confirm', this.form)
+        const data = {
+          ...this.form,
+          is_shared: this.form.is_shared === 'true'
+        }
+        this.$emit('confirm', data)
       }
     }
   },
@@ -107,12 +125,14 @@ export default {
       const {
         id,
         color = '',
-        name = ''
+        name = '',
+        is_shared = false
       } = this.groupToEdit?.id ? this.groupToEdit : {}
       this.form = {
         id,
         color,
-        name
+        name,
+        is_shared: is_shared ? 'true' : 'false'
       }
     },
 

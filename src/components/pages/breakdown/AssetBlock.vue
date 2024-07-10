@@ -51,10 +51,12 @@
 
 <script>
 import stringHelpers from '@/lib/string'
+import { domMixin } from '@/components/mixins/dom'
 
 export default {
   name: 'asset-block',
   components: {},
+  mixins: [domMixin],
 
   data() {
     return {
@@ -98,10 +100,12 @@ export default {
 
   methods: {
     removeOneAsset(event) {
+      this.pauseEvent(event)
       this.$emit('remove-one', this.asset.asset_id, this.nbOccurences)
     },
 
     addOneAsset(event) {
+      this.pauseEvent(event)
       this.$emit('add-one', this.asset.asset_id, this.nbOccurences)
     },
 

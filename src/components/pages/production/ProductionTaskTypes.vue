@@ -3,7 +3,7 @@
     <div>
       <route-section-tabs
         class="section-tabs"
-        :activeTab="activeTab"
+        :active-tab="activeTab"
         :route="$route"
         :tabs="taskTypeTabs"
       />
@@ -48,6 +48,16 @@
                 taskListObject.entity === activeTab
               "
             >
+              <!--
+              <thead>
+                <tr>
+                  <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+                  <th class="th-short-name">
+                    {{ $t('task_status.fields.short_name') }}
+                  </th>
+                </tr>
+              </thead>
+              -->
               <draggable
                 v-model="taskListObject.list"
                 draggable=".task-type"
@@ -85,7 +95,7 @@
             @import-from-production="importTaskTypesFromProduction"
             @import-item="addTaskType"
           >
-            <template v-slot:item-line="{ item }">
+            <template #item-line="{ item }">
               <task-type-name class="pointer" :task-type="item" />
             </template>
           </setting-importer>
@@ -98,16 +108,17 @@
 import draggable from 'vuedraggable'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+
 import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 import stringHelper from '@/lib/string'
 
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ProductionTaskType from '@/components/pages/production/ProductionTaskType'
-import RouteSectionTabs from '@/components/widgets/RouteSectionTabs'
-import SettingImporter from '@/components/widgets/SettingImporter'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
+import SettingImporter from '@/components/widgets/SettingImporter.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'production-task-types',
@@ -512,10 +523,6 @@ td.name {
 
 .remove {
   width: 100px;
-}
-
-td ::v-deep p.control.flexrow {
-  width: 105px;
 }
 
 .episode-span-column {

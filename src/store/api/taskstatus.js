@@ -4,6 +4,7 @@ const sanitizeTaskStatus = taskStatus => {
   return {
     name: taskStatus.name,
     short_name: taskStatus.short_name,
+    description: taskStatus.description,
     for_concept: Boolean(taskStatus.for_concept === 'true'),
     is_default: Boolean(taskStatus.is_default === 'true'),
     is_done: Boolean(taskStatus.is_done === 'true'),

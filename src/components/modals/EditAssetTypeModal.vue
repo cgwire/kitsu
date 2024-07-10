@@ -16,7 +16,7 @@
           {{ $t('asset_types.new_asset_type') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <text-field
             ref="nameField"
             :label="$t('asset_types.fields.name')"
@@ -25,7 +25,18 @@
             @enter="runConfirmation"
             v-focus
           />
-
+          <text-field
+            ref="shortNameField"
+            :label="$t('asset_types.fields.short_name')"
+            :maxlength="30"
+            v-model="form.short_name"
+            @enter="runConfirmation"
+          />
+          <textarea-field
+            :label="$t('asset_types.fields.description')"
+            v-model="form.description"
+            @enter="runConfirmation"
+          />
           <combobox-boolean
             :label="$t('main.archived')"
             @enter="runConfirmation"
@@ -83,18 +94,22 @@ import { sortByName } from '@/lib/sorting'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-asset-type-modal',
+
   mixins: [modalMixin],
+
   components: {
     Combobox,
     ComboboxBoolean,
-    TaskTypeName,
     ModalFooter,
+    TaskTypeName,
+    TextareaField,
     TextField
   },
 
@@ -121,6 +136,8 @@ export default {
     return {
       form: {
         name: '',
+        short_name: '',
+        description: '',
         task_types: []
       }
     }
@@ -191,12 +208,16 @@ export default {
         const types = this.assetTypeToEdit.task_types || []
         this.form = {
           name: this.assetTypeToEdit.name,
+          short_name: this.assetTypeToEdit.short_name,
+          description: this.assetTypeToEdit.description,
           task_types: [...types],
           archived: String(this.assetTypeToEdit.archived === true)
         }
       } else {
         this.form = {
           name: '',
+          short_name: '',
+          description: '',
           task_types: [],
           archived: 'false'
         }

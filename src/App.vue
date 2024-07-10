@@ -783,11 +783,12 @@ h2 {
 
   &.bot::after {
     content: 'bot';
+    color: $white;
     position: absolute;
     bottom: -4px;
     font-size: 10px;
     line-height: 10px;
-    padding: 1px 2px;
+    padding: 1px 4px;
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
@@ -1900,6 +1901,14 @@ tbody:last-child .empty-line:last-child {
     background: var(--background-tag);
     border-left: 0.4em solid var(--background-hover);
   }
+
+  table tr:hover {
+    background: var(--background-hover);
+  }
+
+  table thead th {
+    color: inherit;
+  }
 }
 
 .playlist-column .video-player-box .video-js {
@@ -2211,6 +2220,18 @@ th.validation-cell {
   }
 }
 
+.warning {
+  color: $orange;
+}
+
+.warning-text {
+  background-color: rgba($orange, 0.2);
+  border-left: 4px solid $orange;
+  border-bottom-right-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+  padding: 0.5em;
+}
+
 @media screen and (max-width: 1000px) {
   .button .icon.is-small {
     margin-right: 0;
@@ -2252,6 +2273,45 @@ th.validation-cell {
   .hero {
     display: flex;
     flex-direction: column;
+  }
+}
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 20px;
+  height: 20px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #eee;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ddd;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #ccc;
+}
+.dark {
+  ::-webkit-scrollbar-thumb {
+    background-color: #46494f;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #4d5560;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: #5e6169;
   }
 }
 </style>

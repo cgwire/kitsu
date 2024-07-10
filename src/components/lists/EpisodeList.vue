@@ -176,7 +176,7 @@
 
               <table-metadata-selector-menu
                 ref="headerMetadataSelectorMenu"
-                :metadataDisplayHeaders.sync="metadataDisplayHeaders"
+                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="episodeMetadataDescriptors"
                 :exclude="{
                   timeSpent: !isEpisodeTime,
@@ -262,7 +262,7 @@
                 'datatable-row-header': true
               }"
               :column="taskTypeMap.get(columnId)"
-              :columnY="j"
+              :column-y="j"
               :entity="episode"
               :is-assignees="isShowAssignations"
               :is-static="true"
@@ -272,7 +272,7 @@
                   : '0'
               "
               :minimized="hiddenColumns[columnId]"
-              :rowX="i"
+              :row-x="i"
               :selected="isSelected(i, j)"
               :sticked="true"
               :task-test="taskMap.get(episode.validations.get(columnId))"
@@ -377,8 +377,8 @@
               :selected="
                 isSelected(i, j + stickedDisplayedValidationColumns.length)
               "
-              :rowX="i"
-              :columnY="j"
+              :row-x="i"
+              :column-y="j"
               :is-assignees="isShowAssignations"
               @select="onTaskSelected"
               @unselect="onTaskUnselected"

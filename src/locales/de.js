@@ -39,7 +39,9 @@ export default {
     title: 'Vermögensarten',
     production_title: 'Vermögensarten Statistiken',
     fields: {
-      name: 'Name'
+      name: 'Name',
+      short_name: 'Kurzname',
+      description: 'Beschreibung'
     }
   },
 
@@ -455,6 +457,7 @@ export default {
       welcome: 'Willkommen bei Kitsu'
     },
     fields: {
+      code: 'Kurzname',
       fps: 'FPS',
       name: 'Name',
       ratio: 'Ratio',
@@ -577,7 +580,8 @@ export default {
       is_retake: 'Hat Wiederholungswert',
       is_default: 'Is default',
       name: 'Name',
-      short_name: 'Kurzname'
+      short_name: 'Kurzname',
+      description: 'Beschreibung'
     }
   },
 
@@ -592,6 +596,7 @@ export default {
       dedicated_to: 'Für',
       color: 'Farbe',
       name: 'Name',
+      description: 'Beschreibung',
       allow_timelog: 'Zeiterfassung',
       priority: 'Priorität'
     }

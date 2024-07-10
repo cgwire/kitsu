@@ -39,7 +39,8 @@
             "title": "Tipos de Asset",
             "production_title": "Status Tipos de Assets",
             "fields": {
-                "name": "Nome"
+                "name": "Nome",
+                "short_name": "Nome do curta"
             }
         },
         "breakdown": {

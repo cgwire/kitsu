@@ -3,7 +3,7 @@
     <template v-if="full">
       <div
         class="description-shorten-text"
-        v-html="compileMarkdown(entry.description)"
+        v-html="renderMarkdown(entry.description)"
       ></div>
     </template>
     <template v-else>
@@ -11,7 +11,7 @@
       <span
         class="description-shorten-text selectable"
         v-html="
-          compileMarkdown(shortenText(entry.description, 20), {
+          renderMarkdown(shortenText(entry.description, 20), {
             allowedLinkTag: false
           })
         "
@@ -26,7 +26,7 @@
         <div
           class="tooltip-text"
           @keyup.esc="onClick"
-          v-html="compileMarkdown(entry.description)"
+          v-html="renderMarkdown(entry.description)"
           v-if="!isEditing"
         ></div>
         <textarea
@@ -74,9 +74,7 @@ export default {
   },
 
   methods: {
-    compileMarkdown(input, options) {
-      return renderMarkdown(input, options)
-    },
+    renderMarkdown,
 
     shortenText: stringHelpers.shortenText,
 

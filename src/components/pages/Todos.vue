@@ -4,12 +4,12 @@
       <div class="todos page">
         <route-section-tabs
           class="section-tabs"
-          :activeTab="currentSection"
+          :active-tab="currentSection"
           :route="$route"
           :tabs="todoTabs"
         />
 
-        <div class="flexrow">
+        <div class="flexrow" v-if="!isActiveTab('daysoff')">
           <search-field
             class="flexrow-item search-field"
             ref="todos-search-field"
@@ -129,6 +129,15 @@
           @unset-day-off="onUnsetDayOff"
           v-if="isActiveTab('timesheets')"
         />
+
+        <day-off-list
+          ref="days-off-list"
+          :days-off="daysOff"
+          :day-off-error="dayOffError"
+          @set-day-off="onSetDayOff"
+          @unset-day-off="onUnsetDayOff"
+          v-if="isActiveTab('daysoff')"
+        />
       </div>
     </div>
 
@@ -148,6 +157,7 @@ import { parseDate } from '@/lib/time'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
@@ -163,6 +173,7 @@ export default {
   components: {
     Combobox,
     ComboboxProduction,
+    DayOffList,
     KanbanBoard,
     RouteSectionTabs,
     SearchField,
@@ -330,6 +341,10 @@ export default {
         {
           label: this.$t('timesheets.title'),
           name: 'timesheets'
+        },
+        {
+          label: this.$t('days_off.title'),
+          name: 'daysoff'
         }
       ].filter(Boolean)
     },
@@ -462,6 +477,7 @@ export default {
       const availableSections = [
         'board',
         'calendar',
+        'daysoff',
         'done',
         'pending',
         'timesheets'
@@ -531,17 +547,19 @@ export default {
           personId: this.user.id
         })
         this.$refs['timesheet-list']?.closeSetDayOffModal()
+        this.$refs['days-off-list']?.closeSetDayOffModal()
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
       await this.loadData(true)
     },
 
-    async onUnsetDayOff() {
+    async onUnsetDayOff(dayOff = null) {
       this.dayOffError = false
       try {
-        await this.unsetDayOff()
+        await this.unsetDayOff(dayOff)
         this.$refs['timesheet-list']?.closeUnsetDayOffModal()
+        this.$refs['days-off-list']?.closeUnsetDayOffModal()
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }

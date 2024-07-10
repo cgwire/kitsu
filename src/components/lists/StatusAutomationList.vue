@@ -106,16 +106,18 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { AlertTriangleIcon } from 'vue-feather-icons'
+
 import { formatListMixin } from '@/components/mixins/format'
 
-import { AlertTriangleIcon } from 'vue-feather-icons'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskStatusCell from '@/components/cells/TaskStatusCell'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'status-automation-list',
+
   mixins: [formatListMixin],
 
   components: {
@@ -153,8 +155,8 @@ export default {
     ...mapGetters([
       'getTaskStatus',
       'getTaskType',
-      'isTaskTypePriorityHigherById',
       'isStatusAutomationDisabled',
+      'isTaskTypePriorityHigherById',
       'remainingStatusAutomations'
     ])
   },

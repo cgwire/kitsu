@@ -1,8 +1,7 @@
 <template>
   <div class="columns">
     <div class="column is-one-third box">
-      <!-- Form -->
-      <form class="form" v-on:submit.prevent>
+      <form class="form" @submit.prevent>
         <text-field
           ref="nameField"
           :label="$t('productions.fields.name')"
@@ -10,11 +9,20 @@
           v-focus
           v-model="form.name"
         />
+        <text-field
+          ref="codeField"
+          :label="$t('productions.fields.code')"
+          @enter="runConfirmation"
+          v-model="form.code"
+        />
         <div class="columns">
           <div class="mr1">
             <date-field
               ref="startDateField"
               class="mb0"
+              :disabled-dates="{
+                from: form.end_date
+              }"
               :label="$t('productions.fields.start_date')"
               :short-date="true"
               v-model="form.start_date"
@@ -24,6 +32,9 @@
             <date-field
               ref="endDateField"
               class="mb0"
+              :disabled-dates="{
+                to: form.start_date
+              }"
               :label="$t('productions.fields.end_date')"
               :short-date="true"
               v-model="form.end_date"
@@ -184,6 +195,7 @@ export default {
       homepageOptions: HOME_PAGE_OPTIONS,
       form: {
         name: '',
+        code: '',
         start_date: new Date(),
         end_date: new Date(),
         nb_episodes: 0,
@@ -258,6 +270,7 @@ export default {
       if (this.currentProduction) {
         this.form = {
           name: this.currentProduction.name,
+          code: this.currentProduction.code,
           start_date: parseSimpleDate(
             this.currentProduction.start_date
           ).toDate(),
@@ -285,6 +298,7 @@ export default {
       } else {
         this.form = {
           name: '',
+          code: '',
           start_date: new Date(),
           end_date: new Date(),
           production_type: 'short',

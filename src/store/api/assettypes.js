@@ -12,6 +12,8 @@ export default {
   newAssetType(assetType) {
     const data = {
       name: assetType.name,
+      short_name: assetType.short_name,
+      description: assetType.description,
       task_types: assetType.task_types
     }
     return client.ppost('/api/data/entity-types', data)
@@ -20,6 +22,8 @@ export default {
   updateAssetType(assetType) {
     const data = {
       name: assetType.name,
+      short_name: assetType.short_name,
+      description: assetType.description,
       task_types: assetType.task_types,
       archived: assetType.archived === 'true'
     }

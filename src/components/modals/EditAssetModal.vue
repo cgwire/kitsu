@@ -9,14 +9,14 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="assetToEdit && this.assetToEdit.id">
+        <h1 class="title" v-if="assetToEdit && assetToEdit.id">
           {{ $t('assets.edit_title') }} {{ assetToEdit.name }}
         </h1>
         <h1 class="title" v-else>
           {{ $t('assets.new_asset') }}
         </h1>
 
-        <form v-on:submit.prevent>
+        <form @submit.prevent>
           <combobox
             :label="$t('assets.fields.type')"
             :options="productionAssetTypeOptions"
@@ -31,7 +31,7 @@
           <text-field
             ref="nameField"
             :label="$t('assets.fields.name')"
-            v-model="form.name"
+            v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
           />
@@ -39,7 +39,6 @@
             ref="descriptionField"
             :label="$t('assets.fields.description')"
             v-model="form.description"
-            v-focus
           />
           <metadata-field
             :key="descriptor.id"
@@ -59,7 +58,7 @@
               'is-primary': true,
               'is-loading': isLoadingStay
             }"
-            :disabled="this.form.name && this.form.name.length === 0"
+            :disabled="form.name && form.name.length === 0"
             @click="confirmAndStayClicked"
             v-if="!assetToEdit || !assetToEdit.id"
           >
@@ -71,7 +70,7 @@
               'is-primary': true,
               'is-loading': isLoading
             }"
-            :disabled="this.form.name && this.form.name.length === 0"
+            :disabled="form.name && form.name.length === 0"
             @click="confirmClicked"
           >
             {{ $t('main.confirmation') }}

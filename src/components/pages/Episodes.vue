@@ -46,12 +46,10 @@
         </div>
 
         <sorting-info
-          :label="$t('main.sorted_by')"
           :sorting="episodeSorting"
           @clear-sorting="onChangeSortClicked(null)"
-          v-if="episodeSorting && episodeSorting.length > 0"
+          v-if="episodeSorting?.length"
         />
-
         <episode-list
           ref="episode-list"
           :displayed-episodes="displayedEpisodes"

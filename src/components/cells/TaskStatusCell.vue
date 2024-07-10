@@ -2,7 +2,7 @@
   <td class="name">
     <div
       class="tag"
-      v-bind:class="[!disable ? '' : 'canceled']"
+      :class="{ canceled: disable }"
       :style="{
         background: color,
         color: textColor

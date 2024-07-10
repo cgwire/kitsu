@@ -128,6 +128,12 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'studios' }">
+                <grid-icon class="nav-icon" size="0.9x" />
+                {{ $t('studios.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
               <router-link to="/task-types">
                 <kitsu-icon class="nav-icon" name="task-types" />
                 {{ $t('task_types.title') }}
@@ -188,22 +194,23 @@
     <div
       id="c-mask"
       @click="toggleSidebar()"
-      v-bind:class="{ 'is-active': !isSidebarHidden }"
+      :class="{ 'is-active': !isSidebarHidden }"
     ></div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { GlobeIcon } from 'vue-feather-icons'
+import { GlobeIcon, GridIcon } from 'vue-feather-icons'
 
-import KitsuIcon from '@/components/widgets/KitsuIcon'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'sidebar',
   components: {
     GlobeIcon,
-    KitsuIcon
+    KitsuIcon,
+    GridIcon
   },
 
   data() {

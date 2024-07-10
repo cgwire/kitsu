@@ -7,7 +7,7 @@
       <span
         :class="{
           select: true,
-          'is-top': this.isTop
+          'is-top': isTop
         }"
       >
         <select
@@ -15,7 +15,7 @@
             combobox: true,
             thin: thin,
             'select-input': true,
-            error: this.error
+            error: error
           }"
           :style="{
             width: width ? width + 'px' : undefined

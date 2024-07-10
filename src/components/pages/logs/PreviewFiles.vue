@@ -6,7 +6,7 @@
       <button-simple class="flexrow-item" icon="refresh" @click="reload" />
     </p>
     <template v-if="previewFiles.length === 0 && !previewFilesLoading">
-      {{ $t('logs.preview_files.empty_list') }}
+      <p class="empty">{{ $t('logs.preview_files.empty_list') }}</p>
     </template>
     <template v-else>
       <preview-file-list
@@ -107,5 +107,13 @@ em {
 .status[data-status='processing'] {
   color: white;
   background: $blue;
+}
+
+.empty {
+  color: var(--text);
+  font-size: 1.2em;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1em;
 }
 </style>

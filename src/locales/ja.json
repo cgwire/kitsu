@@ -45,6 +45,7 @@
             "production_title": "アセットタイプのステータス",
             "fields": {
                 "name": "名前",
+                "short_name": "略称",
                 "task_types": "ワークフロー"
             },
             "include_all": "すべてのアセットタスクタイプを含む"

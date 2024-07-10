@@ -51,8 +51,9 @@ $yellow: #FFC107;
   --background-hover: #EFEFEF;
   --background-hover-rgb: 240, 255, 240;
   --background-tag:  #EEE;
-  --background-tag-button: #F9F9F9; 
+  --background-tag-button: #F9F9F9;
   --background-selectable: #E3E6FF;
+  --background-selectable-rgb: 227, 230, 255;
   --background-selected: #CECEFE;
   --background-disabled: #DDD;
   --border: #DBDBDB;
@@ -66,7 +67,7 @@ $yellow: #FFC107;
   --text-selectable: #9FA2FB;
   --text-selected: #8F91EB;
   --poster-color: #000;
-  --purple: #CFD1FF; 
+  --purple: #CFD1FF;
 }
 
 .dark {
@@ -79,8 +80,8 @@ $yellow: #FFC107;
   --background-hover: #4F525A;
   --background-hover-rgb: 94, 97, 105;
   --background-page: #36393F;
-  --background-tag:  #36393F; 
-  --background-tag-button: #4E5159; 
+  --background-tag:  #36393F;
+  --background-tag-button: #4E5159;
   --background-selectable: #7375BC;
   --background-selectable-alt: #878B97;
   --background-selected: #5E60BA;
@@ -95,5 +96,5 @@ $yellow: #FFC107;
   --text-strong: #FEFEFE;
   --text-selectable: #BEC0FA;
   --text-selected: #9EA0FA;
-  --purple: #5E60BA; 
+  --purple: #5E60BA;
 }

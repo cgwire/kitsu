@@ -61,11 +61,11 @@
         <spinner />
       </div>
       <div v-else>
-        <div class="pb1" v-if="this.searchFilter.assets">
+        <div class="pb1" v-if="searchFilter.assets">
           <h2 class="mt0">
-            {{ $t('assets.title') }} ({{ this.results.assets?.length || 0 }})
+            {{ $t('assets.title') }} ({{ results.assets?.length || 0 }})
           </h2>
-          <div class="has-text-centered" v-if="!this.results.assets?.length">
+          <div class="has-text-centered" v-if="!results.assets?.length">
             {{ $t('main.search.no_result') }}
           </div>
           <div class="result-list" v-else>
@@ -76,7 +76,7 @@
               }"
               :key="entity.id"
               @mouseover="selectResultById(entity.id)"
-              v-for="entity in this.results.assets"
+              v-for="entity in results.assets"
             >
               <entity-preview
                 :empty-height="200"
@@ -120,11 +120,11 @@
             <spinner v-else />
           </p>
         </div>
-        <div class="pb1" v-if="this.searchFilter.shots">
+        <div class="pb1" v-if="searchFilter.shots">
           <h2 class="mt1">
-            {{ $t('shots.title') }} ({{ this.results.shots?.length || 0 }})
+            {{ $t('shots.title') }} ({{ results.shots?.length || 0 }})
           </h2>
-          <div class="has-text-centered" v-if="!this.results.shots?.length">
+          <div class="has-text-centered" v-if="!results.shots?.length">
             {{ $t('main.search.no_result') }}
           </div>
           <div class="result-list" v-else>
@@ -135,7 +135,7 @@
               }"
               :key="entity.id"
               @mouseover="selectResultById(entity.id)"
-              v-for="entity in this.results.shots"
+              v-for="entity in results.shots"
             >
               <entity-preview
                 :empty-height="200"

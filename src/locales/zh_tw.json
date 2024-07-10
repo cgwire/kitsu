@@ -43,7 +43,8 @@
             "title": "Asset類型(多種)",
             "production_title": "Asset類型統計",
             "fields": {
-                "name": "名稱"
+                "name": "名稱",
+                "short_name": "簡稱"
             }
         },
         "breakdown": {

@@ -10,7 +10,10 @@
     </span>
     <span
       class="tag group"
-      :class="{ open: toggleGroupId === group.id }"
+      :class="{
+        open: toggleGroupId === group.id,
+        'is-shared': group.is_shared
+      }"
       :key="`group-${group.id}`"
       :style="{
         backgroundColor: `${group.color}23`
@@ -31,6 +34,7 @@
           class="edit"
           :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="editGroup(group)"
+          v-if="!group.is_shared || isCurrentUserManager"
         >
           <edit2-icon size="0.6x" />
         </button>
@@ -38,7 +42,9 @@
           class="del"
           :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="removeGroup(group)"
-          v-if="!group.queries.length"
+          v-if="
+            !group.queries.length && (!group.is_shared || isCurrentUserManager)
+          "
         >
           <trash2-icon size="0.6x" />
         </button>
@@ -53,6 +59,9 @@
         </span>
         <span
           class="tag"
+          :class="{
+            'is-shared': searchQuery.is_shared
+          }"
           :key="searchQuery.id"
           :style="{ backgroundColor: `${group.color}23` }"
           @click="changeSearch(searchQuery)"
@@ -68,6 +77,7 @@
               backgroundColor: `${group.color}53`
             }"
             @click.stop="editSearch(searchQuery)"
+            v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
             <edit2-icon size="0.6x" />
           </button>
@@ -75,6 +85,7 @@
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="removeSearch(searchQuery)"
+            v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
             <trash2-icon size="0.6x" />
           </button>
@@ -83,15 +94,26 @@
     </span>
     <span
       class="tag"
+      :class="{
+        'is-shared': searchQuery.is_shared
+      }"
       :key="searchQuery.id"
       @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
       {{ searchQuery.name }}
-      <button class="edit" @click.stop="editSearch(searchQuery)">
+      <button
+        class="edit"
+        @click.stop="editSearch(searchQuery)"
+        v-if="!searchQuery.is_shared || isCurrentUserManager"
+      >
         <edit2-icon size="0.6x" />
       </button>
-      <button class="del" @click.stop="removeSearch(searchQuery)">
+      <button
+        class="del"
+        @click.stop="removeSearch(searchQuery)"
+        v-if="!searchQuery.is_shared || isCurrentUserManager"
+      >
         <trash2-icon size="0.6x" />
       </button>
     </span>
@@ -121,7 +143,7 @@
  * This component displays a list of queries available to users to filter list
  * results. It allows to modify each query too.
  */
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -155,6 +177,7 @@ export default {
       required: true
     }
   },
+
   components: {
     ChevronDownIcon,
     ChevronUpIcon,
@@ -164,6 +187,7 @@ export default {
     FolderPlusIcon,
     Trash2Icon
   },
+
   data() {
     return {
       groupToEdit: {},
@@ -183,13 +207,28 @@ export default {
       toggleGroupId: null
     }
   },
+
   computed: {
+    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+
     sortedFilters() {
       return sortByName([...this.queries])
     },
+
     userFilters() {
-      return this.sortedFilters.filter(query => !query.search_filter_group_id)
+      return this.sortedFilters
+        .filter(query => !query.search_filter_group_id)
+        .sort((a, b) => {
+          if (a.is_shared && !b.is_shared) {
+            return -1
+          } else if (!a.is_shared && b.is_shared) {
+            return 1
+          } else {
+            return 0
+          }
+        })
     },
+
     userFilterGroups() {
       return sortByName([...this.groups]).map(group => {
         return {
@@ -200,21 +239,26 @@ export default {
         }
       })
     },
+
     groupOptions() {
       return [
         { label: '', value: null },
         ...this.userFilterGroups.map(group => ({
           label: group.name,
-          value: group.id
+          value: group.id,
+          is_shared: group.is_shared
         }))
       ]
     }
   },
+
   methods: {
     ...mapActions([
       'removeAssetSearchFilterGroup',
+      'removeBreakdownSearchFilterGroup',
       'removeShotSearchFilterGroup',
       'saveAssetSearchFilterGroup',
+      'saveBreakdownSearchFilterGroup',
       'saveShotSearchFilterGroup',
       'updateSearchFilter',
       'updateSearchFilterGroup'
@@ -238,7 +282,9 @@ export default {
       try {
         this.loading.group = true
         this.errors.group = false
-
+        filterGroup.project_id = this.currentProduction
+          ? this.currentProduction.id
+          : null
         if (!filterGroup.id) {
           await this[
             `save${stringHelpers.capitalize(this.type)}SearchFilterGroup`
@@ -259,6 +305,9 @@ export default {
       try {
         this.loading.edit = true
         this.errors.edit = false
+        searchFilter.project_id = this.currentProduction
+          ? this.currentProduction.id
+          : null
         await this.updateSearchFilter(searchFilter)
         this.modals.edit = false
       } catch (err) {
@@ -331,7 +380,7 @@ export default {
     flex-direction: column;
     left: 0;
     max-height: 200px;
-    overflow: scroll;
+    overflow-y: auto;
     padding: 0.5rem 0;
     position: absolute;
     top: 100%;
@@ -356,9 +405,6 @@ export default {
 
 .search-queries .tag:hover {
   transform: scale(1.1);
-}
-
-.search-queries .group.tag .group-header:hover {
 }
 
 .search-queries .group.tag.open .tag:hover {
@@ -418,5 +464,9 @@ export default {
 
 .search-queries .del {
   margin-left: 0.5em;
+}
+
+.tag.is-shared {
+  border: 1px solid $blue;
 }
 </style>

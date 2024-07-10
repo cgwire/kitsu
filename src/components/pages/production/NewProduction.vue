@@ -20,7 +20,7 @@
         >
           <text-field
             ref="nameField"
-            input-class="w600 is-inline"
+            input-class=" is-inline"
             :placeholder="$t('productions.creation.placeholder_name')"
             v-model="productionToCreate.name"
           />
@@ -36,7 +36,7 @@
               class="flexrow-item"
               :options="productionTypeOptions"
               :label="$t('productions.fields.type')"
-              localeKeyPrefix="productions.type."
+              locale-key-prefix="productions.type."
               v-model="productionToCreate.settings.type"
               thin
               is-inline
@@ -45,7 +45,7 @@
               class="flexrow-item"
               :options="productionStyleOptions"
               :label="$t('productions.fields.style')"
-              localeKeyPrefix="productions.style."
+              locale-key-prefix="productions.style."
               v-model="productionToCreate.settings.style"
               thin
               is-inline
@@ -126,7 +126,9 @@
                 label="Start date"
                 :placeholder="startDatePlaceholder"
                 :language="locale"
-                :disabled-dates="{ days: [6, 0] }"
+                :disabled-dates="{
+                  from: productionToCreate.settings.dateEnd
+                }"
                 :monday-first="true"
                 format="yyyy-MM-dd"
                 v-model="productionToCreate.settings.dateStart"
@@ -136,10 +138,11 @@
                 wrapper-class="datepicker"
                 input-class="is-small date-input input"
                 :language="locale"
-                :disabled-dates="{ days: [6, 0] }"
+                :disabled-dates="{
+                  to: productionToCreate.settings.dateStart
+                }"
                 :placeholder="endDatePlaceholder"
                 :monday-first="true"
-                :disabledDates="{ to: productionToCreate.settings.dateStart }"
                 format="yyyy-MM-dd"
                 v-model="productionToCreate.settings.dateEnd"
               />
@@ -170,17 +173,18 @@
               @delete="deleteFromList(taskType, 'assetTaskTypes')"
               v-for="taskType in productionToCreate.assetTaskTypes"
             />
-            <combobox-task-type
-              slot="footer"
-              class="is-inline inline-task-type-combo"
-              :task-type-list="availableAssetTaskTypes"
-              add-placeholder
-              @input="
-                id =>
-                  productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
-              "
-              v-if="availableAssetTaskTypes.length > 0"
-            />
+            <template #footer>
+              <combobox-task-type
+                class="is-inline inline-task-type-combo"
+                :task-type-list="availableAssetTaskTypes"
+                add-placeholder
+                @input="
+                  id =>
+                    productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
+                "
+                v-if="availableAssetTaskTypes.length > 0"
+              />
+            </template>
           </draggable>
         </timeline-item>
         <timeline-item
@@ -204,16 +208,18 @@
               deletable
               v-for="taskType in productionToCreate.shotTaskTypes"
             />
-            <combobox-task-type
-              slot="footer"
-              class="is-inline inline-task-type-combo"
-              :task-type-list="availableShotTaskTypes"
-              add-placeholder
-              @input="
-                id => productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
-              "
-              v-if="availableShotTaskTypes.length > 0"
-            />
+            <template #footer>
+              <combobox-task-type
+                class="is-inline inline-task-type-combo"
+                :task-type-list="availableShotTaskTypes"
+                add-placeholder
+                @input="
+                  id =>
+                    productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
+                "
+                v-if="availableShotTaskTypes.length > 0"
+              />
+            </template>
           </draggable>
         </timeline-item>
         <timeline-item
@@ -233,7 +239,6 @@
               v-for="taskStatus in productionToCreate.taskStatuses"
             />
             <combobox-status
-              slot="footer"
               class="flexrow-item"
               :task-status-list="availableTaskStatuses"
               :with-margin="false"
@@ -711,7 +716,8 @@ export default {
     availableAssetTaskTypes() {
       return this.assetTaskTypes.filter(
         assetTaskType =>
-          !this.productionToCreate.assetTaskTypes.includes(assetTaskType)
+          !this.productionToCreate.assetTaskTypes.includes(assetTaskType) &&
+          !assetTaskType.archived
       )
     },
 
@@ -738,7 +744,8 @@ export default {
     availableShotTaskTypes() {
       return this.shotTaskTypes.filter(
         shotTaskType =>
-          !this.productionToCreate.shotTaskTypes.includes(shotTaskType)
+          !this.productionToCreate.shotTaskTypes.includes(shotTaskType) &&
+          !shotTaskType.archived
       )
     },
 

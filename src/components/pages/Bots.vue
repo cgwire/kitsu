@@ -20,16 +20,15 @@
         placeholder="ex: gazu bot"
       />
       <combobox-department
-        class="combobox-department flexrow-item"
+        class="flexrow-item"
         :label="$t('main.department')"
         v-model="selectedDepartment"
       />
       <combobox-styled
         class="flexrow-item"
         :label="$t('people.fields.role')"
-        :options="roleOptions"
         locale-key-prefix="people.role."
-        no-margin
+        :options="roleOptions"
         v-model="role"
       />
     </div>
@@ -45,7 +44,18 @@
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
       @refresh-clicked="onRefreshClicked"
+      v-if="isPeopleLoading || currentPeople.length > 0"
     />
+    <div class="has-text-centered strong" v-else>
+      <p>{{ $t('bots.no_bots') }}</p>
+      <button-simple
+        class="mt1"
+        :text="$t('bots.new_bot')"
+        :is-responsive="true"
+        @click="onNewClicked"
+        v-if="isCurrentUserAdmin"
+      />
+    </div>
 
     <edit-avatar-modal
       :active="modals.avatar"
@@ -163,10 +173,10 @@ export default {
   mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
+    this.setSearchFromUrl()
     this.loadPeople(() => {
-      this.setSearchFromUrl()
       this.onSearchChange()
-    }) // Needed to show department informations
+    })
   },
 
   watch: {
@@ -224,7 +234,6 @@ export default {
       'deletePeople',
       'editPerson',
       'generateToken',
-      'loadDepartments',
       'loadPeople',
       'newPerson',
       'setPeopleSearch',
