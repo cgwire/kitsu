@@ -563,6 +563,7 @@ export default {
       'incrementNotificationCounter',
       'logout',
       'setProduction',
+      'setCurrentSection',
       'setCurrentEpisode',
       'setSupportChat',
       'toggleDarkTheme',
@@ -825,6 +826,8 @@ export default {
   },
 
   watch: {
+    // Most changes occur through the route modification. We need to update
+    // the context when the route changes.
     $route() {
       const productionId = this.$route.params.production_id
       if (productionId) {

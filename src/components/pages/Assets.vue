@@ -435,8 +435,10 @@ export default {
       'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
+      'currentSection',
       'departmentMap',
       'departments',
+      'displayedAssets',
       'displayedAssetsByType',
       'episodeMap',
       'isAssetEstimation',
@@ -1004,6 +1006,21 @@ export default {
       this.searchField.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
+    },
+
+    currentSection() {
+      if (
+        this.isTVShow &&
+        this.currentEpisode.id &&
+        !this.displayedAssets.find(
+          asset => asset.episode_id === this.currentEpisode.id
+        )
+      ) {
+        this.searchField.setValue('')
+        this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
+        this.initialLoading = true
+        this.reset()
+      }
     }
   },
 

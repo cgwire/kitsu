@@ -442,10 +442,6 @@ export default {
     this.clearSelectedShots()
   },
 
-  created() {
-    this.setLastProductionScreen('shots')
-  },
-
   mounted() {
     let searchQuery = ''
     if (this.$route.query.search && this.$route.query.search.length > 0) {
@@ -486,7 +482,9 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'currentSection',
       'departmentMap',
+      'displayedSequences',
       'displayedShotsBySequence',
       'episodeMap',
       'episodes',
@@ -1146,6 +1144,24 @@ export default {
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.applySearch(search)
+      }
+    },
+
+    currentSection() {
+      if (
+        this.isTVSHow &&
+        this.displayedSequences.length === 0 ||
+        this.displayedSequences[0].episode_id !== this.currentEpisode.id
+      ) {
+        this.$refs['shot-search-field'].setValue('')
+        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+
+        this.initialLoading = true
+        this.loadShots(() => {
+          this.initialLoading = false
+          this.setSearchFromUrl()
+          this.onSearchChange()
+        })
       }
     },
 

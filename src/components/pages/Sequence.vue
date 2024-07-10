@@ -329,6 +329,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'currentSection',
       'getTaskTypePriority',
       'isCurrentUserManager',
       'isTVShow',
