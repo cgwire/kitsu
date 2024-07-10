@@ -28,7 +28,10 @@
           ((nbSelectedTasks || 0) > 1 || nbSelectedValidations > 0)
         "
       >
-        <h1 class="title">{{ $tc('tasks.selected_tasks') }}</h1>
+        <h1 class="title">
+          {{ $tc('tasks.selected_tasks') }}
+          ({{ nbSelectedTasks }})
+        </h1>
         <div class="task-list mt1">
           <div
             class="selected-task-line flexrow"
@@ -322,9 +325,9 @@ import Comment from '@/components/widgets/Comment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 
 const DEFAULT_PANEL_WIDTH = 400
 
