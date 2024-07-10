@@ -263,12 +263,14 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
+      const currentFrame = this.getCurrentFrame()
       const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects.push(obj.serialize())
       } else {
         this.additions.push({
           time: currentTime,
+          frame: currentFrame,
           drawing: { objects: [obj.serialize()] }
         })
       }
@@ -301,12 +303,14 @@ export const annotationMixin = {
     addToDeletions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
+      const currentFrame = this.getCurrentFrame()
       const deletion = this.findAnnotation(this.deletions, currentTime)
       if (deletion) {
         deletion.objects.push(obj.id)
       } else {
         this.deletions.push({
           time: currentTime,
+          frame: currentFrame,
           objects: [obj.id]
         })
       }
@@ -348,6 +352,7 @@ export const annotationMixin = {
     addToUpdatesSerializedObject(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
+      const currentFrame = this.getCurrentFrame()
       const updates = this.findAnnotation(this.updates, currentTime)
       if (updates) {
         updates.drawing.objects = updates.drawing.objects.filter(
@@ -357,6 +362,7 @@ export const annotationMixin = {
       } else {
         this.updates.push({
           time: currentTime,
+          frame: currentFrame,
           drawing: { objects: [obj] }
         })
       }
@@ -408,7 +414,7 @@ export const annotationMixin = {
      *
      * Later it will be interesting to represent time in as a frame number.
      */
-    getNewAnnotations(currentTime, annotation) {
+    getNewAnnotations(currentTime, currentFrame, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
         if (obj.type === 'path') {
@@ -454,6 +460,7 @@ export const annotationMixin = {
         if (!this.annotations || !this.annotations.push) this.annotations = []
         this.annotations.push({
           time: Math.max(currentTime, 0),
+          frame: Math.max(currentFrame, 0),
           drawing: {
             objects: this.fabricCanvas._objects.map(obj => obj.serialize())
           }
