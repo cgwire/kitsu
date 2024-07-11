@@ -47,7 +47,7 @@
       v-if="isPeopleLoading || currentPeople.length > 0"
     />
     <div class="has-text-centered strong" v-else>
-      <p>{{ $t('bots.no_bots') }}</p>
+      <p>{{ $t('bots.no_bot') }}</p>
       <button-simple
         class="mt1"
         :text="$t('bots.new_bot')"
