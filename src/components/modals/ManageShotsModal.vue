@@ -10,7 +10,7 @@
     <div class="modal-content">
       <div class="box">
         <page-title class="title" :text="$t('shots.manage')" />
-        <div class="explaination">{{ $t('shots.creation_explaination') }}</div>
+        <div class="explanation">{{ $t('shots.creation_explanation') }}</div>
         <div>
           <div class="flexrow">
             <combobox
@@ -430,7 +430,7 @@ input::placeholder {
   color: #bbb;
 }
 
-.explaination {
+.explanation {
   margin-bottom: 1em;
 }
 

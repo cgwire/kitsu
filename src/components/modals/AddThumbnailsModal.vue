@@ -14,7 +14,7 @@
         </h1>
 
         <p>
-          {{ $t('entities.thumbnails.explaination') }}
+          {{ $t('entities.thumbnails.explanation') }}
         </p>
 
         <combobox-task-type
@@ -24,7 +24,7 @@
         />
 
         <p>
-          {{ $t('entities.thumbnails.explaination_two') }}
+          {{ $t('entities.thumbnails.explanation_two') }}
           {{ $t(`entities.thumbnails.${parent}_pattern`) }}
         </p>
 
