@@ -650,8 +650,7 @@ export default {
 
     currentSection() {
       if (
-        this.isTVSHow &&
-        this.displayedSequences.length === 0 ||
+        (this.isTVSHow && this.displayedSequences.length === 0) ||
         this.displayedSequences[0].episode_id !== this.currentEpisode.id
       ) {
         this.$refs['sequence-search-field'].setValue('')

@@ -135,8 +135,9 @@ export default {
     localSection() {
       this.setCurrentSection(this.localSection)
       if (
-        ['assets', 'episodes', 'sequences', 'shots', 'edits']
-        .includes(this.localSection)
+        ['assets', 'episodes', 'sequences', 'shots', 'edits'].includes(
+          this.localSection
+        )
       ) {
         this.setLastProductionScreen(this.localSection)
       }
