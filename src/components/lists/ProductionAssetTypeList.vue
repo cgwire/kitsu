@@ -125,11 +125,13 @@ import { mapGetters } from 'vuex'
 import { getChartColors, getChartData } from '@/lib/stats'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
-import StatsCell from '@/components/cells/StatsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+
+import StatsCell from '@/components/cells/StatsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'production-asset-type-list',
+
   mixins: [entityListMixin],
 
   props: {

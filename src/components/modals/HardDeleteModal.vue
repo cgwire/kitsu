@@ -49,13 +49,13 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
+import Combobox from '@/components/widgets/Combobox.vue'
 
 export default {
   name: 'hard-delete-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -105,15 +105,9 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     isLocked() {
       return this.lockText === 'locked' || this.lockText !== this.userLockText
     }
-  },
-
-  methods: {
-    ...mapActions([])
   },
 
   watch: {

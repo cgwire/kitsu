@@ -5,12 +5,6 @@
 import { mapGetters } from 'vuex'
 
 export const descriptorMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     ...mapGetters(['selectedAssets', 'selectedShots', 'selectedEdits']),
     descriptorLength() {

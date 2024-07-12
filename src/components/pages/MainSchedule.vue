@@ -222,8 +222,6 @@ export default {
     }
   },
 
-  socket: {},
-
   watch: {
     zoomLevel(value) {
       this.updateRoute({ zoom: value })

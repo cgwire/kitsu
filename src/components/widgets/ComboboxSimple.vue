@@ -21,20 +21,15 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 export default {
   name: 'combobox-simple',
-
-  components: {},
 
   data() {
     return {
       selectedOption: {
         label: '',
         value: ''
-      },
-      showList: false
+      }
     }
   },
 
@@ -59,10 +54,6 @@ export default {
 
   mounted() {
     this.resetOptions()
-  },
-
-  computed: {
-    ...mapGetters(['isDarkTheme'])
   },
 
   methods: {

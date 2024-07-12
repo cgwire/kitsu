@@ -199,7 +199,7 @@
                   :key="`${person.id}-remaining`"
                 >
                   <td class="person flexrow">
-                    <corner-down-right-icon class="ml05 mr05" size="0.9x" />
+                    <corner-down-right-icon class="ml05 mr05" :size="12" />
                     {{ $t('main.remaining') }}
                   </td>
                   <td class="count numeric-cell">
@@ -234,19 +234,19 @@
 </template>
 
 <script>
+import { CornerDownRightIcon } from 'lucide-vue'
+import { firstBy } from 'thenby'
 import Vue from 'vue/dist/vue'
 import { mapGetters, mapActions } from 'vuex'
-import { CornerDownRightIcon } from 'vue-feather-icons'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 import { minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
-import { firstBy } from 'thenby'
 
 export default {
   name: 'estimation-helper',
@@ -279,23 +279,21 @@ export default {
     }
   },
 
-  mounted() {},
-
   computed: {
     ...mapGetters([
       'assetMap',
+      'currentProduction',
       'editMap',
       'episodeMap',
-      'currentProduction',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
-      'user',
       'organisation',
       'personMap',
       'sequenceMap',
       'shotMap',
       'taskStatusMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     isAssets() {
@@ -618,7 +616,7 @@ td {
 
 .task-list {
   .empty {
-    border-left: 0px solid transparent;
+    border-left: 0 solid transparent;
   }
 }
 

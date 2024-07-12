@@ -213,7 +213,6 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserAdmin',
-      'isCurrentUserManager',
       'organisation',
       'people',
       'productions',

@@ -58,7 +58,7 @@
         </span>
       </template>
       <span class="subscribed" v-if="task?.is_subscribed">
-        <eye-icon size="0.8x" />
+        <eye-icon :size="12" />
       </span>
     </div>
     <div class="wrapper" v-else>
@@ -69,7 +69,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { EyeIcon } from 'vue-feather-icons'
+import { EyeIcon } from 'lucide-vue'
 
 import colors from '@/lib/colors'
 import { sortPeople } from '@/lib/sorting'
@@ -115,6 +115,7 @@ export default {
       default: true,
       type: Boolean
     },
+    // FIXME: property no longer used in component
     isStatic: {
       default: false,
       type: Boolean

@@ -18,7 +18,8 @@
 
 <script>
 import WaveSurfer from 'wavesurfer.js'
-import Spinner from '@/components/widgets/Spinner'
+
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'sound-viewer',
@@ -92,16 +93,12 @@ export default {
   },
 
   watch: {
-    defaultHeight() {},
-
     previewUrl() {
       if (this.previewUrl && this.previewUrl.length > 0) {
         this.isLoading = true
         this.wavesurfer.load(this.previewUrl)
       }
-    },
-
-    light() {}
+    }
   }
 }
 </script>

@@ -11,16 +11,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { sortByName } from '@/lib/sorting'
 
-import DepartmentName from '@/components/widgets/DepartmentName'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'department-names-cell',
-  data() {
-    return {}
-  },
 
   components: {
     DepartmentName
@@ -38,8 +36,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     sortDepartments(departmentIds = []) {
       return sortByName(
         departmentIds.map(departmentId => this.departmentMap.get(departmentId))
@@ -48,5 +44,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

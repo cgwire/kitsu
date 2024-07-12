@@ -74,16 +74,18 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ComboboxTag from '@/components/widgets/ComboboxTag'
-import TextField from '@/components/widgets/TextField'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'metadata-field',
+
   mixins: [entityListMixin, descriptorMixin],
 
   components: {

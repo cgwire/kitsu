@@ -61,17 +61,19 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
-import MetadataField from '@/components/widgets/MetadataField'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import TextareaField from '@/components/widgets/TextareaField'
+import Combobox from '@/components/widgets/Combobox.vue'
+import MetadataField from '@/components/widgets/MetadataField.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 
 export default {
   name: 'edit-edit-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -147,8 +149,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     runConfirmation() {
       if (this.isEditing()) {
         this.confirmClicked()

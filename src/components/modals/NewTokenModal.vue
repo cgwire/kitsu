@@ -37,9 +37,8 @@
 
         <template v-else>
           <p class="mb2 warning-text">
-            <alert-triangle-icon class="icon mr05 warning" />{{
-              $t('bots.copy_token_warning')
-            }}
+            <alert-triangle-icon class="icon mr05 warning" />
+            {{ $t('bots.copy_token_warning') }}
           </p>
           <div class="token">
             <text-field
@@ -81,9 +80,10 @@
 </template>
 
 <script>
-import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'vue-feather-icons'
+import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue'
 
 import { modalMixin } from '@/components/modals/base_modal'
+
 import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 

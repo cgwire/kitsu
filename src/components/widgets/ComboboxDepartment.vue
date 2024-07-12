@@ -50,14 +50,15 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import DepartmentName from '@/components/widgets/DepartmentName'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'combobox-department',
+
   components: {
     ChevronDownIcon,
     ComboboxMask,
@@ -104,8 +105,6 @@ export default {
       type: Boolean
     }
   },
-
-  mounted() {},
 
   computed: {
     ...mapGetters([
@@ -266,14 +265,14 @@ export default {
   border-radius: 10px;
 
   &.opened {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   .selected-department-line {
-    padding-top: 0px;
+    padding-top: 0;
 
-    padding-bottom: 0px;
+    padding-bottom: 0;
     border-radius: 50px;
   }
 }

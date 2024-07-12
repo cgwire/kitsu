@@ -46,7 +46,8 @@
 </template>
 
 <script>
-import { CheckSquareIcon, ClockIcon, SquareIcon } from 'vue-feather-icons'
+import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue'
+
 import { formatFrame } from '@/lib/video'
 
 export default {

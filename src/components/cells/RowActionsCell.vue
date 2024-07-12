@@ -7,7 +7,7 @@
       @click="$emit('history-clicked')"
       v-if="!hideHistory"
     >
-      <clock-icon class="icon is-small only-icon" />
+      <clock-icon class="icon is-small" />
     </button>
 
     <button
@@ -17,7 +17,7 @@
       @click="$emit('edit-clicked')"
       v-if="!hideEdit && !entry.canceled"
     >
-      <edit-icon class="icon is-small only-icon" />
+      <edit-icon class="icon is-small" />
     </button>
 
     <button
@@ -27,7 +27,7 @@
       @click="$emit('avatar-clicked')"
       v-if="!hideAvatar"
     >
-      <camera-icon class="icon is-small only-icon" />
+      <camera-icon class="icon is-small" />
     </button>
 
     <button
@@ -37,7 +37,7 @@
       @click="$emit('change-password-clicked')"
       v-if="!hideChangePassword && !entry.canceled && isCurrentUserAdmin"
     >
-      <key-icon class="icon is-small only-icon" />
+      <key-icon class="icon is-small" />
     </button>
 
     <button
@@ -47,7 +47,7 @@
       @click="$emit('restore-clicked')"
       v-if="entry.canceled"
     >
-      <rotate-ccw-icon class="icon is-small only-icon" />
+      <rotate-ccw-icon class="icon is-small" />
     </button>
 
     <button
@@ -57,7 +57,7 @@
       @click="$emit('delete-clicked')"
       v-if="!hideDelete && !entry.canceled && isCurrentUserAdmin"
     >
-      <trash-icon class="icon is-small only-icon" />
+      <trash-icon class="icon is-small" />
     </button>
 
     <button
@@ -67,7 +67,7 @@
       @click="$emit('delete-clicked')"
       v-else-if="!hideDelete"
     >
-      <trash-icon class="icon is-small only-icon" />
+      <trash-icon class="icon is-small" />
     </button>
 
     <button
@@ -77,13 +77,13 @@
       @click="$emit('refresh-clicked')"
       v-else-if="!hideRefresh"
     >
-      <refresh-cw-icon class="icon is-small only-icon" />
+      <refresh-cw-icon class="icon is-small" />
     </button>
   </td>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import {
   CameraIcon,
   ClockIcon,
@@ -92,10 +92,11 @@ import {
   RefreshCwIcon,
   RotateCcwIcon,
   TrashIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 
 export default {
   name: 'row-actions-cell',
+
   components: {
     CameraIcon,
     ClockIcon,
@@ -138,11 +139,9 @@ export default {
       default: true
     }
   },
+
   computed: {
     ...mapGetters(['isCurrentUserAdmin'])
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

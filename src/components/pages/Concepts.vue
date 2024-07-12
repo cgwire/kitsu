@@ -132,19 +132,20 @@ import { domMixin } from '@/components/mixins/dom'
 
 import files from '@/lib/files'
 
-import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
-import ConceptCard from '@/components/widgets/ConceptCard'
-import PeopleField from '@/components/widgets/PeopleField'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskInfo from '@/components/sides/TaskInfo'
+import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'concepts',
+
   mixins: [searchMixin, domMixin],
 
   components: {

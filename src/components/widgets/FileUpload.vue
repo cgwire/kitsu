@@ -46,6 +46,7 @@
 <script>
 export default {
   name: 'file-upload',
+
   props: {
     accept: {
       default: '.csv',
@@ -84,6 +85,7 @@ export default {
       uploadedFiles: []
     }
   },
+
   mounted() {
     this.reset()
     const events = [
@@ -102,7 +104,7 @@ export default {
       })
     })
   },
-  computed: {},
+
   methods: {
     filesChange(name, files) {
       const forms = []
@@ -145,8 +147,7 @@ export default {
         this.filesChange('file', event.dataTransfer.files)
       }
     }
-  },
-  watch: {}
+  }
 }
 </script>
 

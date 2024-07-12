@@ -105,8 +105,8 @@
 </template>
 
 <script>
+import { AlertTriangleIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
-import { AlertTriangleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
@@ -147,16 +147,11 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
-
   computed: {
     ...mapGetters([
       'getTaskStatus',
       'getTaskType',
       'isStatusAutomationDisabled',
-      'isTaskTypePriorityHigherById',
       'remainingStatusAutomations'
     ])
   },

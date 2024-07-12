@@ -42,10 +42,10 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import CustomActionList from '@/components/lists/CustomActionList'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditCustomActionModal from '@/components/modals/EditCustomActionModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
+import CustomActionList from '@/components/lists/CustomActionList.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditCustomActionModal from '@/components/modals/EditCustomActionModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 
 export default {
   name: 'custom-actions',

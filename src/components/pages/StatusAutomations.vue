@@ -52,11 +52,11 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditStatusAutomationModal from '@/components/modals/EditStatusAutomationModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import RouteTabs from '@/components/widgets/RouteTabs'
-import StatusAutomationList from '@/components/lists/StatusAutomationList'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditStatusAutomationModal from '@/components/modals/EditStatusAutomationModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
+import StatusAutomationList from '@/components/lists/StatusAutomationList.vue'
 
 export default {
   name: 'status-automations',

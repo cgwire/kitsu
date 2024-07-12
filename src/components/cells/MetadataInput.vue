@@ -125,14 +125,18 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
-import ComboboxTag from '@/components/widgets/ComboboxTag'
+
+import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
 
 export default {
   name: 'metadata-input',
+
   mixins: [descriptorMixin, domMixin, entityListMixin],
+
   components: {
     ComboboxTag
   },

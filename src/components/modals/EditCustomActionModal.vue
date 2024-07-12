@@ -25,9 +25,10 @@
           />
 
           <text-field
-            ref="urlField"
             :label="$t('custom_actions.fields.url')"
-            v-model="form.url"
+            placeholder="https://..."
+            type="url"
+            v-model.trim="form.url"
             @enter="confirmClicked"
           />
 
@@ -58,16 +59,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
+
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-custom-action-modal',
+
   mixins: [modalMixin],
+
   components: {
     Combobox,
     ComboboxBoolean,
@@ -119,12 +122,7 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters(['customActions', 'customActionStatusOptions'])
-  },
-
   methods: {
-    ...mapActions([]),
     confirmClicked() {
       this.$emit('confirm', this.form)
     },

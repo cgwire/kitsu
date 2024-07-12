@@ -78,7 +78,7 @@
           >
             {{ attachment.get('file').name }}
             <span @click="removeAttachment(attachment)">
-              <x-icon size="0.7x" />
+              <x-icon :size="8" />
             </span>
           </div>
         </div>
@@ -108,8 +108,8 @@
 </template>
 
 <script>
+import { XIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
-import { XIcon } from 'vue-feather-icons'
 
 import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
@@ -184,15 +184,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departmentMap',
-      'mainConfig',
-      'personMap',
-      'taskStatusMap',
-      'taskTypeMap',
-      'user'
-    ]),
+    ...mapGetters(['mainConfig', 'personMap', 'user']),
 
     isInChat() {
       return this.participants.includes(this.user.id)
@@ -448,7 +440,7 @@ export default {
 
     textarea {
       background: var(--background);
-      box-shadow: inset 0px 0px 5px 0 rgba(0, 0, 0, 0.1);
+      box-shadow: inset 0 0 5px 0 rgba(0, 0, 0, 0.1);
       font-size: 14px;
       margin-bottom: -5px;
       height: 60px;

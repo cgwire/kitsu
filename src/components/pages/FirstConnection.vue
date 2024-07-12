@@ -30,17 +30,15 @@
               v-focus
             />
             <span class="icon">
-              <mail-icon width="20" height="20" />
+              <mail-icon :size="20" />
             </span>
           </p>
         </div>
 
         <p class="control">
           <a
+            class="button main-button is-fullwidth"
             :class="{
-              button: true,
-              'main-button': true,
-              'is-fullwidth': true,
               'is-loading': isLoading
             }"
             @click="confirmResetPassword"
@@ -49,10 +47,10 @@
             {{ $t('login.reset_password') }}
           </a>
         </p>
-        <p class="error" v-show="isError">
+        <p class="error" v-if="isError">
           {{ $t('login.reset_password_failed') }}
         </p>
-        <p class="success" v-show="isSuccess">
+        <p class="success" v-if="isSuccess">
           {{ $t('login.reset_password_succeed') }}
         </p>
         <p class="has-text-centered">
@@ -68,9 +66,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
-import { MailIcon } from 'vue-feather-icons'
+import { MailIcon } from 'lucide-vue'
 
 export default {
   name: 'first-connection',
@@ -88,14 +86,14 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters([])
-  },
-
   mounted() {
     this.email = this.$store.state.login.email
     this.isLoading = false
     this.isSuccess = false
+  },
+
+  computed: {
+    ...mapGetters(['isDarkTheme'])
   },
 
   methods: {

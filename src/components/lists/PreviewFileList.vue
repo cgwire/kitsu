@@ -81,13 +81,14 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
 import { getTaskPath } from '@/lib/path'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import TableInfo from '@/components/widgets/TableInfo'
-import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'preview-file-list',
+
   mixins: [formatListMixin],
 
   components: {

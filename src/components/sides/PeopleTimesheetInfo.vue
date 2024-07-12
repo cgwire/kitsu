@@ -41,8 +41,8 @@
 </template>
 
 <script>
+import { XIcon } from 'lucide-vue'
 import moment from 'moment-timezone'
-import { XIcon } from 'vue-feather-icons'
 
 import { monthToString } from '@/lib/time'
 

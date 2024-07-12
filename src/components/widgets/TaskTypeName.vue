@@ -34,12 +34,12 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { pluralizeEntityType } from '@/lib/path'
 
 export default {
   name: 'task-type-name',
-  components: {},
 
   props: {
     deletable: {
@@ -69,7 +69,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserClient', 'isTaskTypePriorityHigherById']),
+    ...mapGetters(['isCurrentUserClient']),
 
     color() {
       if (this.taskType.color.toUpperCase() === '#000000') return '$grey-strong'
@@ -125,10 +125,6 @@ export default {
       }
       return route
     }
-  },
-
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

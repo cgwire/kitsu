@@ -71,7 +71,7 @@
               @click="$emit('delete-message', chatMessage.data.id)"
               v-if="chatMessage.data.person_id === user.id"
             >
-              <x-icon class="" size="0.8x" />
+              <x-icon :size="12" />
             </div>
           </div>
         </div>
@@ -87,9 +87,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { XIcon } from 'lucide-vue'
 import moment from 'moment-timezone'
-import { XIcon } from 'vue-feather-icons'
+import { mapGetters } from 'vuex'
 
 import { domMixin } from '@/components/mixins/dom'
 import {
@@ -105,6 +105,7 @@ import PreviewModal from '@/components/modals/PreviewModal.vue'
 
 export default {
   name: 'entity-chat-days',
+
   mixins: [domMixin],
 
   components: {
@@ -125,8 +126,6 @@ export default {
       default: () => []
     }
   },
-
-  mounted() {},
 
   computed: {
     ...mapGetters(['departmentMap', 'personMap', 'user']),
@@ -178,8 +177,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     renderComment,
 
     renderDate(date) {
@@ -220,9 +217,7 @@ export default {
     scrollToBottom() {
       this.$refs.messages.scrollTop = this.$refs.messages.offsetHeight
     }
-  },
-
-  watch: {}
+  }
 }
 </script>
 

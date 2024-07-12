@@ -50,13 +50,15 @@
 </template>
 
 <script>
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-
 import { modalMixin } from '@/components/modals/base_modal'
+
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
 export default {
   name: 'select-task-type-modal',
+
   mixins: [modalMixin],
+
   components: {
     ComboboxTaskType
   },

@@ -9,8 +9,6 @@ export const modalMixin = {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
-  computed: {},
-
   methods: {
     /*
      * Allow to close the modal when escape key is pressed.

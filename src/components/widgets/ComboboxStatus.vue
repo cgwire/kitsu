@@ -61,13 +61,13 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
 import colors from '@/lib/colors'
 import { sortTaskStatuses } from '@/lib/sorting'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 
 export default {
   name: 'combobox-status',

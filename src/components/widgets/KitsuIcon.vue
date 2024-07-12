@@ -132,7 +132,7 @@ const icons = {
 
 export default {
   name: 'kitsu-icon',
-  components: {},
+
   props: {
     name: {
       default: '',
@@ -143,7 +143,7 @@ export default {
       type: String
     },
     alt: {
-      default: '',
+      default: undefined,
       type: String
     },
     active: {

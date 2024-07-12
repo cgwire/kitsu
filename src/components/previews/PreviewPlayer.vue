@@ -530,13 +530,8 @@
 
 <script>
 import { fabric } from 'fabric'
+import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, LinkIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
-import {
-  ArrowUpRightIcon,
-  DownloadIcon,
-  GlobeIcon,
-  LinkIcon
-} from 'vue-feather-icons'
 
 import {
   formatFrame,
@@ -566,6 +561,7 @@ let lastIndex = 1
 
 export default {
   name: 'preview-player',
+
   mixins: [annotationMixin, domMixin, fullScreenMixin],
 
   components: {
@@ -2126,7 +2122,7 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .preview-player {
-    box-shadow: 0px 0px 4px #0008;
+    box-shadow: 0 0 4px #0008;
   }
 }
 
@@ -2284,7 +2280,7 @@ export default {
   display: flex;
   flex-direction: column;
   border-radius: 5px;
-  box-shadow: 0px 0px 4px #0007;
+  box-shadow: 0 0 4px #0007;
   min-height: 200px;
 
   .preview {
@@ -2310,11 +2306,11 @@ export default {
   height: 140px;
   padding-left: 10px;
   padding-top: 10px;
-  box-shadow: inset 0px 0px 10px 1px #0008;
+  box-shadow: inset 0 0 10px 1px #0008;
   align-items: flex-start;
 
   .flexrow-item.revision-preview {
-    margin-right: 0px;
+    margin-right: 0;
   }
 }
 

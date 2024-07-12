@@ -130,14 +130,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import files from '@/lib/files'
+
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
 export default {
   name: 'add-preview-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -195,16 +196,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     previewField() {
       return this.$refs['preview-field']
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     setFiles(files) {
       this.previewField.filesChange('file', files)
     },
@@ -367,10 +364,10 @@ h3.subtitle {
   font-size: 2em;
   justify-content: center;
   position: absolute;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1000;
 }
 </style>

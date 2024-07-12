@@ -48,15 +48,15 @@
 /*
  * Modal used to edit and create milestones.
  */
-import { mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-milestone-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -107,8 +107,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     confirm() {
       return this.$emit('confirm', this.form)
     },
@@ -134,5 +132,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

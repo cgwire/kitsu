@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="timeline">
-      <check-icon class="check" size="30" v-if="isCompleted" />
+      <check-icon class="check" v-if="isCompleted" />
       <span
         :class="{
           step: true,
@@ -25,13 +25,15 @@
 </template>
 
 <script>
-import { CheckIcon } from 'vue-feather-icons'
+import { CheckIcon } from 'lucide-vue'
 
 export default {
   name: 'timeline-item',
+
   components: {
     CheckIcon
   },
+
   props: {
     title: String,
     subtitle: String,
@@ -74,10 +76,8 @@ export default {
   border-radius: 50%;
   height: 36px;
   width: 36px;
-  polyline {
-    transform: scale(0.5) translate(12px, 12px);
-    stroke-width: 4;
-  }
+  padding: 9px;
+  stroke-width: 4;
 }
 
 .step {

@@ -32,9 +32,10 @@
  * }, ...]
  */
 import { mapGetters } from 'vuex'
+
 import { floorToFrame, roundToFrame } from '@/lib/video'
 
-import Spinner from '@/components/widgets/Spinner'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'raw-video-player',

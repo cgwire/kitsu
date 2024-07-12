@@ -167,15 +167,16 @@ import { mapGetters, mapActions } from 'vuex'
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import { PRODUCTION_TYPE_OPTIONS, HOME_PAGE_OPTIONS } from '@/lib/productions'
 
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import DateField from '@/components/widgets/DateField'
-import FileUpload from '@/components/widgets/FileUpload'
-import TextField from '@/components/widgets/TextField'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import FileUpload from '@/components/widgets/FileUpload.vue'
+import TextField from '@/components/widgets/TextField.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 export default {
   name: 'production-parameters',
+
   components: {
     ComboboxBoolean,
     ComboboxStyled,

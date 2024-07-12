@@ -59,18 +59,22 @@
 </template>
 
 <script>
-import ComboboxSimple from '@/components/widgets/ComboboxSimple'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-
 import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
+
 import { sortByName } from '@/lib/sorting'
+
+import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-playlist-modal',
+
   mixins: [modalMixin],
+
   components: {
     ComboboxSimple,
     ComboboxTaskType,

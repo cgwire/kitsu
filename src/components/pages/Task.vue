@@ -180,7 +180,6 @@
                 :is-max-retakes-error="errors.addCommentMaxRetakes"
                 :is-loading="loading.addComment"
                 :is-movie="isMovie"
-                :user="user"
                 :team="currentTeam"
                 :task="task"
                 :task-status="taskStatusForCurrentUser"
@@ -319,7 +318,7 @@
 </template>
 
 <script>
-import { ImageIcon } from 'vue-feather-icons'
+import { ImageIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
@@ -1448,7 +1447,7 @@ export default {
 .dark .column {
   background: #46494f;
   border-color: $dark-grey;
-  box-shadow: 0px 0px 6px #333;
+  box-shadow: 0 0 6px #333;
 }
 
 h2.subtitle {
@@ -1515,18 +1514,18 @@ video {
 .add-comment {
   margin-bottom: 1em;
   padding: 1em;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .no-comment {
   background: white;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
   padding: 1em;
   border-radius: 5px;
 }
 
 .comment {
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
   margin-top: 0.3em;
 }
 

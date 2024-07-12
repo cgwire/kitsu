@@ -84,7 +84,6 @@
           />
           -->
           <color-field
-            ref="colorField"
             :label="$t('task_status.fields.color')"
             :colors="colors"
             v-model="form.color"
@@ -111,18 +110,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
-import BooleanField from '@/components/widgets/BooleanField'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ColorField from '@/components/widgets/ColorField'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import TextareaField from '@/components/widgets/TextareaField'
+
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ColorField from '@/components/widgets/ColorField.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 
 export default {
   name: 'edit-task-status-modal',
+
   mixins: [modalMixin],
+
   components: {
     BooleanField,
     ColorField,
@@ -163,18 +164,6 @@ export default {
         is_default: 'false',
         archived: 'false'
       },
-      isRetakeOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
-      ],
-      isDoneOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
-      ],
-      isArtistAllowedOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
-      ],
       colors: [
         '#999999',
         '#CCCCCC',
@@ -205,16 +194,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskStatus', 'taskStatusStatusOptions']),
-
     isEditing() {
       return this.taskStatusToEdit && this.taskStatusToEdit.id
     }
   },
 
   methods: {
-    ...mapActions([]),
-
     confirmClicked() {
       this.$emit('confirm', this.form)
     },

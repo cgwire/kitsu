@@ -47,16 +47,17 @@
         alt=""
       />
       <span class="view-icon" @click.stop="onPictureClicked()">
-        <eye-icon size="1.2x" />
+        <eye-icon :size="18" />
       </span>
     </template>
   </a>
 </template>
 
 <script>
-import { EyeIcon } from 'vue-feather-icons'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import VideoViewer from '@/components/previews/VideoViewer'
+import { EyeIcon } from 'lucide-vue'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import VideoViewer from '@/components/previews/VideoViewer.vue'
 
 export default {
   name: 'entity-preview',
@@ -78,10 +79,6 @@ export default {
       default: () => {},
       type: Object
     },
-    square: {
-      default: false,
-      type: Boolean
-    },
     cover: {
       default: false,
       type: Boolean
@@ -91,14 +88,6 @@ export default {
       type: Number
     },
     height: {
-      default: null,
-      type: Number
-    },
-    maxWidth: {
-      default: null,
-      type: Number
-    },
-    maxHeight: {
       default: null,
       type: Number
     },
@@ -127,11 +116,6 @@ export default {
   computed: {
     isMovie() {
       return this.entity.preview_file_extension === 'mp4'
-    },
-
-    isPreview() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return previewFileId && previewFileId.length > 0
     },
 
     thumbnailPath() {
@@ -185,7 +169,7 @@ export default {
   padding-left: 13px;
   line-height: initial;
   opacity: 0.75;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 a {
@@ -206,11 +190,6 @@ span.thumbnail-empty {
   background: $white-grey;
   display: block;
   margin: 0;
-}
-
-.thumbnail-picture.square {
-  width: 100px;
-  height: 100px;
 }
 
 span.view-icon {

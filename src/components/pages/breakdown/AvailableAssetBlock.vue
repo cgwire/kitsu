@@ -35,6 +35,7 @@
 <script>
 export default {
   name: 'available-asset-block',
+
   props: {
     asset: {
       default: () => ({
@@ -56,7 +57,7 @@ export default {
       type: Boolean
     }
   },
-  computed: {},
+
   methods: {
     addOneAsset(event) {
       if (this.active) {
@@ -105,7 +106,7 @@ export default {
   position: relative;
   top: 0;
   left: 0;
-  margin-top: 0px;
+  margin-top: 0;
   width: 60px;
   height: 30px;
   background: #e1d4f9;

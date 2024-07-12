@@ -37,25 +37,17 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'department-list',
+
   props: ['entries', 'isLoading', 'isError'],
-  data() {
-    return {}
-  },
+
   components: {
     RowActionsCell,
     TableInfo
-  },
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

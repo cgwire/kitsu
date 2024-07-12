@@ -69,8 +69,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import BooleanField from '@/components/widgets/BooleanField'
-import Combobox from '@/components/widgets/Combobox'
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 
 export default {
   name: 'production-backgrounds',

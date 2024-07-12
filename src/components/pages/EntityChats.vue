@@ -82,8 +82,6 @@ export default {
     }
   },
 
-  props: {},
-
   async mounted() {
     this.loading.list = true
     this.chats = await this.getEntityChats()
@@ -155,8 +153,6 @@ export default {
       return this.formatDate(chat.last_message)
     }
   },
-
-  watch: {},
 
   socket: {
     events: {

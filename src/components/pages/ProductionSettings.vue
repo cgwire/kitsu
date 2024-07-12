@@ -185,19 +185,20 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortTaskStatuses } from '@/lib/sorting'
 
-import BooleanCell from '@/components/cells/BooleanCell'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds'
-import ProductionBoard from '@/components/pages/production/ProductionBoard'
-import ProductionBrief from '@/components/pages/production/ProductionBrief'
-import ProductionParameters from '@/components/pages/production/ProductionParameters'
-import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations'
-import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import BooleanCell from '@/components/cells/BooleanCell.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds.vue'
+import ProductionBoard from '@/components/pages/production/ProductionBoard.vue'
+import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
+import ProductionParameters from '@/components/pages/production/ProductionParameters.vue'
+import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations.vue'
+import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'production-settings',
+
   components: {
     BooleanCell,
     Combobox,
@@ -367,7 +368,7 @@ p {
 }
 
 .wrapper {
-  margin-top: 0px;
+  margin-top: 0;
   overflow-y: scroll;
   padding: 2em;
   flex: 1;

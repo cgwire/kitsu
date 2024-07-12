@@ -418,27 +418,29 @@ import { range } from '@/lib/time'
 import { searchMixin } from '@/components/mixins/search'
 import { entityListMixin } from '@/components/mixins/entity_list'
 
-import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock'
-import BuildFilterModal from '@/components/modals/BuildFilterModal'
-import ButtonHrefLink from '@/components/widgets/ButtonHrefLink'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import DeleteModal from '@/components/modals/DeleteModal'
-import DepartmentName from '@/components/widgets/DepartmentName'
-import EditAssetModal from '@/components/modals/EditAssetModal'
-import EditLabelModal from '@/components/modals/EditLabelModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
-import ImportModal from '@/components/modals/ImportModal'
-import SearchField from '@/components/widgets/SearchField'
-import SearchQueryList from '@/components/widgets/SearchQueryList'
-import ShotLine from '@/components/pages/breakdown/ShotLine'
-import ShowInfosButton from '@/components/widgets/ShowInfosButton'
-import Spinner from '@/components/widgets/Spinner'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
+import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock.vue'
+import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import EditLabelModal from '@/components/modals/EditLabelModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
+import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
+import ShowInfosButton from '@/components/widgets/ShowInfosButton.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
 export default {
   name: 'breakdown',
+
   mixins: [entityListMixin, searchMixin],
+
   components: {
     AvailableAssetBlock,
     BuildFilterModal,
@@ -1544,8 +1546,6 @@ export default {
   },
 
   watch: {
-    $route() {},
-
     castingType() {
       if (this.isShotCasting && this.displayedSequences.length > 0) {
         this.sequenceId = this.displayedSequences[0].id
@@ -1694,7 +1694,7 @@ export default {
   .breakdown-column {
     background: $dark-grey-light;
     border: 1px solid #222;
-    box-shadow: 0px 0px 6px #222;
+    box-shadow: 0 0 6px #222;
   }
 }
 
@@ -1729,7 +1729,7 @@ export default {
   padding: 1em;
   background: white;
   border: 1px solid #eee;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
   border-radius: 1em;
 
   &:not(:first-child) {
@@ -1825,7 +1825,7 @@ export default {
   min-width: 60px;
   text-align: center;
   justify-content: center;
-  padding-left: 0px;
+  padding-left: 0;
 }
 
 .entity-header {

@@ -51,11 +51,11 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import AssetTypeList from '@/components/lists/AssetTypeList'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import RouteTabs from '@/components/widgets/RouteTabs'
+import AssetTypeList from '@/components/lists/AssetTypeList.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 export default {
   name: 'asset-types',

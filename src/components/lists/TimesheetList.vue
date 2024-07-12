@@ -210,12 +210,13 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { mapGetters } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -322,8 +323,6 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrentUserArtist',
-      'isCurrentUserAdmin',
-      'nbSelectedTasks',
       'organisation',
       'personDayOff',
       'personIsDayOff',
@@ -361,8 +360,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     onBodyScroll(event, position) {
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight

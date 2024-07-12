@@ -40,10 +40,11 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
 import colors from '@/lib/colors'
+
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StatusAutomationItem from '@/components/widgets/StatusAutomationItem.vue'
 
@@ -94,12 +95,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isDarkTheme',
-      'statusAutomationMap',
-      'getTaskStatus',
-      'getTaskType'
-    ]),
+    ...mapGetters(['isDarkTheme', 'statusAutomationMap']),
 
     currentStatusAutomation() {
       if (this.value) {

@@ -58,20 +58,24 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
+
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import Checkbox from '@/components/widgets/Checkbox'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'import-edl-modal',
+
   mixins: [modalMixin],
+
   components: {
+    Checkbox,
     FileUpload,
     ModalFooter,
-    TextField,
-    Checkbox
+    TextField
   },
 
   data() {

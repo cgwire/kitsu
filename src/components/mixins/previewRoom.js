@@ -1,10 +1,4 @@
 export const previewRoomMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     room() {
       return this.previewRoom().room

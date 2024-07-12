@@ -89,8 +89,6 @@ export default {
     }
   },
 
-  computed: {},
-
   methods: {
     updateValue() {
       let value = this.$refs.select.value

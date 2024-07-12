@@ -54,7 +54,6 @@
             v-model="form.department_id"
           />
           <color-field
-            ref="colorField"
             class="mt2"
             :label="$t('task_types.fields.color')"
             v-model="form.color"

@@ -53,9 +53,9 @@
 </template>
 
 <script>
-import BooleanCell from '@/components/cells/BooleanCell'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+import BooleanCell from '@/components/cells/BooleanCell.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'background-list',

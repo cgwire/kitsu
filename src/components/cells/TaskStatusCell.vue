@@ -15,11 +15,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'task-status-cell',
-  components: {},
+
   props: {
     entry: {
       type: Object,
@@ -30,6 +30,7 @@ export default {
       default: false
     }
   },
+
   computed: {
     ...mapGetters(['isDarkTheme']),
 
@@ -48,9 +49,6 @@ export default {
         return 'white'
       }
     }
-  },
-  methods: {
-    ...mapActions([])
   }
 }
 </script>

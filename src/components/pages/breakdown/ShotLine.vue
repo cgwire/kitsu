@@ -459,7 +459,7 @@ export default {
 }
 
 .text-mode .asset-list {
-  padding-top: 0em;
+  padding-top: 0;
 }
 
 .asset-type-line {

@@ -20,12 +20,6 @@
 export default {
   name: 'status-stats',
 
-  components: {},
-
-  data() {
-    return {}
-  },
-
   props: {
     stats: Array
   },

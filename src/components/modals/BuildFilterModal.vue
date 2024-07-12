@@ -170,19 +170,19 @@
           />
 
           <div class="flexcolumn">
-            <people-field
-              class="flexrow-item assignation-person"
-              :people="team"
-              big
-              v-model="assignation.person"
-              v-if="['assignedto', '-assignedto'].includes(assignation.value)"
-            />
-            <span
-              class="flexrow-item align-middle"
+            <template
               v-if="['assignedto', '-assignedto'].includes(assignation.value)"
             >
-              {{ $t('main.on') }}
-            </span>
+              <people-field
+                class="flexrow-item"
+                :people="team"
+                big
+                v-model="assignation.person"
+              />
+              <span class="flexrow-item mt05 mb05">
+                {{ $t('main.on') }}
+              </span>
+            </template>
 
             <combobox-task-type
               class="flexrow-item"
@@ -275,19 +275,20 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 import { getFilters } from '@/lib/filtering'
 import { sortPeople } from '@/lib/sorting'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ModalFooter from '@/components/modals/ModalFooter'
-import PeopleField from '@/components/widgets/PeopleField'
-import TextField from '@/components/widgets/TextField'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'build-filter-modal',
@@ -951,13 +952,5 @@ export default {
   input {
     line-height: 30px;
   }
-}
-
-.assignation-person {
-  margin-bottom: 0.5em;
-}
-
-.align-middle {
-  margin-top: 9px;
 }
 </style>

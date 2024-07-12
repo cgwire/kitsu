@@ -61,17 +61,19 @@
 </template>
 
 <script>
-import ModalFooter from '@/components/modals/ModalFooter'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import BooleanField from '@/components/widgets/BooleanField'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
-import TextField from '@/components/widgets/TextField'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
-  name: 'edit-task-status-modal',
+  name: 'edit-background-modal',
+
   mixins: [modalMixin],
+
   components: {
     BooleanField,
     ComboboxBoolean,

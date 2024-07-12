@@ -23,12 +23,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'modal-footer',
-
-  components: {},
 
   props: {
     cancelLabel: {
@@ -55,17 +51,7 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {
-    ...mapActions([])
-  },
-
-  watch: {}
+  }
 }
 </script>
 

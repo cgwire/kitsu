@@ -86,23 +86,24 @@
 </template>
 
 <script>
+import { CheckIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
 
-import { CheckIcon } from 'vue-feather-icons'
+import { modalMixin } from '@/components/modals/base_modal'
 
 import stringHelpers from '@/lib/string'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
 import shotStore from '@/store/modules/shots'
 
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import FileUpload from '@/components/widgets/FileUpload'
-import ModalFooter from '@/components/modals/ModalFooter'
-import Spinner from '@/components/widgets/Spinner'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import FileUpload from '@/components/widgets/FileUpload.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'add-thumbnails-modal',
+
   mixins: [modalMixin],
 
   components: {

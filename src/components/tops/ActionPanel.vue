@@ -804,25 +804,24 @@
 </template>
 
 <script>
+import { CheckSquareIcon, LinkIcon, PlayCircleIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
-import { CheckSquareIcon, LinkIcon, PlayCircleIcon } from 'vue-feather-icons'
-
 import { intersection } from '@/lib/array'
-import { sortPeople } from '@/lib/sorting'
 import func from '@/lib/func'
+import { sortPeople } from '@/lib/sorting'
 
-import BuildFilterModal from '@/components/modals/BuildFilterModal'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxModel from '@/components/widgets/ComboboxModel'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import DeleteEntities from '@/components/tops/actions/DeleteEntities'
-import KitsuIcon from '@/components/widgets/KitsuIcon'
-import PeopleField from '@/components/widgets/PeopleField'
-import SearchField from '@/components/widgets/SearchField'
-import Spinner from '@/components/widgets/Spinner'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal'
+import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 
 export default {
   name: 'action-panel',

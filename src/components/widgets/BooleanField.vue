@@ -7,12 +7,19 @@
   >
     <span class="icon-wrapper flexrow-item">
       <check-icon
-        :title="$t('main.yes')"
         class="true"
-        stroke-width="3"
+        :size="12"
+        :stroke-width="3"
+        :title="$t('main.yes')"
         v-if="localValue"
       />
-      <x-icon :title="$t('main.no')" class="false" stroke-width="3" v-else />
+      <x-icon
+        class="false"
+        :size="12"
+        :stroke-width="3"
+        :title="$t('main.no')"
+        v-else
+      />
     </span>
     <span class="flexrow-item">
       {{ label }}
@@ -21,7 +28,7 @@
 </template>
 
 <script>
-import { CheckIcon, XIcon } from 'vue-feather-icons'
+import { CheckIcon, XIcon } from 'lucide-vue'
 
 export default {
   name: 'boolean-field',
@@ -83,15 +90,7 @@ export default {
   color: $light-green;
 }
 
-.true,
-.false {
-  height: 12px;
-  width: 12px;
-}
-
 .icon-wrapper {
-  height: 12px;
-  width: 12px;
   margin-right: 5px;
 }
 

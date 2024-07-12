@@ -62,11 +62,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
+
+import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
+import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
 
 export default {
   name: 'production-team-list',
+
   components: {
     DepartmentNamesCell,
     PeopleNameCell

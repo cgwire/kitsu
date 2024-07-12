@@ -63,8 +63,8 @@
 </template>
 
 <script>
+import { HelpCircleIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
-import { HelpCircleIcon } from 'vue-feather-icons'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'

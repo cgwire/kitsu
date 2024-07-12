@@ -381,8 +381,6 @@ export default {
     }
   },
 
-  socket: {},
-
   watch: {
     selectedStartDate() {
       this.startDate = parseDate(this.selectedStartDate)

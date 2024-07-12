@@ -304,16 +304,17 @@ import {
 import { formatListMixin } from '@/components/mixins/format'
 import { domMixin } from '@/components/mixins/dom'
 
-import DateField from '@/components/widgets/DateField'
-import EntityPreview from '@/components/widgets/EntityPreview'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu'
-import TableInfo from '@/components/widgets/TableInfo'
-import ValidationCell from '@/components/cells/ValidationCell'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import DateField from '@/components/widgets/DateField.vue'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'task-list',
+
   mixins: [domMixin, formatListMixin],
 
   components: {
@@ -961,7 +962,7 @@ td.retake-count {
 }
 
 .list-wrapper div:first-child h2 {
-  margin-top: 0em;
+  margin-top: 0;
 }
 
 .task-grid {
@@ -997,7 +998,7 @@ td.retake-count {
       padding: 0 0.1em 0 0.3em;
 
       .avatar-wrapper:last-child {
-        margin-right: 0em;
+        margin-right: 0;
       }
     }
   }

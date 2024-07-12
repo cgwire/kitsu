@@ -345,7 +345,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'vue-feather-icons'
+import { CornerLeftUpIcon } from 'lucide-vue'
 
 import { sortByName } from '@/lib/sorting'
 import { entityMixin } from '@/components/mixins/entity'
@@ -373,7 +373,9 @@ import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'asset',
+
   mixins: [entityMixin, formatListMixin],
+
   components: {
     ButtonSimple,
     ConceptCard,

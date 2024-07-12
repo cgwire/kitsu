@@ -20,11 +20,7 @@
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
             <td class="name">
               {{ entry.name }}
-              <span
-                class="help-tooltip"
-                :title="entry.description"
-                v-if="entry.description"
-              >
+              <span :title="entry.description" v-if="entry.description">
                 <help-circle-icon class="icon is-small" />
               </span>
             </td>
@@ -62,16 +58,25 @@
 </template>
 
 <script>
-import { sortTaskTypes } from '@/lib/sorting'
-import { HelpCircleIcon } from 'vue-feather-icons'
+import { HelpCircleIcon } from 'lucide-vue'
+import { mapGetters } from 'vuex'
 
-import { mapGetters, mapActions } from 'vuex'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import { sortTaskTypes } from '@/lib/sorting'
+
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'asset-type-list',
+
+  components: {
+    HelpCircleIcon,
+    RowActionsCell,
+    TableInfo,
+    TaskTypeName
+  },
+
   props: {
     entries: {
       type: Array,
@@ -87,21 +92,11 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
-  components: {
-    TaskTypeName,
-    RowActionsCell,
-    TableInfo,
-    HelpCircleIcon
-  },
   computed: {
     ...mapGetters(['taskTypeMap'])
   },
-  methods: {
-    ...mapActions([]),
 
+  methods: {
     sortTaskTypes(taskTypeIds = []) {
       const taskTypes = taskTypeIds.map(taskTypeId =>
         this.taskTypeMap.get(taskTypeId)

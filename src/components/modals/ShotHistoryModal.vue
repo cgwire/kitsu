@@ -69,13 +69,15 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 import { formatDate } from '@/lib/time'
 
-import TableInfo from '@/components/widgets/TableInfo'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'shot-history-modal',
+
   mixins: [modalMixin],
 
   components: {

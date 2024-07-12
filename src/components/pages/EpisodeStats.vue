@@ -75,14 +75,15 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
-import SearchField from '@/components/widgets/SearchField'
+import SearchField from '@/components/widgets/SearchField.vue'
 
 export default {
   name: 'episode-stats',
@@ -278,8 +279,6 @@ export default {
       this.reset()
     },
 
-    displayedEpisodes() {},
-
     dataMode() {
       preferences.setPreference('stats:episode-mode', this.dataMode)
     }
@@ -294,5 +293,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

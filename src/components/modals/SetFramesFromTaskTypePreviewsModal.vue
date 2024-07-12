@@ -38,14 +38,16 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ModalFooter from '@/components/modals/ModalFooter'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
   name: 'set-frames-from-task-type-previews-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -91,8 +93,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     confirm() {
       return this.$emit('confirm', this.taskTypeId)
     },

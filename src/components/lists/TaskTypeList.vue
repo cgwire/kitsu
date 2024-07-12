@@ -55,9 +55,10 @@
             <td class="short_name">
               {{ taskType.short_name }}
             </td>
-            <td class="allow-timelog">
-              <boolean-rep :value="taskType.allow_timelog" />
-            </td>
+            <boolean-cell
+              class="allow-timelog"
+              :value="taskType.allow_timelog"
+            />
             <td>
               {{ taskType.description }}
             </td>
@@ -108,9 +109,10 @@
             <td class="short_name">
               {{ taskType.short_name }}
             </td>
-            <td class="allow-timelog">
-              <boolean-rep :value="taskType.allow_timelog" />
-            </td>
+            <boolean-cell
+              class="allow-timelog"
+              :value="taskType.allow_timelog"
+            />
             <td>
               {{ taskType.description }}
             </td>
@@ -161,9 +163,10 @@
             <td class="short_name">
               {{ taskType.short_name }}
             </td>
-            <td class="allow-timelog">
-              <boolean-rep :value="taskType.allow_timelog" />
-            </td>
+            <boolean-cell
+              class="allow-timelog"
+              :value="taskType.allow_timelog"
+            />
             <td>
               {{ taskType.description }}
             </td>
@@ -214,9 +217,10 @@
             <td class="short_name">
               {{ taskType.short_name }}
             </td>
-            <td class="allow-timelog">
-              <boolean-rep :value="taskType.allow_timelog" />
-            </td>
+            <boolean-cell
+              class="allow-timelog"
+              :value="taskType.allow_timelog"
+            />
             <td>
               {{ taskType.description }}
             </td>
@@ -267,9 +271,10 @@
             <td class="short_name">
               {{ taskType.short_name }}
             </td>
-            <td class="allow-timelog">
-              <boolean-rep :value="taskType.allow_timelog" />
-            </td>
+            <boolean-cell
+              class="allow-timelog"
+              :value="taskType.allow_timelog"
+            />
             <td>
               {{ taskType.description }}
             </td>
@@ -302,7 +307,7 @@
 import { mapGetters } from 'vuex'
 import draggable from 'vuedraggable'
 
-import BooleanRep from '@/components/widgets/BooleanRep.vue'
+import BooleanCell from '@/components/cells/BooleanCell.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -310,6 +315,15 @@ import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'task-type-list',
+
+  components: {
+    draggable,
+    BooleanCell,
+    DepartmentName,
+    RowActionsCell,
+    TableInfo,
+    TaskTypeCell
+  },
 
   props: {
     entries: {
@@ -334,15 +348,6 @@ export default {
       sequencesItems: [],
       episodesItems: []
     }
-  },
-
-  components: {
-    draggable,
-    BooleanRep,
-    DepartmentName,
-    RowActionsCell,
-    TableInfo,
-    TaskTypeCell
   },
 
   computed: {

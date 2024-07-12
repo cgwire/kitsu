@@ -12,16 +12,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
-  name: 'not-found',
-  computed: {
-    ...mapGetters([])
-  },
-  methods: {
-    ...mapActions([])
-  }
+  name: 'not-found'
 }
 </script>
 

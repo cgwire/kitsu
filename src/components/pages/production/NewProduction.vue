@@ -445,21 +445,22 @@ import {
   PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus'
-import ImportModal from '@/components/modals/ImportModal'
-import ImportRenderModal from '@/components/modals/ImportRenderModal'
-import ManageShotsModal from '@/components/modals/ManageShotsModal'
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import TextField from '@/components/widgets/TextField'
-import TimelineItem from '@/components/pages/production/TimelineItem'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import ManageShotsModal from '@/components/modals/ManageShotsModal.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import TextField from '@/components/widgets/TextField.vue'
+import TimelineItem from '@/components/pages/production/TimelineItem.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'new-production',
+
   components: {
     draggable,
     Combobox,
@@ -1042,7 +1043,7 @@ export default {
 
 <style lang="scss" scoped>
 .new-production {
-  font-family: 'Lato';
+  font-family: Lato;
 }
 
 .hero {

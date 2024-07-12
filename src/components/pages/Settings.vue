@@ -117,9 +117,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import TextField from '@/components/widgets/TextField'
+import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'settings',
@@ -297,7 +297,7 @@ export default {
 .mattermost_integrations {
   margin-bottom: 4em;
   .field {
-    margin-bottom: 0em;
+    margin-bottom: 0;
   }
 }
 
@@ -313,7 +313,7 @@ export default {
   margin-top: 2em;
   margin-bottom: 2em;
   padding: 2em;
-  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 4px 2px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0 1px 4px 2px;
   border-radius: 1em;
 }
 
@@ -324,7 +324,7 @@ span.select {
 }
 
 h2:first-child {
-  margin-top: 0em;
+  margin-top: 0;
 }
 
 .save-button {

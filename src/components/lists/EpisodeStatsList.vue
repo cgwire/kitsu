@@ -191,9 +191,9 @@
 </template>
 
 <script>
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue'
 import Vue from 'vue/dist/vue'
-import { mapGetters, mapActions } from 'vuex'
-import { ChevronDownIcon, ChevronRightIcon } from 'vue-feather-icons'
+import { mapGetters } from 'vuex'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { range } from '@/lib/time'
@@ -203,11 +203,13 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
-import StatsCell from '@/components/cells/StatsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+
+import StatsCell from '@/components/cells/StatsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'episode-stats-list',
+
   mixins: [entityListMixin],
 
   components: {
@@ -295,8 +297,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['displayMoreEpisodes']),
-
     chartColors(entryId, columnId) {
       if (this.isRetakes) {
         return ['#ff3860', '#6f727a', '#22d160']

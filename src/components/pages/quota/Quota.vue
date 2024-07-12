@@ -193,16 +193,18 @@
 <script>
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
-import { episodifyRoute } from '@/lib/path'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import TableInfo from '@/components/widgets/TableInfo'
+
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
+import { episodifyRoute } from '@/lib/path'
 import {
   monthToString,
   getMonthRange,
   getWeekRange,
   getDayRange
 } from '@/lib/time'
+
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'quota',

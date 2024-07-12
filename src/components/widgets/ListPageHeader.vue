@@ -22,8 +22,8 @@
 </template>
 
 <script>
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import PageTitle from '@/components/widgets/PageTitle'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
 
 export default {
   name: 'list-page-header',

@@ -41,8 +41,8 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StudioName from '@/components/widgets/StudioName.vue'
@@ -75,10 +75,6 @@ export default {
       default: false,
       type: Boolean
     },
-    selectableStudios: {
-      type: Array,
-      required: false
-    },
     value: {
       default: '',
       type: String
@@ -94,13 +90,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'studios',
-      'studioMap',
-      'user'
-    ]),
+    ...mapGetters(['studios', 'studioMap']),
 
     studioList() {
       const studios = this.selectableStudio

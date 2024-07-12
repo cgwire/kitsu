@@ -1,7 +1,7 @@
 <template>
   <div
+    class="two-factor-authentication"
     :class="{
-      'two-factor-authentication': true,
       'two-factor-authentication-profile': isProfile
     }"
   >
@@ -17,21 +17,9 @@
           v-focus
         />
         <span class="icon">
-          <smartphone-icon
-            v-if="chosenTwoFA === 'totp'"
-            width="20"
-            height="20"
-          />
-          <mail-icon
-            v-else-if="chosenTwoFA === 'email_otp'"
-            width="20"
-            height="20"
-          />
-          <key-icon
-            v-else-if="chosenTwoFA === 'recovery_code'"
-            width="20"
-            height="20"
-          />
+          <smartphone-icon :size="20" v-if="chosenTwoFA === 'totp'" />
+          <mail-icon :size="20" v-else-if="chosenTwoFA === 'email_otp'" />
+          <key-icon :size="20" v-else-if="chosenTwoFA === 'recovery_code'" />
         </span>
       </p>
 
@@ -88,19 +76,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 
-import { SmartphoneIcon, KeyIcon, MailIcon } from 'vue-feather-icons'
+import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 export default {
   name: 'two-factor-authentication',
+
   components: {
-    SmartphoneIcon,
+    ButtonSimple,
     KeyIcon,
     MailIcon,
-    ButtonSimple
+    SmartphoneIcon
   },
 
   data() {
@@ -159,8 +148,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     placeholderInputText() {
       switch (this.chosenTwoFA) {
         case 'totp':

@@ -75,7 +75,7 @@
 import { mapGetters } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
-import { AlertTriangleIcon } from 'vue-feather-icons'
+import { AlertTriangleIcon } from 'lucide-vue'
 
 import { modalMixin } from '@/components/modals/base_modal'
 import TextField from '@/components/widgets/TextField.vue'

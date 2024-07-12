@@ -46,13 +46,10 @@ export default {
       'episodeMap',
       'isCurrentUserAdmin',
       'isDataLoading',
-      'isPreviewFileDisplayed',
       'isDarkTheme',
-      'isLoginLoading',
       'isSavingCommentPreview',
       'isTVShow',
       'previewFileIdToShow',
-      'route',
       'personMap',
       'productionMap',
       'sequenceMap',
@@ -109,7 +106,6 @@ export default {
       'loadTaskStatus',
       'loadTaskType',
       'refreshMetadataDescriptor',
-      'removeAsset',
       'setMainConfig',
       'setSupportChat'
     ]),
@@ -900,7 +896,7 @@ a:hover {
 }
 
 .pa0 {
-  padding: 0em;
+  padding: 0;
 }
 
 .pa1 {
@@ -908,7 +904,7 @@ a:hover {
 }
 
 .pb0 {
-  padding-bottom: 0em;
+  padding-bottom: 0;
 }
 
 .pb1 {
@@ -916,7 +912,7 @@ a:hover {
 }
 
 .pt0 {
-  padding-top: 0em;
+  padding-top: 0;
 }
 
 .mauto {
@@ -932,7 +928,7 @@ a:hover {
 }
 
 .mr0 {
-  margin-right: 0em;
+  margin-right: 0;
 }
 
 .mr05 {
@@ -1138,7 +1134,7 @@ textarea.input:focus {
   color: white;
   border-color: #5e60ba;
   padding: 12px 12px 12px 12px;
-  margin: 0.3em 0 0em 0;
+  margin: 0.3em 0 0 0;
   font-size: 1.4em;
   font-weight: 500;
   letter-spacing: 1px;
@@ -1188,8 +1184,8 @@ textarea.input:focus {
   padding: 3em 2em 2em 2em;
   border-radius: 2px;
   box-shadow:
-    rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px,
-    rgba(0, 0, 0, 0.09804) 0px 1px 2px 0px;
+    rgba(0, 0, 0, 0.14902) 0 1px 1px 0,
+    rgba(0, 0, 0, 0.09804) 0 1px 2px 0;
 }
 
 .box h1.title {
@@ -1212,15 +1208,15 @@ textarea.input:focus {
 }
 
 .button .icon.is-small:first-child:last-child {
-  margin-right: 0em;
+  margin-right: 0;
 }
 
 .actions .button .icon.is-small.icon-only:first-child:last-child {
-  margin-right: 0em;
+  margin-right: 0;
 }
 
 .actions .button .icon.is-small:first-child:last-child {
-  margin-right: 0em;
+  margin-right: 0;
 }
 
 .button .icon.is-small {
@@ -1847,7 +1843,7 @@ tbody:last-child .empty-line:last-child {
 }
 
 .modal-content label.button {
-  margin-left: 0em;
+  margin-left: 0;
 }
 
 .modal-content .box p.text {
@@ -1954,7 +1950,7 @@ tbody:last-child .empty-line:last-child {
 
 .entity-thumbnail {
   border-radius: 0.5em;
-  box-shadow: 0px 0px 6px var(--box-shadow);
+  box-shadow: 0 0 6px var(--box-shadow);
   cursor: pointer;
   transition: transform ease 0.3s;
   max-width: 90px;
@@ -1994,7 +1990,7 @@ th.validation-cell {
 .block {
   background: var(--background-block);
   border-radius: 1em;
-  box-shadow: 0px 0px 6px var(--box-shadow);
+  box-shadow: 0 0 6px var(--box-shadow);
   color: var(--text);
   padding: 1.5em;
 
@@ -2230,6 +2226,16 @@ th.validation-cell {
   border-bottom-right-radius: 0.5em;
   border-top-right-radius: 0.5em;
   padding: 0.5em;
+}
+
+// Ludice Icons
+.icon-1x {
+  width: 1em;
+  height: 1em;
+}
+
+.align-middle {
+  vertical-align: middle;
 }
 
 @media screen and (max-width: 1000px) {

@@ -141,22 +141,25 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 import { descriptorMixin } from '@/components/mixins/descriptors'
+
 import { remove } from '@/lib/models'
 
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean'
-import ModalFooter from '@/components/modals/ModalFooter'
-import TextField from '@/components/widgets/TextField'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import DepartmentName from '@/components/widgets/DepartmentName'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Checklist from '@/components/widgets/Checklist'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checklist from '@/components/widgets/Checklist.vue'
 
 export default {
   name: 'add-metadata-modal',
+
   mixins: [descriptorMixin, modalMixin],
 
   components: {
@@ -302,8 +305,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     addValue() {
       const newValue = this.$refs.addChoiceField.value
       if (!this.form.values.find(v => v === newValue) && newValue) {

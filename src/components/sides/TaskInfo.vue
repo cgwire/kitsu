@@ -92,7 +92,7 @@
                     class="history-button flexrow-item"
                     :to="taskPath"
                   >
-                    <corner-right-up-icon size="0.9x" />
+                    <corner-right-up-icon :size="12" />
                   </router-link>
                 </div>
               </div>
@@ -141,7 +141,6 @@
                   :team="currentTeam"
                   :task="task"
                   :task-status="taskStatuses"
-                  :light="true"
                   :is-loading="loading.addComment"
                   :preview-forms="previewForms"
                   :is-error="errors.addComment"
@@ -302,8 +301,8 @@
 </template>
 
 <script>
+import { CornerRightUpIcon } from 'lucide-vue'
 import moment from 'moment'
-import { CornerRightUpIcon } from 'vue-feather-icons'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
@@ -1475,7 +1474,7 @@ export default {
   .no-comment {
     background: #46494f;
     border-color: $dark-grey;
-    box-shadow: 0px 0px 6px #333;
+    box-shadow: 0 0 6px #333;
   }
 
   .extend-bar {
@@ -1503,7 +1502,7 @@ export default {
 .add-comment {
   padding: 0.5em;
   margin-bottom: 0.5em;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .page-header {
@@ -1538,7 +1537,7 @@ export default {
   background: white;
   padding: 1em;
   border-radius: 5px;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .task-columns {
@@ -1551,7 +1550,7 @@ export default {
   border-bottom: 1px solid $white-grey;
   border-right: 1px solid $white-grey;
   margin-top: 0.1em;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .add-preview-button {
@@ -1561,7 +1560,7 @@ export default {
 
 .no-comment {
   background: white;
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .comments {
@@ -1569,7 +1568,7 @@ export default {
 }
 
 .preview-colum-content {
-  box-shadow: 0px 0px 6px #e0e0e0;
+  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .preview-standard-file {
@@ -1650,7 +1649,7 @@ export default {
     line-height: 1.1em;
     margin: 0;
     opacity: 0.8;
-    left: 0px;
+    left: 0;
     padding: 0;
     position: absolute;
     text-align: center;

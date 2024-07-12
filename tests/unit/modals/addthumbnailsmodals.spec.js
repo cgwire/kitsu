@@ -4,7 +4,8 @@ import VueRouter from 'vue-router'
 
 import i18n from '@/lib/i18n'
 import auth from '@/lib/auth'
-import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal'
+
+import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)

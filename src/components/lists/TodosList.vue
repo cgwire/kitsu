@@ -279,18 +279,19 @@ import { PAGE_SIZE } from '@/lib/pagination'
 import { sortPeople } from '@/lib/sorting'
 import { formatSimpleDate } from '@/lib/time'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import DescriptionCell from '@/components/cells/DescriptionCell'
-import LastCommentCell from '@/components/cells/LastCommentCell'
-import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
-import TableInfo from '@/components/widgets/TableInfo'
-import ValidationCell from '@/components/cells/ValidationCell'
-import MetadataHeader from '@/components/cells/MetadataHeader'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import LastCommentCell from '@/components/cells/LastCommentCell.vue'
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 
 export default {
   name: 'todos-list',
+
   mixins: [formatListMixin, selectionListMixin, descriptorMixin],
 
   components: {

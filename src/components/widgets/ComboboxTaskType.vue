@@ -38,11 +38,11 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'combobox-task-type',
@@ -91,8 +91,6 @@ export default {
       type: Boolean
     }
   },
-
-  mounted() {},
 
   computed: {
     ...mapGetters(['taskTypeMap']),

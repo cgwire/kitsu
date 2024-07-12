@@ -41,13 +41,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
   name: 'change-avatar-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -80,13 +81,7 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters([])
-  },
-
   methods: {
-    ...mapActions([]),
-
     onFileSelected(formData) {
       this.formData = formData
       this.$emit('fileselected', formData)

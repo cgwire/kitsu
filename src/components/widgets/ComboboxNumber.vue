@@ -82,8 +82,6 @@ export default {
     }
   },
 
-  computed: {},
-
   methods: {
     updateValue() {
       this.$emit('input', parseInt(this.$refs.select.value))

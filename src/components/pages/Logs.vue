@@ -20,8 +20,8 @@
 </template>
 
 <script>
-import Events from '@/components/pages/logs/Events'
-import PreviewFiles from '@/components/pages/logs/PreviewFiles'
+import Events from '@/components/pages/logs/Events.vue'
+import PreviewFiles from '@/components/pages/logs/PreviewFiles.vue'
 
 export default {
   name: 'logs',
@@ -42,8 +42,6 @@ export default {
       this.activeTab = this.$route.query.tab
     }
   },
-
-  computed: {},
 
   methods: {
     isActiveTab(tab) {

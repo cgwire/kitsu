@@ -45,8 +45,6 @@ export default {
     }
   },
 
-  computed: {},
-
   methods: {
     togglePalette() {
       this.isOpen = !this.isOpen
