@@ -1118,6 +1118,15 @@ export default {
       return Number(time.toPrecision(4))
     },
 
+    getCurrentFrame() {
+      if (this.currentFrame) {
+        return this.currentFrame
+      } else {
+        const time = roundToFrame(this.currentTimeRaw, this.fps) || 0
+        return Math.round(time / this.frameDuration)
+      }
+    },
+
     play() {
       this.isPlaying = true
       this.isDrawing = false
@@ -1511,7 +1520,11 @@ export default {
         currentTime = Number(currentTime.toPrecision(4))
       }
       const annotation = this.getAnnotation(currentTime)
-      const annotations = this.getNewAnnotations(currentTime, annotation)
+      const annotations = this.getNewAnnotations(
+        currentTime,
+        this.currentFrame,
+        annotation
+      )
 
       if (!this.readOnly) {
         const preview = this.currentPreview
@@ -1538,6 +1551,7 @@ export default {
           return
         }
       }
+      console.log('annotation to load', annotation)
 
       if (!this.fabricCanvas) this.setupFabricCanvas()
       if (this.isMovie && this.previewViewer && this.isPlaying) {

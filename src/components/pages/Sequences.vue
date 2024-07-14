@@ -358,6 +358,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'currentSection',
       'displayedSequences',
       'departmentMap',
       'departments',
@@ -645,6 +646,18 @@ export default {
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
+    },
+
+    currentSection() {
+      if (
+        (this.isTVSHow && this.displayedSequences.length === 0) ||
+        this.displayedSequences[0].episode_id !== this.currentEpisode.id
+      ) {
+        this.$refs['sequence-search-field'].setValue('')
+        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+        this.initialLoading = false
+        this.reset()
+      }
     },
 
     isSequencesLoading() {

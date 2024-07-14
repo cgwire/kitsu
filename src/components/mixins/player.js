@@ -908,6 +908,15 @@ export const playerMixin = {
       return Number(time.toPrecision(4))
     },
 
+    getCurrentFrame() {
+      if (this.currentFrame) {
+        return this.currentFrame
+      } else {
+        const time = roundToFrame(this.currentTimeRaw, this.fps) || 0
+        return Math.round(time / this.frameDuration)
+      }
+    },
+
     setCurrentTimeRaw(time) {
       const roundedTime = roundToFrame(time, this.fps) || 0
       const frameNumber = roundedTime / this.frameDuration
@@ -1185,10 +1194,16 @@ export const playerMixin = {
       if (this.isCurrentPreviewPicture) currentTime = 0
       if (!this.annotations) return
 
+      const currentFrame = currentTime / this.frameDuration
+
       // Get annotations currently stored
       const annotation = this.getAnnotation(currentTime)
       // Get annotation set on the canvas
-      const annotations = this.getNewAnnotations(currentTime, annotation)
+      const annotations = this.getNewAnnotations(
+        currentTime,
+        currentFrame,
+        annotation
+      )
       // Retrieved current entity.
       const entity = this.entityList[this.playingEntityIndex]
       if (!entity) return

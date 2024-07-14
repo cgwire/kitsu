@@ -973,6 +973,17 @@ export default {
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
 
+    currentSection() {
+      if (
+        (this.isTVSHow && this.edits.length === 0) ||
+        this.edits[0].episode_id !== this.currentEpisode.id
+      ) {
+        this.$refs['edit-search-field'].setValue('')
+        this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
+        this.reset()
+      }
+    },
+
     isEditsLoading() {
       if (!this.isEditsLoading) {
         let searchQuery = ''
