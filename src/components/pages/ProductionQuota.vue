@@ -54,7 +54,7 @@
             :text="
               computeMode === 'weighted'
                 ? $t('quota.explaination')
-                : $t('quota.explaination_feedback')
+                : $t('quota.explanation_feedback')
             "
           />
         </div>
