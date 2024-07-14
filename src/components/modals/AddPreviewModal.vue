@@ -64,32 +64,36 @@
         </h3>
         <p class="upload-previews" v-if="forms.length > 0">
           <template v-for="(form, i) in forms">
-            <p class="preview-name" :key="'name-' + i">
+            <p
+              class="preview-name"
+              :key="`name-${i}`"
+            >
               {{ form.get('file').name }}
               <span @click="removePreview(form)">x</span>
             </p>
             <img
               alt="uploaded file"
               :src="getURL(form)"
-              :key="i"
+              :key="`preview-file-${i}`"
               v-if="isImage(form)"
             />
             <video
+              :ref="`video-${i}`"
+              :key="`preview-video-${i}`"
+              :src="getURL(form)"
               preload="auto"
               class="is-fullwidth"
               autoplay
               controls
               loop
               muted
-              :src="getURL(form)"
-              :key="i"
               v-else-if="isVideo(form)"
             />
             <iframe
               class="is-fullwidth"
               frameborder="0"
               :src="getURL(form)"
-              :key="i"
+              :key="`preview-pdf-${i}`"
               v-else-if="isPdf(form)"
             />
             <hr :key="'separator-' + i" />
@@ -101,6 +105,11 @@
             {{ $t(message) }}
           </div>
         </div>
+
+        <p class="mb2 mt2 warning-text" v-if="isWrongDuration">
+          <alert-triangle-icon class="icon mr05 warning" />
+          {{ $t('shots.wrong_file_duration') }}
+        </p>
 
         <p class="has-text-right">
           <a
@@ -132,6 +141,10 @@
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
 
+import {
+  AlertTriangleIcon
+} from 'vue-feather-icons'
+
 import files from '@/lib/files'
 
 import FileUpload from '@/components/widgets/FileUpload.vue'
@@ -142,6 +155,7 @@ export default {
   mixins: [modalMixin],
 
   components: {
+    AlertTriangleIcon,
     FileUpload
   },
 
@@ -185,12 +199,21 @@ export default {
     title: {
       type: String,
       default: ''
+    },
+    fps: {
+      type: Number,
+      default: 0
+    },
+    expectedFrames: {
+      type: Number,
+      default: 0
     }
   },
 
   data() {
     return {
       forms: [],
+      isWrongDuration: false,
       isDraggingFile: false
     }
   },
@@ -214,6 +237,7 @@ export default {
     reset() {
       this.previewField.reset()
       this.forms = []
+      this.isWrongDuration = false
     },
 
     onPaste(event) {
@@ -268,6 +292,23 @@ export default {
   watch: {
     active() {
       this.reset()
+    },
+
+    forms() {
+      this.$nextTick(() => {
+        this.isWrongDuration = false
+        Object.keys(this.$refs).forEach(key => {
+          const ref = this.$refs[key]
+          if (key.startsWith('video-') && ref[0]) {
+            ref[0].onloadedmetadata = () => {
+              const frames = Math.round(ref[0].duration * this.fps) - 1
+              if (frames !== this.expectedFrames) {
+                this.isWrongDuration = true
+              }
+            }
+          }
+        })
+      })
     }
   },
 
