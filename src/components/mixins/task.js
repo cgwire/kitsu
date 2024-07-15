@@ -12,9 +12,7 @@ export const taskMixin = {
     currentFps() {
       const task = this.getTask()
       if (!task) return 25
-      return parseInt(
-        this.productionMap.get(task.project_id).fps || '25'
-      )
+      return parseInt(this.productionMap.get(task.project_id).fps || '25')
     },
 
     entityFrames() {

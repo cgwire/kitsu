@@ -64,10 +64,7 @@
         </h3>
         <p class="upload-previews" v-if="forms.length > 0">
           <template v-for="(form, i) in forms">
-            <p
-              class="preview-name"
-              :key="`name-${i}`"
-            >
+            <p class="preview-name" :key="`name-${i}`">
               {{ form.get('file').name }}
               <span @click="removePreview(form)">x</span>
             </p>
@@ -141,9 +138,7 @@
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
 
-import {
-  AlertTriangleIcon
-} from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue'
 
 import files from '@/lib/files'
 

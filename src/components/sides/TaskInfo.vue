@@ -612,9 +612,7 @@ export default {
     },
 
     currentFps() {
-      return parseInt(
-        this.productionMap.get(this.task.project_id).fps || '25'
-      )
+      return parseInt(this.productionMap.get(this.task.project_id).fps || '25')
     },
 
     currentRevision() {
