@@ -11,12 +11,6 @@ import {
 } from '@/lib/time'
 
 export const formatListMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     ...mapGetters(['organisation'])
   },

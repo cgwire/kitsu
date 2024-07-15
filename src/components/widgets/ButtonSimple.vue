@@ -1,8 +1,8 @@
 <template>
   <button
+    class="button"
     :class="{
-      button: true,
-      active: active,
+      active,
       'is-on': isOn,
       'is-loading': isLoading,
       'is-primary': isPrimary
@@ -12,52 +12,51 @@
     :type="type"
     @click="$emit('click')"
   >
-    <grid-icon :class="iconClass" v-if="icon === 'grid'" />
-    <send-icon :class="iconClass" v-else-if="icon === 'send'" />
-    <paperclip-icon :class="iconClass" v-else-if="icon === 'attach'" />
-    <corner-left-down-icon :class="iconClass" v-else-if="icon === 'undo'" />
-    <corner-right-down-icon :class="iconClass" v-else-if="icon === 'redo'" />
-    <save-icon :class="iconClass" v-else-if="icon === 'save'" />
-    <plus-icon :class="iconClass" v-else-if="icon === 'plus'" />
-    <minus-icon :class="iconClass" v-else-if="icon === 'minus'" />
-    <message-square-icon :class="iconClass" v-else-if="icon === 'comment'" />
-    <download-icon :class="iconClass" v-else-if="icon === 'download'" />
-    <film-icon :class="iconClass" v-else-if="icon === 'film'" />
-    <pause-icon :class="iconClass" v-else-if="icon === 'pause'" />
-    <edit-icon :class="iconClass" v-else-if="icon === 'edit'" />
-    <image-icon :class="iconClass" v-else-if="icon === 'image'" />
-    <maximize-icon :class="iconClass" v-else-if="icon === 'maximize'" />
-    <skip-back-icon :class="iconClass" v-else-if="icon === 'back'" />
-    <skip-forward-icon :class="iconClass" v-else-if="icon === 'forward'" />
-    <chevron-down-icon :class="iconClass" v-else-if="icon === 'down'" />
-    <chevron-left-icon :class="iconClass" v-else-if="icon === 'left'" />
-    <chevron-right-icon :class="iconClass" v-else-if="icon === 'right'" />
-    <x-icon :class="iconClass" v-else-if="icon === 'remove'" />
-    <edit2-icon :class="iconClass" v-else-if="icon === 'pencil'" />
-    <layers-icon :class="iconClass" v-else-if="icon === 'layers'" />
-    <list-icon :class="iconClass" v-else-if="icon === 'list'" />
-    <triangle-icon :class="iconClass" v-else-if="icon === 'triangle'" />
-    <music-icon :class="iconClass" v-else-if="icon === 'music'" />
-    <square-icon :class="iconClass" v-else-if="icon === 'eraser'" />
-    <key-icon :class="iconClass" v-else-if="icon == 'key'" />
-    <zoom-in-icon :class="iconClass" v-else-if="icon == 'loupe'" />
-    <globe-icon :class="iconClass" v-else-if="icon == 'globe'" />
-    <codepen-icon :class="iconClass" v-else-if="icon == 'codepen'" />
-    <link-icon :class="iconClass" v-else-if="icon == 'link'" />
-    <clock-icon :class="iconClass" v-else-if="icon == 'clock'" />
+    <grid-icon class="icon" v-if="icon === 'grid'" />
+    <send-icon class="icon" v-else-if="icon === 'send'" />
+    <paperclip-icon class="icon" v-else-if="icon === 'attach'" />
+    <corner-left-down-icon class="icon" v-else-if="icon === 'undo'" />
+    <corner-right-down-icon class="icon" v-else-if="icon === 'redo'" />
+    <save-icon class="icon" v-else-if="icon === 'save'" />
+    <plus-icon class="icon" v-else-if="icon === 'plus'" />
+    <minus-icon class="icon" v-else-if="icon === 'minus'" />
+    <message-square-icon class="icon" v-else-if="icon === 'comment'" />
+    <download-icon class="icon" v-else-if="icon === 'download'" />
+    <film-icon class="icon" v-else-if="icon === 'film'" />
+    <pause-icon class="icon" v-else-if="icon === 'pause'" />
+    <edit-icon class="icon" v-else-if="icon === 'edit'" />
+    <image-icon class="icon" v-else-if="icon === 'image'" />
+    <maximize-icon class="icon" v-else-if="icon === 'maximize'" />
+    <skip-back-icon class="icon" v-else-if="icon === 'back'" />
+    <skip-forward-icon class="icon" v-else-if="icon === 'forward'" />
+    <chevron-down-icon class="icon" v-else-if="icon === 'down'" />
+    <chevron-left-icon class="icon" v-else-if="icon === 'left'" />
+    <chevron-right-icon class="icon" v-else-if="icon === 'right'" />
+    <x-icon class="icon" v-else-if="icon === 'remove'" />
+    <edit2-icon class="icon" v-else-if="icon === 'pencil'" />
+    <layers-icon class="icon" v-else-if="icon === 'layers'" />
+    <list-icon class="icon" v-else-if="icon === 'list'" />
+    <triangle-icon class="icon" v-else-if="icon === 'triangle'" />
+    <music-icon class="icon" v-else-if="icon === 'music'" />
+    <square-icon class="icon" v-else-if="icon === 'eraser'" />
+    <key-icon class="icon" v-else-if="icon == 'key'" />
+    <zoom-in-icon class="icon" v-else-if="icon == 'loupe'" />
+    <globe-icon class="icon" v-else-if="icon == 'globe'" />
+    <codepen-icon class="icon" v-else-if="icon == 'codepen'" />
+    <link-icon class="icon" v-else-if="icon == 'link'" />
+    <clock-icon class="icon" v-else-if="icon == 'clock'" />
     <kitsu-icon
+      class="icon"
       :name="icon"
-      :class="iconClass"
       :title="title"
       :active="active"
       v-else-if="icon !== ''"
     />
     <span
       :class="{
-        text: true,
         'is-hidden-touch': isResponsive
       }"
-      v-if="isText"
+      v-if="text"
     >
       {{ text }}
     </span>
@@ -99,12 +98,13 @@ import {
   TriangleIcon,
   XIcon,
   ZoomInIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'button-simple',
+
   components: {
     ChevronDownIcon,
     ChevronLeftIcon,
@@ -182,19 +182,6 @@ export default {
     type: {
       type: String,
       validator: value => ['submit', 'button', 'reset'].includes(value)
-    }
-  },
-
-  computed: {
-    isText() {
-      return this.text && this.text.length > 0
-    },
-
-    iconClass() {
-      return {
-        icon: true,
-        'only-icon': !this.isText
-      }
     }
   }
 }

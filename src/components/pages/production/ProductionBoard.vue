@@ -68,8 +68,8 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortTaskStatuses } from '@/lib/sorting'
 
-import BooleanField from '@/components/widgets/BooleanField'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'production-board',

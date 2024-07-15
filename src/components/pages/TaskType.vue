@@ -5,7 +5,7 @@
         <div class="task-type-header page-header flexrow-item" ref="header">
           <div class="flexcolumn-item flexrow">
             <router-link class="back-link flexrow-item" :to="backPath">
-              <corner-left-up-icon size="1.4x" />
+              <corner-left-up-icon />
             </router-link>
             <div class="flexrow-item"></div>
             <task-type-name
@@ -250,9 +250,9 @@
 </template>
 
 <script>
+import { CornerLeftUpIcon } from 'lucide-vue'
 import moment from 'moment'
 import firstBy from 'thenby'
-import { CornerLeftUpIcon } from 'vue-feather-icons'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapGetters, mapActions } from 'vuex'
 

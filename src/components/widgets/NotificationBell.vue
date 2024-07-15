@@ -1,14 +1,15 @@
 <template>
-  <div class="notification-bell nav-item">
+  <div class="notification-bell">
     <router-link :to="{ name: 'notifications' }">
-      <bell-icon :class="notificationBellClass" />
+      <bell-icon
+        class="align-middle"
+        :class="
+          isNewNotification ? 'has-notifications' : 'has-no-notifications'
+        "
+      />
       <span
         class="number"
-        :title="
-          notificationCount +
-          ' ' +
-          $tc('notifications.unread_notifications', notificationCount)
-        "
+        :title="`${notificationCount} ${$tc('notifications.unread_notifications', notificationCount)}`"
         v-if="isNewNotification"
       >
         {{ notificationCount }}
@@ -25,38 +26,17 @@
  * a badge giving the number of unread notifications.
  */
 import { mapGetters } from 'vuex'
-import { BellIcon } from 'vue-feather-icons'
+import { BellIcon } from 'lucide-vue'
 
 export default {
   name: 'notification-bell',
+
   components: {
     BellIcon
   },
 
-  props: {
-    isWhite: {
-      type: Boolean,
-      default: false
-    }
-  },
-
   computed: {
-    ...mapGetters(['isNewNotification', 'notificationCount']),
-
-    notificationBellClass() {
-      if (this.isNewNotification) {
-        return { 'has-notifications': true }
-      } else {
-        if (this.isWhite) {
-          return {
-            'has-no-notifications': true,
-            white: true
-          }
-        } else {
-          return { 'has-no-notifications': true }
-        }
-      }
-    }
+    ...mapGetters(['isNewNotification', 'notificationCount'])
   }
 }
 </script>
@@ -65,10 +45,6 @@ export default {
 .dark {
   .has-no-notifications {
     color: $grey;
-
-    &.white {
-      color: $white-grey;
-    }
 
     &:hover {
       color: $white;
@@ -84,16 +60,6 @@ export default {
     border: 2px solid $pink-strong;
     color: $pink-strong;
     font-size: 0.9em;
-    margin: 0;
-  }
-}
-
-.has-no-notifications {
-  margin-top: 5px;
-  color: $light-grey;
-
-  &:hover {
-    color: var(--text);
   }
 }
 
@@ -101,8 +67,15 @@ export default {
   position: relative;
 }
 
+.has-no-notifications {
+  color: $light-grey;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
 .has-notifications {
-  margin-top: 5px;
   color: $orange;
 }
 

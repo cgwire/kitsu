@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Combobox from '@/components/widgets/Combobox'
+import Combobox from '@/components/widgets/Combobox.vue'
 
 export default {
   name: 'combobox-model',
@@ -53,8 +53,6 @@ export default {
     this.reset()
   },
 
-  computed: {},
-
   methods: {
     emitValue(value) {
       this.currentModelId = value
@@ -90,5 +88,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

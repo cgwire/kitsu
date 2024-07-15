@@ -31,8 +31,6 @@ z
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'table-metadata-selector-menu',
 
@@ -92,8 +90,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     localStorageKey() {
       return `metadataDisplayHeaders:${this.namespace}`
     },
@@ -119,8 +115,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     setMetadataDisplayValue(metadataName, isSelected) {
       const localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
       localMetadataDisplayHeaders[metadataName] = isSelected

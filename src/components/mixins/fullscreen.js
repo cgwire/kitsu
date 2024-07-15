@@ -2,12 +2,6 @@
  * Utilities to deal with full screen state.
  */
 export const fullScreenMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     isFullScreenEnabled() {
       return !!(

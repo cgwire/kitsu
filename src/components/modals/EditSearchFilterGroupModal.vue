@@ -24,11 +24,7 @@
             @enter="runConfirmation"
             v-focus
           />
-          <color-field
-            ref="colorField"
-            :label="$t('main.color')"
-            v-model="form.color"
-          />
+          <color-field :label="$t('main.color')" v-model="form.color" />
 
           <boolean-field
             :label="$t('main.is_shared')"
@@ -54,15 +50,19 @@
  * Modal used to edit filter group information.
  */
 import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
-import ModalFooter from '@/components/modals/ModalFooter'
-import ColorField from '@/components/widgets/ColorField'
-import TextField from '@/components/widgets/TextField'
-import BooleanField from '@/components/widgets/BooleanField'
+
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ColorField from '@/components/widgets/ColorField.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-search-filter-group-modal',
+
   mixins: [modalMixin],
+
   components: {
     BooleanField,
     ColorField,

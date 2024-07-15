@@ -54,9 +54,9 @@ import { firstBy } from 'thenby'
 import { sortByName } from '@/lib/sorting'
 import { getTaskPath } from '@/lib/path'
 
-import ProductionName from '@/components/widgets/ProductionName'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ProductionName from '@/components/widgets/ProductionName.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'time-spent-task-list',

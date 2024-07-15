@@ -148,14 +148,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
-import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import ProductionStats from '@/components/pages/production/ProductionStats'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+import { mapGetters } from 'vuex'
 
 import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
+
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import ProductionStats from '@/components/pages/production/ProductionStats.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'production-list',
@@ -179,10 +179,6 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
-
   components: {
     ProductionNameCell,
     ProductionStats,
@@ -203,8 +199,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     // Convert a database status to a locale key.
     getStatusLocale(originalStatus) {
       const statusMap = {

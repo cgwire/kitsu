@@ -25,10 +25,12 @@
 <script>
 export default {
   name: 'checkbox',
+
   model: {
     prop: 'checked',
     event: 'change'
   },
+
   props: {
     disabled: {
       default: false,
@@ -58,8 +60,6 @@ export default {
   mounted() {
     this.id = this._uid
   },
-
-  computed: {},
 
   methods: {
     updateStatus() {

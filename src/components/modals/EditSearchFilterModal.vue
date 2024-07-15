@@ -61,16 +61,19 @@
    filter label when it's too complex to read or too long.
  */
 import { mapGetters } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
-import ModalFooter from '@/components/modals/ModalFooter'
 
-import BooleanField from '@/components/widgets/BooleanField'
-import Combobox from '@/components/widgets/Combobox'
-import TextField from '@/components/widgets/TextField'
+import { modalMixin } from '@/components/modals/base_modal'
+
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'edit-search-filter-modal',
+
   mixins: [modalMixin],
+
   components: {
     BooleanField,
     Combobox,

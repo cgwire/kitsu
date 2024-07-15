@@ -35,8 +35,8 @@
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'previews-per-task-type',
@@ -178,8 +178,6 @@ export default {
       this.$emit('preview-changed', this.entity, previewFile)
     },
 
-    'entity.preview_files': function () {},
-
     'entity.preview_file_id': function () {
       if (this.previewFileId !== this.entity.preview_file_id) {
         this.previewFileId = this.entity.preview_file_id
@@ -191,7 +189,7 @@ export default {
 
 <style lang="scss" scoped>
 .field {
-  margin-bottom: 0em;
+  margin-bottom: 0;
 }
 .text {
   color: var(--text);

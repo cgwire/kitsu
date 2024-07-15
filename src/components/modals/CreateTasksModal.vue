@@ -62,12 +62,14 @@
 import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import PageTitle from '@/components/widgets/PageTitle'
+
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
 
 export default {
   name: 'create-tasks-modal',
+
   mixins: [modalMixin],
 
   components: {

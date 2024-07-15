@@ -14,13 +14,15 @@
 </template>
 
 <script>
-import Spinner from '@/components/widgets/Spinner'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'table-info',
+
   components: {
     Spinner
   },
+
   props: {
     isLoading: {
       type: Boolean,
@@ -33,5 +35,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

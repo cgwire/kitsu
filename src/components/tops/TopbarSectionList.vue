@@ -39,8 +39,8 @@
 </template>
 
 <script>
+import { ChevronDownIcon } from 'lucide-vue'
 import { mapActions, mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
 
 import { getProductionPath } from '@/lib/path'
 

@@ -23,11 +23,12 @@ import { mapActions, mapGetters } from 'vuex'
 
 import { timeMixin } from '@/components/mixins/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import PreviewFileList from '@/components/lists/PreviewFileList'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import PreviewFileList from '@/components/lists/PreviewFileList.vue'
 
 export default {
   name: 'preview-files',
+
   mixins: [timeMixin],
 
   components: {

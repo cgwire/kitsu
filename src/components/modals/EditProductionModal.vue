@@ -95,13 +95,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
 
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import ModalFooter from '@/components/modals/ModalFooter'
-import FileUpload from '@/components/widgets/FileUpload'
-import TextField from '@/components/widgets/TextField'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import FileUpload from '@/components/widgets/FileUpload.vue'
+import TextField from '@/components/widgets/TextField.vue'
+
 import {
   PRODUCTION_STYLE_OPTIONS,
   PRODUCTION_TYPE_OPTIONS
@@ -109,7 +111,9 @@ import {
 
 export default {
   name: 'edit-production-modal',
+
   mixins: [modalMixin],
+
   components: {
     ComboboxStyled,
     FileUpload,
@@ -185,16 +189,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'productions',
-      'productionStatus',
-      'productionStatusOptions'
-    ])
+    ...mapGetters(['productionStatus', 'productionStatusOptions'])
   },
 
   methods: {
-    ...mapActions([]),
-
     runConfirmation() {
       this.$emit('confirm', this.form)
     },

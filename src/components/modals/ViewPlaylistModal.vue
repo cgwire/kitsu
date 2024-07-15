@@ -42,14 +42,17 @@
  * This component is aimed at displaying a temporary playlist from any view. It
  * is used in entity list to display playlists from the selection.
  */
-import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
-import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer'
 
 import { mapActions, mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
+
+import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
 
 export default {
   name: 'view-playlist-modal',
+
   mixins: [modalMixin],
 
   components: {

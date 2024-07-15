@@ -25,7 +25,7 @@
       v-model="item"
     />
     <span class="clear-button" @click="item = null" v-show="item !== null">
-      <x-icon size="0.8x" />
+      <x-icon :size="12" />
     </span>
 
     <div
@@ -39,10 +39,11 @@
 </template>
 
 <script>
-import AssignationItem from '@/components/widgets/AssignationItem'
+import { XIcon } from 'lucide-vue'
+
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
-import { XIcon } from 'vue-feather-icons'
+import AssignationItem from '@/components/widgets/AssignationItem.vue'
 
 export default {
   name: 'people-field',

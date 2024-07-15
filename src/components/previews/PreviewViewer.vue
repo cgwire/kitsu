@@ -86,13 +86,6 @@
       v-show="isSound"
     />
 
-    <!--pdf
-      class="pdf-viewer"
-      :height="defaultHeight"
-      :src="originalPath"
-      v-if="isPdf"
-    /-->
-
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
       <a
         class="button mt2"
@@ -110,27 +103,25 @@
 </template>
 
 <script>
-// import pdf from 'vue-pdf'
-import { mapGetters, mapActions } from 'vuex'
-import { formatFrame, formatTime } from '@/lib/video'
+import { DownloadIcon } from 'lucide-vue'
 
+import { formatFrame, formatTime } from '@/lib/video'
 import { domMixin } from '@/components/mixins/dom'
 
-import { DownloadIcon } from 'vue-feather-icons'
-import ObjectViewer from '@/components/previews/ObjectViewer'
-import PictureViewer from '@/components/previews/PictureViewer'
-import SoundViewer from '@/components/previews/SoundViewer'
-import Spinner from '@/components/widgets/Spinner'
-import VideoViewer from '@/components/previews/VideoViewer'
+import ObjectViewer from '@/components/previews/ObjectViewer.vue'
+import PictureViewer from '@/components/previews/PictureViewer.vue'
+import SoundViewer from '@/components/previews/SoundViewer.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import VideoViewer from '@/components/previews/VideoViewer.vue'
 
 export default {
   name: 'preview-viewer',
+
   mixins: [domMixin],
 
   components: {
-    ObjectViewer,
-    // pdf,
     DownloadIcon,
+    ObjectViewer,
     PictureViewer,
     SoundViewer,
     Spinner,
@@ -212,17 +203,7 @@ export default {
     }
   },
 
-  data() {
-    return {}
-  },
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
-    ...mapGetters(['currentProduction']),
-
     // Elements
 
     container() {
@@ -327,7 +308,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['updateRevisionPreviewPosition']),
     formatFrame,
     formatTime,
 

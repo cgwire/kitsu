@@ -236,8 +236,8 @@
                 v-if="withMilestones && isCurrentUserManager"
               >
                 <span class="button">
-                  <edit-icon size="10" v-if="currentMilestones[day.text]" />
-                  <plus-icon size="12" stroke-width="3" v-else />
+                  <edit-icon :size="10" v-if="currentMilestones[day.text]" />
+                  <plus-icon :size="12" :stroke-width="3" v-else />
                 </span>
               </div>
               <div class="date-name">
@@ -252,7 +252,7 @@
                   <span class="day-number">
                     <briefcase-icon
                       class="day-off-icon"
-                      size="14"
+                      :size="14"
                       v-if="day.off"
                     />
                     {{ day.dayNumber }}
@@ -356,7 +356,7 @@
                 :title="dayOff.description"
                 v-for="(dayOff, index) in getDayOffRange(rootElement.daysOff)"
               >
-                <briefcase-icon class="day-off-icon" size="14" />
+                <briefcase-icon class="day-off-icon" :size="14" />
               </div>
               <div
                 class="entity-line root-element"
@@ -502,14 +502,14 @@
 /*
  * Component to facilitate the build of schedule pages.
  */
-import moment from 'moment-timezone'
 import {
   BriefcaseIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   EditIcon,
   PlusIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
+import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
 import { domMixin } from '@/components/mixins/dom'
@@ -562,7 +562,6 @@ export default {
       milestoneToEdit: {
         date: moment()
       },
-      timelineDisplayedDaysIndex: {},
       errors: {
         edit: false
       },
@@ -670,11 +669,10 @@ export default {
       'departmentMap',
       'isCurrentUserManager',
       'isDarkTheme',
+      'milestones',
       'openProductions',
       'organisation',
-      'milestones',
-      'taskMap',
-      'taskTypeMap'
+      'taskMap'
     ]),
 
     currentMilestones() {

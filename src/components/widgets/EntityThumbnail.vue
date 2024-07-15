@@ -215,7 +215,7 @@ span.thumbnail-empty {
 table .thumbnail-picture.thumbnail-empty {
   background: $white-grey;
   border: 1px solid $light-grey;
-  margin: 0px;
+  margin: 0;
 }
 
 table .thumbnail-wrapper {
@@ -224,12 +224,12 @@ table .thumbnail-wrapper {
 table .thumbnail-picture {
   background-color: black;
   border: 0;
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
 }
 
 .thumbnail-wrapper {
-  padding: 0px;
+  padding: 0;
   border: 0;
   border-radius: 4px;
   display: inline-block;

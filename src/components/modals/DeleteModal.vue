@@ -36,7 +36,9 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
   name: 'delete-modal',
+
   mixins: [modalMixin],
+
   props: {
     text: {
       required: true,

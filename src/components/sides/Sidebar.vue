@@ -129,7 +129,7 @@
             </p>
             <p @click="toggleSidebar()">
               <router-link :to="{ name: 'studios' }">
-                <grid-icon class="nav-icon" size="0.9x" />
+                <building-icon class="nav-icon" />
                 {{ $t('studios.title') }}
               </router-link>
             </p>
@@ -165,7 +165,7 @@
             </p>
             <p @click="toggleSidebar()">
               <router-link :to="{ name: 'backgrounds' }">
-                <globe-icon class="nav-icon" size="0.9x" />
+                <globe-icon class="nav-icon" />
                 {{ $t('backgrounds.title') }}
               </router-link>
             </p>
@@ -201,16 +201,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { GlobeIcon, GridIcon } from 'vue-feather-icons'
+import { BuildingIcon, GlobeIcon } from 'lucide-vue'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'sidebar',
   components: {
+    BuildingIcon,
     GlobeIcon,
-    KitsuIcon,
-    GridIcon
+    KitsuIcon
   },
 
   data() {
@@ -278,7 +278,7 @@ aside {
   padding: 15px;
   overflow-y: auto;
   z-index: 205;
-  box-shadow: 1px 0px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 0 6px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 
   h2 {
@@ -359,7 +359,7 @@ p:hover {
 }
 
 .nav-icon {
-  margin-left: 0em;
+  margin-left: 0;
   margin-right: 0.5em;
   width: 20px;
 }

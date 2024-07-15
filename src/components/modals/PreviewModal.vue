@@ -22,15 +22,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
+import { ArrowDownIcon, ArrowUpRightIcon } from 'lucide-vue'
 
 import { getDownloadAttachmentPath } from '@/lib/path'
 
-import { ArrowDownIcon, ArrowUpRightIcon } from 'vue-feather-icons'
+import { modalMixin } from '@/components/modals/base_modal'
 
 export default {
   name: 'preview-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -53,15 +53,7 @@ export default {
     }
   },
 
-  mounted() {},
-
-  data() {
-    return {}
-  },
-
   computed: {
-    ...mapGetters([]),
-
     previewPath() {
       if (this.previewFileId) {
         const id = this.previewFileId
@@ -78,13 +70,7 @@ export default {
       const previewId = this.previewFileId
       return `/api/pictures/originals/preview-files/${previewId}/download`
     }
-  },
-
-  methods: {
-    ...mapActions([])
-  },
-
-  watch: {}
+  }
 }
 </script>
 

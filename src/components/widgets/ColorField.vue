@@ -20,10 +20,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'color-field',
+
   props: {
     label: {
       default: '',
@@ -31,14 +30,6 @@ export default {
     },
     hexaOpacity: {
       default: 'FF',
-      type: String
-    },
-    placeholder: {
-      default: '',
-      type: String
-    },
-    type: {
-      default: 'text',
       type: String
     },
     value: {
@@ -74,22 +65,15 @@ export default {
       ]
     }
   },
-  data() {
-    return {
-      selectedColor: '#999999'
-    }
-  },
-  computed: {
-    ...mapGetters([])
-  },
+
   methods: {
-    ...mapActions([]),
     colorChanged(color, index) {
       this.$emit('input', color)
     }
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .colors {
   display: grid;

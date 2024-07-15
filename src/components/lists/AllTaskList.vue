@@ -153,16 +153,17 @@ import moment from 'moment-timezone'
 import { formatListMixin } from '@/components/mixins/format'
 import { domMixin } from '@/components/mixins/dom'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu'
-import ProductionNameCell from '@/components/cells/ProductionNameCell'
-import Spinner from '@/components/widgets/Spinner'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
-import ValidationCell from '@/components/cells/ValidationCell'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import ValidationCell from '@/components/cells/ValidationCell.vue'
 
 export default {
   name: 'all-task-list',
+
   mixins: [domMixin, formatListMixin],
 
   components: {
@@ -483,7 +484,7 @@ td.due-date {
 }
 
 .list-wrapper div:first-child h2 {
-  margin-top: 0em;
+  margin-top: 0;
 }
 
 .datatable-body {

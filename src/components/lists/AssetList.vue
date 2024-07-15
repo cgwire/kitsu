@@ -483,22 +483,23 @@ import { range } from '@/lib/time'
 import { sortTaskTypes } from '@/lib/sorting'
 import { selectionListMixin } from '@/components/mixins/selection'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import DescriptionCell from '@/components/cells/DescriptionCell'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import MetadataHeader from '@/components/cells/MetadataHeader'
-import MetadataInput from '@/components/cells/MetadataInput'
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableHeaderMenu from '@/components/widgets/TableHeaderMenu'
-import TableInfo from '@/components/widgets/TableInfo'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu'
-import ValidationCell from '@/components/cells/ValidationCell'
-import ValidationHeader from '@/components/cells/ValidationHeader'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import MetadataHeader from '@/components/cells/MetadataHeader.vue'
+import MetadataInput from '@/components/cells/MetadataInput.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 
 export default {
   name: 'asset-list',
+
   mixins: [
     entityListMixin,
     descriptorMixin,

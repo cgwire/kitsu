@@ -59,8 +59,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'vue-feather-icons'
+import { ChevronDownIcon } from 'lucide-vue'
+
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
 export default {
@@ -125,8 +125,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isDarkTheme']),
-
     optionList() {
       if (this.isReversed && !this.keepOrder) {
         return [...this.options].reverse()
@@ -244,8 +242,8 @@ export default {
   vertical-align: middle;
 
   &.open {
-    border-bottom-left-radius: 0em;
-    border-bottom-right-radius: 0em;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 
@@ -332,8 +330,8 @@ export default {
 
 .reversed {
   &.open {
-    border-top-left-radius: 0em;
-    border-top-right-radius: 0em;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
   }
@@ -341,8 +339,8 @@ export default {
   .select-input {
     border-top-left-radius: 1em;
     border-top-right-radius: 1em;
-    border-bottom-left-radius: 0em;
-    border-bottom-right-radius: 0em;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     height: 180px;
     top: -180px;
   }

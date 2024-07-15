@@ -79,12 +79,12 @@
  * given prevision for a given task type for current entity.
  * It fires events about drag'n'drop reordering too.
  */
+import { XIcon } from 'lucide-vue'
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
-import { XIcon } from 'vue-feather-icons'
 
-import Combobox from '@/components/widgets/Combobox'
-import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
+import Combobox from '@/components/widgets/Combobox.vue'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 
 export default {
   name: 'playlisted-entity',
@@ -124,8 +124,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
-      'shotMap',
       'taskMap',
       'taskTypeMap',
       'taskStatusMap',
@@ -337,7 +335,7 @@ export default {
 }
 
 .field {
-  margin-bottom: 0em;
+  margin-bottom: 0;
 }
 
 .version-combo {

@@ -126,17 +126,19 @@ import stringHelpers from '@/lib/string'
 
 import { monthToString, range } from '@/lib/time'
 import { episodifyRoute } from '@/lib/path'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import InfoQuestionMark from '@/components/widgets/InfoQuestionMark'
-import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo'
-import Quota from '@/components/pages/quota/Quota'
-import SearchField from '@/components/widgets/SearchField'
-import TextField from '@/components/widgets/TextField'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
+import Quota from '@/components/pages/quota/Quota.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'production-quota',
+
   components: {
     ButtonSimple,
     Combobox,

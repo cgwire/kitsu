@@ -11,7 +11,7 @@
         />
         <div class="filler">
           <span class="close-contributions" @click="hideContributions">
-            <x-icon size="0.9x" />
+            <x-icon :size="14" />
           </span>
           <p>
             {{ $t('intro.main') }}
@@ -150,8 +150,8 @@
 </template>
 
 <script>
-import { XIcon } from 'vue-feather-icons'
-import { mapGetters, mapActions } from 'vuex'
+import { XIcon } from 'lucide-vue'
+import { mapGetters } from 'vuex'
 
 import { buildNameIndex } from '@/lib/indexing'
 import colors from '@/lib/colors'
@@ -172,8 +172,7 @@ export default {
   data() {
     return {
       isContributions: true,
-      filteredProductions: [],
-      search: ''
+      filteredProductions: []
     }
   },
 
@@ -198,8 +197,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['newProduction']),
-
     generateAvatar(production) {
       const firstLetter = production.name?.[0] || 'P'
       return firstLetter.toUpperCase()
@@ -377,7 +374,7 @@ h1.title {
   .open-production:hover .production-name {
     transition: all 0.4s ease-in-out;
     transform: scale(1.15);
-    text-shadow: 0px 0px 3px var(--box-shadow);
+    text-shadow: 0 0 3px var(--box-shadow);
   }
 }
 
@@ -459,7 +456,7 @@ a.secondary:hover {
   border-radius: 1em;
   font-size: 1.1rem;
   max-width: 800px;
-  margin-bottom: 0em;
+  margin-bottom: 0;
   margin-top: 2em;
   margin-left: auto;
   margin-right: auto;

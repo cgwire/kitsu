@@ -153,11 +153,13 @@
 </template>
 
 <script>
-import Spinner from '@/components/widgets/Spinner'
 import { domMixin } from '@/components/mixins/dom'
+
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'video-progress',
+
   mixins: [domMixin],
 
   components: {
@@ -735,7 +737,7 @@ progress {
   content: ' ';
   cursor: pointer;
   height: 34px;
-  left: 0px;
+  left: 0;
   position: absolute;
   top: -2px;
   width: 5px;

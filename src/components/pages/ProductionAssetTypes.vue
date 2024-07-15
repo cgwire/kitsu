@@ -45,12 +45,14 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import Combobox from '@/components/widgets/Combobox'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
-import SearchField from '@/components/widgets/SearchField'
+import SearchField from '@/components/widgets/SearchField.vue'
 
 export default {
   name: 'production-asset-types',
@@ -90,8 +92,6 @@ export default {
       'taskTypeMap'
     ])
   },
-
-  created() {},
 
   mounted() {
     this.setDefaultSearchText()
@@ -189,5 +189,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

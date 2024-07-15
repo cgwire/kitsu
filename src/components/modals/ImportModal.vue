@@ -77,14 +77,17 @@
 
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
+
 import FileUpload from '@/components/widgets/FileUpload.vue'
-import ModalFooter from '@/components/modals/ModalFooter'
-import Tabs from '@/components/widgets/Tabs'
-import Tab from '@/components/widgets/Tab'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import Tab from '@/components/widgets/Tab.vue'
+import Tabs from '@/components/widgets/Tabs.vue'
 
 export default {
   name: 'import-modal',
+
   mixins: [modalMixin],
+
   components: {
     FileUpload,
     ModalFooter,

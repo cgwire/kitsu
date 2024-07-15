@@ -21,8 +21,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'table-metadata-header-menu',
 
@@ -35,18 +33,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  data() {
-    return {}
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {
-    ...mapActions([])
   }
 }
 </script>
@@ -54,14 +40,14 @@ export default {
 <style lang="scss" scoped>
 .dark .header-menu {
   background-color: $dark-grey-light;
-  box-shadow: 0px 2px 6px $dark-grey-light;
+  box-shadow: 0 2px 6px $dark-grey-light;
 }
 
 .header-menu {
   position: absolute;
   background: white;
   width: 128px;
-  box-shadow: 0px 2px 6px $light-grey;
+  box-shadow: 0 2px 6px $light-grey;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   top: 90px;

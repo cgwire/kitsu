@@ -456,7 +456,7 @@ import Vue from 'vue/dist/vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
-import { PlusIcon, XIcon } from 'vue-feather-icons'
+import { PlusIcon, XIcon } from 'lucide-vue'
 
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
@@ -464,18 +464,18 @@ import { getPlaylistPath } from '@/lib/path'
 import { updateModelFromList, removeModelFromList } from '@/lib/models'
 import { sortShots } from '@/lib/sorting'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import BuildFilterModal from '@/components/modals/BuildFilterModal'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType'
-import EditPlaylistModal from '@/components/modals/EditPlaylistModal'
-import ErrorText from '@/components/widgets/ErrorText'
-import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail'
-import PageSubtitle from '@/components/widgets/PageSubtitle'
-import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer'
-import SearchField from '@/components/widgets/SearchField'
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
+import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
+import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
+import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'playlist',
@@ -519,7 +519,6 @@ export default {
       previewFileEntityMap: new Map(),
       modals: {
         isBuildFilterDisplayed: false,
-        isDeleteDisplayed: false,
         isEditDisplayed: false
       },
       loading: {
@@ -529,16 +528,13 @@ export default {
         addMovie: false,
         addSequence: false,
         addWeekly: false,
-        deletePlaylist: false,
         editPlaylist: false,
         playlist: false,
         playlists: false,
         playlistsInit: true
       },
       errors: {
-        addPlaylist: false,
         editPlaylist: false,
-        deletePlaylist: false,
         playlistLoading: false
       }
     }
@@ -655,7 +651,6 @@ export default {
 
   methods: {
     ...mapActions([
-      'addNewBuildJob',
       'pushEntityToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
@@ -670,14 +665,11 @@ export default {
       'loadEntityPreviewFiles',
       'loadShots',
       'loadAssets',
-      'markBuildJobAsDone',
       'newPlaylist',
       'refreshPlaylist',
       'removeEntityPreviewFromPlaylist',
-      'removeBuildJobFromList',
       'resetSequences',
       'setAssetSearch',
-      'setCurrentEpisode',
       'setSequenceSearch',
       'setShotSearch',
       'updatePreviewAnnotation'
@@ -1363,8 +1355,6 @@ export default {
         this.reloadAll()
       }
     },
-
-    playlists() {},
 
     currentSort() {
       localStorage.setItem('playlist-sort', this.currentSort)

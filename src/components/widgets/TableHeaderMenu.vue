@@ -31,8 +31,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'table-header-menu',
 
@@ -49,18 +47,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  data() {
-    return {}
-  },
-
-  computed: {
-    ...mapGetters([])
-  },
-
-  methods: {
-    ...mapActions([])
   }
 }
 </script>
@@ -68,7 +54,7 @@ export default {
 <style lang="scss" scoped>
 .dark .header-menu {
   background-color: $dark-grey-light;
-  box-shadow: 0px 2px 6px $dark-grey-light;
+  box-shadow: 0 2px 6px $dark-grey-light;
 }
 
 .header-menu {
@@ -76,7 +62,7 @@ export default {
   background: white;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  box-shadow: 0px 2px 6px $light-grey;
+  box-shadow: 0 2px 6px $light-grey;
   top: 90px;
   width: 118px;
   z-index: 100;

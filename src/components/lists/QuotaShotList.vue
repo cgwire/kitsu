@@ -28,22 +28,17 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { frameToSeconds } from '@/lib/video'
-import TableInfo from '@/components/widgets/TableInfo'
+
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'quota-shot-list',
 
   components: {
     TableInfo
-  },
-
-  data() {
-    return {
-      projectNames: {}
-    }
   },
 
   props: {
@@ -66,12 +61,10 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'lastProductionScreen', 'taskTypeMap'])
+    ...mapGetters(['currentProduction'])
   },
 
   methods: {
-    ...mapActions([]),
-
     getQuota(shot) {
       if (this.countMode === 'seconds') {
         return frameToSeconds(shot.nb_frames, this.currentProduction, shot)
@@ -79,9 +72,7 @@ export default {
         return shot.nb_frames
       }
     }
-  },
-
-  watch: {}
+  }
 }
 </script>
 

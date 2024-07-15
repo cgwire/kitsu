@@ -42,7 +42,7 @@
             />
           </div>
           <div class="flexrow-item">
-            <chevron-right-icon class="mt05" size="1.4x" />
+            <chevron-right-icon class="align-middle" :size="20" />
           </div>
           <div class="flexrow-item subitem">
             <topbar-section-list
@@ -52,7 +52,7 @@
             />
           </div>
           <div class="flexrow-item" v-if="isEpisodeContext">
-            <chevron-right-icon class="mt05" size="1.4x" />
+            <chevron-right-icon class="align-middle" :size="20" />
           </div>
           <div class="flexrow-item subitem">
             <topbar-episode-list
@@ -119,7 +119,7 @@
             <zap-icon />
           </a>
         </div>
-        <notification-bell />
+        <notification-bell class="nav-item" />
         <div class="nav-item">
           <a
             class="changelog-button help-button"
@@ -208,7 +208,7 @@
         <li class="version">Kitsu {{ kitsuVersion }}</li>
         <hr />
         <li class="flexrow" @click="onLogoutClicked">
-          <log-out-icon class="flexrow-item" size="1x" />
+          <log-out-icon class="flexrow-item icon-1x" />
           <span class="flexrow-item">{{ $t('main.logout') }}</span>
         </li>
       </ul>
@@ -229,7 +229,7 @@ import {
   HelpCircleIcon,
   LogOutIcon,
   ZapIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 
 import localPreferences from '@/lib/preferences'
 
@@ -245,6 +245,7 @@ import { version } from '@/../package.json'
 
 export default {
   name: 'topbar',
+
   components: {
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -280,13 +281,11 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetsPath',
       'currentEpisode',
       'currentProduction',
       'episodes',
       'episodeOptionGroups',
       'isCurrentUserAdmin',
-      'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -296,12 +295,10 @@ export default {
       'isSupportChat',
       'isUserMenuHidden',
       'isTVShow',
-      'isNewNotification',
       'lastProductionScreen',
       'lastProductionViewed',
       'mainConfig',
       'openProductions',
-      'openProductionOptions',
       'organisation',
       'productionMap',
       'productionEditTaskTypes',

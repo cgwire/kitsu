@@ -695,8 +695,6 @@ export default {
     }
   },
 
-  socket: {},
-
   watch: {
     selectedDepartment(value) {
       this.updateRoute({ department: value })

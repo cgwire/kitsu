@@ -20,13 +20,13 @@
         :to="{ name: 'person', params: { person_id: person.id } }"
         class="menu-button flexrow"
       >
-        <user-icon class="flexrow-item" size="1.2x" />
+        <user-icon class="flexrow-item" :size="16" />
         <span class="flexrow-item">
           {{ $t('main.avatar.open_page', { personName: person.name }) }}
         </span>
       </router-link>
       <div class="menu-button flexrow" @click.stop="$emit('unassign', person)">
-        <user-minus-icon class="flexrow-item" size="1.2x" />
+        <user-minus-icon class="flexrow-item" :size="16" />
         <span class="flexrow-item">
           {{ $t('main.avatar.unassign', { personName: person.name }) }}
         </span>
@@ -36,8 +36,8 @@
 </template>
 
 <script>
+import { UserIcon, UserMinusIcon } from 'lucide-vue'
 import { mapGetters } from 'vuex'
-import { UserIcon, UserMinusIcon } from 'vue-feather-icons'
 
 export default {
   name: 'people-avatar-with-menu',
@@ -63,17 +63,9 @@ export default {
       type: Number,
       default: 18
     },
-    isLink: {
-      type: Boolean,
-      default: true
-    },
     isLazy: {
       type: Boolean,
       default: true
-    },
-    isMenu: {
-      type: Boolean,
-      default: false
     }
   },
 

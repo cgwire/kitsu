@@ -250,7 +250,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'vue-feather-icons'
+import { CornerLeftUpIcon } from 'lucide-vue'
 
 import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import { entityMixin } from '@/components/mixins/entity'
@@ -276,7 +276,9 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'sequence',
+
   mixins: [entityMixin, formatListMixin],
+
   components: {
     ButtonSimple,
     ComboboxNumber,

@@ -18,7 +18,6 @@
             v-focus
           />
           <color-field
-            ref="colorField"
             :label="$t('studios.fields.color')"
             v-model="form.color"
           />

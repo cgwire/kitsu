@@ -82,14 +82,15 @@ import Vue from 'vue/dist/vue'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import DateField from '@/components/widgets/DateField'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
-import Spinner from '@/components/widgets/Spinner'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'events',
+
   mixins: [timeMixin],
 
   components: {

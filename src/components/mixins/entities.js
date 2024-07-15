@@ -7,8 +7,6 @@ import preferences from '@/lib/preferences'
  * Common functions to shots and assets pages.
  */
 export const entitiesMixin = {
-  created() {},
-
   data() {
     return {
       keepTaskPanelOpen: false
@@ -28,8 +26,6 @@ export const entitiesMixin = {
     }
     this.onSelectedDepartmentChanged()
   },
-
-  beforeDestroy() {},
 
   computed: {
     ...mapGetters([

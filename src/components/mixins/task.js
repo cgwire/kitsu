@@ -4,12 +4,6 @@ import drafts from '@/lib/drafts'
  * Helpers to display task information
  */
 export const taskMixin = {
-  created() {},
-
-  mounted() {},
-
-  computed: {},
-
   methods: {
     getTask() {
       return this.currentTask || this.task
@@ -83,9 +77,5 @@ export const taskMixin = {
           this.errors.editComment = true
         })
     }
-  },
-
-  socket: {
-    events: {}
   }
 }

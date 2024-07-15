@@ -59,14 +59,16 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 
-import Spinner from '@/components/widgets/Spinner'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
-import ValidationTag from '@/components/widgets/ValidationTag'
+import Spinner from '@/components/widgets/Spinner.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'entity-news',
+
   mixins: [formatListMixin],
+
   components: {
     PeopleAvatar,
     Spinner,

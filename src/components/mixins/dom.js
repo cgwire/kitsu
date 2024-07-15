@@ -2,14 +2,6 @@
  * Helpers to access dom through vanilla javascript.
  */
 export const domMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
-  computed: {},
-
   methods: {
     isFocusTextArea() {
       return document.activeElement.nodeName === 'TEXTAREA'

@@ -35,12 +35,14 @@ import panzoom from 'panzoom'
 import { mapGetters } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
-import Spinner from '@/components/widgets/Spinner'
 
 import { domMixin } from '@/components/mixins/dom'
 
+import Spinner from '@/components/widgets/Spinner.vue'
+
 export default {
   name: 'video-viewer',
+
   mixins: [domMixin],
 
   components: {

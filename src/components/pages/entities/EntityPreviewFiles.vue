@@ -93,17 +93,19 @@
 </template>
 
 <script>
+import { DownloadIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
-import { DownloadIcon } from 'vue-feather-icons'
 import { renderFileSize } from '@/lib/render'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'entity-preview-files',
+
   components: {
     DownloadIcon,
     EntityThumbnail,

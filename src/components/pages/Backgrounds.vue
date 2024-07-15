@@ -46,11 +46,11 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import BackgroundList from '@/components/lists/BackgroundList'
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditBackgroundModal from '@/components/modals/EditBackgroundModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import RouteTabs from '@/components/widgets/RouteTabs'
+import BackgroundList from '@/components/lists/BackgroundList.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditBackgroundModal from '@/components/modals/EditBackgroundModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 export default {
   name: 'backgrounds',

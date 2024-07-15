@@ -48,7 +48,6 @@
  */
 export default {
   name: 'stats-cell',
-  components: {},
 
   props: {
     colors: {

@@ -31,12 +31,11 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
   name: 'preview-room',
-  mixins: [],
 
   components: {
     ButtonSimple,
@@ -62,8 +61,6 @@ export default {
     this.openRoom()
   },
 
-  beforeDestroy() {},
-
   computed: {
     ...mapGetters(['personMap', 'user']),
 
@@ -84,9 +81,7 @@ export default {
         playlist_id: this.roomId
       })
     }
-  },
-
-  watch: {}
+  }
 }
 </script>
 

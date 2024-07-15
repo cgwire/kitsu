@@ -1,6 +1,6 @@
 <template>
   <div class="question-mark">
-    <help-circle-icon :size="small ? '0.5x' : '1x'" />
+    <help-circle-icon class="icon-1x" />
     <div
       class="question-text"
       :class="position"
@@ -10,12 +10,13 @@
 </template>
 
 <script>
-import { HelpCircleIcon } from 'vue-feather-icons'
+import { HelpCircleIcon } from 'lucide-vue'
 
 import { renderMarkdown } from '@/lib/render'
 
 export default {
   name: 'info-question-mark',
+
   components: {
     HelpCircleIcon
   },
@@ -24,10 +25,6 @@ export default {
     text: {
       type: String,
       required: true
-    },
-    small: {
-      type: Boolean,
-      default: false
     },
     position: {
       type: String,

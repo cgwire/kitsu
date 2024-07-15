@@ -336,7 +336,6 @@
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import { mapGetters } from 'vuex'
 
-import colors from '@/lib/colors'
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
 import { replaceTimeWithTimecode } from '@/lib/render'
@@ -391,10 +390,6 @@ export default {
   },
 
   props: {
-    addComment: {
-      type: Function,
-      default: null
-    },
     frame: {
       type: Number,
       default: 0
@@ -415,10 +410,6 @@ export default {
       type: Boolean,
       default: null
     },
-    light: {
-      type: Boolean,
-      default: false
-    },
     task: {
       type: Object,
       default: () => {}
@@ -426,10 +417,6 @@ export default {
     taskStatus: {
       type: Array,
       default: () => []
-    },
-    user: {
-      type: Object,
-      default: () => {}
     },
     team: {
       type: Array,
@@ -474,27 +461,18 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction',
       'departmentMap',
-      'isDarkTheme',
       'isCurrentUserArtist',
       'isCurrentUserClient',
-      'uploadProgress',
       'productionDepartmentIds',
       'taskStatusForCurrentUser',
+      'taskStatusMap',
       'taskTypeMap',
-      'taskStatusMap'
+      'uploadProgress'
     ]),
 
     attachmentModal() {
       return this.$refs['add-attachment-modal']
-    },
-
-    isAddChecklistAllowed() {
-      const status =
-        this.taskStatus.find(t => t.id === this.task_status_id) ||
-        this.taskStatus[0]
-      return status.is_retake && this.checklist.length === 0
     },
 
     isConcept() {
@@ -512,22 +490,6 @@ export default {
               !this.link ||
               this.$refs['input-link']?.checkValidity()))
       )
-    },
-
-    taskStatusColor() {
-      const status =
-        this.taskStatus.find(t => t.id === this.task_status_id) ||
-        this.taskStatus[0]
-      if (status.color === '#f5f5f5') {
-        return this.isDarkTheme ? '#666' : '#999'
-      } else {
-        const color = status.color
-        if (this.isDarkTheme) {
-          return colors.darkenColor(color)
-        } else {
-          return color
-        }
-      }
     }
   },
 
@@ -825,7 +787,7 @@ article.add-comment {
   textarea {
     margin: 0;
     min-height: 3.5em;
-    border-radius: 0px;
+    border-radius: 0;
 
     &:focus,
     &:hover,
@@ -899,7 +861,7 @@ article.add-comment {
     margin: 0;
     margin-right: 3px;
     color: var(--text-alt);
-    padding: 0em 10px;
+    padding: 0 10px;
 
     &:hover {
       color: var(--text);
@@ -922,7 +884,7 @@ article.add-comment {
   font-size: 0.9em;
   text-transform: uppercase;
   margin-top: 5px;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 
   span {
     border-bottom: 1px solid var(--border);

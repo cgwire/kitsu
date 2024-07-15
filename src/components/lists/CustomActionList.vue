@@ -54,12 +54,18 @@
 <script>
 import { formatListMixin } from '@/components/mixins/format'
 
-import RowActionsCell from '@/components/cells/RowActionsCell'
-import TableInfo from '@/components/widgets/TableInfo'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'custom-action-list',
+
   mixins: [formatListMixin],
+
+  components: {
+    RowActionsCell,
+    TableInfo
+  },
 
   props: {
     entries: {
@@ -74,14 +80,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  data() {
-    return {}
-  },
-  components: {
-    RowActionsCell,
-    TableInfo
   }
 }
 </script>

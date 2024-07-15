@@ -131,7 +131,7 @@
         />
 
         <day-off-list
-          ref="days-off-list"
+          ref="day-off-list"
           :days-off="daysOff"
           :day-off-error="dayOffError"
           @set-day-off="onSetDayOff"
@@ -547,7 +547,7 @@ export default {
           personId: this.user.id
         })
         this.$refs['timesheet-list']?.closeSetDayOffModal()
-        this.$refs['days-off-list']?.closeSetDayOffModal()
+        this.$refs['day-off-list']?.closeSetDayOffModal()
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
@@ -559,7 +559,7 @@ export default {
       try {
         await this.unsetDayOff(dayOff)
         this.$refs['timesheet-list']?.closeUnsetDayOffModal()
-        this.$refs['days-off-list']?.closeUnsetDayOffModal()
+        this.$refs['day-off-list']?.closeUnsetDayOffModal()
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }

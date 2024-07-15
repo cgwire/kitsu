@@ -42,10 +42,10 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'vue-feather-icons'
+import { ChevronDownIcon } from 'lucide-vue'
 
-import ComboboxMask from '@/components/widgets/ComboboxMask'
-import ProductionName from '@/components/widgets/ProductionName'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
+import ProductionName from '@/components/widgets/ProductionName.vue'
 
 export default {
   name: 'combobox-production',

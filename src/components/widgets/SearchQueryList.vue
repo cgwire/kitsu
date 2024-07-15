@@ -6,7 +6,7 @@
       :title="$t('main.filter_group_add')"
       v-if="isGroupEnabled"
     >
-      <folder-plus-icon size="12" />
+      <folder-plus-icon :size="12" />
     </span>
     <span
       class="tag group"
@@ -26,17 +26,17 @@
         <span>{{ group.name }}</span>
         <chevron-down-icon
           class="chevron ml05"
-          size="12"
+          :size="12"
           v-if="toggleGroupId !== group.id"
         />
-        <chevron-up-icon class="chevron ml05" size="12" v-else />
+        <chevron-up-icon class="chevron ml05" :size="12" v-else />
         <button
           class="edit"
           :style="{ backgroundColor: `${group.color}53` }"
           @click.stop="editGroup(group)"
           v-if="!group.is_shared || isCurrentUserManager"
         >
-          <edit2-icon size="0.6x" />
+          <edit2-icon :size="8" />
         </button>
         <button
           class="del"
@@ -46,7 +46,7 @@
             !group.queries.length && (!group.is_shared || isCurrentUserManager)
           "
         >
-          <trash2-icon size="0.6x" />
+          <trash2-icon :size="8" />
         </button>
       </div>
       <div
@@ -79,7 +79,7 @@
             @click.stop="editSearch(searchQuery)"
             v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
-            <edit2-icon size="0.6x" />
+            <edit2-icon :size="8" />
           </button>
           <button
             class="del"
@@ -87,7 +87,7 @@
             @click.stop="removeSearch(searchQuery)"
             v-if="!searchQuery.is_shared || isCurrentUserManager"
           >
-            <trash2-icon size="0.6x" />
+            <trash2-icon :size="8" />
           </button>
         </span>
       </div>
@@ -107,14 +107,14 @@
         @click.stop="editSearch(searchQuery)"
         v-if="!searchQuery.is_shared || isCurrentUserManager"
       >
-        <edit2-icon size="0.6x" />
+        <edit2-icon :size="8" />
       </button>
       <button
         class="del"
         @click.stop="removeSearch(searchQuery)"
         v-if="!searchQuery.is_shared || isCurrentUserManager"
       >
-        <trash2-icon size="0.6x" />
+        <trash2-icon :size="8" />
       </button>
     </span>
     <edit-search-filter-modal
@@ -143,22 +143,34 @@
  * This component displays a list of queries available to users to filter list
  * results. It allows to modify each query too.
  */
-import { mapActions, mapGetters } from 'vuex'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   Edit2Icon,
   FolderPlusIcon,
   Trash2Icon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
+import { mapActions, mapGetters } from 'vuex'
 
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
-import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal'
-import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal'
+
+import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
+import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
 export default {
   name: 'search-query-list',
+
+  components: {
+    ChevronDownIcon,
+    ChevronUpIcon,
+    Edit2Icon,
+    EditSearchFilterModal,
+    EditSearchFilterGroupModal,
+    FolderPlusIcon,
+    Trash2Icon
+  },
+
   props: {
     queries: {
       type: Array,
@@ -176,16 +188,6 @@ export default {
       type: String,
       required: true
     }
-  },
-
-  components: {
-    ChevronDownIcon,
-    ChevronUpIcon,
-    Edit2Icon,
-    EditSearchFilterModal,
-    EditSearchFilterGroupModal,
-    FolderPlusIcon,
-    Trash2Icon
   },
 
   data() {

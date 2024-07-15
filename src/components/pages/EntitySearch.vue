@@ -12,7 +12,7 @@
 
       <div class="search-field">
         <span class="search-icon">
-          <search-icon width="20" />
+          <search-icon :size="20" />
         </span>
         <input
           ref="search-field"
@@ -98,7 +98,9 @@
                   {{ entity.asset_type_name }} / {{ entity.name }}
                 </div>
                 <div class="match">
-                  <span class="match-icon"><search-icon width="15" /></span>
+                  <span class="match-icon">
+                    <search-icon :size="15" />
+                  </span>
                   {{ getMatchDetails(entity) }}
                 </div>
               </router-link>
@@ -160,7 +162,9 @@
                   {{ entity.sequence_name }} / {{ entity.name }}
                 </div>
                 <div class="match">
-                  <span class="match-icon"><search-icon width="15" /></span>
+                  <span class="match-icon">
+                    <search-icon :size="15" />
+                  </span>
                   <span class="match-details">{{
                     getMatchDetails(entity)
                   }}</span>
@@ -194,20 +198,19 @@
 import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 
-import { SearchIcon } from 'vue-feather-icons'
+import { SearchIcon } from 'lucide-vue'
 import stringHelpers from '@/lib/string'
 
-import Checkbox from '@/components/widgets/Checkbox'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction'
-import EntityPreview from '@/components/widgets/EntityPreview'
-import Spinner from '@/components/widgets/Spinner'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 const AVAILABLE_LIMITS = [12, 24, 48]
 
 export default {
   name: 'entity-search',
-  mixins: [],
 
   components: {
     Checkbox,
@@ -240,8 +243,6 @@ export default {
       }
     }
   },
-
-  props: {},
 
   mounted() {
     window.addEventListener('keydown', event => {
@@ -468,7 +469,7 @@ export default {
     position: absolute;
     color: $grey;
     z-index: 4;
-    top: 15px;
+    top: 17px;
     left: 10px;
   }
 }
@@ -541,7 +542,7 @@ export default {
       opacity: 0.7;
 
       .match-icon {
-        margin-top: -2px;
+        margin-top: 2px;
         margin-right: 0.5em;
       }
     }

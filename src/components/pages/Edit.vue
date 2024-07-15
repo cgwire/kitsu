@@ -257,7 +257,7 @@
               :title="$t('playlists.actions.see_original_file')"
               target="blank"
             >
-              <arrow-up-right-icon class="icon is-small" />
+              <arrow-up-right-icon class="icon" />
             </a>
           </div>
 
@@ -585,7 +585,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon, DownloadIcon } from 'vue-feather-icons'
+import { ArrowUpRightIcon, CornerLeftUpIcon, DownloadIcon } from 'lucide-vue'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
@@ -619,6 +619,7 @@ import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 export default {
   name: 'edit',
+
   mixins: [
     annotationMixin,
     domMixin,
@@ -627,7 +628,9 @@ export default {
     previewRoomMixin,
     playerMixin
   ],
+
   components: {
+    ArrowUpRightIcon,
     ButtonSimple,
     CornerLeftUpIcon,
     ColorPicker,
@@ -1068,7 +1071,7 @@ h2.subtitle {
 
 .page {
   background: #f9f9f9;
-  padding: 0em;
+  padding: 0;
 }
 
 .page-header {
@@ -1225,11 +1228,6 @@ h2.subtitle {
   min-width: 450px;
   max-width: 450px;
   overflow-y: auto;
-}
-
-.icon {
-  margin-top: -4px;
-  height: 20px;
 }
 
 .smaller {

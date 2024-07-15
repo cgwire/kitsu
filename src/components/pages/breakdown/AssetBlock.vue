@@ -55,17 +55,9 @@ import { domMixin } from '@/components/mixins/dom'
 
 export default {
   name: 'asset-block',
-  components: {},
+
   mixins: [domMixin],
 
-  data() {
-    return {
-      initialLoading: true,
-      loading: {
-        EditLabel: false
-      }
-    }
-  },
   props: {
     asset: {
       default: () => ({
@@ -95,8 +87,6 @@ export default {
       type: Boolean
     }
   },
-
-  computed: {},
 
   methods: {
     removeOneAsset(event) {

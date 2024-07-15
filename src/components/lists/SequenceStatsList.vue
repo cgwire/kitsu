@@ -131,15 +131,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { getChartColors, getChartData } from '@/lib/stats'
+
 import { entityListMixin } from '@/components/mixins/entity_list'
 
-import TableInfo from '@/components/widgets/TableInfo'
-import StatsCell from '@/components/cells/StatsCell'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import StatsCell from '@/components/cells/StatsCell.vue'
 
 export default {
   name: 'sequence-stats-list',
+
   mixins: [entityListMixin],
 
   components: {
@@ -187,9 +190,7 @@ export default {
       'currentProduction',
       'currentEpisode',
       'displayedSequencesLength',
-      'isDarkTheme',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isTVShow',
       'sequenceSearchText',
       'taskTypeMap'
@@ -207,8 +208,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     chartColors(entryId, columnId) {
       return getChartColors(this.sequenceStats, entryId, columnId)
     },

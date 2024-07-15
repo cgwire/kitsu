@@ -58,17 +58,16 @@
                 />
                 <message-square-icon
                   class="icon flexrow-item"
-                  v-if="isComment(notification)"
+                  v-else-if="isComment(notification)"
                 />
                 <corner-up-left-icon
                   class="icon flexrow-item"
-                  v-if="isReply(notification)"
+                  v-else-if="isReply(notification)"
                 />
                 <user-icon
                   class="icon flexrow-item"
-                  v-if="isAssignation(notification)"
+                  v-else-if="isAssignation(notification)"
                 />
-
                 <task-type-name
                   class="task-type-name"
                   :task-type="buildTaskTypeFromNotification(notification)"
@@ -218,7 +217,7 @@ import {
   CornerUpLeftIcon,
   MessageSquareIcon,
   UserIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 import moment from 'moment-timezone'
 
 import { pluralizeEntityType } from '@/lib/path'
@@ -309,7 +308,6 @@ export default {
       'taskStatus',
       'taskTypes',
       'taskTypeMap',
-      'taskStatusMap',
       'user'
     ]),
 
@@ -513,7 +511,7 @@ export default {
   .notification {
     background: $dark-grey-lighter;
     color: $white-grey;
-    box-shadow: 0px 1px 1px 1px $dark-grey;
+    box-shadow: 0 1px 1px 1px $dark-grey;
   }
 
   .icon,
@@ -600,7 +598,7 @@ a {
 
 .icon {
   width: 20px;
-  margin-right: 0em;
+  margin-right: 0;
   font-size: 0.8em;
   color: $grey;
 }

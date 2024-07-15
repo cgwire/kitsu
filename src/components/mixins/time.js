@@ -6,12 +6,6 @@ import moment from 'moment-timezone'
 import { formatFullDateWithTimezone } from '@/lib/time'
 
 export const timeMixin = {
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     timezone() {
       return this.user.timezone || moment.tz.guess()

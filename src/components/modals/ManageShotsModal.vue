@@ -156,13 +156,15 @@ import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
-import PageTitle from '@/components/widgets/PageTitle'
 import stringHelpers from '@/lib/string'
 import { sortByName } from '@/lib/sorting'
 
+import Combobox from '@/components/widgets/Combobox.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
+
 export default {
   name: 'manage-shots-modal',
+
   mixins: [modalMixin],
 
   components: {

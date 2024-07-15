@@ -25,14 +25,14 @@
 
     <div class="flexrow-item save-search" v-if="canSave">
       <button class="button save-button" @click="onSaveClicked">
-        <save-icon class="icon is-small only-icon" />
+        <save-icon class="icon is-small" />
       </button>
     </div>
   </div>
 </template>
 
 <script>
-import { SaveIcon, SearchIcon } from 'vue-feather-icons'
+import { SaveIcon, SearchIcon } from 'lucide-vue'
 
 export default {
   name: 'search-field',
@@ -53,7 +53,7 @@ export default {
       type: Boolean,
       default: false
     },
-    // FIXME:property no longer used in component
+    // FIXME: property no longer used in component
     active: {
       type: Boolean,
       default: true

@@ -89,11 +89,12 @@
 import { mapGetters, mapActions } from 'vuex'
 import { renderFileSize } from '@/lib/render'
 
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'entity-output-files',
+
   components: {
     Spinner,
     TaskTypeCell

@@ -56,13 +56,16 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
-import PeopleNameCell from '@/components/cells/PeopleNameCell'
-import Spinner from '@/components/widgets/Spinner'
-import TaskTypeCell from '@/components/cells/TaskTypeCell'
+
+import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'entity-time-logs',
+
   mixins: [formatListMixin],
+
   components: {
     PeopleNameCell,
     Spinner,

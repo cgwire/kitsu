@@ -24,15 +24,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import KitsuIcon from '@/components/widgets/KitsuIcon'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'big-thumbnails-button',
+
   components: {
     KitsuIcon
   },
-
-  props: {},
 
   computed: {
     ...mapGetters(['isBigThumbnails'])

@@ -45,11 +45,7 @@
           >
             <td class="name">
               {{ entry.name }}
-              <span
-                class="help-tooltip"
-                :title="entry.description"
-                v-if="entry.description"
-              >
+              <span :title="entry.description" v-if="entry.description">
                 <help-circle-icon class="icon is-small" />
               </span>
             </td>
@@ -89,8 +85,8 @@
 </template>
 
 <script>
+import { HelpCircleIcon } from 'lucide-vue'
 import draggable from 'vuedraggable'
-import { HelpCircleIcon } from 'vue-feather-icons'
 
 import { formatListMixin } from '@/components/mixins/format'
 
@@ -103,6 +99,15 @@ export default {
   name: 'task-status-list',
 
   mixins: [formatListMixin],
+
+  components: {
+    BooleanCell,
+    draggable,
+    HelpCircleIcon,
+    RowActionsCell,
+    TableInfo,
+    TaskStatusCell
+  },
 
   props: {
     entries: {
@@ -117,15 +122,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  components: {
-    BooleanCell,
-    draggable,
-    HelpCircleIcon,
-    RowActionsCell,
-    TableInfo,
-    TaskStatusCell
   },
 
   methods: {

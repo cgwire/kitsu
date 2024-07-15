@@ -5,8 +5,6 @@ export const selectionListMixin = {
     }
   },
 
-  computed: {},
-
   methods: {
     onKeyUp(event) {
       this.shiftKeyPressed = event.shiftKey

@@ -47,8 +47,8 @@ import { mapGetters } from 'vuex'
 
 import { getEntityPath } from '@/lib/path'
 
-import EntityPreview from '@/components/widgets/EntityPreview'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
   name: 'concept-card',
@@ -64,12 +64,6 @@ export default {
       required: true
     }
   },
-
-  data() {
-    return {}
-  },
-
-  mounted() {},
 
   computed: {
     ...mapGetters([

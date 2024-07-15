@@ -36,14 +36,14 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import Combobox from '@/components/widgets/Combobox'
-import ModalFooter from '@/components/modals/ModalFooter'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
   name: 'edit-label-modal',
+
   mixins: [modalMixin],
 
   components: {
@@ -75,7 +75,6 @@ export default {
 
   data() {
     return {
-      asset: null,
       form: {
         label: 'animate'
       },
@@ -92,13 +91,7 @@ export default {
     }
   },
 
-  computed: {
-    ...mapGetters([])
-  },
-
   methods: {
-    ...mapActions([]),
-
     confirm() {
       return this.$emit('confirm', this.form)
     }

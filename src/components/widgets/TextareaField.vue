@@ -18,10 +18,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
 export default {
   name: 'textarea-field',
+
   props: {
     label: {
       default: '',
@@ -44,11 +43,8 @@ export default {
       type: String
     }
   },
-  computed: {
-    ...mapGetters([])
-  },
+
   methods: {
-    ...mapActions([]),
     emitEnter() {
       this.$emit('enter', this.$refs.input.value)
     },
@@ -64,6 +60,7 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .field {
   display: flex;

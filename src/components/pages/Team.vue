@@ -104,14 +104,14 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment'
-import PageLayout from '@/components/layouts/PageLayout'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleField from '@/components/widgets/PeopleField'
-import PeopleName from '@/components/widgets/PeopleName'
-import ProductionTeamList from '@/components/lists/ProductionTeamList'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import PageLayout from '@/components/layouts/PageLayout.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import ProductionTeamList from '@/components/lists/ProductionTeamList.vue'
 
 export default {
   name: 'team',

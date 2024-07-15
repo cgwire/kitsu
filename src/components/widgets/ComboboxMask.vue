@@ -17,10 +17,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-
-  computed: {}
+  }
 }
 </script>
-
-<style lang="scss" scoped></style>

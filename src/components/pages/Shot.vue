@@ -322,7 +322,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'vue-feather-icons'
+import { CornerLeftUpIcon } from 'lucide-vue'
 
 import { episodifyRoute } from '@/lib/path'
 import { entityMixin } from '@/components/mixins/entity'
@@ -347,7 +347,9 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'shot',
+
   mixins: [entityMixin, formatListMixin],
+
   components: {
     ButtonSimple,
     ComboboxNumber,

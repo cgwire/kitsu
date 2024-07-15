@@ -33,17 +33,20 @@
 
 <script>
 import panzoom from 'panzoom'
+
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
-import Spinner from '@/components/widgets/Spinner'
+
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'picture-viewer',
 
+  mixins: [domMixin, fullScreenMixin],
+
   components: {
     Spinner
   },
-  mixins: [domMixin, fullScreenMixin],
 
   props: {
     big: {

@@ -6,7 +6,7 @@
     }"
   >
     <span class="search-icon">
-      <search-icon width="20" />
+      <search-icon :size="20" />
     </span>
     <input
       ref="global-search-field"
@@ -152,16 +152,16 @@
 </template>
 
 <script>
+import { SearchIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
+
 import { getEntityPath, getPersonPath } from '@/lib/path'
-
-import { SearchIcon } from 'vue-feather-icons'
-
 import peopleStore from '@/store/modules/people'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import PeopleName from '@/components/widgets/PeopleName'
-import Spinner from '@/components/widgets/Spinner'
+
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'global-search-field',
@@ -185,8 +185,6 @@ export default {
       searchQuery: ''
     }
   },
-
-  props: {},
 
   mounted() {
     window.addEventListener('keydown', event => {
@@ -351,8 +349,8 @@ export default {
   position: relative;
 
   &.global-search-field-open {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   input {
@@ -364,7 +362,7 @@ export default {
     position: absolute;
     color: $grey;
     z-index: 4;
-    top: 18px;
+    top: 20px;
     left: 10px;
   }
 }

@@ -134,11 +134,11 @@ import { sortPeople } from '@/lib/sorting'
 import { domMixin } from '@/components/mixins/dom'
 import { formatListMixin } from '@/components/mixins/format'
 
-import AddPreviewModal from '@/components/modals/AddPreviewModal'
-import EntityPreview from '@/components/widgets/EntityPreview'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
-import TableInfo from '@/components/widgets/TableInfo'
-import TaskTypeName from '@/components/widgets/TaskTypeName'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'kanban-board',

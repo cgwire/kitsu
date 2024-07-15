@@ -1,5 +1,5 @@
 <template>
-  <div class="days-off-list data-list">
+  <div class="day-off-list data-list">
     <div class="flexrow header">
       <div class="filler"></div>
       <button-simple
@@ -106,7 +106,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
-  name: 'days-off-list',
+  name: 'day-off-list',
 
   components: {
     ButtonSimple,
@@ -205,7 +205,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.days-off-list {
+.day-off-list {
   max-width: 800px;
 }
 

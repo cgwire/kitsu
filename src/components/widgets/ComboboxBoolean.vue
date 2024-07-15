@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Combobox from '@/components/widgets/Combobox'
+import Combobox from '@/components/widgets/Combobox.vue'
 
 export default {
   name: 'combobox-boolean',
@@ -30,11 +30,6 @@ export default {
       type: String
     },
 
-    options: {
-      default: () => [],
-      type: Array
-    },
-
     disabled: {
       default: false,
       type: Boolean
@@ -50,8 +45,6 @@ export default {
     }
   },
 
-  computed: {},
-
   methods: {
     emitValue(value) {
       this.$emit('input', value)
@@ -62,5 +55,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

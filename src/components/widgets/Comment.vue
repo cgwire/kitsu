@@ -70,7 +70,7 @@
                 {{ $t('comments.comment_from_client') }}
                 <copy-icon
                   class="copy-icon"
-                  size="1.1x"
+                  :size="12"
                   @click="$emit('duplicate-comment', comment)"
                 />
               </span>
@@ -124,10 +124,7 @@
                 target="_blank"
                 v-for="attachment in fileAttachments"
               >
-                <paperclip-icon
-                  size="1x"
-                  class="flexrow-item attachment-icon"
-                />
+                <paperclip-icon class="flexrow-item attachment-icon icon-1x" />
                 <span class="flexrow-item">
                   {{ attachment.name }}
                 </span>
@@ -255,7 +252,7 @@
                 type="button"
                 @click="acknowledgeComment(comment)"
               >
-                <thumbs-up-icon size="1x" />
+                <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
               </button>
               <span class="filler"></span>
@@ -281,7 +278,7 @@
           class="flexrow-item round-name revision"
           :to="previewRoute"
         >
-          Revision {{ comment.previews[0].revision }}
+          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
         </router-link>
         <a
           class="preview-link button flexrow-item"
@@ -301,14 +298,6 @@
           &nbsp;
         </span>
       </div>
-
-      <!--div
-      class="has-text-centered add-checklist"
-      @click="addChecklistEntry()"
-      v-if="isAddChecklistAllowed"
-    >
-      {{ $t('comments.add_checklist') }}
-    </div-->
     </article>
     <div class="empty-comment" v-else>
       <div class="flexrow content-wrapper">
@@ -365,9 +354,8 @@ import {
   LinkIcon,
   PaperclipIcon,
   ThumbsUpIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 
-import colors from '@/lib/colors'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
 import { pluralizeEntityType } from '@/lib/path'
@@ -498,7 +486,6 @@ export default {
       'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
-      'isDarkTheme',
       'personMap',
       'productionDepartmentIds',
       'taskStatusMap',
@@ -550,35 +537,9 @@ export default {
       return route
     },
 
-    deleteCommentPath() {
-      return this.getPath('task-delete-comment')
-    },
-
-    editCommentPath() {
-      return this.getPath('task-edit-comment')
-    },
-
-    addPreviewPath() {
-      return this.getPath('task-add-preview')
-    },
-
     taskStatus() {
       const status = this.taskStatusMap.get(this.comment?.task_status.id)
       return status || this.comment.task_status
-    },
-
-    isAddChecklistAllowed() {
-      return (
-        this.taskStatus.is_retake &&
-        this.checklist.length === 0 &&
-        this.user.id === this.comment.person_id
-      )
-    },
-
-    isChangeChecklistAllowed() {
-      return (
-        this.taskStatus.is_retake && this.user.id === this.comment.person_id
-      )
     },
 
     isLikedBy() {
@@ -625,15 +586,6 @@ export default {
     boxShadowStyle() {
       const status = this.comment.task_status
       return `0 0 3px 2px ${status.color}1F`
-    },
-
-    statusColor() {
-      const color = this.comment.task_status.color
-      if (this.isDarkTheme && !this.isEmpty) {
-        return colors.darkenColor(color)
-      } else {
-        return color
-      }
     },
 
     isAuthorClient() {

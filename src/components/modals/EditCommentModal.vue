@@ -108,7 +108,7 @@
             >
               {{ attachment.name }}
               <span @click="removeAttachment(attachment)">
-                <x-icon size="0.9x" />
+                <x-icon :size="12" />
               </span>
             </div>
           </div>
@@ -156,8 +156,8 @@
 </template>
 
 <script>
+import { XIcon } from 'lucide-vue'
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import { XIcon } from 'vue-feather-icons'
 import { mapGetters } from 'vuex'
 
 import files from '@/lib/files'
@@ -165,6 +165,7 @@ import { remove } from '@/lib/models'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
 import { modalMixin } from '@/components/modals/base_modal'
+
 import Checklist from '@/components/widgets/Checklist.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'

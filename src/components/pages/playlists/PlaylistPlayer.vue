@@ -832,7 +832,7 @@
                   v-if="!joinedRoom"
                   @click="playBuild(job)"
                 >
-                  <play-icon size="0.8x" />
+                  <play-icon :size="12" />
                 </button>
                 <a class="flexrow-item" :href="getBuildPath(job)">
                   {{ formatDate(job.created_at) }}
@@ -924,42 +924,39 @@
  * This modules manages all the options available while playing a playlist.
  * It is made to work with a single playlist.
  */
+import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, PlayIcon } from 'lucide-vue'
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
 import { mapActions, mapGetters } from 'vuex'
-import {
-  ArrowUpRightIcon,
-  DownloadIcon,
-  GlobeIcon,
-  PlayIcon
-} from 'vue-feather-icons'
 
 import { formatFrame } from '@/lib/video'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ColorPicker from '@/components/widgets/ColorPicker'
-import Combobox from '@/components/widgets/Combobox'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled'
-import DeleteModal from '@/components/modals/DeleteModal'
-import ObjectViewer from '@/components/previews/ObjectViewer'
-import PencilPicker from '@/components/widgets/PencilPicker'
-import PictureViewer from '@/components/previews/PictureViewer'
-import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity'
-import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer'
-import PreviewRoom from '@/components/widgets/PreviewRoom'
-import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal'
-import SoundViewer from '@/components/previews/SoundViewer'
-import Spinner from '@/components/widgets/Spinner'
-const TaskInfo = () => import('@/components/sides/TaskInfo')
-import VideoProgress from '@/components/previews/VideoProgress'
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import { annotationMixin } from '@/components/mixins/annotation'
-import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { domMixin } from '@/components/mixins/dom'
 import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ColorPicker from '@/components/widgets/ColorPicker.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import ObjectViewer from '@/components/previews/ObjectViewer.vue'
+import PencilPicker from '@/components/widgets/PencilPicker.vue'
+import PictureViewer from '@/components/previews/PictureViewer.vue'
+import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
+import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
+import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
+import SoundViewer from '@/components/previews/SoundViewer.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
+import VideoProgress from '@/components/previews/VideoProgress.vue'
+
 export default {
   name: 'playlist-player',
+
   mixins: [annotationMixin, domMixin, previewRoomMixin, playerMixin],
 
   components: {
@@ -2080,8 +2077,6 @@ export default {
       }
     },
 
-    revisionToCompare() {},
-
     entities() {
       this.currentPreviewIndex = 0
       this.currentComparisonPreviewuIndex = 0
@@ -2202,7 +2197,7 @@ export default {
   .playlist-button.edit-button,
   .playlist-button.delete-button {
     margin-left: 5px;
-    margin-right: 0px;
+    margin-right: 0;
   }
 
   .playlist-button.delete-button {
@@ -2250,7 +2245,7 @@ export default {
 
 .playlisted-entities {
   border-top: 1px solid $dark-grey-strong;
-  padding: 0.4em 0em 0 0.4em;
+  padding: 0.4em 0 0 0.4em;
   overflow-x: auto;
   min-height: 600px;
   align-items: flex-start;

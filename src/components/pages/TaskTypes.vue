@@ -53,11 +53,11 @@ import csv from '@/lib/csv'
 import func from '@/lib/func'
 import stringHelpers from '@/lib/string'
 
-import DeleteModal from '@/components/modals/DeleteModal'
-import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal'
-import ListPageHeader from '@/components/widgets/ListPageHeader'
-import RouteTabs from '@/components/widgets/RouteTabs'
-import TaskTypeList from '@/components/lists/TaskTypeList'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
+import TaskTypeList from '@/components/lists/TaskTypeList.vue'
 
 export default {
   name: 'task-types',

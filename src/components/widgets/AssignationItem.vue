@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import PeopleAvatar from '@/components/widgets/PeopleAvatar'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
   name: 'assignation-item',

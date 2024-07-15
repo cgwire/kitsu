@@ -15,17 +15,13 @@
 </template>
 
 <script>
-import Spinner from '@/components/widgets/Spinner'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'delete-entities',
 
   components: {
     Spinner
-  },
-
-  data() {
-    return {}
   },
 
   props: {

@@ -35,12 +35,6 @@ export const entityMixin = {
     }
   },
 
-  created() {},
-
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
     ...mapGetters(['organisation']),
 

@@ -1,8 +1,7 @@
 <template>
   <div class="productions page fixed-page">
     <div class="flexrow page-header">
-      <page-title :text="$t('productions.title')" />
-      <div class="filler"></div>
+      <page-title class="filler" :text="$t('productions.title')" />
       <button-simple
         class="flexrow-item"
         :text="$t('productions.load_stats')"
@@ -51,12 +50,13 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ButtonLink from '@/components/widgets/ButtonLink'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import EditProductionModal from '@/components/modals/EditProductionModal'
-import HardDeleteModal from '@/components/modals/HardDeleteModal'
-import ProductionList from '@/components/lists/ProductionList'
-import PageTitle from '@/components/widgets/PageTitle'
+
+import ButtonLink from '@/components/widgets/ButtonLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EditProductionModal from '@/components/modals/EditProductionModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ProductionList from '@/components/lists/ProductionList.vue'
+import PageTitle from '@/components/widgets/PageTitle.vue'
 
 export default {
   name: 'productions',
@@ -87,8 +87,7 @@ export default {
       },
       productionStats: {},
       productionToDelete: null,
-      productionToEdit: null,
-      choices: []
+      productionToEdit: null
     }
   },
 
@@ -202,8 +201,6 @@ export default {
     }
   },
 
-  watch: {},
-
   metaInfo() {
     return {
       title: `${this.$t('productions.title')} - Kitsu`
@@ -211,5 +208,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

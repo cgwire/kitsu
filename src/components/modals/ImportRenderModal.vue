@@ -162,16 +162,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
+
 import { modalMixin } from '@/components/modals/base_modal'
-import Combobox from '@/components/widgets/Combobox'
-import Checkbox from '@/components/widgets/Checkbox'
-import ButtonSimple from '@/components/widgets/ButtonSimple'
-import ModalFooter from '@/components/modals/ModalFooter'
+
+import Combobox from '@/components/widgets/Combobox.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
   name: 'import-render-modal',
+
   mixins: [modalMixin],
+
   components: {
     ButtonSimple,
     Combobox,
@@ -183,9 +187,6 @@ export default {
     return {
       duplicates: [],
       formData: null,
-      form: {
-        name: ''
-      },
       updateData: false
     }
   },
@@ -236,7 +237,6 @@ export default {
   computed: {
     ...mapGetters([
       'assetMetadataDescriptors',
-      'isTVShow',
       'shotMetadataDescriptors',
       'editMetadataDescriptors'
     ]),
@@ -326,8 +326,6 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
-
     onConfirmClicked() {
       this.$emit('confirm', this.parsedCsv, this.updateData)
     },
@@ -473,7 +471,7 @@ export default {
   font-size: 1em;
   font-weight: bold;
   margin-bottom: 1.5em;
-  margin-top: 0em;
+  margin-top: 0;
   text-transform: uppercase;
 }
 

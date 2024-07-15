@@ -2,7 +2,6 @@
  * Set of helpers to deal with annotation canvas. It's aimed at preview
  * widgets.
  */
-import { mapGetters } from 'vuex'
 import { fabric } from 'fabric'
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
@@ -47,13 +46,7 @@ export const annotationMixin = {
     this.resetUndoStacks()
   },
 
-  mounted() {},
-
-  beforeDestroy() {},
-
   computed: {
-    ...mapGetters([]),
-
     annotationCanvas() {
       return this.$refs['annotation-canvas'] // Canvas used by fabric
     }
