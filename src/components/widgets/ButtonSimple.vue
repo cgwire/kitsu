@@ -45,6 +45,7 @@
     <codepen-icon class="icon" v-else-if="icon == 'codepen'" />
     <link-icon class="icon" v-else-if="icon == 'link'" />
     <clock-icon class="icon" v-else-if="icon == 'clock'" />
+    <file-digit stroke-width="1.2" size="20" class="icon" v-else-if="icon == 'file-digit'" />
     <kitsu-icon
       class="icon"
       :name="icon"
@@ -73,6 +74,7 @@ import {
   CornerLeftDownIcon,
   CornerRightDownIcon,
   DownloadIcon,
+  FileDigit,
   EditIcon,
   Edit2Icon,
   GlobeIcon,
@@ -116,6 +118,7 @@ export default {
     DownloadIcon,
     EditIcon,
     Edit2Icon,
+    FileDigit,
     FilmIcon,
     GlobeIcon,
     GridIcon,

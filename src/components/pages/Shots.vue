@@ -47,7 +47,7 @@
               />
               <button-simple
                 class="flexrow-item"
-                icon="film"
+                icon="file-digit"
                 :title="$t('shots.get_frames_from_previews')"
                 @click="() => (modals.isSetFramesDisplayed = true)"
                 v-if="isCurrentUserManager"

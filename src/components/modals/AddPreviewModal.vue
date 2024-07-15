@@ -143,7 +143,7 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import {
   AlertTriangleIcon
-} from 'vue-feather-icons'
+} from 'lucide-vue'
 
 import files from '@/lib/files'
 
