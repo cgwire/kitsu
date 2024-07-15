@@ -309,14 +309,13 @@ export default {
       this.$refs['th-prod'].offsetWidth +
       this.$refs['th-type'].offsetWidth +
       'px'
-    const beginningOfTheWeek = moment().startOf('isoWeek').toDate()
     this.disabledDates = {
       to:
         this.isCurrentUserArtist &&
         this.organisation.timesheets_locked === 'true'
-          ? beginningOfTheWeek
+          ? moment().subtract(1, 'weeks').toDate() // Disable dates older than one week
           : undefined,
-      from: moment().toDate() // Disable dates after today.
+      from: moment().toDate() // Disable dates after today
     }
   },
 
