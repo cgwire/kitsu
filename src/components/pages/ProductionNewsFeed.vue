@@ -238,7 +238,7 @@
 
                   <div
                     class="has-text-centered"
-                    v-if="previewMode == 'previews'"
+                    v-if="previewMode === 'previews'"
                   >
                     <preview-player
                       :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(
