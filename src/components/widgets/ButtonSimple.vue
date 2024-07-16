@@ -46,10 +46,9 @@
     <link-icon class="icon" v-else-if="icon == 'link'" />
     <clock-icon class="icon" v-else-if="icon == 'clock'" />
     <file-digit-icon
-      stroke-width="1.2"
-      size="20"
       class="icon"
-      v-else-if="icon == 'file-digit'"
+      :stroke-width="1.2"
+      v-else-if="icon === 'file-digit'"
     />
     <kitsu-icon
       class="icon"
