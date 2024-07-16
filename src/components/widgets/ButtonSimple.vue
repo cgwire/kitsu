@@ -45,7 +45,7 @@
     <codepen-icon class="icon" v-else-if="icon == 'codepen'" />
     <link-icon class="icon" v-else-if="icon == 'link'" />
     <clock-icon class="icon" v-else-if="icon == 'clock'" />
-    <file-digit
+    <file-digit-icon
       stroke-width="1.2"
       size="20"
       class="icon"
@@ -79,7 +79,7 @@ import {
   CornerLeftDownIcon,
   CornerRightDownIcon,
   DownloadIcon,
-  FileDigit,
+  FileDigitIcon,
   EditIcon,
   Edit2Icon,
   GlobeIcon,
@@ -123,7 +123,7 @@ export default {
     DownloadIcon,
     EditIcon,
     Edit2Icon,
-    FileDigit,
+    FileDigitIcon,
     FilmIcon,
     GlobeIcon,
     GridIcon,
