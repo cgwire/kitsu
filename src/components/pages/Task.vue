@@ -184,7 +184,7 @@
                 :task="task"
                 :task-status="taskStatusForCurrentUser"
                 :preview-forms="previewForms"
-                :fps="parseInt(currentFps)"
+                :fps="currentFps"
                 :revision="currentRevision"
                 @add-comment="addComment"
                 @add-preview="onAddPreviewClicked"
@@ -205,7 +205,7 @@
                   <comment
                     :key="comment.id"
                     :comment="comment"
-                    :fps="parseInt(currentFps)"
+                    :fps="currentFps"
                     :frame="currentFrame"
                     :is-checkable="
                       user.id === comment.person?.id ||
@@ -256,6 +256,8 @@
         :is-loading="loading.addPreview"
         :is-error="errors.addPreview"
         :form-data="addPreviewFormData"
+        :fps="currentFps"
+        :expected-frames="entityFrames"
         :title="
           task
             ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
@@ -288,7 +290,7 @@
         :is-error="errors.editComment"
         :comment-to-edit="commentToEdit"
         :team="currentTeam"
-        :fps="parseInt(currentFps)"
+        :fps="currentFps"
         :revision="currentRevision"
         @confirm="confirmEditTaskComment"
         @cancel="onCancelEditComment"
@@ -447,6 +449,7 @@ export default {
       'personMap',
       'productionMap',
       'route',
+      'shotMap',
       'taskEntityPreviews',
       'taskStatus',
       'taskStatusForCurrentUser',
@@ -526,10 +529,6 @@ export default {
           preview => preview.revision === this.currentRevision
         )
       )
-    },
-
-    currentFps() {
-      return this.productionMap.get(this.task?.project_id)?.fps || '25'
     },
 
     currentRevision() {

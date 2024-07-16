@@ -1036,6 +1036,7 @@ export const annotationMixin = {
      * Store selected annotations into the clipboard.
      */
     copyAnnotations() {
+      if (!this.fabricCanvas) return
       const activeObject = this.fabricCanvas.getActiveObject()
       if (activeObject) {
         activeObject.clone().then(cloned => {
@@ -1049,16 +1050,37 @@ export const annotationMixin = {
      * Paste annotations stored in the clipboard.
      */
     pasteAnnotations() {
+      if (!this.fabricCanvas) return
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
       if (clonedObj._objects) {
-        clonedObj._objects.forEach(obj => this.addObject(obj))
+        clonedObj._objects.forEach(obj => {
+          obj = this.applyGroupChanges(clonedObj, obj)
+          obj.group = null
+          this.addObject(obj)
+        })
         this.fabricCanvas.requestRenderAll()
       } else if (clonedObj._set) {
         this.addObject(clonedObj)
         this.fabricCanvas.setActiveObject(clonedObj)
         this.fabricCanvas.requestRenderAll()
       }
+    },
+
+    applyGroupChanges(group, obj) {
+      if (obj.group) {
+        const point = new fabric.Point(obj.left, obj.top)
+        const transformedPoint = fabric.util.transformPoint(
+          point,
+          group.calcTransformMatrix()
+        )
+        obj.left = transformedPoint.x
+        obj.top = transformedPoint.y
+        obj.angle += group.angle
+        obj.scaleX *= group.scaleX
+        obj.scaleY *= group.scaleY
+      }
+      return obj
     },
 
     /*

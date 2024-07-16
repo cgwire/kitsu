@@ -171,7 +171,7 @@
             </p>
             <p @click="toggleSidebar()">
               <router-link :to="{ name: 'bots' }">
-                <kitsu-icon class="nav-icon" name="bot" />
+                <bot-icon class="nav-icon" />
                 {{ $t('bots.title') }}
               </router-link>
             </p>
@@ -201,13 +201,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BuildingIcon, GlobeIcon } from 'lucide-vue'
+import { BotIcon, BuildingIcon, GlobeIcon } from 'lucide-vue'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'sidebar',
   components: {
+    BotIcon,
     BuildingIcon,
     GlobeIcon,
     KitsuIcon

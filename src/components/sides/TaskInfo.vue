@@ -145,7 +145,7 @@
                   :preview-forms="previewForms"
                   :is-error="errors.addComment"
                   :is-max-retakes-error="errors.addCommentMaxRetakes"
-                  :fps="parseInt(currentFps)"
+                  :fps="currentFps"
                   :frame="currentFrame || currentFrameRaw"
                   :revision="currentRevision"
                   :is-movie="isMoviePreview"
@@ -171,7 +171,7 @@
                     <comment
                       :key="`comment-${comment.id}`"
                       :comment="comment"
-                      :fps="parseInt(currentFps)"
+                      :fps="currentFps"
                       :frame="currentFrame || currentFrameRaw"
                       :is-change="isStatusChange(index)"
                       :is-checkable="
@@ -221,6 +221,8 @@
           :active="modals.addPreview"
           :is-loading="loading.addPreview"
           :is-error="errors.addPreview"
+          :expected-frames="entityFrames"
+          :fps="currentFps"
           @cancel="closeAddPreviewModal"
           @confirm="confirmAddPreviewModal"
         />
@@ -239,7 +241,7 @@
         <edit-comment-modal
           :active="modals.editComment"
           :comment-to-edit="commentToEdit"
-          :fps="parseInt(currentFps)"
+          :fps="currentFps"
           :frame="currentFrame || currentFrameRaw"
           :is-loading="loading.editComment"
           :is-error="errors.editComment"
@@ -480,6 +482,7 @@ export default {
       'selectedEdits',
       'selectedShots',
       'selectedTasks',
+      'shotMap',
       'nbSelectedValidations',
       'taskEntityPreviews',
       'taskTypeMap',
@@ -609,7 +612,7 @@ export default {
     },
 
     currentFps() {
-      return this.productionMap.get(this.task.project_id).fps || '25'
+      return parseInt(this.productionMap.get(this.task.project_id).fps || '25')
     },
 
     currentRevision() {
