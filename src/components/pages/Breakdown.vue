@@ -88,7 +88,8 @@
               timeSpent: true
             }"
             :metadata-display-headers.sync="metadataDisplayHeaders"
-            v-if="isShowInfosBreakdown && columnSelectorDisplayed"
+            v-if="isShowInfosBreakdown"
+            v-show="columnSelectorDisplayed"
           />
           <span class="filler"></span>
 
