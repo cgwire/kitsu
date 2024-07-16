@@ -19,6 +19,7 @@ import {
   CASTING_SET_SEQUENCES,
   CASTING_ADD_TO_CASTING,
   CASTING_REMOVE_FROM_CASTING,
+  LOAD_ASSETS_END,
   LOAD_EPISODES_START,
   LOAD_SHOTS_START,
   LOAD_EPISODE_CASTING_END,
@@ -33,7 +34,6 @@ import {
   SET_IS_SHOW_INFOS_BREAKDOWN,
   RESET_ALL
 } from '@/store/mutation-types'
-import { LOAD_ASSETS_END } from '../mutation-types'
 
 const initialState = {
   breakdownSearchFilterGroups: [],

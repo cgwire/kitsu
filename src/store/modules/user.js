@@ -59,7 +59,9 @@ import {
   SET_TODO_LIST_SCROLL_POSITION,
   SAVE_ASSET_SEARCH_END,
   SAVE_SHOT_SEARCH_END,
-  REMOVE_ASSET_SEARCH_END,
+  SAVE_EDIT_SEARCH_END,
+  SAVE_SEQUENCE_SEARCH_END,
+  SAVE_BREAKDOWN_SEARCH_END,
   LOAD_PRODUCTION_STATUS_END,
   LOAD_BACKGROUNDS_END,
   LOAD_DEPARTMENTS_END,
@@ -769,7 +771,50 @@ const mutations = {
     }
   },
 
-  [REMOVE_ASSET_SEARCH_END](state) {},
+  [SAVE_EDIT_SEARCH_END](state, { searchQuery, production }) {
+    if (!state.userFilters.edit) {
+      state.userFilters.edit = {}
+    }
+    if (!state.userFilters.edit[production.id]) {
+      state.userFilters.edit[production.id] = []
+    }
+    if (!state.userFilters.edit[production.id].includes(searchQuery)) {
+      state.userFilters.edit[production.id].push(searchQuery)
+      state.userFilters.edit[production.id] = sortByName(
+        state.userFilters.edit[production.id]
+      )
+    }
+  },
+
+  [SAVE_SEQUENCE_SEARCH_END](state, { searchQuery, production }) {
+    if (!state.userFilters.sequence) {
+      state.userFilters.sequence = {}
+    }
+    if (!state.userFilters.sequence[production.id]) {
+      state.userFilters.sequence[production.id] = []
+    }
+    if (!state.userFilters.sequence[production.id].includes(searchQuery)) {
+      state.userFilters.sequence[production.id].push(searchQuery)
+      state.userFilters.sequence[production.id] = sortByName(
+        state.userFilters.sequence[production.id]
+      )
+    }
+  },
+
+  [SAVE_BREAKDOWN_SEARCH_END](state, { searchQuery, production }) {
+    if (!state.userFilters.breakdown) {
+      state.userFilters.breakdown = {}
+    }
+    if (!state.userFilters.breakdown[production.id]) {
+      state.userFilters.breakdown[production.id] = []
+    }
+    if (!state.userFilters.breakdown[production.id].includes(searchQuery)) {
+      state.userFilters.breakdown[production.id].push(searchQuery)
+      state.userFilters.breakdown[production.id] = sortByName(
+        state.userFilters.breakdown[production.id]
+      )
+    }
+  },
 
   [CLEAR_AVATAR](state, userId) {
     if (state.user.id === userId) {
