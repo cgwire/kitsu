@@ -1,2 +1,0 @@
-import{n,aj as o,b1 as s}from"./index-D4bhLR-r.js";const a={name:"people-name-cell",components:{PeopleAvatar:o,PeopleName:s},props:{person:{type:Object,required:!0}}};var t=function(){var r=this,e=r._self._c;return e("td",{attrs:{scope:"row"}},[e("div",{staticClass:"flexrow"},[e("people-avatar",{attrs:{person:r.person}}),e("people-name",{attrs:{"with-link":"",person:r.person}})],1)])},p=[],l=n(a,t,p,!1,null,"4283522f",null,null);const m=l.exports;export{m as P};
-//# sourceMappingURL=PeopleNameCell-D8Zo7pjO.js.map

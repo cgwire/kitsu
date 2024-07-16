@@ -1,0 +1,2 @@
+import{n as s}from"./index-BefzwOg-.js";const e={name:"page-layout"};var t=function(){var n=this,a=n._self._c;return a("div",{ref:"page",staticClass:"columns fixed-page"},[a("div",{staticClass:"column main-column"},[n._t("main")],2),a("div",{staticClass:"column side-column"},[n._t("side")],2)])},o=[],c=s(e,t,o,!1,null,null);const l=c.exports;export{l as P};
+//# sourceMappingURL=PageLayout-DJvVW-JJ.js.map
