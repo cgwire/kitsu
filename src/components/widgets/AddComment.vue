@@ -482,7 +482,7 @@ export default {
     isValidForm() {
       return Boolean(
         this.mode === 'status' ||
-          (this.mode == 'publish' &&
+          (this.mode === 'publish' &&
             this.previewForms.length &&
             (this.nextRevision === undefined ||
               this.nextRevision > this.revision) &&

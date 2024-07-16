@@ -15,6 +15,7 @@ module.exports = {
     'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
     'no-unused-vars': ['error', { args: 'none' }],
     'no-var': 'error',
+    eqeqeq: ['error', 'always', { null: 'ignore' }],
     'prefer-const': [
       'error',
       {
@@ -25,6 +26,7 @@ module.exports = {
     // additional rules for Vue
     'vue/component-definition-name-casing': ['error', 'kebab-case'],
     'vue/component-name-in-template-casing': ['error', 'kebab-case'],
+    'vue/eqeqeq': ['error', 'always', { null: 'ignore' }],
     'vue/prop-name-casing': ['error', 'camelCase'],
 
     // disabled vue/recommended rules

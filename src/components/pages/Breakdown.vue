@@ -88,7 +88,8 @@
               timeSpent: true
             }"
             :metadata-display-headers.sync="metadataDisplayHeaders"
-            v-if="isShowInfosBreakdown && columnSelectorDisplayed"
+            v-if="isShowInfosBreakdown"
+            v-show="columnSelectorDisplayed"
           />
           <span class="filler"></span>
 
@@ -1326,11 +1327,11 @@ export default {
       ]
       if (this.isTVShow) {
         if (this.currentEpisode) {
-          if (this.currentEpisode.id == 'all') {
+          if (this.currentEpisode.id === 'all') {
             nameData.splice(4, 0, 'all')
-          } else if (this.currentEpisode.id == 'main') {
+          } else if (this.currentEpisode.id === 'main') {
             nameData.splice(4, 0, 'main pack')
-            if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+            if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
               nameData.splice(
                 5,
                 0,
@@ -1339,10 +1340,10 @@ export default {
             }
           } else {
             nameData.splice(4, 0, this.currentEpisode.name)
-            if (this.sequenceId !== 'all' && this.castingType == 'shot') {
+            if (this.sequenceId !== 'all' && this.castingType === 'shot') {
               nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
             }
-            if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+            if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
               nameData.splice(
                 5,
                 0,
@@ -1352,10 +1353,10 @@ export default {
           }
         }
       } else {
-        if (this.sequenceId !== 'all' && this.castingType == 'shot') {
+        if (this.sequenceId !== 'all' && this.castingType === 'shot') {
           nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
         }
-        if (this.assetTypeId !== 'all' && this.castingType == 'asset') {
+        if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
           nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
         }
       }

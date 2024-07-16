@@ -39,17 +39,16 @@
     <triangle-icon class="icon" v-else-if="icon === 'triangle'" />
     <music-icon class="icon" v-else-if="icon === 'music'" />
     <square-icon class="icon" v-else-if="icon === 'eraser'" />
-    <key-icon class="icon" v-else-if="icon == 'key'" />
-    <zoom-in-icon class="icon" v-else-if="icon == 'loupe'" />
-    <globe-icon class="icon" v-else-if="icon == 'globe'" />
-    <codepen-icon class="icon" v-else-if="icon == 'codepen'" />
-    <link-icon class="icon" v-else-if="icon == 'link'" />
-    <clock-icon class="icon" v-else-if="icon == 'clock'" />
+    <key-icon class="icon" v-else-if="icon === 'key'" />
+    <zoom-in-icon class="icon" v-else-if="icon === 'loupe'" />
+    <globe-icon class="icon" v-else-if="icon === 'globe'" />
+    <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
+    <link-icon class="icon" v-else-if="icon === 'link'" />
+    <clock-icon class="icon" v-else-if="icon === 'clock'" />
     <file-digit-icon
-      stroke-width="1.2"
-      size="20"
       class="icon"
-      v-else-if="icon == 'file-digit'"
+      :stroke-width="1.2"
+      v-else-if="icon === 'file-digit'"
     />
     <kitsu-icon
       class="icon"

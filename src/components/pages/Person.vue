@@ -113,7 +113,7 @@
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
             :hide-done="personTasksSearchText.length === 0"
-            :hide-day-off="!(isCurrentUserAdmin || user.id == person.id)"
+            :hide-day-off="!(isCurrentUserAdmin || user.id === person.id)"
             @date-changed="onDateChanged"
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"
