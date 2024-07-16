@@ -1058,9 +1058,7 @@ export default {
       const isMuted = localPreferences.getBoolPreference('player:muted')
       this.isRepeating = isRepeating
       this.isMuted = isMuted
-      this.isHd = this.organisation
-        ? this.organisation.hd_by_default === 'true'
-        : false
+      this.isHd = Boolean(this.organisation.hd_by_default)
     },
 
     focus() {

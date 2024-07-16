@@ -686,9 +686,7 @@ export default {
     this.$on('annotation-changed', this.onAnnotationChanged)
 
     this.$options.scrubbing = false
-    this.isHd = this.organisation
-      ? this.organisation.hd_by_default === 'true'
-      : false
+    this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.picturePlayer) {
       this.picturePlayer.addEventListener('load', async () => {
         const wasPlaying = this.isPlaying

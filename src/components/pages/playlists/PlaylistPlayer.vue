@@ -1064,9 +1064,7 @@ export default {
 
   mounted() {
     this.$options.scrubbing = false
-    this.isHd = this.organisation
-      ? this.organisation.hd_by_default === 'true'
-      : false
+    this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.entities) {
       this.entityList = Object.values(this.entities)
     } else {

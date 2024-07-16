@@ -116,8 +116,9 @@ const initialState = {
     name: 'Kitsu',
     hours_by_day: 8,
     has_avatar: false,
-    use_original_file_name: 'false',
-    timesheets_locked: 'false'
+    hd_by_default: false,
+    timesheets_locked: false,
+    use_original_file_name: false
   },
 
   people: [],
@@ -218,8 +219,8 @@ const getters = {
 
 const actions = {
   async getOrganisation({ commit }) {
-    const organisation = await peopleApi.getOrganisation()
-    commit(SET_ORGANISATION, organisation)
+    const organisations = await peopleApi.getOrganisations()
+    commit(SET_ORGANISATION, organisations[0])
   },
 
   async saveOrganisation({ commit }, form) {

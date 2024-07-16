@@ -200,7 +200,13 @@ export default {
       if (this.checkWebhook()) {
         this.loading.save = true
         this.errors.save = false
-        this.saveOrganisation(this.form)
+        const organisation = {
+          ...this.form,
+          hd_by_default: this.form.hd_by_default === 'true',
+          timesheets_locked: this.form.timesheets_locked === 'true',
+          use_original_file_name: this.form.use_original_file_name === 'true'
+        }
+        this.saveOrganisation(organisation)
           .catch(err => {
             console.error(err)
             this.errors.save = true
