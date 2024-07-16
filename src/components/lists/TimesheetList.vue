@@ -311,8 +311,7 @@ export default {
       'px'
     this.disabledDates = {
       to:
-        this.isCurrentUserArtist &&
-        this.organisation.timesheets_locked === 'true'
+        this.isCurrentUserArtist && this.organisation.timesheets_locked
           ? moment().subtract(1, 'weeks').toDate() // Disable dates older than one week
           : undefined,
       from: moment().toDate() // Disable dates after today

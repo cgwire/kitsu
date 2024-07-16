@@ -2,36 +2,17 @@ import client from '@/store/api/client'
 import { buildQueryString } from '@/lib/query'
 
 export default {
-  getOrganisation() {
-    return client.pget('/api/data/organisations').then(organisations => {
-      let organisation = {
-        name: 'Kitsu',
-        hours_by_day: 8,
-        has_avatar: false,
-        use_original_file_name: false,
-        timesheets_locked: false,
-        chat_token_slack: '',
-        chat_webhook_mattermost: '',
-        chat_token_discord: ''
-      }
-      if (organisations.length > 0) organisation = organisations[0]
-      organisation.use_original_file_name = organisation.use_original_file_name
-        ? 'true'
-        : 'false'
-      organisation.timesheets_locked = organisation.timesheets_locked
-        ? 'true'
-        : 'false'
-      Promise.resolve(organisation)
-    })
+  getOrganisations() {
+    return client.pget('/api/data/organisations')
   },
 
   updateOrganisation(organisation) {
     const data = {
       name: organisation.name,
       hours_by_day: organisation.hours_by_day,
-      timesheets_locked: organisation.timesheets_locked === 'true',
-      use_original_file_name: organisation.use_original_file_name === 'true',
-      hd_by_default: organisation.hd_by_default === 'true',
+      timesheets_locked: organisation.timesheets_locked,
+      use_original_file_name: organisation.use_original_file_name,
+      hd_by_default: organisation.hd_by_default,
       chat_token_slack: organisation.chat_token_slack,
       chat_webhook_mattermost: organisation.chat_webhook_mattermost,
       chat_token_discord: organisation.chat_token_discord,
