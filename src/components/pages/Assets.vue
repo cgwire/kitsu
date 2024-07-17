@@ -471,7 +471,11 @@ export default {
       this.displayedAssetsByType.forEach(type => {
         type.forEach(item => {
           let assetKey = ''
-          if (this.isTVShow && item.episode_id) {
+          if (
+            this.isTVShow &&
+            item.episode_id &&
+            this.episodeMap.has(item.episode_id)
+          ) {
             assetKey += this.episodeMap.get(item.episode_id).name
           }
           assetKey += `${item.asset_type_name}${item.name}`
