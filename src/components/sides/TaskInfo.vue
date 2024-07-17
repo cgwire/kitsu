@@ -507,6 +507,7 @@ export default {
     currentTeam() {
       if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
+      if (!production) return []
       return sortPeople(
         production.team.map(personId => this.personMap.get(personId))
       )
@@ -612,7 +613,7 @@ export default {
     },
 
     currentFps() {
-      return parseInt(this.productionMap.get(this.task.project_id).fps || '25')
+      return parseInt(this.productionMap.get(this.task.project_id)?.fps || '25')
     },
 
     currentRevision() {

@@ -4,15 +4,11 @@ import drafts from '@/lib/drafts'
  * Helpers to display task information
  */
 export const taskMixin = {
-  created() {},
-
-  mounted() {},
-
   computed: {
     currentFps() {
       const task = this.getTask()
       if (!task) return 25
-      return parseInt(this.productionMap.get(task.project_id).fps || '25')
+      return parseInt(this.productionMap.get(task.project_id)?.fps || '25')
     },
 
     entityFrames() {
