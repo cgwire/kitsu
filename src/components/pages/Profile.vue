@@ -592,6 +592,8 @@ import {
 } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
+import lang from '@/lib/lang'
+
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -811,15 +813,7 @@ export default {
     ]),
 
     localeChanged() {
-      this.$i18n.locale = this.form.locale.substring(0, 2)
-      if (this.form.locale === 'zh_Hans_CN') {
-        moment.locale('zh_CN')
-      } else if (this.form.locale === 'zh_Hant_TW') {
-        moment.locale('zh_TW')
-        this.$i18n.locale = 'zw'
-      } else {
-        moment.locale(this.form.locale.substring(0, 2))
-      }
+      lang.setLocale(this.form.locale)
     },
 
     passwordChangeRequested() {
