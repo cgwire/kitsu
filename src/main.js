@@ -15,7 +15,7 @@ import VueTextareaAutosize from 'vue-textarea-autosize'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import 'v-autocomplete/dist/v-autocomplete.css'
-import VueAnimXYZ from '@animxyz/vue'
+import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core' // Import css here if you haven't elsewhere
 
 const app = createApp({
