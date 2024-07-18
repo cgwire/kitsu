@@ -34,8 +34,8 @@
               </span>
             </th>
           </tr>
-          <template v-for="entry in openProductions">
-            <tr class="datatable-row" :key="entry.id">
+          <template v-for="entry in openProductions" :key="entry.id">
+            <tr class="datatable-row">
               <th class="name datatable-row-header" scope="row">
                 <production-name-cell
                   :with-avatar="true"
@@ -75,7 +75,6 @@
             </tr>
             <tr
               class="datatable-row"
-              :key="entry.id + '-stats'"
               v-if="Object.keys(productionStats).length > 0"
             >
               <td :colspan="7" class="datatable-row-stats">
