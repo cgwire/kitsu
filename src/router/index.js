@@ -1,18 +1,18 @@
-import Vue from 'vue'
-import { routes } from '@/router/routes'
+import { createRouter, createWebHistory } from 'vue-router'
 
-Vue.use(VueRouter)
+import { routes } from '@/router/routes'
 
 const loadSavedScrollPosition = (to, from, savedPosition) => {
   if (savedPosition) {
     return savedPosition
-  } else {
-    return { x: 0, y: 0 }
   }
+  return { left: 0, top: 0 }
 }
 
-export default new VueRouter({
-  mode: 'history',
+const router = createRouter({
+  history: createWebHistory(),
   scrollBehavior: loadSavedScrollPosition,
   routes
 })
+
+export default router

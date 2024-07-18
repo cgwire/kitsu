@@ -20,12 +20,12 @@ import '@animxyz/core' // Import css here if you haven't elsewhere
 
 const app = createApp({
   components: { App },
-  template: '<App/>',
-  router,
-  store
+  template: '<App/>'
 })
 
 app.use(i18n)
+app.use(router)
+app.use(store)
 
 app.use(VueWebsocket, IO, '/events')
 app.use(Autocomplete)
