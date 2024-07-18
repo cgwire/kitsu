@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 import breakdownApi from '@/store/api/breakdown'
 import peopleApi from '@/store/api/people'
 import { sortAssets, sortByName, sortShots } from '@/lib/sorting'

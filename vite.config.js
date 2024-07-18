@@ -1,23 +1,29 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue2'
+import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          compatConfig: {
+            MODE: 2
+          }
+        }
+      }
+    })
+  ],
   build: {
-    minify: true,
     sourcemap: true
   },
   resolve: {
-    vue: 'vue/dist/vue.esm.js',
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
-    alias: [
-      {
-        find: '@',
-        replacement: path.resolve(__dirname, 'src')
-      }
-    ]
+    alias: {
+      vue: '@vue/compat',
+      '@': path.resolve(__dirname, 'src/')
+    }
   },
   css: {
     preprocessorOptions: {

@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 
 import colors from '@/lib/colors'
 import stringHelpers from '@/lib/string'

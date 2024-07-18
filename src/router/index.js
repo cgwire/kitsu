@@ -1,5 +1,4 @@
-import Vue from 'vue/dist/vue'
-import VueRouter from 'vue-router'
+import Vue from 'vue'
 import { routes } from '@/router/routes'
 
 Vue.use(VueRouter)

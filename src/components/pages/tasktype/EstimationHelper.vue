@@ -236,7 +236,7 @@
 <script>
 import { CornerDownRightIcon } from 'lucide-vue'
 import { firstBy } from 'thenby'
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
