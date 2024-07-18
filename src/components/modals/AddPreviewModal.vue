@@ -62,21 +62,15 @@
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           Selected Files
         </h3>
-        <p class="upload-previews" v-if="forms.length > 0">
-          <template v-for="(form, i) in forms">
-            <p class="preview-name" :key="`name-${i}`">
+        <div class="upload-previews" v-if="forms.length > 0">
+          <template v-for="(form, index) in forms" :key="`preview-${index}`">
+            <p class="preview-name">
               {{ form.get('file').name }}
               <span @click="removePreview(form)">x</span>
             </p>
-            <img
-              alt="uploaded file"
-              :src="getURL(form)"
-              :key="`preview-file-${i}`"
-              v-if="isImage(form)"
-            />
+            <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
               :ref="`video-${i}`"
-              :key="`preview-video-${i}`"
               :src="getURL(form)"
               preload="auto"
               class="is-fullwidth"
@@ -90,12 +84,11 @@
               class="is-fullwidth"
               frameborder="0"
               :src="getURL(form)"
-              :key="`preview-pdf-${i}`"
               v-else-if="isPdf(form)"
             />
-            <hr :key="'separator-' + i" />
+            <hr />
           </template>
-        </p>
+        </div>
 
         <div class="mt1 message" v-if="message">
           <div class="message-body">

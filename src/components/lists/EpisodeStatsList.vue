@@ -69,8 +69,8 @@
             <td class="actions"></td>
           </tr>
 
-          <template v-for="entry in entries">
-            <tr :key="entry.id" class="datatable-row">
+          <template v-for="entry in entries" :key="entry.id">
+            <tr class="datatable-row">
               <td class="expander" @click="toggleExpanded(entry.id)">
                 <chevron-right-icon
                   v-if="isRetakes && expanded[entry.id] !== true"
