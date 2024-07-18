@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 import * as Sentry from '@sentry/vue'
 
 import { name, version } from '@/../package.json'

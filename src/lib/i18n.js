@@ -1,6 +1,5 @@
 // Localisation
-import Vue from 'vue/dist/vue'
-import VueI18n from 'vue-i18n'
+import Vue from 'vue'
 import locales from '@/locales'
 
 Vue.use(VueI18n)

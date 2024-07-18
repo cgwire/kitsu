@@ -324,7 +324,7 @@
 </template>
 
 <script>
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import {
