@@ -42,7 +42,7 @@ sync(store, router)
 
 // Global custom directive to enable automatic focus on field after page loading.
 app.directive('focus', {
-  inserted(el, binding) {
+  mounted(el, binding) {
     el.focus(binding.value)
   }
 })
