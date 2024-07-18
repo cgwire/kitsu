@@ -57,18 +57,13 @@
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           {{ $t('comments.selected_files') }}
         </h3>
-        <p class="upload-previews" v-if="forms.length > 0">
-          <template v-for="(form, i) in forms">
-            <p class="attachment-name" :key="'name-' + i">
+        <div class="upload-attachments" v-if="forms.length > 0">
+          <template v-for="(form, index) in forms" :key="`attachment-${index}`">
+            <p class="attachment-name">
               {{ form.get('file').name }}
               <span @click="removeAttachment(form)">x</span>
             </p>
-            <img
-              alt="uploaded file"
-              :src="getURL(form)"
-              :key="i"
-              v-if="isImage(form)"
-            />
+            <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
               class="is-fullwidth"
               preload="auto"
@@ -76,19 +71,17 @@
               loop
               muted
               :src="getURL(form)"
-              :key="i"
               v-else-if="isVideo(form)"
             />
             <iframe
               class="is-fullwidth"
               frameborder="0"
               :src="getURL(form)"
-              :key="i"
               v-else-if="isPdf(form)"
             />
-            <hr :key="'separator-' + i" />
+            <hr />
           </template>
-        </p>
+        </div>
         <p class="has-text-right mt2">
           <a
             :class="{
@@ -284,7 +277,7 @@ export default {
   width: 100%;
 }
 
-.upload-previews {
+.upload-attachments {
   text-align: center;
 }
 

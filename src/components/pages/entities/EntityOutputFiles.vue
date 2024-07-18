@@ -35,8 +35,8 @@
           </tr>
         </thead>
         <tbody class="datatable-body">
-          <template v-for="outputFile in outputFiles">
-            <tr :key="outputFile.id" class="datatable-row">
+          <template v-for="outputFile in outputFiles" :key="outputFile.id">
+            <tr class="datatable-row">
               <task-type-cell
                 class="type"
                 :task-type="getTaskType(outputFile)"
@@ -66,11 +66,7 @@
               />
               <td class="end-cell"></td>
             </tr>
-            <tr
-              :key="'path-' + outputFile.id"
-              class="datatable-row"
-              v-if="outputFile.path"
-            >
+            <tr class="datatable-row" v-if="outputFile.path">
               <td colspan="10">
                 {{ outputFile.path }}
               </td>
