@@ -197,7 +197,7 @@
 
 <script>
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue'
-import Vue from 'vue/dist/vue'
+import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 import { entityListMixin } from '@/components/mixins/entity_list'

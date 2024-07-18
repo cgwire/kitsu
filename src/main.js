@@ -1,4 +1,4 @@
-import Vue from 'vue/dist/vue'
+import { createApp } from 'vue'
 import { sync } from 'vuex-router-sync'
 import App from '@/App'
 import i18n from '@/lib/i18n'
@@ -18,30 +18,7 @@ import 'v-autocomplete/dist/v-autocomplete.css'
 import VueAnimXYZ from '@animxyz/vue'
 import '@animxyz/core' // Import css here if you haven't elsewhere
 
-Vue.use(VueWebsocket, IO, '/events')
-Vue.config.productionTip = false
-Vue.use(Autocomplete)
-Vue.use(Meta)
-Vue.use(resizableColumn)
-Vue.use(VueChartkick, { adapter: Chart })
-Vue.use(vuescroll)
-Vue.use(VueDragDrop)
-Vue.use(VueTextareaAutosize)
-Vue.use(VueAnimXYZ)
-
-// Make the current route part of the main state.
-sync(store, router)
-
-// Global custom directive to enable automatic focus on field after page loading.
-Vue.directive('focus', {
-  inserted(el, binding) {
-    el.focus(binding.value)
-  }
-})
-
-// Start application.
-new Vue({
-  el: '#app',
+const app = createApp({
   components: { App },
   template: '<App/>',
   i18n,
@@ -49,4 +26,29 @@ new Vue({
   store
 })
 
-Vue.config.keyCodes.backspace = 8
+app.use(VueWebsocket, IO, '/events')
+app.use(Autocomplete)
+app.use(Meta)
+app.use(resizableColumn)
+app.use(VueChartkick, { adapter: Chart })
+app.use(vuescroll)
+app.use(VueDragDrop)
+app.use(VueTextareaAutosize)
+app.use(VueAnimXYZ)
+
+// Make the current route part of the main state.
+sync(store, router)
+
+// Global custom directive to enable automatic focus on field after page loading.
+app.directive('focus', {
+  inserted(el, binding) {
+    el.focus(binding.value)
+  }
+})
+
+app.config.compilerOptions.whitespace = 'preserve'
+
+// actually mount to DOM
+app.mount('#app')
+
+// app.config.keyCodes.backspace = 8
