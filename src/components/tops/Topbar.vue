@@ -215,8 +215,9 @@
     </nav>
 
     <shortcut-modal
-      :active="display.shortcutModal"
+      active
       @cancel="display.shortcutModal = false"
+      v-if="display.shortcutModal"
     />
   </div>
 </template>
