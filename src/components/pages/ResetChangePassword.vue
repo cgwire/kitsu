@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { LockIcon } from 'lucide-vue'
+import { LockIcon } from 'lucide-vue-next'
 import { mapActions } from 'vuex'
 
 import auth from '@/lib/auth'

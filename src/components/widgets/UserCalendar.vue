@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { BriefcaseIcon } from 'lucide-vue'
+import { BriefcaseIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import FullCalendar from '@fullcalendar/vue'

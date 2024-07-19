@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { sortByValue } from '@/lib/sorting'
 

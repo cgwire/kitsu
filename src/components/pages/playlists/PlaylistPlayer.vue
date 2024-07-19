@@ -933,7 +933,12 @@
  * This modules manages all the options available while playing a playlist.
  * It is made to work with a single playlist.
  */
-import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, PlayIcon } from 'lucide-vue'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  PlayIcon
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
 import { mapActions, mapGetters } from 'vuex'

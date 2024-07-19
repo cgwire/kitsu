@@ -352,7 +352,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'lucide-vue'
+import { CornerLeftUpIcon } from 'lucide-vue-next'
 
 import { sortByName } from '@/lib/sorting'
 import { entityMixin } from '@/components/mixins/entity'

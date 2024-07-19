@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'

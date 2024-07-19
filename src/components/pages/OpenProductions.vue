@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { buildNameIndex } from '@/lib/indexing'

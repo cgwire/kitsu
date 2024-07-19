@@ -531,7 +531,12 @@
 
 <script>
 import { fabric } from 'fabric'
-import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, LinkIcon } from 'lucide-vue'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  LinkIcon
+} from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import {

@@ -310,7 +310,7 @@
 </template>
 
 <script>
-import { CornerRightUpIcon, XIcon } from 'lucide-vue'
+import { CornerRightUpIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 

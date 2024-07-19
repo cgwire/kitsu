@@ -264,7 +264,7 @@ import {
   ImageIcon,
   MessageSquareIcon,
   UserIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 
 import { parametersMixin } from '@/components/mixins/parameters'

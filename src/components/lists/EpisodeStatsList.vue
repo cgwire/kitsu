@@ -196,7 +196,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue'
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 

@@ -163,7 +163,7 @@ import {
   Edit2Icon,
   FolderPlusIcon,
   Trash2Icon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import { sortByName } from '@/lib/sorting'

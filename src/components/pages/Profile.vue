@@ -589,7 +589,7 @@ import {
   XCircleIcon,
   KeyIcon,
   TrashIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import lang from '@/lib/lang'

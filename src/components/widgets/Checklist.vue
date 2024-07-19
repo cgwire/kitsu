@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue'
+import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue-next'
 
 import { formatFrame } from '@/lib/video'
 
