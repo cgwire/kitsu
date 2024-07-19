@@ -11,7 +11,8 @@
     <router-view v-else />
 
     <preview-modal
-      :active="previewFileIdToShow.length > 0"
+      v-if="previewFileIdToShow"
+      active
       :preview-file-id="previewFileIdToShow"
       @cancel="() => $store.commit('HIDE_PREVIEW_FILE')"
     />

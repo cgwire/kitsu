@@ -22,14 +22,16 @@ export const modalMixin = {
 
   watch: {
     /*
-     * Make sure that the keydown event is removed each time, the modla is
-     * hidden.
+     * Make sure that the keydown event is removed each time the modal is hidden.
      */
-    active() {
-      if (this.active) {
-        window.addEventListener('keydown', this.onKeyDown, false)
-      } else {
-        window.removeEventListener('keydown', this.onKeyDown)
+    active: {
+      immediate: true,
+      handler() {
+        if (this.active) {
+          window.addEventListener('keydown', this.onKeyDown, false)
+        } else {
+          window.removeEventListener('keydown', this.onKeyDown)
+        }
       }
     }
   }
