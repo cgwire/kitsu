@@ -219,7 +219,7 @@ import {
   HelpCircleIcon,
   LogOutIcon,
   ZapIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 import localPreferences from '@/lib/preferences'
 

@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { HelpCircleIcon } from 'lucide-vue'
+import { HelpCircleIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'

@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import { AlertTriangleIcon } from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'

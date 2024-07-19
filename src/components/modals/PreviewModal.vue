@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { ArrowDownIcon, ArrowUpRightIcon } from 'lucide-vue'
+import { ArrowDownIcon, ArrowUpRightIcon } from 'lucide-vue-next'
 
 import { getDownloadAttachmentPath } from '@/lib/path'
 

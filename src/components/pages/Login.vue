@@ -104,7 +104,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { MailIcon, LockIcon } from 'lucide-vue'
+import { MailIcon, LockIcon } from 'lucide-vue-next'
 
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 

@@ -78,7 +78,7 @@
 <script>
 import { mapActions } from 'vuex'
 
-import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue'
+import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 

@@ -92,7 +92,7 @@ import {
   RefreshCwIcon,
   RotateCcwIcon,
   TrashIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 export default {
   name: 'row-actions-cell',

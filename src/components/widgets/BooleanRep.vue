@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { CheckIcon, XIcon } from 'lucide-vue'
+import { CheckIcon, XIcon } from 'lucide-vue-next'
 
 export default {
   name: 'boolean-rep',

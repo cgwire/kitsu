@@ -103,7 +103,7 @@
 </template>
 
 <script>
-import { DownloadIcon } from 'lucide-vue'
+import { DownloadIcon } from 'lucide-vue-next'
 
 import { formatFrame, formatTime } from '@/lib/video'
 import { domMixin } from '@/components/mixins/dom'

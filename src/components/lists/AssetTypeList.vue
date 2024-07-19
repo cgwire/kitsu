@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import { HelpCircleIcon } from 'lucide-vue'
+import { HelpCircleIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { sortTaskTypes } from '@/lib/sorting'

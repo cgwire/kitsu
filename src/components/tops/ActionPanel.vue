@@ -805,7 +805,12 @@
 </template>
 
 <script>
-import { CheckSquareIcon, LinkIcon, PlayCircleIcon, XIcon } from 'lucide-vue'
+import {
+  CheckSquareIcon,
+  LinkIcon,
+  PlayCircleIcon,
+  XIcon
+} from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { intersection } from '@/lib/array'

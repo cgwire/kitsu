@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 

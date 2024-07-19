@@ -104,7 +104,7 @@ import {
   TriangleIcon,
   XIcon,
   ZoomInIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
