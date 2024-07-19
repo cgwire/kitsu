@@ -456,7 +456,7 @@ import Vue from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
-import { PlusIcon, XIcon } from 'lucide-vue'
+import { PlusIcon, XIcon } from 'lucide-vue-next'
 
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'

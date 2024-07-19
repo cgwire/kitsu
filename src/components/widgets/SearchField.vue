@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { SaveIcon, SearchIcon } from 'lucide-vue'
+import { SaveIcon, SearchIcon } from 'lucide-vue-next'
 
 export default {
   name: 'search-field',

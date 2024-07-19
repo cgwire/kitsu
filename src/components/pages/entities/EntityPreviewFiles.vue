@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import { DownloadIcon } from 'lucide-vue'
+import { DownloadIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { renderFileSize } from '@/lib/render'

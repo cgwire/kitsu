@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { CheckIcon } from 'lucide-vue'
+import { CheckIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'

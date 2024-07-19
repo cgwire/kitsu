@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'

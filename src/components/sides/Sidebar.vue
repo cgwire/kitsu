@@ -210,7 +210,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BotIcon, BuildingIcon, GlobeIcon } from 'lucide-vue'
+import { BotIcon, BuildingIcon, GlobeIcon } from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 

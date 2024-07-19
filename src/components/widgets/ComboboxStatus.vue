@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import colors from '@/lib/colors'

@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'

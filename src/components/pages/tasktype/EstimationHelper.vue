@@ -226,7 +226,7 @@
 </template>
 
 <script>
-import { CornerDownRightIcon } from 'lucide-vue'
+import { CornerDownRightIcon } from 'lucide-vue-next'
 import { firstBy } from 'thenby'
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'

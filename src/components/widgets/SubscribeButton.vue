@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { EyeIcon, EyeOffIcon } from 'lucide-vue'
+import { EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 export default {
   name: 'subscribe-button',

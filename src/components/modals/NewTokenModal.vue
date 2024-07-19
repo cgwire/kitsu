@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue'
+import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 import { modalMixin } from '@/components/modals/base_modal'
 

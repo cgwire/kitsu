@@ -79,7 +79,7 @@
  * given prevision for a given task type for current entity.
  * It fires events about drag'n'drop reordering too.
  */
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'lucide-vue'
+import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 

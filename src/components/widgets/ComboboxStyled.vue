@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 

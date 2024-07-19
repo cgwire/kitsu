@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { configureCompat, createApp } from 'vue'
 import { sync } from 'vuex-router-sync'
 
 import App from '@/App'
@@ -19,6 +19,10 @@ import IO from 'socket.io-client'
 import 'v-autocomplete/dist/v-autocomplete.css'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
+
+configureCompat({
+  COMPONENT_ASYNC: false
+})
 
 const app = createApp({
   components: { App },

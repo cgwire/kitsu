@@ -511,7 +511,7 @@ import {
   ChevronRightIcon,
   EditIcon,
   PlusIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 

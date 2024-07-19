@@ -144,7 +144,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { AlertTriangleIcon } from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
 import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'

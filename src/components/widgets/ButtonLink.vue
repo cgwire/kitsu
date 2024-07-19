@@ -29,7 +29,7 @@ import {
   RotateCcwIcon,
   TrashIcon,
   UploadIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 export default {
   name: 'button-link',

@@ -131,7 +131,7 @@
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
 
-import { AlertTriangleIcon } from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import files from '@/lib/files'
 

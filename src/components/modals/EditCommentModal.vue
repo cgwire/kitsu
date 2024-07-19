@@ -156,7 +156,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import { mapGetters } from 'vuex'
 

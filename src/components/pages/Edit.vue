@@ -585,7 +585,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { ArrowUpRightIcon, CornerLeftUpIcon, DownloadIcon } from 'lucide-vue'
+import {
+  ArrowUpRightIcon,
+  CornerLeftUpIcon,
+  DownloadIcon
+} from 'lucide-vue-next'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
