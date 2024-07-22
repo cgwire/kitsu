@@ -29,7 +29,7 @@
               <combobox-department
                 class="combobox-department flexrow-item"
                 :selectable-departments="selectableDepartments('Shot')"
-                :dispay-all-and-my-departments="true"
+                :display-all-and-my-departments="true"
                 rounded
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"

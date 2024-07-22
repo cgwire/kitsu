@@ -23,7 +23,7 @@
             <combobox-department
               class="combobox-department flexrow-item"
               :selectable-departments="selectableDepartments('Edit')"
-              :dispay-all-and-my-departments="true"
+              :display-all-and-my-departments="true"
               :width="230"
               rounded
               v-model="selectedDepartment"

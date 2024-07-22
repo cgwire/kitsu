@@ -533,7 +533,7 @@ export default {
     this.isTextMode = preferences.getBoolPreference('breakdown:text-mode')
     window.addEventListener('keydown', this.onKeyDown, false)
 
-    this.resetDispayHeaders()
+    this.resetDisplayHeaders()
     this.resetColumnWidth()
   },
 
@@ -1494,7 +1494,7 @@ export default {
       this.resizedDescriptorId = null
     },
 
-    resetDispayHeaders() {
+    resetDisplayHeaders() {
       if (this.isEpisodeCasting) {
         this.metadataDisplayHeaders = {}
       } else if (this.isShotCasting) {
@@ -1562,7 +1562,7 @@ export default {
           this.assetTypeId = this.castingAssetTypesOptions[0].value
         }
       }
-      this.resetDispayHeaders()
+      this.resetDisplayHeaders()
       this.resetColumnWidth()
     },
 
