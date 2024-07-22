@@ -250,7 +250,7 @@ export default {
     window.addEventListener('paste', this.onPaste, false)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('paste', this.onPaste)
   }
 }

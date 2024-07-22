@@ -730,7 +730,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
   },

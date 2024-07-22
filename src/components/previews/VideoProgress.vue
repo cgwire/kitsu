@@ -280,7 +280,7 @@ export default {
     this.progress.setAttribute('max', this.videoDuration)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.removeEvents(this.domEvents)
   },
 

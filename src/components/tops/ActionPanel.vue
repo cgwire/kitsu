@@ -932,7 +932,7 @@ export default {
     this.customAction = this.defaultCustomAction
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 

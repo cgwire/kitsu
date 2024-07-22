@@ -662,7 +662,7 @@ export default {
     this.addEvents(this.domEvents)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.removeEvents(this.domEvents)
     document.body.style.cursor = 'default'
   },
