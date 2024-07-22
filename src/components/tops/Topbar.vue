@@ -1,18 +1,15 @@
 <template>
   <div class="topbar">
     <div
-      id="c-mask-user-menu"
+      class="c-mask-user-menu"
       @click="toggleUserMenu()"
-      :class="{ 'is-active': !isUserMenuHidden }"
+      v-if="!isUserMenuHidden"
     ></div>
 
     <nav class="nav">
       <div class="nav-left">
         <a
           class="studio-logo-wrapper nav-item"
-          :class="{
-            selected: !isSidebarHidden
-          }"
           @click="toggleSidebar()"
           v-if="!isCurrentUserClient"
         >
@@ -122,18 +119,14 @@
         <notification-bell class="nav-item" />
         <div class="nav-item">
           <a
-            class="changelog-button help-button"
+            class="help-button"
             href="https://kitsu.cg-wire.com/"
             target="_blank"
           >
             <help-circle-icon />
           </a>
         </div>
-        <div
-          class="nav-item user-nav"
-          :class="{ active: !isUserMenuHidden }"
-          @click="toggleUserMenu"
-        >
+        <div class="nav-item pointer" @click="toggleUserMenu">
           <people-avatar
             class="avatar"
             :is-lazy="false"
@@ -151,60 +144,58 @@
       }"
     >
       <ul>
-        <router-link to="/profile" @click.native="toggleUserMenu()">
-          <li>
+        <li>
+          <router-link to="/profile" @click.native="toggleUserMenu()">
             {{ $t('main.profile') }}
-          </li>
-        </router-link>
+          </router-link>
+        </li>
         <li @click="toggleDarkTheme">
-          <span v-if="!isDarkTheme">
-            {{ $t('main.dark_theme') }}
-          </span>
-          <span v-else>
-            {{ $t('main.white_theme') }}
-          </span>
+          {{ !isDarkTheme ? $t('main.dark_theme') : $t('main.white_theme') }}
         </li>
         <li @click="setSupportChat(!isSupportChat)">
-          <span v-if="isSupportChat">
-            {{ $t('main.hide_support_chat') }}
-          </span>
-          <span v-else>
-            {{ $t('main.show_support_chat') }}
-          </span>
+          {{
+            isSupportChat
+              ? $t('main.hide_support_chat')
+              : $t('main.show_support_chat')
+          }}
         </li>
         <hr />
-        <a
-          href="https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29"
-          target="_blank"
-        >
-          <li>
+        <li>
+          <a
+            href="https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29"
+            target="_blank"
+          >
             {{ $t('main.tutorials') }}
-          </li>
-        </a>
-        <a @click="display.shortcutModal = true">
-          <li>
+          </a>
+        </li>
+        <li>
+          <a @click="display.shortcutModal = true">
             {{ $t('keyboard.shortcuts') }}
-          </li>
-        </a>
+          </a>
+        </li>
         <hr />
-        <a href="https://discord.gg/VbCxtKN" target="_blank">
-          <li>Discord</li>
-        </a>
-        <a href="https://linkedin.com/company/cgwire/" target="_blank">
-          <li>LinkedIn</li>
-        </a>
-        <a href="https://twitter.com/cgwirekitsu" target="_blank">
-          <li>X</li>
-        </a>
-        <a href="https://cgwire.canny.io" target="_blank">
-          <li>Roadmap / Feedback</li>
-        </a>
+        <li>
+          <a href="https://discord.gg/VbCxtKN" target="_blank"> Discord </a>
+        </li>
+        <li>
+          <a href="https://linkedin.com/company/cgwire/" target="_blank">
+            LinkedIn
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/cgwirekitsu" target="_blank"> X </a>
+        </li>
+        <li>
+          <a href="https://cgwire.canny.io" target="_blank">
+            Roadmap / Feedback
+          </a>
+        </li>
         <hr />
-        <a href="https://cg-wire.com/about" target="_blank">
-          <li>
+        <li>
+          <a href="https://cg-wire.com/about" target="_blank">
             {{ $t('main.about') }}
-          </li>
-        </a>
+          </a>
+        </li>
         <li class="version">Kitsu {{ kitsuVersion }}</li>
         <hr />
         <li class="flexrow" @click="onLogoutClicked">
@@ -215,8 +206,9 @@
     </nav>
 
     <shortcut-modal
-      :active="display.shortcutModal"
+      active
       @cancel="display.shortcutModal = false"
+      v-if="display.shortcutModal"
     />
   </div>
 </template>
@@ -291,7 +283,6 @@ export default {
       'isCurrentUserSupervisor',
       'isCurrentUserVendor',
       'isDarkTheme',
-      'isSidebarHidden',
       'isSupportChat',
       'isUserMenuHidden',
       'isTVShow',
@@ -560,7 +551,6 @@ export default {
       'incrementNotificationCounter',
       'logout',
       'setProduction',
-      'setCurrentSection',
       'setCurrentEpisode',
       'setSupportChat',
       'toggleDarkTheme',
@@ -889,11 +879,12 @@ export default {
     border-bottom: 1px solid #2f3136;
   }
 
-  .changelog-button {
+  .changelog-button,
+  .help-button {
     color: $grey;
 
     &:hover {
-      color: white;
+      color: $white;
     }
   }
 
@@ -910,25 +901,17 @@ export default {
   position: fixed;
   right: 0;
   z-index: 204;
-}
-
-.avatar {
-  margin-right: 10px;
-  min-width: 40px;
-}
-
-.user-nav {
-  cursor: pointer;
+  border-bottom: 1px solid transparent;
 }
 
 .user-menu {
-  background-color: white;
+  background-color: $white;
   box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.2);
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
   border-bottom-left-radius: 10px;
   min-width: 220px;
-  padding: 1em 1em 1em 1em;
+  padding: 10px;
   position: fixed;
   transition: top 0.5s ease;
   right: 0;
@@ -958,53 +941,23 @@ export default {
   color: #333;
 }
 
-#c-mask-user-menu {
+.c-mask-user-menu {
   position: fixed;
   z-index: 202;
   top: 0;
   left: 0;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  background-color: #000;
-  opacity: 0;
-}
-
-#c-mask-user-menu.is-active {
   width: 100%;
   height: 100%;
-}
-
-.nav-right {
-  padding-right: 0;
-  flex-grow: 0;
-}
-
-.context-selector-label {
-  margin-right: 1em;
-}
-
-.context-selector {
-  margin-top: 23px;
-  margin-right: 1em;
-}
-
-.icon-link {
-  margin: 0 0.5em;
-}
-
-strong {
-  margin-right: 1em;
+  overflow: hidden;
 }
 
 .version {
   color: $grey;
 }
 
-.changelog-button {
-  background: transparent;
+.changelog-button,
+.help-button {
   color: $light-grey;
-  cursor: pointer;
 
   &:hover {
     color: var(--text);
@@ -1012,19 +965,7 @@ strong {
 }
 
 .help-button {
-  background: transparent;
-  color: $light-grey;
-  cursor: pointer;
   margin-top: 3px;
-
-  &:hover {
-    color: var(--text);
-  }
-}
-
-.user-menu {
-  padding: 10px;
-  border-bottom-left-radius: 10px;
 }
 
 .studio-logo-wrapper {
@@ -1040,39 +981,8 @@ strong {
 }
 
 @media screen and (max-width: 768px) {
-  .home-button {
-    display: none;
-  }
-
   .nav-right {
     display: flex;
-    flex: 0;
-  }
-
-  .nav-item {
-    justify-content: right;
-  }
-
-  .user-name {
-    display: none;
-  }
-
-  .avatar {
-    margin-right: 0;
-  }
-
-  .user-menu {
-    right: -160;
-  }
-
-  .icon-link,
-  .context-selector-label {
-    display: none;
-  }
-
-  .field.context-selector {
-    padding: 0;
-    margin-top: 2em;
   }
 }
 </style>

@@ -72,7 +72,7 @@ export default {
   },
 
   props: {
-    dispayAllAndMyDepartments: {
+    displayAllAndMyDepartments: {
       default: false,
       type: Boolean
     },
@@ -127,7 +127,7 @@ export default {
     },
 
     departmentList() {
-      if (this.dispayAllAndMyDepartments) {
+      if (this.displayAllAndMyDepartments) {
         const departmentFilter = [
           {
             name: this.$t('tasks.combobox_departments.all_departments'),

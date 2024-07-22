@@ -11,7 +11,8 @@
     <router-view v-else />
 
     <preview-modal
-      :active="previewFileIdToShow.length > 0"
+      v-if="previewFileIdToShow"
+      active
       :preview-file-id="previewFileIdToShow"
       @cancel="() => $store.commit('HIDE_PREVIEW_FILE')"
     />
@@ -700,10 +701,6 @@ body {
     border-bottom: 1px solid $grey;
   }
 } // End dark theme
-
-#app .router-link-active {
-  color: #00d1b2;
-}
 
 .loading-info {
   background: white;
