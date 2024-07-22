@@ -706,7 +706,7 @@ export default {
     })
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.$off('annotation-changed', this.onAnnotationChanged)
   },
 

@@ -114,7 +114,7 @@ export default {
     this.player2.addEventListener('error', this.hideLoading)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.resetHeight)
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
 

@@ -653,8 +653,6 @@ export default {
     }
   },
 
-  beforeDestroy() {},
-
   metaInfo() {
     return {
       title: `${this.$t('notifications.title')} - Kitsu`

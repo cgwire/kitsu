@@ -438,7 +438,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedAssets()
   },
 

@@ -308,7 +308,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedEpisodes()
   },
 

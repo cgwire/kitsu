@@ -42,7 +42,7 @@ export const playerMixin = {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
     this.leaveRoom()

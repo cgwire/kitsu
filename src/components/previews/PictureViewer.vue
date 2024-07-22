@@ -123,7 +123,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.onWindowResize)
     this.panzoomInstances.forEach(panzoom => panzoom.dispose())
   },
