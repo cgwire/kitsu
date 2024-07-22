@@ -456,7 +456,7 @@ export default {
     )
   },
 
-  destroyed() {
+  beforeUnmount() {
     Array.from(document.getElementsByClassName(this.uniqueClassName)).forEach(
       element => {
         element.removeEventListener('click', this.timeCodeClicked)

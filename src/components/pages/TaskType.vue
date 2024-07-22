@@ -544,7 +544,7 @@ export default {
     window.addEventListener('resize', this.resetScheduleHeight)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedTasks()
     window.removeEventListener('resize', this.resetScheduleHeight)
   },
