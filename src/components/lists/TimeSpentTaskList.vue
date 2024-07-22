@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <table-info :is-loading="isLoading" :is-error="isLoadingError" />
+    <table-info :is-loading="isLoading" :is-error="isError" />
 
     <div class="aggregated-time-spents">
       <div
@@ -82,7 +82,7 @@ export default {
       type: Boolean,
       default: false
     },
-    isLoadingError: {
+    isError: {
       type: Boolean,
       default: false
     }
