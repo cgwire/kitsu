@@ -18,7 +18,7 @@
 
 <script>
 export default {
-  name: 'route-tabs',
+  name: 'route-section-tabs',
 
   props: {
     activeTab: {
