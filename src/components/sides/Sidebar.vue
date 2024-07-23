@@ -134,19 +134,22 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
-              <router-link to="/task-types">
+              <router-link :to="{ name: 'task-types' }">
                 <kitsu-icon class="nav-icon" name="task-types" />
                 {{ $t('task_types.title') }}
               </router-link>
             </p>
             <p @click="toggleSidebar()">
-              <router-link to="/task-status" class="task-status-link">
+              <router-link
+                :to="{ name: 'task-status' }"
+                class="task-status-link"
+              >
                 <kitsu-icon class="nav-icon" name="task-status" />
                 {{ $t('task_status.title') }}
               </router-link>
             </p>
             <p @click="toggleSidebar()">
-              <router-link to="/asset-types">
+              <router-link :to="{ name: 'asset-types' }">
                 <kitsu-icon class="nav-icon" name="asset-types" />
                 {{ $t('asset_types.title') }}
               </router-link>

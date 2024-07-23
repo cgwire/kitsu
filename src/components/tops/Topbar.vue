@@ -145,7 +145,10 @@
     >
       <ul>
         <li>
-          <router-link to="/profile" @click.native="toggleUserMenu()">
+          <router-link
+            :to="{ name: 'profile' }"
+            @click.native="toggleUserMenu()"
+          >
             {{ $t('main.profile') }}
           </router-link>
         </li>
