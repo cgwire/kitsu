@@ -938,6 +938,7 @@ export default {
 }
 
 .user-menu ul a {
+  display: block;
   color: #333;
 }
 
