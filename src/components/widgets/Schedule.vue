@@ -2099,10 +2099,6 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         z-index: 10000;
       }
 
-      .weekday-number {
-        color: var(--text);
-      }
-
       .month-name {
         background: white;
         border-left: 2px solid black;
