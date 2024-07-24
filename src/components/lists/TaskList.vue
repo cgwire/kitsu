@@ -53,6 +53,9 @@
             <th class="real-end-date" ref="th-status">
               {{ $t('tasks.fields.real_end_date') }}
             </th>
+            <th class="done-date" ref="th-status">
+              {{ $t('tasks.fields.done_date') }}
+            </th>
             <th class="last-comment-date" ref="th-status">
               {{ $t('tasks.fields.last_comment_date') }}
             </th>
@@ -176,6 +179,9 @@
             </td>
             <td class="real-end-date">
               {{ formatDate(task.end_date) }}
+            </td>
+            <td class="done-date">
+              {{ formatDate(task.done_date) }}
             </td>
             <td class="last-comment-date">
               {{ formatDate(task.last_comment_date) }}
@@ -773,6 +779,7 @@ export default {
         this.$t('tasks.fields.due_date'),
         this.$t('tasks.fields.real_start_date'),
         this.$t('tasks.fields.real_end_date'),
+        this.$t('tasks.fields.done_date'),
         this.$t('tasks.fields.last_comment_date')
       ]
       if (!this.isAssets) {
@@ -803,6 +810,7 @@ export default {
           this.formatDate(task.due_date),
           this.formatDate(task.real_start_date),
           this.formatDate(task.end_date),
+          this.formatDate(task.done_date),
           this.formatDate(task.last_comment_date)
         ]
         if (!this.isAssets) {
@@ -876,7 +884,8 @@ export default {
 
 .last-comment-date,
 .real-start-date,
-.real-end-date {
+.real-end-date,
+.done-date {
   min-width: 110px;
   max-width: 110px;
   width: 110px;

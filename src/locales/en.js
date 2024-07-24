@@ -1547,6 +1547,7 @@ export default {
       asset_type: 'Asset type',
       assignees: 'Assignees',
       count: 'Count',
+      done_date: 'Approval date',
       due_date: 'Due date',
       duration: 'Duration',
       end_date: 'Feedback date',

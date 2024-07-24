@@ -33,11 +33,14 @@
             <th class="duration number-cell" ref="th-duration">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th class="start-date" ref="th-estimation">
+            <th class="start-date" ref="th-date">
               {{ $t('tasks.fields.start_date') }}
             </th>
-            <th class="due-date" ref="th-estimation">
+            <th class="due-date" ref="th-date">
               {{ $t('tasks.fields.due_date') }}
+            </th>
+            <th class="done-date" ref="th-date">
+              {{ $t('tasks.fields.done_date') }}
             </th>
             <th class="empty" ref="">&nbsp;</th>
           </tr>
@@ -121,6 +124,9 @@
             </td>
             <td class="due-date">
               {{ formatDate(task.due_date) }}
+            </td>
+            <td class="done-date">
+              {{ formatDate(task.done_date) }}
             </td>
             <td class="empty"></td>
           </tr>
