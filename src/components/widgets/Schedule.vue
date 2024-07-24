@@ -1914,6 +1914,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         }
 
         .month-name {
+          background: $dark-grey-2;
           border-left: 2px solid white;
           color: white;
         }
@@ -2103,6 +2104,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       .month-name {
+        background: white;
         border-left: 2px solid black;
         bottom: 0;
         color: black;
