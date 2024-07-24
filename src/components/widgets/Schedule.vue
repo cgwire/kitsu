@@ -2112,6 +2112,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         top: 10px;
         text-transform: uppercase;
         position: absolute;
+        z-index: -1;
       }
     }
   }
