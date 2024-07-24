@@ -2062,6 +2062,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       &.week {
+        margin-top: 8px;
+      }
+
+      &.without-milestones.week {
         margin-top: 20px;
       }
 
