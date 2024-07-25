@@ -25,7 +25,7 @@
     "@fullcalendar/vue": "6.1.15",
     "@google/model-viewer": "3.5.0",
     "@sentry/vue": "8.24.0",
-    "@vue/compat": "3.4.32",
+    "@vue/compat": "3.4.34",
     "async": "3.2.5",
     "bowser": "2.11.0",
     "chart.js": "2.9.4",
@@ -48,7 +48,7 @@
     "three": "0.163.0",
     "uuid": "10.0.0",
     "v-autocomplete": "1.8.2",
-    "vue": "3.4.32",
+    "vue": "3.4.34",
     "vue-at": "3.0.0-alpha.2",
     "vue-chartkick": "0.6.1",
     "vue-drag-drop": "1.1.4",
@@ -66,8 +66,8 @@
     "wavesurfer.js": "7.8.2"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "5.0.5",
-    "@vue/compiler-sfc": "3.4.32",
+    "@vitejs/plugin-vue": "5.1.0",
+    "@vue/compiler-sfc": "3.4.34",
     "@vue/test-utils": "1.3.6",
     "autoprefixer": "10.4.20",
     "eslint": "8.57.0",
