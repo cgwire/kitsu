@@ -100,7 +100,7 @@
                     query: {
                       countMode: countMode,
                       computeMode: computeMode,
-                      taskTypeId: taskTypeId,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "
@@ -137,7 +137,7 @@
                     query: {
                       countMode: countMode,
                       computeMode: computeMode,
-                      taskTypeId: taskTypeId,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "
@@ -176,7 +176,7 @@
                     query: {
                       countMode: countMode,
                       computeMode: computeMode,
-                      taskTypeId: taskTypeId,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "

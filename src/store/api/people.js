@@ -429,7 +429,6 @@ export default {
     computeMode
   ) {
     let path = `/api/data/persons/${personId}/quota-shots/`
-    const weighted = computeMode === 'weighted'
 
     if (detailLevel === 'year') {
       path += `year/${year}`
