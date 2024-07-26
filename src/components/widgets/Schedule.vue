@@ -202,20 +202,21 @@
           <div
             class="day"
             :class="{
-              'without-milestones': !withMilestones
+              'without-milestones': !withMilestones,
+              'new-week': day.newWeek
             }"
             :key="'header-' + day.text + '-' + index"
             v-for="(day, index) in daysAvailable"
           >
             <div
-              class="milestone"
+              class="milestone pointer"
               @click="showEditMilestoneModal(day, currentMilestones[day.text])"
               v-if="currentMilestones[day.text] && withMilestones"
             >
               <div class="milestone-tooltip">
                 {{ currentMilestones[day.text].name }}
               </div>
-              <div class="bull pointer">&bull;</div>
+              <div class="bull">&bull;</div>
             </div>
             <div class="milestone" v-else-if="withMilestones">
               <div class="bull">&nbsp;</div>
@@ -227,19 +228,6 @@
                 'date-widget': true
               }"
             >
-              <div
-                class="add-milestone"
-                :title="addMilestoneTitle(day)"
-                @click="
-                  showEditMilestoneModal(day, currentMilestones[day.text])
-                "
-                v-if="withMilestones && isCurrentUserManager"
-              >
-                <span class="button">
-                  <edit-icon :size="10" v-if="currentMilestones[day.text]" />
-                  <plus-icon :size="12" :stroke-width="3" v-else />
-                </span>
-              </div>
               <div class="date-name">
                 <span class="month-name" v-if="day.newMonth">
                   {{ day.monthText }}
@@ -258,6 +246,19 @@
                     {{ day.dayNumber }}
                   </span>
                 </div>
+              </div>
+              <div
+                class="add-milestone"
+                :title="addMilestoneTitle(day)"
+                @click="
+                  showEditMilestoneModal(day, currentMilestones[day.text])
+                "
+                v-if="withMilestones && isCurrentUserManager"
+              >
+                <span class="button">
+                  <edit-icon :size="10" v-if="currentMilestones[day.text]" />
+                  <plus-icon :size="12" :stroke-width="3" v-else />
+                </span>
               </div>
             </div>
           </div>
@@ -1914,6 +1915,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         }
 
         .month-name {
+          background: $dark-grey-2;
           border-left: 2px solid white;
           color: white;
         }
@@ -2061,6 +2063,10 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
       }
 
       &.week {
+        margin-top: 8px;
+      }
+
+      &.without-milestones.week {
         margin-top: 20px;
       }
 
@@ -2098,11 +2104,8 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         z-index: 10000;
       }
 
-      .weekday-number {
-        color: var(--text);
-      }
-
       .month-name {
+        background: white;
         border-left: 2px solid black;
         bottom: 0;
         color: black;
@@ -2112,6 +2115,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
         top: 10px;
         text-transform: uppercase;
         position: absolute;
+        z-index: -1;
       }
     }
   }
@@ -2390,10 +2394,12 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
 }
 
 .milestone {
-  margin-bottom: 0;
   min-height: 48px;
-  position: relative;
   text-align: center;
+
+  .day.new-week & {
+    transform: translateY(16.5px);
+  }
 
   .flexrow-item {
     margin-left: 5px;
@@ -2493,17 +2499,12 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
   }
 
   &.with-milestones:hover {
-    background: $light-green-light;
-
     .add-milestone {
+      background: $light-green-light;
       display: block;
     }
 
     .day-name {
-      display: none;
-    }
-
-    .week-number {
       display: none;
     }
   }
