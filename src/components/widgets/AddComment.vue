@@ -317,16 +317,18 @@
       :confirm-button-text="$t('comments.confirm_publish_button')"
       @cancel="modals.confirmFeedbackPublish = false"
       @confirm="
-        modals.confirmFeedbackPublish = false
-        runAddComment(
-          text,
-          attachments,
-          checklist,
-          task_status_id,
-          nextRevision,
-          link,
-          true
-        )
+        () => {
+          modals.confirmFeedbackPublish = false
+          runAddComment(
+            text,
+            attachments,
+            checklist,
+            task_status_id,
+            nextRevision,
+            link,
+            true
+          )
+        }
       "
     />
   </article>
