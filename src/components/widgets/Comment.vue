@@ -45,16 +45,22 @@
               :is-pinned="comment.pinned"
               :is-editable="isEditable"
               @pin-clicked="
-                $emit('pin-comment', comment)
-                toggleCommentMenu()
+                () => {
+                  $emit('pin-comment', comment)
+                  toggleCommentMenu()
+                }
               "
               @edit-clicked="
-                $emit('edit-comment', comment)
-                toggleCommentMenu()
+                () => {
+                  $emit('edit-comment', comment)
+                  toggleCommentMenu()
+                }
               "
               @delete-clicked="
-                $emit('delete-comment', comment)
-                toggleCommentMenu()
+                () => {
+                  $emit('delete-comment', comment)
+                  toggleCommentMenu()
+                }
               "
               v-if="menuVisible"
             />
@@ -319,16 +325,22 @@
             :is-editable="isEditable"
             :is-empty="true"
             @pin-clicked="
-              $emit('pin-comment', comment)
-              toggleCommentMenu()
+              () => {
+                $emit('pin-comment', comment)
+                toggleCommentMenu()
+              }
             "
             @edit-clicked="
-              $emit('edit-comment', comment)
-              toggleCommentMenu()
+              () => {
+                $emit('edit-comment', comment)
+                toggleCommentMenu()
+              }
             "
             @delete-clicked="
-              $emit('delete-comment', comment)
-              toggleCommentMenu()
+              () => {
+                $emit('delete-comment', comment)
+                toggleCommentMenu()
+              }
             "
             v-if="menuVisible"
           />

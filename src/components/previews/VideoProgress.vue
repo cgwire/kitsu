@@ -107,8 +107,10 @@
       @touchcancel="isFrameNumberVisible = false"
       @mousedown="startPlaylistProgressDrag"
       @touchstart="
-        startProgressDrag()
-        isFrameNumberVisible = true
+        () => {
+          startProgressDrag()
+          isFrameNumberVisible = true
+        }
       "
       v-show="entityList.length > 1 && playlistDuration > 0"
     >
@@ -126,8 +128,10 @@
         @touchcancel="isFrameNumberVisible = false"
         @mousedown="startPlaylistProgressDrag"
         @touchstart="
-          startProgressDrag
-          isFrameNumberVisible = true
+          () => {
+            startProgressDrag
+            isFrameNumberVisible = true
+          }
         "
         v-for="entity in entityList"
       >
