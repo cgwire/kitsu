@@ -185,6 +185,8 @@ export default {
 }
 
 .people-timesheet-info {
+  border-left: 1px solid var(--border);
+  height: 100%;
   padding: 1em;
 }
 

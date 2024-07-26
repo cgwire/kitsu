@@ -163,6 +163,18 @@
                     </td>
                     <td>{{ formatSimpleDate(task.due_date) }}</td>
                   </tr>
+                  <tr class="datatable-row">
+                    <td class="field-label">
+                      {{ $t('tasks.fields.end_date') }}
+                    </td>
+                    <td>{{ formatSimpleDate(task.end_date) }}</td>
+                  </tr>
+                  <tr class="datatable-row">
+                    <td class="field-label">
+                      {{ $t('tasks.fields.done_date') }}
+                    </td>
+                    <td>{{ formatSimpleDate(task.done_date) }}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>

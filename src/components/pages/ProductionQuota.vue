@@ -51,11 +51,7 @@
         <div class="flexrow-item">
           <info-question-mark
             class="mt2"
-            :text="
-              computeMode === 'weighted'
-                ? $t('quota.explaination')
-                : $t('quota.explanation_feedback')
-            "
+            :text="$t('quota.explanation_' + computeMode)"
           />
         </div>
         <div class="filler"></div>
@@ -166,7 +162,9 @@ export default {
       ],
       computeModeOptions: [
         { label: this.$t('quota.weighted'), value: 'weighted' },
-        { label: this.$t('quota.feedback_date'), value: 'feedback' }
+        { label: this.$t('quota.feedback_date'), value: 'feedback' },
+        { label: this.$t('quota.weighted_done'), value: 'weighteddone' },
+        { label: this.$t('quota.done_date'), value: 'done' }
       ],
       computeMode: 'weighted',
       currentYear: moment().year(),
@@ -318,6 +316,7 @@ export default {
 
     exportQuotas() {
       const quotas = this.$refs['quota-list'].quotaMap
+
       const nameData = ['quotas', this.detailLevel, this.currentYear]
       if (this.detailLevel === 'day') nameData.push(this.currentMonth)
       const name = stringHelpers.slugify(nameData.join('_'))
@@ -340,6 +339,16 @@ export default {
         this.currentMonth,
         this.currentWeek
       )
+    },
+
+    resetRouteQuery() {
+      this.$router.push({
+        query: {
+          countMode: this.countMode,
+          computeMode: this.computeMode,
+          taskTypeId: this.taskTypeId
+        }
+      })
     },
 
     onSearchChange(searchText) {
@@ -401,7 +410,8 @@ export default {
           },
           query: {
             countMode: this.countMode,
-            computeMode: this.computeMode
+            computeMode: this.computeMode,
+            taskTypeId: this.taskTypeId
           }
         }
         this.$router.push(this.episodifyRoute(route))
@@ -411,24 +421,16 @@ export default {
     countMode() {
       if (this.currentMode !== this.countMode) {
         if (this.$route.query.countMode !== this.countMode) {
-          this.$router.push({
-            query: {
-              countMode: this.countMode,
-              computeMode: this.computeMode
-            }
-          })
+          this.resetRouteQuery()
+          this.currentMode = this.countMode
         }
-        this.currentMode = this.countMode
       }
     },
 
     computeMode() {
       if (this.$route.query.computeMode !== this.computeMode) {
-        this.$router.push({
-          query: {
-            computeMode: this.computeMode
-          }
-        })
+        this.resetRouteQuery()
+        this.currentPerson = null
       }
     },
 
@@ -436,11 +438,7 @@ export default {
       const key = `quota:${this.currentProduction.id}:task-type-id`
       localStorage.setItem(key, this.taskTypeId)
       if (this.$route.query.taskTypeId !== this.taskTypeId) {
-        this.$router.push({
-          query: {
-            taskTypeId: this.taskTypeId
-          }
-        })
+        this.resetRouteQuery()
       }
     },
 
@@ -490,16 +488,17 @@ export default {
 }
 
 .fixed-page {
-  padding: 1em;
-  padding-top: 90px;
+  padding-top: 60px;
   padding-left: 2em;
 }
 
 .main-column {
-  display: flex;
   border: 0;
-  overflow: hidden;
+  display: flex;
   flex-direction: column;
+  overflow: hidden;
+  padding-top: 2em;
+  padding-right: 2em;
 }
 
 .zoom-level {
@@ -507,6 +506,8 @@ export default {
 }
 
 .side-column {
+  border-left: 1px solid var(--border);
+  padding: 0;
   margin: 0;
 }
 

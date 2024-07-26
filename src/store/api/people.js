@@ -450,7 +450,7 @@ export default {
       else path += '&'
       path += `&task_type_id=${taskTypeId}`
     }
-    path += `&weighted=${weighted}`
+    path += `&count_mode=${computeMode}`
 
     return client.pget(path)
   },

@@ -52,6 +52,7 @@ export default {
     padding: 0.5em;
     position: absolute;
     width: max-content;
+    max-width: 500px;
     z-index: 300;
 
     &.left {
