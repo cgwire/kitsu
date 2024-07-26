@@ -4,8 +4,10 @@
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"
       @click="
-        leaveRoom()
-        openRoom()
+        () => {
+          leaveRoom()
+          openRoom()
+        }
       "
       v-if="joinedRoom"
     />
