@@ -186,10 +186,9 @@ export default {
   },
 
   getQuotas(productionId, taskTypeId, detailLevel, computeMode) {
-    const weighted = computeMode === 'weighted'
     return client.pget(
       `/api/data/projects/${productionId}/quotas/` +
-        `${taskTypeId}?detail=${detailLevel}&weighted=${weighted}`
+        `${taskTypeId}?detail=${detailLevel}&count_mode=${computeMode}`
     )
   },
 

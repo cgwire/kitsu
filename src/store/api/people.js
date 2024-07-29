@@ -429,7 +429,6 @@ export default {
     computeMode
   ) {
     let path = `/api/data/persons/${personId}/quota-shots/`
-    const weighted = computeMode === 'weighted'
 
     if (detailLevel === 'year') {
       path += `year/${year}`
@@ -450,7 +449,7 @@ export default {
       else path += '&'
       path += `&task_type_id=${taskTypeId}`
     }
-    path += `&weighted=${weighted}`
+    path += `&count_mode=${computeMode}`
 
     return client.pget(path)
   },

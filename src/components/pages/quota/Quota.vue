@@ -96,6 +96,11 @@
                       person_id: key,
                       year: year,
                       month: month
+                    },
+                    query: {
+                      countMode: countMode,
+                      computeMode: computeMode,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "
@@ -128,6 +133,11 @@
                       person_id: key,
                       year: year,
                       week: week
+                    },
+                    query: {
+                      countMode: countMode,
+                      computeMode: computeMode,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "
@@ -162,6 +172,11 @@
                       year: year,
                       month: month,
                       day: day
+                    },
+                    query: {
+                      countMode: countMode,
+                      computeMode: computeMode,
+                      taskTypeId: taskTypeId
                     }
                   })
                 "
