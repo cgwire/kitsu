@@ -893,10 +893,7 @@ export default {
           console.error(err)
           this.errors.addComment = true
           this.loading.addComment = false
-          const isRetakeError =
-            err.response &&
-            err.response.body.message &&
-            err.response.body.message.indexOf('retake') > 0
+          const isRetakeError = err.body?.message?.includes('retake') ?? false
           this.errors.addComment = !isRetakeError
           this.errors.addCommentMaxRetakes = isRetakeError
         })
