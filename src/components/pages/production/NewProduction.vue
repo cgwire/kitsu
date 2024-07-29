@@ -934,12 +934,11 @@ export default {
         }
         await this.loadContext()
         await this.$router.push(this.createProductionRoute(createdProduction))
-      } catch (error) {
-        console.error(error, error.response)
+      } catch (err) {
+        console.error(err)
         this.errors.creatingProduction = true
-        this.errors.creatingProductionError = error.response
-          ? ': ' + error.response.body.message.substring(0, 165)
-          : ''
+        this.errors.creatingProductionError =
+          err.body?.message?.substring(0, 165) ?? ''
       }
       this.loading.createProduction = false
     },

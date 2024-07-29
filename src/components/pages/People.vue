@@ -461,9 +461,7 @@ export default {
         })
         .catch(err => {
           const isUserLimitReached =
-            err.body &&
-            err.body.message &&
-            err.body.message.indexOf('limit') > 0
+            err.body?.message?.includes('limit') ?? false
           if (isUserLimitReached) {
             this.errors.userLimit = true
           } else {
