@@ -437,19 +437,6 @@ export const entityListMixin = {
       return false
     },
 
-    isSupervisorInDepartments(departments = []) {
-      if (!Array.isArray(departments)) {
-        departments = [departments]
-      }
-      return (
-        this.isCurrentUserSupervisor &&
-        (this.user.departments.length === 0 ||
-          this.user.departments.some(department =>
-            departments.includes(department)
-          ))
-      )
-    },
-
     isValidResolution(shot) {
       if (!shot) return true
       const res = this.getMetadataFieldValue({ field_name: 'resolution' }, shot)
