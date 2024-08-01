@@ -321,7 +321,6 @@ export default {
       'setCurrentEpisode'
     ]),
 
-    // TODO: module actions
     setConceptSearch: searchQuery => Promise.resolve(),
     saveConceptSearch: searchQuery => Promise.resolve(),
     removeConceptSearch: searchQuery => Promise.resolve(),

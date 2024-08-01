@@ -1,5 +1,5 @@
 <template>
-  <div class="concept-item">
+  <div class="concept-item" @click="$emit('click')">
     <entity-preview
       :entity="concept"
       :empty-height="200"
