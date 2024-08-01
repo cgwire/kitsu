@@ -148,14 +148,14 @@ import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import { remove } from '@/lib/models'
 
-import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
-import TextField from '@/components/widgets/TextField.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 export default {
   name: 'add-metadata-modal',
@@ -163,14 +163,14 @@ export default {
   mixins: [descriptorMixin, modalMixin],
 
   components: {
+    ButtonSimple,
+    Checklist,
     Combobox,
     ComboboxBoolean,
     ComboboxDepartment,
     DepartmentName,
     ModalFooter,
-    TextField,
-    ButtonSimple,
-    Checklist
+    TextField
   },
 
   props: {
@@ -189,10 +189,6 @@ export default {
     isError: {
       type: Boolean,
       default: false
-    },
-    errorText: {
-      type: String,
-      default: ''
     },
     entityType: {
       type: String,
@@ -247,11 +243,10 @@ export default {
 
   computed: {
     ...mapGetters([
-      'departments',
-      'departmentMap',
       'currentProduction',
-      'taskTypeMap',
+      'departmentMap',
       'isCurrentUserSupervisor',
+      'taskTypeMap',
       'user'
     ]),
 
