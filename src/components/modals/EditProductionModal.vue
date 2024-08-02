@@ -1,7 +1,7 @@
 <template>
   <div
+    class="modal"
     :class="{
-      modal: true,
       'is-active': active
     }"
   >
@@ -9,46 +9,44 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="productionToEdit && productionToEdit.id">
+        <h1 class="title">
           {{ $t('productions.edit_title') }} {{ productionToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('productions.new_production') }}
         </h1>
 
         <form @submit.prevent>
           <text-field
-            ref="nameField"
             :label="$t('productions.fields.name')"
-            v-model="form.name"
             @enter="runConfirmation"
+            v-model="form.name"
             v-focus
           />
           <text-field
-            ref="codeField"
             :label="$t('productions.fields.code')"
-            v-model="form.code"
             @enter="runConfirmation"
+            v-model="form.code"
           />
           <combobox-styled
             class="field"
             :label="$t('productions.fields.status')"
-            :options="productionStatusOptions"
             locale-key-prefix="productions.status."
-            @enter="runConfirmation"
+            :options="productionStatusOptions"
             v-model="form.project_status_id"
-            v-if="productionToEdit && productionToEdit.id"
+          />
+          <combobox-styled
+            class="field"
+            :label="$t('productions.fields.type')"
+            locale-key-prefix="productions.type."
+            :options="productionTypeOptions"
+            v-model="form.production_type"
           />
           <combobox-styled
             class="field"
             :label="$t('productions.fields.style')"
-            :options="productionStyleOptions"
             locale-key-prefix="productions.style."
+            :options="productionStyleOptions"
             v-model="form.production_style"
           />
           <text-field
-            v-if="productionToEdit && productionToEdit.id"
-            ref="fpsField"
             :label="$t('productions.fields.fps')"
             type="number"
             :max="60"
@@ -57,24 +55,18 @@
             v-model="form.fps"
           />
           <text-field
-            v-if="productionToEdit && productionToEdit.id"
-            ref="ratioField"
             :label="$t('productions.fields.ratio')"
-            v-model="form.ratio"
             @enter="runConfirmation"
+            v-model="form.ratio"
           />
           <text-field
-            v-if="productionToEdit && productionToEdit.id"
-            ref="resolutionField"
             :label="$t('productions.fields.resolution')"
-            v-model="form.resolution"
             @enter="runConfirmation"
+            v-model="form.resolution"
           />
-
-          <div v-if="productionToEdit && productionToEdit.id">
+          <div>
             <label class="label">{{ $t('productions.picture') }}</label>
             <file-upload
-              ref="fileField"
               :label="$t('main.csv.upload_file')"
               accept=".png,.jpg,.jpeg"
               @fileselected="onFileSelected"
@@ -100,8 +92,8 @@ import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 import {
@@ -136,60 +128,21 @@ export default {
     },
     productionToEdit: {
       type: Object,
-      default: () => {}
+      required: true
     }
   },
 
   data() {
-    const data = {
+    return {
+      form: {},
       formData: null,
       productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS
     }
-
-    if (this.productionToEdit && this.productionToEdit.id) {
-      data.form = {
-        name: this.productionToEdit.name,
-        code: this.productionToEdit.code,
-        project_status_id: this.productionToEdit.project_status_id,
-        fps: this.productionToEdit.fps,
-        ratio: this.productionToEdit.ratio,
-        resolution: this.productionToEdit.resolution,
-        production_type: this.productionToEdit.production_type || 'short',
-        production_style: this.productionToEdit.production_style || '2d3d'
-      }
-    } else {
-      data.form = {
-        name: '',
-        code: '',
-        project_status_id: this.productionStatus
-          ? this.productionStatus[0].id
-          : null,
-        fps: '',
-        ratio: '',
-        resolution: '',
-        production_type: 'short',
-        production_style: '2d3d'
-      }
-    }
-
-    return data
-  },
-
-  created() {
-    this.resetForm()
-
-    this.productionTypeOptions = PRODUCTION_TYPE_OPTIONS
-  },
-
-  mounted() {
-    if (this.productionStatus.length > 0) {
-      this.form.project_status_id = this.productionStatus[0].id
-    }
   },
 
   computed: {
-    ...mapGetters(['productionStatus', 'productionStatusOptions'])
+    ...mapGetters(['productionStatusOptions'])
   },
 
   methods: {
@@ -203,45 +156,24 @@ export default {
     },
 
     resetForm() {
-      if (this.productionToEdit && this.productionToEdit.id) {
-        this.form = {
-          name: this.productionToEdit.name,
-          code: this.productionToEdit.code,
-          project_status_id: this.productionToEdit.project_status_id,
-          fps: this.productionToEdit.fps,
-          ratio: this.productionToEdit.ratio,
-          resolution: this.productionToEdit.resolution,
-          production_type: this.productionToEdit.production_type || 'short'
-        }
-        this.form.project_status_id = null
-        this.$nextTick(() => {
-          this.form.project_status_id = this.productionToEdit.project_status_id
-        })
-      } else {
-        this.form = {
-          name: '',
-          project_status_id: this.productionStatusOptions[0].value,
-          fps: '',
-          ratio: '',
-          resolution: '',
-          production_type: 'short'
-        }
+      this.form = {
+        name: this.productionToEdit.name,
+        code: this.productionToEdit.code,
+        project_status_id: this.productionToEdit.project_status_id,
+        production_type: this.productionToEdit.production_type || 'short',
+        production_style: this.productionToEdit.production_style || '2d3d',
+        fps: this.productionToEdit.fps,
+        ratio: this.productionToEdit.ratio,
+        resolution: this.productionToEdit.resolution
       }
     }
   },
 
   watch: {
-    productionToEdit() {
-      this.resetForm()
-    },
-
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-          this.formData = null
-          if (this.$refs.fileField) this.$refs.fileField.reset()
-        }, 100)
+    productionToEdit: {
+      immediate: true,
+      handler() {
+        this.resetForm()
       }
     }
   }
