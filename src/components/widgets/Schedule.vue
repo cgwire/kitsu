@@ -337,13 +337,14 @@
               :style="timelinePositionStyle"
               v-show="!isChangeDates"
             ></div>
-            <div
-              class="milestone-vertical-line"
-              :style="milestoneLineStyle(milestone)"
-              :key="'milestone-' + milestone.date"
-              v-for="milestone in Object.values(currentMilestones)"
-              v-if="!isWeekMode"
-            ></div>
+            <template v-if="withMilestones && !isWeekMode">
+              <div
+                class="milestone-vertical-line"
+                :style="milestoneLineStyle(milestone)"
+                :key="`milestone-${milestone.date}`"
+                v-for="milestone in Object.values(currentMilestones)"
+              ></div>
+            </template>
             <div
               class="timeline-element"
               :data-id="rootElement.id"
@@ -488,13 +489,14 @@
     </div>
 
     <edit-milestone-modal
-      :active="modals.edit"
+      active
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :milestone-to-edit="milestoneToEdit"
       @confirm="confirmEditMilestone"
       @cancel="hideEditMilestoneModal"
       @remove-milestone="removeMilestone"
+      v-if="withMilestones && modals.edit"
     />
   </div>
 </template>
@@ -667,6 +669,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'departmentMap',
       'isCurrentUserManager',
       'isDarkTheme',
@@ -932,7 +935,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['deleteMilestone', 'saveMilestone']),
+    ...mapActions(['deleteMilestone', 'loadMilestones', 'saveMilestone']),
 
     getDayOffRange,
 
@@ -1813,6 +1816,14 @@ export default {
             task,
             updatedAt: formatFullDate(moment())
           })
+        }
+      }
+    },
+    currentProduction: {
+      immediate: true,
+      handler() {
+        if (this.withMilestones) {
+          this.loadMilestones(this.currentProduction)
         }
       }
     }
