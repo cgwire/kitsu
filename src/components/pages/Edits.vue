@@ -602,6 +602,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -931,23 +932,25 @@ export default {
       this.applySearch(query)
     },
 
-    onFieldChanged({ entry, fieldName, value }) {
+    async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         description: entry.description
       }
       data[fieldName] = value
-      this.editEdit(data)
+      await this.editEdit(data)
+      this.onSearchChange()
     },
 
-    onMetadataChanged({ entry, descriptor, value }) {
+    async onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
         data: metadata
       }
-      this.editEdit(data)
+      await this.editEdit(data)
+      this.onSearchChange()
     }
   },
 

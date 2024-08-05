@@ -18,6 +18,9 @@ export default {
       { id: 'asset-type-1', name: 'Characters' },
       { id: 'asset-type-2', name: 'Sets' }
     ],
+    productionShotTaskTypes: () => [
+      { id: 'task-type-1', name: 'Animation' },
+    ],
     isTVShow: () => false
   },
   actions: {}

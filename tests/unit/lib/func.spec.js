@@ -1,4 +1,4 @@
-import func from '../../../src/lib/func'
+import func from '@/lib/func'
 
 describe('func', () => {
   test('runPromiseMapAsSeries', () => new Promise((done) => {

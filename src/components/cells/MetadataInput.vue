@@ -140,6 +140,7 @@ export default {
   components: {
     ComboboxTag
   },
+
   props: {
     entity: {
       type: Object,
@@ -154,8 +155,10 @@ export default {
       required: true
     }
   },
+
   computed: {
     ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
+
     isEditable() {
       return (
         this.isCurrentUserManager ||

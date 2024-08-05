@@ -76,15 +76,11 @@ const applyFiltersFunctions = {
 
   descriptor(entry, filter, taskMap) {
     let isOk = false
-    if (
-      entry.data &&
-      entry.data[filter.descriptor.field_name] &&
-      filter.values
-    ) {
-      let dataValue = entry.data[filter.descriptor.field_name]
+    let dataValue = entry.data?.[filter.descriptor.field_name]
+    if ((dataValue || dataValue === 0) && filter.values) {
       if (typeof dataValue === 'string') dataValue = dataValue.toLowerCase()
 
-      // Boolean case
+      // Checklist case
       if (
         filter.values.length === 1 &&
         filter.values[0].match(new RegExp('(:true)|(:false)$'))
@@ -103,6 +99,8 @@ const applyFiltersFunctions = {
         } catch {
           isOk = false
         }
+
+        // Number case
       } else if (filter.descriptor.data_type === 'number') {
         try {
           dataValue = parseFloat(dataValue)
@@ -118,7 +116,7 @@ const applyFiltersFunctions = {
       } else {
         filter.values.forEach(value => {
           dataValue = `${dataValue}`
-          isOk = isOk || dataValue.indexOf(value.toLowerCase()) >= 0
+          isOk = isOk || dataValue.includes(value.toLowerCase())
         })
       }
     } else {

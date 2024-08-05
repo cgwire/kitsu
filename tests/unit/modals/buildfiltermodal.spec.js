@@ -1,12 +1,12 @@
-/* eslint-disable no-undef */
-
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
 
-import i18n from '../../../src/lib/i18n'
-import BuildFilterModal from '../../../src/components/modals/BuildFilterModal'
-import productionStoreFixture from '../fixtures/production-store.js'
+import i18n from '@/lib/i18n'
+
+import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+
+import productionStoreFixture from '../fixtures/production-store'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)

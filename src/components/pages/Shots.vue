@@ -691,6 +691,7 @@ export default {
         .then(() => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -1056,17 +1057,18 @@ export default {
       this.applySearch(query)
     },
 
-    onFieldChanged({ entry, fieldName, value }) {
+    async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         nb_frames: entry.nb_frames,
         description: entry.description
       }
       data[fieldName] = value
-      this.editShot(data)
+      await this.editShot(data)
+      this.onSearchChange()
     },
 
-    onMetadataChanged({ entry, descriptor, value }) {
+    async onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
@@ -1088,7 +1090,8 @@ export default {
       ) {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
-      this.editShot(data)
+      await this.editShot(data)
+      this.onSearchChange()
     },
 
     showEDLImportModal() {

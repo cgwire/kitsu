@@ -1,4 +1,4 @@
-import auth from '../../../src/lib/auth'
+import auth from '@/lib/auth'
 
 describe('auth', () => {
   test('isPasswordValid', () => {

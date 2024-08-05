@@ -554,23 +554,25 @@ export default {
       })
     },
 
-    onFieldChanged({ entry, fieldName, value }) {
+    async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
         description: entry.description
       }
       data[fieldName] = value
-      this.editSequence(data)
+      await this.editSequence(data)
+      this.onSearchChange()
     },
 
-    onMetadataChanged({ entry, descriptor, value }) {
+    async onMetadataChanged({ entry, descriptor, value }) {
       const metadata = {}
       metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
         data: metadata
       }
-      this.editSequence(data)
+      await this.editSequence(data)
+      this.onSearchChange()
     },
 
     onEditClicked(sequence) {
@@ -591,6 +593,7 @@ export default {
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
+            this.onSearchChange()
           })
           .catch(err => {
             console.error(err)

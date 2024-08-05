@@ -1,4 +1,4 @@
-import stringHelpers from '../../../src/lib/string'
+import stringHelpers from '@/lib/string'
 
 describe('lib/string', () => {
   it('generateNextName', () => {

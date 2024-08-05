@@ -1,4 +1,4 @@
-import { buildQueryString } from '../../../src/lib/query'
+import { buildQueryString } from '@/lib/query'
 
 describe('query', () => {
   describe('Mount', () => {
