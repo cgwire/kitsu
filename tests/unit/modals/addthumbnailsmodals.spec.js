@@ -41,6 +41,7 @@ describe('AddThumbnailsModal', () => {
       router,
       auth,
       propsData: {
+        entityType: 'Asset',
         parent: 'assets'
       }
     })
