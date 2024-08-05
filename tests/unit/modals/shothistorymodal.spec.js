@@ -1,10 +1,13 @@
 import Vue from 'vue'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
-import i18n from '../../../src/lib/i18n'
-import ShotHistoryModal from '../../../src/components/modals/ShotHistoryModal'
-import TableInfo from '../../../src/components/widgets/TableInfo'
-import peopleStoreFixture from '../fixtures/person-store.js'
+
+import i18n from '@/lib/i18n'
+
+import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+
+import peopleStoreFixture from '../fixtures/person-store'
 
 const localVue = createLocalVue()
 localVue.use(Vuex)

@@ -2,7 +2,7 @@ import {
   computeStats,
   getChartData,
   getChartColors
-} from '../../../src/lib/stats'
+} from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
   'task-1': {

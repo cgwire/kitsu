@@ -1,11 +1,9 @@
-/* eslint-disable no-undef */
-
 import {
   formatFrame,
   formatTime,
   frameToSeconds,
   roundToFrame
-} from '../../../src/lib/video'
+} from '@/lib/video'
 
 describe('video', () => {
   it('roundToFrame', () => {

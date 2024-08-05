@@ -1,4 +1,3 @@
-import test from '../../../src/lib/string'
 import {
   addToIdList,
   removeFromIdList,
@@ -7,9 +6,8 @@ import {
   findModelInList,
   populateTask,
   updateModelFromList,
-  remove,
   removeModelFromList
-} from '../../../src/lib/models'
+} from '@/lib/models'
 
 describe('lib/helpers', () => {
   it('populateTask', () => {

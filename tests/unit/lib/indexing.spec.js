@@ -1,11 +1,10 @@
-/* eslint-disable no-undef */
 import {
   buildNameIndex,
   buildAssetIndex,
   buildShotIndex,
   buildTaskIndex,
   indexSearch
-} from '../../../src/lib/indexing'
+} from '@/lib/indexing'
 
 describe('lib/indexing', () => {
   it('buildNameIndex', () => {

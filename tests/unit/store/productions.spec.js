@@ -1,6 +1,6 @@
-import store from '../../../src/store/modules/productions'
+import store from '@/store/modules/productions'
 
-import productionApi from '../../../src/store/api/productions.js'
+import productionApi from '@/store/api/productions.js'
 import {
   ADD_METADATA_DESCRIPTOR_END,
   ADD_PRODUCTION,

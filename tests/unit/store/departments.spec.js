@@ -1,4 +1,4 @@
-import store from '../../../src/store/modules/departments'
+import store from '@/store/modules/departments'
 
 const departments = [
   {

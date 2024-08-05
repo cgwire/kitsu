@@ -1,4 +1,4 @@
-import store from '../../../src/store/modules/news'
+import store from '@/store/modules/news'
 
 const timezone = 'Europe/Paris'
 

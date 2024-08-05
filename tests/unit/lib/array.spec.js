@@ -1,6 +1,6 @@
 import {
   intersection
-} from '../../../src/lib/array'
+} from '@/lib/array'
 
 describe('array', () => {
   it('intersection', () => {

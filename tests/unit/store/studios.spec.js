@@ -1,4 +1,4 @@
-import store from '../../../src/store/modules/studios'
+import store from '@/store/modules/studios'
 
 const studios = [
   {

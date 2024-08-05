@@ -1,8 +1,8 @@
 import { createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 
-import store from '../../../src/store/modules/breakdown'
-import breakdownApi from '../../../src/store/api/breakdown'
+import store from '@/store/modules/breakdown'
+import breakdownApi from '@/store/api/breakdown'
 
 breakdownApi.updateCasting = vi.fn()
 breakdownApi.getSequenceCasting = vi.fn()

@@ -1,9 +1,9 @@
 import moment from 'moment-timezone'
-import lang from '../../../src/lib/lang'
-import timezone from '../../../src/lib/timezone'
+import lang from '@/lib/lang'
+import timezone from '@/lib/timezone'
 
-import i18n from '../../../src/lib/i18n'
-import store from '../../../src/store'
+import i18n from '@/lib/i18n'
+import store from '@/store'
 
 class ColorHash {
   constructor (colorData) {
