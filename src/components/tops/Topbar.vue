@@ -550,7 +550,6 @@ export default {
       'clearEpisodes',
       'clearSelectedTasks',
       'loadEpisodes',
-      'loadMilestones',
       'incrementNotificationCounter',
       'logout',
       'setProduction',
@@ -823,12 +822,6 @@ export default {
       if (productionId) {
         this.updateContext(productionId)
       }
-    },
-
-    currentProduction() {
-      this.$nextTick(() => {
-        this.loadMilestones()
-      })
     },
 
     currentEpisode() {

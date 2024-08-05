@@ -113,11 +113,11 @@ const actions = {
       .catch(console.error)
   },
 
-  loadMilestones({ commit, rootState }) {
-    const production = rootState.productions.currentProduction
-    return scheduleApi.getMilestones(production).then(milestones => {
-      commit(ADD_MILESTONES, milestones)
-    })
+  async loadMilestones({ commit, rootState }, production) {
+    const milestones = production
+      ? await scheduleApi.getMilestones(production)
+      : []
+    commit(ADD_MILESTONES, milestones)
   },
 
   saveMilestone({ commit, rootState }, milestone) {

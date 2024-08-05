@@ -158,7 +158,6 @@ export default {
       'editProduction',
       'loadAssetTypeScheduleItems',
       'loadEpisodeScheduleItems',
-      'loadMilestones',
       'loadScheduleItems',
       'loadSequenceScheduleItems',
       'saveScheduleItem'
@@ -225,7 +224,6 @@ export default {
           )
           this.loading.schedule = false
         })
-        .then(this.loadMilestones)
         .catch(err => {
           console.error(err)
           this.loading.schedule = false

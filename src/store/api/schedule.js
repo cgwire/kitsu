@@ -2,17 +2,8 @@ import client from '@/store/api/client'
 
 export default {
   getMilestones(production) {
-    return new Promise((resolve, reject) => {
-      if (production) {
-        const path = `/api/data/projects/${production.id}/milestones`
-        client.get(path, (err, milestones) => {
-          if (err) reject(err)
-          else resolve(milestones)
-        })
-      } else {
-        resolve([])
-      }
-    })
+    const path = `/api/data/projects/${production.id}/milestones`
+    return client.pget(path)
   },
 
   createMilestone(production, milestone) {
