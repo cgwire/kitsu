@@ -2064,6 +2064,7 @@ const setItemPositions = (items, attributeName, unitOfTime = 'days') => {
     margin-left: 2px;
     padding-bottom: 0;
     overflow: hidden;
+    z-index: 0;
 
     .day {
       display: inline-block;
