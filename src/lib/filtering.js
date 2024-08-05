@@ -542,12 +542,9 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const pattern = rgxMatch.split('=')
       let taskTypeName = pattern[0].substring('assignedto'.length)
       taskTypeName = cleanParenthesis(taskTypeName)
-      let taskType = null
-      if (taskTypeName !== '') {
-        const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-        taskType = taskTypes[0]
-      }
-
+      const taskType = taskTypeName
+        ? taskTypeNameIndex[taskTypeName.toLowerCase()]?.[0]
+        : null
       let value = pattern[1]
       value = cleanParenthesis(value)
       const excluding = value.startsWith('-')
@@ -557,7 +554,7 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       if (person) {
         results.push({
           personId: person.id,
-          taskType: taskType,
+          taskType,
           value,
           type: 'assignedto',
           excluding
