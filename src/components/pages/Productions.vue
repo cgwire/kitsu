@@ -26,13 +26,14 @@
     />
 
     <edit-production-modal
-      :active="modals.isNewDisplayed"
+      active
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :production-to-edit="productionToEdit"
-      @cancel="modals.isNewDisplayed = false"
+      @cancel="modals.isEditDisplayed = false"
       @fileselected="onProductionPictureSelected"
       @confirm="confirmEditProduction"
+      v-if="modals.isEditDisplayed"
     />
 
     <hard-delete-modal
@@ -82,7 +83,7 @@ export default {
         stats: false
       },
       modals: {
-        isNewDisplayed: false,
+        isEditDisplayed: false,
         isDeleteDisplayed: false
       },
       productionStats: {},
@@ -139,7 +140,7 @@ export default {
           }
         })
         .then(() => {
-          this.modals.isNewDisplayed = false
+          this.modals.isEditDisplayed = false
           this.loading.edit = false
         })
         .catch(err => {
@@ -177,17 +178,12 @@ export default {
 
     onEditClicked(production) {
       this.productionToEdit = production
-      this.modals.isNewDisplayed = true
+      this.modals.isEditDisplayed = true
     },
 
     onDeleteClicked(production) {
       this.productionToDelete = production
       this.modals.isDeleteDisplayed = true
-    },
-
-    onNewClicked(production) {
-      this.productionToEdit = {}
-      this.modals.isNewDisplayed = true
     },
 
     onProductionPictureSelected(formData) {
