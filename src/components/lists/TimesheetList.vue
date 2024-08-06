@@ -154,7 +154,7 @@
               class="name datatable-row-header"
               :style="{ left: colNamePosX }"
             >
-              <router-link :to="task.entity_path">
+              <router-link :to="entityPath(task)">
                 {{ task.full_entity_name }}
               </router-link>
             </th>
