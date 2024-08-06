@@ -260,7 +260,7 @@ export default {
       let departments = this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)
-          return taskType.for_entity === this.entityType
+          return taskType && taskType.for_entity === this.entityType
             ? this.departmentMap.get(taskType.department_id)
             : false
         })

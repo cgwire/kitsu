@@ -15,7 +15,7 @@ export const entitiesMixin = {
 
   mounted() {
     const departmentId = preferences.getPreference(
-      this.pageName + ':department'
+      `${this.pageName}:department`
     )
     if (departmentId) {
       this.selectedDepartment = departmentId
@@ -111,14 +111,14 @@ export const entitiesMixin = {
       } else {
         this.departmentFilter = [departmentId]
       }
-      preferences.setPreference(this.pageName + ':department', departmentId)
+      preferences.setPreference(`${this.pageName}:department`, departmentId)
     },
 
     selectableDepartments(forEntity) {
       return this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)
-          return taskType.for_entity === forEntity
+          return taskType && taskType.for_entity === forEntity
             ? this.departmentMap.get(taskType.department_id)
             : false
         })
@@ -195,7 +195,7 @@ export const entitiesMixin = {
           taskId: form.task.id,
           commentText: '',
           taskStatusId: form.task.task_status_id,
-          form: form
+          form
         })
           .then(({ newComment, preview }) => {
             return this.setPreview({
