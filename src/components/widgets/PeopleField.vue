@@ -24,7 +24,7 @@
       @update-items="update"
       v-model="item"
     />
-    <span class="clear-button" @click="item = null" v-show="item !== null">
+    <span class="clear-button" @click="item = null" v-show="item != null">
       <x-icon :size="12" />
     </span>
 
@@ -154,6 +154,11 @@ export default {
   }
 }
 
+.dark .v-autocomplete .v-autocomplete-list {
+  box-shadow: 2px 2px 2px 0 $dark-grey-light;
+  border-color: $dark-grey;
+}
+
 .people-field {
   position: relative;
 
@@ -163,13 +168,18 @@ export default {
     position: absolute;
     right: 4px;
     top: 0;
-    z-index: 3001;
+    z-index: 206; // +1 relative to the z-index of .v-autocomplete
   }
 }
 
-.dark .v-autocomplete .v-autocomplete-list {
-  box-shadow: 2px 2px 2px 0 $dark-grey-light;
-  border-color: $dark-grey;
+.v-autocomplete {
+  z-index: 205; // +1 relative to the z-index of c-mask
+  position: relative;
+
+  // Hide native clear button for Webkit browsers (Chrome, Safari)
+  input[type='search']::-webkit-search-cancel-button {
+    display: none;
+  }
 }
 
 .v-autocomplete .v-autocomplete-list {
@@ -183,16 +193,6 @@ export default {
   border: 1px solid var(--border);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-}
-
-.v-autocomplete {
-  z-index: 205; // +1 relative to the z-index of c-mask
-  position: relative;
-
-  // Hide native clear button for Webkit browsers (Chrome, Safari)
-  input[type='search']::-webkit-search-cancel-button {
-    display: none;
-  }
 }
 
 .v-autocomplete .v-autocomplete-list-item {
