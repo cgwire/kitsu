@@ -67,7 +67,7 @@
           <tr
             class="datatable-row"
             v-for="(task, i) in displayedTasks"
-            :key="task.id + '-' + i"
+            :key="`${task.id}-${i}`"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"
@@ -125,7 +125,7 @@
           <tr
             class="datatable-row"
             v-for="(task, i) in doneTasks"
-            :key="task + '-' + i"
+            :key="`${task}-${i}`"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"
@@ -262,10 +262,6 @@ export default {
       default: false,
       type: Boolean
     },
-    done: {
-      default: false,
-      type: Boolean
-    },
     dayOffError: {
       default: false,
       type: [String, Boolean]
@@ -304,11 +300,10 @@ export default {
   },
 
   mounted() {
-    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
-    this.colNamePosX =
-      this.$refs['th-prod'].offsetWidth +
-      this.$refs['th-type'].offsetWidth +
-      'px'
+    this.colTypePosX = `${this.$refs['th-prod'].offsetWidth}px`
+    this.colNamePosX = `${
+      this.$refs['th-prod'].offsetWidth + this.$refs['th-type'].offsetWidth
+    }px`
     this.disabledDates = {
       to:
         this.isCurrentUserArtist && this.organisation.timesheets_locked
