@@ -79,7 +79,7 @@ const helpers = {
     let route = { name: 'open-productions' }
     if (episodeId) {
       route = {
-        name: 'episode-' + routeName,
+        name: `episode-${routeName}`,
         params: {
           episode_id: episodeId,
           production_id: productionId
@@ -281,7 +281,7 @@ const getters = {
   productionDepartmentIds: (state, getters) => {
     const departmentIds = {}
     return getters.productionTaskTypes.reduce((acc, type) => {
-      if (type.department_id && !departmentIds[type.department_id]) {
+      if (type?.department_id && !departmentIds[type.department_id]) {
         departmentIds[type.department_id] = true
         acc.push(type.department_id)
       }

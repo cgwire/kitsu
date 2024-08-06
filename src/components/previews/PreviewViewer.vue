@@ -386,14 +386,10 @@ export default {
       return dimensions
     },
 
-    resetPicture() {
-      if (this.pictureViewer) this.pictureViewer.resetPicture()
-    },
-
     resize() {
-      if (this.isPicture) this.pictureViewer.resetPicture()
-      if (this.isMovie) this.videoViewer.mountVideo()
-      if (this.isSound) this.soundViewer.redraw()
+      if (this.isPicture) this.pictureViewer?.resetPicture()
+      else if (this.isMovie) this.videoViewer?.mountVideo()
+      else if (this.isSound) this.soundViewer?.redraw()
     },
 
     setCurrentFrame(frameNumber) {
