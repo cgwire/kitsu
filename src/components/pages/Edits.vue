@@ -381,8 +381,8 @@ export default {
 
   mounted() {
     let searchQuery = ''
-    if (this.editSearchText && this.editSearchText.length > 0) {
-      this.searchField.setValue(this.editSearchText)
+    if (this.editSearchText.length > 0) {
+      this.$refs['edit-search-field']?.setValue(this.editSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = `${this.$route.query.search}`
@@ -962,7 +962,7 @@ export default {
     $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
-      const actualSearch = this.$refs['edit-search-field'].getValue()
+      const actualSearch = this.$refs['edit-search-field']?.getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.applySearch(search)
@@ -970,14 +970,14 @@ export default {
     },
 
     currentProduction() {
-      this.$refs['edit-search-field'].setValue('')
+      this.$refs['edit-search-field']?.setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
 
     currentEpisode() {
-      this.searchField?.setValue('')
+      this.$refs['edit-search-field']?.setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
