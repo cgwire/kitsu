@@ -977,7 +977,7 @@ export default {
     },
 
     currentEpisode() {
-      this.$refs['edit-search-field'].setValue('')
+      this.searchField?.setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
