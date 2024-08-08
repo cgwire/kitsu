@@ -983,7 +983,7 @@ export default {
         ? sortPeople(
             this.currentProductionTeam
               .map(personId => this.personMap.get(personId))
-              .filter(person => !person.is_bot)
+              .filter(person => person && !person.is_bot)
           )
         : [...this.peopleWithoutBot]
 
