@@ -1192,20 +1192,26 @@ export default {
 
     availableLinksByType() {
       const assetGroups = [...this.assetsByType]
-      const result = assetGroups.map(assets => {
-        if (!assets.length) return
-        return {
-          type: assets[0].asset_type_name,
-          links: assets
+      const result = assetGroups
+        .map(assets => {
+          if (!assets.length) return
+          const links = assets
+            .filter(
+              asset =>
+                !this.conceptLinkedEntities.some(
+                  entity => entity.id === asset.id
+                )
+            )
             .map(asset => ({
               id: asset.id,
               name: asset.name
             }))
-            .filter(asset => {
-              return !this.conceptLinkedEntities.some(e => e.id === asset.id)
-            })
-        }
-      })
+          return {
+            type: assets[0].asset_type_name,
+            links
+          }
+        })
+        .filter(Boolean)
       return result
     }
   },
