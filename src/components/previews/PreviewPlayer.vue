@@ -820,9 +820,7 @@ export default {
     },
 
     fps() {
-      return this.currentProduction.fps
-        ? parseFloat(this.currentProduction.fps)
-        : 24
+      return parseFloat(this.currentProduction?.fps) || 24
     },
 
     frameDuration() {
