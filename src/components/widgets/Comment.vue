@@ -480,7 +480,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction',
       'departmentMap',
       'isCurrentUserAdmin',
       'isCurrentUserArtist',
@@ -512,7 +511,7 @@ export default {
         name: 'task',
         params: {
           task_id: this.comment.object_id,
-          production_id: this.currentProduction.id
+          production_id: this.task.project_id
         }
       }
       if (this.comment.previews.length > 0) {
@@ -521,7 +520,7 @@ export default {
           params: {
             task_id: this.comment.object_id,
             preview_id: this.comment.previews[0].id,
-            production_id: this.currentProduction.id
+            production_id: this.task.project_id
           }
         }
       }
@@ -625,7 +624,7 @@ export default {
 
     getPath(name) {
       const route = {
-        name: name,
+        name,
         params: {
           task_id: this.comment.object_id,
           comment_id: this.comment.id
