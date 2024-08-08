@@ -1414,15 +1414,16 @@ export default {
 
       'preview-file:annotation-update'(eventData) {
         const previewPlayer = this.$refs['preview-player']
+        if (!previewPlayer) return
         const isValid = previewPlayer.isValidPreviewModification(
           eventData.preview_file_id,
           eventData.updated_at
         )
-        if (isValid && previewPlayer) {
+        if (isValid) {
           this.refreshPreview({
             previewId: previewPlayer.currentPreview.id,
             taskId: previewPlayer.currentPreview.task_id
-          }).then(preview => {
+          }).then(() => {
             if (!previewPlayer.notSaved) {
               this.taskPreviews = this.getCurrentTaskPreviews()
               this.$nextTick(() => {
