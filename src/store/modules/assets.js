@@ -74,7 +74,10 @@ import {
   UNLOCK_ASSET,
   RESET_ALL,
   CLEAR_SELECTED_ASSETS,
-  SET_ASSET_SELECTION
+  SET_ASSET_SELECTION,
+  LOAD_SHARED_ASSETS_START,
+  // LOAD_SHARED_ASSETS_ERROR,
+  LOAD_SHARED_ASSETS_END
 } from '@/store/mutation-types'
 import async from 'async'
 
@@ -298,7 +301,10 @@ const initialState = {
   personTasks: [],
   assetListScrollPosition: 0,
 
-  selectedAssets: new Map()
+  selectedAssets: new Map(),
+
+  sharedAssets: [],
+  sharedAssetMap: new Map()
 }
 
 const state = {
@@ -350,7 +356,9 @@ const getters = {
 
   assetsCsvFormData: state => state.assetsCsvFormData,
 
-  selectedAssets: state => state.selectedAssets
+  selectedAssets: state => state.selectedAssets,
+
+  sharedAssets: state => state.sharedAssets
 }
 
 const actions = {
@@ -471,7 +479,7 @@ const actions = {
         dispatch('createTask', {
           entityId: asset.id,
           projectId: asset.project_id,
-          taskTypeId: taskTypeId,
+          taskTypeId,
           type: 'assets'
         })
       })
@@ -746,6 +754,18 @@ const actions = {
         }
       )
     })
+  },
+
+  async loadSharedAssets({ commit, rootGetters }) {
+    commit(LOAD_SHARED_ASSETS_START)
+    try {
+      const assets = await assetsApi.getSharedAssets()
+      commit(LOAD_SHARED_ASSETS_END, { assets })
+    } catch (err) {
+      console.error(err)
+      // commit(LOAD_SHARED_ASSETS_ERROR)
+      throw err
+    }
   }
 }
 
@@ -863,6 +883,13 @@ const mutations = {
 
     state.assetSearchFilterGroups =
       userFilterGroups?.asset?.[production.id] || []
+  },
+
+  [LOAD_SHARED_ASSETS_START](state) {},
+
+  [LOAD_SHARED_ASSETS_END](state, { assets }) {
+    state.sharedAssets = assets
+    state.sharedAssetMap = new Map(assets.map(asset => [asset.id, asset]))
   },
 
   [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {

@@ -3,7 +3,7 @@
     <div class="column main-column">
       <slot name="main" />
     </div>
-    <div class="column side-column">
+    <div class="column side-column" v-if="side">
       <slot name="side" />
     </div>
   </div>
@@ -11,6 +11,13 @@
 
 <script>
 export default {
-  name: 'page-layout'
+  name: 'page-layout',
+
+  props: {
+    side: {
+      type: Boolean,
+      default: true
+    }
+  }
 }
 </script>
