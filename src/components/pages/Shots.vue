@@ -449,7 +449,7 @@ export default {
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = `${this.$route.query.search}`
     }
-    this.$refs['shot-search-field'].setValue(searchQuery)
+    this.$refs['shot-search-field']?.setValue(searchQuery)
     const finalize = () => {
       this.loadShots(() => {})
     }
@@ -1145,7 +1145,7 @@ export default {
     $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
-      const actualSearch = this.$refs['shot-search-field'].getValue()
+      const actualSearch = this.$refs['shot-search-field']?.getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.applySearch(search)
@@ -1170,7 +1170,7 @@ export default {
     },
 
     currentProduction() {
-      this.$refs['shot-search-field'].setValue('')
+      this.$refs['shot-search-field']?.setValue('')
       this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
       this.initialLoading = true

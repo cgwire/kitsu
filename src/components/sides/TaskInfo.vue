@@ -41,7 +41,7 @@
             <task-type-name
               class="flexrow-item task-type"
               :task-type="taskTypeMap.get(task.task_type_id)"
-              :production-id="currentProduction.id"
+              :production-id="task.project_id"
             />
             <span class="flexrow-item">{{ task.entity_name }}</span>
           </div>
@@ -59,7 +59,7 @@
             <task-type-name
               class="flexrow-item task-type"
               :task-type="currentTaskType"
-              :production-id="currentProduction.id"
+              :production-id="task.project_id"
               v-if="currentTaskType"
             />
             <div class="title flexrow-item filler">
@@ -460,7 +460,6 @@ export default {
   computed: {
     ...mapGetters([
       'currentEpisode',
-      'currentProduction',
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
@@ -613,7 +612,7 @@ export default {
     },
 
     currentFps() {
-      return parseInt(this.productionMap.get(this.task.project_id)?.fps || '25')
+      return parseInt(this.productionMap.get(this.task.project_id)?.fps) || 25
     },
 
     currentRevision() {
@@ -696,7 +695,7 @@ export default {
     taskPath() {
       return getTaskPath(
         this.task,
-        this.currentProduction,
+        null,
         this.isTVShow,
         this.currentEpisode,
         this.taskTypeMap
@@ -927,7 +926,7 @@ export default {
             preview: {
               id: previewId,
               revision,
-              extension: extension
+              extension
             },
             taskId,
             commentId,
@@ -1190,7 +1189,7 @@ export default {
       const nameData = [
         moment().format('YYYY-MM-DD'),
         'kitsu',
-        this.currentProduction.name,
+        this.productionMap.get(this.task.project_id)?.name,
         this.task.entity_name.replaceAll(' / ', '_'),
         this.taskTypeMap.get(this.task.task_type_id).name,
         'comments'

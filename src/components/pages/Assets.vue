@@ -385,7 +385,7 @@ export default {
   mounted() {
     let searchQuery = ''
     if (this.assetSearchText.length > 0) {
-      this.searchField.setValue(this.assetSearchText)
+      this.$refs['asset-search-field']?.setValue(this.assetSearchText)
     }
     if (this.$route.query.search && this.$route.query.search.length > 0) {
       searchQuery = `${this.$route.query.search}`
@@ -999,7 +999,7 @@ export default {
     $route() {
       if (!this.$route.query) return
       const search = this.$route.query.search
-      const actualSearch = this.searchField.getValue()
+      const actualSearch = this.$refs['asset-search-field']?.getValue()
       if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.onSearchChange()
@@ -1007,14 +1007,14 @@ export default {
     },
 
     currentProduction() {
-      this.searchField.setValue('')
+      this.$refs['asset-search-field']?.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true
       if (!this.isTVShow) this.reset()
     },
 
     currentEpisode() {
-      this.searchField.setValue('')
+      this.$refs['asset-search-field']?.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       if (this.isTVShow && this.currentEpisode) this.reset()
     },
