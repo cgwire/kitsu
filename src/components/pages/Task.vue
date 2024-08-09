@@ -1304,6 +1304,10 @@ export default {
       }
     },
 
+    currentProduction() {
+      this.loadTaskData()
+    },
+
     selectedPreviewId() {
       if (this.task) {
         this.$router.push(this.previewPath(this.selectedPreviewId))
