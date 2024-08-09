@@ -459,6 +459,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isSavingCommentPreview',
       'currentEpisode',
       'getTaskComment',
       'getTaskComments',
@@ -1375,8 +1376,8 @@ export default {
       'comment:update'(eventData) {
         const commentId = eventData.comment_id
         if (
-          !this.task &&
-          !this.taskComments.some(({ id }) => id === commentId)
+          this.isSavingCommentPreview ||
+          (!this.task && !this.taskComments.some(({ id }) => id === commentId))
         ) {
           return
         }
