@@ -1253,7 +1253,7 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { taskId, previewId }) {
-    if (state.taskMap.get(taskId)) {
+    if (state.taskMap.get(taskId)?.entity) {
       state.taskMap.get(taskId).entity.preview_file_id = previewId
     }
   },
