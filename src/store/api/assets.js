@@ -12,33 +12,12 @@ export default {
     return client.pget(path)
   },
 
-  getSharedAssets(/* production */) {
-    // const path = '/api/data/assets?is_shared=true'
-    const path = '/api/data/assets/'
-    // if (production) {
-    //   path += `?project_id=${production.id}`
-    // }
-    return (
-      client
-        .pget(path)
-        // FIXME: remove following mock data
-        .then(assets => {
-          return assets.map(entity => {
-            const types = [
-              { id: 1, name: 'type 1' },
-              { id: 2, name: 'type 2' },
-              { id: 3, name: 'type 3' }
-            ]
-            const randomType = types[Math.floor(Math.random() * 3)]
-            return {
-              ...entity,
-              project_name: 'production',
-              asset_type_id: randomType.id,
-              asset_type_name: randomType.name
-            }
-          })
-        })
-    )
+  getSharedAssets(production) {
+    let path = '/api/data/assets?is_shared=true'
+    if (production) {
+      path += `&project_id=${production.id}`
+    }
+    return client.pget(path)
   },
 
   getAsset(assetId) {

@@ -12,8 +12,6 @@
           />
         </header>
 
-        <pre>{{ filteredAssetList.length }}</pre>
-
         <div class="filters flexrow">
           <search-field
             ref="search-field"
@@ -23,16 +21,13 @@
             :can-save="false"
             v-focus
           />
-
           <combobox-production
             class="flexrow-item"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
           />
-
           <span class="filler"></span>
-
           <combobox
             class="flexrow-item"
             :label="$t('main.sorted_by')"
@@ -59,7 +54,7 @@
             :is-error="errors.sharedAssets"
             v-if="loading.sharedAssets || errors.sharedAssets"
           />
-          <div class="has-text-centered" v-else-if="!filteredAssetList.length">
+          <div class="has-text-centered" v-else-if="!sharedAssets.length">
             {{ $t('library.no_shared_assets') }}
           </div>
           <template v-else>
@@ -75,7 +70,7 @@
                 <div
                   class="result flexcolumn"
                   :key="entity.id"
-                  v-for="entity in filteredAssetList"
+                  v-for="entity in sharedAssets"
                 >
                   <entity-preview
                     :empty-height="200"
@@ -176,7 +171,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['openProductions', 'sharedAssets']),
+    ...mapGetters(['openProductions', 'productionMap', 'sharedAssets']),
 
     searchField() {
       return this.$refs['search-field']
@@ -186,17 +181,8 @@ export default {
       return [{ name: this.$t('main.all') }, ...this.openProductions]
     },
 
-    filteredAssetList() {
-      if (this.filters.productionId) {
-        return this.sharedAssets.filter(
-          asset => asset.project_id === this.filters.productionId
-        )
-      }
-      return this.sharedAssets
-    },
-
     groupedAssetList() {
-      return this.filteredAssetList.reduce((acc, asset) => {
+      return this.sharedAssets.reduce((acc, asset) => {
         if (!acc[asset.asset_type_id]) {
           acc[asset.asset_type_id] = []
         }
@@ -211,10 +197,11 @@ export default {
 
     getEntityPath,
 
-    async reset() {
+    async refresh() {
       this.loading.sharedAssets = true
+      const production = this.productionMap.get(this.filters.productionId)
       try {
-        await this.loadSharedAssets()
+        await this.loadSharedAssets({ production })
       } catch (err) {
         console.error(err)
         this.errors.sharedAssets = true
@@ -265,13 +252,7 @@ export default {
   watch: {
     'filters.productionId'(value) {
       this.updateRoute({ production: value })
-    },
-
-    currentProduction: {
-      immediate: true,
-      handler() {
-        this.reset()
-      }
+      this.refresh()
     }
   },
 

@@ -756,10 +756,10 @@ const actions = {
     })
   },
 
-  async loadSharedAssets({ commit, rootGetters }) {
+  async loadSharedAssets({ commit, rootGetters }, { production }) {
     commit(LOAD_SHARED_ASSETS_START)
     try {
-      const assets = await assetsApi.getSharedAssets()
+      const assets = await assetsApi.getSharedAssets(production)
       commit(LOAD_SHARED_ASSETS_END, { assets })
     } catch (err) {
       console.error(err)

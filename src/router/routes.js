@@ -188,7 +188,7 @@ export const routes = [
       },
 
       {
-        path: 'rasset-library',
+        path: 'asset-library',
         component: AssetLibrary,
         name: 'asset-library'
       },
