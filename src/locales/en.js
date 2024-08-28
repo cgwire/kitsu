@@ -490,7 +490,9 @@ export default {
       totp: 'TOTP',
       email_otp: 'OTP via email',
       recovery_code: 'Recovery code'
-    }
+    },
+    login_with_saml: 'SSO login with {saml_idp_name}',
+    login_saml: 'SSO login',
   },
 
   logs: {
