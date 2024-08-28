@@ -70,7 +70,7 @@
                 <div
                   class="result flexcolumn"
                   :key="entity.id"
-                  v-for="entity in sharedAssets"
+                  v-for="entity in group"
                 >
                   <entity-preview
                     :empty-height="200"
@@ -86,14 +86,11 @@
                     :to="getEntityPath(entity.id, entity.project_id, 'asset')"
                   >
                     <div class="entity-name mt05">
-                      {{ entity.asset_type_name }} / {{ entity.name }}
+                      {{ entity.full_name }}
                     </div>
                     <production-name
                       class="mt05"
-                      :production="{
-                        id: entity.project_id,
-                        name: entity.project_name
-                      }"
+                      :production="entity.production"
                     />
                   </router-link>
                 </div>
@@ -183,10 +180,10 @@ export default {
 
     groupedAssetList() {
       return this.sharedAssets.reduce((acc, asset) => {
-        if (!acc[asset.asset_type_id]) {
-          acc[asset.asset_type_id] = []
+        if (!acc[asset.entity_type_id]) {
+          acc[asset.entity_type_id] = []
         }
-        acc[asset.asset_type_id].push(asset)
+        acc[asset.entity_type_id].push(asset)
         return acc
       }, {})
     }

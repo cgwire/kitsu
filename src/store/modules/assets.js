@@ -760,7 +760,9 @@ const actions = {
     commit(LOAD_SHARED_ASSETS_START)
     try {
       const assets = await assetsApi.getSharedAssets(production)
-      commit(LOAD_SHARED_ASSETS_END, { assets })
+      const productionMap = rootGetters.productionMap
+      const assetTypeMap = rootGetters.assetTypeMap
+      commit(LOAD_SHARED_ASSETS_END, { assets, productionMap, assetTypeMap })
     } catch (err) {
       console.error(err)
       // commit(LOAD_SHARED_ASSETS_ERROR)
@@ -887,7 +889,15 @@ const mutations = {
 
   [LOAD_SHARED_ASSETS_START](state) {},
 
-  [LOAD_SHARED_ASSETS_END](state, { assets }) {
+  [LOAD_SHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
+    // populate shared assets
+    assets.forEach(asset => {
+      asset.production = productionMap.get(asset.project_id)
+      asset.assetType = assetTypeMap.get(asset.entity_type_id)
+      asset.asset_type_name = asset.assetType?.name
+      asset.full_name = `${asset.asset_type_name} / ${asset.name}`
+    })
+    assets = sortAssets(assets)
     state.sharedAssets = assets
     state.sharedAssetMap = new Map(assets.map(asset => [asset.id, asset]))
   },
