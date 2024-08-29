@@ -506,7 +506,7 @@ const actions = {
     const table = await getTableFn(year, monthString, productionId, studioId)
     if (detailLevel === 'day') {
       const dayOffs = await peopleApi.getDaysOff(year, monthString)
-      commit(PEOPLE_SET_DAY_OFFS, dayOffs)
+      commit(PEOPLE_SET_DAY_OFFS, { dayOffs, month })
     }
     commit(PEOPLE_TIMESHEET_LOADED, table)
   },
@@ -808,7 +808,7 @@ const mutations = {
     state.daysOff = daysOff
   },
 
-  [PEOPLE_SET_DAY_OFFS](state, dayOffs) {
+  [PEOPLE_SET_DAY_OFFS](state, { dayOffs, month }) {
     const dayOffMap = {}
     // Build a map that tells if a day is off. It uses two keys: the person id
     // and the day number.
@@ -819,8 +819,10 @@ const mutations = {
       const currentDate = new Date(date)
       const endDate = new Date(end_date)
       while (currentDate <= endDate) {
-        const day = currentDate.toISOString().substring(8, 10)
-        dayOffMap[person_id][day] = true
+        if (currentDate.getUTCMonth() + 1 === month) {
+          const day = currentDate.toISOString().substring(8, 10)
+          dayOffMap[person_id][day] = true
+        }
         currentDate.setDate(currentDate.getDate() + 1)
       }
     })
