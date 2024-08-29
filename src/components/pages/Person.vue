@@ -99,6 +99,7 @@
           <user-calendar
             ref="user-calendar"
             class="calendar"
+            :days-off="daysOff"
             :tasks="sortedTasks"
             v-if="isActiveTab('calendar')"
           />
