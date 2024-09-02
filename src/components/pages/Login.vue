@@ -13,6 +13,19 @@
           <img src="../../assets/kitsu-text.svg" v-else />
         </div>
         <form v-if="!(isMissingOTP || isWrongOTP)">
+          <div class="field" v-if="mainConfig?.saml_enabled">
+            <p class="control">
+              <a
+                class="button is-fullwidth"
+                :class="{
+                  'is-loading': isLoginLoading
+                }"
+                href="/api/auth/saml/login"
+              >
+                {{ loginSAMLButtonInfo }}
+              </a>
+            </p>
+          </div>
           <div class="field mt2">
             <p class="control has-icon">
               <input
@@ -125,7 +138,22 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isDarkTheme', 'isLoginLoading', 'isLoginError'])
+    ...mapGetters([
+      'isDarkTheme',
+      'isLoginLoading',
+      'isLoginError',
+      'mainConfig'
+    ]),
+
+    loginSAMLButtonInfo() {
+      if (this.mainConfig?.saml_idp_name) {
+        return this.$t('login.login_with_saml', {
+          saml_idp_name: this.mainConfig.saml_idp_name
+        })
+      } else {
+        return this.$t('login.saml')
+      }
+    }
   },
 
   methods: {

@@ -140,9 +140,11 @@ const mutations = {
   },
 
   [RESET_ALL](state) {
-    const isDarkTheme = state.isDarkTheme
-    Object.assign(state, { ...initialState })
-    state.isDarkTheme = isDarkTheme
+    Object.assign(state, {
+      ...initialState,
+      mainConfig: state.mainConfig,
+      isDarkTheme: state.isDarkTheme
+    })
   }
 }
 
