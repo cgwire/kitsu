@@ -272,9 +272,7 @@
             :task-status-list="taskStatusList"
             v-model="currentConceptStatus"
           />
-          <div
-            class="concept-list mt1"
-          >
+          <div class="concept-list mt1">
             <template v-if="filteredLinkedConcepts.length">
               <concept-card
                 class="concept"
@@ -336,14 +334,8 @@
       </task-info>
     </div>
 
-    <div
-      class="column side-column"
-      v-show="currentSection === 'concepts'"
-    >
-      <task-info
-        entity-type="Concept"
-        :task="currentConceptTask"
-      />
+    <div class="column side-column" v-show="currentSection === 'concepts'">
+      <task-info entity-type="Concept" :task="currentConceptTask" />
     </div>
 
     <edit-asset-modal
