@@ -324,7 +324,11 @@ export default {
 
     // Asset pages require a all section and a main pack section.
     currentEpisodeOptionGroups() {
-      if (this.assetSections.includes(this.currentProjectSection)) {
+      let section = this.isCurrentUserClient ? 'playlists' : 'assets'
+      if (this.currentProjectSection) {
+        section = this.currentProjectSection
+      }
+      if (this.assetSections.includes(section)) {
         return [
           {
             name: '',
@@ -334,7 +338,7 @@ export default {
             ]
           }
         ].concat(this.episodeOptionGroups)
-      } else if (['playlists'].includes(this.currentProjectSection)) {
+      } else if (['playlists'].includes(section)) {
         return [
           {
             name: '',
@@ -344,14 +348,14 @@ export default {
             ]
           }
         ].concat(this.episodeOptionGroups)
-      } else if (['edits'].includes(this.currentProjectSection)) {
+      } else if (['edits'].includes(section)) {
         return [
           {
             name: '',
             episodeList: [{ label: this.$t('main.all_edits'), value: 'all' }]
           }
         ].concat(this.episodeOptionGroups)
-      } else if (['breakdown'].includes(this.currentProjectSection)) {
+      } else if (['breakdown'].includes(section)) {
         return [
           {
             name: '',
@@ -596,7 +600,9 @@ export default {
     clearContext() {
       this.silent = true
       this.currentProductionId = null
-      this.currentProjectSection = null
+      this.currentProjectSection = this.isCurrentUserClient
+        ? 'playlists'
+        : 'assets'
       if (!this.isTVShow) {
         this.setCurrentEpisode(null)
         this.currentEpisodeId = null
