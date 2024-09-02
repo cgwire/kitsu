@@ -75,9 +75,8 @@ import {
   RESET_ALL,
   CLEAR_SELECTED_ASSETS,
   SET_ASSET_SELECTION,
-  LOAD_SHARED_ASSETS_START,
-  // LOAD_SHARED_ASSETS_ERROR,
-  LOAD_SHARED_ASSETS_END
+  LOAD_SHARED_ASSETS_END,
+  LOAD_UNSHARED_ASSETS_END
 } from '@/store/mutation-types'
 import async from 'async'
 
@@ -304,7 +303,7 @@ const initialState = {
   selectedAssets: new Map(),
 
   sharedAssets: [],
-  sharedAssetMap: new Map()
+  unsharedAssets: []
 }
 
 const state = {
@@ -358,7 +357,15 @@ const getters = {
 
   selectedAssets: state => state.selectedAssets,
 
-  sharedAssets: state => state.sharedAssets
+  sharedAssets: state => state.sharedAssets,
+  unsharedAssets: state => state.unsharedAssets,
+
+  sharedAssetsByType: state => {
+    return groupEntitiesByParents(state.sharedAssets, 'asset_type_name')
+  },
+  unsharedAssetsByType: state => {
+    return groupEntitiesByParents(state.unsharedAssets, 'asset_type_name')
+  }
 }
 
 const actions = {
@@ -530,6 +537,14 @@ const actions = {
       commit(RESTORE_ASSET_END, asset)
       return Promise.resolve(asset)
     })
+  },
+
+  shareAssets({}, { production, assetType, assetIds }) {
+    return assetsApi.shareAssets(production, assetType, assetIds)
+  },
+
+  unshareAssets({}, { assetIds }) {
+    return assetsApi.shareAssets(null, null, assetIds, false)
   },
 
   uploadAssetFile({ commit, state }, toUpdate) {
@@ -757,7 +772,6 @@ const actions = {
   },
 
   async loadSharedAssets({ commit, rootGetters }, { production }) {
-    commit(LOAD_SHARED_ASSETS_START)
     try {
       const assets = await assetsApi.getSharedAssets(production)
       const productionMap = rootGetters.productionMap
@@ -765,7 +779,18 @@ const actions = {
       commit(LOAD_SHARED_ASSETS_END, { assets, productionMap, assetTypeMap })
     } catch (err) {
       console.error(err)
-      // commit(LOAD_SHARED_ASSETS_ERROR)
+      throw err
+    }
+  },
+
+  async loadUnsharedAssets({ commit, rootGetters }, { production }) {
+    try {
+      const assets = await assetsApi.getSharedAssets(production, false)
+      const productionMap = rootGetters.productionMap
+      const assetTypeMap = rootGetters.assetTypeMap
+      commit(LOAD_UNSHARED_ASSETS_END, { assets, productionMap, assetTypeMap })
+    } catch (err) {
+      console.error(err)
       throw err
     }
   }
@@ -887,8 +912,6 @@ const mutations = {
       userFilterGroups?.asset?.[production.id] || []
   },
 
-  [LOAD_SHARED_ASSETS_START](state) {},
-
   [LOAD_SHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
     // populate shared assets
     assets.forEach(asset => {
@@ -899,7 +922,18 @@ const mutations = {
     })
     assets = sortAssets(assets)
     state.sharedAssets = assets
-    state.sharedAssetMap = new Map(assets.map(asset => [asset.id, asset]))
+  },
+
+  [LOAD_UNSHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
+    // populate unshared assets
+    assets.forEach(asset => {
+      asset.production = productionMap.get(asset.project_id)
+      asset.assetType = assetTypeMap.get(asset.entity_type_id)
+      asset.asset_type_name = asset.assetType?.name
+      asset.full_name = `${asset.asset_type_name} / ${asset.name}`
+    })
+    assets = sortAssets(assets)
+    state.unsharedAssets = assets
   },
 
   [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {

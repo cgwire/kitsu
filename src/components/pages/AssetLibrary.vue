@@ -1,11 +1,12 @@
 <template>
-  <page-layout :side="openedSidePanel">
+  <page-layout :side="openedSidePanel || hasSelectedAssets">
     <template #main>
       <div class="asset-library">
         <header class="flexrow">
           <page-title class="mt1 filler" :text="$t('library.asset_library')" />
           <button-simple
             class="button"
+            :disabled="hasSelectedAssets"
             icon="plus"
             :text="$t('library.manage')"
             @click="openedSidePanel = !openedSidePanel"
@@ -60,55 +61,56 @@
           <template v-else>
             <div
               class="pb1"
-              v-for="(group, index) in groupedAssetList"
+              v-for="(group, index) in sharedAssetsByType"
               :key="index"
             >
               <h2 class="mt0">
                 {{ group[0].asset_type_name }} ({{ group.length }})
               </h2>
-              <div class="result-list">
-                <div
-                  class="result flexcolumn"
+              <ul class="items">
+                <li
+                  class="item flexcolumn"
+                  :class="{
+                    'selected-item': isSelected(entity)
+                  }"
                   :key="entity.id"
                   v-for="entity in group"
+                  @click="toggleEntity(entity)"
                 >
-                  <entity-preview
-                    :empty-height="200"
-                    :empty-width="300"
-                    :height="200"
-                    :width="300"
-                    :entity="entity"
-                    is-rounded-top-border
-                  />
-                  <router-link
-                    class="result-description"
-                    :id="`result-link-${entity.id}`"
-                    :to="getEntityPath(entity.id, entity.project_id, 'asset')"
-                  >
-                    <div class="entity-name mt05">
-                      {{ entity.full_name }}
-                    </div>
-                    <production-name
-                      class="mt05"
-                      :production="entity.production"
+                  <div class="card">
+                    <entity-preview
+                      :empty-height="200"
+                      :empty-width="300"
+                      :height="200"
+                      :width="300"
+                      :entity="entity"
+                      is-rounded-top-border
                     />
-                  </router-link>
-                </div>
-              </div>
+                    <div class="item-description">
+                      <div class="entity-name mt05">
+                        {{ entity.full_name }}
+                      </div>
+                      <production-name
+                        class="mt05"
+                        :production="entity.production"
+                      />
+                    </div>
+                  </div>
+                </li>
+              </ul>
             </div>
           </template>
         </div>
       </div>
     </template>
     <template #side>
-      <task-info entity-type="shared-asset" />
+      <manage-library @library-updated="refresh(true)" />
     </template>
   </page-layout>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { getEntityPath } from '@/lib/path'
 
 // import { searchMixin } from '@/components/mixins/search'
 
@@ -116,13 +118,13 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
+import ManageLibrary from '@/components/sides/ManageLibrary.vue'
 import PageLayout from '@/components/layouts/PageLayout.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 // import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
   name: 'asset-library',
@@ -134,13 +136,13 @@ export default {
     Combobox,
     ComboboxProduction,
     EntityPreview,
+    ManageLibrary,
     PageLayout,
     PageTitle,
     ProductionName,
     SearchField,
     // SearchQueryList,
-    TableInfo,
-    TaskInfo
+    TableInfo
   },
 
   data() {
@@ -168,7 +170,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['openProductions', 'productionMap', 'sharedAssets']),
+    ...mapGetters([
+      'openProductions',
+      'productionMap',
+      'selectedAssets',
+      'sharedAssets',
+      'sharedAssetsByType'
+    ]),
 
     searchField() {
       return this.$refs['search-field']
@@ -178,32 +186,33 @@ export default {
       return [{ name: this.$t('main.all') }, ...this.openProductions]
     },
 
-    groupedAssetList() {
-      return this.sharedAssets.reduce((acc, asset) => {
-        if (!acc[asset.entity_type_id]) {
-          acc[asset.entity_type_id] = []
-        }
-        acc[asset.entity_type_id].push(asset)
-        return acc
-      }, {})
+    hasSelectedAssets() {
+      return this.selectedAssets.size > 0
     }
   },
 
   methods: {
-    ...mapActions(['loadSharedAssets']),
+    ...mapActions(['loadSharedAssets', 'setAssetSelection']),
 
-    getEntityPath,
-
-    async refresh() {
-      this.loading.sharedAssets = true
+    async refresh(silent = false) {
+      this.loading.sharedAssets = !silent
       const production = this.productionMap.get(this.filters.productionId)
       try {
         await this.loadSharedAssets({ production })
-      } catch (err) {
-        console.error(err)
+      } catch (error) {
+        console.error(error)
         this.errors.sharedAssets = true
       }
       this.loading.sharedAssets = false
+    },
+
+    toggleEntity(entity) {
+      const selected = this.isSelected(entity)
+      this.setAssetSelection({ asset: entity, selected: !selected })
+    },
+
+    isSelected(entity) {
+      return this.selectedAssets.has(entity.id)
     },
 
     onSearchChange() {
@@ -274,27 +283,37 @@ export default {
 }
 
 .entities {
-  .result-list {
+  .items {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
   }
 
-  .result {
-    // height: 300px;
-    background: var(--background);
+  .item {
+    background-color: var(--background);
+    border: 5px solid transparent;
     border-radius: 1em;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.2s ease-in-out;
+    cursor: pointer;
 
-    .dark & {
-      background: var(--background-alt);
+    &:hover {
+      border-color: var(--background-selectable);
     }
 
-    &.selected-result {
-      background: var(--background-hover);
+    &.selected-item {
+      border-color: var(--background-selected);
     }
 
-    .result-description {
+    .card {
+      border-radius: inherit;
+      box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.1);
+
+      .dark & {
+        background-color: var(--background-alt);
+      }
+    }
+
+    .item-description {
       max-width: 300px;
       color: var(--text-strong);
       font-weight: bold;

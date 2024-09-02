@@ -12,8 +12,8 @@ export default {
     return client.pget(path)
   },
 
-  getSharedAssets(production) {
-    let path = '/api/data/assets?is_shared=true'
+  getSharedAssets(production, shared = true) {
+    let path = `/api/data/assets?is_shared=${shared}`
     if (production) {
       path += `&project_id=${production.id}`
     }
@@ -69,6 +69,27 @@ export default {
   restoreAsset(asset) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${asset.id}`, data)
+  },
+
+  shareAssets(
+    production = null,
+    assetType = null,
+    assetIds = undefined,
+    isShared = true
+  ) {
+    let path = '/api/actions/'
+    if (production) {
+      path += `projects/${production.id}/`
+      if (assetType) {
+        path += `asset-types/${assetType.id}/`
+      }
+    }
+    path += 'assets/share/'
+    const data = {
+      asset_ids: assetIds,
+      is_shared: isShared
+    }
+    return client.ppost(path, data)
   },
 
   postCsv(production, formData, toUpdate) {
