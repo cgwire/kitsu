@@ -272,11 +272,16 @@
             :task-status-list="taskStatusList"
             v-model="currentConceptStatus"
           />
-          <div class="concept-list mt1">
+          <div
+            class="concept-list mt1"
+          >
             <template v-if="filteredLinkedConcepts.length">
               <concept-card
+                class="concept"
+                :class="{ selected: currentConcept?.id === concept.id }"
                 :key="'concept-' + concept.id"
                 :concept="concept"
+                @click="selectConcept(concept)"
                 v-for="concept in filteredLinkedConcepts"
               />
             </template>
@@ -329,6 +334,16 @@
       <task-info :task="currentTask" entity-type="Asset" with-actions>
         <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
+    </div>
+
+    <div
+      class="column side-column"
+      v-show="currentSection === 'concepts'"
+    >
+      <task-info
+        entity-type="Concept"
+        :task="currentConceptTask"
+      />
     </div>
 
     <edit-asset-modal
@@ -403,8 +418,10 @@ export default {
     return {
       type: 'asset',
       currentAsset: null,
+      currentConcept: null,
       currentTask: null,
       currentConceptStatus: null,
+      currentConceptTask: null,
       localTasks: [],
       castIn: {
         isLoading: false,
@@ -592,7 +609,9 @@ export default {
 
   methods: {
     ...mapActions([
+      'addSelectedConcepts',
       'clearSelectedTasks',
+      'clearSelectedConcepts',
       'editAsset',
       'loadAsset',
       'loadAssets',
@@ -732,6 +751,21 @@ export default {
           }, 100)
         })
         .catch(console.error)
+    },
+
+    selectConcept(concept) {
+      if (this.currentConcept && this.currentConcept.id === concept.id) {
+        this.currentConcept = null
+        this.currentConceptTask = null
+        this.clearSelectedConcepts()
+      } else {
+        const selection = new Map()
+        selection.set(concept.id, concept)
+        this.clearSelectedConcepts()
+        this.addSelectedConcepts(selection)
+        this.currentConcept = concept
+        this.currentConceptTask = concept.tasks[0]
+      }
     }
   },
 
@@ -1002,5 +1036,18 @@ h2.subtitle {
 
 .news-column {
   max-height: 85%;
+}
+
+.concept {
+  border: 5px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s linear;
+  &:hover {
+    border: 5px solid var(--background-selectable);
+  }
+}
+
+.selected {
+  border: 5px solid var(--background-selected);
 }
 </style>
