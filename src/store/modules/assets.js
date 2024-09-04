@@ -240,7 +240,11 @@ const helpers = {
     result = sortAssetResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const displayedAssets = result.slice(0, PAGE_SIZE)
+    const limit =
+      state.displayedAssets.length > PAGE_SIZE
+        ? state.displayedAssets.length
+        : PAGE_SIZE
+    const displayedAssets = result.slice(0, limit)
     const maxX = displayedAssets.length
     const maxY = state.nbValidationColumns
 

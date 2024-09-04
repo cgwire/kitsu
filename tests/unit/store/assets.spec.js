@@ -1498,7 +1498,8 @@ describe('Assets store', () => {
 
     test('SET_ASSET_SEARCH', () => {
       const state = {
-        assetSorting: { 123: 123 }
+        assetSorting: { 123: 123 },
+        displayedAssets: []
       }
       const payload = {
         sorting: 123,
@@ -1864,7 +1865,8 @@ describe('Assets store', () => {
     test('CHANGE_ASSET_SORT', () => {
       const state = {
         assetSorting: { 123: 123 },
-        assetSearchText: 'search'
+        assetSearchText: 'search',
+        displayedAssets: []
       }
       const payload = {
         sorting: { 123: 124 },
