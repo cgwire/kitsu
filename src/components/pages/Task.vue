@@ -3,6 +3,13 @@
     <div class="page column main-column">
       <div class="page-header pa1 mb0" xyz="fade">
         <div class="flexrow header-title" v-if="task">
+          <router-link
+            class="flexrow-item has-text-centered back-link ml1"
+            :to="taskEntitiesPath"
+          >
+            <corner-left-up-icon />
+          </router-link>
+
           <task-type-name
             class="flexrow-item task-type block"
             :task-type="taskType"
@@ -332,11 +339,11 @@
 </template>
 
 <script>
-import { ImageIcon } from 'lucide-vue'
+import { CornerLeftUpIcon, ImageIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
-import { getTaskEntityPath } from '@/lib/path'
+import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { sortPeople } from '@/lib/sorting'
 
 import { formatListMixin } from '@/components/mixins/format'
@@ -367,6 +374,7 @@ export default {
     AddPreviewModal,
     ComboboxStyled,
     Comment,
+    CornerLeftUpIcon,
     DeleteModal,
     EditCommentModal,
     EntityThumbnail,
@@ -569,6 +577,19 @@ export default {
           ? this.currentEpisode.id
           : this.$route.params.episode_id
         return getTaskEntityPath(this.task, episodeId)
+      } else {
+        return {
+          name: 'open-productions'
+        }
+      }
+    },
+
+    taskEntitiesPath() {
+      if (this.task) {
+        const episodeId = this.currentEpisode
+          ? this.currentEpisode.id
+          : this.$route.params.episode_id
+        return getTaskEntitiesPath(this.task, episodeId)
       } else {
         return {
           name: 'open-productions'

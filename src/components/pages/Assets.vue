@@ -340,6 +340,9 @@ export default {
       descriptorToEdit: {},
       departmentFilter: [],
       onlySharedAssets: false,
+      optionalColumns: ['Description', 'Ready for'],
+      pageName: 'Assets',
+      parsedCSV: [],
       selectedDepartment: 'ALL',
       taskTypeForTaskDeletion: null,
       errors: {
@@ -385,9 +388,6 @@ export default {
         isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
-      pageName: 'Assets',
-      optionalColumns: ['Description', 'Ready for'],
-      parsedCSV: [],
       success: {
         edit: false
       }
@@ -414,6 +414,9 @@ export default {
         this.searchField.setValue(searchQuery)
         this.onSearchChange()
         this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
+        this.$nextTick(() => {
+          this.$refs['asset-list'].selectTaskFromQuery()
+        })
       }
     }
 

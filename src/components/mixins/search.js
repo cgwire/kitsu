@@ -34,6 +34,7 @@ export const searchMixin = {
       if (this.$route.query.search !== searchQuery) {
         this.$router.push({
           query: {
+            ...this.$route.query,
             search: searchQuery
           }
         })

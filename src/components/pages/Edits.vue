@@ -396,6 +396,7 @@ export default {
         this.$refs['edit-search-field'].setValue(searchQuery)
         this.onSearchChange()
         this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
+        this.$refs['edit-list'].selectTaskFromQuery()
       }
     }
 
@@ -409,7 +410,7 @@ export default {
           setTimeout(() => {
             this.initialLoading = false
             finalize()
-          }, 500)
+          }, 200)
         })
       }, 0)
     } else {
