@@ -299,7 +299,7 @@
           <div class="filler"></div>
 
           <div
-            class="menu-item mr1"
+            class="menu-item"
             :title="$t('main.csv.export_file')"
             @click="$emit('export-task')"
             v-if="
@@ -307,6 +307,17 @@
             "
           >
             <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
+          </div>
+
+          <div
+            class="menu-item mr05"
+            :title="$t('menu.clear_selection')"
+            @click="clearSelection"
+          >
+            <x-icon
+              :title="$t('menu.clear_selection')"
+              size="16"
+            />
           </div>
         </div>
       </div>
@@ -804,7 +815,7 @@
 </template>
 
 <script>
-import { CheckSquareIcon, LinkIcon, PlayCircleIcon } from 'lucide-vue'
+import { CheckSquareIcon, LinkIcon, PlayCircleIcon, XIcon } from 'lucide-vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import { intersection } from '@/lib/array'
@@ -851,7 +862,8 @@ export default {
     PlayCircleIcon,
     SearchField,
     Spinner,
-    ViewPlaylistModal
+    ViewPlaylistModal,
+    XIcon
   },
 
   data() {
@@ -1698,10 +1710,12 @@ export default {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
     },
 
-    $route() {
-      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
-      if (this.nbSelectedTasks > 0) {
-        this.clearSelectedTasks()
+    $route(oldRoute, newRoute) {
+      if (oldRoute.name !== newRoute.name) {
+        this.selectedTaskIds = Array.from(this.selectedTasks.keys())
+        if (this.nbSelectedTasks > 0) {
+          this.clearSelectedTasks()
+        }
       }
     }
   }
