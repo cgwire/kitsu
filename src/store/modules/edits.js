@@ -214,7 +214,11 @@ const helpers = {
     result = sortEditResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const displayedEdits = result.slice(0, PAGE_SIZE)
+    const limit =
+      state.displayedEdits.length > PAGE_SIZE
+        ? state.displayedEdits.length
+        : PAGE_SIZE
+    const displayedEdits = result.slice(0, limit)
     const maxX = displayedEdits.length
     const maxY = state.nbValidationColumns
 
