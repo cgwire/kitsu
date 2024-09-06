@@ -107,9 +107,11 @@ export default {
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     episode_casting: 'Episode casting',
+    hide_library: 'Hide My Library',
     label: 'Label',
     picture_mode: 'Switch to picture mode',
     save_error: 'Error while saving casting',
+    show_library: 'Show My Library',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
     options: {

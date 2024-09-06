@@ -370,6 +370,7 @@ const getters = {
 
 const actions = {
   loadAssets({ commit, state, rootGetters }, all = false) {
+    const assetTypeMap = rootGetters.assetTypeMap
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
@@ -402,6 +403,20 @@ const actions = {
     commit(LOAD_ASSETS_START)
     return assetsApi
       .getAssets(production, episode)
+      .then(async assets => {
+        let sharedAssets = await assetsApi.getSharedAssets()
+        sharedAssets = sharedAssets
+          .filter(asset => asset.project_id !== production.id)
+          .map(sharedAsset => {
+            const assetType = assetTypeMap.get(sharedAsset.entity_type_id)
+            return {
+              ...sharedAsset,
+              asset_type_name: assetType?.name,
+              tasks: []
+            }
+          })
+        return [...assets, ...sharedAssets]
+      })
       .then(assets => {
         commit(LOAD_ASSETS_END, {
           production,

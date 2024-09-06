@@ -1,12 +1,10 @@
 <template>
   <div
+    class="asset big casted labelled"
     :class="{
-      asset: true,
-      big: true,
+      active,
       'big-asset': bigMode,
-      casted: true,
-      active: active,
-      labelled: true
+      'shared-asset': asset.is_shared
     }"
     :title="`${asset.name} (${nbOccurences})`"
     v-if="!textMode"
@@ -34,7 +32,13 @@
       {{ asset.label || $t('breakdown.options.animate') }}
     </div>
   </div>
-  <div class="asset-text flexrow-item flexrow" v-else>
+  <div
+    class="asset-text flexrow-item flexrow"
+    :class="{
+      'shared-asset': asset.is_shared
+    }"
+    v-else
+  >
     <span class="asset-text-name flexrow-item">
       {{ asset.name }} ({{ nbOccurences }})
     </span>
@@ -159,6 +163,10 @@ export default {
       bottom: 15px;
     }
   }
+
+  &.shared-asset .asset-picture {
+    background-color: $purple;
+  }
 }
 
 .labelled {
@@ -265,6 +273,15 @@ export default {
 .asset-text {
   width: 120px;
   margin-right: 0;
+
+  &.shared-asset {
+    background-color: $purple;
+    box-shadow: 0 0 0 1px $white-grey;
+
+    .dark & .asset-text-name {
+      color: $dark-grey;
+    }
+  }
 }
 
 .modify-asset {

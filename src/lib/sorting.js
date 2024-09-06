@@ -13,6 +13,7 @@ export const sortAssets = assets => {
           numeric: true
         })
       )
+      .thenBy('is_shared')
       .thenBy((a, b) =>
         a.name.localeCompare(b.name, undefined, { numeric: true })
       )

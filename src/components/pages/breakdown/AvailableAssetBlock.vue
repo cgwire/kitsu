@@ -1,10 +1,11 @@
 <template>
   <div
-    :id="'casting-' + asset.id"
+    :id="`casting-${asset.id}`"
+    class="asset"
     :class="{
-      asset: true,
+      active,
       'big-asset': bigMode,
-      active: active
+      'shared-asset': asset.is_shared
     }"
     :title="asset.name"
     v-if="!textMode"
@@ -24,7 +25,13 @@
       </span>
     </div>
   </div>
-  <div class="asset-text flexrow-item flexrow" v-else>
+  <div
+    class="asset-text flexrow-item flexrow"
+    :class="{
+      'shared-asset': asset.is_shared
+    }"
+    v-else
+  >
     <span class="asset-text-name flexrow-item">
       {{ asset.name }}
     </span>
@@ -153,6 +160,10 @@ export default {
       height: 50px;
     }
   }
+
+  &.shared-asset {
+    background-color: $purple;
+  }
 }
 
 .asset-picture {
@@ -192,5 +203,13 @@ export default {
 .asset-text {
   font-size: 0.9em;
   margin-bottom: 0.5em;
+
+  &.shared-asset {
+    background-color: $purple;
+
+    .dark & .asset-text-name {
+      color: $dark-grey;
+    }
+  }
 }
 </style>
