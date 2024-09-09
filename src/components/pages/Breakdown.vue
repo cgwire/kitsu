@@ -340,7 +340,7 @@
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
-              v-show="!asset.is_shared || libraryDisplayed"
+              v-show="libraryDisplayed || !asset.shared"
             />
           </div>
         </div>
@@ -810,7 +810,7 @@ export default {
       } else {
         this.setCastingEpisode(null)
       }
-      this.loadAssets(true).then(() => {
+      this.loadAssets({ all: true, withTasks: false }).then(() => {
         this.isLoading = false
         this.displayMoreAssets()
         this.setCastingAssetTypes()

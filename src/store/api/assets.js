@@ -1,8 +1,11 @@
 import client from '@/store/api/client'
 
 export default {
-  getAssets(production, episode) {
-    let path = '/api/data/assets/with-tasks'
+  getAssets(production, episode, withTasks = false) {
+    let path = '/api/data/assets'
+    if (withTasks) {
+      path += '/with-tasks'
+    }
     if (production) {
       path += `?project_id=${production.id}`
     }
@@ -17,6 +20,15 @@ export default {
     if (production) {
       path += `&project_id=${production.id}`
     }
+    return client.pget(path)
+  },
+
+  getUsedSharedAssets(production, episode = undefined) {
+    let path = `/api/data/projects/${production.id}`
+    if (episode) {
+      path += `/episodes/${episode.id}`
+    }
+    path += '/assets/shared-used'
     return client.pget(path)
   },
 

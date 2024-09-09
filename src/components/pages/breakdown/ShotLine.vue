@@ -252,7 +252,7 @@
           <asset-block
             class="flexrow-item"
             :key="asset.id"
-            :asset="{ ...asset, is_shared: isSharedAsset(asset) }"
+            :asset="asset"
             :active="selected"
             :nb-occurences="asset.nb_occurences"
             :read-only="readOnly"
@@ -382,10 +382,6 @@ export default {
   },
 
   methods: {
-    isSharedAsset(asset) {
-      return Boolean(this.assetMap.get(asset.asset_id)?.is_shared)
-    },
-
     onClicked(event) {
       this.$emit('click', this.entity.id, event)
     },

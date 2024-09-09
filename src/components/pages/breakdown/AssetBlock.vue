@@ -4,7 +4,7 @@
     :class="{
       active,
       'big-asset': bigMode,
-      'shared-asset': asset.is_shared
+      shared: asset.shared
     }"
     :title="`${asset.name} (${nbOccurences})`"
     v-if="!textMode"
@@ -35,7 +35,7 @@
   <div
     class="asset-text flexrow-item flexrow"
     :class="{
-      'shared-asset': asset.is_shared
+      shared: asset.shared
     }"
     v-else
   >
@@ -164,8 +164,8 @@ export default {
     }
   }
 
-  &.shared-asset .asset-picture {
-    background-color: $purple;
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
   }
 }
 
@@ -274,13 +274,8 @@ export default {
   width: 120px;
   margin-right: 0;
 
-  &.shared-asset {
-    background-color: $purple;
-    box-shadow: 0 0 0 1px $white-grey;
-
-    .dark & .asset-text-name {
-      color: $dark-grey;
-    }
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
   }
 }
 

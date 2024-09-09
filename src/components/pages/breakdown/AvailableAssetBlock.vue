@@ -5,14 +5,14 @@
     :class="{
       active,
       'big-asset': bigMode,
-      'shared-asset': asset.is_shared
+      shared: asset.shared
     }"
     :title="asset.name"
     v-if="!textMode"
   >
     <div class="asset-add" @click="addOneAsset">+ 1</div>
     <div class="asset-add-10" @click="addTenAssets">+ 10</div>
-    <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+    <div class="asset-picture" v-if="asset.preview_file_id">
       <img
         loading="lazy"
         alt=""
@@ -28,7 +28,7 @@
   <div
     class="asset-text flexrow-item flexrow"
     :class="{
-      'shared-asset': asset.is_shared
+      shared: asset.shared
     }"
     v-else
   >
@@ -161,8 +161,8 @@ export default {
     }
   }
 
-  &.shared-asset {
-    background-color: $purple;
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
   }
 }
 
@@ -204,12 +204,8 @@ export default {
   font-size: 0.9em;
   margin-bottom: 0.5em;
 
-  &.shared-asset {
-    background-color: $purple;
-
-    .dark & .asset-text-name {
-      color: $dark-grey;
-    }
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
   }
 }
 </style>

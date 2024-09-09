@@ -1064,7 +1064,7 @@ input.input:focus {
   background: #67be4b;
 }
 
-input[type='checkbox'] {
+input[type='checkbox']:not([disabled]) {
   cursor: pointer;
 }
 

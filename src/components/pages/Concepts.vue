@@ -361,7 +361,7 @@ export default {
         if (this.isTVShow) {
           this.setCurrentEpisode('all') // mandatory to load all assets of a TV show
         }
-        await this.loadAssets(true)
+        await this.loadAssets({ all: true })
         await this.loadConcepts()
       } catch (err) {
         console.error(err)

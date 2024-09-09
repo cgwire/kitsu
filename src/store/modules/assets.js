@@ -170,7 +170,7 @@ const helpers = {
     asset.production_name = production.name
 
     const taskIds = []
-    asset.tasks.forEach(task => {
+    asset.tasks?.forEach(task => {
       if (typeof task === 'string') {
         task = taskMap.get(task)
       }
@@ -369,7 +369,10 @@ const getters = {
 }
 
 const actions = {
-  loadAssets({ commit, state, rootGetters }, all = false) {
+  loadAssets(
+    { commit, state, rootGetters },
+    { all = false, withTasks = true } = {}
+  ) {
     const assetTypeMap = rootGetters.assetTypeMap
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -384,16 +387,18 @@ const actions = {
       // If it's tv show and if we don't have any episode set,
       // we use the first one.
       episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
-      if (!episode) return Promise.resolve([])
+      if (!episode) {
+        return []
+      }
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (isTVShow && !episode && !all) {
-      return Promise.resolve([])
+      return []
     }
 
     if (state.isAssetsLoading) {
-      return Promise.resolve([])
+      return []
     }
 
     if (all) {
@@ -402,22 +407,26 @@ const actions = {
 
     commit(LOAD_ASSETS_START)
     return assetsApi
-      .getAssets(production, episode)
+      .getAssets(production, episode, withTasks)
       .then(async assets => {
-        let sharedAssets = await assetsApi.getSharedAssets()
+        let sharedAssets = all
+          ? await assetsApi.getSharedAssets()
+          : await assetsApi.getUsedSharedAssets(production, episode)
         sharedAssets = sharedAssets
           .filter(asset => asset.project_id !== production.id)
-          .map(sharedAsset => {
-            const assetType = assetTypeMap.get(sharedAsset.entity_type_id)
-            return {
-              ...sharedAsset,
-              asset_type_name: assetType?.name,
-              tasks: []
-            }
-          })
+          .map(asset => ({
+            ...asset,
+            shared: true
+          }))
         return [...assets, ...sharedAssets]
       })
       .then(assets => {
+        assets.forEach(asset => {
+          if (!asset.asset_type_name) {
+            const assetType = assetTypeMap.get(asset.entity_type_id)
+            asset.asset_type_name = assetType?.name
+          }
+        })
         commit(LOAD_ASSETS_END, {
           production,
           assets,
@@ -427,12 +436,12 @@ const actions = {
           taskMap,
           taskTypeMap
         })
-        return Promise.resolve(assets)
+        return assets
       })
       .catch(err => {
         console.error('an error occurred while loading assets', err)
         commit(LOAD_ASSETS_ERROR)
-        return Promise.resolve([])
+        return []
       })
   },
 
