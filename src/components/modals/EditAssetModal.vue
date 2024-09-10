@@ -49,6 +49,11 @@
             v-for="descriptor in assetMetadataDescriptors"
             v-if="assetToEdit"
           />
+          <combobox-boolean
+            :label="$t('assets.fields.shared')"
+            v-model="form.is_shared"
+            @enter="runConfirmation"
+          />
         </form>
 
         <div class="has-text-right">
@@ -96,6 +101,7 @@ import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import MetadataField from '@/components/widgets/MetadataField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
@@ -107,6 +113,7 @@ export default {
 
   components: {
     Combobox,
+    ComboboxBoolean,
     MetadataField,
     TextField,
     TextareaField
@@ -149,7 +156,8 @@ export default {
         name: '',
         description: '',
         source_id: null,
-        data: {}
+        data: {},
+        is_shared: 'false'
       },
       assetSuccessText: ''
     }
@@ -206,11 +214,17 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', this.form)
+      this.$emit('confirmAndStay', {
+        ...this.form,
+        is_shared: this.form.is_shared === 'true'
+      })
     },
 
     confirmClicked() {
-      this.$emit('confirm', this.form)
+      this.$emit('confirm', {
+        ...this.form,
+        is_shared: this.form.is_shared === 'true'
+      })
     },
 
     isEditing() {
@@ -247,6 +261,7 @@ export default {
           ? this.currentEpisode.id
           : null
         this.form.data = {}
+        this.form.is_shared = 'false'
       } else {
         const entityTypeId = this.getEntityTypeIdDefaultValue()
         this.form = {
@@ -255,7 +270,8 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
-          data: { ...this.assetToEdit.data } || {}
+          data: { ...this.assetToEdit.data } || {},
+          is_shared: String(this.assetToEdit.is_shared === true)
         }
       }
     }

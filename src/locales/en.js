@@ -32,7 +32,8 @@ export default {
       ready_for: 'Ready for',
       time_spent: 'Time',
       type: 'Type',
-      hidden_from_client: 'Displayed to client'
+      hidden_from_client: 'Displayed to client',
+      shared: 'Shared in Asset Library',
     }
   },
 

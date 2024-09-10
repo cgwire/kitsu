@@ -40,7 +40,8 @@ export default {
     const data = {
       name: asset.name,
       description: asset.description,
-      data: asset.data
+      data: asset.data,
+      is_shared: asset.is_shared
     }
     if (asset.source_id !== 'null') {
       data.episode_id = asset.source_id
@@ -59,7 +60,8 @@ export default {
       entity_type_id: asset.entity_type_id,
       project_id: asset.project_id,
       ready_for: asset.ready_for,
-      data: asset.data
+      data: asset.data,
+      is_shared: asset.is_shared
     }
     if (asset.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(asset.is_casting_standby)
