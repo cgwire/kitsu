@@ -1648,7 +1648,8 @@ export default {
   library: {
     asset_library: 'Asset Library',
     manage: 'Manage your library',
-    no_more_entities: 'No entities are available',
+    no_entities: 'No entities are available',
+    no_open_productions: 'No open productions',
     no_shared_assets: 'No shared assets are available',
     import_from_production: 'Import all assets from another production',
     import_from_asset_type: 'Import an asset type from the selected production',
@@ -1659,8 +1660,8 @@ export default {
       name: 'Name',
       production: 'Production',
       created_at: 'Creation date',
-      updated_at: 'Update date',
-    },
+      updated_at: 'Update date'
+    }
   },
 
   wrong_browser: {

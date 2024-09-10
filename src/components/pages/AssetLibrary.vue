@@ -20,7 +20,7 @@
             @change="onSearchChange"
             :can-save="false"
             v-focus
-            v-if="false"
+            v-show="false"
           />
           <combobox-production
             class="flexrow-item"

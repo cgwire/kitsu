@@ -35,6 +35,10 @@
         </div>
       </div>
 
+      <div class="has-text-centered mt2" v-if="!openProductions.length">
+        {{ $t('library.no_open_productions') }}
+      </div>
+
       <template v-else>
         <div class="flexcolumn mt2">
           <combobox-production
@@ -74,7 +78,7 @@
             {{ $t('library.import_from_assets') }}
           </label>
           <div class="mt1" v-if="!productionUnsharedEntities.length">
-            {{ $t('library.no_more_entities') }}
+            {{ $t('library.no_entities') }}
           </div>
           <div class="unshared-entities" v-else>
             <table
