@@ -18,9 +18,9 @@
             ref="search-field"
             class="flexrow-item"
             @change="onSearchChange"
-            @save="/* saveSearchQuery */"
             :can-save="false"
             v-focus
+            v-if="false"
           />
           <combobox-production
             class="flexrow-item"
@@ -33,21 +33,10 @@
             class="flexrow-item"
             :label="$t('main.sorted_by')"
             :options="sorting.options"
-            locale-key-prefix="tasks.fields."
+            locale-key-prefix="library.fields."
             v-model="sorting.current"
           />
         </div>
-
-        <!--
-        <div class="query-list">
-          <search-query-list
-            :queries="searchQueries"
-            type="library"
-            @change-search="changeSearch"
-            @remove-search="removeSearchQuery"
-          />
-        </div>
-        -->
 
         <div class="entities mb2">
           <table-info
@@ -61,7 +50,7 @@
           <template v-else>
             <div
               class="pb1"
-              v-for="(group, index) in sharedAssetsByType"
+              v-for="(group, index) in sortedSharedAssetsByType"
               :key="index"
             >
               <h2 class="mt0">
@@ -110,6 +99,7 @@
 </template>
 
 <script>
+import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 // import { searchMixin } from '@/components/mixins/search'
@@ -123,7 +113,6 @@ import PageLayout from '@/components/layouts/PageLayout.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
-// import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
@@ -141,7 +130,6 @@ export default {
     PageTitle,
     ProductionName,
     SearchField,
-    // SearchQueryList,
     TableInfo
   },
 
@@ -158,8 +146,13 @@ export default {
         sharedAssets: false
       },
       sorting: {
-        current: 'entity_name',
-        options: ['entity_name'].map(name => ({ label: name, value: name }))
+        current: 'name',
+        options: ['name', 'production', 'created_at', 'updated_at'].map(
+          name => ({
+            label: name,
+            value: name
+          })
+        )
       }
     }
   },
@@ -184,6 +177,27 @@ export default {
 
     productionList() {
       return [{ name: this.$t('main.all') }, ...this.openProductions]
+    },
+
+    sortedSharedAssetsByType() {
+      const nameFilter = (a, b) =>
+        a.name.localeCompare(b.name, undefined, { numeric: true })
+      const productionFilter = (a, b) =>
+        a.production.name.localeCompare(b.production.name, undefined, {
+          numeric: true
+        })
+      return this.sharedAssetsByType.map(type => {
+        if (this.sorting.current === 'production') {
+          return type.sort(firstBy(productionFilter).thenBy(nameFilter))
+        }
+        if (this.sorting.current === 'created_at') {
+          return type.sort(firstBy('created_at'))
+        }
+        if (this.sorting.current === 'updated_at') {
+          return type.sort(firstBy('updated_at', -1))
+        }
+        return type.sort(firstBy(nameFilter).thenBy(productionFilter))
+      })
     },
 
     hasSelectedAssets() {
@@ -223,24 +237,6 @@ export default {
       }
       this.updateRoute({ search: searchQuery })
     },
-
-    // saveSearchQuery(searchQuery) {
-    //   if (this.loading.savingSearch) {
-    //     return
-    //   }
-    //   this.loading.savingSearch = true
-    //   this.saveSharedAssetSearch(searchQuery)
-    //     .catch(console.error)
-    //     .finally(() => {
-    //       this.loading.savingSearch = false
-    //     })
-    // },
-
-    // removeSearchQuery(searchQuery) {
-    //   this.removeSharedAssetSearch(searchQuery).catch(err => {
-    //     if (err) console.error(err)
-    //   })
-    // }
 
     updateRoute({ production, search }) {
       const query = {

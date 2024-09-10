@@ -1654,7 +1654,13 @@ export default {
     import_from_asset_type: 'Import an asset type from the selected production',
     import_from_assets: 'Import unselected assets from the selected production',
     selected_assets: 'Selected assets',
-    remove_selected_assets: 'Remove the selected asset | Remove the {nbSelectedAssets} selected assets'
+    remove_selected_assets: 'Remove the selected asset | Remove the {nbSelectedAssets} selected assets',
+    fields: {
+      name: 'Name',
+      production: 'Production',
+      created_at: 'Creation date',
+      updated_at: 'Update date',
+    },
   },
 
   wrong_browser: {
