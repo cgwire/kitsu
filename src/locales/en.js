@@ -1648,11 +1648,11 @@ export default {
   library: {
     asset_library: 'Asset Library',
     manage: 'Manage your library',
-    no_more_entities: 'No more entities are available',
+    no_more_entities: 'No entities are available',
     no_shared_assets: 'No shared assets are available',
     import_from_production: 'Import all assets from another production',
     import_from_asset_type: 'Import an asset type from the selected production',
-    import_from_assets: 'Add from unselected assets',
+    import_from_assets: 'Import unselected assets from the selected production',
     selected_assets: 'Selected assets',
     remove_selected_assets: 'Remove the selected asset | Remove the {nbSelectedAssets} selected assets'
   },

@@ -73,13 +73,13 @@
           <label class="label">
             {{ $t('library.import_from_assets') }}
           </label>
-          <div class="mt1" v-if="!unsharedAssets.length">
+          <div class="mt1" v-if="!productionUnsharedEntities.length">
             {{ $t('library.no_more_entities') }}
           </div>
           <div class="unshared-entities" v-else>
             <table
               class="datatable multi-section"
-              v-for="(group, index) in unsharedAssetsByType"
+              v-for="(group, index) in productionUnsharedEntitiesByType"
               :key="index"
             >
               <tr class="datatable-type-header">
@@ -228,6 +228,17 @@ export default {
       return types.map(type => ({ label: type.name, value: type.id }))
     },
 
+    productionUnsharedEntities() {
+      return this.unsharedAssets.filter(
+        entity => entity.project_id === this.productionId
+      )
+    },
+    productionUnsharedEntitiesByType() {
+      return this.unsharedAssetsByType.map(type =>
+        type.filter(entity => entity.project_id === this.productionId)
+      )
+    },
+
     selectedEntities() {
       return [...this.selectedAssets.values()]
     }
@@ -251,8 +262,9 @@ export default {
     async refresh() {
       this.loading = true
       this.entityIds = []
+      const production = this.productionMap.get(this.productionId)
       try {
-        await this.loadUnsharedAssets({ production: null })
+        await this.loadUnsharedAssets({ production })
       } catch (error) {
         console.error(error)
       }
@@ -366,20 +378,6 @@ export default {
       this.isExtraWide = width >= 900
     }
     */
-  },
-
-  watch: {
-    // productionId() {
-    //   this.refresh()
-    // }
-  },
-
-  socket: {
-    events: {
-      // 'asset:update'(eventData) {
-      //   this.refresh()
-      // }
-    }
   }
 }
 </script>
