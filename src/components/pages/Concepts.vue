@@ -358,7 +358,9 @@ export default {
     async refreshConcepts() {
       this.loading.loadingConcepts = true
       try {
-        this.setCurrentEpisode('all') // mandatory to load all assets
+        if (this.isTVShow) {
+          this.setCurrentEpisode('all') // mandatory to load all assets of a TV show
+        }
         await this.loadAssets(true)
         await this.loadConcepts()
       } catch (err) {
