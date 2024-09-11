@@ -51,6 +51,7 @@ import {
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   SET_ASSET_SEARCH,
+  SET_SHARED_ASSET_SEARCH,
   SET_CURRENT_PRODUCTION,
   DISPLAY_MORE_ASSETS,
   SET_PREVIEW,
@@ -255,14 +256,24 @@ const helpers = {
     helpers.setListStats(state, result)
     state.assetSearchText = query
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+  },
+
+  buildResultForSharedAssets(state, { assetSearch }) {
+    const query = assetSearch
+    const keywords = getKeyWords(query) || []
+    const result =
+      indexSearch(cache.sharedAssetIndex, keywords) || state.sharedAssets
+    state.sharedAssetSearchText = query
+    state.displayedSharedAssets = result
   }
 }
 
 const cache = {
+  assets: [],
   assetIndex: {},
   assetTypeIndex: {},
-  assets: [],
-  result: []
+  result: [],
+  sharedAssetIndex: {}
 }
 
 const initialState = {
@@ -302,7 +313,9 @@ const initialState = {
 
   selectedAssets: new Map(),
 
+  displayedSharedAssets: [],
   sharedAssets: [],
+  sharedAssetSearchText: '',
   unsharedAssets: []
 }
 
@@ -359,6 +372,14 @@ const getters = {
 
   sharedAssets: state => state.sharedAssets,
   unsharedAssets: state => state.unsharedAssets,
+
+  displayedSharedAssets: state => state.displayedSharedAssets,
+  displayedSharedAssetsByType: state => {
+    return groupEntitiesByParents(
+      state.displayedSharedAssets,
+      'asset_type_name'
+    )
+  },
 
   sharedAssetsByType: state => {
     return groupEntitiesByParents(state.sharedAssets, 'asset_type_name')
@@ -596,6 +617,10 @@ const actions = {
       persons,
       production
     })
+  },
+
+  setSharedAssetSearch({ commit }, assetSearch) {
+    commit(SET_SHARED_ASSET_SEARCH, { assetSearch })
   },
 
   saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
@@ -946,6 +971,10 @@ const mutations = {
     })
     assets = sortAssets(assets)
     state.sharedAssets = assets
+    cache.sharedAssetIndex = buildAssetIndex(state.sharedAssets)
+    helpers.buildResultForSharedAssets(state, {
+      assetSearch: state.sharedAssetSearchText
+    })
   },
 
   [LOAD_UNSHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
@@ -1095,6 +1124,10 @@ const mutations = {
   [SET_ASSET_SEARCH](state, payload) {
     payload.sorting = state.assetSorting
     helpers.buildResult(state, payload)
+  },
+
+  [SET_SHARED_ASSET_SEARCH](state, { assetSearch }) {
+    helpers.buildResultForSharedAssets(state, { assetSearch })
   },
 
   [SAVE_ASSET_SEARCH_END](state, { searchQuery }) {

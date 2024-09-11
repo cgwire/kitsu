@@ -1997,6 +1997,7 @@ describe('Assets store', () => {
         displayedAssetsCount: 0,
         displayedAssetsLength: 0,
         displayedAssetsTimeSpent: 0,
+        displayedSharedAssets: [],
         filteredAssets: [],
         isAssetDescription: false,
         isAssetEstimation: false,
@@ -2006,6 +2007,7 @@ describe('Assets store', () => {
         nbValidationColumns: 0,
         personTasks: [],
         sharedAssets: [],
+        sharedAssetSearchText: '',
         selectedAssets: new Map(),
         unsharedAssets: [],
       })

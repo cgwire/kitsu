@@ -8,6 +8,7 @@
             class="button"
             :disabled="hasSelectedAssets"
             icon="plus"
+            :is-on="openedSidePanel"
             :text="$t('library.manage')"
             @click="openedSidePanel = !openedSidePanel"
           />
@@ -20,7 +21,6 @@
             @change="onSearchChange"
             :can-save="false"
             v-focus
-            v-show="false"
           />
           <combobox-production
             class="flexrow-item"
@@ -44,7 +44,10 @@
             :is-error="errors.sharedAssets"
             v-if="loading.sharedAssets || errors.sharedAssets"
           />
-          <div class="has-text-centered" v-else-if="!sharedAssets.length">
+          <div
+            class="has-text-centered"
+            v-else-if="!displayedSharedAssets.length"
+          >
             {{ $t('library.no_shared_assets') }}
           </div>
           <template v-else>
@@ -102,8 +105,6 @@
 import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
-// import { searchMixin } from '@/components/mixins/search'
-
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
@@ -117,8 +118,6 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'asset-library',
-
-  // mixins: [searchMixin],
 
   components: {
     ButtonSimple,
@@ -164,11 +163,11 @@ export default {
 
   computed: {
     ...mapGetters([
+      'displayedSharedAssets',
+      'displayedSharedAssetsByType',
       'openProductions',
       'productionMap',
-      'selectedAssets',
-      'sharedAssets',
-      'sharedAssetsByType'
+      'selectedAssets'
     ]),
 
     searchField() {
@@ -186,7 +185,7 @@ export default {
         a.production.name.localeCompare(b.production.name, undefined, {
           numeric: true
         })
-      return this.sharedAssetsByType.map(type => {
+      return this.displayedSharedAssetsByType.map(type => {
         if (this.sorting.current === 'production') {
           return type.sort(firstBy(productionFilter).thenBy(nameFilter))
         }
@@ -206,7 +205,11 @@ export default {
   },
 
   methods: {
-    ...mapActions(['loadSharedAssets', 'setAssetSelection']),
+    ...mapActions([
+      'loadSharedAssets',
+      'setAssetSelection',
+      'setSharedAssetSearch'
+    ]),
 
     async refresh(silent = false) {
       this.loading.sharedAssets = !silent
@@ -231,10 +234,7 @@ export default {
 
     onSearchChange() {
       const searchQuery = this.searchField.getValue() || ''
-      if (searchQuery?.length !== 1) {
-        // TODO: module action
-        // this.setSharedAssetSearch(searchQuery)
-      }
+      this.setSharedAssetSearch(searchQuery)
       this.updateRoute({ search: searchQuery })
     },
 
