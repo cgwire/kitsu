@@ -572,11 +572,13 @@ export default {
       'isTVShow',
       'nbSelectedTasks',
       'selectedEdits',
+      'edits',
       'editFilledColumns',
       'editMap',
       'editMetadataDescriptors',
       'editSearchText',
       'editSelectionGrid',
+      'selectedTasks',
       'taskMap',
       'taskTypeMap',
       'user'

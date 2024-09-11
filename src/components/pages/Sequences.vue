@@ -336,6 +336,7 @@ export default {
         this.$refs['sequence-list'].setScrollPosition(
           this.sequenceListScrollPosition
         )
+        this.$refs['sequence-list'].selectTaskFromQuery()
       }
     }
 
@@ -347,6 +348,7 @@ export default {
       this.loadSequencesWithTasks()
         .then(() => {
           this.initialLoading = false
+          finalize()
         })
         .catch(console.error)
     } else {

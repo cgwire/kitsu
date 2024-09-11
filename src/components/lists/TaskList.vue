@@ -687,12 +687,12 @@ export default {
       const isSelected = this.selectionGrid[task.id]
       const isManySelection = Object.keys(this.selectionGrid).length > 1
       if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
-        this.clearSelectedTasks({ task })
+        this.clearSelectedTasks()
         this.resetSelection()
       }
 
       if (!event.shiftKey) {
-        if (this.selectionGrid[task.id]) {
+        if (isSelected && !isManySelection) {
           this.removeSelectedTask({ task })
           Vue.set(this.selectionGrid, task.id, undefined)
         } else if (!isSelected || isManySelection) {

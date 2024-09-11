@@ -333,6 +333,9 @@ export default {
         this.$refs['episode-list'].setScrollPosition(
           this.episodeListScrollPosition
         )
+        this.$nextTick(() => {
+          this.$refs['episode-list'].selectTaskFromQuery()
+        })
       }
     }
 
@@ -343,7 +346,9 @@ export default {
     ) {
       this.loadEpisodesWithTasks()
         .then(() => {
-          this.initialLoading = false
+          setTimeout(() => {
+            finalize()
+          }, 200)
         })
         .catch(console.error)
     } else {

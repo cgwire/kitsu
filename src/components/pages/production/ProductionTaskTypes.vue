@@ -546,6 +546,7 @@ h2 {
 }
 
 .empty {
+  color: var(--text);
   font-style: italic;
 }
 

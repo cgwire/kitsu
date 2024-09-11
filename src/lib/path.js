@@ -55,6 +55,34 @@ export const getTaskEntityPath = (task, episodeId) => {
   }
 }
 
+export const getTaskEntitiesPath = (task, episodeId) => {
+  if (task) {
+    let type = task.entity_type_name
+    if (!['Shot', 'Sequence', 'Episode', 'Edit'].includes(type)) {
+      type = 'Asset'
+    }
+    const route = {
+      name: type.toLowerCase() + 's',
+      params: {
+        production_id: task.project_id
+      },
+      query: {
+        search: '',
+        task_id: task.id
+      }
+    }
+    if (episodeId && !['episode', 'episodes'].includes(route.name)) {
+      route.name = `episode-${route.name}`
+      route.params.episode_id = episodeId
+    }
+    return route
+  } else {
+    return {
+      name: 'open-productions'
+    }
+  }
+}
+
 export const getEntitiesPath = (productionId, type, episodeId) => {
   const route = {
     name: type,

@@ -545,6 +545,7 @@ export default {
       'isShowAssignations',
       'isShowInfos',
       'nbSelectedTasks',
+      'selectedTasks',
       'taskMap',
       'taskTypeMap',
       'user'

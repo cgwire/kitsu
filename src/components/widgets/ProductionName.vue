@@ -76,6 +76,7 @@ export default {
 }
 
 .avatar-name {
+  color: var(--text);
   margin-left: 0.8em;
 }
 </style>

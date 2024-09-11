@@ -738,6 +738,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'addSelectedTask',
       'clearSelectedTasks',
       'initTaskType',
       'loadAggregatedPersonDaysOff',
@@ -782,6 +783,15 @@ export default {
             this.dueDateFilter = this.$route.query.duedate || 'all'
             this.estimationFilter = this.$route.query.late || 'all'
             this.priorityFilter = this.$route.query.priority || '-1'
+
+            const taskId = this.$route.query.task_id
+            const task = this.taskMap.get(taskId)
+            if (task) {
+              const index = this.tasks.findIndex(t => t.id === taskId)
+              this.$nextTick(() => {
+                this.$refs['task-list'].selectTask({}, index, task)
+              })
+            }
           })
           .catch(err => {
             console.error(err)
@@ -969,6 +979,27 @@ export default {
 
     onTaskSelected(task) {
       this.currentTask = task
+      this.updateTaskInQuery()
+    },
+
+    updateTaskInQuery() {
+      if (this.nbSelectedTasks === 1) {
+        const selectedTaskIds = Array.from(this.selectedTasks.keys())
+        const taskId = selectedTaskIds[0]
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            task_id: taskId
+          }
+        })
+      } else {
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            task_id: undefined
+          }
+        })
+      }
     },
 
     resetTasks() {
@@ -1430,6 +1461,10 @@ export default {
       this.initData(true)
     },
 
+    nbSelectedTasks() {
+      this.updateTaskInQuery()
+    },
+
     // Quickfix for the edge case where the backPath is not properly set
     // because it was set when the episode was not fully loaded.
     currentEpisode() {
@@ -1457,6 +1492,7 @@ export default {
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
       this.clearSelectedTasks()
+      this.updateTaskInQuery()
     },
 
     'schedule.currentColor'() {
