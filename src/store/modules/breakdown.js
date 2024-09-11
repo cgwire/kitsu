@@ -76,7 +76,6 @@ const getters = {
 const actions = {
   setCastingForProductionEpisodes({ commit, rootState }, episodeId) {
     const production = rootState.productions.currentProduction
-    const assetMap = rootState.assets.assetMap
     const episodes = Array.from(rootState.episodes.episodeMap.values()).sort(
       (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })
     )
@@ -84,7 +83,7 @@ const actions = {
     return breakdownApi
       .getProductionEpisodesCasting(production.id, episodeId)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, assetMap })
+        commit(CASTING_SET_CASTING, { casting, production })
       })
   },
 
@@ -95,7 +94,6 @@ const actions = {
     const production = rootGetters.currentProduction
     const episode = rootGetters.currentEpisode
     const episodeId = episode ? episode.id : null
-    const assetMap = rootGetters.assetMap
     const shots = sortShots(
       Array.from(rootGetters.shotMap.values()).filter(
         shot => shot.sequence_id === sequenceId || sequenceId === 'all'
@@ -106,8 +104,7 @@ const actions = {
     return breakdownApi
       .getSequenceCasting(production.id, sequenceId, episodeId)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, assetMap })
-        return Promise.resolve()
+        commit(CASTING_SET_CASTING, { casting, production })
       })
   },
 
@@ -116,7 +113,6 @@ const actions = {
       return console.error('assetTypeId is undefined, no casting can be set.')
     }
     const production = rootState.productions.currentProduction
-    const assetMap = rootState.assets.assetMap
     const assets = Array.from(rootState.assets.assetMap.values())
       .filter(asset => asset.asset_type_id === assetTypeId)
       .sort((a, b) =>
@@ -127,7 +123,7 @@ const actions = {
     return breakdownApi
       .getAssetTypeCasting(production.id, assetTypeId)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, assetMap })
+        commit(CASTING_SET_CASTING, { casting, production })
       })
   },
 
@@ -217,9 +213,8 @@ const actions = {
 
   loadShotCasting({ commit, rootGetters }, shot) {
     if (!shot) return Promise.resolve({})
-    const assetMap = rootGetters.assetMap
     return breakdownApi.getShotCasting(shot).then(casting => {
-      commit(LOAD_SHOT_CASTING_END, { shot, casting, assetMap })
+      commit(LOAD_SHOT_CASTING_END, { shot, casting })
       return Promise.resolve(casting)
     })
   },
@@ -459,11 +454,14 @@ const mutations = {
     state.castingAssetTypeId = assetTypeId
   },
 
-  [CASTING_SET_CASTING](state, { casting, assetMap }) {
+  [CASTING_SET_CASTING](state, { casting, production }) {
     const entityCastingByType = {}
     const entityCastingKeys = Object.keys(casting)
     entityCastingKeys.forEach(entityId => {
       const entityCasting = casting[entityId]
+      entityCasting.forEach(entity => {
+        entity.shared = entity.project_id !== production.id
+      })
       entityCastingByType[entityId] = groupEntitiesByParents(
         entityCasting,
         'asset_type_name'
@@ -552,8 +550,9 @@ const mutations = {
   },
 
   [LOAD_SHOT_CASTING_END](state, { shot, casting }) {
-    casting.forEach(a => {
-      a.name = a.asset_name || a.name
+    casting.forEach(asset => {
+      asset.name = asset.asset_name || asset.name
+      asset.shared = asset.is_shared && shot.project_id !== asset.project_id
     })
     const castingByType = groupEntitiesByParents(casting, 'asset_type_name')
     shot.casting = casting
@@ -570,6 +569,8 @@ const mutations = {
         if (!presenceMap[asset.asset_id]) {
           presenceMap[asset.asset_id] = true
           asset.name = asset.asset_name || asset.name
+          asset.shared =
+            asset.is_shared && asset.project_id !== sequence.production_id
           sequenceCasting.push(asset)
         }
       })

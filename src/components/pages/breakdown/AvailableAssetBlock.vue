@@ -1,17 +1,18 @@
 <template>
   <div
-    :id="'casting-' + asset.id"
+    :id="`casting-${asset.id}`"
+    class="asset"
     :class="{
-      asset: true,
+      active,
       'big-asset': bigMode,
-      active: active
+      shared: asset.shared
     }"
     :title="asset.name"
     v-if="!textMode"
   >
     <div class="asset-add" @click="addOneAsset">+ 1</div>
     <div class="asset-add-10" @click="addTenAssets">+ 10</div>
-    <div class="asset-picture" v-if="asset.preview_file_id.length > 0">
+    <div class="asset-picture" v-if="asset.preview_file_id">
       <img
         loading="lazy"
         alt=""
@@ -24,7 +25,13 @@
       </span>
     </div>
   </div>
-  <div class="asset-text flexrow-item flexrow" v-else>
+  <div
+    class="asset-text flexrow-item flexrow"
+    :class="{
+      shared: asset.shared
+    }"
+    v-else
+  >
     <span class="asset-text-name flexrow-item">
       {{ asset.name }}
     </span>
@@ -153,6 +160,10 @@ export default {
       height: 50px;
     }
   }
+
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
+  }
 }
 
 .asset-picture {
@@ -192,5 +203,9 @@ export default {
 .asset-text {
   font-size: 0.9em;
   margin-bottom: 0.5em;
+
+  &.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
+  }
 }
 </style>

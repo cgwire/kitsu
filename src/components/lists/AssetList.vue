@@ -228,9 +228,12 @@
 
           <tr
             class="datatable-row"
+            :class="{
+              canceled: asset.canceled,
+              shared: asset.shared
+            }"
             scope="row"
-            :key="'row' + asset.id"
-            :class="{ canceled: asset.canceled }"
+            :key="`row${asset.id}`"
             v-for="(asset, i) in group"
           >
             <th
@@ -245,6 +248,7 @@
                   type="checkbox"
                   class="flexrow-item"
                   :checked="selectedAssets.has(asset.id)"
+                  :disabled="asset.shared"
                   @input="event => toggleLine(asset, event)"
                   v-show="isCurrentUserManager"
                 />
@@ -424,7 +428,7 @@
               @edit-clicked="$emit('edit-clicked', asset)"
               @delete-clicked="$emit('delete-clicked', asset)"
               @restore-clicked="$emit('restore-clicked', asset)"
-              v-if="isCurrentUserManager"
+              v-if="isCurrentUserManager && !asset.shared"
             />
             <td class="actions" v-else></td>
           </tr>
@@ -713,6 +717,9 @@ export default {
 
     // Selectable if the task type is included in the workflow.
     isSelectable(asset, columnId) {
+      if (asset.shared) {
+        return false
+      }
       const key = asset.asset_type_id + columnId
       if (this.isSelectableMap === undefined) this.isSelectableMap = {}
       if (this.isSelectableMap[key] === undefined) {
@@ -983,6 +990,18 @@ td.ready-for {
 .datatable-wrapper {
   min-height: 200px;
   flex: 1;
+}
+
+.datatable-row.shared {
+  > th,
+  > td {
+    opacity: 0.6;
+    background: color-mix(
+      in srgb,
+      var(--shared-color) 20%,
+      transparent
+    ) !important;
+  }
 }
 
 .datatable-row th.name {

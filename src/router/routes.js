@@ -21,6 +21,7 @@ import TaskType from '@/components/pages/TaskType.vue'
 import Todos from '@/components/pages/Todos.vue'
 import Edits from '@/components/pages/Edits.vue'
 
+const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
 const AllTasks = () => import('@/components/pages/AllTasks.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
@@ -184,6 +185,12 @@ export const routes = [
       {
         path: '',
         name: 'home'
+      },
+
+      {
+        path: 'asset-library',
+        component: AssetLibrary,
+        name: 'asset-library'
       },
 
       {

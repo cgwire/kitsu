@@ -230,6 +230,7 @@
                   >
                     <entity-thumbnail
                       class="entity-thumbnail"
+                      :class="{ shared: asset.shared }"
                       :entity="asset"
                       :square="true"
                       :empty-width="103"
@@ -678,11 +679,16 @@ h2.subtitle {
 
 .asset-link {
   color: inherit;
-  margin-right: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: 0.8em;
+
+  .entity-thumbnail.shared {
+    box-shadow: 0 0 3px 2px var(--shared-color);
+  }
 
   .ready-for .no-link {
     cursor: inherit;

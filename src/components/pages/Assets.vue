@@ -18,6 +18,17 @@
               icon="filter"
               @click="modals.isBuildFilterDisplayed = true"
             />
+            <button-simple
+              class="flexrow-item"
+              icon="assets"
+              :is-on="onlySharedAssets"
+              :title="
+                onlySharedAssets
+                  ? $t('breakdown.hide_library')
+                  : $t('breakdown.show_library')
+              "
+              @click="onlySharedAssets = !onlySharedAssets"
+            />
             <div class="flexrow-item filler"></div>
             <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
               <combobox-department
@@ -79,7 +90,11 @@
         />
         <asset-list
           ref="asset-list"
-          :displayed-assets="displayedAssetsByType"
+          :displayed-assets="
+            onlySharedAssets
+              ? displayedSharedAssetsByType
+              : displayedAssetsByType
+          "
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
           :validation-columns="assetValidationColumns"
@@ -324,6 +339,7 @@ export default {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
+      onlySharedAssets: false,
       selectedDepartment: 'ALL',
       taskTypeForTaskDeletion: null,
       errors: {
@@ -464,6 +480,12 @@ export default {
 
     searchField() {
       return this.$refs['asset-search-field']
+    },
+
+    displayedSharedAssetsByType() {
+      return this.displayedAssetsByType.map(type =>
+        type.filter(asset => asset.shared)
+      )
     },
 
     filteredAssets() {

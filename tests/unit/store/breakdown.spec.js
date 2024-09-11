@@ -26,13 +26,15 @@ describe('Breakdown store', () => {
         id: 'shot-1',
         name: 'SH01',
         sequence_name: 'SE01',
-        sequence_id: 'sequence-1'
+        sequence_id: 'sequence-1',
+        project_id: 'production-1',
       },
       {
         id: 'shot-2',
         name: 'SH02',
         sequence_name: 'SE02',
-        sequence_id: 'sequence-2'
+        sequence_id: 'sequence-2',
+        project_id: 'production-1',
       }
     ]
     sequences = [
@@ -45,14 +47,18 @@ describe('Breakdown store', () => {
         asset_id: 'asset-1',
         name: 'Asset 1',
         asset_type_name: 'Characters',
-        nb_occurences: 1
+        nb_occurences: 1,
+        project_id: 'production-1',
+        is_shared: false,
       },
       {
         id: 'asset-2',
         asset_id: 'asset-2',
         name: 'Asset 2',
         asset_type_name: 'Props',
-        nb_occurences: 2
+        nb_occurences: 2,
+        project_id: 'production-2',
+        is_shared: true,
       }
     ]
     assetMap = new Map(Object.entries({
@@ -64,7 +70,8 @@ describe('Breakdown store', () => {
         asset_type_name: 'Props',
         name: 'Asset 3',
         nb_occurences: 1,
-        preview_file_id: undefined
+        preview_file_id: undefined,
+        project_id: 'production-1',
       }
     }))
     casting = {
@@ -153,9 +160,9 @@ describe('Breakdown store', () => {
         nbOccurences: 3
       })
       expect(vuexStore.state.casting['shot-1'][2].asset_id)
-        .toEqual('asset-3')
+        .toEqual('asset-2')
       expect(vuexStore.state.castingByType['shot-1'][1][1].asset_id)
-        .toEqual('asset-3')
+        .toEqual('asset-2')
     })
     test('removeAssetFromCasting', async () => {
       await store.actions.removeAssetFromCasting({ commit, rootState }, {
@@ -163,9 +170,9 @@ describe('Breakdown store', () => {
         assetId: 'asset-2',
         nbOccurences: 1
       })
-      expect(vuexStore.state.casting['shot-1'][1].nb_occurences)
+      expect(vuexStore.state.casting['shot-1'][2].nb_occurences)
         .toEqual(1)
-      expect(vuexStore.state.castingByType['shot-1'][1][0].nb_occurences)
+      expect(vuexStore.state.castingByType['shot-1'][1][1].nb_occurences)
         .toEqual(1)
     })
     test('saveCasting', async () => {
@@ -178,12 +185,12 @@ describe('Breakdown store', () => {
           nb_occurences: 1
         },
         {
-          asset_id: 'asset-2',
-          nb_occurences: 1
-        },
-        {
           asset_id: 'asset-3',
           nb_occurences: 3
+        },
+        {
+          asset_id: 'asset-2',
+          nb_occurences: 1
         }]
       )
     })
@@ -218,7 +225,7 @@ describe('Breakdown store', () => {
 
     test('CASTING_SET_CASTING', () => {
       store.mutations.CASTING_SET_SHOTS(state, shots)
-      store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
+      store.mutations.CASTING_SET_CASTING(state, { casting, production })
       expect(state.casting['shot-1']).toEqual(assetCasting)
       expect(state.casting['shot-2']).toEqual([])
       expect(state.castingByType['shot-1']).toEqual([
@@ -227,14 +234,20 @@ describe('Breakdown store', () => {
           asset_id: 'asset-1',
           name: 'Asset 1',
           asset_type_name: 'Characters',
-          nb_occurences: 1
+          nb_occurences: 1,
+          project_id: 'production-1',
+          is_shared: false,
+          shared: false
         }],
         [{
           id: 'asset-2',
           asset_id: 'asset-2',
           name: 'Asset 2',
           asset_type_name: 'Props',
-          nb_occurences: 2
+          nb_occurences: 2,
+          project_id: 'production-2',
+          is_shared: true,
+          shared: true
         }]
       ])
       expect(state.castingByType['shot-2']).toEqual([[]])
@@ -247,29 +260,31 @@ describe('Breakdown store', () => {
         asset_type_name: 'Props',
         name: 'Asset 3',
         nb_occurences: 1,
-        preview_file_id: undefined
+        preview_file_id: undefined,
+        project_id: 'production-1',
+        is_shared: false
       }
       store.mutations.CASTING_SET_SHOTS(state, shots)
-      store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
+      store.mutations.CASTING_SET_CASTING(state, { casting, production })
       store.mutations.CASTING_ADD_TO_CASTING(state,
         { entityId: 'shot-1', asset: newAsset, nbOccurences: 1 }
       )
-      expect(state.casting['shot-1'][2].asset_id).toEqual(newAsset.id)
-      expect(state.castingByType['shot-1'][1][1].asset_id)
+      expect(state.casting['shot-1'][1].asset_id).toEqual(newAsset.id)
+      expect(state.castingByType['shot-1'][1][0].asset_id)
         .toEqual(newAsset.id)
 
       store.mutations.CASTING_ADD_TO_CASTING(state,
         { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 3 }
       )
-      expect(state.casting['shot-1'][1].nb_occurences)
+      expect(state.casting['shot-1'][2].nb_occurences)
         .toEqual(5)
-      expect(state.castingByType['shot-1'][1][0].nb_occurences)
+      expect(state.castingByType['shot-1'][1][1].nb_occurences)
         .toEqual(5)
     })
 
     test('CASTING_REMOVE_FROM_CASTING', () => {
       store.mutations.CASTING_SET_SHOTS(state, shots)
-      store.mutations.CASTING_SET_CASTING(state, { casting, assetMap })
+      store.mutations.CASTING_SET_CASTING(state, { casting, production })
       store.mutations.CASTING_REMOVE_FROM_CASTING(state,
         { entityId: 'shot-1', asset: assetMap.get('asset-2'), nbOccurences: 1 }
       )
@@ -297,14 +312,20 @@ describe('Breakdown store', () => {
           asset_id: 'asset-1',
           name: 'Asset 1',
           asset_type_name: 'Characters',
-          nb_occurences: 1
+          nb_occurences: 1,
+          project_id: "production-1",
+          is_shared: false,
+          shared: false
         }],
         [{
           id: 'asset-2',
           asset_id: 'asset-2',
           name: 'Asset 2',
           asset_type_name: 'Props',
-          nb_occurences: 2
+          nb_occurences: 2,
+          project_id: "production-2",
+          is_shared: true,
+          shared: true
         }]
       ])
     })
@@ -319,7 +340,8 @@ describe('Breakdown store', () => {
             id: 'shot-1',
             name: 'SH01',
             sequence_name: 'SE01',
-            sequence_id: 'sequence-1'
+            sequence_id: 'sequence-1',
+            project_id: 'production-1'
           }
         ],
         [
@@ -327,7 +349,8 @@ describe('Breakdown store', () => {
             id: 'shot-2',
             name: 'SH02',
             sequence_name: 'SE02',
-            sequence_id: 'sequence-2'
+            sequence_id: 'sequence-2',
+            project_id: 'production-1'
           }
         ]
       ])

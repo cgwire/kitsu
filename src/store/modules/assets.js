@@ -51,6 +51,7 @@ import {
   NEW_TASK_COMMENT_END,
   NEW_TASK_END,
   SET_ASSET_SEARCH,
+  SET_SHARED_ASSET_SEARCH,
   SET_CURRENT_PRODUCTION,
   DISPLAY_MORE_ASSETS,
   SET_PREVIEW,
@@ -74,7 +75,9 @@ import {
   UNLOCK_ASSET,
   RESET_ALL,
   CLEAR_SELECTED_ASSETS,
-  SET_ASSET_SELECTION
+  SET_ASSET_SELECTION,
+  LOAD_SHARED_ASSETS_END,
+  LOAD_UNSHARED_ASSETS_END
 } from '@/store/mutation-types'
 import async from 'async'
 
@@ -168,7 +171,7 @@ const helpers = {
     asset.production_name = production.name
 
     const taskIds = []
-    asset.tasks.forEach(task => {
+    asset.tasks?.forEach(task => {
       if (typeof task === 'string') {
         task = taskMap.get(task)
       }
@@ -253,14 +256,24 @@ const helpers = {
     helpers.setListStats(state, result)
     state.assetSearchText = query
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+  },
+
+  buildResultForSharedAssets(state, { assetSearch }) {
+    const query = assetSearch
+    const keywords = getKeyWords(query) || []
+    const result =
+      indexSearch(cache.sharedAssetIndex, keywords) || state.sharedAssets
+    state.sharedAssetSearchText = query
+    state.displayedSharedAssets = result
   }
 }
 
 const cache = {
+  assets: [],
   assetIndex: {},
   assetTypeIndex: {},
-  assets: [],
-  result: []
+  result: [],
+  sharedAssetIndex: {}
 }
 
 const initialState = {
@@ -298,7 +311,12 @@ const initialState = {
   personTasks: [],
   assetListScrollPosition: 0,
 
-  selectedAssets: new Map()
+  selectedAssets: new Map(),
+
+  displayedSharedAssets: [],
+  sharedAssets: [],
+  sharedAssetSearchText: '',
+  unsharedAssets: []
 }
 
 const state = {
@@ -350,11 +368,33 @@ const getters = {
 
   assetsCsvFormData: state => state.assetsCsvFormData,
 
-  selectedAssets: state => state.selectedAssets
+  selectedAssets: state => state.selectedAssets,
+
+  sharedAssets: state => state.sharedAssets,
+  unsharedAssets: state => state.unsharedAssets,
+
+  displayedSharedAssets: state => state.displayedSharedAssets,
+  displayedSharedAssetsByType: state => {
+    return groupEntitiesByParents(
+      state.displayedSharedAssets,
+      'asset_type_name'
+    )
+  },
+
+  sharedAssetsByType: state => {
+    return groupEntitiesByParents(state.sharedAssets, 'asset_type_name')
+  },
+  unsharedAssetsByType: state => {
+    return groupEntitiesByParents(state.unsharedAssets, 'asset_type_name')
+  }
 }
 
 const actions = {
-  loadAssets({ commit, state, rootGetters }, all = false) {
+  loadAssets(
+    { commit, state, rootGetters },
+    { all = false, withTasks = true } = {}
+  ) {
+    const assetTypeMap = rootGetters.assetTypeMap
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
@@ -368,16 +408,18 @@ const actions = {
       // If it's tv show and if we don't have any episode set,
       // we use the first one.
       episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
-      if (!episode) return Promise.resolve([])
+      if (!episode) {
+        return []
+      }
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
     if (isTVShow && !episode && !all) {
-      return Promise.resolve([])
+      return []
     }
 
     if (state.isAssetsLoading) {
-      return Promise.resolve([])
+      return []
     }
 
     if (all) {
@@ -386,8 +428,26 @@ const actions = {
 
     commit(LOAD_ASSETS_START)
     return assetsApi
-      .getAssets(production, episode)
+      .getAssets(production, episode, withTasks)
+      .then(async assets => {
+        let sharedAssets = all
+          ? await assetsApi.getSharedAssets()
+          : await assetsApi.getUsedSharedAssets(production, episode)
+        sharedAssets = sharedAssets
+          .filter(asset => asset.project_id !== production.id)
+          .map(asset => ({
+            ...asset,
+            shared: true
+          }))
+        return [...assets, ...sharedAssets]
+      })
       .then(assets => {
+        assets.forEach(asset => {
+          if (!asset.asset_type_name) {
+            const assetType = assetTypeMap.get(asset.entity_type_id)
+            asset.asset_type_name = assetType?.name
+          }
+        })
         commit(LOAD_ASSETS_END, {
           production,
           assets,
@@ -397,12 +457,12 @@ const actions = {
           taskMap,
           taskTypeMap
         })
-        return Promise.resolve(assets)
+        return assets
       })
       .catch(err => {
         console.error('an error occurred while loading assets', err)
         commit(LOAD_ASSETS_ERROR)
-        return Promise.resolve([])
+        return []
       })
   },
 
@@ -471,7 +531,7 @@ const actions = {
         dispatch('createTask', {
           entityId: asset.id,
           projectId: asset.project_id,
-          taskTypeId: taskTypeId,
+          taskTypeId,
           type: 'assets'
         })
       })
@@ -524,6 +584,14 @@ const actions = {
     })
   },
 
+  shareAssets({}, { production, assetType, assetIds }) {
+    return assetsApi.shareAssets(production, assetType, assetIds)
+  },
+
+  unshareAssets({}, { assetIds }) {
+    return assetsApi.shareAssets(null, null, assetIds, false)
+  },
+
   uploadAssetFile({ commit, state }, toUpdate) {
     const production = helpers.getCurrentProduction()
     commit(IMPORT_ASSETS_START)
@@ -549,6 +617,10 @@ const actions = {
       persons,
       production
     })
+  },
+
+  setSharedAssetSearch({ commit }, assetSearch) {
+    commit(SET_SHARED_ASSET_SEARCH, { assetSearch })
   },
 
   saveAssetSearch({ commit, state, rootGetters }, searchQuery) {
@@ -746,6 +818,30 @@ const actions = {
         }
       )
     })
+  },
+
+  async loadSharedAssets({ commit, rootGetters }, { production }) {
+    try {
+      const assets = await assetsApi.getSharedAssets(production)
+      const productionMap = rootGetters.productionMap
+      const assetTypeMap = rootGetters.assetTypeMap
+      commit(LOAD_SHARED_ASSETS_END, { assets, productionMap, assetTypeMap })
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
+  },
+
+  async loadUnsharedAssets({ commit, rootGetters }, { production }) {
+    try {
+      const assets = await assetsApi.getSharedAssets(production, false)
+      const productionMap = rootGetters.productionMap
+      const assetTypeMap = rootGetters.assetTypeMap
+      commit(LOAD_UNSHARED_ASSETS_END, { assets, productionMap, assetTypeMap })
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
   }
 }
 
@@ -863,6 +959,34 @@ const mutations = {
 
     state.assetSearchFilterGroups =
       userFilterGroups?.asset?.[production.id] || []
+  },
+
+  [LOAD_SHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
+    // populate shared assets
+    assets.forEach(asset => {
+      asset.production = productionMap.get(asset.project_id)
+      asset.assetType = assetTypeMap.get(asset.entity_type_id)
+      asset.asset_type_name = asset.assetType?.name
+      asset.full_name = `${asset.asset_type_name} / ${asset.name}`
+    })
+    assets = sortAssets(assets)
+    state.sharedAssets = assets
+    cache.sharedAssetIndex = buildAssetIndex(state.sharedAssets)
+    helpers.buildResultForSharedAssets(state, {
+      assetSearch: state.sharedAssetSearchText
+    })
+  },
+
+  [LOAD_UNSHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
+    // populate unshared assets
+    assets.forEach(asset => {
+      asset.production = productionMap.get(asset.project_id)
+      asset.assetType = assetTypeMap.get(asset.entity_type_id)
+      asset.asset_type_name = asset.assetType?.name
+      asset.full_name = `${asset.asset_type_name} / ${asset.name}`
+    })
+    assets = sortAssets(assets)
+    state.unsharedAssets = assets
   },
 
   [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {
@@ -1000,6 +1124,10 @@ const mutations = {
   [SET_ASSET_SEARCH](state, payload) {
     payload.sorting = state.assetSorting
     helpers.buildResult(state, payload)
+  },
+
+  [SET_SHARED_ASSET_SEARCH](state, { assetSearch }) {
+    helpers.buildResultForSharedAssets(state, { assetSearch })
   },
 
   [SAVE_ASSET_SEARCH_END](state, { searchQuery }) {

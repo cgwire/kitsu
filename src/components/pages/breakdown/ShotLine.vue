@@ -354,6 +354,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'assetMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isFrameIn',

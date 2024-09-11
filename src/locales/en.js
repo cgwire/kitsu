@@ -32,7 +32,8 @@ export default {
       ready_for: 'Ready for',
       time_spent: 'Time',
       type: 'Type',
-      hidden_from_client: 'Displayed to client'
+      hidden_from_client: 'Displayed to client',
+      shared: 'Shared in Asset Library',
     }
   },
 
@@ -107,9 +108,11 @@ export default {
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     episode_casting: 'Episode casting',
+    hide_library: 'Hide My Library',
     label: 'Label',
     picture_mode: 'Switch to picture mode',
     save_error: 'Error while saving casting',
+    show_library: 'Show My Library',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
     options: {
@@ -1639,7 +1642,26 @@ export default {
     delete: 'Delete day off',
     confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
     confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
-    error_days_off: 'An error occurred while updating days off.',
+    error_days_off: 'An error occurred while updating days off.'
+  },
+
+  library: {
+    asset_library: 'Asset Library',
+    manage: 'Manage your library',
+    no_entities: 'No entities are available',
+    no_open_productions: 'No open productions',
+    no_shared_assets: 'No shared assets are available',
+    import_from_production: 'Import all assets from another production',
+    import_from_asset_type: 'Import an asset type from the selected production',
+    import_from_assets: 'Import unselected assets from the selected production',
+    selected_assets: 'Selected assets',
+    remove_selected_assets: 'Remove the selected asset | Remove the {nbSelectedAssets} selected assets',
+    fields: {
+      name: 'Name',
+      production: 'Production',
+      created_at: 'Creation date',
+      updated_at: 'Update date'
+    }
   },
 
   wrong_browser: {

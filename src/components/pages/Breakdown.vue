@@ -263,10 +263,21 @@
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
-        <div class="flexrow mb1 mt0">
-          <h2 class="flexrow subtitle">
-            {{ $t('breakdown.all_assets') }}
-          </h2>
+        <h2 class="subtitle">
+          {{ $t('breakdown.all_assets') }}
+        </h2>
+        <div class="flexrow mt1 mb1">
+          <button-simple
+            class="flexrow-item"
+            :text="
+              libraryDisplayed
+                ? $t('breakdown.hide_library')
+                : $t('breakdown.show_library')
+            "
+            icon="assets"
+            :is-on="libraryDisplayed"
+            @click="libraryDisplayed = !libraryDisplayed"
+          />
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
@@ -329,6 +340,7 @@
               @add-one="addOneAsset"
               @add-ten="addTenAssets"
               v-for="asset in typeAssets"
+              v-show="libraryDisplayed || !asset.shared"
             />
           </div>
         </div>
@@ -477,6 +489,7 @@ export default {
       isLoading: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
+      libraryDisplayed: false,
       optionalCsvColumns: ['Label'],
       parsedCSV: [],
       removalData: {},
@@ -797,7 +810,7 @@ export default {
       } else {
         this.setCastingEpisode(null)
       }
-      this.loadAssets(true).then(() => {
+      this.loadAssets({ all: true, withTasks: false }).then(() => {
         this.isLoading = false
         this.displayMoreAssets()
         this.setCastingAssetTypes()

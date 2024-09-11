@@ -48,6 +48,12 @@
                 {{ $t('productions.open_productions') }}
               </router-link>
             </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'asset-library' }">
+                <kitsu-icon class="nav-icon" name="assets" />
+                {{ $t('library.asset_library') }}
+              </router-link>
+            </p>
           </div>
 
           <div v-if="!isCurrentUserClient && !isCurrentUserVendor">
@@ -248,9 +254,8 @@ export default {
     reset() {
       this.title = this.organisation.name
       this.logoPath =
-        '/api/pictures/thumbnails/organisations/' +
-        `${this.organisation.id}.png?t=` +
-        new Date().toISOString()
+        `/api/pictures/thumbnails/organisations/` +
+        `${this.organisation.id}.png?t=${new Date().toISOString()}`
     }
   },
 
