@@ -146,6 +146,9 @@ export default {
           this.isLoading = false
           this.setCurrentTime(0)
           this.setCurrentTimeRaw(0)
+          this.$nextTick(() => {
+            this.video.currentTime = 0
+          })
           this.$emit('video-loaded')
         }
         this.video.addEventListener(
@@ -340,7 +343,7 @@ export default {
         this.$options.running = true
         const currentTime = this.$options.currentTimeCalls.shift()
         if (this.video.currentTime !== currentTime) {
-          this.video.currentTime = Number(currentTime.toPrecision(4))
+          this.video.currentTime = Number(currentTime.toPrecision(4)) + 0.001
         }
         setTimeout(() => {
           this.runSetCurrentTime()
@@ -451,7 +454,7 @@ export default {
     goPreviousFrame() {
       const nextFrame = this.currentFrame - 1
       if (nextFrame < 0) return
-      this.video.currentTime = nextFrame * this.frameDuration
+      this.video.currentTime = nextFrame * this.frameDuration + 0.001
       this.$emit('frame-update', nextFrame)
       return nextFrame
     },
@@ -459,7 +462,7 @@ export default {
     goNextFrame() {
       const nextFrame = this.currentFrame + 1
       if (nextFrame >= this.nbFrames) return
-      this.video.currentTime = nextFrame * this.frameDuration
+      this.video.currentTime = nextFrame * this.frameDuration + 0.001
       this.$emit('frame-update', nextFrame)
       return nextFrame
     },
