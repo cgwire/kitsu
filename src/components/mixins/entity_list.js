@@ -2,7 +2,6 @@ import Vue from 'vue/dist/vue'
 
 import colors from '@/lib/colors'
 import stringHelpers from '@/lib/string'
-import { flatten } from '@/lib/array'
 
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
@@ -514,7 +513,7 @@ export const entityListMixin = {
 
         let list = this['displayed' + stringHelpers.capitalize(this.type) + 's']
         if (['asset', 'shot'].includes(this.type)) {
-          list = flatten(list)
+          list = list.flat()
         }
         const x = list.findIndex(e => e.id === entity.id)
         const y = this.validationColumns.indexOf(task.task_type_id)

@@ -4,5 +4,3 @@ export const intersection = arrays => {
   rest = rest.map(x => new Set(x))
   return first.filter(x => rest.every(a => a.has(x)))
 }
-
-export const flatten = arr => arr.reduce((acc, val) => acc.concat(val), [])
