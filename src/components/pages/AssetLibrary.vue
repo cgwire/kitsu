@@ -1,17 +1,9 @@
 <template>
-  <page-layout :side="openedSidePanel || hasSelectedAssets">
+  <page-layout>
     <template #main>
       <div class="asset-library">
         <header class="flexrow">
           <page-title class="mt1 filler" :text="$t('library.asset_library')" />
-          <button-simple
-            class="button"
-            :disabled="hasSelectedAssets"
-            icon="plus"
-            :is-on="openedSidePanel"
-            :text="$t('library.manage')"
-            @click="openedSidePanel = !openedSidePanel"
-          />
         </header>
 
         <div class="filters flexrow">
@@ -78,14 +70,16 @@
                       :entity="entity"
                       is-rounded-top-border
                     />
-                    <div class="item-description">
-                      <div class="entity-name mt05">
+                    <div class="item-description flexrow">
+                      <production-name
+                        class="flexrow-item"
+                        :production="entity.production"
+                        :size="30"
+                        only-avatar
+                      />
+                      <div class="entity-name ml1 flexrow-item">
                         {{ entity.full_name }}
                       </div>
-                      <production-name
-                        class="mt05"
-                        :production="entity.production"
-                      />
                     </div>
                   </div>
                 </li>
@@ -105,7 +99,6 @@
 import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
@@ -120,7 +113,6 @@ export default {
   name: 'asset-library',
 
   components: {
-    ButtonSimple,
     Combobox,
     ComboboxProduction,
     EntityPreview,
@@ -134,7 +126,6 @@ export default {
 
   data() {
     return {
-      openedSidePanel: false,
       errors: {
         sharedAssets: false
       },
@@ -271,9 +262,8 @@ export default {
   display: flex;
   flex-direction: column;
   max-height: 100%;
-  padding: 4em 1em 1em 1em;
+  padding: 4em 2em 1em 2em;
   color: var(--text);
-  max-width: calc(1260px + 2em); // (300px * 4 + gap * 3) + padding * 2
   margin-left: auto;
   margin-right: auto;
 }

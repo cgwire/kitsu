@@ -48,12 +48,6 @@
                 {{ $t('productions.open_productions') }}
               </router-link>
             </p>
-            <p @click="toggleSidebar()">
-              <router-link :to="{ name: 'asset-library' }">
-                <kitsu-icon class="nav-icon" name="assets" />
-                {{ $t('library.asset_library') }}
-              </router-link>
-            </p>
           </div>
 
           <div v-if="!isCurrentUserClient && !isCurrentUserVendor">
@@ -121,6 +115,12 @@
               <router-link :to="{ name: 'entity-search' }">
                 <kitsu-icon class="nav-icon" name="search" />
                 {{ $t('search.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'asset-library' }">
+                <kitsu-icon class="nav-icon" name="assets" />
+                {{ $t('library.asset_library') }}
               </router-link>
             </p>
           </div>

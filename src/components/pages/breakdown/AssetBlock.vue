@@ -165,7 +165,7 @@ export default {
   }
 
   &.shared {
-    box-shadow: 0 0 3px 2px var(--shared-color);
+    box-shadow: 0 0 0 2px var(--shared-color);
   }
 }
 
@@ -275,7 +275,7 @@ export default {
   margin-right: 0;
 
   &.shared {
-    box-shadow: 0 0 3px 2px var(--shared-color);
+    box-shadow: 0 0 0 2px var(--shared-color);
   }
 }
 
