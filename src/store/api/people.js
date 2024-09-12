@@ -16,7 +16,8 @@ export default {
       chat_token_slack: organisation.chat_token_slack,
       chat_webhook_mattermost: organisation.chat_webhook_mattermost,
       chat_token_discord: organisation.chat_token_discord,
-      has_avatar: organisation.has_avatar
+      has_avatar: organisation.has_avatar,
+      format_duration_in_hours: organisation.format_duration_in_hours
     }
     return client.pput(`/api/data/organisations/${organisation.id}`, data)
   },

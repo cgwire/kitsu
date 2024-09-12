@@ -28,13 +28,17 @@ export const formatListMixin = {
       if (!minutes) {
         return 0
       }
-      const days = minutesToDays(this.organisation, minutes)
+
+      const duration = this.organisation.format_duration_in_hours
+        ? minutes / 60
+        : minutesToDays(this.organisation, minutes)
+
       if (toLocale) {
-        return days.toLocaleString('fullwide', {
+        return duration.toLocaleString('fullwide', {
           maximumFractionDigits: 2
         })
       }
-      return days
+      return duration
     },
 
     formatPriority(priority) {

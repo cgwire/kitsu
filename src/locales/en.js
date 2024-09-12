@@ -1195,7 +1195,8 @@ export default {
       discord_token: 'Discord Token (Optional)',
       timesheets_locked: 'Lock artist timesheets older than 1 week',
       use_original_name: 'Use original file name for downloads',
-      show_hd_default: 'Show movies with HD quality by default (slower)'
+      show_hd_default: 'Show movies with HD quality by default (slower)',
+      format_duration_in_hours: 'Display durations and estimations in hours'
     },
     production: {
       empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.',
