@@ -82,9 +82,7 @@
             {{ $t('library.no_entities') }}
           </div>
           <div class="unshared-entities mt1" v-else>
-           <table
-              class="datatable"
-            >
+            <table class="datatable">
               <tr
                 class="datatable-row"
                 :key="entity.id"
@@ -165,9 +163,6 @@ export default {
       this.entityTypeId = this.productionEntityTypes[0]?.value
     })
     await this.refresh()
-  },
-
-  beforeDestroy() {
   },
 
   computed: {
@@ -301,6 +296,12 @@ export default {
       }
       this.loading = false
       await this.refresh()
+    }
+  },
+
+  watch: {
+    productionId() {
+      this.refresh()
     }
   }
 }
