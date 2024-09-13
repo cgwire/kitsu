@@ -53,8 +53,7 @@ export default {
   data() {
     return {
       isEditing: false,
-      isOpen: false,
-      timeout: null
+      isOpen: false
     }
   },
 
@@ -80,8 +79,8 @@ export default {
 
     onClick(event) {
       if (
-        event.target.className.substring(0, 11) === 'description' ||
-        event.target.parentNode.className.substring(0, 11) === 'description' ||
+        (event.currentTarget.classList.contains('description-cell') &&
+          !event.target.closest('.description-cell .tooltip')) ||
         event.keyCode === 27
       ) {
         this.isOpen = !this.isOpen

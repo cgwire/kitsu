@@ -265,9 +265,13 @@
                   class="asset-link asset-name flexrow-item"
                   :to="assetPath(asset.id)"
                   :title="asset.full_name"
+                  v-if="!asset.shared"
                 >
                   {{ asset.name }}
                 </router-link>
+                <template v-else>
+                  {{ asset.name }}
+                </template>
               </div>
             </th>
 
@@ -1001,6 +1005,9 @@ td.ready-for {
       var(--shared-color) 20%,
       transparent
     ) !important;
+  }
+  > td > :deep(*) {
+    display: none;
   }
 }
 

@@ -137,7 +137,7 @@
                       <task-type-name
                         class="task-type-name"
                         :task-type="buildTaskTypeFromNews(news)"
-                        :production-id="currentProduction.id"
+                        :production-id="news.project_id"
                         :is-static="true"
                       />
                     </div>
@@ -210,7 +210,7 @@
                       <task-type-name
                         class="task-type-name"
                         :task-type="buildTaskTypeFromNews(news)"
-                        :production-id="currentProduction.id"
+                        :production-id="news.project_id"
                       />
                     </div>
 
