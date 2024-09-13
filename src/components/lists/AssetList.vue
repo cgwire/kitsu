@@ -265,9 +265,13 @@
                   class="asset-link asset-name flexrow-item"
                   :to="assetPath(asset.id)"
                   :title="asset.full_name"
+                  v-if="!asset.shared"
                 >
                   {{ asset.name }}
                 </router-link>
+                <template v-else>
+                  {{ asset.name }}
+                </template>
               </div>
             </th>
 
