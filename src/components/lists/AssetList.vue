@@ -1006,6 +1006,9 @@ td.ready-for {
       transparent
     ) !important;
   }
+  > td > :deep(*) {
+    display: none;
+  }
 }
 
 .datatable-row th.name {
