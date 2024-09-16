@@ -14,7 +14,7 @@
           :is-error="error"
           :text="
             $tc('library.remove_selected_assets', selectedEntities.length, {
-              nbSelectedEntities: selectedEntities.length
+              nbSelectedAssets: selectedEntities.length
             })
           "
           @confirm="removeSharedEntities(selectedEntities)"
@@ -73,7 +73,7 @@
             class="flexrow-item"
             :disabled="!entityIds.length"
             :is-loading="loading"
-            text="$t('library.import_from_list')"
+            :text="$t('library.import_from_list')"
             @click="importFromEntityIds(entityIds)"
           />
         </div>
@@ -172,8 +172,7 @@ export default {
       'openProductions',
       'productionMap',
       'selectedAssets',
-      'unsharedAssets',
-      'unsharedAssetsByType'
+      'unsharedAssets'
     ]),
 
     productionEntityTypes() {
@@ -194,12 +193,6 @@ export default {
         entity =>
           entity.project_id === this.productionId &&
           entity.entity_type_id === this.entityTypeId
-      )
-    },
-
-    productionUnsharedEntitiesByType() {
-      return this.unsharedAssetsByType.map(type =>
-        type.filter(entity => entity.project_id === this.productionId)
       )
     },
 
