@@ -383,9 +383,6 @@ const getters = {
 
   sharedAssetsByType: state => {
     return groupEntitiesByParents(state.sharedAssets, 'asset_type_name')
-  },
-  unsharedAssetsByType: state => {
-    return groupEntitiesByParents(state.unsharedAssets, 'asset_type_name')
   }
 }
 
