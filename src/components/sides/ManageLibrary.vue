@@ -61,6 +61,14 @@
         </div>
         <div class="flexcolumn mt2">
           <button-simple
+            class="flexrow-item mb05"
+            :disabled="!productionId"
+            :is-loading="loading"
+            :text="$t('library.import_from_production')"
+            @click="importFromProduction(productionId)"
+          />
+
+          <button-simple
             class="flexrow-item"
             :disabled="!productionId"
             :is-loading="loading"

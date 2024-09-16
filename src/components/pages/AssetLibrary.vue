@@ -61,24 +61,24 @@
                   v-for="entity in group"
                   @click="toggleEntity(entity)"
                 >
-                  <div class="card">
+                  <div class="card" :title="entity.full_name">
                     <entity-preview
-                      :empty-height="200"
-                      :empty-width="300"
-                      :height="200"
-                      :width="300"
+                      :empty-height="100"
+                      :empty-width="150"
+                      :height="100"
+                      :width="150"
                       :entity="entity"
                       is-rounded-top-border
                     />
                     <div class="item-description flexrow">
                       <production-name
-                        class="flexrow-item"
+                        class="flexrow-item mr0"
                         :production="entity.production"
-                        :size="30"
+                        :size="20"
                         only-avatar
                       />
                       <div class="entity-name ml1 flexrow-item">
-                        {{ entity.full_name }}
+                        {{ entity.name }}
                       </div>
                     </div>
                   </div>
@@ -300,10 +300,16 @@ export default {
     }
 
     .item-description {
-      max-width: 300px;
       color: var(--text-strong);
+      font-size: 0.9em;
       font-weight: bold;
-      padding: 0.3em 1em;
+      max-width: 150px;
+      min-width: 150px;
+      padding: 0.5em;
+
+      .entity-name {
+        margin-left: 0.5em;
+      }
     }
   }
 }
