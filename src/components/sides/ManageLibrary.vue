@@ -14,7 +14,7 @@
           :is-error="error"
           :text="
             $tc('library.remove_selected_assets', selectedEntities.length, {
-              nbSelectedEntities: selectedEntities.length
+              nbSelectedAssets: selectedEntities.length
             })
           "
           @confirm="removeSharedEntities(selectedEntities)"
