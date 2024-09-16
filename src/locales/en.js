@@ -1647,17 +1647,18 @@ export default {
 
   library: {
     asset_library: 'Asset Library',
+    from_library: 'From the asset library',
+    import_from_asset_type: 'Import all assets from selected type and production',
+    import_from_assets: 'Import assets from the selected production and asset type',
+    import_from_list: 'Import selected assets from the list',
     manage: 'Add assets to your library',
     no_entities: 'No entities are available',
     no_open_productions: 'No open productions',
     no_shared_assets: 'No shared assets are available',
-    import_from_production: 'Import all assets from the selected production',
-    import_from_asset_type: 'Import all assets from selected type and production',
-    import_from_assets: 'Import assets from the selected production and asset type',
+    remove_selected_assets: 'Remove the selected asset from the library | Remove {nbSelectedAssets} selected assets from the library',
     select_asset_type: 'Select an asset type',
     select_production: 'Select a production',
     selected_assets: 'Selected assets',
-    remove_selected_assets: 'Remove the selected asset from the library | Remove {nbSelectedAssets} selected assets from the library',
     fields: {
       name: 'Name',
       production: 'Production',
