@@ -21,13 +21,13 @@
             <button-simple
               class="flexrow-item"
               icon="assets"
-              :is-on="onlySharedAssets"
+              :is-on="showSharedAssets"
               :title="
-                onlySharedAssets
+                showSharedAssets
                   ? $t('breakdown.hide_library')
                   : $t('breakdown.show_library')
               "
-              @click="onlySharedAssets = !onlySharedAssets"
+              @click="showSharedAssets = !showSharedAssets"
             />
             <div class="flexrow-item filler"></div>
             <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
@@ -91,9 +91,9 @@
         <asset-list
           ref="asset-list"
           :displayed-assets="
-            onlySharedAssets
-              ? displayedSharedAssetsByType
-              : displayedAssetsByType
+            showSharedAssets
+              ? displayedAssetsByType
+              : displayedAssetsByTypeWithoutShared
           "
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
@@ -339,7 +339,7 @@ export default {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
-      onlySharedAssets: false,
+      showSharedAssets: true,
       optionalColumns: ['Description', 'Ready for'],
       pageName: 'Assets',
       parsedCSV: [],
@@ -485,9 +485,9 @@ export default {
       return this.$refs['asset-search-field']
     },
 
-    displayedSharedAssetsByType() {
+    displayedAssetsByTypeWithoutShared() {
       return this.displayedAssetsByType.map(type =>
-        type.filter(asset => asset.shared)
+        type.filter(asset => !asset.shared)
       )
     },
 
