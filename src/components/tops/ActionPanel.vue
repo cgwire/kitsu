@@ -314,7 +314,7 @@
             :title="$t('menu.clear_selection')"
             @click="clearSelection"
           >
-            <x-icon :title="$t('menu.clear_selection')" size="16" />
+            <x-icon :title="$t('main.clear_selection')" :size="16" />
           </div>
         </div>
       </div>

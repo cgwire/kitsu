@@ -269,6 +269,14 @@
         <div class="flexrow mt1 mb1">
           <button-simple
             class="flexrow-item"
+            :title="$t('assets.new_asset')"
+            icon="plus"
+            @click="modals.isNewDisplayed = true"
+          />
+          <span class="filler"></span>
+
+          <button-simple
+            class="flexrow-item"
             :text="
               libraryDisplayed
                 ? $t('breakdown.hide_library')
@@ -277,13 +285,7 @@
             icon="assets"
             :is-on="libraryDisplayed"
             @click="libraryDisplayed = !libraryDisplayed"
-          />
-          <span class="filler"></span>
-          <button-simple
-            class="flexrow-item"
-            :title="$t('assets.new_asset')"
-            icon="plus"
-            @click="modals.isNewDisplayed = true"
+            v-if="!isOnlyCurrentEpisode"
           />
           <button-simple
             class="flexrow-item"

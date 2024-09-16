@@ -234,6 +234,7 @@
             }"
             scope="row"
             :key="`row${asset.id}`"
+            :title="asset.shared ? $t('library.from_library') : undefined"
             v-for="(asset, i) in group"
           >
             <th

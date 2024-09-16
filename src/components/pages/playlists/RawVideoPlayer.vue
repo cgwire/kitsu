@@ -467,14 +467,12 @@ export default {
     },
 
     runSetCurrentTime(currentTime) {
-      const isChromium = !!window.chrome
-      const change = isChromium ? 0 : 0
       if (
         this.currentPlayer &&
-        this.currentPlayer.currentTime !== currentTime + change
+        this.currentPlayer.currentTime !== currentTime
       ) {
         // tweaks needed because the html video player is messy with frames
-        this.currentPlayer.currentTime = currentTime + change + 0.001
+        this.currentPlayer.currentTime = currentTime + 0.001
         this.onTimeUpdate()
       }
     },

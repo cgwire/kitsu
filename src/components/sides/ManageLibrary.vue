@@ -7,7 +7,6 @@
       v-if="extendable"
     ></div>
     <div class="side manage-library">
-      <h2 class="mt0">{{ $t('library.manage') }}</h2>
       <div class="flexrowcolumn" v-if="selectedEntities.length">
         <delete-entities
           :error-text="$t('assets.multiple_delete_error')"
@@ -23,7 +22,7 @@
         <div class="has-text-centered pa1">
           <a @click="clearSelectedAssets()">{{ $t('main.clear_selection') }}</a>
         </div>
-        <h1 class="title mt05">{{ $tc('tasks.selected_entities') }}</h1>
+        <!--h1 class="title mt05">{{ $tc('tasks.selected_entities') }}</h1>
         <div class="pa2 mt1">
           <div
             class="entity-line"
@@ -32,9 +31,12 @@
           >
             {{ entity.full_name }}
           </div>
-        </div>
+        </div-->
       </div>
 
+      <hr v-if="selectedEntities.length" />
+
+      <h2 class="mt0">{{ $t('library.manage') }}</h2>
       <div class="has-text-centered mt2" v-if="!openProductions.length">
         {{ $t('library.no_open_productions') }}
       </div>
@@ -43,64 +45,48 @@
         <div class="flexcolumn mt2">
           <combobox-production
             class="flexrow-item"
-            :label="$t('library.import_from_production')"
+            :label="$t('library.select_production')"
             :production-list="openProductions"
             :with-margin="false"
             v-model="productionId"
           />
-          <button-simple
-            class="flexrow-item mt05"
-            :disabled="!productionId"
-            :is-loading="loading"
-            :text="$t('main.import')"
-            @click="importFromProduction(productionId)"
-          />
-        </div>
-        <div class="flexcolumn mt2">
           <combobox
-            class="flexrow-item"
+            class="flexrow-item mt2"
             :disabled="!productionId"
-            :label="$t('library.import_from_asset_type')"
+            :label="$t('library.select_asset_type')"
             :options="productionEntityTypes"
             :with-margin="false"
             v-model="entityTypeId"
           />
-          <button-simple
-            class="flexrow-item mt05"
-            :disabled="!productionId"
-            :is-loading="loading"
-            :text="$t('main.import')"
-            @click="importFromAssetType(productionId, entityTypeId)"
-          />
         </div>
         <div class="flexcolumn mt2">
-          <label class="label">
-            {{ $t('library.import_from_assets') }}
-          </label>
+          <button-simple
+            class="flexrow-item"
+            :disabled="!productionId"
+            :is-loading="loading"
+            :text="$t('library.import_from_asset_type')"
+            @click="importFromAssetType(productionId, entityTypeId)"
+          />
+          <hr class="mt1" />
+
+          <button-simple
+            class="flexrow-item"
+            :disabled="!entityIds.length"
+            :is-loading="loading"
+            text="$t('library.import_from_list')"
+            @click="importFromEntityIds(entityIds)"
+          />
+        </div>
+        <div class="flexcolumn">
           <div class="mt1" v-if="!productionUnsharedEntities.length">
             {{ $t('library.no_entities') }}
           </div>
-          <div class="unshared-entities" v-else>
-            <table
-              class="datatable multi-section"
-              v-for="(group, index) in productionUnsharedEntitiesByType"
-              :key="index"
-            >
-              <tr class="datatable-type-header">
-                <th>
-                  <span
-                    class="datatable-row-header pointer"
-                    @click="toggleEntities(group)"
-                  >
-                    {{ group[0]?.asset_type_name }}
-                  </span>
-                </th>
-              </tr>
-
+          <div class="unshared-entities mt1" v-else>
+            <table class="datatable">
               <tr
                 class="datatable-row"
                 :key="entity.id"
-                v-for="entity in group"
+                v-for="entity in productionUnsharedEntities"
               >
                 <td
                   class="datatable-row-header pointer"
@@ -120,7 +106,7 @@
                       :empty-width="50"
                       :empty-height="32"
                     />
-                    <span class="entity-name">
+                    <span class="entity-name ml05">
                       {{ entity.name }}
                     </span>
                   </div>
@@ -128,13 +114,6 @@
               </tr>
             </table>
           </div>
-          <button-simple
-            class="flexrow-item mt2"
-            :disabled="!entityIds.length"
-            :is-loading="loading"
-            :text="$t('main.import')"
-            @click="importFromEntityIds(entityIds)"
-          />
         </div>
       </template>
     </div>
@@ -144,20 +123,14 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-// import { domMixin } from '@/components/mixins/dom'
-
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
-// const DEFAULT_PANEL_WIDTH = 400
-
 export default {
   name: 'manage-library',
-
-  // mixins: [domMixin],
 
   components: {
     ButtonSimple,
@@ -181,31 +154,15 @@ export default {
       entityIds: [],
       loading: false,
       error: false
-      // domEvents: [
-      //   ['mousemove', this.onExtendMove],
-      //   ['touchmove', this.onExtendMove],
-      //   ['mouseup', this.onExtendUp],
-      //   ['mouseleave', this.onExtendUp],
-      //   ['touchend', this.onExtendUp],
-      //   ['touchcancel', this.onExtendUp]
-      // ],
     }
   },
 
   async mounted() {
-    // if (this.sideColumnParent) {
-    //   const panelWidth =
-    //     preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
-    //   this.setWidth(panelWidth)
-    // }
-
     this.productionId = this.openProductions[0]?.id
-
+    this.$nextTick(() => {
+      this.entityTypeId = this.productionEntityTypes[0]?.value
+    })
     await this.refresh()
-  },
-
-  beforeDestroy() {
-    // this.removeEvents(this.domEvents)
   },
 
   computed: {
@@ -234,9 +191,12 @@ export default {
 
     productionUnsharedEntities() {
       return this.unsharedAssets.filter(
-        entity => entity.project_id === this.productionId
+        entity =>
+          entity.project_id === this.productionId &&
+          entity.entity_type_id === this.entityTypeId
       )
     },
+
     productionUnsharedEntitiesByType() {
       return this.unsharedAssetsByType.map(type =>
         type.filter(entity => entity.project_id === this.productionId)
@@ -246,13 +206,6 @@ export default {
     selectedEntities() {
       return [...this.selectedAssets.values()]
     }
-
-    // sideColumnParent() {
-    //   if (this.$el.parentElement.classList.contains('side-column')) {
-    //     return this.$el.parentElement
-    //   }
-    //   return undefined
-    // },
   },
 
   methods: {
@@ -344,44 +297,12 @@ export default {
       this.loading = false
       await this.refresh()
     }
+  },
 
-    /*
-    onExtendDown(event) {
-      // if (!this.sideColumnParent) {
-      //   return
-      // }
-      this.lastWidthX = this.getClientX(event)
-      const panelWidth = this.sideColumnParent.offsetWidth
-      this.lastWidth = panelWidth
-      this.addEvents(this.domEvents)
-    },
-
-    onExtendMove(event) {
-      const diff = this.lastWidthX - this.getClientX(event)
-      let panelWidth = Math.max(this.lastWidth + diff, DEFAULT_PANEL_WIDTH)
-      if (panelWidth > 900) panelWidth = 900
-      this.setWidth(panelWidth)
-      this.refreshPreviewPlay()
-    },
-
-    onExtendUp() {
-      this.removeEvents(this.domEvents)
-      this.refreshPreviewPlay()
-      // if (this.sideColumnParent) {
-      const panelWidth = this.sideColumnParent.offsetWidth
-      preferences.setPreference('task:panel-width', panelWidth)
-      // }
-    },
-
-    setWidth(width) {
-      // if (!this.sideColumnParent) {
-      //   return
-      // }
-      this.sideColumnParent.style['min-width'] = `${width}px`
-      this.isWide = width > 699
-      this.isExtraWide = width >= 900
+  watch: {
+    productionId() {
+      this.refresh()
     }
-    */
   }
 }
 </script>
@@ -402,7 +323,6 @@ export default {
   width: 3px;
   margin-left: 3px;
   background: #ccc;
-  // cursor: ew-resize;
 }
 
 .side-wrapper {

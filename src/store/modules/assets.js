@@ -962,7 +962,6 @@ const mutations = {
   },
 
   [LOAD_SHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
-    // populate shared assets
     assets.forEach(asset => {
       asset.production = productionMap.get(asset.project_id)
       asset.assetType = assetTypeMap.get(asset.entity_type_id)
@@ -978,7 +977,6 @@ const mutations = {
   },
 
   [LOAD_UNSHARED_ASSETS_END](state, { assets, productionMap, assetTypeMap }) {
-    // populate unshared assets
     assets.forEach(asset => {
       asset.production = productionMap.get(asset.project_id)
       asset.assetType = assetTypeMap.get(asset.entity_type_id)
