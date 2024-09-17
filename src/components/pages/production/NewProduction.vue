@@ -161,18 +161,15 @@
           :is-completed="hasValidAssetTaskTypes"
           v-if="!isShotsOnly"
         >
-          <draggable
-            v-model="productionToCreate.assetTaskTypes"
-            draggable=".task-type"
-          >
-            <task-type-name
-              class="task-type"
-              :task-type="taskType"
-              :key="taskType.id"
-              deletable
-              @delete="deleteFromList(taskType, 'assetTaskTypes')"
-              v-for="taskType in productionToCreate.assetTaskTypes"
-            />
+          <draggable item-key="id" v-model="productionToCreate.assetTaskTypes">
+            <template #item="{ element: taskType }">
+              <task-type-name
+                class="task-type"
+                deletable
+                :task-type="taskType"
+                @delete="deleteFromList(taskType, 'assetTaskTypes')"
+              />
+            </template>
             <template #footer>
               <combobox-task-type
                 class="is-inline inline-task-type-combo"
@@ -182,7 +179,7 @@
                   id =>
                     productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
                 "
-                v-if="availableAssetTaskTypes.length > 0"
+                v-if="availableAssetTaskTypes.length"
               />
             </template>
           </draggable>
@@ -196,18 +193,15 @@
           :is-completed="hasValidShotTaskTypes"
           v-if="!isAssetsOnly"
         >
-          <draggable
-            v-model="productionToCreate.shotTaskTypes"
-            draggable=".task-type"
-          >
-            <task-type-name
-              class="task-type"
-              :task-type="taskType"
-              :key="taskType.id"
-              @delete="deleteFromList(taskType, 'shotTaskTypes')"
-              deletable
-              v-for="taskType in productionToCreate.shotTaskTypes"
-            />
+          <draggable item-key="id" v-model="productionToCreate.shotTaskTypes">
+            <template #item="{ element: taskType }">
+              <task-type-name
+                class="task-type"
+                deletable
+                :task-type="taskType"
+                @delete="deleteFromList(taskType, 'shotTaskTypes')"
+              />
+            </template>
             <template #footer>
               <combobox-task-type
                 class="is-inline inline-task-type-combo"
@@ -217,7 +211,7 @@
                   id =>
                     productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
                 "
-                v-if="availableShotTaskTypes.length > 0"
+                v-if="availableShotTaskTypes.length"
               />
             </template>
           </draggable>
@@ -477,6 +471,7 @@ export default {
     TimelineItem,
     ValidationTag
   },
+
   data() {
     return {
       errors: {
@@ -800,6 +795,7 @@ export default {
       'uploadAssetFile',
       'uploadShotFile'
     ]),
+
     removeModelFromList,
 
     deleteFromList(object, listName) {
