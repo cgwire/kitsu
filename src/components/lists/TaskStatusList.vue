@@ -33,45 +33,48 @@
         </thead>
         <draggable
           class="datatable-body"
-          draggable=".task-status"
+          item-key="id"
           tag="tbody"
-          :value="entries"
-          @end="updateTaskStatusPriority($event.oldIndex, $event.newIndex)"
+          @end="updateTaskStatusPriorities"
+          v-model="taskStatuses"
         >
-          <tr
-            class="datatable-row task-status"
-            v-for="entry in entries"
-            :key="entry.id"
-          >
-            <td class="name">
-              {{ entry.name }}
-              <span :title="entry.description" v-if="entry.description">
-                <help-circle-icon class="icon is-small" />
-              </span>
-            </td>
-            <task-status-cell class="short-name" :entry="entry" />
-            <boolean-cell class="is-default" :value="entry.is_default" />
-            <boolean-cell class="is-done" :value="entry.is_done" />
-            <boolean-cell class="is-retake" :value="entry.is_retake" />
-            <boolean-cell
-              class="is-artist-allowed"
-              :value="entry.is_artist_allowed"
-            />
-            <boolean-cell
-              class="is-client-allowed"
-              :value="entry.is_client_allowed"
-            />
-            <boolean-cell
-              class="is-feedback-request"
-              :value="entry.is_feedback_request"
-            />
-            <row-actions-cell
-              :entry-id="entry.id"
-              :hide-delete="entry.is_default === true || entry.for_concept"
-              @edit-clicked="$emit('edit-clicked', entry)"
-              @delete-clicked="$emit('delete-clicked', entry)"
-            />
-          </tr>
+          <template #item="{ element: taskStatus }">
+            <tr class="datatable-row task-status">
+              <td class="name">
+                {{ taskStatus.name }}
+                <span
+                  :title="taskStatus.description"
+                  v-if="taskStatus.description"
+                >
+                  <help-circle-icon class="icon is-small" />
+                </span>
+              </td>
+              <task-status-cell class="short-name" :entry="taskStatus" />
+              <boolean-cell class="is-default" :value="taskStatus.is_default" />
+              <boolean-cell class="is-done" :value="taskStatus.is_done" />
+              <boolean-cell class="is-retake" :value="taskStatus.is_retake" />
+              <boolean-cell
+                class="is-artist-allowed"
+                :value="taskStatus.is_artist_allowed"
+              />
+              <boolean-cell
+                class="is-client-allowed"
+                :value="taskStatus.is_client_allowed"
+              />
+              <boolean-cell
+                class="is-feedback-request"
+                :value="taskStatus.is_feedback_request"
+              />
+              <row-actions-cell
+                :entry-id="taskStatus.id"
+                :hide-delete="
+                  taskStatus.is_default === true || taskStatus.for_concept
+                "
+                @edit-clicked="$emit('edit-clicked', taskStatus)"
+                @delete-clicked="$emit('delete-clicked', taskStatus)"
+              />
+            </tr>
+          </template>
         </draggable>
       </table>
     </div>
@@ -124,21 +127,30 @@ export default {
     }
   },
 
-  methods: {
-    async updateTaskStatusPriority(oldIndex, newIndex) {
-      const taskStatuses = [...this.entries]
-      const taskStatus = taskStatuses[oldIndex]
-      taskStatuses.splice(oldIndex, 1)
-      taskStatuses.splice(newIndex, 0, taskStatus)
-      await this.updateTaskStatusPriorities(taskStatuses)
-    },
+  data() {
+    return {
+      taskStatuses: []
+    }
+  },
 
-    async updateTaskStatusPriorities(taskStatuses) {
-      const taskStatusPriorities = taskStatuses.map((taskStatus, index) => ({
-        id: taskStatus.id,
-        priority: index + 1
-      }))
+  methods: {
+    async updateTaskStatusPriorities() {
+      const taskStatusPriorities = this.taskStatuses.map(
+        (taskStatus, index) => ({
+          id: taskStatus.id,
+          priority: index + 1
+        })
+      )
       this.$emit('update-priorities', taskStatusPriorities)
+    }
+  },
+
+  watch: {
+    entries: {
+      immediate: true,
+      handler() {
+        this.taskStatuses = JSON.parse(JSON.stringify(this.entries))
+      }
     }
   }
 }
@@ -160,7 +172,6 @@ export default {
   min-width: 150px;
 }
 
-.is-reviewable,
 .is-done,
 .is-default,
 .is-retake,
