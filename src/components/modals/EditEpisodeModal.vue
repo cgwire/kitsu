@@ -32,6 +32,13 @@
             v-model="form.status"
           />
 
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            v-model="form.data.resolution"
+            @enter="runConfirmation"
+          />
+
           <textarea-field
             ref="descriptionField"
             :label="$t('episodes.fields.description')"
@@ -112,7 +119,9 @@ export default {
       name: '',
       description: '',
       fps: '',
-      data: {}
+      data: {
+        resolution: ''
+      }
     }
     if (this.episodeToEdit && this.episodeToEdit.id) {
       form = {
@@ -120,7 +129,10 @@ export default {
         name: this.episodeToEdit.name,
         description: this.episodeToEdit.description,
         production_id: this.episodeToEdit.project_id,
-        data: this.episodeToEdit.data || {}
+        data: {
+          ...this.episodeToEdit.data,
+          resolution: this.episodeToEdit.data.resolution || ''
+        } || {}
       }
     }
     return {
@@ -162,7 +174,10 @@ export default {
           name: this.episodeToEdit.name,
           status: this.episodeToEdit.status,
           description: this.episodeToEdit.description,
-          data: this.episodeToEdit.data || {}
+          data: {
+            ...this.episodeToEdit.data,
+            resolution: this.episodeToEdit.data.resolution || ''
+          } || {}
         }
       }
     }

@@ -114,6 +114,7 @@
             >
               {{ $t('assets.fields.description') }}
             </th>
+
             <th
               scope="col"
               class="time-spent number-cell"
@@ -141,6 +142,16 @@
               "
             >
               {{ $t('main.estimation_short') }}
+            </th>
+
+            <th
+              scope="col"
+              class="resolution"
+              v-if="
+                isAssetResolution && isShowInfos && metadataDisplayHeaders.resolution
+              "
+            >
+              {{ $t('shots.fields.resolution') }}
             </th>
 
             <metadata-header
@@ -189,13 +200,13 @@
 
               <table-metadata-selector-menu
                 ref="headerMetadataSelectorMenu"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
+                namespace="assets"
                 :descriptors="assetMetadataDescriptors"
+                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :exclude="{
                   timeSpent: !isAssetTime,
                   estimation: !isAssetEstimation
                 }"
-                namespace="assets"
                 v-show="columnSelectorDisplayed && isShowInfos"
               />
 
@@ -383,6 +394,42 @@
               {{ formatDuration(asset.estimation) }}
             </td>
 
+            <td
+              class="resolution"
+              v-if="
+                isAssetResolution &&
+                isShowInfos &&
+                metadataDisplayHeaders.resolution
+              "
+            >
+              <input
+                :class="{
+                  'input-editor': true,
+                  error: !isValidResolution(asset)
+                }"
+                :value="
+                  getMetadataFieldValue({ field_name: 'resolution' }, asset)
+                "
+                @input="
+                  event =>
+                    onMetadataFieldChanged(
+                      asset,
+                      { field_name: 'resolution' },
+                      event
+                    )
+                "
+                @keyup.ctrl="
+                  event =>
+                    onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
+                "
+                v-if="isCurrentUserManager"
+              />
+
+              <span class="metadata-value selectable" v-else>
+                {{ getMetadataFieldValue({ field_name: 'resolution' }, asset) }}
+              </span>
+            </td>
+
             <!-- other Metadata cells -->
             <td
               class="metadata-descriptor"
@@ -567,6 +614,7 @@ export default {
       metadataDisplayHeaders: {
         estimation: true,
         readyFor: true,
+        resolution: true,
         timeSpent: true
       },
       stickedColumns: {},
@@ -593,6 +641,7 @@ export default {
       'displayedAssetsEstimation',
       'nbSelectedTasks',
       'isAssetDescription',
+      'isAssetResolution',
       'isBigThumbnails',
       'isCurrentUserClient',
       'isCurrentUserManager',
@@ -956,6 +1005,12 @@ td.estimation {
   width: 60px;
 }
 
+td.resolution {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
+}
+
 th.ready-for,
 td.ready-for {
   max-width: 180px;
@@ -1037,6 +1092,7 @@ input[type='number'] {
 
 // Metadata cell CSS
 
+td.resolution,
 td.metadata-descriptor {
   height: 3.1rem;
   max-width: 120px;

@@ -304,6 +304,7 @@ const initialState = {
   isAssetsLoadingError: false,
   isAssetDescription: false,
   isAssetEstimation: false,
+  isAssetResolution: false,
   isAssetTime: false,
   assetsCsvFormData: null,
 
@@ -365,6 +366,7 @@ const getters = {
   isAssetEstimation: state => state.isAssetEstimation,
   isAssetTime: state => state.isAssetTime,
   isAssetDescription: state => state.isAssetDescription,
+  isAssetResolution: state => state.isAssetResolution,
 
   assetsCsvFormData: state => state.assetsCsvFormData,
 
@@ -899,6 +901,7 @@ const mutations = {
     let isTime = false
     let isEstimation = false
     let isDescription = false
+    let isResolution = false
     assets = sortAssets(assets)
     cache.assets = assets
     cache.result = assets
@@ -919,6 +922,7 @@ const mutations = {
       if (!isTime && asset.timeSpent > 0) isTime = true
       if (!isEstimation && asset.estimation > 0) isEstimation = true
       if (!isDescription && asset.description) isDescription = true
+      if (!isResolution && asset.data.resolution) isResolution = true
     })
 
     const assetTypes = Array.from(assetTypeMap.values())
@@ -934,6 +938,7 @@ const mutations = {
     state.isAssetTime = isTime
     state.isAssetEstimation = isEstimation
     state.isAssetDescription = isDescription
+    state.isAssetResolution = isResolution
 
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false

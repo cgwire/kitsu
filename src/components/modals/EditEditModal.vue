@@ -30,6 +30,12 @@
             @enter="runConfirmation"
             v-focus
           />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            @enter="runConfirmation"
+            v-model="form.data.resolution"
+          />
           <textarea-field
             ref="descriptionField"
             :label="$t('edits.fields.description')"
@@ -117,7 +123,9 @@ export default {
         name: '',
         description: '',
         parent_id: null,
-        data: {}
+        data: {
+          resolution: ''
+        }
       },
       editSuccessText: ''
     }
@@ -182,14 +190,19 @@ export default {
         this.form.parent_id = this.currentEpisode
           ? this.currentEpisode.id
           : null
-        this.form.data = {}
+        this.form.data = {
+          resolution: ''
+        }
       } else {
         this.form = {
           project_id: this.editToEdit.project_id,
           name: this.editToEdit.name,
           description: this.editToEdit.description,
           parent_id: this.editToEdit.parent_id,
-          data: { ...this.editToEdit.data } || {}
+          data: {
+            ...this.editToEdit.data,
+            resolution: this.editToEdit.data.resolution || ''
+          } || {}
         }
       }
     }

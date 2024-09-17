@@ -24,6 +24,12 @@
             @enter="runConfirmation"
             v-focus
           />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            v-model="form.data.resolution"
+            @enter="runConfirmation"
+          />
           <textarea-field
             ref="descriptionField"
             :label="$t('sequences.fields.description')"
@@ -31,7 +37,6 @@
             @keyup.meta.enter="runConfirmation"
             v-model="form.description"
           />
-
           <metadata-field
             :key="descriptor.id"
             :descriptor="descriptor"
@@ -104,7 +109,10 @@ export default {
           name: this.sequenceToEdit.name,
           description: this.sequenceToEdit.description,
           production_id: this.sequenceToEdit.project_id,
-          data: this.sequenceToEdit.data || {}
+          data: {
+            ...this.sequenceToEdit.data,
+            resolution: this.sequenceToEdit.data.resolution || ''
+          } || {}
         },
         sequenceSuccessText: ''
       }
@@ -114,7 +122,9 @@ export default {
           id: '',
           name: '',
           description: '',
-          data: {}
+          data: {
+            resolution: ''
+          }
         },
         sequenceSuccessText: ''
       }
@@ -144,12 +154,18 @@ export default {
         this.form.id = null
         this.form.name = ''
         this.form.description = ''
+        this.form.data = {
+          resolution: ''
+        }
       } else {
         this.form = {
           id: this.sequenceToEdit.id,
           name: this.sequenceToEdit.name,
           description: this.sequenceToEdit.description,
-          data: this.sequenceToEdit.data || {}
+          data: {
+            ...this.sequenceToEdit.data,
+            resolution: this.sequenceToEdit.data.resolution || ''
+          } || {}
         }
       }
     }

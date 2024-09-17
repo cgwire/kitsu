@@ -446,7 +446,10 @@ export const entityListMixin = {
 
     isValidResolution(shot) {
       if (!shot) return true
-      const res = this.getMetadataFieldValue({ field_name: 'resolution' }, shot)
+      const res = this.getMetadataFieldValue(
+        { field_name: 'resolution' },
+        shot
+      )
       if (!res || res.length === 0) return true
       const isValid = new RegExp(/\d{3,4}x\d{3,4}/).test(res)
       return isValid
