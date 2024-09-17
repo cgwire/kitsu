@@ -1649,6 +1649,7 @@ export default {
     asset_library: 'Asset Library',
     from_library: 'From the asset library',
     import_from_asset_type: 'Import all assets from selected type and production',
+    import_from_production: 'Import all assets from selected production',
     import_from_assets: 'Import assets from the selected production and asset type',
     import_from_list: 'Import selected assets from the list',
     manage: 'Add assets to your library',
