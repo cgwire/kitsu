@@ -126,17 +126,13 @@
           </thead>
           <draggable
             class="datatable-body"
-            draggable=".task-status"
+            item-key="id"
             tag="tbody"
-            :value="sortedProductionTaskStatuses"
-            @end="updateTaskStatusPriority($event.oldIndex, $event.newIndex)"
+            v-model="taskStatusItems"
+            @end="updateTaskStatusPriority"
           >
-            <template v-for="taskStatus in sortedProductionTaskStatuses">
-              <tr
-                class="datatable-row task-status"
-                :key="taskStatus.id"
-                v-if="taskStatus"
-              >
+            <template #item="{ element: taskStatus }">
+              <tr class="datatable-row task-status">
                 <td>
                   {{ taskStatus.name }}
                 </td>
@@ -217,6 +213,7 @@ export default {
     return {
       activeTab: 'parameters',
       assetTypeId: '',
+      taskStatusItems: [],
       taskStatusId: ''
     }
   },
@@ -235,18 +232,11 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTypeMap',
       'currentProduction',
       'assetTypes',
       'productionAssetTypes',
-      'productionTaskTypes',
       'productionTaskStatuses',
-      'productionStatusAutomations',
-      'taskStatus',
-      'taskStatusMap',
-      'taskTypeMap',
-      'taskTypes',
-      'isTVShow'
+      'taskStatus'
     ]),
 
     remainingAssetTypes() {
@@ -312,12 +302,8 @@ export default {
       this.taskStatusId = this.remainingTaskStatuses[0]?.id
     },
 
-    async updateTaskStatusPriority(oldIndex, newIndex) {
-      const taskStatuses = [...this.productionTaskStatuses]
-      const taskStatus = taskStatuses[oldIndex]
-      taskStatuses.splice(oldIndex, 1)
-      taskStatuses.splice(newIndex, 0, taskStatus)
-      await this.updateTaskStatusPriorities(taskStatuses)
+    async updateTaskStatusPriority() {
+      await this.updateTaskStatusPriorities(this.taskStatusItems)
     },
 
     async updateTaskStatusPriorities(taskStatuses) {
@@ -342,6 +328,15 @@ export default {
             tab: this.activeTab
           }
         })
+      }
+    },
+
+    sortedProductionTaskStatuses: {
+      immediate: true,
+      handler() {
+        this.taskStatusItems = JSON.parse(
+          JSON.stringify(this.sortedProductionTaskStatuses)
+        )
       }
     }
   },
