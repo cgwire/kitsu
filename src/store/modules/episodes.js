@@ -184,6 +184,7 @@ const initialState = {
   episodeValidationColumns: [],
   isEpisodeDescription: false,
   isEpisodeEstimation: false,
+  isEpisodeResolution: false,
   isEpisodeTime: false,
   isEpisodesLoading: false,
   isEpisodesLoadingError: false,
@@ -213,6 +214,7 @@ const getters = {
   displayedEpisodesEstimation: state => state.displayedEpisodesEstimation,
   displayedEpisodesTimeSpent: state => state.displayedEpisodesTimeSpent,
   isEpisodeDescription: state => state.isEpisodeDescription,
+  isEpisodeResolution: state => state.isEpisodeResolution,
   isEpisodeEstimation: state => state.isEpisodeEstimation,
   isEpisodeTime: state => state.isEpisodeTime,
 
@@ -590,6 +592,7 @@ const mutations = {
     let isDescription = false
     let isTime = false
     let isEstimation = false
+    let isResolution = false
     state.episodeMap = new Map()
     episodes.forEach(episode => {
       const taskIds = []
@@ -633,6 +636,7 @@ const mutations = {
       if (!isTime && episode.timeSpent > 0) isTime = true
       if (!isEstimation && episode.estimation > 0) isEstimation = true
       if (!isDescription && episode.description) isDescription = true
+      if (!isResolution && episode.data.resolution) isResolution = true
 
       state.episodeMap.set(episode.id, episode)
     })
@@ -655,6 +659,7 @@ const mutations = {
     state.isEpisodeTime = isTime
     state.isEpisodeEstimation = isEstimation
     state.isEpisodeDescription = isDescription
+    state.isEpisodeResolution = isResolution
 
     state.isEpisodesLoading = false
     state.isEpisodesLoadingError = false
@@ -740,6 +745,9 @@ const mutations = {
     state.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true
+    }
+    if (episode.resolution && !state.isEpisodeResolution) {
+      state.isEpisodeResolution = true
     }
   },
 

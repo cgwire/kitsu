@@ -46,6 +46,9 @@ export default {
     if (asset.source_id !== 'null') {
       data.episode_id = asset.source_id
     }
+    if (asset.data.resolution) {
+      data.data.resolution = asset.data.resolution
+    }
 
     const path =
       `/api/data/projects/${asset.project_id}/asset-types/` +
@@ -68,6 +71,9 @@ export default {
     }
     if (asset.source_id === 'null' || asset.source_id) {
       data.source_id = asset.source_id
+    }
+    if (asset.data.resolution) {
+      data.data.resolution = asset.data.resolution
     }
     return client.pput(`/api/data/entities/${asset.id}`, data)
   },

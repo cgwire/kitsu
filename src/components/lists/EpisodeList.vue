@@ -142,6 +142,14 @@
               {{ $t('main.status') }}
             </th>
 
+            <th
+              scope="col"
+              class="resolution selectable"
+              v-if="!isCurrentUserClient && isShowInfos && isEpisodeResolution"
+            >
+              {{ $t('shots.fields.resolution') }}
+            </th>
+
             <validation-header
               :key="columnId"
               :hidden-columns="hiddenColumns"
@@ -357,6 +365,37 @@
               </span>
             </td>
 
+            <td class="resolution" v-if="isEpisodeResolution && isShowInfos">
+              <input
+                :class="{
+                  'input-editor': true,
+                  error: !isValidResolution(episode)
+                }"
+                :value="
+                  getMetadataFieldValue({ field_name: 'resolution' }, episode)
+                "
+                @input="
+                  event =>
+                    onMetadataFieldChanged(
+                      episode,
+                      { field_name: 'resolution' },
+                      event
+                    )
+                "
+                @keyup.ctrl="
+                  event =>
+                    onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
+                "
+                v-if="isCurrentUserManager"
+              />
+
+              <span class="metadata-value selectable" v-else>
+                {{
+                  getMetadataFieldValue({ field_name: 'resolution' }, episode)
+                }}
+              </span>
+            </td>
+
             <validation-cell
               :ref="`validation-${i}-${
                 j + stickedDisplayedValidationColumns.length
@@ -541,6 +580,7 @@ export default {
       'isSingleEpisode',
       'isEpisodeDescription',
       'isEpisodeEstimation',
+      'isEpisodeResolution',
       'isEpisodeTime',
       'isShowAssignations',
       'isShowInfos',
@@ -864,5 +904,11 @@ td .select {
 
 .metadata-value {
   padding: 0.8rem;
+}
+
+.resolution {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
 }
 </style>

@@ -100,6 +100,14 @@
               {{ $t('sequences.fields.description') }}
             </th>
 
+            <th
+              scope="col"
+              class="resolution"
+              v-if="isSequenceResolution && isShowInfos"
+            >
+              {{ $t('shots.fields.resolution') }}
+            </th>
+
             <metadata-header
               :key="descriptor.id"
               :descriptor="descriptor"
@@ -288,6 +296,37 @@
                 !isCurrentUserClient && isShowInfos && isSequenceDescription
               "
             />
+
+            <td class="resolution" v-if="isSequenceResolution && isShowInfos">
+              <input
+                :class="{
+                  'input-editor': true,
+                  error: !isValidResolution(sequence)
+                }"
+                :value="
+                  getMetadataFieldValue({ field_name: 'resolution' }, sequence)
+                "
+                @input="
+                  event =>
+                    onMetadataFieldChanged(
+                      sequence,
+                      { field_name: 'resolution' },
+                      event
+                    )
+                "
+                @keyup.ctrl="
+                  event =>
+                    onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
+                "
+                v-if="isCurrentUserManager"
+              />
+
+              <span class="metadata-value selectable" v-else>
+                {{
+                  getMetadataFieldValue({ field_name: 'resolution' }, sequence)
+                }}
+              </span>
+            </td>
 
             <!-- other Metadata cells -->
             <td
@@ -506,6 +545,7 @@ export default {
       'isSingleSequence',
       'isSequenceDescription',
       'isSequenceEstimation',
+      'isSequenceResolution',
       'isSequenceTime',
       'isShowAssignations',
       'isShowInfos',
@@ -693,6 +733,12 @@ th.actions {
   min-width: 70px;
   max-width: 70px;
   width: 70px;
+}
+
+td.resolution {
+  min-width: 110px;
+  max-width: 110px;
+  width: 110px;
 }
 
 td.name {

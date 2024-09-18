@@ -192,6 +192,7 @@ const initialState = {
   sequenceValidationColumns: [],
   isSequenceDescription: false,
   isSequenceEstimation: false,
+  isSequenceResolution: false,
   isSequenceTime: false,
   isSequencesLoading: false,
   isSequencesLoadingError: false,
@@ -223,6 +224,7 @@ const getters = {
   displayedSequencesTimeSpent: state => state.displayedSequencesTimeSpent,
   isSequenceDescription: state => state.isSequenceDescription,
   isSequenceEstimation: state => state.isSequenceEstimation,
+  isSequenceResolution: state => state.isSequenceResolution,
   isSequenceTime: state => state.isSequenceTime,
 
   sequences: state => cache.sequences,
@@ -622,6 +624,7 @@ const mutations = {
     let isDescription = false
     let isTime = false
     let isEstimation = false
+    let isResolution = false
     state.sequenceMap = new Map()
     sequences.forEach(sequence => {
       const taskIds = []
@@ -669,6 +672,7 @@ const mutations = {
       if (!isTime && sequence.timeSpent > 0) isTime = true
       if (!isEstimation && sequence.estimation > 0) isEstimation = true
       if (!isDescription && sequence.description) isDescription = true
+      if (!isResolution && sequence.data.resolution) isResolution = true
 
       state.sequenceMap.set(sequence.id, sequence)
     })
@@ -691,6 +695,7 @@ const mutations = {
     state.isSequenceTime = isTime
     state.isSequenceEstimation = isEstimation
     state.isSequenceDescription = isDescription
+    state.isSequenceResolution = isResolution
 
     state.isSequencesLoading = false
     state.isSequencesLoadingError = false
@@ -783,6 +788,9 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     if (sequence.description && !state.isSequenceDescription) {
       state.isSequenceDescription = true
+    }
+    if (sequence.data.resolution && !state.isSequenceResolution) {
+      state.isSequenceResolution = true
     }
   },
 

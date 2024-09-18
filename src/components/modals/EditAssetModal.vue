@@ -35,6 +35,12 @@
             @enter="runConfirmation"
             v-focus
           />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            v-model="form.data.resolution"
+            @enter="runConfirmation"
+          />
           <textarea-field
             ref="descriptionField"
             :label="$t('assets.fields.description')"
@@ -156,7 +162,9 @@ export default {
         name: '',
         description: '',
         source_id: null,
-        data: {},
+        data: {
+          resolution: ''
+        },
         is_shared: 'false'
       },
       assetSuccessText: ''
@@ -182,6 +190,10 @@ export default {
       'productionAssetTypeOptions',
       'openProductions'
     ]),
+
+    resolution() {
+      return this.assetToEdit.data?.resolution || ''
+    },
 
     episodeOptions() {
       const options = this.episodes.map(episode => {
@@ -270,7 +282,11 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
-          data: { ...this.assetToEdit.data } || {},
+          data:
+            {
+              ...this.assetToEdit.data,
+              resolution: this.assetToEdit.data.resolution || ''
+            } || {},
           is_shared: String(this.assetToEdit.is_shared === true)
         }
       }

@@ -139,15 +139,17 @@
       :style="{
         'min-width': columnWidth[descriptor.id]
           ? columnWidth[descriptor.id] + 'px'
+          : '110px',
+        'max-width': columnWidth[descriptor.id]
+          ? columnWidth[descriptor.id] + 'px'
           : '110px'
       }"
-      v-for="(descriptor, j) in visibleMetadataDescriptors"
+      v-for="descriptor in visibleMetadataDescriptors"
       v-if="isShowInfosBreakdown"
     >
       <input
         class="input-editor"
         @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-        @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
         :value="getMetadataFieldValue(descriptor, entity)"
         v-if="
           descriptor.choices.length === 0 &&
@@ -216,7 +218,6 @@
       >
         <select
           class="select-input"
-          @keyup.ctrl="event => onInputKeyUp(event, getIndex(i, k), j)"
           @change="event => onMetadataFieldChanged(entity, descriptor, event)"
         >
           <option

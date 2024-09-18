@@ -259,6 +259,7 @@ const initialState = {
   isEditDescription: false,
   isEditEstimation: false,
   isEditTime: false,
+  isEditResolution: false,
 
   displayedEdits: [],
   displayedEditsCount: 0,
@@ -296,6 +297,7 @@ const getters = {
   isEditDescription: state => state.isEditDescription,
   isEditEstimation: state => state.isEditEstimation,
   isEditTime: state => state.isEditTime,
+  isEditResolution: state => state.isEditResolution,
 
   editSearchText: state => state.editSearchText,
   editSelectionGrid: state => state.editSelectionGrid,
@@ -432,6 +434,7 @@ const actions = {
   editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
     commit(EDIT_EDIT_END, data)
+    console.log('editEdit', JSON.stringify(data, null, 2))
     return editsApi.updateEdit(data).finally(() => {
       setTimeout(() => {
         commit(UNLOCK_EDIT, data)
@@ -704,6 +707,7 @@ const mutations = {
     let isDescription = false
     let isTime = false
     let isEstimation = false
+    let isResolution = false
     state.editMap = new Map()
     edits.forEach(edit => {
       const taskIds = []
@@ -740,6 +744,7 @@ const mutations = {
       if (!isTime && edit.timeSpent > 0) isTime = true
       if (!isEstimation && edit.estimation > 0) isEstimation = true
       if (!isDescription && edit.description) isDescription = true
+      if (!isResolution && edit.resolution) isResolution = true
 
       state.editMap.set(edit.id, edit)
     })
@@ -761,6 +766,7 @@ const mutations = {
     state.isEditTime = isTime
     state.isEditEstimation = isEstimation
     state.isEditDescription = isDescription
+    state.isEditResolution = isResolution
 
     state.isEditsLoading = false
     state.isEditsLoadingError = false
@@ -845,6 +851,9 @@ const mutations = {
     if (!newEdit.data) newEdit.data = {}
     if (edit.description && !state.isEditDescription) {
       state.isEditDescription = true
+    }
+    if (edit.resolution && !state.isEditResolution) {
+      state.isEditResolution = true
     }
   },
 
