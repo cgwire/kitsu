@@ -925,41 +925,34 @@ export default {
       }
     },
 
-    addOneAsset(assetId) {
+    async addOneAsset(assetId, amount = 1) {
       this.isLocked = true
-      Object.keys(this.selection)
-        .filter(key => this.selection[key])
-        .forEach(entityId => {
-          this.addAssetToCasting({
-            entityId,
-            assetId,
-            nbOccurences: 1,
-            label: this.castingType === 'shot' ? 'animate' : 'fixed'
-          })
-          delete this.saveErrors[entityId]
-          this.saveCasting(entityId)
-            .then(this.setLock)
-            .catch(err => {
-              this.saveErrors[entityId] = true
-              console.error(err)
-            })
+      const entityIds = Object.keys(this.selection).filter(
+        key => this.selection[key]
+      )
+
+      for (const entityId of entityIds) {
+        this.addAssetToCasting({
+          entityId,
+          assetId,
+          nbOccurences: amount,
+          label: this.castingType === 'shot' ? 'animate' : 'fixed'
         })
+
+        delete this.saveErrors[entityId]
+
+        try {
+          await this.saveCasting(entityId)
+          this.setLock()
+        } catch (err) {
+          this.saveErrors[entityId] = true
+          console.error(err)
+        }
+      }
     },
 
-    addTenAssets(assetId) {
-      this.isLocked = true
-      Object.keys(this.selection)
-        .filter(key => this.selection[key])
-        .forEach(entityId => {
-          this.addAssetToCasting({ entityId, assetId, nbOccurences: 10 })
-          delete this.saveErrors[entityId]
-          this.saveCasting(entityId)
-            .then(this.setLock)
-            .catch(err => {
-              this.saveErrors[entityId] = true
-              console.error(err)
-            })
-        })
+    async addTenAssets(assetId) {
+      this.addOneAsset(assetId, 10)
     },
 
     confirmAssetRemoval() {
@@ -974,7 +967,7 @@ export default {
       this.loading.remove = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
       delete this.saveErrors[entityId]
-      this.saveCasting(entityId)
+      return this.saveCasting(entityId)
         .then(() => {
           this.setLock()
           this.modals.isRemoveConfirmationDisplayed = false
@@ -989,15 +982,17 @@ export default {
         })
     },
 
-    removeOneAssetFromSelection(assetId) {
-      Object.keys(this.selection)
-        .filter(key => this.selection[key])
-        .forEach(entityId => {
-          const nbOccurences = this.casting[entityId].find(
-            asset => asset.asset_id === assetId
-          ).nb_occurences
-          this.removeOneAsset(assetId, entityId, nbOccurences)
-        })
+    async removeOneAssetFromSelection(assetId) {
+      const entityIds = Object.keys(this.selection).filter(
+        key => this.selection[key]
+      )
+
+      for (const entityId of entityIds) {
+        const nbOccurences = this.casting[entityId].find(
+          asset => asset.asset_id === assetId
+        ).nb_occurences
+        await this.removeOneAsset(assetId, entityId, nbOccurences)
+      }
     },
 
     removeOneAsset(assetId, entityId, nbOccurences) {
@@ -1005,18 +1000,9 @@ export default {
       if (this.isEpisodeCasting && nbOccurences === 1) {
         this.removalData = { assetId, entityId, nbOccurences }
         this.modals.isRemoveConfirmationDisplayed = true
+        return Promise.resolve()
       } else {
-        this.saveAssetRemoval(entityId, assetId, 1)
-      }
-    },
-
-    removeTenAssets(assetId, entityId, nbOccurences) {
-      this.isLocked = true
-      if (this.isEpisodeCasting && nbOccurences < 10) {
-        this.removalData = { assetId, entityId, nbOccurences }
-        this.modals.isRemoveConfirmationDisplayed = true
-      } else {
-        this.saveAssetRemoval(entityId, assetId, 10)
+        return this.saveAssetRemoval(entityId, assetId, 1)
       }
     },
 
@@ -1249,25 +1235,24 @@ export default {
       clipboard.copyCasting(selectedCasting)
     },
 
-    pasteCasting() {
+    async pasteCasting() {
       const castingToPaste = clipboard.pasteCasting()
       if (!castingToPaste || castingToPaste.length === 0) return
-      const selectedElements = Object.keys(this.selection).filter(
-        key => this.selection[key]
-      )
-      selectedElements.forEach(entityId => {
+      const selectedElements = Object.keys(this.selection)
+        .filter(key => this.selection[key])
+      for (const entityId of selectedElements) {
         this.setEntityCasting({
           entityId,
           casting: castingToPaste
         })
         delete this.saveErrors[entityId]
-        this.saveCasting(entityId)
+        await this.saveCasting(entityId)
           .then(this.setLock)
           .catch(err => {
             this.saveErrors[entityId] = true
             console.error(err)
           })
-      })
+      }
       return castingToPaste
     },
 
