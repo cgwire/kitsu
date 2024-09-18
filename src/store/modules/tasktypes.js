@@ -33,7 +33,9 @@ const getters = {
   sequenceSubscriptions: state => state.sequenceSubscriptions,
 
   currentTaskType: (state, getters, rootState) => {
-    return state.taskTypeMap.get(rootState.route.params.task_type_id) || {}
+    const route = rootState.route || {}
+    const params = route.params || {}
+    return state.taskTypeMap.get(params.task_type_id) || {}
   },
 
   assetTaskTypes: (state, getters, rootState, rootGetters) => {

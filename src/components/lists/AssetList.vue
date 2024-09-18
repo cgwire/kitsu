@@ -228,7 +228,7 @@
           v-for="(group, k) in displayedAssets"
           v-if="!isLoading && isListVisible"
         >
-          <tr class="datatable-type-header">
+          <tr class="datatable-type-header" v-if="group[0]">
             <th scope="rowgroup" :colspan="visibleColumns">
               <span
                 class="datatable-row-header pointer"

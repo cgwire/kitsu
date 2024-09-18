@@ -922,7 +922,7 @@ const mutations = {
       if (!isTime && asset.timeSpent > 0) isTime = true
       if (!isEstimation && asset.estimation > 0) isEstimation = true
       if (!isDescription && asset.description) isDescription = true
-      if (!isResolution && asset.data.resolution) isResolution = true
+      if (!isResolution && asset.data?.resolution) isResolution = true
     })
 
     const assetTypes = Array.from(assetTypeMap.values())
