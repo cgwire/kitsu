@@ -109,10 +109,11 @@ export default {
           name: this.sequenceToEdit.name,
           description: this.sequenceToEdit.description,
           production_id: this.sequenceToEdit.project_id,
-          data: {
-            ...this.sequenceToEdit.data,
-            resolution: this.sequenceToEdit.data.resolution || ''
-          } || {}
+          data:
+            {
+              ...this.sequenceToEdit.data,
+              resolution: this.sequenceToEdit.data.resolution || ''
+            } || {}
         },
         sequenceSuccessText: ''
       }
@@ -162,10 +163,11 @@ export default {
           id: this.sequenceToEdit.id,
           name: this.sequenceToEdit.name,
           description: this.sequenceToEdit.description,
-          data: {
-            ...this.sequenceToEdit.data,
-            resolution: this.sequenceToEdit.data.resolution || ''
-          } || {}
+          data:
+            {
+              ...this.sequenceToEdit.data,
+              resolution: this.sequenceToEdit.data.resolution || ''
+            } || {}
         }
       }
     }

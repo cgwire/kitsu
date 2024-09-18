@@ -365,13 +365,7 @@
               </span>
             </td>
 
-            <td
-              class="resolution"
-              v-if="
-                isEpisodeResolution &&
-                isShowInfos
-              "
-            >
+            <td class="resolution" v-if="isEpisodeResolution && isShowInfos">
               <input
                 :class="{
                   'input-editor': true,
@@ -396,7 +390,9 @@
               />
 
               <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue({ field_name: 'resolution' }, episode) }}
+                {{
+                  getMetadataFieldValue({ field_name: 'resolution' }, episode)
+                }}
               </span>
             </td>
 

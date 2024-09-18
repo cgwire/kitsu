@@ -103,9 +103,7 @@
             <th
               scope="col"
               class="resolution"
-              v-if="
-                isSequenceResolution && isShowInfos
-              "
+              v-if="isSequenceResolution && isShowInfos"
             >
               {{ $t('shots.fields.resolution') }}
             </th>
@@ -299,13 +297,7 @@
               "
             />
 
-            <td
-              class="resolution"
-              v-if="
-                isSequenceResolution &&
-                isShowInfos
-              "
-            >
+            <td class="resolution" v-if="isSequenceResolution && isShowInfos">
               <input
                 :class="{
                   'input-editor': true,
@@ -330,7 +322,9 @@
               />
 
               <span class="metadata-value selectable" v-else>
-                {{ getMetadataFieldValue({ field_name: 'resolution' }, sequence) }}
+                {{
+                  getMetadataFieldValue({ field_name: 'resolution' }, sequence)
+                }}
               </span>
             </td>
 

@@ -129,10 +129,11 @@ export default {
         name: this.episodeToEdit.name,
         description: this.episodeToEdit.description,
         production_id: this.episodeToEdit.project_id,
-        data: {
-          ...this.episodeToEdit.data,
-          resolution: this.episodeToEdit.data.resolution || ''
-        } || {}
+        data:
+          {
+            ...this.episodeToEdit.data,
+            resolution: this.episodeToEdit.data.resolution || ''
+          } || {}
       }
     }
     return {
@@ -174,10 +175,11 @@ export default {
           name: this.episodeToEdit.name,
           status: this.episodeToEdit.status,
           description: this.episodeToEdit.description,
-          data: {
-            ...this.episodeToEdit.data,
-            resolution: this.episodeToEdit.data.resolution || ''
-          } || {}
+          data:
+            {
+              ...this.episodeToEdit.data,
+              resolution: this.episodeToEdit.data.resolution || ''
+            } || {}
         }
       }
     }

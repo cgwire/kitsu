@@ -199,10 +199,11 @@ export default {
           name: this.editToEdit.name,
           description: this.editToEdit.description,
           parent_id: this.editToEdit.parent_id,
-          data: {
-            ...this.editToEdit.data,
-            resolution: this.editToEdit.data.resolution || ''
-          } || {}
+          data:
+            {
+              ...this.editToEdit.data,
+              resolution: this.editToEdit.data.resolution || ''
+            } || {}
         }
       }
     }

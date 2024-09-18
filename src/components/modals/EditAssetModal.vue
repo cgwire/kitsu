@@ -282,10 +282,11 @@ export default {
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
           source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
-          data: {
-            ...this.assetToEdit.data,
-            resolution: this.assetToEdit.data.resolution || '',
-          } || {},
+          data:
+            {
+              ...this.assetToEdit.data,
+              resolution: this.assetToEdit.data.resolution || ''
+            } || {},
           is_shared: String(this.assetToEdit.is_shared === true)
         }
       }

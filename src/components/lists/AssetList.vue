@@ -148,7 +148,9 @@
               scope="col"
               class="resolution"
               v-if="
-                isAssetResolution && isShowInfos && metadataDisplayHeaders.resolution
+                isAssetResolution &&
+                isShowInfos &&
+                metadataDisplayHeaders.resolution
               "
             >
               {{ $t('shots.fields.resolution') }}
