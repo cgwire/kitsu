@@ -22,11 +22,7 @@
               class="flexrow-item"
               icon="assets"
               :is-on="showSharedAssets"
-              :title="
-                showSharedAssets
-                  ? $t('breakdown.hide_library')
-                  : $t('breakdown.show_library')
-              "
+              :title="$t('breakdown.show_library')"
               @click="showSharedAssets = !showSharedAssets"
             />
             <div class="flexrow-item filler"></div>
