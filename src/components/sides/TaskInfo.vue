@@ -183,8 +183,6 @@
                       :is-editable="
                         user.id === comment.person?.id || isCurrentUserAdmin
                       "
-                      :is-first="index === 0"
-                      :is-last="index === pinnedCount"
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
@@ -714,11 +712,6 @@ export default {
         value: preview.id,
         label: `v${preview.revision}`
       }))
-    },
-
-    pinnedCount() {
-      if (!this.taskComments) return 0
-      return this.taskComments.filter(c => c.pinned).length
     },
 
     selectedTasksToDisplay() {
