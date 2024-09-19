@@ -434,7 +434,6 @@ const actions = {
   editEdit({ commit, state }, data) {
     commit(LOCK_EDIT, data)
     commit(EDIT_EDIT_END, data)
-    console.log('editEdit', JSON.stringify(data, null, 2))
     return editsApi.updateEdit(data).finally(() => {
       setTimeout(() => {
         commit(UNLOCK_EDIT, data)
