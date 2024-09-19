@@ -326,7 +326,7 @@ export default {
     async addTaskType(taskType) {
       const taskTypeId = taskType && taskType.id ? taskType.id : this.taskTypeId
       await this.addTaskTypeToProduction({
-        taskTypeId: taskTypeId,
+        taskTypeId,
         priority: this.assetTaskTypes.length
       })
       try {
@@ -435,9 +435,9 @@ export default {
       await this.loadContext()
     },
 
-    async importTaskTypesFromProduction(production) {
+    async importTaskTypesFromProduction(productionId) {
       this.loading.import = true
-      const taskTypes = this.getProductionTaskTypes(production.id).filter(
+      const taskTypes = this.getProductionTaskTypes(productionId).filter(
         t => `${t.for_entity.toLowerCase()}s` === this.activeTab
       )
       const entityName = stringHelper.capitalize(this.activeTab).slice(0, -1)
