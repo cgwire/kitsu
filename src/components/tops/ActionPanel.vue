@@ -1522,6 +1522,7 @@ export default {
       this.clearSelectedShots()
       this.clearSelectedTasks()
       this.clearSelectedEdits()
+      this.clearSelectedConcepts()
     },
 
     selectBar(barName) {
