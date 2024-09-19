@@ -311,10 +311,10 @@
 
           <div
             class="menu-item mr05"
-            :title="$t('menu.clear_selection')"
+            :title="$t('main.clear_selection')"
             @click="clearSelection"
           >
-            <x-icon :title="$t('main.clear_selection')" :size="16" />
+            <x-icon :size="16" />
           </div>
         </div>
       </div>
