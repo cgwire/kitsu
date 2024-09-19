@@ -202,7 +202,7 @@ const actions = {
 
   loadComment({ commit }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
-      commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
+      commit(NEW_TASK_COMMENT_END, { comment })
       return comment
     })
   },
@@ -929,7 +929,7 @@ const mutations = {
     task.is_subscribed = subscribed
   },
 
-  [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
+  [NEW_TASK_COMMENT_END](state, { comment, taskId = undefined }) {
     const task = state.taskMap.get(taskId)
     if (comment.task_status === undefined) {
       const getTaskStatus = getters.getTaskStatus(state, getters)
@@ -945,6 +945,9 @@ const mutations = {
       comment.person
     )
 
+    if (taskId) {
+      taskId = comment.object_id
+    }
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
     const commentIndex = state.taskComments[taskId].findIndex(
       ({ id }) => id === comment.id
@@ -955,6 +958,7 @@ const mutations = {
       state.taskComments[taskId].splice(commentIndex, 1, comment)
     }
     state.taskComments[taskId] = sortComments(state.taskComments[taskId])
+
     if (task) {
       Object.assign(task, {
         task_status_id: comment.task_status_id,

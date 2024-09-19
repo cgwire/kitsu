@@ -226,6 +226,7 @@
                     :comment="comment"
                     :fps="currentFps"
                     :frame="currentFrame"
+                    :is-change="isStatusChange(index)"
                     :is-checkable="
                       user.id === comment.person?.id ||
                       (isCurrentUserArtist && isAssigned) ||
@@ -235,12 +236,9 @@
                     :is-editable="
                       user.id === comment.person?.id || isCurrentUserAdmin
                     "
-                    :is-first="index === 0"
-                    :is-last="index === pinnedCount"
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
-                    :is-change="isStatusChange(index)"
                     :revision="currentRevision"
                     :task="task"
                     :team="currentTeam"
@@ -781,10 +779,6 @@ export default {
           this.personMap.get(personId)
         )
       )
-    },
-
-    pinnedCount() {
-      return this.taskComments.filter(c => c.pinned).length
     }
   },
 

@@ -100,12 +100,6 @@
               @time-code-clicked="onChecklistTimecodeClicked"
               v-if="checklist.length > 0"
             />
-            <p class="has-text-centered" v-if="taskStatus.is_done && isLast">
-              <img
-                class="congrats-picture"
-                src="../../assets/illustrations/validated.png"
-              />
-            </p>
             <p v-if="comment.attachment_files.length > 0">
               <a
                 :href="getAttachmentPath(attachment)"
@@ -429,14 +423,6 @@ export default {
       type: Boolean,
       default: false
     },
-    isFirst: {
-      type: Boolean,
-      default: false
-    },
-    isLast: {
-      type: Boolean,
-      default: false
-    },
     isPinnable: {
       type: Boolean,
       default: false
@@ -487,7 +473,6 @@ export default {
       'isCurrentUserManager',
       'personMap',
       'productionDepartmentIds',
-      'taskStatusMap',
       'taskTypeMap',
       'user'
     ]),
@@ -501,8 +486,7 @@ export default {
         this.comment.text.length === 0 &&
         (!this.comment.checklist || this.comment.checklist.length === 0) &&
         this.comment.attachment_files.length === 0 &&
-        this.comment.previews.length === 0 &&
-        !(this.isFirst && this.taskStatus.is_done)
+        this.comment.previews.length === 0
       )
     },
 
@@ -534,11 +518,6 @@ export default {
       const taskType = this.taskTypeMap.get(this.task.task_type_id)
       route.params.type = pluralizeEntityType(taskType.for_entity)
       return route
-    },
-
-    taskStatus() {
-      const status = this.taskStatusMap.get(this.comment?.task_status.id)
-      return status || this.comment.task_status
     },
 
     isLikedBy() {
