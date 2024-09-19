@@ -68,6 +68,7 @@
             :label="$t('task_status.fields.is_client_allowed')"
             @enter="confirmClicked"
             v-model="form.is_client_allowed"
+            v-if="form.for_concept !== 'true'"
           />
           <boolean-field
             :label="$t('task_status.fields.is_feedback_request')"
@@ -75,14 +76,6 @@
             v-model="form.is_feedback_request"
             v-if="form.is_default === 'false'"
           />
-          <!--
-          <boolean-field
-            :label="$t('task_status.fields.for_concept')"
-            @enter="confirmClicked"
-            v-model="form.for_concept"
-            v-if="form.is_default === 'false'"
-          />
-          -->
           <color-field
             :label="$t('task_status.fields.color')"
             :colors="colors"
@@ -113,8 +106,8 @@
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BooleanField from '@/components/widgets/BooleanField.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ColorField from '@/components/widgets/ColorField.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
