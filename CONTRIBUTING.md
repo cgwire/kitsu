@@ -73,4 +73,4 @@ The Kitsu code is written with JavaScript (ES6+) and is based on the
 [Vue.js](https://v2.vuejs.org/v2/guide/) framework extended with 
 the [Vuex](https://vuex.vuejs.org) plugin.
 
-To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/development-environment/).
+To install the development environment, follow [the dedicated guide](https://kitsu.cg-wire.com/installation/#development-environment).
