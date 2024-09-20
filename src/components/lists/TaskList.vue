@@ -532,8 +532,11 @@ export default {
       return date ? moment(date, 'YYYY-MM-DD').toDate() : null
     },
 
-    updateEstimation(days) {
-      const estimation = daysToMinutes(this.organisation, days)
+    updateEstimation(duration) {
+      const estimation = this.organisation.format_duration_in_hours
+        ? duration * 60
+        : daysToMinutes(this.organisation, duration)
+
       this.updateTasksEstimation({ estimation })
     },
 
