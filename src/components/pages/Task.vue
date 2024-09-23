@@ -144,7 +144,7 @@
                     <td class="field-label">
                       {{ $t('tasks.fields.estimation') }}
                     </td>
-                    <td>{{ task.estimation }}</td>
+                    <td>{{ formatDuration(task.estimation) }}</td>
                   </tr>
                   <tr class="datatable-row">
                     <td class="field-label">

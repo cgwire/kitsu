@@ -41,6 +41,10 @@ export const formatListMixin = {
       return duration
     },
 
+    isDurationInHours() {
+      return this.organisation.format_duration_in_hours
+    },
+
     formatPriority(priority) {
       let label = priority + ''
       if (priority === 0) {

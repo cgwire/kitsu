@@ -284,9 +284,16 @@
       {{ tasks.length }} {{ $tc('tasks.number', tasks.length) }} ({{
         formatDuration(timeEstimated)
       }}
-      {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
+      {{
+        isDurationInHours()
+          ? $tc('main.hours_estimated', isTimeEstimatedPlural)
+          : $tc('main.days_estimated', isTimeEstimatedPlural)
+      }},
       {{ formatDuration(timeSpent) }}
-      {{ $tc('main.days_spent', isTimeSpentPlural)
+      {{
+        isDurationInHours()
+          ? $tc('main.hours_spent', isTimeSpentPlural)
+          : $tc('main.days_spent', isTimeSpentPlural)
       }}<span v-if="!isAssets"
         >, {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span
       >)
@@ -565,6 +572,7 @@ export default {
           )
             return
           data = getDatesFromStartDate(
+            this.organisation,
             startDate,
             dueDate,
             minutesToDays(this.organisation, task.estimation)
@@ -599,6 +607,7 @@ export default {
           )
             return
           data = getDatesFromEndDate(
+            this.organisation,
             startDate,
             dueDate,
             minutesToDays(this.organisation, task.estimation)

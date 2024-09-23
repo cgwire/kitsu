@@ -551,6 +551,8 @@ export default {
     days: 'days',
     days_spent: 'day spent | days spent',
     days_estimated: 'day estimated | days estimated',
+    hours_spent: 'hour spent | hours spent',
+    hours_estimated: 'hour estimated | hours estimated',
     delete: 'Delete',
     delete_all: 'Delete all',
     delete_text: 'Are you sure you want to remove {name} from your database?',
