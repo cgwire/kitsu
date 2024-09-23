@@ -29,10 +29,7 @@ export default {
     const data = {
       name: edit.name,
       description: edit.description,
-      data: {}
-    }
-    if (edit.data.resolution) {
-      data.data.resolution = edit.resolution
+      data: edit.data
     }
     if (edit.parent_id !== 'null') {
       data.episode_id = edit.parent_id
@@ -44,10 +41,7 @@ export default {
     const data = {
       name: edit.name,
       description: edit.description,
-      data: edit.data || {}
-    }
-    if (edit.data.resolution) {
-      data.data.resolution = edit.data.resolution
+      data: edit.data
     }
     if (edit.parent_id === 'null' || edit.parent_id) {
       data.parent_id = edit.parent_id

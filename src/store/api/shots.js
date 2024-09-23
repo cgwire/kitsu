@@ -62,9 +62,6 @@ export default {
       description: sequence.description,
       data: sequence.data
     }
-    if (sequence.data.resolution) {
-      data.data.resolution = sequence.data.resolution
-    }
     const path = `/api/data/projects/${sequence.project_id}/sequences`
     return client.ppost(path, data)
   },
@@ -75,9 +72,6 @@ export default {
       description: episode.description || '',
       status: episode.status || 'running',
       data: episode.data || {}
-    }
-    if (episode.data.resolution) {
-      data.data.resolution = episode.data.resolution
     }
     const path = `/api/data/projects/${episode.project_id}/episodes`
     return client.ppost(path, data)
@@ -125,9 +119,6 @@ export default {
       description: sequence.description,
       data: sequence.data
     }
-    if (sequence.data.resolution) {
-      data.data.resolution = sequence.data.resolution
-    }
     return client.pput(`/api/data/entities/${sequence.id}`, data)
   },
 
@@ -137,9 +128,6 @@ export default {
       description: episode.description,
       status: episode.status,
       data: episode.data
-    }
-    if (episode.data.resolution) {
-      data.data.resolution = episode.data.resolution
     }
     if (episode.is_casting_standby !== undefined) {
       data.is_casting_standby = Boolean(episode.is_casting_standby)
