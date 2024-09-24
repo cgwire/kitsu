@@ -387,7 +387,6 @@ const actions = {
     const userFilters = rootGetters.userFilters
     const userFilterGroups = rootGetters.userFilterGroups
     const taskTypeMap = rootGetters.taskTypeMap
-    const taskMap = rootGetters.taskMap
     const episodeMap = rootGetters.episodeMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
@@ -425,6 +424,7 @@ const actions = {
       })
       .then(shots => {
         const sequenceMap = rootGetters.sequenceMap
+        const taskMap = rootGetters.taskMap
         commit(LOAD_SHOTS_END, {
           production,
           shots,
