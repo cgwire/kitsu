@@ -186,7 +186,7 @@
                 :members="atOptions"
                 name-key="full_name"
                 :limit="2"
-                @input="onAtTextChanged"
+                @update:value="onAtTextChanged"
               >
                 <template #item="{ item }">
                   <template v-if="item.isTime"> ⏱️ frame </template>
