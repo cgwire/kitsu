@@ -223,26 +223,6 @@ export default {
       this.forms = this.forms.filter(f => f !== form)
     },
 
-    onDrop(event) {
-      this.isDraggingFile = false
-      this.fileField.onDrop(event)
-      event.preventDefault()
-    },
-
-    onFileDragover(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.isDraggingFile = true
-    },
-
-    onFileDragLeave(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      if (event.target.id === 'drop-mask') {
-        this.isDraggingFile = false
-      }
-    },
-
     onFileDragover(event) {
       event.preventDefault()
       event.stopPropagation()
