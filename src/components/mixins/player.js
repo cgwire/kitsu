@@ -592,6 +592,7 @@ export const playerMixin = {
         nextFrameTime = nextFrame / this.fps
         this.setFullPlayerTime(nextFrameTime)
       } else {
+        if (!this.rawPlayer) return
         const nextFrameTime =
           this.rawPlayer.getCurrentTimeRaw() + this.frameDuration + 0.0001
         const nextFrame = Math.round(nextFrameTime * this.fps)
