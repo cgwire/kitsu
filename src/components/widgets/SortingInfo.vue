@@ -31,6 +31,8 @@ export default {
     }
   },
 
+  emits: ['clear-sorting'],
+
   computed: {
     text() {
       return `${this.label} ${this.sorting[0]?.name}`

@@ -15,12 +15,12 @@
         :disabled-dates="disabledDates"
         :monday-first="true"
         format="yyyy-MM-dd"
-        @input="$emit('input', localValue)"
+        @input="updateValue"
         v-model="localValue"
       />
       <span
         class="clear-button unselectable"
-        @click="event => clearValue(event)"
+        @click.stop="clearValue"
         v-if="localValue && canDelete && !disabled"
       >
         +
@@ -34,16 +34,12 @@ import { mapGetters } from 'vuex'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
-import { domMixin } from '@/components/mixins/dom'
-
 export default {
   name: 'date-field',
 
   components: {
     Datepicker
   },
-
-  mixins: [domMixin],
 
   props: {
     canDelete: {
@@ -70,7 +66,7 @@ export default {
       default: true,
       type: Boolean
     },
-    value: {
+    modelValue: {
       default: () => new Date(),
       type: Date
     },
@@ -80,6 +76,8 @@ export default {
     }
   },
 
+  emits: ['update:modelValue'],
+
   data() {
     return {
       localValue: null
@@ -87,7 +85,7 @@ export default {
   },
 
   mounted() {
-    this.localValue = this.value
+    this.localValue = this.modelValue
   },
 
   computed: {
@@ -104,15 +102,18 @@ export default {
 
   methods: {
     clearValue(event) {
-      this.pauseEvent(event)
       this.localValue = null
-      this.$emit('input', null)
+      this.updateValue(null)
+    },
+
+    updateValue(value) {
+      this.$emit('update:modelValue', value)
     }
   },
 
   watch: {
-    value() {
-      this.localValue = this.value
+    modelValue() {
+      this.localValue = this.modelValue
     }
   }
 }

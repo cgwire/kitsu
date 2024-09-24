@@ -204,6 +204,8 @@ export default {
     }
   },
 
+  emits: ['change-search', 'remove-search'],
+
   data() {
     return {
       groupToEdit: {},

@@ -93,6 +93,8 @@ export default {
     }
   },
 
+  emits: ['add-one', 'edit-label', 'remove-one'],
+
   methods: {
     removeOneAsset(event) {
       this.$emit('remove-one', this.asset.asset_id)

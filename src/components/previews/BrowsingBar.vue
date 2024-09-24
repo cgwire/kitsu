@@ -83,6 +83,14 @@ export default {
     }
   },
 
+  emits: [
+    'add-preview-clicked',
+    'current-index-clicked',
+    'next-clicked',
+    'previous-clicked',
+    'remove-preview-clicked'
+  ],
+
   computed: {
     isBigDisplay() {
       return (!this.light || this.fullScreen) && this.previews.length > 1

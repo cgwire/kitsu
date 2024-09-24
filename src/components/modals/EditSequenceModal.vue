@@ -101,6 +101,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     if (this.sequenceToEdit && this.sequenceToEdit.id) {
       return {

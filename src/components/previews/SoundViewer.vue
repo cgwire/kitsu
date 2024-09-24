@@ -28,6 +28,8 @@ export default {
     Spinner
   },
 
+  emits: ['play-ended'],
+
   data() {
     return {
       isLoading: false,

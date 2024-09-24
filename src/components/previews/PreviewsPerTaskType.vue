@@ -46,6 +46,8 @@ export default {
     ValidationTag
   },
 
+  emits: ['preview-changed'],
+
   data() {
     return {
       taskTypeId: null,

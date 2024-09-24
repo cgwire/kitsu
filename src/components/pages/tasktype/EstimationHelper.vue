@@ -263,6 +263,8 @@ export default {
     }
   },
 
+  emits: ['estimation-changed'],
+
   data() {
     return {
       lastSelection: 0,

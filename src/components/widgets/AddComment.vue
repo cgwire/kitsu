@@ -365,6 +365,15 @@ export default {
     PeopleAvatar
   },
 
+  emits: [
+    'add-comment',
+    'add-preview',
+    'annotation-snapshots-requested',
+    'clear-files',
+    'file-drop',
+    'remove-preview'
+  ],
+
   data() {
     return {
       atOptions: [],

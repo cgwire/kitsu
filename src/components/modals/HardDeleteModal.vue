@@ -62,6 +62,8 @@ export default {
     Combobox
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       userLockText: '',

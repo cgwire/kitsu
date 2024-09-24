@@ -5,10 +5,10 @@
       <textarea
         ref="input"
         class="input"
-        :class="'input ' + inputClass"
+        :class="`input ${inputClass}`"
         :placeholder="placeholder"
         :type="type"
-        :value="value"
+        :value="modelValue"
         @input="updateValue"
         @keyup.enter="emitEnter"
         @keyup="emitKeyup"
@@ -26,7 +26,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     },
@@ -43,19 +43,20 @@ export default {
       type: String
     }
   },
+  emits: ['enter', 'keyup', 'update:modelValue'],
 
   methods: {
     emitEnter() {
       this.$emit('enter', this.$refs.input.value)
     },
     updateValue() {
-      this.$emit('input', this.$refs.input.value)
+      this.$emit('update:modelValue', this.$refs.input.value)
     },
     emitKeyup(event) {
       this.$emit('keyup', event)
     },
     focus() {
-      if (this.$refs.input) this.$refs.input.focus()
+      this.$refs.input?.focus()
     }
   }
 }

@@ -140,6 +140,16 @@ export default {
     }
   },
 
+  emits: [
+    'avatar-clicked',
+    'change-password-clicked',
+    'delete-clicked',
+    'edit-clicked',
+    'history-clicked',
+    'refresh-clicked',
+    'restore-clicked'
+  ],
+
   computed: {
     ...mapGetters(['isCurrentUserAdmin'])
   }

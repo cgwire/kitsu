@@ -114,6 +114,8 @@ export default {
     XIcon
   },
 
+  emits: ['delete-message'],
+
   data() {
     return {
       currentAttachment: null

@@ -51,7 +51,7 @@
               class="ml05 mb0"
               :disabled="isGlobalDefaultBackground(background)"
               :label="$t('backgrounds.fields.is_default')"
-              :value="String(isCurrentDefaultBackground(background))"
+              :model-value="String(isCurrentDefaultBackground(background))"
               @click="setDefaultBackground(background, $event === 'true')"
             />
           </td>

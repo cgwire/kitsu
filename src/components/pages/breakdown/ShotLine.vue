@@ -352,6 +352,15 @@ export default {
     }
   },
 
+  emits: [
+    'add-one',
+    'click',
+    'description-changed',
+    'edit-label',
+    'remove-one',
+    'standby-changed'
+  ],
+
   computed: {
     ...mapGetters([
       'assetMap',

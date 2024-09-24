@@ -88,6 +88,8 @@ export default {
     }
   },
 
+  emits: ['cancel'],
+
   data() {
     return {
       isError: false,

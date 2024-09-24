@@ -64,7 +64,9 @@ export default {
       default: '',
       type: String
     }
-  }
+  },
+
+  emits: ['cancel', 'confirm']
 }
 </script>
 

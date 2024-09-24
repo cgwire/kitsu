@@ -92,6 +92,8 @@ export default {
     SmartphoneIcon
   },
 
+  emits: ['changed-two-fa', 'validate'],
+
   data() {
     return {
       chosenTwoFA: '',

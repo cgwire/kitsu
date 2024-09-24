@@ -75,6 +75,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm', 'fileselected'],
+
   data() {
     return {
       formData: null

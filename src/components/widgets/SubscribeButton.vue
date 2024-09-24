@@ -23,6 +23,8 @@ export default {
     }
   },
 
+  emits: ['click'],
+
   computed: {
     buttonTitle() {
       if (!this.subscribed) {

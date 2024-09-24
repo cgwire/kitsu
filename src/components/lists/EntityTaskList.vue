@@ -141,6 +141,8 @@ export default {
     }
   },
 
+  emits: ['task-selected'],
+
   data() {
     return {
       currentTask: null

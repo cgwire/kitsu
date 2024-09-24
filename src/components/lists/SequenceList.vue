@@ -496,6 +496,8 @@ export default {
     }
   },
 
+  emits: ['create-tasks', 'delete-clicked', 'edit-clicked'],
+
   data() {
     return {
       type: 'sequence',

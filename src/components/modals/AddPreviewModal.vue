@@ -198,6 +198,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm', 'fileselected'],
+
   data() {
     return {
       forms: [],

@@ -190,6 +190,8 @@ export default {
     }
   },
 
+  emits: ['scroll'],
+
   computed: {
     ...mapGetters([
       'currentProduction',
