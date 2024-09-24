@@ -418,8 +418,14 @@ export default {
 
     if (
       this.assetMap.size < 2 ||
-      (this.assetValidationColumns.length > 0 &&
-        !this.assetMap.get(this.assetMap.keys().next().value).validations)
+      this.assetValidationColumns.length === 0 ||
+      (
+        this.assetValidationColumns.length > 0 &&
+        (
+          !this.assetMap.get(this.assetMap.keys().next().value).validations ||
+          this.assetMap.get(this.assetMap.keys().next().value).validations.size === 0
+        )
+      )
     ) {
       setTimeout(() => {
         this.loadAssets().then(() => {
