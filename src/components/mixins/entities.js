@@ -1,4 +1,4 @@
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
@@ -70,6 +70,8 @@ export const entitiesMixin = {
   },
 
   methods: {
+    ...mapActions(['clearSelectedTasks']),
+
     showImportModal() {
       this.modals.isImportDisplayed = true
     },
@@ -268,6 +270,7 @@ export const entitiesMixin = {
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
       this.applySearch(searchQuery)
+      this.clearSelection()
     },
 
     onChangeSortClicked(sortInfo) {
@@ -284,6 +287,11 @@ export const entitiesMixin = {
 
     onKeepTaskPanelOpenChanged(keepOpen) {
       this.keepTaskPanelOpen = keepOpen
+    },
+
+    clearSelection() {
+      this[`clearSelected${this.entityTypeName}s`]()
+      this.clearSelectedTasks()
     }
   },
 

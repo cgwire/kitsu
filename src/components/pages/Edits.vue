@@ -838,6 +838,7 @@ export default {
       if (searchQuery.length === 0 && this.isLongEditList) {
         this.applySearch('')
       }
+      this.clearSelection()
     },
 
     saveScrollPosition(scrollPosition) {

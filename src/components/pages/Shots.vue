@@ -451,11 +451,15 @@ export default {
     }
     this.$refs['shot-search-field']?.setValue(searchQuery)
     const finalize = () => {
-      this.loadShots(() => {
-        this.$nextTick(() => {
-          this.onSearchChange()
+      this.$nextTick(() => {
+        // Needed to be sure the current production is set
+        this.loadShots(() => {
           this.$nextTick(() => {
-            this.$refs['shot-list'].selectTaskFromQuery()
+            // Needed to be sure the shots are loaded
+            this.onSearchChange()
+            this.$nextTick(() => {
+              this.$refs['shot-list'].selectTaskFromQuery()
+            })
           })
         })
       })
@@ -584,6 +588,7 @@ export default {
       'createTasks',
       'changeShotSort',
       'clearSelectedShots',
+      'clearSelectedTasks',
       'commentTaskWithPreview',
       'deleteAllShotTasks',
       'deleteShot',
@@ -940,6 +945,7 @@ export default {
       if (searchQuery.length === 0 && this.isLongShotList) {
         this.applySearch('')
       }
+      this.clearSelection()
     },
 
     saveScrollPosition(scrollPosition) {
