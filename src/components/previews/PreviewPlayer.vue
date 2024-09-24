@@ -445,7 +445,7 @@
               is-preview
               thin
               :value="currentPreview?.id"
-              @input="changeCurrentPreviewFile"
+              @update:model-value="changeCurrentPreviewFile"
             />
           </div>
 
@@ -639,6 +639,16 @@ export default {
       type: String
     }
   },
+
+  emits: [
+    'add-extra-preview',
+    'add-preview',
+    'change-current-preview',
+    'comment-added',
+    'frame-updated',
+    'previews-order-changed',
+    'remove-extra-preview'
+  ],
 
   data() {
     return {

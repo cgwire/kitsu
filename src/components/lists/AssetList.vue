@@ -357,10 +357,12 @@
             >
               <combobox-task-type
                 class="mb0"
-                :value="asset.ready_for"
+                :model-value="asset.ready_for"
                 :task-type-list="readyForTaskTypes"
                 :shy="true"
-                @input="taskTypeId => onReadyForChanged(asset, taskTypeId)"
+                @update:model-value="
+                  taskTypeId => onReadyForChanged(asset, taskTypeId)
+                "
               />
             </td>
 
@@ -611,6 +613,17 @@ export default {
       default: () => []
     }
   },
+
+  emits: [
+    'asset-changed',
+    'asset-type-clicked',
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'new-clicked',
+    'restore-clicked',
+    'scroll'
+  ],
 
   data() {
     return {

@@ -55,7 +55,7 @@
           <combobox
             class="flexrow-item"
             :options="general.taskTypeOperatorOptions"
-            @input="onTaskTypeOperatorChanged(taskTypeFilter)"
+            @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
             locale-key-prefix="entities.build_filter."
             v-model="taskTypeFilter.operator"
           />
@@ -97,7 +97,7 @@
             <combobox
               class="flexrow-item"
               :options="descriptorOptions"
-              @input="onDescriptorChanged(descriptorFilter)"
+              @update:model-value="onDescriptorChanged(descriptorFilter)"
               v-model="descriptorFilter.id"
             />
 
@@ -121,7 +121,9 @@
               class="flexrow-item"
               :options="general.operatorOptions"
               locale-key-prefix="entities.build_filter."
-              @input="operator => onOperatorChanged(operator, descriptorFilter)"
+              @update:model-value="
+                operator => onOperatorChanged(operator, descriptorFilter)
+              "
               v-model="descriptorFilter.operator"
               v-else
             />
@@ -330,6 +332,8 @@ export default {
       default: 'asset'
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {

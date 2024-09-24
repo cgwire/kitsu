@@ -74,6 +74,8 @@ export default {
     }
   },
 
+  emits: ['cancel'],
+
   data() {
     return {
       previewFileMap: new Map(),

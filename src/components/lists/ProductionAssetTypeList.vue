@@ -175,6 +175,8 @@ export default {
     TableInfo
   },
 
+  emits: ['scroll'],
+
   computed: {
     ...mapGetters([
       'assetTypeSearchText',

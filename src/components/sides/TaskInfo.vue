@@ -92,7 +92,7 @@
                     is-preview
                     thin
                     :value="previewOptions[currentPreviewIndex]?.value"
-                    @input="onPreviewChanged"
+                    @update:model-value="onPreviewChanged"
                   />
                 </div>
                 <div class="filler"></div>
@@ -397,6 +397,8 @@ export default {
       default: false
     }
   },
+
+  emits: ['comment-added', 'time-code-clicked'],
 
   data() {
     return {

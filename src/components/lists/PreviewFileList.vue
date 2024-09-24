@@ -113,6 +113,8 @@ export default {
     }
   },
 
+  emits: ['mark-broken-clicked'],
+
   data() {
     return {
       currentTask: null

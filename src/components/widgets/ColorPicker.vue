@@ -49,6 +49,8 @@ export default {
     }
   },
 
+  emits: ['change'],
+
   data() {
     return {
       isOpen: false

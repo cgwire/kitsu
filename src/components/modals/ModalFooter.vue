@@ -51,7 +51,9 @@ export default {
       type: Boolean,
       default: false
     }
-  }
+  },
+
+  emits: ['cancel', 'confirm']
 }
 </script>
 

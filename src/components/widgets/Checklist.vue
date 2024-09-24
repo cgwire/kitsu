@@ -86,6 +86,14 @@ export default {
     }
   },
 
+  emits: [
+    'add-item',
+    'emit-change',
+    'insert-item',
+    'remove-task',
+    'time-code-clicked'
+  ],
+
   computed: {
     filteredChecklist() {
       return this.checklist.filter(Boolean) // remove empty entries

@@ -92,6 +92,8 @@ export default {
     }
   },
 
+  emits: ['delete-clicked', 'edit-clicked'],
+
   computed: {
     ...mapGetters(['taskTypeMap'])
   },

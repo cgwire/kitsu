@@ -78,6 +78,8 @@ export default {
     }
   },
 
+  emits: ['fileselected'],
+
   data() {
     return {
       isInitial: true,

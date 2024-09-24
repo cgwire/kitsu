@@ -48,7 +48,9 @@ export default {
   components: {
     RowActionsCell,
     TableInfo
-  }
+  },
+
+  emits: ['delete-clicked', 'edit-clicked']
 }
 </script>
 

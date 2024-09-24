@@ -128,6 +128,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   watch: {
     taskTypeToEdit() {
       if (this.taskTypeToEdit) {

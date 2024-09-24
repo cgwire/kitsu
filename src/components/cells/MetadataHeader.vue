@@ -61,6 +61,8 @@ export default {
     DepartmentName
   },
 
+  emits: ['show-metadata-header-menu'],
+
   computed: {
     ...mapGetters(['departmentMap']),
 

@@ -7,7 +7,7 @@
         :key="'color-' + index"
         :class="{
           color: true,
-          selected: value === color
+          selected: modelValue === color
         }"
         :style="{ 'border-color': color + hexaOpacity }"
         @click="colorChanged(color)"
@@ -32,7 +32,7 @@ export default {
       default: 'FF',
       type: String
     },
-    value: {
+    modelValue: {
       default: '#999999',
       type: String
     },
@@ -66,9 +66,11 @@ export default {
     }
   },
 
+  emits: ['update:modelValue'],
+
   methods: {
     colorChanged(color, index) {
-      this.$emit('input', color)
+      this.$emit('update:modelValue', color)
     }
   }
 }

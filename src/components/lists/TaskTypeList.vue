@@ -335,6 +335,8 @@ export default {
     }
   },
 
+  emits: ['delete-clicked', 'edit-clicked', 'update-priorities'],
+
   data() {
     return {
       assetsItems: [],

@@ -183,6 +183,14 @@ export default {
     }
   },
 
+  emits: [
+    'avatar-clicked',
+    'change-password-clicked',
+    'delete-clicked',
+    'edit-clicked',
+    'refresh-clicked'
+  ],
+
   computed: {
     ...mapGetters(['isCurrentUserAdmin']),
 

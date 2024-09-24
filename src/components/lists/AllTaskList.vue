@@ -182,6 +182,8 @@ export default {
     ValidationCell
   },
 
+  emits: ['more-clicked', 'task-selected'],
+
   data() {
     return {
       lastSelection: null,

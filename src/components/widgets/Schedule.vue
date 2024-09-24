@@ -657,6 +657,15 @@ export default {
     }
   },
 
+  emits: [
+    'estimation-changed',
+    'item-assign',
+    'item-changed',
+    'item-drop',
+    'item-unassign',
+    'root-element-expanded'
+  ],
+
   mounted() {
     this.resetScheduleSize()
     this.addEvents(this.domEvents)

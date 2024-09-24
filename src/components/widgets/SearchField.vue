@@ -63,6 +63,8 @@ export default {
     }
   },
 
+  emits: ['change', 'enter', 'save'],
+
   components: {
     SaveIcon,
     SearchIcon

@@ -54,6 +54,11 @@ import DepartmentName from '@/components/widgets/DepartmentName.vue'
 export default {
   name: 'validation-header',
 
+  components: {
+    ChevronDownIcon,
+    DepartmentName
+  },
+
   props: {
     hiddenColumns: Object,
     columnId: String,
@@ -72,10 +77,7 @@ export default {
     }
   },
 
-  components: {
-    ChevronDownIcon,
-    DepartmentName
-  },
+  emits: ['show-header-menu'],
 
   computed: {
     ...mapGetters([

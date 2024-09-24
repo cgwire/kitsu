@@ -56,6 +56,8 @@ export default {
     }
   },
 
+  emits: ['preview-dropped', 'selected'],
+
   mounted() {
     this.setListeners()
   },

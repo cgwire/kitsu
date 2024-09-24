@@ -410,6 +410,16 @@ export default {
     }
   },
 
+  emits: [
+    'ack-comment',
+    'checklist-updated',
+    'delete-comment',
+    'duplicate-comment',
+    'edit-comment',
+    'pin-comment',
+    'time-code-clicked'
+  ],
+
   props: {
     comment: {
       type: Object,

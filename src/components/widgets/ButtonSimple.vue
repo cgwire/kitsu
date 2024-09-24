@@ -190,7 +190,9 @@ export default {
       type: String,
       validator: value => ['submit', 'button', 'reset'].includes(value)
     }
-  }
+  },
+
+  emits: ['click']
 }
 </script>
 

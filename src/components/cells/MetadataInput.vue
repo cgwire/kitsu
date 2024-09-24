@@ -112,9 +112,11 @@
   <combobox-tag
     :options="getDescriptorChoicesOptions(descriptor, false)"
     :shy="true"
-    :value="getMetadataFieldValue(descriptor, entity)"
+    :model-value="getMetadataFieldValue(descriptor, entity)"
     :with-margin="false"
-    @input="value => onMetadataFieldChanged(entity, descriptor, value)"
+    @update:model-value="
+      value => onMetadataFieldChanged(entity, descriptor, value)
+    "
     v-else-if="descriptor.data_type === 'taglist' && isEditable"
   />
   <!-- default -->

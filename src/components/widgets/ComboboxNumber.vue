@@ -43,7 +43,7 @@
         v-for="(option, i) in options"
         :key="i + '-' + option.label + '-' + option.value"
         :value="option.value || option.label"
-        :selected="value === option.value"
+        :selected="modelValue === option.value"
       >
         {{ getOptionLabel(option) }}
       </option>
@@ -60,7 +60,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: 0,
       type: Number
     },
@@ -82,10 +82,13 @@ export default {
     }
   },
 
+  emits: ['enter', 'update:modelValue'],
+
   methods: {
     updateValue() {
-      this.$emit('input', parseInt(this.$refs.select.value))
+      this.$emit('update:modelValue', parseInt(this.$refs.select.value))
     },
+
     emitEnter() {
       this.$emit('enter', parseInt(this.$refs.select.value))
     },

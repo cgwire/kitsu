@@ -113,6 +113,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     let form = {
       id: '',

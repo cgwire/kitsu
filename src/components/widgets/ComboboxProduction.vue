@@ -56,6 +56,8 @@ export default {
     ProductionName
   },
 
+  emits: ['update:modelValue'],
+
   data() {
     return {
       showProductionList: false
@@ -75,7 +77,7 @@ export default {
       required: true,
       type: Array
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     }
@@ -84,7 +86,7 @@ export default {
   computed: {
     currentProduction() {
       return (
-        this.productionList.find(({ id }) => id === this.value) ||
+        this.productionList.find(({ id }) => id === this.modelValue) ||
         this.productionList[0]
       )
     }
@@ -92,7 +94,7 @@ export default {
 
   methods: {
     selectProduction(production) {
-      this.$emit('input', production.id)
+      this.$emit('update:modelValue', production.id)
       this.showProductionList = false
     },
 

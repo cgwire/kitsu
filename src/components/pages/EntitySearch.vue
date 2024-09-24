@@ -45,7 +45,7 @@
           class="search-limit flexrow-item"
           :options="limitOptions"
           :with-margin="false"
-          @input="search"
+          @update:model-value="search"
           v-model="limit"
         />
       </div>
