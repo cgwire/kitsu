@@ -618,15 +618,23 @@ export default {
 
     onDrop(event) {
       if (event.target.id === 'drop-mask') return
-      if (event.target.parentElement?.className?.indexOf(
-        'add-attachment-box') >= 0
-      ) return
-      if (event.target.parentElement?.className?.indexOf(
-        'add-attachment-buttons') >= 0
-      ) return
-      if (event.target.parentElement?.className?.indexOf(
-        'attachment-modal-box') >= 0
-      ) return
+      if (
+        event.target.parentElement?.className?.indexOf('add-attachment-box') >=
+        0
+      )
+        return
+      if (
+        event.target.parentElement?.className?.indexOf(
+          'add-attachment-buttons'
+        ) >= 0
+      )
+        return
+      if (
+        event.target.parentElement?.className?.indexOf(
+          'attachment-modal-box'
+        ) >= 0
+      )
+        return
 
       const forms = []
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
