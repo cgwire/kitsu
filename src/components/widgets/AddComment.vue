@@ -42,7 +42,7 @@
         :members="atOptions"
         name-key="full_name"
         :limit="2"
-        @input="onAtTextChanged"
+        @update:value="onAtTextChanged"
         v-if="mode === 'status' || showCommentArea"
       >
         <template #item="{ item }">
