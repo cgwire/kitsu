@@ -284,6 +284,8 @@ export default {
     }
   },
 
+  emits: ['date-changed', 'set-day-off', 'time-spent-change', 'unset-day-off'],
+
   data() {
     const today = new Date()
     return {

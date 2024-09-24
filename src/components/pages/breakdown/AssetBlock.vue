@@ -92,6 +92,8 @@ export default {
     }
   },
 
+  emits: ['add-one', 'edit-label', 'remove-one'],
+
   methods: {
     removeOneAsset(event) {
       this.pauseEvent(event)

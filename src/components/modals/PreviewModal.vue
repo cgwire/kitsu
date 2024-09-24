@@ -53,6 +53,8 @@ export default {
     }
   },
 
+  emits: ['cancel'],
+
   computed: {
     previewPath() {
       if (this.previewFileId) {

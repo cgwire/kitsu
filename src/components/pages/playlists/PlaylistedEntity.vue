@@ -95,6 +95,8 @@ export default {
     XIcon
   },
 
+  emits: ['entity-dropped', 'play-click', 'preview-changed', 'remove-entity'],
+
   data() {
     return {
       taskTypeId: null,

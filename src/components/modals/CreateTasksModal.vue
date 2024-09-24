@@ -113,6 +113,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
+
   data() {
     return {
       form: {

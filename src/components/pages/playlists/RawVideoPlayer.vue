@@ -84,6 +84,16 @@ export default {
     }
   },
 
+  emits: [
+    'entity-change',
+    'frame-update',
+    'max-duration-update',
+    'metadata-loaded',
+    'play-next',
+    'repeat',
+    'video-loaded'
+  ],
+
   data() {
     return {
       currentPlayer: undefined,

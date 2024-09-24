@@ -203,6 +203,15 @@ export default {
     }
   },
 
+  emits: [
+    'duration-changed',
+    'frame-update',
+    'play-ended',
+    'size-changed',
+    'video-end',
+    'video-loaded'
+  ],
+
   computed: {
     // Elements
 

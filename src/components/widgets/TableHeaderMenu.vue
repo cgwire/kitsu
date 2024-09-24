@@ -47,7 +47,14 @@ export default {
       type: Boolean,
       default: false
     }
-  }
+  },
+  emits: [
+    'delete-all-clicked',
+    'minimize-clicked',
+    'select-column',
+    'sort-by-clicked',
+    'toggle-stick'
+  ]
 }
 </script>
 

@@ -39,35 +39,35 @@
     v-else-if="descriptor.data_type === 'list'"
     :label="label ?? descriptor.name"
     :options="getDescriptorChoicesOptions(descriptor)"
-    :value="value"
+    :model-value="modelValue"
     @enter="onEnter"
-    @input="updateValue"
+    @update:model-value="updateValue"
   />
   <!-- boolean field -->
   <combobox-boolean
     :label="label ?? descriptor.name"
-    :value="value === 'true' ? value : 'false'"
+    :model-value="modelValue === 'true' ? modelValue : 'false'"
     @enter="onEnter"
-    @input="updateValue"
+    @update:model-value="updateValue"
     v-else-if="descriptor.data_type === 'boolean'"
   />
   <!-- tag list field -->
   <combobox-tag
     :label="label ?? descriptor.name"
     :options="getDescriptorChoicesOptions(descriptor, false)"
-    :value="value"
+    :model-value="modelValue"
     @enter="onEnter"
-    @input="updateValue"
+    @update:model-value="updateValue"
     v-else-if="descriptor.data_type === 'taglist'"
   />
   <!-- number or text field-->
   <text-field
     :label="label ?? descriptor.name"
     :type="descriptor.data_type"
-    :value="value"
+    :model-value="modelValue"
     :min="null"
     @enter="onEnter"
-    @input="updateValue"
+    @update:model-value="updateValue"
     v-else
   />
 </template>
@@ -106,11 +106,13 @@ export default {
     label: {
       type: String
     },
-    value: {
+    modelValue: {
       type: [Number, String, Object],
       default: ''
     }
   },
+
+  emits: ['enter', 'update:modelValue'],
 
   computed: {
     ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
@@ -133,7 +135,7 @@ export default {
 
   methods: {
     updateValue(value) {
-      this.$emit('input', value)
+      this.$emit('update:modelValue', value)
     },
 
     onEnter() {

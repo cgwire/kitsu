@@ -514,6 +514,16 @@ export default {
     }
   },
 
+  emits: [
+    'add-edits',
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'edit-history',
+    'restore-clicked',
+    'scroll'
+  ],
+
   data() {
     return {
       type: 'edit',

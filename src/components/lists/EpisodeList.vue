@@ -519,6 +519,8 @@ export default {
     }
   },
 
+  emits: ['create-tasks', 'delete-clicked', 'edit-clicked', 'field-changed'],
+
   data() {
     return {
       type: 'episode',

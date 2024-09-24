@@ -179,6 +179,8 @@ export default {
     }
   },
 
+  emits: ['add-episode', 'add-sequence', 'add-shot', 'cancel'],
+
   data() {
     return {
       names: {

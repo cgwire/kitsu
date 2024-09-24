@@ -163,6 +163,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       entityTypeOptions: [

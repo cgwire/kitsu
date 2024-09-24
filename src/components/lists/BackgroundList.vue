@@ -79,7 +79,9 @@ export default {
     BooleanCell,
     RowActionsCell,
     TableInfo
-  }
+  },
+
+  emits: ['delete-clicked', 'edit-clicked']
 }
 </script>
 

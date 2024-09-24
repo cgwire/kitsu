@@ -1,16 +1,16 @@
 <template>
   <div>
-    <label class="label" v-if="label.length > 0">
+    <label class="label" v-if="label.length">
       {{ label }}
     </label>
     <div
+      class="department-combo"
       :class="{
-        'department-combo': true,
         opened: showDepartmentList,
-        rounded: rounded
+        rounded
       }"
       :style="{
-        width: width + 'px'
+        width: `${width}px`
       }"
     >
       <div class="flexrow" @click="toggleDepartmentList">
@@ -26,15 +26,17 @@
         class="select-input"
         ref="select"
         :style="{
-          'max-height': maxHeightSelectInput + 'px',
-          width: width + 'px',
+          'max-height': `${maxHeightSelectInput}px`,
+          width: `${width}px`,
           top: rounded ? '30px' : '37px'
         }"
         v-if="showDepartmentList"
       >
         <div
           class="department-line"
-          v-for="department in departmentList.filter(({ id }) => id !== value)"
+          v-for="department in departmentList.filter(
+            ({ id }) => id !== modelValue
+          )"
           @click="selectDepartment(department)"
           :key="department.id"
         >
@@ -65,6 +67,8 @@ export default {
     DepartmentName
   },
 
+  emits: ['update:modelValue'],
+
   data() {
     return {
       showDepartmentList: false
@@ -92,7 +96,7 @@ export default {
       type: Array,
       required: false
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     },
@@ -163,12 +167,12 @@ export default {
     },
 
     currentDepartment() {
-      if (this.value) {
-        const departmentMapped = this.departmentMap.get(this.value)
+      if (this.modelValue) {
+        const departmentMapped = this.departmentMap.get(this.modelValue)
         if (departmentMapped) {
           return departmentMapped
         } else {
-          return this.departmentList.find(d => d.id === this.value)
+          return this.departmentList.find(d => d.id === this.modelValue)
         }
       } else {
         return this.departmentList[0]
@@ -178,7 +182,7 @@ export default {
 
   methods: {
     selectDepartment(department) {
-      this.$emit('input', department.id)
+      this.$emit('update:modelValue', department.id)
       this.showDepartmentList = false
     },
 

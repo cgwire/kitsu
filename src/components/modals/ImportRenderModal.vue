@@ -104,7 +104,7 @@
                       :value="cell"
                       :error="isDuplicated(index)"
                       v-model="columnSelect[index]"
-                      @input="checkForDuplicate"
+                      @update:model-value="checkForDuplicate"
                     />
                   </div>
                   {{ cell || '-' }}
@@ -182,6 +182,8 @@ export default {
     Checkbox,
     ModalFooter
   },
+
+  emits: ['cancel', 'confirm', 'reupload'],
 
   data() {
     return {

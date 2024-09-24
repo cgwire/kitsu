@@ -33,7 +33,9 @@ export default {
       type: Boolean,
       default: false
     }
-  }
+  },
+
+  emits: ['delete-clicked', 'edit-clicked', 'pin-clicked']
 }
 </script>
 

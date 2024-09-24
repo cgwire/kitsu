@@ -59,6 +59,8 @@ export default {
     }
   },
 
+  emits: ['change'],
+
   computed: {
     ...mapGetters(['organisation']),
 

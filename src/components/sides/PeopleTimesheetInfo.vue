@@ -99,6 +99,8 @@ export default {
     }
   },
 
+  emits: ['close'],
+
   computed: {
     startDay() {
       return moment().day('Monday').year(this.year).week(this.week).date()

@@ -78,6 +78,8 @@ export default {
     TextField
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       form: {

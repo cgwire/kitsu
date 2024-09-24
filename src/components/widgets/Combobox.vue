@@ -4,21 +4,15 @@
       {{ label }}
     </label>
     <p class="control" :class="{ 'is-inline': isInline }">
-      <span
-        :class="{
-          select: true,
-          'is-top': isTop
-        }"
-      >
+      <span class="select" :class="{ 'is-top': isTop }">
         <select
+          class="combobox select-input"
           :class="{
-            combobox: true,
-            thin: thin,
-            'select-input': true,
-            error: error
+            thin,
+            error
           }"
           :style="{
-            width: width ? width + 'px' : undefined
+            width: width ? `${width}px` : undefined
           }"
           ref="select"
           :disabled="disabled"
@@ -29,7 +23,7 @@
             v-for="(option, i) in options"
             :key="`${i}-${option.label}-${option.value}`"
             :value="option.label || option.value"
-            :selected="value === option.value"
+            :selected="modelValue === option.value || null"
           >
             {{ getOptionLabel(option) }}
           </option>
@@ -48,7 +42,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: '',
       type: [Object, String, Boolean, Number]
     },
@@ -89,6 +83,8 @@ export default {
     }
   },
 
+  emits: ['enter', 'update:modelValue'],
+
   methods: {
     updateValue() {
       let value = this.$refs.select.value
@@ -97,7 +93,7 @@ export default {
           value = option.value
         }
       })
-      this.$emit('input', value)
+      this.$emit('update:modelValue', value)
     },
 
     emitEnter() {

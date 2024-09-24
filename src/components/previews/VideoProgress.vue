@@ -237,6 +237,15 @@ export default {
     }
   },
 
+  emits: [
+    'end-scrub',
+    'handle-in-changed',
+    'handle-out-changed',
+    'progress-changed',
+    'progress-playlist-changed',
+    'start-scrub'
+  ],
+
   data() {
     return {
       currentMouseFrame: {},

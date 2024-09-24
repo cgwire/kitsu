@@ -185,6 +185,8 @@ export default {
     TableInfo
   },
 
+  emits: ['delete-clicked', 'edit-clicked'],
+
   computed: {
     ...mapGetters(['openProductions', 'lastProductionScreen']),
 

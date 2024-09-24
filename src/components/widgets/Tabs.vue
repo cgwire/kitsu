@@ -14,7 +14,6 @@
         </li>
       </ul>
     </div>
-
     <div class="tabs-details">
       <slot></slot>
     </div>
@@ -24,15 +23,23 @@
 <script>
 export default {
   name: 'tabs',
+
+  emits: ['update'],
+
   data() {
-    return { tabs: [] }
+    return {
+      tabs: []
+    }
   },
+
   created() {
     this.tabs = this.$children
   },
+
   mounted() {
     this.$emit('update', this.tabs)
   },
+
   methods: {
     selectTab(selectedTab) {
       this.tabs.forEach(tab => {
@@ -43,6 +50,7 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .tabs ul {
   margin-left: 0;

@@ -95,6 +95,8 @@ export default {
     Tabs
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       formData: null,

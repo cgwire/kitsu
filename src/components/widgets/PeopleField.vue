@@ -52,6 +52,8 @@ export default {
     XIcon
   },
 
+  emits: ['enter', 'update:modelValue'],
+
   data() {
     return {
       assignationItem: AssignationItem,
@@ -63,7 +65,7 @@ export default {
 
   created() {
     this.items = this.people
-    this.item = this.value
+    this.item = this.modelValue
     this.index = buildNameIndex(this.people)
   },
 
@@ -84,7 +86,7 @@ export default {
       type: String,
       default: ''
     },
-    value: {
+    modelValue: {
       type: Object,
       default: () => {}
     },
@@ -107,7 +109,7 @@ export default {
     },
 
     onChange() {
-      this.$emit('input', this.item)
+      this.$emit('update:modelValue', this.item)
     },
 
     onEnter() {

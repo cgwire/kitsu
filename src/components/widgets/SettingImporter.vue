@@ -59,6 +59,8 @@ export default {
     ComboboxProduction
   },
 
+  emits: ['import-from-production', 'import-item'],
+
   data() {
     return {
       importProductionId: null

@@ -41,7 +41,9 @@ export default {
       default: '',
       type: String
     }
-  }
+  },
+
+  emits: ['confirm']
 }
 </script>
 

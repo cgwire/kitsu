@@ -150,6 +150,8 @@ export default {
     }
   },
 
+  emits: ['add-snapshots', 'cancel', 'confirm'],
+
   data() {
     return {
       forms: [],

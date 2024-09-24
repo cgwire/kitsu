@@ -239,6 +239,8 @@ export default {
     }
   },
 
+  emits: ['cancel'],
+
   data() {
     return {
       activeOptions: [

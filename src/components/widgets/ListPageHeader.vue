@@ -46,6 +46,8 @@ export default {
       type: String,
       default: ''
     }
-  }
+  },
+
+  emits: ['export-clicked', 'new-clicked']
 }
 </script>

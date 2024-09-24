@@ -155,6 +155,8 @@ export default {
     }
   },
 
+  emits: ['library-updated'],
+
   data() {
     return {
       productionId: null,

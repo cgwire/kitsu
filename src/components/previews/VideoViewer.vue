@@ -119,6 +119,14 @@ export default {
       default: false
     }
   },
+  emits: [
+    'duration-changed',
+    'frame-update',
+    'play-ended',
+    'size-changed',
+    'video-end',
+    'video-loaded'
+  ],
 
   data() {
     return {

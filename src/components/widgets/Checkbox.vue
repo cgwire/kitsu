@@ -51,15 +51,7 @@ export default {
     }
   },
 
-  data() {
-    return {
-      id: null
-    }
-  },
-
-  mounted() {
-    this.id = this._uid
-  },
+  emits: ['change'],
 
   methods: {
     updateStatus() {
@@ -68,6 +60,7 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 .dark {
   .checkbox-field label {

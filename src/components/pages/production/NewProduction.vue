@@ -175,7 +175,7 @@
                 class="is-inline inline-task-type-combo"
                 :task-type-list="availableAssetTaskTypes"
                 add-placeholder
-                @input="
+                @update:model-value="
                   id =>
                     productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
                 "
@@ -207,7 +207,7 @@
                 class="is-inline inline-task-type-combo"
                 :task-type-list="availableShotTaskTypes"
                 add-placeholder
-                @input="
+                @update:model-value="
                   id =>
                     productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
                 "
@@ -237,7 +237,7 @@
               :task-status-list="availableTaskStatuses"
               :with-margin="false"
               add-placeholder
-              @input="
+              @update:model-value="
                 id =>
                   productionToCreate.taskStatuses.push(taskStatusMap.get(id))
               "
@@ -265,7 +265,7 @@
               class="flexrow-item"
               :options="availableAssetTypes"
               :with-margin="false"
-              @input="
+              @update:model-value="
                 id => {
                   assetTypeMap.get(id) &&
                     productionToCreate.assetTypes.push(assetTypeMap.get(id))

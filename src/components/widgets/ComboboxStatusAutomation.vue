@@ -57,6 +57,8 @@ export default {
     StatusAutomationItem
   },
 
+  emits: ['update:modelValue'],
+
   data() {
     return {
       showStatusAutomationsList: false
@@ -72,7 +74,7 @@ export default {
       default: () => [],
       type: Array
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     },
@@ -98,8 +100,8 @@ export default {
     ...mapGetters(['isDarkTheme', 'statusAutomationMap']),
 
     currentStatusAutomation() {
-      if (this.value) {
-        return this.statusAutomationMap.get(this.value)
+      if (this.modelValue) {
+        return this.statusAutomationMap.get(this.modelValue)
       } else if (this.addPlaceholder) {
         return {
           short_name: '+ status',
@@ -113,7 +115,7 @@ export default {
 
   methods: {
     selectStatusAutomation(status) {
-      this.$emit('input', status.id)
+      this.$emit('update:modelValue', status.id)
       this.showStatusAutomationsList = false
     },
 

@@ -70,6 +70,8 @@ export default {
     ComboboxMask
   },
 
+  emits: ['input'],
+
   data() {
     return {
       showAllMode: false,

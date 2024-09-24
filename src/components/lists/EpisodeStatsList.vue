@@ -254,6 +254,8 @@ export default {
     }
   },
 
+  emits: ['scroll'],
+
   data() {
     return {
       expanded: {},

@@ -176,7 +176,7 @@
                 :with-margin="false"
                 :value="getDate(task.start_date)"
                 :disabled-dates="disabledDates"
-                @input="updateStartDate"
+                @update:model-value="updateStartDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <span v-else>
@@ -189,7 +189,7 @@
                 :with-margin="false"
                 :value="getDate(task.due_date)"
                 :disabled-dates="disabledDates"
-                @input="updateDueDate"
+                @update:model-value="updateDueDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <span v-else>
@@ -363,6 +363,8 @@ export default {
     ValidationCell,
     ValidationTag
   },
+
+  emits: ['scroll', 'task-selected'],
 
   data() {
     return {

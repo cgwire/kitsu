@@ -56,6 +56,8 @@ export default {
     KitsuIcon
   },
 
+  emits: ['input'],
+
   data() {
     return {
       localSection: null,

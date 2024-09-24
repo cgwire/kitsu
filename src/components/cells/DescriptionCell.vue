@@ -72,6 +72,8 @@ export default {
     }
   },
 
+  emits: ['description-changed'],
+
   methods: {
     renderMarkdown,
 

@@ -69,6 +69,8 @@ export default {
     }
   },
 
+  emits: ['unassign'],
+
   computed: {
     ...mapGetters(['isDarkTheme']),
 

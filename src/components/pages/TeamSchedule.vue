@@ -114,14 +114,14 @@
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
-            @input="loadUnassignedTasks()"
+            @update:model-value="loadUnassignedTasks()"
           />
           <combobox-task-type
             class="mb05"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
-            @input="loadUnassignedTasks()"
+            @update:model-value="loadUnassignedTasks()"
           />
         </div>
         <template v-if="unassignedTasks.length > 0">

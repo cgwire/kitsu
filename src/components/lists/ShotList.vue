@@ -749,6 +749,18 @@ export default {
     }
   },
 
+  emits: [
+    'add-shots',
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'field-changed',
+    'restore-clicked',
+    'scroll',
+    'sequence-clicked',
+    'shot-history'
+  ],
+
   data() {
     return {
       type: 'shot',

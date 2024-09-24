@@ -106,6 +106,8 @@ export default {
     }
   },
 
+  emits: ['close', 'delete', 'update'],
+
   methods: {
     selectFile() {
       this.$refs['input-file'].click()

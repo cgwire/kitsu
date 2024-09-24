@@ -337,6 +337,13 @@ export default {
     }
   },
 
+  emits: [
+    'scroll',
+    'task-selection-addition',
+    'task-selection-cleared',
+    'task-selection-removal'
+  ],
+
   data() {
     return {
       page: 1,

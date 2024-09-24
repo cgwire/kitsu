@@ -18,7 +18,7 @@
         "
         :placeholder="placeholder"
         :type="type"
-        :value="value"
+        :value="modelValue"
         :disabled="disabled"
         :maxlength="maxlength"
         :min="min"
@@ -55,7 +55,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: '',
       type: [String, Number]
     },
@@ -115,6 +115,8 @@ export default {
     }
   },
 
+  emits: ['enter', 'update:modelValue'],
+
   methods: {
     getInputValue() {
       const input = this.$refs.input
@@ -130,7 +132,7 @@ export default {
     },
 
     updateValue() {
-      this.$emit('input', this.getInputValue())
+      this.$emit('update:modelValue', this.getInputValue())
     },
 
     focus() {

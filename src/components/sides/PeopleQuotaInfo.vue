@@ -90,6 +90,8 @@ export default {
     }
   },
 
+  emits: ['close'],
+
   computed: {
     ...mapGetters(['currentEpisode', 'currentProduction']),
 

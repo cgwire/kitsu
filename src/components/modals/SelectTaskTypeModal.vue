@@ -17,7 +17,7 @@
           <combobox-task-type
             :task-type-list="taskTypeList"
             :value="taskTypeId"
-            @input="onTaskTypeChanged"
+            @update:model-value="onTaskTypeChanged"
           />
         </form>
 
@@ -81,6 +81,8 @@ export default {
       default: () => {}
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {

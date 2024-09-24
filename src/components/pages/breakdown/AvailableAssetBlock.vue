@@ -65,6 +65,8 @@ export default {
     }
   },
 
+  emits: ['add-one', 'add-ten'],
+
   methods: {
     addOneAsset(event) {
       if (this.active) {

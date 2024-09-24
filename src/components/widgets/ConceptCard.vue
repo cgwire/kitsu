@@ -65,6 +65,8 @@ export default {
     }
   },
 
+  emits: ['click'],
+
   computed: {
     ...mapGetters([
       'assetMap',

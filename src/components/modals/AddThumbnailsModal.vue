@@ -138,6 +138,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       extensions: '.png,.jpg,.jpeg,.mp4,.mov',

@@ -868,6 +868,8 @@ export default {
     XIcon
   },
 
+  emits: ['export-task', 'set-frame-thumbnail'],
+
   data() {
     return {
       availableTaskStatuses: [],

@@ -41,6 +41,8 @@ export default {
     }
   },
 
+  emits: ['date-changed', 'remove'],
+
   data() {
     return {
       startDate: null,
