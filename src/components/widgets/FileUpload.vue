@@ -129,7 +129,9 @@ export default {
       this.isSaving = false
       this.isInitial = true
       this.uploadedFiles = []
-      this.$refs.uploadInput.value = ''
+      if (this.$refs.uploadInput) {
+        this.$refs.uploadInput.value = ''
+      }
     },
 
     onDragover() {

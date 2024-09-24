@@ -7,9 +7,13 @@
   >
     <div class="modal-background" @click="$emit('cancel')"></div>
 
-    <div class="modal-content">
-      <div class="box content">
-        <!--div
+    <div
+      class="modal-content"
+      @dragover="onFileDragover"
+      @dragleave="onFileDragLeave"
+    >
+      <div class="box content attachment-modal-box">
+        <div
           ref="dropMask"
           id="drop-mask"
           class="drop-mask"
@@ -17,13 +21,13 @@
           v-if="isDraggingFile"
         >
           {{ $t('main.drop_files_here') }}
-        </div-->
+        </div>
         <h2 class="subtitle">{{ title }}</h2>
         <h1 class="title">
           {{ $t('tasks.comment_image') }}
         </h1>
 
-        <div class="flexrow buttons">
+        <div class="flexrow buttons attachment-modal-buttons">
           <file-upload
             ref="file-field"
             class="flexrow-item"
@@ -237,6 +241,28 @@ export default {
       if (event.target.id === 'drop-mask') {
         this.isDraggingFile = false
       }
+    },
+
+    onFileDragover(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.isDraggingFile = true
+    },
+
+    onFileDragLeave(event) {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.target.id === 'drop-mask') {
+        this.isDraggingFile = false
+      }
+    },
+
+    onDrag(event) {},
+
+    onDrop(event) {
+      this.fileField.onDrop(event)
+      this.isDraggingFile = false
+      event.preventDefault()
     }
   },
 
