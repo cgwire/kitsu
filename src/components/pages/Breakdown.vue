@@ -624,8 +624,7 @@ export default {
           newGroup = typeGroup.filter(asset => {
             return (
               asset.episode_id === this.currentEpisode.id ||
-              (asset.casting_episode_ids &&
-                asset.casting_episode_ids.includes(this.currentEpisode.id))
+              asset.casting_episode_ids?.includes(this.currentEpisode.id)
             )
           })
         }
@@ -669,7 +668,7 @@ export default {
           return this.castingAssetTypeAssets.filter(
             asset =>
               asset.episode_id === this.currentEpisode.id ||
-              asset.casting_episode_ids.includes(this.currentEpisode.id)
+              asset.casting_episode_ids?.includes(this.currentEpisode.id)
           )
         } else if (this.isTVShow && this.currentEpisode.id === 'main') {
           return this.castingAssetTypeAssets.filter(asset => !asset.episode_id)
