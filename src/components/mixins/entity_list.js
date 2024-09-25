@@ -527,5 +527,11 @@ export const entityListMixin = {
         })
       }
     }
+  },
+
+  watch: {
+    nbSelectedTasks() {
+      this.updateTaskInQuery()
+    }
   }
 }
