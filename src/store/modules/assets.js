@@ -442,9 +442,13 @@ const actions = {
       })
       .then(assets => {
         assets.forEach(asset => {
-          if (!asset.asset_type_name) {
-            const assetType = assetTypeMap.get(asset.entity_type_id)
-            asset.asset_type_name = assetType?.name
+          if (
+            asset.asset_type_name === null ||
+            asset.asset_type_name === undefined
+          ) {
+            const typeId = asset.asset_type_id || asset.entity_type_id
+            const assetType = assetTypeMap.get(typeId)
+            asset.asset_type_name = assetType?.name || ''
           }
         })
         commit(LOAD_ASSETS_END, {
