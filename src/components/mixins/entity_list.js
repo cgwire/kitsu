@@ -190,7 +190,7 @@ export const entityListMixin = {
           let startY = this.lastSelection.y
           if (!sticked) startY += columnOffset
           let endY = validationInfo.y
-          const grid = this[this.type + 'SelectionGrid']
+          const grid = this[`${this.type}SelectionGrid`]
           if (validationInfo.x < this.lastSelection.x) {
             startX = validationInfo.x
             endX = this.lastSelection.x
@@ -203,7 +203,7 @@ export const entityListMixin = {
 
           for (let i = startX; i <= endX; i++) {
             for (let j = startY; j <= endY; j++) {
-              const ref = 'validation-' + i + '-' + j
+              const ref = `validation-${i}-${j}`
               const validationCell = this.$refs[ref][0]
               if (!grid[i][j]) {
                 let y = validationCell.columnY
@@ -242,7 +242,7 @@ export const entityListMixin = {
         let y = validationInfo.y
         if (!sticked) y -= columnOffset
         this.lastSelection = { x, y }
-        const ref = 'validation-' + x + '-' + y
+        const ref = `validation-${x}-${y}`
         const validationCell = this.$refs[ref][0]
         this.$nextTick(() => {
           this.scrollToValidationCell(validationCell)
@@ -286,9 +286,9 @@ export const entityListMixin = {
         const left = headerBox.left
         const top = headerBox.bottom
         const width = Math.max(100, headerBox.width - 1)
-        headerMenuEl.style.left = left + 'px'
-        headerMenuEl.style.top = top + 'px'
-        headerMenuEl.style.width = width + 'px'
+        headerMenuEl.style.left = `${left}px`
+        headerMenuEl.style.top = `${top}px`
+        headerMenuEl.style.width = `${width}px`
       }
       this.lastHeaderMenuDisplayed = columnId
       this.lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
@@ -341,7 +341,7 @@ export const entityListMixin = {
 
       entities.forEach((entity, i) => {
         selection.push({
-          entity: entity,
+          entity,
           column: this.taskTypeMap.get(taskTypeId),
           task: this.taskMap.get(entity.validations.get(taskTypeId)),
           x: i,
@@ -505,13 +505,13 @@ export const entityListMixin = {
      */
     selectTaskFromQuery() {
       const taskId = this.$route.query.task_id
-      if (taskId) {
-        const task = this.taskMap.get(taskId)
-        const entityMap = this[this.type + 'Map']
+      const task = this.taskMap.get(taskId)
+      if (task) {
+        const entityMap = this[`${this.type}Map`]
         const entity = entityMap.get(task.entity_id)
         const taskType = this.taskTypeMap.get(task.task_type_id)
 
-        let list = this['displayed' + stringHelpers.capitalize(this.type) + 's']
+        let list = this[`displayed${stringHelpers.capitalize(this.type)}s`]
         if (['asset', 'shot'].includes(this.type)) {
           list = list.flat()
         }
@@ -520,7 +520,7 @@ export const entityListMixin = {
 
         this.$store.commit('ADD_SELECTED_TASK', {
           task,
-          entity: entity,
+          entity,
           column: taskType,
           x,
           y
