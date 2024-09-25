@@ -1,0 +1,2 @@
+import{n as e}from"./index-DOfQ8DGZ.js";const n="/assets/404-VtGghZp-.png",_={name:"not-found"};var a=function(){var t=this,s=t._self._c;return s("div",{staticClass:"not-found page has-text-centered"},[s("img",{staticClass:"illustration",attrs:{src:n}}),s("h1",{staticClass:"title"},[t._v(t._s(t.$t("not_found.title")))]),s("p",[t._v(" "+t._s(t.$t("not_found.text"))+" ")]),s("p",[s("a",{attrs:{href:"/"}},[t._v(t._s(t.$t("main.home")))])])])},o=[],r=e(_,a,o,!1,null,"de57cd59");const d=r.exports;export{d as default};
+//# sourceMappingURL=NotFound-CxN3-256.js.map
