@@ -1,6 +1,7 @@
 const ALL_EXTENSIONS = [
   'png',
   'jpg',
+  'kra',
   'mp4',
   'mov',
   'obj',
@@ -25,6 +26,8 @@ const ALL_EXTENSIONS = [
   'ae',
   'fla',
   'flv',
+  'sai',
+  'sai2',
   'swf',
   'sbbkp',
   'wav',
