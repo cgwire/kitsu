@@ -642,6 +642,12 @@ export const playerMixin = {
       this.container.setAttribute('data-fullscreen', !!false)
       document.activeElement.blur()
       this.fullScreen = false
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 200)
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'))
+      }, 500)
     },
 
     isFullScreen() {
@@ -756,6 +762,12 @@ export const playerMixin = {
     onFullScreenChange() {
       if (this.fullScreen && !this.isFullScreen()) {
         this.fullScreen = false
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 200)
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'))
+        }, 500)
       }
     },
 
