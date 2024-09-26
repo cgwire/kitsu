@@ -44,6 +44,12 @@
               :production-id="task.project_id"
             />
             <span class="flexrow-item">{{ task.entity_name }}</span>
+            <span
+              class="flexrow-item pointer"
+              @click="removeTaskFromSelection(task)"
+            >
+              <x-icon :size="12" />
+            </span>
           </div>
           <div class="mt2 selected-task-line" v-if="nbSelectedValidations > 0">
             <span v-if="nbSelectedTasks > 0">+</span>
@@ -301,7 +307,7 @@
 </template>
 
 <script>
-import { CornerRightUpIcon } from 'lucide-vue'
+import { CornerRightUpIcon, XIcon } from 'lucide-vue'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -346,7 +352,8 @@ export default {
     EditCommentModal,
     PreviewPlayer,
     Spinner,
-    TaskTypeName
+    TaskTypeName,
+    XIcon
   },
 
   props: {
@@ -741,6 +748,7 @@ export default {
       'refreshPreview',
       'pinComment',
       'refreshComment',
+      'removeSelectedTask',
       'setPreview',
       'subscribeToTask',
       'unsubscribeFromTask',
@@ -1285,6 +1293,17 @@ export default {
       if (this.$refs['preview-player']) {
         this.$refs['preview-player'].previewViewer.resize()
       }
+    },
+
+    removeTaskFromSelection(task) {
+      const data = {
+        column: { id: task.task_type_id },
+        entity: { id: task.entity_id },
+        task
+      }
+      this.removeSelectedTask({ task: data }) // remove list selection
+      this.removeSelectedTask({ task }) // remove
+      this.$emit('task-removed', task)
     }
   },
 
