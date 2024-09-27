@@ -178,15 +178,15 @@
               />
 
               <table-metadata-selector-menu
-                ref="headerMetadataSelectorMenu"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="sequenceMetadataDescriptors"
                 :exclude="{
                   timeSpent: !isSequenceTime,
                   estimation: !isSequenceEstimation
                 }"
                 namespace="sequences"
-                v-show="columnSelectorDisplayed && isShowInfos"
+                v-model="metadataDisplayHeaders"
+                v-show="columnSelectorDisplayed"
+                v-if="isShowInfos"
               />
 
               <button-simple

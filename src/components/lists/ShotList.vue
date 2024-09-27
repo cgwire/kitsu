@@ -215,8 +215,6 @@
               />
 
               <table-metadata-selector-menu
-                ref="headerMetadataSelectorMenu"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="shotMetadataDescriptors"
                 namespace="shots"
                 :exclude="{
@@ -229,7 +227,9 @@
                   resolution: !isResolution,
                   max_retakes: !isMaxRetakes
                 }"
-                v-show="columnSelectorDisplayed && isShowInfos"
+                v-model="metadataDisplayHeaders"
+                v-show="columnSelectorDisplayed"
+                v-if="isShowInfos"
               />
 
               <button-simple

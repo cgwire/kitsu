@@ -7,26 +7,26 @@ z
     }"
   >
     <h2>{{ $t('main.column_visibility') }}</h2>
-    <div
-      class="field is-marginless"
-      :key="descriptor.field_name"
-      v-for="descriptor in filteredMetadataDescriptors"
-    >
-      <label class="checkbox" :for="descriptor.field_name">
-        <input
-          type="checkbox"
-          :id="descriptor.field_name"
-          :checked="metadataDisplayHeaders[descriptor.field_name] !== false"
-          @change="
-            setMetadataDisplayValue(
-              descriptor.field_name,
-              $event.target.checked
-            )
-          "
-        />
-        {{ descriptor.name }}
-      </label>
-    </div>
+    <ul>
+      <li
+        :key="descriptor.field_name"
+        v-for="descriptor in filteredMetadataDescriptors"
+      >
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            :checked="modelValue[descriptor.field_name] !== false"
+            @change="
+              setMetadataDisplayValue(
+                descriptor.field_name,
+                $event.target.checked
+              )
+            "
+          />
+          {{ descriptor.name }}
+        </label>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -35,23 +35,25 @@ export default {
   name: 'table-metadata-selector-menu',
 
   props: {
-    metadataDisplayHeaders: {
-      type: Object,
-      required: true
-    },
     descriptors: {
       type: Array,
-      required: true
-    },
-    namespace: {
-      type: String,
       required: true
     },
     exclude: {
       type: Object,
       default: () => {}
+    },
+    modelValue: {
+      type: Object,
+      required: true
+    },
+    namespace: {
+      type: String,
+      required: true
     }
   },
+
+  emits: ['update:modelValue'],
 
   data() {
     return {
@@ -74,7 +76,7 @@ export default {
     const metadataDisplayHeadersString = localStorage.getItem(
       this.localStorageKey
     )
-    let localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
+    let localMetadataDisplayHeaders = { ...this.modelValue }
     if (metadataDisplayHeadersString) {
       localMetadataDisplayHeaders = {
         ...localMetadataDisplayHeaders,
@@ -86,7 +88,7 @@ export default {
         localMetadataDisplayHeaders[descriptor.field_name] = true
       }
     }
-    this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
+    this.$emit('update:modelValue', localMetadataDisplayHeaders)
   },
 
   computed: {
@@ -96,7 +98,7 @@ export default {
 
     metadataDescriptors() {
       const fixedColumns = []
-      for (const headerName in this.metadataDisplayHeaders) {
+      for (const headerName in this.modelValue) {
         if (this.fieldToName[headerName]) {
           fixedColumns.push({
             field_name: headerName,
@@ -116,13 +118,13 @@ export default {
 
   methods: {
     setMetadataDisplayValue(metadataName, isSelected) {
-      const localMetadataDisplayHeaders = { ...this.metadataDisplayHeaders }
+      const localMetadataDisplayHeaders = { ...this.modelValue }
       localMetadataDisplayHeaders[metadataName] = isSelected
       localStorage.setItem(
         this.localStorageKey,
         JSON.stringify(localMetadataDisplayHeaders)
       )
-      this.$emit('update:metadataDisplayHeaders', localMetadataDisplayHeaders)
+      this.$emit('update:modelValue', localMetadataDisplayHeaders)
     }
   }
 }
@@ -139,7 +141,7 @@ export default {
 }
 
 .column-menu {
-  background: white;
+  background: $white;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   box-shadow: 0 2px 6px $light-grey;
@@ -162,12 +164,17 @@ export default {
     text-transform: capitalize;
   }
 
-  div {
+  ul {
+    list-style-type: none;
+    margin: 0;
+  }
+
+  li {
     padding: 0.8em;
   }
-}
 
-span.checkbox {
-  width: 100%;
+  .checkbox {
+    width: 100%;
+  }
 }
 </style>

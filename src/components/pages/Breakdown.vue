@@ -77,7 +77,6 @@
 
         <div class="flexrow mb05 list-options">
           <table-metadata-selector-menu
-            ref="headerMetadataSelectorMenu"
             namespace="breakdown"
             :descriptors="metadataDescriptors"
             :exclude="{
@@ -87,9 +86,9 @@
               maxRetakes: true,
               timeSpent: true
             }"
-            :metadata-display-headers.sync="metadataDisplayHeaders"
-            v-if="isShowInfosBreakdown"
+            v-model="metadataDisplayHeaders"
             v-show="columnSelectorDisplayed"
+            v-if="isShowInfosBreakdown"
           />
           <span class="filler"></span>
 

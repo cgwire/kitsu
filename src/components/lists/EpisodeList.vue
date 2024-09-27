@@ -183,15 +183,15 @@
               />
 
               <table-metadata-selector-menu
-                ref="headerMetadataSelectorMenu"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="episodeMetadataDescriptors"
                 :exclude="{
                   timeSpent: !isEpisodeTime,
                   estimation: !isEpisodeEstimation
                 }"
                 namespace="episodes"
-                v-show="columnSelectorDisplayed && isShowInfos"
+                v-model="metadataDisplayHeaders"
+                v-show="columnSelectorDisplayed"
+                v-if="isShowInfos"
               />
 
               <button-simple

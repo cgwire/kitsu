@@ -171,15 +171,15 @@
               />
 
               <table-metadata-selector-menu
-                ref="headerMetadataSelectorMenu"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :descriptors="editMetadataDescriptors"
                 :exclude="{
                   timeSpent: !isEditTime,
                   estimation: !isEditEstimation
                 }"
                 namespace="edits"
-                v-show="columnSelectorDisplayed && isShowInfos"
+                v-model="metadataDisplayHeaders"
+                v-show="columnSelectorDisplayed"
+                v-if="isShowInfos"
               />
 
               <button-simple

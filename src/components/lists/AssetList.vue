@@ -201,15 +201,15 @@
               />
 
               <table-metadata-selector-menu
-                ref="headerMetadataSelectorMenu"
-                namespace="assets"
                 :descriptors="assetMetadataDescriptors"
-                :metadata-display-headers.sync="metadataDisplayHeaders"
                 :exclude="{
                   timeSpent: !isAssetTime,
                   estimation: !isAssetEstimation
                 }"
-                v-show="columnSelectorDisplayed && isShowInfos"
+                namespace="assets"
+                v-model="metadataDisplayHeaders"
+                v-show="columnSelectorDisplayed"
+                v-if="isShowInfos"
               />
 
               <button-simple
