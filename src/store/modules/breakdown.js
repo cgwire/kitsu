@@ -114,7 +114,12 @@ const actions = {
     }
     const production = rootState.productions.currentProduction
     const assets = Array.from(rootState.assets.assetMap.values())
-      .filter(asset => asset.asset_type_id === assetTypeId)
+      .filter(asset => {
+        return (
+          asset.asset_type_id === assetTypeId ||
+          asset.entity_type_id === assetTypeId
+        )
+      })
       .sort((a, b) =>
         a.name.localeCompare(b.name, undefined, { numeric: true })
       )
@@ -368,7 +373,6 @@ const mutations = {
   },
 
   [CASTING_SET_EPISODES](state, { production, episodes }) {
-    // TODO CASTING must be renamed to BREAKDOWN when used for namespacing, and CASTING must be kept for meaningful mutations
     state.castingEpisodes = episodes
     state.castingEpisodeOptions = episodes.map(production => {
       const route = {

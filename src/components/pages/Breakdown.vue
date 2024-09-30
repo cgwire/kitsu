@@ -664,7 +664,11 @@ export default {
       } else if (this.isShotCasting) {
         return this.castingSequenceShots
       } else {
-        if (this.isTVShow && this.currentEpisode.id !== 'main') {
+        if (
+          this.isTVShow &&
+          this.currentEpisode &&
+          this.currentEpisode.id !== 'main'
+        ) {
           return this.castingAssetTypeAssets.filter(
             asset =>
               asset.episode_id === this.currentEpisode.id ||
@@ -1097,7 +1101,7 @@ export default {
           }
         }
       } else if (this.isAssetCasting) {
-        const assetTypeId = this.$route.params.asset_type_id
+        const assetTypeId = this.$route.params.asset_type_id || ''
         if (assetTypeId !== this.assetTypeId) {
           isChange = true
           route = {
