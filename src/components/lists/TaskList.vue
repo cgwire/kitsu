@@ -116,7 +116,7 @@
                 />
               </div>
             </td>
-            <td class="frames" v-if="isShots">
+            <td class="frames number-cell" v-if="isShots">
               {{ getEntity(task.entity.id).nb_frames }}
             </td>
             <td class="estimation number-cell">
@@ -1062,5 +1062,9 @@ input[type='number'] {
 
 .datatable-row:hover {
   background: var(--background-selectable);
+}
+
+.frames {
+  padding-right: 10px;
 }
 </style>

@@ -338,7 +338,7 @@ const mutations = {
 
   [CASTING_SET_FOR_EPISODES](state, episodes) {
     const casting = {}
-    const castingByType = []
+    const castingByType = {}
     state.castingEpisodes = episodes
     episodes.forEach(episode => {
       casting[episode.id] = []
@@ -350,7 +350,7 @@ const mutations = {
 
   [CASTING_SET_SHOTS](state, shots) {
     const casting = {}
-    const castingByType = []
+    const castingByType = {}
     state.castingSequenceShots = shots
     shots.forEach(shot => {
       casting[shot.id] = []
@@ -362,7 +362,7 @@ const mutations = {
 
   [CASTING_SET_ASSETS](state, assets) {
     const casting = {}
-    const castingByType = []
+    const castingByType = {}
     state.castingAssetTypeAssets = assets
     assets.forEach(asset => {
       casting[asset.id] = []

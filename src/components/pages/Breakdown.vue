@@ -812,7 +812,7 @@ export default {
       } else {
         this.setCastingEpisode(null)
       }
-      this.loadAssets({ all: true, withTasks: false }).then(() => {
+      this.loadAssets({ all: true, withTasks: true }).then(() => {
         this.isLoading = false
         this.displayMoreAssets()
         this.setCastingAssetTypes()

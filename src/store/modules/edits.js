@@ -951,6 +951,17 @@ const mutations = {
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (
+      !validationInfo.x &&
+      validationInfo.task?.column &&
+      state.editMap.get(validationInfo.task.entity.id)
+    ) {
+      const entity = validationInfo.task.entity
+      const taskType = validationInfo.task.column
+      const list = state.displayedEdits.flat()
+      validationInfo.x = list.findIndex(e => e.id === entity.id)
+      validationInfo.y = state.editValidationColumns.indexOf(taskType.id)
+    }
+    if (
       state.editSelectionGrid[0] &&
       state.editSelectionGrid[validationInfo.x]
     ) {
