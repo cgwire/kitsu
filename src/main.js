@@ -8,12 +8,12 @@ import router from '@/router'
 import store from '@/store'
 
 import Autocomplete from 'v-autocomplete'
+import Autosize from 'v-autosize/src/plugin.js'
 import Chart from 'chart.js/auto'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueDragDrop from 'vue-drag-drop'
 import vuescroll from 'vue-scroll'
-import VueTextareaAutosize from 'vue-textarea-autosize'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import 'v-autocomplete/dist/v-autocomplete.css'
@@ -35,11 +35,11 @@ app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket, IO, '/events')
 app.use(Autocomplete)
+app.use(Autosize)
 app.use(Meta)
 app.use(VueChartkick, { adapter: Chart })
 app.use(vuescroll)
 app.use(VueDragDrop)
-app.use(VueTextareaAutosize)
 app.use(VueAnimXYZ)
 
 // Make the current route part of the main state.
