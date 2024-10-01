@@ -110,6 +110,7 @@ export default {
       default: () => {}
     }
   },
+
   emits: ['cancel', 'close', 'generate-token'],
 
   data() {

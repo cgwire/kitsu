@@ -43,6 +43,7 @@ export default {
       type: String
     }
   },
+
   emits: ['enter', 'keyup', 'update:modelValue'],
 
   methods: {

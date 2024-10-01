@@ -9,7 +9,7 @@
         extension: entity.preview_file_extension
       }"
       :is-rounded-top-border="isRoundedTopBorder"
-      @click.native="onVideoClicked()"
+      @click="onVideoClicked()"
     />
     <button-simple
       class="button-play"

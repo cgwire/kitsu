@@ -101,7 +101,6 @@
               :disabled="true"
               :is-editable="isCheckable"
               @remove-task="removeTask"
-              @keyup.native="onChecklistChanged"
               @emit-change="onChecklistChanged"
               @time-code-clicked="onChecklistTimecodeClicked"
               v-if="checklist.length > 0"

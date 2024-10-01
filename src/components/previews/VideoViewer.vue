@@ -6,6 +6,7 @@
       'border-top-left-radius': isRoundedTopBorder ? '10px' : '',
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
+    @click="$emit('click')"
   >
     <div
       class="video-wrapper"
@@ -119,7 +120,9 @@ export default {
       default: false
     }
   },
+
   emits: [
+    'click',
     'duration-changed',
     'frame-update',
     'play-ended',
