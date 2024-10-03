@@ -3,8 +3,8 @@
     <label class="label">{{ label }}</label>
     <div class="control colors">
       <div
-        :ref="'color-' + index"
-        :key="'color-' + index"
+        :ref="`color-${index}`"
+        :key="`color-${index}`"
         :class="{
           color: true,
           selected: modelValue === color

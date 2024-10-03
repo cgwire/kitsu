@@ -400,7 +400,7 @@
       :is-loading-stay="loading.stay"
       :is-success="success.edit"
       @confirm="confirmNewAsset"
-      @confirmAndStay="confirmNewAssetStay"
+      @confirm-and-stay="confirmNewAssetStay"
       @cancel="modals.isNewDisplayed = false"
     />
 

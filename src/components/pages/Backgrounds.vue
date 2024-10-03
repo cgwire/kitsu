@@ -67,6 +67,7 @@ export default {
     return {
       activeTab: 'active',
       backgroundToEdit: {},
+      backgroundToDelete: {},
       modals: {
         edit: false,
         del: false

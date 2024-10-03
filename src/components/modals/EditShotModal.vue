@@ -145,7 +145,7 @@ export default {
     }
   },
 
-  emits: ['cancel', 'confirm', 'confirmAndStay'],
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
 
   data() {
     return {
@@ -206,7 +206,7 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', this.form)
+      this.$emit('confirm-and-stay', this.form)
     },
 
     confirmClicked() {
