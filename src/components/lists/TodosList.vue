@@ -470,12 +470,6 @@ export default {
       return sortPeople(people)
     },
 
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
-    },
-
     formatDate(date) {
       return date ? formatSimpleDate(date) : ''
     },

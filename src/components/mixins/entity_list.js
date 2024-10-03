@@ -10,6 +10,8 @@ import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 
 export const entityListMixin = {
+  emits: ['scroll'],
+
   created() {
     this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
   },

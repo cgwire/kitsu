@@ -139,10 +139,6 @@ export default {
       const isTVShow = project.production_type === 'tvshow'
       const episode = { id: project.first_episode_id }
       return getTaskPath(task, null, isTVShow, episode, this.taskTypeMap)
-    },
-
-    onBodyScroll(event, position) {
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     }
   },
 

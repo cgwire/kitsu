@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
+    <div class="datatable-wrapper">
       <table class="datatable multi-section">
         <thead class="datatable-head">
           <tr>
@@ -234,11 +234,6 @@ export default {
 
     isSoonExpired(expirationDate) {
       return !this.isExpired(expirationDate) && expirationDate < this.nextWeek
-    },
-
-    onBodyScroll(event) {
-      const position = event.target
-      this.$refs.body.style.left = `-${position.scrollLeft}px`
     }
   }
 }
