@@ -554,18 +554,21 @@ export default {
       }
     },
 
-    entities() {
-      if (this.entities.length > 0) {
-        this.loadEntity(0)
-        this.pause()
-        this._setCurrentTime(0)
+    entities: {
+      deep: true,
+      handler() {
+        if (this.entities.length > 0) {
+          this.loadEntity(0)
+          this.pause()
+          this._setCurrentTime(0)
 
-        const entity = this.entities[this.currentIndex]
-        if (entity && !entity.preview_file_id) this.loadNextEntity()
+          const entity = this.entities[this.currentIndex]
+          if (entity && !entity.preview_file_id) this.loadNextEntity()
+        }
+        setTimeout(() => {
+          this.resetHeight()
+        }, 300)
       }
-      setTimeout(() => {
-        this.resetHeight()
-      }, 300)
     },
 
     isHd() {

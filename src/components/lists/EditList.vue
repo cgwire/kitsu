@@ -205,9 +205,9 @@
                 <input
                   type="checkbox"
                   class="mr1"
-                  :checked="selectedEdits.has(edit.id)"
+                  :checked="selectedEdits.has(edit.id) || null"
                   @input="event => toggleLine(edit, event)"
-                  v-show="isCurrentUserManager"
+                  v-if="isCurrentUserManager"
                 />
                 {{
                   episodeMap.get(edit.parent_id)
@@ -226,12 +226,11 @@
             >
               <div class="flexrow">
                 <input
-                  v-if="!isTVShow"
                   type="checkbox"
                   class="mr1"
-                  :checked="selectedEdits.has(edit.id)"
+                  :checked="selectedEdits.has(edit.id) || null"
                   @input="event => toggleLine(edit, event)"
-                  v-show="isCurrentUserManager"
+                  v-if="!isTVShow && isCurrentUserManager"
                 />
                 <entity-thumbnail
                   :entity="edit"
