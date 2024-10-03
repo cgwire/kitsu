@@ -1,4 +1,13 @@
 export const previewRoomMixin = {
+  emits: [
+    'preview-room:add-annotation',
+    'preview-room:join',
+    'preview-room:leave',
+    'preview-room:remove-annotation',
+    'preview-room:update-annotation',
+    'preview-room:update-playing-status'
+  ],
+
   computed: {
     room() {
       return this.previewRoom().room
