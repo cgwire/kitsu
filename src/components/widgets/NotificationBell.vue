@@ -1,5 +1,5 @@
 <template>
-  <div class="notification-bell">
+  <div class="notification-bell" :class="{ active: isNotificationPage }">
     <router-link :to="{ name: 'notifications' }">
       <bell-icon
         class="align-middle"
@@ -36,7 +36,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isNewNotification', 'notificationCount'])
+    ...mapGetters(['isNewNotification', 'notificationCount']),
+
+    isNotificationPage() {
+      return this.$route.name === 'notifications'
+    }
   }
 }
 </script>
@@ -65,6 +69,17 @@ export default {
 
 .notification-bell {
   position: relative;
+  width: 40px;
+  height: 40px;
+
+  &.active {
+    border-radius: 50%;
+    background: var(--background-selectable);
+
+    .dark & {
+      background: $dark-grey-light;
+    }
+  }
 }
 
 .has-no-notifications {

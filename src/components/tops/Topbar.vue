@@ -116,7 +116,7 @@
             <zap-icon />
           </a>
         </div>
-        <notification-bell class="nav-item" />
+        <notification-bell class="nav-item notification-bell" />
         <div class="nav-item">
           <a
             class="help-button"
@@ -981,6 +981,10 @@ export default {
     min-height: 36px;
     width: 36px;
   }
+}
+
+.notification-bell {
+  margin-top: 9px;
 }
 
 @media screen and (max-width: 768px) {

@@ -10,6 +10,7 @@ import {
   MARK_ALL_NOTIFICATIONS_AS_READ,
   NOTIFICATION_ADD_PREVIEW,
   SET_NOTIFICATION_COUNT,
+  TOGGLE_NOTIFICATION_READ_STATUS,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -72,6 +73,14 @@ const actions = {
 
   markAllNotificationsAsRead({ commit }) {
     commit(MARK_ALL_NOTIFICATIONS_AS_READ)
+    return notificationsApi.markAllNotificationsAsRead()
+  },
+
+  toggleNotificationReadStatus({ commit }, notification) {
+    commit(TOGGLE_NOTIFICATION_READ_STATUS, notification)
+    return notificationsApi.updateNotificationReadStatus(
+      notification.id, notification.read
+    )
   }
 }
 
@@ -101,6 +110,9 @@ const mutations = {
     let notificationCount = state.notificationCount - state.notifications.length
     if (notificationCount < 0) notificationCount = 0
     state.notificationCount = notificationCount
+    state.notifications.forEach(notification => {
+      notification.read = true
+    })
   },
 
   [NOTIFICATION_ADD_PREVIEW](state, { commentId, previewId }) {
@@ -115,6 +127,13 @@ const mutations = {
 
   [INCREMENT_NOTIFICATION_COUNTER](state) {
     state.notificationCount = state.notificationCount + 1
+  },
+
+  [TOGGLE_NOTIFICATION_READ_STATUS](state, notification) {
+    notification.read = !notification.read
+    state.notificationCount = notification.read
+      ? state.notificationCount - 1
+      : state.notificationCount + 1
   },
 
   [RESET_ALL](state) {
