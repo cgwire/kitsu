@@ -105,12 +105,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'archivedTaskTypes',
-      'departmentMap',
-      'getTaskType',
-      'taskTypes'
-    ]),
+    ...mapGetters(['archivedTaskTypes', 'departmentMap', 'taskTypes']),
 
     isActiveTab() {
       return this.activeTab === 'active'

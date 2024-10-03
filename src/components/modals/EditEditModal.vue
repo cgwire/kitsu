@@ -103,21 +103,13 @@ export default {
       type: Boolean,
       default: false
     },
-    isLoadingStay: {
-      type: Boolean,
-      default: false
-    },
-    isSuccess: {
-      type: Boolean,
-      default: false
-    },
     editToEdit: {
       type: Object,
       default: () => {}
     }
   },
 
-  emits: ['cancel', 'confirm', 'confirmAndStay'],
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
 
   data() {
     return {
@@ -139,9 +131,7 @@ export default {
       'currentEpisode',
       'editCreated',
       'editMetadataDescriptors',
-      'edits',
       'episodes',
-      'getOpenProductionOptions',
       'isTVShow',
       'openProductions'
     ]),
@@ -168,7 +158,7 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', this.form)
+      this.$emit('confirm-and-stay', this.form)
     },
 
     confirmClicked() {

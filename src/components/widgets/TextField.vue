@@ -1,7 +1,7 @@
 <template>
   <div class="field" :class="{ 'is-inline': isInline }">
     <label class="label" v-if="label">{{ label }}</label>
-    <label class="label empty-label" v-if="emptyLabel">A</label>
+    <label class="label empty-label" v-if="emptyLabel">&nbsp;</label>
     <p
       class="control"
       :class="{

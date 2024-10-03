@@ -682,7 +682,7 @@
             <color-picker
               :is-open="isShowingPalette"
               :color="textColor"
-              @TogglePalette="onPickColor"
+              @toggle-palette="onPickColor"
               @change="onChangeTextColor"
             />
           </div>
@@ -708,7 +708,7 @@
             <color-picker
               :is-open="isShowingPalette"
               :color="color"
-              @TogglePalette="onPickColor"
+              @toggle-palette="onPickColor"
               @change="onChangeColor"
             />
           </div>

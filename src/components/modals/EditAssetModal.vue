@@ -45,6 +45,8 @@
             ref="descriptionField"
             :label="$t('assets.fields.description')"
             v-model="form.description"
+            @keyup.ctrl.enter="runConfirmation"
+            @keyup.meta.enter="runConfirmation"
           />
           <metadata-field
             :key="descriptor.id"
@@ -156,7 +158,7 @@ export default {
     }
   },
 
-  emits: ['cancel', 'confirm', 'confirmAndStay'],
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
 
   data() {
     return {
@@ -228,7 +230,7 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', {
+      this.$emit('confirm-and-stay', {
         ...this.form,
         is_shared: this.form.is_shared === 'true'
       })
