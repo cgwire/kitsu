@@ -6,7 +6,7 @@
       'is-true': localValue,
       small: isSmall
     }"
-    :disabled="disabled"
+    :disabled="disabled || null"
     @click="onClick"
   >
     <span class="icon-wrapper flexrow-item">

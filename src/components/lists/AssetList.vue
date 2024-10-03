@@ -261,10 +261,10 @@
                 <input
                   type="checkbox"
                   class="flexrow-item"
-                  :checked="selectedAssets.has(asset.id)"
+                  :checked="selectedAssets.has(asset.id) || null"
                   :disabled="asset.shared"
                   @input="event => toggleLine(asset, event)"
-                  v-show="isCurrentUserManager"
+                  v-if="isCurrentUserManager"
                 />
                 <entity-thumbnail
                   class="entity-thumbnail flexrow-item"
@@ -962,12 +962,18 @@ export default {
   },
 
   watch: {
-    displayedAssets() {
-      this.$options.lineIndex = {}
+    displayedAssets: {
+      deep: true,
+      handler() {
+        this.$options.lineIndex = {}
+      }
     },
 
-    validationColumns() {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+    validationColumns: {
+      deep: true,
+      handler() {
+        this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
+      }
     },
 
     stickedColumns() {
