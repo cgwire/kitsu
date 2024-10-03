@@ -364,7 +364,7 @@ export default {
     ValidationTag
   },
 
-  emits: ['scroll', 'task-selected'],
+  emits: ['task-selected'],
 
   data() {
     return {
@@ -713,7 +713,6 @@ export default {
 
     onBodyScroll(event) {
       const position = event.target
-      this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {
