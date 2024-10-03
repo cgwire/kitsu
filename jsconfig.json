@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "checkJs": false,
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "resolveJsonModule": true,
+    "target": "ES2021"
+  },
+  "vueCompilerOptions": {
+    "target": "auto"
+  },
+  "include": ["src/**/*", "tests/**/*"]
+}
