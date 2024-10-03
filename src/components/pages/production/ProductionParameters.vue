@@ -126,6 +126,13 @@
           v-model="form.is_set_preview_automated"
           v-if="currentProduction && currentProduction.id"
         />
+        <combobox-boolean
+          ref="isPublishDefault"
+          :label="$t('productions.fields.is_publish_default')"
+          @enter="runConfirmation"
+          v-model="form.is_publish_default_for_artists"
+          v-if="currentProduction && currentProduction.id"
+        />
         <text-field
           ref="maxRetakesField"
           type="number"
@@ -206,6 +213,7 @@ export default {
         is_clients_isolated: 'false',
         is_preview_download_allowed: 'false',
         is_set_preview_automated: 'false',
+        is_publish_default_for_artists: 'false',
         ratio: '',
         resolution: '',
         production_type: 'short'
@@ -292,6 +300,10 @@ export default {
             .is_set_preview_automated
             ? 'true'
             : 'false',
+          is_publish_default_for_artists: this.currentProduction
+            .is_publish_default_for_artists
+            ? 'true'
+            : 'false',
           ratio: this.currentProduction.ratio,
           resolution: this.currentProduction.resolution,
           homepage: this.currentProduction.homepage
@@ -309,6 +321,7 @@ export default {
           is_clients_isolated: 'false',
           is_preview_download_allowed: 'false',
           is_set_preview_automated: 'false',
+          is_publish_default_for_artists: 'false',
           fps: '',
           ratio: '',
           resolution: '',

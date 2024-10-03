@@ -46,6 +46,8 @@ export default {
       is_preview_download_allowed:
         production.is_preview_download_allowed === 'true',
       is_set_preview_automated: production.is_set_preview_automated === 'true',
+      is_publish_default_for_artists:
+        production.is_publish_default_for_artists === 'true',
       homepage: production.homepage
     }
     return client.pput(`/api/data/projects/${production.id}`, data)
