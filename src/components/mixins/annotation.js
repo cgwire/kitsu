@@ -28,6 +28,8 @@ if (fabric) {
 }
 
 export const annotationMixin = {
+  emits: ['annotation-changed'],
+
   data() {
     return {
       fabricCanvas: null,

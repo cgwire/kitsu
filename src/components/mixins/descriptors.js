@@ -5,6 +5,14 @@
 import { mapGetters } from 'vuex'
 
 export const descriptorMixin = {
+  emits: [
+    'add-metadata',
+    'change-sort',
+    'delete-metadata',
+    'edit-metadata',
+    'metadata-changed'
+  ],
+
   computed: {
     ...mapGetters([
       'isCurrentUserSupervisor',
