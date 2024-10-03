@@ -64,6 +64,7 @@
           }"
           :key="searchQuery.id"
           :style="{ backgroundColor: `${group.color}23` }"
+          :title="getSearchQueryTitle(searchQuery)"
           @click="changeSearch(searchQuery)"
           v-for="searchQuery in group.queries"
           v-else
@@ -98,6 +99,7 @@
         'is-shared': searchQuery.is_shared
       }"
       :key="searchQuery.id"
+      :title="getSearchQueryTitle(searchQuery)"
       @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
@@ -211,7 +213,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+    ...mapGetters([
+      'currentProduction',
+      'isCurrentUserManager',
+      'personMap'
+    ]),
 
     sortedFilters() {
       return sortByName([...this.queries])
@@ -340,6 +346,19 @@ export default {
 
     toggleFilterGroup(group) {
       this.toggleGroupId = this.toggleGroupId !== group.id ? group.id : null
+    },
+
+    getSearchQueryTitle(searchQuery) {
+      if (searchQuery.is_shared) {
+        let title = 'Shared by '
+        const person = this.personMap.get(searchQuery.person_id)
+        if (person) {
+          title += person.full_name
+        }
+        return title
+      } else {
+        return null
+      }
     }
   }
 }
