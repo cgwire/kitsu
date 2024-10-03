@@ -28,6 +28,9 @@
             <th class="frames number-cell" ref="th-frames" v-if="isShots">
               {{ $t('tasks.fields.frames') }}
             </th>
+            <th class="difficulty number-cell" ref="th-difficulty">
+              {{ $t('tasks.fields.difficulty') }}
+            </th>
             <th
               ref="th-estimation"
               class="estimation number-cell"
@@ -118,6 +121,25 @@
             </td>
             <td class="frames number-cell" v-if="isShots">
               {{ getEntity(task.entity.id).nb_frames }}
+            </td>
+            <td class="difficulty number-cell">
+              <combobox
+                class="difficulty-combobox"
+                :options="difficultyOptions"
+                :with-margin="false"
+                :value="task.difficulty"
+                @input="updateDifficulty($event)"
+                v-if="isInDepartment(task) && selectionGrid[task.id]"
+                v-models="task.difficulty"
+              />
+              <span
+                class="difficulty number-cell"
+                v-for="index in task.difficulty"
+                :key="task.id + 'difficulty' + index"
+                v-else
+              >
+                &bull;
+              </span>
             </td>
             <td class="estimation number-cell">
               <input
@@ -317,6 +339,7 @@ import {
 import { formatListMixin } from '@/components/mixins/format'
 import { domMixin } from '@/components/mixins/dom'
 
+import Combobox from '@/components/widgets/Combobox.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -331,6 +354,7 @@ export default {
   mixins: [domMixin, formatListMixin],
 
   components: {
+    Combobox,
     DateField,
     EntityPreview,
     EntityThumbnail,
@@ -342,6 +366,13 @@ export default {
 
   data() {
     return {
+      difficultyOptions: [
+        { label: '•', value: 1 },
+        { label: '••', value: 2 },
+        { label: '•••', value: 3 },
+        { label: '••••', value: 4 },
+        { label: '•••••', value: 5 }
+      ],
       lastSelection: null,
       page: 1,
       selectionGrid: {},
@@ -531,7 +562,9 @@ export default {
       return (
         (data.start_date !== undefined && taskStart !== data.start_date) ||
         (data.due_date !== undefined && taskDue !== data.due_date) ||
-        (data.estimation !== undefined && task.estimation !== data.estimation)
+        (data.estimation !== undefined && task.estimation !== data.estimation) ||
+        (data.difficulty !== undefined && task.difficulty !== data.difficulty)
+
       )
     },
 
@@ -560,7 +593,8 @@ export default {
       Object.keys(this.selectionGrid).forEach(taskId => {
         let data = {
           start_date: null,
-          due_date: null
+          due_date: null,
+          difficulty: null
         }
         const task = this.taskMap.get(taskId)
         const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
@@ -582,6 +616,9 @@ export default {
             start_date: null,
             due_date: dueDate
           }
+        }
+        if (task.difficulty) {
+          data.difficulty = task.difficulty
         }
         if (this.isTaskChanged(task, data)) {
           this.updateTask({ taskId, data }).catch(console.error)
@@ -644,6 +681,21 @@ export default {
       })
     },
 
+    updateDifficulty(difficulty) {
+      this.updateTasksDifficulty({ difficulty })
+    },
+
+    updateTasksDifficulty({ difficulty }) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        const task = this.taskMap.get(taskId)
+        let data = { difficulty }
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data }).catch(console.error)
+        }
+      })
+    },
+
+
     formatDate(date) {
       if (date) return moment(date).format('YYYY-MM-DD')
       return ''
@@ -690,10 +742,26 @@ export default {
         event &&
         event.target &&
         // Dirty hack needed to make date picker and inputs work properly
-        (['INPUT'].includes(event.target.nodeName) ||
-          (event.target.parentNode &&
-            ['HEADER'].includes(event.target.parentNode.nodeName)) ||
-          ['cell day selected'].includes(event.target.className))
+        (
+          ['INPUT'].includes(event.target.nodeName) ||
+          // Combo box should not trigger selection
+          event.target.className.indexOf('selected-line') >= 0 ||
+          event.target.className.indexOf('down-icon') >= 0 ||
+          event.target.className.indexOf('flexrow') >= 0 ||
+          event.target.className.indexOf('c-mask') >= 0 ||
+          event.target.className.indexOf('option-line') >= 0 ||
+          event.target.className.indexOf('combobox') >= 0 ||
+          event.target.className === '' ||
+          (
+            event.target.parentNode &&
+            ['difficulty'].includes(event.target.className)
+          ) ||
+          (
+            event.target.parentNode &&
+            ['HEADER'].includes(event.target.parentNode.nodeName)
+          ) ||
+            ['cell day selected'].includes(event.target.className)
+        )
       )
         return
       const isSelected = this.selectionGrid[task.id]
