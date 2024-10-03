@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table-header-menu
         ref="headerMenu"
         :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"
@@ -695,7 +695,8 @@ export default {
       })
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight

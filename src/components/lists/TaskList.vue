@@ -3,7 +3,7 @@
     <div
       ref="body"
       class="datatable-wrapper"
-      v-scroll="onBodyScroll"
+      @scroll.passive="onBodyScroll"
       v-if="!isContactSheet"
     >
       <table class="datatable">
@@ -711,7 +711,8 @@ export default {
       )
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight

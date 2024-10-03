@@ -13,7 +13,6 @@ import Chart from 'chart.js/auto'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueDragDrop from 'vue-drag-drop'
-import vuescroll from 'vue-scroll'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import 'v-autocomplete/dist/v-autocomplete.css'
@@ -38,7 +37,6 @@ app.use(Autocomplete)
 app.use(Autosize)
 app.use(Meta)
 app.use(VueChartkick, { adapter: Chart })
-app.use(vuescroll)
 app.use(VueDragDrop)
 app.use(VueAnimXYZ)
 
