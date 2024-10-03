@@ -282,9 +282,9 @@
                 <input
                   type="checkbox"
                   class="mr1"
-                  :checked="selectedShots.has(shot.id)"
+                  :checked="selectedShots.has(shot.id) || null"
                   @input="event => toggleLine(shot, event)"
-                  v-show="isCurrentUserManager"
+                  v-if="isCurrentUserManager"
                 />
                 <entity-thumbnail
                   :entity="shot"

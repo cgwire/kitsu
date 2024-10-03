@@ -146,6 +146,7 @@ export default {
 
   watch: {
     remainingBackgrounds: {
+      deep: true,
       immediate: true,
       handler() {
         this.resetSelection()

@@ -129,12 +129,15 @@ export default {
   },
 
   watch: {
-    people() {
-      this.item = this.item
-        ? this.people.find(person => person.id === this.item.id)
-        : null
-      this.items = this.people
-      this.index = buildNameIndex(this.people)
+    people: {
+      deep: true,
+      handler() {
+        this.item = this.item
+          ? this.people.find(person => person.id === this.item.id)
+          : null
+        this.items = this.people
+        this.index = buildNameIndex(this.people)
+      }
     }
   }
 }

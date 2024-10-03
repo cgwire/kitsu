@@ -174,6 +174,7 @@ export default {
 
   watch: {
     options: {
+      deep: true,
       immediate: true,
       handler() {
         if (this.options.length > 0) {
