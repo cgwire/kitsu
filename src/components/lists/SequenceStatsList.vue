@@ -185,8 +185,6 @@ export default {
     }
   },
 
-  emits: ['scroll'],
-
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -232,17 +230,6 @@ export default {
         isStats = isStats || this.sequenceStats[entryId][statKey]
       })
       return isStats
-    },
-
-    onBodyScroll(event) {
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-    },
-
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
     },
 
     editPath(sequenceId) {

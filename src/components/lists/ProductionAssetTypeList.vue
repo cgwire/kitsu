@@ -170,8 +170,6 @@ export default {
     TableInfo
   },
 
-  emits: ['scroll'],
-
   computed: {
     ...mapGetters([
       'assetTypeSearchText',
@@ -211,17 +209,6 @@ export default {
 
     onHeaderScroll(event, position) {
       this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
-    onBodyScroll(event) {
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-    },
-
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
     },
 
     taskTypePath(taskTypeId) {

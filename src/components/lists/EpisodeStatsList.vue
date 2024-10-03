@@ -254,8 +254,6 @@ export default {
     }
   },
 
-  emits: ['scroll'],
-
   data() {
     return {
       expanded: {},
@@ -371,15 +369,6 @@ export default {
 
     isStats(entryId, columnId) {
       return this.episodeStats[entryId] && this.episodeStats[entryId][columnId]
-    },
-
-    onBodyScroll(event) {
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-    },
-
-    setScrollPosition(scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
     },
 
     taskTypePath(taskTypeId) {
