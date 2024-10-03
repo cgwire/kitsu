@@ -10,7 +10,13 @@ import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 
 export const entityListMixin = {
-  emits: ['scroll'],
+  emits: [
+    'change-sort',
+    'delete-all-tasks',
+    'field-changed',
+    'keep-task-panel-open',
+    'scroll'
+  ],
 
   created() {
     this.initHiddenColumns(this.validationColumns, this.hiddenColumns)

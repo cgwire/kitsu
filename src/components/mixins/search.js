@@ -3,6 +3,8 @@
  * list.
  */
 export const searchMixin = {
+  emits: ['change'],
+
   methods: {
     changeSearch(searchQuery) {
       this.searchField.setValue(searchQuery.search_query)

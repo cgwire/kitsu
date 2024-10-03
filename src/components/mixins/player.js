@@ -8,6 +8,8 @@ import {
 } from '@/lib/video'
 
 export const playerMixin = {
+  emits: ['annotations-refreshed'],
+
   data() {
     return {
       annotations: [],
