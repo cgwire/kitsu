@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table-header-menu
         ref="headerMenu"
         :is-minimized="hiddenColumns[lastHeaderMenuDisplayed]"

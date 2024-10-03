@@ -32,7 +32,7 @@
       />
     </div>
 
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable multi-section">
         <thead class="datatable-head">
           <tr>
@@ -355,7 +355,8 @@ export default {
   },
 
   methods: {
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {

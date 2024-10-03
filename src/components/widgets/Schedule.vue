@@ -303,7 +303,7 @@
         <div
           ref="timeline-content-wrapper"
           class="timeline-content-wrapper"
-          v-scroll="onTimelineScroll"
+          @scroll.passive="onTimelineScroll"
         >
           <div
             ref="timeline-content"
@@ -1370,7 +1370,8 @@ export default {
       }
     },
 
-    onTimelineScroll(event, position) {
+    onTimelineScroll(event) {
+      const position = event.target
       const newTop = position.scrollTop
       this.entityList.scrollTop = newTop
       const newLeft = position.scrollLeft

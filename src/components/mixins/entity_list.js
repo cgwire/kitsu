@@ -84,7 +84,8 @@ export const entityListMixin = {
   },
 
   methods: {
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       this.$emit('scroll', position.scrollTop)
     },
 

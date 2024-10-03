@@ -1,7 +1,7 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="notifications page" v-scroll="onBodyScroll" ref="body">
+      <div class="notifications page" @scroll.passive="onBodyScroll" ref="body">
         <div class="flexrow">
           <combobox-task-type
             class="flexrow-item selector"
@@ -468,7 +468,8 @@ export default {
         })
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {

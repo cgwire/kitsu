@@ -1,7 +1,7 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="news page" ref="body" v-scroll="onBodyScroll">
+      <div class="news page" ref="body" @scroll.passive="onBodyScroll">
         <div class="timeline-wrapper">
           <div class="has-text-right filler filter-button">
             <button-simple
@@ -663,7 +663,8 @@ export default {
       }
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 200) {
