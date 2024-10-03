@@ -36,6 +36,7 @@
             v-model.trim="form.name"
           />
           <boolean-field
+            class="mb2"
             :label="$t('backgrounds.fields.is_default')"
             @enter="confirmClicked"
             v-model="form.is_default"
