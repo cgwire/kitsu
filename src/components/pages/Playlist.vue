@@ -8,7 +8,7 @@
           column: true,
           toggled: isListToggled
         }"
-        v-scroll="onPlaylistListScroll"
+        @scroll.passive="onPlaylistListScroll"
       >
         <div class="flexrow top-section">
           <combobox-task-type
@@ -301,7 +301,7 @@
           v-if="
             (isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity
           "
-          v-scroll="onBodyScroll"
+          @scroll.passive="onBodyScroll"
         >
           <spinner
             class="mt2"
@@ -778,10 +778,11 @@ export default {
       }
     },
 
-    onPlaylistListScroll(event, position) {
+    onPlaylistListScroll(event) {
       if (this.$options.silentMore) return
       const listEl = this.$refs.playlistList
       const maxHeight = listEl.scrollHeight - listEl.offsetHeight
+      const position = event.target
       if (maxHeight < position.scrollTop + 20) {
         this.$options.silentMore = true
         this.page++
@@ -1247,7 +1248,8 @@ export default {
       })
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.entityListContent.scrollHeight -
         this.$refs.entityListContent.offsetHeight

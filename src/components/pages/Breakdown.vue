@@ -103,7 +103,7 @@
         <div
           ref="casting-header"
           class="casting-header flexrow"
-          v-scroll="onCastingHeaderScroll"
+          @scroll.passive="onCastingHeaderScroll"
           v-if="!isLoading"
         >
           <div
@@ -223,7 +223,7 @@
         <div
           ref="casting-list"
           class="casting-list"
-          v-scroll="onCastingScroll"
+          @scroll.passive="onCastingScroll"
           v-if="!isLoading"
         >
           <div class="shot-lines">
@@ -258,7 +258,7 @@
 
       <div
         ref="asset-list"
-        v-scroll="onAssetListScroll"
+        @scroll.passive="onAssetListScroll"
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
@@ -1009,9 +1009,10 @@ export default {
       }
     },
 
-    onAssetListScroll(event, position) {
+    onAssetListScroll(event) {
       const assetList = this.$refs['asset-list']
       const maxHeight = assetList.scrollHeight - assetList.offsetHeight
+      const position = event.target
       if (maxHeight < position.scrollTop + 100) {
         this.displayMoreAssets()
       }
@@ -1538,11 +1539,13 @@ export default {
       })
     },
 
-    onCastingHeaderScroll(event, position) {
+    onCastingHeaderScroll(event) {
+      const position = event.target
       this.$refs['casting-list'].scrollLeft = position.scrollLeft
     },
 
-    onCastingScroll(event, position) {
+    onCastingScroll(event) {
+      const position = event.target
       this.$refs['casting-header'].scrollLeft = position.scrollLeft
     }
   },

@@ -30,7 +30,7 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" />
 
-    <div v-scroll="onBodyScroll" v-if="previewFiles.length > 0">
+    <div @scroll.passive="onBodyScroll" v-if="previewFiles.length > 0">
       <table class="datatable">
         <tbody class="datatable-body">
           <tr
@@ -128,7 +128,8 @@ export default {
   methods: {
     ...mapActions(['loadTask', 'markBroken']),
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     },
 
