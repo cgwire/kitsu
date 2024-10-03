@@ -1,23 +1,15 @@
 <template>
   <div class="field">
-    <div
-      :class="{
-        'checkbox-field': true,
-        toggle: toggle
-      }"
-    >
+    <div class="checkbox-field" :class="{ toggle }">
       <input
-        class="visuallyhidden"
-        ref="checkbox"
+        class="hidden"
         type="checkbox"
         :id="id"
-        :checked="checked"
+        :checked="modelValue || null"
         :disabled="disabled"
-        @change="updateStatus()"
+        @change="onChange"
       />
-      <label :for="id"
-        ><span>{{ label }}</span></label
-      >
+      <label :for="id">{{ label }}</label>
     </div>
   </div>
 </template>
@@ -25,11 +17,6 @@
 <script>
 export default {
   name: 'checkbox',
-
-  model: {
-    prop: 'checked',
-    event: 'change'
-  },
 
   props: {
     disabled: {
@@ -41,7 +28,7 @@ export default {
       type: String,
       required: true
     },
-    checked: {
+    modelValue: {
       default: false,
       type: Boolean
     },
@@ -51,11 +38,22 @@ export default {
     }
   },
 
-  emits: ['change'],
+  data() {
+    return {
+      id: null
+    }
+  },
+
+  mounted() {
+    this.id = this.$.uid
+  },
+
+  emits: ['change', 'update:modelValue'],
 
   methods: {
-    updateStatus() {
-      this.$emit('change', this.$refs.checkbox.checked)
+    onChange(event) {
+      this.$emit('update:modelValue', event.target.checked)
+      this.$emit('change', event.target.checked)
     }
   }
 }
