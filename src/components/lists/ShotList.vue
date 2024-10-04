@@ -321,7 +321,7 @@
                 :entity="shot"
                 :descriptor="descriptor"
                 :indexes="{ i, j, k }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -583,7 +583,7 @@
                 :entity="shot"
                 :descriptor="descriptor"
                 :indexes="{ i, j, k }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -755,6 +755,7 @@ export default {
     'delete-clicked',
     'edit-clicked',
     'field-changed',
+    'metadata-changed',
     'restore-clicked',
     'scroll',
     'sequence-clicked',

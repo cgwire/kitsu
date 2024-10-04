@@ -294,7 +294,7 @@
                 :entity="edit"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -347,7 +347,7 @@
                 :entity="edit"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -519,6 +519,7 @@ export default {
     'delete-clicked',
     'edit-clicked',
     'edit-history',
+    'metadata-changed',
     'restore-clicked',
     'scroll'
   ],
