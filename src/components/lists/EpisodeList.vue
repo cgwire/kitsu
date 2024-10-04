@@ -257,7 +257,7 @@
                 :entity="episode"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -312,7 +312,7 @@
                 :entity="episode"
                 :descriptor="descriptor"
                 :indexes="{ i, j }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -519,7 +519,13 @@ export default {
     }
   },
 
-  emits: ['create-tasks', 'delete-clicked', 'edit-clicked', 'field-changed'],
+  emits: [
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'field-changed',
+    'metadata-changed'
+  ],
 
   data() {
     return {

@@ -312,7 +312,7 @@
                 :entity="asset"
                 :descriptor="descriptor"
                 :indexes="{ i, j, k }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -446,7 +446,7 @@
                 :entity="asset"
                 :descriptor="descriptor"
                 :indexes="{ i, j, k }"
-                v-on="$listeners"
+                @metadata-changed="$emit('metadata-changed', $event)"
               />
             </td>
 
@@ -620,6 +620,7 @@ export default {
     'create-tasks',
     'delete-clicked',
     'edit-clicked',
+    'metadata-changed',
     'new-clicked',
     'restore-clicked',
     'scroll'
