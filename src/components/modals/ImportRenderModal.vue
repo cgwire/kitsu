@@ -124,8 +124,9 @@
                   overwrite: updateData && existingData(index),
                   disabled: !updateData && existingData(index)
                 }"
-                v-for="(line, index) in startFrom(parsedCsv, 1)"
-                v-if="line && line.length > 1"
+                v-for="(line, index) in parsedCsv
+                  .slice(1)
+                  .filter(line => line.length > 1)"
                 :key="`line-${index}`"
               >
                 <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
@@ -334,10 +335,6 @@ export default {
 
     onReupload() {
       this.$emit('reupload')
-    },
-
-    startFrom(arr, index) {
-      return arr.slice(index)
     },
 
     stateColumn(data) {
