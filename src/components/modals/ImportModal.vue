@@ -38,28 +38,33 @@
           </ul>
         </div>
 
-        <tabs @update="onTabUpdate">
-          <tab :name="$t('main.csv.tab_select_file')" :selected="true">
-            <p>
-              {{ $t('main.csv.select_file') }}
-            </p>
-            <file-upload
-              @fileselected="onFileSelected"
-              :label="$t('main.csv.upload_file')"
-              ref="inputFile"
-            />
-          </tab>
-          <tab :name="$t('main.csv.tab_paste_code')">
-            <p>
-              {{ $t('main.csv.paste_code') }}
-            </p>
-            <textarea
-              class="paste-area"
-              :placeholder="pasteAreaPlaceholder"
-              v-model="pastedCode"
-            ></textarea>
-          </tab>
-        </tabs>
+        <div class="tabs">
+          <ul>
+            <li
+              :class="{ 'is-active': activeTab === tab.id }"
+              v-for="tab in tabs"
+              :key="`tab-${tab.id}`"
+            >
+              <a @click="activeTab = tab.id">{{ tab.name }}</a>
+            </li>
+          </ul>
+        </div>
+        <div v-show="activeTab === 'file'">
+          <p>{{ $t('main.csv.select_file') }}</p>
+          <file-upload
+            @fileselected="onFileSelected"
+            :label="$t('main.csv.upload_file')"
+            ref="inputFile"
+          />
+        </div>
+        <div v-show="activeTab === 'text'">
+          <p>{{ $t('main.csv.paste_code') }}</p>
+          <textarea
+            class="paste-area"
+            :placeholder="pasteAreaPlaceholder"
+            v-model="pastedCode"
+          ></textarea>
+        </div>
 
         <modal-footer
           :confirm-label="$t('main.csv.preview')"
@@ -80,8 +85,6 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
-import Tab from '@/components/widgets/Tab.vue'
-import Tabs from '@/components/widgets/Tabs.vue'
 
 export default {
   name: 'import-modal',
@@ -90,9 +93,7 @@ export default {
 
   components: {
     FileUpload,
-    ModalFooter,
-    Tab,
-    Tabs
+    ModalFooter
   },
 
   emits: ['cancel', 'confirm'],
@@ -101,7 +102,17 @@ export default {
     return {
       formData: null,
       pastedCode: '',
-      tabs: []
+      activeTab: 'file',
+      tabs: [
+        {
+          id: 'file',
+          name: this.$t('main.csv.tab_select_file')
+        },
+        {
+          id: 'text',
+          name: this.$t('main.csv.tab_paste_code')
+        }
+      ]
     }
   },
 
@@ -138,31 +149,18 @@ export default {
 
   computed: {
     pasteAreaPlaceholder() {
-      let placeholder = this.columns.toString()
-      placeholder = placeholder.replace(/,/g, ';')
-      return placeholder
+      return this.columns.join(';')
     }
   },
 
   methods: {
-    onTabUpdate(tabs) {
-      this.tabs = tabs
-    },
-
     onFileSelected(formData) {
       this.formData = formData
     },
 
     onConfirmClicked() {
-      let mode = ''
-      let data = null
-      if (this.tabs[0].isActive === true) {
-        data = this.formData
-        mode = 'file'
-      } else if (this.tabs[1].isActive === true) {
-        data = this.pastedCode
-        mode = 'text'
-      }
+      const mode = this.activeTab
+      const data = mode === 'file' ? this.formData : this.pastedCode
       this.$emit('confirm', data, mode)
     },
 
@@ -187,6 +185,10 @@ export default {
 
 .error {
   margin-top: 1em;
+}
+
+.tabs ul {
+  margin-left: 0;
 }
 
 .paste-area {
