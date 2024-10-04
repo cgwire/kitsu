@@ -395,7 +395,7 @@ export default {
     }
   },
 
-  emits: ['comment-added', 'time-code-clicked'],
+  emits: ['comment-added', 'task-removed', 'time-code-clicked'],
 
   data() {
     return {

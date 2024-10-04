@@ -630,6 +630,7 @@ export default {
       type: 'asset',
       columnSelectorDisplayed: false,
       hiddenColumns: {},
+      isSelectableMap: {},
       lastSelection: null,
       lastHeaderMenuDisplayed: null,
       lastMetadaDataHeaderMenuDisplayed: null,
