@@ -83,7 +83,6 @@
                   empty-width="38px"
                   empty-height="30px"
                   :title="playlist.name"
-                  with-link="false"
                 />
                 <div class="flerxow-item ml05">
                   {{ playlist.name }}
