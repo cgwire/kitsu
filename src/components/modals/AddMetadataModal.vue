@@ -469,9 +469,3 @@ export default {
   margin: 0.5em 0.2em;
 }
 </style>
-
-<style lang="scss">
-.checklist-entry.checked .checklist-text {
-  text-decoration: none !important;
-}
-</style>

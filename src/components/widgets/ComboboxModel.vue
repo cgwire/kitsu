@@ -70,7 +70,9 @@ export default {
 
     reset() {
       if (this.models.length > 0) {
-        this.currentModelId = this.models[0].id
+        this.currentModelId =
+          this.models.find(model => model.id === this.modelValue.id) ??
+          this.models[0].id
         this.modelMap = {}
         this.modelOptions = this.models.map(model => ({
           label: model.name,

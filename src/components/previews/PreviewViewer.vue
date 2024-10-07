@@ -55,7 +55,6 @@
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
       :is-comparing="isComparing"
-      :is-comparison-overlay="isComparisonOverlay"
       :light="isLight"
       :margin-bottom="marginBottom"
       :panzoom="true"
