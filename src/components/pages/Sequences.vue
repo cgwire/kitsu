@@ -390,7 +390,6 @@ export default {
       'productionSequenceTaskTypes',
       'sequenceMap',
       'sequenceFilledColumns',
-      'sequencesCsvFormData',
       'sequenceSearchText',
       'sequenceValidationColumns',
       'sequenceListScrollPosition',

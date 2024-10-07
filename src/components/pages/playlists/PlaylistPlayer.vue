@@ -680,7 +680,6 @@
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
             <color-picker
-              :is-open="isShowingPalette"
               :color="textColor"
               @toggle-palette="onPickColor"
               @change="onChangeTextColor"
@@ -698,7 +697,6 @@
         <transition name="slide">
           <div class="annotation-tools" v-show="isDrawing">
             <pencil-picker
-              :is-open="isShowingPencilPalette"
               :pencil="pencil"
               :sizes="pencilPalette"
               @toggle-palette="onPickPencil"
@@ -706,7 +704,6 @@
             />
 
             <color-picker
-              :is-open="isShowingPalette"
               :color="color"
               @toggle-palette="onPickColor"
               @change="onChangeColor"
