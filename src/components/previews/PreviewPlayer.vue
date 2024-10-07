@@ -48,7 +48,6 @@
               :is-light="light"
               :is-muted="isMuted"
               :is-object-background="isObjectBackground"
-              :is-ordering="isOrdering"
               :is-repeating="isRepeating"
               :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
@@ -78,7 +77,6 @@
               :is-light="light"
               :is-hd="isHd"
               :is-muted="true"
-              :is-ordering="isOrdering"
               :is-repeating="isRepeating"
               :margin-bottom="marginBottom"
               :preview="previewToCompare"
@@ -283,7 +281,6 @@
                 v-show="isTyping && (!light || fullScreen)"
               >
                 <color-picker
-                  :is-open="isShowingPalette"
                   :color="textColor"
                   @toggle-palette="onPickColor"
                   @change="onChangeTextColor"
@@ -306,15 +303,12 @@
                 v-show="isDrawing && (!light || fullScreen)"
               >
                 <pencil-picker
-                  :is-open="isShowingPencilPalette"
                   :pencil="pencil"
                   :sizes="pencilPalette"
                   @toggle-palette="onPickPencil"
                   @change="onChangePencil"
                 />
-
                 <color-picker
-                  :is-open="isShowingPalette"
                   :color="color"
                   @toggle-palette="onPickColor"
                   @change="onChangeColor"
@@ -751,6 +745,7 @@ export default {
       'currentProduction',
       'getProductionBackgrounds',
       'isCurrentUserArtist',
+      'isTVShow',
       'organisation',
       'selectedConcepts',
       'user'

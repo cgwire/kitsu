@@ -24,7 +24,7 @@
                 ? option.value
                 : option.label
             "
-            :selected="value === option.value"
+            :selected="modelValue === option.value"
           >
             {{ getOptionLabel(option) }}
           </option>

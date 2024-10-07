@@ -89,7 +89,6 @@
         </div>
         <div class="column">
           <setting-importer
-            :is-import-loading="loading.import"
             :items="remainingTaskTypesForEntity"
             :loading-import="loading.import"
             @import-from-production="importTaskTypesFromProduction"

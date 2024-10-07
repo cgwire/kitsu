@@ -269,8 +269,11 @@ export default {
       }
     },
 
-    searchSequenceFilters() {
-      this.computeSequenceStats()
+    searchSequenceFilters: {
+      deep: true,
+      handler() {
+        this.computeSequenceStats()
+      }
     }
   },
 

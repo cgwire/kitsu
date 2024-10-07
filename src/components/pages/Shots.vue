@@ -139,8 +139,6 @@
     <manage-shots-modal
       :active="modals.isManageDisplayed"
       :is-loading="loading.manage"
-      :is-error="false"
-      :is-success="false"
       @add-episode="addEpisode"
       @add-sequence="addSequence"
       @add-shot="addShot"
@@ -392,6 +390,7 @@ export default {
       selectedDepartment: 'ALL',
       shotToDelete: null,
       shotToEdit: null,
+      shotToRestore: null,
       taskTypeForTaskDeletion: null,
       departmentFilter: [],
       modals: {

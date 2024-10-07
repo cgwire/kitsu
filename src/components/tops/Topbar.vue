@@ -132,6 +132,7 @@
             :is-lazy="false"
             :is-link="false"
             :person="user"
+            v-if="user"
           />
         </div>
       </div>

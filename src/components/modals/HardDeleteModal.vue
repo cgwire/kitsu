@@ -34,7 +34,7 @@
               'is-danger': true,
               'is-loading': isLoading
             }"
-            :disabled="isLocked"
+            :disabled="isLocked || null"
             @click="$emit('confirm', selectionOnly === 'true')"
           >
             {{ $t('main.confirmation') }}

@@ -270,6 +270,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'displayedEpisodesLength',
       'episodeSearchText',
@@ -278,6 +279,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
+      'isTVShow',
       'taskTypeMap'
     ]),
 
@@ -407,17 +409,20 @@ export default {
   },
 
   watch: {
-    entries() {
-      this.entries.forEach(e => {
-        const value = this.expanded[e.id] || false
-        Vue.set(this.expanded, e.id, value)
-      })
+    entries: {
+      deep: true,
+      handler() {
+        this.entries.forEach(e => {
+          const value = this.expanded[e.id] || false
+          this.expanded[e.id] = value
+        })
+      }
     },
 
     isRetakes() {
       if (!this.isRetakes) {
         this.entries.forEach(e => {
-          Vue.set(this.expanded, e.id, false)
+          this.expanded[e.id] = false
         })
       }
     }

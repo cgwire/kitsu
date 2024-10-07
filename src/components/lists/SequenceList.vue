@@ -16,9 +16,6 @@
       <table-metadata-header-menu
         ref="headerMetadataMenu"
         :is-edit-allowed="isCurrentUserManager"
-        :is-sequence-allowed="
-          isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)
-        "
         :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
         @edit-clicked="onEditMetadataClicked()"
         @delete-clicked="onDeleteMetadataClicked()"

@@ -19,13 +19,12 @@
     />
     <people-avatar
       class="person-avatar"
-      :key="personId"
-      :person="personMap.get(personId)"
+      :key="person.id"
+      :person="person"
       :size="30"
       :font-size="15"
       :is-link="false"
-      v-for="personId in room.people"
-      v-if="personMap.get(personId)"
+      v-for="person in peopleInRoom"
     />
   </div>
 </template>
@@ -66,11 +65,15 @@ export default {
   computed: {
     ...mapGetters(['personMap', 'user']),
 
+    peopleInRoom() {
+      return this.room.people.map(id => this.personMap.get(id)).filter(Boolean)
+    },
+
     joinedRoom() {
       if (!this.roomId) {
         return
       }
-      return !!this.room.people.find(id => id === this.user.id)
+      return this.room.people.some(id => id === this.user.id)
     }
   },
 

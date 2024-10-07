@@ -63,12 +63,7 @@
             <td class="actions"></td>
           </tr>
 
-          <tr
-            class="datatable-row"
-            :key="entry.id"
-            v-for="entry in entries"
-            v-if="isEntryStats(entry.id)"
-          >
+          <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
             <td scope="row" class="name datatable-row-header">
               {{ entry.name }}
             </td>
@@ -195,6 +190,10 @@ export default {
       'sequenceSearchText',
       'taskTypeMap'
     ]),
+
+    entryStats() {
+      return this.entries.filter(entry => this.isEntryStats(entry.id))
+    },
 
     isEmptyList() {
       return (

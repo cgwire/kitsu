@@ -247,7 +247,6 @@ export default {
 
   &.checked .checklist-text {
     color: $light-grey-2;
-    text-decoration: line-through;
   }
 
   &.disabled {

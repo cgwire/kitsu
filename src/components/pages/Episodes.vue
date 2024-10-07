@@ -367,7 +367,6 @@ export default {
       'episodes',
       'episodeMap',
       'episodeFilledColumns',
-      'episodesCsvFormData',
       'episodeSearchText',
       'episodeValidationColumns',
       'episodeListScrollPosition',

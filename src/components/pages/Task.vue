@@ -390,6 +390,7 @@ export default {
     return {
       previewForms: [],
       currentFrame: 0,
+      currentTask: null,
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,

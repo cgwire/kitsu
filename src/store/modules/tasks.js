@@ -904,7 +904,6 @@ const mutations = {
                 duration: p.duration,
                 original_name: p.original_name
               }
-              Vue.set(prev, 'status', p.status)
               return prev
             })
           )

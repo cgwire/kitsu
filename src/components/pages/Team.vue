@@ -20,12 +20,7 @@
             {{ $t('main.add') }}
           </button>
         </div>
-        <production-team-list
-          :entries="teamPersons"
-          :is-loading="isTeamLoading"
-          :is-error="isTeamLoadingError"
-          @remove="removePerson"
-        />
+        <production-team-list :entries="teamPersons" @remove="removePerson" />
       </div>
     </template>
     <template #side v-if="isCurrentUserManager">
@@ -85,13 +80,9 @@
               :key="person.id"
               :person="person"
               :size="30"
-              :with-link="false"
+              :is-link="false"
             />
-            <people-name
-              class="flexrow-item"
-              :person="person"
-              :with-link="false"
-            />
+            <people-name class="flexrow-item" :person="person" />
           </div>
         </div>
       </div>

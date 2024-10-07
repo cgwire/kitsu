@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 import colors from '@/lib/colors'
 import stringHelpers from '@/lib/string'
 
@@ -147,7 +145,7 @@ export const entityListMixin = {
       if (validationColumns && hiddenColumns) {
         validationColumns.forEach(columnId => {
           const key = this.buildHideKey(columnId)
-          Vue.set(hiddenColumns, columnId, localStorage.getItem(key) === 'true')
+          hiddenColumns[columnId] = localStorage.getItem(key) === 'true'
         })
       }
     },
@@ -159,7 +157,6 @@ export const entityListMixin = {
         isColumnHidden = false
       }
       localStorage.setItem(key, isColumnHidden)
-      Vue.set(this.hiddenColumns, columnId, isColumnHidden)
       this.hiddenColumns[columnId] = isColumnHidden
       return isColumnHidden
     },
