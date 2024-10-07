@@ -7,39 +7,39 @@
             class="flexrow-item selector"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
-            v-model="taskTypeId"
+            v-model="parameters.taskTypeId"
           />
           <combobox-status
             class="flexrow-item selector"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
-            v-model="taskStatusId"
+            v-model="parameters.taskStatusId"
           />
           <combobox-styled
             class="flexrow-item selector field"
             :label="$t('main.type')"
             :options="typeOptions"
-            v-model="typeMode"
+            v-model="parameters.typeMode"
           />
           <combobox-styled
             class="flexrow-item selector field"
             :label="$t('main.status')"
             :options="statusOptions"
-            v-model="statusMode"
+            v-model="parameters.statusMode"
           />
           <combobox-styled
             class="flexrow-item selector field"
             :label="$t('notifications.watching')"
             :options="watchingOptions"
-            v-model="watchingMode"
+            v-model="parameters.watchingMode"
           />
         </div>
         <div class="flexrow mb1">
           <button-simple
             class="flexrow-item"
             :text="$t('notifications.show_comments')"
-            :active="showComments"
-            @click="showComments = !showComments"
+            :active="parameters.showComments"
+            @click="parameters.showComments = !parameters.showComments"
           />
           <span class="filler"></span>
           <button-simple
@@ -150,7 +150,7 @@
             <div class="flexrow-item comment-content">
               <div
                 class="notification-info flexrow"
-                v-if="showComments || isSelected(notification)"
+                v-if="parameters.showComments || isSelected(notification)"
               >
                 <span class="person-name flexrow-item ml0">
                   {{ personName(notification) }}
@@ -212,7 +212,7 @@
                 "
                 v-if="
                   (isReply(notification) || isReplyMention(notification)) &&
-                  (showComments || isSelected(notification))
+                  (parameters.showComments || isSelected(notification))
                 "
               ></div>
 
@@ -221,7 +221,7 @@
                 v-if="
                   (isReply(notification) || isReplyMention(notification)) &&
                   notification.comment_text &&
-                  (showComments || isSelected(notification))
+                  (parameters.showComments || isSelected(notification))
                 "
               >
                 <em>{{ $t('notifications.initial_comment') }}</em>
@@ -254,7 +254,7 @@
                       isReplyMention(notification)
                     )
                   ) &&
-                  (showComments || isSelected(notification))
+                  (parameters.showComments || isSelected(notification))
                 "
               ></div>
             </div>
@@ -280,6 +280,8 @@ import {
 } from 'lucide-vue'
 import moment from 'moment-timezone'
 
+import { parametersMixin } from '@/components/mixins/parameters'
+
 import { pluralizeEntityType } from '@/lib/path'
 import { renderComment } from '@/lib/render'
 
@@ -298,6 +300,8 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
   name: 'notifications',
+
+  mixins: [parametersMixin],
 
   components: {
     AtSignIcon,
@@ -332,8 +336,15 @@ export default {
         more: false,
         notifications: false
       },
-      showComments: false,
-      statusMode: null,
+      parameterNamespace: 'notifications',
+      parameters: {
+        taskTypeId: '',
+        taskStatusId: '',
+        typeMode: '',
+        showComments: false,
+        statusMode: null,
+        watchingMode: null,
+      },
       statusOptions: [
         {
           label: this.$t('notifications.all_statuses'),
@@ -348,9 +359,6 @@ export default {
           value: 'unread'
         }
       ],
-      taskTypeId: '',
-      taskStatusId: '',
-      typeMode: '',
       typeOptions: [
         {
           label: this.$t('notifications.all_types'),
@@ -373,7 +381,6 @@ export default {
           value: 'reply'
         }
       ],
-      watchingMode: null,
       watchingOptions: [
         {
           label: this.$t('notifications.all_notifications'),
@@ -396,6 +403,14 @@ export default {
   },
 
   mounted() {
+    const params = this.getParametersFromPreferences(this.parameters) || {}
+    this.applyQueryParameters(params)
+    if (params.showComments === 'true' || params.showComments === true) {
+      params.showComments = true
+    } else {
+      params.showComments = false
+    }
+    this.parameters = params
     this.reloadData()
   },
 
@@ -447,15 +462,15 @@ export default {
       this.errors.notifications = false
       this.currentTask = null
       const params = {
-        task_status_id: this.taskStatusId,
-        task_type_id: this.taskTypeId,
-        type: this.typeMode,
+        task_status_id: this.parameters.taskStatusId,
+        task_type_id: this.parameters.taskTypeId,
+        type: this.parameters.typeMode,
       }
-      if (this.statusMode) {
-        params.read = this.statusMode === 'read'
+      if (this.parameters.statusMode) {
+        params.read = this.parameters.statusMode === 'read'
       }
-      if (this.watchingMode !== null) {
-        params.watching = this.watchingMode === 'watching'
+      if (this.parameters.watchingMode !== null) {
+        params.watching = this.parameters.watchingMode === 'watching'
       }
       this.loadNotifications(params)
         .then(() => {
@@ -479,15 +494,15 @@ export default {
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
         const params = {
-          task_status_id: this.taskStatusId,
-          task_type_id: this.taskTypeId,
-          type: this.typeMode
+          task_status_id: this.parameters.taskStatusId,
+          task_type_id: this.parameters.taskTypeId,
+          type: this.parameters.typeMode
         }
-        if (this.statusMode) {
-          params.read = this.statusMode === 'read'
+        if (this.parameters.statusMode) {
+          params.read = this.parameters.statusMode === 'read'
         }
-        if (this.watchingMode) {
-          params.watching = this.watchingMode === 'watching'
+        if (this.parameters.watchingMode) {
+          params.watching = this.parameters.watchingMode === 'watching'
         }
         this.loadMoreNotifications().then(() => {
           this.loading.more = false
@@ -635,25 +650,11 @@ export default {
   },
 
   watch: {
-    taskTypeId() {
-      this.reloadData()
-    },
-
-    taskStatusId() {
-      this.reloadData()
-    },
-
-    typeMode() {
-      this.reloadData()
-    },
-
-    statusMode() {
-      this.reloadData()
-    },
-
-    watchingMode() {
-      this.reloadData()
-    }
+    'parameters.taskTypeId'() { this.reloadData() },
+    'parameters.taskStatusId'() { this.reloadData() },
+    'parameters.typeMode'() { this.reloadData() },
+    'parameters.statusMode'() { this.reloadData() },
+    'parameters.watchingMode'() { this.reloadData() }
   },
 
   beforeDestroy() {
