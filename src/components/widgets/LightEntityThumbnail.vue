@@ -1,26 +1,24 @@
-<template functional>
+<template>
   <img
     class="thumbnail-picture"
     loading="lazy"
     alt=""
-    :key="props.previewFileId"
-    :src="`/api/pictures/${props.type}/preview-files/${props.previewFileId}.png`"
+    :key="previewFileId"
+    :src="`/api/pictures/${type}/preview-files/${previewFileId}.png`"
     :style="{
-      width: props.width,
-      height: props.height,
-      'max-width': props.maxWidth,
-      'max-height': props.maxHeight
+      width,
+      height,
+      'max-width': maxWidth,
+      'max-height': maxHeight
     }"
-    v-bind="data.attrs"
-    v-if="props.previewFileId"
+    v-if="previewFileId"
   />
   <span
     class="thumbnail-picture thumbnail-empty"
     :style="{
-      width: props.emptyWidth ? props.emptyWidth : props.width,
-      height: props.emptyHeight ? props.emptyHeight : props.height
+      width: emptyWidth ? emptyWidth : width,
+      height: emptyHeight ? emptyHeight : height
     }"
-    v-bind="data.attrs"
     v-else
   >
   </span>
@@ -29,7 +27,6 @@
 <script>
 export default {
   name: 'light-entity-thumbnail',
-  functional: true,
 
   props: {
     previewFileId: {
@@ -66,7 +63,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .dark .thumbnail-picture {
   background-color: $dark-grey-lighter;
   border-color: $dark-grey-light;
