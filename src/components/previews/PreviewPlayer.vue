@@ -1543,8 +1543,6 @@ export default {
           return
         }
       }
-      console.log('annotation to load', annotation)
-
       if (!this.fabricCanvas) this.setupFabricCanvas()
       if (this.isMovie && this.previewViewer && this.isPlaying) {
         this.previewViewer.pause()
