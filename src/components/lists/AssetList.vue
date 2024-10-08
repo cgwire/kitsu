@@ -523,9 +523,17 @@
         v-show="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
       >
         ({{ formatDuration(displayedAssetsTimeSpent) }}
-        {{ $tc('main.days_spent', displayedAssetsTimeSpent) }},
+        {{
+          isDurationInHours()
+            ? $tc('main.hours_spent', displayedAssetsTimeSpent)
+            : $tc('main.days_spent', displayedAssetsTimeSpent)
+        }},
         {{ formatDuration(displayedAssetsEstimation) }}
-        {{ $tc('main.man_days', displayedAssetsEstimation) }})
+        {{
+          isDurationInHours()
+            ? $tc('main.hours_estimated', displayedAssetsEstimation)
+            : $tc('main.man_days', displayedAssetsEstimation)
+        }})
       </span>
     </p>
   </div>
@@ -642,6 +650,7 @@ export default {
       'displayedAssetsTimeSpent',
       'displayedAssetsEstimation',
       'nbSelectedTasks',
+      'organisation',
       'isAssetDescription',
       'isAssetResolution',
       'isBigThumbnails',
@@ -744,6 +753,10 @@ export default {
 
     isAssetsOnly() {
       return this.currentProduction.production_type === 'assets'
+    },
+
+    formatDurationInHours() {
+      return this.organisation.format_duration_in_hours
     }
   },
 

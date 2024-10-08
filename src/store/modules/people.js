@@ -118,7 +118,8 @@ const initialState = {
     has_avatar: false,
     hd_by_default: false,
     timesheets_locked: false,
-    use_original_file_name: false
+    use_original_file_name: false,
+    format_duration_in_hours: false
   },
 
   people: [],

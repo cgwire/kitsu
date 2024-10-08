@@ -136,12 +136,13 @@ export const getEndDateFromString = (startDate, endDateString) => {
 }
 
 export const getDatesFromStartDate = (
+  organisation,
   startDate,
   dueDate,
   estimation,
   daysOff = []
 ) => {
-  if (estimation > 0) {
+  if (estimation > 0 && !organisation.format_duration_in_hours) {
     dueDate = addBusinessDays(startDate, Math.ceil(estimation) - 1, daysOff)
   }
 
@@ -166,12 +167,13 @@ export const getDatesFromStartDate = (
 }
 
 export const getDatesFromEndDate = (
+  organisation,
   startDate,
   dueDate,
   estimation,
   daysOff = []
 ) => {
-  if (estimation > 0) {
+  if (estimation > 0 && !organisation.format_duration_in_hours) {
     startDate = removeBusinessDays(dueDate, Math.ceil(estimation) - 1, daysOff)
   }
 
