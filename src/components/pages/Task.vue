@@ -4,7 +4,7 @@
       <div class="page-header pa1 mb0" xyz="fade">
         <div class="flexrow header-title" v-if="task">
           <router-link
-            class="flexrow-item has-text-centered back-link ml1"
+            class="flexrow-item has-text-centered back-link"
             :to="taskEntitiesPath"
           >
             <corner-left-up-icon />
