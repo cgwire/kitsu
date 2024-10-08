@@ -79,7 +79,8 @@ const actions = {
   toggleNotificationReadStatus({ commit }, notification) {
     commit(TOGGLE_NOTIFICATION_READ_STATUS, notification)
     return notificationsApi.updateNotificationReadStatus(
-      notification.id, notification.read
+      notification.id,
+      notification.read
     )
   }
 }

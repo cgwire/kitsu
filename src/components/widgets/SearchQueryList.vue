@@ -213,11 +213,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'isCurrentUserManager',
-      'personMap'
-    ]),
+    ...mapGetters(['currentProduction', 'isCurrentUserManager', 'personMap']),
 
     sortedFilters() {
       return sortByName([...this.queries])

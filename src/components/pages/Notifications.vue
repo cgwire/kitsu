@@ -119,10 +119,7 @@
                 :task-type="buildTaskTypeFromNotification(notification)"
                 :production-id="notification.project_id"
               />
-              <router-link
-                class="flexrow-item"
-                :to="entityPath(notification)"
-              >
+              <router-link class="flexrow-item" :to="entityPath(notification)">
                 {{ notification.project_name }} /
                 {{ notification.full_entity_name }}
               </router-link>
@@ -157,46 +154,43 @@
                 </span>
 
                 <div class="flexrow-item">
-                <template class="flexrow-item" v-if="isPublish(notification)">
-                  {{ $t('notifications.published') }}
-                </template>
-
-                <template
-                  class="flexrow-item"
-                  v-if="isComment(notification) && !isPublish(notification)"
-                >
-                  {{ $t('notifications.commented_on') }}
-                </template>
-
-                <template
-                  v-if="
-                    (
-                      isComment(notification) ||
-                      isPublish(notification)
-                    ) && notification.change
-                  "
-                >
-                  {{ $t('notifications.and_change_status') }}
-                </template>
-
-                <template v-if="isReply(notification)">
-                  {{ $t('notifications.replied_on') }}
-                </template>
-
-                <template v-if="isAssignation(notification)">
-                  {{ $t('notifications.assigned_you') }}
-                </template>
-
-                <template
-                  v-if="
-                    isMention(notification) || isReplyMention(notification)
-                  "
-                >
-                  {{ $t('notifications.mention_you_on') }}
-                  <template v-if="isReplyMention(notification)">
-                    ({{ $t('main.reply').toLowerCase() }})
+                  <template v-if="isPublish(notification)">
+                    {{ $t('notifications.published') }}
                   </template>
-                </template>
+
+                  <template
+                    v-if="isComment(notification) && !isPublish(notification)"
+                  >
+                    {{ $t('notifications.commented_on') }}
+                  </template>
+
+                  <template
+                    v-if="
+                      (isComment(notification) || isPublish(notification)) &&
+                      notification.change
+                    "
+                  >
+                    {{ $t('notifications.and_change_status') }}
+                  </template>
+
+                  <template v-if="isReply(notification)">
+                    {{ $t('notifications.replied_on') }}
+                  </template>
+
+                  <template v-if="isAssignation(notification)">
+                    {{ $t('notifications.assigned_you') }}
+                  </template>
+
+                  <template
+                    v-if="
+                      isMention(notification) || isReplyMention(notification)
+                    "
+                  >
+                    {{ $t('notifications.mention_you_on') }}
+                    <template v-if="isReplyMention(notification)">
+                      ({{ $t('main.reply').toLowerCase() }})
+                    </template>
+                  </template>
                 </div>
               </div>
               <div
@@ -229,7 +223,10 @@
               <div
                 class="comment-text content"
                 :style="{
-                  'opacity': isReply(notification) || isReplyMention(notification) ? '0.8' : '1'
+                  opacity:
+                    isReply(notification) || isReplyMention(notification)
+                      ? '0.8'
+                      : '1'
                 }"
                 v-html="
                   renderComment(
@@ -241,19 +238,10 @@
                   )
                 "
                 v-if="
-                  (
-                    (
-                      (
-                        isComment(notification) ||
-                        isMention(notification)
-                      ) &&
-                      notification.comment_text
-                    ) ||
-                    (
-                      isReply(notification) ||
-                      isReplyMention(notification)
-                    )
-                  ) &&
+                  (((isComment(notification) || isMention(notification)) &&
+                    notification.comment_text) ||
+                    isReply(notification) ||
+                    isReplyMention(notification)) &&
                   (parameters.showComments || isSelected(notification))
                 "
               ></div>
@@ -291,7 +279,6 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
-import PageTitle from '@/components/widgets/PageTitle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -314,7 +301,6 @@ export default {
     EntityThumbnail,
     ImageIcon,
     MessageSquareIcon,
-    PageTitle,
     PeopleAvatar,
     Spinner,
     TaskInfo,
@@ -343,7 +329,7 @@ export default {
         typeMode: '',
         showComments: false,
         statusMode: null,
-        watchingMode: null,
+        watchingMode: null
       },
       statusOptions: [
         {
@@ -454,7 +440,7 @@ export default {
       'loadNotifications',
       'loadTask',
       'markAllNotificationsAsRead',
-      'toggleNotificationReadStatus',
+      'toggleNotificationReadStatus'
     ]),
 
     reloadData() {
@@ -464,7 +450,7 @@ export default {
       const params = {
         task_status_id: this.parameters.taskStatusId,
         task_type_id: this.parameters.taskTypeId,
-        type: this.parameters.typeMode,
+        type: this.parameters.typeMode
       }
       if (this.parameters.statusMode) {
         params.read = this.parameters.statusMode === 'read'
@@ -560,7 +546,9 @@ export default {
       if (
         event.target.classList.contains('bool-field') ||
         event.target.parentElement.classList.contains('bool-field') ||
-        event.target.parentElement.parentElement.classList.contains('bool-field')
+        event.target.parentElement.parentElement.classList.contains(
+          'bool-field'
+        )
       ) {
         return
       }
@@ -590,8 +578,8 @@ export default {
     isComment: notification => {
       return (
         !notification.notification_type ||
-        notification.notification_type === 'comment' &&
-        !notification.preview_file_id
+        (notification.notification_type === 'comment' &&
+          !notification.preview_file_id)
       )
     },
 
@@ -650,15 +638,24 @@ export default {
   },
 
   watch: {
-    'parameters.taskTypeId'() { this.reloadData() },
-    'parameters.taskStatusId'() { this.reloadData() },
-    'parameters.typeMode'() { this.reloadData() },
-    'parameters.statusMode'() { this.reloadData() },
-    'parameters.watchingMode'() { this.reloadData() }
+    'parameters.taskTypeId'() {
+      this.reloadData()
+    },
+    'parameters.taskStatusId'() {
+      this.reloadData()
+    },
+    'parameters.typeMode'() {
+      this.reloadData()
+    },
+    'parameters.statusMode'() {
+      this.reloadData()
+    },
+    'parameters.watchingMode'() {
+      this.reloadData()
+    }
   },
 
-  beforeDestroy() {
-  },
+  beforeDestroy() {},
 
   metaInfo() {
     return {
@@ -693,7 +690,7 @@ export default {
     border: 4px solid #906571;
 
     &:hover {
-      border: 4px solid #6065A1;//;var(--background-selectable);
+      border: 4px solid #6065a1; //;var(--background-selectable);
     }
   }
 }
@@ -719,14 +716,14 @@ a {
   transition: all 0.2s ease-in-out;
 
   &.unread {
-    border: 4px solid #F0C5D1;
+    border: 4px solid #f0c5d1;
   }
 
   &:hover {
     border: 4px solid var(--background-selectable);
 
     .dark & {
-      border: 4px solid #6065A1;//;var(--background-selectable);
+      border: 4px solid #6065a1; //;var(--background-selectable);
     }
   }
 }

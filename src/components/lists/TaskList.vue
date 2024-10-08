@@ -562,9 +562,9 @@ export default {
       return (
         (data.start_date !== undefined && taskStart !== data.start_date) ||
         (data.due_date !== undefined && taskDue !== data.due_date) ||
-        (data.estimation !== undefined && task.estimation !== data.estimation) ||
+        (data.estimation !== undefined &&
+          task.estimation !== data.estimation) ||
         (data.difficulty !== undefined && task.difficulty !== data.difficulty)
-
       )
     },
 
@@ -688,13 +688,12 @@ export default {
     updateTasksDifficulty({ difficulty }) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
-        let data = { difficulty }
+        const data = { difficulty }
         if (this.isTaskChanged(task, data)) {
           this.updateTask({ taskId, data }).catch(console.error)
         }
       })
     },
-
 
     formatDate(date) {
       if (date) return moment(date).format('YYYY-MM-DD')
@@ -742,8 +741,7 @@ export default {
         event &&
         event.target &&
         // Dirty hack needed to make date picker and inputs work properly
-        (
-          ['INPUT'].includes(event.target.nodeName) ||
+        (['INPUT'].includes(event.target.nodeName) ||
           // Combo box should not trigger selection
           event.target.className.indexOf('selected-line') >= 0 ||
           event.target.className.indexOf('down-icon') >= 0 ||
@@ -752,16 +750,11 @@ export default {
           event.target.className.indexOf('option-line') >= 0 ||
           event.target.className.indexOf('combobox') >= 0 ||
           event.target.className === '' ||
-          (
-            event.target.parentNode &&
-            ['difficulty'].includes(event.target.className)
-          ) ||
-          (
-            event.target.parentNode &&
-            ['HEADER'].includes(event.target.parentNode.nodeName)
-          ) ||
-            ['cell day selected'].includes(event.target.className)
-        )
+          (event.target.parentNode &&
+            ['difficulty'].includes(event.target.className)) ||
+          (event.target.parentNode &&
+            ['HEADER'].includes(event.target.parentNode.nodeName)) ||
+          ['cell day selected'].includes(event.target.className))
       )
         return
       const isSelected = this.selectionGrid[task.id]

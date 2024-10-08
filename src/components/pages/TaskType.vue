@@ -987,7 +987,7 @@ export default {
       const priority = this.priorityFilter
       const difficulty = this.difficultyFilter
       this.$router.push({
-        query: { search, duedate, late, priority }
+        query: { search, duedate, late, priority, difficulty }
       })
     },
 
@@ -1077,13 +1077,11 @@ export default {
         'due_date'
       ].includes(this.currentSort)
       if (this.currentSort === 'nb_frames') {
-        this.tasks = tasks.sort(
-          (ta, tb) => {
-            const nbFramesA = this.getEntity(ta.entity.id)?.nb_frames || 0
-            const nbFramesB = this.getEntity(tb.entity.id)?.nb_frames || 0
-            return nbFramesB - nbFramesA
-          }
-        )
+        this.tasks = tasks.sort((ta, tb) => {
+          const nbFramesA = this.getEntity(ta.entity.id)?.nb_frames || 0
+          const nbFramesB = this.getEntity(tb.entity.id)?.nb_frames || 0
+          return nbFramesB - nbFramesA
+        })
       } else if (this.currentSort !== name) {
         this.tasks = tasks.sort(
           firstBy(this.currentSort, isDesc ? 1 : -1).thenBy('entity_name')

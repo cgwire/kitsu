@@ -13,11 +13,9 @@ export const buildQueryString = (path, params) => {
   Object.keys(params).forEach(key => {
     if (
       params[key] ||
-      (
-        typeof params[key] === 'boolean' &&
-        params[key] === false
-      )
-    ) couples.push(`${key}=${params[key]}`)
+      (typeof params[key] === 'boolean' && params[key] === false)
+    )
+      couples.push(`${key}=${params[key]}`)
   })
   return result + couples.join('&')
 }

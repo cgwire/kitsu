@@ -1,7 +1,7 @@
 /*
  * Helpers to apply and save parameters to the url and local storage.
  */
-import preferences from "@/lib/preferences"
+import preferences from '@/lib/preferences'
 
 export const parametersMixin = {
   methods: {
@@ -38,9 +38,11 @@ export const parametersMixin = {
     },
 
     getParametersFromPreferences(defaultParameters) {
-      return preferences.getObjectPreference(
+      return (
+        preferences.getObjectPreference(
           `parameters:{this.parameterNamespace}`
         ) || defaultParameters
+      )
     }
   },
 

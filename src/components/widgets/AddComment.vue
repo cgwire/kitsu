@@ -448,7 +448,7 @@ export default {
         : 'status'
 
     this.$nextTick(() => {
-      [
+      ;[
         'drag',
         'dragstart',
         'dragend',
