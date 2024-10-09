@@ -125,17 +125,30 @@
                 v-model="names.shot"
               />
             </div>
-            <div class="field">
+            <div class="flexrow">
               <button
                 :class="{
                   button: true,
+                  'is-fullwidth': true,
                   'is-success': true,
                   'is-loading': loading.addShot
                 }"
                 :disabled="!isAddShotAllowed || loading.addShot"
                 @click="addShot"
               >
-                {{ $t('main.add') }}
+                {{ $t('doodle.add1') }}
+              </button>
+              <button
+                :class="{
+                  button: true,
+                  'is-fullwidth': true,
+                  'is-success': true,
+                  'is-loading': loading.addShot
+                }"
+                :disabled="!isAddShotAllowed || loading.addShot"
+                @click="addShot10"
+              >
+                {{ $t('doodle.add10') }}
               </button>
             </div>
           </div>
@@ -342,6 +355,41 @@ export default {
           })
         }
       }
+    },
+
+    addShot10() {
+      if (this.isAddShotAllowed && !this.loading.addShot) {
+        const shotName = this.names.shot
+        const number = shotName.replace(/\D/g, '')
+        if (number.length > 0) {
+          const val = parseInt(number)
+          if (val) {
+            let i
+            for (i = 0; i < 10; i++) {
+              this.loading.addShot = true
+              const names_shot = stringHelpers.generateNextName(
+                shotName,
+                parseInt(i)
+              )
+              if (this.selectedSequenceId) {
+                const shot = {
+                  name: names_shot,
+                  sequence_id: this.selectedSequenceId,
+                  project_id: this.currentProduction.id
+                }
+                this.$emit('add-shot', shot, shot => {
+                  this.loading.addShot = false
+                  this.selectSequence(this.selectedSequenceId)
+                  this.names.shot = stringHelpers.generateNextName(
+                    shotName,
+                    parseInt(10)
+                  )
+                })
+              }
+            }
+          }
+        }
+      }
     }
   },
 
@@ -442,5 +490,12 @@ input::placeholder {
 
 .shot-padding {
   margin-right: 1em;
+}
+
+.flexrow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  margin-right: 10px;
 }
 </style>
