@@ -46,6 +46,7 @@ import trash from '@/assets/icons/fi-trash-2.svg'
 import user from '@/assets/icons/fi-user.svg'
 import userCheck from '@/assets/icons/fi-user-check.svg'
 import watch from '@/assets/icons/fi-eye.svg'
+import myWorksheet from '@/assets/icons/fi-task-status.svg'
 
 // Player icons
 
@@ -96,6 +97,7 @@ const icons = {
   logs,
   message,
   'my-checks': myChecks,
+  'my-worksheet': myWorksheet,
   'my-productions': myProductions,
   'my-tasks': myTasks,
   newsFeed,

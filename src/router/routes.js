@@ -73,6 +73,7 @@ const Team = () => import('@/components/pages/Team.vue')
 const TeamSchedule = () => import('@/components/pages/TeamSchedule')
 const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
+const MyWorkSheet = () => import('@/components/pages/MyWorkSheet.vue')
 
 const ADMIN_PAGES = [
   'asset-types',
@@ -396,6 +397,12 @@ export const routes = [
         path: 'my-checks',
         component: MyChecks,
         name: 'checks'
+      },
+
+      {
+        path: 'my-worksheet',
+        component: MyWorkSheet,
+        name: 'Worksheet'
       },
 
       {

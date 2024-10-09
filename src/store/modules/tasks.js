@@ -470,6 +470,105 @@ const actions = {
     })
   },
 
+  createUserInfo({ commit, state }, { user_id, company }) {
+    return tasksApi
+      .createUserInfo({
+        user_id,
+        company
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  getUserInfo({ commit, state }, { user_id }) {
+    return tasksApi
+      .getUserInfo({
+        user_id
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  countTaskTime({ commit, state }, { user_id, year, month, data_list }) {
+    return tasksApi
+      .countTaskTime({
+        user_id,
+        year,
+        month,
+        data_list
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  getTaskTime({ commit, state }, { user_id, year, month }) {
+    return tasksApi
+      .getTaskTime({
+        user_id,
+        year,
+        month
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  removeTaskTime({ commit, state }, { time_task_id }) {
+    return tasksApi
+      .removeTaskTime({
+        time_task_id
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  setTaskTime({ commit, state }, { user_id, year, month, task_id, duration }) {
+    return tasksApi
+      .setTaskTime({
+        user_id,
+        year,
+        month,
+        task_id,
+        duration
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  getCompanyList({ commit }) {
+    return tasksApi.getCompanyList()
+  },
+
+  getDutyList({ commit, state }, { user_id, year, month }) {
+    return tasksApi
+      .getDutyList({
+        user_id,
+        year,
+        month
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+
+  getDutyDingDing({ commit, state }, { user_id, year, month, day }) {
+    return tasksApi
+      .getDutyDingDing({
+        user_id,
+        year,
+        month,
+        day
+      })
+      .then(comment => {
+        return Promise.resolve(comment)
+      })
+  },
+  //--------------------------
   commentTask(
     { commit },
     { taskId, taskStatusId, comment, attachment, checklist }

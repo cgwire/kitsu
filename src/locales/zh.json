@@ -1553,6 +1553,52 @@
         "wrong_browser": {
             "title": "Kitsu不支持您的浏览器",
             "text": "itsu 只能与 Firefox 和 Chrome 浏览器一起使用。"
+        },
+
+        "doodle":
+        {
+            "role":"角色",
+            "binding":"绑定",
+            "animation":"动画",
+            "effects":"特效",
+            "maps":"地编",
+            "role_mode":"角色模型",
+            "wait_approval":"审批中",
+            "completed":"完成",
+            "repair":"返修",
+            "add1":"添加1个",
+            "add10":"添加10个",
+            "my_worksheet": "工作表",
+            "task_sheet":"任务表",
+            "export":"",
+            "duty":"考勤表",
+            "select_all_month":"勾选整月",
+            "unselect_all_month":"取消整月",
+            "add_task":"添加任务",
+            "add_select_task":"添加选中任务",
+            "get_time":"计算时长",
+            "get_duty":"获取假勤",
+            "action":"操作",
+            "company":"公司",
+            "day":"日",
+            "input_phone":"输入手机号...",
+            "person_tip":"请先选择用户",
+            "phone_tip":"该用户未填写电话",
+            "calculate_tip":"请先计算时间",
+            "company_tip":"请先选择公司",
+            "start_date":"开始日期",
+            "end_date":"结束日期",
+            "time_remark":"时间备注",
+            "user_remark":"备注",
+            "type":"类型",
+            "overtime":"加班",
+            "leave":"请假",
+            "simple_thumbnails":"预览模式",
+            "close_simple_thumbnails":"关闭预览模式",
+            "batch-export-list":"导出人员列表",
+            "batch-export":"批量导出",
+            "select-person-tip":"无用户数据",
+            "filter-person":"筛选部门人员"
         }
     }
 }

@@ -101,6 +101,9 @@ const mutations = {
   [LOAD_STATUS_AUTOMATIONS_END](state, statusAutomations) {
     state.statusAutomations = statusAutomations
     state.statusAutomationMap = new Map()
+    if (!statusAutomations) {
+      return
+    }
     statusAutomations.forEach(statusAutomation => {
       state.statusAutomationMap.set(statusAutomation.id, statusAutomation)
     })

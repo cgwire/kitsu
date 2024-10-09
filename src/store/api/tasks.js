@@ -36,6 +36,77 @@ export default {
     return client.pget(`/api/data/tasks/${taskId}/previews`)
   },
 
+  getCompanyList() {
+    return client.pget(`/api/doodle/company`)
+  },
+
+  getUserInfo(data) {
+    const user_id = data.user_id
+    return client.pget(`/api/doodle/user/${user_id}`)
+  },
+
+  createUserInfo(data) {
+    const user_id = data.user_id
+    const commentData = {
+      company: data.company
+    }
+    return client.ppost(`/api/doodle/user/${user_id}`, commentData)
+  },
+
+  countTaskTime(data) {
+    const month = data.month.padStart(2, '0')
+    const year_month = `${data.year}-${month}`
+    const commentData = {
+      data: data.data_list
+    }
+    return client.ppost(
+      `/api/doodle/computing_time/${data.user_id}/${year_month}`,
+      commentData
+    )
+  },
+
+  getTaskTime(data) {
+    const month = data.month.padStart(2, '0')
+    const year_month = `${data.year}-${month}`
+    return client.pget(
+      `/api/doodle/computing_time/${data.user_id}/${year_month}`
+    )
+  },
+
+  removeTaskTime(data) {
+    const computing_time_id = data.time_task_id
+    return client.pdel(`/api/doodle/computing_time/${computing_time_id}`)
+  },
+
+  setTaskTime(data) {
+    const month = data.month.padStart(2, '0')
+    const year_month = `${data.year}-${month}`
+    const duration = Number(data.duration) * 1000 * 1000 * 60 * 60
+    const commentData = {
+      duration: duration
+    }
+    return client.ppatch(
+      `/api/doodle/computing_time/${data.user_id}/${year_month}/${data.task_id}`,
+      commentData
+    )
+  },
+
+  getDutyList(data) {
+    const month = data.month.padStart(2, '0')
+    const year_month = `${data.year}-${month}`
+    return client.pget(`/api/doodle/attendance/${data.user_id}/${year_month}`)
+  },
+
+  getDutyDingDing(data) {
+    const month = data.month.padStart(2, '0')
+    const day = data.day.padStart(2, '0')
+    const year_month_day = `${data.year}-${month}-${day}`
+    const commentData = {
+      work_date: year_month_day
+    }
+    return client.ppost(`/api/doodle/attendance/${data.user_id}`, commentData)
+  },
+
   commentTask(data) {
     let commentData = {
       task_status_id: data.taskStatusId,
