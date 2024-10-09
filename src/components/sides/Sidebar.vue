@@ -36,6 +36,15 @@
                 {{ $t('tasks.my_checks') }}
               </router-link>
             </p>
+            <p
+              @click="toggleSidebar()"
+              v-if="isCurrentUserSupervisor || isCurrentUserManager"
+            >
+              <router-link :to="{ name: 'Worksheet' }">
+                <kitsu-icon class="nav-icon" name="my-worksheet" />
+                {{ $t('doodle.my_worksheet') }}
+              </router-link>
+            </p>
             <p @click="toggleSidebar()">
               <router-link :to="{ name: 'entity-chats' }">
                 <kitsu-icon class="nav-icon" name="message" />

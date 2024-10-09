@@ -37,7 +37,11 @@
               />
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
-              <big-thumbnails-button class="flexrow-item" />
+              <big-thumbnails-button
+                class="flexrow-item"
+                v-show="!isSimpleThumbnails"
+              />
+              <simple-thumbnails-button class="flexrow-item" />
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
@@ -274,6 +278,7 @@ import AssetList from '@/components/lists/AssetList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton.vue'
+import SimpleThumbnailsButton from '@/components/widgets/SimpleThumbnailsButton.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -300,6 +305,7 @@ export default {
     AddMetadataModal,
     AddThumbnailsModal,
     BigThumbnailsButton,
+    SimpleThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
     ComboboxDepartment,
@@ -473,7 +479,8 @@ export default {
       'productionAssetTaskTypes',
       'selectedAssets',
       'taskTypeMap',
-      'user'
+      'user',
+      'isSimpleThumbnails'
     ]),
 
     addThumbnailsModal() {
