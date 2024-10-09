@@ -56,6 +56,7 @@
           />
           <template v-else>{{ person.initials }}</template>
         </span>
+        <span class="dot" v-if="typeof task?.file_exist === 'boolean' ? !task.file_exist : false"></span>
       </template>
       <span class="subscribed" v-if="task?.is_subscribed">
         <eye-icon :size="12" />
@@ -372,5 +373,13 @@ export default {
   &.emergency {
     background-color: $red;
   }
+}
+
+.dot {
+  position: absolute;
+  right: -5px;
+  border: 4px solid;
+  color: red;
+  border-radius: 4px;
 }
 </style>
