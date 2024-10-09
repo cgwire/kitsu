@@ -253,7 +253,7 @@
 import { CornerLeftUpIcon } from 'lucide-vue'
 import moment from 'moment'
 import firstBy from 'thenby'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { en, fr, zh } from 'vuejs-datepicker/dist/locale'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
@@ -588,6 +588,8 @@ export default {
     locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
+      } else if (this.user.locale === 'zh_Hans_CN') {
+        return zh
       }
       return en
     },

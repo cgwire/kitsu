@@ -207,7 +207,7 @@
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
 import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { en, fr, zh } from 'vuejs-datepicker/dist/locale'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getPersonTabPath } from '@/lib/path'
@@ -320,6 +320,8 @@ export default {
     locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
+      } else if (this.user.locale === 'zh_Hans_CN') {
+        return zh
       } else {
         return en
       }

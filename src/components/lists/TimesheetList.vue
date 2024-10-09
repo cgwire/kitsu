@@ -212,7 +212,7 @@
 <script>
 import moment from 'moment-timezone'
 import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { en, fr, zh } from 'vuejs-datepicker/dist/locale'
 import { mapGetters } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -327,6 +327,8 @@ export default {
     locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
+      } else if (this.user.locale === 'zh_Hans_CN') {
+        return zh
       } else {
         return en
       }

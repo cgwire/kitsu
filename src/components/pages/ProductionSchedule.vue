@@ -81,7 +81,7 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
+import { en, fr, zh } from 'vuejs-datepicker/dist/locale'
 import Datepicker from 'vuejs-datepicker'
 
 import { sortTaskTypeScheduleItems } from '@/lib/sorting'
@@ -147,6 +147,8 @@ export default {
     locale() {
       if (this.user.locale === 'fr_FR') {
         return fr
+      } else if (this.user.locale === 'zh_Hans_CN') {
+        return zh
       } else {
         return en
       }
