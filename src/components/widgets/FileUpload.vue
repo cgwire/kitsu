@@ -49,7 +49,7 @@ export default {
 
   props: {
     accept: {
-      default: '.csv',
+      default: '.csv,.xlsx',
       type: String
     },
     isPrimary: {
