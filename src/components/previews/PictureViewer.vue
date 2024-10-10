@@ -65,6 +65,10 @@ export default {
       type: Boolean,
       default: false
     },
+    highQuality: {
+      type: Boolean,
+      default: false
+    },
     isComparing: {
       type: Boolean,
       default: false
@@ -312,7 +316,11 @@ export default {
         this.pictureGifPath = `/api/pictures/originals/preview-files/${previewId}.gif`
       } else if (this.preview && this.isAvailable && this.isPicture) {
         const previewId = this.preview.id
-        this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
+        if (this.highQuality) {
+          this.picturePath = `/api/pictures/originals/preview-files/${previewId}.png`
+        } else {
+          this.picturePath = `/api/pictures/previews/preview-files/${previewId}.png`
+        }
       }
       this.setPictureDlPath()
     },

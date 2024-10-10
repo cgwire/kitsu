@@ -36,6 +36,7 @@
           />
 
           <combobox
+            class="mt2"
             :label="$t('main.filter_group')"
             :options="allowedGroups"
             v-model="form.search_filter_group_id"

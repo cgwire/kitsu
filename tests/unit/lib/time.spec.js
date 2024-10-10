@@ -146,32 +146,32 @@ describe('time', () => {
     const startDate = parseSimpleDate('2019-10-01')
     const farStartDate = parseSimpleDate('2020-10-01')
     const dueDate = parseSimpleDate('2020-01-31')
-    expect(getDatesFromStartDate(startDate, dueDate, 0)).toEqual({
+    expect(getDatesFromStartDate({}, startDate, dueDate, 0)).toEqual({
       start_date: '2019-10-01',
       due_date: '2020-01-31'
     })
-    expect(getDatesFromStartDate(farStartDate, dueDate, 0)).toEqual({
+    expect(getDatesFromStartDate({}, farStartDate, dueDate, 0)).toEqual({
       start_date: '2020-10-01',
       due_date: '2020-10-01'
     })
-    expect(getDatesFromStartDate(null, dueDate, 0)).toEqual({
+    expect(getDatesFromStartDate({}, null, dueDate, 0)).toEqual({
       start_date: null,
       due_date: '2020-01-31'
     })
-    expect(getDatesFromStartDate(startDate, null, 0)).toEqual({
+    expect(getDatesFromStartDate({}, startDate, null, 0)).toEqual({
       start_date: '2019-10-01',
       due_date: null
     })
-    expect(getDatesFromStartDate(startDate, null, 1)).toEqual({
+    expect(getDatesFromStartDate({}, startDate, null, 1)).toEqual({
       start_date: '2019-10-01',
       due_date: '2019-10-01'
     })
-    expect(getDatesFromStartDate(startDate, null, 7)).toEqual({
+    expect(getDatesFromStartDate({}, startDate, null, 7)).toEqual({
       start_date: '2019-10-01', // tuesday
       due_date: '2019-10-09' // a week later + 2 days (weekend)
     })
     const daysOff = [{ date: '2019-10-09' }]
-    expect(getDatesFromStartDate(startDate, null, 7, daysOff)).toEqual({
+    expect(getDatesFromStartDate({}, startDate, null, 7, daysOff)).toEqual({
       start_date: '2019-10-01', // tuesday
       due_date: '2019-10-10' // a week later + 2 days (weekend) + 1 day off
     })
@@ -180,32 +180,32 @@ describe('time', () => {
     const startDate = parseSimpleDate('2019-10-01')
     const farStartDate = parseSimpleDate('2020-10-01')
     const dueDate = parseSimpleDate('2020-01-31')
-    expect(getDatesFromEndDate(startDate, dueDate, 0)).toEqual({
+    expect(getDatesFromEndDate({}, startDate, dueDate, 0)).toEqual({
       start_date: '2019-10-01',
       due_date: '2020-01-31'
     })
-    expect(getDatesFromEndDate(farStartDate, dueDate, 0)).toEqual({
+    expect(getDatesFromEndDate({}, farStartDate, dueDate, 0)).toEqual({
       start_date: '2020-01-31',
       due_date: '2020-01-31'
     })
-    expect(getDatesFromEndDate(null, dueDate, 0)).toEqual({
+    expect(getDatesFromEndDate({}, null, dueDate, 0)).toEqual({
       start_date: null,
       due_date: '2020-01-31'
     })
-    expect(getDatesFromEndDate(startDate, null, 0)).toEqual({
+    expect(getDatesFromEndDate({}, startDate, null, 0)).toEqual({
       start_date: '2019-10-01',
       due_date: null
     })
-    expect(getDatesFromEndDate(null, dueDate, 1)).toEqual({
+    expect(getDatesFromEndDate({}, null, dueDate, 1)).toEqual({
       start_date: '2020-01-31',
       due_date: '2020-01-31'
     })
-    expect(getDatesFromEndDate(null, dueDate, 7)).toEqual({
+    expect(getDatesFromEndDate({}, null, dueDate, 7)).toEqual({
       start_date: '2020-01-23',
       due_date: '2020-01-31'
     })
     const daysOff = [{ date: '2020-01-23' }]
-    expect(getDatesFromEndDate(null, dueDate, 7, daysOff)).toEqual({
+    expect(getDatesFromEndDate({}, null, dueDate, 7, daysOff)).toEqual({
       start_date: '2020-01-22',
       due_date: '2020-01-31'
     })

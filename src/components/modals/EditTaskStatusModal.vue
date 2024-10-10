@@ -42,41 +42,48 @@
             v-model="form.description"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_default')"
             @enter="confirmClicked"
             v-model="form.is_default"
             :disabled="form.for_concept === 'true'"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_done')"
             @enter="confirmClicked"
             v-model="form.is_done"
             v-if="form.is_default === 'false'"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_retake')"
             @enter="confirmClicked"
             v-model="form.is_retake"
             v-if="form.is_default === 'false'"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_artist_allowed')"
             @enter="confirmClicked"
             v-model="form.is_artist_allowed"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_client_allowed')"
             @enter="confirmClicked"
             v-model="form.is_client_allowed"
             v-if="form.for_concept !== 'true'"
           />
           <boolean-field
+            class="mr05 mb05"
             :label="$t('task_status.fields.is_feedback_request')"
             @enter="confirmClicked"
             v-model="form.is_feedback_request"
             v-if="form.is_default === 'false'"
           />
           <color-field
+            class="mt2"
             :label="$t('task_status.fields.color')"
             :colors="colors"
             v-model="form.color"

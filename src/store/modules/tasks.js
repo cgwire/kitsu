@@ -1208,6 +1208,7 @@ const mutations = {
           .short_name,
         priority: task.priority,
         estimation: task.estimation,
+        difficulty: task.difficulty,
         duration: task.duration,
         real_start_date: task.real_start_date,
         end_date: task.end_date,

@@ -1170,7 +1170,8 @@ export default {
     currentSection() {
       if (
         (this.isTVSHow && this.displayedSequences.length === 0) ||
-        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id
+        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
+        this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
       ) {
         this.$refs['shot-search-field'].setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)

@@ -643,10 +643,10 @@ export const playerMixin = {
       document.activeElement.blur()
       this.fullScreen = false
       setTimeout(() => {
-        window.dispatchEvent(new Event('resize'))
+        this.triggerResize()
       }, 200)
       setTimeout(() => {
-        window.dispatchEvent(new Event('resize'))
+        this.triggerResize()
       }, 500)
     },
 
@@ -763,10 +763,10 @@ export const playerMixin = {
       if (this.fullScreen && !this.isFullScreen()) {
         this.fullScreen = false
         setTimeout(() => {
-          window.dispatchEvent(new Event('resize'))
+          this.triggerResize()
         }, 200)
         setTimeout(() => {
-          window.dispatchEvent(new Event('resize'))
+          this.triggerResize()
         }, 500)
       }
     },
@@ -905,7 +905,7 @@ export const playerMixin = {
 
     onFilmClicked() {
       this.isEntitiesHidden = !this.isEntitiesHidden
-      window.dispatchEvent(new Event('resize'))
+      this.triggerResize()
       this.$nextTick(() => {
         this.resetHeight()
         this.scrollToEntity(this.playingEntityIndex)
@@ -953,7 +953,7 @@ export const playerMixin = {
       if (!this.isCommentsHidden) {
         this.$refs['task-info'].$el.style.height = `${height}px`
       }
-      window.dispatchEvent(new Event('resize'))
+      this.triggerResize()
       this.$nextTick(() => {
         this.$refs['task-info'].focusCommentTextarea()
         this.resetHeight()
@@ -1422,6 +1422,10 @@ export const playerMixin = {
           return resolve(file)
         })
       })
+    },
+
+    triggerResize() {
+      window.dispatchEvent(new Event('resize'))
     }
   },
 

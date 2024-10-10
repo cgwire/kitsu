@@ -27,6 +27,7 @@
           <color-field :label="$t('main.color')" v-model="form.color" />
 
           <boolean-field
+            class="mt1"
             :label="$t('main.is_shared')"
             v-model="form.is_shared"
             v-if="isCurrentUserManager && currentProduction"
