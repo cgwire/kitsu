@@ -6,13 +6,13 @@
     :style="{ left }"
   >
     <div class="flexrow metadata-wrapper-header">
-      <department-name
+      <!-- <department-name
         :key="department.id"
         :department="department"
         no-padding
         only-dot
         v-for="department in currentDepartments"
-      />
+      /> -->
       <span
         class="flexrow-item ellipsis descriptor-name"
         :title="descriptor.name"
