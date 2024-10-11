@@ -124,6 +124,17 @@
             "save_error": "保存角选角时出错"
         },
 
+        "chats": {
+            "delete_message": "您确定要删除这条信息吗？",
+            "delete_message_confirm": "删除信息",
+            "join": "加入聊天",
+            "leave": "离开聊天室",
+            "no_message_yet": "无信息",
+            "no_chat": "您目前没有参与任何项目聊天。 搜索一个项目并加入其页面上的聊天。",
+            "search_entity": "搜索项目",
+            "title": "项目聊天"
+        },
+
         "comments": {
             "add_attachment": "添加附件",
             "add_checklist": "添加清单",
@@ -1550,13 +1561,51 @@
             "unit": "单位"
         },
 
+        "days_off": {
+            "title": "休息日",
+            "period": "期间",
+            "description": "说明",
+            "updated_at": "更新日期",
+            "nb_days_off": "休息日",
+            "no_day_off": "所选期间无休息日。",
+            "no_days_off": "您还没有登记休息日。",
+            "add": "增加休息日",
+            "edit": "编辑休息日",
+            "delete": "删除休息日",
+            "confirm_day_offs": "设置这些休息日将清除所有已填满的时间。 您确定要继续吗？",
+            "confirm_unset_day_offs": "目前的休息日是从 {start} 到 {end}。 您确定要删除这段时间吗？",
+            "error_days_off": "更新休息日时发生错误。"
+        },
+        
+        "library": {
+            "asset_library": "资产库",
+            "from_library": "来自资产库",
+            "import_from_asset_type": "从选定的类型和生产中导入所有资产",
+            "import_from_assets": "从选定的生产和资产类型中导入资产",
+            "import_from_list": "从列表中导入选定的资产",
+            "import_from_production": "从选定产品导入所有资产",
+            "manage": "将资产添加到您的资料库",
+            "no_entities": "没有实体",
+            "no_open_productions": "无公开制作",
+            "no_shared_assets": "没有共享资产",
+            "remove_selected_assets": "从库中移除所选资产 | 从库中移除 {nbSelectedAssets} 所选资产",
+            "select_asset_type": "选择资产类型",
+            "select_production": "选择生产",
+            "selected_assets": "部分资产",
+            "fields": {
+              "name": "名称",
+              "production": "生产",
+              "created_at": "创建日期",
+              "updated_at": "更新日期"
+            }
+        },
+          
         "wrong_browser": {
             "title": "Kitsu不支持您的浏览器",
             "text": "itsu 只能与 Firefox 和 Chrome 浏览器一起使用。"
         },
 
-        "doodle":
-        {
+        "doodle": {
             "role":"角色",
             "binding":"绑定",
             "animation":"动画",
