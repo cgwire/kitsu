@@ -22,7 +22,7 @@
     "@fullcalendar/core": "6.1.15",
     "@fullcalendar/daygrid": "6.1.15",
     "@fullcalendar/multimonth": "6.1.15",
-    "@fullcalendar/vue": "6.1.15",
+    "@fullcalendar/vue3": "6.1.15",
     "@google/model-viewer": "3.5.0",
     "@sentry/vue": "8.33.1",
     "@vue/compat": "3.5.12",
