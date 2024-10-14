@@ -8,9 +8,9 @@ import router from '@/router'
 import store from '@/store'
 
 import Autosize from 'v-autosize/src/plugin.js'
-import Chart from 'chart.js'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
+import 'chartkick/chart.js'
 import VueDragDrop from 'vue-drag-drop'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
@@ -33,7 +33,7 @@ app.use(resizableColumn)
 app.use(VueWebsocket, IO, '/events')
 app.use(Autosize)
 app.use(Meta)
-app.use(VueChartkick, { adapter: Chart })
+app.use(VueChartkick)
 app.use(VueDragDrop)
 app.use(VueAnimXYZ)
 
