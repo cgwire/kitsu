@@ -7,15 +7,13 @@ import resizableColumn from '@/directives/resizable-column'
 import router from '@/router'
 import store from '@/store'
 
-import Autocomplete from 'v-autocomplete'
 import Autosize from 'v-autosize/src/plugin.js'
-import Chart from 'chart.js/auto'
+import Chart from 'chart.js'
 import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import VueDragDrop from 'vue-drag-drop'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
-import 'v-autocomplete/dist/v-autocomplete.css'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
@@ -33,7 +31,6 @@ app.use(router)
 app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket, IO, '/events')
-app.use(Autocomplete)
 app.use(Autosize)
 app.use(Meta)
 app.use(VueChartkick, { adapter: Chart })

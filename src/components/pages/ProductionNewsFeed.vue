@@ -37,9 +37,9 @@
                 {{ $t('main.person') }}
               </label>
               <people-field
-                class="person-field small"
-                big
+                class="person-field"
                 :people="team"
+                small
                 v-model="person"
               />
             </div>
@@ -979,10 +979,6 @@ export default {
 .person-label {
   margin-top: 5px;
   margin-bottom: 4px;
-}
-
-.person-field :deep(.v-autocomplete) {
-  z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
 .filter-button {

@@ -46,6 +46,7 @@
 <script>
 export default {
   name: 'text-field',
+
   props: {
     disabled: {
       default: false,

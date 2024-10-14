@@ -192,7 +192,6 @@
               <people-field
                 class="flexrow-item"
                 :people="team"
-                big
                 v-model="assignation.person"
               />
               <span class="flexrow-item mt05 mb05">

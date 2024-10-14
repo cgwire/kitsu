@@ -32,7 +32,6 @@
             </label>
             <people-field
               class="person-field"
-              big
               :people="personList"
               v-model="filters.person"
             />
