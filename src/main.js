@@ -8,7 +8,7 @@ import router from '@/router'
 import store from '@/store'
 
 import Autosize from 'v-autosize/src/plugin.js'
-import Meta from 'vue-meta'
+// import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import 'chartkick/chart.js'
 import VueDragDrop from 'vue-drag-drop'
@@ -32,7 +32,7 @@ app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket, IO, '/events')
 app.use(Autosize)
-app.use(Meta)
+// app.use(Meta)
 app.use(VueChartkick)
 app.use(VueDragDrop)
 app.use(VueAnimXYZ)
