@@ -1,45 +1,34 @@
 <template>
-  <div class="people-field">
-    <v-autocomplete
-      ref="autocomplete"
-      :auto-select-one-item="false"
-      :component-item="assignationItem"
-      :get-label="getAssignationLabel"
-      :items="items"
-      :input-attrs="{
-        placeholder: placeholder || $t('people.select_person'),
-        class: wide
-          ? 'big wide v-autocomplete-input'
-          : big
-            ? 'big v-autocomplete-input'
-            : 'v-autocomplete-input'
-      }"
-      :keep-open="keepOpen"
-      :min-len="0"
-      :wait="100"
-      @focus="keepOpen = true"
-      @input="onChange"
-      @item-clicked="keepOpen = false"
-      @keyup.enter.native="onEnter"
-      @update-items="update"
+  <div class="people-field" :class="{ small, wide }">
+    <multiselect
+      ref="multiselect"
+      label="name"
+      :internal-search="false"
+      :options="items"
+      :placeholder="placeholder || $t('people.select_person')"
+      :show-labels="false"
+      :show-no-options="false"
+      :show-no-results="false"
+      track-by="name"
+      @search-change="onSearchChange"
+      @select="onSelect"
       v-model="item"
-    />
-    <span class="clear-button" @click="item = null" v-show="item != null">
+    >
+      <template #option="props">
+        <assignation-item :item="props.option" :search="search" />
+      </template>
+      <template #noResult></template>
+    </multiselect>
+    <span class="clear-button" @click="clear" v-if="item">
       <x-icon :size="12" />
     </span>
-
-    <div
-      @click="keepOpen = false"
-      :class="{
-        'c-mask': true,
-        'is-active': keepOpen
-      }"
-    ></div>
   </div>
 </template>
 
 <script>
 import { XIcon } from 'lucide-vue-next'
+import Multiselect from 'vue-multiselect'
+import 'vue-multiselect/dist/vue-multiselect.min.css'
 
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
@@ -49,17 +38,18 @@ export default {
   name: 'people-field',
 
   components: {
+    AssignationItem,
+    Multiselect,
     XIcon
   },
 
-  emits: ['enter', 'update:modelValue'],
+  emits: ['select', 'update:modelValue'],
 
   data() {
     return {
-      assignationItem: AssignationItem,
       item: null,
       items: [],
-      keepOpen: false
+      search: ''
     }
   },
 
@@ -74,10 +64,6 @@ export default {
   },
 
   props: {
-    big: {
-      type: Boolean,
-      default: false
-    },
     people: {
       type: Array,
       default: () => []
@@ -90,6 +76,10 @@ export default {
       type: Object,
       default: () => {}
     },
+    small: {
+      type: Boolean,
+      default: false
+    },
     wide: {
       type: Boolean,
       default: false
@@ -97,34 +87,25 @@ export default {
   },
 
   methods: {
-    getAssignationLabel(item) {
-      return item?.name || ''
-    },
-
-    update(searchText) {
-      this.keepOpen = true
-      this.items = searchText?.length
-        ? indexSearch(this.index, [searchText])
+    onSearchChange(search) {
+      this.items = search?.length
+        ? indexSearch(this.index, [search])
         : this.people
+      this.search = search
     },
 
-    onChange() {
+    onSelect() {
       this.$emit('update:modelValue', this.item)
-    },
-
-    onEnter() {
-      if (this.item) {
-        this.$emit('enter')
-        this.$refs.autocomplete.focus()
-      }
+      this.$emit('select', this.item)
     },
 
     clear() {
       this.item = null
+      this.onSelect()
     },
 
     focus() {
-      this.$el.querySelector('.v-autocomplete-input')?.focus()
+      this.$refs.multiselect.$el.focus()
     }
   },
 
@@ -143,29 +124,17 @@ export default {
 }
 </script>
 
-<style lang="scss">
-.dark .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
-  background-color: $dark-grey-light;
-  border-color: $dark-grey;
-  color: $white-grey;
-
-  &:active,
-  &:hover {
-    border: 1px solid $green;
-  }
-
-  &:focus {
-    border-color: $green;
-  }
-}
-
-.dark .v-autocomplete .v-autocomplete-list {
-  box-shadow: 2px 2px 2px 0 $dark-grey-light;
-  border-color: $dark-grey;
-}
-
+<style lang="scss" scoped>
 .people-field {
   position: relative;
+
+  &:not(.wide) {
+    width: 300px;
+  }
+
+  &.small {
+    width: 200px;
+  }
 
   .clear-button {
     color: var(--text);
@@ -173,71 +142,74 @@ export default {
     position: absolute;
     right: 4px;
     top: 0;
-    z-index: 206; // +1 relative to the z-index of .v-autocomplete
   }
 }
+</style>
 
-.v-autocomplete {
-  z-index: 205; // +1 relative to the z-index of c-mask
-  position: relative;
+<style lang="scss">
+.multiselect {
+  color: var(--text);
 
-  // Hide native clear button for Webkit browsers (Chrome, Safari)
-  input[type='search']::-webkit-search-cancel-button {
+  .multiselect__input,
+  .multiselect__single {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  .multiselect__input::placeholder {
+    color: $grey;
+  }
+  .multiselect__placeholder {
+    color: $grey;
+    padding-top: 0;
+  }
+
+  .multiselect__select {
     display: none;
   }
-}
 
-.v-autocomplete .v-autocomplete-list {
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
-  left: 6px;
-  top: 41px;
-  width: calc(100% - 13px);
-  max-height: 300px;
-  overflow-y: auto;
-  z-index: 3000;
-  border: 1px solid var(--border);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
+  .multiselect__tags {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding-left: 0.85em;
+    padding-right: 0.85em;
+    min-height: 42px;
 
-.v-autocomplete .v-autocomplete-list-item {
-  background: white;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.v-autocomplete .v-autocomplete-list-item:last-child {
-  background: white;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.v-autocomplete .v-autocomplete-input-group .v-autocomplete-input.wide.big {
-  width: 100%;
-}
-
-.v-autocomplete .v-autocomplete-list-item.v-autocomplete-item-active {
-  background: $light-grey-light;
-}
-
-.small .v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
-  width: 200px;
-}
-
-.v-autocomplete .v-autocomplete-input-group .v-autocomplete-input {
-  width: 300px;
-  margin-bottom: 1px;
-  border: 1px solid $light-grey-light;
-  border-radius: 10px;
-  padding: 0.5em;
-
-  &:active,
-  &:hover {
-    border: 1px solid $green;
+    &:active,
+    &:hover,
+    &:focus {
+      border: 1px solid $green;
+    }
   }
 
-  &.big {
-    padding: 0.85em;
+  .multiselect__content-wrapper {
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+
+  .multiselect__element {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .multiselect__option--highlight {
+    background: var(--background-selectable);
+    color: inherit;
+  }
+  .multiselect__option--selected {
+    background: var(--background-selected);
+    color: inherit;
+    font-weight: inherit;
+  }
+
+  .dark & {
+    .multiselect__content-wrapper,
+    .multiselect__element,
+    .multiselect__tags {
+      background-color: $dark-grey-light;
+    }
   }
 }
 </style>

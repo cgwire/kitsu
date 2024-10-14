@@ -700,11 +700,6 @@ body {
     color: #555;
   }
 
-  .v-autocomplete-input {
-    background: $dark-grey;
-    color: white;
-  }
-
   h2 {
     border-bottom: 1px solid $grey;
   }

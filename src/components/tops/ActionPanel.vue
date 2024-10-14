@@ -366,7 +366,6 @@
               ref="assignation-field"
               :people="currentTeam"
               :placeholder="$t('tasks.assign_explaination')"
-              big
               wide
               v-model="person"
               v-show="isCurrentUserManager || isCurrentUserSupervisor"
@@ -1840,10 +1839,6 @@ div.assignation {
 
 .change-status-item {
   margin-right: 0.5em;
-}
-
-.assignation-field :deep(.v-autocomplete) {
-  z-index: 501; // +1 relative to the z-index of canvas-wrapper
 }
 
 .status-item {

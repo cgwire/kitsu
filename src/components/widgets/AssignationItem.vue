@@ -4,11 +4,10 @@
       :is-link="false"
       :person="item"
       :size="30"
+      :font-size="14"
       class="flexrow-item"
     />
-    <span class="flexrow-item">
-      {{ item.name }}
-    </span>
+    <span class="flexrow-item" v-html="label"></span>
   </div>
 </template>
 
@@ -23,39 +22,29 @@ export default {
   },
 
   props: {
-    item: { required: true },
-    searchText: { required: true }
+    item: {
+      type: Object,
+      required: true
+    },
+    search: {
+      type: String
+    }
   },
 
   computed: {
-    nonHighilightedText() {
-      if (this.searchText === this.item.first_name) {
-        return '&nbsp;' + this.item.name.substring(this.searchText.length)
-      } else {
-        return this.item.name.substring(this.searchText.length)
-      }
+    label() {
+      const text = this.item.name.trim()
+      const search = this.search.trim()
+      return !search
+        ? text
+        : text.replace(RegExp(this.regExpEscape(search), 'gi'), '<b>$&</b>')
+    }
+  },
+
+  methods: {
+    regExpEscape(string) {
+      return string.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.dark div {
-  background-color: $dark-grey-light;
-  border-color: $dark-grey;
-  color: $white-grey;
-}
-
-.dark div:hover {
-  background-color: $dark-grey-lightest;
-}
-
-div {
-  color: black;
-  width: 100%;
-  padding: 0.5em;
-  border-bottom: 1px solid #ddd;
-  border-left: 1px solid $light-grey;
-  border-right: 1px solid $light-grey;
-}
-</style>
