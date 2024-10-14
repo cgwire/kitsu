@@ -18,12 +18,12 @@
               :task-status-list="taskStatusList"
               v-model="filters.taskStatusId"
             />
-            <span class="field small">
+            <span class="field">
               <label class="label">
                 {{ $t('concepts.fields.publisher') }}
               </label>
               <people-field
-                :big="true"
+                small
                 :people="publishers"
                 v-model="filters.publisher"
               />

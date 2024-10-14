@@ -35,11 +35,11 @@
             v-model="taskStatusId"
           />
 
-          <div class="field flexrow-item selector small">
+          <div class="field flexrow-item selector">
             <label class="label person-label">
               {{ $t('main.person') }}
             </label>
-            <people-field :people="assignees" :big="true" v-model="person" />
+            <people-field :people="assignees" small v-model="person" />
           </div>
 
           <combobox
