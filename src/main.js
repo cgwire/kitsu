@@ -18,7 +18,7 @@ import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
 configureCompat({
-  COMPONENT_ASYNC: false
+  MODE: 3
 })
 
 const app = createApp({
