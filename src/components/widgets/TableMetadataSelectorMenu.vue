@@ -1,4 +1,3 @@
-z
 <template>
   <div
     class="column-menu"
