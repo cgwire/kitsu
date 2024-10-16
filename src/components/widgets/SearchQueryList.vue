@@ -23,6 +23,12 @@
       v-if="isGroupEnabled"
     >
       <div class="group-header">
+        <span
+          class="dot"
+          :style="{ borderColor: getDepartment(group).color }"
+          :title="getDepartment(group).name"
+          v-if="group.is_shared && group.department_id"
+        ></span>
         <span>{{ group.name }}</span>
         <chevron-down-icon
           class="chevron ml05"
@@ -103,6 +109,12 @@
       @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
+      <span
+        class="dot"
+        :style="{ borderColor: getDepartment(searchQuery).color }"
+        :title="getDepartment(searchQuery).name"
+        v-if="searchQuery.is_shared && searchQuery.department_id"
+      ></span>
       {{ searchQuery.name }}
       <button
         class="edit"
@@ -213,7 +225,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager', 'personMap']),
+    ...mapGetters([
+      'currentProduction',
+      'departmentMap',
+      'isCurrentUserManager',
+      'personMap'
+    ]),
 
     sortedFilters() {
       return sortByName([...this.queries])
@@ -355,6 +372,10 @@ export default {
       } else {
         return null
       }
+    },
+
+    getDepartment(group) {
+      return this.departmentMap.get(group.department_id)
     }
   }
 }
@@ -485,5 +506,12 @@ export default {
 
 .tag.is-shared {
   border: 1px solid $blue;
+}
+
+.dot {
+  display: inline-block;
+  border: 4px solid;
+  border-radius: 50%;
+  margin-right: 0.5em;
 }
 </style>
