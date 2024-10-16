@@ -50,6 +50,7 @@ export default {
       'isDarkTheme',
       'isSavingCommentPreview',
       'isTVShow',
+      'mainConfig',
       'previewFileIdToShow',
       'personMap',
       'productionMap',
@@ -63,31 +64,10 @@ export default {
   },
 
   async mounted() {
-    if (localStorage.getItem('dark-theme') === 'true' && !this.isDarkTheme) {
-      this.$store.commit('TOGGLE_DARK_THEME')
-      document.documentElement.style.background = '#36393F'
-      document.body.style.background = '#36393F'
-    } else {
-      document.documentElement.style.background = '#FFF'
-      document.body.style.background = '#FFF'
-    }
     const config = await this.setMainConfig()
-    // Setup Crisp
-    if (config.crisp_token?.length) {
-      const supportChat = localPreferences.getBoolPreference(
-        'support:show',
-        true
-      )
-      this.setSupportChat(supportChat)
-      crisp.init(config.crisp_token)
-    }
-    // Setup Sentry
-    if (config.sentry?.dsn?.length) {
-      sentry.init(this.$router, {
-        dsn: config.sentry.dsn,
-        sampleRate: config.sentry.sampleRate
-      })
-    }
+    this.setupDarkTheme()
+    this.setupCrisp(config)
+    this.setupSentry(config)
   },
 
   methods: {
@@ -120,6 +100,40 @@ export default {
         this.$store.commit('ASSIGN_TASKS', { selectedTaskIds, personId })
       } else {
         this.$store.commit('UNASSIGN_TASKS', selectedTaskIds)
+      }
+    },
+
+    setupDarkTheme() {
+      if (localStorage.getItem('dark-theme') === 'false') {
+        document.documentElement.style.background = '#FFF'
+        document.body.style.background = '#FFF'
+      } else if (this.mainConfig?.dark_theme_by_default && !this.isDarkTheme) {
+        this.$store.commit('TOGGLE_DARK_THEME')
+        document.documentElement.style.background = '#36393F'
+        document.body.style.background = '#36393F'
+      } else {
+        document.documentElement.style.background = '#FFF'
+        document.body.style.background = '#FFF'
+      }
+    },
+
+    setupCrisp(config) {
+      if (config.crisp_token?.length) {
+        const supportChat = localPreferences.getBoolPreference(
+          'support:show',
+          true
+        )
+        this.setSupportChat(supportChat)
+        crisp.init(config.crisp_token)
+      }
+    },
+
+    setupSentry(config) {
+      if (config.sentry?.dsn?.length) {
+        sentry.init(this.$router, {
+          dsn: config.sentry.dsn,
+          sampleRate: config.sentry.sampleRate
+        })
       }
     }
   },

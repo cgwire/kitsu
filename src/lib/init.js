@@ -10,6 +10,9 @@ const init = callback => {
   return store
     .dispatch('loadContext')
     .then(() => {
+      return store.dispatch('getOrganisation')
+    })
+    .then(() => {
       // We run login success mutation when done because init
       // happens either after successful login or at first connexion
       // when the user have an active session.

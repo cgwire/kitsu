@@ -112,17 +112,10 @@ const auth = {
   requireAuth(to, from, next) {
     const finalize = () => {
       if (!store.state.user.isAuthenticated) {
-        store
-          .dispatch('getOrganisation')
-          .catch(err => {
-            console.error(err)
-          })
-          .finally(() => {
-            next({
-              name: 'login',
-              query: { redirect: to.fullPath }
-            })
-          })
+        next({
+          name: 'login',
+          query: { redirect: to.fullPath }
+        })
       } else {
         store.commit(DATA_LOADING_START)
         next()
