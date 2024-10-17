@@ -31,8 +31,16 @@
           <boolean-field
             :label="$t('main.is_shared')"
             v-model="form.is_shared"
-            v-if="isCurrentUserManager && currentProduction"
             @click="form.search_filter_group_id = null"
+            v-if="isCurrentUserManager && currentProduction"
+          />
+
+          <combobox-department
+            class="mt2"
+            :label="$t('main.department')"
+            :top="true"
+            v-model="form.department_id"
+            v-if="form.is_shared === 'true'"
           />
 
           <combobox
@@ -40,7 +48,7 @@
             :label="$t('main.filter_group')"
             :options="allowedGroups"
             v-model="form.search_filter_group_id"
-            v-if="isGroupEnabled"
+            v-if="isGroupEnabled && allowedGroups.length > 1"
           />
         </form>
 
@@ -67,6 +75,7 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -78,6 +87,7 @@ export default {
   components: {
     BooleanField,
     Combobox,
+    ComboboxDepartment,
     ModalFooter,
     TextField
   },
@@ -146,6 +156,7 @@ export default {
           ...this.form,
           is_shared: this.form.is_shared === 'true'
         }
+        console.log(data)
         this.$emit('confirm', data)
       }
     }
@@ -159,7 +170,8 @@ export default {
           name: this.searchQueryToEdit.name,
           search_filter_group_id: this.searchQueryToEdit.search_filter_group_id,
           search_query: this.searchQueryToEdit.search_query,
-          is_shared: this.searchQueryToEdit.is_shared ? 'true' : 'false'
+          is_shared: this.searchQueryToEdit.is_shared ? 'true' : 'false',
+          department_id: this.searchQueryToEdit.department_id
         }
       } else {
         this.form = {
@@ -167,7 +179,8 @@ export default {
           name: '',
           search_filter_group_id: null,
           search_query: '',
-          is_shared: 'false'
+          is_shared: 'false',
+          department_id: null
         }
       }
     },

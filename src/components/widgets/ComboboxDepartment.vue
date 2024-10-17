@@ -7,7 +7,8 @@
       :class="{
         'department-combo': true,
         opened: showDepartmentList,
-        rounded: rounded
+        rounded: rounded,
+        top: top
       }"
       :style="{
         width: width + 'px'
@@ -25,11 +26,7 @@
       <div
         class="select-input"
         ref="select"
-        :style="{
-          'max-height': maxHeightSelectInput + 'px',
-          width: width + 'px',
-          top: rounded ? '30px' : '37px'
-        }"
+        :style="listStyle"
         v-if="showDepartmentList"
       >
         <div
@@ -103,6 +100,10 @@ export default {
     withEmptyChoice: {
       default: true,
       type: Boolean
+    },
+    top: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -173,6 +174,28 @@ export default {
       } else {
         return this.departmentList[0]
       }
+    },
+
+    listStyle() {
+      const data = {
+        'max-height': this.maxHeightSelectInput + 'px',
+        width: this.width + 'px',
+        top: this.top ? '30px' : '37px',
+        left: '0px'
+      }
+      if (this.top) {
+        Object.assign(data, {
+          top: '-200px',
+          bottom: '-90px',
+          'border-top-left-radius': '10px',
+          'border-top-right-radius': '10px',
+          'border-bottom-left-radius': '0px',
+          'border-bottom-right-radius': '0px'
+        })
+      }
+
+      console.log(data, this.top)
+      return data
     }
   },
 
@@ -213,6 +236,17 @@ export default {
   margin: 0;
   padding: 0.15em;
   position: relative;
+
+  &.opened {
+    &.top {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+    &:not(.top) {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
 }
 
 .department-combo:hover {

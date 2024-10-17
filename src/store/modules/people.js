@@ -119,7 +119,8 @@ const initialState = {
     hd_by_default: false,
     timesheets_locked: false,
     use_original_file_name: false,
-    format_duration_in_hours: false
+    format_duration_in_hours: false,
+    dark_theme_by_default: false
   },
 
   people: [],

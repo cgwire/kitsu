@@ -653,7 +653,8 @@ const actions = {
         filterGroup.name,
         filterGroup.color,
         production.id,
-        null
+        filterGroup.is_shared,
+        filterGroup.department_id
       )
       .then(filterGroup => {
         commit(SAVE_ASSET_SEARCH_FILTER_GROUP_END, { filterGroup, production })
