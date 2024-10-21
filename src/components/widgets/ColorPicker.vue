@@ -16,10 +16,10 @@
       }"
     >
       <label
-        v-for="shade in palette"
         :key="shade"
         :title="shade"
         :style="{ color: shade }"
+        v-for="shade in palette"
       >
         <input type="radio" :value="shade" @click="onColorPicked(shade)" />
       </label>

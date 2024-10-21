@@ -22,9 +22,9 @@
       <div class="select-input" ref="select" v-if="showProductionList">
         <div
           class="production-line"
-          v-for="production in productionList"
-          @click="selectProduction(production)"
           :key="production.id"
+          @click="selectProduction(production)"
+          v-for="production in productionList"
         >
           <production-name
             :size="25"

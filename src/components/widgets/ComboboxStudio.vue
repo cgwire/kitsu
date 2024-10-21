@@ -29,8 +29,8 @@
         <div
           class="studio-line"
           :key="studio.id"
-          v-for="studio in studioList"
           @click="selectStudio(studio)"
+          v-for="studio in studioList"
         >
           <studio-name :studio="studio" />
         </div>

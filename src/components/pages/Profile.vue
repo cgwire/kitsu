@@ -542,8 +542,8 @@
 
         <ul class="pa1">
           <li
-            v-for="(device, index) in user.fido_devices"
             :key="`${device}-${index}`"
+            v-for="(device, index) in user.fido_devices"
           >
             {{ device }}
             <trash-icon

@@ -53,41 +53,44 @@
                 />
               </div>
             </th>
-            <metadata-header
-              :ref="`editor-${j}`"
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              :left="
-                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-              "
-              is-stick
-              @show-metadata-header-menu="
-                event => showMetadataHeaderMenu(descriptor.id, event)
-              "
-              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              v-if="isShowInfos"
-            />
-            <validation-header
-              :ref="`validation-${columnIndexInGrid}`"
-              :key="columnId"
-              :hidden-columns="hiddenColumns"
-              :column-id="columnId"
-              :validation-style="getValidationStyle(columnId)"
-              :left="
-                offsets['validation-' + columnIndexInGrid]
-                  ? `${offsets['validation-' + columnIndexInGrid]}px`
-                  : '0'
-              "
-              type="editor"
-              is-stick
-              @show-header-menu="
-                event => showHeaderMenu(columnId, columnIndexInGrid, event)
-              "
-              v-for="(
-                columnId, columnIndexInGrid
-              ) in stickedDisplayedValidationColumns"
-              v-if="!isLoading"
-            />
+
+            <template v-if="isShowInfos">
+              <metadata-header
+                :ref="`editor-${j}`"
+                :key="descriptor.id"
+                :descriptor="descriptor"
+                :left="
+                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+                "
+                is-stick
+                @show-metadata-header-menu="
+                  event => showMetadataHeaderMenu(descriptor.id, event)
+                "
+                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+              />
+            </template>
+            <template v-if="!isLoading">
+              <validation-header
+                :ref="`validation-${columnIndexInGrid}`"
+                :key="columnId"
+                :hidden-columns="hiddenColumns"
+                :column-id="columnId"
+                :validation-style="getValidationStyle(columnId)"
+                :left="
+                  offsets['validation-' + columnIndexInGrid]
+                    ? `${offsets['validation-' + columnIndexInGrid]}px`
+                    : '0'
+                "
+                type="editor"
+                is-stick
+                @show-header-menu="
+                  event => showHeaderMenu(columnId, columnIndexInGrid, event)
+                "
+                v-for="(
+                  columnId, columnIndexInGrid
+                ) in stickedDisplayedValidationColumns"
+              />
+            </template>
 
             <th
               scope="col"
@@ -97,15 +100,16 @@
               {{ $t('episodes.fields.description') }}
             </th>
 
-            <metadata-header
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              @show-metadata-header-menu="
-                event => showMetadataHeaderMenu(descriptor.id, event)
-              "
-              v-for="descriptor in nonStickedVisibleMetadataDescriptors"
-              v-if="isShowInfos"
-            />
+            <template v-if="isShowInfos">
+              <metadata-header
+                :key="descriptor.id"
+                :descriptor="descriptor"
+                @show-metadata-header-menu="
+                  event => showMetadataHeaderMenu(descriptor.id, event)
+                "
+                v-for="descriptor in nonStickedVisibleMetadataDescriptors"
+              />
+            </template>
             <th
               scope="col"
               class="time-spent"
@@ -150,22 +154,23 @@
               {{ $t('shots.fields.resolution') }}
             </th>
 
-            <validation-header
-              :key="columnId"
-              :hidden-columns="hiddenColumns"
-              :column-id="columnId"
-              :validation-style="getValidationStyle(columnId)"
-              type="episodes"
-              @show-header-menu="
-                event => {
-                  showHeaderMenu(columnId, columnIndexInGrid, event)
-                }
-              "
-              v-for="(
-                columnId, columnIndexInGrid
-              ) in nonStickedDisplayedValidationColumns"
-              v-if="!isLoading"
-            />
+            <template v-if="!isLoading">
+              <validation-header
+                :key="columnId"
+                :hidden-columns="hiddenColumns"
+                :column-id="columnId"
+                :validation-style="getValidationStyle(columnId)"
+                type="episodes"
+                @show-header-menu="
+                  event => {
+                    showHeaderMenu(columnId, columnIndexInGrid, event)
+                  }
+                "
+                v-for="(
+                  columnId, columnIndexInGrid
+                ) in nonStickedDisplayedValidationColumns"
+              />
+            </template>
             <th scope="col" class="actions" ref="actionsSection">
               <button-simple
                 :class="{
@@ -204,234 +209,245 @@
           </tr>
         </thead>
         <tbody class="datatable-body">
-          <tr
-            class="datatable-row"
-            scope="row"
-            :key="episode.id"
-            :class="{ canceled: episode.canceled }"
-            v-for="(episode, i) in displayedEpisodes"
-            v-if="!isLoading && isListVisible"
-          >
-            <th
-              :class="{
-                'datatable-row-header': true,
-                'episode-name': true,
-                name: true,
-                strong: !episode.canceled
-              }"
+          <template v-if="!isLoading && isListVisible">
+            <tr
+              class="datatable-row"
+              scope="row"
+              :key="episode.id"
+              :class="{ canceled: episode.canceled }"
+              v-for="(episode, i) in displayedEpisodes"
             >
-              <div class="flexrow">
-                <entity-thumbnail
-                  :entity="episode"
-                  :width="isBigThumbnails ? 150 : 50"
-                  :height="isBigThumbnails ? 100 : 33"
-                  :empty-width="isBigThumbnails ? 150 : 50"
-                  :empty-height="isBigThumbnails ? 100 : 34"
-                />
-                <router-link
-                  tabindex="-1"
-                  :title="episode.name"
-                  :to="episodePath(episode.id)"
-                >
-                  {{ episode.name }}
-                </router-link>
-              </div>
-            </th>
-
-            <!-- Metadata stick -->
-            <td
-              :ref="`editor-${i}-${j}`"
-              class="metadata-descriptor datatable-row-header"
-              :title="episode.data ? episode.data[descriptor.field_name] : ''"
-              :style="{
-                'z-index': 1000 - i, // Need for combo to be above the next cell
-                left: offsets['editor-' + j]
-                  ? `${offsets['editor-' + j]}px`
-                  : '0'
-              }"
-              :key="episode.id + '-' + descriptor.id"
-              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              v-if="isShowInfos"
-            >
-              <metadata-input
-                :entity="episode"
-                :descriptor="descriptor"
-                :indexes="{ i, j }"
-                @metadata-changed="$emit('metadata-changed', $event)"
-              />
-            </td>
-
-            <validation-cell
-              :ref="`validation-${i}-${j}`"
-              :key="columnId + '-' + episode.id"
-              :class="{
-                'validation-cell': !hiddenColumns[columnId],
-                'hidden-validation-cell': hiddenColumns[columnId],
-                'datatable-row-header': true
-              }"
-              :column="taskTypeMap.get(columnId)"
-              :column-y="j"
-              :entity="episode"
-              :is-assignees="isShowAssignations"
-              :is-static="true"
-              :left="
-                offsets['validation-' + j]
-                  ? `${offsets['validation-' + j]}px`
-                  : '0'
-              "
-              :minimized="hiddenColumns[columnId]"
-              :row-x="i"
-              :selected="isSelected(i, j)"
-              :sticked="true"
-              :task-test="taskMap.get(episode.validations.get(columnId))"
-              @select="infos => onTaskSelected(infos, true)"
-              @unselect="infos => onTaskUnselected(infos, true)"
-              v-for="(columnId, j) in stickedDisplayedValidationColumns"
-              v-if="!isLoading"
-            />
-
-            <description-cell
-              class="description"
-              :entry="episode"
-              :editable="isCurrentUserManager"
-              @description-changed="
-                value => onDescriptionChanged(episode, value)
-              "
-              v-if="!isCurrentUserClient && isShowInfos && isEpisodeDescription"
-            />
-
-            <!-- other Metadata cells -->
-            <td
-              class="metadata-descriptor"
-              :title="episode.data ? episode.data[descriptor.field_name] : ''"
-              :key="episode.id + '-' + descriptor.id"
-              v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
-              v-if="isShowInfos"
-            >
-              <metadata-input
-                :entity="episode"
-                :descriptor="descriptor"
-                :indexes="{ i, j }"
-                @metadata-changed="$emit('metadata-changed', $event)"
-              />
-            </td>
-
-            <td
-              class="time-spent selectable"
-              v-if="
-                !isCurrentUserClient &&
-                isShowInfos &&
-                isEpisodeTime &&
-                metadataDisplayHeaders.timeSpent
-              "
-            >
-              {{ formatDuration(episode.timeSpent) }}
-            </td>
-
-            <td
-              class="estimation selectable"
-              v-if="
-                !isCurrentUserClient &&
-                isShowInfos &&
-                isEpisodeEstimation &&
-                metadataDisplayHeaders.estimation
-              "
-            >
-              {{ formatDuration(episode.estimation) }}
-            </td>
-
-            <td
-              scope="col"
-              class="status metadata-descriptor"
-              ref="th-status"
-              v-if="isShowInfos && metadataDisplayHeaders.status"
-            >
-              <span class="select">
-                <select
-                  class="select-input"
-                  @change="
-                    event => onEpisodeStatusChanged(episode, event.target.value)
-                  "
-                >
-                  <option
-                    v-for="option in episodeStatusOptions"
-                    :key="`${episode.id}-status-option-${option.value}`"
-                    :value="option.value"
-                    :selected="(episode.status || 'running') === option.value"
-                  >
-                    {{ $t('episodes.status.' + option.label) }}
-                  </option>
-                </select>
-              </span>
-            </td>
-
-            <td class="resolution" v-if="isEpisodeResolution && isShowInfos">
-              <input
+              <th
                 :class="{
-                  'input-editor': true,
-                  error: !isValidResolution(episode)
+                  'datatable-row-header': true,
+                  'episode-name': true,
+                  name: true,
+                  strong: !episode.canceled
                 }"
-                :value="
-                  getMetadataFieldValue({ field_name: 'resolution' }, episode)
+              >
+                <div class="flexrow">
+                  <entity-thumbnail
+                    :entity="episode"
+                    :width="isBigThumbnails ? 150 : 50"
+                    :height="isBigThumbnails ? 100 : 33"
+                    :empty-width="isBigThumbnails ? 150 : 50"
+                    :empty-height="isBigThumbnails ? 100 : 34"
+                  />
+                  <router-link
+                    tabindex="-1"
+                    :title="episode.name"
+                    :to="episodePath(episode.id)"
+                  >
+                    {{ episode.name }}
+                  </router-link>
+                </div>
+              </th>
+
+              <!-- Metadata stick -->
+              <template v-if="isShowInfos">
+                <td
+                  :ref="`editor-${i}-${j}`"
+                  class="metadata-descriptor datatable-row-header"
+                  :title="
+                    episode.data ? episode.data[descriptor.field_name] : ''
+                  "
+                  :style="{
+                    'z-index': 1000 - i, // Need for combo to be above the next cell
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="episode.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="episode"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
+
+              <template v-if="!isLoading">
+                <validation-cell
+                  :ref="`validation-${i}-${j}`"
+                  :key="columnId + '-' + episode.id"
+                  :class="{
+                    'validation-cell': !hiddenColumns[columnId],
+                    'hidden-validation-cell': hiddenColumns[columnId],
+                    'datatable-row-header': true
+                  }"
+                  :column="taskTypeMap.get(columnId)"
+                  :column-y="j"
+                  :entity="episode"
+                  :is-assignees="isShowAssignations"
+                  :is-static="true"
+                  :left="
+                    offsets['validation-' + j]
+                      ? `${offsets['validation-' + j]}px`
+                      : '0'
+                  "
+                  :minimized="hiddenColumns[columnId]"
+                  :row-x="i"
+                  :selected="isSelected(i, j)"
+                  :sticked="true"
+                  :task-test="taskMap.get(episode.validations.get(columnId))"
+                  @select="infos => onTaskSelected(infos, true)"
+                  @unselect="infos => onTaskUnselected(infos, true)"
+                  v-for="(columnId, j) in stickedDisplayedValidationColumns"
+                />
+              </template>
+
+              <description-cell
+                class="description"
+                :entry="episode"
+                :editable="isCurrentUserManager"
+                @description-changed="
+                  value => onDescriptionChanged(episode, value)
                 "
-                @input="
-                  event =>
-                    onMetadataFieldChanged(
-                      episode,
-                      { field_name: 'resolution' },
-                      event
+                v-if="
+                  !isCurrentUserClient && isShowInfos && isEpisodeDescription
+                "
+              />
+
+              <!-- other Metadata cells -->
+              <template v-if="isShowInfos">
+                <td
+                  class="metadata-descriptor"
+                  :title="episode.data ? episode.data[descriptor.field_name] : ''"
+                  :key="episode.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="episode"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
+
+              <td
+                class="time-spent selectable"
+                v-if="
+                  !isCurrentUserClient &&
+                  isShowInfos &&
+                  isEpisodeTime &&
+                  metadataDisplayHeaders.timeSpent
+                "
+              >
+                {{ formatDuration(episode.timeSpent) }}
+              </td>
+
+              <td
+                class="estimation selectable"
+                v-if="
+                  !isCurrentUserClient &&
+                  isShowInfos &&
+                  isEpisodeEstimation &&
+                  metadataDisplayHeaders.estimation
+                "
+              >
+                {{ formatDuration(episode.estimation) }}
+              </td>
+
+              <td
+                scope="col"
+                class="status metadata-descriptor"
+                ref="th-status"
+                v-if="isShowInfos && metadataDisplayHeaders.status"
+              >
+                <span class="select">
+                  <select
+                    class="select-input"
+                    @change="
+                      event => onEpisodeStatusChanged(
+                        episode, event.target.value
+                      )
+                    "
+                  >
+                    <option
+                      v-for="option in episodeStatusOptions"
+                      :key="`${episode.id}-status-option-${option.value}`"
+                      :value="option.value"
+                      :selected="(episode.status || 'running') === option.value"
+                    >
+                      {{ $t('episodes.status.' + option.label) }}
+                    </option>
+                  </select>
+                </span>
+              </td>
+
+              <td class="resolution" v-if="isEpisodeResolution && isShowInfos">
+                <input
+                  :class="{
+                    'input-editor': true,
+                    error: !isValidResolution(episode)
+                  }"
+                  :value="
+                    getMetadataFieldValue({ field_name: 'resolution' }, episode)
+                  "
+                  @input="
+                    event =>
+                      onMetadataFieldChanged(
+                        episode,
+                        { field_name: 'resolution' },
+                        event
+                      )
+                  "
+                  @keyup.ctrl="
+                    event =>
+                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
+                  "
+                  v-if="isCurrentUserManager"
+                />
+
+                <span class="metadata-value selectable" v-else>
+                  {{
+                    getMetadataFieldValue({ field_name: 'resolution' }, episode)
+                  }}
+                </span>
+              </td>
+
+              <template v-if="!isLoading">
+                <validation-cell
+                  :ref="`validation-${i}-${
+                    j + stickedDisplayedValidationColumns.length
+                  }`"
+                  :class="{
+                    'validation-cell': !hiddenColumns[columnId],
+                    'hidden-validation-cell': hiddenColumns[columnId]
+                  }"
+                  :key="`${columnId}-${episode.id}`"
+                  :column="taskTypeMap.get(columnId)"
+                  :entity="episode"
+                  :task-test="
+                    taskMap.get(
+                      episode.validations ? episode.validations.get(columnId) : null
                     )
-                "
-                @keyup.ctrl="
-                  event =>
-                    onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                "
+                  "
+                  :minimized="hiddenColumns[columnId]"
+                  :selected="
+                    isSelected(i, j + stickedDisplayedValidationColumns.length)
+                  "
+                  :row-x="i"
+                  :column-y="j"
+                  :is-assignees="isShowAssignations"
+                  @select="onTaskSelected"
+                  @unselect="onTaskUnselected"
+                  v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
+                />
+              </template>
+              <row-actions-cell
+                :entry="episode"
+                @delete-clicked="$emit('delete-clicked', episode)"
+                @edit-clicked="$emit('edit-clicked', episode)"
                 v-if="isCurrentUserManager"
               />
-
-              <span class="metadata-value selectable" v-else>
-                {{
-                  getMetadataFieldValue({ field_name: 'resolution' }, episode)
-                }}
-              </span>
-            </td>
-
-            <validation-cell
-              :ref="`validation-${i}-${
-                j + stickedDisplayedValidationColumns.length
-              }`"
-              :class="{
-                'validation-cell': !hiddenColumns[columnId],
-                'hidden-validation-cell': hiddenColumns[columnId]
-              }"
-              :key="`${columnId}-${episode.id}`"
-              :column="taskTypeMap.get(columnId)"
-              :entity="episode"
-              :task-test="
-                taskMap.get(
-                  episode.validations ? episode.validations.get(columnId) : null
-                )
-              "
-              :minimized="hiddenColumns[columnId]"
-              :selected="
-                isSelected(i, j + stickedDisplayedValidationColumns.length)
-              "
-              :row-x="i"
-              :column-y="j"
-              :is-assignees="isShowAssignations"
-              @select="onTaskSelected"
-              @unselect="onTaskUnselected"
-              v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
-              v-if="!isLoading"
-            />
-            <row-actions-cell
-              :entry="episode"
-              @delete-clicked="$emit('delete-clicked', episode)"
-              @edit-clicked="$emit('edit-clicked', episode)"
-              v-if="isCurrentUserManager"
-            />
-            <td class="actions" v-else></td>
-          </tr>
+              <td class="actions" v-else></td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>

@@ -17,7 +17,6 @@
           @change="updateValue"
         >
           <option
-            v-for="(option, i) in options"
             :key="i + '-' + option.label + '-' + option.value"
             :value="
               option.value !== null && option.value !== undefined
@@ -25,6 +24,7 @@
                 : option.label
             "
             :selected="modelValue === option.value"
+            v-for="(option, i) in options"
           >
             {{ getOptionLabel(option) }}
           </option>
@@ -40,10 +40,10 @@
       @change="updateValue"
     >
       <option
-        v-for="(option, i) in options"
         :key="i + '-' + option.label + '-' + option.value"
         :value="option.value || option.label"
         :selected="modelValue === option.value"
+        v-for="(option, i) in options"
       >
         {{ getOptionLabel(option) }}
       </option>

@@ -38,8 +38,8 @@
 
           <div
             v-else
-            v-for="(taskListObject, index) in taskTypeGroups"
             :key="index"
+            v-for="(taskListObject, index) in taskTypeGroups"
           >
             <table
               class="datatable list"

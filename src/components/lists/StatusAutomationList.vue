@@ -31,8 +31,8 @@
         <tbody class="datatable-body">
           <tr
             class="datatable-row"
-            v-for="statusAutomation in entries"
             :key="statusAutomation.id"
+            v-for="statusAutomation in entries"
           >
             <td scope="row" class="name">
               <div class="flexrow">

@@ -77,7 +77,6 @@
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
-            v-for="(entry, i) in displayedTasks"
             :key="entry + '-' + i"
             :class="{
               'datatable-row': true,
@@ -86,6 +85,7 @@
                 selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
             }"
             @click="onLineClicked(i, $event)"
+            v-for="(entry, i) in displayedTasks"
           >
             <td
               class="production datatable-row-header datatable-row-header--nobd"
@@ -171,12 +171,12 @@
                   "
                 >
                   <p
-                    v-for="(option, i) in getDescriptorChecklistValues(
-                      getMetadataDescriptor(fieldName, entry)
-                    )"
                     :key="`${entry.id}-
                     ${getMetadataDescriptor(fieldName, entry).id}
                     -${i}-${option.text}-div`"
+                    v-for="(option, i) in getDescriptorChecklistValues(
+                      getMetadataDescriptor(fieldName, entry)
+                    )"
                   >
                     <input
                       type="checkbox"

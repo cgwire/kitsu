@@ -151,48 +151,52 @@
               "
             >
               <em>Casted in {{ nbShotsCastedIn }} shots</em>
-              <div
-                class="sequence-shots"
-                :key="
-                  sequenceShots.length > 0 ? sequenceShots[0].sequence_name : ''
-                "
-                v-if="sequenceShots[0].sequence_name"
-                v-for="sequenceShots in currentAsset.castInShotsBySequence"
-              >
-                <div class="shot-sequence">
-                  {{
-                    sequenceShots.length > 0
-                      ? sequenceShots[0].sequence_name
-                      : ''
-                  }}
+              <template v-if="
+                currentAsset.castInShotsBySequence.length > 0 &&
+                currentAsset.castInShotsBySequence[0][0].sequence_name
+              ">
+                <div
+                  class="sequence-shots"
+                  :key="
+                    sequenceShots?.length > 0 ? sequenceShots[0].sequence_name : ''
+                  "
+                  v-for="sequenceShots in currentAsset.castInShotsBySequence || []"
+                >
+                  <div class="shot-sequence">
+                    {{
+                      sequenceShots?.length > 0
+                        ? sequenceShots[0].sequence_name
+                        : ''
+                    }}
+                  </div>
+                  <div class="shot-list">
+                    <router-link
+                      class="shot-link"
+                      :key="shot.shot_id"
+                      :to="shotPath(shot)"
+                      v-for="shot in sequenceShots"
+                    >
+                      <entity-thumbnail
+                        class="entity-thumbnail"
+                        :entity="shot"
+                        :square="true"
+                        :empty-width="103"
+                        :empty-height="103"
+                        :with-link="false"
+                      />
+                      <div>
+                        <span class="break-word">{{ shot.shot_name }}</span>
+                        <span v-if="shot.nb_occurences > 1">
+                          ({{ shot.nb_occurences }})
+                        </span>
+                      </div>
+                    </router-link>
+                  </div>
                 </div>
-                <div class="shot-list">
-                  <router-link
-                    class="shot-link"
-                    :key="shot.shot_id"
-                    :to="shotPath(shot)"
-                    v-for="shot in sequenceShots"
-                  >
-                    <entity-thumbnail
-                      class="entity-thumbnail"
-                      :entity="shot"
-                      :square="true"
-                      :empty-width="103"
-                      :empty-height="103"
-                      :with-link="false"
-                    />
-                    <div>
-                      <span class="break-word">{{ shot.shot_name }}</span>
-                      <span v-if="shot.nb_occurences > 1">
-                        ({{ shot.nb_occurences }})
-                      </span>
-                    </div>
-                  </router-link>
-                </div>
+              </template>
+              <div v-else>
+                {{ $t('assets.no_cast_in') }}
               </div>
-            </div>
-            <div v-else>
-              {{ $t('assets.no_cast_in') }}
             </div>
           </div>
           <table-info

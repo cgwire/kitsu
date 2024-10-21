@@ -18,9 +18,9 @@
       >
         <div
           class="task-type-line"
-          v-for="taskType in taskTypeList"
-          @click="selectTaskType(taskType)"
           :key="taskType.id"
+          @click="selectTaskType(taskType)"
+          v-for="taskType in taskTypeList"
         >
           <task-type-name :task-type="taskType" />
         </div>
