@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
@@ -873,7 +872,7 @@ const mutations = {
           episode.validations.set(task.task_type_id, task.id)
           const validations = episode.validations
           episode.validations = []
-          Vue.set(episode, 'validations', validations)
+          episode.validations = validations
           episode.tasks.push(task.id)
         }
       }
@@ -953,7 +952,7 @@ const mutations = {
       episode.tasks.push(task.id)
       if (!episode.validations) episode.validations = new Map()
       episode.validations.set(task.task_type_id, task.id)
-      Vue.set(episode, 'validations', new Map(episode.validations))
+      episode.validations = new Map(episode.validations)
     }
   },
 
@@ -963,7 +962,7 @@ const mutations = {
       const validations = new Map(episode.validations)
       validations.delete(task.task_type_id)
       delete episode.validations
-      Vue.set(episode, 'validations', validations)
+      episode.validations = validations
       const taskIndex = episode.tasks.findIndex(
         episodeTaskId => episodeTaskId === task.id
       )

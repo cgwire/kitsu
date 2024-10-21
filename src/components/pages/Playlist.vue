@@ -451,7 +451,6 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
@@ -951,7 +950,7 @@ export default {
 
     addToPlayerPlaylist(entity, scrollRight = true) {
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-      Vue.set(this.currentEntities, playlistEntity.id, playlistEntity)
+      this.currentEntities[playlistEntity.id] = playlistEntity
       this.playlistPlayer.entityList.push(playlistEntity)
       if (scrollRight) {
         this.$nextTick(() => {
