@@ -112,10 +112,10 @@
               class="task-item"
               draggable
               :key="task.id"
-              v-for="task in unassignedTasks"
               @dragstart="onTaskDragStart($event, task)"
               @drag="onTaskDrag"
               @dragend="onTaskDragEnd"
+              v-for="task in unassignedTasks"
             >
               <div
                 class="ui-droppable"
@@ -295,14 +295,6 @@ export default {
       'taskTypeMap',
       'user'
     ]),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    },
 
     daysOffByPerson() {
       return this.daysOff.reduce((acc, dayOff) => {

@@ -12,13 +12,13 @@
     />
     <div v-show="isOpen" class="pencil-palette">
       <label
-        v-for="pencil in sizes"
         :key="pencil"
         :title="$t(`playlists.actions.annotation_${pencil}`)"
         :class="{
           medium: pencil === 'medium',
           small: pencil === 'small'
         }"
+        v-for="pencil in sizes"
       >
         <input type="radio" :value="pencil" @click="onPencilPicked(pencil)" />
       </label>

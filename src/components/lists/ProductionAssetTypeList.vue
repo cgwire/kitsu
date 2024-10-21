@@ -8,34 +8,31 @@
               {{ $t('asset_types.fields.name') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
-            <th
-              scope="col"
-              class="validation validation-cell"
-              :key="columnId"
-              v-for="columnId in validationColumns"
-              v-if="!isLoading"
-            >
-              <div
-                class="flexrow validation-content"
-                :style="getValidationStyle(columnId)"
+            <template v-if="!isLoading">
+              <th
+                scope="col"
+                class="validation validation-cell"
+                :key="columnId"
+                v-for="columnId in validationColumns"
               >
-                <router-link
-                  class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
-                  :to="taskTypePath(columnId)"
-                  v-if="!isCurrentUserClient"
+                <div
+                  class="flexrow validation-content"
+                  :style="getValidationStyle(columnId)"
                 >
-                  {{ taskTypeMap.get(columnId).name }}
-                </router-link>
-                <span
-                  class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
-                  v-else
-                >
-                  {{ taskTypeMap.get(columnId).name }}
-                </span>
-              </div>
-            </th>
+                  <router-link
+                    class="flexrow-item"
+                    :title="taskTypeMap.get(columnId).name"
+                    :to="taskTypePath(columnId)"
+                    v-if="!isCurrentUserClient"
+                  >
+                    {{ taskTypeMap.get(columnId).name }}
+                  </router-link>
+                  <span class="flexrow-item" v-else>
+                    {{ taskTypeMap.get(columnId).name }}
+                  </span>
+                </div>
+              </th>
+            </template>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -76,16 +73,20 @@
             />
             <td v-else></td>
 
-            <stats-cell
-              :key="entry.id + columnId"
-              :style="getValidationStyle(columnId)"
-              :colors="chartColors(entry.id, columnId)"
-              :data="chartData(entry.id, columnId)"
-              :display-mode="displayMode"
-              v-if="isStats(entry.id, columnId)"
+            <template
+              :key="entry.id + '-' + columnId"
               v-for="columnId in validationColumns"
-            />
-            <td :style="getValidationStyle(columnId)" v-else></td>
+            >
+              <stats-cell
+                :key="entry.id + columnId"
+                :style="getValidationStyle(columnId)"
+                :colors="chartColors(entry.id, columnId)"
+                :data="chartData(entry.id, columnId)"
+                :display-mode="displayMode"
+                v-if="isStats(entry.id, columnId)"
+              />
+              <td :style="getValidationStyle(columnId)" v-else></td>
+            </template>
 
             <td class="actions"></td>
           </tr>

@@ -37,15 +37,16 @@
             @keyup.meta.enter="runConfirmation"
             v-model="form.description"
           />
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="sequenceToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in sequenceMetadataDescriptors"
-            v-if="sequenceToEdit"
-          />
+          <template v-if="sequenceToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="sequenceToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in sequenceMetadataDescriptors"
+            />
+          </template>
         </form>
 
         <modal-footer

@@ -21,9 +21,9 @@
       <div class="select-input" ref="select" v-if="showStatusAutomationsList">
         <div
           class="status-automation-line"
-          v-for="statusAutomation in statusAutomationsList"
-          @click="selectStatusAutomation(statusAutomation)"
           :key="statusAutomation.id"
+          @click="selectStatusAutomation(statusAutomation)"
+          v-for="statusAutomation in statusAutomationsList"
         >
           <status-automation-item
             :status-automation="statusAutomation"

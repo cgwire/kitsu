@@ -45,8 +45,8 @@
           <template v-else>
             <div
               class="pb1"
-              v-for="(group, index) in sortedSharedAssetsByType"
               :key="index"
+              v-for="(group, index) in sortedSharedAssetsByType"
             >
               <h2 class="mt0">
                 {{ group[0].asset_type_name }} ({{ group.length }})
@@ -59,8 +59,8 @@
                     'selected-item': isSelected(entity)
                   }"
                   :key="entity.id"
-                  v-for="entity in group"
                   @click="isCurrentUserManager && toggleEntity(entity)"
+                  v-for="entity in group"
                 >
                   <div class="card" :title="entity.full_name">
                     <entity-preview

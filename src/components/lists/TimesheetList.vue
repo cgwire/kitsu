@@ -2,8 +2,7 @@
   <div class="user-timesheet data-list">
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
-        <datepicker
-        />
+        <datepicker />
       </div>
       <div class="flexrow-item flexrow time-spent-total">
         -&nbsp;&nbsp;
@@ -59,8 +58,8 @@
         <tbody class="datatable-body" v-if="tasks.length > 0 && !isLoading">
           <tr
             class="datatable-row"
-            v-for="(task, i) in displayedTasks"
             :key="`${task.id}-${i}`"
+            v-for="(task, i) in displayedTasks"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"
@@ -117,8 +116,8 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="(task, i) in doneTasks"
             :key="`${task}-${i}`"
+            v-for="(task, i) in doneTasks"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"

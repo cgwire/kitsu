@@ -12,8 +12,8 @@
     </label>
     <div
       class="checkbox-wrapper"
-      v-for="(option, i) in descriptorChecklistValues"
       :key="`${descriptor.id}-${i}-${option.text}-wrapper`"
+      v-for="(option, i) in descriptorChecklistValues"
     >
       <input
         type="checkbox"

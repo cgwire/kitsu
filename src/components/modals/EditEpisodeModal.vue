@@ -47,15 +47,16 @@
             v-model="form.description"
           />
 
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="episodeToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in episodeMetadataDescriptors"
-            v-if="episodeToEdit"
-          />
+          <template v-if="episodeToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="episodeToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in episodeMetadataDescriptors"
+            />
+          </template>
         </form>
 
         <modal-footer

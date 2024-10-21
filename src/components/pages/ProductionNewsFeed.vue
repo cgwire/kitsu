@@ -79,193 +79,196 @@
               <spinner />
             </div>
 
-            <div
-              :key="dayList.length > 0 ? dayList[0].created_at : ''"
-              v-for="dayList in newsListByDay(timezone)"
-              v-if="!loading.news"
-            >
-              <div class="has-text-centered subtitle timeline-entry">
-                <span class="big-dot"></span>
-                {{ dayList.length > 0 ? formatDay(dayList[0].created_at) : '' }}
-              </div>
+            <template v-if="!loading.news">
               <div
-                :key="'news-' + news.id"
-                :ref="'news-' + news.id"
-                v-for="(news, index) in dayList"
+                :key="dayList.length > 0 ? dayList[0].created_at : ''"
+                v-for="dayList in newsListByDay(timezone)"
               >
-                <div v-if="previewMode === 'comments'">
-                  <div
-                    :class="{
-                      'news-line': true,
-                      'timeline-entry': true,
-                      flexrow: true,
-                      selected: news.id === currentNewsId
-                    }"
-                    @click.prevent="onNewsSelected(news)"
-                  >
-                    <span
+                <div class="has-text-centered subtitle timeline-entry">
+                  <span class="big-dot"></span>
+                  {{
+                    dayList.length > 0 ? formatDay(dayList[0].created_at) : ''
+                  }}
+                </div>
+                <div
+                  :key="'news-' + news.id"
+                  :ref="'news-' + news.id"
+                  v-for="(news, index) in dayList"
+                >
+                  <div v-if="previewMode === 'comments'">
+                    <div
                       :class="{
-                        dot: true,
-                        red: hasRetakeValue(news),
-                        green: hasDoneValue(news)
+                        'news-line': true,
+                        'timeline-entry': true,
+                        flexrow: true,
+                        selected: news.id === currentNewsId
                       }"
-                    ></span>
-                    <span class="date flexrow-item">
-                      {{ formatTime(news.created_at) }}
-                    </span>
+                      @click.prevent="onNewsSelected(news)"
+                    >
+                      <span
+                        :class="{
+                          dot: true,
+                          red: hasRetakeValue(news),
+                          green: hasDoneValue(news)
+                        }"
+                      ></span>
+                      <span class="date flexrow-item">
+                        {{ formatTime(news.created_at) }}
+                      </span>
+
+                      <div
+                        class="flexrow-item production-name-wrapper"
+                        v-if="isStudio"
+                      >
+                        <production-name
+                          :production="productionMap.get(news.project_id)"
+                          only-avatar
+                        />
+                      </div>
+
+                      <people-avatar
+                        class="flexrow-item"
+                        :person="personMap.get(news.author_id)"
+                        :size="30"
+                        :font-size="14"
+                        :is-link="false"
+                        v-if="personMap.get(news.author_id)"
+                      />
+
+                      <div class="flexrow-item task-type-wrapper">
+                        <task-type-name
+                          class="task-type-name"
+                          :task-type="buildTaskTypeFromNews(news)"
+                          :production-id="news.project_id"
+                          :is-static="true"
+                        />
+                      </div>
+
+                      <div class="flexrow-item validation-wrapper">
+                        <validation-tag
+                          class="validation-tag"
+                          :task="buildTaskFromNews(news)"
+                          :is-static="true"
+                          :thin="!news.change"
+                        />
+                      </div>
+
+                      <div class="flexrow-item comment-content">
+                        <div>
+                          <div class="news-info flexrow">
+                            <span class="explaination flexrow-item flexrow">
+                              <entity-thumbnail
+                                class="ml1 entity-thumbnail mr1 flexrow-item"
+                                :entity="{
+                                  id: news.task_entity_id,
+                                  preview_file_id: news.entity_preview_file_id
+                                }"
+                                :with-link="false"
+                              />
+
+                              <span class="strong ml05">
+                                {{ news.full_entity_name }}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="preview"
+                    v-if="news.preview_file_id && previewMode === 'previews'"
+                  >
+                    <div
+                      :class="{
+                        'news-line': true,
+                        'timeline-entry': true,
+                        flexrow: true,
+                        selected: news.id === currentNewsId
+                      }"
+                      @click.prevent="onNewsSelected(news)"
+                    >
+                      <span
+                        :class="{
+                          dot: true,
+                          red: hasRetakeValue(news),
+                          green: hasDoneValue(news)
+                        }"
+                      ></span>
+                      <span class="date flexrow-item">
+                        {{ formatTime(news.created_at) }}
+                      </span>
+
+                      <people-avatar
+                        class="flexrow-item"
+                        :person="personMap.get(news.author_id)"
+                        :size="30"
+                        :no-link="true"
+                        v-if="personMap.get(news.author_id)"
+                      />
+
+                      <div class="flexrow-item task-type-wrapper">
+                        <task-type-name
+                          class="task-type-name"
+                          :task-type="buildTaskTypeFromNews(news)"
+                          :production-id="news.project_id"
+                        />
+                      </div>
+
+                      <div class="flexrow-item comment-content">
+                        <div>
+                          <div class="news-info flexrow">
+                            <span class="explaination flexrow-item flexrow">
+                              <entity-thumbnail
+                                class="ml1"
+                                :entity="{
+                                  id: news.task_entity_id,
+                                  preview_file_id: news.entity_preview_file_id
+                                }"
+                                :with-link="false"
+                                v-if="news.entity_preview_file_id"
+                              />
+                              <span class="strong ml05 flexrow-item">
+                                {{ news.full_entity_name }}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
                     <div
-                      class="flexrow-item production-name-wrapper"
-                      v-if="isStudio"
+                      class="has-text-centered"
+                      v-if="previewMode === 'previews'"
                     >
-                      <production-name
-                        :production="productionMap.get(news.project_id)"
-                        only-avatar
+                      <preview-player
+                        :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(
+                          0,
+                          10
+                        )}-${index}`"
+                        :previews="[
+                          {
+                            id: news.preview_file_id,
+                            extension: news.preview_file_extension,
+                            annotations: news.preview_file_annotations
+                          }
+                        ]"
+                        :task="{
+                          id: news.task_id,
+                          project_id: news.project_id,
+                          task_type_id: news.task_type_id,
+                          assignees: []
+                        }"
+                        :read-only="true"
+                        :light="true"
+                        :big="true"
                       />
                     </div>
-
-                    <people-avatar
-                      class="flexrow-item"
-                      :person="personMap.get(news.author_id)"
-                      :size="30"
-                      :font-size="14"
-                      :is-link="false"
-                      v-if="personMap.get(news.author_id)"
-                    />
-
-                    <div class="flexrow-item task-type-wrapper">
-                      <task-type-name
-                        class="task-type-name"
-                        :task-type="buildTaskTypeFromNews(news)"
-                        :production-id="news.project_id"
-                        :is-static="true"
-                      />
-                    </div>
-
-                    <div class="flexrow-item validation-wrapper">
-                      <validation-tag
-                        class="validation-tag"
-                        :task="buildTaskFromNews(news)"
-                        :is-static="true"
-                        :thin="!news.change"
-                      />
-                    </div>
-
-                    <div class="flexrow-item comment-content">
-                      <div>
-                        <div class="news-info flexrow">
-                          <span class="explaination flexrow-item flexrow">
-                            <entity-thumbnail
-                              class="ml1 entity-thumbnail mr1 flexrow-item"
-                              :entity="{
-                                id: news.task_entity_id,
-                                preview_file_id: news.entity_preview_file_id
-                              }"
-                              :with-link="false"
-                            />
-
-                            <span class="strong ml05">
-                              {{ news.full_entity_name }}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  class="preview"
-                  v-if="news.preview_file_id && previewMode === 'previews'"
-                >
-                  <div
-                    :class="{
-                      'news-line': true,
-                      'timeline-entry': true,
-                      flexrow: true,
-                      selected: news.id === currentNewsId
-                    }"
-                    @click.prevent="onNewsSelected(news)"
-                  >
-                    <span
-                      :class="{
-                        dot: true,
-                        red: hasRetakeValue(news),
-                        green: hasDoneValue(news)
-                      }"
-                    ></span>
-                    <span class="date flexrow-item">
-                      {{ formatTime(news.created_at) }}
-                    </span>
-
-                    <people-avatar
-                      class="flexrow-item"
-                      :person="personMap.get(news.author_id)"
-                      :size="30"
-                      :no-link="true"
-                      v-if="personMap.get(news.author_id)"
-                    />
-
-                    <div class="flexrow-item task-type-wrapper">
-                      <task-type-name
-                        class="task-type-name"
-                        :task-type="buildTaskTypeFromNews(news)"
-                        :production-id="news.project_id"
-                      />
-                    </div>
-
-                    <div class="flexrow-item comment-content">
-                      <div>
-                        <div class="news-info flexrow">
-                          <span class="explaination flexrow-item flexrow">
-                            <entity-thumbnail
-                              class="ml1"
-                              :entity="{
-                                id: news.task_entity_id,
-                                preview_file_id: news.entity_preview_file_id
-                              }"
-                              :with-link="false"
-                              v-if="news.entity_preview_file_id"
-                            />
-                            <span class="strong ml05 flexrow-item">
-                              {{ news.full_entity_name }}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    class="has-text-centered"
-                    v-if="previewMode === 'previews'"
-                  >
-                    <preview-player
-                      :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(
-                        0,
-                        10
-                      )}-${index}`"
-                      :previews="[
-                        {
-                          id: news.preview_file_id,
-                          extension: news.preview_file_extension,
-                          annotations: news.preview_file_annotations
-                        }
-                      ]"
-                      :task="{
-                        id: news.task_id,
-                        project_id: news.project_id,
-                        task_type_id: news.task_type_id,
-                        assignees: []
-                      }"
-                      :read-only="true"
-                      :light="true"
-                      :big="true"
-                    />
                   </div>
                 </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
       </div>
