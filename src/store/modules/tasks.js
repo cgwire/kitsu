@@ -1,5 +1,4 @@
 import async from 'async'
-import Vue from 'vue'
 
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
@@ -883,37 +882,33 @@ const mutations = {
       comment.person = personStore.state.personMap.get(comment.person_id)
     })
     state.taskComments[taskId] = sortComments(comments)
-    Vue.set(
-      state.taskPreviews,
-      taskId,
-      comments.reduce((previews, comment) => {
-        if (comment.previews && comment.previews.length > 0) {
-          const preview = comment.previews[0]
-          preview.previews = sortRevisionPreviewFiles(
-            comment.previews.map(p => {
-              const prev = {
-                id: p.id,
-                annotations: p.annotations,
-                extension: p.extension,
-                width: p.width,
-                height: p.height,
-                task_id: p.task_id,
-                status: p.status,
-                revision: p.revision,
-                position: p.position,
-                duration: p.duration,
-                original_name: p.original_name
-              }
-              return prev
-            })
-          )
-          previews.push(preview)
-          return previews
-        } else {
-          return previews
-        }
-      }, [])
-    )
+    state.taskPreviews.taskId = comments.reduce((previews, comment) => {
+      if (comment.previews && comment.previews.length > 0) {
+        const preview = comment.previews[0]
+        preview.previews = sortRevisionPreviewFiles(
+          comment.previews.map(p => {
+            const prev = {
+              id: p.id,
+              annotations: p.annotations,
+              extension: p.extension,
+              width: p.width,
+              height: p.height,
+              task_id: p.task_id,
+              status: p.status,
+              revision: p.revision,
+              position: p.position,
+              duration: p.duration,
+              original_name: p.original_name
+            }
+            return prev
+          })
+        )
+        previews.push(preview)
+        return previews
+      } else {
+        return previews
+      }
+    }, [])
   },
 
   [LOAD_TASK_STATUSES_END](state, taskStatuses) {
@@ -1371,7 +1366,7 @@ const mutations = {
       c => c.id === comment.id
     )
     if (!comment.attachment_files) {
-      Vue.set(comment, 'attachment_files', [])
+      comment.attachment_files = []
     }
     oldComment.attachment_files =
       oldComment.attachment_files.concat(attachmentFiles)
@@ -1414,7 +1409,7 @@ const mutations = {
 
   [SET_UPLOAD_PROGRESS](state, { name, percent }) {
     if (!state.uploadProgress.name) {
-      Vue.set(state.uploadProgress, name, percent)
+      state.uploadProgress.name = percent
     }
     state.uploadProgress[name] = percent
   },

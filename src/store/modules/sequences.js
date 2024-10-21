@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
@@ -901,7 +900,7 @@ const mutations = {
           sequence.validations.set(task.task_type_id, task.id)
           const validations = sequence.validations
           sequence.validations = []
-          Vue.set(sequence, 'validations', validations)
+          sequence.validations = validations
           sequence.tasks.push(task.id)
         }
       }
@@ -981,7 +980,7 @@ const mutations = {
       sequence.tasks.push(task.id)
       if (!sequence.validations) sequence.validations = new Map()
       sequence.validations.set(task.task_type_id, task.id)
-      Vue.set(sequence, 'validations', new Map(sequence.validations))
+      sequence.validations = new Map(sequence.validations)
     }
   },
 
@@ -991,7 +990,7 @@ const mutations = {
       const validations = new Map(sequence.validations)
       validations.delete(task.task_type_id)
       delete sequence.validations
-      Vue.set(sequence, 'validations', validations)
+      sequence.validations = validations
       const taskIndex = sequence.tasks.findIndex(
         sequenceTaskId => sequenceTaskId === task.id
       )
