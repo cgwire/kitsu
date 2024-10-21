@@ -6,8 +6,8 @@
       </span>
       <vue-slider
         class="flexrow-item slider"
+        :options="options"
         v-model="value"
-        v-bind="options"
         :max="maxHoursByDay"
       />
       <button class="button flexrow-item" @click="setValue(1)">1</button>
@@ -21,7 +21,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import VueSlider from 'vue-slider-component'
+import VueSlider from 'vue-3-slider-component'
 
 export default {
   name: 'time-slider-cell',

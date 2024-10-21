@@ -268,7 +268,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('task_types.title')} - Kitsu`
     }

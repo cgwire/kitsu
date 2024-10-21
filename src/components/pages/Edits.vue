@@ -1012,7 +1012,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return {
         title: `${

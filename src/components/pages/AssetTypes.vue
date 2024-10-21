@@ -225,7 +225,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('asset_types.title')} - Kitsu`
     }

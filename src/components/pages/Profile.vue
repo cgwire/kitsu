@@ -1166,7 +1166,7 @@ export default {
     window.addEventListener('keydown', this.onKeyDown, false)
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('profile.title')} - Kitsu`
     }

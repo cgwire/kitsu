@@ -6,15 +6,7 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{
-              from: selectedEndDate
-            }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
+          <vuejs-datepicker
             v-model="selectedStartDate"
           />
         </div>
@@ -22,15 +14,7 @@
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{
-              to: selectedStartDate
-            }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
+          <vuejs-datepicker
             v-model="selectedEndDate"
           />
         </div>
@@ -81,8 +65,6 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import Datepicker from 'vuejs-datepicker'
 
 import { sortTaskTypeScheduleItems } from '@/lib/sorting'
 import { getTaskTypeSchedulePath } from '@/lib/path'
@@ -96,7 +78,6 @@ export default {
   name: 'production-schedule',
   components: {
     ComboboxNumber,
-    Datepicker,
     Schedule,
     TaskInfo
   },
@@ -142,15 +123,7 @@ export default {
       'organisation',
       'taskTypeMap',
       'user'
-    ]),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    }
+    ])
   },
 
   methods: {
@@ -422,7 +395,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title:
         `${this.currentProduction.name} ` +

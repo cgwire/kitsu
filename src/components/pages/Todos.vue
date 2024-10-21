@@ -148,6 +148,7 @@
 </template>
 
 <script>
+import { useHead } from 'unhead'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
@@ -213,6 +214,9 @@ export default {
   },
 
   mounted() {
+    useHead({
+      title: `${this.$t('tasks.my_tasks')} - Kitsu`
+    })
     this.updateActiveTab()
     if (this.todosSearchText.length > 0) {
       this.$refs['todos-search-field'].setValue(this.todosSearchText)
@@ -643,7 +647,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('tasks.my_tasks')} - Kitsu`
     }

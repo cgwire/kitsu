@@ -283,7 +283,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return { title: `${this.$t('tasks.all_tasks')} - Kitsu` }
   }
 }

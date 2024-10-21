@@ -31,8 +31,8 @@
           <boolean-field
             :label="$t('main.is_shared')"
             v-model="form.is_shared"
-            v-if="isCurrentUserManager && currentProduction"
             @click="form.search_filter_group_id = null"
+            v-if="isCurrentUserManager && currentProduction"
           />
 
           <combobox

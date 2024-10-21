@@ -180,7 +180,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.currentProduction.name} | ${this.$t(
         'asset_types.production_title'

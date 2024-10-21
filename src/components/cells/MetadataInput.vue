@@ -59,8 +59,8 @@
     "
   >
     <p
-      v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
       :key="`${entity.id}-${descriptor.id}-${i}-${option.text}-div`"
+      v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
     >
       <input
         type="checkbox"
@@ -99,10 +99,10 @@
       @change="event => onMetadataFieldChanged(entity, descriptor, event)"
     >
       <option
-        v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
         :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
         :value="option.value"
         :selected="getMetadataFieldValue(descriptor, entity) === option.value"
+        v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
       >
         {{ option.label }}
       </option>

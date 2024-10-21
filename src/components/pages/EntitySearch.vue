@@ -436,7 +436,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('search.title')} - Kitsu`
     }

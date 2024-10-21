@@ -116,7 +116,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: this.$t('login.first_connection_title')
     }

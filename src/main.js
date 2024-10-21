@@ -1,4 +1,5 @@
-import { configureCompat, createApp } from 'vue'
+import { createApp } from 'vue'
+import { createHead, VueHeadMixin } from '@unhead/vue'
 import { sync } from 'vuex-router-sync'
 
 import App from '@/App'
@@ -11,22 +12,29 @@ import Autosize from 'v-autosize/src/plugin.js'
 // import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import 'chartkick/chart.js'
-import VueDragDrop from 'vue-drag-drop'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
+/*
 configureCompat({
   MODE: 3
 })
+*/
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+
 
 const app = createApp({
   components: { App },
   template: '<App/>'
 })
+const head = createHead()
 
 app.use(i18n)
+app.use(head)
+app.mixin(VueHeadMixin)
 app.use(router)
 app.use(store)
 app.use(resizableColumn)
@@ -34,8 +42,9 @@ app.use(VueWebsocket, IO, '/events')
 app.use(Autosize)
 // app.use(Meta)
 app.use(VueChartkick)
-app.use(VueDragDrop)
 app.use(VueAnimXYZ)
+
+app.component('VueDatePicker', VueDatePicker)
 
 // Make the current route part of the main state.
 sync(store, router)

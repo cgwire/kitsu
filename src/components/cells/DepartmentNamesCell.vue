@@ -2,8 +2,8 @@
   <td class="departments">
     <span
       class="departments-element"
-      v-for="department in sortDepartments(departments)"
       :key="'department-' + department.id"
+      v-for="department in sortDepartments(departments)"
     >
       <department-name :department="department" v-if="department" />
     </span>

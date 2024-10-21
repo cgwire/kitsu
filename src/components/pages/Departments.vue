@@ -209,7 +209,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('departments.title')} - Kitsu`
     }

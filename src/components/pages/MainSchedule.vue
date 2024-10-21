@@ -6,30 +6,14 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedStartDate"
-            disabled
+          <vuejs-datepicker
           />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedEndDate"
-            disabled
+          <vuejs-datepicker
           />
         </div>
         <combobox-number
@@ -63,8 +47,6 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import Datepicker from 'vuejs-datepicker'
 import { getProductionSchedulePath } from '@/lib/path'
 
 import {
@@ -83,7 +65,6 @@ export default {
 
   components: {
     ComboboxNumber,
-    Datepicker,
     Schedule
   },
 
@@ -228,7 +209,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('schedule.title_main')} - Kitsu`
     }

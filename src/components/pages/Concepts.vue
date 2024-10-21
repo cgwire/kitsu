@@ -456,9 +456,9 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
-      title: `${this.$t('concepts.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('concepts.title')} - Kitsu`
     }
   }
 }

@@ -11,32 +11,11 @@
             <label class="label">
               {{ $t('main.start_date') }}
             </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input short"
-              :language="locale"
-              :disabled-dates="{ days: [6, 0] }"
-              :monday-first="true"
-              format="yyyy-MM-dd"
-              v-model="form.startDate"
-              @input="validateDates"
+            <vuejs-datepicker
             />
           </div>
           <div class="flexrow-item">
-            <label class="label">
-              {{ $t('main.end_date') }}
-            </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input short"
-              :language="locale"
-              :disabled-dates="{
-                days: [6, 0],
-                to: form.startDate
-              }"
-              :monday-first="true"
-              format="yyyy-MM-dd"
-              v-model="form.endDate"
+            <vuejs-datepicker
             />
           </div>
         </div>
@@ -73,8 +52,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import { modalMixin } from '@/components/modals/base_modal'
@@ -87,7 +64,6 @@ export default {
 
   components: {
     AlertTriangleIcon,
-    Datepicker,
     TextField
   },
 

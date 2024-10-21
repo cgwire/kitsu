@@ -461,6 +461,13 @@ export default {
     $route() {
       this.loadRoute()
     }
+  },
+
+  head() {
+    const prodName = this.currentProduction.name
+    return {
+      title: `${prodName} | ${this.$t('quota.title')} - Kitsu`
+    }
   }
 }
 </script>

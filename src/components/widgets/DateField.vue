@@ -2,22 +2,7 @@
   <div :class="{ field: withMargin }">
     <label class="label" v-if="label">{{ label }}</label>
     <p class="control">
-      <datepicker
-        wrapper-class="datepicker"
-        :input-class="{
-          'date-input': true,
-          input: true,
-          invalid,
-          short: shortDate
-        }"
-        :language="locale"
-        :disabled="disabled"
-        :disabled-dates="disabledDates"
-        :monday-first="true"
-        format="yyyy-MM-dd"
-        @input="updateValue"
-        v-model="localValue"
-      />
+      <vue-date-picker></vue-date-picker>
       <span
         class="clear-button unselectable"
         @click.stop="clearValue"
@@ -31,14 +16,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import Datepicker from 'vuejs-datepicker'
 
 export default {
   name: 'date-field',
 
   components: {
-    Datepicker
   },
 
   props: {

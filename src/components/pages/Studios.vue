@@ -200,7 +200,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('studios.title')} - Kitsu`
     }

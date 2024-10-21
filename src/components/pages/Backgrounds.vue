@@ -181,7 +181,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('backgrounds.title')} - Kitsu`
     }
