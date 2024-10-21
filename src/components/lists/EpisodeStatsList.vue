@@ -94,20 +94,23 @@
               />
               <td v-else></td>
 
-              <stats-cell
-                :key="entry.id + columnId"
-                :style="getValidationStyle(columnId)"
-                :colors="chartColors(entry.id, columnId)"
-                :data="chartData(entry.id, columnId)"
-                :frames-data="chartData(entry.id, columnId, 'frames')"
-                :count-mode="countMode"
-                :display-mode="displayMode"
-                :label="chartLabel(entry.id, columnId)"
-                :label-color="chartLabelColor(entry.id, columnId)"
+              <template
                 v-for="columnId in validationColumns"
-                v-if="isStats(entry.id, columnId)"
-              />
-              <td :style="getValidationStyle(columnId)" v-else></td>
+              >
+                <stats-cell
+                  :key="entry.id + columnId"
+                  :style="getValidationStyle(columnId)"
+                  :colors="chartColors(entry.id, columnId)"
+                  :data="chartData(entry.id, columnId)"
+                  :frames-data="chartData(entry.id, columnId, 'frames')"
+                  :count-mode="countMode"
+                  :display-mode="displayMode"
+                  :label="chartLabel(entry.id, columnId)"
+                  :label-color="chartLabelColor(entry.id, columnId)"
+                  v-if="isStats(entry.id, columnId)"
+                />
+                <td :style="getValidationStyle(columnId)" v-else></td>
+              </template>
 
               <td class="actions"></td>
             </tr>

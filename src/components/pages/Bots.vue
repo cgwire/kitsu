@@ -369,7 +369,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('bots.title')} - Kitsu`
     }

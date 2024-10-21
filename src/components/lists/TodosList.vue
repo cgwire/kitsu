@@ -348,7 +348,8 @@ export default {
     return {
       page: 1,
       colTypePosX: '',
-      colNamePosX: ''
+      colNamePosX: '',
+      lastSelection: null
     }
   },
 

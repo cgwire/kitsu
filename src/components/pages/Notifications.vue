@@ -654,7 +654,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('notifications.title')} - Kitsu`
     }

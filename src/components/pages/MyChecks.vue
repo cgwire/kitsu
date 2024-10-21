@@ -418,7 +418,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('tasks.my_checks')} - Kitsu`
     }

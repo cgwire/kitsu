@@ -694,11 +694,17 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
+    if (this.isTVShow) {
+      return {
+        title:
+          `${this.currentProduction?.name || ''}` +
+          ` - ${this.currentEpisode?.name || ''}` +
+          ` | ${this.$t('sequences.title')} - Kitsu`
+      }
+    }
     return {
-      title: `${this.currentProduction.name} ${this.$t(
-        'sequences.title'
-      )} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('sequences.title')} - Kitsu`
     }
   }
 }

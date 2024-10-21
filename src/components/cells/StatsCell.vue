@@ -18,14 +18,16 @@
       </span>
     </div>
     <div v-else>
-      <div :key="data[0]" v-if="data[0]" v-for="data in selectedData">
-        <span class="stats-name" :style="{ color: data[2] }">
-          {{ data[0] }}
-        </span>
-        <span> : </span>
-        <span class="stats-value">
-          {{ data[1] }} ({{ percent(data[1]) }}%)
-        </span>
+      <div :key="data[0]" v-for="data in selectedData">
+        <template v-if="data[0]">
+          <span class="stats-name" :style="{ color: data[2] }">
+            {{ data[0] }}
+          </span>
+          <span> : </span>
+          <span class="stats-value">
+            {{ data[1] }} ({{ percent(data[1]) }}%)
+          </span>
+        </template>
       </div>
       <span
         class="tag flexrow-item"

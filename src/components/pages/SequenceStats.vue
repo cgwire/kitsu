@@ -278,7 +278,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return {
         title:
@@ -290,7 +290,7 @@ export default {
       return {
         title:
           `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` ${this.$t('sequences.title')} - Kitsu`
+          ` | ${this.$t('sequences.title')} - Kitsu`
       }
     }
   }

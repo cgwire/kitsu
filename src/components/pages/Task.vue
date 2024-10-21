@@ -1459,7 +1459,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     let title = 'Loading task... - Kitsu'
     if (this.task) {
       const taskTypeName = this.taskTypeMap.get(this.task.task_type_id).name
