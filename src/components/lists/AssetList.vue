@@ -367,7 +367,7 @@
             <description-cell
               class="description"
               @description-changed="value => onDescriptionChanged(asset, value)"
-              :editable="isCurrentUserManager"
+              :editable="isCurrentUserManager && !asset.shared"
               v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
               :entry="asset"
             />
@@ -1076,9 +1076,17 @@ td.ready-for {
       var(--shared-color) 20%,
       transparent
     ) !important;
+
+    &:hover {
+      opacity: 1;
+    }
   }
-  > td > :deep(*) {
-    display: none;
+  > td:not(.description-cell) {
+    font-size: 0;
+
+    > :deep(*) {
+      display: none;
+    }
   }
 }
 
