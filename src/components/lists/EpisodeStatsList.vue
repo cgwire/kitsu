@@ -192,7 +192,6 @@
 
 <script>
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
-import Vue from 'vue'
 import { mapGetters } from 'vuex'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -264,7 +263,7 @@ export default {
 
   mounted() {
     this.entries.forEach(e => {
-      Vue.set(this.expanded, e.id, false)
+      this.expanded[e.id] = false
     })
   },
 

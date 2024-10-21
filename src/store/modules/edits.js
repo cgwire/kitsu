@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import moment from 'moment'
 import peopleApi from '@/store/api/people'
 import editsApi from '@/store/api/edits'
@@ -997,7 +996,7 @@ const mutations = {
       edit.tasks.push(task)
       if (!edit.validations) edit.validations = new Map()
       edit.validations.set(task.task_type_id, task.id)
-      Vue.set(edit, 'validations', new Map(edit.validations))
+      edit.validations = new Map(edit.validations)
     }
   },
 
@@ -1007,7 +1006,7 @@ const mutations = {
       const validations = new Map(edit.validations)
       validations.delete(task.task_type_id)
       delete edit.validations
-      Vue.set(edit, 'validations', validations)
+      edit.validations = validations
 
       const taskIndex = edit.tasks.findIndex(
         editTaskId => editTaskId === task.id

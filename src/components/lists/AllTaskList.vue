@@ -152,7 +152,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 
@@ -347,11 +346,11 @@ export default {
 
       if (this.selectionGrid[task.id]) {
         this.removeSelectedTask({ task })
-        Vue.set(this.selectionGrid, task.id, undefined)
+        this.selectionGrid[task.id] = undefined
       } else if (!isSelected || isManySelection) {
         this.addSelectedTask({ task })
         this.$emit('task-selected', task)
-        Vue.set(this.selectionGrid, task.id, true)
+        this.selectionGrid[task.id] = true
         this.lastSelection = index
       }
     },

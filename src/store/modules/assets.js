@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
 import tasksStore from '@/store/modules/tasks'
@@ -1113,12 +1111,12 @@ const mutations = {
     if (asset) {
       const validations = new Map(asset.validations)
       delete asset.validations
-      Vue.set(asset, 'validations', validations)
+      asset.validations = validations
 
       const tasks = JSON.parse(JSON.stringify(asset.tasks))
       const taskIndex = tasks.findIndex(assetTaskId => assetTaskId === task.id)
       tasks.splice(taskIndex, 1)
-      Vue.set(asset, 'tasks', tasks)
+      asset.tasks = tasks
     }
   },
 
@@ -1278,7 +1276,7 @@ const mutations = {
       asset.tasks.push(task.id)
       if (!asset.validations) asset.validations = new Map()
       asset.validations.set(task.task_type_id, task.id)
-      Vue.set(asset, 'validations', new Map(asset.validations))
+      asset.validations = new Map(asset.validations)
     }
   },
 
@@ -1292,7 +1290,7 @@ const mutations = {
           asset.validations.set(task.task_type_id, task.id)
           const validations = asset.validations
           asset.validations = []
-          Vue.set(asset, 'validations', validations)
+          asset.validations = validations
           asset.tasks.push(task.id)
         }
       }
