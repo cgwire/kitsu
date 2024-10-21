@@ -880,24 +880,25 @@
       v-if="playlist.id"
     >
       <spinner class="spinner" v-if="isLoading" />
-      <div
-        class="flexrow-item has-text-centered playlisted-wrapper"
-        :key="entity.id"
-        v-for="(entity, index) in entityList"
-        v-else
-      >
-        <playlisted-entity
-          :ref="'entity-' + index"
-          :index="index"
-          :entity="entity"
-          :is-playing="playingEntityIndex === index"
-          @play-click="entityListClicked"
-          @remove-entity="removeEntity"
-          @preview-changed="onPreviewChanged"
-          @entity-to-add="$emit('entity-to-add', $event)"
-          @entity-dropped="onEntityDropped"
-        />
-      </div>
+      <template v-else>
+        <div
+          class="flexrow-item has-text-centered playlisted-wrapper"
+          :key="entity.id"
+          v-for="(entity, index) in entityList"
+        >
+          <playlisted-entity
+            :ref="'entity-' + index"
+            :index="index"
+            :entity="entity"
+            :is-playing="playingEntityIndex === index"
+            @play-click="entityListClicked"
+            @remove-entity="removeEntity"
+            @preview-changed="onPreviewChanged"
+            @entity-to-add="$emit('entity-to-add', $event)"
+            @entity-dropped="onEntityDropped"
+          />
+        </div>
+      </template>
     </div>
 
     <delete-modal

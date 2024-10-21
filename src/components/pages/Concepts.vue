@@ -77,11 +77,11 @@
               :class="{
                 'selected-item': isSelected(concept)
               }"
-              v-for="concept in filteredConcepts"
               :key="concept.id"
               @click="
                 onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
               "
+              v-for="concept in filteredConcepts"
             >
               <concept-card :concept="concept" />
             </li>

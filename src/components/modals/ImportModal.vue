@@ -42,8 +42,8 @@
           <ul>
             <li
               :class="{ 'is-active': activeTab === tab.id }"
-              v-for="tab in tabs"
               :key="`tab-${tab.id}`"
+              v-for="tab in tabs"
             >
               <a @click="activeTab = tab.id">{{ tab.name }}</a>
             </li>

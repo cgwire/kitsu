@@ -771,8 +771,8 @@
                 <li
                   class="tag"
                   :key="link.id"
-                  v-for="link in linkGroup.links"
                   @click="onSelectLink(link)"
+                  v-for="link in linkGroup.links"
                 >
                   {{ link.name }}
                 </li>

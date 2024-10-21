@@ -50,19 +50,20 @@
             >
               {{ $t('tasks.fields.assignees') }}:
             </span>
-            <span
-              class="flexrow-item avatar-wrapper"
-              :key="person.id"
-              v-for="person in assignees"
-              v-if="!isCurrentUserClient"
-            >
-              <people-avatar
-                class="flexrow-item"
-                :person="person"
-                :size="30"
-                :font-size="16"
-              />
-            </span>
+            <template v-if="!isCurrentUserClient">
+              <span
+                class="flexrow-item avatar-wrapper"
+                :key="person.id"
+                v-for="person in assignees"
+              >
+                <people-avatar
+                  class="flexrow-item"
+                  :person="person"
+                  :size="30"
+                  :font-size="16"
+                />
+              </span>
+            </template>
             <subscribe-button
               class="flexrow-item action-button"
               :subscribed="isAssigned || task.is_subscribed"

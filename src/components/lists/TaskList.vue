@@ -132,14 +132,15 @@
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
                 v-model="task.difficulty"
               />
-              <span
-                class="difficulty number-cell"
-                v-for="index in task.difficulty"
-                :key="task.id + 'difficulty' + index"
-                v-else
-              >
-                &bull;
-              </span>
+              <template v-else>
+                <span
+                  class="difficulty number-cell"
+                  v-for="index in task.difficulty"
+                  :key="task.id + 'difficulty' + index"
+                >
+                  &bull;
+                </span>
+              </template>
             </td>
             <td class="estimation number-cell">
               <input

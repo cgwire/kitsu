@@ -319,29 +319,30 @@
         </div>
 
         <spinner v-if="isAssetsLoading" />
-        <div
-          class="type-assets"
-          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in availableAssetsByType"
-          v-else
-        >
-          <div class="asset-type">
-            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+        <template v-else>
+          <div
+            class="type-assets"
+            :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+            v-for="typeAssets in availableAssetsByType"
+          >
+            <div class="asset-type">
+              {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+            </div>
+            <div class="asset-list">
+              <available-asset-block
+                :key="asset.id"
+                :asset="asset"
+                :active="Object.keys(selection).length > 0"
+                :text-mode="isTextMode"
+                :big-mode="isBigMode"
+                @add-one="addOneAsset"
+                @add-ten="addTenAssets"
+                v-for="asset in typeAssets"
+                v-show="libraryDisplayed || !asset.shared"
+              />
+            </div>
           </div>
-          <div class="asset-list">
-            <available-asset-block
-              :key="asset.id"
-              :asset="asset"
-              :active="Object.keys(selection).length > 0"
-              :text-mode="isTextMode"
-              :big-mode="isBigMode"
-              @add-one="addOneAsset"
-              @add-ten="addTenAssets"
-              v-for="asset in typeAssets"
-              v-show="libraryDisplayed || !asset.shared"
-            />
-          </div>
-        </div>
+        </template>
       </div>
     </div>
 

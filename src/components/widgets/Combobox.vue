@@ -20,10 +20,10 @@
           @change="updateValue"
         >
           <option
-            v-for="(option, i) in options"
             :key="`${i}-${option.label}-${option.value}`"
             :value="option.label || option.value"
             :selected="modelValue === option.value || null"
+            v-for="(option, i) in options"
           >
             {{ getOptionLabel(option) }}
           </option>

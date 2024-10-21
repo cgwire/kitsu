@@ -31,11 +31,11 @@
       >
         <div
           class="department-line"
+          :key="department.id"
+          @click="selectDepartment(department)"
           v-for="department in departmentList.filter(
             ({ id }) => id !== modelValue
           )"
-          @click="selectDepartment(department)"
-          :key="department.id"
         >
           <department-name :department="department" />
         </div>

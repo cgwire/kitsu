@@ -131,110 +131,112 @@
         {{ getMetadataFieldValue({ field_name: 'frame_out' }, entity) }}
       </span>
     </div>
-    <div
-      class="metadata-descriptor flexrow-item"
-      :title="entity.data ? entity.data[descriptor.field_name] : ''"
-      :key="'desc' + entity.id + '-' + descriptor.id"
-      :style="{
-        'min-width': columnWidth[descriptor.id]
-          ? columnWidth[descriptor.id] + 'px'
-          : '110px',
-        'max-width': columnWidth[descriptor.id]
-          ? columnWidth[descriptor.id] + 'px'
-          : '110px'
-      }"
-      v-for="descriptor in visibleMetadataDescriptors"
-      v-if="isShowInfosBreakdown"
-    >
-      <input
-        class="input-editor"
-        @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-        :value="getMetadataFieldValue(descriptor, entity)"
-        v-if="
-          descriptor.choices.length === 0 &&
-          (isCurrentUserManager ||
-            isSupervisorInDepartments(descriptor.departments))
-        "
-      />
+
+    <template v-if="isShowInfosBreakdown">
       <div
-        class="metadata-value selectable"
-        v-else-if="
-          descriptor.choices.length > 0 &&
-          getDescriptorChecklistValues(descriptor).length > 0
-        "
+        class="metadata-descriptor flexrow-item"
+        :title="entity.data ? entity.data[descriptor.field_name] : ''"
+        :key="'desc' + entity.id + '-' + descriptor.id"
+        :style="{
+          'min-width': columnWidth[descriptor.id]
+            ? columnWidth[descriptor.id] + 'px'
+            : '110px',
+          'max-width': columnWidth[descriptor.id]
+            ? columnWidth[descriptor.id] + 'px'
+            : '110px'
+        }"
+        v-for="descriptor in visibleMetadataDescriptors"
       >
-        <p
-          v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
-          :key="`${entity.id}-${descriptor.id}-${i}-${option.text}-div`"
+        <input
+          class="input-editor"
+          @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+          :value="getMetadataFieldValue(descriptor, entity)"
+          v-if="
+            descriptor.choices.length === 0 &&
+            (isCurrentUserManager ||
+              isSupervisorInDepartments(descriptor.departments))
+          "
+        />
+        <div
+          class="metadata-value selectable"
+          v-else-if="
+            descriptor.choices.length > 0 &&
+            getDescriptorChecklistValues(descriptor).length > 0
+          "
         >
-          <input
-            type="checkbox"
-            @change="
-              event =>
-                onMetadataChecklistChanged(
-                  entity,
-                  descriptor,
-                  option.text,
-                  event
+          <p
+            :key="`${entity.id}-${descriptor.id}-${i}-${option.text}-div`"
+            v-for="(option, i) in getDescriptorChecklistValues(descriptor)"
+          >
+            <input
+              type="checkbox"
+              @change="
+                event =>
+                  onMetadataChecklistChanged(
+                    entity,
+                    descriptor,
+                    option.text,
+                    event
+                  )
+              "
+              :id="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
+              :checked="
+                getMetadataChecklistValues(descriptor, entity)[option.text]
+              "
+              :disabled="
+                !(
+                  isCurrentUserManager ||
+                  isSupervisorInDepartments(descriptor.departments)
                 )
-            "
-            :id="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-            :checked="
-              getMetadataChecklistValues(descriptor, entity)[option.text]
-            "
-            :disabled="
-              !(
+              "
+              :style="[
                 isCurrentUserManager ||
                 isSupervisorInDepartments(descriptor.departments)
-              )
-            "
-            :style="[
-              isCurrentUserManager ||
-              isSupervisorInDepartments(descriptor.departments)
-                ? { cursor: 'pointer' }
-                : { cursor: 'auto' }
-            ]"
-          />
-          <label
-            :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-            :style="[
-              isCurrentUserManager ||
-              isSupervisorInDepartments(descriptor.departments)
-                ? { cursor: 'pointer' }
-                : { cursor: 'auto' }
-            ]"
-          >
-            {{ option.text }}
-          </label>
-        </p>
-      </div>
-      <span
-        class="select"
-        v-else-if="
-          isCurrentUserManager ||
-          isSupervisorInDepartments(descriptor.departments)
-        "
-      >
-        <select
-          class="select-input"
-          @change="event => onMetadataFieldChanged(entity, descriptor, event)"
+                  ? { cursor: 'pointer' }
+                  : { cursor: 'auto' }
+              ]"
+            />
+            <label
+              :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
+              :style="[
+                isCurrentUserManager ||
+                isSupervisorInDepartments(descriptor.departments)
+                  ? { cursor: 'pointer' }
+                  : { cursor: 'auto' }
+              ]"
+            >
+              {{ option.text }}
+            </label>
+          </p>
+        </div>
+        <span
+          class="select"
+          v-else-if="
+            isCurrentUserManager ||
+            isSupervisorInDepartments(descriptor.departments)
+          "
         >
-          <option
-            v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
-            :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
-            :value="option.value"
-            :selected="
-              getMetadataFieldValue(descriptor, entity) === option.value
-            "
+          <select
+            class="select-input"
+            @change="event => onMetadataFieldChanged(entity, descriptor, event)"
           >
-            {{ option.label }}
-          </option>
-        </select>
-      </span>
-      <span class="metadata-value selectable" v-else>
-        {{ getMetadataFieldValue(descriptor, entity) }}
-      </span>
-    </div>
+            <option
+              :key="`desc-value-${entity.id}-${descriptor.id}-${i}-${option.label}-${option.value}`"
+              :value="option.value"
+              :selected="
+                getMetadataFieldValue(descriptor, entity) === option.value
+              "
+              v-for="(option, i) in getDescriptorChoicesOptions(descriptor)"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </span>
+        <span class="metadata-value selectable" v-else>
+          {{ getMetadataFieldValue(descriptor, entity) }}
+        </span>
+      </div>
+    </template>
     <div
       class="asset-list flexrow-item"
       :key="entity.id + '-' + assetType"

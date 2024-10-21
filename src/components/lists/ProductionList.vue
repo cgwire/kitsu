@@ -34,7 +34,7 @@
               </span>
             </th>
           </tr>
-          <template v-for="entry in openProductions" :key="entry.id">
+          <template :key="entry.id" v-for="entry in openProductions">
             <tr class="datatable-row">
               <th class="name datatable-row-header" scope="row">
                 <production-name-cell
@@ -93,8 +93,8 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="entry in closedProductions"
             :key="entry.id"
+            v-for="entry in closedProductions"
           >
             <th class="name datatable-row-header" scope="row">
               <production-name-cell

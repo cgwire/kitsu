@@ -79,15 +79,16 @@
             @enter="runConfirmation"
           />
 
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="shotToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in shotMetadataDescriptors"
-            v-if="shotToEdit"
-          />
+          <template v-if="shotToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="shotToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in shotMetadataDescriptors"
+            />
+          </template>
         </form>
 
         <modal-footer

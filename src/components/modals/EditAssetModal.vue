@@ -48,15 +48,16 @@
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
           />
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="assetToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in assetMetadataDescriptors"
-            v-if="assetToEdit"
-          />
+          <template v-if="assetToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="assetToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in assetMetadataDescriptors"
+            />
+          </template>
           <combobox-boolean
             :label="$t('assets.fields.shared')"
             v-model="form.is_shared"
