@@ -281,7 +281,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('productions.home.title')} - Kitsu`
     }

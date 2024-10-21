@@ -104,7 +104,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: this.$t('login.reset_password_title')
     }

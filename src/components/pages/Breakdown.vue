@@ -1682,10 +1682,17 @@ export default {
     }
   },
 
-  metaInfo() {
-    const pageTitle = this.$t('breakdown.title')
+  head() {
+    if (this.isTVShow) {
+      return {
+        title:
+          `${this.currentProduction?.name || ''}` +
+          ` - ${this.currentEpisode?.name || ''}` +
+          ` | ${this.$t('breakdown.title')} - Kitsu`
+      }
+    }
     return {
-      title: `${this.currentProduction.name} ${pageTitle} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('breakdown.title')} - Kitsu`
     }
   }
 }

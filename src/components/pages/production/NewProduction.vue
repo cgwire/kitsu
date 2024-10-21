@@ -121,30 +121,9 @@
             </label>
             <div class="date-picker-wrapper">
               <datepicker
-                wrapper-class="datepicker"
-                input-class="is-small date-input input"
-                label="Start date"
-                :placeholder="startDatePlaceholder"
-                :language="locale"
-                :disabled-dates="{
-                  from: productionToCreate.settings.dateEnd
-                }"
-                :monday-first="true"
-                format="yyyy-MM-dd"
-                v-model="productionToCreate.settings.dateStart"
               />
               <span class="input-separator">-</span>
               <datepicker
-                wrapper-class="datepicker"
-                input-class="is-small date-input input"
-                :language="locale"
-                :disabled-dates="{
-                  to: productionToCreate.settings.dateStart
-                }"
-                :placeholder="endDatePlaceholder"
-                :monday-first="true"
-                format="yyyy-MM-dd"
-                v-model="productionToCreate.settings.dateEnd"
               />
             </div>
           </div>
@@ -424,9 +403,7 @@
 
 <script>
 import draggable from 'vuedraggable'
-import Datepicker from 'vuejs-datepicker'
 import moment from 'moment'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapActions, mapGetters } from 'vuex'
 
 import csv from '@/lib/csv'
@@ -461,7 +438,6 @@ export default {
     ComboboxStyled,
     ComboboxTaskType,
     ComboboxStatus,
-    Datepicker,
     ImportModal,
     ImportRenderModal,
     ManageShotsModal,

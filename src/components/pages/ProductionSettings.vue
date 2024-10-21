@@ -341,7 +341,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.currentProduction.name} | ${this.$t(
         'settings.title'

@@ -1242,17 +1242,17 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return {
         title:
-          `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
+          `${this.currentProduction?.name || ''}` +
+          ` - ${this.currentEpisode?.name || ''}` +
           ` | ${this.$t('shots.title')} - Kitsu`
       }
     }
     return {
-      title: `${this.currentProduction.name} ${this.$t('shots.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('shots.title')} - Kitsu`
     }
   }
 }

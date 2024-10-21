@@ -6,31 +6,13 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :monday-first="true"
-            :typeable="true"
-            format="yyyy-MM-dd"
-            @selected="onUpdateSelectedStartDate"
-            v-model="selectedStartDate"
-          />
+          <vuejs-datepicker />
         </div>
         <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :monday-first="true"
-            :typeable="true"
-            format="yyyy-MM-dd"
-            @selected="onUpdateSelectedEndDate"
-            v-model="selectedEndDate"
-          />
+          <vuejs-datepicker />
         </div>
         <combobox-number
           class="flexrow-item zoom-level"
@@ -206,8 +188,6 @@
  */
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getPersonTabPath } from '@/lib/path'
@@ -243,7 +223,6 @@ export default {
     ComboboxProduction,
     ComboboxStudio,
     ComboboxTaskType,
-    Datepicker,
     DepartmentName,
     EntityThumbnail,
     PeopleField,
@@ -736,7 +715,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('team_schedule.title_main')} - Kitsu`
     }

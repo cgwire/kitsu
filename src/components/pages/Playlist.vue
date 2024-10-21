@@ -633,7 +633,7 @@ export default {
       const productionName = this.currentProduction
         ? this.currentProduction.name
         : ''
-      return `${productionName} ${this.$t('playlists.title')} - Kitsu`
+      return `${productionName} | ${this.$t('playlists.title')} - Kitsu`
     },
 
     taskTypeList() {
@@ -1425,7 +1425,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
     } else {

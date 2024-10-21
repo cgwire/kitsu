@@ -533,7 +533,7 @@ export default {
 
     shortPageTitle() {
       const productionName = this.currentProduction?.name || ''
-      return `${productionName} ${this.$t('assets.title')} - Kitsu`
+      return `${productionName} | ${this.$t('assets.title')} - Kitsu`
     },
 
     dataMatchers() {
@@ -1063,7 +1063,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
     }

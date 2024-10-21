@@ -14,7 +14,7 @@
         <label class="checkbox">
           <input
             type="checkbox"
-            :checked="modelValue[descriptor.field_name] !== false"
+            :checked="modelValue && modelValue[descriptor.field_name] !== false"
             @change="
               setMetadataDisplayValue(
                 descriptor.field_name,

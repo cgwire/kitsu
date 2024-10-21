@@ -8,97 +8,99 @@
     >
       <folder-plus-icon :size="12" />
     </span>
-    <span
-      class="tag group"
-      :class="{
-        open: toggleGroupId === group.id,
-        'is-shared': group.is_shared
-      }"
-      :key="`group-${group.id}`"
-      :style="{
-        backgroundColor: `${group.color}23`
-      }"
-      @click="toggleFilterGroup(group)"
-      v-for="group in userFilterGroups"
-      v-if="isGroupEnabled"
-    >
-      <div class="group-header">
-        <span
-          class="dot"
-          :style="{ borderColor: getDepartment(group).color }"
-          :title="getDepartment(group).name"
-          v-if="group.is_shared && group.department_id"
-        ></span>
-        <span>{{ group.name }}</span>
-        <chevron-down-icon
-          class="chevron ml05"
-          :size="12"
-          v-if="toggleGroupId !== group.id"
-        />
-        <chevron-up-icon class="chevron ml05" :size="12" v-else />
-        <button
-          class="edit"
-          :style="{ backgroundColor: `${group.color}53` }"
-          @click.stop="editGroup(group)"
-          v-if="!group.is_shared || isCurrentUserManager"
-        >
-          <edit2-icon :size="8" />
-        </button>
-        <button
-          class="del"
-          :style="{ backgroundColor: `${group.color}53` }"
-          @click.stop="removeGroup(group)"
-          v-if="
-            !group.queries.length && (!group.is_shared || isCurrentUserManager)
-          "
-        >
-          <trash2-icon :size="8" />
-        </button>
-      </div>
-      <div
-        :ref="`group-${group.id}`"
-        class="group-list"
-        v-if="toggleGroupId === group.id"
+    <template v-if="isGroupEnabled">
+      <span
+        class="tag group"
+        :class="{
+          open: toggleGroupId === group.id,
+          'is-shared': group.is_shared
+        }"
+        :key="`group-${group.id}`"
+        :style="{
+          backgroundColor: `${group.color}23`
+        }"
+        @click="toggleFilterGroup(group)"
+        v-for="group in userFilterGroups"
       >
-        <span class="tag empty" v-if="!group.queries.length">
-          <em>{{ $t('main.filter_group_empty') }}</em>
-        </span>
-        <span
-          class="tag"
-          :class="{
-            'is-shared': searchQuery.is_shared
-          }"
-          :key="searchQuery.id"
-          :style="{ backgroundColor: `${group.color}23` }"
-          :title="getSearchQueryTitle(searchQuery)"
-          @click="changeSearch(searchQuery)"
-          v-for="searchQuery in group.queries"
-          v-else
-        >
-          <span>
-            {{ searchQuery.name }}
-          </span>
+        <div class="group-header">
+          <span
+            class="dot"
+            :style="{ borderColor: getDepartment(group).color }"
+            :title="getDepartment(group).name"
+            v-if="group.is_shared && group.department_id"
+          ></span>
+          <span>{{ group.name }}</span>
+          <chevron-down-icon
+            class="chevron ml05"
+            :size="12"
+            v-if="toggleGroupId !== group.id"
+          />
+          <chevron-up-icon class="chevron ml05" :size="12" v-else />
           <button
             class="edit"
-            :style="{
-              backgroundColor: `${group.color}53`
-            }"
-            @click.stop="editSearch(searchQuery)"
-            v-if="!searchQuery.is_shared || isCurrentUserManager"
+            :style="{ backgroundColor: `${group.color}53` }"
+            @click.stop="editGroup(group)"
+            v-if="!group.is_shared || isCurrentUserManager"
           >
             <edit2-icon :size="8" />
           </button>
           <button
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
-            @click.stop="removeSearch(searchQuery)"
-            v-if="!searchQuery.is_shared || isCurrentUserManager"
+            @click.stop="removeGroup(group)"
+            v-if="
+              !group.queries.length && (!group.is_shared || isCurrentUserManager)
+            "
           >
             <trash2-icon :size="8" />
           </button>
-        </span>
-      </div>
-    </span>
+        </div>
+        <div
+          :ref="`group-${group.id}`"
+          class="group-list"
+          v-if="toggleGroupId === group.id"
+        >
+          <span class="tag empty" v-if="!group.queries.length">
+            <em>{{ $t('main.filter_group_empty') }}</em>
+          </span>
+          <template v-else>
+            <span
+              class="tag"
+              :class="{
+                'is-shared': searchQuery.is_shared
+              }"
+              :key="searchQuery.id"
+              :style="{ backgroundColor: `${group.color}23` }"
+              :title="getSearchQueryTitle(searchQuery)"
+              @click="changeSearch(searchQuery)"
+              v-for="searchQuery in group.queries"
+            >
+              <span>
+                {{ searchQuery.name }}
+              </span>
+              <button
+                class="edit"
+                :style="{
+                  backgroundColor: `${group.color}53`
+                }"
+                @click.stop="editSearch(searchQuery)"
+                v-if="!searchQuery.is_shared || isCurrentUserManager"
+              >
+                <edit2-icon :size="8" />
+              </button>
+              <button
+                class="del"
+                :style="{ backgroundColor: `${group.color}53` }"
+                @click.stop="removeSearch(searchQuery)"
+                v-if="!searchQuery.is_shared || isCurrentUserManager"
+              >
+                <trash2-icon :size="8" />
+              </button>
+            </span>
+          </template>
+        </div>
+      </span>
+    </template>
     <span
       class="tag"
       :class="{

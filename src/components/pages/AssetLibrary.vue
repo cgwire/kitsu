@@ -247,7 +247,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('library.asset_library')} - Kitsu`
     }

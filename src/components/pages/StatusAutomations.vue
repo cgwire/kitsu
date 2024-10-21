@@ -246,7 +246,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('status_automations.title')} - Kitsu`
     }

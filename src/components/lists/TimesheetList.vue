@@ -3,13 +3,6 @@
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
         <datepicker
-          wrapper-class="datepicker"
-          input-class="date-field input short"
-          :language="locale"
-          :disabled-dates="disabledDates"
-          :monday-first="true"
-          format="yyyy-MM-dd"
-          v-model="selectedDate"
         />
       </div>
       <div class="flexrow-item flexrow time-spent-total">
@@ -211,8 +204,6 @@
 
 <script>
 import moment from 'moment-timezone'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapGetters } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -233,7 +224,6 @@ export default {
 
   components: {
     ButtonSimple,
-    Datepicker,
     DayOffModal,
     DeleteModal,
     EntityThumbnail,
@@ -325,14 +315,6 @@ export default {
       'taskTypeMap',
       'user'
     ]),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    },
 
     displayedTasks() {
       return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
