@@ -21,6 +21,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { getCurrentInstance } from 'vue'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -125,10 +126,17 @@ export default {
 
     setupSentry(config) {
       if (config.sentry?.dsn?.length) {
-        sentry.init(this.$router, {
-          dsn: config.sentry.dsn,
-          sampleRate: config.sentry.sampleRate
-        })
+        const instance = getCurrentInstance()
+        const app = instance.appContext.app
+
+        sentry.init(
+          app,
+          this.$router,
+          {
+            dsn: config.sentry.dsn,
+            sampleRate: config.sentry.sampleRate
+          }
+        )
       }
     }
   },
