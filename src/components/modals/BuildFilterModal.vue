@@ -305,6 +305,8 @@ import MetadataField from '@/components/widgets/MetadataField.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
+import { v4 as uuidv4 } from 'uuid'
+
 export default {
   name: 'build-filter-modal',
 
@@ -657,6 +659,7 @@ export default {
 
     addTaskTypeFilter() {
       const filter = {
+        localId: uuidv4(),
         id: this.taskTypeList[0].id,
         operator: '=',
         values: [this.taskStatuses[0].id]
@@ -671,7 +674,7 @@ export default {
 
     removeTaskTypeFilter(taskTypeFilter) {
       this.taskTypeFilters.values = this.taskTypeFilters.values.filter(
-        f => f !== taskTypeFilter
+        f => f.localId !== taskTypeFilter.localId
       )
     },
 
@@ -718,6 +721,7 @@ export default {
         values.push('')
       }
       const filter = {
+        localId: uuidv4(),
         id: this.descriptorOptions[0].value,
         operator: '=',
         values,
@@ -730,7 +734,7 @@ export default {
     removeDescriptorFilter(descriptorFilter) {
       this.metadataDescriptorFilters.values =
         this.metadataDescriptorFilters.values.filter(
-          f => f !== descriptorFilter
+          f => f.localId !== descriptorFilter.localId
         )
     },
 

@@ -1,5 +1,4 @@
-import { createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
+import { createStore } from 'vuex'
 
 import store from '@/store/modules/breakdown'
 import breakdownApi from '@/store/api/breakdown'
@@ -7,9 +6,7 @@ import breakdownApi from '@/store/api/breakdown'
 breakdownApi.updateCasting = vi.fn()
 breakdownApi.getSequenceCasting = vi.fn()
 
-const localVue = createLocalVue()
-localVue.use(Vuex)
-const vuexStore = new Vuex.Store(store)
+const vuexStore = createStore(store)
 const commit = vuexStore.commit
 
 describe('Breakdown store', () => {
