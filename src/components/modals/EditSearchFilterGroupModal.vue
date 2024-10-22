@@ -32,6 +32,14 @@
             v-model="form.is_shared"
             v-if="isCurrentUserManager && currentProduction"
           />
+
+          <combobox-department
+            class="mt2"
+            :label="$t('main.department')"
+            v-model="form.department_id"
+            :top="true"
+            v-if="form.is_shared === 'true'"
+          />
         </form>
 
         <modal-footer
@@ -56,6 +64,7 @@ import { modalMixin } from '@/components/modals/base_modal'
 
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import ColorField from '@/components/widgets/ColorField.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -67,6 +76,7 @@ export default {
   components: {
     BooleanField,
     ColorField,
+    ComboboxDepartment,
     ModalFooter,
     TextField
   },
@@ -127,13 +137,15 @@ export default {
         id,
         color = '',
         name = '',
-        is_shared = false
+        is_shared = false,
+        department_id = null
       } = this.groupToEdit?.id ? this.groupToEdit : {}
       this.form = {
         id,
         color,
         name,
-        is_shared: is_shared ? 'true' : 'false'
+        is_shared: is_shared ? 'true' : 'false',
+        department_id
       }
     },
 
