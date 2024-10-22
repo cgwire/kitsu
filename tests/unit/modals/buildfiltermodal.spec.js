@@ -1,6 +1,6 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
-import VueRouter from 'vue-router'
+import { shallowMount } from '@vue/test-utils'
+import { createStore } from 'vuex'
+import { createRouter, createWebHistory } from 'vue-router'
 
 import i18n from '@/lib/i18n'
 
@@ -8,10 +8,10 @@ import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 
 import productionStoreFixture from '../fixtures/production-store'
 
-const localVue = createLocalVue()
-localVue.use(Vuex)
-localVue.use(VueRouter)
-const router = new VueRouter()
+const router = createRouter({
+  history: createWebHistory(),
+  routes: []
+})
 
 describe('BuildFilterModal', () => {
   let store, assetStore, peopleStore, shotStore, taskStore
@@ -122,7 +122,7 @@ describe('BuildFilterModal', () => {
       },
       actions: {}
     }
-    store = new Vuex.Store({
+    store = createStore({
       strict: true,
       modules: {
         assets: assetStore,
@@ -136,10 +136,14 @@ describe('BuildFilterModal', () => {
     wrapper = shallowMount(BuildFilterModal, {
       store,
       getters,
-      localVue,
       i18n,
       router,
-      propsData: {
+      global: {
+        mocks: {
+          $store: store
+        }
+      },
+      props: {
         entityType: 'asset'
       }
     })
@@ -574,6 +578,7 @@ describe('BuildFilterModal', () => {
           expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
             {
               id: 'task-type-1',
+              localId: wrapper.vm.taskTypeFilters.values[0].localId,
               operator: '=',
               values: ['task-status-1']
             }
@@ -597,6 +602,7 @@ describe('BuildFilterModal', () => {
           expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
             {
               id: 'descriptor-1',
+              localId: wrapper.vm.metadataDescriptorFilters.values[0].localId,
               operator: '=',
               values: ['easy'],
               is_checklist: false

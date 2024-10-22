@@ -1,32 +1,35 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
-import VueRouter from 'vue-router'
+import { shallowMount } from '@vue/test-utils'
+import { createStore } from 'vuex'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import i18n from '@/lib/i18n'
 import auth from '@/lib/auth'
 
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 
-const localVue = createLocalVue()
-localVue.use(Vuex)
-localVue.use(VueRouter)
-const router = new VueRouter()
+const router = createRouter({
+  history: createMemoryHistory(),
+  routes: []
+})
 
 describe('AddThumbnailsModal', () => {
   let store, shotStore
   let wrapper
-  let getters
 
   beforeEach(() => {
     shotStore = {
+      state() {
+        return {}
+      },
       getters: {
+        isAssets: () => true,
         assetValidationColumns: () => [],
-        shotValidationColumns: () => []
+        shotValidationColumns: () => [],
       },
       actions: {
       }
     }
-    store = new Vuex.Store({
+    store = createStore({
       strict: true,
       modules: {
         shots: shotStore
@@ -35,12 +38,15 @@ describe('AddThumbnailsModal', () => {
 
     wrapper = shallowMount(AddThumbnailsModal, {
       store,
-      getters,
-      localVue,
       i18n,
       router,
       auth,
-      propsData: {
+      global: {
+        mocks: {
+          $store: store,
+        }
+      },
+      props: {
         entityType: 'Asset',
         parent: 'assets'
       }
