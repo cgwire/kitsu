@@ -1,321 +1,314 @@
 <template>
   <div>
     <div class="action-topbar unselectable">
-      <div class="menu">
-        <div class="flexrow">
-          <div
-            class="menu-item status-item"
-            :class="{
-              active: selectedBar === 'change-status'
-            }"
-            :title="$t('menu.change_status')"
-            @click="selectBar('change-status')"
-            v-if="
-              (isCurrentUserManager ||
-                isSupervisorInDepartment ||
-                isInDepartment ||
-                isCurrentViewTodos) &&
-              !isEntitySelection &&
-              isTaskSelection &&
-              nbSelectedTasks > 1
-            "
-          >
-            {{ $t('main.status') }}
-          </div>
+      <div class="menu flexrow">
+        <div
+          class="menu-item status-item"
+          :class="{
+            active: selectedBar === 'change-status'
+          }"
+          :title="$t('menu.change_status')"
+          @click="selectBar('change-status')"
+          v-if="
+            (isCurrentUserManager ||
+              isSupervisorInDepartment ||
+              isInDepartment ||
+              isCurrentViewTodos) &&
+            !isEntitySelection &&
+            isTaskSelection &&
+            nbSelectedTasks > 1
+          "
+        >
+          {{ $t('main.status') }}
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'assignation'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'assignation'
+          }"
+          :title="$t('menu.assign_tasks')"
+          @click="selectBar('assignation')"
+          v-if="
+            (isCurrentViewSingleEntity || isCurrentViewEntity) &&
+            (isCurrentUserManager ||
+              isSupervisorInDepartment ||
+              isInDepartment ||
+              isCurrentViewSingleEntity) &&
+            !isEntitySelection &&
+            isTaskSelection &&
+            !isCurrentUserArtist
+          "
+        >
+          <kitsu-icon
+            name="user-check"
+            :active="selectedBar === 'assignation'"
             :title="$t('menu.assign_tasks')"
-            @click="selectBar('assignation')"
-            v-if="
-              (isCurrentViewSingleEntity || isCurrentViewEntity) &&
-              (isCurrentUserManager ||
-                isSupervisorInDepartment ||
-                isInDepartment ||
-                isCurrentViewSingleEntity) &&
-              !isEntitySelection &&
-              isTaskSelection &&
-              !isCurrentUserArtist
-            "
-          >
-            <kitsu-icon
-              name="user-check"
-              :active="selectedBar === 'assignation'"
-              :title="$t('menu.assign_tasks')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'priorities'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'priorities'
+          }"
+          :title="$t('menu.change_priority')"
+          v-if="
+            (isCurrentViewSingleEntity ||
+              isCurrentViewEntity ||
+              isCurrentViewPerson ||
+              isCurrentViewSingleEntity) &&
+            (isCurrentUserManager || isSupervisorInDepartment) &&
+            !isEntitySelection &&
+            isTaskSelection
+          "
+          @click="selectBar('priorities')"
+        >
+          <kitsu-icon
+            name="priority"
+            :active="selectedBar === 'priorities'"
             :title="$t('menu.change_priority')"
-            v-if="
-              (isCurrentViewSingleEntity ||
-                isCurrentViewEntity ||
-                isCurrentViewPerson ||
-                isCurrentViewSingleEntity) &&
-              (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection &&
-              isTaskSelection
-            "
-            @click="selectBar('priorities')"
-          >
-            <kitsu-icon
-              name="priority"
-              :active="selectedBar === 'priorities'"
-              :title="$t('menu.change_priority')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'thumbnails'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'thumbnails'
+          }"
+          :title="$t('menu.set_thumbnails')"
+          v-if="
+            isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
+          "
+          @click="selectBar('thumbnails')"
+        >
+          <kitsu-icon
+            name="add-thumbnail"
+            :active="selectedBar === 'thumbnails'"
             :title="$t('menu.set_thumbnails')"
-            v-if="
-              isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
-            "
-            @click="selectBar('thumbnails')"
-          >
-            <kitsu-icon
-              name="add-thumbnail"
-              :active="selectedBar === 'thumbnails'"
-              :title="$t('menu.set_thumbnails')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'subscribe'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'subscribe'
+          }"
+          :title="$t('menu.subscribe')"
+          v-if="
+            isTaskSelection &&
+            !isCurrentViewSingleEntity &&
+            !isCurrentViewTodos &&
+            !isCurrentViewConcept
+          "
+          @click="selectBar('subscribe')"
+        >
+          <kitsu-icon
+            name="watch"
+            :active="selectedBar === 'subscribe'"
             :title="$t('menu.subscribe')"
-            v-if="
-              isTaskSelection &&
-              !isCurrentViewSingleEntity &&
-              !isCurrentViewTodos &&
-              !isCurrentViewConcept
-            "
-            @click="selectBar('subscribe')"
-          >
-            <kitsu-icon
-              name="watch"
-              :active="selectedBar === 'subscribe'"
-              :title="$t('menu.subscribe')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            class="menu-item ml05"
-            :class="{
-              active: selectedBar === 'edit-concepts'
-            }"
-            :title="$t('menu.edit_concepts')"
-            @click="selectBar('edit-concepts')"
-            v-if="
-              isCurrentViewConcept &&
-              (isCurrentUserManager || isConceptPublisher) &&
-              isTaskSelection
-            "
-          >
-            <link-icon />
-          </div>
+        <div
+          class="menu-item ml05"
+          :class="{
+            active: selectedBar === 'edit-concepts'
+          }"
+          :title="$t('menu.edit_concepts')"
+          @click="selectBar('edit-concepts')"
+          v-if="
+            isCurrentViewConcept &&
+            (isCurrentUserManager || isConceptPublisher) &&
+            isTaskSelection
+          "
+        >
+          <link-icon />
+        </div>
 
-          <div
-            class="menu-separator"
-            v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
-          ></div>
+        <div
+          class="menu-separator"
+          v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
+        ></div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'playlists'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'playlists'
+          }"
+          :title="$t('menu.generate_playlist')"
+          v-if="
+            (isCurrentViewAsset ||
+              isCurrentViewShot ||
+              isCurrentViewSequence ||
+              isCurrentViewTodos ||
+              isCurrentViewTaskType) &&
+            !isEntitySelection &&
+            !isCurrentViewSingleEntity &&
+            isTaskSelection &&
+            nbSelectedTasks > 0
+          "
+          @click="selectBar('playlists')"
+        >
+          <kitsu-icon
+            name="playlists"
+            :active="selectedBar === 'playlists'"
             :title="$t('menu.generate_playlist')"
-            v-if="
-              (isCurrentViewAsset ||
-                isCurrentViewShot ||
-                isCurrentViewSequence ||
-                isCurrentViewTodos ||
-                isCurrentViewTaskType) &&
-              !isEntitySelection &&
-              !isCurrentViewSingleEntity &&
-              isTaskSelection &&
-              nbSelectedTasks > 0
-            "
-            @click="selectBar('playlists')"
-          >
-            <kitsu-icon
-              name="playlists"
-              :active="selectedBar === 'playlists'"
-              :title="$t('menu.generate_playlist')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            v-if="
-              (isCurrentViewAsset ||
-                isCurrentViewShot ||
-                isCurrentViewTaskType) &&
-              !isEntitySelection &&
-              !isCurrentViewSingleEntity &&
-              isTaskSelection &&
-              isCurrentUserManager
-            "
-            class="menu-separator"
-          ></div>
+        <div
+          v-if="
+            (isCurrentViewAsset ||
+              isCurrentViewShot ||
+              isCurrentViewTaskType) &&
+            !isEntitySelection &&
+            !isCurrentViewSingleEntity &&
+            isTaskSelection &&
+            isCurrentUserManager
+          "
+          class="menu-separator"
+        ></div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'create-tasks'
-            }"
-            :title="$t('menu.create_tasks')"
-            @click="selectBar('create-tasks')"
-            v-if="
-              isCurrentViewEntity &&
-              !isCurrentViewTaskType &&
-              isCurrentUserManager &&
-              !isEntitySelection &&
-              nbSelectedTasks !== 1
-            "
-          >
-            <check-square-icon />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'create-tasks'
+          }"
+          :title="$t('menu.create_tasks')"
+          @click="selectBar('create-tasks')"
+          v-if="
+            isCurrentViewEntity &&
+            !isCurrentViewTaskType &&
+            isCurrentUserManager &&
+            !isEntitySelection &&
+            nbSelectedTasks !== 1
+          "
+        >
+          <check-square-icon />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'delete-tasks'
-            }"
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'delete-tasks'
+          }"
+          :title="$t('menu.delete_tasks')"
+          @click="selectBar('delete-tasks')"
+          v-if="
+            isCurrentViewEntity &&
+            isCurrentUserManager &&
+            !isEntitySelection &&
+            !isCurrentViewSingleEntity &&
+            isTaskSelection
+          "
+        >
+          <kitsu-icon
+            name="trash"
+            :active="selectedBar === 'delete-tasks'"
             :title="$t('menu.delete_tasks')"
-            @click="selectBar('delete-tasks')"
-            v-if="
-              isCurrentViewEntity &&
-              isCurrentUserManager &&
-              !isEntitySelection &&
-              !isCurrentViewSingleEntity &&
-              isTaskSelection
-            "
-          >
-            <kitsu-icon
-              name="trash"
-              :active="selectedBar === 'delete-tasks'"
-              :title="$t('menu.delete_tasks')"
-            />
-          </div>
+          />
+        </div>
 
-          <div
-            class="menu-separator"
-            v-if="
-              !isEntitySelection &&
-              isTaskSelection &&
-              !isCurrentViewEpisode &&
-              !isCurrentViewConcept &&
-              customActions &&
-              customActions.length > 0
-            "
-          ></div>
+        <div
+          class="menu-separator"
+          v-if="
+            !isEntitySelection &&
+            isTaskSelection &&
+            !isCurrentViewEpisode &&
+            !isCurrentViewConcept &&
+            customActions &&
+            customActions.length > 0
+          "
+        ></div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'custom-actions'
-            }"
-            :title="$t('menu.run_custom_action')"
-            @click="selectBar('custom-actions')"
-            v-if="
-              (isCurrentUserManager || isSupervisorInDepartment) &&
-              !isEntitySelection &&
-              isTaskSelection &&
-              !isCurrentViewEpisode &&
-              !isCurrentViewConcept &&
-              customActions &&
-              customActions.length > 0
-            "
-          >
-            <play-circle-icon />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'custom-actions'
+          }"
+          :title="$t('menu.run_custom_action')"
+          @click="selectBar('custom-actions')"
+          v-if="
+            (isCurrentUserManager || isSupervisorInDepartment) &&
+            !isEntitySelection &&
+            isTaskSelection &&
+            !isCurrentViewEpisode &&
+            !isCurrentViewConcept &&
+            customActions &&
+            customActions.length > 0
+          "
+        >
+          <play-circle-icon />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'delete-assets'
-            }"
-            :title="$t('menu.delete_assets')"
-            @click="selectBar('delete-assets')"
-            v-if="
-              isCurrentViewAsset && isCurrentUserManager && !isTaskSelection
-            "
-          >
-            <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'delete-assets'
+          }"
+          :title="$t('menu.delete_assets')"
+          @click="selectBar('delete-assets')"
+          v-if="isCurrentViewAsset && isCurrentUserManager && !isTaskSelection"
+        >
+          <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'delete-shots'
-            }"
-            :title="$t('menu.delete_shots')"
-            @click="selectBar('delete-shots')"
-            v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
-          >
-            <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'delete-shots'
+          }"
+          :title="$t('menu.delete_shots')"
+          @click="selectBar('delete-shots')"
+          v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
+        >
+          <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'delete-edits'
-            }"
-            :title="$t('menu.delete_edits')"
-            @click="selectBar('delete-edits')"
-            v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
-          >
-            <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'delete-edits'
+          }"
+          :title="$t('menu.delete_edits')"
+          @click="selectBar('delete-edits')"
+          v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
+        >
+          <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
+        </div>
 
-          <div
-            class="menu-item"
-            :class="{
-              active: selectedBar === 'delete-concepts'
-            }"
-            :title="$t('menu.delete_concepts')"
-            @click="selectBar('delete-concepts')"
-            v-if="
-              isCurrentViewConcept &&
-              (isCurrentUserManager || isConceptPublisher)
-            "
-          >
-            <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
-          </div>
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'delete-concepts'
+          }"
+          :title="$t('menu.delete_concepts')"
+          @click="selectBar('delete-concepts')"
+          v-if="
+            isCurrentViewConcept && (isCurrentUserManager || isConceptPublisher)
+          "
+        >
+          <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
+        </div>
 
-          <div class="filler"></div>
+        <div class="filler"></div>
 
-          <div
-            class="menu-item"
-            :title="$t('main.csv.export_file')"
-            @click="$emit('export-task')"
-            v-if="
-              isTaskSelection && !isEntitySelection && nbSelectedTasks === 1
-            "
-          >
-            <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
-          </div>
+        <div
+          class="menu-item"
+          :title="$t('main.csv.export_file')"
+          @click="$emit('export-task')"
+          v-if="isTaskSelection && !isEntitySelection && nbSelectedTasks === 1"
+        >
+          <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
+        </div>
 
-          <div
-            class="menu-item mr05"
-            :title="$t('main.clear_selection')"
-            @click="clearSelection"
-          >
-            <x-icon :size="16" />
-          </div>
+        <div
+          class="menu-item mr05"
+          :title="$t('main.clear_selection')"
+          @click="clearSelection"
+        >
+          <x-icon :size="16" />
         </div>
       </div>
 
@@ -1768,11 +1761,12 @@ div.assignation {
 }
 
 .menu {
-  background: var(--background);
   color: var(--text);
   padding-top: 0.7em;
   border-bottom: 1px solid $light-grey-light;
   background: #fcfcff;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .menu-item {
@@ -1780,6 +1774,10 @@ div.assignation {
   font-size: 0.9em;
   transform: scale(0.9);
   padding: 0.2em 0.6em 0.4em 0.6em;
+
+  > img {
+    max-width: none;
+  }
 
   &:hover {
     transform: scale(1.1);
