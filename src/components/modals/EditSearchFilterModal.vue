@@ -156,7 +156,6 @@ export default {
           ...this.form,
           is_shared: this.form.is_shared === 'true'
         }
-        console.log(data)
         this.$emit('confirm', data)
       }
     }
