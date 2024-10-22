@@ -194,7 +194,6 @@ export default {
         })
       }
 
-      console.log(data, this.top)
       return data
     }
   },
