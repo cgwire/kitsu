@@ -23,9 +23,9 @@ describe('lang', () => {
     timezone: 'Europe/Paris'
   })
   test('setLocale', () => {
-    lang.setLocale()
+    lang.setLocale('french')
     expect(moment.locale()).toEqual('fr')
-    expect(i18n.locale).toEqual('fr')
+    expect(i18n.global.locale).toEqual('fr')
   })
 })
 

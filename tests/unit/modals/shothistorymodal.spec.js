@@ -1,6 +1,6 @@
-import Vue from 'vue'
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
+import { nextTick } from 'vue'
+import { shallowMount } from '@vue/test-utils'
+import { createStore } from 'vuex'
 
 import i18n from '@/lib/i18n'
 
@@ -8,9 +8,6 @@ import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 import peopleStoreFixture from '../fixtures/person-store'
-
-const localVue = createLocalVue()
-localVue.use(Vuex)
 
 describe('ShotHistoryModal', () => {
   let store, shotStore
@@ -22,27 +19,29 @@ describe('ShotHistoryModal', () => {
       getters: {
       },
       actions: {
-        loadShotHistory: () => Promise.resolve([
-          {
-            id: 'version-1',
-            name: 'SH01',
-            data: {
-              frame_in: 12,
-              frame_out: 22
+        loadShotHistory () {
+          return Promise.resolve([
+            {
+              id: 'version-1',
+              name: 'SH01',
+              data: {
+                frame_in: 12,
+                frame_out: 22
+              }
+            },
+            {
+              id: 'version-2',
+              name: 'SH01',
+              data: {
+                frame_in: 14,
+                frame_out: 24
+              }
             }
-          },
-          {
-            id: 'version-2',
-            name: 'SH01',
-            data: {
-              frame_in: 14,
-              frame_out: 24
-            }
-          }
-        ])
+          ])
+        }
       }
     }
-    store = new Vuex.Store({
+    store = createStore({
       strict: true,
       modules: {
         shots: shotStore,
@@ -53,9 +52,13 @@ describe('ShotHistoryModal', () => {
     wrapper = shallowMount(ShotHistoryModal, {
       store,
       getters,
-      localVue,
       i18n,
-      propsData: {
+      global: {
+        mocks: {
+          $store: store
+        }
+      },
+      props: {
         active: true,
         shot: { id: 'shot-01' }
       }
@@ -71,7 +74,7 @@ describe('ShotHistoryModal', () => {
     })
     it('spinner on loading', () => new Promise(done => {
       wrapper.setData({ isLoading: true })
-      Vue.nextTick(() => {
+      nextTick(() => {
         const modal = wrapper.findComponent(ShotHistoryModal)
         const tableInfo = wrapper.findComponent(TableInfo)
         expect(tableInfo.props().isLoading).toBe(true)

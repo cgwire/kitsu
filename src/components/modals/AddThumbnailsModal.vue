@@ -171,11 +171,11 @@ export default {
     taskTypeList() {
       let validationColumns = []
       if (this.isAssets) {
-        validationColumns = this.assetValidationColumns
+        validationColumns = this.assetValidationColumns || []
       } else if (this.isEdits) {
-        validationColumns = this.editValidationColumns
+        validationColumns = this.editValidationColumns || []
       } else if (this.isShots) {
-        validationColumns = this.shotValidationColumns
+        validationColumns = this.shotValidationColumns || []
       }
       return validationColumns.map(taskTypeId =>
         this.taskTypeMap.get(taskTypeId)
