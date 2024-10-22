@@ -180,8 +180,8 @@ export default {
       const data = {
         'max-height': this.maxHeightSelectInput + 'px',
         width: this.width + 'px',
-        top: this.top ? '30px' : '37px',
-        left: '0px'
+        top: '37px',
+        left: '0'
       }
       if (this.top) {
         Object.assign(data, {
@@ -189,8 +189,8 @@ export default {
           bottom: '-90px',
           'border-top-left-radius': '10px',
           'border-top-right-radius': '10px',
-          'border-bottom-left-radius': '0px',
-          'border-bottom-right-radius': '0px'
+          'border-bottom-left-radius': '0',
+          'border-bottom-right-radius': '0'
         })
       }
 
