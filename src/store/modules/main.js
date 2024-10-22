@@ -93,8 +93,8 @@ const actions = {
 }
 
 const mutations = {
-  [TOGGLE_DARK_THEME](state) {
-    state.isDarkTheme = !state.isDarkTheme
+  [TOGGLE_DARK_THEME](state, isDarkTheme = undefined) {
+    state.isDarkTheme = isDarkTheme ?? !state.isDarkTheme
   },
 
   [TOGGLE_SUPPORT_CHAT](state, isSupportChat) {

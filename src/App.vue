@@ -104,17 +104,11 @@ export default {
     },
 
     setupDarkTheme() {
-      if (localStorage.getItem('dark-theme') === 'false') {
-        document.documentElement.style.background = '#FFF'
-        document.body.style.background = '#FFF'
-      } else if (this.mainConfig?.dark_theme_by_default && !this.isDarkTheme) {
-        this.$store.commit('TOGGLE_DARK_THEME')
-        document.documentElement.style.background = '#36393F'
-        document.body.style.background = '#36393F'
-      } else {
-        document.documentElement.style.background = '#FFF'
-        document.body.style.background = '#FFF'
-      }
+      const darkTheme = localStorage.getItem('dark-theme')
+      const isDarkTheme =
+        darkTheme === 'true' ||
+        (darkTheme !== 'false' && this.mainConfig?.dark_theme_by_default)
+      this.$store.commit('TOGGLE_DARK_THEME', isDarkTheme)
     },
 
     setupCrisp(config) {
@@ -139,13 +133,12 @@ export default {
   },
 
   watch: {
-    isDarkTheme() {
-      if (this.isDarkTheme) {
-        document.documentElement.style.background = '#36393F'
-        document.body.style.background = '#36393F'
-      } else {
-        document.documentElement.style.background = '#FFF'
-        document.body.style.background = '#FFF'
+    isDarkTheme: {
+      immediate: true,
+      handler() {
+        const background = this.isDarkTheme ? '#36393F' : '#FFF'
+        document.documentElement.style.background = background
+        document.body.style.background = background
       }
     },
 
