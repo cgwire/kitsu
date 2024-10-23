@@ -50,7 +50,7 @@ Validate everything with the ![All done](../img/getting-started/all_done_go.png)
 
 
 
-## Introduction to Kitsu global Page
+## Introduction to the Kitsu Global Page
 
 
 
@@ -159,9 +159,7 @@ The next icon ![News](../img/getting-started/canny.png) is a direct link to our 
 
 You can see all the new features with an animated gif and also add suggestions about the next feature you want to see in Kitsu.
 
-
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png). The number of notifications unread will appear in the bell icon.
-
+Next, the bell icon ![Notification](../img/getting-started/notification_icon_on.png) displays your notifications (assignments, comments, tags). The number of unread notifications will be shown on the bell icon. There are various filters to help you stay on top of updates and revisit important ones when needed. You can easily mark notifications as read or unread or quickly filter by watching/non-watching to focus on what matters most and declutter your feed.
 
 
 The last icon before your avatar is the documentation button.
