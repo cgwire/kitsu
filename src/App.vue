@@ -107,7 +107,8 @@ export default {
       const darkTheme = localStorage.getItem('dark-theme')
       const isDarkTheme =
         darkTheme === 'true' ||
-        (darkTheme !== 'false' && this.mainConfig?.dark_theme_by_default)
+        (darkTheme !== 'false' &&
+          Boolean(this.mainConfig?.dark_theme_by_default))
       this.$store.commit('TOGGLE_DARK_THEME', isDarkTheme)
     },
 
