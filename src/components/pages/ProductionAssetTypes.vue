@@ -153,7 +153,8 @@ export default {
         this.taskTypeMap,
         this.taskStatusMap,
         this.assetTypeMap,
-        this.countMode
+        this.countMode,
+        this.currentProduction
       )
     },
 

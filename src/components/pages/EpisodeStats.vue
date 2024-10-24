@@ -235,7 +235,8 @@ export default {
           this.taskTypeMap,
           this.taskStatusMap,
           this.episodeMap,
-          this.countMode
+          this.countMode,
+          this.currentProduction
         )
       } else {
         csv.generateStatReports(
@@ -244,7 +245,8 @@ export default {
           this.taskTypeMap,
           this.taskStatusMap,
           this.episodeMap,
-          this.countMode
+          this.countMode,
+          this.currentProduction
         )
       }
     },

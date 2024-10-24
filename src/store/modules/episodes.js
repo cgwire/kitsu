@@ -455,11 +455,12 @@ const actions = {
 
   loadEpisodeStats({ commit, rootGetters }, productionId) {
     const taskTypeMap = rootGetters.taskTypeMap
-    commit(SET_EPISODE_STATS, { episodeStats: {}, taskTypeMap })
+    const production = rootGetters.currentProduction
+    commit(SET_EPISODE_STATS, { episodeStats: {}, taskTypeMap, production })
     return shotsApi
       .getEpisodeStats(productionId)
       .then(episodeStats => {
-        commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap })
+        commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap, production })
         return Promise.resolve(episodeStats)
       })
       .catch(console.error)
@@ -842,7 +843,8 @@ const mutations = {
   ) {
     state.episodeValidationColumns = helpers.sortStatColumns(
       episodeRetakeStats,
-      taskTypeMap
+      taskTypeMap,
+      production
     )
     state.episodeRetakeStats = episodeRetakeStats
   },
