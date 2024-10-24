@@ -292,13 +292,7 @@ const csv = {
       )
 
       taskTypeIds.forEach(taskTypeId => {
-        if (taskTypeId === 'all') {
-          Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
-            if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
-              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
-            }
-          })
-        } else {
+        if (taskTypeId !== 'all') {
           const taskTypeStats = mainStats[entryId][taskTypeId]
           if (taskTypeStats) {
             const total = getStatsTotalEntryCount(
@@ -318,6 +312,12 @@ const csv = {
               lineMap
             )
           }
+        } else {
+          Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
+            if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
+              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
+            }
+          })
         }
       })
 
