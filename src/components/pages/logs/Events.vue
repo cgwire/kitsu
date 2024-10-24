@@ -4,7 +4,7 @@
       <date-field
         class="flexrow-item"
         :can-delete="false"
-        :disabled-dates="{ from: today }"
+        :max-date="today"
         :label="$t('logs.current_date_label')"
         v-model="currentDate"
       />
@@ -18,7 +18,7 @@
       </span>
     </div>
 
-    <div class="mt2" v-if="!isLoading && events.length === 0">
+    <div class="mt2 empty" v-if="!isLoading && events.length === 0">
       {{ $t('logs.empty_list') }}
     </div>
     <div class="has-text-centered" v-if="isLoading">
@@ -192,6 +192,11 @@ export default {
   .nb-events {
     color: $white;
   }
+}
+
+.empty {
+  color: var(--text);
+  font-style: italic;
 }
 
 .log-list {

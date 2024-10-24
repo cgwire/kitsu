@@ -2,14 +2,20 @@
   <div :class="{ field: withMargin }">
     <label class="label" v-if="label">{{ label }}</label>
     <p class="control">
-      <vue-date-picker></vue-date-picker>
-      <span
-        class="clear-button unselectable"
-        @click.stop="clearValue"
-        v-if="localValue && canDelete && !disabled"
-      >
-        +
-      </span>
+      <vue-date-picker
+        auto-apply
+        class="datepicker"
+        :clearable="canDelete"
+        :disabled="disabled"
+        :enable-time-picker="false"
+        :format="'yyyy-MM-dd'"
+        :min-date="minDate"
+        :max-date="maxDate"
+        :locale="user.locale.substring(0, 2)"
+        :dark="isDarkTheme"
+        :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
+        v-model="localValue"
+      />
     </p>
   </div>
 </template>
@@ -35,21 +41,25 @@ export default {
       default: () => {},
       type: Object
     },
-    invalid: {
-      default: false,
-      type: Boolean
-    },
     label: {
       default: '',
       type: String
     },
-    shortDate: {
-      default: true,
-      type: Boolean
+    minDate: {
+      default: null,
+      type: Date
+    },
+    maxDate: {
+      default: null,
+      type: Date
     },
     modelValue: {
       default: () => new Date(),
       type: Date
+    },
+    weekDaysDisabled: {
+      default: false,
+      type: Boolean
     },
     withMargin: {
       default: true,
@@ -70,15 +80,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['user']),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    }
+    ...mapGetters(['user', 'isDarkTheme'])
   },
 
   methods: {
@@ -93,6 +95,10 @@ export default {
   },
 
   watch: {
+    localValue() {
+      this.$emit('update:modelValue', this.localValue)
+    },
+
     modelValue() {
       this.localValue = this.modelValue
     }
@@ -111,5 +117,9 @@ export default {
   top: 0;
   color: $light-grey;
   transform: rotate(45deg);
+}
+
+.datepicker {
+  max-width: 200px;
 }
 </style>
