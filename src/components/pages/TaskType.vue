@@ -117,10 +117,12 @@
             >
               <date-field
                 class="flexrow-item"
-                :disabled-dates="startDisabledDates"
-                :with-margin="false"
-                :label="$t('main.start_date')"
                 :can-delete="false"
+                :min-date="startDisabledDates.to"
+                :max-date="startDisabledDates.from"
+                :label="$t('main.start_date')"
+                week-days-disabled
+                :with-margin="false"
                 v-model="schedule.taskTypeStartDate"
               />
             </div>
@@ -130,10 +132,12 @@
             >
               <date-field
                 class="flexrow-item"
-                :disabled-dates="endDisabledDates"
-                :with-margin="false"
-                :label="$t('main.end_date')"
                 :can-delete="false"
+                :min-date="endDisabledDates.to"
+                :max-date="endDisabledDates.from"
+                :label="$t('main.end_date')"
+                week-days-disabled
+                :with-margin="false"
                 v-model="schedule.taskTypeEndDate"
               />
             </div>
@@ -1032,6 +1036,7 @@ export default {
     },
 
     resetTaskIndex() {
+      if (!this.entityTasks) return
       this.$options.taskIndex = buildSupervisorTaskIndex(
         this.entityTasks,
         this.personMap,
@@ -1046,12 +1051,10 @@ export default {
     getTasks(entities) {
       const tasks = []
       entities.forEach(entity => {
-        ;(entity.tasks || []).forEach(taskId => {
+        const  entityTasks = entity.tasks || []
+        entityTasks.forEach(taskId => {
           const task = this.taskMap.get(taskId.id || taskId)
           if (task && !entity.canceled) {
-            // Hack to allow filtering on linked entity metadata.
-
-            task.data = entity.data
             if (task.task_type_id === this.currentTaskType.id) {
               tasks.push(task)
             }

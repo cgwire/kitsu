@@ -6,13 +6,19 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <vuejs-datepicker />
+          <date-field
+            v-model="selectedStartDate"
+            @update:model-value="onUpdateSelectedStartDate"
+          />
         </div>
         <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <vuejs-datepicker />
+          <date-field
+            v-model="selectedEndDate"
+            @update:model-value="onUpdateSelectedEndDate"
+          />
         </div>
         <combobox-number
           class="flexrow-item zoom-level"
@@ -202,6 +208,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -223,6 +230,7 @@ export default {
     ComboboxProduction,
     ComboboxStudio,
     ComboboxTaskType,
+    DateField,
     DepartmentName,
     EntityThumbnail,
     PeopleField,

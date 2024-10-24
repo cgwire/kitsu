@@ -48,15 +48,15 @@
           <div class="filters flexrow mt1" v-if="isFiltersDisplayed">
             <date-field
               class="flexrow-item"
-              :disabled-dates="{ from: today }"
+              :max-date="today"
               :label="$t('main.from')"
               :with-margin="false"
               v-model="after"
             />
             <date-field
               class="flexrow-item"
+              :max-date="today"
               :label="$t('main.to')"
-              :disabled-dates="{ from: today }"
               :with-margin="false"
               v-model="before"
             />

@@ -6,14 +6,18 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <vuejs-datepicker
+          <date-field
+            week-days-disabled
+            v-model="selectedStartDate"
           />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <vuejs-datepicker
+          <date-field
+            week-days-disabled
+            v-model="selectedEndDate"
           />
         </div>
         <combobox-number
@@ -58,6 +62,7 @@ import {
 import colors from '@/lib/colors'
 
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 
 export default {
@@ -65,6 +70,7 @@ export default {
 
   components: {
     ComboboxNumber,
+    DateField,
     Schedule
   },
 
@@ -100,15 +106,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['openProductions', 'taskTypeMap', 'user']),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    }
+    ...mapGetters(['openProductions', 'taskTypeMap', 'user'])
   },
 
   methods: {

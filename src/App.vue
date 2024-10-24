@@ -667,39 +667,6 @@ body {
     }
   }
 
-  .vdp-datepicker__calendar {
-    background-color: #36393f;
-    border-color: #25282e;
-
-    .prev,
-    .next,
-    .day__month_btn,
-    header span:hover {
-      background: #36393f;
-    }
-
-    header .prev::after,
-    header .prev::after {
-      border-right-color: #eee;
-    }
-
-    header .next::after,
-    header .next::after {
-      border-left-color: #eee;
-    }
-
-    header .next.disabled::after,
-    header .next.disabled::after {
-      border-left-color: #666;
-    }
-
-    .cell.year.disabled,
-    .cell.month.disabled,
-    .cell.day.disabled {
-      color: $grey;
-    }
-  }
-
   .hero .control .icon {
     color: #555;
   }
@@ -2159,40 +2126,6 @@ th.validation-cell {
   }
 }
 
-.theme .datepicker .vdp-datepicker__calendar {
-  z-index: 2000;
-
-  .cell.year:not(.blank):not(.disabled):hover,
-  .cell.month:not(.blank):not(.disabled):hover,
-  .cell.day:not(.blank):not(.disabled):hover {
-    background: var(--background-selectable);
-    border: 1px solid transparent;
-  }
-
-  .cell.year.disabled:hover,
-  .cell.month.disabled:hover,
-  .cell.day.disabled:hover {
-    border: 1px solid transparent;
-  }
-
-  .cell.year.selected,
-  .cell.month.selected,
-  .cell.day.selected {
-    background: var(--background-selected);
-  }
-
-  .cell.year.selected:not(.blank):not(.disabled):hover,
-  .cell.month.selected:not(.blank):not(.disabled):hover,
-  .cell.day.selected:not(.blank):not(.disabled):hover {
-    border: 1px solid transparent;
-    background: var(--background-selected);
-  }
-
-  header span:not(.disabled):hover {
-    background: var(--background-selectable);
-  }
-}
-
 .theme .vue-slider-dot-tooltip-inner {
   background: $purple-strong;
   border-color: $purple-strong;
@@ -2311,6 +2244,19 @@ th.validation-cell {
   .button .icon.is-small {
     margin-right: 0;
   }
+}
+
+#app .dp__active_date {
+  color: $black;
+  background: var(--background-selected);
+}
+
+#app .dp__today {
+  border-color: var(--background-selected);
+}
+
+#app .dp__date_hover:hover {
+  background: var(--background-selectable);
 }
 
 @media screen and (max-width: 768px) {

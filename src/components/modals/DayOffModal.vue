@@ -11,11 +11,20 @@
             <label class="label">
               {{ $t('main.start_date') }}
             </label>
-            <vuejs-datepicker
+            <date-field
+              week-days-disabled
+              @update:model-value="validateDates"
+              v-model="form.startDate"
             />
           </div>
           <div class="flexrow-item">
-            <vuejs-datepicker
+            <label class="label">
+              {{ $t('main.end_date') }}
+            </label>
+            <date-field
+              week-days-disabled
+              @update:model-value="validateDates"
+              v-model="form.endDate"
             />
           </div>
         </div>
@@ -107,14 +116,6 @@ export default {
 
     isEditing() {
       return Boolean(this.dayOffToEdit?.id)
-    },
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
     }
   },
 

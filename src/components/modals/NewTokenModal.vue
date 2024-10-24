@@ -13,9 +13,9 @@
             {{ $t('bots.new_token_warning') }}
           </p>
           <date-field
-            :disabled-dates="{ to: new Date() }"
             :invalid="!isValidExpirationDate"
             :label="$t('bots.fields.expiration_date')"
+            :min-date="today"
             v-model="form.expiration_date"
           />
           <div class="flexrow right">
@@ -83,6 +83,7 @@
 import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 import { modalMixin } from '@/components/modals/base_modal'
+import { timeMixin } from '@/components/mixins/time'
 
 import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -90,7 +91,7 @@ import TextField from '@/components/widgets/TextField.vue'
 export default {
   name: 'new-token-modal',
 
-  mixins: [modalMixin],
+  mixins: [modalMixin, timeMixin],
 
   components: {
     AlertTriangleIcon,
@@ -171,11 +172,6 @@ export default {
 <style lang="scss" scoped>
 .warning {
   color: $orange;
-}
-
-.form :deep(.vdp-datepicker__calendar) {
-  top: -175px;
-  left: -10px;
 }
 
 .token {

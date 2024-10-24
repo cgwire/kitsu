@@ -2,7 +2,11 @@
   <div class="user-timesheet data-list">
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
-        <datepicker />
+        <date-field
+          min-date="disabledDates.from"
+          max-date="disabledDates.to"
+          v-model="selectedDate"
+        />
       </div>
       <div class="flexrow-item flexrow time-spent-total">
         -&nbsp;&nbsp;

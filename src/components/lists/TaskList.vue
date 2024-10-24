@@ -175,8 +175,8 @@
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
+                :min-date="disabledDates.to"
                 :value="getDate(task.start_date)"
-                :disabled-dates="disabledDates"
                 @update:model-value="updateStartDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
@@ -189,7 +189,7 @@
                 class="flexrow-item"
                 :with-margin="false"
                 :value="getDate(task.due_date)"
-                :disabled-dates="disabledDates"
+                :max-date="disabledDates.from"
                 @update:model-value="updateDueDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />

@@ -38,7 +38,7 @@
         />
         <date-field
           :label="$t('bots.fields.expiration_date')"
-          :disabled-dates="{ to: new Date() }"
+          :min-date="today"
           :disabled="isEditing"
           v-model="form.expiration_date"
           v-if="isBot"
@@ -174,6 +174,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
+import { timeMixin } from '@/components/mixins/time'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -185,7 +186,7 @@ import TextField from '@/components/widgets/TextField.vue'
 export default {
   name: 'edit-person-modal',
 
-  mixins: [modalMixin],
+  mixins: [modalMixin, timeMixin],
 
   components: {
     Combobox,

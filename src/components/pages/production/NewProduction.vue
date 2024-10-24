@@ -120,10 +120,18 @@
               {{ $t('productions.creation.start_and_end_dates') }}
             </label>
             <div class="date-picker-wrapper">
-              <datepicker
+              <date-field
+                :label="$t('main.start_date')"
+                :placeholder="startDatePlaceholder"
+                max-date="productionToCreate.settings.dateEnd"
+                v-model="productionToCreate.settings.dateStart"
               />
               <span class="input-separator">-</span>
-              <datepicker
+              <date-field
+                :label="$t('main.start_end')"
+                :placeholder="startEndPlaceholder"
+                min-date="productionToCreate.settings.dateStart"
+                v-model="productionToCreate.settings.dateEnd"
               />
             </div>
           </div>
@@ -418,8 +426,9 @@ import {
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import ManageShotsModal from '@/components/modals/ManageShotsModal.vue'
@@ -438,6 +447,7 @@ export default {
     ComboboxStyled,
     ComboboxTaskType,
     ComboboxStatus,
+    DateField,
     ImportModal,
     ImportRenderModal,
     ManageShotsModal,
@@ -580,14 +590,6 @@ export default {
       return this.isTVShow
         ? ['Episode', 'Sequence', 'Name']
         : ['Sequence', 'Name']
-    },
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
     },
 
     allowedProductionTypes() {
