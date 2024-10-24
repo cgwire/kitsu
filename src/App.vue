@@ -129,14 +129,10 @@ export default {
         const instance = getCurrentInstance()
         const app = instance.appContext.app
 
-        sentry.init(
-          app,
-          this.$router,
-          {
-            dsn: config.sentry.dsn,
-            sampleRate: config.sentry.sampleRate
-          }
-        )
+        sentry.init(app, this.$router, {
+          dsn: config.sentry.dsn,
+          sampleRate: config.sentry.sampleRate
+        })
       }
     }
   },

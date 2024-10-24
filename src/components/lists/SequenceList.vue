@@ -239,7 +239,9 @@
                 <td
                   :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
-                  :title="sequence.data ? sequence.data[descriptor.field_name] : ''"
+                  :title="
+                    sequence.data ? sequence.data[descriptor.field_name] : ''
+                  "
                   :style="{
                     'z-index': 1000 - i, // Need for combo to be above the next cell
                     left: offsets['editor-' + j]
@@ -307,7 +309,10 @@
                     error: !isValidResolution(sequence)
                   }"
                   :value="
-                    getMetadataFieldValue({ field_name: 'resolution' }, sequence)
+                    getMetadataFieldValue(
+                      { field_name: 'resolution' },
+                      sequence
+                    )
                   "
                   @input="
                     event =>
@@ -326,7 +331,10 @@
 
                 <span class="metadata-value selectable" v-else>
                   {{
-                    getMetadataFieldValue({ field_name: 'resolution' }, sequence)
+                    getMetadataFieldValue(
+                      { field_name: 'resolution' },
+                      sequence
+                    )
                   }}
                 </span>
               </td>
@@ -335,9 +343,13 @@
               <template v-if="isShowInfos">
                 <td
                   class="metadata-descriptor"
-                  :title="sequence.data ? sequence.data[descriptor.field_name] : ''"
+                  :title="
+                    sequence.data ? sequence.data[descriptor.field_name] : ''
+                  "
                   :key="sequence.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="sequence"
@@ -348,9 +360,13 @@
                 </td>
                 <td
                   class="metadata-descriptor"
-                  :title="sequence.data ? sequence.data[descriptor.field_name] : ''"
+                  :title="
+                    sequence.data ? sequence.data[descriptor.field_name] : ''
+                  "
                   :key="sequence.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="sequence"

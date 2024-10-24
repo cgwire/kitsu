@@ -49,7 +49,8 @@
             :style="{ backgroundColor: `${group.color}53` }"
             @click.stop="removeGroup(group)"
             v-if="
-              !group.queries.length && (!group.is_shared || isCurrentUserManager)
+              !group.queries.length &&
+              (!group.is_shared || isCurrentUserManager)
             "
           >
             <trash2-icon :size="8" />

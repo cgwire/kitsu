@@ -315,9 +315,13 @@
               <template v-if="isShowInfos">
                 <td
                   class="metadata-descriptor"
-                  :title="episode.data ? episode.data[descriptor.field_name] : ''"
+                  :title="
+                    episode.data ? episode.data[descriptor.field_name] : ''
+                  "
                   :key="episode.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="episode"
@@ -362,9 +366,8 @@
                   <select
                     class="select-input"
                     @change="
-                      event => onEpisodeStatusChanged(
-                        episode, event.target.value
-                      )
+                      event =>
+                        onEpisodeStatusChanged(episode, event.target.value)
                     "
                   >
                     <option
@@ -424,7 +427,9 @@
                   :entity="episode"
                   :task-test="
                     taskMap.get(
-                      episode.validations ? episode.validations.get(columnId) : null
+                      episode.validations
+                        ? episode.validations.get(columnId)
+                        : null
                     )
                   "
                   :minimized="hiddenColumns[columnId]"

@@ -20,8 +20,7 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'date-field',
 
-  components: {
-  },
+  components: {},
 
   props: {
     canDelete: {

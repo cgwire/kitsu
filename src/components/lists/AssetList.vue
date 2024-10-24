@@ -157,9 +157,7 @@
               {{ $t('shots.fields.resolution') }}
             </th>
 
-            <template
-              v-if="isShowInfos"
-            >
+            <template v-if="isShowInfos">
               <metadata-header
                 :key="'header' + descriptor.id"
                 :descriptor="descriptor"
@@ -170,9 +168,7 @@
               />
             </template>
 
-            <template
-              v-if="!isLoading"
-            >
+            <template v-if="!isLoading">
               <validation-header
                 :key="'header' + columnId"
                 :hidden-columns="hiddenColumns"
@@ -229,9 +225,7 @@
           </tr>
         </thead>
 
-        <template
-          v-if="!isLoading && isListVisible"
-        >
+        <template v-if="!isLoading && isListVisible">
           <tbody
             class="datatable-body"
             :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
@@ -378,7 +372,9 @@
 
               <description-cell
                 class="description"
-                @description-changed="value => onDescriptionChanged(asset, value)"
+                @description-changed="
+                  value => onDescriptionChanged(asset, value)
+                "
                 :editable="isCurrentUserManager && !asset.shared"
                 v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
                 :entry="asset"
@@ -440,7 +436,9 @@
                 />
 
                 <span class="metadata-value selectable" v-else>
-                  {{ getMetadataFieldValue({ field_name: 'resolution' }, asset) }}
+                  {{
+                    getMetadataFieldValue({ field_name: 'resolution' }, asset)
+                  }}
                 </span>
               </td>
 
@@ -450,7 +448,9 @@
                   class="metadata-descriptor"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
                   :key="'desc' + asset.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="asset"
@@ -476,7 +476,11 @@
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
                   :selected="
-                    isSelected(i, k, j + stickedDisplayedValidationColumns.length)
+                    isSelected(
+                      i,
+                      k,
+                      j + stickedDisplayedValidationColumns.length
+                    )
                   "
                   :row-x="getIndex(i, k)"
                   :column-y="j"
