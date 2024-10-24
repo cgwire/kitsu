@@ -23,11 +23,7 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isEmpty">
-          <tr
-            class="datatable-row"
-            :key="person.id"
-            v-for="person in entries"
-          >
+          <tr class="datatable-row" :key="person.id" v-for="person in entries">
             <people-name-cell
               class="name datatable-row-header"
               :person="person"

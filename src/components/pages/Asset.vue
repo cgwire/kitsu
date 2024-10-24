@@ -151,16 +151,21 @@
               "
             >
               <em>Casted in {{ nbShotsCastedIn }} shots</em>
-              <template v-if="
-                currentAsset.castInShotsBySequence.length > 0 &&
-                currentAsset.castInShotsBySequence[0][0].sequence_name
-              ">
+              <template
+                v-if="
+                  currentAsset.castInShotsBySequence.length > 0 &&
+                  currentAsset.castInShotsBySequence[0][0].sequence_name
+                "
+              >
                 <div
                   class="sequence-shots"
                   :key="
-                    sequenceShots?.length > 0 ? sequenceShots[0].sequence_name : ''
+                    sequenceShots?.length > 0
+                      ? sequenceShots[0].sequence_name
+                      : ''
                   "
-                  v-for="sequenceShots in currentAsset.castInShotsBySequence || []"
+                  v-for="sequenceShots in currentAsset.castInShotsBySequence ||
+                  []"
                 >
                   <div class="shot-sequence">
                     {{

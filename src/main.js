@@ -25,7 +25,6 @@ configureCompat({
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 
-
 const app = createApp({
   components: { App },
   template: '<App/>'
@@ -44,7 +43,7 @@ app.use(Autosize)
 app.use(VueChartkick)
 app.use(VueAnimXYZ)
 
-app.component('VueDatePicker', VueDatePicker)
+app.component('vue-date-picker', VueDatePicker)
 
 // Make the current route part of the main state.
 sync(store, router)

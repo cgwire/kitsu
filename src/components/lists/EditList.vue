@@ -271,8 +271,8 @@
                       )
                   "
                   @keyup.ctrl="
-                    event => onInputKeyUp(
-                      event, getIndex(i, k), descriptorLength)
+                    event =>
+                      onInputKeyUp(event, getIndex(i, k), descriptorLength)
                   "
                   v-if="isCurrentUserManager"
                 />
@@ -339,7 +339,9 @@
                 class="description"
                 :entry="edit"
                 :editable="isCurrentUserManager"
-                @description-changed="value => onDescriptionChanged(edit, value)"
+                @description-changed="
+                  value => onDescriptionChanged(edit, value)
+                "
                 v-if="!isCurrentUserClient && isShowInfos && isEditDescription"
               />
 
@@ -349,7 +351,9 @@
                   class="metadata-descriptor"
                   :title="edit.data ? edit.data[descriptor.field_name] : ''"
                   :key="edit.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="edit"

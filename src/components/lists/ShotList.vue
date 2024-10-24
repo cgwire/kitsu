@@ -365,7 +365,9 @@
                 class="description"
                 :entry="shot"
                 :editable="isCurrentUserManager"
-                @description-changed="value => onDescriptionChanged(shot, value)"
+                @description-changed="
+                  value => onDescriptionChanged(shot, value)
+                "
                 v-if="!isCurrentUserClient && isShowInfos && isShotDescription"
               />
 
@@ -407,7 +409,8 @@
                   @input="event => onNbFramesChanged(shot, event.target.value)"
                   @keydown="onNumberFieldKeyDown"
                   @keyup.ctrl="
-                    event => onInputKeyUp(event, getIndex(i, k), descriptorLength)
+                    event =>
+                      onInputKeyUp(event, getIndex(i, k), descriptorLength)
                   "
                   v-if="isCurrentUserManager"
                 />
@@ -417,15 +420,17 @@
               </td>
               <td
                 class="framein number-cell"
-                v-if="isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn"
+                v-if="
+                  isFrameIn && isShowInfos && metadataDisplayHeaders.frameIn
+                "
               >
                 <input
                   class="input-editor"
                   step="1"
                   type="number"
                   min="0"
-                  :value="getMetadataFieldValue(
-                    { field_name: 'frame_in' }, shot)
+                  :value="
+                    getMetadataFieldValue({ field_name: 'frame_in' }, shot)
                   "
                   @input="
                     event =>
@@ -514,7 +519,9 @@
               <td
                 class="max-retakes number-cell"
                 v-if="
-                  isMaxRetakes && isShowInfos && metadataDisplayHeaders.maxRetakes
+                  isMaxRetakes &&
+                  isShowInfos &&
+                  metadataDisplayHeaders.maxRetakes
                 "
               >
                 <input
@@ -540,14 +547,18 @@
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
-                  {{ getMetadataFieldValue({ field_name: 'max_retakes' }, shot) }}
+                  {{
+                    getMetadataFieldValue({ field_name: 'max_retakes' }, shot)
+                  }}
                 </span>
               </td>
 
               <td
                 class="resolution"
                 v-if="
-                  isResolution && isShowInfos && metadataDisplayHeaders.resolution
+                  isResolution &&
+                  isShowInfos &&
+                  metadataDisplayHeaders.resolution
                 "
               >
                 <input
@@ -573,7 +584,9 @@
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
-                  {{ getMetadataFieldValue({ field_name: 'resolution' }, shot) }}
+                  {{
+                    getMetadataFieldValue({ field_name: 'resolution' }, shot)
+                  }}
                 </span>
               </td>
 
@@ -583,7 +596,9 @@
                   class="metadata-descriptor"
                   :title="shot.data ? shot.data[descriptor.field_name] : ''"
                   :key="shot.id + '-' + descriptor.id"
-                  v-for="(descriptor, j) in nonStickedVisibleMetadataDescriptors"
+                  v-for="(
+                    descriptor, j
+                  ) in nonStickedVisibleMetadataDescriptors"
                 >
                   <metadata-input
                     :entity="shot"
@@ -615,7 +630,9 @@
                   :minimized="hiddenColumns[columnId]"
                   :selected="
                     isSelected(
-                      i, k, j + stickedDisplayedValidationColumns.length
+                      i,
+                      k,
+                      j + stickedDisplayedValidationColumns.length
                     )
                   "
                   :row-x="getIndex(i, k)"

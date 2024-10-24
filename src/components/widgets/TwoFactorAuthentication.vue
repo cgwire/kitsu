@@ -64,7 +64,7 @@
           {{ unableToVerify }}
         </p>
         <ul>
-          <li :key="twoFa" v-for="twoFA in othersTwoFA">
+          <li :key="twoFA" v-for="twoFA in othersTwoFA">
             <a @click="changeTwoFA(twoFA)">
               {{ changeTwoFAText(twoFA) }}
             </a>

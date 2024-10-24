@@ -1482,7 +1482,7 @@ export default {
       }
     },
 
-    head () {
+    head() {
       return {
         title: this.title
       }
