@@ -18,6 +18,9 @@
       />
       <router-link
         class="flexrow-item datatable-dropdown ellipsis task-type-name"
+        :title="
+          !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : null
+        "
         :to="taskTypePath(columnId)"
         v-if="!isCurrentUserClient"
       >
@@ -25,6 +28,9 @@
       </router-link>
       <span
         class="flexrow-item datatable-dropdown ellipsis task-type-name"
+        :title="
+          !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : null
+        "
         v-else
       >
         {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
