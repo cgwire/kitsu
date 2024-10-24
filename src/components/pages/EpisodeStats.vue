@@ -45,6 +45,7 @@
       />
       <button-simple
         class="flexrow-item"
+        :disabled="isLoading"
         icon="download"
         @click="exportStatisticsToCsv"
       />
