@@ -128,8 +128,7 @@ const csv = {
 
   buildCsvFile(name, entries) {
     const csvContent = csv.turnEntriesToCsvString(entries)
-    const result =
-      'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent)
+    const result = `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`
     const link = document.createElement('a')
     link.setAttribute('href', result)
     link.setAttribute('download', `${name}.csv`)
@@ -419,7 +418,14 @@ const getStatsTaskTypeIds = (mainStats, taskTypeMap) => {
     .sort((a, b) => {
       if (a === 'all') return 1
       if (b === 'all') return -1
-      return taskTypeMap.get(a).priority - taskTypeMap.get(b).priority
+      const taskTypeA = taskTypeMap.get(a)
+      const taskTypeB = taskTypeMap.get(b)
+      if (taskTypeA.priority === taskTypeB.priority) {
+        return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
+          numeric: true
+        })
+      }
+      return taskTypeA.priority - taskTypeB.priority
     })
 }
 
@@ -485,7 +491,7 @@ const buildTotalLines = (
       name,
       taskStatusName,
       count || '0',
-      percentage + '%'
+      `${percentage}%`
     ]
   })
   return lineMap
@@ -507,7 +513,7 @@ const addEntryStatusStats = (
     const percentage = getPercentage(count, total)
     lineMap[taskStatusId] = lineMap[taskStatusId].concat([
       count || '0',
-      percentage + '%'
+      `${percentage}%`
     ])
   })
 }
