@@ -430,13 +430,17 @@ const getStatsTaskTypeIds = (mainStats, taskTypeMap) => {
 }
 
 const getStatsEntryIds = (mainStats, entryMap) => {
-  return Object.keys(mainStats).sort((a, b) => {
-    if (a === 'all') return -1
-    if (b === 'all') return 1
-    return entryMap.get(a).name.localeCompare(entryMap.get(b).name, undefined, {
-      numeric: true
+  return Object.keys(mainStats)
+    .filter(entryId => entryId === 'all' || entryMap.get(entryId))
+    .sort((a, b) => {
+      if (a === 'all') return -1
+      if (b === 'all') return 1
+      return entryMap
+        .get(a)
+        .name.localeCompare(entryMap.get(b).name, undefined, {
+          numeric: true
+        })
     })
-  })
 }
 
 const getStatsTotalCount = (mainStats, taskStatusIds, countMode, entryId) => {
