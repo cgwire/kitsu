@@ -326,13 +326,13 @@ const csv = {
               total,
               lineMap
             )
+          } else {
+            Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
+              if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
+                lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
+              }
+            })
           }
-        } else {
-          Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
-            if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
-              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
-            }
-          })
         }
       })
 
