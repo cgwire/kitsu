@@ -231,7 +231,8 @@ export default {
         this.taskTypeMap,
         this.taskStatusMap,
         this.sequenceMap,
-        this.countMode
+        this.countMode,
+        this.currentProduction
       )
     },
 

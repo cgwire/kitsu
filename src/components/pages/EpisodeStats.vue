@@ -45,6 +45,7 @@
       />
       <button-simple
         class="flexrow-item"
+        :disabled="isLoading"
         icon="download"
         @click="exportStatisticsToCsv"
       />
@@ -234,7 +235,8 @@ export default {
           this.taskTypeMap,
           this.taskStatusMap,
           this.episodeMap,
-          this.countMode
+          this.countMode,
+          this.currentProduction
         )
       } else {
         csv.generateStatReports(
@@ -243,7 +245,8 @@ export default {
           this.taskTypeMap,
           this.taskStatusMap,
           this.episodeMap,
-          this.countMode
+          this.countMode,
+          this.currentProduction
         )
       }
     },
