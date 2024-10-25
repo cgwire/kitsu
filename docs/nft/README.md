@@ -32,16 +32,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
+See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/NFT Collection.
 
 See the **import CSV** section for more details.
 
-[Import asset](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
+[Import asset](../nft/README.md#create-an-asset)
 
-[Import NFT Collection](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
+[Import NFT Collection](../nft/README.md#create-a-nft-collection)
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 

@@ -32,16 +32,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
+See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/map.
 
 See the **import CSV** section for more details.
 
-[Import asset](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
+[Import asset](../videogame/README.md#create-an-asset)
 
-[Import map](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
+[Import map](../videogame/README.md#create-maps-from-an-edl-file)
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
@@ -814,7 +814,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update maps information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+ [Update maps information with CSV Import](../videogame/README.md#update-your-maps)
 
 You can also access the map values history.
 

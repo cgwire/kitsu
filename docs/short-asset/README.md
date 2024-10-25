@@ -32,16 +32,14 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you will be able to create them later.
 
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
+See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
 :::
 
 Then, 6 is the option part. If you already have a spreadsheet with your Asset.
 
 See the **import CSV** section for more details.
 
-[Import asset](../batch-action/README.md#create-assets-from-a-csv-spreadsheet-file)
-
-[Import shot](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
+[Import asset](../short-asset/README.md#create-an-asset)
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 

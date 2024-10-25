@@ -29,15 +29,14 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
+See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
 :::
 
 Then, 5 is the option parts. If you already have a spreadsheet with your shot.
 
 See the **import CSV** section for more details.
 
-
-[Import shot](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
+[Import shot](../short-shot/README.md#create-shots-from-an-edl-file
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
@@ -513,7 +512,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+ [Update Shots information with CSV Import](../short-shot/README.md#update-your-shots)
 
 You can also access the history of shot values.
 

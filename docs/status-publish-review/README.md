@@ -351,7 +351,7 @@ You can also select in the menu if you want to edit the name of the metadata col
 You can also use the **CSV Import** to fill your custom metadata column quickly.
 First, you must create your **Metadata column** into Kitsu, add it to your spreadsheet, and copy-paste your data into the **CSV Import**.
 
-[Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+[Update Shots information with CSV Import](../feature/README.md#update-your-shots)
 
 
 # Playlists
