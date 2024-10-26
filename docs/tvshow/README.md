@@ -47,7 +47,7 @@ Welcome to Kitsu's global asset page. Let's take a look around.
 
 ![Presentation of the global page](../img/getting-started/presentation_global_tv.png)
 
-At the top, you have the **global navigation**, which is always visible throughout all the production pages.
+At the top, you’ll find the **global navigation**, which remains visible across all production pages.
 
 **From left to right:**
 
@@ -55,7 +55,7 @@ At the top, you have the **global navigation**, which is always visible througho
 
 By clicking on the top left button, Kitsu ![Main menu button](../img/getting-started/main_button.png) (or your Studio logo), you will open the Main Menu.
 
-In the Main Menu, you will find direct access to your assigned tasks, productions, global and team schedules, the workflow customization page, and Kitsu settings.
+In the Main Menu, you’ll have direct access to your assigned tasks, productions, global and team schedules, the workflow customization page, and Kitsu settings.
 
 ::: details Main Menu Details
 **WORKSPACE**
@@ -137,13 +137,11 @@ If you realize you don't need an extra level of navigation, such as **Episodes**
 
 ### Global Search, News, Notification, and Documentation
 
-To the right of the navigation dropdown menu, you will find the global search. This quick access search displays the first four results. For more results and filtering options, visit the **Entity Search** page in the Main Menu.
+To the right of the navigation dropdown menu, you’ll find the global search. This quick-access feature shows the first four results. For more results and filtering options, visit the **Entity Search** page in the Main Menu.
 
-The next icon ![News](../img/getting-started/canny.png) is a direct link to our news and feedback page.
+The next icon ![News](../img/getting-started/canny.png) is a direct link to our news and feedback page. Here, you can view all the new features, complete with animated GIFs, and also submit suggestions for the next feature you’d like to see in Kitsu.
 
-Here, you can see all the new features with animated GIFs and also add suggestions for the next feature you want to see in Kitsu.
-
-Then, the bell icon ![Notification](../img/getting-started/notification_icon_on.png) shows your notifications (assignments, comments, tags). The number of unread notifications will appear on the bell icon.
+Next, the bell icon ![Notification](../img/getting-started/notification_icon_on.png) displays your notifications (assignments, comments, tags). The number of unread notifications will be shown on the bell icon. There are various filters to help you stay on top of updates and revisit important ones when needed. You can easily mark notifications as read or unread or quickly filter by watching/non-watching to focus on what matters most and declutter your feed.
 
 The last icon before your avatar is the documentation button ![documentation button](../img/getting-started/documentation_button.png), which you are reading right now!
 

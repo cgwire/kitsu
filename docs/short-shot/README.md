@@ -29,15 +29,14 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../first_production/README_configure_Kitsu.md#studio-workflow) section.
+See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
 :::
 
 Then, 5 is the option parts. If you already have a spreadsheet with your shot.
 
 See the **import CSV** section for more details.
 
-
-[Import shot](../batch-action/README.md#create-shots-from-a-csv-spreadsheet-file)
+[Import shot](../short-shot/README.md#create-shots-from-an-edl-file
 
 Validate everything with the ![All done](../img/getting-started/all_done_go.png) button.
 
@@ -46,7 +45,7 @@ Validate everything with the ![All done](../img/getting-started/all_done_go.png)
 
 
 
-## Introduction to Kitsu global Page
+## Introduction to the Kitsu Global Page
 
 
 
@@ -157,10 +156,7 @@ The next icon ![News](../img/getting-started/canny.png) is a direct link to our 
 
 You can see all the new features with an animated gif and also add suggestions about the next feature you want to see in Kitsu.
 
-
-Then, the bell shows you your notification (assignation, comments, tag)![Notification](../img/getting-started/notification_icon_on.png). The number of notifications unread will appear in the bell icon.
-
-
+Next, the bell icon ![Notification](../img/getting-started/notification_icon_on.png) displays your notifications (assignments, comments, tags). The number of unread notifications will be shown on the bell icon. There are various filters to help you stay on top of updates and revisit important ones when needed. You can easily mark notifications as read or unread or quickly filter by watching/non-watching to focus on what matters most and declutter your feed.
 
 The last icon before your avatar is the documentation button.
 ![documentation button](../img/getting-started/documentation_button.png), that you are reading right now!
@@ -516,7 +512,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../batch-action/README.md#update-shots-information-with-csv-import)
+ [Update Shots information with CSV Import](../short-shot/README.md#update-your-shots)
 
 You can also access the history of shot values.
 
