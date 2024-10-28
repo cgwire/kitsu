@@ -348,8 +348,6 @@ To edit assets, go to the asset page, hover over the asset you want to modify, a
 
 To view the full description on the main asset page, click on the first words (2), and a pop-up with the full description will open.
 
-To delete an asset, see the FAQ: [How to Delete an Asset](../faq-deletion/README.md##how-to-delete-an-asset).
-
 ::: details Update Assets with the CSV Import
 You can use the CSV import to update your data quickly.
 
@@ -536,10 +534,6 @@ sequence.
 
 ![Change Sequence](../img/getting-started/change_seq.png)
 :::
-
-To delete a shot, see the FAQ: [How to Delete a Shot](../faq-deletion/README.md#how-to-delete-a-shot)
-
-To delete a sequence, see the FAQ: [How to Delete a Sequence](../faq-deletion/README.md#how-to-delete-a-sequence)
 
 
 

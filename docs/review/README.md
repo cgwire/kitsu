@@ -181,7 +181,7 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](../img/getting-started/playlist_comment.png)
 
-You can draw or type on the video (similar to [Perform a review](../getting-started-production/README.md#perform-a-review)) using the **draw** button ![draw button](../img/getting-started/draw.png).
+You can draw or type on the video (similar to [Perform a review](../status-publish-review/README.md#perform-a-review)) using the **draw** button ![draw button](../img/getting-started/draw.png).
 
 ## Review Room
 

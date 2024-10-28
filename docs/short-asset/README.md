@@ -239,8 +239,8 @@ If you didn't add a new asset type, Kitsu will provide you with examples such as
 Let's start with a character.
 
 ::: tip
-You can also customize the asset type list and the tasks pipeline.
-[Customization of the workflow](../customization-pipeline/README.md#modify-an-existing-asset-types) )
+You can also customize the asset type list and the tasks pipeline. See the guide (
+[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the Asset.
@@ -392,8 +392,6 @@ the line.
 ![Edit an asset](../img/getting-started/asset_edit01.png)
 
 To extend the description on the main asset page, click on the first words (2), and a pop-up with the full description will open.
-
-To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
 
 
 ::: details Update Assets with the CSV Import
