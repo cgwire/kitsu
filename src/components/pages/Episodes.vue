@@ -334,7 +334,7 @@ export default {
           this.episodeListScrollPosition
         )
         this.$nextTick(() => {
-          this.$refs['episode-list'].selectTaskFromQuery()
+          this.$refs['episode-list']?.selectTaskFromQuery()
         })
       }
     }

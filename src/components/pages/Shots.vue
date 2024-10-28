@@ -458,7 +458,7 @@ export default {
             // Needed to be sure the shots are loaded
             this.onSearchChange()
             this.$nextTick(() => {
-              this.$refs['shot-list'].selectTaskFromQuery()
+              this.$refs['shot-list']?.selectTaskFromQuery()
             })
           })
         })
@@ -487,7 +487,7 @@ export default {
       this.onSearchChange()
       this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
       this.$nextTick(() => {
-        this.$refs['shot-list'].selectTaskFromQuery()
+        this.$refs['shot-list']?.selectTaskFromQuery()
       })
     }
   },

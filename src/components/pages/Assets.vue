@@ -411,7 +411,7 @@ export default {
         this.onSearchChange()
         this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
         this.$nextTick(() => {
-          this.$refs['asset-list'].selectTaskFromQuery()
+          this.$refs['asset-list']?.selectTaskFromQuery()
         })
       }
     }
