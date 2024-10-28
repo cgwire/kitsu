@@ -19,10 +19,9 @@
       @click="onVideoClicked()"
     />
   </div>
-  <a
+  <div
     class="preview-wrapper preview-picture"
     :class="{ cover }"
-    target="_blank"
     :style="{
       width: emptyWidth ? `${emptyWidth}px` : undefined,
       'min-width': emptyWidth ? `${emptyWidth}px` : undefined,
@@ -46,11 +45,11 @@
         :width="width || ''"
         alt=""
       />
-      <span class="view-icon" @click.stop="onPictureClicked()">
+      <a class="view-icon" @click.stop="onPictureClicked()">
         <eye-icon :size="18" />
-      </span>
+      </a>
     </template>
-  </a>
+  </div>
 </template>
 
 <script>
@@ -120,7 +119,7 @@ export default {
 
     thumbnailPath() {
       const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return '/api/pictures/previews/preview-files/' + previewFileId + '.png'
+      return `/api/pictures/previews/preview-files/${previewFileId}.png`
     },
 
     thumbnailKey() {
@@ -172,52 +171,41 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-a {
+.preview-picture {
+  position: relative;
   background: $black;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: auto;
-}
 
-img {
-  display: block;
-  border: 0;
-  border-radius: 0;
-}
-
-span.thumbnail-empty {
-  background: $white-grey;
-  display: block;
-  margin: 0;
-}
-
-span.view-icon {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  color: $light-grey-light;
-  display: none;
-  padding: 0.4rem;
-  height: 30px;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  width: 30px;
-  transition: all 0.2s ease-in-out;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.75);
-    color: $white;
+  .thumbnail-picture {
+    display: block;
+    border: 0;
+    border-radius: 0;
   }
-}
 
-.preview-wrapper {
-  position: relative;
+  .view-icon {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    color: $light-grey-light;
+    display: none;
+    padding: 0.4rem;
+    height: 30px;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 30px;
+    transition: all 0.2s ease-in-out;
 
-  &:hover {
-    span.view-icon {
-      display: block;
+    &:hover {
+      background: rgba(0, 0, 0, 0.75);
+      color: $white;
     }
+  }
+
+  &:hover .view-icon {
+    display: block;
   }
 }
 
