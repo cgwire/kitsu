@@ -20,21 +20,15 @@
     <div
       class="search-results"
       :style="{
-        'min-height': nbResults * 60 + 'px'
+        'min-height': `${(nbResults || 1) * 60}px`
       }"
       v-if="isSearchActive"
     >
       <div class="result-line" v-if="searchQuery.length < 3">
         {{ $t('main.search.type') }}
       </div>
-      <div
-        class="search-loader"
-        :style="{
-          'min-height': nbResults * 60 + 'px'
-        }"
-        v-else-if="isLoading"
-      >
-        <div><spinner /></div>
+      <div class="search-loader" v-else-if="isLoading">
+        <spinner />
       </div>
       <div v-else-if="nbResults > 0">
         <div
@@ -47,7 +41,7 @@
           v-for="(asset, index) in assets"
         >
           <router-link
-            :id="'result-link-' + index"
+            :id="`result-link-${index}`"
             :to="entityPath(asset, 'asset')"
           >
             <div class="flexrow" @mouseover="selectedIndex = index">
@@ -83,7 +77,7 @@
           v-for="(shot, index) in shots"
         >
           <router-link
-            :id="'result-link-' + (index + assets.length)"
+            :id="`result-link-${index + assets.length}`"
             :to="entityPath(shot, 'shot')"
           >
             <div
@@ -126,7 +120,7 @@
           v-for="(person, index) in persons"
         >
           <router-link
-            :id="'result-link-' + (index + assets.length + shots.length)"
+            :id="`result-link-${index + assets.length + shots.length}`"
             :to="personPath(person)"
           >
             <div
@@ -143,7 +137,6 @@
           </router-link>
         </div>
       </div>
-
       <div class="result-line" v-else>
         {{ $t('main.search.no_result') }}
       </div>
@@ -368,12 +361,7 @@ export default {
 }
 
 .search-loader {
-  background: var(--background);
-  left: 0;
   opacity: 0.5;
   padding-top: 0.8em;
-  position: absolute;
-  top: 0;
-  width: 350px;
 }
 </style>
