@@ -607,7 +607,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.onSearchChange()
+          this.onSearchChange(false)
         })
         .catch(err => {
           console.error(err)
@@ -828,7 +828,7 @@ export default {
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
-    onSearchChange() {
+    onSearchChange(clearSelection = true) {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
@@ -838,7 +838,9 @@ export default {
       if (searchQuery.length === 0 && this.isLongEditList) {
         this.applySearch('')
       }
-      this.clearSelection()
+      if (clearSelection) {
+        this.clearSelection()
+      }
     },
 
     saveScrollPosition(scrollPosition) {
@@ -941,22 +943,22 @@ export default {
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
-        description: entry.description
+        description: entry.description,
+        [fieldName]: value
       }
-      data[fieldName] = value
       await this.editEdit(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
-      const metadata = {}
-      metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        data: metadata
+        data: {
+          [descriptor.field_name]: value
+        }
       }
       await this.editEdit(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     }
   },
 
