@@ -398,8 +398,6 @@ the line.
 
 To extend the description on the main asset page, click on the first words (2), and a pop-up with the full description will open.
 
-To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
-
 
 ::: details Update Assets with the CSV Import
 You can use the CSV import to update your data quickly.
@@ -580,11 +578,6 @@ sequence.
 
 ![Change sequence](../img/getting-started/change_seq.png)
 :::
-
-
-To delete an NFT Collection, see the FAQ : [How to delete an NFT Collection](../faq-deletion/README.md#how-to-delete-a-shot)
-
-To delete a sequence, see the FAQ : [How to delete a Sequence](../faq-deletion/README.md#how-to-delete-a-sequence)
 
 
 

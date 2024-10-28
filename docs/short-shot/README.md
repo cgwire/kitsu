@@ -280,11 +280,6 @@ sequence.
 :::
 
 
-To delete a shot, see the FAQ : [How to delete a shot](../faq-deletion/README.md#how-to-delete-a-shot)
-
-To delete a sequence, see the FAQ : [How to delete a Sequence](../faq-deletion/README.md#how-to-delete-a-sequence)
-
-
 
 
 ## Create Shots from an EDL File

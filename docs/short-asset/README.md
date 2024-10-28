@@ -393,8 +393,6 @@ the line.
 
 To extend the description on the main asset page, click on the first words (2), and a pop-up with the full description will open.
 
-To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
-
 
 ::: details Update Assets with the CSV Import
 You can use the CSV import to update your data quickly.

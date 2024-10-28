@@ -398,8 +398,6 @@ the line.
 
 To extend the description on the main asset page, click on the first words (2), and a pop-up with the full description will open.
 
-To delete an asset, see the FAQ : [How to delete an asset](../faq-deletion/README.md##how-to-delete-an-asset)
-
 
 ::: details Update Assets with the CSV Import
 You can use the CSV import to update your data quickly.
@@ -580,13 +578,6 @@ level.
 
 ![Change level](../img/getting-started/change_seq.png)
 :::
-
-
-To delete a map, see the FAQ : [How to delete a map](../faq-deletion/README.md#how-to-delete-a-shot)
-
-To delete a level, see the FAQ : [How to delete a level](../faq-deletion/README.md#how-to-delete-a-sequence)
-
-
 
 
 ## Create maps from an EDL File
