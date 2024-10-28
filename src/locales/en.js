@@ -634,7 +634,7 @@ export default {
     unstick: 'Unstick',
     user: 'User',
     week: 'Week',
-    white_theme: 'White Theme',
+    white_theme: 'Light Theme',
     workspace: 'Workspace',
     yes: 'Yes',
     search: {

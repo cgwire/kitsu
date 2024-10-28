@@ -458,7 +458,7 @@ export default {
             // Needed to be sure the shots are loaded
             this.onSearchChange()
             this.$nextTick(() => {
-              this.$refs['shot-list'].selectTaskFromQuery()
+              this.$refs['shot-list']?.selectTaskFromQuery()
             })
           })
         })
@@ -487,7 +487,7 @@ export default {
       this.onSearchChange()
       this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
       this.$nextTick(() => {
-        this.$refs['shot-list'].selectTaskFromQuery()
+        this.$refs['shot-list']?.selectTaskFromQuery()
       })
     }
   },
@@ -705,7 +705,7 @@ export default {
         .then(() => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.onSearchChange()
+          this.onSearchChange(false)
         })
         .catch(err => {
           console.error(err)
@@ -935,7 +935,7 @@ export default {
       this.onSearchChange()
     },
 
-    onSearchChange() {
+    onSearchChange(clearSelection = true) {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
@@ -945,7 +945,9 @@ export default {
       if (searchQuery.length === 0 && this.isLongShotList) {
         this.applySearch('')
       }
-      this.clearSelection()
+      if (clearSelection) {
+        this.clearSelection()
+      }
     },
 
     saveScrollPosition(scrollPosition) {
@@ -1080,15 +1082,15 @@ export default {
       }
       data[fieldName] = value
       await this.editShot(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
-      const metadata = {}
-      metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        data: metadata
+        data: {
+          [descriptor.field_name]: value
+        }
       }
       const shot = this.shotMap.get(entry.id)
       if (
@@ -1106,7 +1108,7 @@ export default {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
       await this.editShot(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     showEDLImportModal() {

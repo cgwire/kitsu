@@ -386,7 +386,7 @@ const mutations = {
       return {
         label: 'All',
         value: production.id,
-        route: route
+        route
       }
     })
   },
@@ -408,7 +408,7 @@ const mutations = {
       return {
         label: sequence.name,
         value: sequence.id,
-        route: route
+        route
       }
     })
     if (state.castingEpisodeSequences.length > 0) {
@@ -442,7 +442,7 @@ const mutations = {
       return {
         label: assetType.name,
         value: assetType.id,
-        route: route
+        route
       }
     })
   },
@@ -493,7 +493,8 @@ const mutations = {
         asset_type_name: asset.asset_type_name,
         nb_occurences: nbOccurences,
         preview_file_id: asset.preview_file_id,
-        label
+        label,
+        shared: asset.shared
       }
       state.casting[entityId].push(newAsset)
     }

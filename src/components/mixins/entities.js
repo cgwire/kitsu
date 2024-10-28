@@ -265,12 +265,14 @@ export const entitiesMixin = {
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
     },
 
-    onSearchChange() {
+    onSearchChange(clearSelection = true) {
       if (!this.searchField) return
       this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
       this.applySearch(searchQuery)
-      this.clearSelection()
+      if (clearSelection) {
+        this.clearSelection()
+      }
     },
 
     onChangeSortClicked(sortInfo) {

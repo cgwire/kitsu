@@ -411,7 +411,7 @@ export default {
         this.onSearchChange()
         this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
         this.$nextTick(() => {
-          this.$refs['asset-list'].selectTaskFromQuery()
+          this.$refs['asset-list']?.selectTaskFromQuery()
         })
       }
     }
@@ -629,7 +629,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.onSearchChange()
+          this.onSearchChange(false)
         })
         .catch(err => {
           console.error(err)
@@ -837,7 +837,7 @@ export default {
       this.showImportModal()
     },
 
-    onSearchChange() {
+    onSearchChange(clearSelection = true) {
       const searchQuery = this.searchField.getValue() || ''
       if (
         searchQuery.length !== 1 &&
@@ -847,7 +847,9 @@ export default {
         this.setAssetSearch(searchQuery)
         this.setSearchInUrl()
       }
-      this.clearSelection()
+      if (clearSelection) {
+        this.clearSelection()
+      }
     },
 
     saveSearchQuery(searchQuery) {
@@ -988,26 +990,28 @@ export default {
     },
 
     async onFieldChanged({ entry, fieldName, value }) {
-      const data = { id: entry.id }
-      data[fieldName] = value
+      const data = {
+        id: entry.id,
+        [fieldName]: value
+      }
       await this.editAsset(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
-      const metadata = {}
-      metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        data: metadata
+        data: {
+          [descriptor.field_name]: value
+        }
       }
       await this.editAsset(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     async onAssetChanged(asset) {
       await this.editAsset(asset)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     reset() {

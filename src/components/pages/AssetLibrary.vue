@@ -1,5 +1,5 @@
 <template>
-  <page-layout>
+  <page-layout :side="isCurrentUserManager">
     <template #main>
       <div class="asset-library">
         <header class="flexrow">
@@ -55,11 +55,12 @@
                 <li
                   class="item flexcolumn"
                   :class="{
+                    'selectable-item': isCurrentUserManager,
                     'selected-item': isSelected(entity)
                   }"
                   :key="entity.id"
                   v-for="entity in group"
-                  @click="toggleEntity(entity)"
+                  @click="isCurrentUserManager && toggleEntity(entity)"
                 >
                   <div class="card" :title="entity.full_name">
                     <entity-preview
@@ -156,6 +157,7 @@ export default {
     ...mapGetters([
       'displayedSharedAssets',
       'displayedSharedAssetsByType',
+      'isCurrentUserManager',
       'openProductions',
       'productionMap',
       'selectedAssets'
@@ -188,10 +190,6 @@ export default {
         }
         return type.sort(firstBy(nameFilter).thenBy(productionFilter))
       })
-    },
-
-    hasSelectedAssets() {
-      return this.selectedAssets.size > 0
     }
   },
 
@@ -280,10 +278,13 @@ export default {
     border: 5px solid transparent;
     border-radius: 1em;
     transition: border-color 0.2s ease-in-out;
-    cursor: pointer;
 
-    &:hover {
-      border-color: var(--background-selectable);
+    &.selectable-item {
+      cursor: pointer;
+
+      &:hover {
+        border-color: var(--background-selectable);
+      }
     }
 
     &.selected-item {

@@ -334,7 +334,7 @@ export default {
           this.episodeListScrollPosition
         )
         this.$nextTick(() => {
-          this.$refs['episode-list'].selectTaskFromQuery()
+          this.$refs['episode-list']?.selectTaskFromQuery()
         })
       }
     }
@@ -559,22 +559,22 @@ export default {
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
-        description: entry.description
+        description: entry.description,
+        [fieldName]: value
       }
-      data[fieldName] = value
       await this.editEpisode(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
-      const metadata = {}
-      metadata[descriptor.field_name] = value
       const data = {
         id: entry.id,
-        data: metadata
+        data: {
+          [descriptor.field_name]: value
+        }
       }
       await this.editEpisode(data)
-      this.onSearchChange()
+      this.onSearchChange(false)
     },
 
     onEditClicked(episode) {
@@ -596,7 +596,7 @@ export default {
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.onSearchChange()
+            this.onSearchChange(false)
           })
           .catch(err => {
             console.error(err)

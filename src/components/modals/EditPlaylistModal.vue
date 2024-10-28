@@ -220,7 +220,7 @@ export default {
         this.forClient = this.playlistToEdit.for_client ? 'true' : 'false'
         this.resetForm()
         setTimeout(() => {
-          this.$refs.nameField.focus()
+          this.$refs.nameField?.focus()
         }, 100)
       }
     }
