@@ -2259,6 +2259,20 @@ th.validation-cell {
   background: var(--background-selectable);
 }
 
+#app .dp__input {
+  border-radius: 10px;
+  padding-left: 0;
+  height: 40px;
+  padding-inline-start: 0.8em;
+  width: 116px;
+}
+
+#app .datatable .dp__input {
+  border-radius: 2px;
+  height: 43px;
+  width: 116px;
+}
+
 @media screen and (max-width: 768px) {
   .level-left + .level-right {
     display: flex;
