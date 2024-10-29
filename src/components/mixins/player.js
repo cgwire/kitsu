@@ -1235,6 +1235,7 @@ export const playerMixin = {
           annotations: previewFile.annotations || []
         }
       }
+
       if (!this.isCurrentUserArtist) {
         // Artists are not allowed to draw
         // Emit an event for remote and store update
@@ -1256,9 +1257,16 @@ export const playerMixin = {
               })
             }
           })
-          if (revPreview) revPreview.annotations = annotations
+          if (revPreview) {
+            this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
+              taskId: preview.task_id,
+              preview: revPreview,
+              annotations
+            })
+          }
         })
       }
+      console.log('ok')
     },
 
     onDeleteClicked() {
@@ -1287,7 +1295,10 @@ export const playerMixin = {
           this.annotations.length > 0
         ) {
           annotation = this.annotations[0]
-          annotation.time = 0
+          this.$store.commit('UPDATE_ANNOTATION', {
+            annotation,
+            data: { time: 0 }
+          })
         }
         return annotation
       } else {

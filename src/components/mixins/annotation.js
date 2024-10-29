@@ -453,17 +453,16 @@ export const annotationMixin = {
         }
       } else {
         if (!this.annotations || !this.annotations.push) this.annotations = []
-        this.annotations.push({
-          time: Math.max(currentTime, 0),
-          frame: Math.max(currentFrame, 0),
-          drawing: {
-            objects: this.fabricCanvas._objects.map(obj => obj.serialize())
+        this.$store.commit('ADD_ANNOTATION', {
+          annotations: this.annotations,
+          annotation: {
+            time: Math.max(currentTime, 0),
+            frame: Math.max(currentFrame, 0),
+            drawing: {
+              objects: this.fabricCanvas._objects.map(obj => obj.serialize())
+            }
           }
         })
-        this.annotations =
-          this.annotations.sort((a, b) => {
-            return a.time < b.time
-          }) || []
       }
       const annotations = []
       this.annotations.forEach(a => annotations.push({ ...a }))
