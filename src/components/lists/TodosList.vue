@@ -549,7 +549,7 @@ export default {
     },
 
     getTaskType(entry) {
-      const taskType = this.taskTypeMap.get(entry.task_type_id)
+      const taskType = { ...this.taskTypeMap.get(entry.task_type_id) }
       const production = this.productionMap.get(entry.project_id)
       taskType.episode_id = entry.episode_id
       if (

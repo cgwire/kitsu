@@ -45,7 +45,7 @@
             :class="{
               selected: isSelected(task)
             }"
-            draggable
+            draggable="true"
             :key="task.id"
             @click="onSelectTask(task, $event.ctrlKey || $event.metaKey)"
             @dragstart="onCardDragStart($event, task, column.status)"
@@ -274,7 +274,7 @@ export default {
     },
 
     getTaskType(task) {
-      const taskType = this.taskTypeMap.get(task.task_type_id)
+      const taskType = { ...this.taskTypeMap.get(task.task_type_id) }
       const production = this.productionMap.get(task.project_id)
       taskType.episode_id = task.episode_id
       if (production?.production_type === 'tvshow' && !task.episode_id) {
