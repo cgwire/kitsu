@@ -524,6 +524,7 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import { fabric } from 'fabric'
 import {
   ArrowUpRightIcon,
@@ -554,8 +555,9 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
-import VideoProgress from '@/components/previews/VideoProgress.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
+import VideoProgress from '@/components/previews/VideoProgress.vue'
+
 
 let lastIndex = 1
 
@@ -577,7 +579,7 @@ export default {
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
-    TaskInfo,
+    TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
 
