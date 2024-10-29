@@ -7,7 +7,7 @@
           {{ isEditing ? $t('days_off.edit') : $t('days_off.add') }}
         </h1>
         <div class="flexrow field">
-          <div class="flexrow-item">
+          <div class="flexrow-item ml2">
             <label class="label">
               {{ $t('main.start_date') }}
             </label>
@@ -64,6 +64,8 @@ import { mapGetters } from 'vuex'
 import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import { modalMixin } from '@/components/modals/base_modal'
+
+import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
@@ -73,6 +75,7 @@ export default {
 
   components: {
     AlertTriangleIcon,
+    DateField,
     TextField
   },
 
@@ -134,7 +137,7 @@ export default {
       this.form = {
         startDate: this.dayOffToEdit?.date || new Date(),
         endDate:
-          this.dayOffToEdit?.endDate || this.dayOffToEdit?.date || new Date(),
+          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || new Date(),
         description: this.dayOffToEdit?.description || null
       }
     },
@@ -167,5 +170,8 @@ export default {
 }
 .modal-content .box p.text {
   margin-bottom: 1em;
+}
+.ml2 {
+  margin-left: 2.5em;
 }
 </style>
