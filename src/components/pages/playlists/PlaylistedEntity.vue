@@ -1,75 +1,77 @@
 <template>
   <div class="flexrow wrapper">
-    <drag @drag="onDragged" :transfer-data="entity.id">
-      <div
-        :class="{
-          'playlisted-entity': true,
-          playing: isPlaying
-        }"
-      >
-        <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
-          <span
-            class="remove-button flexrow-item"
-            :title="$t('playlists.remove')"
-            @click.prevent="onRemoveClick"
-            v-if="isCurrentUserManager || isCurrentUserSupervisor"
-          >
-            <x-icon />
-          </span>
-          <light-entity-thumbnail
-            width="150px"
-            height="103px"
-            :preview-file-id="previewFileId"
-          />
-        </div>
-
-        <div
-          class="entity-title"
-          :title="taskStatus.name"
-          :style="{
-            'border-bottom': '2px solid ' + taskStatus.color,
-            'padding-bottom': '5px'
-          }"
-          @click.prevent="onPlayClick"
+    <div
+      :class="{
+        'playlisted-entity': true,
+        playing: isPlaying
+      }"
+    >
+      <div class="thumbnail-wrapper" @click.prevent="onPlayClick">
+        <span
+          class="remove-button flexrow-item"
+          :title="$t('playlists.remove')"
+          @click.prevent="onRemoveClick"
+          v-if="isCurrentUserManager || isCurrentUserSupervisor"
         >
-          {{ entity.parent_name }} / {{ entity.name }}
-        </div>
-
-        <div class="preview-choice" v-if="taskTypeOptions.length > 0">
-          <combobox
-            ref="task-type-combobox"
-            :thin="true"
-            :width="150"
-            :options="taskTypeOptions"
-            v-model="taskTypeId"
-          />
-          <combobox
-            class="version-combo"
-            :thin="true"
-            :width="150"
-            :options="previewFileOptions"
-            v-model="previewFileId"
-          />
-        </div>
-        <div v-else>
-          {{ $t('playlists.no_preview') }}
-        </div>
+          <x-icon />
+        </span>
+        <light-entity-thumbnail
+          width="150px"
+          height="103px"
+          :preview-file-id="previewFileId"
+        />
       </div>
-    </drag>
-    <drop @drop="onDropped">
+
       <div
-        :id="'drop-area-wide-' + entity.id"
-        class="drop-area-wide"
-        ref="drop-area-wide"
-      ></div>
-    </drop>
-    <drop @drop="onDropped">
-      <div
-        :id="'drop-area-' + entity.id"
-        class="drop-area"
-        ref="drop-area"
-      ></div>
-    </drop>
+        class="entity-title"
+        :title="taskStatus.name"
+        :style="{
+          'border-bottom': '2px solid ' + taskStatus.color,
+          'padding-bottom': '5px'
+        }"
+        @click.prevent="onPlayClick"
+      >
+        {{ entity.parent_name }} / {{ entity.name }}
+      </div>
+
+      <div class="preview-choice" v-if="taskTypeOptions.length > 0">
+        <combobox
+          ref="task-type-combobox"
+          :thin="true"
+          :width="150"
+          :options="taskTypeOptions"
+          v-model="taskTypeId"
+        />
+        <combobox
+          class="version-combo"
+          :thin="true"
+          :width="150"
+          :options="previewFileOptions"
+          v-model="previewFileId"
+        />
+      </div>
+      <div v-else>
+        {{ $t('playlists.no_preview') }}
+      </div>
+    </div>
+
+    <div
+      :id="'drop-area-' + entity.id"
+      class="drop-area"
+      @dragover="onDragover"
+      @dragleave="onDragleave"
+      @drop="onDropped"
+      ref="drop-area"
+    ></div>
+    <div
+      :id="'drop-area-wide-' + entity.id"
+      class="drop-area-wide"
+      @dragover="onDragover"
+      @dragleave="onDragleave"
+      @drop="onDropped"
+      @click.prevent="onPlayClick"
+      ref="drop-area-wide"
+    ></div>
   </div>
 </template>
 
@@ -212,33 +214,24 @@ export default {
       this.$emit('remove-entity', this.entity)
     },
 
-    setListeners() {
-      this.dropArea.addEventListener('dragover', this.onDragover)
-      this.dropArea.addEventListener('dragleave', this.onDragleave)
-      this.dropAreaWide.addEventListener('dragover', this.onDragover)
-      this.dropAreaWide.addEventListener('dragleave', this.onDragleave)
-    },
+    setListeners() {},
 
     onDragged() {},
 
     onDragleave() {
-      const dropArea = document.getElementById('drop-area-' + this.entity.id)
-      dropArea.style.background = 'transparent'
-      dropArea.style.width = '15px'
+      this.dropArea.style.width = '15px'
     },
 
-    onDragover() {
-      const dropArea = document.getElementById('drop-area-' + this.entity.id)
-      dropArea.style.width = '60px'
+    onDragover(event) {
+      event.preventDefault()
+      this.dropArea.style.width = '60px'
     },
 
-    onDropped(entityId) {
-      const dropArea = document.getElementById('drop-area-' + this.entity.id)
-      dropArea.style.background = 'transparent'
-      dropArea.style.width = '15px'
+    onDropped(event) {
+      this.dropArea.style.width = '15px'
       this.$emit('entity-dropped', {
         before: this.entity.id,
-        after: entityId
+        after: event.dataTransfer.getData('entityId')
       })
     }
   },
@@ -284,18 +277,22 @@ export default {
 <style lang="scss" scoped>
 .wrapper {
   align-items: stretch;
+  position: relative;
 }
 
 .drop-area {
   width: 15px;
-  height: 100%;
+  height: 220px;
   transition: width 0.3s ease;
 }
 
 .drop-area-wide {
+  cursor: pointer;
   height: 100%;
+  left: 100px;
   position: absolute;
   width: 60px;
+  z-index: 2;
 }
 
 .playlisted-entity {

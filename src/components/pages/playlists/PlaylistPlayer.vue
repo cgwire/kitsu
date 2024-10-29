@@ -888,14 +888,16 @@
         >
           <playlisted-entity
             :ref="'entity-' + index"
-            :index="index"
             :entity="entity"
+            :index="index"
             :is-playing="playingEntityIndex === index"
-            @play-click="entityListClicked"
-            @remove-entity="removeEntity"
-            @preview-changed="onPreviewChanged"
+            draggable="true"
+            @dragstart="onEntityDragStart($event, entity)"
             @entity-to-add="$emit('entity-to-add', $event)"
             @entity-dropped="onEntityDropped"
+            @play-click="entityListClicked"
+            @preview-changed="onPreviewChanged"
+            @remove-entity="removeEntity"
           />
         </div>
       </template>
@@ -1460,10 +1462,9 @@ export default {
         this.framesSeenOfPicture = Math.floor(
           (durationWaited / 1000) * this.fps
         )
-        this.playingPictureTimeout = setTimeout(
-          () => this.continuePlayingPlaylist(entityIndex, startMs),
-          100
-        )
+        this.playingPictureTimeout = setTimeout(() => {
+          this.continuePlayingPlaylist(entityIndex, startMs)
+        }, 100)
         return
       }
 
@@ -2015,6 +2016,10 @@ export default {
       if (!this.isFullMode) {
         this.onFrameUpdate(frame)
       }
+    },
+
+    onEntityDragStart(event, entity) {
+      event.dataTransfer.setData('entityId', entity.id)
     }
   },
 

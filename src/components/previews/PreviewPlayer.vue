@@ -557,7 +557,6 @@ import RevisionPreview from '@/components/previews/RevisionPreview.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 import VideoProgress from '@/components/previews/VideoProgress.vue'
 
-
 let lastIndex = 1
 
 export default {

@@ -555,7 +555,6 @@ export default {
     },
 
     entities: {
-      deep: true,
       handler() {
         if (this.entities.length > 0) {
           this.loadEntity(0)
