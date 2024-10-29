@@ -15,7 +15,9 @@
         :dark="isDarkTheme"
         :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
         v-model="localValue"
-      />
+      >
+        <template #input-icon></template>
+      </vue-date-picker>
     </p>
   </div>
 </template>
