@@ -1,6 +1,7 @@
 <template>
   <img
     class="thumbnail-picture"
+    draggable="false"
     loading="lazy"
     alt=""
     :key="previewFileId"

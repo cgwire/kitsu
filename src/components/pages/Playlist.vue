@@ -323,6 +323,8 @@
                       playlisted: currentEntities[asset.id] !== undefined
                     }"
                     :key="asset.id"
+                    draggable="true"
+                    @dragstart="onEntityDragStart($event, asset)"
                     @click.prevent="addEntityToPlaylist(asset)"
                     v-for="asset in typeAssets.filter(a => !a.canceled)"
                   >
@@ -344,6 +346,8 @@
                     playlisted: currentEntities[sequence.id] !== undefined
                   }"
                   :key="sequence.id"
+                  draggable="true"
+                  @dragstart="onEntityDragStart($event, sequence)"
                   @click.prevent="addEntityToPlaylist(sequence)"
                   v-for="sequence in displayedSequences.filter(
                     s => !s.canceled
@@ -388,9 +392,8 @@
                   </button>
                 </h2>
                 <div class="addition-entities">
-                  <drag
+                  <div
                     :key="shot.id"
-                    :transfer-data="shot.id"
                     v-for="shot in sequenceShots.filter(s => !s.canceled)"
                   >
                     <div
@@ -398,7 +401,8 @@
                         'addition-shot': true,
                         playlisted: currentEntities[shot.id] !== undefined
                       }"
-                      :transfer-data="shot.id"
+                      draggable="true"
+                      @dragstart="onEntityDragStart($event, shot)"
                       @click.prevent="addEntityToPlaylist(shot)"
                     >
                       <light-entity-thumbnail
@@ -421,7 +425,7 @@
                         }}</span>
                       </div>
                     </div>
-                  </drag>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1225,6 +1229,10 @@ export default {
       } else {
         this.$router.push(this.playlistsPath)
       }
+    },
+
+    onEntityDragStart(event, entity) {
+      event.dataTransfer.setData('entityId', entity.id)
     },
 
     // Changes
