@@ -73,6 +73,8 @@ import {
   ADD_ATTACHMENT_TO_COMMENT,
   REMOVE_ATTACHMENT_FROM_COMMENT,
   UPDATE_REVISION_PREVIEW_POSITION,
+  ADD_ANNOTATION,
+  UPDATE_ANNOTATION,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -882,7 +884,7 @@ const mutations = {
       comment.person = personStore.state.personMap.get(comment.person_id)
     })
     state.taskComments[taskId] = sortComments(comments)
-    state.taskPreviews.taskId = comments.reduce((previews, comment) => {
+    state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
         const preview = comment.previews[0]
         preview.previews = sortRevisionPreviewFiles(
@@ -1416,6 +1418,17 @@ const mutations = {
 
   [CLEAR_UPLOAD_PROGRESS](state) {
     state.uploadProgress = {}
+  },
+
+  [ADD_ANNOTATION](state, { annotations, annotation }) {
+    annotations.push(annotation)
+    annotations.sort((a, b) => {
+      return a.time < b.time
+    })
+  },
+
+  [UPDATE_ANNOTATION](state, { annotation, data }) {
+    Object.assign(annotation, data)
   },
 
   [RESET_ALL](state) {
