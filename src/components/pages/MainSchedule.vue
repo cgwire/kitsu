@@ -6,19 +6,13 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <date-field
-            week-days-disabled
-            v-model="selectedStartDate"
-          />
+          <date-field week-days-disabled v-model="selectedStartDate" />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <date-field
-            week-days-disabled
-            v-model="selectedEndDate"
-          />
+          <date-field week-days-disabled v-model="selectedEndDate" />
         </div>
         <combobox-number
           class="flexrow-item zoom-level"

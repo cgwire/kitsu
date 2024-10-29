@@ -1051,7 +1051,7 @@ export default {
     getTasks(entities) {
       const tasks = []
       entities.forEach(entity => {
-        const  entityTasks = entity.tasks || []
+        const entityTasks = entity.tasks || []
         entityTasks.forEach(taskId => {
           const task = this.taskMap.get(taskId.id || taskId)
           if (task && !entity.canceled) {
