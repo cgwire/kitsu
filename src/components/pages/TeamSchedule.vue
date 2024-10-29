@@ -116,7 +116,7 @@
           <ul class="task-list">
             <li
               class="task-item"
-              draggable
+              :draggable="true"
               :key="task.id"
               @dragstart="onTaskDragStart($event, task)"
               @drag="onTaskDrag"
