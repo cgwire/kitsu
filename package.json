@@ -10,10 +10,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "format": "prettier --write --list-different src/**/*.{js,vue}",
     "lint": "eslint --ext .js,.vue src/",
     "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --write --list-different src/**/*.{js,vue}",
+    "preview": "vite preview",
     "test:unit": "vitest tests/unit",
     "prepare": "husky install"
   },
