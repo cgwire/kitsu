@@ -684,8 +684,6 @@ export default {
 
   mounted() {
     this.resetData()
-    this.$on('annotation-changed', this.onAnnotationChanged)
-
     this.$options.scrubbing = false
     this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.picturePlayer) {
@@ -701,10 +699,6 @@ export default {
       this.setPlayerSpeed(1)
       this.onFrameUpdate(1)
     })
-  },
-
-  beforeUnmount() {
-    this.$off('annotation-changed', this.onAnnotationChanged)
   },
 
   computed: {

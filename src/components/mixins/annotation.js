@@ -1138,6 +1138,9 @@ export const annotationMixin = {
         clearTimeout(this.$options.annotationToSave)
         this.notSaved = false
         this.$emit('annotation-changed', this.$options.changesToSave)
+        if (this.onAnnotationChanged) {
+          this.onAnnotationChanged(this.$options.changesToSave)
+        }
       }
     },
 

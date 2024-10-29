@@ -107,7 +107,11 @@
                   :label-color="chartLabelColor(entry.id, columnId)"
                   v-if="isStats(entry.id, columnId)"
                 />
-                <td :style="getValidationStyle(columnId)" v-else></td>
+                <td
+                  :key="entry.id + columnId + '-td'"
+                  :style="getValidationStyle(columnId)"
+                  v-else
+                ></td>
               </template>
 
               <td class="actions"></td>
