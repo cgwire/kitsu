@@ -3,8 +3,9 @@
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
         <date-field
-          min-date="disabledDates.from"
-          max-date="disabledDates.to"
+          :min-date="disabledDates.from"
+          :max-date="disabledDates.to"
+          :with-margin="false"
           v-model="selectedDate"
         />
       </div>
@@ -99,10 +100,10 @@
               </router-link>
             </th>
             <time-slider-cell
+              class="time-spent"
               :duration="
                 timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
               "
-              class="time-spent"
               :task-id="task.id"
               @change="onSliderChange"
               v-if="!personIsDayOff"
@@ -155,10 +156,10 @@
               </router-link>
             </th>
             <time-slider-cell
+              class="time-spent"
               :duration="
                 timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
               "
-              class="time-spent"
               :task-id="task.id"
               @change="onSliderChange"
               v-if="!personIsDayOff"
@@ -212,6 +213,7 @@ import { mapGetters } from 'vuex'
 import { PAGE_SIZE } from '@/lib/pagination'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -228,6 +230,7 @@ export default {
   components: {
     ButtonSimple,
     DayOffModal,
+    DateField,
     DeleteModal,
     EntityThumbnail,
     InfoQuestionMark,
