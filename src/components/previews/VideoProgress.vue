@@ -362,8 +362,10 @@ export default {
 
   methods: {
     onWindowResize() {
-      const progressCoordinates = this.progress.getBoundingClientRect()
-      this.width = progressCoordinates.width
+      if (this.progress) {
+        const progressCoordinates = this.progress.getBoundingClientRect()
+        this.width = progressCoordinates.width
+      }
     },
 
     getAnnotationPosition(annotation) {
