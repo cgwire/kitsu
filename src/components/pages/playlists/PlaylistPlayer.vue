@@ -939,6 +939,8 @@ import {
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
+
+import { defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
@@ -990,7 +992,7 @@ export default {
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
-    TaskInfo,
+    TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
 
