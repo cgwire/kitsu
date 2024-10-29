@@ -85,6 +85,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { renderFileSize } from '@/lib/render'
 
+import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
@@ -92,6 +93,7 @@ export default {
   name: 'entity-output-files',
 
   components: {
+    PeopleNameCell,
     Spinner,
     TaskTypeCell
   },
@@ -144,11 +146,6 @@ export default {
 
     getOutputType(outputFile) {
       return this.outputFileTypeMap.get(outputFile.output_type_id)
-    },
-
-    getDownloadPath(outputFileId) {
-      const type = this.isMovie ? 'movies' : 'pictures'
-      return `/api/${type}/originals/output-files/${outputFileId}/download`
     },
 
     renderFileSize,
