@@ -988,7 +988,7 @@ export default {
 
     currentSection() {
       if (
-        (this.isTVSHow && this.edits.length === 0) ||
+        (this.isTVShow && this.edits.length === 0) ||
         this.edits[0].episode_id !== this.currentEpisode.id
       ) {
         this.$refs['edit-search-field'].setValue('')
