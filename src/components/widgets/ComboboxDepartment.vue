@@ -4,11 +4,11 @@
       {{ label }}
     </label>
     <div
+      class="department-combo"
       :class="{
-        'department-combo': true,
         opened: showDepartmentList,
-        rounded: rounded,
-        top: top
+        rounded,
+        top
       }"
       :style="{
         width: width + 'px'
@@ -178,9 +178,9 @@ export default {
 
     listStyle() {
       const data = {
-        'max-height': this.maxHeightSelectInput + 'px',
-        width: this.width + 'px',
-        top: '37px',
+        'max-height': `${this.maxHeightSelectInput}px`,
+        width: `${this.width}px`,
+        top: this.rounded ? '31px' : '37px',
         left: '0'
       }
       if (this.top) {
@@ -304,7 +304,6 @@ export default {
 
   .selected-department-line {
     padding-top: 0;
-
     padding-bottom: 0;
     border-radius: 50px;
   }
