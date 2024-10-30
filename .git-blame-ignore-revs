@@ -1,0 +1,5 @@
+# https://git-scm.com/docs/git-blame#Documentation/git-blame.txt---ignore-revs-fileltfilegt
+# https://docs.github.com/en/repositories/working-with-files/using-files/viewing-a-file#ignore-commits-in-the-blame-view
+
+# nicopennec: format with eslint & prettier
+52b161016c4d97f08cd50b01bfc61ac98f62ef92
