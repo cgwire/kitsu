@@ -73,6 +73,7 @@ export default {
 
   data() {
     return {
+      silent: false,
       localValue: null
     }
   },
@@ -98,11 +99,17 @@ export default {
 
   watch: {
     localValue() {
-      this.$emit('update:modelValue', this.localValue)
+      if (!this.silent) {
+        this.$emit('update:modelValue', this.localValue)
+      }
     },
 
     modelValue() {
+      this.silent = true
       this.localValue = this.modelValue
+      this.$nextTick(() => {
+        this.silent = false
+      })
     }
   }
 }

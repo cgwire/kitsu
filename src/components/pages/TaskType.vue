@@ -1055,6 +1055,11 @@ export default {
         entityTasks.forEach(taskId => {
           const task = this.taskMap.get(taskId.id || taskId)
           if (task && !entity.canceled) {
+            // Hack to allow filtering on linked entity metadata.
+            this.$store.commit('SET_TASK_EXTRA_DATA', {
+              task,
+              data: entity.data
+            })
             if (task.task_type_id === this.currentTaskType.id) {
               tasks.push(task)
             }
@@ -1552,10 +1557,13 @@ export default {
     'schedule.taskTypeStartDate'() {
       const newDate = formatSimpleDate(this.schedule.taskTypeStartDate)
       if (newDate !== this.currentScheduleItem.start_date) {
-        this.currentScheduleItem.startDate = moment(
-          this.schedule.taskTypeStartDate
-        )
-        this.currentScheduleItem.endDate = moment(this.schedule.taskTypeEndDate)
+        this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
+          scheduleItem: this.currentScheduleItem,
+          dates: {
+            startDate: moment(this.schedule.taskTypeStartDate),
+            endDate: moment(this.schedule.taskTypeEndDate)
+          }
+        })
         this.saveScheduleItem(this.currentScheduleItem)
       }
     },
@@ -1563,10 +1571,13 @@ export default {
     'schedule.taskTypeEndDate'() {
       const newDate = formatSimpleDate(this.schedule.taskTypeEndDate)
       if (newDate !== this.currentScheduleItem.end_date) {
-        this.currentScheduleItem.startDate = moment(
-          this.schedule.taskTypeStartDate
-        )
-        this.currentScheduleItem.endDate = moment(this.schedule.taskTypeEndDate)
+        this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
+          scheduleItem: this.currentScheduleItem,
+          dates: {
+            startDate: moment(this.schedule.taskTypeStartDate),
+            endDate: moment(this.schedule.taskTypeEndDate)
+          }
+        })
         this.saveScheduleItem(this.currentScheduleItem)
       }
     }

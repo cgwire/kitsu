@@ -1973,9 +1973,11 @@ export default {
         this.maxDuration = '00:00:00:00'
         this.isDrawing = false
         setTimeout(() => {
-          this.movieDimensions = this.previewViewer.getNaturalDimensions()
-          this.previewViewer.resize()
-          this.comparisonViewer.resize()
+          if (this.previewViewer) {
+            this.movieDimensions = this.previewViewer.getNaturalDimensions()
+            this.previewViewer.resize()
+            this.comparisonViewer.resize()
+          }
         }, 500)
       } else if (this.isPicture) {
         this.pause()
