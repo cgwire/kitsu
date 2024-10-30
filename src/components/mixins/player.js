@@ -1266,7 +1266,6 @@ export const playerMixin = {
           }
         })
       }
-      console.log('ok')
     },
 
     onDeleteClicked() {

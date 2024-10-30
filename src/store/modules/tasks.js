@@ -75,6 +75,7 @@ import {
   UPDATE_REVISION_PREVIEW_POSITION,
   ADD_ANNOTATION,
   UPDATE_ANNOTATION,
+  SET_TASK_EXTRA_DATA,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -1429,6 +1430,10 @@ const mutations = {
 
   [UPDATE_ANNOTATION](state, { annotation, data }) {
     Object.assign(annotation, data)
+  },
+
+  [SET_TASK_EXTRA_DATA](state, { task, data }) {
+    task.data = data
   },
 
   [RESET_ALL](state) {

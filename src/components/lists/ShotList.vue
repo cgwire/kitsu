@@ -189,7 +189,7 @@
               />
             </template>
 
-            <template v-if="!isLoanding">
+            <template v-if="!isLoading">
               <validation-header
                 :key="columnId"
                 :hidden-columns="hiddenColumns"

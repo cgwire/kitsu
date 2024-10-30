@@ -302,16 +302,16 @@ export default {
 
     getNaturalDimensions() {
       return {
-        height: this.video.videoHeight,
-        width: this.video.videoWidth
+        height: this.video ? this.video.videoHeight : 0,
+        width: this.video ? this.video.videoWidth : 0
       }
     },
 
     getDimensions() {
       const dimensions = this.getNaturalDimensions()
       const ratio = dimensions.height / dimensions.width || 1
-      const fullWidth = this.container.offsetWidth
-      const fullHeight = this.container.offsetHeight
+      const fullWidth = this.container ? this.container.offsetWidth : 0
+      const fullHeight = this.container ? this.container.offsetHeight : 0
       let width = fullWidth
       let height = Math.floor(width * ratio)
       if (height > fullHeight) {
