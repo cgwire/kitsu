@@ -19,6 +19,7 @@ img[src$='#logo-kitsu'] {
 [Kitsu](https://cg-wire.com/kitsu) is a collaboration platform for animation and VFX productions. Through its clean UI and shared database, it connects all relevant stakeholders throughout the production process, including artists, production managers, supervisors, vendors, and clients.
 
 ### Introduction to Kitsu
+
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
 
 * [Getting Started With Kitsu](configure-kitsu/README.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
@@ -55,7 +56,7 @@ In this section, we will explain some of Kitsu's main use cases:
 How keep your work organized, and your team updated on it's progress
 
 * [Statuses & Feedback](status/README.md): How to change statuses and keep your team updated on the progress of work.
-* [Publishes](publish/README.md): How to publish and share work with your team. 
+* [Publishes](publish/README.md): How to publish and share work with your team.
 * [Thumbnails](thumbnails/README.md): How to apply thumbnails to assets and shots.
 
 ### Internal Review and Client Playlists
@@ -72,7 +73,7 @@ How to organize internal and external reviews:
 As a supervisor, your uses cases when using Kitsu may differ than your production team.
 
 * [Managing Your Department](supervisor-team/README.md): Discover methods for effectively managing and overseeing your team.
-* [Task Supervision](supervisor-tasks/README.md): Learn how to stay on top of task assignments. 
+* [Task Supervision](supervisor-tasks/README.md): Learn how to stay on top of task assignments.
 
 ### Producer Workflows
 
