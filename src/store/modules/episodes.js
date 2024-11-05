@@ -963,7 +963,7 @@ const mutations = {
       const validations = new Map(episode.validations)
       validations.delete(task.task_type_id)
       delete episode.validations
-        episode.validations = validations
+      episode.validations = validations
       const taskIndex = episode.tasks.findIndex(
         episodeTaskId => episodeTaskId === task.id
       )

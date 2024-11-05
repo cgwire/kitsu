@@ -71,7 +71,7 @@ import async from 'async'
 const cache = {
   edits: [],
   editIndex: [],
-  editMap: new Map(),
+  editMap: new Map()
 }
 
 const helpers = {

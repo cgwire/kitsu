@@ -15,7 +15,7 @@ const cache = {
 }
 
 const initialState = {
-  taskStatuses: [],
+  taskStatuses: []
 }
 
 const state = initialState
@@ -81,7 +81,7 @@ const getters = {
       value: status.id,
       color: status.color,
       isArtistAllowed: status.is_artist_allowed
-    })),
+    }))
 }
 
 const actions = {
@@ -171,8 +171,9 @@ const mutations = {
     }
 
     if (taskStatus && taskStatus.id) {
-      taskStatus = state.taskStatuses
-        .find(taskStatus => taskStatus.id === newTaskStatus.id)
+      taskStatus = state.taskStatuses.find(
+        taskStatus => taskStatus.id === newTaskStatus.id
+      )
       console.log('taskStatus single', taskStatus, newTaskStatus)
       Object.assign(taskStatus, newTaskStatus)
       cache.taskStatusMap.set(taskStatus.id, taskStatus)

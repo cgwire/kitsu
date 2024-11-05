@@ -15,7 +15,7 @@ const cache = {
 }
 
 const initialState = {
-  statusAutomations: [],
+  statusAutomations: []
 }
 
 const state = { ...initialState }
