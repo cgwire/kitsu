@@ -128,7 +128,9 @@ const mutations = {
   },
 
   [DATA_LOADING_END](state) {
-    state.isDataLoading = false
+    if (state.isDataLoading) {
+      state.isDataLoading = false
+    }
   },
 
   [RESET_ALL](state) {
