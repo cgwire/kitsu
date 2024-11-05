@@ -74,10 +74,10 @@ export default {
   methods: {
     ...mapActions([
       'getOrganisation',
-      'loadTask',
       'loadAsset',
       'loadAssetType',
       'loadComment',
+      'loadDepartment',
       'loadEdit',
       'loadEpisode',
       'loadOpenProductions',
@@ -85,6 +85,7 @@ export default {
       'loadProduction',
       'loadSequence',
       'loadShot',
+      'loadTask',
       'loadTaskStatus',
       'loadTaskType',
       'refreshMetadataDescriptor',
@@ -302,6 +303,25 @@ export default {
         const task = this.taskMap.get(eventData.task_id)
         if (task) {
           this.$store.commit('DELETE_TASK_END', task)
+        }
+      },
+
+      'department:new'(eventData) {
+        console.log('department:new', eventData)
+        if (!this.departmentMap.get(eventData.department_id)) {
+          this.loadDepartment(eventData.department_id)
+        }
+      },
+
+      'department:update'(eventData) {
+        this.loadDepartment(eventData.department_id)
+      },
+
+      'department:delete'(eventData) {
+        if (this.departmentMap.get(eventData.task_type_id)) {
+          this.$store.commit('DELETE_DEPARTMENTS_END', {
+            id: eventData.task_type_id
+          })
         }
       },
 

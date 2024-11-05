@@ -24,6 +24,12 @@ const getters = {
 }
 
 const actions = {
+  async loadDepartment({ commit }, departmentId) {
+    const department = await departmentsApi.getDepartment(departmentId)
+    commit(EDIT_DEPARTMENTS_END, department)
+    return department
+  },
+
   async loadDepartments({ commit }) {
     const departments = await departmentsApi.getDepartments()
     commit(LOAD_DEPARTMENTS_END, departments)
