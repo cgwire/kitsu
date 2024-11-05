@@ -1,11 +1,5 @@
 <template>
   <div class="topbar">
-    <div
-      class="c-mask-user-menu"
-      @click="toggleUserMenu()"
-      v-if="!isUserMenuHidden"
-    ></div>
-
     <nav class="nav">
       <div class="nav-left">
         <a
@@ -137,12 +131,13 @@
       </div>
     </nav>
 
-    <nav
-      class="user-menu"
-      :style="{
-        top: isUserMenuHidden ? '-500px' : '60px'
-      }"
-    >
+    <div
+      class="c-mask-user-menu"
+      @click="toggleUserMenu()"
+      v-if="!isUserMenuHidden"
+    ></div>
+
+    <nav class="user-menu" v-if="!isUserMenuHidden">
       <ul>
         <li>
           <router-link
@@ -907,6 +902,7 @@ export default {
 }
 
 .user-menu {
+  animation: slide-down 0.5s ease;
   background-color: $white;
   box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.2);
   border-left: 1px solid $white-grey;
@@ -915,10 +911,19 @@ export default {
   min-width: 220px;
   padding: 10px;
   position: fixed;
-  transition: top 0.5s ease;
   right: 0;
+  top: 60px;
   width: 220px;
   z-index: 203;
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .user-menu ul {
