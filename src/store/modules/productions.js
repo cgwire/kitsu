@@ -1,5 +1,10 @@
 import productionsApi from '@/store/api/productions'
 import { sortProductions, sortByName } from '@/lib/sorting'
+
+import assetTypeStore from '@/store/modules/assettypes'
+import taskTypeStore from '@/store/modules/tasktypes'
+import taskStatusStore from '@/store/modules/taskstatus'
+
 import {
   addToIdList,
   removeFromIdList,
@@ -44,6 +49,10 @@ import {
   CLEAR_ASSETS,
   RESET_ALL
 } from '@/store/mutation-types'
+
+
+const taskTypesCache = taskTypeStore.cache
+const taskStatusCache = taskStatusStore.cache
 
 const initialState = {
   productions: [],
@@ -160,7 +169,7 @@ const getters = {
     } else {
       return sortByName(
         state.currentProduction.asset_types.map(id =>
-          rootState.assetTypes.assetTypeMap.get(id)
+          assetTypeStore.cache.assetTypeMap.get(id)
         )
       )
     }
@@ -182,9 +191,10 @@ const getters = {
     if (helpers.isEmptyArray(state.currentProduction, 'task_statuses')) {
       return rootState.taskStatus.taskStatus
     } else {
+      console.log('prod status', taskStatusCache.taskStatusMap)
       return sortByName(
         state.currentProduction.task_statuses.map(id =>
-          rootState.taskStatus.taskStatusMap.get(id)
+          taskStatusCache.taskStatusMap.get(id)
         )
       )
     }
@@ -197,7 +207,7 @@ const getters = {
     } else {
       return sortByName(
         production.task_statuses.map(id =>
-          rootState.taskStatus.taskStatusMap.get(id)
+          taskStatusCache.taskStatusMap.get(id)
         )
       )
     }
@@ -227,7 +237,7 @@ const getters = {
     } else {
       return sortByName(
         state.currentProduction.task_types.map(id =>
-          rootState.taskTypes.taskTypeMap.get(id)
+          taskTypesCache.taskTypeMap.get(id)
         )
       )
     }
@@ -239,7 +249,7 @@ const getters = {
       return rootState.taskTypes.taskTypes
     } else {
       return sortByName(
-        production.task_types.map(id => rootState.taskTypes.taskTypeMap.get(id))
+        production.task_types.map(id => taskTypesCache.taskTypeMap.get(id))
       )
     }
   },
@@ -647,7 +657,6 @@ const mutations = {
     production.project_status_name = productionStatus.name
     state.productions.push(production)
     state.productionMap.set(production.id, production)
-    state.productionMap = new Map(state.productionMap) // for reactivity
     state.openProductions.push(production)
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)
@@ -690,7 +699,6 @@ const mutations = {
       }
     }
     state.productionMap.set(production.id, production)
-    state.productionMap = new Map(state.productionMap) // for reactivity
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)
   },

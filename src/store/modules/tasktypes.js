@@ -15,9 +15,12 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+const cache = {
+  taskTypeMap: new Map(),
+}
+
 const initialState = {
   taskTypes: [],
-  taskTypeMap: new Map(),
   sequenceSubscriptions: {}
 }
 
@@ -29,13 +32,13 @@ const getters = {
   taskTypes: state => state.taskTypes.filter(taskType => !taskType.archived),
   archivedTaskTypes: state =>
     state.taskTypes.filter(taskType => taskType.archived),
-  taskTypeMap: state => state.taskTypeMap,
+  taskTypeMap: state => cache.taskTypeMap,
   sequenceSubscriptions: state => state.sequenceSubscriptions,
 
   currentTaskType: (state, getters, rootState) => {
     const route = rootState.route || {}
     const params = route.params || {}
-    return state.taskTypeMap.get(params.task_type_id) || {}
+    return cache.taskTypeMap.get(params.task_type_id) || {}
   },
 
   assetTaskTypes: (state, getters, rootState, rootGetters) => {
@@ -86,7 +89,7 @@ const getters = {
     }),
 
   getTaskType: (state, getters) => id => {
-    return state.taskTypeMap.get(id)
+    return cache.taskTypeMap.get(id)
   },
 
   getTaskTypePriority:
@@ -234,26 +237,29 @@ const mutations = {
 
   [LOAD_TASK_TYPES_ERROR](state) {
     state.taskTypes = []
-    state.taskTypeMap = new Map()
+    cache.taskTypeMap = new Map()
   },
 
   [LOAD_TASK_TYPES_END](state, taskTypes) {
     state.taskTypes = sortTaskTypes(taskTypes)
-    state.taskTypeMap = new Map()
+    const map = new Map()
     taskTypes.forEach(taskType => {
-      state.taskTypeMap.set(taskType.id, taskType)
+      map.set(taskType.id, taskType)
     })
+    cache.taskTypeMap = map
   },
 
   [EDIT_TASK_TYPE_START](state, data) {},
   [EDIT_TASK_TYPE_ERROR](state) {},
   [EDIT_TASK_TYPE_END](state, newTaskType) {
-    const taskType = state.taskTypeMap.get(newTaskType.id)
+    let taskType = cache.taskTypeMap.get(newTaskType.id)
     if (taskType && taskType.id) {
+      taskType = state.taskTypes
+        .find(taskType => taskType.id === newTaskType.id)
       Object.assign(taskType, newTaskType)
     } else {
       state.taskTypes.push(newTaskType)
-      state.taskTypeMap.set(newTaskType.id, newTaskType)
+      cache.taskTypeMap.set(newTaskType.id, newTaskType)
     }
     state.taskTypes = sortTaskTypes(state.taskTypes)
   },
@@ -267,7 +273,7 @@ const mutations = {
     if (taskTypeToDeleteIndex >= 0) {
       state.taskTypes.splice(taskTypeToDeleteIndex, 1)
     }
-    state.taskTypeMap.delete(taskTypeToDelete.id)
+    cache.taskTypeMap.delete(taskTypeToDelete.id)
   },
 
   [RESET_ALL](state) {
@@ -279,5 +285,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

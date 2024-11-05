@@ -208,7 +208,6 @@ const mutations = {
       state.concepts.push(newConcept)
       state.conceptMap.set(newConcept.id, newConcept)
     }
-    state.conceptMap = new Map(state.conceptMap) // for reactivity
   },
 
   [DELETE_CONCEPT_END](state, concept) {
@@ -223,7 +222,6 @@ const mutations = {
     concepts.forEach(concept => {
       state.selectedConcepts.set(concept.id, concept)
     })
-    state.selectedConcepts = new Map(state.selectedConcepts) // for reactivity
   },
 
   [CLEAR_SELECTED_CONCEPTS](state) {

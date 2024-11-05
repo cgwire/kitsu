@@ -10,9 +10,12 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
-const initialState = {
-  taskStatus: [],
+const cache = {
   taskStatusMap: new Map()
+}
+
+const initialState = {
+  taskStatuses: [],
 }
 
 const state = initialState
@@ -20,12 +23,12 @@ const state = initialState
 const getters = {
   taskStatus: (
     state // Wrong naming, keep it for compatibility
-  ) => state.taskStatus.filter(taskStatus => !taskStatus.archived),
+  ) => state.taskStatuses.filter(taskStatus => !taskStatus.archived),
   taskStatuses: state =>
-    state.taskStatus.filter(taskStatus => !taskStatus.archived),
+    state.taskStatuses.filter(taskStatus => !taskStatus.archived),
   archivedTaskStatus: state =>
-    state.taskStatus.filter(taskStatus => taskStatus.archived),
-  taskStatusMap: state => state.taskStatusMap,
+    state.taskStatuses.filter(taskStatus => taskStatus.archived),
+  taskStatusMap: state => cache.taskStatusMap,
   editTaskStatus: state => state.editTaskStatus,
   deleteTaskStatus: state => state.deleteTaskStatus,
 
@@ -66,7 +69,19 @@ const getters = {
       } else {
         return statuses.filter(taskStatus => taskStatus.is_artist_allowed)
       }
-    }
+    },
+
+  getTaskStatus: state => id => {
+    return state.taskStatuseses.find(taskStatus => taskStatus.id === id)
+  },
+
+  taskStatusOptions: state =>
+    state.taskStatuseses.map(status => ({
+      label: status.short_name,
+      value: status.id,
+      color: status.color,
+      isArtistAllowed: status.is_artist_allowed
+    })),
 }
 
 const actions = {
@@ -121,58 +136,61 @@ const actions = {
 
 const mutations = {
   [LOAD_TASK_STATUSES_START](state) {
-    state.taskStatus = []
-    state.taskStatusMap = new Map()
+    state.taskStatuses = []
+    cache.taskStatusMap = new Map()
   },
 
   [LOAD_TASK_STATUSES_ERROR](state) {
-    state.taskStatus = []
-    state.taskStatusMap = new Map()
+    state.taskStatuses = []
+    cache.taskStatusMap = new Map()
   },
 
-  [LOAD_TASK_STATUSES_END](state, taskStatus) {
-    state.taskStatus = sortByName(taskStatus)
-    state.taskStatusMap = new Map()
-    taskStatus.forEach(taskStatus => {
+  [LOAD_TASK_STATUSES_END](state, taskStatuses) {
+    state.taskStatuses = sortByName(taskStatuses)
+    const taskStatusMap = new Map()
+    taskStatuses.forEach(taskStatus => {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
       }
       if (taskStatus.is_client_allowed === null) {
         taskStatus.is_client_allowed = false
       }
-      state.taskStatusMap.set(taskStatus.id, taskStatus)
+      taskStatusMap.set(taskStatus.id, taskStatus)
     })
+    cache.taskStatusMap = taskStatusMap
   },
 
   [EDIT_TASK_STATUS_END](state, newTaskStatus) {
-    const taskStatus = state.taskStatusMap.get(newTaskStatus.id)
-
+    let taskStatus = cache.taskStatusMap.get(newTaskStatus.id)
+    console.log('taskStatus single 2', taskStatus)
     if (newTaskStatus.is_default) {
-      state.taskStatus.forEach(status => {
+      state.taskStatuses.forEach(status => {
         if (status.is_default && status.id !== newTaskStatus.id)
           status.is_default = false
       })
     }
 
     if (taskStatus && taskStatus.id) {
+      taskStatus = state.taskStatuses
+        .find(taskStatus => taskStatus.id === newTaskStatus.id)
+      console.log('taskStatus single', taskStatus, newTaskStatus)
       Object.assign(taskStatus, newTaskStatus)
-      state.taskStatusMap.delete(taskStatus.id)
-      state.taskStatusMap.set(taskStatus.id, taskStatus)
+      cache.taskStatusMap.set(taskStatus.id, taskStatus)
     } else {
-      state.taskStatus.push(newTaskStatus)
-      state.taskStatus = sortByName(state.taskStatus)
-      state.taskStatusMap.set(newTaskStatus.id, newTaskStatus)
+      state.taskStatuses.push(newTaskStatus)
+      state.taskStatuses = sortByName(state.taskStatuses)
+      cache.taskStatusMap.set(newTaskStatus.id, newTaskStatus)
     }
   },
 
   [DELETE_TASK_STATUS_END](state, taskStatusToDelete) {
-    const taskStatusToDeleteIndex = state.taskStatus.findIndex(
+    const taskStatusToDeleteIndex = state.taskStatuses.findIndex(
       taskStatus => taskStatus.id === taskStatusToDelete.id
     )
     if (taskStatusToDeleteIndex >= 0) {
-      state.taskStatus.splice(taskStatusToDeleteIndex, 1)
+      state.taskStatuses.splice(taskStatusToDeleteIndex, 1)
     }
-    delete state.taskStatusMap.get(taskStatusToDelete.id)
+    delete cache.taskStatusMap.get(taskStatusToDelete.id)
   },
 
   [RESET_ALL](state) {
@@ -184,5 +202,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

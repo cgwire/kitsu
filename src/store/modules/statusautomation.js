@@ -10,19 +10,12 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+const cache = {
+  statusAutomationMap: new Map()
+}
+
 const initialState = {
   statusAutomations: [],
-  statusAutomationMap: new Map(),
-
-  editStatusAutomation: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteStatusAutomation: {
-    isLoading: false,
-    isError: false
-  }
 }
 
 const state = { ...initialState }
@@ -31,7 +24,7 @@ const getters = {
   statusAutomations: state => state.statusAutomations.filter(s => !s.archived),
   archivedStatusAutomations: state =>
     state.statusAutomations.filter(s => s.archived),
-  statusAutomationMap: state => state.statusAutomationMap,
+  statusAutomationMap: state => cache.statusAutomationMap,
 
   // Used to know if the automation will apply in the current production.
   isStatusAutomationDisabled:
@@ -95,25 +88,25 @@ const mutations = {
 
   [LOAD_STATUS_AUTOMATIONS_ERROR](state) {
     state.statusAutomations = []
-    state.statusAutomationMap = new Map()
+    cache.statusAutomationMap = new Map()
   },
 
   [LOAD_STATUS_AUTOMATIONS_END](state, statusAutomations) {
     state.statusAutomations = statusAutomations
-    state.statusAutomationMap = new Map()
+    cache.statusAutomationMap = new Map()
     statusAutomations.forEach(statusAutomation => {
-      state.statusAutomationMap.set(statusAutomation.id, statusAutomation)
+      cache.statusAutomationMap.set(statusAutomation.id, statusAutomation)
     })
   },
 
   [EDIT_STATUS_AUTOMATION_END](state, newAutomation) {
-    const automation = state.statusAutomationMap.get(newAutomation.id)
+    const automation = cache.statusAutomationMap.get(newAutomation.id)
     if (automation && automation.id) {
       Object.assign(automation, newAutomation)
     } else {
       state.statusAutomations.push(newAutomation)
     }
-    state.statusAutomationMap.set(newAutomation.id, newAutomation)
+    cache.statusAutomationMap.set(newAutomation.id, newAutomation)
   },
 
   [DELETE_STATUS_AUTOMATION_END](state, statusAutomationToDelete) {
@@ -121,7 +114,7 @@ const mutations = {
       state.statusAutomations,
       statusAutomationToDelete
     )
-    state.statusAutomationMap.delete(statusAutomationToDelete.id)
+    cache.statusAutomationMap.delete(statusAutomationToDelete.id)
   },
 
   [RESET_ALL](state) {
@@ -133,5 +126,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }
