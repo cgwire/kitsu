@@ -130,8 +130,12 @@ export default {
   emits: ['delete-clicked', 'edit-clicked', 'update-priorities'],
 
   data() {
-    return {
-      taskStatuses: []
+    return {}
+  },
+
+  computed: {
+    taskStatuses() {
+      return this.entries
     }
   },
 
@@ -144,15 +148,6 @@ export default {
         })
       )
       this.$emit('update-priorities', taskStatusPriorities)
-    }
-  },
-
-  watch: {
-    entries: {
-      immediate: true,
-      handler() {
-        this.taskStatuses = JSON.parse(JSON.stringify(this.entries))
-      }
     }
   }
 }
