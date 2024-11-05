@@ -1,10 +1,9 @@
 <template>
   <div
     :id="entity.id"
+    class="shot unselectable"
     :class="{
-      shot: true,
-      selected: selected,
-      unselectable: true,
+      selected,
       stdby: entity ? entity.is_casting_standby : false,
       'text-mode': textMode
     }"
@@ -391,12 +390,12 @@ export default {
       this.$emit('edit-label', asset, label, this.entity.id)
     },
 
-    removeOneAsset(assetId, nbOccurences) {
-      this.$emit('remove-one', assetId, this.entity.id, nbOccurences)
+    removeOneAsset(assetId) {
+      this.$emit('remove-one', assetId)
     },
 
-    addOneAsset(assetId, nbOccurences) {
-      this.$emit('add-one', assetId, this.entity.id, nbOccurences)
+    addOneAsset(assetId) {
+      this.$emit('add-one', assetId)
     },
 
     onDescriptionChanged(entity, event) {
