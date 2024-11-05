@@ -87,6 +87,7 @@
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
+      v-if="modals.isImportRenderDisplayed"
     />
 
     <import-modal
@@ -296,6 +297,7 @@ export default {
       'isPeopleLoadingError',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
+      'people',
       'peopleSearchQueries',
       'personCsvFormData',
       'studioMap'

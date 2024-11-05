@@ -7,6 +7,14 @@ import episodeStore from '@/store/modules/episodes'
 import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 
+const entityMaps = {
+  asset: assetStore.cache.assetMap,
+  shot: shotStore.cache.shotMap,
+  sequence: sequenceStore.cache.sequenceMap,
+  episode: episodeStore.cache.episodeMap,
+  edit: editStore.cache.editMap
+}
+
 export const entityListMixin = {
   emits: [
     'change-sort',
@@ -514,7 +522,7 @@ export const entityListMixin = {
       const taskId = this.$route.query.task_id
       const task = this.taskMap.get(taskId)
       if (task) {
-        const entityMap = this[`${this.type}Map`]
+        const entityMap = entityMaps[this.type]
         const entity = entityMap.get(task.entity_id)
         const taskType = this.taskTypeMap.get(task.task_type_id)
 

@@ -54,7 +54,7 @@
             />
             <task-status-cell
               class="in-task-status"
-              :entry="getTaskStatus(statusAutomation.in_task_status_id)"
+              :entry="taskStatusMap.get(statusAutomation.in_task_status_id)"
             />
             <td class="input-separator">
               {{
@@ -70,7 +70,7 @@
             <task-status-cell
               class="out-task-status"
               v-if="statusAutomation.out_field_type === 'status'"
-              :entry="getTaskStatus(statusAutomation.out_task_status_id)"
+              :entry="taskStatusMap.get(statusAutomation.out_task_status_id)"
             />
             <td class="name out-task-status" v-else></td>
             <td class="import-last-revision">
@@ -151,7 +151,7 @@ export default {
 
   computed: {
     ...mapGetters([
-      'getTaskStatus',
+      'taskStatusMap',
       'getTaskType',
       'isStatusAutomationDisabled',
       'remainingStatusAutomations'
