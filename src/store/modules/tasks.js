@@ -1010,8 +1010,9 @@ const mutations = {
     Object.assign(oldComment, {
       text: comment.text,
       task_status_id: comment.task_status_id,
-      task_status: taskStatusStore.cache.taskStatusMap
-        .get(comment.task_status_id),
+      task_status: taskStatusStore.cache.taskStatusMap.get(
+        comment.task_status_id
+      ),
       checklist: comment.checklist || []
     })
   },
@@ -1188,9 +1189,9 @@ const mutations = {
     if (currentTask) {
       Object.assign(state.taskMap.get(task.id), {
         task_status_id: task.task_status_id,
-        task_status_short_name: taskStatusStore.cache.taskStatusMap
-          .get(task.task_status_id)
-          .short_name,
+        task_status_short_name: taskStatusStore.cache.taskStatusMap.get(
+          task.task_status_id
+        ).short_name,
         priority: task.priority,
         estimation: task.estimation,
         difficulty: task.difficulty,

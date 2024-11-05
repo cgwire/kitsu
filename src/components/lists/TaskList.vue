@@ -128,7 +128,7 @@
                 :options="difficultyOptions"
                 :with-margin="false"
                 :value="task.difficulty"
-                @update:modelValue="updateDifficulty($event)"
+                @update:model-value="updateDifficulty($event)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
                 v-model="task.difficulty"
               />
@@ -176,7 +176,7 @@
                 class="flexrow-item"
                 :with-margin="false"
                 :min-date="disabledDates.to"
-                :modelValue="getDate(task.start_date)"
+                :model-value="getDate(task.start_date)"
                 @update:model-value="updateStartDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
@@ -188,7 +188,7 @@
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :modelValue="getDate(task.due_date)"
+                :model-value="getDate(task.due_date)"
                 :max-date="disabledDates.from"
                 @update:model-value="updateDueDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"

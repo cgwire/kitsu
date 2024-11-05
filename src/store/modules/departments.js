@@ -59,8 +59,7 @@ const actions = {
 
 const mutations = {
   [LOAD_DEPARTMENTS_END](state, departments) {
-    state.departments = departments
-      .sort((a, b) => a.name.localeCompare(b.name))
+    state.departments = departments.sort((a, b) => a.name.localeCompare(b.name))
     const departmentMap = new Map()
     departments.forEach(department => {
       departmentMap.set(department.id, department)

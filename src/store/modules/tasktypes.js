@@ -16,7 +16,7 @@ import {
 } from '@/store/mutation-types'
 
 const cache = {
-  taskTypeMap: new Map(),
+  taskTypeMap: new Map()
 }
 
 const initialState = {
@@ -254,8 +254,9 @@ const mutations = {
   [EDIT_TASK_TYPE_END](state, newTaskType) {
     let taskType = cache.taskTypeMap.get(newTaskType.id)
     if (taskType && taskType.id) {
-      taskType = state.taskTypes
-        .find(taskType => taskType.id === newTaskType.id)
+      taskType = state.taskTypes.find(
+        taskType => taskType.id === newTaskType.id
+      )
       Object.assign(taskType, newTaskType)
     } else {
       state.taskTypes.push(newTaskType)

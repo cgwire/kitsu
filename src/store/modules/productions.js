@@ -50,7 +50,6 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
-
 const taskTypesCache = taskTypeStore.cache
 const taskStatusCache = taskStatusStore.cache
 
