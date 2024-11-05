@@ -7,16 +7,18 @@ import {
 } from '@/store/mutation-types'
 
 const initialState = {
-  departments: [],
-  departmentMap: new Map()
+  departments: []
 }
 
 const state = { ...initialState }
+const cache = {
+  departmentMap: new Map()
+}
 
 const getters = {
   departments: state => state.departments.filter(d => !d.archived),
   archivedDepartments: state => state.departments.filter(d => d.archived),
-  departmentMap: state => state.departmentMap,
+  departmentMap: state => cache.departmentMap,
 
   getDepartment: state => id => {
     return state.departments.find(department => department.id === id)
@@ -58,9 +60,12 @@ const actions = {
 const mutations = {
   [LOAD_DEPARTMENTS_END](state, departments) {
     state.departments = departments
+      .sort((a, b) => a.name.localeCompare(b.name))
+    const departmentMap = new Map()
     departments.forEach(department => {
-      state.departmentMap.set(department.id, department)
+      departmentMap.set(department.id, department)
     })
+    cache.departmentMap = departmentMap
   },
 
   [EDIT_DEPARTMENTS_END](state, newDepartment) {
@@ -70,7 +75,7 @@ const mutations = {
     } else {
       state.departments.push(newDepartment)
     }
-    state.departmentMap.set(newDepartment.id, newDepartment)
+    cache.departmentMap.set(newDepartment.id, newDepartment)
   },
 
   [DELETE_DEPARTMENTS_END](state, departmentToDelete) {
@@ -80,7 +85,7 @@ const mutations = {
     if (departmentToDeleteIndex >= 0) {
       state.departments.splice(departmentToDeleteIndex, 1)
     }
-    state.departmentMap.delete(departmentToDelete.id)
+    cache.departmentMap.delete(departmentToDelete.id)
   },
 
   [RESET_ALL](state) {

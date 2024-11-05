@@ -1,7 +1,11 @@
 import breakdownApi from '@/store/api/breakdown'
 import peopleApi from '@/store/api/people'
+
 import { sortAssets, sortByName, sortShots } from '@/lib/sorting'
 import { groupEntitiesByParents } from '@/lib/models'
+
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
 
 import {
   CASTING_SET_ASSET_TYPES,
@@ -94,7 +98,7 @@ const actions = {
     const episode = rootGetters.currentEpisode
     const episodeId = episode ? episode.id : null
     const shots = sortShots(
-      Array.from(rootGetters.shotMap.values()).filter(
+      Array.from(shotStore.cache.shotMap.values()).filter(
         shot => shot.sequence_id === sequenceId || sequenceId === 'all'
       )
     )
@@ -112,7 +116,7 @@ const actions = {
       return console.error('assetTypeId is undefined, no casting can be set.')
     }
     const production = rootState.productions.currentProduction
-    const assets = Array.from(rootState.assets.assetMap.values())
+    const assets = Array.from(assetStore.cache.assetMap.values())
       .filter(asset => {
         return (
           asset.asset_type_id === assetTypeId ||
@@ -152,7 +156,7 @@ const actions = {
     { commit, rootState },
     { entityId, assetId, nbOccurences, label }
   ) {
-    const asset = rootState.assets.assetMap.get(assetId)
+    const asset = assetStore.cache.assetMap.get(assetId)
     commit(CASTING_ADD_TO_CASTING, { entityId, asset, nbOccurences, label })
   },
 
@@ -160,7 +164,7 @@ const actions = {
     { commit, rootState },
     { entityId, assetId, nbOccurences }
   ) {
-    const asset = rootState.assets.assetMap.get(assetId)
+    const asset = assetStore.cache.assetMap.get(assetId)
     commit(CASTING_REMOVE_FROM_CASTING, { entityId, asset, nbOccurences })
   },
 
@@ -208,7 +212,7 @@ const actions = {
 
   loadAssetCasting({ commit, rootGetters }, asset) {
     if (!asset) return Promise.resolve({})
-    const assetMap = rootGetters.assetMap
+    const assetMap = assetStore.cache.assetMap
     return breakdownApi.getAssetCasting(asset).then(casting => {
       commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
       return Promise.resolve(casting)
@@ -225,7 +229,7 @@ const actions = {
 
   loadSequenceCasting({ commit, rootGetters }, sequence) {
     if (!sequence) return Promise.resolve({})
-    const assetMap = rootGetters.assetMap
+    const assetMap = assetStore.cache.assetMap
     return breakdownApi
       .getSequenceCasting(sequence.production_id, sequence.id)
       .then(casting => {
@@ -236,7 +240,7 @@ const actions = {
 
   loadAssetCastIn({ commit, state, rootState }, asset) {
     if (!asset) return Promise.resolve({})
-    const shotMap = rootState.shots.shotMap
+    const shotMap = shotStore.cache.shotMap
     return breakdownApi.getAssetCastIn(asset).then(castIn => {
       commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
       return Promise.resolve(castIn)
@@ -471,9 +475,7 @@ const mutations = {
         'asset_type_name'
       )
     })
-    Object.assign(state.casting, casting)
     state.casting = { ...state.casting }
-    Object.assign(state.castingByType, entityCastingByType)
     state.castingByType = { ...state.castingByType }
   },
 

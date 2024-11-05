@@ -9,9 +9,12 @@ import {
 } from '@/store/mutation-types'
 import { sortByName } from '@/lib/sorting'
 
-const initialState = {
-  assetTypes: [],
+const cache = {
   assetTypeMap: new Map()
+}
+
+const initialState = {
+  assetTypes: []
 }
 
 const state = { ...initialState }
@@ -19,7 +22,7 @@ const state = { ...initialState }
 const getters = {
   assetTypes: state => state.assetTypes.filter(type => !type.archived),
   archivedAssetTypes: state => state.assetTypes.filter(type => type.archived),
-  assetTypeMap: state => state.assetTypeMap,
+  assetTypeMap: state => cache.assetTypeMap,
 
   getAssetType: (state, getters) => id => {
     return state.assetTypes.find(assetType => assetType.id === id)
@@ -84,11 +87,10 @@ const mutations = {
   [LOAD_ASSET_TYPES_END](state, assetTypes) {
     state.isAssetTypesLoading = false
     state.isAssetTypesLoadingError = false
-    state.assetTypes = assetTypes
-    state.assetTypes = sortByName(state.assetTypes)
-    state.assetTypeMap = new Map()
+    state.assetTypes = sortByName(assetTypes)
+    cache.assetTypeMap = new Map()
     state.assetTypes.forEach(assetType => {
-      state.assetTypeMap.set(assetType.id, assetType)
+      cache.assetTypeMap.set(assetType.id, assetType)
     })
   },
 
@@ -99,7 +101,7 @@ const mutations = {
       Object.assign(assetType, newAssetType)
     } else {
       state.assetTypes.push(newAssetType)
-      state.assetTypeMap.set(newAssetType.id, newAssetType)
+      cache.assetTypeMap.set(newAssetType.id, newAssetType)
     }
     state.assetTypes = sortByName(state.assetTypes)
   },
@@ -111,7 +113,7 @@ const mutations = {
     if (assetTypeToDeleteIndex >= 0) {
       state.assetTypes.splice(assetTypeToDeleteIndex, 1)
     }
-    state.assetTypeMap.delete(assetTypeToDelete.id)
+    cache.assetTypeMap.delete(assetTypeToDelete.id)
   },
 
   [RESET_ALL](state) {
@@ -123,5 +125,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

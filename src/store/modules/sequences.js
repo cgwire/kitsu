@@ -1,6 +1,7 @@
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
+import taskStore from '@/store/modules/tasks'
 
 import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -175,12 +176,12 @@ const helpers = {
 const cache = {
   sequences: [],
   result: [],
-  sequenceIndex: {}
+  sequenceIndex: {},
+  sequenceMap: new Map()
 }
 
 const initialState = {
   currentSequence: null,
-  sequenceMap: new Map(),
 
   displayedSequences: [],
   displayedSequencesLength: 0,
@@ -227,7 +228,7 @@ const getters = {
   isSequenceTime: state => state.isSequenceTime,
 
   sequences: state => cache.sequences,
-  sequenceMap: state => state.sequenceMap,
+  sequenceMap: state => cache.sequenceMap,
   sequenceRetakeStats: state => state.sequenceRetakeStats,
   sequenceStats: state => state.sequenceStats,
 
@@ -462,14 +463,14 @@ const actions = {
   },
 
   loadSequence({ commit, state, rootGetters }, sequenceId) {
-    const sequence = state.sequenceMap.get(sequenceId)
+    const sequence = cache.sequenceMap.get(sequenceId)
     if (sequence?.lock) return
 
     const episodeMap = rootGetters.episodeMap
     return shotsApi
       .getSequence(sequenceId)
       .then(sequence => {
-        if (state.sequenceMap.get(sequence.id)) {
+        if (cache.sequenceMap.get(sequence.id)) {
           commit(UPDATE_SEQUENCE, sequence)
         } else {
           commit(ADD_SEQUENCE, { sequence, episodeMap })
@@ -569,11 +570,9 @@ const mutations = {
   [SET_SEQUENCE_SELECTION](state, { sequence, selected, displayedSequences }) {
     if (!selected && state.selectedSequences.has(sequence.id)) {
       state.selectedSequences.delete(sequence.id)
-      state.selectedSequences = new Map(state.selectedSequences) // for reactivity
     }
     if (selected) {
       state.selectedSequences.set(sequence.id, sequence)
-      state.selectedSequences = new Map(state.selectedSequences) // for reactivity
       const maxX = displayedSequences.length
       const maxY = state.nbValidationColumns
       // unselect previously selected tasks
@@ -601,7 +600,7 @@ const mutations = {
       } else if (sequenceId === 'all') {
         state.currentSequence = { id: 'all' }
       } else {
-        state.currentSequence = state.sequenceMap.get(sequenceId)
+        state.currentSequence = cache.sequenceMap.get(sequenceId)
       }
     }
   },
@@ -624,7 +623,7 @@ const mutations = {
     let isTime = false
     let isEstimation = false
     let isResolution = false
-    state.sequenceMap = new Map()
+    cache.sequenceMap = new Map()
     sequences.forEach(sequence => {
       const taskIds = []
       const validations = new Map()
@@ -673,7 +672,7 @@ const mutations = {
       if (!isDescription && sequence.description) isDescription = true
       if (!isResolution && sequence.data.resolution) isResolution = true
 
-      state.sequenceMap.set(sequence.id, sequence)
+      cache.sequenceMap.set(sequence.id, sequence)
     })
     sequences = sortSequences(sequences)
     cache.sequences = sequences
@@ -772,13 +771,13 @@ const mutations = {
     cache.sequences = sortByName(cache.sequences)
     state.displayedSequences = cache.sequences
     helpers.setListStats(state, cache.sequences)
-    state.sequenceMap.set(sequence.id, sequence)
+    cache.sequenceMap.set(sequence.id, sequence)
     state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
     // cache.sequenceIndex = buildNameIndex(cache.sequences)
   },
 
   [EDIT_SEQUENCE_END](state, newSequence) {
-    const sequence = state.sequenceMap.get(newSequence.id)
+    const sequence = cache.sequenceMap.get(newSequence.id)
     if (sequence) {
       const copyNewSequence = { ...newSequence }
       copyNewSequence.data = { ...sequence.data, ...newSequence.data }
@@ -797,7 +796,7 @@ const mutations = {
     cache.sequences = []
     cache.result = []
     cache.sequenceIndex = {}
-    state.sequenceMap = new Map()
+    cache.sequenceMap = new Map()
     state.sequenceValidationColumns = []
 
     state.isSequencesLoading = true
@@ -844,7 +843,7 @@ const mutations = {
         }
       }
     })
-    state.sequenceMap = sequenceMap
+    cache.sequenceMap = sequenceMap
     cache.sequences = sortByName(sequences)
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = cache.sequences
@@ -888,7 +887,7 @@ const mutations = {
   [CREATE_TASKS_END](state, { tasks, production, taskTypeMap, taskStatusMap }) {
     tasks.forEach(task => {
       if (task) {
-        const sequence = state.sequenceMap.get(task.entity_id)
+        const sequence = cache.sequenceMap.get(task.entity_id)
         if (sequence) {
           helpers.populateTask(
             production,
@@ -911,7 +910,7 @@ const mutations = {
     if (
       !validationInfo.x &&
       validationInfo.task?.column &&
-      state.sequenceMap.get(validationInfo.task.entity.id)
+      cache.sequenceMap.get(validationInfo.task.entity.id)
     ) {
       const entity = validationInfo.task.entity
       const taskType = validationInfo.task.column
@@ -957,12 +956,14 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.sequenceSelectionGrid))
-    state.sequenceSelectionGrid = clearSelectionGrid(tmpGrid)
+    if (taskStore.state.nbSelectedTasks > 0) {
+      const tmpGrid = JSON.parse(JSON.stringify(state.sequenceSelectionGrid))
+      state.sequenceSelectionGrid = clearSelectionGrid(tmpGrid)
+    }
   },
 
   [NEW_TASK_END](state, { task, production, taskTypeMap, taskStatusMap }) {
-    const sequence = state.sequenceMap.get(task.entity_id)
+    const sequence = cache.sequenceMap.get(task.entity_id)
     if (sequence && task) {
       task = helpers.populateTask(
         production,
@@ -985,7 +986,7 @@ const mutations = {
   },
 
   [DELETE_TASK_END](state, task) {
-    const sequence = state.sequenceMap.get(task.entity_id)
+    const sequence = cache.sequenceMap.get(task.entity_id)
     if (sequence) {
       const validations = new Map(sequence.validations)
       validations.delete(task.task_type_id)
@@ -1001,7 +1002,7 @@ const mutations = {
   [ADD_SEQUENCE](state, { sequence, episodeMap }) {
     cache.sequences.push(sequence)
     const sortedSequences = sortSequences(cache.sequences)
-    state.sequenceMap.set(sequence.id, sequence)
+    cache.sequenceMap.set(sequence.id, sequence)
     if (sequence.parent_id) {
       const episode = episodeMap.get(sequence.parent_id)
       if (episode) {
@@ -1019,12 +1020,12 @@ const mutations = {
   },
 
   [UPDATE_SEQUENCE](state, sequence) {
-    Object.assign(state.sequenceMap.get(sequence.id), sequence)
+    Object.assign(cache.sequenceMap.get(sequence.id), sequence)
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
   [REMOVE_SEQUENCE](state, sequence) {
-    delete state.sequenceMap.get(sequence.id)
+    delete cache.sequenceMap.get(sequence.id)
     cache.sequences = removeModelFromList(cache.sequences, sequence)
     state.displayedSequences = removeModelFromList(
       state.displayedSequences,
@@ -1034,14 +1035,14 @@ const mutations = {
   },
 
   [LOCK_SEQUENCE](state, sequence) {
-    sequence = state.sequenceMap.get(sequence.id)
+    sequence = cache.sequenceMap.get(sequence.id)
     if (sequence) {
       sequence.lock = !sequence.lock ? 1 : sequence.lock + 1
     }
   },
 
   [UNLOCK_SEQUENCE](state, sequence) {
-    sequence = state.sequenceMap.get(sequence.id)
+    sequence = cache.sequenceMap.get(sequence.id)
     if (sequence) {
       sequence.lock = !sequence.lock ? 0 : sequence.lock - 1
     }

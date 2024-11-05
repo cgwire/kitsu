@@ -5,6 +5,7 @@ import tasksStore from '@/store/modules/tasks'
 import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
 import taskTypesStore from '@/store/modules/tasktypes'
+import taskStatusStore from '@/store/modules/taskstatus'
 
 import func from '@/lib/func'
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -69,7 +70,8 @@ import async from 'async'
 
 const cache = {
   edits: [],
-  editIndex: []
+  editIndex: [],
+  editMap: new Map(),
 }
 
 const helpers = {
@@ -80,13 +82,13 @@ const helpers = {
     return tasksStore.state.taskMap.get(taskId)
   },
   getTaskStatus(taskStatusId) {
-    return tasksStore.state.taskStatusMap.get(taskStatusId)
+    return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
   },
   getTaskType(taskTypeId) {
-    return taskTypesStore.state.taskTypeMap.get(taskTypeId)
+    return taskTypesStore.cache.taskTypeMap.get(taskTypeId)
   },
   getPerson(personId) {
-    return peopleStore.state.personMap.get(personId)
+    return peopleStore.cache.personMap.get(personId)
   },
 
   getEditName(edit) {
@@ -247,8 +249,6 @@ const helpers = {
 }
 
 const initialState = {
-  editMap: new Map(),
-  episodeMap: new Map(),
   editSearchText: '',
   editSearchQueries: [],
   editSorting: [],
@@ -290,7 +290,7 @@ const getters = {
   editValidationColumns: state => state.editValidationColumns,
 
   editSearchQueries: state => state.editSearchQueries,
-  editMap: state => state.editMap,
+  editMap: state => cache.editMap,
   editSorting: state => state.editSorting,
 
   isEditDescription: state => state.isEditDescription,
@@ -312,7 +312,7 @@ const getters = {
   isEditsLoadingError: state => state.isEditsLoadingError,
   editCreated: state => state.editCreated,
 
-  isLongEditList: state => state.editMap.size > 500,
+  isLongEditList: state => cache.editMap.size > 500,
   editsCsvFormData: state => state.editsCsvFormData,
   editListScrollPosition: state => state.editListScrollPosition,
 
@@ -386,7 +386,7 @@ const actions = {
     return editsApi
       .getEdit(editId)
       .then(edit => {
-        if (state.editMap.get(edit.id)) {
+        if (cache.editMap.get(edit.id)) {
           commit(UPDATE_EDIT, edit)
         } else {
           commit(ADD_EDIT, {
@@ -442,7 +442,7 @@ const actions = {
 
   deleteEdit({ commit, state }, edit) {
     return editsApi.deleteEdit(edit).then(() => {
-      const previousEdit = state.editMap.get(edit.id)
+      const previousEdit = cache.editMap.get(edit.id)
       if (
         previousEdit &&
         previousEdit.tasks.length > 0 &&
@@ -655,7 +655,7 @@ const actions = {
       async.eachSeries(
         selectedEditIds,
         (editId, next) => {
-          const edit = state.editMap.get(editId)
+          const edit = cache.editMap.get(editId)
           if (edit) {
             dispatch('deleteEdit', edit)
           }
@@ -677,7 +677,7 @@ const mutations = {
     cache.edits = []
     cache.result = []
     cache.editIndex = {}
-    state.editMap = new Map()
+    cache.editMap = new Map()
     state.editValidationColumns = []
 
     state.isEditsLoading = true
@@ -706,7 +706,7 @@ const mutations = {
     let isTime = false
     let isEstimation = false
     let isResolution = false
-    state.editMap = new Map()
+    cache.editMap = new Map()
     edits.forEach(edit => {
       const taskIds = []
       const validations = new Map()
@@ -744,7 +744,7 @@ const mutations = {
       if (!isDescription && edit.description) isDescription = true
       if (!isResolution && edit.resolution) isResolution = true
 
-      state.editMap.set(edit.id, edit)
+      cache.editMap.set(edit.id, edit)
     })
     edits = sortEdits(edits)
     cache.edits = edits
@@ -803,7 +803,7 @@ const mutations = {
       helpers.populateTask(task, edit)
     })
     edit.tasks = sortTasks(edit.tasks, taskTypeMap)
-    state.editMap.set(edit.id, edit)
+    cache.editMap.set(edit.id, edit)
   },
 
   [EDIT_CSV_FILE_SELECTED](state, formData) {
@@ -818,7 +818,7 @@ const mutations = {
   },
 
   [EDIT_EDIT_END](state, newEdit) {
-    const edit = state.editMap.get(newEdit.id)
+    const edit = cache.editMap.get(newEdit.id)
 
     if (edit) {
       const copyNewEdit = { ...newEdit }
@@ -827,7 +827,7 @@ const mutations = {
     } else {
       cache.edits.push(newEdit)
       cache.edits = sortEdits(cache.edits)
-      state.editMap.set(newEdit.id, newEdit)
+      cache.editMap.set(newEdit.id, newEdit)
 
       const maxX = state.displayedEdits.length
       const maxY = state.nbValidationColumns
@@ -856,7 +856,7 @@ const mutations = {
   },
 
   [RESTORE_EDIT_END](state, editToRestore) {
-    const edit = state.editMap.get(editToRestore.id)
+    const edit = cache.editMap.get(editToRestore.id)
     edit.canceled = false
     cache.editIndex = buildEditIndex(cache.edits)
   },
@@ -882,7 +882,7 @@ const mutations = {
     state.displayedEdits = cache.edits.slice(0, PAGE_SIZE)
     helpers.setListStats(state, cache.edits)
     state.editFilledColumns = getFilledColumns(state.displayedEdits)
-    state.editMap.set(edit.id, edit)
+    cache.editMap.set(edit.id, edit)
     cache.editIndex = buildEditIndex(cache.edits)
 
     const maxX = state.displayedEdits.length
@@ -893,7 +893,7 @@ const mutations = {
   [CREATE_TASKS_END](state, { tasks }) {
     tasks.forEach(task => {
       if (task) {
-        const edit = state.editMap.get(task.entity_id)
+        const edit = cache.editMap.get(task.entity_id)
         if (edit) {
           helpers.populateTask(task, edit)
           edit.validations.set(task.task_type_id, task.id)
@@ -934,7 +934,7 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const edit = state.editMap.get(entityId)
+    const edit = cache.editMap.get(entityId)
     if (edit) {
       edit.preview_file_id = previewId
       edit.tasks.forEach(taskId => {
@@ -952,7 +952,7 @@ const mutations = {
     if (
       !validationInfo.x &&
       validationInfo.task?.column &&
-      state.editMap.get(validationInfo.task.entity.id)
+      cache.editMap.get(validationInfo.task.entity.id)
     ) {
       const entity = validationInfo.task.entity
       const taskType = validationInfo.task.column
@@ -979,12 +979,14 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.editSelectionGrid))
-    state.editSelectionGrid = clearSelectionGrid(tmpGrid)
+    if (tasksStore.state.nbSelectedTasks > 0) {
+      const tmpGrid = JSON.parse(JSON.stringify(state.editSelectionGrid))
+      state.editSelectionGrid = clearSelectionGrid(tmpGrid)
+    }
   },
 
   [NEW_TASK_END](state, { task }) {
-    const edit = state.editMap.get(task.entity_id)
+    const edit = cache.editMap.get(task.entity_id)
     if (edit && task) {
       task = helpers.populateTask(task, edit)
       // Add Column if it is missing
@@ -1063,7 +1065,7 @@ const mutations = {
 
     cache.edits.push(edit)
     cache.edits = sortEdits(cache.edits)
-    state.editMap.set(edit.id, edit)
+    cache.editMap.set(edit.id, edit)
 
     state.displayedEdits.push(edit)
     state.displayedEdits = sortEdits(state.displayedEdits)
@@ -1074,16 +1076,16 @@ const mutations = {
     const maxX = state.displayedEdits.length
     const maxY = state.nbValidationColumns
     state.editSelectionGrid = buildSelectionGrid(maxX, maxY)
-    state.editMap.set(edit.id, edit)
+    cache.editMap.set(edit.id, edit)
   },
 
   [UPDATE_EDIT](state, edit) {
-    Object.assign(state.editMap.get(edit.id), edit)
+    Object.assign(cache.editMap.get(edit.id), edit)
     cache.editIndex = buildEditIndex(cache.edits)
   },
 
   [REMOVE_EDIT](state, editToDelete) {
-    state.editMap.delete(editToDelete.id)
+    cache.editMap.delete(editToDelete.id)
     cache.edits = removeModelFromList(cache.edits, editToDelete)
     cache.result = removeModelFromList(cache.result, editToDelete)
     cache.editIndex = buildEditIndex(cache.edits)
@@ -1139,14 +1141,14 @@ const mutations = {
   },
 
   [LOCK_EDIT](state, edit) {
-    edit = state.editMap.get(edit.id)
+    edit = cache.editMap.get(edit.id)
     if (edit) {
       edit.lock = !edit.lock ? 1 : edit.lock + 1
     }
   },
 
   [UNLOCK_EDIT](state, edit) {
-    edit = state.editMap.get(edit.id)
+    edit = cache.editMap.get(edit.id)
     if (edit) {
       edit.lock = !edit.lock ? 0 : edit.lock - 1
     }
@@ -1163,11 +1165,9 @@ const mutations = {
   [SET_EDIT_SELECTION](state, { edit, selected }) {
     if (!selected && state.selectedEdits.has(edit.id)) {
       state.selectedEdits.delete(edit.id)
-      state.selectedEdits = new Map(state.selectedEdits) // for reactivity
     }
     if (selected) {
       state.selectedEdits.set(edit.id, edit)
-      state.selectedEdits = new Map(state.selectedEdits) // for reactivity
       const maxX = state.displayedEdits.length
       const maxY = state.nbValidationColumns
       // unselect previously selected tasks
