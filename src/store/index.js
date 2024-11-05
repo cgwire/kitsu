@@ -61,6 +61,6 @@ const modules = {
 }
 export default createStore({
   getters,
-  strict: process.env.NODE_ENV !== 'production',
-  modules
+  modules,
+  strict: false
 })
