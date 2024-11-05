@@ -1119,6 +1119,7 @@ export default {
       const startDate = parseDate(task.start_date)
       const dueDate = task.due_date ? parseDate(task.due_date) : null
       data = getDatesFromStartDate(
+        this.organisation,
         startDate,
         dueDate,
         minutesToDays(this.organisation, estimation),

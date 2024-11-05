@@ -669,6 +669,7 @@ export default {
           const startDate = moment(task.start_date)
           const dueDate = task.due_date ? moment(task.due_date) : null
           data = getDatesFromStartDate(
+            this.organisation,
             startDate,
             dueDate,
             minutesToDays(this.organisation, estimation)
