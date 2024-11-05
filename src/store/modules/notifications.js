@@ -104,7 +104,9 @@ const mutations = {
   },
 
   [SET_NOTIFICATION_COUNT](state, count) {
-    state.notificationCount = count
+    if (state.notificationCount !== count) {
+      state.notificationCount = count
+    }
   },
 
   [MARK_ALL_NOTIFICATIONS_AS_READ](state) {
