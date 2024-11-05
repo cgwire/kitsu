@@ -65,8 +65,15 @@
       />
     </div>
 
+    <route-tabs
+      class="mb0"
+      :active-tab="activeTab"
+      :tabs="tabs"
+      route-name="people"
+    />
+
     <people-list
-      :entries="currentPeople"
+      :entries="activeTab === 'active' ? activePeople : unactivePeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
       @avatar-clicked="onAvatarClicked"
@@ -170,6 +177,7 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import PeopleList from '@/components/lists/PeopleList.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 
@@ -192,12 +200,14 @@ export default {
     ImportRenderModal,
     PageTitle,
     PeopleList,
+    RouteTabs,
     SearchField,
     SearchQueryList
   },
 
   data() {
     return {
+      activeTab: 'active',
       csvColumns: ['First Name', 'Last Name'],
       optionalCsvColumns: [
         'Phone',
@@ -249,7 +259,17 @@ export default {
       selectedStudio: '',
       success: {
         invite: false
-      }
+      },
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'unactive',
+          label: this.$t('people.unactive')
+        }
+      ]
     }
   },
 
@@ -261,32 +281,6 @@ export default {
     this.loadPeople(() => {
       this.onSearchChange()
     })
-  },
-
-  watch: {
-    'modals.edit'() {
-      if (this.modals.edit) {
-        this.loading.createAndInvite = false
-        this.errors.edit = false
-        this.errors.invite = false
-        this.errors.userLimit = false
-        this.loading.edit = false
-        this.loading.invite = false
-        this.success.invite = false
-      }
-    },
-
-    selectedDepartment() {
-      this.updateRoute()
-    },
-
-    selectedStudio() {
-      this.updateRoute()
-    },
-
-    role() {
-      this.updateRoute()
-    }
   },
 
   computed: {
@@ -340,6 +334,14 @@ export default {
 
     searchField() {
       return this.$refs['people-search-field']
+    },
+
+    activePeople() {
+      return this.currentPeople.filter(person => person.active)
+    },
+
+    unactivePeople() {
+      return this.currentPeople.filter(person => !person.active)
     }
   },
 
@@ -515,6 +517,10 @@ export default {
         this.setPeopleSearch(searchQuery)
         this.updateRoute()
       }
+      this.tabs[0].label =
+        this.$t('main.active') + ' (' + this.activePeople.length + ')'
+      this.tabs[1].label =
+        this.$t('people.unactive') + ' (' + this.unactivePeople.length + ')'
     },
 
     onAvatarClicked(person) {
@@ -588,6 +594,36 @@ export default {
     }
   },
 
+  watch: {
+    'modals.edit'() {
+      if (this.modals.edit) {
+        this.loading.createAndInvite = false
+        this.errors.edit = false
+        this.errors.invite = false
+        this.errors.userLimit = false
+        this.loading.edit = false
+        this.loading.invite = false
+        this.success.invite = false
+      }
+    },
+
+    selectedDepartment() {
+      this.updateRoute()
+    },
+
+    selectedStudio() {
+      this.updateRoute()
+    },
+
+    role() {
+      this.updateRoute()
+    },
+
+    '$route.query.tab'() {
+      this.activeTab = this.$route.query.tab || 'active'
+    }
+  },
+
   head() {
     return {
       title: `${this.$t('people.title')} - Kitsu`
@@ -597,11 +633,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page-header {
+  margin-bottom: 0em;
+}
+
+.tabs {
+  margin-bottom: 0;
+}
+
+.data-list {
+  margin-top: 1em;
+}
+
 .search {
   margin-top: 2em;
 }
 .query-list {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 .search-options {
   align-items: flex-end;
