@@ -989,12 +989,13 @@ export default {
       const entityIds = Object.keys(this.selection).filter(
         key => this.selection[key]
       )
-
       for (const entityId of entityIds) {
-        const nbOccurences = this.casting[entityId].find(
+        const asset = this.casting[entityId].find(
           asset => asset.asset_id === assetId
-        ).nb_occurences
-        await this.removeOneAsset(assetId, entityId, nbOccurences)
+        )
+        if (asset) {
+          await this.removeOneAsset(assetId, entityId, asset.nb_occurences)
+        }
       }
     },
 
