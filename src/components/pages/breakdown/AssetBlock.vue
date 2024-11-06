@@ -10,8 +10,10 @@
     v-if="!textMode"
   >
     <div class="asset-wrapper">
-      <div class="asset-add-1" @click="addOneAsset" v-if="!readOnly">+ 1</div>
-      <div class="asset-add" @click="removeOneAsset" v-if="!readOnly">- 1</div>
+      <template v-if="!readOnly && active">
+        <div class="asset-add-1" @click.stop="addOneAsset">+ 1</div>
+        <div class="asset-add" @click.stop="removeOneAsset">- 1</div>
+      </template>
       <div class="asset-picture" v-if="asset.preview_file_id">
         <img
           loading="lazy"
@@ -39,14 +41,13 @@
     }"
     v-else
   >
-    <span class="asset-text-name flexrow-item">
+    <span class="asset-text-name flexrow-item filler">
       {{ asset.name }} ({{ nbOccurences }})
     </span>
-    <span class="filler"></span>
     <span
       class="modify-asset flexrow-item"
-      @click="removeOneAsset"
-      v-if="!readOnly"
+      @click.stop="removeOneAsset"
+      v-if="!readOnly && active"
     >
       - 1
     </span>
@@ -94,13 +95,11 @@ export default {
 
   methods: {
     removeOneAsset(event) {
-      this.pauseEvent(event)
-      this.$emit('remove-one', this.asset.asset_id, this.nbOccurences)
+      this.$emit('remove-one', this.asset.asset_id)
     },
 
     addOneAsset(event) {
-      this.pauseEvent(event)
-      this.$emit('add-one', this.asset.asset_id, this.nbOccurences)
+      this.$emit('add-one', this.asset.asset_id)
     },
 
     shortenName(name) {
@@ -200,7 +199,7 @@ export default {
   font-weight: bold;
   font-size: 0.9em;
   opacity: 0;
-  z-index: 2;
+  z-index: 3;
 }
 
 .asset-add-1 {
