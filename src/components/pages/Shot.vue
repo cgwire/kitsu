@@ -239,11 +239,14 @@
                     />
                     <div class="break-word">
                       {{ asset.asset_name }}
-                      <span v-if="asset.nb_occurences > 1">
+                      <template v-if="asset.nb_occurences > 1">
                         ({{ asset.nb_occurences }})
-                      </span>
+                      </template>
                     </div>
-                    <div class="ready-for flexrow">
+                    <div
+                      class="ready-for flexrow"
+                      v-if="!asset.shared && asset.ready_for"
+                    >
                       <task-type-name
                         class="flexrow-item"
                         :task-type="taskTypeMap.get(asset.ready_for)"
@@ -251,7 +254,6 @@
                         :title="
                           'Ready for: ' + taskTypeMap.get(asset.ready_for).name
                         "
-                        v-if="asset.ready_for"
                       />
                     </div>
                   </router-link>
