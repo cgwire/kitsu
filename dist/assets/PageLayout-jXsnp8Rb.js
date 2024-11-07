@@ -1,0 +1,2 @@
+import{n as a}from"./index-DBhRzdm1.js";const n={name:"page-layout",props:{side:{type:Boolean,default:!0}}};var t=function(){var e=this,s=e._self._c;return s("div",{ref:"page",staticClass:"columns fixed-page"},[s("div",{staticClass:"column main-column"},[e._t("main")],2),e.side?s("div",{staticClass:"column side-column"},[e._t("side")],2):e._e()])},o=[],i=a(n,t,o,!1,null,null);const l=i.exports;export{l as P};
+//# sourceMappingURL=PageLayout-jXsnp8Rb.js.map
