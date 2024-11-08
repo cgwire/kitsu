@@ -1,4 +1,4 @@
 set -e
-git pull --rebase origin master
+git pull --rebase origin main
 npm version patch
-git push origin master --tag
+git push origin main --tag
