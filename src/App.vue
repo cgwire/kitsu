@@ -980,6 +980,10 @@ a:hover {
   flex: 1;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
 .z300 {
   z-index: 300000;
 }

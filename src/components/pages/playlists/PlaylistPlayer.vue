@@ -403,30 +403,37 @@
         />
       </div>
 
-      <div v-if="isCurrentPreviewMovie">
-        <template v-if="!isFullMode">
-          <span
-            class="flexrow-item time-indicator is-hidden-desktop"
-            :title="$t('playlists.actions.current_time')"
-          >
-            {{ currentTime }}
+      <div
+        class="flexrow flexrow-item mr0"
+        v-if="isCurrentPreviewMovie && !isFullMode"
+      >
+        <span
+          class="flexrow-item time-indicator"
+          :title="$t('playlists.actions.current_time')"
+        >
+          {{ currentTime }}
+        </span>
+        <span
+          class="flexrow-item time-indicator is-hidden-touch is-hidden-desktop-only"
+        >
+          /
+        </span>
+        <span
+          class="flexrow-item time-indicator is-hidden-touch is-hidden-desktop-only"
+          :title="$t('playlists.actions.max_duration')"
+        >
+          {{ maxDuration }}
+        </span>
+        <span
+          class="flexrow-item time-indicator mr05 nowrap"
+          :title="$t('playlists.actions.frame_number')"
+        >
+          ({{ currentFrame }}
+          <span class="is-hidden-touch is-hidden-desktop-only">
+            / {{ (nbFrames + '').padStart(3, '0') }}
           </span>
-          <span class="flexrow-item time-indicator is-hidden-desktop"> / </span>
-          <span
-            class="flexrow-item time-indicator is-hidden-desktop"
-            :title="$t('playlists.actions.max_duration')"
-          >
-            {{ maxDuration }}
-          </span>
-          <span
-            class="flexrow-item time-indicator mr1"
-            :title="$t('playlists.actions.frame_number')"
-          >
-            ({{ currentFrame }}&nbsp;/&nbsp;{{
-              (nbFrames + '').padStart(3, '0')
-            }})
-          </span>
-        </template>
+          )
+        </span>
       </div>
 
       <div class="separator"></div>
