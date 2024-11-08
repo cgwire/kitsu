@@ -181,7 +181,7 @@ export default {
       this.$router.push(this.sequencesPath)
     },
 
-    onSearchChange(event) {
+    onSearchChange() {
       const searchQuery = this.$refs['sequence-search-field'].getValue()
       this.setSequenceStatsSearch(searchQuery)
     },

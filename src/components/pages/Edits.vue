@@ -834,9 +834,10 @@ export default {
       const searchQuery = this.searchField.getValue() || ''
       if (searchQuery.length !== 1 && !this.isLongEditList) {
         this.applySearch(searchQuery)
-      }
-      if (searchQuery.length === 0 && this.isLongEditList) {
+      } else if (searchQuery.length === 0 && this.isLongEditList) {
         this.applySearch('')
+      } else {
+        this.setSearchInUrl()
       }
       if (clearSelection) {
         this.clearSelection()

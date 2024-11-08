@@ -941,9 +941,10 @@ export default {
       const searchQuery = this.searchField.getValue() || ''
       if (searchQuery.length !== 1 && !this.isLongShotList) {
         this.applySearch(searchQuery)
-      }
-      if (searchQuery.length === 0 && this.isLongShotList) {
+      } else if (searchQuery.length === 0 && this.isLongShotList) {
         this.applySearch('')
+      } else {
+        this.setSearchInUrl()
       }
       if (clearSelection) {
         this.clearSelection()
