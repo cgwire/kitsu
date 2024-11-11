@@ -9,7 +9,6 @@ import router from '@/router'
 import store from '@/store'
 
 import Autosize from 'v-autosize/src/plugin.js'
-// import Meta from 'vue-meta'
 import VueChartkick from 'vue-chartkick'
 import 'chartkick/chart.js'
 import VueWebsocket from 'vue-websocket-next'
@@ -17,11 +16,6 @@ import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
-/*
-configureCompat({
-  MODE: 3
-})
-*/
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 
@@ -39,7 +33,6 @@ app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket, IO, '/events')
 app.use(Autosize)
-// app.use(Meta)
 app.use(VueChartkick)
 app.use(VueAnimXYZ)
 
