@@ -845,8 +845,8 @@ export default {
         searchQuery !== 'undefined'
       ) {
         this.setAssetSearch(searchQuery)
-        this.setSearchInUrl()
       }
+      this.setSearchInUrl()
       if (clearSelection) {
         this.clearSelection()
       }
