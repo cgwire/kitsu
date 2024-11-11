@@ -6,6 +6,7 @@ import { groupEntitiesByParents } from '@/lib/models'
 
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
+import episodeStore from '@/store/modules/episodes'
 
 import {
   CASTING_SET_ASSET_TYPES,
@@ -79,7 +80,9 @@ const getters = {
 const actions = {
   setCastingForProductionEpisodes({ commit, rootState }, episodeId) {
     const production = rootState.productions.currentProduction
-    const episodes = Array.from(rootState.episodes.episodeMap.values()).sort(
+    if (!production) return Promise.resolve()
+
+    const episodes = Array.from(episodeStore.cache.episodeMap.values()).sort(
       (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })
     )
     commit(CASTING_SET_FOR_EPISODES, episodes)
