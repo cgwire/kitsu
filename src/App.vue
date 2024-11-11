@@ -68,7 +68,7 @@ export default {
     const config = await this.setMainConfig()
     this.setupDarkTheme()
     this.setupCrisp(config)
-    this.setupSentry(config)
+    // this.setupSentry(config)
   },
 
   methods: {
