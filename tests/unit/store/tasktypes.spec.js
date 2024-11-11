@@ -27,10 +27,8 @@ const taskTypes = [
   }
 ]
 
-const taskTypeMap = new Map()
-taskTypes.forEach(taskType => {
-  taskTypeMap.set(taskType.id, taskType)
-})
+const taskTypeMap = new Map(taskTypes.map(t => [t.id, t]))
+store.cache.taskTypeMap = taskTypeMap
 
 const rootGetters = {
   productionTaskTypes: taskTypes
@@ -140,14 +138,14 @@ describe('Task types store', () => {
     test('LOAD_TASK_TYPES_ERROR', () => {
       store.mutations.LOAD_TASK_TYPES_ERROR(state)
       expect(state.taskTypes).toEqual([])
-      expect(state.taskTypeMap.size).toEqual(0)
+      expect(store.cache.taskTypeMap.size).toEqual(0)
     })
 
     test('LOAD_TASK_TYPES_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
       expect(state.taskTypes).toStrictEqual(taskTypes)
-      expect(state.taskTypeMap.size).toEqual(4)
+      expect(store.cache.taskTypeMap.size).toEqual(4)
     })
 
     test('DELETE_TASK_TYPE_END', () => {
@@ -155,7 +153,7 @@ describe('Task types store', () => {
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
       store.mutations.DELETE_TASK_TYPE_END(state, { id: 'task-type-2' })
       expect(state.taskTypes).toHaveLength(3)
-      expect(state.taskTypeMap.size).toEqual(3)
+      expect(store.cache.taskTypeMap.size).toEqual(3)
     })
   })
 })

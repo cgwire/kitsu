@@ -1,4 +1,7 @@
 import store from '@/store/modules/productions'
+import assetTypeStore from '@/store/modules/assettypes'
+import taskStatusStore from '@/store/modules/taskstatus'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 import productionApi from '@/store/api/productions.js'
 import {
@@ -89,6 +92,9 @@ describe('Productions store', () => {
           }))
         }
       }
+      assetTypeStore.cache.assetTypeMap = rootState.assetTypes.assetTypeMap
+      taskStatusStore.cache.taskStatusMap = rootState.taskStatus.taskStatusMap
+      taskTypeStore.cache.taskTypeMap = rootState.taskTypes.taskTypeMap
     })
 
     test('isTVShow', () => {

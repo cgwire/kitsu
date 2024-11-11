@@ -1,13 +1,13 @@
-import { createStore } from 'vuex'
-
 import store from '@/store/modules/breakdown'
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
+
 import breakdownApi from '@/store/api/breakdown'
 
 breakdownApi.updateCasting = vi.fn()
 breakdownApi.getSequenceCasting = vi.fn()
 
-const vuexStore = createStore(store)
-const commit = vuexStore.commit
+const commit = store.commit
 
 describe('Breakdown store', () => {
   let state, shots, assetCasting, casting, assetMap, production, shotMap
@@ -128,6 +128,8 @@ describe('Breakdown store', () => {
       shotMap,
       displayedSequences: sequences
     }
+    assetStore.state.assetMap = assetMap
+    shotStore.state.shotMap = shotMap
     breakdownApi.getSequenceCasting.mockImplementation(
       () => Promise.resolve({ 'shot-1': assetCasting })
     )
@@ -138,16 +140,16 @@ describe('Breakdown store', () => {
       await store.actions.setCastingSequence(
         { commit, rootState, rootGetters }, 'sequence-1'
       )
-      expect(vuexStore.state.castingSequenceId).toEqual('sequence-1')
-      expect(vuexStore.state.castingSequenceShots).toEqual([shots[0]])
-      expect(vuexStore.state.casting['shot-1']).toEqual(assetCasting)
+      expect(store.state.castingSequenceId).toEqual('sequence-1')
+      expect(store.state.castingSequenceShots).toEqual([shots[0]])
+      expect(store.state.casting['shot-1']).toEqual(assetCasting)
     })
     test('setCastingEpisode', async () => {
       await store.actions.setCastingEpisode(
         { commit, rootState, rootGetters }, 'episode-1'
       )
-      expect(vuexStore.state.castingEpisodeId).toEqual('episode-1')
-      expect(vuexStore.state.castingSequencesOptions)
+      expect(store.state.castingEpisodeId).toEqual('episode-1')
+      expect(store.state.castingSequencesOptions)
         .toEqual(expectedSequencesOptions)
     })
     test('addAssetToCasting', async () => {
@@ -156,9 +158,9 @@ describe('Breakdown store', () => {
         assetId: 'asset-3',
         nbOccurences: 3
       })
-      expect(vuexStore.state.casting['shot-1'][2].asset_id)
+      expect(store.state.casting['shot-1'][2].asset_id)
         .toEqual('asset-2')
-      expect(vuexStore.state.castingByType['shot-1'][1][1].asset_id)
+      expect(store.state.castingByType['shot-1'][1][1].asset_id)
         .toEqual('asset-2')
     })
     test('removeAssetFromCasting', async () => {
@@ -167,9 +169,9 @@ describe('Breakdown store', () => {
         assetId: 'asset-2',
         nbOccurences: 1
       })
-      expect(vuexStore.state.casting['shot-1'][2].nb_occurences)
+      expect(store.state.casting['shot-1'][2].nb_occurences)
         .toEqual(1)
-      expect(vuexStore.state.castingByType['shot-1'][1][1].nb_occurences)
+      expect(store.state.castingByType['shot-1'][1][1].nb_occurences)
         .toEqual(1)
     })
     test('saveCasting', async () => {

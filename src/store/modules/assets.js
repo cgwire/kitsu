@@ -131,6 +131,9 @@ const helpers = {
       helpers.getTaskType(task.task_type_id),
       production || helpers.getCurrentProduction()
     ).toString()
+    console.log(
+      'task', task.task_status_id, taskStatusStore.cache.taskStatusMap
+    )
     task.task_status_short_name = helpers.getTaskStatus(
       task.task_status_id
     ).short_name
@@ -1102,6 +1105,7 @@ const mutations = {
   },
 
   [RESTORE_ASSET_END](state, assetToRestore) {
+    console.log(cache.assetMap)
     const asset = cache.assetMap.get(assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
