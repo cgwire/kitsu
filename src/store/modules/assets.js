@@ -1,5 +1,6 @@
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
+import assetTypeStore from '@/store/modules/assettypes'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
@@ -548,7 +549,7 @@ const actions = {
     if (existingAsset) {
       return Promise.reject(new Error('Asset already exists'))
     }
-    const assetTypeMap = rootState.assetTypes.assetTypeMap
+    const assetTypeMap = assetTypeStore.cache.assetTypeMap
     commit(LOCK_ASSET, data)
     commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
     return assetsApi.updateAsset(data).finally(() => {
