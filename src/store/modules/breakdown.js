@@ -145,7 +145,7 @@ const actions = {
   },
 
   setCastingEpisodes({ commit, rootState }) {
-    const episodes = Array.from(rootState.episodes.episodeMap.values())
+    const episodes = Array.from(episodeStore.cache.episodeMap.values())
     const production = rootState.productions.currentProduction
     commit(CASTING_SET_EPISODES, { production, episodes })
   },
