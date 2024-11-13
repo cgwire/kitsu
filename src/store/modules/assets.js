@@ -94,7 +94,7 @@ const helpers = {
     return taskTypesStore.cache.taskTypeMap.get(taskTypeId)
   },
   getTask(taskId) {
-    return tasksStore.cache.taskMap.get(taskId)
+    return tasksStore.state.taskMap.get(taskId)
   },
   getPerson(personId) {
     return peopleStore.cache.personMap.get(personId)
@@ -222,7 +222,7 @@ const helpers = {
     state,
     { assetSearch, production, sorting, taskStatusMap, taskTypeMap, persons }
   ) {
-    const taskMap = tasksStore.cache.taskMap
+    const taskMap = tasksStore.state.taskMap
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch

@@ -2,6 +2,7 @@ import moment from 'moment'
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 
+import episodeStore from '@/store/modules/episodes'
 import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
 import tasksStore from '@/store/modules/tasks'
@@ -389,7 +390,7 @@ const actions = {
     const userFilters = rootGetters.userFilters
     const userFilterGroups = rootGetters.userFilterGroups
     const taskTypeMap = rootGetters.taskTypeMap
-    const episodeMap = rootGetters.episodeMap
+    const episodeMap = episodeStore.cache.episodeMap
     const personMap = rootGetters.personMap
     const isTVShow = rootGetters.isTVShow
     let episode = isTVShow ? rootGetters.currentEpisode : null
@@ -481,7 +482,7 @@ const actions = {
   },
 
   newShot({ commit, dispatch, rootGetters }, shot) {
-    const episodeMap = rootGetters.episodeMap
+    const episodeMap = episodeStore.cache.episodeMap
     const sequenceMap = rootGetters.sequenceMap
     return shotsApi.newShot(shot).then(shot => {
       commit(NEW_SHOT_END, { shot, episodeMap, sequenceMap })
