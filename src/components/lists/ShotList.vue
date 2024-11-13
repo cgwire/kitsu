@@ -258,11 +258,6 @@
                   @click="$emit('sequence-clicked', group[0].sequence_name)"
                 >
                   {{ group[0] ? group[0].sequence_name : '' }}
-                  <!--info-question-mark
-                  class="flexrow-item"
-                  :text="sequenceMap.get(group[0].sequence_id).description"
-                  v-if="sequenceMap.get(group[0].sequence_id).description"
-                /-->
                 </div>
               </th>
             </tr>
