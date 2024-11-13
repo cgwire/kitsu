@@ -66,7 +66,7 @@
                 v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
               />
             </template>
-            <template v-if="!isShowLoading">
+            <template>
               <validation-header
                 :ref="`validation-${columnIndexInGrid}`"
                 :key="columnId"
@@ -235,7 +235,7 @@
               </th>
 
               <!-- Metadata stick -->
-              <template v-if="isShowInfos">
+              <template v-if="isShowInfos && !isLoading">
                 <td
                   :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
@@ -341,23 +341,6 @@
 
               <!-- other Metadata cells -->
               <template v-if="isShowInfos">
-                <td
-                  class="metadata-descriptor"
-                  :title="
-                    sequence.data ? sequence.data[descriptor.field_name] : ''
-                  "
-                  :key="sequence.id + '-' + descriptor.id"
-                  v-for="(
-                    descriptor, j
-                  ) in nonStickedVisibleMetadataDescriptors"
-                >
-                  <metadata-input
-                    :entity="sequence"
-                    :descriptor="descriptor"
-                    :indexes="{ i, j }"
-                    @metadata-changed="$emit('metadata-changed', $event)"
-                  />
-                </td>
                 <td
                   class="metadata-descriptor"
                   :title="
