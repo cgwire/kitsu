@@ -715,10 +715,12 @@ export default {
 
     previewOptions() {
       if (!this.taskPreviews) return []
-      return this.taskPreviews.map(preview => ({
-        value: preview.id,
-        label: `v${preview.revision}`
-      }))
+      return [...this.taskPreviews]
+        .sort((a, b) => b.revision - a.revision)
+        .map(preview => ({
+          value: preview.id,
+          label: `v${preview.revision}`
+        }))
     },
 
     selectedTasksToDisplay() {
