@@ -1,0 +1,2 @@
+import{n as s}from"./index-BBnYp8lc.js";const t={name:"wrong-browser"};var n=function(){var r=this,e=r._self._c;return e("div",{staticClass:"server-down page"},[e("h1",{staticClass:"title"},[r._v(r._s(r.$t("wrong_browser.title")))]),e("p",[r._v(" "+r._s(r.$t("wrong_browser.text"))+" ")])])},o=[],_=s(t,n,o,!1,null,null);const l=_.exports;export{l as default};
+//# sourceMappingURL=WrongBrowser-DgmNQq_K.js.map
