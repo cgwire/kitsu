@@ -123,14 +123,14 @@
               <date-field
                 :label="$t('main.start_date')"
                 :placeholder="startDatePlaceholder"
-                max-date="productionToCreate.settings.dateEnd"
+                :max-date="productionToCreate.settings.dateEnd"
                 v-model="productionToCreate.settings.dateStart"
               />
               <span class="input-separator">-</span>
               <date-field
-                :label="$t('main.start_end')"
-                :placeholder="startEndPlaceholder"
-                min-date="productionToCreate.settings.dateStart"
+                :label="$t('main.end_date')"
+                :placeholder="endDatePlaceholder"
+                :min-date="productionToCreate.settings.dateStart"
                 v-model="productionToCreate.settings.dateEnd"
               />
             </div>
