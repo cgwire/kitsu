@@ -16,7 +16,7 @@ export default {
 
   getPlaylist(production, playlist, callback) {
     const path = `/api/data/projects/${production.id}/playlists/${playlist.id}`
-    client.get(path, callback)
+    return client.pget(path, callback)
   },
 
   getEntityPreviewFiles(entity, callback) {
