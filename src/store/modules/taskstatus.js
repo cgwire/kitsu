@@ -72,7 +72,7 @@ const getters = {
     },
 
   getTaskStatus: state => id => {
-    return state.taskStatuseses.find(taskStatus => taskStatus.id === id)
+    return state.taskStatuses.find(taskStatus => taskStatus.id === id)
   },
 
   taskStatusOptions: state =>
