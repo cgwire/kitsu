@@ -7,7 +7,6 @@ import {
   ADD_PLAYLISTS,
   LOAD_PLAYLISTS_END,
   LOAD_PLAYLIST_START,
-  LOAD_PLAYLIST_ERROR,
   LOAD_PLAYLIST_END,
   EDIT_PLAYLIST_START,
   EDIT_PLAYLIST_ERROR,
@@ -84,14 +83,18 @@ const actions = {
       })
   },
 
-  loadPlaylist({ commit, rootGetters }, { playlist, callback }) {
+  loadPlaylist({ commit, rootGetters }, playlist) {
     const currentProduction = rootGetters.currentProduction
     commit(LOAD_PLAYLIST_START)
-    playlistsApi.getPlaylist(currentProduction, playlist, (err, playlist) => {
-      if (err) commit(LOAD_PLAYLIST_ERROR)
-      else commit(LOAD_PLAYLIST_END, playlist)
-      if (callback) callback(err, playlist)
-    })
+    return playlistsApi.getPlaylist(currentProduction, playlist)
+      .then(playlist => {
+        commit(LOAD_PLAYLIST_END, playlist)
+        return Promise.resolve(playlist)
+      })
+      .catch(err => {
+        console.error(err)
+        return Promise.resolve({})
+      })
   },
 
   refreshPlaylist({ commit, rootGetters }, id) {
@@ -239,8 +242,6 @@ const mutations = {
   },
 
   [LOAD_PLAYLIST_START](state) {},
-
-  [LOAD_PLAYLIST_ERROR](state) {},
 
   [LOAD_PLAYLIST_END](state, playlist) {
     state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
