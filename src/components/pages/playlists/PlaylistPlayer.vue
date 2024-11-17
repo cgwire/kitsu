@@ -302,6 +302,7 @@
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
+        :player="this"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
       />

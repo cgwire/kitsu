@@ -395,6 +395,10 @@ export default {
     withActions: {
       type: Boolean,
       default: false
+    },
+    player: {
+      type: Object,
+      default: null
     }
   },
 
@@ -1194,7 +1198,7 @@ export default {
 
     async extractAnnotationSnapshots() {
       let previewPlayer = this.$refs['preview-player']
-      if (!previewPlayer) previewPlayer = this.$parent
+      if (!previewPlayer) previewPlayer = this.player
       this.$refs['add-comment'].showAnnotationLoading()
       const files = await previewPlayer.extractAnnotationSnapshots()
       this.$refs['add-comment'].hideAnnotationLoading()
