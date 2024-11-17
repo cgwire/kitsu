@@ -524,22 +524,25 @@ export const entityListMixin = {
       if (task) {
         const entityMap = entityMaps[this.type]
         const entity = entityMap.get(task.entity_id)
-        const taskType = this.taskTypeMap.get(task.task_type_id)
 
-        let list = this[`displayed${stringHelpers.capitalize(this.type)}s`]
-        if (['asset', 'shot'].includes(this.type)) {
-          list = list.flat()
+        if (entity) {
+          const taskType = this.taskTypeMap.get(task.task_type_id)
+
+          let list = this[`displayed${stringHelpers.capitalize(this.type)}s`]
+          if (['asset', 'shot'].includes(this.type)) {
+            list = list.flat()
+          }
+          const x = list.findIndex(e => e.id === entity.id)
+          const y = this.validationColumns.indexOf(task.task_type_id)
+
+          this.$store.commit('ADD_SELECTED_TASK', {
+            task,
+            entity,
+            column: taskType,
+            x,
+            y
+          })
         }
-        const x = list.findIndex(e => e.id === entity.id)
-        const y = this.validationColumns.indexOf(task.task_type_id)
-
-        this.$store.commit('ADD_SELECTED_TASK', {
-          task,
-          entity,
-          column: taskType,
-          x,
-          y
-        })
       }
     }
   },
