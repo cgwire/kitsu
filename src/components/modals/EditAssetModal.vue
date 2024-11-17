@@ -35,18 +35,18 @@
             @enter="runConfirmation"
             v-focus
           />
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            v-model="form.data.resolution"
-            @enter="runConfirmation"
-          />
-          <textarea-field
+         <textarea-field
             ref="descriptionField"
             :label="$t('assets.fields.description')"
             v-model="form.description"
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
+          />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            v-model="form.data.resolution"
+            @enter="runConfirmation"
           />
           <template v-if="assetToEdit">
             <metadata-field
@@ -72,7 +72,6 @@
               'is-primary': true,
               'is-loading': isLoadingStay
             }"
-            :disabled="form.name && form.name.length === 0"
             @click="confirmAndStayClicked"
             v-if="!assetToEdit || !assetToEdit.id"
           >
@@ -84,7 +83,6 @@
               'is-primary': true,
               'is-loading': isLoading
             }"
-            :disabled="form.name && form.name.length === 0"
             @click="confirmClicked"
           >
             {{ $t('main.confirmation') }}
