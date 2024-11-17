@@ -100,6 +100,7 @@ export default {
   watch: {
     localValue() {
       if (!this.silent) {
+        if (this.localValue) this.localValue.setHours(0, 0, 0, 0)
         this.$emit('update:modelValue', this.localValue)
       }
     },
