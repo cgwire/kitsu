@@ -29,6 +29,7 @@ import {
   CLEAR_SEQUENCES,
   CLEAR_SELECTED_SEQUENCES,
   CLEAR_SELECTED_TASKS,
+  CLEAR_SHOTS,
   COMPUTE_SEQUENCE_STATS,
   CREATE_TASKS_END,
   DELETE_TASK_END,
@@ -580,6 +581,14 @@ const mutations = {
     }
   },
 
+  [CLEAR_SHOTS](state) {
+    cache.sequences = []
+    state.currentSequence = null
+    state.displayedSequences = []
+    cache.sequenceMap = new Map()
+    state.selectedSequences = new Map()
+  },
+
   [CLEAR_SELECTED_SEQUENCES](state) {
     state.selectedSequences = new Map()
   },
@@ -587,6 +596,9 @@ const mutations = {
   [CLEAR_SEQUENCES](state) {
     cache.sequences = []
     state.currentSequence = null
+    state.displayedSequences = []
+    cache.sequenceMap = new Map()
+    state.selectedSequences = new Map()
   },
 
   [SET_CURRENT_PRODUCTION](state, production) {
@@ -773,7 +785,7 @@ const mutations = {
     helpers.setListStats(state, cache.sequences)
     cache.sequenceMap.set(sequence.id, sequence)
     state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
-    // cache.sequenceIndex = buildNameIndex(cache.sequences)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
   [EDIT_SEQUENCE_END](state, newSequence) {
