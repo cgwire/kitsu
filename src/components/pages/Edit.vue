@@ -40,11 +40,10 @@
         <div class="flexrow-item block mt0">
           <preview-room
             :ref="previewRoomRef"
-            :room-id="
-              currentEdit && isValidRoomId(currentEdit.id) ? currentEdit.id : ''
-            "
-            :join-room="joinRoom"
-            :leave-room="leaveRoom"
+            :room="room"
+            @open-room="openRoom"
+            @join-room="joinRoom"
+            @leave-room="leaveRoom"
             v-if="
               currentEdit &&
               isValidRoomId(currentEdit.id) &&
@@ -658,6 +657,7 @@ export default {
 
   data() {
     return {
+      type: 'edit',
       currentEdit: null,
       currentSection: 'infos',
       isLoading: true,
@@ -665,6 +665,11 @@ export default {
       movieDimensions: { width: 0, height: 0 },
       previewRoomRef: 'edits-preview-room',
       previewFileMap: new Map(),
+      room: {
+        id: null,
+        people: [],
+        newComer: true
+      },
       tempMode: false,
       errors: {
         edit: false
@@ -902,6 +907,7 @@ export default {
       this.$nextTick(() => {
         this.loadEdits().then(() => {
           this.currentEdit = this.getCurrentEdit()
+          this.room.id = this.currentEdit ? this.currentEdit.id : null
           if (!this.currentEdit) {
             return
           }
@@ -938,6 +944,10 @@ export default {
   },
 
   watch: {
+    currentEdit() {
+      this.room.id = this.currentEdit ? this.currentEdit.id : null
+    },
+
     // Needed when reloading the page with F5
     currentProduction() {
       if (!this.isTVShow) this.resetData()

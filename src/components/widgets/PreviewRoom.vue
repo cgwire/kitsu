@@ -1,20 +1,15 @@
-<template v-if="roomId">
-  <div class="preview-room">
+<template v-if="room.id">
+  <div class="preview-room mr05">
     <button-simple
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"
-      @click="
-        () => {
-          leaveRoom()
-          openRoom()
-        }
-      "
+      @click="onLeaveClicked"
       v-if="joinedRoom"
     />
     <button-simple
       :text="$t('preview_room.join_room')"
       class="preview-room-button"
-      @click="joinRoom"
+      @click="onJoinClicked"
       v-else
     />
     <people-avatar
@@ -44,18 +39,16 @@ export default {
   },
 
   props: {
-    roomId: { type: String },
-    joinRoom: { type: Function },
-    leaveRoom: { type: Function }
+    room: {
+      type: Object,
+      default: () => {}
+    }
   },
 
+  emits: ['join-room', 'leave-room', 'open-room'],
+
   data() {
-    return {
-      room: {
-        people: [],
-        newComer: true
-      }
-    }
+    return {}
   },
 
   mounted() {
@@ -66,25 +59,28 @@ export default {
     ...mapGetters(['personMap', 'user']),
 
     peopleInRoom() {
-      return this.room.people.map(id => this.personMap.get(id)).filter(Boolean)
+      return this.room.people.map(id => this.personMap.get(id)) // .filter(Boolean)
     },
 
     joinedRoom() {
-      if (!this.roomId) {
-        return
-      }
-      return this.room.people.some(id => id === this.user.id)
+      if (!this.room.id) return
+      return this.room.people.find(id => id === this.user.id)
     }
   },
 
   methods: {
     openRoom() {
-      if (!this.roomId) {
-        return
-      }
-      this.$socket.emit('preview-room:open-playlist', {
-        playlist_id: this.roomId
-      })
+      if (!this.room.id) return
+      this.$emit('open-room', this.room.id)
+    },
+
+    onJoinClicked() {
+      this.$emit('join-room', this.room.id)
+    },
+
+    onLeaveClicked() {
+      this.$emit('leave-room', this.room.id)
+      this.openRoom()
     }
   }
 }

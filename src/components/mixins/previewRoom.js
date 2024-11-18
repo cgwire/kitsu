@@ -1,28 +1,17 @@
 export const previewRoomMixin = {
-  emits: [
-    'preview-room:add-annotation',
-    'preview-room:join',
-    'preview-room:leave',
-    'preview-room:remove-annotation',
-    'preview-room:update-annotation',
-    'preview-room:update-playing-status'
-  ],
+  emits: [],
 
   computed: {
-    room() {
-      return this.previewRoom().room
-    },
-
     joinedRoom() {
-      return this.previewRoom() && this.previewRoom().joinedRoom
+      return this.room.people.find(id => id === this.user.id)
     }
   },
 
   methods: {
-    previewRoom() {
-      // N.B.: computed won't work in this case because it will
-      // cache the invalid value before component is rendered.
-      return this.$refs[this.previewRoomRef]
+    openRoom() {
+      this.$socket.emit('preview-room:open-playlist', {
+        playlist_id: this.room.id
+      })
     },
 
     isValidRoomId(value) {
@@ -33,12 +22,12 @@ export const previewRoomMixin = {
     },
 
     joinRoom() {
-      if (!this.previewRoom()) return
+      if (!this.room.id) return
       if (this.isFullMode) this.isFullMode = false
 
       this.$socket.emit('preview-room:join', {
         user_id: this.user.id,
-        playlist_id: this.previewRoom().roomId,
+        playlist_id: this.room.id,
         is_playing: this.isPlaying,
         current_entity_index: this.playingEntityIndex,
         current_preview_file_id: this.playingPreviewFileId,
@@ -59,11 +48,11 @@ export const previewRoomMixin = {
     },
 
     leaveRoom() {
-      if (!this.previewRoom()) return
+      if (!this.room.id) return
       if (!this.user) return
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id,
-        playlist_id: this.previewRoom().roomId
+        playlist_id: this.room.id
       })
     },
 
@@ -78,11 +67,11 @@ export const previewRoomMixin = {
     },
 
     updateRoomStatus() {
-      if (!this.previewRoom()) return
+      if (!this.room.id) return
       if (!this.joinedRoom) return
 
       this.$socket.emit('preview-room:update-playing-status', {
-        playlist_id: this.previewRoom().roomId,
+        playlist_id: this.room.id,
         is_playing: this.isPlaying,
         current_entity_index: this.playingEntityIndex,
         current_preview_file_id: this.playingPreviewFileId,
@@ -103,9 +92,9 @@ export const previewRoomMixin = {
     },
 
     postAnnotationAddition(time, serializedObj) {
-      if (!this.previewRoom()) return
+      if (!this.room.id) return
       this.$socket.emit('preview-room:add-annotation', {
-        playlist_id: this.previewRoom().roomId,
+        playlist_id: this.room.id,
         data: {
           user_id: this.user.id,
           time,
@@ -115,9 +104,9 @@ export const previewRoomMixin = {
     },
 
     postAnnotationDeletion(time, serializedObj) {
-      if (!this.previewRoom()) return
+      if (!this.room.id) return
       this.$socket.emit('preview-room:remove-annotation', {
-        playlist_id: this.previewRoom().roomId,
+        playlist_id: this.room.id,
         data: {
           user_id: this.user.id,
           time,
@@ -127,9 +116,9 @@ export const previewRoomMixin = {
     },
 
     postAnnotationUpdate(time, serializedObj) {
-      if (!this.previewRoom()) return
-      this.$socket.emit('preview-room:update-annotation', {
-        playlist_id: this.previewRoom().roomId,
+      if (!this.room.id) return
+      this.$socket.emit('preview-update-annotation', {
+        playlist_id: this.room.id,
         data: {
           user_id: this.user.id,
           time,
@@ -260,36 +249,32 @@ export const previewRoomMixin = {
   },
 
   /* N.B.: socket.events are not part of Vue's mixin boilerplate and
-   * must be included explicitly in each component using preview rooms!
+   * must be included explicitly in each component using preview !
    */
   socket: {
     events: {
       'preview-room:room-people-updated'(eventData) {
         // someone joined the room
-        if (!this.previewRoom()) return
+        if (!this.room.id) return
 
+        this.room.people = eventData.people
         if (this.joinedRoom) {
-          this.room.people = eventData.people
-        } else {
-          this.room.people = eventData.people
-          if (this.joinedRoom) {
-            this.room.newComer = false
-            this.loadRoomCurrentState(eventData)
-          }
+          this.room.newComer = false
+          this.loadRoomCurrentState(eventData)
         }
       },
 
       'preview-room:room-updated'(eventData) {
-        if (!this.previewRoom()) return
+        if (!this.room) return
 
-        this.room.people = eventData.people
+        this.people = eventData.people
         if (!this.joinedRoom) return
-        if (eventData.only_newcomer && !this.room.newComer) return
+        if (eventData.only_newcomer && !this.newComer) return
         this.loadRoomCurrentState(eventData)
       },
 
       'preview-room:add-annotation'(eventData) {
-        if (!this.previewRoom()) return
+        if (!this.room) return
         if (!this.joinedRoom) return
         const annotation = this.getAnnotation(eventData.time)
         const obj = eventData.data.obj
@@ -303,7 +288,7 @@ export const previewRoomMixin = {
       },
 
       'preview-room:remove-annotation'(eventData) {
-        if (!this.previewRoom()) return
+        if (!this.room) return
 
         if (!this.joinedRoom) return
         const obj = eventData.data.obj
@@ -312,7 +297,7 @@ export const previewRoomMixin = {
       },
 
       'preview-room:update-annotation'(eventData) {
-        if (!this.previewRoom()) return
+        if (!this.room) return
         if (!this.joinedRoom) return
         // if (this.user.id === eventData.data.user_id) return
         const annotation = this.getAnnotation(eventData.time)

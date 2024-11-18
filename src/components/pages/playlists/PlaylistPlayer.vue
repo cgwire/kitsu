@@ -56,10 +56,10 @@
       />
 
       <preview-room
-        :ref="previewRoomRef"
-        :room-id="isValidRoomId(playlist.id) ? playlist.id : ''"
-        :join-room="joinRoom"
-        :leave-room="leaveRoom"
+        :room="room"
+        @open-room="openRoom"
+        @join-room="joinRoom"
+        @leave-room="leaveRoom"
         v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
@@ -1067,12 +1067,15 @@ export default {
       playlistDuration: 0,
       playlistProgress: 0,
       playlistToEdit: {},
-      previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
       savedTaskTypeToCompare: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
       revisionToCompare: null,
+      room: {
+        people: [],
+        newComer: true
+      },
       modals: {
         delete: false,
         taskType: false
@@ -1101,6 +1104,7 @@ export default {
       this.entityList = []
     }
     this.resetPlaylistFrameData()
+    this.room.id = this.playlist.id
     this.$nextTick(() => {
       this.configureEvents()
       this.setupFabricCanvas()
@@ -2156,6 +2160,7 @@ export default {
 
     playlist() {
       this.endAnnotationSaving()
+      this.room.id = this.playlist.id
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
@@ -2219,10 +2224,6 @@ export default {
     events: {
       ...previewRoomMixin.socket.events,
       ...playerMixin.socket.events
-
-      // TODO (?) :
-      // - handle updating the playlist order, adding/removing items
-      // - sync number of frames per image
     }
   }
 }
