@@ -476,7 +476,7 @@ export default {
       }
     },
 
-    loadFollowingNotifications() {
+    async loadFollowingNotifications() {
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
         const params = {
@@ -490,9 +490,8 @@ export default {
         if (this.parameters.watchingMode) {
           params.watching = this.parameters.watchingMode === 'watching'
         }
-        this.loadMoreNotifications().then(() => {
-          this.loading.more = false
-        })
+        await this.loadMoreNotifications(params)
+        this.loading.more = false
       }
     },
 
