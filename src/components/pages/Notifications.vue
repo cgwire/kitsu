@@ -136,7 +136,6 @@
                 <boolean-field
                   class="selector"
                   :label="$t('notifications.read')"
-                  :is-field="false"
                   is-small
                   @input="value => toggleNotificationRead(notification, value)"
                   :value="notification.read ? 'true' : 'false'"
