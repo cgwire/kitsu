@@ -130,7 +130,7 @@
                 :value="task.difficulty"
                 @input="updateDifficulty($event)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
-                v-models="task.difficulty"
+                v-model="task.difficulty"
               />
               <span
                 class="difficulty number-cell"
