@@ -17,6 +17,8 @@
         "
         :is-movie-preview="isMoviePreview"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
+        :production-id="currentProductionId"
+        :team="currentTeam"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
       />
@@ -466,6 +468,7 @@ export default {
     ...mapGetters([
       'isSavingCommentPreview',
       'currentEpisode',
+      'currentProduction',
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
@@ -507,6 +510,10 @@ export default {
 
     selectedEntities() {
       return this[`selected${this.entityType}s`]
+    },
+
+    currentProductionId() {
+      return this.task?.project_id || this.currentProduction?.id
     },
 
     currentTeam() {
