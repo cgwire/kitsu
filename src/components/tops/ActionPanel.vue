@@ -355,28 +355,26 @@
           class="flexcolumn flexrow-item is-wide"
           v-if="selectedBar === 'assignation'"
         >
-          <div class="assignation flexrow-item">
-            <span v-show="isCurrentUserArtist">
-              {{ $tc('tasks.to_myself') }}
-            </span>
+          <div class="mb05" v-if="isCurrentUserArtist">
+            {{ $tc('tasks.to_myself') }}
           </div>
-          <div class="flexrow mb05">
+          <div
+            class="mb05"
+            v-else-if="isCurrentUserManager || isCurrentUserSupervisor"
+          >
             <people-field
-              class="flexrow-item is-wide assignation-field"
+              class="is-wide assignation-field"
               ref="assignation-field"
               :people="currentTeam"
               :placeholder="$t('tasks.assign_explaination')"
               big
               wide
               v-model="person"
-              v-show="isCurrentUserManager || isCurrentUserSupervisor"
             />
           </div>
-          <div v-if="loading.assignation">
-            <div class="flexrow-item">
-              <spinner :size="20" class="spinner" />
-            </div>
-            <div class="flexrow-item">&nbsp;</div>
+
+          <div class="flexrow-item mt1 mb1" v-if="loading.assignation">
+            <spinner :size="20" class="spinner" />
           </div>
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
@@ -387,7 +385,7 @@
             </button>
           </div>
           <div
-            class="flexrow-item is-wide has-text-centered flexrow"
+            class="flexrow-item is-wide flexrow"
             v-if="
               !loading.assignation &&
               (isCurrentUserManager || isSupervisorInDepartment)
@@ -400,9 +398,7 @@
               >
                 {{ $t('tasks.clear_assignations') }}
               </button>
-              <span>
-                {{ $t('main.or') }}
-              </span>
+              {{ $t('main.or') }}
               <button
                 class="button is-link clear-assignation-button"
                 @click="clearAllAssignations"
