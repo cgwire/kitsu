@@ -967,6 +967,7 @@ export default {
     currentEntityType() {
       if (this.isCurrentViewAsset) return 'asset'
       if (this.isCurrentViewShot) return 'shot'
+      if (this.isCurrentViewSequence) return 'sequence'
       if (this.isCurrentViewEdit) return 'edit'
       return 'episode'
     },
