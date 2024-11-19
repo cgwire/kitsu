@@ -1315,7 +1315,7 @@ export default {
 
   watch: {
     $route() {
-      if (this.$route.params.task_id !== this.task.id) {
+      if (this.task && this.$route.params.task_id !== this.task.id) {
         this.loadTaskData()
       }
       if (this.$route.params.preview_id !== this.selectedPreviewId) {
