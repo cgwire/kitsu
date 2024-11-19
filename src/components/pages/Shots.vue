@@ -1251,6 +1251,11 @@ export default {
           ` | ${this.$t('shots.title')} - Kitsu`
       }
     }
+    if (!this.currentProduction) {
+      return {
+        title: `${this.$t('shots.title')} - Kitsu`
+      }
+    }
     return {
       title: `${this.currentProduction.name} | ${this.$t('shots.title')} - Kitsu`
     }

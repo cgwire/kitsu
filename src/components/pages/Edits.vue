@@ -317,6 +317,7 @@ export default {
       departmentFilter: [],
       editToDelete: null,
       editToEdit: null,
+      editToRestore: null,
       formData: null,
       genericColumns: [
         'Metadata column name (text value)',

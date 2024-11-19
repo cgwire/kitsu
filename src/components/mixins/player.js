@@ -1027,7 +1027,7 @@ export const playerMixin = {
         duration = floorToFrame(duration, this.fps)
         this.maxDurationRaw = duration
         this.maxDuration = this.formatTime(duration, this.fps)
-        this.resetHandles()
+        if (this.resetHandles) this.resetHandles()
       } else {
         this.maxDurationRaw = 0
         this.maxDuration = '00.00.000'
