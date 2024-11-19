@@ -31,7 +31,6 @@
             <previews-per-task-type
               ref="previews-per-task-type"
               :entity="currentEntity"
-              :entity-map="editMap"
               @preview-changed="onPreviewChanged"
             />
           </div>
@@ -587,6 +586,8 @@ import {
   DownloadIcon
 } from 'lucide-vue-next'
 
+import editStore from '@/store/modules/edits'
+
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
 import { entityMixin } from '@/components/mixins/entity'
@@ -607,6 +608,7 @@ import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
@@ -614,6 +616,7 @@ import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import SoundViewer from '@/components/previews/SoundViewer.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
 
@@ -644,11 +647,13 @@ export default {
     EntityTaskList,
     EntityTimeLogs,
     EntityThumbnail,
+    ObjectViewer,
     PageSubtitle,
     PencilPicker,
     PreviewRoom,
     PreviewsPerTaskType,
     RawVideoPlayer,
+    SoundViewer,
     Schedule,
     Spinner,
     TaskInfo,
@@ -715,7 +720,6 @@ export default {
       'isCurrentUserManager',
       'isTVShow',
       'route',
-      'editMap',
       'editMetadataDescriptors',
       'taskMap',
       'taskTypeMap',
@@ -831,7 +835,7 @@ export default {
     },
 
     getCurrentEdit() {
-      return this.editMap.get(this.route.params.edit_id) || null
+      return editStore.cache.editMap.get(this.route.params.edit_id) || null
     },
 
     confirmEditEdit(form) {
@@ -954,7 +958,7 @@ export default {
     },
 
     currentEpisode() {
-      if (this.isTVShow && this.editMap.size === 0) {
+      if (this.isTVShow && editStore.cache.editMap.size === 0) {
         this.resetData()
       }
     },

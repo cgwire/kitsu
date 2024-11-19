@@ -363,6 +363,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 
+import assetStore from '@/store/modules/assets'
+
 import { sortByName } from '@/lib/sorting'
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
@@ -632,11 +634,11 @@ export default {
         const assetId = this.route.params.asset_id
         this.currentAssetId = assetId
         if (!assetId) resolve(null)
-        let asset = this.assetMap.get(assetId) || null
+        let asset = assetStore.cache.assetMap.get(assetId) || null
         if (!asset) {
           if (assetId) {
             return this.loadAsset(assetId).then(() => {
-              asset = this.assetMap.get(assetId)
+              asset = assetStore.cache.assetMap.get(assetId)
               this.localTasks = asset.tasks.map(taskId =>
                 this.taskMap.get(taskId)
               )

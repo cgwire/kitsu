@@ -62,6 +62,23 @@
                     </td>
                     <description-cell :entry="currentEpisode" :full="true" />
                   </tr>
+
+                  <tr
+                    class="datatable-row"
+                    v-if="
+                      currentEpisode &&
+                      currentEpisode.data &&
+                      currentEpisode.data.resolution
+                    "
+                  >
+                    <td class="field-label">
+                      {{ $t('shots.fields.resolution') }}
+                    </td>
+                    <td>
+                      {{ currentEpisode ? currentEpisode.data.resolution : '' }}
+                    </td>
+                  </tr>
+
                   <tr
                     :key="descriptor.id"
                     class="datatable-row"
@@ -242,6 +259,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 
+import episodeStore from '@/store/modules/episodes'
+
 import { episodifyRoute } from '@/lib/path'
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
@@ -405,19 +424,16 @@ export default {
         .catch(console.error)
     },
 
-    loadCurrentEpisode() {
-      return new Promise((resolve, reject) => {
-        const episodeId = this.route.params.episode_id
-        const episode = this.episodeMap.get(episodeId) || null
-        if (!episode || !episode.validations) {
-          return this.loadEpisodesWithTasks().then(() => {
-            const episode = this.episodeMap.get(episodeId) || null
-            return resolve(episode)
-          })
-        } else {
-          return resolve(episode)
-        }
-      })
+    async loadCurrentEpisode() {
+      const episodeId = this.route.params.episode_id
+      const episode = episodeStore.cache.episodeMap.get(episodeId) || null
+      if (!episode || !episode.validations) {
+        await this.loadEpisodesWithTasks()
+        const episode = episodeStore.episodeMap.get(episodeId) || null
+        return episode
+      } else {
+        return episode
+      }
     },
 
     confirmEditEpisode(form) {

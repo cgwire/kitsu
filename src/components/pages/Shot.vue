@@ -327,6 +327,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 
+import shotStore from '@/store/modules/shots'
+
 import { episodifyRoute } from '@/lib/path'
 import { entityMixin } from '@/components/mixins/entity'
 import { formatListMixin } from '@/components/mixins/format'
@@ -494,7 +496,7 @@ export default {
     getCurrentShot() {
       return new Promise((resolve, reject) => {
         const shotId = this.route.params.shot_id
-        const shot = this.shotMap.get(shotId) || null
+        const shot = shotStore.cache.shotMap.get(shotId) || null
         if (!shot) {
           return this.loadShot(shotId).then(resolve)
         } else {
