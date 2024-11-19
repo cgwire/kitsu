@@ -455,6 +455,7 @@
   </div>
 </template>
 <script>
+import { ref } from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
@@ -661,6 +662,7 @@ export default {
       'displayMoreShots',
       'editPlaylist',
       'getPending',
+      'loadEpisodes',
       'loadMorePlaylists',
       'loadPlaylist',
       'loadPlaylists',
@@ -722,7 +724,7 @@ export default {
 
     // Data loading
 
-    loadShotsData(callback) {
+    async loadShotsData() {
       if (
         this.displayedShots.length === 0 ||
         this.displayedShots[0].project_id !== this.currentProduction.id ||
@@ -735,12 +737,13 @@ export default {
           (this.currentEpisode.id === 'main' ||
             this.currentEpisode.id === 'all')
         ) {
-          callback()
+          // Do nothing for main or all episodes
         } else {
-          this.loadShots(callback)
+          if (this.isTVShow && !this.currentEpisode) {
+            await this.loadEpisodes()
+          }
+          await this.loadShots()
         }
-      } else {
-        callback()
       }
     },
 
@@ -917,7 +920,7 @@ export default {
         this.loading.playlist = true
         this.loadPlaylist(playlist)
           .then(loadedPlaylist => {
-            this.currentPlaylist = loadedPlaylist
+            this.currentPlaylist = ref(loadedPlaylist)
             this.rebuildCurrentEntities()
             this.loading.playlist = false
             if (callback) callback()
@@ -1302,23 +1305,18 @@ export default {
 
     // Loading
 
-    reloadAll() {
+    async reloadAll() {
       if (!this.loading.playlists) {
         this.loading.playlists = true
-        this.loadShotsData(() => {
-          this.loadAssetsData()
-            .then(() => {
-              this.page = 1
-              return this.loadPlaylistsData()
-            })
-            .then(() => {
-              this.loading.playlists = false
-              this.resetPlaylist()
-              setTimeout(() => {
-                this.loading.playlistsInit = false
-              }, 300)
-            })
-        })
+        await this.loadShotsData()
+        await this.loadAssetsData()
+        this.page = 1
+        await this.loadPlaylistsData()
+        this.loading.playlists = false
+        this.resetPlaylist()
+        setTimeout(() => {
+          this.loading.playlistsInit = false
+        }, 300)
       }
     }
   },
