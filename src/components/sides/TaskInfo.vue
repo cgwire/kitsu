@@ -91,6 +91,7 @@
                     :options="previewOptions"
                     is-preview
                     thin
+                    :value="previewOptions[currentPreviewIndex]?.value"
                     @input="onPreviewChanged"
                   />
                 </div>

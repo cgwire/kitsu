@@ -444,6 +444,7 @@
               is-reversed
               is-preview
               thin
+              :value="currentPreview?.id"
               @input="changeCurrentPreviewFile"
             />
           </div>
