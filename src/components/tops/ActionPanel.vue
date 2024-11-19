@@ -355,28 +355,26 @@
           class="flexcolumn flexrow-item is-wide"
           v-if="selectedBar === 'assignation'"
         >
-          <div class="assignation flexrow-item">
-            <span v-show="isCurrentUserArtist">
-              {{ $tc('tasks.to_myself') }}
-            </span>
+          <div class="mb05" v-if="isCurrentUserArtist">
+            {{ $tc('tasks.to_myself') }}
           </div>
-          <div class="flexrow mb05">
+          <div
+            class="mb05"
+            v-else-if="isCurrentUserManager || isCurrentUserSupervisor"
+          >
             <people-field
-              class="flexrow-item is-wide assignation-field"
+              class="is-wide assignation-field"
               ref="assignation-field"
               :people="currentTeam"
               :placeholder="$t('tasks.assign_explaination')"
               big
               wide
               v-model="person"
-              v-show="isCurrentUserManager || isCurrentUserSupervisor"
             />
           </div>
-          <div v-if="loading.assignation">
-            <div class="flexrow-item">
-              <spinner :size="20" class="spinner" />
-            </div>
-            <div class="flexrow-item">&nbsp;</div>
+
+          <div class="flexrow-item mt1 mb1" v-if="loading.assignation">
+            <spinner :size="20" class="spinner" />
           </div>
           <div class="flexrow-item is-wide" v-if="!loading.assignation">
             <button
@@ -387,7 +385,7 @@
             </button>
           </div>
           <div
-            class="flexrow-item is-wide has-text-centered flexrow"
+            class="flexrow-item is-wide flexrow"
             v-if="
               !loading.assignation &&
               (isCurrentUserManager || isSupervisorInDepartment)
@@ -400,9 +398,7 @@
               >
                 {{ $t('tasks.clear_assignations') }}
               </button>
-              <span>
-                {{ $t('main.or') }}
-              </span>
+              {{ $t('main.or') }}
               <button
                 class="button is-link clear-assignation-button"
                 @click="clearAllAssignations"
@@ -615,7 +611,7 @@
                   type="hidden"
                   id="projectid"
                   name="projectid"
-                  :value="currentProduction ? currentProduction.id : null"
+                  :value="productionId"
                 />
                 <input
                   type="hidden"
@@ -810,7 +806,6 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
-import { sortPeople } from '@/lib/sorting'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -835,6 +830,14 @@ export default {
     isSetFrameThumbnailLoading: {
       type: Boolean,
       default: false
+    },
+    productionId: {
+      type: String,
+      default: null
+    },
+    team: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -930,16 +933,12 @@ export default {
       'assetMap',
       'assetCustomActions',
       'assetsByType',
-      'currentProduction',
       'isCurrentUserArtist',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isShowAssignations',
       'nbSelectedTasks',
       'nbSelectedValidations',
-      'organisation',
-      'peopleWithoutBot',
-      'personMap',
       'productionMap',
       'selectedAssets',
       'selectedConcepts',
@@ -968,6 +967,7 @@ export default {
     currentEntityType() {
       if (this.isCurrentViewAsset) return 'asset'
       if (this.isCurrentViewShot) return 'shot'
+      if (this.isCurrentViewSequence) return 'sequence'
       if (this.isCurrentViewEdit) return 'edit'
       return 'episode'
     },
@@ -981,22 +981,23 @@ export default {
     },
 
     currentTeam() {
-      let team = this.currentProduction
-        ? sortPeople(
-            this.currentProductionTeam
-              .map(personId => this.personMap.get(personId))
-              .filter(person => person && !person.is_bot)
-          )
-        : [...this.peopleWithoutBot]
+      const isSupervisorWithDepartments =
+        this.isCurrentUserSupervisor && this.user.departments.length > 0
 
-      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
-        team = team.filter(person =>
-          person.departments.some(department =>
-            this.user.departments.includes(department)
-          )
-        )
-      }
-      return team
+      return this.team.filter(person => {
+        if (!person?.is_bot) {
+          if (isSupervisorWithDepartments) {
+            return (
+              person.departments.length === 0 ||
+              person.departments.some(department =>
+                this.user.departments.includes(department)
+              )
+            )
+          }
+          return true
+        }
+        return false
+      })
     },
 
     defaultCustomAction() {
@@ -1150,10 +1151,6 @@ export default {
 
     selectedPersonId() {
       return this.person ? this.person.id : null
-    },
-
-    currentProductionTeam() {
-      return this.currentProduction ? this.currentProduction.team || [] : []
     },
 
     isInDepartment() {
@@ -1336,7 +1333,7 @@ export default {
       this.loading.taskCreation = true
       this.createSelectedTasks({
         type,
-        projectId: this.currentProduction.id
+        projectId: this.productionId
       })
         .then(() => {
           this.loading.taskCreation = false
@@ -1494,7 +1491,7 @@ export default {
           originurl: this.currentUrl,
           originserver: this.currentHost,
           selection: this.selectedTaskIds,
-          productionid: this.currentProduction.id,
+          productionid: this.productionId,
           userid: this.user.id,
           useremail: this.user.email
         },
@@ -1739,11 +1736,6 @@ export default {
   background: #f4f4ff;
   color: $grey;
   z-index: 1000;
-}
-
-div.assignation {
-  margin-right: 1em;
-  padding-right: 0;
 }
 
 .hidden {

@@ -136,7 +136,6 @@
                 <boolean-field
                   class="selector"
                   :label="$t('notifications.read')"
-                  :is-field="false"
                   is-small
                   @input="value => toggleNotificationRead(notification, value)"
                   :value="notification.read ? 'true' : 'false'"
@@ -476,7 +475,7 @@ export default {
       }
     },
 
-    loadFollowingNotifications() {
+    async loadFollowingNotifications() {
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
         const params = {
@@ -490,9 +489,8 @@ export default {
         if (this.parameters.watchingMode) {
           params.watching = this.parameters.watchingMode === 'watching'
         }
-        this.loadMoreNotifications().then(() => {
-          this.loading.more = false
-        })
+        await this.loadMoreNotifications(params)
+        this.loading.more = false
       }
     },
 
