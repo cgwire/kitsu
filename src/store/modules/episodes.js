@@ -733,7 +733,7 @@ const mutations = {
     helpers.setListStats(state, cache.episodes)
     cache.episodeMap.set(episode.id, episode)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
-    // cache.episodeIndex = buildNameIndex(cache.episodes)
+    cache.episodeIndex = buildEpisodeIndex(cache.episodes)
   },
 
   [EDIT_EPISODE_END](state, newEpisode) {
@@ -774,28 +774,16 @@ const mutations = {
     state.isEpisodesLoadingError = true
   },
 
-  [LOAD_EPISODES_END](state, { production, userFilters }) {
-    if (
-      production &&
-      userFilters.episode &&
-      userFilters.episode[production.id]
-    ) {
-      state.episodeSearchQueries = userFilters.episode[production.id]
-    } else {
-      state.episodeSearchQueries = []
-    }
-  },
-
   [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {
-    const episodeMap = new Map()
+    if (state.episodes.length > 0) return
     if (!episodes) episodes = []
+    cache.episodeMap = new Map()
     episodes.forEach(episode => {
       if (!EPISODE_STATUS.includes(episode.status)) {
         episode.status = 'running'
       }
-      episodeMap.set(episode.id, episode)
+      cache.episodeMap.set(episode.id, episode)
     })
-    cache.episodeMap = episodeMap
     state.episodes = sortByName(episodes)
 
     state.episodeIndex = buildEpisodeIndex(state.episodes)
