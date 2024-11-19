@@ -5,6 +5,7 @@ import shotsApi from '@/store/api/shots'
 import episodeStore from '@/store/modules/episodes'
 import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
+import sequenceStore from '@/store/modules/sequences'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
@@ -252,7 +253,6 @@ const helpers = {
 }
 
 const initialState = {
-  shotMap: new Map(),
   shotSearchText: '',
   shotSearchQueries: [],
   shotSearchFilterGroups: [],
@@ -363,7 +363,7 @@ const actions = {
       cache.shots.forEach(shot => {
         let isPending = false
         shot.tasks.forEach(taskId => {
-          const task = tasksStore.cache.taskMap.get(taskId)
+          const task = tasksStore.state.taskMap.get(taskId)
           if (!isPending) {
             if (daily) {
               if (task.last_comment_date) {
@@ -405,6 +405,7 @@ const actions = {
       // one.
       episode = episodes.length > 0 ? episodes[0] : null
       if (!episode && callback) return callback()
+      if (!episode) return
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
@@ -482,10 +483,8 @@ const actions = {
   },
 
   newShot({ commit, dispatch, rootGetters }, shot) {
-    const episodeMap = episodeStore.cache.episodeMap
-    const sequenceMap = rootGetters.sequenceMap
     return shotsApi.newShot(shot).then(shot => {
-      commit(NEW_SHOT_END, { shot, episodeMap, sequenceMap })
+      commit(NEW_SHOT_END, { shot })
       const taskTypeIds = rootGetters.productionShotTaskTypeIds
       const createTaskPromises = taskTypeIds.map(taskTypeId =>
         dispatch('createTask', {
@@ -791,7 +790,7 @@ const mutations = {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
-    // cache.shotMap = new Map()
+    cache.shotMap = new Map()
 
     state.displayedShots = []
     state.displayedShotsCount = 0
@@ -801,8 +800,6 @@ const mutations = {
     state.displayedFrames = 0
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
-    state.displayedSequences = []
-    state.displayedSequencesLength = 0
 
     state.selectedShots = new Map()
   },
@@ -811,7 +808,7 @@ const mutations = {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
-    // cache.shotMap = new Map()
+    cache.shotMap = new Map()
     state.shotValidationColumns = []
 
     state.isShotsLoading = true
@@ -824,8 +821,6 @@ const mutations = {
     state.displayedFrames = 0
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
-    state.displayedSequences = []
-    state.displayedSequencesLength = 0
 
     state.selectedShots = new Map()
   },
@@ -1056,9 +1051,9 @@ const mutations = {
     helpers.buildResult(state, payload)
   },
 
-  [NEW_SHOT_END](state, { shot, episodeMap, sequenceMap }) {
-    const sequence = sequenceMap.get(shot.parent_id)
-    const episode = episodeMap.get(sequence.parent_id)
+  [NEW_SHOT_END](state, { shot, episodeMap }) {
+    const sequence = sequenceStore.cache.sequenceMap.get(shot.parent_id)
+    const episode = episodeStore.cache.episodeMap.get(sequence.parent_id)
     shot.production_id = shot.project_id
     shot.sequence_name = sequence.name
     shot.sequence_id = sequence.id
