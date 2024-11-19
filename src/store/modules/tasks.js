@@ -882,7 +882,7 @@ const mutations = {
     comments.forEach(comment => {
       comment.person = personStore.state.personMap.get(comment.person_id)
     })
-    state.taskComments[taskId] = sortComments(comments)
+    state.taskComments[taskId] = sortComments([...comments])
     Vue.set(
       state.taskPreviews,
       taskId,
