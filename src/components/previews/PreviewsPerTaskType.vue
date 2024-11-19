@@ -35,6 +35,8 @@
 import firstBy from 'thenby'
 import { mapGetters } from 'vuex'
 
+import editStore from '@/store/modules/edits'
+
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
@@ -56,10 +58,6 @@ export default {
   },
 
   props: {
-    entityMap: {
-      default: () => {},
-      type: Map
-    },
     index: {
       default: 0,
       type: Number
@@ -83,7 +81,7 @@ export default {
     ]),
 
     taskTypeOptions() {
-      const entity = this.entityMap.get(this.entity.id)
+      const entity = editStore.cache.editMap.get(this.entity.id)
       return entity.tasks
         .map(taskId => this.taskMap.get(taskId))
         .map(task => this.taskTypeMap.get(task.task_type_id))
@@ -105,9 +103,9 @@ export default {
     },
 
     taskStatus() {
-      if (!this.entityMap) return ''
+      if (!editStore.cache.editMap) return ''
 
-      const entity = this.entityMap.get(this.entity.id)
+      const entity = editStore.cache.editMap.get(this.entity.id)
       if (!entity) return ''
 
       const taskId = entity.validations.get(this.taskTypeId)
