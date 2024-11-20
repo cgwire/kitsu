@@ -308,14 +308,14 @@
 
 <script>
 import Vue from 'vue/dist/vue'
-import {mapActions, mapGetters} from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
-import {selectionListMixin} from '@/components/mixins/selection'
-import {formatListMixin} from '@/components/mixins/format'
-import {descriptorMixin} from '@/components/mixins/descriptors'
+import { selectionListMixin } from '@/components/mixins/selection'
+import { formatListMixin } from '@/components/mixins/format'
+import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import {PAGE_SIZE} from '@/lib/pagination'
-import {sortPeople} from '@/lib/sorting'
+import { PAGE_SIZE } from '@/lib/pagination'
+import { sortPeople } from '@/lib/sorting'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -383,8 +383,7 @@ export default {
     },
     disabledDates: {
       type: Object,
-      default: () => {
-      }
+      default: () => {}
     }
   },
 
@@ -726,13 +725,13 @@ export default {
         ? duration * 60
         : daysToMinutes(this.organisation, duration)
 
-      this.updateTasksEstimation({estimation})
+      this.updateTasksEstimation({ estimation })
     },
 
-    updateTasksEstimation({estimation}) {
+    updateTasksEstimation({ estimation }) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
-        let data = {estimation}
+        let data = { estimation }
         if (task.start_date) {
           const startDate = moment(task.start_date)
           const dueDate = task.due_date ? moment(task.due_date) : null
@@ -744,7 +743,7 @@ export default {
           data.estimation = estimation
         }
         if (this.isTaskChanged(task, data)) {
-          this.updateTask({taskId, data}).catch(console.error)
+          this.updateTask({ taskId, data }).catch(console.error)
         }
       })
     },
@@ -777,7 +776,7 @@ export default {
           }
         }
         if (this.isTaskChanged(task, data)) {
-          this.updateTask({taskId, data}).catch(console.error)
+          this.updateTask({ taskId, data }).catch(console.error)
         }
       })
     },
@@ -812,7 +811,7 @@ export default {
           }
         }
         if (this.isTaskChanged(task, data)) {
-          this.updateTask({taskId, data}).catch(console.error)
+          this.updateTask({ taskId, data }).catch(console.error)
         }
       })
     },
@@ -845,10 +844,10 @@ export default {
 
       if (!event.shiftKey) {
         if (isSelected && !isManySelection) {
-          this.removeSelectedTask({task})
+          this.removeSelectedTask({ task })
           Vue.set(this.selectionGrid, task.id, undefined)
         } else if (!isSelected || isManySelection) {
-          this.addSelectedTask({task})
+          this.addSelectedTask({ task })
           this.$emit('task-selected', task)
           Vue.set(this.selectionGrid, task.id, true)
           this.lastSelection = index
@@ -861,7 +860,7 @@ export default {
         } else {
           taskIndices = range(this.lastSelection, index)
         }
-        const selection = taskIndices.map(i => ({task: this.tasks[i]}))
+        const selection = taskIndices.map(i => ({ task: this.tasks[i] }))
         selection.forEach(task => {
           Vue.set(this.selectionGrid, task.task.id, true)
         })
