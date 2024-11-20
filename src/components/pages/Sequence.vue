@@ -429,7 +429,8 @@ export default {
               return this.loadSequencesWithTasks()
             })
             .then(() => {
-              const sequence = sequenceStore.cache.sequenceMap.get(sequenceId) || null
+              const sequence =
+                sequenceStore.cache.sequenceMap.get(sequenceId) || null
               return resolve(sequence)
             })
         } else {

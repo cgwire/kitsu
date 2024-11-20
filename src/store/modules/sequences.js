@@ -921,7 +921,6 @@ const mutations = {
             taskStatusMap
           )
           sequence.validations.set(task.task_type_id, task.id)
-          const validations = sequence.validations
           sequence.tasks.push(task.id)
           const displayedSequence = state.displayedSequences.find(
             e => e.id === sequence.id

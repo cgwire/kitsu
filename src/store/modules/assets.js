@@ -1272,7 +1272,9 @@ const mutations = {
         state.assetFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
-      const displayedAsset = state.displayedAssets.find(asset => asset.id === task.entity_id)
+      const displayedAsset = state.displayedAssets.find(
+        asset => asset.id === task.entity_id
+      )
       if (!asset.validations) asset.validations = new Map()
       asset.validations.set(task.task_type_id, task.id)
       if (displayedAsset) {

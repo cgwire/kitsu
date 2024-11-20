@@ -918,13 +918,12 @@ export default {
       const playlist = this.playlistMap.get(playlistId)
       if (playlist) {
         this.loading.playlist = true
-        this.loadPlaylist(playlist)
-          .then(loadedPlaylist => {
-            this.currentPlaylist = ref(loadedPlaylist)
-            this.rebuildCurrentEntities()
-            this.loading.playlist = false
-            if (callback) callback()
-          })
+        this.loadPlaylist(playlist).then(loadedPlaylist => {
+          this.currentPlaylist = ref(loadedPlaylist)
+          this.rebuildCurrentEntities()
+          this.loading.playlist = false
+          if (callback) callback()
+        })
       } else {
         this.currentPlaylist = {
           name: ''

@@ -66,28 +66,26 @@
                 v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
               />
             </template>
-            <template>
-              <validation-header
-                :ref="`validation-${columnIndexInGrid}`"
-                :key="columnId"
-                :hidden-columns="hiddenColumns"
-                :column-id="columnId"
-                :validation-style="getValidationStyle(columnId)"
-                :left="
-                  offsets['validation-' + columnIndexInGrid]
-                    ? `${offsets['validation-' + columnIndexInGrid]}px`
-                    : '0'
-                "
-                type="editor"
-                is-stick
-                @show-header-menu="
-                  event => showHeaderMenu(columnId, columnIndexInGrid, event)
-                "
-                v-for="(
-                  columnId, columnIndexInGrid
-                ) in stickedDisplayedValidationColumns"
-              />
-            </template>
+            <validation-header
+              :ref="`validation-${columnIndexInGrid}`"
+              :key="columnId"
+              :hidden-columns="hiddenColumns"
+              :column-id="columnId"
+              :validation-style="getValidationStyle(columnId)"
+              :left="
+                offsets['validation-' + columnIndexInGrid]
+                  ? `${offsets['validation-' + columnIndexInGrid]}px`
+                  : '0'
+              "
+              type="editor"
+              is-stick
+              @show-header-menu="
+                event => showHeaderMenu(columnId, columnIndexInGrid, event)
+              "
+              v-for="(
+                columnId, columnIndexInGrid
+              ) in stickedDisplayedValidationColumns"
+            />
 
             <th
               scope="col"

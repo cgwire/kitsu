@@ -35,7 +35,7 @@
             @enter="runConfirmation"
             v-focus
           />
-         <textarea-field
+          <textarea-field
             ref="descriptionField"
             :label="$t('assets.fields.description')"
             v-model="form.description"

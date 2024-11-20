@@ -86,7 +86,8 @@ const actions = {
   loadPlaylist({ commit, rootGetters }, playlist) {
     const currentProduction = rootGetters.currentProduction
     commit(LOAD_PLAYLIST_START)
-    return playlistsApi.getPlaylist(currentProduction, playlist)
+    return playlistsApi
+      .getPlaylist(currentProduction, playlist)
       .then(playlist => {
         commit(LOAD_PLAYLIST_END, playlist)
         return Promise.resolve(playlist)

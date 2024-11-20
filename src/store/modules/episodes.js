@@ -979,7 +979,6 @@ const mutations = {
     }
   },
 
-
   [UPDATE_METADATA_DESCRIPTOR_END](
     state,
     { descriptor, previousDescriptorFieldName }
