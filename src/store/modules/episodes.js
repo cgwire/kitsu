@@ -48,6 +48,7 @@ import {
   SET_EPISODE_RETAKE_STATS,
   SET_EPISODE_STATS,
   SET_EPISODES_WITH_TASKS,
+  SET_PREVIEW,
   UPDATE_EPISODE,
   UPDATE_METADATA_DESCRIPTOR_END,
   RESET_ALL
@@ -857,9 +858,12 @@ const mutations = {
             taskStatusMap
           )
           episode.validations.set(task.task_type_id, task.id)
-          const validations = episode.validations
-          episode.validations = []
-          episode.validations = validations
+          const displayedEpisode = state.displayedEpisodes.find(
+            e => e.id === episode.id
+          )
+          if (displayedEpisode) {
+            displayedEpisode.validations = new Map(episode.validations)
+          }
           episode.tasks.push(task.id)
         }
       }
@@ -941,7 +945,12 @@ const mutations = {
       episode.tasks.push(task.id)
       if (!episode.validations) episode.validations = new Map()
       episode.validations.set(task.task_type_id, task.id)
-      episode.validations = new Map(episode.validations)
+      const displayedEpisode = state.displayedEpisodes.find(
+        e => e.id === episode.id
+      )
+      if (displayedEpisode) {
+        displayedEpisode.validations = new Map(episode.validations)
+      }
     }
   },
 
@@ -958,6 +967,18 @@ const mutations = {
       episode.tasks.splice(taskIndex, 1)
     }
   },
+
+  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+    const episodes = state.displayedEpisodes.find(s => s.id === entityId)
+    if (episodes) {
+      episodes.preview_file_id = previewId
+      episodes.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task) task.entity.preview_file_id = previewId
+      })
+    }
+  },
+
 
   [UPDATE_METADATA_DESCRIPTOR_END](
     state,

@@ -1070,6 +1070,7 @@ const mutations = {
       Object.assign(asset, copyNewAsset)
     } else {
       newAsset.validations = new Map()
+      newAsset.tasks = []
       newAsset.production_id = newAsset.project_id
       newAsset.episode_id = newAsset.source_id
       cache.assets.push(newAsset)
@@ -1189,13 +1190,11 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
-    const asset = cache.assetMap.get(entityId)
+    const asset = state.displayedAssets.find(a => a.id === entityId)
     if (asset) {
       asset.preview_file_id = previewId
-      asset.tasks.forEach(taskId => {
-        const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
-      })
+      const task = asset.tasks.find(taskId => taskMap.get(taskId))
+      if (task && task.entity) task.entity.preview_file_id = previewId
     }
   },
 
@@ -1273,10 +1272,12 @@ const mutations = {
         state.assetFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
-      asset.tasks.push(task.id)
+      const displayedAsset = state.displayedAssets.find(asset => asset.id === task.entity_id)
       if (!asset.validations) asset.validations = new Map()
       asset.validations.set(task.task_type_id, task.id)
-      asset.validations = new Map(asset.validations)
+      if (displayedAsset) {
+        displayedAsset.validations = new Map(asset.validations)
+      }
     }
   },
 
@@ -1284,14 +1285,16 @@ const mutations = {
     tasks.forEach(task => {
       if (task) {
         const asset = cache.assetMap.get(task.entity_id)
+        const displayedAsset = state.displayedAssets.find(
+          a => a.id === task.entity_id
+        )
         if (asset) {
           if (!asset.validations) asset.validations = new Map()
           helpers.populateTask(task, asset)
           asset.validations.set(task.task_type_id, task.id)
-          const validations = asset.validations
-          asset.validations = []
-          asset.validations = validations
-          asset.tasks.push(task.id)
+          if (displayedAsset) {
+            displayedAsset.validations = new Map(asset.validations)
+          }
         }
       }
     })

@@ -898,6 +898,12 @@ const mutations = {
           helpers.populateTask(task, edit)
           edit.validations.set(task.task_type_id, task.id)
           edit.tasks.push(task.id)
+          const displayedEdit = state.displayedEdits.find(
+            displayedEdit => displayedEdit.id === edit.id
+          )
+          if (displayedEdit) {
+            displayedEdit.validations = new Map(edit.validations)
+          }
         }
       }
     })
@@ -934,7 +940,7 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const edit = cache.editMap.get(entityId)
+    const edit = state.displayedEdits.find(edit => edit.id === entityId)
     if (edit) {
       edit.preview_file_id = previewId
       edit.tasks.forEach(taskId => {
@@ -998,7 +1004,12 @@ const mutations = {
       edit.tasks.push(task)
       if (!edit.validations) edit.validations = new Map()
       edit.validations.set(task.task_type_id, task.id)
-      edit.validations = new Map(edit.validations)
+      const displayedEdit = state.displayedEdits.find(
+        displayedEdit => displayedEdit.id === edit.id
+      )
+      if (displayedEdit) {
+        displayedEdit.validations = new Map(edit.validations)
+      }
     }
   },
 

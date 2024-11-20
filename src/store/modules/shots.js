@@ -1094,6 +1094,12 @@ const mutations = {
           shot.validations.set(task.task_type_id, task.id)
           shot.tasks.push(task.id)
         }
+        const displayedShot = state.displayedShots.find(
+          s => s.id === task.entity_id
+        )
+        if (displayedShot) {
+          displayedShot.validations = new Map(shot.validations)
+        }
       }
     })
   },
@@ -1129,7 +1135,7 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const shot = cache.shotMap.get(entityId)
+    const shot = state.displayedShots.find(s => s.id === entityId)
     if (shot) {
       shot.preview_file_id = previewId
       shot.tasks.forEach(taskId => {
@@ -1193,7 +1199,12 @@ const mutations = {
       shot.tasks.push(task.id)
       if (!shot.validations) shot.validations = new Map()
       shot.validations.set(task.task_type_id, task.id)
-      shot.validations = new Map(shot.validations)
+      const displayedShot = state.displayedShots.find(
+        s => s.id === task.entity_id
+      )
+      if (displayedShot) {
+        displayedShot.validations = new Map(shot.validations)
+      }
     }
   },
 

@@ -55,6 +55,7 @@ import {
   SET_SEQUENCE_RETAKE_STATS,
   SET_SEQUENCE_STATS,
   SET_SEQUENCES_WITH_TASKS,
+  SET_PREVIEW,
   UNLOCK_SEQUENCE,
   UPDATE_SEQUENCE,
   UPDATE_METADATA_DESCRIPTOR_END,
@@ -762,6 +763,17 @@ const mutations = {
     state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
   },
 
+  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+    const sequences = state.displayedSequences.find(s => s.id === entityId)
+    if (sequences) {
+      sequences.preview_file_id = previewId
+      sequences.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task) task.entity.preview_file_id = previewId
+      })
+    }
+  },
+
   [REMOVE_SEQUENCE_SEARCH_END](state, { searchQuery }) {
     state.sequenceSearchQueries = state.sequenceSearchQueries.filter(
       query => query.name !== searchQuery.name
@@ -910,9 +922,13 @@ const mutations = {
           )
           sequence.validations.set(task.task_type_id, task.id)
           const validations = sequence.validations
-          sequence.validations = []
-          sequence.validations = validations
           sequence.tasks.push(task.id)
+          const displayedSequence = state.displayedSequences.find(
+            e => e.id === sequence.id
+          )
+          if (displayedSequence) {
+            displayedSequence.validations = new Map(sequence.validations)
+          }
         }
       }
     })
@@ -993,7 +1009,12 @@ const mutations = {
       sequence.tasks.push(task.id)
       if (!sequence.validations) sequence.validations = new Map()
       sequence.validations.set(task.task_type_id, task.id)
-      sequence.validations = new Map(sequence.validations)
+      const displayedSequence = state.displayedSequences.find(
+        e => e.id === sequence.id
+      )
+      if (displayedSequence) {
+        displayedSequence.validations = new Map(sequence.validations)
+      }
     }
   },
 
