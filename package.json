@@ -51,7 +51,7 @@
     "uuid": "10.0.0",
     "v-autosize": "2.0.0",
     "vue": "3.5.12",
-    "vue-3-slider-component": "^1.0.1",
+    "vue-3-slider-component": "1.0.1",
     "vue-at": "3.0.0-alpha.2",
     "vue-chartkick": "1.1.0",
     "vue-i18n": "9.14.1",
