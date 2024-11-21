@@ -1,0 +1,2 @@
+import{_ as n,o as s,c as o,e as c,a_ as a,d}from"./index-a83mlrHR.js";const r={name:"page-layout",props:{side:{type:Boolean,default:!0}}},i={ref:"page",class:"columns fixed-page"},l={class:"column main-column"},m={key:0,class:"column side-column"};function _(e,u,t,p,f,$){return s(),o("div",i,[c("div",l,[a(e.$slots,"main")]),t.side?(s(),o("div",m,[a(e.$slots,"side")])):d("",!0)],512)}const h=n(r,[["render",_]]);export{h as P};
+//# sourceMappingURL=PageLayout-B0r1kUra.js.map
