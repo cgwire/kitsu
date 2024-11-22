@@ -338,6 +338,7 @@ import { mapGetters } from 'vuex'
 
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
+import { getDownloadAttachmentPath } from '@/lib/path'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import strings from '@/lib/string'
 
@@ -689,9 +690,24 @@ export default {
       this.checklist = remove(this.checklist, entry)
     },
 
-    setValue(comment) {
-      this.checklist = comment.checklist
+    async setValue(comment) {
+      this.checklist = JSON.parse(JSON.stringify(comment.checklist))
       this.text = comment.text
+
+      // duplicate attachment files
+      this.attachments = (
+        await Promise.all(
+          comment.attachment_files.map(async attachment => {
+            const fileUrl = getDownloadAttachmentPath(attachment)
+            const response = await fetch(fileUrl)
+            if (!response.ok) return
+            const fileBlob = await response.blob()
+            const formData = new FormData()
+            formData.append('file', fileBlob, attachment.name)
+            return formData
+          })
+        )
+      ).filter(Boolean)
     },
 
     onAtTextChanged(input) {
