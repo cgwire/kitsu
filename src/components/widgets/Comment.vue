@@ -72,14 +72,12 @@
               class="client-comment"
               v-if="isAuthorClient && !isCurrentUserClient"
             >
-              <span>
-                {{ $t('comments.comment_from_client') }}
-                <copy-icon
-                  class="copy-icon"
-                  :size="12"
-                  @click="$emit('duplicate-comment', comment)"
-                />
-              </span>
+              {{ $t('comments.comment_from_client') }}
+              <copy-icon
+                class="copy-icon"
+                :size="12"
+                @click="$emit('duplicate-comment', comment)"
+              />
             </p>
             <p
               v-html="
