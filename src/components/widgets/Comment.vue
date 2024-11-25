@@ -72,14 +72,12 @@
               class="client-comment"
               v-if="isAuthorClient && !isCurrentUserClient"
             >
-              <span>
-                {{ $t('comments.comment_from_client') }}
-                <copy-icon
-                  class="copy-icon"
-                  :size="12"
-                  @click="$emit('duplicate-comment', comment)"
-                />
-              </span>
+              {{ $t('comments.comment_from_client') }}
+              <copy-icon
+                class="copy-icon"
+                :size="12"
+                @click="$emit('duplicate-comment', comment)"
+              />
             </p>
             <p
               v-html="
@@ -107,16 +105,19 @@
             />
             <p v-if="comment.attachment_files.length > 0">
               <a
-                :href="getAttachmentPath(attachment)"
+                :href="getDownloadAttachmentPath(attachment)"
                 :key="attachment.id"
                 :title="attachment.name"
                 target="_blank"
                 v-for="attachment in pictureAttachments"
               >
-                <img class="attachment" :src="getAttachmentPath(attachment)" />
+                <img
+                  class="attachment"
+                  :src="getDownloadAttachmentPath(attachment)"
+                />
               </a>
               <a
-                :href="getAttachmentPath(attachment)"
+                :href="getDownloadAttachmentPath(attachment)"
                 :key="attachment.id"
                 :title="attachment.name"
                 class="flexrow"
@@ -363,7 +364,7 @@ import {
 
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
-import { pluralizeEntityType } from '@/lib/path'
+import { getDownloadAttachmentPath, pluralizeEntityType } from '@/lib/path'
 import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
@@ -637,9 +638,7 @@ export default {
       return route
     },
 
-    getAttachmentPath(attachment) {
-      return `/api/data/attachment-files/${attachment.id}/file/${attachment.name}`
-    },
+    getDownloadAttachmentPath,
 
     toggleCommentMenu() {
       this.menuVisible = !this.menuVisible
