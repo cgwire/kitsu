@@ -307,7 +307,6 @@ export default {
       },
 
       'department:new'(eventData) {
-        console.log('department:new', eventData)
         if (!this.departmentMap.get(eventData.department_id)) {
           this.loadDepartment(eventData.department_id)
         }
