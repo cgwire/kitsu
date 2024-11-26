@@ -162,7 +162,6 @@ const mutations = {
 
   [EDIT_TASK_STATUS_END](state, newTaskStatus) {
     let taskStatus = cache.taskStatusMap.get(newTaskStatus.id)
-    console.log('taskStatus single 2', taskStatus)
     if (newTaskStatus.is_default) {
       state.taskStatuses.forEach(status => {
         if (status.is_default && status.id !== newTaskStatus.id)
@@ -174,7 +173,6 @@ const mutations = {
       taskStatus = state.taskStatuses.find(
         taskStatus => taskStatus.id === newTaskStatus.id
       )
-      console.log('taskStatus single', taskStatus, newTaskStatus)
       Object.assign(taskStatus, newTaskStatus)
       cache.taskStatusMap.set(taskStatus.id, taskStatus)
     } else {

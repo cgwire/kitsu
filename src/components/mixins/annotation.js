@@ -384,6 +384,7 @@ export const annotationMixin = {
      * Debug helper.
      */
     printModificationStats(prefix) {
+      // eslint-disable-next-line no-console
       console.log(
         prefix,
         this.additions.length > 0

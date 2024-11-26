@@ -107,7 +107,7 @@ export default {
     try {
       await this.loadStudios()
     } catch (error) {
-      console.log(error)
+      console.error(error)
       this.errors.studios = true
     }
     this.loading.studios = false

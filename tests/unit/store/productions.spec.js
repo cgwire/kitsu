@@ -132,7 +132,7 @@ describe('Productions store', () => {
     test('productionTaskStatuses', () => {
       const productions = rootState.productions
       expect(store.getters.productionTaskStatuses(productions, null, rootState))
-        .toEqual(rootState.taskStatus.taskStatus)
+        .toEqual(rootState.taskStatus.taskStatuses)
       productions.currentProduction.task_statuses =
         ['task-status-3', 'task-status-1']
       expect(store.getters.productionTaskStatuses(productions, null, rootState))

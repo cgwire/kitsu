@@ -187,11 +187,9 @@ const getters = {
   },
 
   productionTaskStatuses: (state, getters, rootState) => {
-    console.log('prod status', rootState.taskStatus.taskStatuses)
     if (helpers.isEmptyArray(state.currentProduction, 'task_statuses')) {
       return rootState.taskStatus.taskStatuses
     } else {
-      console.log('prod status', taskStatusCache.taskStatusMap)
       return sortByName(
         state.currentProduction.task_statuses.map(id =>
           taskStatusCache.taskStatusMap.get(id)
@@ -203,7 +201,7 @@ const getters = {
   getProductionTaskStatuses: (state, getters, rootState) => id => {
     const production = state.productionMap.get(id)
     if (helpers.isEmptyArray(production, 'task_statuses')) {
-      return rootState.taskStatus.taskStatus
+      return rootState.taskStatus.taskStatuses
     } else {
       return sortByName(
         production.task_statuses.map(id =>
