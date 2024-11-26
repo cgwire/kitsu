@@ -300,6 +300,8 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
+import shotStore from '@/store/modules/shots'
+
 import csv from '@/lib/csv'
 import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
@@ -522,7 +524,6 @@ export default {
       'productionShotTaskTypes',
       'selectedShots',
       'sequences',
-      'shotMap',
       'shotFilledColumns',
       'shotsCsvFormData',
       'shotSearchQueries',
@@ -535,6 +536,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    shotMap() {
+      return shotStore.cache.shotMap
+    },
 
     searchField() {
       return this.$refs['shot-search-field']
