@@ -1094,14 +1094,14 @@ export default {
       const shot = this.shotMap.get(entry.id)
       if (
         descriptor.field_name === 'frame_in' &&
-        shot.data.frame_out &&
+        shot.data?.frame_out &&
         parseInt(shot.data.frame_out) > parseInt(value)
       ) {
         data.nb_frames = parseInt(shot.data.frame_out) - parseInt(value) + 1
       }
       if (
         descriptor.field_name === 'frame_out' &&
-        shot.data.frame_in &&
+        shot.data?.frame_in &&
         parseInt(shot.data.frame_in) < parseInt(value)
       ) {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
