@@ -167,6 +167,7 @@ export default {
     // Events
 
     onEditClicked(production) {
+      this.storeProductionPicture(null)
       this.productionToEdit = production
       this.modals.isEditDisplayed = true
     },

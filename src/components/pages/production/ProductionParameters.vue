@@ -274,6 +274,9 @@ export default {
     },
 
     resetForm() {
+      this.$refs.fileField?.reset()
+      this.storeProductionPicture(null)
+
       if (this.currentProduction) {
         this.form = {
           name: this.currentProduction.name,
