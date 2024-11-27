@@ -1104,7 +1104,7 @@ If you see the white box, Kitsu will display how many assets are ready for this 
 
 ![Asset Status](../img/getting-started/asset_status_empty_tv.png)
 
- ::: tip
+::: tip
 No assets are cast for this shot if you don't see any boxes.
 :::
  
