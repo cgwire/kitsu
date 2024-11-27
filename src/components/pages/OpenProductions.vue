@@ -258,7 +258,9 @@ export default {
     },
 
     getThumbnailPath(production) {
-      return `/api/pictures/thumbnails/projects/${production.id}.png`
+      const lastUpdate = production.updated_at || production.created_at
+      const timestamp = Date.parse(lastUpdate)
+      return `/api/pictures/thumbnails/projects/${production.id}.png?t=${timestamp}`
     },
 
     newProductionPage() {

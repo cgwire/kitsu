@@ -64,7 +64,10 @@ export default {
     },
 
     thumbnailPath() {
-      return `/api/pictures/thumbnails/projects/${this.production.id}.png`
+      const lastUpdate =
+        this.production.updated_at || this.production.created_at
+      const timestamp = Date.parse(lastUpdate)
+      return `/api/pictures/thumbnails/projects/${this.production.id}.png?t=${timestamp}`
     }
   }
 }
