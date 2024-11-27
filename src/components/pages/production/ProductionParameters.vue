@@ -167,15 +167,16 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import { PRODUCTION_TYPE_OPTIONS, HOME_PAGE_OPTIONS } from '@/lib/productions'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import TextField from '@/components/widgets/TextField.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 export default {
   name: 'production-parameters',
@@ -220,12 +221,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'productionAvatarFormData',
-      'productionStatus',
-      'isTVShow'
-    ])
+    ...mapGetters(['currentProduction', 'productionAvatarFormData', 'isTVShow'])
   },
 
   mounted() {
@@ -278,6 +274,9 @@ export default {
     },
 
     resetForm() {
+      this.$refs.fileField?.reset()
+      this.storeProductionPicture(null)
+
       if (this.currentProduction) {
         this.form = {
           name: this.currentProduction.name,
@@ -334,20 +333,19 @@ export default {
 
     async editParameters() {
       this.isLoading = true
+      this.isError = false
       try {
-        await this.editProduction({
-          id: this.currentProduction.id,
-          ...this.form,
-          start_date: formatSimpleDate(this.form.start_date),
-          end_date: formatSimpleDate(this.form.end_date)
-        })
         if (this.productionAvatarFormData) {
           await this.uploadProductionAvatar(this.currentProduction.id)
         }
+        await this.editProduction({
+          ...this.form,
+          id: this.currentProduction.id,
+          start_date: formatSimpleDate(this.form.start_date),
+          end_date: formatSimpleDate(this.form.end_date)
+        })
       } catch {
-        this.isLoading = false
         this.isError = true
-        return
       }
       this.isLoading = false
     }

@@ -397,18 +397,12 @@ const actions = {
     commit(PRODUCTION_PICTURE_FILE_SELECTED, formData)
   },
 
-  uploadProductionAvatar({ commit, state }, productionId) {
-    return new Promise((resolve, reject) => {
-      productionsApi.postAvatar(
-        productionId,
-        state.productionAvatarFormData,
-        err => {
-          commit(PRODUCTION_AVATAR_UPLOADED, productionId)
-          if (err) reject(err)
-          else resolve()
-        }
-      )
-    })
+  async uploadProductionAvatar({ commit, state }, productionId) {
+    await productionsApi.postAvatar(
+      productionId,
+      state.productionAvatarFormData
+    )
+    commit(PRODUCTION_AVATAR_UPLOADED, productionId)
   },
 
   addPersonToTeam({ commit, state }, person) {

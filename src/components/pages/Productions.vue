@@ -112,6 +112,7 @@ export default {
   methods: {
     ...mapActions([
       'deleteProduction',
+      'editProduction',
       'loadProductions',
       'loadProductionStats',
       'storeProductionPicture',
@@ -120,34 +121,23 @@ export default {
 
     // Actions
 
-    confirmEditProduction(form) {
-      let action = 'newProduction'
-      const isEditing = this.productionToEdit && this.productionToEdit.id
-      if (isEditing) {
-        action = 'editProduction'
-        form.id = this.productionToEdit.id
-      }
-
+    async confirmEditProduction(form) {
       this.loading.edit = true
       this.errors.edit = false
-      this.$store
-        .dispatch(action, form)
-        .then(() => {
-          if (isEditing && this.productionAvatarFormData) {
-            return this.uploadProductionAvatar(form.id)
-          } else {
-            return Promise.resolve()
-          }
+      try {
+        if (this.productionAvatarFormData) {
+          await this.uploadProductionAvatar(this.productionToEdit.id)
+        }
+        await this.editProduction({
+          ...form,
+          id: this.productionToEdit.id
         })
-        .then(() => {
-          this.modals.isEditDisplayed = false
-          this.loading.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
+        this.modals.isEditDisplayed = false
+      } catch (error) {
+        console.error(error)
+        this.errors.edit = true
+      }
+      this.loading.edit = false
     },
 
     confirmDeleteProduction() {
@@ -177,6 +167,7 @@ export default {
     // Events
 
     onEditClicked(production) {
+      this.storeProductionPicture(null)
       this.productionToEdit = production
       this.modals.isEditDisplayed = true
     },
