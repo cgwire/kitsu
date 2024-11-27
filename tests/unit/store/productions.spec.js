@@ -440,18 +440,18 @@ describe('Productions store', () => {
       const state = {
         productionAvatarFormData: 'form-data'
       }
-      productionApi.postAvatar = vi.fn((_, __, callback) => callback(null))
+      productionApi.postAvatar = vi.fn(() => Promise.resolve())
       await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_AVATAR_UPLOADED, 'production-id')
 
       mockCommit = vi.fn()
-      productionApi.postAvatar = vi.fn((_, __, callback) => callback(new Error('error')))
+      productionApi.postAvatar = vi.fn(() => Promise.reject())
       try {
         await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       } catch (e) {
-        expect(mockCommit).toBeCalledTimes(1)
-        expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_AVATAR_UPLOADED, 'production-id')
+        expect(productionApi.postAvatar).toBeCalledTimes(1)
+        expect(mockCommit).toBeCalledTimes(0)
       }
     })
 
