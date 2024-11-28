@@ -55,7 +55,7 @@
           <combobox
             class="flexrow-item"
             :options="general.taskTypeOperatorOptions"
-            @input="onTaskTypeOperatorChanged(taskTypeFilter)"
+            @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
             locale-key-prefix="entities.build_filter."
             v-model="taskTypeFilter.operator"
           />
@@ -97,7 +97,7 @@
             <combobox
               class="flexrow-item"
               :options="descriptorOptions"
-              @input="onDescriptorChanged(descriptorFilter)"
+              @update:model-value="onDescriptorChanged(descriptorFilter)"
               v-model="descriptorFilter.id"
             />
 
@@ -121,7 +121,9 @@
               class="flexrow-item"
               :options="general.operatorOptions"
               locale-key-prefix="entities.build_filter."
-              @input="operator => onOperatorChanged(operator, descriptorFilter)"
+              @update:model-value="
+                operator => onOperatorChanged(operator, descriptorFilter)
+              "
               v-model="descriptorFilter.operator"
               v-else
             />
@@ -190,7 +192,6 @@
               <people-field
                 class="flexrow-item"
                 :people="team"
-                big
                 v-model="assignation.person"
               />
               <span class="flexrow-item mt05 mb05">
@@ -304,6 +305,8 @@ import MetadataField from '@/components/widgets/MetadataField.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
+import { v4 as uuidv4 } from 'uuid'
+
 export default {
   name: 'build-filter-modal',
 
@@ -330,6 +333,8 @@ export default {
       default: 'asset'
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {
@@ -654,6 +659,7 @@ export default {
 
     addTaskTypeFilter() {
       const filter = {
+        localId: uuidv4(),
         id: this.taskTypeList[0].id,
         operator: '=',
         values: [this.taskStatuses[0].id]
@@ -668,7 +674,7 @@ export default {
 
     removeTaskTypeFilter(taskTypeFilter) {
       this.taskTypeFilters.values = this.taskTypeFilters.values.filter(
-        f => f !== taskTypeFilter
+        f => f.localId !== taskTypeFilter.localId
       )
     },
 
@@ -715,6 +721,7 @@ export default {
         values.push('')
       }
       const filter = {
+        localId: uuidv4(),
         id: this.descriptorOptions[0].value,
         operator: '=',
         values,
@@ -727,7 +734,7 @@ export default {
     removeDescriptorFilter(descriptorFilter) {
       this.metadataDescriptorFilters.values =
         this.metadataDescriptorFilters.values.filter(
-          f => f !== descriptorFilter
+          f => f.localId !== descriptorFilter.localId
         )
     },
 

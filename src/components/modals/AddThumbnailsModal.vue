@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { CheckIcon } from 'lucide-vue'
+import { CheckIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'
@@ -138,6 +138,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       extensions: '.png,.jpg,.jpeg,.mp4,.mov',
@@ -169,11 +171,11 @@ export default {
     taskTypeList() {
       let validationColumns = []
       if (this.isAssets) {
-        validationColumns = this.assetValidationColumns
+        validationColumns = this.assetValidationColumns || []
       } else if (this.isEdits) {
-        validationColumns = this.editValidationColumns
+        validationColumns = this.editValidationColumns || []
       } else if (this.isShots) {
-        validationColumns = this.shotValidationColumns
+        validationColumns = this.shotValidationColumns || []
       }
       return validationColumns.map(taskTypeId =>
         this.taskTypeMap.get(taskTypeId)

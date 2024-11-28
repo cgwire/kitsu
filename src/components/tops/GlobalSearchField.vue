@@ -145,7 +145,7 @@
 </template>
 
 <script>
-import { SearchIcon } from 'lucide-vue'
+import { SearchIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getEntityPath, getPersonPath } from '@/lib/path'

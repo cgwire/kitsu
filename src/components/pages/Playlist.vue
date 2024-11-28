@@ -8,7 +8,7 @@
           column: true,
           toggled: isListToggled
         }"
-        v-scroll="onPlaylistListScroll"
+        @scroll.passive="onPlaylistListScroll"
       >
         <div class="flexrow top-section">
           <combobox-task-type
@@ -83,7 +83,6 @@
                   empty-width="38px"
                   empty-height="30px"
                   :title="playlist.name"
-                  with-link="false"
                 />
                 <div class="flerxow-item ml05">
                   {{ playlist.name }}
@@ -301,7 +300,7 @@
           v-if="
             (isCurrentUserManager || isCurrentUserSupervisor) && isAddingEntity
           "
-          v-scroll="onBodyScroll"
+          @scroll.passive="onBodyScroll"
         >
           <spinner
             class="mt2"
@@ -324,6 +323,8 @@
                       playlisted: currentEntities[asset.id] !== undefined
                     }"
                     :key="asset.id"
+                    draggable="true"
+                    @dragstart="onEntityDragStart($event, asset)"
                     @click.prevent="addEntityToPlaylist(asset)"
                     v-for="asset in typeAssets.filter(a => !a.canceled)"
                   >
@@ -345,6 +346,8 @@
                     playlisted: currentEntities[sequence.id] !== undefined
                   }"
                   :key="sequence.id"
+                  draggable="true"
+                  @dragstart="onEntityDragStart($event, sequence)"
                   @click.prevent="addEntityToPlaylist(sequence)"
                   v-for="sequence in displayedSequences.filter(
                     s => !s.canceled
@@ -389,9 +392,8 @@
                   </button>
                 </h2>
                 <div class="addition-entities">
-                  <drag
+                  <div
                     :key="shot.id"
-                    :transfer-data="shot.id"
                     v-for="shot in sequenceShots.filter(s => !s.canceled)"
                   >
                     <div
@@ -399,7 +401,8 @@
                         'addition-shot': true,
                         playlisted: currentEntities[shot.id] !== undefined
                       }"
-                      :transfer-data="shot.id"
+                      draggable="true"
+                      @dragstart="onEntityDragStart($event, shot)"
                       @click.prevent="addEntityToPlaylist(shot)"
                     >
                       <light-entity-thumbnail
@@ -422,7 +425,7 @@
                         }}</span>
                       </div>
                     </div>
-                  </drag>
+                  </div>
                 </div>
               </div>
             </div>
@@ -452,11 +455,11 @@
   </div>
 </template>
 <script>
-import Vue from 'vue/dist/vue'
+import { ref } from 'vue'
 import firstBy from 'thenby'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
-import { PlusIcon, XIcon } from 'lucide-vue'
+import { PlusIcon, XIcon } from 'lucide-vue-next'
 
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
@@ -635,7 +638,7 @@ export default {
       const productionName = this.currentProduction
         ? this.currentProduction.name
         : ''
-      return `${productionName} ${this.$t('playlists.title')} - Kitsu`
+      return `${productionName} | ${this.$t('playlists.title')} - Kitsu`
     },
 
     taskTypeList() {
@@ -659,6 +662,7 @@ export default {
       'displayMoreShots',
       'editPlaylist',
       'getPending',
+      'loadEpisodes',
       'loadMorePlaylists',
       'loadPlaylist',
       'loadPlaylists',
@@ -720,7 +724,7 @@ export default {
 
     // Data loading
 
-    loadShotsData(callback) {
+    async loadShotsData() {
       if (
         this.displayedShots.length === 0 ||
         this.displayedShots[0].project_id !== this.currentProduction.id ||
@@ -733,12 +737,13 @@ export default {
           (this.currentEpisode.id === 'main' ||
             this.currentEpisode.id === 'all')
         ) {
-          callback()
+          // Do nothing for main or all episodes
         } else {
-          this.loadShots(callback)
+          if (this.isTVShow && !this.currentEpisode) {
+            await this.loadEpisodes()
+          }
+          await this.loadShots()
         }
-      } else {
-        callback()
       }
     },
 
@@ -778,10 +783,11 @@ export default {
       }
     },
 
-    onPlaylistListScroll(event, position) {
+    onPlaylistListScroll(event) {
       if (this.$options.silentMore) return
       const listEl = this.$refs.playlistList
       const maxHeight = listEl.scrollHeight - listEl.offsetHeight
+      const position = event.target
       if (maxHeight < position.scrollTop + 20) {
         this.$options.silentMore = true
         this.page++
@@ -912,15 +918,11 @@ export default {
       const playlist = this.playlistMap.get(playlistId)
       if (playlist) {
         this.loading.playlist = true
-        this.loadPlaylist({
-          playlist,
-          callback: (err, playlist) => {
-            if (err) console.error(err)
-            this.currentPlaylist = playlist
-            this.rebuildCurrentEntities()
-            this.loading.playlist = false
-            if (callback) callback()
-          }
+        this.loadPlaylist(playlist).then(loadedPlaylist => {
+          this.currentPlaylist = ref(loadedPlaylist)
+          this.rebuildCurrentEntities()
+          this.loading.playlist = false
+          if (callback) callback()
         })
       } else {
         this.currentPlaylist = {
@@ -951,7 +953,7 @@ export default {
 
     addToPlayerPlaylist(entity, scrollRight = true) {
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-      Vue.set(this.currentEntities, playlistEntity.id, playlistEntity)
+      this.currentEntities[playlistEntity.id] = playlistEntity
       this.playlistPlayer.entityList.push(playlistEntity)
       if (scrollRight) {
         this.$nextTick(() => {
@@ -1228,6 +1230,10 @@ export default {
       }
     },
 
+    onEntityDragStart(event, entity) {
+      event.dataTransfer.setData('entityId', entity.id)
+    },
+
     // Changes
 
     toggleAddEntities() {
@@ -1247,7 +1253,8 @@ export default {
       })
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.entityListContent.scrollHeight -
         this.$refs.entityListContent.offsetHeight
@@ -1297,23 +1304,18 @@ export default {
 
     // Loading
 
-    reloadAll() {
+    async reloadAll() {
       if (!this.loading.playlists) {
         this.loading.playlists = true
-        this.loadShotsData(() => {
-          this.loadAssetsData()
-            .then(() => {
-              this.page = 1
-              return this.loadPlaylistsData()
-            })
-            .then(() => {
-              this.loading.playlists = false
-              this.resetPlaylist()
-              setTimeout(() => {
-                this.loading.playlistsInit = false
-              }, 300)
-            })
-        })
+        await this.loadShotsData()
+        await this.loadAssetsData()
+        this.page = 1
+        await this.loadPlaylistsData()
+        this.loading.playlists = false
+        this.resetPlaylist()
+        setTimeout(() => {
+          this.loading.playlistsInit = false
+        }, 300)
       }
     }
   },
@@ -1425,7 +1427,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
     } else {

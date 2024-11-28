@@ -21,6 +21,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { getCurrentInstance } from 'vue'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -67,16 +68,16 @@ export default {
     const config = await this.setMainConfig()
     this.setupDarkTheme()
     this.setupCrisp(config)
-    this.setupSentry(config)
+    // this.setupSentry(config)
   },
 
   methods: {
     ...mapActions([
       'getOrganisation',
-      'loadTask',
       'loadAsset',
       'loadAssetType',
       'loadComment',
+      'loadDepartment',
       'loadEdit',
       'loadEpisode',
       'loadOpenProductions',
@@ -84,6 +85,7 @@ export default {
       'loadProduction',
       'loadSequence',
       'loadShot',
+      'loadTask',
       'loadTaskStatus',
       'loadTaskType',
       'refreshMetadataDescriptor',
@@ -125,7 +127,10 @@ export default {
 
     setupSentry(config) {
       if (config.sentry?.dsn?.length) {
-        sentry.init(this.$router, {
+        const instance = getCurrentInstance()
+        const app = instance.appContext.app
+
+        sentry.init(app, this.$router, {
           dsn: config.sentry.dsn,
           sampleRate: config.sentry.sampleRate
         })
@@ -298,6 +303,24 @@ export default {
         const task = this.taskMap.get(eventData.task_id)
         if (task) {
           this.$store.commit('DELETE_TASK_END', task)
+        }
+      },
+
+      'department:new'(eventData) {
+        if (!this.departmentMap.get(eventData.department_id)) {
+          this.loadDepartment(eventData.department_id)
+        }
+      },
+
+      'department:update'(eventData) {
+        this.loadDepartment(eventData.department_id)
+      },
+
+      'department:delete'(eventData) {
+        if (this.departmentMap.get(eventData.task_type_id)) {
+          this.$store.commit('DELETE_DEPARTMENTS_END', {
+            id: eventData.task_type_id
+          })
         }
       },
 
@@ -663,46 +686,8 @@ body {
     }
   }
 
-  .vdp-datepicker__calendar {
-    background-color: #36393f;
-    border-color: #25282e;
-
-    .prev,
-    .next,
-    .day__month_btn,
-    header span:hover {
-      background: #36393f;
-    }
-
-    header .prev::after,
-    header .prev::after {
-      border-right-color: #eee;
-    }
-
-    header .next::after,
-    header .next::after {
-      border-left-color: #eee;
-    }
-
-    header .next.disabled::after,
-    header .next.disabled::after {
-      border-left-color: #666;
-    }
-
-    .cell.year.disabled,
-    .cell.month.disabled,
-    .cell.day.disabled {
-      color: $grey;
-    }
-  }
-
   .hero .control .icon {
     color: #555;
-  }
-
-  .v-autocomplete-input {
-    background: $dark-grey;
-    color: white;
   }
 
   h2 {
@@ -2160,40 +2145,6 @@ th.validation-cell {
   }
 }
 
-.theme .datepicker .vdp-datepicker__calendar {
-  z-index: 2000;
-
-  .cell.year:not(.blank):not(.disabled):hover,
-  .cell.month:not(.blank):not(.disabled):hover,
-  .cell.day:not(.blank):not(.disabled):hover {
-    background: var(--background-selectable);
-    border: 1px solid transparent;
-  }
-
-  .cell.year.disabled:hover,
-  .cell.month.disabled:hover,
-  .cell.day.disabled:hover {
-    border: 1px solid transparent;
-  }
-
-  .cell.year.selected,
-  .cell.month.selected,
-  .cell.day.selected {
-    background: var(--background-selected);
-  }
-
-  .cell.year.selected:not(.blank):not(.disabled):hover,
-  .cell.month.selected:not(.blank):not(.disabled):hover,
-  .cell.day.selected:not(.blank):not(.disabled):hover {
-    border: 1px solid transparent;
-    background: var(--background-selected);
-  }
-
-  header span:not(.disabled):hover {
-    background: var(--background-selectable);
-  }
-}
-
 .theme .vue-slider-dot-tooltip-inner {
   background: $purple-strong;
   border-color: $purple-strong;
@@ -2312,6 +2263,33 @@ th.validation-cell {
   .button .icon.is-small {
     margin-right: 0;
   }
+}
+
+#app .dp__active_date {
+  color: $black;
+  background: var(--background-selected);
+}
+
+#app .dp__today {
+  border-color: var(--background-selected);
+}
+
+#app .dp__date_hover:hover {
+  background: var(--background-selectable);
+}
+
+#app .dp__input {
+  border-radius: 10px;
+  padding-left: 0;
+  height: 40px;
+  padding-inline-start: 0.8em;
+  width: 116px;
+}
+
+#app .datatable .dp__input {
+  border-radius: 2px;
+  height: 43px;
+  width: 116px;
 }
 
 @media screen and (max-width: 768px) {

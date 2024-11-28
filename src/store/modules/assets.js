@@ -1,13 +1,15 @@
-import Vue from 'vue/dist/vue'
-
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
+import assetTypeStore from '@/store/modules/assettypes'
 import tasksStore from '@/store/modules/tasks'
+import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
 import productionsStore from '@/store/modules/productions'
 import peopleStore from '@/store/modules/people'
+
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { minutesToDays } from '@/lib/time'
+
 import func from '@/lib/func'
 
 import { PAGE_SIZE } from '@/lib/pagination'
@@ -86,16 +88,16 @@ const helpers = {
     return productionsStore.getters.currentProduction(productionsStore.state)
   },
   getTaskStatus(taskStatusId) {
-    return tasksStore.state.taskStatusMap.get(taskStatusId)
+    return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
   },
   getTaskType(taskTypeId) {
-    return taskTypesStore.state.taskTypeMap.get(taskTypeId)
+    return taskTypesStore.cache.taskTypeMap.get(taskTypeId)
   },
   getTask(taskId) {
     return tasksStore.state.taskMap.get(taskId)
   },
   getPerson(personId) {
-    return peopleStore.state.personMap.get(personId)
+    return peopleStore.cache.personMap.get(personId)
   },
 
   setListStats(state, assets) {
@@ -178,6 +180,7 @@ const helpers = {
         task = taskMap.get(task)
       }
       if (!task) return
+      task.data = asset.data || {}
       asset.full_name = `${asset.asset_type_name} / ${asset.name}`
       helpers.populateTask(task, asset)
 
@@ -217,16 +220,9 @@ const helpers = {
 
   buildResult(
     state,
-    {
-      assetSearch,
-      production,
-      sorting,
-      taskStatusMap,
-      taskTypeMap,
-      persons,
-      taskMap
-    }
+    { assetSearch, production, sorting, taskStatusMap, taskTypeMap, persons }
   ) {
+    const taskMap = tasksStore.state.taskMap
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
@@ -272,6 +268,7 @@ const helpers = {
 
 const cache = {
   assets: [],
+  assetMap: new Map(),
   assetIndex: {},
   assetTypeIndex: {},
   result: [],
@@ -279,7 +276,6 @@ const cache = {
 }
 
 const initialState = {
-  assetMap: new Map(),
   assetValidationColumns: [],
   nbValidationColumns: 0,
 
@@ -328,7 +324,7 @@ const state = {
 
 const getters = {
   assets: state => cache.assets,
-  assetMap: state => state.assetMap,
+  assetMap: state => cache.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,
   assetSearchFilterGroups: state => state.assetSearchFilterGroups,
@@ -477,7 +473,7 @@ const actions = {
    * occurs.
    */
   loadAsset({ commit, state, rootGetters }, assetId) {
-    const asset = state.assetMap.get(assetId)
+    const asset = cache.assetMap.get(assetId)
     if (asset?.lock) return
 
     const personMap = rootGetters.personMap
@@ -487,7 +483,7 @@ const actions = {
     return assetsApi
       .getAsset(assetId)
       .then(asset => {
-        if (state.assetMap.get(asset.id)) {
+        if (cache.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
         } else {
           asset.tasks.forEach(task => {
@@ -553,7 +549,7 @@ const actions = {
     if (existingAsset) {
       return Promise.reject(new Error('Asset already exists'))
     }
-    const assetTypeMap = rootState.assetTypes.assetTypeMap
+    const assetTypeMap = assetTypeStore.cache.assetTypeMap
     commit(LOCK_ASSET, data)
     commit(EDIT_ASSET_END, { newAsset: data, assetTypeMap })
     return assetsApi.updateAsset(data).finally(() => {
@@ -565,7 +561,7 @@ const actions = {
 
   deleteAsset({ commit, state }, asset) {
     return assetsApi.deleteAsset(asset).then(() => {
-      const previousAsset = state.assetMap.get(asset.id)
+      const previousAsset = cache.assetMap.get(asset.id)
       if (
         previousAsset &&
         previousAsset.tasks.length > 0 &&
@@ -807,7 +803,7 @@ const actions = {
       async.eachSeries(
         selectedAssetIds,
         (assetId, next) => {
-          const asset = state.assetMap.get(assetId)
+          const asset = cache.assetMap.get(assetId)
           if (asset) {
             dispatch('deleteAsset', asset)
           }
@@ -851,8 +847,8 @@ const actions = {
 const mutations = {
   [CLEAR_ASSETS](state) {
     cache.assets = []
-    state.assetMap = new Map()
     cache.result = []
+    cache.assetMap = new Map()
     state.assetValidationColumns = []
 
     cache.assetIndex = {}
@@ -868,7 +864,7 @@ const mutations = {
   [LOAD_ASSETS_START](state) {
     cache.assets = []
     cache.result = []
-    state.assetMap = new Map()
+    cache.assetMap = new Map()
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
     state.assetValidationColumns = []
@@ -910,7 +906,7 @@ const mutations = {
     cache.assets = assets
     cache.result = assets
     cache.assetIndex = buildAssetIndex(assets)
-    state.assetMap = new Map()
+    cache.assetMap = new Map()
 
     assets.forEach(asset => {
       helpers.populateAndRegisterAsset(
@@ -922,7 +918,7 @@ const mutations = {
         validationColumns,
         asset
       )
-      state.assetMap.set(asset.id, asset)
+      cache.assetMap.set(asset.id, asset)
       if (!isTime && asset.timeSpent > 0) isTime = true
       if (!isEstimation && asset.estimation > 0) isEstimation = true
       if (!isDescription && asset.description) isDescription = true
@@ -1009,7 +1005,6 @@ const mutations = {
     )
     cache.assets.push(asset)
     cache.assets = sortAssets(cache.assets)
-    state.assetMap.set(asset.id, asset)
 
     state.displayedAssets.push(asset)
     state.displayedAssets = sortAssets(state.displayedAssets)
@@ -1019,19 +1014,19 @@ const mutations = {
     const maxX = state.displayedAssets.length
     const maxY = state.nbValidationColumns
     state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
-    state.assetMap.set(asset.id, asset)
+    cache.assetMap.set(asset.id, asset)
 
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [UPDATE_ASSET](state, asset) {
-    Object.assign(state.assetMap.get(asset.id), asset)
+    Object.assign(cache.assetMap.get(asset.id), asset)
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
   [REMOVE_ASSET](state, assetToDelete) {
-    if (state.assetMap.get(assetToDelete.id)) {
-      state.assetMap.delete(assetToDelete.id)
+    if (cache.assetMap.get(assetToDelete.id)) {
+      cache.assetMap.delete(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)
       state.displayedAssets = removeModelFromList(
         state.displayedAssets,
@@ -1059,7 +1054,7 @@ const mutations = {
 
   [EDIT_ASSET_END](state, { newAsset, assetTypeMap }) {
     state.assetCreated = newAsset.name
-    const asset = state.assetMap.get(newAsset.id)
+    const asset = cache.assetMap.get(newAsset.id)
     const assetType = assetTypeMap.get(newAsset.entity_type_id)
     if (assetType) {
       newAsset.asset_type_name = assetType.name
@@ -1075,6 +1070,7 @@ const mutations = {
       Object.assign(asset, copyNewAsset)
     } else {
       newAsset.validations = new Map()
+      newAsset.tasks = []
       newAsset.production_id = newAsset.project_id
       newAsset.episode_id = newAsset.source_id
       cache.assets.push(newAsset)
@@ -1087,7 +1083,7 @@ const mutations = {
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
-      state.assetMap.set(newAsset.id, newAsset)
+      cache.assetMap.set(newAsset.id, newAsset)
     }
     if (newAsset.description && !state.isAssetDescription) {
       state.isAssetDescription = true
@@ -1101,7 +1097,7 @@ const mutations = {
   },
 
   [RESTORE_ASSET_END](state, assetToRestore) {
-    const asset = state.assetMap.get(assetToRestore.id)
+    const asset = cache.assetMap.get(assetToRestore.id)
     asset.canceled = false
     cache.assetIndex = buildAssetIndex(cache.assets)
     state.displayedAssetsLength = cache.result.filter(a => !a.canceled).length
@@ -1114,12 +1110,12 @@ const mutations = {
     if (asset) {
       const validations = new Map(asset.validations)
       delete asset.validations
-      Vue.set(asset, 'validations', validations)
+      asset.validations = validations
 
       const tasks = JSON.parse(JSON.stringify(asset.tasks))
       const taskIndex = tasks.findIndex(assetTaskId => assetTaskId === task.id)
       tasks.splice(taskIndex, 1)
-      Vue.set(asset, 'tasks', tasks)
+      asset.tasks = tasks
     }
   },
 
@@ -1194,13 +1190,11 @@ const mutations = {
   },
 
   [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
-    const asset = state.assetMap.get(entityId)
+    const asset = state.displayedAssets.find(a => a.id === entityId)
     if (asset) {
       asset.preview_file_id = previewId
-      asset.tasks.forEach(taskId => {
-        const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
-      })
+      const task = asset.tasks.find(taskId => taskMap.get(taskId))
+      if (task && task.entity) task.entity.preview_file_id = previewId
     }
   },
 
@@ -1216,7 +1210,7 @@ const mutations = {
     if (
       !validationInfo.x &&
       validationInfo.task?.column &&
-      state.assetMap.get(validationInfo.task.entity.id)
+      cache.assetMap.get(validationInfo.task.entity.id)
     ) {
       const entity = validationInfo.task.entity
       const taskType = validationInfo.task.column
@@ -1262,12 +1256,14 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
-    state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
+    if (tasksStore.state.nbSelectedTasks > 0) {
+      const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
+      state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
+    }
   },
 
   [NEW_TASK_END](state, { task }) {
-    const asset = state.assetMap.get(task.entity_id)
+    const asset = cache.assetMap.get(task.entity_id)
     if (asset && task) {
       task = helpers.populateTask(task, asset)
       // Add Column if it is missing
@@ -1276,25 +1272,31 @@ const mutations = {
         state.assetFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
-      asset.tasks.push(task.id)
+      const displayedAsset = state.displayedAssets.find(
+        asset => asset.id === task.entity_id
+      )
       if (!asset.validations) asset.validations = new Map()
       asset.validations.set(task.task_type_id, task.id)
-      Vue.set(asset, 'validations', new Map(asset.validations))
+      if (displayedAsset) {
+        displayedAsset.validations = new Map(asset.validations)
+      }
     }
   },
 
   [CREATE_TASKS_END](state, { tasks }) {
     tasks.forEach(task => {
       if (task) {
-        const asset = state.assetMap.get(task.entity_id)
+        const asset = cache.assetMap.get(task.entity_id)
+        const displayedAsset = state.displayedAssets.find(
+          a => a.id === task.entity_id
+        )
         if (asset) {
           if (!asset.validations) asset.validations = new Map()
           helpers.populateTask(task, asset)
           asset.validations.set(task.task_type_id, task.id)
-          const validations = asset.validations
-          asset.validations = []
-          Vue.set(asset, 'validations', validations)
-          asset.tasks.push(task.id)
+          if (displayedAsset) {
+            displayedAsset.validations = new Map(asset.validations)
+          }
         }
       }
     })
@@ -1357,14 +1359,14 @@ const mutations = {
   },
 
   [LOCK_ASSET](state, asset) {
-    asset = state.assetMap.get(asset.id)
+    asset = cache.assetMap.get(asset.id)
     if (asset) {
       asset.lock = !asset.lock ? 1 : asset.lock + 1
     }
   },
 
   [UNLOCK_ASSET](state, asset) {
-    asset = state.assetMap.get(asset.id)
+    asset = cache.assetMap.get(asset.id)
     if (asset) {
       asset.lock = !asset.lock ? 0 : asset.lock - 1
     }
@@ -1381,11 +1383,9 @@ const mutations = {
   [SET_ASSET_SELECTION](state, { asset, selected }) {
     if (!selected && state.selectedAssets.has(asset.id)) {
       state.selectedAssets.delete(asset.id)
-      state.selectedAssets = new Map(state.selectedAssets) // for reactivity
     }
     if (selected) {
       state.selectedAssets.set(asset.id, asset)
-      state.selectedAssets = new Map(state.selectedAssets) // for reactivity
       const maxX = state.displayedAssets.length
       const maxY = state.nbValidationColumns
       // unselect previously selected tasks

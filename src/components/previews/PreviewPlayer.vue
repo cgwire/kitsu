@@ -48,7 +48,6 @@
               :is-light="light"
               :is-muted="isMuted"
               :is-object-background="isObjectBackground"
-              :is-ordering="isOrdering"
               :is-repeating="isRepeating"
               :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
@@ -78,7 +77,6 @@
               :is-light="light"
               :is-hd="isHd"
               :is-muted="true"
-              :is-ordering="isOrdering"
               :is-repeating="isRepeating"
               :margin-bottom="marginBottom"
               :preview="previewToCompare"
@@ -283,9 +281,8 @@
                 v-show="isTyping && (!light || fullScreen)"
               >
                 <color-picker
-                  :is-open="isShowingPalette"
                   :color="textColor"
-                  @TogglePalette="onPickColor"
+                  @toggle-palette="onPickColor"
                   @change="onChangeTextColor"
                 />
               </div>
@@ -306,17 +303,14 @@
                 v-show="isDrawing && (!light || fullScreen)"
               >
                 <pencil-picker
-                  :is-open="isShowingPencilPalette"
                   :pencil="pencil"
                   :sizes="pencilPalette"
                   @toggle-palette="onPickPencil"
                   @change="onChangePencil"
                 />
-
                 <color-picker
-                  :is-open="isShowingPalette"
                   :color="color"
-                  @TogglePalette="onPickColor"
+                  @toggle-palette="onPickColor"
                   @change="onChangeColor"
                 />
               </div>
@@ -444,7 +438,8 @@
               is-reversed
               is-preview
               thin
-              @input="changeCurrentPreviewFile"
+              :value="currentPreview?.id"
+              @update:model-value="changeCurrentPreviewFile"
             />
           </div>
 
@@ -529,8 +524,14 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from 'vue'
 import { fabric } from 'fabric'
-import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, LinkIcon } from 'lucide-vue'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  LinkIcon
+} from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import {
@@ -554,8 +555,8 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
-import VideoProgress from '@/components/previews/VideoProgress.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
+import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 let lastIndex = 1
 
@@ -577,7 +578,7 @@ export default {
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
-    TaskInfo,
+    TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
 
@@ -633,6 +634,16 @@ export default {
       type: String
     }
   },
+
+  emits: [
+    'add-extra-preview',
+    'add-preview',
+    'change-current-preview',
+    'comment-added',
+    'frame-updated',
+    'previews-order-changed',
+    'remove-extra-preview'
+  ],
 
   data() {
     return {
@@ -725,7 +736,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
   },
@@ -736,6 +747,7 @@ export default {
       'currentProduction',
       'getProductionBackgrounds',
       'isCurrentUserArtist',
+      'isTVShow',
       'organisation',
       'selectedConcepts',
       'user'
@@ -914,12 +926,12 @@ export default {
 
     lastPreviewFileOptions() {
       if (!this.lastPreviewFiles) return []
-      return this.lastPreviewFiles.map(previewFile => {
-        return {
-          label: `v${previewFile.revision}`,
-          value: previewFile.id
-        }
-      })
+      return [...this.lastPreviewFiles]
+        .sort((a, b) => b.revision - a.revision)
+        .map(preview => ({
+          value: preview.id,
+          label: `v${preview.revision}`
+        }))
     },
 
     previewFileOptions() {
@@ -1962,9 +1974,11 @@ export default {
         this.maxDuration = '00:00:00:00'
         this.isDrawing = false
         setTimeout(() => {
-          this.movieDimensions = this.previewViewer.getNaturalDimensions()
-          this.previewViewer.resize()
-          this.comparisonViewer.resize()
+          if (this.previewViewer) {
+            this.movieDimensions = this.previewViewer.getNaturalDimensions()
+            this.previewViewer.resize()
+            this.comparisonViewer.resize()
+          }
         }, 500)
       } else if (this.isPicture) {
         this.pause()

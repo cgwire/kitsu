@@ -196,6 +196,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       form: {
@@ -465,11 +467,5 @@ export default {
 
 .checklist-wrapper .button {
   margin: 0.5em 0.2em;
-}
-</style>
-
-<style lang="scss">
-.checklist-entry.checked .checklist-text {
-  text-decoration: none !important;
 }
 </style>

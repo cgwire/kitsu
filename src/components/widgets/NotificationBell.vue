@@ -26,7 +26,7 @@
  * a badge giving the number of unread notifications.
  */
 import { mapGetters } from 'vuex'
-import { BellIcon } from 'lucide-vue'
+import { BellIcon } from 'lucide-vue-next'
 
 export default {
   name: 'notification-bell',

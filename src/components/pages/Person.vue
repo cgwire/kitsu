@@ -796,7 +796,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.person?.name || '...'} - Kitsu`
     }

@@ -4,9 +4,9 @@
       {{ label }}
     </label>
     <div
+      class="combo"
       :class="{
-        combo: true,
-        thin: thin,
+        thin,
         compact: isCompact,
         reversed: isReversed,
         open: showList
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
@@ -70,6 +70,8 @@ export default {
     ChevronDownIcon,
     EntityThumbnail
   },
+
+  emits: ['change', 'update:modelValue'],
 
   data() {
     return {
@@ -94,7 +96,7 @@ export default {
       default: () => [],
       type: Array
     },
-    value: {
+    modelValue: {
       default: '',
       type: [String, Object]
     },
@@ -145,7 +147,7 @@ export default {
     },
 
     selectOption(option) {
-      this.$emit('input', option.value)
+      this.$emit('update:modelValue', option.value)
       this.$emit('change', option.value)
       this.selectedOption = option
     },
@@ -172,10 +174,13 @@ export default {
 
   watch: {
     options: {
+      deep: true,
       immediate: true,
       handler() {
         if (this.options.length > 0) {
-          const option = this.options.find(({ value }) => value === this.value)
+          const option = this.options.find(
+            ({ value }) => value === this.modelValue
+          )
           this.selectedOption = option || this.options[0]
         }
       }
@@ -196,7 +201,7 @@ export default {
     },
 
     value() {
-      this.selectedOption = this.options.find(o => o.value === this.value)
+      this.selectedOption = this.options.find(o => o.value === this.modelValue)
     }
   }
 }

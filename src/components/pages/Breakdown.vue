@@ -77,7 +77,6 @@
 
         <div class="flexrow mb05 list-options">
           <table-metadata-selector-menu
-            ref="headerMetadataSelectorMenu"
             namespace="breakdown"
             :descriptors="metadataDescriptors"
             :exclude="{
@@ -87,9 +86,9 @@
               maxRetakes: true,
               timeSpent: true
             }"
-            :metadata-display-headers.sync="metadataDisplayHeaders"
-            v-if="isShowInfosBreakdown"
+            v-model="metadataDisplayHeaders"
             v-show="columnSelectorDisplayed"
+            v-if="isShowInfosBreakdown"
           />
           <span class="filler"></span>
 
@@ -104,7 +103,7 @@
         <div
           ref="casting-header"
           class="casting-header flexrow"
-          v-scroll="onCastingHeaderScroll"
+          @scroll.passive="onCastingHeaderScroll"
           v-if="!isLoading"
         >
           <div
@@ -224,7 +223,7 @@
         <div
           ref="casting-list"
           class="casting-list"
-          v-scroll="onCastingScroll"
+          @scroll.passive="onCastingScroll"
           v-if="!isLoading"
         >
           <div class="shot-lines">
@@ -259,7 +258,7 @@
 
       <div
         ref="asset-list"
-        v-scroll="onAssetListScroll"
+        @scroll.passive="onAssetListScroll"
         class="breakdown-column assets-column"
         v-if="isCurrentUserManager"
       >
@@ -320,29 +319,30 @@
         </div>
 
         <spinner v-if="isAssetsLoading" />
-        <div
-          class="type-assets"
-          :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
-          v-for="typeAssets in availableAssetsByType"
-          v-else
-        >
-          <div class="asset-type">
-            {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+        <template v-else>
+          <div
+            class="type-assets"
+            :key="typeAssets.length > 0 ? typeAssets[0].asset_type_name : ''"
+            v-for="typeAssets in availableAssetsByType"
+          >
+            <div class="asset-type">
+              {{ typeAssets.length > 0 ? typeAssets[0].asset_type_name : '' }}
+            </div>
+            <div class="asset-list">
+              <available-asset-block
+                :key="asset.id"
+                :asset="asset"
+                :active="Object.keys(selection).length > 0"
+                :text-mode="isTextMode"
+                :big-mode="isBigMode"
+                @add-one="addOneAsset"
+                @add-ten="addTenAssets"
+                v-for="asset in typeAssets"
+                v-show="libraryDisplayed || !asset.shared"
+              />
+            </div>
           </div>
-          <div class="asset-list">
-            <available-asset-block
-              :key="asset.id"
-              :asset="asset"
-              :active="Object.keys(selection).length > 0"
-              :text-mode="isTextMode"
-              :big-mode="isBigMode"
-              @add-one="addOneAsset"
-              @add-ten="addTenAssets"
-              v-for="asset in typeAssets"
-              v-show="libraryDisplayed || !asset.shared"
-            />
-          </div>
-        </div>
+        </template>
       </div>
     </div>
 
@@ -401,7 +401,7 @@
       :is-loading-stay="loading.stay"
       :is-success="success.edit"
       @confirm="confirmNewAsset"
-      @confirmAndStay="confirmNewAssetStay"
+      @confirm-and-stay="confirmNewAssetStay"
       @cancel="modals.isNewDisplayed = false"
     />
 
@@ -549,7 +549,7 @@ export default {
     this.resetColumnWidth()
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
@@ -1010,9 +1010,10 @@ export default {
       }
     },
 
-    onAssetListScroll(event, position) {
+    onAssetListScroll(event) {
       const assetList = this.$refs['asset-list']
       const maxHeight = assetList.scrollHeight - assetList.offsetHeight
+      const position = event.target
       if (maxHeight < position.scrollTop + 100) {
         this.displayMoreAssets()
       }
@@ -1539,11 +1540,13 @@ export default {
       })
     },
 
-    onCastingHeaderScroll(event, position) {
+    onCastingHeaderScroll(event) {
+      const position = event.target
       this.$refs['casting-list'].scrollLeft = position.scrollLeft
     },
 
-    onCastingScroll(event, position) {
+    onCastingScroll(event) {
+      const position = event.target
       this.$refs['casting-header'].scrollLeft = position.scrollLeft
     }
   },
@@ -1680,10 +1683,17 @@ export default {
     }
   },
 
-  metaInfo() {
-    const pageTitle = this.$t('breakdown.title')
+  head() {
+    if (this.isTVShow) {
+      return {
+        title:
+          `${this.currentProduction?.name || ''}` +
+          ` - ${this.currentEpisode?.name || ''}` +
+          ` | ${this.$t('breakdown.title')} - Kitsu`
+      }
+    }
     return {
-      title: `${this.currentProduction.name} ${pageTitle} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('breakdown.title')} - Kitsu`
     }
   }
 }

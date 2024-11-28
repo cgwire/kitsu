@@ -1,6 +1,6 @@
 <template>
   <div class="data-list task-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -82,7 +82,6 @@
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
-            v-for="(entry, i) in displayedTasks"
             :key="entry + '-' + i"
             :class="{
               'datatable-row': true,
@@ -90,6 +89,7 @@
               selected: selectionGrid[entry.id]
             }"
             @click="selectTask($event, i, entry)"
+            v-for="(entry, i) in displayedTasks"
           >
             <td
               class="production datatable-row-header datatable-row-header--nobd"
@@ -213,12 +213,12 @@
                   "
                 >
                   <p
-                    v-for="(option, i) in getDescriptorChecklistValues(
-                      getMetadataDescriptor(fieldName, entry)
-                    )"
                     :key="`${entry.id}-
                     ${getMetadataDescriptor(fieldName, entry).id}
                     -${i}-${option.text}-div`"
+                    v-for="(option, i) in getDescriptorChecklistValues(
+                      getMetadataDescriptor(fieldName, entry)
+                    )"
                   >
                     <input
                       type="checkbox"
@@ -387,6 +387,13 @@ export default {
     }
   },
 
+  emits: [
+    'scroll',
+    'task-selection-addition',
+    'task-selection-cleared',
+    'task-selection-removal'
+  ],
+
   data() {
     return {
       page: 1,
@@ -409,7 +416,7 @@ export default {
       'px'
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
@@ -526,12 +533,6 @@ export default {
       return sortPeople(people)
     },
 
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
-    },
-
     getDate(date) {
       return date ? moment(date, 'YYYY-MM-DD').toDate() : null
     },
@@ -540,7 +541,8 @@ export default {
       return date ? formatSimpleDate(date) : ''
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
@@ -550,7 +552,7 @@ export default {
     },
 
     getTaskType(entry) {
-      const taskType = this.taskTypeMap.get(entry.task_type_id)
+      const taskType = { ...this.taskTypeMap.get(entry.task_type_id) }
       const production = this.productionMap.get(entry.project_id)
       taskType.episode_id = entry.episode_id
       if (

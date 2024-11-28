@@ -251,7 +251,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'lucide-vue'
+import { CornerLeftUpIcon } from 'lucide-vue-next'
+
+import sequenceStore from '@/store/modules/sequences'
 
 import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import { entityMixin } from '@/components/mixins/entity'
@@ -306,6 +308,7 @@ export default {
       type: 'sequence',
       currentSequence: null,
       currentTask: null,
+      currentSection: 'infos',
       casting: {
         isLoading: false,
         isError: false
@@ -332,7 +335,6 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
-      'currentSection',
       'getTaskTypePriority',
       'isCurrentUserManager',
       'isTVShow',
@@ -427,7 +429,8 @@ export default {
               return this.loadSequencesWithTasks()
             })
             .then(() => {
-              const sequence = this.sequenceMap.get(sequenceId) || null
+              const sequence =
+                sequenceStore.cache.sequenceMap.get(sequenceId) || null
               return resolve(sequence)
             })
         } else {
@@ -485,7 +488,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.title} - Kitsu`
     }

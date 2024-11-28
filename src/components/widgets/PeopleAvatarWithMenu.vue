@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { UserIcon, UserMinusIcon } from 'lucide-vue'
+import { UserIcon, UserMinusIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -68,6 +68,8 @@ export default {
       default: true
     }
   },
+
+  emits: ['unassign'],
 
   computed: {
     ...mapGetters(['isDarkTheme']),

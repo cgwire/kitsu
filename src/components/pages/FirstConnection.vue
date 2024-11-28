@@ -68,7 +68,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 
-import { MailIcon } from 'lucide-vue'
+import { MailIcon } from 'lucide-vue-next'
 
 export default {
   name: 'first-connection',
@@ -116,7 +116,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: this.$t('login.first_connection_title')
     }

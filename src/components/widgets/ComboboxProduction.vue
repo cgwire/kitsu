@@ -22,9 +22,9 @@
       <div class="select-input" ref="select" v-if="showProductionList">
         <div
           class="production-line"
-          v-for="production in productionList"
-          @click="selectProduction(production)"
           :key="production.id"
+          @click="selectProduction(production)"
+          v-for="production in productionList"
         >
           <production-name
             :size="25"
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -55,6 +55,8 @@ export default {
     ComboboxMask,
     ProductionName
   },
+
+  emits: ['update:modelValue'],
 
   data() {
     return {
@@ -75,7 +77,7 @@ export default {
       required: true,
       type: Array
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     }
@@ -84,7 +86,7 @@ export default {
   computed: {
     currentProduction() {
       return (
-        this.productionList.find(({ id }) => id === this.value) ||
+        this.productionList.find(({ id }) => id === this.modelValue) ||
         this.productionList[0]
       )
     }
@@ -92,7 +94,7 @@ export default {
 
   methods: {
     selectProduction(production) {
-      this.$emit('input', production.id)
+      this.$emit('update:modelValue', production.id)
       this.showProductionList = false
     },
 

@@ -1,7 +1,7 @@
-import Vue from 'vue/dist/vue'
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
+import taskStore from '@/store/modules/tasks'
 
 import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -48,6 +48,7 @@ import {
   SET_EPISODE_RETAKE_STATS,
   SET_EPISODE_STATS,
   SET_EPISODES_WITH_TASKS,
+  SET_PREVIEW,
   UPDATE_EPISODE,
   UPDATE_METADATA_DESCRIPTOR_END,
   RESET_ALL
@@ -167,13 +168,13 @@ const helpers = {
 const cache = {
   episodes: [],
   result: [],
-  episodeIndex: {}
+  episodeIndex: {},
+  episodeMap: new Map()
 }
 
 const initialState = {
   currentEpisode: null,
   episodes: [],
-  episodeMap: new Map(),
 
   displayedEpisodes: [],
   displayedEpisodesLength: 0,
@@ -219,7 +220,7 @@ const getters = {
   isEpisodeTime: state => state.isEpisodeTime,
 
   episodes: state => state.episodes,
-  episodeMap: state => state.episodeMap,
+  episodeMap: state => cache.episodeMap,
   episodeRetakeStats: state => state.episodeRetakeStats,
   episodeStats: state => state.episodeStats,
 
@@ -371,7 +372,7 @@ const actions = {
     return shotsApi
       .getEpisode(episodeId)
       .then(episode => {
-        if (state.episodeMap.get(episode.id)) {
+        if (cache.episodeMap.get(episode.id)) {
           commit(UPDATE_EPISODE, episode)
         } else {
           commit(ADD_EPISODE, episode)
@@ -541,11 +542,9 @@ const mutations = {
   [SET_EPISODE_SELECTION](state, { episode, selected, displayedEpisodes }) {
     if (!selected && state.selectedEpisodes.has(episode.id)) {
       state.selectedEpisodes.delete(episode.id)
-      state.selectedEpisodes = new Map(state.selectedEpisodes) // for reactivity
     }
     if (selected) {
       state.selectedEpisodes.set(episode.id, episode)
-      state.selectedEpisodes = new Map(state.selectedEpisodes) // for reactivity
       const maxX = displayedEpisodes.length
       const maxY = state.nbValidationColumns
       // unselect previously selected tasks
@@ -572,7 +571,7 @@ const mutations = {
       } else if (episodeId === 'all') {
         state.currentEpisode = { id: 'all' }
       } else {
-        state.currentEpisode = state.episodeMap.get(episodeId)
+        state.currentEpisode = cache.episodeMap.get(episodeId)
       }
     }
   },
@@ -594,7 +593,7 @@ const mutations = {
     let isTime = false
     let isEstimation = false
     let isResolution = false
-    state.episodeMap = new Map()
+    cache.episodeMap = new Map()
     episodes.forEach(episode => {
       const taskIds = []
       const validations = new Map()
@@ -639,7 +638,7 @@ const mutations = {
       if (!isDescription && episode.description) isDescription = true
       if (!isResolution && episode.data.resolution) isResolution = true
 
-      state.episodeMap.set(episode.id, episode)
+      cache.episodeMap.set(episode.id, episode)
     })
     episodes = sortByName(episodes)
     cache.episodes = episodes
@@ -684,7 +683,7 @@ const mutations = {
   [ADD_EPISODE](state, episode) {
     state.episodes.push(episode)
     const sortedEpisodes = sortByName(state.episodes)
-    state.episodeMap.set(episode.id, episode)
+    cache.episodeMap.set(episode.id, episode)
     state.episodes = sortedEpisodes
     state.displayedEpisodes.push(episode)
     state.displayedEpisodes = sortByName(state.displayedEpisodes)
@@ -693,12 +692,12 @@ const mutations = {
   },
 
   [UPDATE_EPISODE](state, episode) {
-    Object.assign(state.episodeMap.get(episode.id), episode)
+    Object.assign(cache.episodeMap.get(episode.id), episode)
     state.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
   [REMOVE_EPISODE](state, episode) {
-    delete state.episodeMap.get(episode.id)
+    delete cache.episodeMap.get(episode.id)
     state.episodes = removeModelFromList(state.episodes, episode)
     state.displayedEpisodes = removeModelFromList(
       state.displayedEpisodes,
@@ -733,13 +732,13 @@ const mutations = {
     cache.episodes = sortByName(cache.episodes)
     state.displayedEpisodes = cache.episodes
     helpers.setListStats(state, cache.episodes)
-    state.episodeMap.set(episode.id, episode)
+    cache.episodeMap.set(episode.id, episode)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
-    // cache.episodeIndex = buildNameIndex(cache.episodes)
+    cache.episodeIndex = buildEpisodeIndex(cache.episodes)
   },
 
   [EDIT_EPISODE_END](state, newEpisode) {
-    const episode = state.episodeMap.get(newEpisode.id)
+    const episode = cache.episodeMap.get(newEpisode.id)
     if (episode) {
       Object.assign(episode, newEpisode)
     }
@@ -756,7 +755,7 @@ const mutations = {
     cache.episodes = []
     cache.result = []
     cache.episodeIndex = {}
-    state.episodeMap = new Map()
+    cache.episodeMap = new Map()
     state.episodeValidationColumns = []
 
     state.isEpisodesLoading = true
@@ -776,28 +775,16 @@ const mutations = {
     state.isEpisodesLoadingError = true
   },
 
-  [LOAD_EPISODES_END](state, { production, userFilters }) {
-    if (
-      production &&
-      userFilters.episode &&
-      userFilters.episode[production.id]
-    ) {
-      state.episodeSearchQueries = userFilters.episode[production.id]
-    } else {
-      state.episodeSearchQueries = []
-    }
-  },
-
   [LOAD_EPISODES_END](state, { episodes, routeEpisodeId }) {
-    const episodeMap = new Map()
+    if (state.episodes.length > 0) return
     if (!episodes) episodes = []
+    cache.episodeMap = new Map()
     episodes.forEach(episode => {
       if (!EPISODE_STATUS.includes(episode.status)) {
         episode.status = 'running'
       }
-      episodeMap.set(episode.id, episode)
+      cache.episodeMap.set(episode.id, episode)
     })
-    state.episodeMap = episodeMap
     state.episodes = sortByName(episodes)
 
     state.episodeIndex = buildEpisodeIndex(state.episodes)
@@ -811,7 +798,7 @@ const mutations = {
       } else if (routeEpisodeId === 'main') {
         state.currentEpisode = { id: 'main' }
       } else if (routeEpisodeId) {
-        state.currentEpisode = state.episodeMap.get(routeEpisodeId)
+        state.currentEpisode = cache.episodeMap.get(routeEpisodeId)
       }
       if (!state.currentEpisode) {
         const runningEpisodes = state.episodes.filter(
@@ -861,7 +848,7 @@ const mutations = {
   [CREATE_TASKS_END](state, { tasks, production, taskTypeMap, taskStatusMap }) {
     tasks.forEach(task => {
       if (task) {
-        const episode = state.episodeMap.get(task.entity_id)
+        const episode = cache.episodeMap.get(task.entity_id)
         if (episode) {
           helpers.populateTask(
             production,
@@ -871,9 +858,12 @@ const mutations = {
             taskStatusMap
           )
           episode.validations.set(task.task_type_id, task.id)
-          const validations = episode.validations
-          episode.validations = []
-          Vue.set(episode, 'validations', validations)
+          const displayedEpisode = state.displayedEpisodes.find(
+            e => e.id === episode.id
+          )
+          if (displayedEpisode) {
+            displayedEpisode.validations = new Map(episode.validations)
+          }
           episode.tasks.push(task.id)
         }
       }
@@ -884,7 +874,7 @@ const mutations = {
     if (
       !validationInfo.x &&
       validationInfo.task?.column &&
-      state.episodeMap.get(validationInfo.task.entity.id)
+      cache.episodeMap.get(validationInfo.task.entity.id)
     ) {
       const entity = validationInfo.task.entity
       const taskType = validationInfo.task.column
@@ -930,12 +920,14 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    const tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
-    state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
+    if (taskStore.state.nbSelectedTasks > 0) {
+      const tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
+      state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
+    }
   },
 
   [NEW_TASK_END](state, { task, taskTypeMap, taskStatusMap, production }) {
-    const episode = state.episodeMap.get(task.entity_id)
+    const episode = cache.episodeMap.get(task.entity_id)
     if (episode && task) {
       task = helpers.populateTask(
         production,
@@ -953,21 +945,37 @@ const mutations = {
       episode.tasks.push(task.id)
       if (!episode.validations) episode.validations = new Map()
       episode.validations.set(task.task_type_id, task.id)
-      Vue.set(episode, 'validations', new Map(episode.validations))
+      const displayedEpisode = state.displayedEpisodes.find(
+        e => e.id === episode.id
+      )
+      if (displayedEpisode) {
+        displayedEpisode.validations = new Map(episode.validations)
+      }
     }
   },
 
   [DELETE_TASK_END](state, task) {
-    const episode = state.episodeMap.get(task.entity_id)
+    const episode = cache.episodeMap.get(task.entity_id)
     if (episode) {
       const validations = new Map(episode.validations)
       validations.delete(task.task_type_id)
       delete episode.validations
-      Vue.set(episode, 'validations', validations)
+      episode.validations = validations
       const taskIndex = episode.tasks.findIndex(
         episodeTaskId => episodeTaskId === task.id
       )
       episode.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+    const episodes = state.displayedEpisodes.find(s => s.id === entityId)
+    if (episodes) {
+      episodes.preview_file_id = previewId
+      episodes.tasks.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task) task.entity.preview_file_id = previewId
+      })
     }
   },
 

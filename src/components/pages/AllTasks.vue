@@ -32,7 +32,6 @@
             </label>
             <people-field
               class="person-field"
-              big
               :people="personList"
               v-model="filters.person"
             />
@@ -284,7 +283,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return { title: `${this.$t('tasks.all_tasks')} - Kitsu` }
   }
 }

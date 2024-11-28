@@ -31,6 +31,7 @@
             @enter="confirmClicked"
           />
           <boolean-field
+            is-field
             :label="$t('task_types.fields.allow_timelog')"
             @enter="confirmClicked"
             v-model="form.allow_timelog"
@@ -126,6 +127,8 @@ export default {
       default: () => {}
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   watch: {
     taskTypeToEdit() {

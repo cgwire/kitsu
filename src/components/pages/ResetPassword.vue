@@ -60,7 +60,7 @@
 <script>
 import { mapActions } from 'vuex'
 
-import { MailIcon } from 'lucide-vue'
+import { MailIcon } from 'lucide-vue-next'
 
 export default {
   name: 'reset-password',
@@ -104,7 +104,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: this.$t('login.reset_password_title')
     }

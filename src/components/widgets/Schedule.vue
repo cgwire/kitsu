@@ -139,53 +139,54 @@
               <div class="flexrow" v-if="rootElement.loading">
                 <spinner class="child-spinner" :size="20" />
               </div>
-              <div
-                class="child-name"
-                :key="'entity-' + childElement.id"
-                v-for="(childElement, j) in rootElement.children"
-                v-if="!multiline"
-              >
+              <template v-if="!multiline">
                 <div
-                  class="entity-line entity-name child-line flexrow"
-                  :style="childNameStyle(rootElement, j)"
+                  class="child-name"
+                  :key="'entity-' + childElement.id"
+                  v-for="(childElement, j) in rootElement.children"
                 >
-                  <router-link
-                    :to="childElement.route"
-                    class="filler flexrow-item child-element-name"
-                    v-if="childElement.route"
+                  <div
+                    class="entity-line entity-name child-line flexrow"
+                    :style="childNameStyle(rootElement, j)"
                   >
-                    {{ childElement.name }}
-                  </router-link>
-                  <span class="filler flexrow-item" v-else>
-                    {{ childElement.name }}
-                  </span>
-                  <span
-                    class="flexrow flexrow-item man-days-unit-wrapper"
-                    v-if="childElement.editable && !hideManDays"
-                  >
-                    <input
-                      class="flexrow-item man-days-unit"
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      step="any"
-                      @input="
-                        onChildEstimationChanged(
-                          $event,
-                          childElement,
-                          rootElement
-                        )
-                      "
-                      :value="formatDuration(childElement.man_days, false)"
-                    />
-                    {{ $t('schedule.md') }}
-                  </span>
-                  <span class="man-days-unit flexrow-item" v-else>
-                    {{ formatDuration(childElement.man_days) }}
-                    {{ $t('schedule.md') }}
-                  </span>
+                    <router-link
+                      :to="childElement.route"
+                      class="filler flexrow-item child-element-name"
+                      v-if="childElement.route"
+                    >
+                      {{ childElement.name }}
+                    </router-link>
+                    <span class="filler flexrow-item" v-else>
+                      {{ childElement.name }}
+                    </span>
+                    <span
+                      class="flexrow flexrow-item man-days-unit-wrapper"
+                      v-if="childElement.editable && !hideManDays"
+                    >
+                      <input
+                        class="flexrow-item man-days-unit"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        step="any"
+                        @input="
+                          onChildEstimationChanged(
+                            $event,
+                            childElement,
+                            rootElement
+                          )
+                        "
+                        :value="formatDuration(childElement.man_days, false)"
+                      />
+                      {{ $t('schedule.md') }}
+                    </span>
+                    <span class="man-days-unit flexrow-item" v-else>
+                      {{ formatDuration(childElement.man_days) }}
+                      {{ $t('schedule.md') }}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </template>
             </div>
           </div>
         </div>
@@ -303,7 +304,7 @@
         <div
           ref="timeline-content-wrapper"
           class="timeline-content-wrapper"
-          v-scroll="onTimelineScroll"
+          @scroll.passive="onTimelineScroll"
         >
           <div
             ref="timeline-content"
@@ -511,7 +512,7 @@ import {
   ChevronRightIcon,
   EditIcon,
   PlusIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -657,12 +658,21 @@ export default {
     }
   },
 
+  emits: [
+    'estimation-changed',
+    'item-assign',
+    'item-changed',
+    'item-drop',
+    'item-unassign',
+    'root-element-expanded'
+  ],
+
   mounted() {
     this.resetScheduleSize()
     this.addEvents(this.domEvents)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.removeEvents(this.domEvents)
     document.body.style.cursor = 'default'
   },
@@ -1361,7 +1371,9 @@ export default {
       }
     },
 
-    onTimelineScroll(event, position) {
+    onTimelineScroll(event) {
+      if (!event) return
+      const position = event.target
       const newTop = position.scrollTop
       this.entityList.scrollTop = newTop
       const newLeft = position.scrollLeft

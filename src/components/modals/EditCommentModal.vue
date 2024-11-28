@@ -28,7 +28,7 @@
               :members="atOptions"
               name-key="full_name"
               limit="2"
-              @input="onAtTextChanged"
+              @update:value="onAtTextChanged"
             >
               <template #item="{ item }">
                 <template v-if="item.isTime"> ⏱️ frame </template>
@@ -156,7 +156,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import { mapGetters } from 'vuex'
 
@@ -223,6 +223,8 @@ export default {
       default: 1
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {

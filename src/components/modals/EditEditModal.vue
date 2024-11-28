@@ -43,15 +43,16 @@
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
           />
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="editToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in editMetadataDescriptors"
-            v-if="editToEdit"
-          />
+          <template v-if="editToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="editToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in editMetadataDescriptors"
+            />
+          </template>
         </form>
 
         <modal-footer
@@ -103,19 +104,13 @@ export default {
       type: Boolean,
       default: false
     },
-    isLoadingStay: {
-      type: Boolean,
-      default: false
-    },
-    isSuccess: {
-      type: Boolean,
-      default: false
-    },
     editToEdit: {
       type: Object,
       default: () => {}
     }
   },
+
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
 
   data() {
     return {
@@ -137,9 +132,7 @@ export default {
       'currentEpisode',
       'editCreated',
       'editMetadataDescriptors',
-      'edits',
       'episodes',
-      'getOpenProductionOptions',
       'isTVShow',
       'openProductions'
     ]),
@@ -166,7 +159,7 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', this.form)
+      this.$emit('confirm-and-stay', this.form)
     },
 
     confirmClicked() {

@@ -3,7 +3,7 @@
     <div
       ref="body"
       class="datatable-wrapper"
-      v-scroll="onBodyScroll"
+      @scroll.passive="onBodyScroll"
       v-if="!isContactSheet"
     >
       <table class="datatable">
@@ -128,18 +128,19 @@
                 :options="difficultyOptions"
                 :with-margin="false"
                 :value="task.difficulty"
-                @input="updateDifficulty($event)"
+                @update:model-value="updateDifficulty($event)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
-                v-models="task.difficulty"
+                v-model="task.difficulty"
               />
-              <span
-                class="difficulty number-cell"
-                v-for="index in task.difficulty"
-                :key="task.id + 'difficulty' + index"
-                v-else
-              >
-                &bull;
-              </span>
+              <template v-else>
+                <span
+                  class="difficulty number-cell"
+                  v-for="index in task.difficulty"
+                  :key="task.id + 'difficulty' + index"
+                >
+                  &bull;
+                </span>
+              </template>
             </td>
             <td class="estimation number-cell">
               <input
@@ -174,9 +175,9 @@
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :value="getDate(task.start_date)"
-                :disabled-dates="disabledDates"
-                @input="updateStartDate"
+                :min-date="disabledDates.to"
+                :model-value="getDate(task.start_date)"
+                @update:model-value="updateStartDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <span v-else>
@@ -187,9 +188,9 @@
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
-                :value="getDate(task.due_date)"
-                :disabled-dates="disabledDates"
-                @input="updateDueDate"
+                :model-value="getDate(task.due_date)"
+                :max-date="disabledDates.from"
+                @update:model-value="updateDueDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <span v-else>
@@ -324,7 +325,6 @@
 </template>
 
 <script>
-import Vue from 'vue/dist/vue'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import {
@@ -363,6 +363,8 @@ export default {
     ValidationCell,
     ValidationTag
   },
+
+  emits: ['task-selected'],
 
   data() {
     return {
@@ -419,7 +421,7 @@ export default {
     window.addEventListener('keydown', this.onKeyDown, false)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
   },
 
@@ -709,8 +711,8 @@ export default {
       )
     },
 
-    onBodyScroll(event, position) {
-      this.$emit('scroll', position.scrollTop)
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {
@@ -768,11 +770,11 @@ export default {
       if (!event.shiftKey) {
         if (isSelected && !isManySelection) {
           this.removeSelectedTask({ task })
-          Vue.set(this.selectionGrid, task.id, undefined)
+          this.selectionGrid[task.id] = undefined
         } else if (!isSelected || isManySelection) {
           this.addSelectedTask({ task })
           this.$emit('task-selected', task)
-          Vue.set(this.selectionGrid, task.id, true)
+          this.selectionGrid[task.id] = true
           this.lastSelection = index
         }
       } else {
@@ -785,7 +787,7 @@ export default {
         }
         const selection = taskIndices.map(i => ({ task: this.tasks[i] }))
         selection.forEach(task => {
-          Vue.set(this.selectionGrid, task.task.id, true)
+          this.selectionGrid[task.task.id] = true
         })
         this.addSelectedTasks(selection)
       }

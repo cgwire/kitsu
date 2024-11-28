@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -8,34 +8,31 @@
               {{ $t('shots.fields.sequence') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
-            <th
-              scope="col"
-              class="validation validation-cell"
-              :key="columnId"
-              v-for="columnId in validationColumns"
-              v-if="!isLoading"
-            >
-              <div
-                class="flexrow validation-content"
-                :style="getValidationStyle(columnId)"
+            <template v-if="!isLoading">
+              <th
+                scope="col"
+                class="validation validation-cell"
+                :key="columnId"
+                v-for="columnId in validationColumns"
               >
-                <router-link
-                  class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
-                  :to="taskTypePath(columnId)"
-                  v-if="!isCurrentUserClient"
+                <div
+                  class="flexrow validation-content"
+                  :style="getValidationStyle(columnId)"
                 >
-                  {{ taskTypeMap.get(columnId).name }}
-                </router-link>
-                <span
-                  class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
-                  v-else
-                >
-                  {{ taskTypeMap.get(columnId).name }}
-                </span>
-              </div>
-            </th>
+                  <router-link
+                    class="flexrow-item"
+                    :title="taskTypeMap.get(columnId).name"
+                    :to="taskTypePath(columnId)"
+                    v-if="!isCurrentUserClient"
+                  >
+                    {{ taskTypeMap.get(columnId).name }}
+                  </router-link>
+                  <span class="flexrow-item" v-else>
+                    {{ taskTypeMap.get(columnId).name }}
+                  </span>
+                </div>
+              </th>
+            </template>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -68,12 +65,7 @@
             <td class="actions"></td>
           </tr>
 
-          <tr
-            class="datatable-row"
-            :key="entry.id"
-            v-for="entry in entries"
-            v-if="isEntryStats(entry.id)"
-          >
+          <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
             <td scope="row" class="name datatable-row-header">
               {{ entry.name }}
             </td>
@@ -88,18 +80,22 @@
             />
             <td v-else></td>
 
-            <stats-cell
-              :key="entry.id + columnId"
-              :style="getValidationStyle(columnId)"
-              :colors="chartColors(entry.id, columnId)"
-              :data="chartData(entry.id, columnId)"
-              :frames-data="chartData(entry.id, columnId, 'frames')"
-              :count-mode="countMode"
-              :display-mode="displayMode"
-              v-if="isStats(entry.id, columnId)"
+            <template
+              :key="entry.id + '-' + columnId"
               v-for="columnId in validationColumns"
-            />
-            <td :style="getValidationStyle(columnId)" v-else></td>
+            >
+              <stats-cell
+                :key="entry.id + columnId"
+                :style="getValidationStyle(columnId)"
+                :colors="chartColors(entry.id, columnId)"
+                :data="chartData(entry.id, columnId)"
+                :frames-data="chartData(entry.id, columnId, 'frames')"
+                :count-mode="countMode"
+                :display-mode="displayMode"
+                v-if="isStats(entry.id, columnId)"
+              />
+              <td :style="getValidationStyle(columnId)" v-else></td>
+            </template>
 
             <td class="actions"></td>
           </tr>
@@ -201,6 +197,10 @@ export default {
       'taskTypeMap'
     ]),
 
+    entryStats() {
+      return this.entries.filter(entry => this.isEntryStats(entry.id))
+    },
+
     isEmptyList() {
       return (
         this.entries &&
@@ -235,16 +235,6 @@ export default {
         isStats = isStats || this.sequenceStats[entryId][statKey]
       })
       return isStats
-    },
-
-    onBodyScroll(event, position) {
-      this.$emit('scroll', position.scrollTop)
-    },
-
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
     },
 
     editPath(sequenceId) {

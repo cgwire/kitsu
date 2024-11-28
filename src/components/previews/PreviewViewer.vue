@@ -55,7 +55,6 @@
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
       :is-comparing="isComparing"
-      :is-comparison-overlay="isComparisonOverlay"
       :light="isLight"
       :margin-bottom="marginBottom"
       :panzoom="true"
@@ -103,7 +102,7 @@
 </template>
 
 <script>
-import { DownloadIcon } from 'lucide-vue'
+import { DownloadIcon } from 'lucide-vue-next'
 
 import { formatFrame, formatTime } from '@/lib/video'
 import { domMixin } from '@/components/mixins/dom'
@@ -202,6 +201,15 @@ export default {
       default: () => {}
     }
   },
+
+  emits: [
+    'duration-changed',
+    'frame-update',
+    'play-ended',
+    'size-changed',
+    'video-end',
+    'video-loaded'
+  ],
 
   computed: {
     // Elements

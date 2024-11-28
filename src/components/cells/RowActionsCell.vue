@@ -92,7 +92,7 @@ import {
   RefreshCwIcon,
   RotateCcwIcon,
   TrashIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 export default {
   name: 'row-actions-cell',
@@ -139,6 +139,16 @@ export default {
       default: true
     }
   },
+
+  emits: [
+    'avatar-clicked',
+    'change-password-clicked',
+    'delete-clicked',
+    'edit-clicked',
+    'history-clicked',
+    'refresh-clicked',
+    'restore-clicked'
+  ],
 
   computed: {
     ...mapGetters(['isCurrentUserAdmin'])

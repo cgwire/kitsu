@@ -49,7 +49,9 @@ export default {
   components: {
     RowActionsCell,
     TableInfo
-  }
+  },
+
+  emits: ['delete-clicked', 'edit-clicked']
 }
 </script>
 
@@ -73,7 +75,7 @@ export default {
     display: inline-block;
     width: 20px;
     height: 20px;
-    border-radius: 10px;
+    border-radius: 2px;
   }
 }
 </style>

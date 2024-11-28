@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import { CheckIcon } from 'lucide-vue'
+import { CheckIcon } from 'lucide-vue-next'
 
 export default {
   name: 'timeline-item',

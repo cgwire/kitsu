@@ -18,12 +18,12 @@
               :task-status-list="taskStatusList"
               v-model="filters.taskStatusId"
             />
-            <span class="field small">
+            <span class="field">
               <label class="label">
                 {{ $t('concepts.fields.publisher') }}
               </label>
               <people-field
-                :big="true"
+                small
                 :people="publishers"
                 v-model="filters.publisher"
               />
@@ -77,11 +77,11 @@
               :class="{
                 'selected-item': isSelected(concept)
               }"
-              v-for="concept in filteredConcepts"
               :key="concept.id"
               @click="
                 onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
               "
+              v-for="concept in filteredConcepts"
             >
               <concept-card :concept="concept" />
             </li>
@@ -456,9 +456,9 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
-      title: `${this.$t('concepts.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('concepts.title')} - Kitsu`
     }
   }
 }

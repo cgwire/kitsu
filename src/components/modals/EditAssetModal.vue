@@ -35,26 +35,29 @@
             @enter="runConfirmation"
             v-focus
           />
+          <textarea-field
+            ref="descriptionField"
+            :label="$t('assets.fields.description')"
+            v-model="form.description"
+            @keyup.ctrl.enter="runConfirmation"
+            @keyup.meta.enter="runConfirmation"
+          />
           <text-field
             ref="resolutionField"
             :label="$t('shots.fields.resolution')"
             v-model="form.data.resolution"
             @enter="runConfirmation"
           />
-          <textarea-field
-            ref="descriptionField"
-            :label="$t('assets.fields.description')"
-            v-model="form.description"
-          />
-          <metadata-field
-            :key="descriptor.id"
-            :descriptor="descriptor"
-            :entity="assetToEdit"
-            @enter="runConfirmation"
-            v-model="form.data[descriptor.field_name]"
-            v-for="descriptor in assetMetadataDescriptors"
-            v-if="assetToEdit"
-          />
+          <template v-if="assetToEdit">
+            <metadata-field
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              :entity="assetToEdit"
+              @enter="runConfirmation"
+              v-model="form.data[descriptor.field_name]"
+              v-for="descriptor in assetMetadataDescriptors"
+            />
+          </template>
           <combobox-boolean
             :label="$t('assets.fields.shared')"
             v-model="form.is_shared"
@@ -69,7 +72,6 @@
               'is-primary': true,
               'is-loading': isLoadingStay
             }"
-            :disabled="form.name && form.name.length === 0"
             @click="confirmAndStayClicked"
             v-if="!assetToEdit || !assetToEdit.id"
           >
@@ -81,7 +83,6 @@
               'is-primary': true,
               'is-loading': isLoading
             }"
-            :disabled="form.name && form.name.length === 0"
             @click="confirmClicked"
           >
             {{ $t('main.confirmation') }}
@@ -156,6 +157,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm', 'confirm-and-stay'],
+
   data() {
     return {
       form: {
@@ -226,7 +229,7 @@ export default {
     },
 
     confirmAndStayClicked() {
-      this.$emit('confirmAndStay', {
+      this.$emit('confirm-and-stay', {
         ...this.form,
         is_shared: this.form.is_shared === 'true'
       })

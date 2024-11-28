@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import { LockIcon } from 'lucide-vue'
+import { LockIcon } from 'lucide-vue-next'
 import { mapActions } from 'vuex'
 
 import auth from '@/lib/auth'
@@ -145,7 +145,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: this.$t('login.reset_change_password_title')
     }

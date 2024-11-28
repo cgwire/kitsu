@@ -33,7 +33,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
@@ -60,6 +60,8 @@ export default {
     ChevronDownIcon,
     DepartmentName
   },
+
+  emits: ['show-metadata-header-menu'],
 
   computed: {
     ...mapGetters(['departmentMap']),

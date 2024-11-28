@@ -7,9 +7,12 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
-const initialState = {
-  studios: [],
+const cache = {
   studioMap: new Map()
+}
+
+const initialState = {
+  studios: []
 }
 
 const state = { ...initialState }
@@ -17,7 +20,7 @@ const state = { ...initialState }
 const getters = {
   studios: state => state.studios.filter(d => !d.archived),
   archivedStudios: state => state.studios.filter(d => d.archived),
-  studioMap: state => state.studioMap,
+  studioMap: state => cache.studioMap,
 
   getStudio: state => id => {
     return state.studios.find(studio => studio.id === id)
@@ -54,7 +57,7 @@ const mutations = {
   [LOAD_STUDIOS_END](state, studios) {
     state.studios = sortByName(studios)
     studios.forEach(studio => {
-      state.studioMap.set(studio.id, studio)
+      cache.studioMap.set(studio.id, studio)
     })
   },
 
@@ -65,7 +68,7 @@ const mutations = {
     } else {
       state.studios.push(newStudio)
     }
-    state.studioMap.set(newStudio.id, newStudio)
+    cache.studioMap.set(newStudio.id, newStudio)
   },
 
   [DELETE_STUDIOS_END](state, studioToDelete) {
@@ -75,11 +78,12 @@ const mutations = {
     if (studioToDeleteIndex >= 0) {
       state.studios.splice(studioToDeleteIndex, 1)
     }
-    state.studioMap.delete(studioToDelete.id)
+    cache.studioMap.delete(studioToDelete.id)
   },
 
   [RESET_ALL](state) {
     Object.assign(state, { ...initialState })
+    cache.studioMap.clear()
   }
 }
 

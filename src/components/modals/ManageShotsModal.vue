@@ -179,6 +179,8 @@ export default {
     }
   },
 
+  emits: ['add-episode', 'add-sequence', 'add-shot', 'cancel'],
+
   data() {
     return {
       names: {
@@ -217,9 +219,9 @@ export default {
     ...mapGetters([
       'currentProduction',
       'displayedEpisodes',
-      'isTVShow',
       'displayedSequences',
-      'shotMap'
+      'isTVShow',
+      'shots'
     ]),
 
     isAddEpisodeAllowed() {
@@ -275,7 +277,7 @@ export default {
     selectSequence(sequenceId) {
       this.selectedSequenceId = sequenceId
       this.displayedShots = sortByName(
-        Array.from(this.shotMap.values()).filter(shot => {
+        this.shots.filter(shot => {
           return shot.sequence_id === sequenceId
         })
       )

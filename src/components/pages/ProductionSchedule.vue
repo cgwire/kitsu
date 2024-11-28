@@ -6,33 +6,13 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{
-              from: selectedEndDate
-            }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedStartDate"
-          />
+          <date-field v-model="selectedStartDate" />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{
-              to: selectedStartDate
-            }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedEndDate"
-          />
+          <date-field v-model="selectedEndDate" />
         </div>
         <!--
         <text-field
@@ -81,14 +61,13 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import Datepicker from 'vuejs-datepicker'
 
-import { sortTaskTypeScheduleItems } from '@/lib/sorting'
 import { getTaskTypeSchedulePath } from '@/lib/path'
+import { sortTaskTypeScheduleItems } from '@/lib/sorting'
 import { daysToMinutes, parseDate } from '@/lib/time'
 
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
@@ -96,7 +75,7 @@ export default {
   name: 'production-schedule',
   components: {
     ComboboxNumber,
-    Datepicker,
+    DateField,
     Schedule,
     TaskInfo
   },
@@ -142,15 +121,7 @@ export default {
       'organisation',
       'taskTypeMap',
       'user'
-    ]),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    }
+    ])
   },
 
   methods: {
@@ -422,7 +393,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title:
         `${this.currentProduction.name} ` +

@@ -45,7 +45,7 @@
           class="search-limit flexrow-item"
           :options="limitOptions"
           :with-margin="false"
-          @input="search"
+          @update:model-value="search"
           v-model="limit"
         />
       </div>
@@ -198,7 +198,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 
-import { SearchIcon } from 'lucide-vue'
+import { SearchIcon } from 'lucide-vue-next'
 import stringHelpers from '@/lib/string'
 
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -436,7 +436,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('search.title')} - Kitsu`
     }

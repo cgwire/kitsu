@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 export const populateTask = task => {
   if (task.entity_type_name === 'Shot') {
     if (task.episode_name) {
@@ -87,7 +85,9 @@ export const groupEntitiesByParents = (entities, parentNameField) => {
 }
 
 export const addToIdList = (production, field, id) => {
-  if (!production[field]) Vue.set(production, field, [])
+  if (!production[field]) {
+    production[field] = []
+  }
   if (!production[field].find(mid => mid === id)) {
     production[field].push(id)
   }

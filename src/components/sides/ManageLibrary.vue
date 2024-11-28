@@ -1,11 +1,6 @@
 <template>
   <div class="side-wrapper">
-    <div
-      class="extend-bar"
-      @mousedown.prevent="/* onExtendDown */"
-      @touchstart.prevent="/* onExtendDown */"
-      v-if="extendable"
-    ></div>
+    <div class="extend-bar" v-if="extendable"></div>
     <div class="side manage-library">
       <div class="flexrowcolumn" v-if="selectedEntities.length">
         <delete-entities
@@ -154,6 +149,8 @@ export default {
       default: true
     }
   },
+
+  emits: ['library-updated'],
 
   data() {
     return {

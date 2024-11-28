@@ -80,7 +80,7 @@ import {
 
 const helpers = {
   getTaskStatus(taskStatusId) {
-    return taskStatusStore.state.taskStatusMap.get(taskStatusId)
+    return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
   }
 }
 
@@ -671,8 +671,10 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state) {
-    state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
-    state.doneSelectionGrid = clearSelectionGrid(state.doneSelectionGrid)
+    if (Object.keys(state.todoSelectionGrid).length > 0) {
+      state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
+      state.doneSelectionGrid = clearSelectionGrid(state.doneSelectionGrid)
+    }
   },
 
   [SET_TODO_LIST_SCROLL_POSITION](state, scrollPosition) {

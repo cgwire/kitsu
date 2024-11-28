@@ -56,10 +56,10 @@
       />
 
       <preview-room
-        :ref="previewRoomRef"
-        :room-id="isValidRoomId(playlist.id) ? playlist.id : ''"
-        :join-room="joinRoom"
-        :leave-room="leaveRoom"
+        :room="room"
+        @open-room="openRoom"
+        @join-room="joinRoom"
+        @leave-room="leaveRoom"
         v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
@@ -302,6 +302,7 @@
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
+        :player="this"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
       />
@@ -559,13 +560,13 @@
             class="playlist-button flexrow-item comparison-list"
             :options="taskTypeOptions"
             v-model="taskTypeToCompare"
-            @input="onTaskTypeToCompareChanged"
+            @update:model-value="onTaskTypeToCompareChanged"
             v-if="isComparing"
           />
           <combobox
             class="playlist-button flexrow-item comparison-list"
             :options="revisionOptions"
-            @input="onRevisionToCompareChanged"
+            @update:model-value="onRevisionToCompareChanged"
             v-model="revisionToCompare"
             v-if="isComparing"
           />
@@ -573,7 +574,7 @@
             class="playlist-button flexrow-item comparison-list"
             :options="comparisonModeOptions"
             v-model="comparisonMode"
-            @input="updateRoomStatus"
+            @update:model-value="updateRoomStatus"
             v-if="isComparing"
           />
           <div
@@ -680,9 +681,8 @@
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
             <color-picker
-              :is-open="isShowingPalette"
               :color="textColor"
-              @TogglePalette="onPickColor"
+              @toggle-palette="onPickColor"
               @change="onChangeTextColor"
             />
           </div>
@@ -698,7 +698,6 @@
         <transition name="slide">
           <div class="annotation-tools" v-show="isDrawing">
             <pencil-picker
-              :is-open="isShowingPencilPalette"
               :pencil="pencil"
               :sizes="pencilPalette"
               @toggle-palette="onPickPencil"
@@ -706,9 +705,8 @@
             />
 
             <color-picker
-              :is-open="isShowingPalette"
               :color="color"
-              @TogglePalette="onPickColor"
+              @toggle-palette="onPickColor"
               @change="onChangeColor"
             />
           </div>
@@ -883,24 +881,27 @@
       v-if="playlist.id"
     >
       <spinner class="spinner" v-if="isLoading" />
-      <div
-        class="flexrow-item has-text-centered playlisted-wrapper"
-        :key="entity.id"
-        v-for="(entity, index) in entityList"
-        v-else
-      >
-        <playlisted-entity
-          :ref="'entity-' + index"
-          :index="index"
-          :entity="entity"
-          :is-playing="playingEntityIndex === index"
-          @play-click="entityListClicked"
-          @remove-entity="removeEntity"
-          @preview-changed="onPreviewChanged"
-          @entity-to-add="$emit('entity-to-add', $event)"
-          @entity-dropped="onEntityDropped"
-        />
-      </div>
+      <template v-else>
+        <div
+          class="flexrow-item has-text-centered playlisted-wrapper"
+          :key="entity.id"
+          v-for="(entity, index) in entityList"
+        >
+          <playlisted-entity
+            :ref="'entity-' + index"
+            :entity="entity"
+            :index="index"
+            :is-playing="playingEntityIndex === index"
+            draggable="true"
+            @dragstart="onEntityDragStart($event, entity)"
+            @entity-to-add="$emit('entity-to-add', $event)"
+            @entity-dropped="onEntityDropped"
+            @play-click="entityListClicked"
+            @preview-changed="onPreviewChanged"
+            @remove-entity="removeEntity"
+          />
+        </div>
+      </template>
     </div>
 
     <delete-modal
@@ -933,9 +934,16 @@
  * This modules manages all the options available while playing a playlist.
  * It is made to work with a single playlist.
  */
-import { ArrowUpRightIcon, DownloadIcon, GlobeIcon, PlayIcon } from 'lucide-vue'
+import {
+  ArrowUpRightIcon,
+  DownloadIcon,
+  GlobeIcon,
+  PlayIcon
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import WaveSurfer from 'wavesurfer.js'
+
+import { defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
@@ -987,7 +995,7 @@ export default {
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
-    TaskInfo,
+    TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
 
@@ -1018,6 +1026,19 @@ export default {
     }
   },
 
+  emits: [
+    'edit-clicked',
+    'entity-to-add',
+    'new-entity-dropped',
+    'order-change',
+    'playlist-deleted',
+    'preview-changed',
+    'save-clicked',
+    'show-add-entities',
+    'remove-entity',
+    'task-type-changed'
+  ],
+
   data() {
     return {
       buildLaunched: false,
@@ -1046,12 +1067,15 @@ export default {
       playlistDuration: 0,
       playlistProgress: 0,
       playlistToEdit: {},
-      previewRoomRef: 'playlist-player-preview-room',
       revisionOptions: [],
       savedTaskTypeToCompare: null,
       taskTypeOptions: [],
       taskTypeToCompare: null,
       revisionToCompare: null,
+      room: {
+        people: [],
+        newComer: true
+      },
       modals: {
         delete: false,
         taskType: false
@@ -1080,6 +1104,7 @@ export default {
       this.entityList = []
     }
     this.resetPlaylistFrameData()
+    this.room.id = this.playlist.id
     this.$nextTick(() => {
       this.configureEvents()
       this.setupFabricCanvas()
@@ -1442,10 +1467,9 @@ export default {
         this.framesSeenOfPicture = Math.floor(
           (durationWaited / 1000) * this.fps
         )
-        this.playingPictureTimeout = setTimeout(
-          () => this.continuePlayingPlaylist(entityIndex, startMs),
-          100
-        )
+        this.playingPictureTimeout = setTimeout(() => {
+          this.continuePlayingPlaylist(entityIndex, startMs)
+        }, 100)
         return
       }
 
@@ -1997,6 +2021,10 @@ export default {
       if (!this.isFullMode) {
         this.onFrameUpdate(frame)
       }
+    },
+
+    onEntityDragStart(event, entity) {
+      event.dataTransfer.setData('entityId', entity.id)
     }
   },
 
@@ -2132,6 +2160,7 @@ export default {
 
     playlist() {
       this.endAnnotationSaving()
+      this.room.id = this.playlist.id
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
@@ -2195,10 +2224,6 @@ export default {
     events: {
       ...previewRoomMixin.socket.events,
       ...playerMixin.socket.events
-
-      // TODO (?) :
-      // - handle updating the playlist order, adding/removing items
-      // - sync number of frames per image
     }
   }
 }

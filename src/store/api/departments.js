@@ -5,6 +5,10 @@ export default {
     return client.pget('/api/data/departments')
   },
 
+  getDepartment(departmentId) {
+    return client.pget(`/api/data/departments/${departmentId}`)
+  },
+
   newDepartment(department) {
     const data = {
       name: department.name,

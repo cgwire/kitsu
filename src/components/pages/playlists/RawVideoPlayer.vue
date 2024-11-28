@@ -84,6 +84,16 @@ export default {
     }
   },
 
+  emits: [
+    'entity-change',
+    'frame-update',
+    'max-duration-update',
+    'metadata-loaded',
+    'play-next',
+    'repeat',
+    'video-loaded'
+  ],
+
   data() {
     return {
       currentPlayer: undefined,
@@ -114,7 +124,7 @@ export default {
     this.player2.addEventListener('error', this.hideLoading)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('resize', this.resetHeight)
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
 
@@ -544,18 +554,20 @@ export default {
       }
     },
 
-    entities() {
-      if (this.entities.length > 0) {
-        this.loadEntity(0)
-        this.pause()
-        this._setCurrentTime(0)
+    entities: {
+      handler() {
+        if (this.entities.length > 0) {
+          this.loadEntity(0)
+          this.pause()
+          this._setCurrentTime(0)
 
-        const entity = this.entities[this.currentIndex]
-        if (entity && !entity.preview_file_id) this.loadNextEntity()
+          const entity = this.entities[this.currentIndex]
+          if (entity && !entity.preview_file_id) this.loadNextEntity()
+        }
+        setTimeout(() => {
+          this.resetHeight()
+        }, 300)
       }
-      setTimeout(() => {
-        this.resetHeight()
-      }, 300)
     },
 
     isHd() {

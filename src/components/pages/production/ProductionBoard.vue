@@ -34,7 +34,7 @@
                 class="role-field"
                 :key="`${taskStatus.id}-${role}`"
                 :label="$t(`people.role.${role}`)"
-                :value="String(isActiveRole(taskStatus, role))"
+                :model-value="String(isActiveRole(taskStatus, role))"
                 @click="
                   value =>
                     updateRolesForBoard(taskStatus, [role], value === 'true')

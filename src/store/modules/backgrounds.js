@@ -10,9 +10,12 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
-const initialState = {
-  backgrounds: [],
+const cache = {
   backgroundMap: new Map()
+}
+
+const initialState = {
+  backgrounds: []
 }
 
 const state = initialState
@@ -22,7 +25,7 @@ const getters = {
     state.backgrounds.filter(background => !background.archived),
   archivedBackgrounds: state =>
     state.backgrounds.filter(background => background.archived),
-  backgroundMap: state => state.backgroundMap,
+  backgroundMap: state => cache.backgroundMap,
   editBackgrounds: state => state.editBackgrounds,
   deleteBackground: state => state.deleteBackground
 }
@@ -72,12 +75,12 @@ const actions = {
 const mutations = {
   [LOAD_BACKGROUNDS_START](state) {
     state.backgrounds = []
-    state.backgroundMap = new Map()
+    cache.backgroundMap = new Map()
   },
 
   [LOAD_BACKGROUNDS_ERROR](state) {
     state.backgrounds = []
-    state.backgroundMap = new Map()
+    cache.backgroundMap = new Map()
   },
 
   [LOAD_BACKGROUNDS_END](state, backgrounds) {
@@ -87,13 +90,13 @@ const mutations = {
       background.thumbnail = `/api/pictures/thumbnails/preview-background-files/${background.id}.png`
     })
     state.backgrounds = sortByName(backgrounds)
-    state.backgroundMap = new Map(
+    cache.backgroundMap = new Map(
       state.backgrounds.map(background => [background.id, background])
     )
   },
 
   [EDIT_BACKGROUND_END](state, newBackground) {
-    const background = state.backgroundMap.get(newBackground.id)
+    const background = cache.backgroundMap.get(newBackground.id)
 
     newBackground.url = `/api/pictures/preview-background-files/${newBackground.id}.${newBackground.extension}`
     newBackground.thumbnail = `/api/pictures/thumbnails/preview-background-files/${newBackground.id}.png`
@@ -107,13 +110,13 @@ const mutations = {
 
     if (background?.id) {
       Object.assign(background, newBackground)
-      state.backgroundMap.delete(background.id)
-      state.backgroundMap.set(background.id, background)
+      cache.backgroundMap.delete(background.id)
+      cache.backgroundMap.set(background.id, background)
       state.backgrounds = sortByName(state.backgrounds)
     } else {
       state.backgrounds.push(newBackground)
       state.backgrounds = sortByName(state.backgrounds)
-      state.backgroundMap.set(newBackground.id, newBackground)
+      cache.backgroundMap.set(newBackground.id, newBackground)
     }
   },
 
@@ -124,7 +127,7 @@ const mutations = {
     if (backgroundToDeleteIndex >= 0) {
       state.backgrounds.splice(backgroundToDeleteIndex, 1)
     }
-    delete state.backgroundMap.get(backgroundToDelete.id)
+    delete cache.backgroundMap.get(backgroundToDelete.id)
   },
 
   [RESET_ALL](state) {
@@ -136,5 +139,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

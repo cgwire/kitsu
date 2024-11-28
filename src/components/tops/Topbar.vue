@@ -126,6 +126,7 @@
             :is-lazy="false"
             :is-link="false"
             :person="user"
+            v-if="user"
           />
         </div>
       </div>
@@ -140,10 +141,7 @@
     <nav class="user-menu" v-if="!isUserMenuHidden">
       <ul>
         <li>
-          <router-link
-            :to="{ name: 'profile' }"
-            @click.native="toggleUserMenu()"
-          >
+          <router-link :to="{ name: 'profile' }" @click="toggleUserMenu()">
             {{ $t('main.profile') }}
           </router-link>
         </li>
@@ -219,7 +217,7 @@ import {
   HelpCircleIcon,
   LogOutIcon,
   ZapIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 import localPreferences from '@/lib/preferences'
 

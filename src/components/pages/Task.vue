@@ -50,19 +50,20 @@
             >
               {{ $t('tasks.fields.assignees') }}:
             </span>
-            <span
-              class="flexrow-item avatar-wrapper"
-              :key="person.id"
-              v-for="person in assignees"
-              v-if="!isCurrentUserClient"
-            >
-              <people-avatar
-                class="flexrow-item"
-                :person="person"
-                :size="30"
-                :font-size="16"
-              />
-            </span>
+            <template v-if="!isCurrentUserClient">
+              <span
+                class="flexrow-item avatar-wrapper"
+                :key="person.id"
+                v-for="person in assignees"
+              >
+                <people-avatar
+                  class="flexrow-item"
+                  :person="person"
+                  :size="30"
+                  :font-size="16"
+                />
+              </span>
+            </template>
             <subscribe-button
               class="flexrow-item action-button"
               :subscribed="isAssigned || task.is_subscribed"
@@ -337,7 +338,7 @@
 </template>
 
 <script>
-import { CornerLeftUpIcon, ImageIcon } from 'lucide-vue'
+import { CornerLeftUpIcon, ImageIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
@@ -390,6 +391,7 @@ export default {
     return {
       previewForms: [],
       currentFrame: 0,
+      currentTask: null,
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -481,12 +483,14 @@ export default {
     },
 
     previewOptions() {
-      return this.taskPreviews.map(preview => {
-        return {
-          label: `v${preview.revision}`,
-          value: preview.id
-        }
-      })
+      return [...this.taskPreviews]
+        .sort((a, b) => b.revision - a.revision)
+        .map(preview => {
+          return {
+            label: `v${preview.revision}`,
+            value: preview.id
+          }
+        })
     },
 
     isPreviewButtonVisible() {
@@ -1311,7 +1315,7 @@ export default {
 
   watch: {
     $route() {
-      if (this.$route.params.task_id !== this.task.id) {
+      if (this.task && this.$route.params.task_id !== this.task.id) {
         this.loadTaskData()
       }
       if (this.$route.params.preview_id !== this.selectedPreviewId) {
@@ -1456,7 +1460,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     let title = 'Loading task... - Kitsu'
     if (this.task) {
       const taskTypeName = this.taskTypeMap.get(this.task.task_type_id).name

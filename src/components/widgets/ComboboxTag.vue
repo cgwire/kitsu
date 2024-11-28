@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { sortByValue } from '@/lib/sorting'
 
@@ -52,6 +52,8 @@ export default {
   components: {
     ChevronDownIcon
   },
+
+  emits: ['change', 'update:modelValue'],
 
   data() {
     return {
@@ -68,7 +70,7 @@ export default {
       default: () => [],
       type: Array
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     },
@@ -104,13 +106,13 @@ export default {
     },
 
     renderedValue() {
-      return this.value.split(',').filter(Boolean).sort().join(', ')
+      return this.modelValue.split(',').filter(Boolean).sort().join(', ')
     }
   },
 
   methods: {
     selectOption(option) {
-      let values = this.value.split(',').filter(Boolean)
+      let values = this.modelValue.split(',').filter(Boolean)
       if (values.includes(option.value)) {
         values.splice(values.indexOf(option.value), 1)
       } else {
@@ -122,7 +124,7 @@ export default {
           .map(oldOption => oldOption.value)
       }
       const value = values.join(',')
-      this.$emit('input', value)
+      this.$emit('update:modelValue', value)
       this.$emit('change', value)
     },
 
@@ -146,7 +148,7 @@ export default {
     },
 
     isChecked(option) {
-      const values = this.value.split(',')
+      const values = this.modelValue.split(',')
       return values.includes(option.value)
     }
   },

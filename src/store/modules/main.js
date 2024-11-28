@@ -81,7 +81,7 @@ const actions = {
     try {
       config = await client.getConfig()
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
     commit(SET_CONFIG, config)
     return config

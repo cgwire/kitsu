@@ -53,11 +53,10 @@ export default {
     return client.pput(`/api/data/projects/${production.id}`, data)
   },
 
-  postAvatar(productionId, formData, callback) {
-    client.post(
+  postAvatar(productionId, formData) {
+    return client.ppost(
       `/api/pictures/thumbnails/projects/${productionId}`,
-      formData,
-      callback
+      formData
     )
   },
 

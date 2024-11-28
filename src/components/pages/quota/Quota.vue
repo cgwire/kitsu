@@ -18,31 +18,25 @@
             >
               {{ $t('quota.average') }}
             </th>
-            <th
-              scope="col"
-              :key="'month-' + month"
-              v-for="month in monthRange"
-              v-if="detailLevel === 'month'"
-            >
-              {{ monthToString(month) }}
-            </th>
-            <th
-              scope="col"
-              :key="'week-' + week"
-              v-for="week in weekRange"
-              v-if="detailLevel === 'week'"
-            >
-              {{ week }}
-            </th>
-
-            <th
-              scope="col"
-              :key="'day-' + day"
-              v-for="day in dayRange"
-              v-if="detailLevel === 'day'"
-            >
-              {{ day }}
-            </th>
+            <template v-if="detailLevel === 'month'">
+              <th
+                scope="col"
+                :key="'month-' + month"
+                v-for="month in monthRange"
+              >
+                {{ monthToString(month) }}
+              </th>
+            </template>
+            <template v-else-if="detailLevel === 'week'">
+              <th scope="col" :key="'week-' + week" v-for="week in weekRange">
+                {{ week }}
+              </th>
+            </template>
+            <template v-else-if="detailLevel === 'day'">
+              <th scope="col" :key="'day-' + day" v-for="day in dayRange">
+                {{ day }}
+              </th>
+            </template>
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="quotaLength > 0 && !isLoading">
@@ -60,136 +54,129 @@
             <td
               class="average datatable-row-header"
               :style="{ left: averageColumnX }"
-              v-if="detailLevel === 'month'"
             >
-              {{ getQuotaAverage(key, { year }) }}
-            </td>
-            <td
-              class="average datatable-row-header"
-              :style="{ left: averageColumnX }"
-              v-if="detailLevel === 'week'"
-            >
-              {{ getQuotaAverage(key, { year }) }}
-            </td>
-            <td
-              class="average datatable-row-header"
-              :style="{ left: averageColumnX }"
-              v-if="detailLevel === 'day'"
-            >
-              {{ getQuotaAverage(key, { year, month }) }}
-            </td>
-            <td
-              :class="{
-                selected: isMonthSelected(key, year, month),
-                'quota-low': isMonthQuotaLow(key, year, month)
-              }"
-              :key="'month-' + month"
-              v-for="month in monthRange"
-              v-if="detailLevel === 'month'"
-            >
-              <router-link
-                class="quota-button"
-                :to="
-                  episodifyRoute({
-                    name: 'quota-month-person',
-                    params: {
-                      person_id: key,
-                      year: year,
-                      month: month
-                    },
-                    query: {
-                      countMode: countMode,
-                      computeMode: computeMode,
-                      taskTypeId: taskTypeId
-                    }
-                  })
-                "
-                v-if="getQuota(key, { year, month })"
+              <template
+                v-if="detailLevel === 'month' || detailLevel === 'week'"
               >
-                {{
-                  countMode === 'seconds'
-                    ? getQuota(key, { year, month }).toFixed(2)
-                    : getQuota(key, { year, month })
-                }}
-              </router-link>
-              <span v-else>-</span>
+                {{ getQuotaAverage(key, { year }) }}
+              </template>
+              <template v-else-if="detailLevel === 'day'">
+                {{ getQuotaAverage(key, { year, month }) }}
+              </template>
             </td>
-
-            <td
-              :class="{
-                selected: isWeekSelected(key, year, week),
-                'quota-low': isWeekQuotaLow(key, year, month)
-              }"
-              :key="'week-' + week"
-              v-for="week in weekRange"
-              v-if="detailLevel === 'week'"
-            >
-              <router-link
-                class="quota-button"
-                :to="
-                  episodifyRoute({
-                    name: 'quota-week-person',
-                    params: {
-                      person_id: key,
-                      year: year,
-                      week: week
-                    },
-                    query: {
-                      countMode: countMode,
-                      computeMode: computeMode,
-                      taskTypeId: taskTypeId
-                    }
-                  })
-                "
-                v-if="getQuota(key, { year, week })"
+            <template v-if="detailLevel === 'month'">
+              <td
+                :class="{
+                  selected: isMonthSelected(key, year, month),
+                  'quota-low': isMonthQuotaLow(key, year, month)
+                }"
+                :key="'month-' + month"
+                v-for="month in monthRange"
               >
-                {{
-                  countMode === 'seconds'
-                    ? getQuota(key, { year, week }).toFixed(2)
-                    : getQuota(key, { year, week })
-                }}
-              </router-link>
-              <span v-else> - </span>
-            </td>
-
-            <td
-              :class="{
-                weekend: isWeekend(year, month, day),
-                selected: isDaySelected(key, year, month, day),
-                'quota-low': isDayQuotaLow(key, year, month, day)
-              }"
-              :key="'day-' + day"
-              v-for="day in dayRange"
-              v-if="detailLevel === 'day'"
-            >
-              <router-link
-                class="quota-button"
-                :to="
-                  episodifyRoute({
-                    name: 'quota-day-person',
-                    params: {
-                      person_id: key,
-                      year: year,
-                      month: month,
-                      day: day
-                    },
-                    query: {
-                      countMode: countMode,
-                      computeMode: computeMode,
-                      taskTypeId: taskTypeId
-                    }
-                  })
-                "
-                v-if="getQuota(key, { year, month, day })"
+                <router-link
+                  class="quota-button"
+                  :to="
+                    episodifyRoute({
+                      name: 'quota-month-person',
+                      params: {
+                        person_id: key,
+                        year: year,
+                        month: month
+                      },
+                      query: {
+                        countMode: countMode,
+                        computeMode: computeMode,
+                        taskTypeId: taskTypeId
+                      }
+                    })
+                  "
+                  v-if="getQuota(key, { year, month })"
+                >
+                  {{
+                    countMode === 'seconds'
+                      ? getQuota(key, { year, month }).toFixed(2)
+                      : getQuota(key, { year, month })
+                  }}
+                </router-link>
+                <span v-else>-</span>
+              </td>
+            </template>
+            <template v-else-if="detailLevel === 'week'">
+              <td
+                :class="{
+                  selected: isWeekSelected(key, year, week),
+                  'quota-low': isWeekQuotaLow(key, year, month)
+                }"
+                :key="'week-' + week"
+                v-for="week in weekRange"
               >
-                {{
-                  countMode === 'seconds'
-                    ? getQuota(key, { year, month, day }).toFixed(2)
-                    : getQuota(key, { year, month, day })
-                }}
-              </router-link>
-              <span v-else> - </span>
-            </td>
+                <router-link
+                  class="quota-button"
+                  :to="
+                    episodifyRoute({
+                      name: 'quota-week-person',
+                      params: {
+                        person_id: key,
+                        year: year,
+                        week: week
+                      },
+                      query: {
+                        countMode: countMode,
+                        computeMode: computeMode,
+                        taskTypeId: taskTypeId
+                      }
+                    })
+                  "
+                  v-if="getQuota(key, { year, week })"
+                >
+                  {{
+                    countMode === 'seconds'
+                      ? getQuota(key, { year, week }).toFixed(2)
+                      : getQuota(key, { year, week })
+                  }}
+                </router-link>
+                <span v-else> - </span>
+              </td>
+            </template>
+            <template v-else-if="detailLevel === 'day'">
+              <td
+                :class="{
+                  weekend: isWeekend(year, month, day),
+                  selected: isDaySelected(key, year, month, day),
+                  'quota-low': isDayQuotaLow(key, year, month, day)
+                }"
+                :key="'day-' + day"
+                v-for="day in dayRange"
+              >
+                <router-link
+                  class="quota-button"
+                  :to="
+                    episodifyRoute({
+                      name: 'quota-day-person',
+                      params: {
+                        person_id: key,
+                        year: year,
+                        month: month,
+                        day: day
+                      },
+                      query: {
+                        countMode: countMode,
+                        computeMode: computeMode,
+                        taskTypeId: taskTypeId
+                      }
+                    })
+                  "
+                  v-if="getQuota(key, { year, month, day })"
+                >
+                  {{
+                    countMode === 'seconds'
+                      ? getQuota(key, { year, month, day }).toFixed(2)
+                      : getQuota(key, { year, month, day })
+                  }}
+                </router-link>
+                <span v-else> - </span>
+              </td>
+            </template>
           </tr>
         </tbody>
       </table>

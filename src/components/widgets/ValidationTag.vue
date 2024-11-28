@@ -55,6 +55,7 @@ import { pluralizeEntityType } from '@/lib/path'
 
 export default {
   name: 'validation-tag',
+
   props: {
     task: {
       default: () => {},
@@ -81,6 +82,8 @@ export default {
       type: Boolean
     }
   },
+
+  emits: ['click'],
 
   computed: {
     ...mapGetters([

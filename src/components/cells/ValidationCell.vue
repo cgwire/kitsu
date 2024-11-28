@@ -69,7 +69,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { EyeIcon } from 'lucide-vue'
+import { EyeIcon } from 'lucide-vue-next'
 
 import colors from '@/lib/colors'
 import { sortPeople } from '@/lib/sorting'

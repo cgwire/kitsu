@@ -6,31 +6,13 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedStartDate"
-            disabled
-          />
+          <date-field week-days-disabled v-model="selectedStartDate" />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :disabled-dates="{ days: [6, 0] }"
-            :monday-first="true"
-            format="yyyy-MM-dd"
-            v-model="selectedEndDate"
-            disabled
-          />
+          <date-field week-days-disabled v-model="selectedEndDate" />
         </div>
         <combobox-number
           class="flexrow-item zoom-level"
@@ -63,8 +45,6 @@
  */
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import Datepicker from 'vuejs-datepicker'
 import { getProductionSchedulePath } from '@/lib/path'
 
 import {
@@ -76,6 +56,7 @@ import {
 import colors from '@/lib/colors'
 
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 
 export default {
@@ -83,7 +64,7 @@ export default {
 
   components: {
     ComboboxNumber,
-    Datepicker,
+    DateField,
     Schedule
   },
 
@@ -119,15 +100,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['openProductions', 'taskTypeMap', 'user']),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    }
+    ...mapGetters(['openProductions', 'taskTypeMap', 'user'])
   },
 
   methods: {
@@ -228,7 +201,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('schedule.title_main')} - Kitsu`
     }

@@ -1,4 +1,7 @@
 import store from '@/store/modules/productions'
+import assetTypeStore from '@/store/modules/assettypes'
+import taskStatusStore from '@/store/modules/taskstatus'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 import productionApi from '@/store/api/productions.js'
 import {
@@ -89,6 +92,9 @@ describe('Productions store', () => {
           }))
         }
       }
+      assetTypeStore.cache.assetTypeMap = rootState.assetTypes.assetTypeMap
+      taskStatusStore.cache.taskStatusMap = rootState.taskStatus.taskStatusMap
+      taskTypeStore.cache.taskTypeMap = rootState.taskTypes.taskTypeMap
     })
 
     test('isTVShow', () => {
@@ -126,7 +132,7 @@ describe('Productions store', () => {
     test('productionTaskStatuses', () => {
       const productions = rootState.productions
       expect(store.getters.productionTaskStatuses(productions, null, rootState))
-        .toEqual(rootState.taskStatus.taskStatus)
+        .toEqual(rootState.taskStatus.taskStatuses)
       productions.currentProduction.task_statuses =
         ['task-status-3', 'task-status-1']
       expect(store.getters.productionTaskStatuses(productions, null, rootState))
@@ -434,18 +440,18 @@ describe('Productions store', () => {
       const state = {
         productionAvatarFormData: 'form-data'
       }
-      productionApi.postAvatar = vi.fn((_, __, callback) => callback(null))
+      productionApi.postAvatar = vi.fn(() => Promise.resolve())
       await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_AVATAR_UPLOADED, 'production-id')
 
       mockCommit = vi.fn()
-      productionApi.postAvatar = vi.fn((_, __, callback) => callback(new Error('error')))
+      productionApi.postAvatar = vi.fn(() => Promise.reject())
       try {
         await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
       } catch (e) {
-        expect(mockCommit).toBeCalledTimes(1)
-        expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_AVATAR_UPLOADED, 'production-id')
+        expect(productionApi.postAvatar).toBeCalledTimes(1)
+        expect(mockCommit).toBeCalledTimes(0)
       }
     })
 

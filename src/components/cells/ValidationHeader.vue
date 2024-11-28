@@ -47,12 +47,17 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 export default {
   name: 'validation-header',
+
+  components: {
+    ChevronDownIcon,
+    DepartmentName
+  },
 
   props: {
     hiddenColumns: Object,
@@ -72,10 +77,7 @@ export default {
     }
   },
 
-  components: {
-    ChevronDownIcon,
-    DepartmentName
-  },
+  emits: ['show-header-menu'],
 
   computed: {
     ...mapGetters([

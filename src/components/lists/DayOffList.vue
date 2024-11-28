@@ -134,6 +134,8 @@ export default {
     }
   },
 
+  emits: ['set-day-off', 'unset-day-off'],
+
   data() {
     return {
       dayOffToEdit: null,

@@ -42,7 +42,7 @@
         :members="atOptions"
         name-key="full_name"
         :limit="2"
-        @input="onAtTextChanged"
+        @update:value="onAtTextChanged"
         v-if="mode === 'status' || showCommentArea"
       >
         <template #item="{ item }">
@@ -77,14 +77,13 @@
             </div>
           </template>
         </template>
-        <textarea-autosize
+        <textarea
           ref="comment-textarea"
           class="textarea flexrow-item"
           :disabled="isLoading"
-          :min-height="50"
-          :max-height="300"
           :placeholder="$t('comments.add_comment')"
-          @keyup.enter.ctrl.native="
+          rows="2"
+          @keyup.enter.ctrl="
             runAddComment(
               text,
               attachments,
@@ -94,7 +93,7 @@
               link
             )
           "
-          @keyup.enter.meta.native="
+          @keyup.enter.meta="
             runAddComment(
               text,
               attachments,
@@ -104,9 +103,10 @@
               link
             )
           "
-          v-model="text"
+          v-autosize
           v-focus
-        />
+          v-model="text"
+        ></textarea>
       </at-ta>
       <div
         class="flexrow link-field"
@@ -317,16 +317,18 @@
       :confirm-button-text="$t('comments.confirm_publish_button')"
       @cancel="modals.confirmFeedbackPublish = false"
       @confirm="
-        modals.confirmFeedbackPublish = false
-        runAddComment(
-          text,
-          attachments,
-          checklist,
-          task_status_id,
-          nextRevision,
-          link,
-          true
-        )
+        () => {
+          modals.confirmFeedbackPublish = false
+          runAddComment(
+            text,
+            attachments,
+            checklist,
+            task_status_id,
+            nextRevision,
+            link,
+            true
+          )
+        }
       "
     />
   </article>
@@ -338,6 +340,7 @@ import { mapGetters } from 'vuex'
 
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
+import { getDownloadAttachmentPath } from '@/lib/path'
 import { replaceTimeWithTimecode } from '@/lib/render'
 import strings from '@/lib/string'
 
@@ -362,6 +365,15 @@ export default {
     ComboboxStatus,
     PeopleAvatar
   },
+
+  emits: [
+    'add-comment',
+    'add-preview',
+    'annotation-snapshots-requested',
+    'clear-files',
+    'file-drop',
+    'remove-preview'
+  ],
 
   data() {
     return {
@@ -577,9 +589,9 @@ export default {
     focus() {
       const textarea = this.$refs['comment-textarea']
       if (textarea) {
-        textarea.$el.focus()
-        const caretPosition = textarea.$el.value.length
-        textarea.$el.setSelectionRange(caretPosition, caretPosition)
+        textarea.focus()
+        const caretPosition = textarea.value.length
+        textarea.setSelectionRange(caretPosition, caretPosition)
       }
     },
 
@@ -689,9 +701,24 @@ export default {
       this.checklist = remove(this.checklist, entry)
     },
 
-    setValue(comment) {
-      this.checklist = comment.checklist
+    async setValue(comment) {
+      this.checklist = JSON.parse(JSON.stringify(comment.checklist))
       this.text = comment.text
+
+      // duplicate attachment files
+      this.attachments = (
+        await Promise.all(
+          comment.attachment_files.map(async attachment => {
+            const fileUrl = getDownloadAttachmentPath(attachment)
+            const response = await fetch(fileUrl)
+            if (!response.ok) return
+            const fileBlob = await response.blob()
+            const formData = new FormData()
+            formData.append('file', fileBlob, attachment.name)
+            return formData
+          })
+        )
+      ).filter(Boolean)
     },
 
     onAtTextChanged(input) {
@@ -809,7 +836,8 @@ article.add-comment {
 
   textarea {
     margin: 0;
-    min-height: 3.5em;
+    min-height: 57px;
+    max-height: 300px;
     border-radius: 0;
 
     &:focus,

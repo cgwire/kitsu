@@ -6,7 +6,7 @@
       'is-true': localValue,
       small: isSmall
     }"
-    :disabled="disabled"
+    :disabled="disabled || null"
     @click="onClick"
   >
     <span class="icon-wrapper flexrow-item">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { CheckIcon, XIcon } from 'lucide-vue'
+import { CheckIcon, XIcon } from 'lucide-vue-next'
 
 export default {
   name: 'boolean-field',
@@ -47,7 +47,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: 'false',
       type: String
     },
@@ -65,6 +65,8 @@ export default {
     }
   },
 
+  emits: ['click', 'update:modelValue'],
+
   data() {
     return {
       localValue: false
@@ -73,7 +75,7 @@ export default {
 
   methods: {
     emitValue() {
-      this.$emit('input', this.localValue ? 'true' : 'false')
+      this.$emit('update:modelValue', this.localValue ? 'true' : 'false')
     },
 
     onClick() {
@@ -84,10 +86,10 @@ export default {
   },
 
   watch: {
-    value: {
+    modelValue: {
       immediate: true,
       handler() {
-        this.localValue = this.value === 'true'
+        this.localValue = this.modelValue === 'true'
       }
     },
 

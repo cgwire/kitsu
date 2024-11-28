@@ -18,7 +18,7 @@ For further information about features and installation, please refer to the
 ## Contributing
 
 There are many ways to contribute to Kitsu, from simple tasks to most complex ones. We created a
-[contributing guide](https://github.com/cgwire/kitsu/blob/master/CONTRIBUTING.md) explaining everything.
+[contributing guide](https://github.com/cgwire/kitsu/blob/main/CONTRIBUTING.md) explaining everything.
 You will find all the information you are looking for!
 
 ## Sponsors

@@ -144,7 +144,6 @@
     <add-metadata-modal
       :active="modals.isAddMetadataDisplayed"
       :is-loading="loading.addMetadata"
-      :is-loading-stay="loading.addMetadata"
       :is-error="errors.addMetadata"
       :descriptor-to-edit="descriptorToEdit"
       entity-type="Sequence"
@@ -307,7 +306,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedSequences()
   },
 
@@ -391,7 +390,6 @@ export default {
       'productionSequenceTaskTypes',
       'sequenceMap',
       'sequenceFilledColumns',
-      'sequencesCsvFormData',
       'sequenceSearchText',
       'sequenceValidationColumns',
       'sequenceListScrollPosition',
@@ -696,11 +694,17 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
+    if (this.isTVShow) {
+      return {
+        title:
+          `${this.currentProduction?.name || ''}` +
+          ` - ${this.currentEpisode?.name || ''}` +
+          ` | ${this.$t('sequences.title')} - Kitsu`
+      }
+    }
     return {
-      title: `${this.currentProduction.name} ${this.$t(
-        'sequences.title'
-      )} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('sequences.title')} - Kitsu`
     }
   }
 }

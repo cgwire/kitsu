@@ -293,7 +293,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('settings.title')} - Kitsu`
     }

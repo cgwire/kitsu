@@ -136,7 +136,7 @@
       :is-success="success.edit"
       :asset-to-edit="assetToEdit"
       @confirm="confirmEditAsset"
-      @confirmAndStay="confirmNewAssetStay"
+      @confirm-and-stay="confirmNewAssetStay"
       @cancel="modals.isNewDisplayed = false"
     />
 
@@ -230,7 +230,6 @@
     <add-metadata-modal
       :active="modals.isAddMetadataDisplayed"
       :is-loading="loading.addMetadata"
-      :is-loading-stay="loading.addMetadata"
       :is-error="errors.addMetadata"
       :descriptor-to-edit="descriptorToEdit"
       entity-type="Asset"
@@ -438,7 +437,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedAssets()
   },
 
@@ -534,7 +533,7 @@ export default {
 
     shortPageTitle() {
       const productionName = this.currentProduction?.name || ''
-      return `${productionName} ${this.$t('assets.title')} - Kitsu`
+      return `${productionName} | ${this.$t('assets.title')} - Kitsu`
     },
 
     dataMatchers() {
@@ -1064,7 +1063,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return { title: this.tvShowPageTitle }
     }

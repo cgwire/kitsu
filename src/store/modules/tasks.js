@@ -1,5 +1,4 @@
 import async from 'async'
-import Vue from 'vue/dist/vue'
 
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
@@ -19,6 +18,7 @@ import personStore from '@/store/modules/people'
 import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
+import taskStatusStore from '@/store/modules/taskstatus'
 
 import {
   LOAD_ASSETS_END,
@@ -74,16 +74,18 @@ import {
   ADD_ATTACHMENT_TO_COMMENT,
   REMOVE_ATTACHMENT_FROM_COMMENT,
   UPDATE_REVISION_PREVIEW_POSITION,
+  ADD_ANNOTATION,
+  UPDATE_ANNOTATION,
+  SET_TASK_EXTRA_DATA,
   RESET_ALL
 } from '@/store/mutation-types'
 
 const locks = {}
 
+const cache = {}
+
 const initialState = {
   taskMap: new Map(),
-  taskStatusMap: new Map(),
-
-  taskStatuses: [],
   taskComments: {},
   taskPreviews: {},
   taskEntityPreviews: {},
@@ -114,7 +116,11 @@ const helpers = {
   },
 
   getTaskType(taskTypeId) {
-    return taskTypeStore.state.taskTypeMap.get(taskTypeId)
+    return taskTypeStore.cache.taskTypeMap.get(taskTypeId)
+  },
+
+  getTaskStatus(taskStatusId) {
+    return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
   }
 }
 
@@ -127,18 +133,6 @@ const getters = {
   getTaskComment: state => (taskId, commentId) => {
     return state.taskComments[taskId]?.find(comment => comment.id === commentId)
   },
-
-  getTaskStatus: state => id => {
-    return state.taskStatuses.find(taskStatus => taskStatus.id === id)
-  },
-
-  taskStatusOptions: state =>
-    state.taskStatuses.map(status => ({
-      label: status.short_name,
-      value: status.id,
-      color: status.color,
-      isArtistAllowed: status.is_artist_allowed
-    })),
 
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
@@ -226,8 +220,8 @@ const actions = {
 
   createTasks({ commit, rootGetters }, payload) {
     const production = rootGetters.currentProduction
-    const taskStatusMap = rootGetters.taskStatusMap
-    const taskTypeMap = rootGetters.taskTypeMap
+    const taskStatusMap = taskStatusStore.cache.taskStatusMap
+    const taskTypeMap = taskTypeStore.cache.taskTypeMap
     let entityIds = payload.entityIds || []
     if (payload.selectionOnly) {
       if (payload.type === 'shots') {
@@ -267,8 +261,8 @@ const actions = {
 
   createSelectedTasks({ commit, state, rootGetters }, { type, projectId }) {
     const production = rootGetters.currentProduction
-    const taskTypeMap = rootGetters.taskTypeMap
-    const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = taskTypeStore.cache.taskTypeMap
+    const taskStatusMap = taskStatusStore.cache.taskStatusMap
     const selectedTaskIds = Array.from(state.selectedValidations.keys())
     const entityIdsByTaskType = {}
     selectedTaskIds.forEach(taskId => {
@@ -351,8 +345,8 @@ const actions = {
     { entityId, projectId, taskTypeId, type }
   ) {
     const production = rootGetters.currentProduction
-    const taskTypeMap = rootGetters.taskTypeMap
-    const taskStatusMap = rootGetters.taskStatusMap
+    const taskTypeMap = taskTypeStore.cache.taskTypeMap
+    const taskStatusMap = taskStatusStore.cache.taskStatusMap
     const data = {
       entity_id: entityId,
       task_type_id: taskTypeId,
@@ -453,8 +447,8 @@ const actions = {
 
   deleteTaskComment({ commit, rootState }, { taskId, commentId }) {
     return tasksApi.deleteTaskComment(taskId, commentId).then(() => {
-      const taskStatusMap = rootState.taskStatus.taskStatusMap
-      const todoStatus = rootState.taskStatus.taskStatus.find(
+      const taskStatusMap = taskStatusStore.cache.taskStatusMap
+      const todoStatus = rootState.taskStatus.taskStatuses.find(
         taskStatus => taskStatus.is_default
       )
       commit(DELETE_COMMENT_END, {
@@ -835,6 +829,7 @@ const mutations = {
     } else {
       state.taskSearchQueries = []
     }
+    state.tasks = Array.from(state.taskMap.values())
   },
 
   [LOAD_SHOTS_END](state, { production, userFilters }) {
@@ -880,48 +875,40 @@ const mutations = {
 
   [LOAD_TASK_COMMENTS_END](state, { taskId, comments }) {
     comments.forEach(comment => {
-      comment.person = personStore.state.personMap.get(comment.person_id)
+      comment.person = personStore.cache.personMap.get(comment.person_id)
     })
-    state.taskComments[taskId] = sortComments(comments)
-    Vue.set(
-      state.taskPreviews,
-      taskId,
-      comments.reduce((previews, comment) => {
-        if (comment.previews && comment.previews.length > 0) {
-          const preview = comment.previews[0]
-          preview.previews = sortRevisionPreviewFiles(
-            comment.previews.map(p => {
-              const prev = {
-                id: p.id,
-                annotations: p.annotations,
-                extension: p.extension,
-                width: p.width,
-                height: p.height,
-                task_id: p.task_id,
-                status: p.status,
-                revision: p.revision,
-                position: p.position,
-                duration: p.duration,
-                original_name: p.original_name
-              }
-              Vue.set(prev, 'status', p.status)
-              return prev
-            })
-          )
-          previews.push(preview)
-          return previews
-        } else {
-          return previews
-        }
-      }, [])
-    )
+    state.taskComments[taskId] = sortComments([...comments])
+    state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
+      if (comment.previews && comment.previews.length > 0) {
+        const preview = comment.previews[0]
+        preview.previews = sortRevisionPreviewFiles(
+          comment.previews.map(p => {
+            const prev = {
+              id: p.id,
+              annotations: p.annotations,
+              extension: p.extension,
+              width: p.width,
+              height: p.height,
+              task_id: p.task_id,
+              status: p.status,
+              revision: p.revision,
+              position: p.position,
+              duration: p.duration,
+              original_name: p.original_name
+            }
+            return prev
+          })
+        )
+        previews.push(preview)
+        return previews
+      } else {
+        return previews
+      }
+    }, [])
   },
 
   [LOAD_TASK_STATUSES_END](state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
-    state.taskStatuses.forEach(taskStatus => {
-      state.taskStatusMap.set(taskStatus.id, taskStatus)
-    })
   },
 
   [LOAD_TASK_SUBSCRIBE_END](state, { taskId, subscribed }) {
@@ -932,8 +919,7 @@ const mutations = {
   [NEW_TASK_COMMENT_END](state, { comment, taskId = undefined }) {
     const task = state.taskMap.get(taskId)
     if (comment.task_status === undefined) {
-      const getTaskStatus = getters.getTaskStatus(state, getters)
-      comment.task_status = getTaskStatus(comment.task_status_id)
+      comment.task_status = helpers.getTaskStatus(comment.task_status_id)
     }
 
     if (comment.person === undefined) {
@@ -1024,7 +1010,9 @@ const mutations = {
     Object.assign(oldComment, {
       text: comment.text,
       task_status_id: comment.task_status_id,
-      task_status: state.taskStatusMap.get(comment.task_status_id),
+      task_status: taskStatusStore.cache.taskStatusMap.get(
+        comment.task_status_id
+      ),
       checklist: comment.checklist || []
     })
   },
@@ -1128,18 +1116,15 @@ const mutations = {
     if (validationInfo.id) {
       const task = validationInfo
       state.selectedTasks.set(task.id, task)
-      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
     } else if (validationInfo.task) {
       state.selectedTasks.set(validationInfo.task.id, validationInfo.task)
-      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations.set(validationKey, validationInfo)
-      state.selectedValidations = new Map(state.selectedValidations) // for reactivity
       state.nbSelectedValidations = state.selectedValidations.size
     }
   },
@@ -1170,23 +1155,23 @@ const mutations = {
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (validationInfo.task) {
       state.selectedTasks.delete(validationInfo.task.id)
-      state.selectedTasks = new Map(state.selectedTasks) // for reactivity
       state.nbSelectedTasks = state.selectedTasks.size
     } else {
       const taskTypeId = validationInfo.column.id
       const entityId = validationInfo.entity.id
       const validationKey = `${entityId}-${taskTypeId}`
       state.selectedValidations.delete(validationKey)
-      state.selectedValidations = new Map(state.selectedValidations) // for reactivity
       state.nbSelectedValidations = state.selectedValidations.size
     }
   },
 
   [CLEAR_SELECTED_TASKS](state) {
-    state.selectedTasks = new Map()
-    state.nbSelectedTasks = 0
-    state.selectedValidations = new Map()
-    state.nbSelectedValidations = 0
+    if (state.nbSelectedTasks > 0) {
+      state.selectedTasks = new Map()
+      state.nbSelectedTasks = 0
+      state.selectedValidations = new Map()
+      state.nbSelectedValidations = 0
+    }
   },
 
   [CREATE_TASKS_END](state, { tasks }) {
@@ -1204,8 +1189,9 @@ const mutations = {
     if (currentTask) {
       Object.assign(state.taskMap.get(task.id), {
         task_status_id: task.task_status_id,
-        task_status_short_name: state.taskStatusMap.get(task.task_status_id)
-          .short_name,
+        task_status_short_name: taskStatusStore.cache.taskStatusMap.get(
+          task.task_status_id
+        ).short_name,
         priority: task.priority,
         estimation: task.estimation,
         difficulty: task.difficulty,
@@ -1372,7 +1358,7 @@ const mutations = {
       c => c.id === comment.id
     )
     if (!comment.attachment_files) {
-      Vue.set(comment, 'attachment_files', [])
+      comment.attachment_files = []
     }
     oldComment.attachment_files =
       oldComment.attachment_files.concat(attachmentFiles)
@@ -1415,13 +1401,28 @@ const mutations = {
 
   [SET_UPLOAD_PROGRESS](state, { name, percent }) {
     if (!state.uploadProgress.name) {
-      Vue.set(state.uploadProgress, name, percent)
+      state.uploadProgress.name = percent
     }
     state.uploadProgress[name] = percent
   },
 
   [CLEAR_UPLOAD_PROGRESS](state) {
     state.uploadProgress = {}
+  },
+
+  [ADD_ANNOTATION](state, { annotations, annotation }) {
+    annotations.push(annotation)
+    annotations.sort((a, b) => {
+      return a.time < b.time
+    })
+  },
+
+  [UPDATE_ANNOTATION](state, { annotation, data }) {
+    Object.assign(annotation, data)
+  },
+
+  [SET_TASK_EXTRA_DATA](state, { task, data }) {
+    task.data = data
   },
 
   [RESET_ALL](state) {
@@ -1433,5 +1434,6 @@ export default {
   state,
   getters,
   actions,
-  mutations
+  mutations,
+  cache
 }

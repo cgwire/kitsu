@@ -6,30 +6,18 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :monday-first="true"
-            :typeable="true"
-            format="yyyy-MM-dd"
-            @selected="onUpdateSelectedStartDate"
+          <date-field
             v-model="selectedStartDate"
+            @update:model-value="onUpdateSelectedStartDate"
           />
         </div>
         <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <datepicker
-            wrapper-class="datepicker"
-            input-class="date-input input short"
-            :language="locale"
-            :monday-first="true"
-            :typeable="true"
-            format="yyyy-MM-dd"
-            @selected="onUpdateSelectedEndDate"
+          <date-field
             v-model="selectedEndDate"
+            @update:model-value="onUpdateSelectedEndDate"
           />
         </div>
         <combobox-number
@@ -114,26 +102,26 @@
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
-            @input="loadUnassignedTasks()"
+            @update:model-value="loadUnassignedTasks()"
           />
           <combobox-task-type
             class="mb05"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
-            @input="loadUnassignedTasks()"
+            @update:model-value="loadUnassignedTasks()"
           />
         </div>
         <template v-if="unassignedTasks.length > 0">
           <ul class="task-list">
             <li
               class="task-item"
-              draggable
+              :draggable="true"
               :key="task.id"
-              v-for="task in unassignedTasks"
               @dragstart="onTaskDragStart($event, task)"
               @drag="onTaskDrag"
               @dragend="onTaskDragEnd"
+              v-for="task in unassignedTasks"
             >
               <div
                 class="ui-droppable"
@@ -206,8 +194,6 @@
  */
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getPersonTabPath } from '@/lib/path'
@@ -222,6 +208,7 @@ import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -243,7 +230,7 @@ export default {
     ComboboxProduction,
     ComboboxStudio,
     ComboboxTaskType,
-    Datepicker,
+    DateField,
     DepartmentName,
     EntityThumbnail,
     PeopleField,
@@ -316,14 +303,6 @@ export default {
       'taskTypeMap',
       'user'
     ]),
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    },
 
     daysOffByPerson() {
       return this.daysOff.reduce((acc, dayOff) => {
@@ -736,7 +715,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('team_schedule.title_main')} - Kitsu`
     }

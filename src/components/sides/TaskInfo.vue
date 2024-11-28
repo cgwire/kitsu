@@ -17,6 +17,8 @@
         "
         :is-movie-preview="isMoviePreview"
         :is-set-frame-thumbnail-loading="loading.setFrameThumbnail"
+        :production-id="currentProductionId"
+        :team="currentTeam"
         @export-task="onExportClick"
         @set-frame-thumbnail="onSetCurrentFrameAsThumbnail"
       />
@@ -89,7 +91,8 @@
                     :options="previewOptions"
                     is-preview
                     thin
-                    @input="onPreviewChanged"
+                    :value="previewOptions[currentPreviewIndex]?.value"
+                    @update:model-value="onPreviewChanged"
                   />
                 </div>
                 <div class="filler"></div>
@@ -307,7 +310,7 @@
 </template>
 
 <script>
-import { CornerRightUpIcon, XIcon } from 'lucide-vue'
+import { CornerRightUpIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -392,8 +395,14 @@ export default {
     withActions: {
       type: Boolean,
       default: false
+    },
+    player: {
+      type: Object,
+      default: null
     }
   },
+
+  emits: ['comment-added', 'task-removed', 'time-code-clicked'],
 
   data() {
     return {
@@ -404,11 +413,14 @@ export default {
       currentPreviewIndex: 0,
       currentPreviewPath: '',
       currentPreviewDlPath: '',
+      currentTask: null,
       commentToEdit: null,
       isWide: false,
       isExtraWide: false,
       otherPreviews: [],
       panelWidth: 800,
+      selectedEpisodes: null,
+      selectedSequences: null,
       taskComments: [],
       taskPreviews: [],
       domEvents: [
@@ -458,7 +470,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.removeEvents(this.domEvents)
   },
 
@@ -466,6 +478,7 @@ export default {
     ...mapGetters([
       'isSavingCommentPreview',
       'currentEpisode',
+      'currentProduction',
       'getTaskComment',
       'getTaskComments',
       'getTaskPreviews',
@@ -507,6 +520,10 @@ export default {
 
     selectedEntities() {
       return this[`selected${this.entityType}s`]
+    },
+
+    currentProductionId() {
+      return this.task?.project_id || this.currentProduction?.id
     },
 
     currentTeam() {
@@ -715,10 +732,12 @@ export default {
 
     previewOptions() {
       if (!this.taskPreviews) return []
-      return this.taskPreviews.map(preview => ({
-        value: preview.id,
-        label: `v${preview.revision}`
-      }))
+      return [...this.taskPreviews]
+        .sort((a, b) => b.revision - a.revision)
+        .map(preview => ({
+          value: preview.id,
+          label: `v${preview.revision}`
+        }))
     },
 
     selectedTasksToDisplay() {
@@ -1179,7 +1198,7 @@ export default {
 
     async extractAnnotationSnapshots() {
       let previewPlayer = this.$refs['preview-player']
-      if (!previewPlayer) previewPlayer = this.$parent
+      if (!previewPlayer) previewPlayer = this.player
       this.$refs['add-comment'].showAnnotationLoading()
       const files = await previewPlayer.extractAnnotationSnapshots()
       this.$refs['add-comment'].hideAnnotationLoading()
@@ -1474,6 +1493,12 @@ export default {
             }
           })
         }
+      }
+    },
+
+    head() {
+      return {
+        title: this.title
       }
     }
   }

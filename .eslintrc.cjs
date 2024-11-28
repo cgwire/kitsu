@@ -6,11 +6,14 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:vue/recommended',
+    'plugin:vue/vue3-recommended',
     'plugin:prettier/recommended'
   ],
   rules: {
-    'no-console': 'off',
+    'no-console':
+      process.env.NODE_ENV === 'production'
+        ? ['error', { allow: ['error', 'warn'] }]
+        : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
     'no-unused-vars': ['error', { args: 'none' }],
@@ -26,14 +29,15 @@ module.exports = {
     // additional rules for Vue
     'vue/component-definition-name-casing': ['error', 'kebab-case'],
     'vue/component-name-in-template-casing': ['error', 'kebab-case'],
+    'vue/custom-event-name-casing': ['error', 'kebab-case'],
     'vue/eqeqeq': ['error', 'always', { null: 'ignore' }],
+    'vue/no-unused-emit-declarations': 'error',
     'vue/prop-name-casing': ['error', 'camelCase'],
+    'vue/require-explicit-emits': 'error',
 
     // disabled vue/recommended rules
     'vue/attributes-order': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-lone-template': 'off',
-    'vue/no-use-v-if-with-v-for': 'off',
     'vue/no-v-html': 'off',
     'vue/order-in-components': 'off',
     'vue/require-default-prop': 'off',

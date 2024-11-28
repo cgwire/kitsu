@@ -1,7 +1,7 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="notifications page" v-scroll="onBodyScroll" ref="body">
+      <div class="notifications page" @scroll.passive="onBodyScroll" ref="body">
         <div class="flexrow">
           <combobox-task-type
             class="flexrow-item selector"
@@ -136,7 +136,6 @@
                 <boolean-field
                   class="selector"
                   :label="$t('notifications.read')"
-                  :is-field="false"
                   is-small
                   @input="value => toggleNotificationRead(notification, value)"
                   :value="notification.read ? 'true' : 'false'"
@@ -265,7 +264,7 @@ import {
   ImageIcon,
   MessageSquareIcon,
   UserIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
 
 import { parametersMixin } from '@/components/mixins/parameters'
@@ -468,7 +467,8 @@ export default {
         })
     },
 
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {
@@ -476,7 +476,7 @@ export default {
       }
     },
 
-    loadFollowingNotifications() {
+    async loadFollowingNotifications() {
       if (!this.loading.more && !this.loading.notifications) {
         this.loading.more = true
         const params = {
@@ -490,9 +490,8 @@ export default {
         if (this.parameters.watchingMode) {
           params.watching = this.parameters.watchingMode === 'watching'
         }
-        this.loadMoreNotifications().then(() => {
-          this.loading.more = false
-        })
+        await this.loadMoreNotifications(params)
+        this.loading.more = false
       }
     },
 
@@ -655,9 +654,7 @@ export default {
     }
   },
 
-  beforeDestroy() {},
-
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('notifications.title')} - Kitsu`
     }

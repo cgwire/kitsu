@@ -144,7 +144,6 @@
     <add-metadata-modal
       :active="modals.isAddMetadataDisplayed"
       :is-loading="loading.addMetadata"
-      :is-loading-stay="loading.addMetadata"
       :is-error="errors.addMetadata"
       :descriptor-to-edit="descriptorToEdit"
       entity-type="Episode"
@@ -308,7 +307,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedEpisodes()
   },
 
@@ -378,7 +377,6 @@ export default {
       'episodes',
       'episodeMap',
       'episodeFilledColumns',
-      'episodesCsvFormData',
       'episodeSearchText',
       'episodeValidationColumns',
       'episodeListScrollPosition',
@@ -674,7 +672,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.currentProduction.name} ${this.$t(
         'episodes.title'

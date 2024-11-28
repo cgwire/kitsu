@@ -8,6 +8,8 @@ import {
 } from '@/lib/video'
 
 export const playerMixin = {
+  emits: ['annotations-refreshed'],
+
   data() {
     return {
       annotations: [],
@@ -42,7 +44,7 @@ export const playerMixin = {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
     this.leaveRoom()
@@ -1025,7 +1027,7 @@ export const playerMixin = {
         duration = floorToFrame(duration, this.fps)
         this.maxDurationRaw = duration
         this.maxDuration = this.formatTime(duration, this.fps)
-        this.resetHandles()
+        if (this.resetHandles) this.resetHandles()
       } else {
         this.maxDurationRaw = 0
         this.maxDuration = '00.00.000'
@@ -1233,6 +1235,7 @@ export const playerMixin = {
           annotations: previewFile.annotations || []
         }
       }
+
       if (!this.isCurrentUserArtist) {
         // Artists are not allowed to draw
         // Emit an event for remote and store update
@@ -1254,7 +1257,13 @@ export const playerMixin = {
               })
             }
           })
-          if (revPreview) revPreview.annotations = annotations
+          if (revPreview) {
+            this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
+              taskId: preview.task_id,
+              preview: revPreview,
+              annotations
+            })
+          }
         })
       }
     },
@@ -1285,7 +1294,10 @@ export const playerMixin = {
           this.annotations.length > 0
         ) {
           annotation = this.annotations[0]
-          annotation.time = 0
+          this.$store.commit('UPDATE_ANNOTATION', {
+            annotation,
+            data: { time: 0 }
+          })
         }
         return annotation
       } else {

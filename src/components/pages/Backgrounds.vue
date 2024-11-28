@@ -67,6 +67,7 @@ export default {
     return {
       activeTab: 'active',
       backgroundToEdit: {},
+      backgroundToDelete: {},
       modals: {
         edit: false,
         del: false
@@ -180,7 +181,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('backgrounds.title')} - Kitsu`
     }

@@ -7,35 +7,23 @@
           {{ isEditing ? $t('days_off.edit') : $t('days_off.add') }}
         </h1>
         <div class="flexrow field">
-          <div class="flexrow-item">
+          <div class="flexrow-item ml2">
             <label class="label">
               {{ $t('main.start_date') }}
             </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input short"
-              :language="locale"
-              :disabled-dates="{ days: [6, 0] }"
-              :monday-first="true"
-              format="yyyy-MM-dd"
+            <date-field
+              week-days-disabled
+              @update:model-value="validateDates"
               v-model="form.startDate"
-              @input="validateDates"
             />
           </div>
           <div class="flexrow-item">
             <label class="label">
               {{ $t('main.end_date') }}
             </label>
-            <datepicker
-              wrapper-class="datepicker"
-              input-class="date-input input short"
-              :language="locale"
-              :disabled-dates="{
-                days: [6, 0],
-                to: form.startDate
-              }"
-              :monday-first="true"
-              format="yyyy-MM-dd"
+            <date-field
+              week-days-disabled
+              @update:model-value="validateDates"
               v-model="form.endDate"
             />
           </div>
@@ -73,11 +61,11 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
-import { AlertTriangleIcon } from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import { modalMixin } from '@/components/modals/base_modal'
+
+import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
@@ -87,7 +75,7 @@ export default {
 
   components: {
     AlertTriangleIcon,
-    Datepicker,
+    DateField,
     TextField
   },
 
@@ -114,6 +102,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   data() {
     return {
       form: {
@@ -129,14 +119,6 @@ export default {
 
     isEditing() {
       return Boolean(this.dayOffToEdit?.id)
-    },
-
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
     }
   },
 
@@ -155,7 +137,7 @@ export default {
       this.form = {
         startDate: this.dayOffToEdit?.date || new Date(),
         endDate:
-          this.dayOffToEdit?.endDate || this.dayOffToEdit?.date || new Date(),
+          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || new Date(),
         description: this.dayOffToEdit?.description || null
       }
     },
@@ -188,5 +170,8 @@ export default {
 }
 .modal-content .box p.text {
   margin-bottom: 1em;
+}
+.ml2 {
+  margin-left: 2.5em;
 }
 </style>

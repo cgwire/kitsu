@@ -9,7 +9,7 @@
         extension: entity.preview_file_extension
       }"
       :is-rounded-top-border="isRoundedTopBorder"
-      @click.native="onVideoClicked()"
+      @click="onVideoClicked()"
     />
     <button-simple
       class="button-play"
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { EyeIcon } from 'lucide-vue'
+import { EyeIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import VideoViewer from '@/components/previews/VideoViewer.vue'

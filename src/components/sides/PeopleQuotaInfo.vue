@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
 
@@ -89,6 +89,8 @@ export default {
       default: () => []
     }
   },
+
+  emits: ['close'],
 
   computed: {
     ...mapGetters(['currentEpisode', 'currentProduction']),

@@ -38,8 +38,8 @@
 
           <div
             v-else
-            v-for="(taskListObject, index) in taskTypeGroups"
             :key="index"
+            v-for="(taskListObject, index) in taskTypeGroups"
           >
             <table
               class="datatable list"
@@ -59,21 +59,21 @@
               </thead>
               -->
               <draggable
-                v-model="taskListObject.list"
-                draggable=".task-type"
                 class="datatable-body"
+                item-key="taskType.id"
                 tag="tbody"
                 @end="updatePriorities(taskListObject.list)"
+                v-model="taskListObject.list"
               >
-                <production-task-type
-                  class="task-type"
-                  :key="taskTypeData.taskType.id"
-                  :task-type="taskTypeData.taskType"
-                  :schedule-item="taskTypeData.scheduleItem"
-                  @date-changed="onDateChanged"
-                  @remove="removeTaskType"
-                  v-for="taskTypeData in taskListObject.list"
-                />
+                <template #item="{ element: taskTypeData }">
+                  <production-task-type
+                    class="task-type"
+                    :task-type="taskTypeData.taskType"
+                    :schedule-item="taskTypeData.scheduleItem"
+                    @date-changed="onDateChanged"
+                    @remove="removeTaskType"
+                  />
+                </template>
               </draggable>
             </table>
             <p
@@ -89,7 +89,6 @@
         </div>
         <div class="column">
           <setting-importer
-            :is-import-loading="loading.import"
             :items="remainingTaskTypesForEntity"
             :loading-import="loading.import"
             @import-from-production="importTaskTypesFromProduction"

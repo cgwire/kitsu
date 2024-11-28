@@ -161,13 +161,11 @@ export default {
     reset() {
       this.initialLoading = true
       this.$refs['asset-type-search-field'].setValue('')
-      this.loadAssets()
-        .then(this.handleModalsDisplay)
-        .then(() => {
-          this.computeAssetTypeStats()
-          this.setAssetTypeListScrollPosition(0)
-          this.initialLoading = false
-        })
+      this.loadAssets().then(() => {
+        this.computeAssetTypeStats()
+        this.setAssetTypeListScrollPosition(0)
+        this.initialLoading = false
+      })
     }
   },
 
@@ -181,7 +179,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.currentProduction.name} | ${this.$t(
         'asset_types.production_title'

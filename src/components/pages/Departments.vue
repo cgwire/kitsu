@@ -107,7 +107,7 @@ export default {
     try {
       await this.loadDepartments()
     } catch (error) {
-      console.log(error)
+      console.error(error)
       this.errors.departments = true
     }
     this.loading.departments = false
@@ -209,7 +209,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('departments.title')} - Kitsu`
     }

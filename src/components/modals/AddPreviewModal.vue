@@ -62,21 +62,15 @@
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           Selected Files
         </h3>
-        <p class="upload-previews" v-if="forms.length > 0">
-          <template v-for="(form, i) in forms">
-            <p class="preview-name" :key="`name-${i}`">
+        <div class="upload-previews" v-if="forms.length > 0">
+          <template v-for="(form, index) in forms" :key="`preview-${index}`">
+            <p class="preview-name">
               {{ form.get('file').name }}
               <span @click="removePreview(form)">x</span>
             </p>
-            <img
-              alt="uploaded file"
-              :src="getURL(form)"
-              :key="`preview-file-${i}`"
-              v-if="isImage(form)"
-            />
+            <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
               :ref="`video-${i}`"
-              :key="`preview-video-${i}`"
               :src="getURL(form)"
               preload="auto"
               class="is-fullwidth"
@@ -90,12 +84,11 @@
               class="is-fullwidth"
               frameborder="0"
               :src="getURL(form)"
-              :key="`preview-pdf-${i}`"
               v-else-if="isPdf(form)"
             />
-            <hr :key="'separator-' + i" />
+            <hr />
           </template>
-        </p>
+        </div>
 
         <div class="mt1 message" v-if="message">
           <div class="message-body">
@@ -138,7 +131,7 @@
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
 
-import { AlertTriangleIcon } from 'lucide-vue'
+import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import files from '@/lib/files'
 
@@ -204,6 +197,8 @@ export default {
       default: 0
     }
   },
+
+  emits: ['cancel', 'confirm', 'fileselected'],
 
   data() {
     return {
@@ -289,21 +284,24 @@ export default {
       this.reset()
     },
 
-    forms() {
-      this.$nextTick(() => {
-        this.isWrongDuration = false
-        Object.keys(this.$refs).forEach(key => {
-          const ref = this.$refs[key]
-          if (key.startsWith('video-') && ref[0]) {
-            ref[0].onloadedmetadata = () => {
-              const frames = Math.round(ref[0].duration * this.fps) - 1
-              if (frames !== this.expectedFrames) {
-                this.isWrongDuration = true
+    forms: {
+      deep: true,
+      handler() {
+        this.$nextTick(() => {
+          this.isWrongDuration = false
+          Object.keys(this.$refs).forEach(key => {
+            const ref = this.$refs[key]
+            if (key.startsWith('video-') && ref[0]) {
+              ref[0].onloadedmetadata = () => {
+                const frames = Math.round(ref[0].duration * this.fps) - 1
+                if (frames !== this.expectedFrames) {
+                  this.isWrongDuration = true
+                }
               }
             }
-          }
+          })
         })
-      })
+      }
     }
   },
 
@@ -312,7 +310,7 @@ export default {
     window.addEventListener('paste', this.onPaste, false)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     window.removeEventListener('paste', this.onPaste)
   }
 }

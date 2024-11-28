@@ -1,12 +1,11 @@
-import auth from '@/lib/auth'
 import store from '@/store/modules/assets'
 import taskTypesStore from '@/store/modules/tasktypes'
+import taskStatusStore from '@/store/modules/taskstatus'
 import tasksStore from '@/store/modules/tasks'
 import productionsStore from '@/store/modules/productions'
 import {
   ADD_ASSET,
   CANCEL_ASSET,
-  CHANGE_ASSET_SORT,
   COMPUTE_ASSET_TYPE_STATS,
   DISPLAY_MORE_ASSETS,
   EDIT_ASSET_END,
@@ -16,10 +15,10 @@ import {
   LOAD_ASSETS_START,
   LOCK_ASSET,
   REMOVE_ASSET,
-  REMOVE_ASSET_SEARCH_END, SET_ASSET_TYPE_SEARCH,
+  REMOVE_ASSET_SEARCH_END,
+  SET_ASSET_TYPE_SEARCH,
   RESTORE_ASSET_END,
   SAVE_ASSET_SEARCH_END,
-  SET_ASSET_SEARCH,
   SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION,
   UPDATE_ASSET
 } from '@/store/mutation-types'
@@ -28,424 +27,403 @@ import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
 
 describe('Assets store', () => {
-  describe('Getters', () => {
-    test('assets', () => {
-      store.cache.assets = '123'
-      expect(store.getters.assets(null)).toEqual('123')
-    })
-
-    test('assetMap', () => {
-      const state = {
-        assetMap: '123'
-      }
-      expect(store.getters.assetMap(state)).toEqual('123')
-    })
-
-    test('assetSearchText', () => {
-      const state = {
-        assetSearchText: '123'
-      }
-      expect(store.getters.assetSearchText(state)).toEqual('123')
-    })
-
-    test('assetSearchQueries', () => {
-      const state = {
-        assetSearchQueries: '123'
-      }
-      expect(store.getters.assetSearchQueries(state)).toEqual('123')
-    })
-
-    test('assetSelectionGrid', () => {
-      const state = {
-        assetSelectionGrid: '123'
-      }
-      expect(store.getters.assetSelectionGrid(state)).toEqual('123')
-    })
-
-    test('assetValidationColumns', () => {
-      const state = {
-        assetValidationColumns: '123'
-      }
-      expect(store.getters.assetValidationColumns(state)).toEqual('123')
-    })
-
-    test('isAssetsLoading', () => {
-      const state = {
-        isAssetsLoading: true
-      }
-      expect(store.getters.isAssetsLoading(state)).toBeTruthy()
-    })
-
-    test('isAssetsLoadingError', () => {
-      const state = {
-        isAssetsLoadingError: true
-      }
-      expect(store.getters.isAssetsLoadingError(state)).toBeTruthy()
-    })
-
-    test('displayedAssets', () => {
-      const state = {
-        displayedAssets: '123'
-      }
-      expect(store.getters.displayedAssets(state)).toEqual('123')
-    })
-
-    test('displayedAssetsLength', () => {
-      const state = {
-        displayedAssetsLength: 123
-      }
-      expect(store.getters.displayedAssetsLength(state)).toEqual(123)
-    })
-
-    test('displayedAssetsTimeSpent', () => {
-      const state = {
-        displayedAssetsTimeSpent: 123
-      }
-      expect(store.getters.displayedAssetsTimeSpent(state)).toEqual(123)
-    })
-
-    test('displayedAssetsEstimation', () => {
-      const state = {
-        displayedAssetsEstimation: 123
-      }
-      expect(store.getters.displayedAssetsEstimation(state)).toEqual(123)
-    })
-
-    test('assetFilledColumns', () => {
-      const state = {
-        assetFilledColumns: 123
-      }
-      expect(store.getters.assetFilledColumns(state)).toEqual(123)
-    })
-
-    test('displayedAssetTypes', () => {
-      const state = {
-        displayedAssetTypes: '123'
-      }
-      expect(store.getters.displayedAssetTypes(state)).toEqual('123')
-    })
-
-    test('displayedAssetTypesLength', () => {
-      const state = {
-        displayedAssetTypesLength: 123
-      }
-      expect(store.getters.displayedAssetTypesLength(state)).toEqual(123)
-    })
-
-    test('assetTypeSearchText', () => {
-      const state = {
-        assetTypeSearchText: '123'
-      }
-      expect(store.getters.assetTypeSearchText(state)).toEqual('123')
-    })
-
-    test('assetTypeStats', () => {
-      const state = {
-        assetTypeStats: '123'
-      }
-      expect(store.getters.assetTypeStats(state)).toEqual('123')
-    })
-
-    test('assetTypeListScrollPosition', () => {
-      const state = {
-        assetTypeListScrollPosition: 123
-      }
-      expect(store.getters.assetTypeListScrollPosition(state)).toEqual(123)
-    })
-
-    test('assetSorting', () => {
-      const state = {
-        assetSorting: 123
-      }
-      expect(store.getters.assetSorting(state)).toEqual(123)
-    })
-
-    test('assetListScrollPosition', () => {
-      const state = {
-        assetListScrollPosition: 123
-      }
-      expect(store.getters.assetListScrollPosition(state)).toEqual(123)
-    })
-
-    test('displayedAssetsByType', () => {
-      const state = {
-        displayedAssets: [
-          { id: 123, asset_type_name: 'test' },
-          { id: 345, asset_type_name: 'test' },
-          { id: 234, asset_type_name: 'test2' },
-          { id: 456, asset_type_name: 'test2' }
-        ]
-      }
-      expect(store.getters.displayedAssetsByType(state)).toEqual([
-        [
-          { id: 123, asset_type_name: 'test' },
-          { id: 345, asset_type_name: 'test' }
-        ],
-        [
-          { id: 234, asset_type_name: 'test2' },
-          { id: 456, asset_type_name: 'test2' }
-        ]
-      ])
-    })
-
-    test('assetsByType', () => {
-      const state = {
-        displayedAssets: [
-          { id: 123, asset_type_name: 'test', canceled: true },
-          { id: 234, asset_type_name: 'test2' },
-          { id: 456, asset_type_name: 'test2' },
-          { id: 345, asset_type_name: 'test' }
-        ]
-      }
-      expect(store.getters.assetsByType(state)).toEqual([
-        [
-          { id: 234, asset_type_name: 'test2' },
-          { id: 456, asset_type_name: 'test2' }
-        ],
-        [
-          { id: 345, asset_type_name: 'test' }
-        ]
-      ])
-    })
-
-    test('assetCreated', () => {
-      const state = {
-        assetCreated: '123'
-      }
-      expect(store.getters.assetCreated(state)).toEqual('123')
-    })
-
-    test('assetsCsvFormData', () => {
-      const state = {
-        assetsCsvFormData: '123'
-      }
-      expect(store.getters.assetsCsvFormData(state)).toEqual('123')
-    })
-
-    test('isAssetEstimation', () => {
-      const state = {
-        isAssetEstimation: true
-      }
-      expect(store.getters.isAssetEstimation(state)).toBeTruthy()
-    })
-
-    test('isAssetTime', () => {
-      const state = {
-        isAssetTime: true
-      }
-      expect(store.getters.isAssetTime(state)).toBeTruthy()
-    })
-
-    test('isAssetDescription', () => {
-      const state = {
-        isAssetDescription: true
-      }
-      expect(store.getters.isAssetDescription(state)).toBeTruthy()
-    })
+describe('Getters', () => {
+  test('assets', () => {
+    store.cache.assets = '123'
+    expect(store.getters.assets(null)).toEqual('123')
   })
 
-  describe('Actions', () => {
-    beforeEach(() => {
-      store.cache.assets = []
+  test('assetSearchText', () => {
+    const state = {
+      assetSearchText: '123'
+    }
+    expect(store.getters.assetSearchText(state)).toEqual('123')
+  })
+
+  test('assetSearchQueries', () => {
+    const state = {
+      assetSearchQueries: '123'
+    }
+    expect(store.getters.assetSearchQueries(state)).toEqual('123')
+  })
+
+  test('assetSelectionGrid', () => {
+    const state = {
+      assetSelectionGrid: '123'
+    }
+    expect(store.getters.assetSelectionGrid(state)).toEqual('123')
+  })
+
+  test('assetValidationColumns', () => {
+    const state = {
+      assetValidationColumns: '123'
+    }
+    expect(store.getters.assetValidationColumns(state)).toEqual('123')
+  })
+
+  test('isAssetsLoading', () => {
+    const state = {
+      isAssetsLoading: true
+    }
+    expect(store.getters.isAssetsLoading(state)).toBeTruthy()
+  })
+
+  test('isAssetsLoadingError', () => {
+    const state = {
+      isAssetsLoadingError: true
+    }
+    expect(store.getters.isAssetsLoadingError(state)).toBeTruthy()
+  })
+
+  test('displayedAssets', () => {
+    const state = {
+      displayedAssets: '123'
+    }
+    expect(store.getters.displayedAssets(state)).toEqual('123')
+  })
+
+  test('displayedAssetsLength', () => {
+    const state = {
+      displayedAssetsLength: 123
+    }
+    expect(store.getters.displayedAssetsLength(state)).toEqual(123)
+  })
+
+  test('displayedAssetsTimeSpent', () => {
+    const state = {
+      displayedAssetsTimeSpent: 123
+    }
+    expect(store.getters.displayedAssetsTimeSpent(state)).toEqual(123)
+  })
+
+  test('displayedAssetsEstimation', () => {
+    const state = {
+      displayedAssetsEstimation: 123
+    }
+    expect(store.getters.displayedAssetsEstimation(state)).toEqual(123)
+  })
+
+  test('assetFilledColumns', () => {
+    const state = {
+      assetFilledColumns: 123
+    }
+    expect(store.getters.assetFilledColumns(state)).toEqual(123)
+  })
+
+  test('displayedAssetTypes', () => {
+    const state = {
+      displayedAssetTypes: '123'
+    }
+    expect(store.getters.displayedAssetTypes(state)).toEqual('123')
+  })
+
+  test('displayedAssetTypesLength', () => {
+    const state = {
+      displayedAssetTypesLength: 123
+    }
+    expect(store.getters.displayedAssetTypesLength(state)).toEqual(123)
+  })
+
+  test('assetTypeSearchText', () => {
+    const state = {
+      assetTypeSearchText: '123'
+    }
+    expect(store.getters.assetTypeSearchText(state)).toEqual('123')
+  })
+
+  test('assetTypeStats', () => {
+    const state = {
+      assetTypeStats: '123'
+    }
+    expect(store.getters.assetTypeStats(state)).toEqual('123')
+  })
+
+  test('assetTypeListScrollPosition', () => {
+    const state = {
+      assetTypeListScrollPosition: 123
+    }
+    expect(store.getters.assetTypeListScrollPosition(state)).toEqual(123)
+  })
+
+  test('assetSorting', () => {
+    const state = {
+      assetSorting: 123
+    }
+    expect(store.getters.assetSorting(state)).toEqual(123)
+  })
+
+  test('assetListScrollPosition', () => {
+    const state = {
+      assetListScrollPosition: 123
+    }
+    expect(store.getters.assetListScrollPosition(state)).toEqual(123)
+  })
+
+  test('displayedAssetsByType', () => {
+    const state = {
+      displayedAssets: [
+        { id: 123, asset_type_name: 'test' },
+        { id: 345, asset_type_name: 'test' },
+        { id: 234, asset_type_name: 'test2' },
+        { id: 456, asset_type_name: 'test2' }
+      ]
+    }
+    expect(store.getters.displayedAssetsByType(state)).toEqual([
+      [
+        { id: 123, asset_type_name: 'test' },
+        { id: 345, asset_type_name: 'test' }
+      ],
+      [
+        { id: 234, asset_type_name: 'test2' },
+        { id: 456, asset_type_name: 'test2' }
+      ]
+    ])
+  })
+
+  test('assetsByType', () => {
+    const state = {
+      displayedAssets: [
+        { id: 123, asset_type_name: 'test', canceled: true },
+        { id: 234, asset_type_name: 'test2' },
+        { id: 456, asset_type_name: 'test2' },
+        { id: 345, asset_type_name: 'test' }
+      ]
+    }
+    expect(store.getters.assetsByType(state)).toEqual([
+      [
+        { id: 234, asset_type_name: 'test2' },
+        { id: 456, asset_type_name: 'test2' }
+      ],
+      [
+        { id: 345, asset_type_name: 'test' }
+      ]
+    ])
+  })
+
+  test('assetCreated', () => {
+    const state = {
+      assetCreated: '123'
+    }
+    expect(store.getters.assetCreated(state)).toEqual('123')
+  })
+
+  test('assetsCsvFormData', () => {
+    const state = {
+      assetsCsvFormData: '123'
+    }
+    expect(store.getters.assetsCsvFormData(state)).toEqual('123')
+  })
+
+  test('isAssetEstimation', () => {
+    const state = {
+      isAssetEstimation: true
+    }
+    expect(store.getters.isAssetEstimation(state)).toBeTruthy()
+  })
+
+  test('isAssetTime', () => {
+    const state = {
+      isAssetTime: true
+    }
+    expect(store.getters.isAssetTime(state)).toBeTruthy()
+  })
+
+  test('isAssetDescription', () => {
+    const state = {
+      isAssetDescription: true
+    }
+    expect(store.getters.isAssetDescription(state)).toBeTruthy()
+  })
+})
+
+describe('Actions', () => {
+  beforeEach(() => {
+    store.cache.assets = []
+  })
+
+  test('loadAssets', async () => {
+    let mockCommit = vi.fn()
+    const state = {
+      episode: null,
+      isAssetsLoading: true
+    }
+    const rootGetters = {
+      currentProduction: 1,
+      userFilters: 2,
+      personMap: 3,
+      currentEpisode: 4,
+      isTVShow: true,
+      taskTypeMap: 5,
+      taskMap: 6,
+      assetTypeMap: new Map(),
+    }
+    const res1 = await store.actions.loadAssets(
+      { commit: mockCommit, state, rootGetters })
+    expect(res1).toEqual([])
+    state.episode = {
+      id: 123
+    }
+    const res2 = await store.actions.loadAssets(
+      { commit: mockCommit, state, rootGetters })
+    expect(res2).toEqual([])
+    state.isAssetsLoading = false
+    const assets = [{
+      id: 456,
+      type: 'asset',
+    }]
+    assetsApi.getAssets = vi.fn(() => Promise.resolve(assets))
+    assetsApi.getUsedSharedAssets = vi.fn(() => Promise.resolve([]))
+    mockCommit = vi.fn()
+    const res3 = await store.actions.loadAssets(
+      { commit: mockCommit, state, rootGetters })
+    expect(mockCommit).toBeCalledTimes(2)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
+    expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_END, {
+      production: 1,
+      assets,
+      userFilters: 2,
+      personMap: 3,
+      taskMap: 6,
+      taskTypeMap: 5
+    })
+    expect(res3).toEqual(assets)
+  })
+
+  test('loadAsset', async () => {
+    const rootGetters = {
+      currentProduction: 1,
+      personMap: 3,
+      taskTypeMap: 5,
+      taskMap: 6
+    }
+    let mockCommit = vi.fn()
+    assetsApi.getAsset = vi.fn(() => Promise.resolve({
+      id: 1,
+      tasks: []
+    }))
+    await store.actions.loadAsset(
+      { commit: mockCommit, state: {}, rootGetters }, 1)
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_ASSET, {
+      asset: { id: 1, tasks: [] },
+      taskTypeMap: 5,
+      taskMap: 6,
+      personMap: 3,
+      production: 1
     })
 
-    test('loadAssets', async () => {
-      let mockCommit = vi.fn()
-      const state = {
-        episode: null,
-        isAssetsLoading: true
-      }
-      const rootGetters = {
-        currentProduction: 1,
-        userFilters: 2,
-        personMap: 3,
-        currentEpisode: 4,
-        isTVShow: true,
-        taskTypeMap: 5,
-        taskMap: 6,
-        assetTypeMap: new Map(),
-      }
-      const res1 = await store.actions.loadAssets(
-        { commit: mockCommit, state, rootGetters })
-      expect(res1).toEqual([])
-      state.episode = {
-        id: 123
-      }
-      const res2 = await store.actions.loadAssets(
-        { commit: mockCommit, state, rootGetters })
-      expect(res2).toEqual([])
-      state.isAssetsLoading = false
-      const assets = [{
-        id: 456,
-        type: 'asset',
-      }]
-      assetsApi.getAssets = vi.fn(() => Promise.resolve(assets))
-      assetsApi.getUsedSharedAssets = vi.fn(() => Promise.resolve([]))
-      mockCommit = vi.fn()
-      const res3 = await store.actions.loadAssets(
-        { commit: mockCommit, state, rootGetters })
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_END, {
-        production: 1,
-        assets,
-        userFilters: 2,
-        personMap: 3,
-        taskMap: 6,
-        taskTypeMap: 5
+    mockCommit = vi.fn()
+    store.cache.assetMap.set(1, { id: 1, tasks: [] })
+    await store.actions.loadAsset(
+      { commit: mockCommit, state: {}, rootGetters }, 1)
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(
+      1,
+      UPDATE_ASSET,
+      { id: 1, tasks: [] }
+    )
+
+    mockCommit = vi.fn()
+    store.cache.assetMap.get(1).lock = true
+    await store.actions.loadAsset(
+      { commit: mockCommit, state: {}, rootGetters }, 1)
+    expect(mockCommit).toBeCalledTimes(0)
+  })
+
+  test.skip('newAsset', async () => {
+    const assetTypeMap = new Map()
+    const rootGetters = {
+      assetTypeMap: assetTypeMap,
+      taskTypeMap: 5,
+      productionAssetTaskTypeIds: [
+        1, 2
+      ]
+    }
+    const state = {}
+    const mockCommit = vi.fn()
+    const mockDispatch = vi.fn()
+    const asset = { id: 1, name: 'assetTest', project_id: 3 }
+    assetsApi.newAsset = vi.fn(() => Promise.resolve(asset))
+    const res = await store.actions.newAsset(
+      { commit: mockCommit, state, rootGetters, dispatch: mockDispatch },
+      new Map()
+    )
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(
+      1, EDIT_ASSET_END, {
+        assetTypeMap, newAsset: asset
       })
-      expect(res3).toEqual(assets)
-      /*
-      mockCommit = vi.fn()
-      assetsApi.getAssets = vi.fn(() => Promise.reject(new Error('error')))
-      assetsApi.getSharedAssets = vi.fn(() => Promise.resolve([]))
-      const res5 = await store.actions.loadAssets(
-        { commit: mockCommit, state, rootGetters }, { all: true, withTasks: false })
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_ASSETS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_ASSETS_ERROR)
-      expect(res5).toEqual([])
-      */
+    expect(mockDispatch).toBeCalledTimes(3)
+    expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTasks', {
+      entityIds: [1],
+      project_id: 3,
+      task_type_id: 1,
+      type: 'assets'
     })
-
-    test('loadAsset', async () => {
-      const rootGetters = {
-        currentProduction: 1,
-        personMap: 3,
-        taskTypeMap: 5,
-        taskMap: 6
-      }
-      const state = {
-        assetMap: new Map()
-      }
-      let mockCommit = vi.fn()
-      assetsApi.getAsset = vi.fn(() => Promise.resolve({
-        id: 1,
-        tasks: []
-      }))
-      await store.actions.loadAsset(
-        { commit: mockCommit, state, rootGetters }, 1)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_ASSET, {
-        asset: { id: 1, tasks: [] },
-        taskTypeMap: 5,
-        taskMap: 6,
-        personMap: 3,
-        production: 1
-      })
-
-      mockCommit = vi.fn()
-      state.assetMap.set(1, { id: 1, tasks: [] })
-      await store.actions.loadAsset(
-        { commit: mockCommit, state, rootGetters }, 1)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(
-        1,
-        UPDATE_ASSET,
-        { id: 1, tasks: [] }
-      )
-
-      mockCommit = vi.fn()
-      state.assetMap.get(1).lock = true
-      await store.actions.loadAsset(
-        { commit: mockCommit, state, rootGetters }, 1)
-      expect(mockCommit).toBeCalledTimes(0)
+    expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTasks', {
+      entityIds: [1],
+      project_id: 3,
+      task_type_id: 2,
+      type: 'assets'
     })
+    expect(res).toEqual(asset)
+  })
 
-    test.skip('newAsset', async () => {
-      const assetTypeMap = new Map()
-      const rootGetters = {
-        assetTypeMap: assetTypeMap,
-        taskTypeMap: 5,
-        productionAssetTaskTypeIds: [
-          1, 2
-        ]
+  test('editAsset', async () => {
+    const rootState = {
+      assetTypes: {
+        assetTypeMap: 1
       }
-      const state = {}
-      const mockCommit = vi.fn()
-      const mockDispatch = vi.fn()
-      const asset = { id: 1, name: 'assetTest', project_id: 3 }
-      assetsApi.newAsset = vi.fn(() => Promise.resolve(asset))
-      const res = await store.actions.newAsset(
-        { commit: mockCommit, state, rootGetters, dispatch: mockDispatch },
-        new Map()
-      )
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(
-        1, EDIT_ASSET_END, {
-          assetTypeMap, newAsset: asset
-        })
-      expect(mockDispatch).toBeCalledTimes(3)
-      expect(mockDispatch).toHaveBeenNthCalledWith(2, 'createTasks', {
-        entityIds: [1],
-        project_id: 3,
-        task_type_id: 1,
-        type: 'assets'
-      })
-      expect(mockDispatch).toHaveBeenNthCalledWith(3, 'createTasks', {
-        entityIds: [1],
-        project_id: 3,
-        task_type_id: 2,
-        type: 'assets'
-      })
-      expect(res).toEqual(asset)
-    })
+    }
+    const mockCommit = vi.fn()
+    const asset = { id: 1, name: 'assetTest', project_id: 3 }
+    assetsApi.updateAsset = vi.fn(() => Promise.resolve(asset))
+    const res = await store.actions.editAsset(
+      { commit: mockCommit, state: {}, rootState }, asset)
+    expect(mockCommit).toBeCalledTimes(2)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, LOCK_ASSET, asset)
+    expect(mockCommit).toHaveBeenNthCalledWith(
+      2, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
+    expect(res).toEqual(asset)
+  })
 
-    test('editAsset', async () => {
-      const rootState = {
-        assetTypes: {
-          assetTypeMap: 1
-        }
-      }
-      const mockCommit = vi.fn()
-      const asset = { id: 1, name: 'assetTest', project_id: 3 }
-      assetsApi.updateAsset = vi.fn(() => Promise.resolve(asset))
-      const res = await store.actions.editAsset(
-        { commit: mockCommit, state: {}, rootState }, asset)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOCK_ASSET, asset)
-      expect(mockCommit).toHaveBeenNthCalledWith(
-        2, EDIT_ASSET_END, { newAsset: asset, assetTypeMap: 1 })
-      expect(res).toEqual(asset)
-    })
+  test('deleteAsset', async () => {
+    let mockCommit = vi.fn()
+    const asset = {
+      id: 1,
+      name: 'assetTest',
+      project_id: 3,
+      tasks: [{ id: 2 }],
+      canceled: false
+    }
+    store.cache.assetMap.set(1, asset)
+    assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
+    const res1 = await store.actions.deleteAsset(
+      { commit: mockCommit, state: {} }, asset
+    )
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, CANCEL_ASSET, asset)
+    expect(res1).toEqual(asset)
 
-    test('deleteAsset', async () => {
-      const state = {
-        assetMap: new Map()
-      }
-      let mockCommit = vi.fn()
-      const asset = {
-        id: 1,
-        name: 'assetTest',
-        project_id: 3,
-        tasks: [{ id: 2 }],
-        canceled: false
-      }
-      state.assetMap.set(1, asset)
-      assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
-      const res1 = await store.actions.deleteAsset({ commit: mockCommit, state }, asset)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, CANCEL_ASSET, asset)
-      expect(res1).toEqual(asset)
+    asset.canceled = true
+    mockCommit = vi.fn()
+    assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
+    const res2 = await store.actions.deleteAsset(
+      { commit: mockCommit, state: {} }, asset)
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_ASSET, asset)
+    expect(res2).toEqual(asset)
+  })
 
-      asset.canceled = true
-      mockCommit = vi.fn()
-      assetsApi.deleteAsset = vi.fn(() => Promise.resolve(asset))
-      const res2 = await store.actions.deleteAsset(
-        { commit: mockCommit, state }, asset)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_ASSET, asset)
-      expect(res2).toEqual(asset)
-    })
-
-    test('restoreAsset', async () => {
-      const mockCommit = vi.fn()
-      const asset = { id: 1, name: 'assetTest' }
-      assetsApi.restoreAsset = vi.fn(() => Promise.resolve(asset))
-      const res1 = await store.actions.restoreAsset(
-        { commit: mockCommit, state: {} }, asset)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, RESTORE_ASSET_END, asset)
+  test('restoreAsset', async () => {
+    const mockCommit = vi.fn()
+    const asset = { id: 1, name: 'assetTest' }
+    assetsApi.restoreAsset = vi.fn(() => Promise.resolve(asset))
+    store.cache.assetMap = new Map([[asset.id, asset]])
+    const res1 = await store.actions.restoreAsset(
+      { commit: mockCommit, state: {} }, asset)
+    expect(mockCommit).toBeCalledTimes(1)
+    expect(mockCommit).toHaveBeenNthCalledWith(1, RESTORE_ASSET_END, asset)
       expect(res1).toEqual(asset)
     })
 
@@ -458,29 +436,6 @@ describe('Assets store', () => {
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, IMPORT_ASSETS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, IMPORT_ASSETS_END)
-    })
-
-    test('setAssetSearch', async () => {
-      const rootGetters = {
-        taskStatusMap: 1,
-        taskTypeMap: 2,
-        taskMap: 3,
-        currentProduction: 4,
-        people: 5
-      }
-
-      const mockCommit = vi.fn()
-      await store.actions.setAssetSearch(
-        { commit: mockCommit, state: {}, rootGetters }, 6)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, SET_ASSET_SEARCH, {
-        assetSearch: 6,
-        taskMap: 3,
-        taskStatusMap: 1,
-        taskTypeMap: 2,
-        persons: 5,
-        production: 4
-      })
     })
 
     test('saveAssetSearch', async () => {
@@ -709,27 +664,6 @@ describe('Assets store', () => {
       ])
     })
 
-    test('changeAssetSort', () => {
-      const mockCommit = vi.fn()
-      const rootGetters = {
-        taskTypeMap: 1,
-        taskStatus: 2,
-        taskMap: 3,
-        currentProduction: 4,
-        people: 5
-      }
-      store.actions.changeAssetSort({ commit: mockCommit, rootGetters })
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, CHANGE_ASSET_SORT, {
-        taskTypeMap: 1,
-        taskStatusMap: 2,
-        taskMap: 3,
-        production: 4,
-        persons: 5,
-        sorting: []
-      })
-    })
-
     test('deleteAllAssetTasks', () => {
       const dispatch = vi.fn()
       const projectId = 1
@@ -761,6 +695,7 @@ describe('Assets store', () => {
           'asset-id': asset
         }))
       }
+      store.cache.assetMap.set(asset.id, asset)
       await store.actions.deleteSelectedAssets({ state, dispatch })
       expect(dispatch).toBeCalledTimes(1)
       expect(dispatch).toHaveBeenNthCalledWith(1, 'deleteAsset', asset)
@@ -773,7 +708,7 @@ describe('Assets store', () => {
       store.cache.result = 1
       store.cache.assetIndex = 1
       const state = {
-        assetMap: 1,
+        assetMap: new Map(),
         assetValidationColumns: 1,
         displayedAssets: 1,
         assetFilledColumns: 1,
@@ -810,7 +745,7 @@ describe('Assets store', () => {
       const state = {
         isAssetsLoading: false,
         isAssetsLoadingError: true,
-        assetMap: 1,
+        assetMap: new Map(),
         assetValidationColumns: 1,
         displayedAssets: 1,
         assetFilledColumns: 1,
@@ -1017,62 +952,62 @@ describe('Assets store', () => {
         displayedAssetsTimeSpent: 0,
         assetSearchFilterGroups: 'assetSearchFilterGroups',
         assetSearchQueries: 'assetSearchQueries',
-        assetMap: new Map(Object.entries({
-          4: {
-            id: '4',
-            canceled: false,
-            asset_type_name: 'assettypename2',
-            name: 'name1',
-            validations: new Map(),
-            tasks: [],
-            estimation: 0,
-            production_id: '1',
-            production_name: 'production',
-            project_name: 'production',
-            timeSpent: 0
-          },
-          2: {
-            id: '2',
-            canceled: false,
-            asset_type_name: 'assettypename2',
-            name: 'name3',
-            validations: new Map(),
-            tasks: [],
-            estimation: 0,
-            production_id: '1',
-            production_name: 'production',
-            project_name: 'production',
-            timeSpent: 0
-          },
-          3: {
-            id: '3',
-            canceled: true,
-            asset_type_name: 'assettypename1',
-            name: 'name2',
-            validations: new Map(),
-            tasks: [],
-            estimation: 0,
-            production_id: '1',
-            production_name: 'production',
-            project_name: 'production',
-            timeSpent: 0
-          },
-          1: {
-            id: '1',
-            canceled: true,
-            asset_type_name: 'assettypename2',
-            name: 'name4',
-            description: 'azerty',
-            validations: new Map(),
-            tasks: [],
-            estimation: 0,
-            production_id: '1',
-            production_name: 'production',
-            project_name: 'production',
-            timeSpent: 0
-          }
-        }))
       })
+      expect(store.cache.assetMap).toEqual(new Map(Object.entries({
+        4: {
+          id: '4',
+          canceled: false,
+          asset_type_name: 'assettypename2',
+          name: 'name1',
+          validations: new Map(),
+          tasks: [],
+          estimation: 0,
+          production_id: '1',
+          production_name: 'production',
+          project_name: 'production',
+          timeSpent: 0
+        },
+        2: {
+          id: '2',
+          canceled: false,
+          asset_type_name: 'assettypename2',
+          name: 'name3',
+          validations: new Map(),
+          tasks: [],
+          estimation: 0,
+          production_id: '1',
+          production_name: 'production',
+          project_name: 'production',
+          timeSpent: 0
+        },
+        3: {
+          id: '3',
+          canceled: true,
+          asset_type_name: 'assettypename1',
+          name: 'name2',
+          validations: new Map(),
+          tasks: [],
+          estimation: 0,
+          production_id: '1',
+          production_name: 'production',
+          project_name: 'production',
+          timeSpent: 0
+        },
+        1: {
+          id: '1',
+          canceled: true,
+          asset_type_name: 'assettypename2',
+          name: 'name4',
+          description: 'azerty',
+          validations: new Map(),
+          tasks: [],
+          estimation: 0,
+          production_id: '1',
+          production_name: 'production',
+          project_name: 'production',
+          timeSpent: 0
+        }
+      })))
     })
 
     test.skip('ADD_ASSET', () => {
@@ -1119,7 +1054,7 @@ describe('Assets store', () => {
           estimation: 200
         }]
       }
-      tasksStore.state.taskStatusMap = new Map(Object.entries({
+      tasksStore.cache.taskStatusMap = new Map(Object.entries({
         todo: {
           short_name: 'TODO'
         }
@@ -1266,16 +1201,14 @@ describe('Assets store', () => {
         id: '123',
         name: 'new asset'
       }
-      const state = {
-        assetMap: new Map(Object.entries({
-          123: {
-            id: '123',
-            name: 'old asset'
-          }
-        }))
-      }
-      store.mutations.UPDATE_ASSET(state, asset)
-      expect(state.assetMap.get('123').name).toEqual('new asset')
+      store.cache.assetMap = new Map(Object.entries({
+        123: {
+          id: '123',
+          name: 'old asset'
+        }
+      }))
+      store.mutations.UPDATE_ASSET({}, asset)
+      expect(store.cache.assetMap.get('123').name).toEqual('new asset')
     })
 
     test('REMOVE_ASSET', () => {
@@ -1285,11 +1218,9 @@ describe('Assets store', () => {
         estimation: 200
       }
       store.cache.assets = [assetToDelete]
+      store.cache.assetMap = new Map([[assetToDelete.id, assetToDelete]])
       store.cache.assetIndex = null
       const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': assetToDelete
-        })),
         displayedAssets: [assetToDelete],
         displayedAssetsTimeSpent: 100,
         displayedAssetsEstimation: 200,
@@ -1299,7 +1230,6 @@ describe('Assets store', () => {
       }
       store.mutations.REMOVE_ASSET(state, assetToDelete)
       expect(state).toEqual({
-        assetMap: new Map(),
         displayedAssets: [],
         displayedAssetsTimeSpent: 0,
         displayedAssetsEstimation: 0,
@@ -1307,6 +1237,8 @@ describe('Assets store', () => {
         displayedAssetsCount: 0,
         displayedAssetsLength: 0
       })
+      expect(store.cache.assets).toEqual([])
+      expect(store.cache.assetMap).toEqual(new Map())
       expect(store.cache.assetIndex !== null).toBeTruthy()
       expect(store.cache.assets).toEqual([])
     })
@@ -1362,12 +1294,10 @@ describe('Assets store', () => {
       }))
       const state = {
         assetTypeMap,
-        assetMap: new Map(Object.entries({
-          1: oldAsset
-        })),
         displayedAssets: [oldAsset]
       }
       store.cache.assets = [oldAsset]
+      store.cache.assetMap = new Map([[oldAsset.id, oldAsset]])
 
       store.mutations.EDIT_ASSET_END(state, { newAsset, assetTypeMap })
       expect(newAsset).toEqual({
@@ -1390,28 +1320,6 @@ describe('Assets store', () => {
       expect(state).toEqual({
         assetCreated: 'name4',
         assetTypeMap,
-        assetMap: new Map(Object.entries({
-          1: {
-            asset_type_name: 'entity name',
-            asset_type_id: 'entity id',
-            entity_type_id: 'entity_type_id',
-            canceled: true,
-            description: 'azerty',
-            episode_id: undefined,
-            estimation: 200,
-            full_name: 'assettypename2 / name4',
-            id: '1',
-            name: 'name4',
-            production_id: '1',
-            production_name: 'production',
-            project_name: 'production',
-            timeSpent: 100,
-            validations: new Map(Object.entries({
-              'task-type-id': 'task-id'
-            })),
-            data: {}
-          }
-        })),
         displayedAssets: [
           {
             asset_type_name: 'entity name',
@@ -1470,13 +1378,11 @@ describe('Assets store', () => {
         id: 'asset-id',
         canceled: true
       }
-      const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': asset
-        }))
-      }
+      store.cache.assetMap = new Map(Object.entries({
+        'asset-id': asset
+      }))
       store.cache.assetIndex = null
-      store.mutations.RESTORE_ASSET_END(state, asset)
+      store.mutations.RESTORE_ASSET_END({}, asset)
       expect(asset.canceled).toBeFalsy()
       expect(store.cache.assetIndex !== null).toBeTruthy()
     })
@@ -1615,27 +1521,23 @@ describe('Assets store', () => {
     })
 
     test('SET_PREVIEW', () => {
-      const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': {
-            tasks: ['task-id']
-          }
-        }))
-      }
-      const taskMap = new Map(Object.entries({
-        'task-id': {
-          entity: {}
+      store.cache.assetMap = new Map(Object.entries({
+        'asset-id': {
+          tasks: ['task-id']
         }
       }))
-      store.mutations.SET_PREVIEW(state, {
+      tasksStore.state.taskMap.set('task-id', {
+        entity: {}
+      })
+      store.mutations.SET_PREVIEW({}, {
         entityId: 'asset-id',
         taskId: 'task-id',
         previewId: 'preview-id',
-        taskMap
+        taskMap: tasksStore.state.taskMap,
       })
-      expect(taskMap.get('task-id').entity.preview_file_id)
+      expect(tasksStore.state.taskMap.get('task-id').entity.preview_file_id)
         .toEqual('preview-id')
-      expect(state.assetMap.get('asset-id').preview_file_id)
+      expect(store.cache.assetMap.get('asset-id').preview_file_id)
         .toEqual('preview-id')
     })
 
@@ -1701,8 +1603,10 @@ describe('Assets store', () => {
       }
       state.assetSelectionGrid[0] = {}
       state.assetSelectionGrid[0][0] = true
+      tasksStore.state.nbSelectedTasks = 1
       store.mutations.CLEAR_SELECTED_TASKS(state)
       expect(state.assetSelectionGrid[0][0]).toBeFalsy()
+      tasksStore.state.nbSelectedTasks = 0
     })
 
     test.skip('NEW_TASK_END', () => {
@@ -1716,12 +1620,12 @@ describe('Assets store', () => {
         assetValidationColumns: [],
         assetFilledColumns: []
       }
-      taskTypesStore.state.taskTypeMap = new Map(Object.entries({
+      taskTypesStore.cache.taskTypeMap = new Map(Object.entries({
         task_type_id: {
           priority: 1
         }
       }))
-      tasksStore.state.taskStatusMap = new Map(Object.entries({
+      tasksStore.cache.taskStatusMap = new Map(Object.entries({
         todo: {
           short_name: 'TODO'
         }
@@ -1765,27 +1669,23 @@ describe('Assets store', () => {
     })
 
     test('CREATE_TASKS_END', () => {
-      const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': {
-            validations: new Map(),
-            tasks: []
-          }
-        }))
-      }
+      store.cache.assetMap = new Map(Object.entries({
+        'asset-id': {
+          validations: new Map(),
+          tasks: []
+        }
+      }))
       const tasks = [{
         entity_id: 'asset-id',
         task_type_id: 'task_type_id',
         task_status_id: 'todo',
         id: 'task-id'
       }]
-      tasksStore.state.taskStatusMap = new Map(Object.entries({
-        todo: {
-          short_name: 'TODO'
-        }
-      }))
-      store.mutations.CREATE_TASKS_END(state, { tasks })
-      expect(state.assetMap.get('asset-id').validations).toEqual(
+      taskStatusStore.cache.taskStatusMap = new Map(
+        [['todo', { id: 'todo', short_name: 'TODO' }]]
+      )
+      store.mutations.CREATE_TASKS_END({}, { tasks })
+      expect(store.cache.assetMap.get('asset-id').validations).toEqual(
         new Map(Object.entries({
           task_type_id: 'task-id'
         })))
@@ -1869,37 +1769,6 @@ describe('Assets store', () => {
       })
     })
 
-    test('CHANGE_ASSET_SORT', () => {
-      const state = {
-        assetSorting: { 123: 123 },
-        assetSearchText: 'search',
-        displayedAssets: []
-      }
-      const payload = {
-        sorting: { 123: 124 },
-        assetSearch: 'search',
-        production: {},
-        taskStatusMap: new Map(),
-        taskTypeMap: new Map(),
-        persons: new Map(),
-        taskMap: new Map()
-      }
-      store.mutations.CHANGE_ASSET_SORT(state, payload)
-      expect(state).toEqual({
-        assetFilledColumns: {},
-        assetSearchText: 'search',
-        assetSelectionGrid: {},
-        assetSorting: {
-          123: 124
-        },
-        displayedAssets: [],
-        displayedAssetsEstimation: 0,
-        displayedAssetsCount: 0,
-        displayedAssetsLength: 0,
-        displayedAssetsTimeSpent: 0
-      })
-    })
-
     test('UPDATE_METADATA_DESCRIPTOR_END', () => {
       const state = {}
       const descriptor = {
@@ -1928,17 +1797,13 @@ describe('Assets store', () => {
         id: 'asset-id',
         lock: false
       }
-      const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': asset
-        }))
-      }
-      store.mutations.LOCK_ASSET(state, asset)
+      store.cache.assetMap.set('asset-id', asset)
+      store.mutations.LOCK_ASSET({}, asset)
       expect(asset).toEqual({
         id: 'asset-id',
         lock: 1
       })
-      store.mutations.LOCK_ASSET(state, asset)
+      store.mutations.LOCK_ASSET({}, asset)
       expect(asset).toEqual({
         id: 'asset-id',
         lock: 2
@@ -1950,17 +1815,13 @@ describe('Assets store', () => {
         id: 'asset-id',
         lock: 2
       }
-      const state = {
-        assetMap: new Map(Object.entries({
-          'asset-id': asset
-        }))
-      }
-      store.mutations.UNLOCK_ASSET(state, asset)
+      store.cache.assetMap.set('asset-id', asset)
+      store.mutations.UNLOCK_ASSET({}, asset)
       expect(asset).toEqual({
         id: 'asset-id',
         lock: 1
       })
-      store.mutations.UNLOCK_ASSET(state, asset)
+      store.mutations.UNLOCK_ASSET({}, asset)
       expect(asset).toEqual({
         id: 'asset-id',
         lock: 0
@@ -1980,7 +1841,6 @@ describe('Assets store', () => {
         assetCreated: '',
         assetFilledColumns: {},
         assetListScrollPosition: 0,
-        assetMap: new Map(),
         assetSearchFilterGroups: [],
         assetSearchQueries: [],
         assetSearchText: '',

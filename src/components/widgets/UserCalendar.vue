@@ -59,10 +59,10 @@
 </template>
 
 <script>
-import { BriefcaseIcon } from 'lucide-vue'
+import { BriefcaseIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
-import FullCalendar from '@fullcalendar/vue'
+import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 

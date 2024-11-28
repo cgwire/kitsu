@@ -70,19 +70,19 @@
           <table class="render">
             <colgroup>
               <col
-                v-for="item in columnsRequired"
                 :key="`col-missing-${item}`"
                 class="missing"
+                v-for="item in columnsRequired"
               />
               <col
-                v-for="(cell, index) in parsedCsv[0]"
                 :key="`col-${index}`"
                 :class="stateColumn(cell)"
+                v-for="(cell, index) in parsedCsv[0]"
               />
               <col
-                v-for="item in columnsOptional"
                 :key="`col-missing-${item}`"
                 class="missing-optional"
+                v-for="item in columnsOptional"
               />
             </colgroup>
             <thead>
@@ -95,8 +95,8 @@
                   {{ cell }}
                 </th>
                 <th
-                  v-for="(cell, index) in parsedCsv[0]"
                   :key="`header-${index}`"
+                  v-for="(cell, index) in parsedCsv[0]"
                 >
                   <div class="render-select">
                     <combobox
@@ -104,7 +104,7 @@
                       :value="cell"
                       :error="isDuplicated(index)"
                       v-model="columnSelect[index]"
-                      @input="checkForDuplicate"
+                      @update:model-value="checkForDuplicate"
                     />
                   </div>
                   {{ cell || '-' }}
@@ -124,9 +124,10 @@
                   overwrite: updateData && existingData(index),
                   disabled: !updateData && existingData(index)
                 }"
-                v-for="(line, index) in startFrom(parsedCsv, 1)"
-                v-if="line && line.length > 1"
                 :key="`line-${index}`"
+                v-for="(line, index) in parsedCsv
+                  .slice(1)
+                  .filter(line => line.length > 1)"
               >
                 <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
                   {{ '-' }}
@@ -182,6 +183,8 @@ export default {
     Checkbox,
     ModalFooter
   },
+
+  emits: ['cancel', 'confirm', 'reupload'],
 
   data() {
     return {
@@ -332,10 +335,6 @@ export default {
 
     onReupload() {
       this.$emit('reupload')
-    },
-
-    startFrom(arr, index) {
-      return arr.slice(index)
     },
 
     stateColumn(data) {

@@ -64,7 +64,7 @@
               class="flexrow-item mb1"
               :options="availableTaskTypes"
               :with-margin="false"
-              @input="
+              @update:model-value="
                 id => {
                   taskTypeMap.get(id) && form.task_types.push(id)
                 }
@@ -131,6 +131,8 @@ export default {
       default: () => {}
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {

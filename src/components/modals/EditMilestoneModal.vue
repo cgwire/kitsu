@@ -84,6 +84,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm', 'remove-milestone'],
+
   data() {
     return {
       form: {

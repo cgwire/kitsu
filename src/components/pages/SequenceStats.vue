@@ -270,12 +270,15 @@ export default {
       }
     },
 
-    searchSequenceFilters() {
-      this.computeSequenceStats()
+    searchSequenceFilters: {
+      deep: true,
+      handler() {
+        this.computeSequenceStats()
+      }
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return {
         title:
@@ -287,7 +290,7 @@ export default {
       return {
         title:
           `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` ${this.$t('sequences.title')} - Kitsu`
+          ` | ${this.$t('sequences.title')} - Kitsu`
       }
     }
   }

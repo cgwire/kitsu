@@ -1,7 +1,7 @@
 <template>
   <div class="field" :class="{ 'is-inline': isInline }">
     <label class="label" v-if="label">{{ label }}</label>
-    <label class="label empty-label" v-if="emptyLabel">A</label>
+    <label class="label empty-label" v-if="emptyLabel">&nbsp;</label>
     <p
       class="control"
       :class="{
@@ -18,7 +18,7 @@
         "
         :placeholder="placeholder"
         :type="type"
-        :value="value"
+        :value="modelValue"
         :disabled="disabled"
         :maxlength="maxlength"
         :min="min"
@@ -46,6 +46,7 @@
 <script>
 export default {
   name: 'text-field',
+
   props: {
     disabled: {
       default: false,
@@ -55,7 +56,7 @@ export default {
       default: '',
       type: String
     },
-    value: {
+    modelValue: {
       default: '',
       type: [String, Number]
     },
@@ -115,6 +116,8 @@ export default {
     }
   },
 
+  emits: ['enter', 'update:modelValue'],
+
   methods: {
     getInputValue() {
       const input = this.$refs.input
@@ -130,7 +133,7 @@ export default {
     },
 
     updateValue() {
-      this.$emit('input', this.getInputValue())
+      this.$emit('update:modelValue', this.getInputValue())
     },
 
     focus() {

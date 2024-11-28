@@ -2,13 +2,10 @@
   <div class="user-timesheet data-list">
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
-        <datepicker
-          wrapper-class="datepicker"
-          input-class="date-field input short"
-          :language="locale"
-          :disabled-dates="disabledDates"
-          :monday-first="true"
-          format="yyyy-MM-dd"
+        <date-field
+          :min-date="disabledDates.from"
+          :max-date="disabledDates.to"
+          :with-margin="false"
           v-model="selectedDate"
         />
       </div>
@@ -32,7 +29,7 @@
       />
     </div>
 
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable multi-section">
         <thead class="datatable-head">
           <tr>
@@ -66,8 +63,8 @@
         <tbody class="datatable-body" v-if="tasks.length > 0 && !isLoading">
           <tr
             class="datatable-row"
-            v-for="(task, i) in displayedTasks"
             :key="`${task.id}-${i}`"
+            v-for="(task, i) in displayedTasks"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"
@@ -103,10 +100,10 @@
               </router-link>
             </th>
             <time-slider-cell
+              class="time-spent"
               :duration="
                 timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
               "
-              class="time-spent"
               :task-id="task.id"
               @change="onSliderChange"
               v-if="!personIsDayOff"
@@ -124,8 +121,8 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="(task, i) in doneTasks"
             :key="`${task}-${i}`"
+            v-for="(task, i) in doneTasks"
           >
             <th
               class="production datatable-row-header datatable-row-header--nobd"
@@ -159,10 +156,10 @@
               </router-link>
             </th>
             <time-slider-cell
+              class="time-spent"
               :duration="
                 timeSpentMap[task.id] ? timeSpentMap[task.id].duration / 60 : 0
               "
-              class="time-spent"
               :task-id="task.id"
               @change="onSliderChange"
               v-if="!personIsDayOff"
@@ -211,13 +208,12 @@
 
 <script>
 import moment from 'moment-timezone'
-import Datepicker from 'vuejs-datepicker'
-import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { mapGetters } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -233,8 +229,8 @@ export default {
 
   components: {
     ButtonSimple,
-    Datepicker,
     DayOffModal,
+    DateField,
     DeleteModal,
     EntityThumbnail,
     InfoQuestionMark,
@@ -284,6 +280,8 @@ export default {
     }
   },
 
+  emits: ['date-changed', 'set-day-off', 'time-spent-change', 'unset-day-off'],
+
   data() {
     const today = new Date()
     return {
@@ -324,14 +322,6 @@ export default {
       'user'
     ]),
 
-    locale() {
-      if (this.user.locale === 'fr_FR') {
-        return fr
-      } else {
-        return en
-      }
-    },
-
     displayedTasks() {
       return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
     },
@@ -353,7 +343,8 @@ export default {
   },
 
   methods: {
-    onBodyScroll(event, position) {
+    onBodyScroll(event) {
+      const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {

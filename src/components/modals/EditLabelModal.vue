@@ -69,6 +69,8 @@ export default {
     }
   },
 
+  emits: ['cancel', 'confirm'],
+
   mounted() {
     this.form.label = this.label
   },

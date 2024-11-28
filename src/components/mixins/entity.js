@@ -61,12 +61,7 @@ export const entityMixin = {
     },
 
     currentTasks() {
-      const entity =
-        this.currentAsset ||
-        this.currentShot ||
-        this.currentEdit ||
-        this.currentSequence ||
-        this.currentEpisode
+      const entity = this[`current${stringHelpers.capitalize(this.type)}`]
       if (!entity || !entity.tasks) return []
       return entity
         ? entity.tasks

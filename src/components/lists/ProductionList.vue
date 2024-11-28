@@ -34,8 +34,8 @@
               </span>
             </th>
           </tr>
-          <template v-for="entry in openProductions">
-            <tr class="datatable-row" :key="entry.id">
+          <template :key="entry.id" v-for="entry in openProductions">
+            <tr class="datatable-row">
               <th class="name datatable-row-header" scope="row">
                 <production-name-cell
                   :with-avatar="true"
@@ -75,7 +75,6 @@
             </tr>
             <tr
               class="datatable-row"
-              :key="entry.id + '-stats'"
               v-if="Object.keys(productionStats).length > 0"
             >
               <td :colspan="7" class="datatable-row-stats">
@@ -94,8 +93,8 @@
           </tr>
           <tr
             class="datatable-row"
-            v-for="entry in closedProductions"
             :key="entry.id"
+            v-for="entry in closedProductions"
           >
             <th class="name datatable-row-header" scope="row">
               <production-name-cell
@@ -185,6 +184,8 @@ export default {
     RowActionsCell,
     TableInfo
   },
+
+  emits: ['delete-clicked', 'edit-clicked'],
 
   computed: {
     ...mapGetters(['openProductions', 'lastProductionScreen']),

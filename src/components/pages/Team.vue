@@ -8,8 +8,7 @@
             class="flexrow-item add-people-field"
             :people="unlistedPeople"
             :placeholder="$t('people.add_member_to_team')"
-            big
-            @enter="addPerson"
+            @select="addPerson"
             v-model="person"
           />
           <button
@@ -20,12 +19,7 @@
             {{ $t('main.add') }}
           </button>
         </div>
-        <production-team-list
-          :entries="teamPersons"
-          :is-loading="isTeamLoading"
-          :is-error="isTeamLoadingError"
-          @remove="removePerson"
-        />
+        <production-team-list :entries="teamPersons" @remove="removePerson" />
       </div>
     </template>
     <template #side v-if="isCurrentUserManager">
@@ -85,13 +79,9 @@
               :key="person.id"
               :person="person"
               :size="30"
-              :with-link="false"
+              :is-link="false"
             />
-            <people-name
-              class="flexrow-item"
-              :person="person"
-              :with-link="false"
-            />
+            <people-name class="flexrow-item" :person="person" />
           </div>
         </div>
       </div>
@@ -186,9 +176,7 @@ export default {
     addPerson() {
       if (this.person) {
         this.addPersonToTeam(this.person)
-        setTimeout(() => {
-          this.$refs['people-field'].clear()
-        }, 1)
+        this.$refs['people-field'].focus()
       }
     },
 
@@ -213,7 +201,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.currentProduction.name} | ${this.$t(
         'people.team'

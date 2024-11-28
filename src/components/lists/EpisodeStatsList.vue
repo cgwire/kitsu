@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" v-scroll="onBodyScroll">
+    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -69,8 +69,8 @@
             <td class="actions"></td>
           </tr>
 
-          <template v-for="entry in entries">
-            <tr :key="entry.id" class="datatable-row">
+          <template v-for="entry in entries" :key="entry.id">
+            <tr class="datatable-row">
               <td class="expander" @click="toggleExpanded(entry.id)">
                 <chevron-right-icon
                   v-if="isRetakes && expanded[entry.id] !== true"
@@ -94,20 +94,25 @@
               />
               <td v-else></td>
 
-              <stats-cell
-                :key="entry.id + columnId"
-                :style="getValidationStyle(columnId)"
-                :colors="chartColors(entry.id, columnId)"
-                :data="chartData(entry.id, columnId)"
-                :frames-data="chartData(entry.id, columnId, 'frames')"
-                :count-mode="countMode"
-                :display-mode="displayMode"
-                :label="chartLabel(entry.id, columnId)"
-                :label-color="chartLabelColor(entry.id, columnId)"
-                v-for="columnId in validationColumns"
-                v-if="isStats(entry.id, columnId)"
-              />
-              <td :style="getValidationStyle(columnId)" v-else></td>
+              <template v-for="columnId in validationColumns">
+                <stats-cell
+                  :key="entry.id + columnId"
+                  :style="getValidationStyle(columnId)"
+                  :colors="chartColors(entry.id, columnId)"
+                  :data="chartData(entry.id, columnId)"
+                  :frames-data="chartData(entry.id, columnId, 'frames')"
+                  :count-mode="countMode"
+                  :display-mode="displayMode"
+                  :label="chartLabel(entry.id, columnId)"
+                  :label-color="chartLabelColor(entry.id, columnId)"
+                  v-if="isStats(entry.id, columnId)"
+                />
+                <td
+                  :key="entry.id + columnId + '-td'"
+                  :style="getValidationStyle(columnId)"
+                  v-else
+                ></td>
+              </template>
 
               <td class="actions"></td>
             </tr>
@@ -196,8 +201,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue'
-import Vue from 'vue/dist/vue'
+import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -269,12 +273,13 @@ export default {
 
   mounted() {
     this.entries.forEach(e => {
-      Vue.set(this.expanded, e.id, false)
+      this.expanded[e.id] = false
     })
   },
 
   computed: {
     ...mapGetters([
+      'currentEpisode',
       'currentProduction',
       'displayedEpisodesLength',
       'episodeSearchText',
@@ -283,6 +288,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isSingleEpisode',
+      'isTVShow',
       'taskTypeMap'
     ]),
 
@@ -376,14 +382,6 @@ export default {
       return this.episodeStats[entryId] && this.episodeStats[entryId][columnId]
     },
 
-    onBodyScroll(event, position) {
-      this.$emit('scroll', position.scrollTop)
-    },
-
-    setScrollPosition(scrollPosition) {
-      this.$refs.body.scrollTop = scrollPosition
-    },
-
     taskTypePath(taskTypeId) {
       const route = {
         name: 'task-type',
@@ -420,17 +418,20 @@ export default {
   },
 
   watch: {
-    entries() {
-      this.entries.forEach(e => {
-        const value = this.expanded[e.id] || false
-        Vue.set(this.expanded, e.id, value)
-      })
+    entries: {
+      deep: true,
+      handler() {
+        this.entries.forEach(e => {
+          const value = this.expanded[e.id] || false
+          this.expanded[e.id] = value
+        })
+      }
     },
 
     isRetakes() {
       if (!this.isRetakes) {
         this.entries.forEach(e => {
-          Vue.set(this.expanded, e.id, false)
+          this.expanded[e.id] = false
         })
       }
     }

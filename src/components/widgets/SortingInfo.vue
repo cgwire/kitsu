@@ -19,21 +19,17 @@ export default {
   },
 
   props: {
-    label: {
-      type: String,
-      default: function () {
-        return this.$t('main.sorted_by')
-      }
-    },
     sorting: {
       type: Array,
       required: true
     }
   },
 
+  emits: ['clear-sorting'],
+
   computed: {
     text() {
-      return `${this.label} ${this.sorting[0]?.name}`
+      return `${this.$t('main.sorted_by')} ${this.sorting[0]?.name}`
     }
   }
 }

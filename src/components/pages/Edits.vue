@@ -214,7 +214,6 @@
     <add-metadata-modal
       :active="modals.isAddMetadataDisplayed"
       :is-loading="loading.addMetadata"
-      :is-loading-stay="loading.addMetadata"
       :is-error="errors.addMetadata"
       :descriptor-to-edit="descriptorToEdit"
       entity-type="Edit"
@@ -318,6 +317,7 @@ export default {
       departmentFilter: [],
       editToDelete: null,
       editToEdit: null,
+      editToRestore: null,
       formData: null,
       genericColumns: [
         'Metadata column name (text value)',
@@ -371,7 +371,7 @@ export default {
     }
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.clearSelectedEdits()
   },
 
@@ -1016,7 +1016,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     if (this.isTVShow) {
       return {
         title: `${

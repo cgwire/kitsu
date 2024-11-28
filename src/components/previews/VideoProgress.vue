@@ -107,8 +107,10 @@
       @touchcancel="isFrameNumberVisible = false"
       @mousedown="startPlaylistProgressDrag"
       @touchstart="
-        startProgressDrag()
-        isFrameNumberVisible = true
+        () => {
+          startProgressDrag()
+          isFrameNumberVisible = true
+        }
       "
       v-show="entityList.length > 1 && playlistDuration > 0"
     >
@@ -126,8 +128,10 @@
         @touchcancel="isFrameNumberVisible = false"
         @mousedown="startPlaylistProgressDrag"
         @touchstart="
-          startProgressDrag
-          isFrameNumberVisible = true
+          () => {
+            startProgressDrag
+            isFrameNumberVisible = true
+          }
         "
         v-for="entity in entityList"
       >
@@ -233,6 +237,15 @@ export default {
     }
   },
 
+  emits: [
+    'end-scrub',
+    'handle-in-changed',
+    'handle-out-changed',
+    'progress-changed',
+    'progress-playlist-changed',
+    'start-scrub'
+  ],
+
   data() {
     return {
       currentMouseFrame: {},
@@ -280,7 +293,7 @@ export default {
     this.progress.setAttribute('max', this.videoDuration)
   },
 
-  beforeDestroy() {
+  beforeUnmount() {
     this.removeEvents(this.domEvents)
   },
 
@@ -349,8 +362,10 @@ export default {
 
   methods: {
     onWindowResize() {
-      const progressCoordinates = this.progress.getBoundingClientRect()
-      this.width = progressCoordinates.width
+      if (this.progress) {
+        const progressCoordinates = this.progress.getBoundingClientRect()
+        this.width = progressCoordinates.width
+      }
     },
 
     getAnnotationPosition(annotation) {

@@ -29,8 +29,8 @@
         <div
           class="studio-line"
           :key="studio.id"
-          v-for="studio in studioList"
           @click="selectStudio(studio)"
+          v-for="studio in studioList"
         >
           <studio-name :studio="studio" />
         </div>
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue'
+import { ChevronDownIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
@@ -55,6 +55,8 @@ export default {
     ComboboxMask,
     StudioName
   },
+
+  emits: ['update:modelValue'],
 
   data() {
     return {
@@ -75,7 +77,7 @@ export default {
       default: false,
       type: Boolean
     },
-    value: {
+    modelValue: {
       default: '',
       type: String
     },
@@ -93,9 +95,7 @@ export default {
     ...mapGetters(['studios', 'studioMap']),
 
     studioList() {
-      const studios = this.selectableStudio
-        ? [...this.selectableStudio]
-        : [...this.studios]
+      const studios = [...this.studios]
 
       if (this.withEmptyChoice) {
         return [
@@ -111,19 +111,19 @@ export default {
     },
 
     currentStudio() {
-      if (!this.value) {
+      if (!this.modelValue) {
         return this.studioList[0]
       }
       return (
-        this.studioMap.get(this.value) ??
-        this.studioList.find(({ id }) => id === this.value)
+        this.studioMap.get(this.modelValue) ??
+        this.studioList.find(({ id }) => id === this.modelValue)
       )
     }
   },
 
   methods: {
     selectStudio(studio) {
-      this.$emit('input', studio.id)
+      this.$emit('update:modelValue', studio.id)
       this.showStudioList = false
     },
 

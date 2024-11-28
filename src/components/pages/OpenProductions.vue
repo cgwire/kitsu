@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import { mapGetters } from 'vuex'
 
 import { buildNameIndex } from '@/lib/indexing'
@@ -258,7 +258,9 @@ export default {
     },
 
     getThumbnailPath(production) {
-      return `/api/pictures/thumbnails/projects/${production.id}.png`
+      const lastUpdate = production.updated_at || production.created_at
+      const timestamp = Date.parse(lastUpdate)
+      return `/api/pictures/thumbnails/projects/${production.id}.png?t=${timestamp}`
     },
 
     newProductionPage() {
@@ -281,7 +283,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('productions.home.title')} - Kitsu`
     }

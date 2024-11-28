@@ -104,7 +104,7 @@ import {
   TriangleIcon,
   XIcon,
   ZoomInIcon
-} from 'lucide-vue'
+} from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
@@ -190,7 +190,9 @@ export default {
       type: String,
       validator: value => ['submit', 'button', 'reset'].includes(value)
     }
-  }
+  },
+
+  emits: ['click']
 }
 </script>
 

@@ -28,25 +28,25 @@
       <span @click="setFrame(entry)" v-if="isMoviePreview">
         <clock-icon class="icon clock" />
       </span>
-      <textarea-autosize
-        type="text"
+      <textarea
         class="checklist-text"
         :ref="`checklist-entry-${index}`"
         rows="1"
         :placeholder="$t('comments.task_placeholder')"
-        @keypress.enter.prevent.native="addChecklistEntry(index)"
-        @keyup.backspace.native="removeChecklistEntry(index)"
-        @keyup.up.native="focusPrevious(index)"
-        @keyup.down.native="focusNext(index)"
+        @keypress.enter.prevent="addChecklistEntry(index)"
+        @keyup.backspace="removeChecklistEntry(index)"
+        @keyup.up="focusPrevious(index)"
+        @keyup.down="focusNext(index)"
         :disabled="entry.text.length !== 0 && disabled"
+        v-autosize
         v-model.trim="entry.text"
-      ></textarea-autosize>
+      ></textarea>
     </div>
   </div>
 </template>
 
 <script>
-import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue'
+import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue-next'
 
 import { formatFrame } from '@/lib/video'
 
@@ -85,6 +85,14 @@ export default {
       type: Number
     }
   },
+
+  emits: [
+    'add-item',
+    'emit-change',
+    'insert-item',
+    'remove-task',
+    'time-code-clicked'
+  ],
 
   computed: {
     filteredChecklist() {
@@ -130,7 +138,7 @@ export default {
         if (index === 0) index = this.checklist.length
         index--
         const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].$el.focus()
+        this.$refs[entryRef][0].focus()
       }
     },
 
@@ -141,7 +149,7 @@ export default {
         if (index === this.checklist.length - 1) index = -1
         index++
         const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].$el.focus()
+        this.$refs[entryRef][0].focus()
       }
     },
 
@@ -219,6 +227,7 @@ export default {
     width: 100%;
     min-height: 20px;
     border: 1px solid transparent;
+    resize: none;
 
     &:focus,
     &:active,
@@ -238,7 +247,6 @@ export default {
 
   &.checked .checklist-text {
     color: $light-grey-2;
-    text-decoration: line-through;
   }
 
   &.disabled {

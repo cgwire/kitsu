@@ -105,12 +105,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'archivedTaskTypes',
-      'departmentMap',
-      'getTaskType',
-      'taskTypes'
-    ]),
+    ...mapGetters(['archivedTaskTypes', 'departmentMap', 'taskTypes']),
 
     isActiveTab() {
       return this.activeTab === 'active'
@@ -273,7 +268,7 @@ export default {
     }
   },
 
-  metaInfo() {
+  head() {
     return {
       title: `${this.$t('task_types.title')} - Kitsu`
     }

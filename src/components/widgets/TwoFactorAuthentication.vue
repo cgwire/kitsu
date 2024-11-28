@@ -64,7 +64,7 @@
           {{ unableToVerify }}
         </p>
         <ul>
-          <li v-for="twoFA in othersTwoFA" :key="twoFA">
+          <li :key="twoFA" v-for="twoFA in othersTwoFA">
             <a @click="changeTwoFA(twoFA)">
               {{ changeTwoFAText(twoFA) }}
             </a>
@@ -78,7 +78,7 @@
 <script>
 import { mapActions } from 'vuex'
 
-import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue'
+import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
@@ -91,6 +91,8 @@ export default {
     MailIcon,
     SmartphoneIcon
   },
+
+  emits: ['changed-two-fa', 'validate'],
 
   data() {
     return {

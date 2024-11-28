@@ -32,7 +32,7 @@
           <combobox
             class="flexrow-item"
             :options="general.operatorOptions"
-            @input="onDepartmentOperatorChanged(departmentFilter)"
+            @update:model-value="onDepartmentOperatorChanged(departmentFilter)"
             locale-key-prefix="entities.build_filter."
             v-model="departmentFilter.operator"
           />
@@ -93,6 +93,8 @@ export default {
       default: false
     }
   },
+
+  emits: ['cancel', 'confirm'],
 
   data() {
     return {

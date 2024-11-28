@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { XIcon } from 'lucide-vue'
+import { XIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
