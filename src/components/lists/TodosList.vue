@@ -41,21 +41,16 @@
             >
               {{ $t('assets.fields.description') }}
             </th>
-            <th
-              ref="th-estimation"
-              :title="$t('main.estimation')"
-              class="estimation number-cell"
-              scope="col"
-            >
-              {{ $t('tasks.fields.estimation').substring(0, 3) }}.
+            <th scope="col" class="estimation" :title="$t('main.estimation')">
+              {{ $t('main.estimation_short') }}
             </th>
-            <th ref="th-duration" class="duration number-cell" scope="col">
+            <th scope="col" class="duration number-cell">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th v-if="!isToCheck" class="start-date" scope="col">
+            <th scope="col" class="start-date" v-if="!isToCheck">
               {{ $t('tasks.fields.start_date_short') }}
             </th>
-            <th class="due-date" scope="col">
+            <th scope="col" class="due-date">
               {{ $t('tasks.fields.due_date') }}
             </th>
             <metadata-header
@@ -147,18 +142,17 @@
             </td>
             <td class="estimation number-cell">
               <input
-                v-if="selectionGrid[entry.id]"
-                :ref="entry.id + '-estimation'"
-                :value="formatDuration(entry.estimation, false)"
                 class="input"
                 min="0"
                 step="any"
                 type="number"
+                :value="formatDuration(entry.estimation, false)"
                 @change="updateEstimation($event.target.value)"
+                v-if="selectionGrid[entry.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDuration(entry.estimation) }}
-              </span>
+              </template>
             </td>
             <td
               :class="{
@@ -171,29 +165,29 @@
             </td>
             <td class="start-date">
               <date-field
-                v-if="selectionGrid[entry.id]"
-                :disabled-dates="disabledDates"
-                :value="getDate(entry.start_date)"
-                :with-margin="false"
                 class="flexrow-item"
-                @input="updateStartDate"
+                :min-date="disabledDates"
+                :model-value="getDate(entry.start_date)"
+                :with-margin="false"
+                @update:model-value="updateStartDate"
+                v-if="selectionGrid[entry.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDate(entry.start_date) }}
-              </span>
+              </template>
             </td>
             <td class="due-date">
               <date-field
-                v-if="selectionGrid[entry.id]"
-                :disabled-dates="disabledDates"
-                :value="getDate(entry.due_date)"
-                :with-margin="false"
                 class="flexrow-item"
-                @input="updateDueDate"
+                :min-date="disabledDates"
+                :model-value="getDate(entry.due_date)"
+                :with-margin="false"
+                @update:model-value="updateDueDate"
+                v-if="selectionGrid[entry.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDate(entry.due_date) }}
-              </span>
+              </template>
             </td>
             <td
               class="metadata-descriptor"
@@ -254,6 +248,7 @@
               </div>
             </td>
             <validation-cell
+              class="status unselectable"
               :ref="'validation-' + i + '-0'"
               :clickable="false"
               :column="entry.taskStatus"
@@ -263,7 +258,6 @@
               :row-x="i"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
-              class="status unselectable"
             />
             <template v-if="!isToCheck">
               <last-comment-cell
@@ -345,15 +339,15 @@ export default {
 
   components: {
     EntityThumbnail,
+    DateField,
     DescriptionCell,
     LastCommentCell,
+    MetadataHeader,
     PeopleAvatar,
     ProductionNameCell,
     TableInfo,
     TaskTypeCell,
-    ValidationCell,
-    MetadataHeader,
-    DateField
+    ValidationCell
   },
 
   props: {
@@ -387,12 +381,7 @@ export default {
     }
   },
 
-  emits: [
-    'scroll',
-    'task-selection-addition',
-    'task-selection-cleared',
-    'task-selection-removal'
-  ],
+  emits: ['scroll', 'task-selected'],
 
   data() {
     return {
@@ -500,8 +489,8 @@ export default {
       'addSelectedTask',
       'addSelectedTasks',
       'clearSelectedTasks',
-      'updateTask',
-      'removeSelectedTask'
+      'removeSelectedTask',
+      'updateTask'
     ]),
 
     assetEpisodes(entry, full) {
@@ -738,6 +727,7 @@ export default {
           const startDate = moment(task.start_date)
           const dueDate = task.due_date ? moment(task.due_date) : null
           data = getDatesFromStartDate(
+            this.organisation,
             startDate,
             dueDate,
             minutesToDays(this.organisation, estimation)
