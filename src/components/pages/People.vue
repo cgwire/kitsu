@@ -442,9 +442,8 @@ export default {
           this.modals.edit = false
         })
         .catch(err => {
-          const message = err.body?.message
           const isUserLimitReached =
-            typeof message === 'string' && message.includes('limit')
+            err.body?.message?.includes('limit') ?? false
           if (isUserLimitReached) {
             this.errors.userLimit = true
           } else {
@@ -464,6 +463,7 @@ export default {
           this.modals.edit = false
         })
         .catch(err => {
+          console.error(err)
           const isUserLimitReached =
             err.body?.message?.includes('limit') ?? false
           if (isUserLimitReached) {
@@ -471,7 +471,6 @@ export default {
           } else {
             this.errors.edit = true
           }
-          this.errors.edit = true
           this.loading.createAndInvite = false
         })
       this.onSearchChange()
