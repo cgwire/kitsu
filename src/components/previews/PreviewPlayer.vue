@@ -103,6 +103,7 @@
           :silent="isCommentsHidden"
           :task="task"
           @comment-added="$emit('comment-added')"
+          @comment-changed="$emit('comment-changed', $event)"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
         />

@@ -121,6 +121,7 @@
                     :task="task"
                     :task-type-map="taskTypeMap"
                     @annotation-changed="onAnnotationChanged"
+                    @comment-changed="onDuplicateComment"
                     @change-current-preview="changeCurrentPreview"
                     @add-extra-preview="onAddExtraPreview"
                     @remove-extra-preview="onRemoveExtraPreview"
@@ -164,6 +165,7 @@
                   @clear-files="clearPreviewFiles"
                   @remove-preview="onPreviewFormRemoved"
                   @annotation-snapshots-requested="extractAnnotationSnapshots"
+                  @change="$emit('comment-changed', $event)"
                   v-if="isCommentingAllowed"
                 />
 

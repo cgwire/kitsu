@@ -715,6 +715,14 @@ export default {
 
     hideAnnotationLoading() {
       this.attachmentModal.hideAnnotationLoading()
+    },
+
+    emitChange() {
+      const comment = {
+        checklist: this.checklist,
+        text: this.text
+      }
+      this.$emit('change', comment)
     }
   },
 
@@ -732,6 +740,7 @@ export default {
 
     text() {
       drafts.setTaskDraft(this.task.id, this.text)
+      this.emitChange()
     },
 
     mode() {
