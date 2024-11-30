@@ -729,6 +729,20 @@ export const playerMixin = {
       this.sendUpdatePlayingStatus()
     },
 
+    onPreviousDrawingClicked() {
+      // TODO IMPLEMENT PREVIOUS DRAWING LOGIC
+      this.clearFocus()
+      this.goPreviousFrame()
+      this.sendUpdatePlayingStatus()
+    },
+
+    onNextDrawingClicked() {
+      // TODO IMPLEMENT NEXT DRAWING LOGIC
+      this.clearFocus()
+      this.goNextFrame()
+      this.sendUpdatePlayingStatus()
+    },
+
     onPlayPauseClicked() {
       this.clearFocus()
       if (!this.isPlaying) {
@@ -789,6 +803,8 @@ export const playerMixin = {
       const ENDKEY = 35
       const LEFTKEY = 37
       const RIGHTKEY = 39
+      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const NEXTANNKEY = '.'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (
@@ -849,6 +865,14 @@ export const playerMixin = {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
+        } else if (event.key === NEXTANNKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.onNextDrawingClicked()
+        } else if (event.key === PREVANNKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPreviousDrawingClicked()
         } else if (event.altKey && event.keyCode === 74) {
           // alt+j
           event.preventDefault()
