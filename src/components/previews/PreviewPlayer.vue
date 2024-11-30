@@ -1170,6 +1170,20 @@ export default {
       this.syncComparisonViewer()
     },
 
+    goPreviousDrawing() {
+      this.clearCanvas()
+      const annotation_time = this.getPreviousAnnotationTime(this.currentTimeRaw).frame
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
+    goNextDrawing() {
+      this.clearCanvas()
+      const annotation_time = this.getNextAnnotationTime(this.currentTimeRaw).frame
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
         this.comparisonViewer.setCurrentFrame(this.currentFrame)
@@ -1227,6 +1241,7 @@ export default {
     },
 
     setupFabricCanvas() {
+      // TODO IMPLEMENT PS_BRUSH
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
@@ -1508,6 +1523,32 @@ export default {
       }
     },
 
+    getNextAnnotationTime(time) {
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return this.annotations.findLast(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) > time + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return this.annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getPreviousAnnotationTime(time) {
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return this.annotations.find(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return this.annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
     onAnnotationDisplayedClicked() {
       this.clearFocus()
       this.isAnnotationsDisplayed = !this.isAnnotationsDisplayed
@@ -1717,6 +1758,8 @@ export default {
     // Events
 
     onKeyDown(event) {
+      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const NEXTANNKEY = '.'
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
@@ -1736,6 +1779,10 @@ export default {
             this.pauseEvent(event)
           }
           return false
+        } else if (event.key === NEXTANNKEY) {
+          this.goNextDrawing()
+        } else if (event.key === PREVANNKEY) {
+          this.goPreviousDrawing()
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
