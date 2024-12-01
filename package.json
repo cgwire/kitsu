@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@animxyz/vue3": "0.6.7",
+    "@arch-inc/fabricjs-psbrush": "^0.0.20",
     "@fullcalendar/core": "6.1.15",
     "@fullcalendar/daygrid": "6.1.15",
     "@fullcalendar/multimonth": "6.1.15",

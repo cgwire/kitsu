@@ -8,6 +8,7 @@ import moment from 'moment'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
+import { PSStroke } from '@arch-inc/fabricjs-psbrush'
 
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
@@ -502,11 +503,11 @@ export const annotationMixin = {
      *
      * @returns: the build object.
      */
-    addObjectToCanvas(annotation, obj, canvas = null) {
+    async addObjectToCanvas(annotation, obj, canvas = null) {
       if (!obj) return
       if (this.getObjectById(obj.id) && !canvas) return
       if (!canvas) canvas = this.fabricCanvas
-      let path, text
+      let path, text, psstroke
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
       if (annotation?.width) {
@@ -602,9 +603,66 @@ export const annotationMixin = {
         this.$options.silentAnnnotation = true
         canvas.add(text)
         this.$options.silentAnnnotation = false
+      } else if (obj.type === 'PSStroke') {
+        let strokeMultiplier = 1
+        if (obj.canvasWidth) {
+          strokeMultiplier = canvasWidth / canvas.width
+        }
+        if (canvas.width < 420) strokeMultiplier /= 2
+        psstroke = await this.deserializePSBrush(obj)
+        psstroke.set('id', obj.id)
+        psstroke.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+        psstroke.set('canvasWidth', canvasWidth)
+        psstroke.set('canvasHeight', canvasHeight)
+        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('left', obj.left * scaleMultiplierX)
+        psstroke.set('top', obj.top * scaleMultiplierY)
+        psstroke.set('radius', obj.radius)
+        psstroke.set('width', obj.width)
+        psstroke.set('height', obj.height)
+        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('angle', obj.angle)
+        psstroke.set('scale', obj.scale)
+        // psstroke.set('editable', !this.isCurrentUserArtist)
+        // psstroke.set('selectable', !this.isCurrentUserArtist)
+        psstroke.set('editable', false)
+        psstroke.set('selectable', false)
+        this.addSerialization(psstroke)
+
+        // this is not supported even though it works
+        psstroke.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: !this.isCurrentUserArtist,
+          tl: false,
+          tr: false,
+          mtr: !this.isCurrentUserArtist
+        })
+        this.$options.silentAnnnotation = true
+        canvas.add(psstroke)
+        this.$options.silentAnnnotation = false
       }
-      return path || text
+      return path || text || psstroke
     },
+
+    deserializePSBrush(obj){
+      // helper function as PSBrush deserializes asynchronously only
+      return new Promise((resolve, reject) => {
+        PSStroke.fromObject(obj, function(psstroke) {
+          if (psstroke) {
+            resolve(psstroke); 
+          } else {
+            reject(new Error('Failed to deserialize PSStroke'));
+          }
+        });
+      });
+    },
+
 
     // Events
 
@@ -952,6 +1010,7 @@ export const annotationMixin = {
         width: 100,
         height: 100
       })
+      // TODO UPDATE WITH PSBRUSH
       if (!this.fabricCanvas.freeDrawingBrush) {
         this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
           this.fabricCanvas

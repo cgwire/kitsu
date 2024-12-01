@@ -557,6 +557,7 @@ import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 import VideoProgress from '@/components/previews/VideoProgress.vue'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
 
 let lastIndex = 1
 
@@ -1248,13 +1249,29 @@ export default {
       this.fabricCanvas = new fabric.Canvas(this.canvasId, {
         fireRightClick: true,
         width,
-        height
+        height,
+        enablePointerEvents: true
       })
+
+      let brush = new PSBrush(this.fabricCanvas)
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        this.fabricCanvas.freeDrawingBrush = brush
+        brush.width = 20; // Set default brush width
+        brush.color = "#000"; // Set default color
+        brush.disableTouch = true; // Disable touch input
+        brush.disableMouse = true;
+        brush.pressureManager.fallback = 1; // Fallback value for mouse/touch
       }
+
+      // fix for firefox 
+      this.fabricCanvas.on('mouse:down', (event) => {
+        if (event.e.pointerType === 'pen') {
+          console.log('Using stylus');
+        } else if (event.e.pointerType === 'mouse') {
+          console.log('Using mouse');
+        }
+      });
+
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
       )
@@ -2115,7 +2132,9 @@ export default {
     },
 
     isDrawing() {
-      if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
+      if (this.fabricCanvas) {
+        this.fabricCanvas.isDrawingMode = this.isDrawing
+      }
       else this.endAnnotationSaving()
 
       if (this.isDrawing) {
