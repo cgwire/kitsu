@@ -47,7 +47,7 @@
               input-class=" token-input"
               :readonly="true"
               :type="visible ? 'text' : 'password'"
-              :value="person.access_token"
+              :model-value="person.access_token"
             />
             <eye-off-icon
               v-if="visible"
