@@ -654,7 +654,13 @@ const actions = {
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Shot')
         .forEach(descriptor => {
-          shotLine.push(shot.data[descriptor.field_name])
+          if (descriptor.data_type === 'boolean') {
+            shotLine.push(
+              shot.data[descriptor.field_name]?.toLowerCase() === 'true'
+            )
+          } else {
+            shotLine.push(shot.data[descriptor.field_name])
+          }
         })
       if (state.isShotTime) {
         shotLine.push(minutesToDays(organisation, shot.timeSpent).toFixed(2))

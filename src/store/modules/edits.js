@@ -539,7 +539,13 @@ const actions = {
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Edit')
         .forEach(descriptor => {
-          editLine.push(edit.data[descriptor.field_name])
+          if (descriptor.data_type === 'boolean') {
+            editLine.push(
+              edit.data[descriptor.field_name]?.toLowerCase() === 'true'
+            )
+          } else {
+            editLine.push(edit.data[descriptor.field_name])
+          }
         })
       if (state.isEditTime) {
         editLine.push(minutesToDays(organisation, edit.timeSpent).toFixed(2))
