@@ -14,6 +14,7 @@
               from: selectedEndDate
             }"
             :monday-first="true"
+            :use-utc="true"
             format="yyyy-MM-dd"
             v-model="selectedStartDate"
           />
@@ -30,6 +31,7 @@
               to: selectedStartDate
             }"
             :monday-first="true"
+            :use-utc="true"
             format="yyyy-MM-dd"
             v-model="selectedEndDate"
           />

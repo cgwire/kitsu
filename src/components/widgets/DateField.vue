@@ -14,6 +14,7 @@
         :disabled="disabled"
         :disabled-dates="disabledDates"
         :monday-first="true"
+        :use-utc="utc"
         format="yyyy-MM-dd"
         @input="$emit('input', localValue)"
         v-model="localValue"
@@ -73,6 +74,10 @@ export default {
     value: {
       default: () => new Date(),
       type: Date
+    },
+    utc: {
+      default: false,
+      type: Boolean
     },
     withMargin: {
       default: true,
