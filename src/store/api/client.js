@@ -130,7 +130,7 @@ const client = {
   },
 
   getEvents(after, before) {
-    const path = `/api/data/events/last?after=${after}&before=${before}&page_size=100000`
+    const path = `/api/data/events/last?after=${after}&before=${before}&limit=100000`
     return client.pget(path)
   },
 
