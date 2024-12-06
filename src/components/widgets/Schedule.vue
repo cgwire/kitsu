@@ -702,7 +702,7 @@ export default {
         dayOff => dayOff.date
       )
 
-      do {
+      while (day.isSameOrBefore(endDate)) {
         day.off = daysOff.includes(day.toISOString().slice(0, 10))
         day.newWeek = day.isoWeekday() === 1
         day.newMonth = day.date() === 1
@@ -714,7 +714,7 @@ export default {
         day.dayText = day.format('ddd')[0]
         days.push(day)
         day = day.clone().add(1, 'days')
-      } while (day.isBefore(endDate))
+      }
 
       // always show month and week number at start of schedule
       if (days.length) {
