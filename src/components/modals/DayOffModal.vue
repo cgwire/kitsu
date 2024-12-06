@@ -155,7 +155,7 @@ export default {
       this.form = {
         startDate: this.dayOffToEdit?.date || new Date(),
         endDate:
-          this.dayOffToEdit?.endDate || this.dayOffToEdit?.date || new Date(),
+          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || new Date(),
         description: this.dayOffToEdit?.description || null
       }
     },
