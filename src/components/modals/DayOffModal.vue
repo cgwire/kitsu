@@ -17,6 +17,7 @@
               :language="locale"
               :disabled-dates="{ days: [6, 0] }"
               :monday-first="true"
+              :use-utc="true"
               format="yyyy-MM-dd"
               v-model="form.startDate"
               @input="validateDates"
@@ -35,6 +36,7 @@
                 to: form.startDate
               }"
               :monday-first="true"
+              :use-utc="true"
               format="yyyy-MM-dd"
               v-model="form.endDate"
             />
@@ -76,6 +78,7 @@ import { mapGetters } from 'vuex'
 import Datepicker from 'vuejs-datepicker'
 import { en, fr } from 'vuejs-datepicker/dist/locale'
 import { AlertTriangleIcon } from 'lucide-vue'
+import moment from 'moment-timezone'
 
 import { modalMixin } from '@/components/modals/base_modal'
 import TextField from '@/components/widgets/TextField.vue'
@@ -152,10 +155,11 @@ export default {
     },
 
     resetForm() {
+      const today = moment().utc().toDate()
       this.form = {
-        startDate: this.dayOffToEdit?.date || new Date(),
+        startDate: this.dayOffToEdit?.date || today,
         endDate:
-          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || new Date(),
+          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || today,
         description: this.dayOffToEdit?.description || null
       }
     },
