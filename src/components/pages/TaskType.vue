@@ -121,6 +121,7 @@
                 :with-margin="false"
                 :label="$t('main.start_date')"
                 :can-delete="false"
+                utc
                 v-model="schedule.taskTypeStartDate"
               />
             </div>
@@ -134,6 +135,7 @@
                 :with-margin="false"
                 :label="$t('main.end_date')"
                 :can-delete="false"
+                utc
                 v-model="schedule.taskTypeEndDate"
               />
             </div>
@@ -580,11 +582,11 @@ export default {
     ]),
 
     taskTypeStartDate() {
-      return moment(this.schedule.taskTypeStartDate)
+      return moment(this.schedule.taskTypeStartDate).utc()
     },
 
     taskTypeEndDate() {
-      return moment(this.schedule.taskTypeEndDate)
+      return moment(this.schedule.taskTypeEndDate).utc()
     },
 
     isSupervisorInDepartment() {
@@ -1555,23 +1557,31 @@ export default {
     },
 
     'schedule.taskTypeStartDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeStartDate)
+      const newDate = moment(this.schedule.taskTypeStartDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.start_date) {
         this.currentScheduleItem.startDate = moment(
           this.schedule.taskTypeStartDate
-        )
-        this.currentScheduleItem.endDate = moment(this.schedule.taskTypeEndDate)
+        ).utc()
+        this.currentScheduleItem.endDate = moment(
+          this.schedule.taskTypeEndDate
+        ).utc()
         this.saveScheduleItem(this.currentScheduleItem)
       }
     },
 
     'schedule.taskTypeEndDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeEndDate)
+      const newDate = moment(this.schedule.taskTypeEndDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.end_date) {
         this.currentScheduleItem.startDate = moment(
           this.schedule.taskTypeStartDate
-        )
-        this.currentScheduleItem.endDate = moment(this.schedule.taskTypeEndDate)
+        ).utc()
+        this.currentScheduleItem.endDate = moment(
+          this.schedule.taskTypeEndDate
+        ).utc()
         this.saveScheduleItem(this.currentScheduleItem)
       }
     }
