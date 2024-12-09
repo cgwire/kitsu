@@ -1419,7 +1419,7 @@ export default {
     sequences: 'Sequences',
     tasks: 'Shot Tasks',
     title: 'Shots',
-    wrong_file_duration: 'One of the upldoaded video file duration doesn\'t match the expected duration of the current shot.',
+    wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current shot.',
     fields: {
       description: 'Description',
       nb_frames: 'Frames',
