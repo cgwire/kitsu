@@ -98,6 +98,7 @@
           :entity-type="entityType"
           :extendable="false"
           :is-preview="false"
+          :root="false"
           :silent="isCommentsHidden"
           :task="task"
           @comment-added="$emit('comment-added')"
