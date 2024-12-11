@@ -262,6 +262,13 @@
 </template>
 
 <script>
+import assetsStore from '@/store/modules/assets.js'
+import editsStore from '@/store/modules/edits.js'
+import episodesStore from '@/store/modules/episodes.js'
+import sequencesStore from '@/store/modules/sequences.js'
+import shotsStore from '@/store/modules/shots.js'
+import taskStatusStore from '@/store/modules/taskstatus.js'
+
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import firstBy from 'thenby'
@@ -556,15 +563,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'assetsPath',
       'currentEpisode',
       'currentProduction',
       'currentTaskType',
       'editsPath',
       'episodesPath',
-      'editMap',
-      'episodeMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isTVShow',
@@ -572,14 +576,11 @@ export default {
       'organisation',
       'personMap',
       'selectedTasks',
-      'sequenceMap',
       'sequencesPath',
       'sequenceSubscriptions',
       'shotsByEpisode',
-      'shotMap',
       'shotsPath',
       'taskSearchQueries',
-      'taskStatusMap',
       'taskMap',
       'user'
     ]),
@@ -603,6 +604,30 @@ export default {
 
     entityMap() {
       return this[`${this.entityType.toLowerCase()}Map`]
+    },
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
+
+    editMap() {
+      return editsStore.cache.editMap
+    },
+
+    episodeMap() {
+      return episodesStore.cache.episodeMap
+    },
+
+    sequenceMap() {
+      return sequencesStore.cache.sequenceMap
+    },
+
+    shotMap() {
+      return shotsStore.cache.shotMap
+    },
+
+    taskStatusMap() {
+      return taskStatusStore.cache.taskStatusMap
     },
 
     productionStartDate() {
