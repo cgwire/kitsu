@@ -489,7 +489,7 @@ export const playerMixin = {
           comparisonPlayer.setCurrentTimeRaw(currentTime)
         }
       } else if (this.isCurrentPreviewSound) {
-        this.soundPlayer.pause()
+        this.soundPlayer?.pause()
       }
       this.isPlaying = false
     },
@@ -1065,7 +1065,7 @@ export const playerMixin = {
     playSound() {
       this.isPlaying = true
       if (this.isCurrentPreviewSound) {
-        this.soundPlayer.play()
+        this.soundPlayer?.play()
       }
     },
 
@@ -1442,7 +1442,7 @@ export const playerMixin = {
   watch: {
     isCommentsHidden() {
       if (this.isCurrentPreviewSound) {
-        this.soundPlayer.redraw()
+        this.soundPlayer?.redraw()
       }
     }
   },

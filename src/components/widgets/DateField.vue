@@ -14,6 +14,7 @@
         :locale="user.locale.substring(0, 2)"
         :dark="isDarkTheme"
         :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
+        :utc="utc ? 'preserve' : false"
         v-model="localValue"
       >
         <template #input-icon></template>
@@ -57,7 +58,11 @@ export default {
     },
     modelValue: {
       default: () => new Date(),
-      type: Date
+      type: [Date, String]
+    },
+    utc: {
+      default: false,
+      type: Boolean
     },
     weekDaysDisabled: {
       default: false,
@@ -100,7 +105,10 @@ export default {
   watch: {
     localValue() {
       if (!this.silent) {
-        if (this.localValue) this.localValue.setHours(0, 0, 0, 0)
+        // if (this.localValue) {
+        if (this.localValue?.setHours) {
+          this.localValue.setHours(0, 0, 0, 0)
+        }
         this.$emit('update:modelValue', this.localValue)
       }
     },
