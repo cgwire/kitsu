@@ -121,6 +121,7 @@
                 :min-date="startDisabledDates.to"
                 :max-date="startDisabledDates.from"
                 :label="$t('main.start_date')"
+                utc
                 week-days-disabled
                 :with-margin="false"
                 v-model="schedule.taskTypeStartDate"
@@ -136,6 +137,7 @@
                 :min-date="endDisabledDates.to"
                 :max-date="endDisabledDates.from"
                 :label="$t('main.end_date')"
+                utc
                 week-days-disabled
                 :with-margin="false"
                 v-model="schedule.taskTypeEndDate"
@@ -583,11 +585,11 @@ export default {
     ]),
 
     taskTypeStartDate() {
-      return moment(this.schedule.taskTypeStartDate)
+      return moment(this.schedule.taskTypeStartDate).utc()
     },
 
     taskTypeEndDate() {
-      return moment(this.schedule.taskTypeEndDate)
+      return moment(this.schedule.taskTypeEndDate).utc()
     },
 
     isSupervisorInDepartment() {
@@ -1555,13 +1557,15 @@ export default {
     },
 
     'schedule.taskTypeStartDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeStartDate)
+      const newDate = moment(this.schedule.taskTypeStartDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.start_date) {
         this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
           scheduleItem: this.currentScheduleItem,
           dates: {
-            startDate: moment(this.schedule.taskTypeStartDate),
-            endDate: moment(this.schedule.taskTypeEndDate)
+            startDate: moment(this.schedule.taskTypeStartDate).utc(),
+            endDate: moment(this.schedule.taskTypeEndDate).utc()
           }
         })
         this.saveScheduleItem(this.currentScheduleItem)
@@ -1569,13 +1573,15 @@ export default {
     },
 
     'schedule.taskTypeEndDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeEndDate)
+      const newDate = moment(this.schedule.taskTypeEndDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.end_date) {
         this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
           scheduleItem: this.currentScheduleItem,
           dates: {
-            startDate: moment(this.schedule.taskTypeStartDate),
-            endDate: moment(this.schedule.taskTypeEndDate)
+            startDate: moment(this.schedule.taskTypeStartDate).utc(),
+            endDate: moment(this.schedule.taskTypeEndDate).utc()
           }
         })
         this.saveScheduleItem(this.currentScheduleItem)
