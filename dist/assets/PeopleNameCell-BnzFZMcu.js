@@ -1,0 +1,2 @@
+import{_ as t,aF as p,bt as r,r as o,o as c,c as l,e as _,f as n}from"./index-ip1P4Oag.js";const m={name:"people-name-cell",components:{PeopleAvatar:p,PeopleName:r},props:{person:{type:Object,required:!0}}},d={scope:"row"},i={class:"flexrow"};function f(u,v,e,h,x,N){const s=o("people-avatar"),a=o("people-name");return c(),l("td",d,[_("div",i,[n(s,{person:e.person},null,8,["person"]),n(a,{"with-link":"",person:e.person},null,8,["person"])])])}const k=t(m,[["render",f],["__scopeId","data-v-7400e2ce"]]);export{k as P};
+//# sourceMappingURL=PeopleNameCell-BnzFZMcu.js.map
