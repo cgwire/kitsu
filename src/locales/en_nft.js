@@ -103,7 +103,7 @@ export default {
     restore_error: 'An error occurred while restoring this NFT.',
     tasks: 'NFT Tasks',
     title: 'NFT Collection',
-    wrong_file_duration: 'One of the upldoaded video file duration doesn\'t match the expected duration of the current NFT.',
+    wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current NFT.',
     fields: {
       placeholder: "NFT01"
     }
