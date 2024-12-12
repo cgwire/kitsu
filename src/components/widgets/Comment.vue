@@ -278,7 +278,13 @@
           class="flexrow-item round-name revision"
           :to="previewRoute"
         >
-          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
+          <template v-if="comment.pinned">
+            {{ $t('comments.pinned_revision') }}
+            {{ comment.previews[0].revision }}
+          </template>
+          <template v-else>
+            {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
+          </template>
         </router-link>
         <a
           class="preview-link button flexrow-item"

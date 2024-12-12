@@ -162,6 +162,7 @@ export default {
     no_file_attached: 'No preview attached',
     pin: 'Pin',
     pinned: 'Pinned',
+    pinned_revision: 'Pinned revision',
     post_status: 'Post comment',
     previews: 'Preview files to publish as a new revision',
     retake: 'Retake',
