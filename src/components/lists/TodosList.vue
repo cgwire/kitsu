@@ -44,7 +44,7 @@
             <th scope="col" class="estimation" :title="$t('main.estimation')">
               {{ $t('main.estimation_short') }}
             </th>
-            <th scope="col" class="estimation">
+            <th scope="col" class="duration number-cell">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
             <th scope="col" class="start-date" v-if="!isToCheck">
@@ -81,10 +81,9 @@
             :class="{
               'datatable-row': true,
               'datatable-row--selectable': true,
-              selected:
-                selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
+              selected: selectionGrid[entry.id]
             }"
-            @click="onLineClicked(i, $event)"
+            @click="selectTask($event, i, entry)"
             v-for="(entry, i) in displayedTasks"
           >
             <td
@@ -141,17 +140,54 @@
                 />
               </div>
             </td>
-            <td class="estimation">
-              {{ formatDuration(entry.estimation) }}
+            <td class="estimation number-cell">
+              <input
+                class="input"
+                min="0"
+                step="any"
+                type="number"
+                :value="formatDuration(entry.estimation, false)"
+                @change="updateEstimation($event.target.value)"
+                v-if="selectionGrid[entry.id]"
+              />
+              <template v-else>
+                {{ formatDuration(entry.estimation) }}
+              </template>
             </td>
-            <td class="estimation">
+            <td
+              :class="{
+                duration: true,
+                'number-cell': true,
+                error: isEstimationBurned(entry)
+              }"
+            >
               {{ formatDuration(entry.duration) }}
             </td>
-            <td class="start-date" v-if="!isToCheck">
-              {{ formatDate(entry.start_date) }}
+            <td class="start-date">
+              <date-field
+                class="flexrow-item"
+                :min-date="disabledDates"
+                :model-value="getDate(entry.start_date)"
+                :with-margin="false"
+                @update:model-value="updateStartDate"
+                v-if="selectionGrid[entry.id]"
+              />
+              <template v-else>
+                {{ formatDate(entry.start_date) }}
+              </template>
             </td>
             <td class="due-date">
-              {{ formatDate(entry.due_date) }}
+              <date-field
+                class="flexrow-item"
+                :min-date="disabledDates"
+                :model-value="getDate(entry.due_date)"
+                :with-margin="false"
+                @update:model-value="updateDueDate"
+                v-if="selectionGrid[entry.id]"
+              />
+              <template v-else>
+                {{ formatDate(entry.due_date) }}
+              </template>
             </td>
             <td
               class="metadata-descriptor"
@@ -214,18 +250,14 @@
             <validation-cell
               class="status unselectable"
               :ref="'validation-' + i + '-0'"
-              :task-test="entry"
-              :is-border="false"
-              :is-assignees="false"
               :clickable="false"
-              :selected="
-                selectionGrid && selectionGrid[i] ? selectionGrid[i][0] : false
-              "
-              :row-x="i"
-              :column-y="0"
               :column="entry.taskStatus"
-              @select="onTaskSelected"
-              @unselect="onTaskUnselected"
+              :column-y="0"
+              :is-assignees="false"
+              :is-border="false"
+              :row-x="i"
+              :selected="selectionGrid[entry.id]"
+              :task-test="entry"
             />
             <template v-if="!isToCheck">
               <last-comment-cell
@@ -269,7 +301,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 import { selectionListMixin } from '@/components/mixins/selection'
 import { formatListMixin } from '@/components/mixins/format'
@@ -277,7 +309,15 @@ import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 import { sortPeople } from '@/lib/sorting'
-import { formatSimpleDate } from '@/lib/time'
+import {
+  daysToMinutes,
+  formatSimpleDate,
+  getDatesFromEndDate,
+  getDatesFromStartDate,
+  minutesToDays,
+  parseSimpleDate,
+  range
+} from '@/lib/time'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
@@ -288,6 +328,8 @@ import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
+import moment from 'moment-timezone'
+import DateField from '@/components/widgets/DateField.vue'
 
 export default {
   name: 'todos-list',
@@ -296,14 +338,15 @@ export default {
 
   components: {
     EntityThumbnail,
+    DateField,
     DescriptionCell,
     LastCommentCell,
+    MetadataHeader,
     PeopleAvatar,
     ProductionNameCell,
     TableInfo,
     TaskTypeCell,
-    ValidationCell,
-    MetadataHeader
+    ValidationCell
   },
 
   props: {
@@ -323,10 +366,6 @@ export default {
       type: Boolean,
       default: false
     },
-    selectionGrid: {
-      type: Object,
-      default: () => {}
-    },
     isToCheck: {
       type: Boolean,
       default: false
@@ -334,22 +373,23 @@ export default {
     emptyText: {
       type: String,
       default: ''
+    },
+    disabledDates: {
+      type: Object,
+      default: () => {}
     }
   },
 
-  emits: [
-    'scroll',
-    'task-selection-addition',
-    'task-selection-cleared',
-    'task-selection-removal'
-  ],
+  emits: ['scroll', 'task-selected'],
 
   data() {
     return {
       page: 1,
       colTypePosX: '',
       colNamePosX: '',
-      lastSelection: null
+      lastSelection: null,
+      selectionGrid: {},
+      selectedDate: moment().toDate() // By default current day.
     }
   },
 
@@ -371,9 +411,11 @@ export default {
   computed: {
     ...mapGetters([
       'nbSelectedTasks',
+      'selectedTasks',
       'openProductions',
       'personMap',
       'productionMap',
+      'taskMap',
       'taskTypeMap',
       'user'
     ]),
@@ -442,6 +484,14 @@ export default {
   },
 
   methods: {
+    ...mapActions([
+      'addSelectedTask',
+      'addSelectedTasks',
+      'clearSelectedTasks',
+      'removeSelectedTask',
+      'updateTask'
+    ]),
+
     assetEpisodes(entry, full) {
       if (
         ['Episode', 'Sequence', 'Shot', 'Edit'].includes(entry.entity_type_name)
@@ -471,6 +521,16 @@ export default {
       return sortPeople(people)
     },
 
+    setScrollPosition(scrollPosition) {
+      if (this.$refs.body) {
+        this.$refs.body.scrollTop = scrollPosition
+      }
+    },
+
+    getDate(date) {
+      return date ? moment(date, 'YYYY-MM-DD').toDate() : null
+    },
+
     formatDate(date) {
       return date ? formatSimpleDate(date) : ''
     },
@@ -482,69 +542,6 @@ export default {
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
       if (maxHeight < position.scrollTop + 100) {
         this.page++
-      }
-    },
-
-    onLineClicked(i, event) {
-      const ref = 'validation-' + i + '-0'
-      const validationCell = this.$refs[ref][0]
-      if (validationCell) {
-        validationCell.select(event)
-      }
-    },
-
-    onTaskSelected(validationInfo) {
-      validationInfo.done = this.done
-      if (validationInfo.isShiftKey) {
-        if (this.lastSelection) {
-          let startX = this.lastSelection.x
-          let endX = validationInfo.x
-          if (validationInfo.x < this.lastSelection.x) {
-            startX = validationInfo.x
-            endX = this.lastSelection.x
-          }
-
-          for (let i = startX; i <= endX; i++) {
-            const ref = 'validation-' + i + '-' + 0
-            const validationCell = this.$refs[ref][0]
-            if (!this.selectionGrid[i][0]) {
-              validationCell.select({ ctrlKey: true, isUserClick: false })
-            }
-          }
-        }
-      } else if (!validationInfo.isCtrlKey) {
-        this.$store.commit('CLEAR_SELECTED_TASKS')
-        this.$emit('task-selection-cleared')
-      }
-      this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-      this.$emit('task-selection-addition', validationInfo)
-
-      if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
-        const x = validationInfo.x
-        const y = 0
-        this.lastSelection = { x, y }
-        const ref = 'validation-' + x + '-' + y
-        const validationCell = this.$refs[ref][0]
-        this.$nextTick(() => {
-          this.scrollToValidationCell(validationCell)
-        })
-      }
-    },
-
-    onTaskUnselected(validationInfo) {
-      if (!validationInfo.isCtrlKey) {
-        if (this.nbSelectedTasks === 1) {
-          this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-          this.$emit('task-selection-removal', validationInfo)
-        } else {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-          this.$emit('task-selection-cleared')
-          this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-          this.$emit('task-selection-addition', validationInfo)
-        }
-      } else {
-        this.$store.commit('REMOVE_SELECTED_TASK', validationInfo)
-        this.$emit('task-selection-removal', validationInfo)
       }
     },
 
@@ -596,23 +593,17 @@ export default {
     },
 
     onKeyDown(event) {
-      const lastSelection = this.lastSelection
-        ? this.lastSelection
-        : { x: 0, y: 0 }
-      const i = lastSelection.x
-      const j = lastSelection.y
-      let validationCell = null
-      if (event.ctrlKey || event.metaKey) {
-        if (event.keyCode === 37) {
-          validationCell = this.select(i, j - 1)
-        } else if (event.keyCode === 38) {
-          validationCell = this.select(i - 1, j)
-        } else if (event.keyCode === 39) {
-          validationCell = this.select(i, j + 1)
-        } else if (event.keyCode === 40) {
-          validationCell = this.select(i + 1, j)
+      if (this.tasks.length > 0 && event.altKey) {
+        let index = this.lastSelection ? this.lastSelection : 0
+        if ([37, 38].includes(event.keyCode)) {
+          index = index - 1 < 0 ? (index = this.tasks.length - 1) : index - 1
+          this.selectTask({}, index, this.tasks[index])
+          this.pauseEvent(event)
+        } else if ([39, 40].includes(event.keyCode)) {
+          index = index + 1 >= this.tasks.length ? (index = 0) : index + 1
+          this.selectTask({}, index, this.tasks[index])
+          this.pauseEvent(event)
         }
-        this.scrollToValidationCell(validationCell)
       }
     },
 
@@ -705,6 +696,209 @@ export default {
         this.metadataDescriptorsMap[fieldName][entityType][projectId]
         ? this.metadataDescriptorsMap[fieldName][entityType][projectId]
         : null
+    },
+
+    isTaskChanged(task, data) {
+      const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
+      const taskDue = task.due_date ? task.due_date.substring(0, 10) : ''
+      return (
+        (data.start_date !== undefined && taskStart !== data.start_date) ||
+        (data.due_date !== undefined && taskDue !== data.due_date) ||
+        (data.estimation !== undefined && task.estimation !== data.estimation)
+      )
+    },
+
+    isEstimationBurned(task) {
+      return (
+        task.estimation &&
+        task.estimation > 0 &&
+        task.duration > task.estimation
+      )
+    },
+
+    updateEstimation(duration) {
+      const estimation = this.organisation.format_duration_in_hours
+        ? duration * 60
+        : daysToMinutes(this.organisation, duration)
+
+      this.updateTasksEstimation({ estimation })
+    },
+
+    updateTasksEstimation({ estimation }) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        const task = this.taskMap.get(taskId)
+        let data = { estimation }
+        if (task.start_date) {
+          const startDate = moment(task.start_date)
+          const dueDate = task.due_date ? moment(task.due_date) : null
+          data = getDatesFromStartDate(
+            this.organisation,
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, estimation)
+          )
+          data.estimation = estimation
+        }
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data }).catch(console.error)
+        }
+      })
+    },
+
+    updateStartDate(date) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        let data = {
+          start_date: null,
+          due_date: null
+        }
+        const task = this.taskMap.get(taskId)
+        const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
+        if (date) {
+          const startDate = moment(date)
+          if (
+            task.start_date &&
+            task.start_date.substring(0, 10) === formatSimpleDate(startDate)
+          )
+            return
+          data = getDatesFromStartDate(
+            this.organisation,
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, task.estimation)
+          )
+        } else {
+          data = {
+            start_date: null,
+            due_date: dueDate
+          }
+        }
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data }).catch(console.error)
+        }
+      })
+    },
+
+    updateDueDate(date) {
+      Object.keys(this.selectionGrid).forEach(taskId => {
+        let data = {
+          start_date: null,
+          due_date: null
+        }
+        const task = this.taskMap.get(taskId)
+        const startDate = task.start_date
+          ? parseSimpleDate(task.start_date)
+          : null
+        if (date) {
+          const dueDate = moment(date)
+          if (
+            task.due_date &&
+            task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
+          )
+            return
+          data = getDatesFromEndDate(
+            this.organisation,
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, task.estimation)
+          )
+        } else {
+          data = {
+            start_date: startDate,
+            due_date: null
+          }
+        }
+        if (this.isTaskChanged(task, data)) {
+          this.updateTask({ taskId, data }).catch(console.error)
+        }
+      })
+    },
+
+    selectTask(event, index, task) {
+      if (
+        event &&
+        event.target &&
+        // Dirty hack needed to make date picker and inputs work properly
+        (['INPUT'].includes(event.target.nodeName) ||
+          // Combo box should not trigger selection
+          event.target.className.indexOf('selected-line') >= 0 ||
+          event.target.className.indexOf('down-icon') >= 0 ||
+          event.target.className.indexOf('flexrow') >= 0 ||
+          event.target.className.indexOf('c-mask') >= 0 ||
+          event.target.className.indexOf('option-line') >= 0 ||
+          event.target.className.indexOf('combobox') >= 0 ||
+          event.target.className === '' ||
+          (event.target.parentNode &&
+            ['HEADER'].includes(event.target.parentNode.nodeName)) ||
+          ['cell day selected'].includes(event.target.className))
+      )
+        return
+      const isSelected = this.selectionGrid[task.id]
+      const isManySelection = Object.keys(this.selectionGrid).length > 1
+      if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
+        this.clearSelectedTasks()
+        this.resetSelection()
+      }
+
+      if (!event.shiftKey) {
+        if (isSelected && !isManySelection) {
+          this.removeSelectedTask({ task })
+          this.selectionGrid[task.id] = undefined
+        } else if (!isSelected || isManySelection) {
+          this.addSelectedTask({ task })
+          this.$emit('task-selected', task)
+          this.selectionGrid[task.id] = true
+          this.lastSelection = index
+        }
+      } else {
+        this.selectionGrid = {}
+        let taskIndices = []
+        if (this.lastSelection > index) {
+          taskIndices = range(index, this.lastSelection)
+        } else {
+          taskIndices = range(this.lastSelection, index)
+        }
+        const selection = taskIndices.map(i => ({ task: this.tasks[i] }))
+        selection.forEach(task => {
+          this.selectionGrid[task.task.id] = true
+        })
+        this.addSelectedTasks(selection)
+      }
+      this.scrollToLine(task.id)
+    },
+
+    resetSelection() {
+      this.selectionGrid = {}
+      this.lastSelection = null
+    },
+
+    scrollToLine(taskId) {
+      const taskLine = this.$refs[`task-${taskId}`]
+      if (taskLine && this.$refs.body) {
+        const margin = 30
+        const rect = taskLine[0].getBoundingClientRect()
+        const listRect = this.$refs.body.getBoundingClientRect()
+        const isBelow = rect.bottom > listRect.bottom - margin
+        const isAbove = rect.top < listRect.top + margin
+
+        if (isBelow) {
+          const scrollingRequired = rect.bottom - listRect.bottom + margin
+          this.setScrollPosition(this.$refs.body.scrollTop + scrollingRequired)
+        } else if (isAbove) {
+          const scrollingRequired = listRect.top - rect.top + margin
+          this.setScrollPosition(this.$refs.body.scrollTop - scrollingRequired)
+        }
+      }
+    }
+  },
+
+  watch: {
+    tasks() {
+      this.page = 1
+      this.resetSelection()
+    },
+
+    nbSelectedTasks() {
+      if (this.nbSelectedTasks === 0) this.resetSelection()
     }
   }
 }
@@ -766,9 +960,16 @@ export default {
   min-width: 130px;
 }
 
+.duration,
 .estimation {
   width: 60px;
   min-width: 60px;
+}
+
+.selected {
+  .estimation {
+    padding: 0;
+  }
 }
 
 td.estimation {
@@ -821,5 +1022,23 @@ td.end-date {
 .episode {
   min-width: 130px;
   width: 130px;
+}
+
+.input {
+  padding: 0.5em;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.error {
+  color: $red;
 }
 </style>

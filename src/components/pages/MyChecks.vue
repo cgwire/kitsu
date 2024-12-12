@@ -77,9 +77,6 @@
           :is-error="isLoadingError"
           :selection-grid="selectionGrid"
           :is-to-check="true"
-          @task-selection-cleared="onTaskSelectionCleared"
-          @task-selection-addition="onTaskSelectionAdded"
-          @task-selection-removal="onTaskSelectionRemoved"
         />
       </div>
     </div>
@@ -383,18 +380,6 @@ export default {
           short_name: this.$t('news.all')
         }
       ].concat(sortByName(taskStatusList))
-    },
-
-    onTaskSelectionCleared() {
-      this.buildSelectionGrid(this.sortedTasks)
-    },
-
-    onTaskSelectionAdded(selection) {
-      this.selectionGrid[selection.x][selection.y] = true
-    },
-
-    onTaskSelectionRemoved(selection) {
-      this.selectionGrid[selection.x][selection.y] = false
     }
   },
 
