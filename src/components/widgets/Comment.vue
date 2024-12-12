@@ -887,6 +887,7 @@ article.comment {
 }
 
 .pinned {
+  border: 2px solid var(--border-alt);
   transform: scale(1.02);
 }
 
