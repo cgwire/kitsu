@@ -489,6 +489,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['shot-list']?.selectTaskFromQuery()
       })
+      this.reloadEpisodeShotsIfNeeded()
     }
   },
 
@@ -615,6 +616,23 @@ export default {
       'uploadShotFile',
       'uploadEdlFile'
     ]),
+
+    reloadEpisodeShotsIfNeeded() {
+      if (
+        (this.isTVShow && this.displayedSequences.length === 0) ||
+        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
+        this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
+      ) {
+        this.$refs['shot-search-field'].setValue('')
+        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+        this.initialLoading = true
+        this.loadShots(() => {
+          this.initialLoading = false
+          this.setSearchFromUrl()
+          this.onSearchChange()
+        })
+      }
+    },
 
     addEpisode(episode, callback) {
       this.newEpisode(episode).then(callback).catch(console.error)
@@ -1174,21 +1192,7 @@ export default {
     },
 
     currentSection() {
-      if (
-        (this.isTVShow && this.displayedSequences.length === 0) ||
-        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
-        this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
-      ) {
-        this.$refs['shot-search-field'].setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-
-        this.initialLoading = true
-        this.loadShots(() => {
-          this.initialLoading = false
-          this.setSearchFromUrl()
-          this.onSearchChange()
-        })
-      }
+      this.reloadEpisodeShotsIfNeeded()
     },
 
     currentProduction() {

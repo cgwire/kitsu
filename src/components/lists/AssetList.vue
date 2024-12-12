@@ -797,6 +797,7 @@ export default {
     ...mapActions(['displayMoreAssets', 'editAsset', 'setAssetSelection']),
 
     assetEpisodes(asset, full) {
+      if (!this.episodeMap) return ''
       const mainEpisode = this.episodeMap.get(asset.episode_id)
       const mainEpisodeName = mainEpisode ? mainEpisode.name : 'MP'
       const episodeNames = (asset.casting_episode_ids || [])
