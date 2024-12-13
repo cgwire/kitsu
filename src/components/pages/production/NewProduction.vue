@@ -493,9 +493,9 @@ export default {
         settings: {
           dateStart: null,
           dateEnd: null,
-          fps: 25, // eg: '24'
-          ratio: [16, 9], // eg: [4, 3]
-          resolution: [1920, 1080], // eg: [1440, 1080]
+          fps: 25,
+          ratio: [16, 9],
+          resolution: [1920, 1080],
           style: PRODUCTION_STYLE_OPTIONS[0].value,
           type: PRODUCTION_TYPE_OPTIONS[0].value
         },
