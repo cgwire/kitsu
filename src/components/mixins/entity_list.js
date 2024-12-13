@@ -428,7 +428,7 @@ export const entityListMixin = {
     validationColumnsIsInDepartmentFilter(columnId) {
       return (
         this.departmentFilter.length === 0 ||
-        this.taskTypeMap.get(columnId).department_id === null ||
+        this.taskTypeMap.get(columnId)?.department_id === null ||
         this.departmentFilter.includes(
           this.taskTypeMap.get(columnId).department_id
         )
