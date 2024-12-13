@@ -433,7 +433,7 @@ export default {
         this.setCurrentTime(0)
       }
       this.video.play()
-      if (this.name.indexOf('comarison') < 0) {
+      if (this.name.indexOf('comparison') < 0) {
         this.runEmitTimeUpdateLoop()
       }
     },
