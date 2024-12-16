@@ -32,7 +32,7 @@ export const parametersMixin = {
 
     saveParametersToPreferences() {
       preferences.setObjectPreference(
-        `parameters:{this.parameterNamespace}`,
+        `parameters:${this.parameterNamespace}`,
         this.parameters
       )
     },
@@ -40,7 +40,7 @@ export const parametersMixin = {
     getParametersFromPreferences(defaultParameters) {
       return (
         preferences.getObjectPreference(
-          `parameters:{this.parameterNamespace}`
+          `parameters:${this.parameterNamespace}`
         ) || defaultParameters
       )
     }
