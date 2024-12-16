@@ -857,7 +857,7 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        const form = this.previewForms.findLast(
+        const form = this.previewForms?.findLast(
           form => this.getRevision(form) > 0
         )
         this.nextRevision = this.getRevision(form)
