@@ -619,6 +619,8 @@ export default {
     configureProduction(routeProductionId, routeEpisodeId = undefined) {
       this.setProduction(routeProductionId)
       this.currentProductionId = routeProductionId
+      this.currentEpisodeId = null
+      this.clearEpisodes()
       if (this.isTVShow) {
         this.loadEpisodes()
           .then(episodes => {
@@ -644,7 +646,6 @@ export default {
           })
           .catch(console.error)
       } else {
-        this.clearEpisodes()
         this.updateCombosFromRoute()
       }
     },
