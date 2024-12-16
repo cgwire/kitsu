@@ -3,8 +3,9 @@
  * widgets.
  */
 import { fabric } from 'fabric'
-import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
+import { v4 as uuidv4 } from 'uuid'
+import { markRaw } from 'vue'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -945,9 +946,12 @@ export const annotationMixin = {
       if (!this.annotationCanvas) return
 
       const canvasId = this.annotationCanvas.id
-      this.fabricCanvas = new fabric.Canvas(canvasId, {
-        fireRightClick: true
-      })
+      // Use markRaw() to avoid reactivity on Fabric Canvas
+      this.fabricCanvas = markRaw(
+        new fabric.Canvas(canvasId, {
+          fireRightClick: true
+        })
+      )
       this.fabricCanvas.setDimensions({
         width: 100,
         height: 100
