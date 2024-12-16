@@ -544,8 +544,8 @@ export default {
     onNotificationSelected(event, notification) {
       if (
         event.target.classList.contains('bool-field') ||
-        event.target.parentElement.classList.contains('bool-field') ||
-        event.target.parentElement.parentElement.classList.contains(
+        event.target.parentElement?.classList.contains('bool-field') ||
+        event.target.parentElement?.parentElement?.classList.contains(
           'bool-field'
         )
       ) {

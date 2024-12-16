@@ -30,9 +30,9 @@ export const parametersMixin = {
       return params
     },
 
-    saveParemetersToPreferences() {
+    saveParametersToPreferences() {
       preferences.setObjectPreference(
-        `parameters:{this.parameterNamespace}`,
+        `parameters:${this.parameterNamespace}`,
         this.parameters
       )
     },
@@ -40,7 +40,7 @@ export const parametersMixin = {
     getParametersFromPreferences(defaultParameters) {
       return (
         preferences.getObjectPreference(
-          `parameters:{this.parameterNamespace}`
+          `parameters:${this.parameterNamespace}`
         ) || defaultParameters
       )
     }
@@ -51,7 +51,7 @@ export const parametersMixin = {
       deep: true,
       handler() {
         this.applyParametersToUrl()
-        this.saveParemetersToPreferences()
+        this.saveParametersToPreferences()
       }
     }
   }

@@ -525,7 +525,6 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
 import { fabric } from 'fabric'
 import {
   ArrowUpRightIcon,
@@ -533,6 +532,7 @@ import {
   GlobeIcon,
   LinkIcon
 } from 'lucide-vue-next'
+import { defineAsyncComponent, markRaw } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import {
@@ -1231,11 +1231,14 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      this.fabricCanvas = new fabric.Canvas(this.canvasId, {
-        fireRightClick: true,
-        width,
-        height
-      })
+      // Use markRaw() to avoid reactivity on Fabric Canvas
+      this.fabricCanvas = markRaw(
+        new fabric.Canvas(this.canvasId, {
+          fireRightClick: true,
+          width,
+          height
+        })
+      )
       if (!this.fabricCanvas.freeDrawingBrush) {
         this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
           this.fabricCanvas

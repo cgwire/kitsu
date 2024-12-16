@@ -25,7 +25,7 @@
     "@fullcalendar/multimonth": "6.1.15",
     "@fullcalendar/vue3": "6.1.15",
     "@google/model-viewer": "3.5.0",
-    "@sentry/vue": "8.43.0",
+    "@sentry/vue": "8.45.1",
     "@unhead/vue": "1.11.14",
     "@vuepic/vue-datepicker": "9.0.3",
     "async": "3.2.6",
@@ -63,7 +63,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "7.8.10"
+    "wavesurfer.js": "7.8.11"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.2.1",
