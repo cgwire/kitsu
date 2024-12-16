@@ -47,6 +47,7 @@ import {
   DELETE_METADATA_DESCRIPTOR_END,
   CLEAR_SHOTS,
   CLEAR_ASSETS,
+  SAVE_LAST_PRODUCTION_ROUTE,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -65,6 +66,8 @@ const initialState = {
   isProductionsLoading: false,
   isProductionsLoadingError: false,
   isOpenProductionsLoading: false,
+
+  lastProductionRoute: { name: 'open-productions' },
 
   assetsPath: { name: 'open-productions' },
   assetTypesPath: { name: 'open-productions' },
@@ -160,6 +163,8 @@ const getters = {
   breakdownPath: state => state.breakdownPath,
   playlistsPath: state => state.playlistsPath,
   teamPath: state => state.teamPath,
+
+  lastProductionRoute: state => state.lastProductionRoute,
 
   productionAssetTypes: (state, getters, rootState) => {
     if (!state.currentProduction) return []
@@ -575,6 +580,10 @@ const actions = {
 
   loadProductionStats() {
     return productionsApi.getProductionStats()
+  },
+
+  saveLastProductionRoute({ commit }, route) {
+    this.commit(SAVE_LAST_PRODUCTION_ROUTE, route)
   }
 }
 
@@ -881,6 +890,10 @@ const mutations = {
     if (!isTeamMember && state.currentProduction) {
       state.currentProduction.team.push(personId)
     }
+  },
+
+  [SAVE_LAST_PRODUCTION_ROUTE](state, route) {
+    state.lastProductionRoute = route
   },
 
   [RESET_ALL](state) {

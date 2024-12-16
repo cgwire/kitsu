@@ -58,7 +58,7 @@
           class="nav-item"
           v-else-if="lastProduction && $route.path !== '/open-productions'"
         >
-          <router-link :to="lastSectionPath" class="flexrow">
+          <router-link :to="lastProductionRoute" class="flexrow">
             <chevron-left-icon />
             {{ $t('main.go_productions') }}
           </router-link>
@@ -282,7 +282,7 @@ export default {
       'isSupportChat',
       'isUserMenuHidden',
       'isTVShow',
-      'lastProductionScreen',
+      'lastProductionRoute',
       'lastProductionViewed',
       'mainConfig',
       'openProductions',
@@ -390,31 +390,6 @@ export default {
         production = this.currentProduction
       }
       return production
-    },
-
-    lastSectionPath() {
-      const production = this.lastProduction
-      const section = this.lastProductionScreen
-      const route = {
-        name: section,
-        params: {
-          production_id: production.id
-        }
-      }
-      if (production.production_type === 'tvshow') {
-        if (section !== 'episodes') {
-          route.name = `episode-${section}`
-        }
-        if (
-          !['edits', 'episodes'].includes(section) &&
-          production.first_episode_id
-        ) {
-          route.params.episode_id = production.first_episode_id
-        } else {
-          route.params.episode_id = 'all'
-        }
-      }
-      return route
     },
 
     sectionOptions() {
@@ -549,6 +524,7 @@ export default {
       'loadEpisodes',
       'incrementNotificationCounter',
       'logout',
+      'saveLastProductionRoute',
       'setProduction',
       'setCurrentEpisode',
       'setSupportChat',
@@ -774,6 +750,8 @@ export default {
     $route() {
       const productionId = this.$route.params.production_id
       if (productionId) {
+        const route = this.$route
+        this.saveLastProductionRoute(route)
         this.updateContext(productionId)
       }
     },
