@@ -348,6 +348,20 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+import assetStore from '@/store/modules/assets'
+import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
+import shotStore from '@/store/modules/shots'
+import sequenceStore from '@/store/modules/sequences'
+
+const stores = {
+  assetStore,
+  episodeStore,
+  shotStore,
+  sequenceStore,
+  editStore
+}
+
 export default {
   name: 'task-list',
 
@@ -721,7 +735,9 @@ export default {
     },
 
     getEntity(entityId) {
-      return this[`${this.entityType.toLowerCase()}Map`].get(entityId) || {}
+      const store = stores[`${this.entityType.toLowerCase()}Store`]
+      const map = store.cache[`${this.entityType.toLowerCase()}Map`]
+      return map.get(entityId) || {}
     },
 
     onKeyDown(event) {
