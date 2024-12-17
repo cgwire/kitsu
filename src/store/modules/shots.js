@@ -427,7 +427,7 @@ const actions = {
         return shotsApi.getShots(production, episode)
       })
       .then(shots => {
-        const sequenceMap = rootGetters.sequenceMap
+        const sequenceMap = sequenceStore.cache.sequenceMap
         const taskMap = rootGetters.taskMap
         commit(LOAD_SHOTS_END, {
           production,
