@@ -2079,7 +2079,7 @@ export default {
           this.rebuildRevisionOptions()
         }
         this.$nextTick(() => {
-          if (this.isCurrentPreviewPicture) {
+          if (this.isCurrentPreviewPicture && !this.isPlaying) {
             this.triggerResize()
             this.resetHeight()
             this.resetPictureCanvas()
