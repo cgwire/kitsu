@@ -467,6 +467,10 @@ import { getPlaylistPath } from '@/lib/path'
 import { updateModelFromList, removeModelFromList } from '@/lib/models'
 import { sortShots } from '@/lib/sorting'
 
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
+import sequenceStore from '@/store/modules/sequences'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -706,9 +710,13 @@ export default {
     },
 
     getTaskStatus(entity) {
-      let entityWithTasks = this.shotMap.get(entity.id)
-      if (!entityWithTasks) entityWithTasks = this.assetMap.get(entity.id)
-      if (!entityWithTasks) entityWithTasks = this.sequenceMap.get(entity.id)
+      let entityWithTasks = shotStore.cache.shotMap.get(entity.id)
+      if (!entityWithTasks) {
+        entityWithTasks = assetStore.cache.assetMap.get(entity.id)
+      }
+      if (!entityWithTasks) {
+        entityWithTasks = sequenceStore.cache.sequenceMap.get(entity.id)
+      }
       if (!entityWithTasks) return {}
 
       const taskId = entity.validations.get(this.currentPlaylist.task_type_id)
@@ -856,14 +864,14 @@ export default {
     convertEntityToPlaylistFormat(entityInfo) {
       let entity
       if (this.isAssetPlaylist) {
-        entity = this.assetMap.get(entityInfo.id)
+        entity = assetStore.cache.assetMap.get(entityInfo.id)
       } else if (this.isSequencePlaylist) {
-        entity = this.sequenceMap.get(entityInfo.id)
+        entity = sequenceStore.cache.sequenceMap.get(entityInfo.id)
         if (this.currentEpisode) {
           entity.episode_name = this.currentEpisode.name
         }
       } else {
-        entity = this.shotMap.get(entityInfo.id)
+        entity = shotStore.cache.shotMap.get(entityInfo.id)
       }
       if (entity) {
         const playlistEntity = {
@@ -971,11 +979,11 @@ export default {
     onNewEntityDropped(info) {
       let entity = null
       if (this.isAssetPlaylist) {
-        entity = this.assetMap.get(info.after)
+        entity = assetStore.cache.assetMap.get(info.after)
       } else if (this.isSequencePlaylist) {
-        entity = this.sequenceMap.get(info.after)
+        entity = sequenceStore.cache.sequenceMap.get(info.after)
       } else {
-        entity = this.shotMap.get(info.after)
+        entity = shotStore.cache.shotMap.get(info.after)
       }
 
       if (entity && !this.currentEntities[entity.id]) {
@@ -1021,7 +1029,7 @@ export default {
     addSequence(sequenceShots) {
       if (sequenceShots.length > 0) {
         const sequenceId = sequenceShots[0].sequence_id
-        const shots = Array.from(this.shotMap.values())
+        const shots = Array.from(shotStore.cache.shotMap.values())
           .filter(s => s.sequence_id === sequenceId)
           .sort(firstBy('name'))
           .reverse()
@@ -1068,7 +1076,7 @@ export default {
     addMovie() {
       this.loading.addMovie = true
       this.$options.silent = true
-      const shots = sortShots(Array.from(this.shotMap.values()))
+      const shots = sortShots(Array.from(shotStore.cache.shotMap.values()))
       this.addEntities(shots.reverse(), () => {
         this.loading.addMovie = false
         this.$options.silent = false
