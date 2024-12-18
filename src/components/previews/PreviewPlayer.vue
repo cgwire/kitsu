@@ -51,6 +51,7 @@
               :is-repeating="isRepeating"
               :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
+              name="main"
               :nb-frames="nbFrames"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"

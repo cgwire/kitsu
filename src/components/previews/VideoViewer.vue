@@ -344,7 +344,7 @@ export default {
         this.$options.currentTimeCalls = []
       }
       this.$options.currentTimeCalls.push(currentTime)
-      if (!this.$options.running) this.runSetCurrentTime()
+      this.runSetCurrentTime()
     },
 
     runSetCurrentTime() {
