@@ -3,8 +3,7 @@ import { buildQueryString } from '@/lib/query'
 
 export default {
   getLastNews(params) {
-    const isStudio = params.isStudio
-    const productionId = params.productionId
+    const { isStudio, productionId } = params
     if (isStudio) {
       delete params.isStudio
       const path = buildQueryString(`/api/data/projects/news`, params)
