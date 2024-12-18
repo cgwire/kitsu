@@ -148,7 +148,7 @@
                 type="number"
                 :value="formatDuration(entry.estimation, false)"
                 @change="updateEstimation($event.target.value)"
-                v-if="selectionGrid[entry.id]"
+                v-if="isCurrentUserManager && selectionGrid[entry.id]"
               />
               <template v-else>
                 {{ formatDuration(entry.estimation) }}
@@ -170,7 +170,7 @@
                 :model-value="getDate(entry.start_date)"
                 :with-margin="false"
                 @update:model-value="updateStartDate"
-                v-if="selectionGrid[entry.id]"
+                v-if="isCurrentUserManager && selectionGrid[entry.id]"
               />
               <template v-else>
                 {{ formatDate(entry.start_date) }}
@@ -183,7 +183,7 @@
                 :model-value="getDate(entry.due_date)"
                 :with-margin="false"
                 @update:model-value="updateDueDate"
-                v-if="selectionGrid[entry.id]"
+                v-if="isCurrentUserManager && selectionGrid[entry.id]"
               />
               <template v-else>
                 {{ formatDate(entry.due_date) }}
@@ -417,7 +417,8 @@ export default {
       'productionMap',
       'taskMap',
       'taskTypeMap',
-      'user'
+      'user',
+      'isCurrentUserManager'
     ]),
 
     displayedTasks() {
