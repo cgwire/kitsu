@@ -3,6 +3,7 @@
     <div class="flexrow timesheet-header">
       <div class="flexrow-item current-date">
         <date-field
+          :can-delete="false"
           :min-date="disabledDates.from"
           :max-date="disabledDates.to"
           :with-margin="false"
