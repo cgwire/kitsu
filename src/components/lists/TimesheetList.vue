@@ -4,8 +4,8 @@
       <div class="flexrow-item current-date">
         <date-field
           :can-delete="false"
-          :min-date="disabledDates.from"
-          :max-date="disabledDates.to"
+          :min-date="disabledDates.to"
+          :max-date="disabledDates.from"
           :with-margin="false"
           v-model="selectedDate"
         />
