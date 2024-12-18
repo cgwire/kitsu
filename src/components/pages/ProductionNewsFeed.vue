@@ -408,12 +408,7 @@ export default {
     this.$options.silent = false
     window.addEventListener('keydown', this.onKeyDown, false)
 
-    if (
-      (this.newsList.length === 0 ||
-        (this.currentProduction &&
-          this.newsList[0].project_id !== this.currentProduction.id)) &&
-      !this.loading.news
-    ) {
+    if (!this.loading.news) {
       this.init()
     }
   },
@@ -438,8 +433,6 @@ export default {
       'taskStatusMap',
       'taskTypeMap',
       'taskStatusMap',
-      'taskStatus',
-      'taskTypes',
       'user'
     ]),
 
@@ -454,12 +447,13 @@ export default {
     },
 
     isStudio() {
-      return this.$route.path.indexOf('productions') < 0
+      return !this.$route.path.includes('productions')
     },
 
     params() {
-      const params = {
-        productionId: this.currentProduction?.id,
+      return {
+        isStudio: this.isStudio || undefined,
+        productionId: !this.isStudio ? this.currentProduction?.id : undefined,
         only_preview: this.previewMode === 'previews',
         page_size: this.previewMode === 'previews' ? 6 : 50,
         task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
@@ -467,12 +461,10 @@ export default {
           this.taskStatusId !== '' ? this.taskStatusId : undefined,
         person_id: this.person ? this.person.id : undefined,
         page: this.currentPage,
-        episode_id: this.episodeId,
+        episode_id: this.episodeId !== 'all' ? this.episodeId : undefined,
         before: formatFullDateWithRevertedTimezone(this.before, this.timezone),
         after: formatFullDateWithRevertedTimezone(this.after, this.timezone)
       }
-      if (this.episodeId === 'all') delete params['episode_id']
-      return params
     },
 
     taskStatusList() {
@@ -651,9 +643,6 @@ export default {
           task_type_id: this.params.task_type_id
         }
         if (this.$router) this.$router.push({ query })
-        if (this.$route.path.indexOf('productions') < 0) {
-          this.params.isStudio = true
-        }
         this.loadNews(this.params)
           .then(() => {
             this.loading.news = false
