@@ -26,7 +26,8 @@
         "time_spent": "Tid",
         "type": "Type",
         "hidden_from_client": "Vises til klient",
-        "ready_for": "Klar til"
+        "ready_for": "Klar til",
+        "shared": "Deles i Asset Library"
       },
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
       "delete_for_selection": "Slet den valgte asset | Slet de {nbSelectedAssets} valgte assets",
@@ -74,7 +75,9 @@
         "standby": "STDB"
       },
       "episode_casting": "Episode casting",
-      "save_error": "Fejl under gemning af casting"
+      "save_error": "Fejl under gemning af casting",
+      "hide_library": "Skjul bibliotek",
+      "show_library": "Vis bibliotek"
     },
     "comments": {
       "add_attachment": "Tilføj vedhæftning",
@@ -116,7 +119,8 @@
       "no_attachments": "Der er ingen vedhæftninger til denne kommentar.",
       "confirm_publish": "Der er ingen preview-filer angivet til publicering. Er du sikker på, at du vil publicere din kommentar?",
       "confirm_publish_button": "Send kommentar uden at publicere filer",
-      "add_link": "Tilføj et URL-link"
+      "add_link": "Tilføj et URL-link",
+      "pinned_revision": "Fastgjort revision"
     },
     "custom_actions": {
       "create_error": "Der opstod en fejl under gemning af denne brugerdefinerede handling. Er du sikker på, at der ikke findes en anden handling med samme navn?",
@@ -316,7 +320,9 @@
       "retry_fido_challenge": "Prøv FIDO-udfordring igen",
       "unable_to_verify_fido": "Har du ikke din FIDO-enhed?",
       "wrong_fido_challenge": "FIDO-udfordringsverifikation mislykkedes.",
-      "login_server_failed": "Der opstod en serverfejl under login."
+      "login_server_failed": "Der opstod en serverfejl under login.",
+      "login_with_saml": "SSO-login med {saml_idp_name}.",
+      "login_saml": "SSO-login"
     },
     "main": {
       "about": "Om",
@@ -485,7 +491,9 @@
       "import": "Import",
       "is_shared": "Delt med hele teamet",
       "no_results": "Ingen resultater",
-      "link": "Link"
+      "link": "Link",
+      "hours_spent": "time brugt | timer brugt",
+      "hours_estimated": "time estimeret | timer estimeret"
     },
     "menu": {
       "assign_tasks": "Tildel opgaver",
@@ -538,7 +546,24 @@
       "only_assignations": "Kun tildelinger",
       "only_comments": "Kun kommentarer",
       "only_mentions": "Kun nævnelser",
-      "only_replies": "Kun svar"
+      "only_replies": "Kun svar",
+      "all_statuses": "Læst og ulæst",
+      "all_notifications": "Alle meddelelser",
+      "assignation": "Tildeling",
+      "comment": "Kommentar",
+      "initial_comment": "Første kommentar",
+      "mark_all_as_read": "Marker alle som læst",
+      "mention": "Omtale",
+      "only_non_watching": "Kun ikke-seende",
+      "only_read": "Læs kun",
+      "only_unread": "Kun ulæst",
+      "only_watching": "Ser kun på",
+      "read": "læse",
+      "reply": "Svar",
+      "publish": "Udgiv",
+      "published": "udgav en forhåndsvisning",
+      "show_comments": "Vis kommentarer",
+      "watching": "ser på"
     },
     "people": {
       "active": "Aktiv",
@@ -767,7 +792,8 @@
         "is_preview_download_allowed": "Tillad kunstnere at downloade previews",
         "is_set_preview_automated": "Angiv automatisk ny preview som enheds-thumbnail",
         "homepage": "Startside (første side der vises)",
-        "code": "Kort Navn"
+        "code": "Kort Navn",
+        "is_publish_default": "Indstil kommentarwidget til kunstnere i udgivelsestilstand som standard"
       },
       "metadata": {
         "add_explaination": "Tilføj specifikke data, der kræves af dette projekt.",
@@ -962,7 +988,9 @@
         "timesheets_locked": "Lås kunstneres tidsregistreringer, der er ældre end 1 uge",
         "mattermost_webhook": "Mattermost Webhook (Valgfrit)",
         "discord_token": "Discord-token (Valgfrit)",
-        "show_hd_default": "Vis film i HD-kvalitet som standard (langsommere)"
+        "show_hd_default": "Vis film i HD-kvalitet som standard (langsommere)",
+        "format_duration_in_hours": "Vis varigheder og estimater i timer",
+        "dark_theme_by_default": "Brug mørkt tema som standard"
       },
       "production": {
         "empty_list": "Listen er i øjeblikket tom. Det betyder, at alle data fra hovedindstillingerne er tilgængelige for brugerne. Tilføj nogle listeelementer for at begrænse valgmulighederne for denne produktion.",
@@ -1080,7 +1108,6 @@
       "year_label": "År",
       "title": "Kvoter",
       "type_label": "Type",
-      "explaination": "Shots betragtes som færdige ved den første feedbackanmodning. Herefter vægtes kvoterne baseret på den tid, der er brugt på opgaven, som registreret i kunstnerens tidsregistrering.\nHvis der ikke er registreret nogen tid, antages det, at:\n * Opgaven startede ved den første statusændring til WIP.\n * Opgaven blev afsluttet på den dag, hvor feedbackanmodningen blev foretaget.\n * De færdige frames fordeles jævnt over alle arbejdsdage mellem start- og slutdatoerne.",
       "export_quotas": "Eksporter kvoter",
       "highlight_quotas": "Fremhæv kvoter nedenfor:",
       "weight": "Vægt",
@@ -1093,7 +1120,12 @@
       "seconds": "Sekunder",
       "weighted": "Vægtet",
       "week": "Uge",
-      "explanation_feedback": "Shotet betragtes som færdigt ved den første feedbackanmodning. Antallet af frames tilføjes til kvoterne for den dag."
+      "explanation_feedback": "Shotet betragtes som færdigt ved den første feedbackanmodning. Antallet af frames tilføjes til kvoterne for den dag.",
+      "done_date": "Dato for godkendelse",
+      "explanation_done": "Optagelsen anses for at være færdig ved den sidste godkendelse. Antallet af billeder lægges til kvoterne for den pågældende dag.",
+      "explanation_weighted": "Billeder anses for at være færdige ved den første anmodning om feedback. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, hvor anmodningen om feedback blev fremsat.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "explanation_weighteddone": "Optagelserne anses for at være færdige efter den sidste godkendelse. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, den blev godkendt.\n * De afsluttede rammer er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "weighted_done": "Vægtet (godkendelse)"
     },
     "shots": {
       "casting": "Shot-casting",
@@ -1246,7 +1278,10 @@
         "task_status_short_name": "Status",
         "task_type": "Type",
         "start_date_short": "Startdato",
-        "parent": "Forældre"
+        "parent": "Forældre",
+        "difficulty": "Sværhedsgrad",
+        "done_date": "Dato for godkendelse",
+        "nb_frames": "Rammer"
       },
       "colors": {
         "title": "Farvelægning",
@@ -1323,7 +1358,14 @@
       "calendar": "Kalender",
       "pending": "Afventer",
       "validated": "Valideret",
-      "unassigned_tasks": "Ufordelte opgaver"
+      "unassigned_tasks": "Ufordelte opgaver",
+      "difficulty": {
+        "very_easy": "Meget let",
+        "easy": "Let",
+        "medium": "Medium",
+        "hard": "Hård",
+        "very_hard": "Meget hård"
+      }
     },
     "timesheets": {
       "detail_level": "Detaljeniveau",
@@ -1403,7 +1445,8 @@
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
       "history": "Rediger værdiers historik",
-      "restore_error": "Der opstod en fejl under gendannelse af denne redigering."
+      "restore_error": "Der opstod en fejl under gendannelse af denne redigering.",
+      "edit_success": "Ændringerne blev gemt med succes."
     },
     "status_automations": {
       "change_ready_for": "skift \"klar til\" til",
@@ -1577,6 +1620,28 @@
       "confirm_day_offs": "Hvis du markerer disse dage som fridage, vil al registreret tid for de berørte dage blive slettet. Er du sikker på, at du vil fortsætte?",
       "confirm_unset_day_offs": "Fridage er i øjeblikket angivet fra {start} til {end}. Er du sikker på, at du vil fjerne denne periode?",
       "error_days_off": "Der opstod en fejl under opdatering af fridage."
+    },
+    "library": {
+      "asset_library": "Bibliotek med aktiver",
+      "from_library": "Fra aktivbiblioteket",
+      "import_from_asset_type": "Importer alle aktiver fra den valgte type og produktion",
+      "import_from_assets": "Importer aktiver fra den valgte produktion og aktivtype",
+      "import_from_list": "Importer udvalgte aktiver fra listen",
+      "import_from_production": "Importer alle aktiver fra den valgte produktion",
+      "manage": "Tilføj aktiver til dit bibliotek",
+      "no_entities": "Ingen enheder er tilgængelige",
+      "no_open_productions": "Ingen åbne produktioner",
+      "no_shared_assets": "Ingen fælles aktiver er tilgængelige",
+      "remove_selected_assets": "Fjern det valgte aktiv fra biblioteket | Fjern {nbSelectedAssets} valgte aktiver fra biblioteket",
+      "select_asset_type": "Vælg en aktivtype",
+      "select_production": "Vælg en produktion",
+      "selected_assets": "Udvalgte aktiver",
+      "fields": {
+        "name": "Navn",
+        "production": "Produktion",
+        "created_at": "Dato for oprettelse",
+        "updated_at": "Dato for opdatering"
+      }
     }
   }
 }
