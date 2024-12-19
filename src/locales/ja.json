@@ -26,7 +26,8 @@
         "time_spent": "タイム",
         "type": "タイプ",
         "hidden_from_client": "クライアントに表示",
-        "ready_for": "以下の準備が完了"
+        "ready_for": "以下の準備が完了",
+        "shared": "アセット・ライブラリーで共有"
       },
       "cancel_text": "{name}をアーカイブしてもよろしいですか？",
       "delete_for_selection": "選択したアセットを削除 | {nbSelectedAssets}の選択したアセットを削除",
@@ -74,7 +75,9 @@
         "standby": "STDB"
       },
       "episode_casting": "エピソード出演者",
-      "save_error": "出演者の保存中にエラーが発生しました"
+      "save_error": "出演者の保存中にエラーが発生しました",
+      "hide_library": "ライブラリを隠す",
+      "show_library": "ディスプレイ・ライブラリー"
     },
     "comments": {
       "add_attachment": "ファイルを添付",
@@ -116,7 +119,8 @@
       "no_attachments": "このコメントには添付ファイルがありません。",
       "confirm_publish": "公開設定になっているプレビューファイルがありません。本当にコメントを公開しますか？",
       "confirm_publish_button": "ファイルを公開せずにコメントを投稿",
-      "add_link": "URLを追加"
+      "add_link": "URLを追加",
+      "pinned_revision": "ピン留め修正"
     },
     "custom_actions": {
       "create_error": "このカスタムアクションの保存中にエラーが発生しました。同じ名前のアクションがありませんか？",
@@ -316,7 +320,9 @@
       "retry_fido_challenge": "FIDOチャレンジを再試行",
       "unable_to_verify_fido": "FIDOデバイスをお持ちですか。",
       "wrong_fido_challenge": "FIDOチャレンジによる認証に失敗しました。",
-      "login_server_failed": "ログイン中にサーバーエラーが発生しました。"
+      "login_server_failed": "ログイン中にサーバーエラーが発生しました。",
+      "login_with_saml": "saml_idp_name}でSSOログイン。",
+      "login_saml": "SSOログイン"
     },
     "main": {
       "about": "当社について",
@@ -485,7 +491,9 @@
       "import": "インポート",
       "is_shared": "チームと共有",
       "no_results": "検索結果なし",
-      "link": "リンク"
+      "link": "リンク",
+      "hours_spent": "滞在時間",
+      "hours_estimated": "時間 見積もり"
     },
     "menu": {
       "assign_tasks": "タスクを割り当て",
@@ -538,7 +546,24 @@
       "only_assignations": "割り当てのみ",
       "only_comments": "コメントのみ",
       "only_mentions": "メンションのみ",
-      "only_replies": "リプライのみ"
+      "only_replies": "リプライのみ",
+      "all_statuses": "既読と未読",
+      "all_notifications": "すべての通知",
+      "assignation": "割り当て",
+      "comment": "コメント",
+      "initial_comment": "最初のコメント",
+      "mark_all_as_read": "すべて既読にする",
+      "mention": "言及",
+      "only_non_watching": "非観戦のみ",
+      "only_read": "読むだけ",
+      "only_unread": "未読のみ",
+      "only_watching": "見るだけ",
+      "read": "読む",
+      "reply": "返信",
+      "publish": "出版",
+      "published": "プレビュー掲載",
+      "show_comments": "コメントを表示",
+      "watching": "ウォッチング"
     },
     "people": {
       "active": "アクティブ",
@@ -767,7 +792,8 @@
         "is_preview_download_allowed": "プレビューのダウンロードをアーティストに許可",
         "is_set_preview_automated": "新しいプレビューをエンティティのサムネイルとして自動的に設定",
         "homepage": "ホームページ（最初に表示したページ）",
-        "code": "短い名前"
+        "code": "短い名前",
+        "is_publish_default": "パブリッシュモードのアーティストにコメントウィジェットをデフォルトで設定する"
       },
       "metadata": {
         "add_explaination": "このプロジェクトで必要とされる特定のデータを追加する。",
@@ -962,7 +988,9 @@
         "timesheets_locked": "1週間よりも前のアーティストタイムシートをロック",
         "mattermost_webhook": "Mattermost Webhook（任意）",
         "discord_token": "Discordトークン（任意）",
-        "show_hd_default": "既定でHD品質の画像を表示（再生スピードが遅くなる）"
+        "show_hd_default": "既定でHD品質の画像を表示（再生スピードが遅くなる）",
+        "format_duration_in_hours": "所要時間と見積りを時間単位で表示",
+        "dark_theme_by_default": "デフォルトでダークテーマを使用"
       },
       "production": {
         "empty_list": "現在、リストには何も入っていません。メイン設定の全データをユーザーが利用できることを意味します。この製作の選択肢を制限するために、いくつかの項目を追加してください。",
@@ -1031,7 +1059,7 @@
     "sequences": {
       "all_sequences": "全てのシークエンス",
       "edit_error": "このシークエンスを保存する際にエラーが発生しました。同様の名前のシークエンスがありませんか？",
-      "delete_text": "本当に{名前}をデータベースから削除してもよろしいでしょうか？関連するショットとプレビューの全てが完全に削除されます。以下にシークエンス名を入力して確定してください。",
+      "delete_text": "本当に{name}をデータベースから削除してもよろしいでしょうか？関連するショットとプレビューの全てが完全に削除されます。以下にシークエンス名を入力して確定してください。",
       "delete_error": "このシークエンスを削除する際にエラーが発生しました。データがリンクされている可能性があります。このシークエンスにリンクされているショットがありませんか？",
       "edit_title": "シークエンスを編集",
       "empty_list": "このプロダクションにはシークエンスがありません。お作りしますか？",
@@ -1080,7 +1108,6 @@
       "year_label": "年",
       "title": "割り当て",
       "type_label": "タイプ",
-      "explaination": "ショットは最初のフィードバックリクエストで終了したと見なされます。その後、割り当てはタスクに費やした時間に応じて（アーティストがタイムシートを記入したときに）加重されます。勤怠が登録されていない場合、以下のように考慮します。\n * タスクはWIPへの最初のステータス変更時に開始。 \n* タスクはフィードバックリクエストが行われた日に実行。\n * 完了したフレームを開始日と終了日の間の全ての営業日で分割。",
       "export_quotas": "割り当てをエクスポート",
       "highlight_quotas": "以下の割り当てをハイライト：",
       "weight": "加重",
@@ -1093,13 +1120,18 @@
       "seconds": "秒",
       "weighted": "加重",
       "week": "週",
-      "explanation_feedback": "ショットは最初のフィードバックリクエストで終了したと見なされます。フレーム数はその日の日あたりの割り当てに追加されます。"
+      "explanation_feedback": "ショットは最初のフィードバックリクエストで終了したと見なされます。フレーム数はその日の日あたりの割り当てに追加されます。",
+      "done_date": "承認日",
+      "explanation_done": "最後の承認で撮影は完了とみなされる。フレーム数はその日のノルマに加算される。",
+      "explanation_weighted": "ショットは、最初のフィードバックリクエストで完了とみなされます。その後、アーティストのタイムシートに記録されたタスクに費やされた時間に基づいて、ノルマが加重される。\n\n 時間が記録されていない場合、それは仮定される：\n* タスクは最初のステータスがWIPに変更されたときに開始された。\n* タスクはフィードバック要求がなされた日に完了した。\n * 完了したフレームは、開始日と終了日の間のすべての営業日に均等に分配される。",
+      "explanation_weighteddone": "ショットは最後の承認をもって完了とみなされる。そして、アーティストのタイムシートに記録されたタスクに費やされた時間に基づいて、ノルマが重み付けされる。\n\n もし時間が記録されていない場合、それは仮定される：\n* タスクは最初のステータスがWIPに変更されたときに開始された。\n* タスクは承認された日に完了した。\n * タスクは承認された日に完了した。",
+      "weighted_done": "加重（承認）"
     },
     "shots": {
       "casting": "場面割り当て",
       "delete_text": "本当に{name}をデータベースから削除してよろしいですか？",
       "delete_error": "このショットを削除する際にエラーが発生しました。リンクされているデータがある可能性があります。このショットにはリンクされているタスクがありませんか？",
-      "edit_success": "場面{名前}の編集に成功しました。",
+      "edit_success": "場面{name}の編集に成功しました。",
       "edit_fail": "作成または編集に失敗し、エラーが発生しました。指定されたシークエンスに既に登録されている名前でショットを名前変更しようとしていないか確認してください。",
       "edit_title": "場面を編集",
       "empty_list": "このプロダクションにはショットがありません。お作りしますか？",
@@ -1246,7 +1278,10 @@
         "task_status_short_name": "ステータス",
         "task_type": "種類",
         "start_date_short": "開始日",
-        "parent": "大人"
+        "parent": "大人",
+        "difficulty": "難易度",
+        "done_date": "承認日",
+        "nb_frames": "フレーム"
       },
       "colors": {
         "title": "カラーリング",
@@ -1323,7 +1358,14 @@
       "calendar": "スケジュール",
       "pending": "保留中",
       "validated": "検証された",
-      "unassigned_tasks": "割り当てのないタスク"
+      "unassigned_tasks": "割り当てのないタスク",
+      "difficulty": {
+        "very_easy": "とても簡単",
+        "easy": "簡単",
+        "medium": "ミディアム",
+        "hard": "ハード",
+        "very_hard": "非常に難しい"
+      }
     },
     "timesheets": {
       "detail_level": "詳細レベル",
@@ -1403,7 +1445,8 @@
       "tasks": "タスク",
       "cancel_text": "本当に{name}をアーカイブしますか？",
       "history": "編集された値の履歴",
-      "restore_error": "この編集の復元中にエラーが発生しました。"
+      "restore_error": "この編集の復元中にエラーが発生しました。",
+      "edit_success": "修正は正常に保存された。"
     },
     "status_automations": {
       "change_ready_for": "「以下の準備が完了」を以下に変更",
@@ -1577,6 +1620,28 @@
       "confirm_day_offs": "この日を休暇日にとして設定すると、当日に入力した勤怠を全て消去することになります。続行しますか？",
       "confirm_unset_day_offs": "{start} から {end}まで休暇が登録されています。この期間を本当に消去してもよろしいでしょうか？",
       "error_days_off": "休暇日の編集中にエラーが発生しました。"
+    },
+    "library": {
+      "asset_library": "資産ライブラリ",
+      "from_library": "アセットライブラリから",
+      "import_from_asset_type": "選択したタイプおよび生産からすべての資産をインポート",
+      "import_from_assets": "選択したプロダクションとアセットタイプからアセットをインポート",
+      "import_from_list": "リストから選択したアセットをインポート",
+      "import_from_production": "選択したプロダクションからすべてのアセットをインポート",
+      "manage": "アセットをライブラリに追加する",
+      "no_entities": "利用可能なエンティティはありません",
+      "no_open_productions": "オープン・プロダクションなし",
+      "no_shared_assets": "共有資産なし",
+      "remove_selected_assets": "選択したアセットをライブラリから削除する｜{nbSelectedAssets}選択したアセットをライブラリから削除する",
+      "select_asset_type": "アセットタイプを選択",
+      "select_production": "プロダクションの選択",
+      "selected_assets": "厳選された資産",
+      "fields": {
+        "name": "名称",
+        "production": "製造",
+        "created_at": "作成日",
+        "updated_at": "更新日"
+      }
     }
   }
 }
