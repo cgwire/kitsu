@@ -26,7 +26,8 @@
         "time_spent": "زمان",
         "type": "طبقه بندی",
         "hidden_from_client": "نمایش داده شده به مشتری",
-        "ready_for": "آماده برای"
+        "ready_for": "آماده برای",
+        "shared": ""
       },
       "cancel_text": "آیا مطمئن هستید که می خواهید {name} را بایگانی کنید؟",
       "delete_for_selection": "حذف منابع انتخاب شده | منابع انتخابی {nbSelectedAssets} را حذف کنید",
@@ -74,7 +75,9 @@
         "standby": "STDB"
       },
       "episode_casting": "محول کردن اپیزود",
-      "save_error": "خطا هنگام ذخیره برای ارسال"
+      "save_error": "خطا هنگام ذخیره برای ارسال",
+      "hide_library": "",
+      "show_library": ""
     },
     "comments": {
       "add_attachment": "اضافه کردن پیوست",
@@ -116,7 +119,8 @@
       "no_attachments": "هیچ پیوستی برای این نظر وجود ندارد.",
       "confirm_publish": "هیچ فایل پیش نمایشی برای انتشار تنظیم نشده است. آیا مطمئن هستید که می خواهید نظر خود را منتشر کنید؟",
       "confirm_publish_button": "ارسال نظر بدون انتشار فایل",
-      "add_link": "یک پیوند URL را اضافه کنید"
+      "add_link": "یک پیوند URL را اضافه کنید",
+      "pinned_revision": ""
     },
     "custom_actions": {
       "create_error": "هنگام ذخیره این اقدام سفارشی خطایی روی داد. آیا مطمئن هستید که هیچ اقدام دیگری با همین نام وجود ندارد؟",
@@ -316,7 +320,9 @@
       "retry_fido_challenge": "دوباره چالش FIDO را امتحان کنید",
       "unable_to_verify_fido": "دستگاه FIDO خود را ندارید؟",
       "wrong_fido_challenge": "تأیید چالش FIDO ناموفق بود.",
-      "login_server_failed": "هنگام ورود به سیستم یک خطای سرور رخ داد."
+      "login_server_failed": "هنگام ورود به سیستم یک خطای سرور رخ داد.",
+      "login_with_saml": "",
+      "login_saml": ""
     },
     "main": {
       "about": "درباره",
@@ -485,7 +491,9 @@
       "import": "وارد کردن",
       "is_shared": "با کل تیم به اشتراک گذاشته شده است",
       "no_results": "هیچ نتیجه ای وجود ندارد",
-      "link": "لینک"
+      "link": "لینک",
+      "hours_spent": "",
+      "hours_estimated": ""
     },
     "menu": {
       "assign_tasks": "محول کردن وظایف",
@@ -538,7 +546,24 @@
       "only_assignations": "فقط تکالیف",
       "only_comments": "فقط نظرات",
       "only_mentions": "فقط اشاره شده ها",
-      "only_replies": "فقط پاسخ ها"
+      "only_replies": "فقط پاسخ ها",
+      "all_statuses": "",
+      "all_notifications": "",
+      "assignation": "",
+      "comment": "",
+      "initial_comment": "",
+      "mark_all_as_read": "",
+      "mention": "",
+      "only_non_watching": "",
+      "only_read": "",
+      "only_unread": "",
+      "only_watching": "",
+      "read": "",
+      "reply": "",
+      "publish": "",
+      "published": "",
+      "show_comments": "",
+      "watching": ""
     },
     "people": {
       "active": "فعال",
@@ -767,7 +792,8 @@
         "is_preview_download_allowed": "به هنرمندان اجازه دهید پیش‌نمایش‌ها را دانلود کنند",
         "is_set_preview_automated": "پیش نمایش جدید را به صورت خودکار به عنوان تصویر کوچک  برای این مورد تنظیم کنید",
         "homepage": "صفحه اصلی (صفحه اول نمایش داده می شود)",
-        "code": "نام کوتاه"
+        "code": "نام کوتاه",
+        "is_publish_default": ""
       },
       "metadata": {
         "add_explaination": "Add specific data required by this project.",
@@ -962,7 +988,9 @@
         "timesheets_locked": "برگه‌های زمانی  قدیمی‌تر از ۱ هفته هنرمند را قفل کنید",
         "mattermost_webhook": "Mattermost Webhook (اختیاری)",
         "discord_token": "توکن Discord (اختیاری)",
-        "show_hd_default": "نمایش فیلم ها با کیفیت HD به صورت پیش فرض (آهسته تر)"
+        "show_hd_default": "نمایش فیلم ها با کیفیت HD به صورت پیش فرض (آهسته تر)",
+        "format_duration_in_hours": "",
+        "dark_theme_by_default": ""
       },
       "production": {
         "empty_list": "لیست در حال حاضر خالی است. به این معنی که تمام داده های تنظیمات اصلی در دسترس کاربران است. برای محدود کردن انتخاب‌ها برای این محصول، چند ورودی اضافه کنید.",
@@ -1080,7 +1108,6 @@
       "year_label": "سال",
       "title": "سهم/ میزان",
       "type_label": "تایپ کردن",
-      "explaination": "شات ها با اولین درخواست بازخورد کامل در نظر گرفته می‌شوند. سپس، نقل قول ها بر اساس زمان صرف شده برای کار، همانطور که در جدول زمانی هنرمند ثبت شده است، وزن می شوند. اگر زمان ثبت نشود، فرض بر این است که:\n * وظیفه در اولین تغییر وضعیت به WIP شروع شده است.\n * وظیفه در روز درخواست بازخورد انجام شد.\n * فریم های تکمیل شده به طور مساوی در بین تمام روزهای کاری بین تاریخ شروع و پایان توزیع می شوند.",
       "export_quotas": "نقل قول ها را صادر کنید",
       "highlight_quotas": "نقل قول های زیر را برجسته کنید:",
       "weight": "وزن",
@@ -1093,7 +1120,12 @@
       "seconds": "ثانیه ها",
       "weighted": "سنگین",
       "week": "هفته",
-      "explanation_feedback": "ذر این شات اولین درخواست بازخورد کامل در نظر گرفته می شود. تعداد فریم های آن به سهمیه های آن روز اضافه می شود."
+      "explanation_feedback": "ذر این شات اولین درخواست بازخورد کامل در نظر گرفته می شود. تعداد فریم های آن به سهمیه های آن روز اضافه می شود.",
+      "done_date": "",
+      "explanation_done": "",
+      "explanation_weighted": "",
+      "explanation_weighteddone": "",
+      "weighted_done": ""
     },
     "shots": {
       "casting": "محول کردن شات",
@@ -1246,7 +1278,10 @@
         "task_status_short_name": "وضعیت",
         "task_type": "نوع",
         "start_date_short": "تاریخ شروع",
-        "parent": "والدین"
+        "parent": "والدین",
+        "difficulty": "",
+        "done_date": "",
+        "nb_frames": ""
       },
       "colors": {
         "title": "رنگ بندی",
@@ -1323,7 +1358,14 @@
       "calendar": "تقویم",
       "pending": "در انتظار",
       "validated": "تایید شد",
-      "unassigned_tasks": "تکلیف محول نشده"
+      "unassigned_tasks": "تکلیف محول نشده",
+      "difficulty": {
+        "very_easy": "",
+        "easy": "",
+        "medium": "",
+        "hard": "",
+        "very_hard": ""
+      }
     },
     "timesheets": {
       "detail_level": "سطح جزئیات",
@@ -1403,7 +1445,8 @@
       "tasks": "وظایف",
       "cancel_text": "آیا مطمئن هستید که می خواهید {name} را بایگانی کنید؟",
       "history": "تاریخچه را ویرایش کنید",
-      "restore_error": "هنگام بازیابی این ویرایش خطایی روی داد."
+      "restore_error": "هنگام بازیابی این ویرایش خطایی روی داد.",
+      "edit_success": ""
     },
     "status_automations": {
       "change_ready_for": "تغییر دادن به \"آماده برای\"",
@@ -1577,6 +1620,28 @@
       "confirm_day_offs": "در صورت تنظیم این روزها، تمام زمان های پر شده در این روزها پاک می شود. آیا مطمئن هستید که می خواهید ادامه دهید؟",
       "confirm_unset_day_offs": "روزهای تعطیل در حال حاضر از {start} تا {end} اعمال می‌شود. آیا مطمئن هستید که می خواهید این دوره را حذف کنید؟",
       "error_days_off": "هنگام به‌روزرسانی روزهای تعطیل خطایی روی داد."
+    },
+    "library": {
+      "asset_library": "",
+      "from_library": "",
+      "import_from_asset_type": "",
+      "import_from_assets": "",
+      "import_from_list": "",
+      "import_from_production": "",
+      "manage": "",
+      "no_entities": "",
+      "no_open_productions": "",
+      "no_shared_assets": "",
+      "remove_selected_assets": "",
+      "select_asset_type": "",
+      "select_production": "",
+      "selected_assets": "",
+      "fields": {
+        "name": "",
+        "production": "",
+        "created_at": "",
+        "updated_at": ""
+      }
     }
   }
 }
