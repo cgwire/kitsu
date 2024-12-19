@@ -367,7 +367,7 @@
       "studio": "Studio",
       "tutorials": "Tutorials",
       "user": "Utilisateur",
-      "white_theme": "Thème blanc",
+      "white_theme": "Thème clair",
       "yes": "oui",
       "csv": {
         "choose": "Choisir",
@@ -463,8 +463,8 @@
       "activity": "Activité",
       "archived": "Archivé",
       "avatar": {
-        "open_page": "Ouvrir la page {nom de la personne}",
-        "unassign": "Désaffecter {nom de la personne}"
+        "open_page": "Ouvrir la page de {personName}",
+        "unassign": "Désaffecter {personName}"
       },
       "color": "Couleur",
       "copy": "Copie",
@@ -603,7 +603,7 @@
       "change_password_error": "Un erreur est survenue en changeant de mot de passe. S'il vous plait vérifiez le nouveau mot de passe.",
       "disable_2FA": "Désactivez l'authentification double facteur",
       "disable_2FA_error": "Un erreur est survenue en désactivant l'authentification double facteur.",
-      "departments_empty": "Cet utilisateur n'est lié à aucun service.",
+      "departments_empty": "Cet utilisateur n'est lié à aucun département.",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar de l'utilisateur.",
       "contract": {
         "open-ended": "Ouvert à tous",
@@ -872,8 +872,8 @@
         "immersive": "Expérience immersive"
       },
       "homepage": {
-        "assets": "Actifs",
-        "shots": "Tirs",
+        "assets": "Assets",
+        "shots": "Plans",
         "sequences": "Séquences"
       },
       "load_stats": "Charger les statistiques"
@@ -1003,7 +1003,7 @@
       "title_entities": "Statut des entités",
       "title_concepts": "Statut des concepts",
       "help": {
-        "entities": "Actifs, plans, séquences, ..."
+        "entities": "Assets, plans, séquences, ..."
       }
     },
     "task_types": {
@@ -1339,7 +1339,7 @@
       "export_timespents": "Exporter les temps passés pour les projets ouverts",
       "unit": "Unité",
       "confirm_day_offs": "Le fait de définir ces jours comme des jours de congé effacera toutes les heures enregistrées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",
-      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {début} à {fin}. Êtes-vous sûr de vouloir supprimer cette période ?",
+      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {start} à {end}. Êtes-vous sûr de vouloir supprimer cette période ?",
       "off": "Arrêt"
     },
     "wrong_browser": {
@@ -1379,7 +1379,7 @@
         "name": "Nom",
         "color": "Couleur"
       },
-      "no_department": "Aucun service"
+      "no_department": "Aucun département"
     },
     "edits": {
       "all_edits": "Tous les montages",
@@ -1483,10 +1483,10 @@
       "title": "Bots",
       "bots": "bot | bots",
       "active_bots": "bot actif | bots actifs",
-      "new_bot": "Ajouter un nouveau robot",
+      "new_bot": "Ajouter un nouveau bot",
       "edit_title": "Editer le bot",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar du bot.",
-      "new_token_title": "Nouveau jeton API pour {nom}",
+      "new_token_title": "Nouveau jeton API pour {name}",
       "new_token_warning": "Si vous générez un nouveau jeton, l'ancien sera désactivé.",
       "generate": "Générer un nouveau jeton",
       "copy_token_warning": "Veillez à copier le jeton ci-dessous. Vous ne pourrez plus le voir.",
@@ -1496,7 +1496,7 @@
         "expiration_date": "Date d'expiration",
         "token": "jeton"
       },
-      "no_bot": "Il n'y a pas de robot. Voulez-vous en créer un ?"
+      "no_bot": "Il n'y a pas de bot. Voulez-vous en créer un ?"
     },
     "chats": {
       "join": "Rejoindre le chat",
@@ -1509,7 +1509,7 @@
       "search_entity": "Recherche d'une entité"
     },
     "concepts": {
-      "add_links": "Ajouter des liens vers les actifs",
+      "add_links": "Ajouter des liens vers les assets",
       "add_new_concept": "Ajouter de nouveaux concepts",
       "add_concept": "Ajouter des fichiers pour les nouveaux concepts",
       "add_concept_error": "Une erreur s'est produite lors de l'ajout de concepts.",
@@ -1551,7 +1551,7 @@
     },
     "studios": {
       "create_error": "Une erreur s'est produite lors de l'enregistrement de ce studio. Êtes-vous sûr qu'il n'existe pas de studio portant un nom similaire ?",
-      "delete_text": "Êtes-vous sûr de vouloir supprimer {nom} de votre base de données ?",
+      "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce studio.",
       "edit_title": "Editer le studio",
       "new_studios": "Ajouter un studio",
@@ -1575,7 +1575,7 @@
       "edit": "Modifier le jour de congé",
       "delete": "Supprimer un jour de congé",
       "confirm_day_offs": "Le fait de définir ces jours de congé effacera toutes les heures de travail effectuées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",
-      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {début} à {fin}. Êtes-vous sûr de vouloir supprimer cette période ?",
+      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {start} à {end}. Êtes-vous sûr de vouloir supprimer cette période ?",
       "error_days_off": "Une erreur s'est produite lors de la mise à jour des jours de congé."
     }
   }
