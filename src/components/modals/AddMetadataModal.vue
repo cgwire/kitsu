@@ -56,7 +56,6 @@
           </div>
 
           <text-field
-            ref="addChoiceField"
             v-model.trim="valueToAdd"
             :button-label="$t('main.add')"
             @enter="addValue"
@@ -302,8 +301,8 @@ export default {
   },
 
   methods: {
-    addValue() {
-      const newValue = this.$refs.addChoiceField.value
+    addValue(value) {
+      const newValue = value
       if (!this.form.values.find(v => v === newValue) && newValue) {
         this.form.values.push(newValue)
         if (this.form.data_type === 'taglist') {
