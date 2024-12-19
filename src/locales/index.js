@@ -22,7 +22,7 @@ export default {
   en_nft: en_nft,
   "en_video-game": en_video_game,
   es: es.default,
-  fa: fa,
+  fa: fa.default,
   fr: fr.default,
   hu: hu.default,
   ja: ja.default,
