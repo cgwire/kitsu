@@ -1244,7 +1244,7 @@ export default {
     },
 
     setupFabricCanvas() {
-      // TODO IMPLEMENT PS_BRUSH
+      // TODO MAKE SURE WE CAN SELECT AND EDIT BRUSH STROKES
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
@@ -1267,7 +1267,9 @@ export default {
         brush.pressureManager.fallback = 1; // Fallback value for mouse/touch
       }
 
-      // fix for firefox 
+      // TODO fix for firefox 
+      // - move mouse with pointer
+      // - remove console logs
       this.fabricCanvas.on('mouse:down', (event) => {
         if (event.e.pointerType === 'pen') {
           console.log('Using stylus');
