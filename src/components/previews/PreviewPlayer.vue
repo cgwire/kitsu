@@ -1245,6 +1245,7 @@ export default {
 
     setupFabricCanvas() {
       // TODO MAKE SURE WE CAN SELECT AND EDIT BRUSH STROKES
+      // ADD THIS TO THE MAIN PLAYER.js AS WELL
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
