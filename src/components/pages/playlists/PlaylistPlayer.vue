@@ -265,8 +265,8 @@
             :margin-bottom="0"
             :panzoom="false"
             :current-preview="{
-               ...currentPreview,
-               position: currentPreviewIndex + 1
+              ...currentPreview,
+              position: currentPreviewIndex + 1
             }"
             :previews="picturePreviews"
             high-qualiy

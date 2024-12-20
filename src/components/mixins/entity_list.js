@@ -598,9 +598,7 @@ export const entityListMixin = {
       const newTop = previousTop - movementY
       this.initialClientY = this.getClientY(event)
       tableWrapper.scrollTop = newTop
-    },
-
-
+    }
   },
 
   watch: {

@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="multi-picture-player">
     <picture-viewer
-      :ref="'picture-'+ preview.id + '-' + preview.position"
+      :ref="'picture-' + preview.id + '-' + preview.position"
       v-for="preview in previews"
       v-show="
         preview.id === currentPreview.id &&
@@ -16,6 +16,8 @@
       :panzoom="panzoom"
       :default-height="defaultHeight"
       :margin-bottom="marginBottom"
+      @loaded="() => $emit('loaded')"
+      @size-changed="() => $emit('size-changed')"
     />
   </div>
 </template>
@@ -81,16 +83,14 @@ export default {
   emits: ['loaded', 'size-changed'],
 
   data() {
-    return {
-    }
+    return {}
   },
 
   mounted() {
     this.container.style.height = this.defaultHeight + 'px'
   },
 
-  beforeUnmount() {
-  },
+  beforeUnmount() {},
 
   computed: {
     container() {
@@ -115,9 +115,13 @@ export default {
 
     getDimensions() {
       if (!this.currentPreview) return { height: 0, width: 0 }
-      const previewPlayer = this.$refs[
-        'picture-' + this.currentPreview.id + '-' + this.currentPreview.position
-      ]
+      const previewPlayer =
+        this.$refs[
+          'picture-' +
+            this.currentPreview.id +
+            '-' +
+            this.currentPreview.position
+        ]
       if (previewPlayer && previewPlayer[0]) {
         return previewPlayer[0].getDimensions()
       }
@@ -133,7 +137,10 @@ export default {
       this.container.style.height = this.defaultHeight + 'px'
       if (this.currentPreview) {
         const key =
-          'picture-' + this.currentPreview.id + '-' + this.currentPreview.position
+          'picture-' +
+          this.currentPreview.id +
+          '-' +
+          this.currentPreview.position
         const previewPlayer = this.$refs[key]
         if (previewPlayer && previewPlayer[0]) {
           previewPlayer[0].resetPicture()

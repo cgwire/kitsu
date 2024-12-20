@@ -203,7 +203,9 @@ export default {
       const dimensions = this.getNaturalDimensions()
       if (dimensions.width > 0) ratio = dimensions.height / dimensions.width
       let width = dimensions.width
-      if (width > this.container.offsetWidth && this.container.offsetWidth > 0
+      if (
+        width > this.container.offsetWidth &&
+        this.container.offsetWidth > 0
       ) {
         width = this.container.offsetWidth
       }
