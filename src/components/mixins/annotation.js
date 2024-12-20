@@ -10,6 +10,7 @@ import { markRaw } from 'vue'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import { PSStroke } from '@arch-inc/fabricjs-psbrush'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
 
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
@@ -628,10 +629,13 @@ export const annotationMixin = {
         psstroke.set('scale', obj.scale)
         // psstroke.set('editable', !this.isCurrentUserArtist)
         // psstroke.set('selectable', !this.isCurrentUserArtist)
-        psstroke.set('editable', false)
-        psstroke.set('selectable', false)
+        // TODO: fix selectability and editability for PSStrokes
+        // It seems like they are editable and selectable _BUT_ we can't see
+        // the Controls and the canvas is not updated while working with them
+        // Since this is the main method of deleting things.. we need to solve this
+        psstroke.set('editable', true)
+        psstroke.set('selectable', true)
         this.addSerialization(psstroke)
-
         // this is not supported even though it works
         psstroke.setControlsVisibility({
           mt: false,
@@ -734,9 +738,8 @@ export const annotationMixin = {
         if (this.fabricCanvas) {
           this.fabricCanvas.isDrawingMode = true
         }
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
         this._resetColor()
         this._resetPencil()
         this.isDrawing = true
@@ -1014,11 +1017,9 @@ export const annotationMixin = {
         width: 100,
         height: 100
       })
-      // TODO UPDATE WITH PSBRUSH
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
       }
       this.configureCanvas()
       return this.fabricCanvas
