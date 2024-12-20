@@ -337,8 +337,16 @@ export default {
         )
         const rate = this.$options.rate || 1
 
-        this.currentPlayer.src = this.getMoviePath(entity)
-        this.nextPlayer.src = this.getMoviePath(nextEntity)
+        if (entity.preview_file_extension === 'mp4' && this.currentPlayer) {
+          this.currentPlayer.src = this.getMoviePath(entity)
+        } else if (this.currentPlayer) {
+          this.currentPlayer.src = ''
+        }
+        if (nextEntity.preview_file_extension === 'mp4' && this.nextPlayer) {
+          this.nextPlayer.src = this.getMoviePath(nextEntity)
+        } else if (this.nextPlayer) {
+          this.nextPlayer.src = ''
+        }
         this.currentPlayer.style.display = 'block'
         this.nextPlayer.style.display = 'none'
         this.resetHeight()
