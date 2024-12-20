@@ -68,7 +68,6 @@ import {
   REMOVE_TASK_SEARCH_END,
   UPDATE_COMMENT_CHECKLIST,
   UPDATE_COMMENT_REPLIES,
-  SET_LAST_COMMENT_DRAFT,
   SET_UPLOAD_PROGRESS,
   CLEAR_UPLOAD_PROGRESS,
   ADD_ATTACHMENT_TO_COMMENT,
@@ -102,7 +101,6 @@ const initialState = {
   isSavingCommentPreview: false,
   previewForms: [],
 
-  lastCommentDraft: '',
   uploadProgress: {}
 }
 
@@ -144,7 +142,6 @@ const getters = {
   taskEntityPreviews: state => state.taskEntityPreviews,
   previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
-  lastCommentDraft: state => state.lastCommentDraft,
   uploadProgress: state => state.uploadProgress
 }
 
@@ -1380,10 +1377,6 @@ const mutations = {
 
   [CLEAR_SHOTS](state) {
     state.taskMap = new Map()
-  },
-
-  [SET_LAST_COMMENT_DRAFT](state, lastCommentDraft) {
-    state.lastCommentDraft = lastCommentDraft
   },
 
   [UPDATE_REVISION_PREVIEW_POSITION](

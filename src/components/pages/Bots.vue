@@ -290,9 +290,8 @@ export default {
         })
         .catch(err => {
           console.error(err)
-          const message = err.body?.message
           const isUserLimitReached =
-            typeof message === 'string' && message.includes('limit')
+            err.body?.message?.includes('limit') ?? false
           if (isUserLimitReached) {
             this.errors.userLimit = true
           } else {

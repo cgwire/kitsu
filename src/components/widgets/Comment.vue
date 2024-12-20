@@ -278,7 +278,12 @@
           class="flexrow-item round-name revision"
           :to="previewRoute"
         >
-          {{ $t('comments.revision') }} {{ comment.previews[0].revision }}
+          {{
+            comment.pinned
+              ? $t('comments.pinned_revision')
+              : $t('comments.revision')
+          }}
+          {{ comment.previews[0].revision }}
         </router-link>
         <a
           class="preview-link button flexrow-item"
@@ -881,6 +886,7 @@ article.comment {
 }
 
 .pinned {
+  border: 2px solid var(--border-alt);
   transform: scale(1.02);
 }
 

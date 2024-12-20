@@ -289,17 +289,19 @@ export default {
       handler() {
         this.$nextTick(() => {
           this.isWrongDuration = false
-          Object.keys(this.$refs).forEach(key => {
-            const ref = this.$refs[key]
-            if (key.startsWith('video-') && ref[0]) {
-              ref[0].onloadedmetadata = () => {
-                const frames = Math.round(ref[0].duration * this.fps) - 1
-                if (frames !== this.expectedFrames) {
-                  this.isWrongDuration = true
+          if (this.expectedFrames !== 0) {
+            Object.keys(this.$refs).forEach(key => {
+              const ref = this.$refs[key]
+              if (key.startsWith('video-') && ref[0]) {
+                ref[0].onloadedmetadata = () => {
+                  const frames = Math.round(ref[0].duration * this.fps)
+                  if (frames !== this.expectedFrames) {
+                    this.isWrongDuration = true
+                  }
                 }
               }
-            }
-          })
+            })
+          }
         })
       }
     }

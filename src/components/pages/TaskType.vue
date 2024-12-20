@@ -121,6 +121,7 @@
                 :min-date="startDisabledDates.to"
                 :max-date="startDisabledDates.from"
                 :label="$t('main.start_date')"
+                utc
                 week-days-disabled
                 :with-margin="false"
                 v-model="schedule.taskTypeStartDate"
@@ -136,6 +137,7 @@
                 :min-date="endDisabledDates.to"
                 :max-date="endDisabledDates.from"
                 :label="$t('main.end_date')"
+                utc
                 week-days-disabled
                 :with-margin="false"
                 v-model="schedule.taskTypeEndDate"
@@ -260,6 +262,13 @@
 </template>
 
 <script>
+import assetsStore from '@/store/modules/assets.js'
+import editsStore from '@/store/modules/edits.js'
+import episodesStore from '@/store/modules/episodes.js'
+import sequencesStore from '@/store/modules/sequences.js'
+import shotsStore from '@/store/modules/shots.js'
+import taskStatusStore from '@/store/modules/taskstatus.js'
+
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import firstBy from 'thenby'
@@ -554,15 +563,12 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'assetsPath',
       'currentEpisode',
       'currentProduction',
       'currentTaskType',
       'editsPath',
       'episodesPath',
-      'editMap',
-      'episodeMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isTVShow',
@@ -570,24 +576,21 @@ export default {
       'organisation',
       'personMap',
       'selectedTasks',
-      'sequenceMap',
       'sequencesPath',
       'sequenceSubscriptions',
       'shotsByEpisode',
-      'shotMap',
       'shotsPath',
       'taskSearchQueries',
-      'taskStatusMap',
       'taskMap',
       'user'
     ]),
 
     taskTypeStartDate() {
-      return moment(this.schedule.taskTypeStartDate)
+      return moment(this.schedule.taskTypeStartDate).utc()
     },
 
     taskTypeEndDate() {
-      return moment(this.schedule.taskTypeEndDate)
+      return moment(this.schedule.taskTypeEndDate).utc()
     },
 
     isSupervisorInDepartment() {
@@ -601,6 +604,30 @@ export default {
 
     entityMap() {
       return this[`${this.entityType.toLowerCase()}Map`]
+    },
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
+
+    editMap() {
+      return editsStore.cache.editMap
+    },
+
+    episodeMap() {
+      return episodesStore.cache.episodeMap
+    },
+
+    sequenceMap() {
+      return sequencesStore.cache.sequenceMap
+    },
+
+    shotMap() {
+      return shotsStore.cache.shotMap
+    },
+
+    taskStatusMap() {
+      return taskStatusStore.cache.taskStatusMap
     },
 
     productionStartDate() {
@@ -1555,13 +1582,15 @@ export default {
     },
 
     'schedule.taskTypeStartDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeStartDate)
+      const newDate = moment(this.schedule.taskTypeStartDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.start_date) {
         this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
           scheduleItem: this.currentScheduleItem,
           dates: {
-            startDate: moment(this.schedule.taskTypeStartDate),
-            endDate: moment(this.schedule.taskTypeEndDate)
+            startDate: moment(this.schedule.taskTypeStartDate).utc(),
+            endDate: moment(this.schedule.taskTypeEndDate).utc()
           }
         })
         this.saveScheduleItem(this.currentScheduleItem)
@@ -1569,13 +1598,15 @@ export default {
     },
 
     'schedule.taskTypeEndDate'() {
-      const newDate = formatSimpleDate(this.schedule.taskTypeEndDate)
+      const newDate = moment(this.schedule.taskTypeEndDate)
+        .utc()
+        .format('YYYY-MM-DD')
       if (newDate !== this.currentScheduleItem.end_date) {
         this.$store.commit('SET_SCHEDULE_ITEM_DATES', {
           scheduleItem: this.currentScheduleItem,
           dates: {
-            startDate: moment(this.schedule.taskTypeStartDate),
-            endDate: moment(this.schedule.taskTypeEndDate)
+            startDate: moment(this.schedule.taskTypeStartDate).utc(),
+            endDate: moment(this.schedule.taskTypeEndDate).utc()
           }
         })
         this.saveScheduleItem(this.currentScheduleItem)

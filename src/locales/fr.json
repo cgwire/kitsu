@@ -26,7 +26,8 @@
         "time_spent": "Jours",
         "type": "Type",
         "hidden_from_client": "Visible par le client",
-        "ready_for": "Prêt pour"
+        "ready_for": "Prêt pour",
+        "shared": "Partagé dans la bibliothèque des actifs"
       },
       "cancel_text": "Êtes-vous sûr de vouloir archiver {name} ?",
       "delete_for_selection": "Supprimer l'asset sélectionné | Supprimer les {nbSelectedAssets} assets sélectionnés",
@@ -74,7 +75,9 @@
         "standby": "Stand By"
       },
       "episode_casting": "Casting de l'épisode",
-      "save_error": "Une erreur est survenue en sauvegardant le casting"
+      "save_error": "Une erreur est survenue en sauvegardant le casting",
+      "hide_library": "Cacher la bibliothèque",
+      "show_library": "Bibliothèque d'affichage"
     },
     "comments": {
       "add_attachment": "Ajouter une pièce jointe",
@@ -116,7 +119,8 @@
       "no_attachments": "Il n'y a pas de pièces jointes pour ce commentaire.",
       "confirm_publish": "Il n'y a pas de fichiers de préviz prêts à être publiées. Êtes-vous sûr de vouloir publier votre commentaire ?",
       "confirm_publish_button": "Envoyer le commentaire sans fichiers à publier",
-      "add_link": "Ajouter un lien URL"
+      "add_link": "Ajouter un lien URL",
+      "pinned_revision": "Révision épinglée"
     },
     "custom_actions": {
       "create_error": "Une erreur est survenue en sauvegardant cette action personnalisée. Êtes-vous sûr qu'aucune autre action a un nom similaire ?",
@@ -316,7 +320,9 @@
       "retry_fido_challenge": "Relancer le challenge FIDO",
       "unable_to_verify_fido": "Est-ce que vous avez un appareil FIDO ?",
       "wrong_fido_challenge": "La vérification du challenge FIDO a échoué.",
-      "login_server_failed": "Une erreur de serveur s'est produite lors de la connexion."
+      "login_server_failed": "Une erreur de serveur s'est produite lors de la connexion.",
+      "login_with_saml": "Connexion SSO avec {saml_idp_name}",
+      "login_saml": "Connexion SSO"
     },
     "main": {
       "about": "À propos",
@@ -367,7 +373,7 @@
       "studio": "Studio",
       "tutorials": "Tutorials",
       "user": "Utilisateur",
-      "white_theme": "Thème blanc",
+      "white_theme": "Thème clair",
       "yes": "oui",
       "csv": {
         "choose": "Choisir",
@@ -463,8 +469,8 @@
       "activity": "Activité",
       "archived": "Archivé",
       "avatar": {
-        "open_page": "Ouvrir la page {nom de la personne}",
-        "unassign": "Désaffecter {nom de la personne}"
+        "open_page": "Ouvrir la page de {personName}",
+        "unassign": "Désaffecter {personName}"
       },
       "color": "Couleur",
       "copy": "Copie",
@@ -485,7 +491,9 @@
       "import": "Importation",
       "is_shared": "Partagé avec l'ensemble de l'équipe",
       "no_results": "Pas de résultats",
-      "link": "Lien"
+      "link": "Lien",
+      "hours_spent": "heure passée | heures passées",
+      "hours_estimated": "heures estimées | heures estimées"
     },
     "menu": {
       "assign_tasks": "Assigner des tâches",
@@ -538,7 +546,24 @@
       "only_assignations": "Seulement les assignations",
       "only_comments": "Seulement les commentaires",
       "only_mentions": "Seulement les mentions",
-      "only_replies": "Seulement les réponses"
+      "only_replies": "Seulement les réponses",
+      "all_statuses": "Lus et non lus",
+      "all_notifications": "Toutes les notifications",
+      "assignation": "Affectation",
+      "comment": "Commentaire",
+      "initial_comment": "Commentaire initial",
+      "mark_all_as_read": "Marquer tous les textes comme lus",
+      "mention": "Mention",
+      "only_non_watching": "Seulement la non-observation",
+      "only_read": "Lire seulement",
+      "only_unread": "Uniquement non lu",
+      "only_watching": "Ne faire que regarder",
+      "read": "lire",
+      "reply": "Répondre",
+      "publish": "Publier",
+      "published": "a publié un aperçu",
+      "show_comments": "Afficher les commentaires",
+      "watching": "l'observation"
     },
     "people": {
       "active": "Présents",
@@ -603,7 +628,7 @@
       "change_password_error": "Un erreur est survenue en changeant de mot de passe. S'il vous plait vérifiez le nouveau mot de passe.",
       "disable_2FA": "Désactivez l'authentification double facteur",
       "disable_2FA_error": "Un erreur est survenue en désactivant l'authentification double facteur.",
-      "departments_empty": "Cet utilisateur n'est lié à aucun service.",
+      "departments_empty": "Cet utilisateur n'est lié à aucun département.",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar de l'utilisateur.",
       "contract": {
         "open-ended": "Ouvert à tous",
@@ -767,7 +792,8 @@
         "is_preview_download_allowed": "Permettre aux artistes de télécharger des aperçus",
         "is_set_preview_automated": "Définir automatiquement la nouvelle prévisualisation comme vignette de l'entité",
         "homepage": "Page d'accueil (première page affichée)",
-        "code": "Nom court"
+        "code": "Nom court",
+        "is_publish_default": "Définir le widget de commentaires pour les artistes en mode publication par défaut"
       },
       "metadata": {
         "add_explaination": "Ajouter des données spécifiques au projet.",
@@ -872,8 +898,8 @@
         "immersive": "Expérience immersive"
       },
       "homepage": {
-        "assets": "Actifs",
-        "shots": "Tirs",
+        "assets": "Assets",
+        "shots": "Plans",
         "sequences": "Séquences"
       },
       "load_stats": "Charger les statistiques"
@@ -962,7 +988,9 @@
         "timesheets_locked": "Bloquer les feuilles de temps des artistes de plus d'une semaine",
         "mattermost_webhook": "Webhook Mattermost (optionnel)",
         "discord_token": "Token Discord (optionnel)",
-        "show_hd_default": "Montre les vidéos par défaut en HD"
+        "show_hd_default": "Montre les vidéos par défaut en HD",
+        "format_duration_in_hours": "Affichage des durées et des estimations en heures",
+        "dark_theme_by_default": "Utiliser un thème sombre par défaut"
       },
       "production": {
         "empty_list": "La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs.",
@@ -1003,7 +1031,7 @@
       "title_entities": "Statut des entités",
       "title_concepts": "Statut des concepts",
       "help": {
-        "entities": "Actifs, plans, séquences, ..."
+        "entities": "Assets, plans, séquences, ..."
       }
     },
     "task_types": {
@@ -1080,7 +1108,6 @@
       "year_label": "Année",
       "title": "Quotas",
       "type_label": "Type",
-      "explaination": "Les plans sont considérés terminés dès lors qu'une demande validation a été envoyée. Les quotas sont ensuite calculés à partir des feuilles de temps. Chaque jour où du temps est rempli, le nombre de frame pondéré en fonction du temps total est calculé.\\n Si aucun temps n'est renseigné, on considère que : \\n * La tâche démarre quand le statut est passé à WIP \\n* La tâche a été terminée à la première demande de retours.\\n * Le nombre de frames réalisés est réparti entre le nombre de jours ouvrés entre la date de début et la date de fin.\"",
       "export_quotas": "Exporter les quotas (.csv)",
       "highlight_quotas": "Mettre en valeurs les quotas sous : ",
       "weight": "Poids",
@@ -1093,7 +1120,12 @@
       "seconds": "Secondes",
       "weighted": "Pondéré",
       "week": "Semaine",
-      "explanation_feedback": "La prise de vue est considérée comme terminée à la première demande de retour d'information. Son nombre de vues est ajouté aux quotas de la journée."
+      "explanation_feedback": "La prise de vue est considérée comme terminée à la première demande de retour d'information. Son nombre de vues est ajouté aux quotas de la journée.",
+      "done_date": "Date d'approbation",
+      "explanation_done": "La prise de vue est considérée comme terminée lors de la dernière approbation. Son nombre d'images est ajouté aux quotas de la journée.",
+      "explanation_weighted": "Les prises de vue sont considérées comme achevées dès la première demande de retour d'information. Ensuite, les quotas sont pondérés en fonction du temps passé sur la tâche, tel qu'il est enregistré dans la feuille de temps de l'artiste.\n\n Si aucun temps n'est enregistré, il est supposé que :\n* la tâche a commencé au premier changement de statut (WIP).\n* La tâche a été achevée le jour où la demande de retour d'information a été faite.\n * Les cadres terminés sont répartis uniformément entre tous les jours ouvrables compris entre les dates de début et de fin.",
+      "explanation_weighteddone": "Les prises de vue sont considérées comme terminées après la dernière approbation. Ensuite, les quotas sont pondérés en fonction du temps passé sur la tâche, tel qu'il est enregistré dans la feuille de temps de l'artiste.\n\n Si aucun temps n'est enregistré, il est supposé que :\n* la tâche a commencé au premier changement de statut vers WIP.\n* La tâche a été achevée le jour où elle a été approuvée.\n * Les cadres terminés sont répartis uniformément entre tous les jours ouvrables compris entre les dates de début et de fin.",
+      "weighted_done": "Pondéré (Approbation)"
     },
     "shots": {
       "casting": "Casting",
@@ -1246,7 +1278,10 @@
         "task_status_short_name": "Statut",
         "task_type": "Type",
         "start_date_short": "Date de début",
-        "parent": "Parent"
+        "parent": "Parent",
+        "difficulty": "Difficulté",
+        "done_date": "Date d'approbation",
+        "nb_frames": "Cadres"
       },
       "colors": {
         "title": "Coloration",
@@ -1323,7 +1358,14 @@
       "calendar": "Calendrier",
       "pending": "En attente",
       "validated": "Validé",
-      "unassigned_tasks": "Tâches non assignées"
+      "unassigned_tasks": "Tâches non assignées",
+      "difficulty": {
+        "very_easy": "Très facile",
+        "easy": "Facile",
+        "medium": "Moyen",
+        "hard": "Dur",
+        "very_hard": "Très difficile"
+      }
     },
     "timesheets": {
       "detail_level": "Niveau de détail",
@@ -1339,7 +1381,7 @@
       "export_timespents": "Exporter les temps passés pour les projets ouverts",
       "unit": "Unité",
       "confirm_day_offs": "Le fait de définir ces jours comme des jours de congé effacera toutes les heures enregistrées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",
-      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {début} à {fin}. Êtes-vous sûr de vouloir supprimer cette période ?",
+      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {start} à {end}. Êtes-vous sûr de vouloir supprimer cette période ?",
       "off": "Arrêt"
     },
     "wrong_browser": {
@@ -1379,7 +1421,7 @@
         "name": "Nom",
         "color": "Couleur"
       },
-      "no_department": "Aucun service"
+      "no_department": "Aucun département"
     },
     "edits": {
       "all_edits": "Tous les montages",
@@ -1403,7 +1445,8 @@
       "tasks": "Tâche",
       "cancel_text": "Êtes-vous sûr que vous voulez archiver {name} ?",
       "history": "Modifier l'historique des valeurs",
-      "restore_error": "Une erreur s'est produite lors de la restauration de cette édition."
+      "restore_error": "Une erreur s'est produite lors de la restauration de cette édition.",
+      "edit_success": "Les modifications ont été enregistrées avec succès."
     },
     "status_automations": {
       "change_ready_for": "Change \"Prêt pour\" pour ",
@@ -1483,10 +1526,10 @@
       "title": "Bots",
       "bots": "bot | bots",
       "active_bots": "bot actif | bots actifs",
-      "new_bot": "Ajouter un nouveau robot",
+      "new_bot": "Ajouter un nouveau bot",
       "edit_title": "Editer le bot",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar du bot.",
-      "new_token_title": "Nouveau jeton API pour {nom}",
+      "new_token_title": "Nouveau jeton API pour {name}",
       "new_token_warning": "Si vous générez un nouveau jeton, l'ancien sera désactivé.",
       "generate": "Générer un nouveau jeton",
       "copy_token_warning": "Veillez à copier le jeton ci-dessous. Vous ne pourrez plus le voir.",
@@ -1496,7 +1539,7 @@
         "expiration_date": "Date d'expiration",
         "token": "jeton"
       },
-      "no_bot": "Il n'y a pas de robot. Voulez-vous en créer un ?"
+      "no_bot": "Il n'y a pas de bot. Voulez-vous en créer un ?"
     },
     "chats": {
       "join": "Rejoindre le chat",
@@ -1509,7 +1552,7 @@
       "search_entity": "Recherche d'une entité"
     },
     "concepts": {
-      "add_links": "Ajouter des liens vers les actifs",
+      "add_links": "Ajouter des liens vers les assets",
       "add_new_concept": "Ajouter de nouveaux concepts",
       "add_concept": "Ajouter des fichiers pour les nouveaux concepts",
       "add_concept_error": "Une erreur s'est produite lors de l'ajout de concepts.",
@@ -1551,7 +1594,7 @@
     },
     "studios": {
       "create_error": "Une erreur s'est produite lors de l'enregistrement de ce studio. Êtes-vous sûr qu'il n'existe pas de studio portant un nom similaire ?",
-      "delete_text": "Êtes-vous sûr de vouloir supprimer {nom} de votre base de données ?",
+      "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce studio.",
       "edit_title": "Editer le studio",
       "new_studios": "Ajouter un studio",
@@ -1575,8 +1618,30 @@
       "edit": "Modifier le jour de congé",
       "delete": "Supprimer un jour de congé",
       "confirm_day_offs": "Le fait de définir ces jours de congé effacera toutes les heures de travail effectuées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",
-      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {début} à {fin}. Êtes-vous sûr de vouloir supprimer cette période ?",
+      "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {start} à {end}. Êtes-vous sûr de vouloir supprimer cette période ?",
       "error_days_off": "Une erreur s'est produite lors de la mise à jour des jours de congé."
+    },
+    "library": {
+      "asset_library": "Bibliothèque des actifs",
+      "from_library": "À partir de la bibliothèque de ressources",
+      "import_from_asset_type": "Importer tous les biens du type et de la production sélectionnés",
+      "import_from_assets": "Importer des actifs à partir de la production et du type d'actif sélectionnés",
+      "import_from_list": "Importer les biens sélectionnés dans la liste",
+      "import_from_production": "Importer tous les actifs de la production sélectionnée",
+      "manage": "Ajouter des actifs à votre bibliothèque",
+      "no_entities": "Aucune entité n'est disponible",
+      "no_open_productions": "Pas de productions ouvertes",
+      "no_shared_assets": "Aucun actif partagé n'est disponible",
+      "remove_selected_assets": "Retirer le bien sélectionné de la bibliothèque | Retirer les biens {nbSelectedAssets} sélectionnés de la bibliothèque",
+      "select_asset_type": "Sélectionner un type d'actif",
+      "select_production": "Sélectionner une production",
+      "selected_assets": "Actifs sélectionnés",
+      "fields": {
+        "name": "Nom",
+        "production": "Production",
+        "created_at": "Date de création",
+        "updated_at": "Date de mise à jour"
+      }
     }
   }
 }

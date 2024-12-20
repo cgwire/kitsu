@@ -228,7 +228,7 @@ export const playerMixin = {
     },
 
     fps() {
-      return parseFloat(this.currentProduction?.fps) || 24
+      return parseFloat(this.currentProduction?.fps) || 25
     },
 
     // Elements
@@ -489,7 +489,7 @@ export const playerMixin = {
           comparisonPlayer.setCurrentTimeRaw(currentTime)
         }
       } else if (this.isCurrentPreviewSound) {
-        this.soundPlayer.pause()
+        this.soundPlayer?.pause()
       }
       this.isPlaying = false
     },
@@ -996,11 +996,9 @@ export const playerMixin = {
     },
 
     onSpeedClicked() {
-      this.speed = this.speed + 1 > 4 ? 1 : this.speed + 1
-      let rate = 1
-      if (this.speed === 4) rate = 2
-      if (this.speed === 2) rate = 0.5
-      if (this.speed === 1) rate = 0.25
+      const rates = [0.25, 0.5, 1, 1.5, 2]
+      this.speed = (this.speed % rates.length) + 1
+      const rate = rates[this.speed - 1]
       this.setPlayerSpeed(rate)
       this.updateRoomStatus()
     },
@@ -1091,7 +1089,7 @@ export const playerMixin = {
     playSound() {
       this.isPlaying = true
       if (this.isCurrentPreviewSound) {
-        this.soundPlayer.play()
+        this.soundPlayer?.play()
       }
     },
 
@@ -1468,7 +1466,7 @@ export const playerMixin = {
   watch: {
     isCommentsHidden() {
       if (this.isCurrentPreviewSound) {
-        this.soundPlayer.redraw()
+        this.soundPlayer?.redraw()
       }
     }
   },

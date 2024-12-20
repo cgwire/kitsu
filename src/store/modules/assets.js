@@ -726,11 +726,17 @@ const actions = {
         asset.description,
         asset.ready_for !== 'None' ? taskTypeMap.get(asset.ready_for).name : ''
       ])
+      asset.data = asset.data || {}
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Asset')
         .forEach(descriptor => {
-          asset.data = asset.data || {}
-          assetLine.push(asset.data[descriptor.field_name])
+          if (descriptor.data_type === 'boolean') {
+            assetLine.push(
+              asset.data[descriptor.field_name]?.toLowerCase() === 'true'
+            )
+          } else {
+            assetLine.push(asset.data[descriptor.field_name])
+          }
         })
       if (state.isAssetTime) {
         assetLine.push(minutesToDays(organisation, asset.timeSpent).toFixed(2))

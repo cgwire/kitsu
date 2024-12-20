@@ -230,6 +230,12 @@ import { CornerDownRightIcon } from 'lucide-vue-next'
 import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
+import assetsStore from '@/store/modules/assets.js'
+import editsStore from '@/store/modules/edits.js'
+import episodesStore from '@/store/modules/episodes.js'
+import sequencesStore from '@/store/modules/sequences.js'
+import shotsStore from '@/store/modules/shots.js'
+
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
@@ -274,16 +280,11 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'currentProduction',
-      'editMap',
-      'episodeMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'organisation',
       'personMap',
-      'sequenceMap',
-      'shotMap',
       'taskStatusMap',
       'taskTypeMap',
       'user'
@@ -299,6 +300,26 @@ export default {
 
     tasksByPerson() {
       return [...this.tasks].sort(this.compareFirstAssignees)
+    },
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
+
+    editMap() {
+      return editsStore.cache.editMap
+    },
+
+    episodeMap() {
+      return episodesStore.cache.episodeMap
+    },
+
+    sequenceMap() {
+      return sequencesStore.cache.sequenceMap
+    },
+
+    shotMap() {
+      return shotsStore.cache.shotMap
     },
 
     entityMap() {

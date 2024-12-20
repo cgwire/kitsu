@@ -387,8 +387,15 @@ export default {
     ValidationTag
   },
 
+  provide() {
+    return {
+      draftComment: this.draftComment
+    }
+  },
+
   data() {
     return {
+      draftComment: {},
       previewForms: [],
       currentFrame: 0,
       currentTask: null,
@@ -901,7 +908,7 @@ export default {
     ) {
       const params = {
         taskId: this.task.id,
-        taskStatusId: taskStatusId,
+        taskStatusId,
         attachment,
         checklist,
         comment,
@@ -1103,7 +1110,7 @@ export default {
           preview: {
             id: previewId,
             revision,
-            extension: extension
+            extension
           },
           taskId,
           commentId,

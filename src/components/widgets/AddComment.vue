@@ -375,19 +375,12 @@ export default {
     'remove-preview'
   ],
 
+  inject: ['draftComment'],
+
   data() {
     return {
       atOptions: [],
-      attachments: [],
-      checklist: [],
       isDragging: false,
-      link: null,
-      mode: 'status',
-      showCommentArea: false,
-      showLinkField: false,
-      nextRevision: undefined,
-      text: '',
-      task_status_id: null,
       errors: {
         addCommentAttachment: false
       },
@@ -452,6 +445,15 @@ export default {
     }
   },
 
+  beforeMount() {
+    if (!this.attachments) {
+      this.attachments = []
+    }
+    if (!this.checklist) {
+      this.checklist = []
+    }
+  },
+
   mounted() {
     const production = this.productionMap.get(this.task.project_id)
     this.mode =
@@ -491,6 +493,88 @@ export default {
       'taskTypeMap',
       'uploadProgress'
     ]),
+
+    attachments: {
+      get() {
+        return this.draftComment.attachments
+      },
+      set(value) {
+        this.draftComment.attachments = value
+      }
+    },
+
+    checklist: {
+      get() {
+        return this.draftComment.checklist
+      },
+      set(value) {
+        this.draftComment.checklist = value
+      }
+    },
+
+    link: {
+      get() {
+        return this.draftComment.link
+      },
+      set(value) {
+        this.draftComment.link = value
+      }
+    },
+
+    mode: {
+      get() {
+        return this.draftComment.mode
+      },
+      set(value) {
+        this.draftComment.mode = value
+      }
+    },
+
+    nextRevision: {
+      get() {
+        return this.draftComment.nextRevision
+      },
+      set(value) {
+        this.draftComment.nextRevision = value
+      }
+    },
+
+    showCommentArea: {
+      get() {
+        return this.draftComment.showCommentArea
+      },
+      set(value) {
+        this.draftComment.showCommentArea = value
+      }
+    },
+
+    showLinkField: {
+      get() {
+        return this.draftComment.showLinkField
+      },
+      set(value) {
+        this.draftComment.showLinkField = value
+      }
+    },
+
+    task_status_id: {
+      get() {
+        return this.draftComment.task_status_id
+      },
+      set(value) {
+        this.draftComment.task_status_id = value
+      }
+    },
+
+    text: {
+      get() {
+        return this.draftComment.text
+      },
+      set(value) {
+        this.draftComment.text = value
+        drafts.setTaskDraft(this.task.id, this.text)
+      }
+    },
 
     attachmentModal() {
       return this.$refs['add-attachment-modal']
@@ -757,10 +841,6 @@ export default {
       }
     },
 
-    text() {
-      drafts.setTaskDraft(this.task.id, this.text)
-    },
-
     mode() {
       if (this.mode === 'publish') {
         this.checklist = []
@@ -777,7 +857,7 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        const form = this.previewForms.findLast(
+        const form = this.previewForms?.findLast(
           form => this.getRevision(form) > 0
         )
         this.nextRevision = this.getRevision(form)

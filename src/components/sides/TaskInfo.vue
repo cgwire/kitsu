@@ -399,13 +399,27 @@ export default {
     player: {
       type: Object,
       default: null
+    },
+    root: {
+      type: Boolean,
+      default: true
     }
   },
 
   emits: ['comment-added', 'task-removed', 'time-code-clicked'],
 
+  provide() {
+    if (this.root) {
+      return {
+        draftComment: this.draftComment
+      }
+    }
+    return {}
+  },
+
   data() {
     return {
+      draftComment: {},
       addExtraPreviewFormData: null,
       animOn: false,
       previewForms: [],
@@ -490,7 +504,6 @@ export default {
       'isCurrentUserSupervisor',
       'isSingleEpisode',
       'isTVShow',
-      'lastCommentDraft',
       'nbSelectedTasks',
       'personMap',
       'previewFormData',
@@ -1302,7 +1315,7 @@ export default {
         this.loading.setFrameThumbnail = true
         let frame = null
         if (isUseCurrentFrame) {
-          frame = this.currentFrameRaw
+          frame = this.currentFrameRaw + 1
         }
         return this.setCurrentPreviewAsEntityThumbnail(frame)
       }

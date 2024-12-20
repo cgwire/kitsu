@@ -706,66 +706,37 @@ export default {
 
     daysAvailable() {
       const days = []
-      const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
-      const day = startDate.clone().add(-1, 'days')
-      let dayDate = day.toDate()
-      const endDate = parseDate(this.endDate.format('YYYY-MM-DD'))
-      const endDayDate = endDate.toDate()
-      dayDate.isoweekday = day.isoWeekday()
-      dayDate.monthday = day.month()
-
+      let day = this.startDate.clone().utc().startOf('day')
+      const endDate = this.endDate.clone().utc().startOf('day')
       const daysOff = this.getDayOffRange(this.daysOff).map(
         dayOff => dayOff.date
       )
 
-      while (dayDate < endDayDate) {
-        const nextDay = new Date(Number(dayDate))
-        nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
-
-        nextDay.isoweekday = dayDate.isoweekday + 1
-        if (nextDay.isoweekday > 7) {
-          nextDay.isoweekday = 1
-          nextDay.newWeek = true
-        }
-        nextDay.monthday = dayDate.monthday + 1
-        if (nextDay.getMonth() !== dayDate.getMonth()) {
-          nextDay.newMonth = true
-          nextDay.monthday = 1
-        }
-        if ([6, 7].includes(nextDay.isoweekday)) {
-          nextDay.weekend = true
-        }
-        if (daysOff.includes(nextDay.toISOString().slice(0, 10))) {
-          nextDay.off = true
-        }
-
-        const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
-        momentDay.off = nextDay.off
-        momentDay.newWeek = nextDay.newWeek
-        momentDay.newMonth = nextDay.newMonth
-        momentDay.weekend = nextDay.weekend
-        momentDay.weekNumber = momentDay.week()
-        momentDay.text = momentDay.format('YYYY-MM-DD')
-        momentDay.monthText = momentDay.format('MMMM YY')
-        momentDay.dayNumber = momentDay.format('DD')
-        momentDay.dayText = momentDay.format('ddd')[0]
-        days.push(momentDay)
-        dayDate = nextDay
+      while (day.isSameOrBefore(endDate)) {
+        day.off = daysOff.includes(day.toISOString().slice(0, 10))
+        day.newWeek = day.isoWeekday() === 1
+        day.newMonth = day.date() === 1
+        day.weekend = [6, 7].includes(day.isoWeekday())
+        day.weekNumber = day.week()
+        day.text = day.format('YYYY-MM-DD')
+        day.monthText = day.format('MMMM YY')
+        day.dayNumber = day.format('DD')
+        day.dayText = day.format('ddd')[0]
+        days.push(day)
+        day = day.clone().add(1, 'days')
       }
 
-      if (days.length > 1 && days[0].weekend === true) {
-        days[0].newMonth = false
-        days[1].newMonth = true
-        if (days.length > 2 && days[1].weekend === true) {
-          days[1].newMonth = false
-          days[2].newMonth = true
-        } else if (days.length > 2) {
-          days[1].newMonth = true
+      // always show month and week number at start of schedule
+      if (days.length) {
+        const indexNextMonth = days.findIndex(day => day.newMonth)
+        if (indexNextMonth >= 5 || indexNextMonth === -1) {
+          days[0].newMonth = true
         }
-      } else if (days.length > 0) {
-        days[0].newMonth = true
+        const indexNextWeek = days.findIndex(day => day.newWeek)
+        if (indexNextWeek === -1) {
+          days[0].newWeek = true
+        }
       }
-
       return days
     },
 
@@ -906,7 +877,7 @@ export default {
     },
 
     timelineTodayPositionStyle() {
-      const today = moment()
+      const today = moment().utc(true)
       const isVisible =
         today.isAfter(this.startDate) && today.isBefore(this.endDate)
       return {
@@ -1502,8 +1473,8 @@ export default {
       ) {
         return 0
       }
-      const first = startDate.clone().startOf('day')
-      const last = endDate.clone().endOf('day')
+      const first = startDate.clone().utc().startOf('day')
+      const last = endDate.clone().utc().endOf('day')
       const diff = last.diff(first, 'days')
       return diff
     },
@@ -1527,7 +1498,7 @@ export default {
     },
 
     getDayOffLeft(dayOff) {
-      const startDate = moment(dayOff.date)
+      const startDate = moment.utc(dayOff.date)
       let startDiff = this.dateDiff(this.startDate, startDate) || 0
       if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
       return startDiff * this.cellWidth + 1

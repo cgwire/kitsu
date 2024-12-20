@@ -59,29 +59,22 @@ const getters = {
 }
 
 const actions = {
-  loadNews({ commit, state }, params) {
+  async loadNews({ commit, state }, params) {
     commit(CLEAR_NEWS)
-    return newsApi.getLastNews(params).then(newsList => {
-      commit(ADD_PREVIOUS_NEWS, newsList.data)
-      commit(NEWS_SET_TOTAL, newsList.total)
-      commit(NEWS_SET_STATS, newsList.stats)
-      return Promise.resolve()
-    })
+    const newsList = await newsApi.getLastNews(params)
+    commit(ADD_PREVIOUS_NEWS, newsList.data)
+    commit(NEWS_SET_TOTAL, newsList.total)
+    commit(NEWS_SET_STATS, newsList.stats)
   },
 
-  loadMoreNews({ commit, state }, params) {
-    return newsApi
-      .getLastNews(params)
-      .then(newsList => commit(ADD_PREVIOUS_NEWS, newsList.data))
+  async loadMoreNews({ commit, state }, params) {
+    const newsList = await newsApi.getLastNews(params)
+    commit(ADD_PREVIOUS_NEWS, newsList.data)
   },
 
-  loadSingleNews({ commit, state }, { productionId, newsId }) {
-    return new Promise((resolve, reject) => {
-      newsApi
-        .getNews(productionId, newsId)
-        .then(news => commit(ADD_FIRST_NEWS, news))
-        .catch(reject)
-    })
+  async loadSingleNews({ commit, state }, { productionId, newsId }) {
+    const news = await newsApi.getNews(productionId, newsId)
+    return commit(ADD_FIRST_NEWS, news)
   }
 }
 
@@ -105,14 +98,11 @@ const mutations = {
   },
 
   [NEWS_ADD_PREVIEW](state, { commentId, previewId, extension }) {
-    if (commentId) {
-      const news = state.newsList.find(news => {
-        return news.comment_id === commentId
-      })
-      if (news) {
-        news.preview_file_id = previewId
-        news.preview_file_extension = extension
-      }
+    if (!commentId) return
+    const news = state.newsList.find(news => news.comment_id === commentId)
+    if (news) {
+      news.preview_file_id = previewId
+      news.preview_file_extension = extension
     }
   },
 

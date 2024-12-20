@@ -51,6 +51,7 @@
               :is-repeating="isRepeating"
               :is-wireframe="isWireframe"
               :margin-bottom="marginBottom"
+              name="main"
               :nb-frames="nbFrames"
               :object-background-url="objectBackgroundUrl"
               :preview="currentPreview"
@@ -98,6 +99,7 @@
           :entity-type="entityType"
           :extendable="false"
           :is-preview="false"
+          :root="false"
           :silent="isCommentsHidden"
           :task="task"
           @comment-added="$emit('comment-added')"
@@ -524,7 +526,6 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue'
 import { fabric } from 'fabric'
 import {
   ArrowUpRightIcon,
@@ -532,6 +533,7 @@ import {
   GlobeIcon,
   LinkIcon
 } from 'lucide-vue-next'
+import { defineAsyncComponent, markRaw } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import {
@@ -833,7 +835,7 @@ export default {
     },
 
     fps() {
-      return parseFloat(this.currentProduction?.fps) || 24
+      return parseFloat(this.currentProduction?.fps) || 25
     },
 
     frameDuration() {
@@ -1246,15 +1248,17 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
-      this.fabricCanvas = new fabric.Canvas(this.canvasId, {
-        fireRightClick: true,
-        width,
-        height,
-        enablePointerEvents: true
-      })
-
-      let brush = new PSBrush(this.fabricCanvas)
+      // Use markRaw() to avoid reactivity on Fabric Canvas
+      this.fabricCanvas = markRaw(
+        new fabric.Canvas(this.canvasId, {
+          fireRightClick: true,
+          width,
+          height,
+          enablePointerEvents: true
+        })
+      )
       if (!this.fabricCanvas.freeDrawingBrush) {
+        let brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
         brush.width = 20; // Set default brush width
         brush.color = "#000"; // Set default color

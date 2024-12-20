@@ -427,7 +427,7 @@ const actions = {
         return shotsApi.getShots(production, episode)
       })
       .then(shots => {
-        const sequenceMap = rootGetters.sequenceMap
+        const sequenceMap = sequenceStore.cache.sequenceMap
         const taskMap = rootGetters.taskMap
         commit(LOAD_SHOTS_END, {
           production,
@@ -654,7 +654,13 @@ const actions = {
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Shot')
         .forEach(descriptor => {
-          shotLine.push(shot.data[descriptor.field_name])
+          if (descriptor.data_type === 'boolean') {
+            shotLine.push(
+              shot.data[descriptor.field_name]?.toLowerCase() === 'true'
+            )
+          } else {
+            shotLine.push(shot.data[descriptor.field_name])
+          }
         })
       if (state.isShotTime) {
         shotLine.push(minutesToDays(organisation, shot.timeSpent).toFixed(2))

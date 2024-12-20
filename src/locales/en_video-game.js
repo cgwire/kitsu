@@ -166,7 +166,7 @@ export default {
     sequences: 'Levels',
     tasks: 'Map Tasks',
     title: 'Maps',
-    wrong_file_duration: 'One of the upldoaded video file duration doesn\'t match the expected duration of the current map.',
+    wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current map.',
     fields: {
       episode: 'Chapter',
       placeholder: 'MP01',

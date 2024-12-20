@@ -76,6 +76,7 @@
             >
               <option value="zh_Hans_CN">Chinese</option>
               <option value="zh_Hant_TW">Chinese (TW)</option>
+              <option value="da_DA">Dannish</option>
               <option value="nl_NL">Dutch</option>
               <option value="en_US">English</option>
               <option value="fr_FR">French</option>

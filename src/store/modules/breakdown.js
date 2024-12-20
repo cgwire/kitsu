@@ -478,8 +478,8 @@ const mutations = {
         'asset_type_name'
       )
     })
-    state.casting = { ...state.casting }
-    state.castingByType = { ...state.castingByType }
+    state.casting = casting
+    state.castingByType = entityCastingByType
   },
 
   [CASTING_ADD_TO_CASTING](state, { entityId, asset, nbOccurences, label }) {

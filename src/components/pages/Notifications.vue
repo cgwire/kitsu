@@ -44,9 +44,9 @@
           <span class="filler"></span>
           <button-simple
             class="flexrow-item"
-            @click="markAllNotificationsRead"
-            :loading="loading.markAll"
+            :is-loading="loading.markAll"
             :text="$t('notifications.mark_all_as_read')"
+            @click="markAllNotificationsRead"
           />
         </div>
         <div
@@ -137,7 +137,7 @@
                   class="selector"
                   :label="$t('notifications.read')"
                   is-small
-                  @input="value => toggleNotificationRead(notification, value)"
+                  @click="value => toggleNotificationRead(notification, value)"
                   :value="notification.read ? 'true' : 'false'"
                 />
               </div>
@@ -544,8 +544,8 @@ export default {
     onNotificationSelected(event, notification) {
       if (
         event.target.classList.contains('bool-field') ||
-        event.target.parentElement.classList.contains('bool-field') ||
-        event.target.parentElement.parentElement.classList.contains(
+        event.target.parentElement?.classList.contains('bool-field') ||
+        event.target.parentElement?.parentElement?.classList.contains(
           'bool-field'
         )
       ) {
@@ -612,7 +612,7 @@ export default {
     async markAllNotificationsRead() {
       this.loading.markAll = true
       await this.markAllNotificationsAsRead()
-      this.loading.markAll = true
+      this.loading.markAll = false
     }
   },
 

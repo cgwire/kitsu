@@ -98,6 +98,8 @@
 </template>
 
 <script>
+import moment from 'moment-timezone'
+
 import { formatSimpleDate } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -172,8 +174,8 @@ export default {
               dayOff.date !== dayOff.end_date
                 ? `${dayOff.date} - ${dayOff.end_date}`
                 : dayOff.date,
-            date: new Date(dayOff.date),
-            end_date: new Date(dayOff.end_date || dayOff.date)
+            date: moment.utc(dayOff.date).toDate(),
+            end_date: moment.utc(dayOff.end_date || dayOff.date).toDate()
           }
         })
     }

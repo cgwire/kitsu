@@ -12,6 +12,7 @@
               {{ $t('main.start_date') }}
             </label>
             <date-field
+              utc
               week-days-disabled
               @update:model-value="validateDates"
               v-model="form.startDate"
@@ -22,6 +23,7 @@
               {{ $t('main.end_date') }}
             </label>
             <date-field
+              utc
               week-days-disabled
               @update:model-value="validateDates"
               v-model="form.endDate"
@@ -62,6 +64,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { AlertTriangleIcon } from 'lucide-vue-next'
+import moment from 'moment-timezone'
 
 import { modalMixin } from '@/components/modals/base_modal'
 
@@ -134,10 +137,11 @@ export default {
     },
 
     resetForm() {
+      const today = moment().utc().toDate()
       this.form = {
-        startDate: this.dayOffToEdit?.date || new Date(),
+        startDate: this.dayOffToEdit?.date || today,
         endDate:
-          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || new Date(),
+          this.dayOffToEdit?.end_date || this.dayOffToEdit?.date || today,
         description: this.dayOffToEdit?.description || null
       }
     },

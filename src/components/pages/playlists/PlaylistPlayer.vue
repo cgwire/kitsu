@@ -1091,7 +1091,7 @@ export default {
         { label: this.$t('playlists.for_client'), value: 'true' },
         { label: this.$t('playlists.for_studio'), value: 'false' }
       ],
-      speedTextMap: ['x0.25', 'x0.50', 'x1.00', 'x2.00']
+      speedTextMap: ['x0.25', 'x0.50', 'x1.00', 'x1.50', 'x2.00']
     }
   },
 
@@ -2079,7 +2079,7 @@ export default {
           this.rebuildRevisionOptions()
         }
         this.$nextTick(() => {
-          if (this.isCurrentPreviewPicture) {
+          if (this.isCurrentPreviewPicture && !this.isPlaying) {
             this.triggerResize()
             this.resetHeight()
             this.resetPictureCanvas()

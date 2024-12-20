@@ -63,15 +63,6 @@
       @drop="onDropped"
       ref="drop-area"
     ></div>
-    <div
-      :id="'drop-area-wide-' + entity.id"
-      class="drop-area-wide"
-      @dragover="onDragover"
-      @dragleave="onDragleave"
-      @drop="onDropped"
-      @click.prevent="onPlayClick"
-      ref="drop-area-wide"
-    ></div>
   </div>
 </template>
 
@@ -137,10 +128,6 @@ export default {
 
     dropArea() {
       return this.$refs['drop-area']
-    },
-
-    dropAreaWide() {
-      return this.$refs['drop-area-wide']
     },
 
     taskTypeOptions() {
@@ -265,7 +252,7 @@ export default {
       this.$emit('preview-changed', this.entity, previewFile)
     },
 
-    'entity.preview_file_id': function () {
+    'entity.preview_file_id'() {
       if (this.previewFileId !== this.entity.preview_file_id) {
         this.previewFileId = this.entity.preview_file_id
       }
@@ -284,15 +271,6 @@ export default {
   width: 15px;
   height: 220px;
   transition: width 0.3s ease;
-}
-
-.drop-area-wide {
-  cursor: pointer;
-  height: 100%;
-  left: 100px;
-  position: absolute;
-  width: 60px;
-  z-index: 2;
 }
 
 .playlisted-entity {

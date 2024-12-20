@@ -7,6 +7,7 @@
             {{ $t('main.start_date') }}
           </label>
           <date-field
+            utc
             v-model="selectedStartDate"
             @update:model-value="onUpdateSelectedStartDate"
           />
@@ -16,6 +17,7 @@
             {{ $t('main.end_date') }}
           </label>
           <date-field
+            utc
             v-model="selectedEndDate"
             @update:model-value="onUpdateSelectedEndDate"
           />
