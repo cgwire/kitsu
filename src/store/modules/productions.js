@@ -2,6 +2,7 @@ import productionsApi from '@/store/api/productions'
 import { sortProductions, sortByName } from '@/lib/sorting'
 
 import assetTypeStore from '@/store/modules/assettypes'
+import statusAutomationsStore from '@/store/modules/statusautomation'
 import taskTypeStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
@@ -221,7 +222,7 @@ const getters = {
       return []
     } else {
       return state.currentProduction.status_automations.map(id =>
-        rootState.statusAutomations.statusAutomationMap.get(id)
+        statusAutomationsStore.cache.statusAutomationMap.get(id)
       )
     }
   },

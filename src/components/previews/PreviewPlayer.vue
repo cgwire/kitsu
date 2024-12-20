@@ -440,7 +440,7 @@
               is-reversed
               is-preview
               thin
-              :value="currentPreview?.id"
+              :model-value="currentPreview?.id"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>

@@ -200,7 +200,7 @@ export default {
       }
     },
 
-    value() {
+    modelValue() {
       this.selectedOption = this.options.find(o => o.value === this.modelValue)
     }
   }
