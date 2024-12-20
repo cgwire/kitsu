@@ -249,6 +249,8 @@
           <tbody
             class="datatable-body"
             :key="getGroupKey(group, k, 'sequence_id')"
+            @mousedown="startBrowsing"
+            @touchstart="startBrowsing"
             v-for="(group, k) in displayedShots"
           >
             <tr class="datatable-type-header">
@@ -805,8 +807,28 @@ export default {
         timeSpent: true
       },
       offsets: {},
-      stickedColumns: {}
+      stickedColumns: {},
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['keyup', this.stopBrowsing],
+      ]
     }
+  },
+
+  mounted() {
+    this.stickedColumns =
+      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+    this.addEvents(this.domEvents)
+  },
+
+  beforeUnmount() {
+    this.removeEvents(this.domEvents)
+    document.body.style.cursor = 'default'
   },
 
   computed: {
@@ -1144,11 +1166,6 @@ export default {
     isBigThumbnails() {
       this.updateOffsets()
     }
-  },
-
-  mounted() {
-    this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
   }
 }
 </script>
