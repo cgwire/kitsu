@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <aside :class="{ 'hidden-bar': isSidebarHidden }">
+    <aside :class="{ 'hidden-bar': isSidebarHidden, smallfont: isLongLocale }">
       <div>
         <router-link class="home-link" to="/" @click="toggleSidebar()">
           <div class="company-logo has-text-centered" :title="title">
@@ -245,7 +245,11 @@ export default {
       'isSidebarHidden',
       'mainConfig',
       'organisation'
-    ])
+    ]),
+
+    isLongLocale() {
+      return this.$i18n.locale === 'ja' || this.$i18n.locale === 'fr'
+    }
   },
 
   methods: {
@@ -371,6 +375,10 @@ p:hover {
   margin-left: 0;
   margin-right: 0.5em;
   width: 20px;
+}
+
+.smallfont p {
+  font-size: 0.85em;
 }
 
 @media screen and (max-width: 768px) {
