@@ -91,7 +91,7 @@
                     :options="previewOptions"
                     is-preview
                     thin
-                    :value="previewOptions[currentPreviewIndex]?.value"
+                    :model-value="previewOptions[currentPreviewIndex]?.value"
                     @update:model-value="onPreviewChanged"
                   />
                 </div>
