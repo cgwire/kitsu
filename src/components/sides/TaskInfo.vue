@@ -841,6 +841,7 @@ export default {
           .dispatch(action, params)
           .then(() => {
             drafts.clearTaskDraft(this.task.id)
+            this.$refs['add-comment']?.reset()
             this.reset()
             this.loading.addComment = false
             this.$emit('comment-added')
@@ -852,7 +853,6 @@ export default {
             this.errors.addCommentMaxRetakes = isRetakeError
             this.loading.addComment = false
           })
-          .finally(() => {})
       })
     },
 
