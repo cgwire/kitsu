@@ -30,6 +30,36 @@ if (fabric) {
   })
 }
 
+if (PSStroke) {
+  /* Monkey patch _getTransformedDimensions() to return a proper fabric point */
+  PSStroke.prototype._getTransformedDimensions = function() {
+    const width = this.width * this.scaleX;
+    const height = this.height * this.scaleY;
+    const dimensions = new fabric.Point(width, height);
+  return dimensions
+};
+
+  /* Monkey patch needed to make PSStroke work correctly by adding missing methods */
+  if (!PSStroke.prototype.getAncestors) {
+    PSStroke.prototype.getAncestors = function () {
+      return [];
+    };
+  }
+
+  if (!PSStroke.prototype.getRelativeCenterPoint) {
+    PSStroke.prototype.getRelativeCenterPoint = function () {
+      const center = new fabric.Point(this.getCenterPoint ? this.getCenterPoint() : { x: this.left, y: this.top });
+      console.log(center)
+      return center
+    };
+  }
+}
+
+
+console.log(PSStroke.prototype._getTransformedDimensions)
+
+
+
 export const annotationMixin = {
   emits: ['annotation-changed'],
 
@@ -416,7 +446,7 @@ export const annotationMixin = {
     getNewAnnotations(currentTime, currentFrame, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
-        if (obj.type === 'path') {
+        if (obj.type === 'path' || obj.type === 'PSStroke') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
           if (!obj.canvasHeight) obj.canvasHeight = this.fabricCanvas.height
           obj.setControlsVisibility({
@@ -488,6 +518,24 @@ export const annotationMixin = {
         this.addObjectToCanvas(annotation, obj, this.fabricCanvasComparison)
       })
     },
+
+    tracePrototypeChainOf(object) {
+      var proto = null
+       if (Object.getPrototypeOf(object) !== null) {
+           var proto = object.constructor.prototype
+      }
+      let result = `${typeof object.name === 'undefined' ? '(.)' : '(' + object.name + ')'}`;
+      if (proto === null) {
+          return `${result} -> (null)`
+      }
+      else {
+              while (proto) {
+              result += ' -> ' + proto.constructor.name;
+              proto = Object.getPrototypeOf(proto)
+          }
+          return result;
+      }
+   },
 
     /*
      * Add an object to the canvas if it is not already there.
@@ -627,16 +675,9 @@ export const annotationMixin = {
         psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
-        // psstroke.set('editable', !this.isCurrentUserArtist)
-        // psstroke.set('selectable', !this.isCurrentUserArtist)
-        // TODO: fix selectability and editability for PSStrokes
-        // It seems like they are editable and selectable _BUT_ we can't see
-        // the Controls and the canvas is not updated while working with them
-        // Since this is the main method of deleting things.. we need to solve this
-        psstroke.set('editable', true)
-        psstroke.set('selectable', true)
+        psstroke.set('editable', !this.isCurrentUserArtist)
+        psstroke.set('selectable', !this.isCurrentUserArtist)
         this.addSerialization(psstroke)
-        // this is not supported even though it works
         psstroke.setControlsVisibility({
           mt: false,
           mb: false,

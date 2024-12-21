@@ -1176,6 +1176,7 @@ export default {
     goPreviousDrawing() {
       this.clearCanvas()
       const annotation_time = this.getPreviousAnnotationTime(this.currentTimeRaw).frame
+      console.log("Going to "+annotation_time)
       this.setCurrentFrame(annotation_time)
       this.syncComparisonViewer()
     },
@@ -1183,6 +1184,7 @@ export default {
     goNextDrawing() {
       this.clearCanvas()
       const annotation_time = this.getNextAnnotationTime(this.currentTimeRaw).frame
+      console.log("Going to "+annotation_time)
       this.setCurrentFrame(annotation_time)
       this.syncComparisonViewer()
     },
@@ -1547,6 +1549,9 @@ export default {
       }
     },
 
+    // TODO FIX: this seems to only work when the drawings are in the right order in the
+    // data array ( drawings one after the other back to front works, starting in the beginning
+    // seems to break - probably the find last thing)
     getNextAnnotationTime(time) {
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
