@@ -179,6 +179,10 @@ export default {
       default: () => [],
       type: Array
     },
+    entityList: {
+      default: () => [],
+      type: Array
+    },
     fps: {
       default: 0,
       type: Number
@@ -230,10 +234,6 @@ export default {
     playlistShotPosition: {
       default: () => {},
       type: Object
-    },
-    entityList: {
-      default: () => [],
-      type: Array
     }
   },
 
@@ -313,14 +313,30 @@ export default {
     frameNumberStyle() {
       const frameHeight = 100
       const height = frameHeight + 30
-      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      let frameWidth = 150
+      console.log('ok', this.isPlaylistHover)
+      if (this.isPlaylistHover) {
+        const preview = this.playlistShotPosition[this.hoverFrame]
+        if (preview.extension === 'mp4') {
+          const ratio = preview.width / preview.height
+          frameWidth = Math.ceil(frameHeight * ratio)
+          console.log('cool', ratio, preview)
+        } else if (
+          this.isPlaylistHover &&
+          preview.extension === 'png'
+        ) {
+          frameWidth = 150
+        }
+      } else {
+        frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      }
       const width = frameWidth + 10
       const left = Math.min(
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
       const top = this.isFullScreen
-        ? `-${height + 30}px`
+        ? `-${height + 10}px`
         : this.isPlaylist
           ? '16px'
           : '0px'
@@ -535,8 +551,10 @@ export default {
     getFrameBackgroundStyle(frame) {
       if (!frame) return {}
       let previewId = this.previewId
+      let extension = null
       if (this.isPlaylistHover) {
         previewId = this.playlistShotPosition[frame].id
+        extension = this.playlistShotPosition[frame].extension
         frame = frame - this.playlistShotPosition[frame].start * this.fps
       } else {
         frame = frame - 1
@@ -548,13 +566,42 @@ export default {
       const frameY = Math.floor(frame / 8)
       const frameHeight = 100
       const frameWidth = Math.ceil(frameHeight * this.videoRatio)
-      const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
-      return {
-        background: `url(${tilePath})`,
-        'background-position': `-${frameX * frameWidth}px -${
-          frameY * frameHeight
-        }px`,
-        width: `${frameWidth}px`
+
+      if (!this.isPlaylistHover) {
+        console.log('not playlist')
+        const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
+        return {
+          background: `url(${tilePath})`,
+          'background-position': `-${frameX * frameWidth}px -${
+            frameY * frameHeight
+          }px`,
+          width: `${frameWidth}px`
+        }
+      } else {
+        if (extension === 'png') {
+          const tilePath = `/api/pictures/thumbnails/preview-files/${previewId}.png`
+          console.log('png')
+          return {
+            background: `url(${tilePath})`,
+            'background-position': '0 0',
+            width: '150px'
+          }
+        } else if (extension === 'mp4') {
+          console.log('mp4', this.extension)
+          const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
+          return {
+            background: `url(${tilePath})`,
+            'background-position': `-${frameX * frameWidth}px -${
+              frameY * frameHeight
+            }px`,
+            width: `${frameWidth}px`
+          }
+        } else {
+          console.log(extension)
+          return {
+            background: 'transparent'
+          }
+        }
       }
     },
 
@@ -593,7 +640,14 @@ export default {
     },
 
     getEntityWidth(entity) {
-      const ratio = entity.preview_file_duration / this.playlistDuration
+      let ratio = 0
+      // console.log(this.playlistDuration, entity.preview_file_duration)
+      if (entity.preview_file_extension === 'mp4') {
+        ratio = entity.preview_file_duration / this.playlistDuration
+      } else {
+        // console.log(this.frameDuration, this.playlistDuration)
+        ratio = 2 * this.fps * this.frameDuration / this.playlistDuration
+      }
       return ratio * 100
     },
 
@@ -618,11 +672,14 @@ export default {
       immediate: true,
       handler() {
         if (this.previewId) {
-          this.isTileLoading = true
-          const img = new Image()
-          img.src = this.tilePath
-          img.onload = () => {
-            this.isTileLoading = false
+          const preview = this.playlistShotPosition[this.hoverFrame]
+          if (preview.extension === 'mp4') {
+            this.isTileLoading = true
+            const img = new Image()
+            img.src = this.tilePath
+            img.onload = () => {
+              this.isTileLoading = false
+            }
           }
         }
       }
@@ -698,6 +755,8 @@ progress {
   top: -300px;
   width: 110px;
   z-index: 800;
+  display: flex;
+  flex-direction: column;
 
   .frame-tile {
     display: inline-block;

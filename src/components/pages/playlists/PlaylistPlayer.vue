@@ -316,6 +316,7 @@
       ref="video-progress"
       class="video-progress pull-bottom"
       :annotations="annotations"
+      :entity-list="entityList"
       :fps="fps"
       :frame-duration="frameDuration"
       :is-playlist="true"
@@ -329,14 +330,13 @@
       :playlist-duration="playlistDuration"
       :playlist-progress="playlistProgress"
       :playlist-shot-position="playlistShotPosition"
-      :entity-list="entityList"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
       @progress-playlist-changed="onProgressPlaylistChanged"
       @handle-in-changed="onHandleInChanged"
       @handle-out-changed="onHandleOutChanged"
-      v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
+      v-show="playlist.id && !isAddingEntity"
     />
 
     <div
@@ -436,8 +436,7 @@
           ({{ currentFrame }}
           <span class="is-hidden-touch is-hidden-desktop-only">
             / {{ (nbFrames + '').padStart(3, '0') }}
-          </span>
-          )
+          </span>)
         </span>
       </div>
 
@@ -1468,6 +1467,7 @@ export default {
         if (this.isCurrentPreviewPicture) {
           this.framesSeenOfPicture = 0
           this.playPicture()
+          this.updateProgressBar()
         }
       }
     },
@@ -2002,6 +2002,7 @@ export default {
         this.progress.updateProgressBar(this.frameNumber + 1)
       }
       if (this.playlistDuration && !this.isFullMode && this.currentEntity) {
+        console.log('updateProgressBar')
         this.playlistProgress =
           this.currentEntity.start_duration + this.frameNumber / this.fps
       }
@@ -2020,17 +2021,22 @@ export default {
       let playlistDuration = 0
       let currentFrame = 0
       this.entityList.forEach((entity, index) => {
-        this.framesPerImage[index] =
+        const defaultNbFrames =
           entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
+        this.framesPerImage[index] = defaultNbFrames
         const nbFrames = Math.round(
           (entity.preview_file_duration || 0) * this.fps
-        )
+        ) || defaultNbFrames
+        console.log(entity.name, nbFrames)
         entity.start_duration = (currentFrame + 1) / this.fps
         for (let i = 0; i < nbFrames; i++) {
           this.playlistShotPosition[currentFrame + i] = {
             index,
             name: entity.name,
+            extension: entity.preview_file_extension,
             start: entity.start_duration,
+            width: entity.preview_file_width,
+            height: entity.preview_file_height,
             id: entity.preview_file_id
           }
         }
