@@ -487,11 +487,6 @@ export const annotationMixin = {
         }
       } else {
         if (!this.annotations || !this.annotations.push) this.annotations = []
-        console.log("ADD_ANNOTATION")
-        console.log(this.annotations)
-        console.log(Math.max(currentTime, 0))
-        console.log(Math.max(currentFrame, 0))
-        console.log("ADD_ANNOTATION end")
         this.$store.commit('ADD_ANNOTATION', {
           annotations: this.annotations,
           annotation: {

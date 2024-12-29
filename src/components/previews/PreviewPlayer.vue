@@ -1593,7 +1593,6 @@ export default {
         currentTime = roundToFrame(currentTime, this.fps)
         currentTime = Number(currentTime.toPrecision(4))
       }
-      console.log(currentTime + " " + this.currentFrame)
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(
         currentTime,
