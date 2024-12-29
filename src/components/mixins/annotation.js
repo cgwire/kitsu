@@ -259,7 +259,7 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const currentFrame = this.getCurrentFrame()
+      const currentFrame = this.getCurrentFrame() // this is different, depending if it is called in PreviewPlayer or player.js
       const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects.push(obj.serialize())
@@ -455,6 +455,11 @@ export const annotationMixin = {
         }
       } else {
         if (!this.annotations || !this.annotations.push) this.annotations = []
+        console.log("ADD_ANNOTATION")
+        console.log(this.annotations)
+        console.log(Math.max(currentTime, 0))
+        console.log(Math.max(currentFrame, 0))
+        console.log("ADD_ANNOTATION end")
         this.$store.commit('ADD_ANNOTATION', {
           annotations: this.annotations,
           annotation: {

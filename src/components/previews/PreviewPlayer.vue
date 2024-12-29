@@ -1126,10 +1126,10 @@ export default {
 
     getCurrentFrame() {
       if (this.currentFrame) {
-        return this.currentFrame
+        return this.currentFrame + 1 //match offset in player.js
       } else {
         const time = roundToFrame(this.currentTimeRaw, this.fps) || 0
-        return Math.round(time / this.frameDuration)
+        return Math.round(time / this.frameDuration) + 1 //match offset in player.js
       }
     },
 
@@ -1528,10 +1528,11 @@ export default {
         currentTime = roundToFrame(currentTime, this.fps)
         currentTime = Number(currentTime.toPrecision(4))
       }
+      console.log(currentTime + " " + this.currentFrame)
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(
         currentTime,
-        this.currentFrame+1, // match player.js frame
+        this.currentFrame,
         annotation
       )
 
