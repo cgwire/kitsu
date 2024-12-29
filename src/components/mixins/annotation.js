@@ -291,7 +291,7 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const currentFrame = this.getCurrentFrame()
+      const currentFrame = this.getCurrentFrame() // this is different, depending if it is called in PreviewPlayer or player.js
       const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects.push(obj.serialize())
@@ -518,24 +518,6 @@ export const annotationMixin = {
         this.addObjectToCanvas(annotation, obj, this.fabricCanvasComparison)
       })
     },
-
-    tracePrototypeChainOf(object) {
-      var proto = null
-       if (Object.getPrototypeOf(object) !== null) {
-           var proto = object.constructor.prototype
-      }
-      let result = `${typeof object.name === 'undefined' ? '(.)' : '(' + object.name + ')'}`;
-      if (proto === null) {
-          return `${result} -> (null)`
-      }
-      else {
-              while (proto) {
-              result += ' -> ' + proto.constructor.name;
-              proto = Object.getPrototypeOf(proto)
-          }
-          return result;
-      }
-   },
 
     /*
      * Add an object to the canvas if it is not already there.
