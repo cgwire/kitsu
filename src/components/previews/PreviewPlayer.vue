@@ -1596,7 +1596,7 @@ export default {
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(
         currentTime,
-        this.currentFrame,
+        this.currentFrame+1, // match player.js frame
         annotation
       )
 
