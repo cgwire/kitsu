@@ -88,7 +88,7 @@ export default {
       this.resetOptions()
     },
 
-    value() {
+    modelValue() {
       this.selectedOption = this.options.find(o => o.value === this.modelValue)
     }
   }

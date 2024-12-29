@@ -663,6 +663,9 @@ export default {
         revision,
         link
       )
+    },
+
+    reset() {
       this.text = ''
       this.link = null
       this.attachments = []

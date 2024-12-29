@@ -440,7 +440,7 @@
               is-reversed
               is-preview
               thin
-              :value="currentPreview?.id"
+              :model-value="currentPreview?.id"
               @update:model-value="changeCurrentPreviewFile"
             />
           </div>
@@ -1596,7 +1596,7 @@ export default {
       const annotation = this.getAnnotation(currentTime)
       const annotations = this.getNewAnnotations(
         currentTime,
-        this.currentFrame,
+        this.currentFrame+1, // match player.js frame
         annotation
       )
 

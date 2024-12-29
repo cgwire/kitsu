@@ -837,7 +837,7 @@ export default {
     },
 
     onSearchChange(clearSelection = true) {
-      const searchQuery = this.searchField.getValue() || ''
+      const searchQuery = this.searchField?.getValue() || ''
       if (
         searchQuery.length !== 1 &&
         searchQuery !== undefined &&
