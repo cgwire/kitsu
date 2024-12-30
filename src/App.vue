@@ -2134,14 +2134,6 @@ th.validation-cell {
   }
 }
 
-.theme .datepicker input {
-  width: 150px;
-
-  &.short {
-    width: 112px;
-  }
-}
-
 .theme .vue-slider-dot-tooltip-inner {
   background: $purple-strong;
   border-color: $purple-strong;
@@ -2277,16 +2269,13 @@ th.validation-cell {
 
 #app .dp__input {
   border-radius: 10px;
-  padding-left: 0;
   height: 40px;
-  padding-inline-start: 0.8em;
-  width: 116px;
+  width: 118px;
 }
 
 #app .datatable .dp__input {
-  border-radius: 2px;
+  border-radius: 3px;
   height: 43px;
-  width: 116px;
 }
 
 @media screen and (max-width: 768px) {
