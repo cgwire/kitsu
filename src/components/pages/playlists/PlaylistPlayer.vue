@@ -256,7 +256,7 @@
           }"
           v-show="isCurrentPreviewPicture && !isLoading"
         >
-          <picture-viewer
+          <multi-picture-viewer
             ref="picture-player"
             :big="true"
             :default-height="pictureDefaultHeight"
@@ -264,8 +264,12 @@
             :light="false"
             :margin-bottom="0"
             :panzoom="false"
-            :preview="currentPreview"
-            high-quality
+            :current-preview="{
+              ...currentPreview,
+              position: currentPreviewIndex + 1
+            }"
+            :previews="picturePreviews"
+            high-qualiy
           />
         </div>
 
@@ -959,10 +963,11 @@ import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import MultiPictureViewer from '@/components/previews/MultiPictureViewer.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
-import PictureViewer from '@/components/previews/PictureViewer.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
+import PictureViewer from '@/components/previews/PictureViewer.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
@@ -988,6 +993,7 @@ export default {
     ObjectViewer,
     PencilPicker,
     PictureViewer,
+    MultiPictureViewer,
     PlayIcon,
     PlaylistedEntity,
     PreviewRoom,
@@ -1144,6 +1150,31 @@ export default {
 
     fullPlayer() {
       return this.$refs['full-playlist-player']
+    },
+
+    picturePreviews() {
+      const picturePreviews = []
+      this.entityList.forEach(e => {
+        picturePreviews.push({
+          id: e.preview_file_id,
+          height: e.preview_file_height,
+          width: e.preview_file_width,
+          extension: e.preview_file_extension,
+          revision: e.preview_file_revision,
+          position: 1
+        })
+        e.preview_file_previews.forEach((p, index) => {
+          picturePreviews.push({
+            id: p.id,
+            height: p.height,
+            width: p.width,
+            extension: p.extension,
+            revision: p.revision,
+            position: index + 2
+          })
+        })
+      })
+      return picturePreviews
     },
 
     isMovieComparison() {
