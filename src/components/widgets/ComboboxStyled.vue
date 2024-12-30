@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ active }">
+  <div :class="{ active }" :disabled="disabled || null">
     <label class="label" v-if="label.length">
       {{ label }}
     </label>
@@ -85,6 +85,10 @@ export default {
 
   props: {
     active: {
+      default: false,
+      type: Boolean
+    },
+    disabled: {
       default: false,
       type: Boolean
     },
