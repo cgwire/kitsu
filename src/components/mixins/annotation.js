@@ -259,7 +259,7 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const currentFrame = this.getCurrentFrame()
+      const currentFrame = this.getCurrentFrame() // this is different, depending if it is called in PreviewPlayer or player.js
       const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
         additions.drawing.objects.push(obj.serialize())
