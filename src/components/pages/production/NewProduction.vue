@@ -121,6 +121,7 @@
             </label>
             <div class="date-picker-wrapper">
               <date-field
+                :can-delete="false"
                 :label="$t('main.start_date')"
                 :placeholder="startDatePlaceholder"
                 :max-date="productionToCreate.settings.dateEnd"
@@ -128,6 +129,7 @@
               />
               <span class="input-separator">-</span>
               <date-field
+                :can-delete="false"
                 :label="$t('main.end_date')"
                 :placeholder="endDatePlaceholder"
                 :min-date="productionToCreate.settings.dateStart"

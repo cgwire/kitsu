@@ -20,8 +20,9 @@
             <date-field
               ref="startDateField"
               class="mb0"
-              :max-date="form.end_date"
+              :can-delete="false"
               :label="$t('productions.fields.start_date')"
+              :max-date="form.end_date"
               :with-margin="false"
               v-model="form.start_date"
             />
@@ -30,8 +31,9 @@
             <date-field
               ref="endDateField"
               class="mb0"
-              :min-date="form.start_date"
+              :can-delete="false"
               :label="$t('productions.fields.end_date')"
+              :min-date="form.start_date"
               :with-margin="false"
               v-model="form.end_date"
             />
