@@ -705,7 +705,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
+
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -822,7 +824,7 @@ export default {
 
   mounted() {
     this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+      preferences.getObjectPreference(this.localStorageStickKey) || {}
     this.addEvents(this.domEvents)
   },
 
@@ -1100,9 +1102,9 @@ export default {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(
+      preferences.setObjectPreference(
         this.localStorageStickKey,
-        JSON.stringify(this.stickedColumns)
+        this.stickedColumns
       )
     },
 
