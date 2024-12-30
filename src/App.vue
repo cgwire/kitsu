@@ -985,7 +985,6 @@ label.label {
   text-transform: uppercase;
 }
 
-texarea,
 input.input {
   padding: 1em;
   height: 3em;
@@ -993,6 +992,10 @@ input.input {
 
 .select select {
   border-radius: 10px;
+
+  .datatable & {
+    border-radius: 3px;
+  }
 }
 
 .select select:hover,
