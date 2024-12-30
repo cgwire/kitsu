@@ -1,4 +1,5 @@
 import colors from '@/lib/colors'
+import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 
 import assetStore from '@/store/modules/assets'
@@ -33,7 +34,7 @@ export const entityListMixin = {
     window.addEventListener('keydown', this.onKeyDown, false)
     window.addEventListener('keyup', this.onKeyUp, false)
     this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+      preferences.getObjectPreference(this.localStorageStickKey) || {}
   },
 
   beforeUnmount() {
@@ -474,9 +475,9 @@ export const entityListMixin = {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(
+      preferences.setObjectPreference(
         this.localStorageStickKey,
-        JSON.stringify(this.stickedColumns)
+        this.stickedColumns
       )
     },
 

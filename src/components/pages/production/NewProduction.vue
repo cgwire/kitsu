@@ -121,16 +121,18 @@
             </label>
             <div class="date-picker-wrapper">
               <date-field
+                :can-delete="false"
                 :label="$t('main.start_date')"
-                :placeholder="startDatePlaceholder"
                 :max-date="productionToCreate.settings.dateEnd"
+                :placeholder="startDatePlaceholder"
                 v-model="productionToCreate.settings.dateStart"
               />
               <span class="input-separator">-</span>
               <date-field
+                :can-delete="false"
                 :label="$t('main.end_date')"
-                :placeholder="endDatePlaceholder"
                 :min-date="productionToCreate.settings.dateStart"
+                :placeholder="endDatePlaceholder"
                 v-model="productionToCreate.settings.dateEnd"
               />
             </div>
@@ -532,14 +534,12 @@ export default {
       'assetTaskTypes',
       'assetTypeMap',
       'assetTypes',
-      'productions',
       'productionStatus',
       'shotsCsvFormData',
       'shotTaskTypes',
       'taskStatus',
       'taskStatusMap',
-      'taskTypeMap',
-      'user'
+      'taskTypeMap'
     ]),
 
     isTVShow() {
