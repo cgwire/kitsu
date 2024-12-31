@@ -3,12 +3,11 @@
     <label class="label">{{ label }}</label>
     <div class="control colors">
       <div
-        :ref="`color-${index}`"
-        :key="`color-${index}`"
+        class="color"
         :class="{
-          color: true,
           selected: modelValue === color
         }"
+        :key="`color-${index}`"
         :style="{ 'border-color': color + hexaOpacity }"
         @click="colorChanged(color)"
         v-for="(color, index) in colors"
@@ -24,18 +23,6 @@ export default {
   name: 'color-field',
 
   props: {
-    label: {
-      default: '',
-      type: String
-    },
-    hexaOpacity: {
-      default: 'FF',
-      type: String
-    },
-    modelValue: {
-      default: '#999999',
-      type: String
-    },
     colors: {
       default: () => [
         '#CCCCCC',
@@ -63,6 +50,22 @@ export default {
         '#64B5F6',
         '#26C6DA'
       ]
+    },
+    column: {
+      default: 8,
+      type: Number
+    },
+    hexaOpacity: {
+      default: 'FF',
+      type: String
+    },
+    label: {
+      default: '',
+      type: String
+    },
+    modelValue: {
+      default: '#999999',
+      type: String
     }
   },
 
@@ -79,8 +82,8 @@ export default {
 <style lang="scss" scoped>
 .colors {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-gap: 18px;
+  grid-template-columns: repeat(v-bind(column), minmax(auto, 80px));
+  row-gap: 15px;
 }
 
 .color {
@@ -95,17 +98,17 @@ export default {
   &:hover {
     transform: scale(1.2);
   }
-}
 
-.color span {
-  display: inline-block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
+  &.selected {
+    border: 5px solid $light-green;
+    padding: 4px;
+  }
 
-.selected {
-  border: 5px solid $light-green;
-  padding: 4px;
+  span {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
 }
 </style>
