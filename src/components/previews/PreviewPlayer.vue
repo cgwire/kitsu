@@ -1175,16 +1175,14 @@ export default {
 
     goPreviousDrawing() {
       this.clearCanvas()
-      const annotation_time = this.getPreviousAnnotationTime(this.currentTimeRaw).frame
-      console.log("Going to "+annotation_time)
+      const annotation_time = this.getPreviousAnnotationTime(this.currentTimeRaw).frame-1 // compensate for offsert frame number
       this.setCurrentFrame(annotation_time)
       this.syncComparisonViewer()
     },
 
     goNextDrawing() {
       this.clearCanvas()
-      const annotation_time = this.getNextAnnotationTime(this.currentTimeRaw).frame
-      console.log("Going to "+annotation_time)
+      const annotation_time = this.getNextAnnotationTime(this.currentTimeRaw).frame-1 // compensate for offset frame number
       this.setCurrentFrame(annotation_time)
       this.syncComparisonViewer()
     },
@@ -1246,8 +1244,6 @@ export default {
     },
 
     setupFabricCanvas() {
-      // TODO MAKE SURE WE CAN SELECT AND EDIT BRUSH STROKES
-      // ADD THIS TO THE MAIN PLAYER.js AS WELL
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
@@ -1267,19 +1263,8 @@ export default {
         brush.color = "#000"; // Set default color
         brush.disableTouch = true; // Disable touch input
         brush.disableMouse = true;
-        brush.pressureManager.fallback = 1; // Fallback value for mouse/touch
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
       }
-
-      // TODO fix for firefox 
-      // - move mouse with pointer
-      // - remove console logs
-      this.fabricCanvas.on('mouse:down', (event) => {
-        if (event.e.pointerType === 'pen') {
-          console.log('Using stylus');
-        } else if (event.e.pointerType === 'mouse') {
-          console.log('Using mouse');
-        }
-      });
 
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
@@ -1510,6 +1495,8 @@ export default {
         this.isDrawing = false
       } else {
         this.isTyping = false
+        this._resetColor()
+        this._resetPencil()
         this.isDrawing = true
       }
     },
@@ -1549,32 +1536,39 @@ export default {
       }
     },
 
-    // TODO FIX: this seems to only work when the drawings are in the right order in the
-    // data array ( drawings one after the other back to front works, starting in the beginning
-    // seems to break - probably the find last thing)
+    getSortedAnnotations() {
+      const annotations = this.annotations
+        annotations.sort((a, b) => 
+          (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)
+        )
+      return annotations
+    },
+
     getNextAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
-        return this.annotations.findLast(annotation => {
+        return annotations.find(annotation => {
           return (
             roundToFrame(annotation.time, this.fps) > time + 0.0001
           )
         })
       } else if (this.isPicture) {
-        return this.annotations.find(annotation => annotation.time === 0)
+        return annotations.find(annotation => annotation.time === 0)
       }
     },
 
     getPreviousAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
-        return this.annotations.find(annotation => {
+        return annotations.findLast(annotation => {
           return (
             roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
           )
         })
       } else if (this.isPicture) {
-        return this.annotations.find(annotation => annotation.time === 0)
+        return annotations.find(annotation => annotation.time === 0)
       }
     },
 
@@ -1815,7 +1809,7 @@ export default {
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
-          this.pauseEvent(event)
+          this.pauseEvent(event)-1 //compensate for offsert frame number
           this.onPencilAnnotateClicked()
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
           // ctrl + z
@@ -1823,7 +1817,7 @@ export default {
         } else if (event.altKey && event.keyCode === 82) {
           // alt + r
           this.redoLastAction()
-        } else if (event.altKey && event.keyCode === 74) {
+        } else if (event.altKey && event.keyCode === 74) {-1 // compensate for offset frame number
           // alt+j
           this.onPreviousClicked()
         } else if (event.altKey && event.keyCode === 75) {
