@@ -16,7 +16,7 @@
     "preview": "vite preview",
     "test": "npm run test:unit",
     "test:unit": "vitest tests/unit",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@animxyz/vue3": "0.6.7",
