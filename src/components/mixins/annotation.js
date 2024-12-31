@@ -49,14 +49,10 @@ if (PSStroke) {
   if (!PSStroke.prototype.getRelativeCenterPoint) {
     PSStroke.prototype.getRelativeCenterPoint = function () {
       const center = new fabric.Point(this.getCenterPoint ? this.getCenterPoint() : { x: this.left, y: this.top });
-      console.log(center)
       return center
     };
   }
 }
-
-
-console.log(PSStroke.prototype._getTransformedDimensions)
 
 
 
@@ -758,9 +754,9 @@ export const annotationMixin = {
 
     _resetPencil() {
       const converter = {
-        big: 4,
-        medium: 2,
-        small: 1
+        big: 8,
+        medium: 4,
+        small: 2
       }
       const strokeWidth = converter[this.pencil]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
@@ -781,6 +777,7 @@ export const annotationMixin = {
         }
         let brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
         this._resetColor()
         this._resetPencil()
         this.isDrawing = true
@@ -1061,7 +1058,9 @@ export const annotationMixin = {
       if (!this.fabricCanvas.freeDrawingBrush) {
         let brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
+        
       }
+      
       this.configureCanvas()
       return this.fabricCanvas
     },
