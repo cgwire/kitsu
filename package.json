@@ -1,6 +1,6 @@
 {
   "name": "kitsu",
-  "version": "0.20.10",
+  "version": "0.20.11",
   "description": "Production Management Software (user interface)",
   "author": "Frank Rousseau <frank@cg-wire.com>",
   "repository": "https://github.com/cgwire/kitsu",
@@ -64,7 +64,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "7.8.11"
+    "wavesurfer.js": "7.8.14"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.2.1",
@@ -78,7 +78,7 @@
     "esm": "3.2.25",
     "husky": "8.0.3",
     "jsdom": "24.1.3",
-    "lint-staged": "15.2.11",
+    "lint-staged": "15.3.0",
     "localStorage": "1.0.4",
     "prettier": "3.4.2",
     "sass": "1.78.0",

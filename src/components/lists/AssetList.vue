@@ -565,9 +565,11 @@ import { mapGetters, mapActions } from 'vuex'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { formatListMixin } from '@/components/mixins/format'
-import { range } from '@/lib/time'
-import { sortTaskTypes } from '@/lib/sorting'
 import { selectionListMixin } from '@/components/mixins/selection'
+
+import preferences from '@/lib/preferences'
+import { sortTaskTypes } from '@/lib/sorting'
+import { range } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
@@ -936,9 +938,9 @@ export default {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(
+      preferences.setObjectPreference(
         this.localStorageStickKey,
-        JSON.stringify(this.stickedColumns)
+        this.stickedColumns
       )
     },
 
@@ -1017,7 +1019,7 @@ export default {
 
   mounted() {
     this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+      preferences.getObjectPreference(this.localStorageStickKey) || {}
   }
 }
 </script>

@@ -3,14 +3,12 @@
     <div class="column is-one-third box">
       <form class="form" @submit.prevent>
         <text-field
-          ref="nameField"
           :label="$t('productions.fields.name')"
           @enter="runConfirmation"
           v-focus
           v-model="form.name"
         />
         <text-field
-          ref="codeField"
           :label="$t('productions.fields.code')"
           @enter="runConfirmation"
           v-model="form.code"
@@ -18,20 +16,20 @@
         <div class="columns">
           <div class="mr1">
             <date-field
-              ref="startDateField"
               class="mb0"
-              :max-date="form.end_date"
+              :can-delete="false"
               :label="$t('productions.fields.start_date')"
+              :max-date="form.end_date"
               :with-margin="false"
               v-model="form.start_date"
             />
           </div>
           <div>
             <date-field
-              ref="endDateField"
               class="mb0"
-              :min-date="form.start_date"
+              :can-delete="false"
               :label="$t('productions.fields.end_date')"
+              :min-date="form.start_date"
               :with-margin="false"
               v-model="form.end_date"
             />
@@ -39,7 +37,6 @@
         </div>
 
         <combobox-styled
-          ref="productionTypeField"
           class="mb2"
           locale-key-prefix="productions.type."
           :label="$t('productions.fields.type')"
@@ -49,7 +46,6 @@
         />
 
         <combobox-styled
-          ref="homepage"
           class="mb2"
           locale-key-prefix="productions.homepage."
           :label="$t('productions.fields.homepage')"
@@ -60,7 +56,6 @@
         />
 
         <!--text-field
-          ref="nbEpisodesField"
           type="number"
           :step="1"
           :label="$t('productions.fields.nb_episodes')"
@@ -69,7 +64,6 @@
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
         <!--text-field
-          ref="episodesSpanField"
           :label="$t('productions.fields.episode_span')"
           @enter="runConfirmation"
           v-focus
@@ -78,7 +72,6 @@
         /-->
 
         <text-field
-          ref="fpsField"
           type="number"
           :max="60"
           :step="0.001"
@@ -88,49 +81,42 @@
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
-          ref="ratioField"
           :label="$t('productions.fields.ratio')"
           @enter="runConfirmation"
           v-model="form.ratio"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
-          ref="resolutionField"
           :label="$t('productions.fields.resolution')"
           @enter="runConfirmation"
           v-model="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
-          ref="isClientsIsolatedField"
           :label="$t('productions.fields.is_clients_isolated')"
           @enter="runConfirmation"
           v-model="form.is_clients_isolated"
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
-          ref="isPreviewDownloadAllowed"
           :label="$t('productions.fields.is_preview_download_allowed')"
           @enter="runConfirmation"
           v-model="form.is_preview_download_allowed"
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
-          ref="isSetPreviewAutomated"
           :label="$t('productions.fields.is_set_preview_automated')"
           @enter="runConfirmation"
           v-model="form.is_set_preview_automated"
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
-          ref="isPublishDefault"
           :label="$t('productions.fields.is_publish_default')"
           @enter="runConfirmation"
           v-model="form.is_publish_default_for_artists"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
-          ref="maxRetakesField"
           type="number"
           :step="1"
           :label="$t('productions.fields.max_retakes')"

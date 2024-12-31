@@ -154,23 +154,20 @@
                       </div>
 
                       <div class="flexrow-item comment-content">
-                        <div>
-                          <div class="news-info flexrow">
-                            <span class="explaination flexrow-item flexrow">
-                              <entity-thumbnail
-                                class="ml1 entity-thumbnail mr1 flexrow-item"
-                                :entity="{
-                                  id: news.task_entity_id,
-                                  preview_file_id: news.entity_preview_file_id
-                                }"
-                                :with-link="false"
-                              />
-
-                              <span class="strong ml05">
-                                {{ news.full_entity_name }}
-                              </span>
+                        <div class="news-info flexrow">
+                          <span class="flexrow-item flexrow">
+                            <entity-thumbnail
+                              class="ml1 entity-thumbnail mr1 flexrow-item"
+                              :entity="{
+                                id: news.task_entity_id,
+                                preview_file_id: news.entity_preview_file_id
+                              }"
+                              :with-link="false"
+                            />
+                            <span class="strong ml05">
+                              {{ news.full_entity_name }}
                             </span>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -217,23 +214,21 @@
                       </div>
 
                       <div class="flexrow-item comment-content">
-                        <div>
-                          <div class="news-info flexrow">
-                            <span class="explaination flexrow-item flexrow">
-                              <entity-thumbnail
-                                class="ml1"
-                                :entity="{
-                                  id: news.task_entity_id,
-                                  preview_file_id: news.entity_preview_file_id
-                                }"
-                                :with-link="false"
-                                v-if="news.entity_preview_file_id"
-                              />
-                              <span class="strong ml05 flexrow-item">
-                                {{ news.full_entity_name }}
-                              </span>
+                        <div class="news-info flexrow">
+                          <span class="flexrow-item flexrow">
+                            <entity-thumbnail
+                              class="ml1"
+                              :entity="{
+                                id: news.task_entity_id,
+                                preview_file_id: news.entity_preview_file_id
+                              }"
+                              :with-link="false"
+                              v-if="news.entity_preview_file_id"
+                            />
+                            <span class="strong ml05 flexrow-item">
+                              {{ news.full_entity_name }}
                             </span>
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>

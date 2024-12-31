@@ -1,25 +1,24 @@
 <template>
   <div :class="{ field: withMargin }">
     <label class="label" v-if="label">{{ label }}</label>
-    <p class="control">
-      <vue-date-picker
-        auto-apply
-        class="datepicker"
-        :clearable="canDelete"
-        :disabled="disabled"
-        :enable-time-picker="false"
-        :format="'yyyy-MM-dd'"
-        :min-date="minDate"
-        :max-date="maxDate"
-        :locale="user.locale.substring(0, 2)"
-        :dark="isDarkTheme"
-        :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
-        :utc="utc ? 'preserve' : false"
-        v-model="localValue"
-      >
-        <template #input-icon></template>
-      </vue-date-picker>
-    </p>
+    <vue-date-picker
+      auto-apply
+      class="datepicker"
+      :clearable="canDelete"
+      :dark="isDarkTheme"
+      :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
+      :disabled="disabled"
+      :enable-time-picker="false"
+      :format="'yyyy-MM-dd'"
+      hide-input-icon
+      :locale="user.locale.substring(0, 2)"
+      :min-date="minDate"
+      :max-date="maxDate"
+      :placeholder="placeholder"
+      :utc="utc ? 'preserve' : false"
+      v-model="localValue"
+    >
+    </vue-date-picker>
   </div>
 </template>
 
@@ -28,8 +27,6 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'date-field',
-
-  components: {},
 
   props: {
     canDelete: {
@@ -40,25 +37,25 @@ export default {
       default: false,
       type: Boolean
     },
-    disabledDates: {
-      default: () => {},
-      type: Object
-    },
     label: {
       default: '',
       type: String
     },
     minDate: {
       default: null,
-      type: Date
+      type: [Date, String]
     },
     maxDate: {
       default: null,
-      type: Date
+      type: [Date, String]
     },
     modelValue: {
       default: () => new Date(),
       type: [Date, String]
+    },
+    placeholder: {
+      default: null,
+      type: String
     },
     utc: {
       default: false,
@@ -76,68 +73,27 @@ export default {
 
   emits: ['update:modelValue'],
 
-  data() {
-    return {
-      silent: false,
-      localValue: null
-    }
-  },
-
-  mounted() {
-    this.localValue = this.modelValue
-  },
-
   computed: {
-    ...mapGetters(['user', 'isDarkTheme'])
-  },
+    ...mapGetters(['isDarkTheme', 'user']),
 
-  methods: {
-    clearValue(event) {
-      this.localValue = null
-      this.updateValue(null)
-    },
-
-    updateValue(value) {
-      this.$emit('update:modelValue', value)
-    }
-  },
-
-  watch: {
-    localValue() {
-      if (!this.silent) {
-        // if (this.localValue) {
-        if (this.localValue?.setHours) {
-          this.localValue.setHours(0, 0, 0, 0)
+    localValue: {
+      get() {
+        return this.modelValue
+      },
+      set(value) {
+        if (value?.setHours) {
+          value.setHours(0, 0, 0, 0)
         }
-        this.$emit('update:modelValue', this.localValue)
+        this.$emit('update:modelValue', value)
       }
-    },
-
-    modelValue() {
-      this.silent = true
-      this.localValue = this.modelValue
-      this.$nextTick(() => {
-        this.silent = false
-      })
     }
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.control {
-  display: inline-flex;
-}
-
-.clear-button {
-  cursor: pointer;
-  position: absolute;
-  right: 5px;
-  top: 0;
-  color: $light-grey;
-  transform: rotate(45deg);
-}
-
 .datepicker {
+  display: inline-flex;
   max-width: 200px;
 }
 </style>

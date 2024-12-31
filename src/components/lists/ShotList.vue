@@ -249,6 +249,8 @@
           <tbody
             class="datatable-body"
             :key="getGroupKey(group, k, 'sequence_id')"
+            @mousedown="startBrowsing"
+            @touchstart="startBrowsing"
             v-for="(group, k) in displayedShots"
           >
             <tr class="datatable-type-header">
@@ -703,7 +705,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
+
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -805,8 +809,28 @@ export default {
         timeSpent: true
       },
       offsets: {},
-      stickedColumns: {}
+      stickedColumns: {},
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['keyup', this.stopBrowsing]
+      ]
     }
+  },
+
+  mounted() {
+    this.stickedColumns =
+      preferences.getObjectPreference(this.localStorageStickKey) || {}
+    this.addEvents(this.domEvents)
+  },
+
+  beforeUnmount() {
+    this.removeEvents(this.domEvents)
+    document.body.style.cursor = 'default'
   },
 
   computed: {
@@ -1078,9 +1102,9 @@ export default {
         ...this.stickedColumns,
         [columnId]: sticked
       }
-      localStorage.setItem(
+      preferences.setObjectPreference(
         this.localStorageStickKey,
-        JSON.stringify(this.stickedColumns)
+        this.stickedColumns
       )
     },
 
@@ -1144,11 +1168,6 @@ export default {
     isBigThumbnails() {
       this.updateOffsets()
     }
-  },
-
-  mounted() {
-    this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
   }
 }
 </script>
