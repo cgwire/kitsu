@@ -4,7 +4,15 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue({})],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: tag => ['model-viewer'].includes(tag)
+        }
+      }
+    })
+  ],
   build: {
     sourcemap: true
   },
@@ -18,7 +26,8 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/variables.scss";`
+        additionalData: `@use "@/variables.scss" as *;`,
+        api: 'modern'
       }
     }
   },

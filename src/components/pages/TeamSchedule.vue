@@ -726,6 +726,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 .dark {
   .project-dates {
     color: $white-grey;
@@ -810,11 +812,10 @@ export default {
         border-left-width: 5px;
         border-radius: 5px;
         box-shadow: 4px 4px 4px var(--box-shadow);
-
-        background-color: darken(#f8f8f8, 5%);
+        background-color: color.adjust(#f8f8f8, $lightness: -5%);
 
         .dark & {
-          background-color: lighten(#36393f, 5%);
+          background-color: color.adjust(#36393f, $lightness: 5%);
         }
       }
 
