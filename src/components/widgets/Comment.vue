@@ -813,6 +813,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 .dark {
   .comment-text {
     color: $white-grey;
@@ -908,8 +910,8 @@ article.comment {
 
 .content .client-comment {
   border-radius: 4px;
-  background: lighten($red, 80%);
-  color: desaturate(darken($red, 30%), 20%);
+  background: color.adjust($red, $lightness: 80%);
+  color: color.adjust($red, $lightness: -30%, $saturation: -20%);
   font-size: 0.8em;
   margin-top: 0.4em;
   margin-bottom: 0;

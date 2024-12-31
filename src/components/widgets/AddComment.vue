@@ -902,6 +902,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@use 'sass:color';
+
 .dark textarea:disabled {
   background: #555;
 }
@@ -1014,7 +1016,7 @@ article.add-comment {
 }
 
 .tab-row {
-  color: lighten($dark-grey-light, 40%);
+  color: color.adjust($dark-grey-light, $lightness: 40%);
   font-size: 0.9em;
   text-transform: uppercase;
   margin-top: 5px;
