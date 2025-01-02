@@ -3,6 +3,7 @@ export default {
   assets: {
     cast_in: 'Cast in',
     cancel_text: 'Are you sure you want to archive {name}?',
+    created_by: 'Created by',
     delete_error: 'An error occurred while deleting this asset. There may be existing data currently linked to it. Are you sure this asset type has no task linked to it?',
     delete_for_selection: 'Delete the selected asset | Delete the {nbSelectedAssets} selected assets',
     delete_text: 'Are you sure you want to remove {name} from your database?',

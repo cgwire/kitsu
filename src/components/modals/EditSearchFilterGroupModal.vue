@@ -42,6 +42,11 @@
           />
         </form>
 
+        <div v-if="groupToEdit?.id" class="mt2">
+          $t('main.created_by'):
+          <people-name :person="personMap.get(groupToEdit.person_id)" />
+        </div>
+
         <modal-footer
           :error-text="$t('main.filter_group_error')"
           :is-error="isError"
@@ -66,6 +71,7 @@ import BooleanField from '@/components/widgets/BooleanField.vue'
 import ColorField from '@/components/widgets/ColorField.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
@@ -78,6 +84,7 @@ export default {
     ColorField,
     ComboboxDepartment,
     ModalFooter,
+    PeopleName,
     TextField
   },
 
@@ -113,7 +120,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager'])
+    ...mapGetters(['currentProduction', 'isCurrentUserManager', 'personMap'])
   },
 
   methods: {
