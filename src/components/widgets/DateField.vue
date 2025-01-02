@@ -15,6 +15,7 @@
       :min-date="minDate"
       :max-date="maxDate"
       :placeholder="placeholder"
+      :teleport="true"
       :utc="utc ? 'preserve' : false"
       v-model="localValue"
     >

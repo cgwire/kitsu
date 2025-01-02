@@ -23,10 +23,15 @@
         <div
           :key="option.id"
           class="option-line flexrow"
-          @click="selectOption(option)"
+          @click="!disabled && selectOption(option)"
           v-for="option in optionList"
         >
-          <input type="checkbox" class="mr05" :checked="isChecked(option)" />
+          <input
+            type="checkbox"
+            class="mr05"
+            :checked="isChecked(option)"
+            :disabled="disabled"
+          />
           {{ getOptionLabel(option) }}
         </div>
       </div>
@@ -62,6 +67,10 @@ export default {
   },
 
   props: {
+    disabled: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
