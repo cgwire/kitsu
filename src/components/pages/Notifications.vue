@@ -138,7 +138,7 @@
                   :label="$t('notifications.read')"
                   is-small
                   @click="value => toggleNotificationRead(notification, value)"
-                  :value="notification.read ? 'true' : 'false'"
+                  :model-value="notification.read ? 'true' : 'false'"
                 />
               </div>
             </div>
