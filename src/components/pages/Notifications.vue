@@ -711,6 +711,7 @@ a {
   margin-bottom: 0.5em;
   padding: 1rem;
   transition: all 0.2s ease-in-out;
+  overflow-x: auto;
 
   &.unread {
     border: 4px solid #f0c5d1;
