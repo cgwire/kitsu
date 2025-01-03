@@ -94,6 +94,13 @@ module.exports = {
             ]
           },
           {
+            title: 'Artist Workflows',
+            collapsable: true,
+            children: [
+              '/artist/'
+            ]
+          },
+          {
             title: 'Developer Workflows',
             collapsable: true,
             children: [
