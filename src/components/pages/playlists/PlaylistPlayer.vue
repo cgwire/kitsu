@@ -456,14 +456,7 @@
       <div class="separator"></div>
 
       <template v-if="isCurrentPreviewPicture">
-        {{ framesSeenOfPicture }} /
-        <input
-          type="number"
-          min="0"
-          class="frame-per-image-input"
-          :title="$t('playlists.actions.frames_per_picture')"
-          v-model="framesPerImage[playingEntityIndex]"
-        />
+        {{ (framesSeenOfPicture + '').padStart(2, '0') }} / 48
       </template>
 
       <div class="flexrow flexrow-item" v-if="currentEntityPreviewLength > 1">
@@ -1092,6 +1085,7 @@ export default {
       isEnvironmentSkybox: false,
       isFullMode: false,
       isLaserModeOn: false,
+      isMounted: false,
       isObjectBackground: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
@@ -1139,6 +1133,7 @@ export default {
   },
 
   mounted() {
+    if (this.isMounted) return
     this.$options.scrubbing = false
     this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.entities) {
@@ -1161,6 +1156,7 @@ export default {
     this.currentBackground =
       this.productionBackgrounds.find(this.isDefaultBackground) || null
     this.onObjectBackgroundSelected()
+    this.isMounted = true
   },
 
   computed: {
@@ -1505,7 +1501,7 @@ export default {
       } else {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
-          this.framesSeenOfPicture = 0
+          this.framesSeenOfPicture = 1
           this.playPicture()
           this.updateProgressBar()
         }
@@ -1533,11 +1529,12 @@ export default {
       const framesPerImage = this.framesPerImage[entityIndex]
       const durationToWaitMs = (framesPerImage * 1000) / this.fps
       const durationWaited = Date.now() - startMs
+      console.log('continuePlayingPlaylist', durationWaited, durationToWaitMs)
       if (!this.isPlaying) return
       else if (durationWaited < durationToWaitMs) {
-        this.framesSeenOfPicture = Math.floor(
+        this.framesSeenOfPicture = Math.max(Math.floor(
           (durationWaited / 1000) * this.fps
-        )
+        ), 1)
         this.playingPictureTimeout = setTimeout(() => {
           this.continuePlayingPlaylist(entityIndex, startMs)
         }, 100)
@@ -1545,7 +1542,7 @@ export default {
       }
 
       // we've seen all the frames the picture should be visible
-      this.framesSeenOfPicture = 0
+      this.framesSeenOfPicture = 1
       const previews = this.currentEntity.preview_file_previews
       if (previews.length === this.currentPreviewIndex) {
         this.$nextTick(() => {
@@ -2014,7 +2011,8 @@ export default {
       }
     },
 
-    onProgressPlaylistChanged(frameNumber) {
+   onProgressPlaylistChanged(frameNumber) {
+     console.log('onProgressPlaylistChanged', frameNumber)
       if (this.isFullMode) {
         const time = frameNumber / this.fps
         this.fullPlayer.currentTime = time
@@ -2028,7 +2026,11 @@ export default {
           this.onFrameUpdate(frame)
         })
       } else {
-        this.setCurrentTimeRaw(frame / this.fps)
+        if (this.isPlayingPicture) {
+          this.framesSeenOfPicture = frame + 1
+        } else {
+          this.setCurrentTimeRaw(frame / this.fps)
+        }
       }
     },
 
@@ -2061,14 +2063,15 @@ export default {
       }
     },
 
-    updateProgressBar() {
+    updateProgressBar(frameNumber) {
+      const frame = frameNumber || this.frameNumber
       if (this.progress) {
-        this.progress.updateProgressBar(this.frameNumber + 1)
+        this.progress.updateProgressBar(frame + 1)
       }
+      // console.error('updateProgressBar', frame)
       if (this.playlistDuration && !this.isFullMode && this.currentEntity) {
-        console.log('updateProgressBar')
         this.playlistProgress =
-          this.currentEntity.start_duration + this.frameNumber / this.fps
+          this.currentEntity.start_duration + frame / this.fps
       }
     },
 
@@ -2132,6 +2135,12 @@ export default {
     'objectModel.currentAnimation'() {
       if (this.isCurrentPreviewModel && this.objectModel.isAnimation) {
         this.playModel()
+      }
+    },
+
+    framesSeenOfPicture() {
+      if (this.isCurrentPreviewPicture) {
+        this.updateProgressBar(this.framesSeenOfPicture - 1)
       }
     },
 
