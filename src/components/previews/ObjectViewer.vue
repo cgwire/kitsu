@@ -10,15 +10,16 @@
     }"
   >
     <model-viewer
-      autoplay
-      camera-controls
+      ref="model-viewer"
       class="model-viewer"
+      camera-controls
       loading="eager"
       :environment-image="backgroundUrl"
       :skybox-image="isEnvironmentSkybox ? backgroundUrl : ''"
       :src="previewUrl"
       :variant-name="isWireframe ? 'variant-wireframe' : null"
       @before-render="createWireframeVariant($event.target.model)"
+      @load="$emit('model-loaded')"
     />
   </div>
 </template>
@@ -60,6 +61,7 @@ export default {
   },
 
   methods: {
+
     /**
      * Create a wireframe variant of each material of a 3D model
      * @param {Model} model - model from model-viewer component
@@ -89,7 +91,20 @@ export default {
           material.envMapIntensity = 0
         })
       }
-    }
+    },
+
+    getAnimations() {
+      return this.$refs['model-viewer'].availableAnimations
+    },
+
+    play(animationName) {
+      this.$refs['model-viewer'].animationName = animationName
+      this.$refs['model-viewer'].play()
+    },
+
+    pause() {
+      this.$refs['model-viewer'].pause()
+    },
   }
 }
 </script>

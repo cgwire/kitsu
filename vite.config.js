@@ -16,6 +16,11 @@ export default defineConfig({
   build: {
     sourcemap: true
   },
+  template: {
+    compilerOptions: {
+      isCustomElement: (tag) => ['model-viewer'].includes(tag),
+    }
+  },
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {

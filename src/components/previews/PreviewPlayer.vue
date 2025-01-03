@@ -60,6 +60,7 @@
               }"
               @duration-changed="changeMaxDuration"
               @frame-update="setVideoFrameContext"
+              @model-loaded="onModelLoaded"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
               @video-end="onVideoEnd"
@@ -129,7 +130,7 @@
       />
 
       <div class="buttons flexrow pull-bottom" ref="buttons">
-        <div class="left flexrow" v-if="isMovie || isSound">
+        <div class="left flexrow" v-if="isMovie || isSound || is3DAnimation">
           <button-simple
             class="flexrow-item"
             :title="$t('playlists.actions.play')"
@@ -143,6 +144,15 @@
             icon="pause"
             @click="onPlayPauseClicked"
             v-else
+          />
+
+          <combobox-styled
+            class="flexrow-item"
+            :options="available3DAnimations"
+            :is-dark="true"
+            :thin="true"
+            v-model="current3DAnimation"
+            v-if="is3DAnimation"
           />
         </div>
 
@@ -650,6 +660,8 @@ export default {
   data() {
     return {
       annotations: [],
+      availableAnimations: [],
+      current3DAnimation: null,
       currentFrame: 0,
       currentIndex: 1,
       fullScreen: false,
@@ -657,6 +669,7 @@ export default {
       currentBackground: null,
       currentTime: '00:00:00:00',
       currentTimeRaw: 0,
+      is3DAnimation: false,
       isObjectBackground: false,
       isAnnotationsDisplayed: true,
       isEnvironmentSkybox: false,
@@ -1137,14 +1150,18 @@ export default {
       this.isPlaying = true
       this.isDrawing = false
       if (this.previewViewer) {
-        this.clearCanvas()
-        if (this.currentFrame >= this.nbFrames - 1) {
-          this.previewViewer.setCurrentFrame(0)
-          this.comparisonViewer.setCurrentFrame(0)
-        }
-        this.previewViewer.play()
-        if (this.comparisonViewer && this.isComparing) {
-          this.comparisonViewer.play()
+        if (this.is3DModel) {
+          this.previewViewer.playModelAnimation(this.current3DAnimation)
+        } else {
+          this.clearCanvas()
+          if (this.currentFrame >= this.nbFrames - 1) {
+            this.previewViewer.setCurrentFrame(0)
+            this.comparisonViewer.setCurrentFrame(0)
+          }
+          this.previewViewer.play()
+          if (this.comparisonViewer && this.isComparing) {
+            this.comparisonViewer.play()
+          }
         }
       }
     },
@@ -1152,11 +1169,16 @@ export default {
     pause() {
       if (this.isPlaying) {
         this.isPlaying = false
-        if (this.previewViewer) this.previewViewer.pause()
-        if (this.comparisonViewer) this.comparisonViewer.pause()
-        this.$nextTick(() => {
-          this.syncComparisonViewer()
-        })
+
+        if (this.is3DModel) {
+          this.previewViewer.pauseModelAnimation()
+        } else {
+          if (this.previewViewer) this.previewViewer.pause()
+          if (this.comparisonViewer) this.comparisonViewer.pause()
+          this.$nextTick(() => {
+            this.syncComparisonViewer()
+          })
+        }
       }
     },
 
@@ -1788,6 +1810,20 @@ export default {
       })
     },
 
+    onModelLoaded() {
+      this.is3DAnimation = this.previewViewer.get3DAnimations().length > 0
+      if (this.is3DAnimation) {
+        this.available3DAnimations = this.previewViewer.get3DAnimations()
+          .map(animation => ({
+            label: animation,
+            value: animation
+          }))
+        this.current3DAnimation = this.available3DAnimations[0].value
+        this.isPlaying = true
+        this.previewViewer.playModelAnimation(this.current3DAnimation)
+      }
+    },
+
     onVideoLoaded() {
       if (this.isMovie) {
         this.movieDimensions = {
@@ -1969,6 +2005,12 @@ export default {
   },
 
   watch: {
+    current3DAnimation() {
+      if (this.is3DModel) {
+        this.previewViewer.playModelAnimation(this.current3DAnimation)
+      }
+    },
+
     currentPreview() {
       this.endAnnotationSaving()
       this.reloadAnnotations()
@@ -1993,7 +2035,10 @@ export default {
           this.previewViewer.resize()
           this.comparisonViewer.resize()
         }, 500)
-      } else if (this.isSound || this.isFile || this.is3DModel) {
+      } else if (this.is3DModel) {
+        this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
+        this.previewViewer.resize()
+      } else if (this.isSound || this.isFile) {
         // hide canvas
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
       }
