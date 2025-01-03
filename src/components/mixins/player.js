@@ -253,6 +253,10 @@ export const playerMixin = {
       return this.$refs['sound-player']
     },
 
+    modelPlayer() {
+      return this.$refs['object-player']
+    },
+
     canvas() {
       return this.$refs['canvas-wrapper']
     },
@@ -425,6 +429,8 @@ export const playerMixin = {
         this.playPicture()
       } else if (this.isCurrentPreviewSound) {
         this.playSound()
+      } else if (this.isCurrentPreviewModel) {
+        this.playModel()
       } else {
         this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
@@ -490,6 +496,8 @@ export const playerMixin = {
         }
       } else if (this.isCurrentPreviewSound) {
         this.soundPlayer?.pause()
+      } else if (this.isCurrentPreviewModel) {
+        this.modelPlayer?.pause()
       }
       this.isPlaying = false
     },
@@ -1067,6 +1075,12 @@ export const playerMixin = {
       if (this.isCurrentPreviewSound) {
         this.soundPlayer?.play()
       }
+    },
+
+    playModel() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
+      this.isPlaying = true
+      this.modelPlayer?.play(this.objectModel.currentAnimation)
     },
 
     resetCanvasSize() {

@@ -214,7 +214,8 @@
             position: isComparisonOverlay ? 'absolute' : 'static',
             opacity: overlayOpacity
           }"
-          v-if="isCurrentPreviewModel && !isLoading"
+          @model-loaded="onModelLoaded"
+          v-show="isCurrentPreviewModel && !isLoading"
         />
 
         <sound-viewer
@@ -323,7 +324,12 @@
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
-      :nb-frames="isCurrentPreviewMovie ? nbFrames : 48"
+      :nb-frames="isCurrentPreviewMovie
+          ? nbFrames
+          : isCurrentPreviewPicture
+            ? 48
+            : 0
+      "
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
       :preview-id="currentPreview ? currentPreview.id : ''"
@@ -385,7 +391,8 @@
         v-if="
           isCurrentPreviewMovie ||
           isCurrentPreviewPicture ||
-          isCurrentPreviewSound
+          isCurrentPreviewSound ||
+          isCurrentPreviewModel
         "
       >
         <button-simple
@@ -402,7 +409,17 @@
           icon="pause"
           v-else
         />
-      </div>
+
+        <combobox-styled
+          class="flexrow-item"
+          :options="objectModel.availableAnimations"
+          :is-dark="true"
+          :thin="true"
+          is-reversed
+          v-model="objectModel.currentAnimation"
+          v-if="objectModel.isAnimation"
+        />
+     </div>
 
       <div
         class="flexrow flexrow-item mr0"
@@ -1093,6 +1110,11 @@ export default {
       taskTypeOptions: [],
       taskTypeToCompare: null,
       revisionToCompare: null,
+      objectModel: {
+        availableAnimations: [],
+        currentAnimation: null,
+        isAnimation: null
+      },
       room: {
         people: [],
         newComer: true
@@ -1545,6 +1567,27 @@ export default {
           width: this.currentPreview.width,
           height: this.currentPreview.height
         }
+      }
+    },
+
+    onModelLoaded() {
+      const animations = this.modelPlayer?.getAnimations() || []
+      console.log('model loaded', animations)
+      this.objectModel.isAnimation = animations.length > 0
+      if (this.objectModel.isAnimation) {
+        console.log(animations)
+        this.objectModel.availableAnimations = animations
+          .map(animation => ({
+            label: animation,
+            value: animation
+          }))
+        this.objectModel.currentAnimation = this.availableAnimations[0].value
+        this.$nextTick(() => {
+          this.playModel()
+        })
+      } else {
+        this.objectModel.availableAnimations = []
+        this.objectModel.currentAnimation = null
       }
     },
 
@@ -2086,6 +2129,12 @@ export default {
   },
 
   watch: {
+    'objectModel.currentAnimation'() {
+      if (this.isCurrentPreviewModel && this.objectModel.isAnimation) {
+        this.playModel()
+      }
+    },
+
     isLoading() {
       if (!this.isLoading) {
         this.resetHeight()
