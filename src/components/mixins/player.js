@@ -20,7 +20,7 @@ export const playerMixin = {
       entityList: [],
       entityListToCompare: [],
       framesPerImage: [],
-      framesSeenOfPicture: 0,
+      framesSeenOfPicture: 1,
       fullScreen: false,
       isCommentsHidden: true,
       isComparing: false,
@@ -203,6 +203,9 @@ export const playerMixin = {
     },
 
     frameNumber() {
+      if (this.isCurrentPreviewPicture) {
+        return this.framesSeenOfPicture - 1
+      }
       let frameNumber = this.currentTimeRaw / this.frameDuration
       if (frameNumber >= this.nbFrames) {
         frameNumber = this.nbFrames
@@ -251,6 +254,10 @@ export const playerMixin = {
 
     soundPlayer() {
       return this.$refs['sound-player']
+    },
+
+    modelPlayer() {
+      return this.$refs['object-player']
     },
 
     canvas() {
@@ -410,6 +417,7 @@ export const playerMixin = {
     },
 
     play() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
       if (this.isFullMode) {
         if (
           this.fullPlayer.currentTime >=
@@ -425,6 +433,8 @@ export const playerMixin = {
         this.playPicture()
       } else if (this.isCurrentPreviewSound) {
         this.playSound()
+      } else if (this.isCurrentPreviewModel) {
+        this.playModel()
       } else {
         this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
@@ -490,6 +500,8 @@ export const playerMixin = {
         }
       } else if (this.isCurrentPreviewSound) {
         this.soundPlayer?.pause()
+      } else if (this.isCurrentPreviewModel) {
+        this.modelPlayer?.pause()
       }
       this.isPlaying = false
     },
@@ -498,7 +510,7 @@ export const playerMixin = {
       const entity = this.entityList[entityIndex]
       const wasDrawing = this.isDrawing === true
       this.clearCanvas()
-      this.framesSeenOfPicture = 0
+      this.framesSeenOfPicture = 1
       this.playingEntityIndex = entityIndex
       if (entity && this.isMovie(entity.preview_file_extension)) {
         this.$nextTick(() => {
@@ -676,21 +688,25 @@ export const playerMixin = {
 
     onProgressChanged(frameNumber, updatePlaylistProgress = true) {
       this.clearCanvas()
-      this.rawPlayer.setCurrentFrame(frameNumber)
-      this.syncComparisonPlayer()
+
+      if (this.isCurrentPreviewPicture) {
+        this.framesSeenOfPicture = frameNumber + 1
+      } else {
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.syncComparisonPlayer()
+      }
+
       const annotation = this.getAnnotation(frameNumber * this.frameDuration)
       if (annotation) this.loadAnnotation(annotation)
+
       this.sendUpdatePlayingStatus()
       this.onFrameUpdate(frameNumber)
+
       if (this.isFullMode && updatePlaylistProgress) {
         const start = this.currentEntity.start_duration
         const time = (frameNumber - 1) / this.fps + start
         this.fullPlayer.currentTime = time
         this.playlistProgress = time
-      } else {
-        setTimeout(() => {
-          this.updateProgressBar()
-        }, 200)
       }
     },
 
@@ -1052,7 +1068,8 @@ export const playerMixin = {
     },
 
     playPicture() {
-      if (this.isPlaying) clearTimeout(this.playingPictureTimeout)
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
+      this.framesSeenOfPicture = 1
       this.isPlaying = true
       this.playingPictureTimeout = setTimeout(() => {
         this.continuePlayingPlaylist(
@@ -1063,10 +1080,17 @@ export const playerMixin = {
     },
 
     playSound() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
       this.isPlaying = true
       if (this.isCurrentPreviewSound) {
         this.soundPlayer?.play()
       }
+    },
+
+    playModel() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
+      this.isPlaying = true
+      this.modelPlayer?.play(this.objectModel.currentAnimation)
     },
 
     resetCanvasSize() {

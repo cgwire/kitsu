@@ -214,7 +214,8 @@
             position: isComparisonOverlay ? 'absolute' : 'static',
             opacity: overlayOpacity
           }"
-          v-if="isCurrentPreviewModel && !isLoading"
+          @model-loaded="onModelLoaded"
+          v-show="isCurrentPreviewModel && !isLoading"
         />
 
         <sound-viewer
@@ -316,27 +317,28 @@
       ref="video-progress"
       class="video-progress pull-bottom"
       :annotations="annotations"
+      :entity-ist="entityList"
+      :empty="!isCurrentPreviewMovie"
       :fps="fps"
       :frame-duration="frameDuration"
-      :is-playlist="true"
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
-      :nb-frames="nbFrames"
+      :nb-frames="isCurrentPreviewMovie
+          ? nbFrames
+          : isCurrentPreviewPicture
+            ? 48
+            : 0
+      "
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
       :preview-id="currentPreview ? currentPreview.id : ''"
-      :playlist-duration="playlistDuration"
-      :playlist-progress="playlistProgress"
-      :playlist-shot-position="playlistShotPosition"
-      :entity-list="entityList"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
-      @progress-playlist-changed="onProgressPlaylistChanged"
       @handle-in-changed="onHandleInChanged"
       @handle-out-changed="onHandleOutChanged"
-      v-show="isCurrentPreviewMovie && playlist.id && !isAddingEntity"
+      v-show="playlist.id && !isAddingEntity"
     />
 
     <div
@@ -389,7 +391,8 @@
         v-if="
           isCurrentPreviewMovie ||
           isCurrentPreviewPicture ||
-          isCurrentPreviewSound
+          isCurrentPreviewSound ||
+          isCurrentPreviewModel
         "
       >
         <button-simple
@@ -406,7 +409,17 @@
           icon="pause"
           v-else
         />
-      </div>
+
+        <combobox-styled
+          class="flexrow-item"
+          :options="objectModel.availableAnimations"
+          :is-dark="true"
+          :thin="true"
+          is-reversed
+          v-model="objectModel.currentAnimation"
+          v-if="objectModel.isAnimation"
+        />
+     </div>
 
       <div
         class="flexrow flexrow-item mr0"
@@ -436,22 +449,14 @@
           ({{ currentFrame }}
           <span class="is-hidden-touch is-hidden-desktop-only">
             / {{ (nbFrames + '').padStart(3, '0') }}
-          </span>
-          )
+          </span>)
         </span>
       </div>
 
       <div class="separator"></div>
 
       <template v-if="isCurrentPreviewPicture">
-        {{ framesSeenOfPicture }} /
-        <input
-          type="number"
-          min="0"
-          class="frame-per-image-input"
-          :title="$t('playlists.actions.frames_per_picture')"
-          v-model="framesPerImage[playingEntityIndex]"
-        />
+        {{ (framesSeenOfPicture + '').padStart(2, '0') }} / 48
       </template>
 
       <div class="flexrow flexrow-item" v-if="currentEntityPreviewLength > 1">
@@ -874,6 +879,24 @@
       />
     </div>
 
+    <playlist-progress
+      ref="playlist-progress"
+      class="video-progress pull-bottom"
+      :entity-list="entityList"
+      :fps="fps"
+      :frame-duration="frameDuration"
+      :is-full-mode="isFullMode"
+      :is-full-screen="fullScreen || isEntitiesHidden"
+      :nb-frames="isCurrentPreviewMovie ? nbFrames : 0"
+      :playlist-duration="playlistDuration"
+      :playlist-progress="playlistProgress"
+      :playlist-shot-position="playlistShotPosition"
+      @start-scrub="onScrubStart"
+      @end-scrub="onScrubEnd"
+      @progress-playlist-changed="onProgressPlaylistChanged"
+      v-show="playlist.id && !isAddingEntity"
+    />
+
     <div
       :class="{
         'playlisted-entities': true,
@@ -974,6 +997,7 @@ import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
+import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 export default {
@@ -995,6 +1019,7 @@ export default {
     PictureViewer,
     MultiPictureViewer,
     PlayIcon,
+    PlaylistProgress,
     PlaylistedEntity,
     PreviewRoom,
     RawVideoPlayer,
@@ -1060,6 +1085,7 @@ export default {
       isEnvironmentSkybox: false,
       isFullMode: false,
       isLaserModeOn: false,
+      isMounted: false,
       isObjectBackground: false,
       isShowingPalette: false,
       isShowingPencilPalette: false,
@@ -1078,6 +1104,11 @@ export default {
       taskTypeOptions: [],
       taskTypeToCompare: null,
       revisionToCompare: null,
+      objectModel: {
+        availableAnimations: [],
+        currentAnimation: null,
+        isAnimation: null
+      },
       room: {
         people: [],
         newComer: true
@@ -1102,6 +1133,7 @@ export default {
   },
 
   mounted() {
+    if (this.isMounted) return
     this.$options.scrubbing = false
     this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.entities) {
@@ -1124,6 +1156,7 @@ export default {
     this.currentBackground =
       this.productionBackgrounds.find(this.isDefaultBackground) || null
     this.onObjectBackgroundSelected()
+    this.isMounted = true
   },
 
   computed: {
@@ -1163,16 +1196,18 @@ export default {
           revision: e.preview_file_revision,
           position: 1
         })
-        e.preview_file_previews.forEach((p, index) => {
-          picturePreviews.push({
-            id: p.id,
-            height: p.height,
-            width: p.width,
-            extension: p.extension,
-            revision: p.revision,
-            position: index + 2
+        if (e.preview_file_previews) {
+          e.preview_file_previews.forEach((p, index) => {
+            picturePreviews.push({
+              id: p.id,
+              height: p.height,
+              width: p.width,
+              extension: p.extension,
+              revision: p.revision,
+              position: index + 2
+            })
           })
-        })
+        }
       })
       return picturePreviews
     },
@@ -1466,8 +1501,9 @@ export default {
       } else {
         this.onPlayNextEntityClicked()
         if (this.isCurrentPreviewPicture) {
-          this.framesSeenOfPicture = 0
+          this.framesSeenOfPicture = 1
           this.playPicture()
+          this.updateProgressBar()
         }
       }
     },
@@ -1493,11 +1529,12 @@ export default {
       const framesPerImage = this.framesPerImage[entityIndex]
       const durationToWaitMs = (framesPerImage * 1000) / this.fps
       const durationWaited = Date.now() - startMs
+      console.log('continuePlayingPlaylist', durationWaited, durationToWaitMs)
       if (!this.isPlaying) return
       else if (durationWaited < durationToWaitMs) {
-        this.framesSeenOfPicture = Math.floor(
+        this.framesSeenOfPicture = Math.max(Math.floor(
           (durationWaited / 1000) * this.fps
-        )
+        ), 1)
         this.playingPictureTimeout = setTimeout(() => {
           this.continuePlayingPlaylist(entityIndex, startMs)
         }, 100)
@@ -1505,7 +1542,7 @@ export default {
       }
 
       // we've seen all the frames the picture should be visible
-      this.framesSeenOfPicture = 0
+      this.framesSeenOfPicture = 1
       const previews = this.currentEntity.preview_file_previews
       if (previews.length === this.currentPreviewIndex) {
         this.$nextTick(() => {
@@ -1527,6 +1564,27 @@ export default {
           width: this.currentPreview.width,
           height: this.currentPreview.height
         }
+      }
+    },
+
+    onModelLoaded() {
+      const animations = this.modelPlayer?.getAnimations() || []
+      console.log('model loaded', animations)
+      this.objectModel.isAnimation = animations.length > 0
+      if (this.objectModel.isAnimation) {
+        console.log(animations)
+        this.objectModel.availableAnimations = animations
+          .map(animation => ({
+            label: animation,
+            value: animation
+          }))
+        this.objectModel.currentAnimation = this.availableAnimations[0].value
+        this.$nextTick(() => {
+          this.playModel()
+        })
+      } else {
+        this.objectModel.availableAnimations = []
+        this.objectModel.currentAnimation = null
       }
     },
 
@@ -1637,6 +1695,9 @@ export default {
         }
         if (this.$refs['video-progress']) {
           height -= this.$refs['video-progress'].$el.offsetHeight
+        }
+        if (this.$refs['playlist-progress']) {
+          height -= this.$refs['playlist-progress'].$el.offsetHeight
         }
         if (this.isWaveformDisplayed) {
           height -= 60
@@ -1950,7 +2011,8 @@ export default {
       }
     },
 
-    onProgressPlaylistChanged(frameNumber) {
+   onProgressPlaylistChanged(frameNumber) {
+     console.log('onProgressPlaylistChanged', frameNumber)
       if (this.isFullMode) {
         const time = frameNumber / this.fps
         this.fullPlayer.currentTime = time
@@ -1964,7 +2026,11 @@ export default {
           this.onFrameUpdate(frame)
         })
       } else {
-        this.setCurrentTimeRaw(frame / this.fps)
+        if (this.isPlayingPicture) {
+          this.framesSeenOfPicture = frame + 1
+        } else {
+          this.setCurrentTimeRaw(frame / this.fps)
+        }
       }
     },
 
@@ -1997,13 +2063,15 @@ export default {
       }
     },
 
-    updateProgressBar() {
+    updateProgressBar(frameNumber) {
+      const frame = frameNumber || this.frameNumber
       if (this.progress) {
-        this.progress.updateProgressBar(this.frameNumber + 1)
+        this.progress.updateProgressBar(frame + 1)
       }
+      // console.error('updateProgressBar', frame)
       if (this.playlistDuration && !this.isFullMode && this.currentEntity) {
         this.playlistProgress =
-          this.currentEntity.start_duration + this.frameNumber / this.fps
+          this.currentEntity.start_duration + frame / this.fps
       }
     },
 
@@ -2020,17 +2088,21 @@ export default {
       let playlistDuration = 0
       let currentFrame = 0
       this.entityList.forEach((entity, index) => {
-        this.framesPerImage[index] =
+        const defaultNbFrames =
           entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
+        this.framesPerImage[index] = defaultNbFrames
         const nbFrames = Math.round(
           (entity.preview_file_duration || 0) * this.fps
-        )
+        ) || defaultNbFrames
         entity.start_duration = (currentFrame + 1) / this.fps
         for (let i = 0; i < nbFrames; i++) {
           this.playlistShotPosition[currentFrame + i] = {
             index,
             name: entity.name,
+            extension: entity.preview_file_extension,
             start: entity.start_duration,
+            width: entity.preview_file_width,
+            height: entity.preview_file_height,
             id: entity.preview_file_id
           }
         }
@@ -2060,6 +2132,18 @@ export default {
   },
 
   watch: {
+    'objectModel.currentAnimation'() {
+      if (this.isCurrentPreviewModel && this.objectModel.isAnimation) {
+        this.playModel()
+      }
+    },
+
+    framesSeenOfPicture() {
+      if (this.isCurrentPreviewPicture) {
+        this.updateProgressBar(this.framesSeenOfPicture - 1)
+      }
+    },
+
     isLoading() {
       if (!this.isLoading) {
         this.resetHeight()
@@ -2453,6 +2537,7 @@ progress {
 }
 
 .playlist-header,
+.playlist-progress,
 .video-progress {
   transition: opacity 0.5s ease;
 }

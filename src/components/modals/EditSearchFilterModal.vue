@@ -52,6 +52,11 @@
           />
         </form>
 
+        <div v-if="searchQueryToEdit?.id" class="mt2">
+          $t('main.created_by'):
+          <people-name :person="personMap.get(searchQueryToEdit.person_id)" />
+        </div>
+
         <modal-footer
           :error-text="$t('main.search_query_edit_error')"
           :is-error="isError"
@@ -77,6 +82,7 @@ import BooleanField from '@/components/widgets/BooleanField.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
@@ -89,6 +95,7 @@ export default {
     Combobox,
     ComboboxDepartment,
     ModalFooter,
+    PeopleName,
     TextField
   },
 
@@ -134,7 +141,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+    ...mapGetters(['currentProduction', 'isCurrentUserManager', 'personMap']),
 
     allowedGroups() {
       return this.groupOptions.filter(
