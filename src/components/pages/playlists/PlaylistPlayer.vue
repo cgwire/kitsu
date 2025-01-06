@@ -111,6 +111,7 @@
         <raw-video-player
           ref="raw-player-comparison"
           class="raw-player"
+          name="comparison"
           :style="{
             position: isComparisonOverlay ? 'absolute' : 'relative'
           }"
@@ -121,7 +122,6 @@
           :muted="true"
           :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
           :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
-          name="comparison"
           v-show="
             isComparing &&
             isCurrentPreviewMovie &&

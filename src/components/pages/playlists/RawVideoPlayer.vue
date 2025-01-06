@@ -385,7 +385,9 @@ export default {
         entity = this.entities[this.currentIndex]
         if (entity.preview_file_id) {
           if (this.currentPlayer) {
-            this.runEmitTimeUpdateLoop()
+            if (this.name === 'main') {
+              this.runEmitTimeUpdateLoop()
+            }
             this.currentPlayer.play()
           }
           this.isPlaying = true
@@ -525,7 +527,9 @@ export default {
 
     updateTime(time) {
       const frameNumber = Math.round(time / this.frameDuration)
-      this.$emit('frame-update', frameNumber)
+      if (this.name === 'main') {
+        this.$emit('frame-update', frameNumber)
+      }
     },
 
     updateMaxDuration() {
