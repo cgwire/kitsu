@@ -1811,7 +1811,7 @@ export default {
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
-          this.pauseEvent(event)-1 //compensate for offsert frame number
+          this.pauseEvent(event)
           this.onPencilAnnotateClicked()
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
           // ctrl + z
@@ -1819,7 +1819,7 @@ export default {
         } else if (event.altKey && event.keyCode === 82) {
           // alt + r
           this.redoLastAction()
-        } else if (event.altKey && event.keyCode === 74) {-1 // compensate for offset frame number
+        } else if (event.altKey && event.keyCode === 74) {
           // alt+j
           this.onPreviousClicked()
         } else if (event.altKey && event.keyCode === 75) {
