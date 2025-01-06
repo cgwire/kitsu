@@ -1254,10 +1254,12 @@ export default {
         new fabric.Canvas(this.canvasId, {
           fireRightClick: true,
           width,
-          height
+          height,
+          enablePointerEvents: true
         })
       )
       if (!this.fabricCanvas.freeDrawingBrush) {
+        let brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
         brush.width = 20; // Set default brush width
         brush.color = "#000"; // Set default color
