@@ -209,7 +209,7 @@
           :full-screen="fullScreen"
           :is-environment-skybox="isEnvironmentSkybox"
           :is-wireframe="isWireframe"
-          :preview-url="currentPreviewDlPath"
+          :preview-url="isCurrentPreviewModel ? currentPreviewDlPath : null"
           :style="{
             position: isComparisonOverlay ? 'absolute' : 'static',
             opacity: overlayOpacity
@@ -1529,7 +1529,6 @@ export default {
       const framesPerImage = this.framesPerImage[entityIndex]
       const durationToWaitMs = (framesPerImage * 1000) / this.fps
       const durationWaited = Date.now() - startMs
-      console.log('continuePlayingPlaylist', durationWaited, durationToWaitMs)
       if (!this.isPlaying) return
       else if (durationWaited < durationToWaitMs) {
         this.framesSeenOfPicture = Math.max(Math.floor(
@@ -1569,16 +1568,14 @@ export default {
 
     onModelLoaded() {
       const animations = this.modelPlayer?.getAnimations() || []
-      console.log('model loaded', animations)
       this.objectModel.isAnimation = animations.length > 0
       if (this.objectModel.isAnimation) {
-        console.log(animations)
         this.objectModel.availableAnimations = animations
           .map(animation => ({
             label: animation,
             value: animation
           }))
-        this.objectModel.currentAnimation = this.availableAnimations[0].value
+        this.objectModel.currentAnimation = animations[0]
         this.$nextTick(() => {
           this.playModel()
         })
@@ -2012,7 +2009,6 @@ export default {
     },
 
    onProgressPlaylistChanged(frameNumber) {
-     console.log('onProgressPlaylistChanged', frameNumber)
       if (this.isFullMode) {
         const time = frameNumber / this.fps
         this.fullPlayer.currentTime = time
