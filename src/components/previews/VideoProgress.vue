@@ -239,8 +239,7 @@ export default {
     frameNumberStyle() {
       const frameHeight = 100
       const height = frameHeight + 30
-      let frameWidth = 150
-      frameWidth = Math.ceil(frameHeight * this.videoRatio)
+      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
       const width = frameWidth + 10
       const left = Math.min(
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),

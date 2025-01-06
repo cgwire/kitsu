@@ -45,7 +45,7 @@ export const annotationMixin = {
       notSave: false,
       pencilColor: '#ff3860',
       pencilWidth: 'big',
-      textColor: '#ff3860',
+      textColor: '#ff3860'
     }
   },
 
@@ -681,7 +681,6 @@ export const annotationMixin = {
       const strokeWidth = converter[this.pencilWidth]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
     },
-
 
     /*
      * Reset pencil configuration to the last saved preferences.
