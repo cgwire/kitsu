@@ -294,7 +294,7 @@
               >
                 <color-picker
                   :color="textColor"
-                  @toggle-palette="onPickColor"
+                  @toggle-palette="onPickTextColor"
                   @change="onChangeTextColor"
                 />
               </div>
@@ -315,15 +315,15 @@
                 v-show="isDrawing && (!light || fullScreen)"
               >
                 <pencil-picker
-                  :pencil="pencil"
+                  :pencil="pencilWidth"
                   :sizes="pencilPalette"
-                  @toggle-palette="onPickPencil"
-                  @change="onChangePencil"
+                  @toggle-palette="onPickPencilWidth"
+                  @change="onChangePencilWidth"
                 />
                 <color-picker
-                  :color="color"
-                  @toggle-palette="onPickColor"
-                  @change="onChangeColor"
+                  :color="pencilColor"
+                  @toggle-palette="onPickPencilColor"
+                  @change="onChangePencilColor"
                 />
               </div>
             </transition>
@@ -665,7 +665,6 @@ export default {
       currentFrame: 0,
       currentIndex: 1,
       fullScreen: false,
-      color: '#ff3860',
       currentBackground: null,
       currentTime: '00:00:00:00',
       currentTimeRaw: 0,
@@ -749,6 +748,7 @@ export default {
         this.productionBackgrounds.find(this.isDefaultBackground) || null
       this.onObjectBackgroundSelected()
     }
+    this.resetPencilConfiguration()
   },
 
   beforeUnmount() {
@@ -1482,12 +1482,6 @@ export default {
     onDeleteClicked() {
       this.clearFocus()
       this.deleteSelection()
-    },
-
-    onChangeColor(newValue) {
-      this.color = newValue
-      this.fabricCanvas.freeDrawingBrush.color = this.color
-      this.isShowingPalette = false
     },
 
     onPencilAnnotateClicked() {

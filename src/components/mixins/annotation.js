@@ -9,6 +9,7 @@ import { markRaw } from 'vue'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
+import localPreferences from '@/lib/preferences'
 
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
@@ -41,7 +42,10 @@ export const annotationMixin = {
       updates: [],
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      notSave: false
+      notSave: false,
+      pencilColor: '#ff3860',
+      pencilWidth: 'big',
+      textColor: '#ff3860',
     }
   },
 
@@ -612,55 +616,86 @@ export const annotationMixin = {
     /*
      * Enable / disabl showing pencil palette flag.
      */
-    onPickPencil() {
+    onPickPencilWidth() {
       this.isShowingPencilPalette = !this.isShowingPencilPalette
     },
 
     /*
-     * Enable / disabl showing color palette flag.
+     * Enable / disable showing color palette flag.
      */
-    onPickColor() {
+    onPickPencilColor() {
       this.isShowingPalette = !this.isShowingPalette
     },
 
     /*
-     * When a drawing color is changed, store it in local state.
+     * Enable / disable showing color palette flag.
      */
-    onChangeColor(color) {
-      this.color = color
+    onPickTextColor() {
+      this.isShowingPalette = !this.isShowingPalette
+    },
+
+    /*
+     * When a drawing color is changed, change fabric configuration and save
+     * the new color in the local preferences.
+     */
+    onChangePencilColor(color) {
+      this.pencilColor = color
       this._resetColor()
       this.isShowingPalette = false
+      localPreferences.setPreference('player:pencil-color', this.pencilColor)
     },
 
     /*
-     * When a text color is changed, store it in local state.
+     * When a pencil width is changed, change fabric configuration and save
+     * the new width in the local preferences.
      */
-    onChangeTextColor(color) {
-      this.textColor = color
-      this.isShowingPalette = false
-    },
-
-    /*
-     * When a pencil is changed, store it in local state.
-     */
-    onChangePencil(pencil) {
-      this.pencil = pencil
+    onChangePencilWidth(pencil) {
+      this.pencilWidth = pencil
       this._resetPencil()
       this.isShowingPalette = false
+      localPreferences.setPreference('player:pencil-width', this.pencilWidth)
+    },
+
+    /*
+     * When a text color is changed, change fabric configuration and save
+     * the new color in the local preferences.
+     */
+    onChangeTextColor(newValue) {
+      this.textColor = newValue
+      this.isShowingPalette = false
+      localPreferences.setPreference('player:text-color', this.textColor)
     },
 
     _resetColor() {
-      this.fabricCanvas.freeDrawingBrush.color = this.color
+      if (!this.fabricCanvas) return
+      this.fabricCanvas.freeDrawingBrush.color = this.pencilColor
     },
 
     _resetPencil() {
+      if (!this.fabricCanvas) return
       const converter = {
         big: 4,
         medium: 2,
         small: 1
       }
-      const strokeWidth = converter[this.pencil]
+      const strokeWidth = converter[this.pencilWidth]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
+    },
+
+
+    /*
+     * Reset pencil configuration to the last saved preferences.
+     */
+    resetPencilConfiguration() {
+      this.pencilColor =
+        localPreferences.getPreference('player:pencil-color') || '#ff3860'
+      this.textColor =
+        localPreferences.getPreference('player:text-color') || '#ff3860'
+      this.pencilWidth =
+        localPreferences.getPreference('player:pencil-width') || 'big'
+
+      this._resetColor()
+      this._resetPencil()
     },
 
     /*
@@ -987,7 +1022,7 @@ export const annotationMixin = {
       this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
-      this.fabricCanvas.freeDrawingBrush.color = this.color
+      this.fabricCanvas.freeDrawingBrush.color = this.pencilColor
       this.fabricCanvas.freeDrawingBrush.width = 4
 
       fabric.Group.prototype._controlsVisibility = {

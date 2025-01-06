@@ -688,7 +688,7 @@
           <div class="annotation-tools" v-show="isTyping">
             <color-picker
               :color="textColor"
-              @toggle-palette="onPickColor"
+              @toggle-palette="onPickPencilColor"
               @change="onChangeTextColor"
             />
           </div>
@@ -704,16 +704,16 @@
         <transition name="slide">
           <div class="annotation-tools" v-show="isDrawing">
             <pencil-picker
-              :pencil="pencil"
+              :pencil="pencilWidth"
               :sizes="pencilPalette"
-              @toggle-palette="onPickPencil"
-              @change="onChangePencil"
+              @toggle-palette="onPickPencilWidth"
+              @change="onChangePencilWidth"
             />
 
             <color-picker
-              :color="color"
-              @toggle-palette="onPickColor"
-              @change="onChangeColor"
+              :color="pencilColor"
+              @toggle-palette="onPickPencilColor"
+              @change="onChangePencilColor"
             />
           </div>
         </transition>
@@ -1154,6 +1154,8 @@ export default {
       this.productionBackgrounds.find(this.isDefaultBackground) || null
     this.onObjectBackgroundSelected()
     this.isMounted = true
+
+    this.resetPencilConfiguration()
   },
 
   computed: {
