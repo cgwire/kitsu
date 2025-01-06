@@ -1813,7 +1813,8 @@ export default {
     onModelLoaded() {
       this.is3DAnimation = this.previewViewer.get3DAnimations().length > 0
       if (this.is3DAnimation) {
-        this.available3DAnimations = this.previewViewer.get3DAnimations()
+        this.available3DAnimations = this.previewViewer
+          .get3DAnimations()
           .map(animation => ({
             label: animation,
             value: animation

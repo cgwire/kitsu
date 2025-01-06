@@ -324,11 +324,8 @@
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
-      :nb-frames="isCurrentPreviewMovie
-          ? nbFrames
-          : isCurrentPreviewPicture
-            ? 48
-            : 0
+      :nb-frames="
+        isCurrentPreviewMovie ? nbFrames : isCurrentPreviewPicture ? 48 : 0
       "
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
@@ -419,7 +416,7 @@
           v-model="objectModel.currentAnimation"
           v-if="objectModel.isAnimation"
         />
-     </div>
+      </div>
 
       <div
         class="flexrow flexrow-item mr0"
@@ -448,8 +445,8 @@
         >
           ({{ currentFrame }}
           <span class="is-hidden-touch is-hidden-desktop-only">
-            / {{ (nbFrames + '').padStart(3, '0') }}
-          </span>)
+            / {{ (nbFrames + '').padStart(3, '0') }} </span
+          >)
         </span>
       </div>
 
@@ -1531,9 +1528,10 @@ export default {
       const durationWaited = Date.now() - startMs
       if (!this.isPlaying) return
       else if (durationWaited < durationToWaitMs) {
-        this.framesSeenOfPicture = Math.max(Math.floor(
-          (durationWaited / 1000) * this.fps
-        ), 1)
+        this.framesSeenOfPicture = Math.max(
+          Math.floor((durationWaited / 1000) * this.fps),
+          1
+        )
         this.playingPictureTimeout = setTimeout(() => {
           this.continuePlayingPlaylist(entityIndex, startMs)
         }, 100)
@@ -1570,11 +1568,10 @@ export default {
       const animations = this.modelPlayer?.getAnimations() || []
       this.objectModel.isAnimation = animations.length > 0
       if (this.objectModel.isAnimation) {
-        this.objectModel.availableAnimations = animations
-          .map(animation => ({
-            label: animation,
-            value: animation
-          }))
+        this.objectModel.availableAnimations = animations.map(animation => ({
+          label: animation,
+          value: animation
+        }))
         this.objectModel.currentAnimation = animations[0]
         this.$nextTick(() => {
           this.playModel()
@@ -2008,7 +2005,7 @@ export default {
       }
     },
 
-   onProgressPlaylistChanged(frameNumber) {
+    onProgressPlaylistChanged(frameNumber) {
       if (this.isFullMode) {
         const time = frameNumber / this.fps
         this.fullPlayer.currentTime = time
@@ -2087,9 +2084,9 @@ export default {
         const defaultNbFrames =
           entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
         this.framesPerImage[index] = defaultNbFrames
-        const nbFrames = Math.round(
-          (entity.preview_file_duration || 0) * this.fps
-        ) || defaultNbFrames
+        const nbFrames =
+          Math.round((entity.preview_file_duration || 0) * this.fps) ||
+          defaultNbFrames
         entity.start_duration = (currentFrame + 1) / this.fps
         for (let i = 0; i < nbFrames; i++) {
           this.playlistShotPosition[currentFrame + i] = {

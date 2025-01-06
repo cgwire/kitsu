@@ -86,10 +86,7 @@
         class="frame-number"
         :style="frameNumberStyle"
         v-show="
-          isFrameNumberVisible &&
-          hoverFrame > 0 &&
-          !empty &&
-          !progressDragging
+          isFrameNumberVisible && hoverFrame > 0 && !empty && !progressDragging
         "
       >
         {{ hoverFrame }}
@@ -249,9 +246,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen
-        ? `-${height + 30}px`
-        : '0px'
+      const top = this.isFullScreen ? `-${height + 30}px` : '0px'
 
       return {
         height: `${height}px`,
@@ -409,8 +404,7 @@ export default {
      */
     getFrameBackgroundStyle(frame) {
       if (!frame) return {}
-      let previewId = this.previewId
-      let extension = null
+      const previewId = this.previewId
       frame = frame - 1
       if (this.nbFrames >= 3840) {
         frame = Math.ceil(frame / Math.ceil(this.nbFrames / 3840))
@@ -441,9 +435,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen
-        ? `-${height}px`
-        : '30px'
+      const top = this.isFullScreen ? `-${height}px` : '30px'
 
       return {
         height: `${height}px`,

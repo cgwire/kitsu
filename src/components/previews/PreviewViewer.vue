@@ -207,6 +207,7 @@ export default {
   emits: [
     'duration-changed',
     'frame-update',
+    'model-loaded',
     'play-ended',
     'size-changed',
     'video-end',

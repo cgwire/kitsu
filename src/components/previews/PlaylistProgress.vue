@@ -140,11 +140,7 @@ export default {
     }
   },
 
-  emits: [
-    'end-scrub',
-    'progress-playlist-changed',
-    'start-scrub'
-  ],
+  emits: ['end-scrub', 'progress-playlist-changed', 'start-scrub'],
 
   data() {
     return {
@@ -167,7 +163,7 @@ export default {
         ['mouseup', this.stopPlaylistProgressDrag],
         ['mouseleave', this.stopPlaylistProgressDrag],
         ['touchend', this.stopPlaylistProgressDrag],
-        ['touchcancel', this.stopPlaylistProgressDrag],
+        ['touchcancel', this.stopPlaylistProgressDrag]
       ]
     }
   },
@@ -212,9 +208,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen
-        ? `-${height + 2}px`
-        : '16px'
+      const top = this.isFullScreen ? `-${height + 2}px` : '16px'
 
       return {
         height: `${height}px`,
@@ -244,7 +238,8 @@ export default {
   methods: {
     resetWidth() {
       if (this.playlistProgressWidget) {
-        const progressCoordinates = this.playlistProgressWidget.getBoundingClientRect()
+        const progressCoordinates =
+          this.playlistProgressWidget.getBoundingClientRect()
         this.width = progressCoordinates.width
         setTimeout(() => {
           this.width = progressCoordinates.width
@@ -269,26 +264,25 @@ export default {
     },
 
     doProgressDrag(event) {
-       if (
-         this.playlistProgressDragging ||
-         this.isFrameNumberVisible ||
-         (!this.progressDragging &&
-           event.target.classList &&
-           (event.target.classList.contains('playlilst-progress') ||
-             event.target.classList.contains('entity-status') ||
-             event.target.classList.contains('playlist-progress-position')))
-       ) {
-         this.currentMouseFrame = this._getPlaylistMouseFrame(event)
-         const { frameNumber } = this.currentMouseFrame
-         this.hoverFrame = frameNumber + 1
-         const allDuration = Math.round(this.playlistDuration * this.fps)
-         this.frameNumberLeftPosition =
-           (this.width / allDuration) * frameNumber
-         if (this.playlistProgressDragging) {
-           this.$emit('progress-playlist-changed', frameNumber)
-         }
-       }
-     },
+      if (
+        this.playlistProgressDragging ||
+        this.isFrameNumberVisible ||
+        (!this.progressDragging &&
+          event.target.classList &&
+          (event.target.classList.contains('playlilst-progress') ||
+            event.target.classList.contains('entity-status') ||
+            event.target.classList.contains('playlist-progress-position')))
+      ) {
+        this.currentMouseFrame = this._getPlaylistMouseFrame(event)
+        const { frameNumber } = this.currentMouseFrame
+        this.hoverFrame = frameNumber + 1
+        const allDuration = Math.round(this.playlistDuration * this.fps)
+        this.frameNumberLeftPosition = (this.width / allDuration) * frameNumber
+        if (this.playlistProgressDragging) {
+          this.$emit('progress-playlist-changed', frameNumber)
+        }
+      }
+    },
 
     onPlaylistProgressClicked(event) {
       const { frameNumber } = this._getPlaylistMouseFrame(event)
@@ -362,9 +356,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen
-        ? `-${height + 32}px`
-        : '42px'
+      const top = this.isFullScreen ? `-${height + 32}px` : '42px'
 
       return {
         height: `${height}px`,
@@ -385,7 +377,7 @@ export default {
       if (entity.preview_file_extension === 'mp4') {
         ratio = entity.preview_file_duration / this.playlistDuration
       } else {
-        ratio = 2 * this.fps * this.frameDuration / this.playlistDuration
+        ratio = (2 * this.fps * this.frameDuration) / this.playlistDuration
       }
       return ratio * 100
     },

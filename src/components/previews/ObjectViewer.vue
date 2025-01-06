@@ -60,8 +60,9 @@ export default {
     }
   },
 
-  methods: {
+  emits: ['model-loaded'],
 
+  methods: {
     /**
      * Create a wireframe variant of each material of a 3D model
      * @param {Model} model - model from model-viewer component
@@ -104,7 +105,7 @@ export default {
 
     pause() {
       this.$refs['model-viewer'].pause()
-    },
+    }
   }
 }
 </script>
