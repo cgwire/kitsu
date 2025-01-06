@@ -64,6 +64,7 @@
     />
 
     <object-viewer
+      ref="object-viewer"
       class="model-viewer"
       :background-url="backgroundUrl"
       :default-height="defaultHeight"
@@ -73,6 +74,7 @@
       :is-wireframe="isWireframe"
       :light="isLight"
       :preview-url="originalPath"
+      @model-loaded="$emit('model-loaded')"
       v-if="is3DModel"
     />
 
@@ -205,6 +207,7 @@ export default {
   emits: [
     'duration-changed',
     'frame-update',
+    'model-loaded',
     'play-ended',
     'size-changed',
     'video-end',
@@ -228,6 +231,10 @@ export default {
 
     soundViewer() {
       return this.$refs['sound-viewer']
+    },
+
+    objectViewer() {
+      return this.$refs['object-viewer']
     },
 
     //  Utils
@@ -359,6 +366,14 @@ export default {
       }
     },
 
+    playModelAnimation(animationName) {
+      this.objectViewer.play(animationName)
+    },
+
+    pauseModelAnimation() {
+      this.objectViewer.pause()
+    },
+
     goPreviousFrame() {
       return this.videoViewer.goPreviousFrame()
     },
@@ -373,6 +388,10 @@ export default {
       } else {
         this.pause()
       }
+    },
+
+    get3DAnimations() {
+      return this.$refs['object-viewer'].getAnimations()
     },
 
     // Sizing

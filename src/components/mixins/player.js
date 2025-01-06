@@ -20,7 +20,7 @@ export const playerMixin = {
       entityList: [],
       entityListToCompare: [],
       framesPerImage: [],
-      framesSeenOfPicture: 0,
+      framesSeenOfPicture: 1,
       fullScreen: false,
       isCommentsHidden: true,
       isComparing: false,
@@ -59,12 +59,49 @@ export const playerMixin = {
       'user'
     ]),
 
+    // Elements
+
+    container() {
+      return this.$refs.container
+    },
+
+    rawPlayer() {
+      return this.$refs['raw-player']
+    },
+
+    rawPlayerComparison() {
+      return this.$refs['raw-player-comparison']
+    },
+
+    picturePlayer() {
+      return this.$refs['picture-player']
+    },
+
+    soundPlayer() {
+      return this.$refs['sound-player']
+    },
+
+    modelPlayer() {
+      return this.$refs['object-player']
+    },
+
+    canvas() {
+      return this.$refs['canvas-wrapper']
+    },
+
+    progress() {
+      return this.$refs['video-progress']
+    },
+
+    video() {
+      return this.$refs.movie
+    },
+
+    // File type
+
     extension() {
-      if (!this.currentPreview) return ''
-      if (this.currentPreview.extension) {
-        return this.currentPreview.extension
-      }
-      return ''
+      if (!this.currentPreview || !this.currentPreview.extension) return ''
+      return this.currentPreview.extension
     },
 
     isCurrentPreviewMovie() {
@@ -202,7 +239,20 @@ export const playerMixin = {
       )
     },
 
+    // Frames
+
+    frameDuration() {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
+    fps() {
+      return parseFloat(this.currentProduction?.fps) || 25
+    },
+
     frameNumber() {
+      if (this.isCurrentPreviewPicture) {
+        return this.framesSeenOfPicture - 1
+      }
       let frameNumber = this.currentTimeRaw / this.frameDuration
       if (frameNumber >= this.nbFrames) {
         frameNumber = this.nbFrames
@@ -221,48 +271,6 @@ export const playerMixin = {
         return this.framesSeenOfPicture
       }
       return 0
-    },
-
-    frameDuration() {
-      return Math.round((1 / this.fps) * 10000) / 10000
-    },
-
-    fps() {
-      return parseFloat(this.currentProduction?.fps) || 25
-    },
-
-    // Elements
-
-    container() {
-      return this.$refs.container
-    },
-
-    rawPlayer() {
-      return this.$refs['raw-player']
-    },
-
-    rawPlayerComparison() {
-      return this.$refs['raw-player-comparison']
-    },
-
-    picturePlayer() {
-      return this.$refs['picture-player']
-    },
-
-    soundPlayer() {
-      return this.$refs['sound-player']
-    },
-
-    canvas() {
-      return this.$refs['canvas-wrapper']
-    },
-
-    progress() {
-      return this.$refs['video-progress']
-    },
-
-    video() {
-      return this.$refs.movie
     },
 
     nbFrames() {
@@ -383,12 +391,6 @@ export const playerMixin = {
       this.$refs['video-progress'].$el.style.opacity = 0
     },
 
-    updateProgressBar() {
-      if (this.progress) {
-        this.progress.updateProgressBar(this.frameNumber)
-      }
-    },
-
     updateTaskPanel() {
       if (this.entityList.length > 0) {
         const entity = this.entityList[this.playingEntityIndex]
@@ -396,6 +398,12 @@ export const playerMixin = {
         else this.task = null
       } else {
         this.task = null
+      }
+    },
+
+    updateProgressBar() {
+      if (this.progress) {
+        this.progress.updateProgressBar(this.frameNumber)
       }
     },
 
@@ -410,6 +418,7 @@ export const playerMixin = {
     },
 
     play() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
       if (this.isFullMode) {
         if (
           this.fullPlayer.currentTime >=
@@ -425,6 +434,8 @@ export const playerMixin = {
         this.playPicture()
       } else if (this.isCurrentPreviewSound) {
         this.playSound()
+      } else if (this.isCurrentPreviewModel) {
+        this.playModel()
       } else {
         this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
@@ -490,6 +501,8 @@ export const playerMixin = {
         }
       } else if (this.isCurrentPreviewSound) {
         this.soundPlayer?.pause()
+      } else if (this.isCurrentPreviewModel) {
+        this.modelPlayer?.pause()
       }
       this.isPlaying = false
     },
@@ -498,7 +511,7 @@ export const playerMixin = {
       const entity = this.entityList[entityIndex]
       const wasDrawing = this.isDrawing === true
       this.clearCanvas()
-      this.framesSeenOfPicture = 0
+      this.framesSeenOfPicture = 1
       this.playingEntityIndex = entityIndex
       if (entity && this.isMovie(entity.preview_file_extension)) {
         this.$nextTick(() => {
@@ -676,21 +689,25 @@ export const playerMixin = {
 
     onProgressChanged(frameNumber, updatePlaylistProgress = true) {
       this.clearCanvas()
-      this.rawPlayer.setCurrentFrame(frameNumber)
-      this.syncComparisonPlayer()
+
+      if (this.isCurrentPreviewPicture) {
+        this.framesSeenOfPicture = frameNumber + 1
+      } else {
+        this.rawPlayer.setCurrentFrame(frameNumber)
+        this.syncComparisonPlayer()
+      }
+
       const annotation = this.getAnnotation(frameNumber * this.frameDuration)
       if (annotation) this.loadAnnotation(annotation)
+
       this.sendUpdatePlayingStatus()
       this.onFrameUpdate(frameNumber)
+
       if (this.isFullMode && updatePlaylistProgress) {
         const start = this.currentEntity.start_duration
         const time = (frameNumber - 1) / this.fps + start
         this.fullPlayer.currentTime = time
         this.playlistProgress = time
-      } else {
-        setTimeout(() => {
-          this.updateProgressBar()
-        }, 200)
       }
     },
 
@@ -1052,7 +1069,8 @@ export const playerMixin = {
     },
 
     playPicture() {
-      if (this.isPlaying) clearTimeout(this.playingPictureTimeout)
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
+      this.framesSeenOfPicture = 1
       this.isPlaying = true
       this.playingPictureTimeout = setTimeout(() => {
         this.continuePlayingPlaylist(
@@ -1063,10 +1081,17 @@ export const playerMixin = {
     },
 
     playSound() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
       this.isPlaying = true
       if (this.isCurrentPreviewSound) {
         this.soundPlayer?.play()
       }
+    },
+
+    playModel() {
+      if (this.playingPictureTimeout) clearTimeout(this.playingPictureTimeout)
+      this.isPlaying = true
+      this.modelPlayer?.play(this.objectModel.currentAnimation)
     },
 
     resetCanvasSize() {
