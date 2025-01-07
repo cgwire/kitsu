@@ -45,7 +45,7 @@
         @touchstart="startProgressDrag"
       ></progress>
 
-      <template v-if="empty">
+      <template v-if="!empty">
         <span
           :key="`annotation-${index}`"
           class="annotation-mark"

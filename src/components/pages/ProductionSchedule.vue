@@ -6,13 +6,13 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <date-field utc v-model="selectedStartDate" />
+          <date-field :can-delete="false" utc v-model="selectedStartDate" />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <date-field utc v-model="selectedEndDate" />
+          <date-field :can-delete="false" utc v-model="selectedEndDate" />
         </div>
         <!--
         <text-field
