@@ -110,6 +110,13 @@ module.exports = {
               '/chat-integration/',
               '/installation/'
             ]
+          },
+          {
+            title: 'Frequently Asked Questions',
+            collapsable: true,
+            children: [
+              '/faq/'
+            ]
           }
         ]
       },
