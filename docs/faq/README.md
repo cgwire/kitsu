@@ -28,13 +28,12 @@ If you're unsure of the correct link:
 ## Task Management
 
 ### I created a new Task Type, but I don't see it in my production
-If you've created a new task type ([see documentation](../configure-kitsu/#task-types)) but don't see it in your production, here's why:
+If you've created a new task type ([see documentation](../configure-kitsu/#task-types)) but it isn’t appearing in your production, it’s likely because task types need to be explicitly added to your **Production Library** after being created in the **Studio Library**.
 
-1. **Studio Library vs. Production Library**:  
-   Task types are first created in the **Studio Library**. You need to add them to your **Production Library** before they can be used in a specific production.
+#### Understanding the Difference:
+- **Studio Library**: This is where all task types are initially created and stored for your studio.
+- **Production Library**: Each production has its own library, and task types must be added here before they can be used within that production.
 
-2. **Permissions**:  
-   If you can't see the **Settings** option in the main menu, you may not have the necessary permissions.
 
 #### Steps to Add Task Types to Your Production
 1. Go to your production **Settings** page from the navigation menu.  
@@ -48,6 +47,11 @@ If you've created a new task type ([see documentation](../configure-kitsu/#task-
 
 Once added, go back to your entity page and click **Add Task Type**.  
 ![Add Task Type](../img/getting-started/add_tasktype.png)
+
+:::warning
+**Permissions**:  
+   If you can't see the **Settings** option in the main menu, you may not have the necessary permissions. Please contact your studio administrator if you do not have this option.
+:::
 
 ---
 
