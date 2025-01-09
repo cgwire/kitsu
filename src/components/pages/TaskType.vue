@@ -533,7 +533,7 @@ export default {
   },
 
   mounted() {
-    this.searchField.setValue(this.$route.query.search || '')
+    this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
     const isAssets = this.$route.path.includes('assets')
     const isShots = this.$route.path.includes('shots')
