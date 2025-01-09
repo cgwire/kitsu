@@ -479,7 +479,7 @@
             :title="$t('playlists.actions.download_file')"
             v-if="
               !isCurrentUserArtist ||
-              currentProduction.is_preview_download_allowed
+              currentProduction?.is_preview_download_allowed
             "
           >
             <download-icon class="icon is-small" />
@@ -762,11 +762,11 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
-      'currentProduction',
       'getProductionBackgrounds',
       'isCurrentUserArtist',
       'isTVShow',
       'organisation',
+      'productionMap',
       'selectedConcepts',
       'user'
     ]),
@@ -828,6 +828,10 @@ export default {
       } else {
         return {}
       }
+    },
+
+    currentProduction() {
+      return this.productionMap.get(this.task.project_id)
     },
 
     marginBottom() {
@@ -1476,7 +1480,7 @@ export default {
 
     isDefaultBackground(background) {
       const defaultId =
-        this.currentProduction.default_preview_background_file_id
+        this.currentProduction?.default_preview_background_file_id
       return defaultId ? background.id === defaultId : background.is_default
     },
 
