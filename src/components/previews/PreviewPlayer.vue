@@ -2040,7 +2040,7 @@ export default {
         }, 500)
       } else if (this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
-        this.previewViewer.resize()
+        this.previewViewer?.resize()
       } else if (this.isSound || this.isFile) {
         // hide canvas
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
