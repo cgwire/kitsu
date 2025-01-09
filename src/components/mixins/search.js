@@ -18,9 +18,7 @@ export const searchMixin = {
     },
 
     focusSearchField(options) {
-      if (this.searchField) {
-        this.searchField.focus(options)
-      }
+      this.searchField?.focus(options)
     },
 
     setSearchFromUrl() {
@@ -32,7 +30,7 @@ export const searchMixin = {
     },
 
     setSearchInUrl() {
-      const searchQuery = this.searchField.getValue()
+      const searchQuery = this.searchField?.getValue()
       if (this.$route.query.search !== searchQuery) {
         this.$router.push({
           query: {
