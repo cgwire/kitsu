@@ -892,7 +892,7 @@ export const routes = [
   },
 
   {
-    path: '/:pathMatch(.*)',
+    path: '/:pathMatch(.*)*',
     component: NotFound,
     name: 'not-found'
   }
