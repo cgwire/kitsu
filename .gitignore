@@ -39,3 +39,4 @@ jspm_packages
 # Vuepress build
 docs/.vuepress/dist/
 docs/.DS_Store
+docs/ja/.DS_Store

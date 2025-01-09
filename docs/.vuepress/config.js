@@ -201,6 +201,13 @@ module.exports = {
             ]
           },
           {
+            title: 'アーティストのワークフロー',
+            collapsable: true,
+            children: [
+              '/ja/artist/'
+            ]
+          },
+          {
             title: '開発者向けワークフロー',
             collapsable: true,
             children: [
@@ -209,6 +216,13 @@ module.exports = {
               '/ja/publisher/',
               '/ja/chat-integration/',
               '/ja/installation/'
+            ]
+          },
+          {
+            title: 'よくある質問',
+            collapsable: true,
+            children: [
+              '/ja/faq/'
             ]
           }
         ]
