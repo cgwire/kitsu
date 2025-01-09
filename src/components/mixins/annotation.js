@@ -73,7 +73,15 @@ export const annotationMixin = {
       notSave: false,
       pencilColor: '#ff3860',
       pencilWidth: 'big',
-      textColor: '#ff3860'
+      textColor: '#ff3860',
+      mouseIsDrawing: false,
+      mouseDrawingPressureMode: "fade", // choose mode how we fake pressure on the mouse "fade" or "distance" or null
+      mouseDrawingStartTime: null,
+      mouseDrawingMinPressure: 0.2,
+      mouseDrawingMaxPressure: 0.6,
+      mouseDrawingFadeTime: 100,
+      mouseDrawingPrevPoint: null,
+      mouseDrawingDistanceFalloff: 20
     }
   },
 
@@ -1099,10 +1107,12 @@ export const annotationMixin = {
       this.fabricCanvas.on('text:changed', this.onObjectModified)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('erasing:end', this.onObjectAdded)
-      this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.on('mouse:move', this.updateMousePressure)
+      this.fabricCanvas.on('mouse:down', this.initalizeMouseDrawing)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
+      this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.freeDrawingBrush.color = this.pencilColor
       this.fabricCanvas.freeDrawingBrush.width = 4
 
@@ -1120,12 +1130,52 @@ export const annotationMixin = {
       return this.fabricCanvas
     },
 
+    // fake mouse pressure
+    initalizeMouseDrawing() {
+      if (this.isDrawing && this.fabricCanvas.freeDrawingBrush) {
+        this.mouseIsDrawing = true
+        this.mouseDrawingStartTime = Date.now()
+        this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
+      }
+    },
+
+    getPointDistance(p1, p2) {
+      return Math.sqrt(Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y))
+    },
+
+    updateMousePressure() {
+      if (this.isDrawing && this.fabricCanvas.freeDrawingBrush && this.mouseIsDrawing) {
+        let pressure = 0.5
+        if (this.mouseDrawingPressureMode === "fade") { 
+          // lerp from mouseDrawingMinPressure to mouseDrawingMaxPressure in mouseDrawingFadeTime
+          const delta_time = Date.now() - this.mouseDrawingStartTime
+          const t = delta_time/this.mouseDrawingFadeTime
+          pressure = Math.max((1-t)*this.mouseDrawingMaxPressure + t*this.mouseDrawingMinPressure, this.mouseDrawingMinPressure)
+        } else if (this.mouseDrawingPressureMode === "distance" && this.mouseDrawingPrevPoint) {
+          // use the distance to the last point to calculate a 'speed' and use it as a multiplier
+          const delta_dist = this.getPointDistance(this.mouseDrawingPrevPoint, this.fabricCanvas.getPointer())
+          pressure = Math.min(1/delta_dist, this.mouseDrawingMaxPressure)
+        } else {
+          pressure = 0.5
+        }
+        this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
+        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = pressure; // Fallback value for mouse/touch
+      }
+    },
+
     /*
      * When drawing is finished, the undone stack is emptied and the saving
      * procedure is started.
      */
     endDrawing() {
       if (this.isDrawing) {
+        if (this.mouseIsDrawing) {
+          this.mouseIsDrawing = false
+          this.mouseDrawingStartTime = null
+          this.mouseDrawingPrevPoint = null
+          this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = this.mouseDrawingMaxPressure
+          console.log("Drawing ended")
+        }
         this.clearUndoneStack()
         this.saveAnnotations()
       }
