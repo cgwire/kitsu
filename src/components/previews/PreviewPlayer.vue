@@ -2009,6 +2009,7 @@ export default {
   watch: {
     current3DAnimation() {
       if (this.is3DModel) {
+        this.isPlaying = true
         this.previewViewer.playModelAnimation(this.current3DAnimation)
       }
     },
