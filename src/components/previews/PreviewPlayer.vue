@@ -105,7 +105,7 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
+          v-if="!isCommentsHidden"
         />
       </div>
     </div>
@@ -443,7 +443,10 @@
             v-if="currentPreview && !isConcept"
           />
 
-          <div class="flexrow" v-if="fullScreen && !isConcept">
+          <div
+            class="flexrow"
+            v-if="fullScreen && !isConcept && lastPreviewFileOptions.length"
+          >
             <combobox-styled
               class="preview-combo flexrow-item"
               :options="lastPreviewFileOptions"
