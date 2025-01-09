@@ -523,7 +523,7 @@ export default {
             const entity = this.shotMap.get(task.entity.id)
             if (previousTask) {
               const previousEntity = this.shotMap.get(previousTask.entity.id)
-              if (previousEntity.sequence_id !== entity.sequence_id) {
+              if (previousEntity?.sequence_id !== entity?.sequence_id) {
                 result.push(currentTasks)
                 currentTasks = {
                   name: task.sequence_name,
@@ -545,7 +545,7 @@ export default {
             const entity = this.assetMap.get(task.entity.id)
             if (previousTask) {
               const previousEntity = this.assetMap.get(previousTask.entity.id)
-              if (previousEntity.asset_type_id !== entity.asset_type_id) {
+              if (previousEntity?.asset_type_id !== entity?.asset_type_id) {
                 result.push(currentTasks)
                 currentTasks = {
                   name: task.entity_type_name,
