@@ -9,6 +9,8 @@ import { markRaw } from 'vue'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
+import { PSStroke } from '@arch-inc/fabricjs-psbrush'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
 import localPreferences from '@/lib/preferences'
 
 /* Monkey patch needed to have text background including the padding. */
@@ -28,6 +30,32 @@ if (fabric) {
     }
   })
 }
+
+if (PSStroke) {
+  /* Monkey patch _getTransformedDimensions() to return a proper fabric point */
+  PSStroke.prototype._getTransformedDimensions = function() {
+    const width = this.width * this.scaleX;
+    const height = this.height * this.scaleY;
+    const dimensions = new fabric.Point(width, height);
+  return dimensions
+};
+
+  /* Monkey patch needed to make PSStroke work correctly by adding missing methods */
+  if (!PSStroke.prototype.getAncestors) {
+    PSStroke.prototype.getAncestors = function () {
+      return [];
+    };
+  }
+
+  if (!PSStroke.prototype.getRelativeCenterPoint) {
+    PSStroke.prototype.getRelativeCenterPoint = function () {
+      const center = new fabric.Point(this.getCenterPoint ? this.getCenterPoint() : { x: this.left, y: this.top });
+      return center
+    };
+  }
+}
+
+
 
 export const annotationMixin = {
   emits: ['annotation-changed'],
@@ -418,7 +446,7 @@ export const annotationMixin = {
     getNewAnnotations(currentTime, currentFrame, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
-        if (obj.type === 'path') {
+        if (obj.type === 'path' || obj.type === 'PSStroke') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
           if (!obj.canvasHeight) obj.canvasHeight = this.fabricCanvas.height
           obj.setControlsVisibility({
@@ -507,11 +535,11 @@ export const annotationMixin = {
      *
      * @returns: the build object.
      */
-    addObjectToCanvas(annotation, obj, canvas = null) {
+    async addObjectToCanvas(annotation, obj, canvas = null) {
       if (!obj) return
       if (this.getObjectById(obj.id) && !canvas) return
       if (!canvas) canvas = this.fabricCanvas
-      let path, text
+      let path, text, psstroke
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
       if (annotation?.width) {
@@ -607,9 +635,62 @@ export const annotationMixin = {
         this.$options.silentAnnnotation = true
         canvas.add(text)
         this.$options.silentAnnnotation = false
+      } else if (obj.type === 'PSStroke') {
+        let strokeMultiplier = 1
+        if (obj.canvasWidth) {
+          strokeMultiplier = canvasWidth / canvas.width
+        }
+        if (canvas.width < 420) strokeMultiplier /= 2
+        psstroke = await this.deserializePSBrush(obj)
+        psstroke.set('id', obj.id)
+        psstroke.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+        psstroke.set('canvasWidth', canvasWidth)
+        psstroke.set('canvasHeight', canvasHeight)
+        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('left', obj.left * scaleMultiplierX)
+        psstroke.set('top', obj.top * scaleMultiplierY)
+        psstroke.set('radius', obj.radius)
+        psstroke.set('width', obj.width)
+        psstroke.set('height', obj.height)
+        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('angle', obj.angle)
+        psstroke.set('scale', obj.scale)
+        psstroke.set('editable', !this.isCurrentUserArtist)
+        psstroke.set('selectable', !this.isCurrentUserArtist)
+        this.addSerialization(psstroke)
+        psstroke.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: !this.isCurrentUserArtist,
+          tl: false,
+          tr: false,
+          mtr: !this.isCurrentUserArtist
+        })
+        this.$options.silentAnnnotation = true
+        canvas.add(psstroke)
+        this.$options.silentAnnnotation = false
       }
-      return path || text
+      return path || text || psstroke
     },
+
+    deserializePSBrush(obj){
+      // helper function as PSBrush deserializes asynchronously only
+      return new Promise((resolve, reject) => {
+        PSStroke.fromObject(obj, function(psstroke) {
+          if (psstroke) {
+            resolve(psstroke); 
+          } else {
+            reject(new Error('Failed to deserialize PSStroke'));
+          }
+        });
+      });
+    },
+
 
     // Events
 
@@ -674,9 +755,9 @@ export const annotationMixin = {
     _resetPencil() {
       if (!this.fabricCanvas) return
       const converter = {
-        big: 4,
-        medium: 2,
-        small: 1
+        big: 8,
+        medium: 4,
+        small: 2
       }
       const strokeWidth = converter[this.pencilWidth]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
@@ -710,9 +791,9 @@ export const annotationMixin = {
         if (this.fabricCanvas) {
           this.fabricCanvas.isDrawingMode = true
         }
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
         this._resetColor()
         this._resetPencil()
         this.isDrawing = true
@@ -991,10 +1072,11 @@ export const annotationMixin = {
         height: 100
       })
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
+        
       }
+      
       this.configureCanvas()
       return this.fabricCanvas
     },

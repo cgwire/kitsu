@@ -620,6 +620,46 @@ export const playerMixin = {
       }
     },
 
+    goPreviousDrawing() {
+      try {
+        this.clearCanvas()
+        const annotation_time = Number(this.getPreviousAnnotationTime(this.currentTimeRaw).frame)-1
+        if (this.isFullMode) {
+          const nextDrawingTime = annotation_time / this.fps
+          this.setFullPlayerTime(nextDrawingTime)
+        } else {
+          this.rawPlayer.setCurrentTimeRaw( annotation_time / this.fps)
+          this.onProgressChanged(annotation_time, true)
+        }
+        if (this.isComparing){
+          this.syncComparisonViewer()
+        }
+      }
+      catch {
+        return // has been called from within PreviewPlayer and returned null
+      }
+    },
+
+    goNextDrawing() {
+      try {
+        this.clearCanvas()
+        const annotation_time = Number(this.getNextAnnotationTime(this.currentTimeRaw).frame)-1
+        if (this.isFullMode) {
+          const nextDrawingTime = annotation_time / this.fps
+          this.setFullPlayerTime(nextDrawingTime)
+        } else {
+          this.rawPlayer.setCurrentTimeRaw( annotation_time / this.fps)
+          this.onProgressChanged(annotation_time, true)
+        }
+        if (this.isComparing){
+          this.syncComparisonViewer()
+        }
+      }
+      catch {
+        return // has been called from within PreviewPlayer and returned null
+      }
+    },
+
     setFullPlayerTime(newTime) {
       if (!this.currentEntity) return
       this.fullPlayer.currentTime = newTime
@@ -746,6 +786,20 @@ export const playerMixin = {
       this.sendUpdatePlayingStatus()
     },
 
+    onPreviousDrawingClicked() {
+      // TODO IMPLEMENT PREVIOUS DRAWING LOGIC
+      this.clearFocus()
+      this.goPreviousDrawing()
+      this.sendUpdatePlayingStatus()
+    },
+
+    onNextDrawingClicked() {
+      // TODO IMPLEMENT NEXT DRAWING LOGIC
+      this.clearFocus()
+      this.goNextDrawing()
+      this.sendUpdatePlayingStatus()
+    },
+
     onPlayPauseClicked() {
       this.clearFocus()
       if (!this.isPlaying) {
@@ -806,6 +860,8 @@ export const playerMixin = {
       const ENDKEY = 35
       const LEFTKEY = 37
       const RIGHTKEY = 39
+      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const NEXTANNKEY = '.'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (
@@ -866,6 +922,14 @@ export const playerMixin = {
           event.preventDefault()
           event.stopPropagation()
           this.onPlayPauseClicked()
+        } else if (event.key === NEXTANNKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.onNextDrawingClicked()
+        } else if (event.key === PREVANNKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.onPreviousDrawingClicked()
         } else if (event.altKey && event.keyCode === 74) {
           // alt+j
           event.preventDefault()
@@ -964,6 +1028,42 @@ export const playerMixin = {
       if (this.isCurrentPreviewPicture) currentTime = 0
       const annotation = this.getAnnotation(currentTime)
       if (annotation) this.loadAnnotation(annotation)
+    },
+
+    getSortedAnnotations() {
+      const annotations = this.annotations
+        annotations.sort((a, b) => 
+          (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)
+        )
+      return annotations
+    },
+
+    getNextAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.find(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) > time + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getPreviousAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.findLast(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
+      }
     },
 
     onCommentClicked() {

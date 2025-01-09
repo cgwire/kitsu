@@ -569,6 +569,7 @@ import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 import VideoProgress from '@/components/previews/VideoProgress.vue'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
 
 let lastIndex = 1
 
@@ -1194,6 +1195,20 @@ export default {
       this.syncComparisonViewer()
     },
 
+    goPreviousDrawing() {
+      this.clearCanvas()
+      const annotation_time = this.getPreviousAnnotationTime(this.currentTimeRaw).frame-1 // compensate for offsert frame number
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
+    goNextDrawing() {
+      this.clearCanvas()
+      const annotation_time = this.getNextAnnotationTime(this.currentTimeRaw).frame-1 // compensate for offset frame number
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
         this.comparisonViewer.setCurrentFrame(this.currentFrame)
@@ -1254,19 +1269,27 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
+
+      let brush = new PSBrush(this.fabricCanvas)
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
         new fabric.Canvas(this.canvasId, {
           fireRightClick: true,
           width,
-          height
+          height,
+          enablePointerEvents: true
         })
       )
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
+        brush.width = 20; // Set default brush width
+        brush.color = "#000"; // Set default color
+        brush.disableTouch = true; // Disable touch input
+        brush.disableMouse = true;
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
       }
+
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
       )
@@ -1490,6 +1513,8 @@ export default {
         this.isDrawing = false
       } else {
         this.isTyping = false
+        this._resetColor()
+        this._resetPencil()
         this.isDrawing = true
       }
     },
@@ -1526,6 +1551,42 @@ export default {
         })
       } else if (this.isPicture) {
         return this.annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getSortedAnnotations() {
+      const annotations = this.annotations
+        annotations.sort((a, b) => 
+          (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)
+        )
+      return annotations
+    },
+
+    getNextAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.find(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) > time + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getPreviousAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.findLast(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
       }
     },
 
@@ -1738,6 +1799,8 @@ export default {
     // Events
 
     onKeyDown(event) {
+      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const NEXTANNKEY = '.'
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
@@ -1757,6 +1820,10 @@ export default {
             this.pauseEvent(event)
           }
           return false
+        } else if (event.key === NEXTANNKEY) {
+          this.goNextDrawing()
+        } else if (event.key === PREVANNKEY) {
+          this.goPreviousDrawing()
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
@@ -2113,7 +2180,9 @@ export default {
     },
 
     isDrawing() {
-      if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
+      if (this.fabricCanvas) {
+        this.fabricCanvas.isDrawingMode = this.isDrawing
+      }
       else this.endAnnotationSaving()
 
       if (this.isDrawing) {
