@@ -92,7 +92,10 @@
                 </em>
               </div>
 
-              <div class="set-main-preview flexrow-item flexrow pull-right">
+              <div
+                class="set-main-preview flexrow-item flexrow pull-right"
+                v-if="isCurrentUserManager && $refs['preview-player']"
+              >
                 <button
                   :class="{
                     button: true,
@@ -100,7 +103,6 @@
                     'is-loading': loading.setPreview
                   }"
                   @click="setPreview"
-                  v-if="isCurrentUserManager"
                 >
                   <image-icon class="icon" />
                   <span class="text">
@@ -1012,9 +1014,10 @@ export default {
     },
 
     setPreview() {
+      const previewPlayer = this.$refs['preview-player']
+      if (!previewPlayer) return
       this.loading.setPreview = true
       this.errors.setPreview = false
-      const previewPlayer = this.$refs['preview-player']
       const previewId = previewPlayer.currentPreview.id
       this.$store
         .dispatch('setPreview', {
