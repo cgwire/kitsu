@@ -1102,6 +1102,7 @@ td.retake-count {
       margin-bottom: 0.5em;
       margin-top: 0.3em;
       padding: 0 0.5em;
+      word-break: break-word;
     }
     .task-data {
       padding: 0 0.1em 0 0.3em;
