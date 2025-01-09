@@ -76,7 +76,7 @@
     "eslint-plugin-vue": "9.32.0",
     "esm": "3.2.25",
     "husky": "9.1.7",
-    "jsdom": "26.0.0",
+    "jsdom": "25.0.1",
     "lint-staged": "15.3.0",
     "localStorage": "1.0.4",
     "prettier": "3.4.2",
