@@ -75,13 +75,16 @@ export const annotationMixin = {
       pencilWidth: 'big',
       textColor: '#ff3860',
       mouseIsDrawing: false,
-      mouseDrawingPressureMode: "fade", // choose mode how we fake pressure on the mouse "fade" or "distance" or null
+      mouseDrawingPressureMode: "distance", // choose mode how we fake pressure on the mouse "fade" or "distance" or null
       mouseDrawingStartTime: null,
-      mouseDrawingMinPressure: 0.2,
-      mouseDrawingMaxPressure: 0.6,
+      mouseDrawingMinPressure: 0.4,
+      mouseDrawingMaxPressure: 0.8,
       mouseDrawingFadeTime: 100,
+      mouseDrawingDistanceFalloff: 2,
+      mouseDrawingMaxChangeRate: 0.03,
       mouseDrawingPrevPoint: null,
-      mouseDrawingDistanceFalloff: 20
+      mouseDrawingPrevPressure: null,
+      mouseDrawingDynamicDistanceMult: null
     }
   },
 
@@ -1136,11 +1139,19 @@ export const annotationMixin = {
         this.mouseIsDrawing = true
         this.mouseDrawingStartTime = Date.now()
         this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
+        this.mouseDrawingPrevPressure = this.fabricCanvas.freeDrawingBrush ? this.fabricCanvas.freeDrawingBrush.pressureManager.fallback : this.mouseDrawingMaxPressure
       }
     },
 
     getPointDistance(p1, p2) {
       return Math.sqrt(Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y))
+    },
+
+    getCanvasRelativePointDistance(p1, p2, canvas) {
+      const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+      const p1_rel = p1.divide(dimensions)
+      const p2_rel = p2.divide(dimensions)
+      return Math.sqrt(Math.abs(p1_rel.x - p2_rel.x) + Math.abs(p1_rel.y - p2_rel.y))
     },
 
     updateMousePressure() {
@@ -1153,13 +1164,25 @@ export const annotationMixin = {
           pressure = Math.max((1-t)*this.mouseDrawingMaxPressure + t*this.mouseDrawingMinPressure, this.mouseDrawingMinPressure)
         } else if (this.mouseDrawingPressureMode === "distance" && this.mouseDrawingPrevPoint) {
           // use the distance to the last point to calculate a 'speed' and use it as a multiplier
-          const delta_dist = this.getPointDistance(this.mouseDrawingPrevPoint, this.fabricCanvas.getPointer())
-          pressure = Math.min(1/delta_dist, this.mouseDrawingMaxPressure)
+          let delta_dist = this.getCanvasRelativePointDistance(this.mouseDrawingPrevPoint, this.fabricCanvas.getPointer(), this.fabricCanvas)
+          delta_dist *= 50 // magic number to scale to nicer values
+          if(!this.mouseDrawingDynamicDistanceMult){
+            // initialize a multiplier when drawing very slowly
+            if (delta_dist < 1.8){
+              this.mouseDrawingDynamicDistanceMult = Math.min((delta_dist*delta_dist), 1.5)
+            } else {
+              this.mouseDrawingDynamicDistanceMult = 1
+            }
+          }
+          delta_dist *= this.mouseDrawingDynamicDistanceMult
+          pressure = Math.min(this.mouseDrawingDistanceFalloff/delta_dist, this.mouseDrawingMaxPressure)
         } else {
           pressure = 0.5
         }
+        const clamped_pressure = Math.max(this.mouseDrawingPrevPressure-this.mouseDrawingMaxChangeRate, Math.min(pressure, this.mouseDrawingPrevPressure+this.mouseDrawingMaxChangeRate))
         this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
-        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = pressure; // Fallback value for mouse/touch
+        this.mouseDrawingPrevPressure = clamped_pressure
+        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = clamped_pressure; // Fallback value for mouse/touch
       }
     },
 
@@ -1173,8 +1196,8 @@ export const annotationMixin = {
           this.mouseIsDrawing = false
           this.mouseDrawingStartTime = null
           this.mouseDrawingPrevPoint = null
+          this.mouseDrawingDynamicDistanceMult = null
           this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = this.mouseDrawingMaxPressure
-          console.log("Drawing ended")
         }
         this.clearUndoneStack()
         this.saveAnnotations()
