@@ -443,6 +443,7 @@ export const playerMixin = {
       } else if (this.isCurrentPreviewModel) {
         this.playModel()
       } else {
+        if (!this.rawPlayer) return
         this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
         if (this.isComparing) {
@@ -594,6 +595,7 @@ export const playerMixin = {
         previousFrameTime = previousFrame / this.fps
         this.setFullPlayerTime(previousFrameTime)
       } else {
+        if (!this.rawPlayer) return
         this.rawPlayer.goPreviousFrame()
         if (this.isComparing) this.syncComparisonPlayer()
         const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
