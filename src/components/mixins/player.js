@@ -637,14 +637,13 @@ export const playerMixin = {
           const nextDrawingTime = annotation_time / this.fps
           this.setFullPlayerTime(nextDrawingTime)
         } else {
-          this.rawPlayer.setCurrentTimeRaw( annotation_time / this.fps)
+          this.rawPlayer.setCurrentTimeRaw(annotation_time / this.fps)
           this.onProgressChanged(annotation_time, true)
         }
-        if (this.isComparing){
+        if (this.isComparing) {
           this.syncComparisonViewer()
         }
-      }
-      catch {
+      } catch {
         console.log('should never happen')
         return // has been called from within PreviewPlayer and returned null
       }
@@ -659,14 +658,13 @@ export const playerMixin = {
           const nextDrawingTime = annotation_time / this.fps
           this.setFullPlayerTime(nextDrawingTime)
         } else {
-          this.rawPlayer.setCurrentTimeRaw( annotation_time / this.fps)
+          this.rawPlayer.setCurrentTimeRaw(annotation_time / this.fps)
           this.onProgressChanged(annotation_time, true)
         }
-        if (this.isComparing){
+        if (this.isComparing) {
           this.syncComparisonViewer()
         }
-      }
-      catch {
+      } catch {
         console.log('should never happen')
         return // has been called from within PreviewPlayer and returned null
       }
@@ -1042,9 +1040,9 @@ export const playerMixin = {
 
     getSortedAnnotations() {
       const annotations = this.annotations
-        annotations.sort((a, b) =>
-          (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)
-        )
+      annotations.sort((a, b) =>
+        a.time > b.time ? 1 : b.time > a.time ? -1 : 0
+      )
       return annotations
     },
 
@@ -1053,9 +1051,7 @@ export const playerMixin = {
       if (this.isMovie) {
         time = roundToFrame(time, this.fps)
         return annotations.find(annotation => {
-          return (
-            roundToFrame(annotation.time, this.fps) > time + 0.0001
-          )
+          return roundToFrame(annotation.time, this.fps) > time + 0.0001
         })
       } else if (this.isPicture) {
         return annotations.find(annotation => annotation.time === 0)
@@ -1068,7 +1064,8 @@ export const playerMixin = {
         time = roundToFrame(time, this.fps)
         return annotations.findLast(annotation => {
           return (
-            roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
+            roundToFrame(annotation.time, this.fps) <
+            time - 1 / this.fps + 0.0001
           )
         })
       } else if (this.isPicture) {
