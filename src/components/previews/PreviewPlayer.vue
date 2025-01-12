@@ -1202,6 +1202,24 @@ export default {
       this.syncComparisonViewer()
     },
 
+    goPreviousDrawing() {
+      this.clearCanvas()
+      // compensate for offsert frame number
+      const annotation_time =
+        this.getPreviousAnnotationTime(this.currentTimeRaw).frame - 1
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
+    goNextDrawing() {
+      this.clearCanvas()
+      // compensate for offset frame number
+      const annotation_time =
+        this.getNextAnnotationTime(this.currentTimeRaw).frame - 1
+      this.setCurrentFrame(annotation_time)
+      this.syncComparisonViewer()
+    },
+
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
         this.comparisonViewer.setCurrentFrame(this.currentFrame)
@@ -1497,6 +1515,8 @@ export default {
       if (this.isDrawing) {
         this.isDrawing = false
       } else {
+        this._resetColor()
+        this._resetPencil()
         this.isTyping = false
         this.isDrawing = true
       }
@@ -1534,6 +1554,42 @@ export default {
         })
       } else if (this.isPicture) {
         return this.annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getSortedAnnotations() {
+      const annotations = this.annotations
+        annotations.sort((a, b) =>
+          (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0)
+        )
+      return annotations
+    },
+
+    getNextAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.find(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) > time + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getPreviousAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.findLast(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) < time - 1/this.fps + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
       }
     },
 
@@ -1746,6 +1802,9 @@ export default {
     // Events
 
     onKeyDown(event) {
+      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const NEXTANNKEY = '.'
+
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
@@ -1765,6 +1824,10 @@ export default {
             this.pauseEvent(event)
           }
           return false
+        } else if (event.key === NEXTANNKEY) {
+          this.goNextDrawing()
+        } else if (event.key === PREVANNKEY) {
+          this.goPreviousDrawing()
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
