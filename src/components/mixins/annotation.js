@@ -33,12 +33,12 @@ if (fabric) {
 
 /* Monkey patch _getTransformedDimensions() to return a proper fabric point */
 if (PSStroke) {
-  PSStroke.prototype._getTransformedDimensions = function() {
+  PSStroke.prototype._getTransformedDimensions = function () {
     const width = this.width * this.scaleX
     const height = this.height * this.scaleY
     const dimensions = new fabric.Point(width, height)
     return dimensions
-  };
+  }
 
   /* Monkey patch needed to make PSStroke work correctly by adding missing methods */
   if (!PSStroke.prototype.getAncestors) {
@@ -48,7 +48,7 @@ if (PSStroke) {
   }
 
   if (!PSStroke.prototype.getRelativeCenterPoint) {
-  PSStroke.prototype.getRelativeCenterPoint = function () {
+    PSStroke.prototype.getRelativeCenterPoint = function () {
       const center = new fabric.Point(
         this.getCenterPoint
           ? this.getCenterPoint()
@@ -77,7 +77,7 @@ export const annotationMixin = {
       pencilWidth: 'big',
       textColor: '#ff3860',
       mouseIsDrawing: false,
-      mouseDrawingPressureMode: "distance", // choose mode how we fake pressure on the mouse "fade" or "distance" or null
+      mouseDrawingPressureMode: 'distance', // choose mode how we fake pressure on the mouse "fade" or "distance" or null
       mouseDrawingStartTime: null,
       mouseDrawingMinPressure: 0.4,
       mouseDrawingMaxPressure: 0.8,
@@ -694,7 +694,7 @@ export const annotationMixin = {
     // Helper function as PSBrush deserializes asynchronously only
     deserializePSBrush(obj) {
       return new Promise((resolve, reject) => {
-        PSStroke.fromObject(obj, function(psstroke) {
+        PSStroke.fromObject(obj, function (psstroke) {
           if (psstroke) {
             resolve(psstroke)
           } else {
@@ -807,9 +807,9 @@ export const annotationMixin = {
         this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
           this.fabricCanvas
         )
-        let brush = new PSBrush(this.fabricCanvas)
+        const brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
-        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
+        brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
 
         this._resetColor()
         this._resetPencil()
@@ -1089,7 +1089,7 @@ export const annotationMixin = {
         height: 100
       })
       if (!this.fabricCanvas.freeDrawingBrush) {
-        let brush = new PSBrush(this.fabricCanvas)
+        const brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
       }
       this.configureCanvas()
@@ -1147,7 +1147,9 @@ export const annotationMixin = {
         this.mouseIsDrawing = true
         this.mouseDrawingStartTime = Date.now()
         this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
-        this.mouseDrawingPrevPressure = this.fabricCanvas.freeDrawingBrush ? this.fabricCanvas.freeDrawingBrush.pressureManager.fallback : this.mouseDrawingMaxPressure
+        this.mouseDrawingPrevPressure = this.fabricCanvas.freeDrawingBrush
+          ? this.fabricCanvas.freeDrawingBrush.pressureManager.fallback
+          : this.mouseDrawingMaxPressure
       }
     },
 
@@ -1159,38 +1161,68 @@ export const annotationMixin = {
       const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
       const p1_rel = p1.divide(dimensions)
       const p2_rel = p2.divide(dimensions)
-      return Math.sqrt(Math.abs(p1_rel.x - p2_rel.x) + Math.abs(p1_rel.y - p2_rel.y))
+      return Math.sqrt(
+        Math.abs(p1_rel.x - p2_rel.x) + Math.abs(p1_rel.y - p2_rel.y)
+      )
     },
 
     updateMousePressure() {
-      if (this.isDrawing && this.fabricCanvas.freeDrawingBrush && this.mouseIsDrawing) {
+      if (
+        this.isDrawing &&
+        this.fabricCanvas.freeDrawingBrush &&
+        this.mouseIsDrawing
+      ) {
         let pressure = 0.5
-        if (this.mouseDrawingPressureMode === "fade") {
+        if (this.mouseDrawingPressureMode === 'fade') {
           // lerp from mouseDrawingMinPressure to mouseDrawingMaxPressure in mouseDrawingFadeTime
           const delta_time = Date.now() - this.mouseDrawingStartTime
-          const t = delta_time/this.mouseDrawingFadeTime
-          pressure = Math.max((1-t)*this.mouseDrawingMaxPressure + t*this.mouseDrawingMinPressure, this.mouseDrawingMinPressure)
-        } else if (this.mouseDrawingPressureMode === "distance" && this.mouseDrawingPrevPoint) {
+          const t = delta_time / this.mouseDrawingFadeTime
+          pressure = Math.max(
+            (1 - t) * this.mouseDrawingMaxPressure +
+              t * this.mouseDrawingMinPressure,
+            this.mouseDrawingMinPressure
+          )
+        } else if (
+          this.mouseDrawingPressureMode === 'distance' &&
+          this.mouseDrawingPrevPoint
+        ) {
           // use the distance to the last point to calculate a 'speed' and use it as a multiplier
-          let delta_dist = this.getCanvasRelativePointDistance(this.mouseDrawingPrevPoint, this.fabricCanvas.getPointer(), this.fabricCanvas)
+          let delta_dist = this.getCanvasRelativePointDistance(
+            this.mouseDrawingPrevPoint,
+            this.fabricCanvas.getPointer(),
+            this.fabricCanvas
+          )
           delta_dist *= 50 // magic number to scale to nicer values
-          if(!this.mouseDrawingDynamicDistanceMult){
+          if (!this.mouseDrawingDynamicDistanceMult) {
             // initialize a multiplier when drawing very slowly
-            if (delta_dist < 1.8){
-              this.mouseDrawingDynamicDistanceMult = Math.min((delta_dist*delta_dist), 1.5)
+            if (delta_dist < 1.8) {
+              this.mouseDrawingDynamicDistanceMult = Math.min(
+                delta_dist * delta_dist,
+                1.5
+              )
             } else {
               this.mouseDrawingDynamicDistanceMult = 1
             }
           }
           delta_dist *= this.mouseDrawingDynamicDistanceMult
-          pressure = Math.min(this.mouseDrawingDistanceFalloff/delta_dist, this.mouseDrawingMaxPressure)
+          pressure = Math.min(
+            this.mouseDrawingDistanceFalloff / delta_dist,
+            this.mouseDrawingMaxPressure
+          )
         } else {
           pressure = 0.5
         }
-        const clamped_pressure = Math.max(this.mouseDrawingPrevPressure-this.mouseDrawingMaxChangeRate, Math.min(pressure, this.mouseDrawingPrevPressure+this.mouseDrawingMaxChangeRate))
+        const clamped_pressure = Math.max(
+          this.mouseDrawingPrevPressure - this.mouseDrawingMaxChangeRate,
+          Math.min(
+            pressure,
+            this.mouseDrawingPrevPressure + this.mouseDrawingMaxChangeRate
+          )
+        )
         this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
         this.mouseDrawingPrevPressure = clamped_pressure
-        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = clamped_pressure; // Fallback value for mouse/touch
+        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback =
+          clamped_pressure // Fallback value for mouse/touch
       }
     },
 
@@ -1205,7 +1237,8 @@ export const annotationMixin = {
           this.mouseDrawingStartTime = null
           this.mouseDrawingPrevPoint = null
           this.mouseDrawingDynamicDistanceMult = null
-          this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = this.mouseDrawingMaxPressure
+          this.fabricCanvas.freeDrawingBrush.pressureManager.fallback =
+            this.mouseDrawingMaxPressure
         }
         this.clearUndoneStack()
         this.saveAnnotations()
