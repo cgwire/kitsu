@@ -339,7 +339,8 @@ const actions = {
     dispatch('setLastProductionScreen', 'sequences')
     if (
       cache.sequences.length === 0 ||
-      cache.sequences[0].production_id !== productionId
+      cache.sequences[0].production_id !== productionId ||
+      cache.sequences[0].tasks.length === 0
     ) {
       return dispatch('loadSequences').then(() => {
         return dispatch('computeSequenceStats')
