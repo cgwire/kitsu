@@ -541,6 +541,8 @@
 
 <script>
 import { fabric } from 'fabric'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
+
 import {
   ArrowUpRightIcon,
   DownloadIcon,
@@ -1280,18 +1282,26 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
+
+      let brush = new PSBrush(this.fabricCanvas)
+
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
         new fabric.Canvas(this.canvasId, {
           fireRightClick: true,
           width,
-          height
+          height,
+          enablePointerEvents: true
         })
       )
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
+        brush.width = 20; // Set default brush width
+        brush.color = "#000"; // Set default color
+        brush.disableTouch = true; // Disable touch input
+        brush.disableMouse = true;
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
       }
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
@@ -2185,7 +2195,9 @@ export default {
     },
 
     isDrawing() {
-      if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
+      if (this.fabricCanvas) {
+        this.fabricCanvas.isDrawingMode = this.isDrawing
+      }
       else this.endAnnotationSaving()
 
       if (this.isDrawing) {

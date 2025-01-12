@@ -4,6 +4,8 @@
  */
 import { fabric } from 'fabric'
 import moment from 'moment'
+import { PSStroke } from '@arch-inc/fabricjs-psbrush'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 import { markRaw } from 'vue'
 
@@ -29,6 +31,34 @@ if (fabric) {
   })
 }
 
+/* Monkey patch _getTransformedDimensions() to return a proper fabric point */
+if (PSStroke) {
+  PSStroke.prototype._getTransformedDimensions = function() {
+    const width = this.width * this.scaleX
+    const height = this.height * this.scaleY
+    const dimensions = new fabric.Point(width, height)
+    return dimensions
+  };
+
+  /* Monkey patch needed to make PSStroke work correctly by adding missing methods */
+  if (!PSStroke.prototype.getAncestors) {
+    PSStroke.prototype.getAncestors = function () {
+      return []
+    }
+  }
+
+  if (!PSStroke.prototype.getRelativeCenterPoint) {
+  PSStroke.prototype.getRelativeCenterPoint = function () {
+      const center = new fabric.Point(
+        this.getCenterPoint
+          ? this.getCenterPoint()
+          : { x: this.left, y: this.top }
+      )
+      return center
+    }
+  }
+}
+
 export const annotationMixin = {
   emits: ['annotation-changed'],
 
@@ -45,7 +75,18 @@ export const annotationMixin = {
       notSave: false,
       pencilColor: '#ff3860',
       pencilWidth: 'big',
-      textColor: '#ff3860'
+      textColor: '#ff3860',
+      mouseIsDrawing: false,
+      mouseDrawingPressureMode: "distance", // choose mode how we fake pressure on the mouse "fade" or "distance" or null
+      mouseDrawingStartTime: null,
+      mouseDrawingMinPressure: 0.4,
+      mouseDrawingMaxPressure: 0.8,
+      mouseDrawingFadeTime: 100,
+      mouseDrawingDistanceFalloff: 2,
+      mouseDrawingMaxChangeRate: 0.03,
+      mouseDrawingPrevPoint: null,
+      mouseDrawingPrevPressure: null,
+      mouseDrawingDynamicDistanceMult: null
     }
   },
 
@@ -418,7 +459,7 @@ export const annotationMixin = {
     getNewAnnotations(currentTime, currentFrame, annotation) {
       this.fabricCanvas.getObjects().forEach(obj => {
         this.setObjectData(obj)
-        if (obj.type === 'path') {
+        if (obj.type === 'path' || obj.type === 'PSStroke') {
           if (!obj.canvasWidth) obj.canvasWidth = this.fabricCanvas.width
           if (!obj.canvasHeight) obj.canvasHeight = this.fabricCanvas.height
           obj.setControlsVisibility({
@@ -507,11 +548,11 @@ export const annotationMixin = {
      *
      * @returns: the build object.
      */
-    addObjectToCanvas(annotation, obj, canvas = null) {
+    async addObjectToCanvas(annotation, obj, canvas = null) {
       if (!obj) return
       if (this.getObjectById(obj.id) && !canvas) return
       if (!canvas) canvas = this.fabricCanvas
-      let path, text
+      let path, text, psstroke
       let scaleMultiplierX = 1
       let scaleMultiplierY = 1
       if (annotation?.width) {
@@ -607,14 +648,66 @@ export const annotationMixin = {
         this.$options.silentAnnnotation = true
         canvas.add(text)
         this.$options.silentAnnnotation = false
+      } else if (obj.type === 'PSStroke') {
+        let strokeMultiplier = 1
+        if (obj.canvasWidth) {
+          strokeMultiplier = canvasWidth / canvas.width
+          if (canvas.width < 420) strokeMultiplier /= 2
+          psstroke = await this.deserializePSBrush(obj)
+          psstroke.set('id', obj.id)
+          psstroke.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+          psstroke.set('canvasWidth', canvasWidth)
+          psstroke.set('canvasHeight', canvasHeight)
+          psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+          psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+          psstroke.set('left', obj.left * scaleMultiplierX)
+          psstroke.set('top', obj.top * scaleMultiplierY)
+          psstroke.set('radius', obj.radius)
+          psstroke.set('width', obj.width)
+          psstroke.set('height', obj.height)
+          psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
+          psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+          psstroke.set('angle', obj.angle)
+          psstroke.set('scale', obj.scale)
+          psstroke.set('editable', !this.isCurrentUserArtist)
+          psstroke.set('selectable', !this.isCurrentUserArtist)
+          this.addSerialization(psstroke)
+          psstroke.setControlsVisibility({
+            mt: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            bl: false,
+            br: !this.isCurrentUserArtist,
+            tl: false,
+            tr: false,
+            mtr: !this.isCurrentUserArtist
+          })
+          this.$options.silentAnnnotation = true
+          canvas.add(psstroke)
+          this.$options.silentAnnnotation = false
+        }
       }
-      return path || text
+      return path || text || psstroke
+    },
+
+    // Helper function as PSBrush deserializes asynchronously only
+    deserializePSBrush(obj) {
+      return new Promise((resolve, reject) => {
+        PSStroke.fromObject(obj, function(psstroke) {
+          if (psstroke) {
+            resolve(psstroke)
+          } else {
+            reject(new Error('Failed to deserialize PSStroke'))
+          }
+        })
+      })
     },
 
     // Events
 
     /*
-     * Enable / disabl showing pencil palette flag.
+     * Enable / disable showing pencil palette flag.
      */
     onPickPencilWidth() {
       this.isShowingPencilPalette = !this.isShowingPencilPalette
@@ -674,9 +767,9 @@ export const annotationMixin = {
     _resetPencil() {
       if (!this.fabricCanvas) return
       const converter = {
-        big: 4,
-        medium: 2,
-        small: 1
+        big: 12,
+        medium: 6,
+        small: 3
       }
       const strokeWidth = converter[this.pencilWidth]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
@@ -710,9 +803,14 @@ export const annotationMixin = {
         if (this.fabricCanvas) {
           this.fabricCanvas.isDrawingMode = true
         }
+
         this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
           this.fabricCanvas
         )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
+        brush.pressureManager.fallback = 0.5; // Fallback value for mouse/touch
+
         this._resetColor()
         this._resetPencil()
         this.isDrawing = true
@@ -991,9 +1089,8 @@ export const annotationMixin = {
         height: 100
       })
       if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
+        let brush = new PSBrush(this.fabricCanvas)
+        this.fabricCanvas.freeDrawingBrush = brush
       }
       this.configureCanvas()
       return this.fabricCanvas
@@ -1008,6 +1105,10 @@ export const annotationMixin = {
       this.fabricCanvas.off('text:changed', this.onObjectModified)
       this.fabricCanvas.off('object:modified', this.onObjectModified)
       this.fabricCanvas.off('object:added', this.onObjectAdded)
+      this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
+      this.fabricCanvas.off('mouse:down', this.initalizeMouseDrawing)
+      this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.off('mouse:move', this.updateMousePressure)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
@@ -1017,9 +1118,11 @@ export const annotationMixin = {
       this.fabricCanvas.on('text:changed', this.onObjectModified)
       this.fabricCanvas.on('object:added', this.onObjectAdded)
       this.fabricCanvas.on('erasing:end', this.onObjectAdded)
-      this.fabricCanvas.on('mouse:up', this.endDrawing)
-      this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.on('mouse:down', this.onCanvasClicked)
+      this.fabricCanvas.on('mouse:down', this.initalizeMouseDrawing)
+      this.fabricCanvas.on('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.on('mouse:move', this.updateMousePressure)
+      this.fabricCanvas.on('mouse:up', this.endDrawing)
       this.fabricCanvas.on('mouse:up', this.onCanvasReleased)
       this.fabricCanvas.freeDrawingBrush.color = this.pencilColor
       this.fabricCanvas.freeDrawingBrush.width = 4
@@ -1038,12 +1141,72 @@ export const annotationMixin = {
       return this.fabricCanvas
     },
 
+    // fake mouse pressure
+    initalizeMouseDrawing() {
+      if (this.isDrawing && this.fabricCanvas.freeDrawingBrush) {
+        this.mouseIsDrawing = true
+        this.mouseDrawingStartTime = Date.now()
+        this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
+        this.mouseDrawingPrevPressure = this.fabricCanvas.freeDrawingBrush ? this.fabricCanvas.freeDrawingBrush.pressureManager.fallback : this.mouseDrawingMaxPressure
+      }
+    },
+
+    getPointDistance(p1, p2) {
+      return Math.sqrt(Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y))
+    },
+
+    getCanvasRelativePointDistance(p1, p2, canvas) {
+      const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+      const p1_rel = p1.divide(dimensions)
+      const p2_rel = p2.divide(dimensions)
+      return Math.sqrt(Math.abs(p1_rel.x - p2_rel.x) + Math.abs(p1_rel.y - p2_rel.y))
+    },
+
+    updateMousePressure() {
+      if (this.isDrawing && this.fabricCanvas.freeDrawingBrush && this.mouseIsDrawing) {
+        let pressure = 0.5
+        if (this.mouseDrawingPressureMode === "fade") {
+          // lerp from mouseDrawingMinPressure to mouseDrawingMaxPressure in mouseDrawingFadeTime
+          const delta_time = Date.now() - this.mouseDrawingStartTime
+          const t = delta_time/this.mouseDrawingFadeTime
+          pressure = Math.max((1-t)*this.mouseDrawingMaxPressure + t*this.mouseDrawingMinPressure, this.mouseDrawingMinPressure)
+        } else if (this.mouseDrawingPressureMode === "distance" && this.mouseDrawingPrevPoint) {
+          // use the distance to the last point to calculate a 'speed' and use it as a multiplier
+          let delta_dist = this.getCanvasRelativePointDistance(this.mouseDrawingPrevPoint, this.fabricCanvas.getPointer(), this.fabricCanvas)
+          delta_dist *= 50 // magic number to scale to nicer values
+          if(!this.mouseDrawingDynamicDistanceMult){
+            // initialize a multiplier when drawing very slowly
+            if (delta_dist < 1.8){
+              this.mouseDrawingDynamicDistanceMult = Math.min((delta_dist*delta_dist), 1.5)
+            } else {
+              this.mouseDrawingDynamicDistanceMult = 1
+            }
+          }
+          delta_dist *= this.mouseDrawingDynamicDistanceMult
+          pressure = Math.min(this.mouseDrawingDistanceFalloff/delta_dist, this.mouseDrawingMaxPressure)
+        } else {
+          pressure = 0.5
+        }
+        const clamped_pressure = Math.max(this.mouseDrawingPrevPressure-this.mouseDrawingMaxChangeRate, Math.min(pressure, this.mouseDrawingPrevPressure+this.mouseDrawingMaxChangeRate))
+        this.mouseDrawingPrevPoint = this.fabricCanvas.getPointer()
+        this.mouseDrawingPrevPressure = clamped_pressure
+        this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = clamped_pressure; // Fallback value for mouse/touch
+      }
+    },
+
     /*
      * When drawing is finished, the undone stack is emptied and the saving
      * procedure is started.
      */
     endDrawing() {
       if (this.isDrawing) {
+        if (this.mouseIsDrawing) {
+          this.mouseIsDrawing = false
+          this.mouseDrawingStartTime = null
+          this.mouseDrawingPrevPoint = null
+          this.mouseDrawingDynamicDistanceMult = null
+          this.fabricCanvas.freeDrawingBrush.pressureManager.fallback = this.mouseDrawingMaxPressure
+        }
         this.clearUndoneStack()
         this.saveAnnotations()
       }
