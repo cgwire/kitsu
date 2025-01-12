@@ -40,7 +40,9 @@ if (PSStroke) {
     return dimensions
   }
 
-  /* Monkey patch needed to make PSStroke work correctly by adding missing methods */
+  /* Monkey patches needed to make PSStroke work correctly by adding missing
+   * expected methods to deal with Fabric and pressure.
+   */
   if (!PSStroke.prototype.getAncestors) {
     PSStroke.prototype.getAncestors = function () {
       return []
@@ -1078,6 +1080,7 @@ export const annotationMixin = {
       if (!this.annotationCanvas) return
 
       const canvasId = this.annotationCanvas.id
+
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
         new fabric.Canvas(canvasId, {
@@ -1141,7 +1144,9 @@ export const annotationMixin = {
       return this.fabricCanvas
     },
 
-    // fake mouse pressure
+    /*
+     * Init data to fake mouse pressure if a mouse is used to draw.
+     */
     initalizeMouseDrawing() {
       if (this.isDrawing && this.fabricCanvas.freeDrawingBrush) {
         this.mouseIsDrawing = true
@@ -1153,10 +1158,16 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Get the distance between two fabric points.
+     */
     getPointDistance(p1, p2) {
       return Math.sqrt(Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y))
     },
 
+    /*
+     * Get the distance between two fabric points relative to the canvas size.
+     */
     getCanvasRelativePointDistance(p1, p2, canvas) {
       const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
       const p1_rel = p1.divide(dimensions)
@@ -1166,6 +1177,14 @@ export const annotationMixin = {
       )
     },
 
+    /*
+     * Update the mouse pressure when drawing.
+     * It can be done in two ways:
+     * - fade: the pressure will fade from the max to the min value
+     *   in a given time.
+     * - distance: the pressure will be inversely proportional to the distance
+     *   between the last two drawn points.
+     */
     updateMousePressure() {
       if (
         this.isDrawing &&
@@ -1174,7 +1193,6 @@ export const annotationMixin = {
       ) {
         let pressure = 0.5
         if (this.mouseDrawingPressureMode === 'fade') {
-          // lerp from mouseDrawingMinPressure to mouseDrawingMaxPressure in mouseDrawingFadeTime
           const delta_time = Date.now() - this.mouseDrawingStartTime
           const t = delta_time / this.mouseDrawingFadeTime
           pressure = Math.max(
@@ -1186,7 +1204,8 @@ export const annotationMixin = {
           this.mouseDrawingPressureMode === 'distance' &&
           this.mouseDrawingPrevPoint
         ) {
-          // use the distance to the last point to calculate a 'speed' and use it as a multiplier
+          // Use the distance to the last point to calculate a 'speed' and
+          // use it as a multiplier for the pressure.
           let delta_dist = this.getCanvasRelativePointDistance(
             this.mouseDrawingPrevPoint,
             this.fabricCanvas.getPointer(),
@@ -1194,7 +1213,8 @@ export const annotationMixin = {
           )
           delta_dist *= 50 // magic number to scale to nicer values
           if (!this.mouseDrawingDynamicDistanceMult) {
-            // initialize a multiplier when drawing very slowly
+            // initialize a multiplier when drawing very slowly to avoid
+            // too much pressure (artifacts).
             if (delta_dist < 1.8) {
               this.mouseDrawingDynamicDistanceMult = Math.min(
                 delta_dist * delta_dist,
@@ -1229,6 +1249,8 @@ export const annotationMixin = {
     /*
      * When drawing is finished, the undone stack is emptied and the saving
      * procedure is started.
+     *
+     * Drawing pressure is reset to the default value.
      */
     endDrawing() {
       if (this.isDrawing) {
@@ -1303,6 +1325,10 @@ export const annotationMixin = {
       }
     },
 
+    /*
+     * Apply group changes to an object to be able to paste it in the right
+     * position (else it uses the coordinate in the group referential).
+     */
     applyGroupChanges(group, obj) {
       if (obj.group) {
         const point = new fabric.Point(obj.left, obj.top)
