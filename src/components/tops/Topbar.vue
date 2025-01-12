@@ -614,7 +614,6 @@ export default {
             this.$router.push({
               params: {
                 production_id: routeProductionId,
-                section: this.currentProjectSection,
                 episode_id: this.currentEpisodeId
               },
               query

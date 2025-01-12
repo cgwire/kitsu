@@ -386,9 +386,15 @@ export const playerMixin = {
     },
 
     hideBars() {
-      this.$refs.header.style.opacity = 0
-      this.$refs['button-bar'].style.opacity = 0
-      this.$refs['video-progress'].$el.style.opacity = 0
+      if (this.$refs.header) {
+        this.$refs.header.style.opacity = 0
+      }
+      if (this.$refs['button-bar']) {
+        this.$refs['button-bar'].style.opacity = 0
+      }
+      if (this.$refs['video-progress']) {
+        this.$refs['video-progress'].$el.style.opacity = 0
+      }
     },
 
     updateTaskPanel() {
@@ -437,6 +443,7 @@ export const playerMixin = {
       } else if (this.isCurrentPreviewModel) {
         this.playModel()
       } else {
+        if (!this.rawPlayer) return
         this._setCurrentTimeOnHandleIn()
         this.rawPlayer.play()
         if (this.isComparing) {
@@ -588,6 +595,7 @@ export const playerMixin = {
         previousFrameTime = previousFrame / this.fps
         this.setFullPlayerTime(previousFrameTime)
       } else {
+        if (!this.rawPlayer) return
         this.rawPlayer.goPreviousFrame()
         if (this.isComparing) this.syncComparisonPlayer()
         const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())

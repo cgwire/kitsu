@@ -31,7 +31,7 @@
       @mousedown="startPlaylistProgressDrag"
       @touchstart="
         () => {
-          startProgressDrag()
+          startPlaylistProgressDrag()
           isFrameNumberVisible = true
         }
       "
@@ -52,7 +52,7 @@
         @mousedown="startPlaylistProgressDrag"
         @touchstart="
           () => {
-            startProgressDrag
+            startPlaylistProgressDrag()
             isFrameNumberVisible = true
           }
         "

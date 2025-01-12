@@ -1050,7 +1050,7 @@ export default {
     currentSection() {
       if (
         this.isTVShow &&
-        this.currentEpisode.id &&
+        this.currentEpisode?.id &&
         !this.displayedAssets.find(
           asset => asset.episode_id === this.currentEpisode.id
         )

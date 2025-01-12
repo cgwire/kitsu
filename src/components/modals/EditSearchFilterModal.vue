@@ -53,7 +53,7 @@
         </form>
 
         <div v-if="searchQueryToEdit?.id" class="mt2">
-          $t('main.created_by'):
+          {{ $t('main.created_by') }}:
           <people-name :person="personMap.get(searchQueryToEdit.person_id)" />
         </div>
 

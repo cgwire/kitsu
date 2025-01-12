@@ -605,7 +605,7 @@ const mutations = {
     })
     asset.castIn = castIn
     asset.castInShotsBySequence = groupEntitiesByParents(
-      castIn,
+      castIn.filter(entity => entity.shot_id),
       'sequence_name'
     )
   },

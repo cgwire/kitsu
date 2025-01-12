@@ -96,7 +96,7 @@
         :max-quota="maxQuota"
       />
     </div>
-    <div class="column side-column" v-if="showInfo">
+    <div class="column side-column" v-if="showInfo && currentPerson">
       <people-quota-info
         :person="currentPerson"
         :year="currentYear"

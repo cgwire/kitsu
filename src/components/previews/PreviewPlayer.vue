@@ -105,7 +105,7 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-show="!isCommentsHidden"
+          v-if="!isCommentsHidden"
         />
       </div>
     </div>
@@ -443,7 +443,10 @@
             v-if="currentPreview && !isConcept"
           />
 
-          <div class="flexrow" v-if="fullScreen && !isConcept">
+          <div
+            class="flexrow"
+            v-if="fullScreen && !isConcept && lastPreviewFileOptions.length"
+          >
             <combobox-styled
               class="preview-combo flexrow-item"
               :options="lastPreviewFileOptions"
@@ -476,7 +479,7 @@
             :title="$t('playlists.actions.download_file')"
             v-if="
               !isCurrentUserArtist ||
-              currentProduction.is_preview_download_allowed
+              currentProduction?.is_preview_download_allowed
             "
           >
             <download-icon class="icon is-small" />
@@ -759,11 +762,11 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
-      'currentProduction',
       'getProductionBackgrounds',
       'isCurrentUserArtist',
       'isTVShow',
       'organisation',
+      'productionMap',
       'selectedConcepts',
       'user'
     ]),
@@ -825,6 +828,10 @@ export default {
       } else {
         return {}
       }
+    },
+
+    currentProduction() {
+      return this.productionMap.get(this.task.project_id)
     },
 
     marginBottom() {
@@ -1473,7 +1480,7 @@ export default {
 
     isDefaultBackground(background) {
       const defaultId =
-        this.currentProduction.default_preview_background_file_id
+        this.currentProduction?.default_preview_background_file_id
       return defaultId ? background.id === defaultId : background.is_default
     },
 
@@ -2002,6 +2009,7 @@ export default {
   watch: {
     current3DAnimation() {
       if (this.is3DModel) {
+        this.isPlaying = true
         this.previewViewer.playModelAnimation(this.current3DAnimation)
       }
     },
@@ -2032,7 +2040,7 @@ export default {
         }, 500)
       } else if (this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
-        this.previewViewer.resize()
+        this.previewViewer?.resize()
       } else if (this.isSound || this.isFile) {
         // hide canvas
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })

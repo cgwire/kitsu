@@ -43,7 +43,7 @@
         </form>
 
         <div v-if="groupToEdit?.id" class="mt2">
-          $t('main.created_by'):
+          {{ $t('main.created_by') }}:
           <people-name :person="personMap.get(groupToEdit.person_id)" />
         </div>
 

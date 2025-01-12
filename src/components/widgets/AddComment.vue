@@ -457,7 +457,7 @@ export default {
   mounted() {
     const production = this.productionMap.get(this.task.project_id)
     this.mode =
-      production.is_publish_default_for_artists && this.isCurrentUserArtist
+      production?.is_publish_default_for_artists && this.isCurrentUserArtist
         ? 'publish'
         : 'status'
 

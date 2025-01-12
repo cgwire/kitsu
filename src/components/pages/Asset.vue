@@ -64,25 +64,23 @@
         <div class="flexrow mt1">
           <span
             class="tag tag-standby"
-            v-show="
-              currentSection === 'casting' && currentAsset.is_casting_standby
+            v-if="
+              currentSection === 'casting' && currentAsset?.is_casting_standby
             "
           >
             {{ $t('breakdown.fields.standby') }}
           </span>
-          <span
-            class="flexrow-item mt05"
-            v-show="currentSection === 'schedule'"
-          >
-            {{ $t('schedule.zoom_level') }}:
-          </span>
-          <combobox-number
-            class="zoom-level flexrow-item"
-            :options="zoomOptions"
-            is-simple
-            v-model="zoomLevel"
-            v-show="currentSection === 'schedule'"
-          />
+          <template v-if="currentSection === 'schedule'">
+            <span class="flexrow-item mt05">
+              {{ $t('schedule.zoom_level') }}:
+            </span>
+            <combobox-number
+              class="zoom-level flexrow-item"
+              is-simple
+              :options="zoomOptions"
+              v-model="zoomLevel"
+            />
+          </template>
         </div>
 
         <div class="flexrow infos" v-show="currentSection === 'infos'">
