@@ -202,7 +202,7 @@
           @show-add-entities="toggleAddEntities"
           @preview-changed="onPreviewChanged"
           @task-type-changed="onTaskTypeChanged"
-          @playlist-deleted="$router.push(playlistsPath)"
+          @playlist-deleted="goFirstPlaylist"
           @remove-entity="removeEntity"
           @order-change="onOrderChange"
           @annotation-changed="onAnnotationChanged"
@@ -1387,17 +1387,25 @@ export default {
   socket: {
     events: {
       'playlist:new'(eventData) {
+        console.log('playlist:new', eventData)
+        console.log('playlist:new', this.playlistMap.get(eventData.playlist_id))
         if (!this.playlistMap.get(eventData.playlist_id)) {
           this.refreshPlaylist(eventData.playlist_id)
         }
       },
 
-      'playlist:update'(eventData) {},
+      'playlist:update'(eventData) {
+        if (this.playlistMap.get(eventData.playlist_id)) {
+          this.refreshPlaylist(eventData.playlist_id)
+        }
+      },
 
       'playlist:delete'(eventData) {
-        this.$store.commit('DELETE_PLAYLIST_END', {
-          id: eventData.playlist_id
-        })
+        if (this.playlistMap.get(eventData.playlist_id)) {
+          this.$store.commit('DELETE_PLAYLIST_END', {
+            id: eventData.playlist_id
+          })
+        }
       },
 
       'build-job:new'(eventData) {
