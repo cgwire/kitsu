@@ -45,12 +45,11 @@
           <div class="flexrow-item" v-if="isEpisodeContext">
             <chevron-right-icon class="align-middle" :size="20" />
           </div>
-          <div class="flexrow-item subitem">
+          <div class="flexrow-item subitem" v-if="isEpisodeContext">
             <topbar-episode-list
               :episode-groups="currentEpisodeOptionGroups || []"
               :episode-id="currentEpisodeId"
               :section="currentSectionOption"
-              v-if="isEpisodeContext"
             />
           </div>
         </div>
@@ -445,7 +444,9 @@ export default {
         options.push({ label: this.$t('news.title'), value: 'newsFeed' })
       }
 
-      options = options.concat([{ label: 'separator', value: 'separator' }])
+      if (!this.isCurrentUserClient) {
+        options.push({ label: 'separator', value: 'separator' })
+      }
 
       // Add sequences
       if (isNotOnlyAssets) {
@@ -483,10 +484,18 @@ export default {
         }
         options.push({ label: this.$t('people.team'), value: 'team' })
 
-        if (this.isCurrentUserAdmin || this.isCurrentUserManager) {
+        if (this.isCurrentUserManager) {
           options = options.concat([
             { label: 'separator', value: 'separator' },
             { label: this.$t('settings.title'), value: 'production-settings' }
+          ])
+        } else {
+          options = options.concat([
+            { label: 'separator', value: 'separator' },
+            {
+              label: this.$t('productions.brief.title'),
+              value: 'brief'
+            }
           ])
         }
       }
@@ -732,6 +741,7 @@ export default {
         section !== 'news-feed' &&
         section !== 'schedule' &&
         section !== 'production-settings' &&
+        section !== 'brief' &&
         section !== 'episodes'
       if (isEpisodeContext) {
         route.name = `episode-${section}`

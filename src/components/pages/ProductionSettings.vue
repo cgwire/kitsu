@@ -219,6 +219,11 @@ export default {
   },
 
   mounted() {
+    if (!this.isCurrentUserManager) {
+      this.$router.push({ name: 'not-found' })
+      return
+    }
+
     if (this.remainingAssetTypes.length > 0) {
       this.assetTypeId = this.remainingAssetTypes[0].value
     }
@@ -232,8 +237,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction',
       'assetTypes',
+      'currentProduction',
+      'isCurrentUserManager',
       'productionAssetTypes',
       'productionTaskStatuses',
       'taskStatus'
