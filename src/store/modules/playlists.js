@@ -98,17 +98,11 @@ const actions = {
       })
   },
 
-  refreshPlaylist({ commit, rootGetters }, id) {
-    return new Promise((resolve, reject) => {
-      const currentProduction = rootGetters.currentProduction
-      playlistsApi.getPlaylist(currentProduction, { id }, (err, playlist) => {
-        if (err) reject(err)
-        else {
-          commit(EDIT_PLAYLIST_END, playlist)
-          resolve(playlist)
-        }
-      })
-    })
+  async refreshPlaylist({ commit, rootGetters }, id) {
+    const currentProduction = rootGetters.currentProduction
+    const playlist = await playlistsApi.getPlaylist(currentProduction, { id })
+    commit(EDIT_PLAYLIST_END, playlist)
+    return playlist
   },
 
   loadEntityPreviewFiles({ commit }, entity) {
