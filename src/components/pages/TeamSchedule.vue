@@ -125,28 +125,46 @@
               @dragend="onTaskDragEnd"
               v-for="task in unassignedTasks"
             >
-              <div
-                class="ui-droppable"
-                :style="{ borderColor: task.type_color }"
-              >
+              <div class="ui-droppable unassigned-task">
                 <div class="flexrow">
-                  <div class="flexrow-item filler">
-                    <production-name
-                      class="strong mb05"
-                      :production="task.production"
-                      :size="25"
-                    />
-                    <div class="ellipsis">{{ task.full_name }}</div>
-                    <em v-if="task.man_days">
-                      {{ $t('main.estimation') }}: {{ task.man_days }}
-                      {{ $tc('main.man_days', task.man_days) }}
-                    </em>
-                  </div>
                   <entity-thumbnail
                     class="task-thumbnail flexrow-item"
                     :preview-file-id="task.entity_preview_file_id"
-                    v-if="task.entity_preview_file_id"
+                    :width="150"
+                    :height="50"
+                    :empty-width="100"
+                    :empty-height="66"
                   />
+                  <div class="flexrow-item filler">
+                    <production-name
+                      class="production-name"
+                      :production="task.production"
+                      :with-avatar="false"
+                    />
+                    <div class="ellipsis strong entity-name">
+                      {{ task.full_name.split(' / ').slice(0, -1).join(' / ') }}
+                    </div>
+                    <div class="flexrow">
+                      <em v-if="task.man_days">
+                        {{ task.man_days }}
+                        {{ $tc('main.man_days', task.man_days) }}
+                      </em>
+                      <em v-else>
+                        {{ $t('main.no_estimation') }}
+                      </em>
+                      <span class="filler"></span>
+                      <task-type-name
+                        class="task-type-name"
+                        :task-type="{
+                          id: task.task_type_id,
+                          color: task.type_color,
+                          name: task.type_name
+                        }"
+                        rounded
+                        thin
+                      />
+                    </div>
+                  </div>
                 </div>
                 <department-name
                   class="task-department"
@@ -217,6 +235,7 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
@@ -240,7 +259,8 @@ export default {
     Schedule,
     Spinner,
     TableInfo,
-    TaskInfo
+    TaskInfo,
+    TaskTypeName
   },
 
   data() {
@@ -800,21 +820,28 @@ export default {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 0.5em;
 
     .task-item {
       position: relative;
       cursor: move;
 
       .ui-droppable {
-        padding: 0.5em;
-        border: 1px solid;
-        border-left-width: 5px;
+        padding: 0.3em;
+        border: 1px solid $light-grey;
         border-radius: 5px;
-        box-shadow: 4px 4px 4px var(--box-shadow);
-        background-color: color.adjust(#f8f8f8, $lightness: -5%);
+        box-shadow: 2px 2px 2px var(--box-shadow);
+        background-color: var(--background);
+
+        .production-name {
+          margin-bottom: 0em;
+          margin-top: 0.3em;
+          font-size: 0.8em;
+          text-transform: uppercase;
+        }
 
         .dark & {
+          border: 1px solid var(--border);
           background-color: color.adjust(#36393f, $lightness: 5%);
         }
       }
