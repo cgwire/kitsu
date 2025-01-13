@@ -113,19 +113,39 @@ If assignees' avatars are no longer visible:
 
 ## Production Management
 
-### How to delete or archive a production
-If you no longer need access to a production:
+### How to Delete or Archive a Production
 
+If you no longer need access to a production, you can choose to archive or delete it.
+
+- **Archiving**: This will remove the production from the navigation menu but keep it accessible for reference.
+- **Deleting**: This is a permanent, non-reversible action that will completely remove the production from your Kitsu instance.
+
+#### Steps to Archive a Production
 1. Go to the main menu and select **Productions** under the **STUDIO** section.  
    ![Main Menu Productions](../img/getting-started/main_menu_production.png)
 
-2. Find the production you want to archive and click the edit button.  
+2. Locate the production you want to archive and click the edit button.  
    ![Edit Productions](../img/getting-started/edit_production.png)
 
 3. Change the **Status** from **Open** to **Closed** and confirm.  
    ![Edit Productions option](../img/getting-started/production_edit_status.png)
 
-Archived productions will no longer appear in the navigation menu but will remain accessible.
+The production is now archived and will no longer appear in the navigation menu.
+
+---
+
+#### Steps to Delete a Production
+Only archived productions can be deleted. If you're sure you want to permanently remove a production:
+
+1. From the **Productions** list, hover over the archived (closed) production. A trash icon will appear.  
+2. Click the trash icon, and a confirmation dialog will open.  
+3. Type the name of the production to confirm the deletion.
+
+![Delete Production](../img/getting-started/delete_production.png)
+
+:::warning
+Deleting a production is permanent and cannot be undone. Only proceed if you’re certain the data is no longer needed.
+:::
 
 ---
 
