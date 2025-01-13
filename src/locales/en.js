@@ -604,6 +604,7 @@ export default {
     man_days: 'person day | person days',
     more_filters: 'More filters',
     move_action_bar: 'Move action bar',
+    no_estimation: 'No estimation',
     nb_frames: 'frame | frames',
     on: 'On',
     optional: 'optional',
