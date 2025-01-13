@@ -28,6 +28,7 @@ const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
 const Bots = () => import('@/components/pages/Bots.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
+const Brief = () => import('@/components/pages/Brief.vue')
 const Concepts = () => import('@/components/pages/Concepts.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
 const Departments = () => import('@/components/pages/Departments.vue')
@@ -449,6 +450,12 @@ export const routes = [
         path: 'productions/:production_id/production-settings',
         component: ProductionSettings,
         name: 'production-settings'
+      },
+
+      {
+        path: 'productions/:production_id/brief',
+        component: Brief,
+        name: 'brief'
       },
 
       {

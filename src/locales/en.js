@@ -1077,6 +1077,7 @@ export default {
     },
 
     brief: {
+      edit_error: 'An error occurred while editing the brief.',
       empty: 'There is no brief yet. How about creating one?',
       title: 'Brief'
     },

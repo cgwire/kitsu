@@ -27,6 +27,7 @@ import AssetTypes from '@/components/pages/AssetTypes.vue'
 import Backgrounds from '@/components/pages/Backgrounds.vue'
 import Bots from '@/components/pages/Bots.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
+import Brief from '@/components/pages/Brief.vue'
 import Concepts from '@/components/pages/Concepts.vue'
 import CustomActions from '@/components/pages/CustomActions.vue'
 import Departments from '@/components/pages/departments/Departments.vue'
@@ -496,6 +497,12 @@ export const routes = [
         path: 'productions/:production_id/production-settings',
         component: ProductionSettings,
         name: 'production-settings'
+      },
+
+      {
+        path: 'productions/:production_id/brief',
+        component: Brief,
+        name: 'brief'
       },
 
       {

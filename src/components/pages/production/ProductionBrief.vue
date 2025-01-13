@@ -1,7 +1,7 @@
 <template>
-  <div class="brief">
+  <div class="production-brief">
     <div v-if="!isEditing" class="box" @dblclick="openEditing">
-      <div v-if="isEmpty(currentProduction.description)">
+      <div v-if="!currentProduction?.description">
         <p>{{ $t('productions.brief.empty') }}</p>
       </div>
       <div
@@ -19,7 +19,7 @@
         v-model="brief"
       />
       <p v-if="errors.editBrief" class="error mt1 has-text-right">
-        {{ $t('productions.brief.edit.errorText') }}
+        {{ $t('productions.brief.edit_error') }}
       </p>
       <p>
         <button-simple
@@ -39,8 +39,8 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { renderMarkdown } from '@/lib/render'
 
-import TextareaField from '@/components/widgets/TextareaField.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 
 export default {
   name: 'production-brief',
@@ -62,7 +62,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction']),
+    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
 
     textarea() {
       return this.$refs.textarea
@@ -70,19 +70,16 @@ export default {
   },
 
   mounted() {
-    if (this.currentProduction) {
-      this.brief = this.currentProduction.description
-    }
+    this.brief = this.currentProduction?.description
   },
 
   methods: {
-    ...mapActions(['editProduction', 'setProduction']),
-
-    isEmpty(str) {
-      return !str || str.length === 0
-    },
+    ...mapActions(['editProduction']),
 
     openEditing() {
+      if (!this.isCurrentUserManager) {
+        return
+      }
       this.isEditing = true
       this.$nextTick(() => {
         // Needed because of the v-if
@@ -92,17 +89,16 @@ export default {
 
     async editBrief() {
       this.isLoading = true
+      this.errors.editBrief = false
       try {
         await this.editProduction({
           id: this.currentProduction.id,
           description: this.brief
         })
+        this.isEditing = false
       } catch {
         this.errors.editBrief = true
-        this.isLoading = false
-        return
       }
-      this.isEditing = false
       this.isLoading = false
     },
 
@@ -118,7 +114,7 @@ export default {
   }
 }
 
-.brief {
+.production-brief {
   flex: 1;
 }
 
@@ -138,9 +134,5 @@ export default {
 
 .editor {
   height: 100%;
-}
-
-.textarea {
-  color: red;
 }
 </style>
