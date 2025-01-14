@@ -26,7 +26,7 @@
     "@fullcalendar/vue3": "6.1.15",
     "@google/model-viewer": "4.0.0",
     "@sentry/vue": "8.48.0",
-    "@unhead/vue": "1.11.15",
+    "@unhead/vue": "1.11.18",
     "@vuepic/vue-datepicker": "11.0.1",
     "async": "3.2.6",
     "bowser": "2.11.0",
@@ -35,7 +35,7 @@
     "color-hash": "2.0.2",
     "color-string": "1.9.1",
     "fabric": "cgwire/fabric.js",
-    "lucide-vue-next": "0.469.0",
+    "lucide-vue-next": "0.471.0",
     "marked": "14.1.4",
     "marked-emoji": "1.4.3",
     "moment": "2.30.1",
@@ -63,7 +63,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "7.8.15"
+    "wavesurfer.js": "7.8.16"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.2.1",
@@ -80,7 +80,7 @@
     "lint-staged": "15.3.0",
     "localStorage": "1.0.4",
     "prettier": "3.4.2",
-    "sass": "1.83.1",
+    "sass": "1.83.4",
     "vite": "6.0.7",
     "vitest": "2.1.8",
     "vitest-localstorage-mock": "0.1.2"
