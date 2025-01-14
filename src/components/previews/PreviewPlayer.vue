@@ -1205,21 +1205,22 @@ export default {
     },
 
     goPreviousDrawing() {
-      this.clearCanvas()
-      // compensate for offsert frame number
-      const annotation_time =
-        this.getPreviousAnnotationTime(this.currentTimeRaw).frame - 1
-      this.setCurrentFrame(annotation_time)
-      this.syncComparisonViewer()
+      const time = this.getPreviousAnnotationTime(this.currentTimeRaw)
+      this.jumpToAnnotationFrame(time)
     },
 
     goNextDrawing() {
-      this.clearCanvas()
-      // compensate for offset frame number
-      const annotation_time =
-        this.getNextAnnotationTime(this.currentTimeRaw).frame - 1
-      this.setCurrentFrame(annotation_time)
-      this.syncComparisonViewer()
+      const time = this.getNextAnnotationTime(this.currentTimeRaw)
+      this.jumpToAnnotationFrame(time)
+    },
+
+    jumpToAnnotationFrame(time) {
+      if (time) {
+        const annotationTime = time.frame - 1
+        this.clearCanvas()
+        this.setCurrentFrame(annotationTime)
+        this.syncComparisonViewer()
+      }
     },
 
     syncComparisonViewer() {
@@ -1283,8 +1284,6 @@ export default {
       const width = dimensions.width
       const height = dimensions.height
 
-      let brush = new PSBrush(this.fabricCanvas)
-
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
         new fabric.Canvas(this.canvasId, {
@@ -1294,15 +1293,13 @@ export default {
           enablePointerEvents: true
         })
       )
-      if (!this.fabricCanvas.freeDrawingBrush) {
-        brush = new PSBrush(this.fabricCanvas)
-        this.fabricCanvas.freeDrawingBrush = brush
-        brush.width = 20 // Set default brush width
-        brush.color = '#000' // Set default color
-        brush.disableTouch = true // Disable touch input
-        brush.disableMouse = true
-        brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
-      }
+      const brush = new PSBrush(this.fabricCanvas)
+      brush.width = 20 // Set default brush width
+      brush.color = '#000' // Set default color
+      brush.disableTouch = true // Disable touch input
+      brush.disableMouse = true
+      brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
+      this.fabricCanvas.freeDrawingBrush = brush
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
       )
@@ -1811,19 +1808,19 @@ export default {
     // Events
 
     onKeyDown(event) {
-      const PREVANNKEY = ',' // keycodes are deprecated, use .key or .code
+      const PREVANNKEY = ','
       const NEXTANNKEY = '.'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
-        } else if (event.keyCode === 37) {
+        } else if (event.code === 37) {
           // arrow left
           this.goPreviousFrame()
-        } else if (event.keyCode === 39) {
+        } else if (event.code === 39) {
           // arrow right
           this.goNextFrame()
-        } else if (event.keyCode === 32) {
+        } else if (event.code === 32) {
           // space
           let styles
           const playlistModal = document.getElementById('temp-playlist-modal')
@@ -1860,7 +1857,7 @@ export default {
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteAnnotations()
-        } else if (event.keyCode === 27) {
+        } else if (event.code === 27) {
           // Esc
           if (this.fullScreen) {
             this.onFullScreenChange()

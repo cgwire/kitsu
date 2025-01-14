@@ -4,8 +4,7 @@
  */
 import { fabric } from 'fabric'
 import moment from 'moment'
-import { PSStroke } from '@arch-inc/fabricjs-psbrush'
-import { PSBrush } from '@arch-inc/fabricjs-psbrush'
+import { PSStroke, PSBrush } from '@arch-inc/fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 import { markRaw } from 'vue'
 
@@ -46,6 +45,12 @@ if (PSStroke) {
   if (!PSStroke.prototype.getAncestors) {
     PSStroke.prototype.getAncestors = function () {
       return []
+    }
+  }
+
+  if (!PSStroke.prototype.contextTop) {
+    PSStroke.prototype.contextTop = function () {
+      return {}
     }
   }
 
@@ -769,9 +774,9 @@ export const annotationMixin = {
     _resetPencil() {
       if (!this.fabricCanvas) return
       const converter = {
-        big: 12,
-        medium: 6,
-        small: 3
+        big: 10,
+        medium: 5,
+        small: 2
       }
       const strokeWidth = converter[this.pencilWidth]
       this.fabricCanvas.freeDrawingBrush.width = strokeWidth
@@ -1110,7 +1115,7 @@ export const annotationMixin = {
       this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.off('mouse:down', this.initalizeMouseDrawing)
-      this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
+      this.fabricCanvas.off('mouse:move', this.onCanvaMouseMoved)
       this.fabricCanvas.off('mouse:move', this.updateMousePressure)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
@@ -1159,21 +1164,16 @@ export const annotationMixin = {
     },
 
     /*
-     * Get the distance between two fabric points.
-     */
-    getPointDistance(p1, p2) {
-      return Math.sqrt(Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y))
-    },
-
-    /*
      * Get the distance between two fabric points relative to the canvas size.
+     * The distance calculus is wrong but it leads to a nice drawing effect.
      */
-    getCanvasRelativePointDistance(p1, p2, canvas) {
+    getCanvasRelativePointDrawingDifference(p1, p2, canvas) {
       const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
       const p1_rel = p1.divide(dimensions)
       const p2_rel = p2.divide(dimensions)
       return Math.sqrt(
-        Math.abs(p1_rel.x - p2_rel.x) + Math.abs(p1_rel.y - p2_rel.y)
+        Math.pow(Math.abs(p1_rel.x - p2_rel.x), 1) +
+          Math.pow(Math.abs(p1_rel.y - p2_rel.y), 1)
       )
     },
 
@@ -1193,6 +1193,7 @@ export const annotationMixin = {
       ) {
         let pressure = 0.5
         if (this.mouseDrawingPressureMode === 'fade') {
+          // The longer the time, the lower the pressure.
           const delta_time = Date.now() - this.mouseDrawingStartTime
           const t = delta_time / this.mouseDrawingFadeTime
           pressure = Math.max(
@@ -1206,7 +1207,7 @@ export const annotationMixin = {
         ) {
           // Use the distance to the last point to calculate a 'speed' and
           // use it as a multiplier for the pressure.
-          let delta_dist = this.getCanvasRelativePointDistance(
+          let delta_dist = this.getCanvasRelativePointDrawingDifference(
             this.mouseDrawingPrevPoint,
             this.fabricCanvas.getPointer(),
             this.fabricCanvas
@@ -1297,9 +1298,8 @@ export const annotationMixin = {
       if (!this.fabricCanvas) return
       const activeObject = this.fabricCanvas.getActiveObject()
       if (activeObject) {
-        activeObject.clone().then(cloned => {
-          clipboard.copyAnnotations(cloned)
-        })
+        const obj = Object.create(activeObject)
+        clipboard.copyAnnotations(obj)
       }
       return activeObject
     },
@@ -1311,6 +1311,7 @@ export const annotationMixin = {
       if (!this.fabricCanvas) return
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
+      console.log(clonedObj, clonedObj._objects)
       if (clonedObj._objects) {
         clonedObj._objects.forEach(obj => {
           obj = this.applyGroupChanges(clonedObj, obj)
@@ -1318,7 +1319,7 @@ export const annotationMixin = {
           this.addObject(obj)
         })
         this.fabricCanvas.requestRenderAll()
-      } else if (clonedObj._set) {
+      } else {
         this.addObject(clonedObj)
         this.fabricCanvas.setActiveObject(clonedObj)
         this.fabricCanvas.requestRenderAll()

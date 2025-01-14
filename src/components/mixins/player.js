@@ -643,8 +643,8 @@ export const playerMixin = {
         if (this.isComparing) {
           this.syncComparisonViewer()
         }
-      } catch {
-        console.log('should never happen')
+      } catch (err) {
+        console.err('wrong call from unexpected player', err)
         return // has been called from within PreviewPlayer and returned null
       }
     },
@@ -664,8 +664,8 @@ export const playerMixin = {
         if (this.isComparing) {
           this.syncComparisonViewer()
         }
-      } catch {
-        console.log('should never happen')
+      } catch (err) {
+        console.err('wrong call from unexpected player', err)
         return // has been called from within PreviewPlayer and returned null
       }
     },
@@ -1040,9 +1040,7 @@ export const playerMixin = {
 
     getSortedAnnotations() {
       const annotations = this.annotations
-      annotations.sort((a, b) =>
-        a.time > b.time ? 1 : b.time > a.time ? -1 : 0
-      )
+      annotations.sort((a, b) => a.time - b.time)
       return annotations
     },
 
@@ -1533,7 +1531,7 @@ export const playerMixin = {
 
     async extractAnnotationSnapshots() {
       const currentFrame = this.currentFrame
-      const annotations = this.annotations.sort((a, b) => b.time < a.time)
+      const annotations = this.annotations.sort((a, b) => a.time - b.time)
       const files = []
       let index = 1
       for (const annotation of annotations) {
