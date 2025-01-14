@@ -2063,7 +2063,6 @@ export default {
       if (this.progress) {
         this.progress.updateProgressBar(frame + 1)
       }
-      // console.error('updateProgressBar', frame)
       if (this.playlistDuration && !this.isFullMode && this.currentEntity) {
         this.playlistProgress =
           this.currentEntity.start_duration + frame / this.fps
@@ -2256,7 +2255,7 @@ export default {
       }
       this.resetHeight()
       this.resetCanvas().then(() => {
-        if (this.isCurrentPreview) {
+        if (this.currentPreview !== null) {
           this.resetHandles()
           this.movieDimensions = {
             width: this.currentPreview.width,

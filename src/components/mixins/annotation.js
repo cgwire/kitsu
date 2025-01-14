@@ -1311,7 +1311,6 @@ export const annotationMixin = {
       if (!this.fabricCanvas) return
       this.fabricCanvas.discardActiveObject()
       const clonedObj = clipboard.pasteAnnotations()
-      console.log(clonedObj, clonedObj._objects)
       if (clonedObj._objects) {
         clonedObj._objects.forEach(obj => {
           obj = this.applyGroupChanges(clonedObj, obj)
