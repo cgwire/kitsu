@@ -355,16 +355,8 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
-import shotStore from '@/store/modules/shots'
 import sequenceStore from '@/store/modules/sequences'
-
-const stores = {
-  assetStore,
-  episodeStore,
-  shotStore,
-  sequenceStore,
-  editStore
-}
+import shotStore from '@/store/modules/shots'
 
 export default {
   name: 'task-list',
@@ -428,10 +420,6 @@ export default {
     tasks: {
       type: Array,
       default: () => []
-    },
-    taskType: {
-      type: Object,
-      default: () => {}
     }
   },
 
@@ -445,20 +433,35 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
-      'editMap',
-      'episodeMap',
       'nbSelectedTasks',
       'personMap',
       'user',
       'selectedTasks',
-      'sequenceMap',
-      'shotMap',
       'taskMap',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'taskTypeMap'
     ]),
+
+    assetMap() {
+      return assetStore.cache.assetMap
+    },
+
+    editMap() {
+      return editStore.cache.editMap
+    },
+
+    episodeMap() {
+      return episodeStore.cache.episodeMap
+    },
+
+    sequenceMap() {
+      return sequenceStore.cache.sequenceMap
+    },
+
+    shotMap() {
+      return shotStore.cache.shotMap
+    },
 
     isAssets() {
       return this.entityType === 'Asset'
@@ -743,9 +746,7 @@ export default {
     },
 
     getEntity(entityId) {
-      const store = stores[`${this.entityType.toLowerCase()}Store`]
-      const map = store.cache[`${this.entityType.toLowerCase()}Map`]
-      return map.get(entityId) || {}
+      return this[`${this.entityType.toLowerCase()}Map`].get(entityId) || {}
     },
 
     onKeyDown(event) {
