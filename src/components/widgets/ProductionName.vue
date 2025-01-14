@@ -22,7 +22,13 @@
         v-else
       />
     </span>
-    <span class="flexrow-item avatar-name" v-if="!onlyAvatar">
+    <span
+      class="flexrow-item avatar-name"
+      :style="{
+        'margin-left': withAvatar ? '0.8em' : '0'
+      }"
+      v-if="!onlyAvatar"
+    >
       {{ production.name }}
     </span>
   </div>
@@ -80,7 +86,6 @@ export default {
 
 .avatar-name {
   color: $black;
-  margin-left: 0.8em;
 
   .dark & {
     color: $white;

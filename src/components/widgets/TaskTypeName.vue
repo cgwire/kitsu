@@ -17,7 +17,8 @@
       'task-type-name': true,
       'no-link': true,
       deletable,
-      canceled: disable
+      canceled: disable,
+      thin: thin
     }"
     :style="{
       'border-left': '4px solid ' + color,
@@ -65,6 +66,10 @@ export default {
     taskType: {
       type: Object,
       default: null
+    },
+    thin: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -140,6 +145,12 @@ export default {
   line-height: 0.8em;
   padding: 0 0.7em;
   margin: 0;
+
+  &.thin {
+    font-size: 0.7em;
+    line-height: 0.6em;
+    padding: 0 0.5em;
+  }
 }
 
 .tag.deletable {

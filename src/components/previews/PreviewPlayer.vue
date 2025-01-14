@@ -540,6 +540,8 @@
 
 <script>
 import { fabric } from 'fabric'
+import { PSBrush } from '@arch-inc/fabricjs-psbrush'
+
 import {
   ArrowUpRightIcon,
   DownloadIcon,
@@ -1201,6 +1203,25 @@ export default {
       this.syncComparisonViewer()
     },
 
+    goPreviousDrawing() {
+      const time = this.getPreviousAnnotationTime(this.currentTimeRaw)
+      this.jumpToAnnotationFrame(time)
+    },
+
+    goNextDrawing() {
+      const time = this.getNextAnnotationTime(this.currentTimeRaw)
+      this.jumpToAnnotationFrame(time)
+    },
+
+    jumpToAnnotationFrame(time) {
+      if (time) {
+        const annotationTime = time.frame - 1
+        this.clearCanvas()
+        this.setCurrentFrame(annotationTime)
+        this.syncComparisonViewer()
+      }
+    },
+
     syncComparisonViewer() {
       if (this.comparisonViewer && this.isComparing) {
         this.comparisonViewer.setCurrentFrame(this.currentFrame)
@@ -1261,19 +1282,23 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
+
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
         new fabric.Canvas(this.canvasId, {
           fireRightClick: true,
           width,
-          height
+          height,
+          enablePointerEvents: true
         })
       )
-      if (!this.fabricCanvas.freeDrawingBrush) {
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
-      }
+      const brush = new PSBrush(this.fabricCanvas)
+      brush.width = 20 // Set default brush width
+      brush.color = '#000' // Set default color
+      brush.disableTouch = true // Disable touch input
+      brush.disableMouse = true
+      brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
+      this.fabricCanvas.freeDrawingBrush = brush
       this.fabricCanvasComparison = new fabric.StaticCanvas(
         this.canvasId + '-comparison'
       )
@@ -1496,6 +1521,8 @@ export default {
       if (this.isDrawing) {
         this.isDrawing = false
       } else {
+        this._resetColor()
+        this._resetPencil()
         this.isTyping = false
         this.isDrawing = true
       }
@@ -1533,6 +1560,41 @@ export default {
         })
       } else if (this.isPicture) {
         return this.annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getSortedAnnotations() {
+      const annotations = this.annotations
+      annotations.sort((a, b) =>
+        a.time > b.time ? 1 : b.time > a.time ? -1 : 0
+      )
+      return annotations
+    },
+
+    getNextAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.find(annotation => {
+          return roundToFrame(annotation.time, this.fps) > time + 0.0001
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
+      }
+    },
+
+    getPreviousAnnotationTime(time) {
+      const annotations = this.getSortedAnnotations()
+      if (this.isMovie) {
+        time = roundToFrame(time, this.fps)
+        return annotations.findLast(annotation => {
+          return (
+            roundToFrame(annotation.time, this.fps) <
+            time - 1 / this.fps + 0.0001
+          )
+        })
+      } else if (this.isPicture) {
+        return annotations.find(annotation => annotation.time === 0)
       }
     },
 
@@ -1745,16 +1807,19 @@ export default {
     // Events
 
     onKeyDown(event) {
+      const PREVANNKEY = ','
+      const NEXTANNKEY = '.'
+
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
-        } else if (event.keyCode === 37) {
+        } else if (event.code === 37) {
           // arrow left
           this.goPreviousFrame()
-        } else if (event.keyCode === 39) {
+        } else if (event.code === 39) {
           // arrow right
           this.goNextFrame()
-        } else if (event.keyCode === 32) {
+        } else if (event.code === 32) {
           // space
           let styles
           const playlistModal = document.getElementById('temp-playlist-modal')
@@ -1764,6 +1829,10 @@ export default {
             this.pauseEvent(event)
           }
           return false
+        } else if (event.key === NEXTANNKEY) {
+          this.goNextDrawing()
+        } else if (event.key === PREVANNKEY) {
+          this.goPreviousDrawing()
         } else if (event.keyCode === 68) {
           // d
           this.container.focus()
@@ -1787,7 +1856,7 @@ export default {
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteAnnotations()
-        } else if (event.keyCode === 27) {
+        } else if (event.code === 27) {
           // Esc
           if (this.fullScreen) {
             this.onFullScreenChange()
@@ -2121,8 +2190,9 @@ export default {
     },
 
     isDrawing() {
-      if (this.fabricCanvas) this.fabricCanvas.isDrawingMode = this.isDrawing
-      else this.endAnnotationSaving()
+      if (this.fabricCanvas) {
+        this.fabricCanvas.isDrawingMode = this.isDrawing
+      } else this.endAnnotationSaving()
 
       if (this.isDrawing) {
         this.isAnnotationsDisplayed = true
