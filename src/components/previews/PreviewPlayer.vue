@@ -105,7 +105,8 @@
           :task="task"
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
-          v-if="!isCommentsHidden"
+          v-show="!isCommentsHidden"
+          v-if="!readOnly"
         />
       </div>
     </div>
