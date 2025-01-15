@@ -1388,8 +1388,8 @@ export default {
       }
       // fix edge cases on toggling fullscreen
       setTimeout(() => {
-        this.previewViewer.resize()
-        this.comparisonViewer.resize()
+        this.previewViewer?.resize()
+        this.comparisonViewer?.resize()
       }, 500)
     },
 
@@ -2035,8 +2035,8 @@ export default {
         this.isDrawing = false
         this.refreshCanvas()
         setTimeout(() => {
-          this.previewViewer.resize()
-          this.comparisonViewer.resize()
+          this.previewViewer?.resize()
+          this.comparisonViewer?.resize()
         }, 500)
       } else if (this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
