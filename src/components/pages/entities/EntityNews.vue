@@ -211,6 +211,7 @@ export default {
     margin-right: 3em;
     font-size: 0.8em;
     color: $grey;
+    white-space: nowrap;
   }
 
   .task-type-wrapper {

@@ -1,5 +1,10 @@
 <template>
-  <router-link :to="targetRoute" v-if="productionId && !isCurrentUserClient">
+  <router-link
+    :to="targetRoute"
+    v-if="
+      productionId && !isCurrentUserClient && taskType.for_entity !== 'Concept'
+    "
+  >
     <span
       class="tag task-type-name"
       :style="{

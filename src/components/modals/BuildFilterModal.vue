@@ -81,7 +81,11 @@
           />
         </div>
         <div class="add-button">
-          <button-simple icon="plus" @click="addTaskTypeFilter" />
+          <button-simple
+            :disabled="!taskTypeList.length"
+            icon="plus"
+            @click="addTaskTypeFilter"
+          />
         </div>
 
         <div class="mt2" v-if="descriptorOptions.length > 0">

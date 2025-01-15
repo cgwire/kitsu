@@ -32,16 +32,14 @@
               {{ person.email }}
             </td>
             <td class="contract" v-if="isCurrentUserManager">
-              {{ $t('people.contract.' + person.contract_type) }}
+              {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
-            <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
+            <td class="role">
+              {{ $t(`people.role.${person.role}`) }}
+            </td>
             <department-names-cell :departments="person.departments" />
             <td class="actions has-text-right" v-if="isCurrentUserManager">
-              <button
-                class="button"
-                @click="removePerson(person)"
-                v-if="isCurrentUserAdmin"
-              >
+              <button class="button" @click="removePerson(person)">
                 {{ $t('main.remove') }}
               </button>
             </td>
@@ -82,7 +80,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['isCurrentUserAdmin', 'isCurrentUserManager']),
+    ...mapGetters(['isCurrentUserManager']),
 
     isEmpty() {
       return !this.entries?.length

@@ -833,7 +833,10 @@ export default {
     },
 
     resetSequenceOption() {
-      if (this.currentProduction.production_style === 'nft') {
+      if (
+        this.currentProduction.production_style === 'nft' &&
+        this.castingSequencesOptions[1]
+      ) {
         this.sequenceId = this.castingSequencesOptions[1].value
       }
     },

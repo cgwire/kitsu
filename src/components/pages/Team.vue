@@ -121,9 +121,7 @@ export default {
     return {
       importDepartmentId: null,
       importProductionId: null,
-      person: null,
-      isTeamLoading: false,
-      isTeamLoadingError: false
+      person: null
     }
   },
 
@@ -131,19 +129,20 @@ export default {
     if (this.availableProductions.length > 0) {
       this.importProductionId = this.availableProductions[0]?.id
       this.importDepartmentId = this.departments.sort((a, b) =>
-        a.name.localeCompare(b.name)
+        a.name.localeCompare(b.name, undefined, {
+          numeric: true
+        })
       )[0]?.id
     }
   },
 
   computed: {
     ...mapGetters([
+      'activePeople',
       'currentProduction',
       'departments',
-      'departmentMap',
       'isCurrentUserManager',
       'openProductions',
-      'activePeople',
       'personMap',
       'productionMap'
     ]),
