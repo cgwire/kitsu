@@ -1566,9 +1566,7 @@ export default {
 
     getSortedAnnotations() {
       const annotations = this.annotations
-      annotations.sort((a, b) =>
-        a.time > b.time ? 1 : b.time > a.time ? -1 : 0
-      )
+      annotations.sort((a, b) => a.time - b.time)
       return annotations
     },
 
