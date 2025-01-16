@@ -194,6 +194,12 @@ export default {
     background: $dark-grey-lighter;
     border-color: $dark-grey-light;
   }
+
+  .thumbnail-picture,
+  span.thumbnail-empty {
+    background: $dark-grey-light;
+    border-color: $dark-grey;
+  }
 }
 
 .thumbnail-picture {
