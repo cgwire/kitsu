@@ -644,7 +644,7 @@ export const playerMixin = {
           this.syncComparisonViewer()
         }
       } catch (err) {
-        console.err('wrong call from unexpected player', err)
+        console.error('wrong call from unexpected player', err)
         return // has been called from within PreviewPlayer and returned null
       }
     },
@@ -665,7 +665,7 @@ export const playerMixin = {
           this.syncComparisonViewer()
         }
       } catch (err) {
-        console.err('wrong call from unexpected player', err)
+        console.error('wrong call from unexpected player', err)
         return // has been called from within PreviewPlayer and returned null
       }
     },
