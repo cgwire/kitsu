@@ -20,7 +20,11 @@ export default defineConfig({
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {
       '@': path.resolve(__dirname, 'src/'),
-      vue: 'vue/dist/vue.esm-bundler.js'
+      vue: 'vue/dist/vue.esm-bundler.js',
+      '@arch-inc/fabricjs-psbrush': path.resolve(
+        __dirname,
+        'node_modules/@arch-inc/fabricjs-psbrush/dist/index.js'
+      )
     }
   },
   css: {
