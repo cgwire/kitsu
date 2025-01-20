@@ -14,15 +14,9 @@ export const previewRoomMixin = {
       })
     },
 
-    isValidRoomId(value) {
-      if (!value || value === 'temp') {
-        return false
-      }
-      return true
-    },
-
     joinRoom() {
-      if (!this.room.id) return
+      if (!this.room?.id) return
+
       if (this.isFullMode) this.isFullMode = false
 
       this.$socket.emit('preview-room:join', {
@@ -48,8 +42,8 @@ export const previewRoomMixin = {
     },
 
     leaveRoom() {
-      if (!this.room.id) return
-      if (!this.user) return
+      if (!this.room?.id || !this.user) return
+
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id,
         playlist_id: this.room.id
@@ -67,9 +61,7 @@ export const previewRoomMixin = {
     },
 
     updateRoomStatus() {
-      if (!this.room.id) return
-      if (!this.joinedRoom) return
-
+      if (!this.room?.id || !this.joinedRoom) return
       this.$socket.emit('preview-room:update-playing-status', {
         playlist_id: this.room.id,
         is_playing: this.isPlaying,
@@ -92,7 +84,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationAddition(time, serializedObj) {
-      if (!this.room.id) return
+      if (!this.room?.id) return
       this.$socket.emit('preview-room:add-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -104,7 +96,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationDeletion(time, serializedObj) {
-      if (!this.room.id) return
+      if (!this.room?.id) return
       this.$socket.emit('preview-room:remove-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -116,7 +108,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationUpdate(time, serializedObj) {
-      if (!this.room.id) return
+      if (!this.room?.id) return
       this.$socket.emit('preview-update-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -255,8 +247,7 @@ export const previewRoomMixin = {
     events: {
       'preview-room:room-people-updated'(eventData) {
         // someone joined the room
-        if (!this.room.id) return
-
+        if (!this.room?.id) return
         this.room.people = eventData.people
         if (this.joinedRoom) {
           this.room.newComer = false

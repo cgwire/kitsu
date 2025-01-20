@@ -82,7 +82,7 @@ export default {
       previewFileEntityMap: new Map(),
       currentEntities: {},
       currentPlaylist: {
-        id: 'temp',
+        id: '',
         name: 'Temporary playlist',
         shots: [],
         for_entity: 'shot'

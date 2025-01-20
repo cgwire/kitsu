@@ -60,7 +60,7 @@
         @open-room="openRoom"
         @join-room="joinRoom"
         @leave-room="leaveRoom"
-        v-if="isValidRoomId(playlist.id) && !isFullMode"
+        v-if="playlist.id && !isFullMode"
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
