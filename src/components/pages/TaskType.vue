@@ -830,7 +830,7 @@ export default {
             if (task) {
               const index = this.tasks.findIndex(t => t.id === taskId)
               this.$nextTick(() => {
-                this.$refs['task-list'].selectTask({}, index, task)
+                this.$refs['task-list']?.selectTask({}, index, task)
               })
             }
           })
