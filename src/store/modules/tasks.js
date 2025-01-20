@@ -928,7 +928,7 @@ const mutations = {
       comment.person
     )
 
-    if (taskId) {
+    if (!taskId) {
       taskId = comment.object_id
     }
     if (!state.taskComments[taskId]) state.taskComments[taskId] = []
