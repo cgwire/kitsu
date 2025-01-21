@@ -964,11 +964,11 @@ export default {
   },
 
   watch: {
-    $route() {
+    $route(nextRoute, previousRoute) {
       if (!this.$route.query) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['edit-search-field']?.getValue()
-      if (search !== actualSearch) {
+      if (search !== actualSearch && !previousRoute.query.task_id) {
         this.searchField.setValue(search)
         this.applySearch(search)
       }
