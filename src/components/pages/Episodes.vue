@@ -7,7 +7,6 @@
             <search-field
               ref="episode-search-field"
               :can-save="true"
-              :active="isSearchActive"
               @change="onSearchChange"
               @save="saveSearchQuery"
               placeholder="ex: e01 episode=wip"
@@ -263,7 +262,6 @@ export default {
       ],
       historyEdit: {},
       initialLoading: true,
-      isSearchActive: false,
       optionalColumns: ['Description'],
       pageName: 'Episodes',
       parsedCSV: [],
@@ -510,7 +508,6 @@ export default {
     applySearch(searchQuery) {
       this.setEpisodeSearch(searchQuery)
       this.setSearchInUrl()
-      this.isSearchActive = true
     },
 
     saveSearchQuery(searchQuery) {

@@ -7,7 +7,6 @@
             <search-field
               ref="shot-search-field"
               :can-save="true"
-              :active="isSearchActive"
               @change="onSearchChange"
               @enter="applySearch(searchField.getValue())"
               @save="saveSearchQuery"
@@ -374,7 +373,6 @@ export default {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       formData: null,
-      isSearchActive: false,
       historyShot: {},
       optionalColumns: [
         'Description',
@@ -958,7 +956,6 @@ export default {
 
     onSearchChange(clearSelection = true) {
       if (!this.searchField) return
-      this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
       if (searchQuery.length !== 1 && !this.isLongShotList) {
         this.applySearch(searchQuery)
@@ -979,7 +976,6 @@ export default {
     applySearch(searchQuery) {
       this.setShotSearch(searchQuery)
       this.setSearchInUrl()
-      this.isSearchActive = true
     },
 
     saveSearchQuery(searchQuery) {

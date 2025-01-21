@@ -267,7 +267,6 @@ export const entitiesMixin = {
 
     onSearchChange(clearSelection = true) {
       if (!this.searchField) return
-      this.isSearchActive = false
       const searchQuery = this.searchField.getValue() || ''
       this.applySearch(searchQuery)
       if (clearSelection) {
