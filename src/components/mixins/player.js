@@ -739,6 +739,7 @@ export const playerMixin = {
 
     onProgressChanged(frameNumber, updatePlaylistProgress = true) {
       this.clearCanvas()
+      this.reloadAnnotations()
 
       if (this.isCurrentPreviewPicture) {
         this.framesSeenOfPicture = frameNumber + 1

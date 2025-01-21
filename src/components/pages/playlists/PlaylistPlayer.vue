@@ -1563,6 +1563,7 @@ export default {
           width: this.currentPreview.width,
           height: this.currentPreview.height
         }
+        this.loadAnnotation(this.getAnnotation(0))
       }
     },
 
