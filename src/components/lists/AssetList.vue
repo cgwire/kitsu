@@ -588,6 +588,10 @@ import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelecto
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 
+import assetTypeStore from '@/store/modules/assettypes'
+import episodeStore from '@/store/modules/episodes'
+import taskTypeStore from '@/store/modules/tasktypes'
+
 export default {
   name: 'asset-list',
 
@@ -679,8 +683,6 @@ export default {
       'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',
-      'assetTypeMap',
-      'episodeMap',
       'currentEpisode',
       'currentProduction',
       'displayedAssetsCount',
@@ -705,9 +707,20 @@ export default {
       'selectedAssets',
       'selectedTasks',
       'taskMap',
-      'taskTypeMap',
       'user'
     ]),
+
+    assetTypeMap() {
+      return assetTypeStore.cache.assetTypeMap
+    },
+
+    episodeMap() {
+      return episodeStore.cache.episodeMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
+    },
 
     createTasksPath() {
       return this.getPath('create-asset-tasks')
