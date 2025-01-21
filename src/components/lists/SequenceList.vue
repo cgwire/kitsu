@@ -60,6 +60,9 @@
                   offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
                 "
                 is-stick
+                :style="{
+                  'z-index': 1001
+                }"
                 @show-metadata-header-menu="
                   event => showMetadataHeaderMenu(descriptor.id, event)
                 "
