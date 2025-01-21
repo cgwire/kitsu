@@ -53,11 +53,6 @@ export default {
       type: Boolean,
       default: false
     },
-    // FIXME: property no longer used in component
-    active: {
-      type: Boolean,
-      default: true
-    },
     focusOptions: {
       type: Object
     }
