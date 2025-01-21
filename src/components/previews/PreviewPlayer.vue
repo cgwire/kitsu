@@ -1754,8 +1754,10 @@ export default {
     },
 
     async extractAnnotationSnapshots() {
-      const annotations = this.annotations.sort((a, b) => b.time < a.time)
       const files = []
+      const annotations = this.annotations.sort((a, b) => {
+        return parseInt(b.frame) < parseInt(a.frame) ? 1 : -1
+      })
       let index = 1
       for (const annotation of annotations) {
         const canvas = document.getElementById('annotation-snapshot')
