@@ -722,10 +722,6 @@ export default {
       return taskTypeStore.cache.taskTypeMap
     },
 
-    createTasksPath() {
-      return this.getPath('create-asset-tasks')
-    },
-
     isEmptyList() {
       return (
         this.displayedAssetsCount === 0 &&
