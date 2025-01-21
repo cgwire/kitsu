@@ -83,7 +83,7 @@
     "prettier": "3.4.2",
     "sass": "1.83.4",
     "vite": "6.0.11",
-    "vitest": "3.0.2",
+    "vitest": "3.0.3",
     "vitest-localstorage-mock": "0.1.2"
   },
   "engines": {

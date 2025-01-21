@@ -188,12 +188,6 @@ export default {
     }
   },
 
-  watch: {
-    $route() {
-      this.handleModalsDisplay()
-    }
-  },
-
   head() {
     return {
       title: `${this.$t('custom_actions.title')} - Kitsu`

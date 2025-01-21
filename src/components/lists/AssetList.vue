@@ -63,6 +63,9 @@
                 offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
               "
               is-stick
+              :style="{
+                'z-index': 1001
+              }"
               @show-metadata-header-menu="
                 event => showMetadataHeaderMenu(descriptor.id, event)
               "
@@ -585,6 +588,10 @@ import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelecto
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 
+import assetTypeStore from '@/store/modules/assettypes'
+import episodeStore from '@/store/modules/episodes'
+import taskTypeStore from '@/store/modules/tasktypes'
+
 export default {
   name: 'asset-list',
 
@@ -676,8 +683,6 @@ export default {
       'assetMetadataDescriptors',
       'assetSearchText',
       'assetSelectionGrid',
-      'assetTypeMap',
-      'episodeMap',
       'currentEpisode',
       'currentProduction',
       'displayedAssetsCount',
@@ -702,12 +707,19 @@ export default {
       'selectedAssets',
       'selectedTasks',
       'taskMap',
-      'taskTypeMap',
       'user'
     ]),
 
-    createTasksPath() {
-      return this.getPath('create-asset-tasks')
+    assetTypeMap() {
+      return assetTypeStore.cache.assetTypeMap
+    },
+
+    episodeMap() {
+      return episodeStore.cache.episodeMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
     },
 
     isEmptyList() {
