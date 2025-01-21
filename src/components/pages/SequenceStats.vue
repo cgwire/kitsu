@@ -250,9 +250,7 @@ export default {
 
       if (!this.isTVShow) {
         this.loadShots(() => {
-          this.initSequences()
-            .then(this.handleModalsDisplay)
-            .catch(err => console.error(err))
+          this.initSequences().catch(err => console.error(err))
         })
       }
     },
@@ -261,7 +259,6 @@ export default {
       if (this.isTVShow && this.currentEpisode) {
         this.loadShots(() => {
           this.initSequences()
-            .then(this.handleModalsDisplay)
             .then(() => {
               this.initialLoading = false
             })
