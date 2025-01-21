@@ -54,6 +54,12 @@ if (PSStroke) {
     }
   }
 
+  if (!PSStroke.prototype.dispose) {
+    PSStroke.prototype.dispose = function () {
+      return {}
+    }
+  }
+
   if (!PSStroke.prototype.getRelativeCenterPoint) {
     PSStroke.prototype.getRelativeCenterPoint = function () {
       const center = new fabric.Point(
@@ -84,7 +90,9 @@ export const annotationMixin = {
       pencilWidth: 'big',
       textColor: '#ff3860',
       mouseIsDrawing: false,
-      mouseDrawingPressureMode: 'distance', // choose mode how we fake pressure on the mouse "fade" or "distance" or null
+      // choose mode how we fake pressure on the mouse:
+      // "fade" or "distance" or null
+      mouseDrawingPressureMode: 'distance',
       mouseDrawingStartTime: null,
       mouseDrawingMinPressure: 0.4,
       mouseDrawingMaxPressure: 0.8,
