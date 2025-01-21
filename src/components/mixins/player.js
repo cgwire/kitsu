@@ -962,6 +962,7 @@ export const playerMixin = {
         ) {
           this.onAnnotateClicked()
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
+          event.preventDefault()
           this.undoLastAction()
         } else if (event.altKey && event.keyCode === 82) {
           this.redoLastAction()
