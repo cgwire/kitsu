@@ -1222,6 +1222,7 @@ export default {
         : this.displayedDays[currentIndex]
 
       if (
+        newEndDate &&
         !newEndDate.isSame(this.currentElement.endDate) &&
         this.isValidItemDates(this.currentElement.startDate, newEndDate)
       ) {
