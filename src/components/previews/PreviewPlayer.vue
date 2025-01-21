@@ -1812,13 +1812,13 @@ export default {
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
           this.deleteSelection()
-        } else if (event.code === 37) {
+        } else if (event.keyCode === 37) {
           // arrow left
           this.goPreviousFrame()
-        } else if (event.code === 39) {
+        } else if (event.keyCode === 39) {
           // arrow right
           this.goNextFrame()
-        } else if (event.code === 32) {
+        } else if (event.keyCode === 32) {
           // space
           let styles
           const playlistModal = document.getElementById('temp-playlist-modal')
