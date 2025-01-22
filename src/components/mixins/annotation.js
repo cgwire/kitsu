@@ -1291,6 +1291,7 @@ export const annotationMixin = {
      * Remove all drawing objects from the fabric canvas
      */
     clearCanvas() {
+      this.endAnnotationSaving()
       if (this.fabricCanvas) {
         this.fabricCanvas.clear()
       }

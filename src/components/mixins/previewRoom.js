@@ -8,6 +8,10 @@ export const previewRoomMixin = {
   },
 
   methods: {
+    isValidRoomId(value) {
+      return value && value !== 'temp'
+    },
+
     openRoom() {
       this.$socket.emit('preview-room:open-playlist', {
         playlist_id: this.room.id
