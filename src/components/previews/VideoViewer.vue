@@ -522,6 +522,9 @@ export default {
       this.pause()
       this.$nextTick(() => {
         this.resetPanZoom()
+        setTimeout(() => {
+          this.resetPanZoom()
+        }, 100)
       })
     },
 
