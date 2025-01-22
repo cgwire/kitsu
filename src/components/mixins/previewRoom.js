@@ -273,8 +273,7 @@ export const previewRoomMixin = {
         const obj = eventData.data.obj
         if (this.getObjectById(obj)) return
         if (this.isLaserModeOn) {
-          const o = this.addObjectToCanvas(annotation, obj)
-          this.fadeObject(o)
+          this.addObjectToCanvas(annotation, obj).then(o => this.fadeObject(o))
         } else {
           this.addObjectToCanvas(annotation, obj)
         }
