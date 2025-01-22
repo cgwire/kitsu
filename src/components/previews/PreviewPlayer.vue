@@ -1230,6 +1230,7 @@ export default {
     },
 
     onProgressChanged(frame) {
+      this.reloadAnnotations()
       if (this.currentFrame !== frame) {
         this.clearCanvas()
         this.setCurrentFrame(frame)
