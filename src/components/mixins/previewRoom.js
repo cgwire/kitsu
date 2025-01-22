@@ -8,8 +8,8 @@ export const previewRoomMixin = {
   },
 
   methods: {
-    isValidRoomId(value) {
-      return value && value !== 'temp'
+    isValidRoomId(room) {
+      return room?.id && room.id !== 'temp'
     },
 
     openRoom() {
@@ -19,7 +19,7 @@ export const previewRoomMixin = {
     },
 
     joinRoom() {
-      if (!this.room?.id) return
+      if (!this.isValidRoomId(this.room)) return
 
       if (this.isFullMode) this.isFullMode = false
 
@@ -46,7 +46,7 @@ export const previewRoomMixin = {
     },
 
     leaveRoom() {
-      if (!this.room?.id || !this.user) return
+      if (!this.isValidRoomId(this.room) || !this.user) return
 
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id,
@@ -65,7 +65,7 @@ export const previewRoomMixin = {
     },
 
     updateRoomStatus() {
-      if (!this.room?.id || !this.joinedRoom) return
+      if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
       this.$socket.emit('preview-room:update-playing-status', {
         playlist_id: this.room.id,
         is_playing: this.isPlaying,
@@ -88,7 +88,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationAddition(time, serializedObj) {
-      if (!this.room?.id) return
+      if (!this.isValidRoomId(this.room)) return
       this.$socket.emit('preview-room:add-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -100,7 +100,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationDeletion(time, serializedObj) {
-      if (!this.room?.id) return
+      if (!this.isValidRoomId(this.room)) return
       this.$socket.emit('preview-room:remove-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -112,7 +112,7 @@ export const previewRoomMixin = {
     },
 
     postAnnotationUpdate(time, serializedObj) {
-      if (!this.room?.id) return
+      if (!this.isValidRoomId(this.room)) return
       this.$socket.emit('preview-update-annotation', {
         playlist_id: this.room.id,
         data: {
@@ -251,7 +251,7 @@ export const previewRoomMixin = {
     events: {
       'preview-room:room-people-updated'(eventData) {
         // someone joined the room
-        if (!this.room?.id) return
+        if (!this.isValidRoomId(this.room)) return
         this.room.people = eventData.people
         if (this.joinedRoom) {
           this.room.newComer = false
@@ -260,8 +260,7 @@ export const previewRoomMixin = {
       },
 
       'preview-room:room-updated'(eventData) {
-        if (!this.room) return
-
+        if (!this.isValidRoomId(this.room)) return
         this.people = eventData.people
         if (!this.joinedRoom) return
         if (eventData.only_newcomer && !this.newComer) return
@@ -269,32 +268,26 @@ export const previewRoomMixin = {
       },
 
       'preview-room:add-annotation'(eventData) {
-        if (!this.room) return
-        if (!this.joinedRoom) return
+        if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
         const annotation = this.getAnnotation(eventData.time)
         const obj = eventData.data.obj
         if (this.getObjectById(obj)) return
         if (this.isLaserModeOn) {
-          const o = this.addObjectToCanvas(annotation, obj)
-          this.fadeObject(o)
+          this.addObjectToCanvas(annotation, obj).then(o => this.fadeObject(o))
         } else {
           this.addObjectToCanvas(annotation, obj)
         }
       },
 
       'preview-room:remove-annotation'(eventData) {
-        if (!this.room) return
-
-        if (!this.joinedRoom) return
+        if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
         const obj = eventData.data.obj
         if (!this.getObjectById(obj)) return
         this.removeObjectFromCanvas(obj)
       },
 
       'preview-room:update-annotation'(eventData) {
-        if (!this.room) return
-        if (!this.joinedRoom) return
-        // if (this.user.id === eventData.data.user_id) return
+        if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
         const annotation = this.getAnnotation(eventData.time)
         const obj = eventData.data.obj
         this.updateObjectInCanvas(annotation, obj)
