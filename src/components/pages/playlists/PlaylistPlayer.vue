@@ -60,7 +60,7 @@
         @open-room="openRoom"
         @join-room="joinRoom"
         @leave-room="leaveRoom"
-        v-if="playlist.id && !isFullMode"
+        v-if="isValidRoomId(playlist.id) && !isFullMode"
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
@@ -1699,6 +1699,7 @@ export default {
         if (this.isWaveformDisplayed) {
           height -= 60
         }
+
         if (this.$refs['video-container']) {
           this.$refs['video-container'].style.height = `${height}px`
         }

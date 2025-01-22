@@ -43,7 +43,7 @@
             @open-room="openRoom"
             @join-room="joinRoom"
             @leave-room="leaveRoom"
-            v-if="currentEdit?.id && currentPreview?.id"
+            v-if="isValidRoomId(currentEdit?.id) && currentPreview?.id"
           />
         </div>
       </div>
