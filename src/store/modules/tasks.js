@@ -1168,6 +1168,8 @@ const mutations = {
     if (state.nbSelectedTasks > 0) {
       state.selectedTasks = new Map()
       state.nbSelectedTasks = 0
+    }
+    if (state.nbSelectedValidations > 0) {
       state.selectedValidations = new Map()
       state.nbSelectedValidations = 0
     }

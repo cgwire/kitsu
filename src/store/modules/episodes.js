@@ -918,7 +918,10 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    if (taskStore.state.nbSelectedTasks > 0) {
+    if (
+      taskStore.state.nbSelectedValidations > 0 ||
+      taskStore.state.nbSelectedTasks > 0
+    ) {
       const tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
       state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
     }
