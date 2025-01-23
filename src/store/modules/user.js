@@ -710,8 +710,11 @@ const mutations = {
         )
         if (filterGroup) {
           Object.assign(filterGroup, userFilterGroup)
+          // update the shared status of filters in group
           state.userFilters?.[typeName]?.[projectId].forEach(filter => {
-            filter.is_shared = userFilterGroup.is_shared
+            if (filter.search_filter_group_id === userFilterGroup.id) {
+              filter.is_shared = userFilterGroup.is_shared
+            }
           })
         }
       })
