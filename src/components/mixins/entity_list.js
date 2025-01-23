@@ -557,6 +557,8 @@ export const entityListMixin = {
     },
 
     startBrowsing(event) {
+      if (event.target.tagName === 'INPUT') return
+
       document.body.style.cursor = 'grabbing'
       this.isBrowsingX = true
       this.isBrowsingY = true
