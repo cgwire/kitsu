@@ -517,7 +517,7 @@ export default {
       },
       parsedCSV: [],
       importCsvFormData: {},
-      optionalColumns: ['Estimation', 'Start date', 'Due date'],
+      optionalColumns: ['Estimation', 'Start date', 'Due date', 'Difficulty'],
       dataMatchers: ['Parent', 'Entity']
     }
   },
