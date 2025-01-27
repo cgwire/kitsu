@@ -917,9 +917,9 @@ This new page behaves like the asset and shot global page.
 To use this page, You first need to create dedicated task types on your **Global Library**
  with the **Sequence** attribute.
 
-See **Pipeline customization** Section to create a new **Task Type**.
+See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Pipeline customization](../customization-pipeline/README.md)
+[Creating a New Task Type](../configure-kitsu/README.md#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -971,9 +971,9 @@ Per default, the **Edit** page will not be displayed until you have task types f
 To use this page, you need to first create a dedicated task type on your **Global Library**
  with the **Edit** attribute.
 
-See **Pipeline customization** Section to create a new **Task Type**.
+See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Pipeline customization](../customization-pipeline/README.md)
+[Creating a New Task Type](../configure-kitsu/README.md#task-types)
 
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your

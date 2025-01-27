@@ -145,13 +145,7 @@ Kitsu will automatically switch to the **Publish Revision** tab when you use sta
 You can add one or several previews to any comments. It can be a picture (`.png`, `.jpg`, `.jpeg`, `.gif`), a video (`.mp4`, `.mov`, `.wmv`),
 or an `.glb` file. You can review all the previews from the browser or mix everything.
 
-For the `.glb` file you can also review it as wireframe, or add a `.HDR` file to check the lighting. 
-
-See the **Customization** section for more details.
-[Pipeline Customization](../customization-pipeline/README.md)
-
-
-Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb`, however, need to be
+For the `.glb` file you can also review it as wireframe, or add a `.HDR` file to check the lighting. Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb`, however, need to be
 downloaded to be reviewed.
 
 
@@ -221,9 +215,6 @@ You can move around the 3d file with a drag and move with your cursor, and zoom 
 ![review 3d wireframe](../img/getting-started/review_wireframe.png)
 
 ![Preview background example](../img/getting-started/preview_background_example.png)
-
-See the **Customization** section for more details.
-[Pipeline Customization](../customization-pipeline/README.md)
 
 You can draw directly on the preview with the **Pencil** tool and select a color ![Pencil](../img/getting-started/draw.png).
 

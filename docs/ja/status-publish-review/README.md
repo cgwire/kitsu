@@ -147,11 +147,7 @@ WFA**ステータスのように、**「フィードバックリクエスト」*
 
 .glb` ファイルについては、ワイヤーフレームとして確認することもできます。また、`.HDR` ファイルを追加して照明を確認することもできます。
 
-詳細は、**カスタマイズ**セクションを参照してください。
-[Pipeline Customization](../customization-pipeline/README.md)
-
-
-しかし、`.pdf`、`.zip`、`.rar`、`.ma`、`.mb`などのファイルは、
+しかし、`.pdf`、`.zip`、`.rar`、`.ma`、`.mb`などのファイルは
 ダウンロードして確認する必要があります。
 
 
@@ -221,9 +217,6 @@ WFA**ステータスのように、**「フィードバックリクエスト」*
 ![3Dワイヤーフレームのレビュー](../img/getting-started/review_wireframe.png)
 
 ![背景プレビューの例](../img/getting-started/preview_background_example.png)
-
-詳細は**カスタマイズ**セクションを参照してください。
-[パイプラインのカスタマイズ](../customization-pipeline/README.md)
 
 **鉛筆**ツールを使用してプレビュー上に直接描画し、色を選択することができます！[鉛筆](../img/getting-started/draw.png)。
 
