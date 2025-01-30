@@ -637,9 +637,10 @@ export default {
   watch: {
     $route(newRoute, previousRoute) {
       if (!this.$route.query) return
+      if (previousRoute.query.task_id !== newRoute.query.task_id) return
       const search = this.$route.query.search
       const actualSearch = this.$refs['sequence-search-field'].getValue()
-      if (search !== actualSearch && !previousRoute.query.task_id) {
+      if (search !== actualSearch) {
         this.searchField.setValue(search)
         this.applySearch(search)
       }
