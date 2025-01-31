@@ -163,7 +163,7 @@
             >
               {{ formatDuration(entry.duration) }}
             </td>
-            <td class="start-date">
+            <td class="start-date" v-if="!isToCheck">
               <date-field
                 class="flexrow-item"
                 :min-date="disabledDates"
