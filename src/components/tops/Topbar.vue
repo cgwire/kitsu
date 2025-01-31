@@ -377,7 +377,7 @@ export default {
       return (
         this.isTVShow &&
         this.hasEpisodeId &&
-        this.currentSectionOption !== 'episodes' &&
+        !['episodes', 'episode-stats'].includes(this.currentSectionOption) &&
         // Do not display combobox if there is no episode
         this.episodes.length > 0
       )

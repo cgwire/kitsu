@@ -241,12 +241,12 @@ const getters = {
     }),
   episodeOptionGroups: state => {
     const groups = []
-    const runnings = state.displayedEpisodes.filter(e => e.status === 'running')
-    const standbys = state.displayedEpisodes.filter(e => e.status === 'standby')
-    const completes = state.displayedEpisodes.filter(
+    const runnings = state.episodes.filter(e => e.status === 'running')
+    const standbys = state.episodes.filter(e => e.status === 'standby')
+    const completes = state.episodes.filter(
       e => e.status === 'complete'
     )
-    const canceleds = state.displayedEpisodes.filter(
+    const canceleds = state.episodes.filter(
       e => e.status === 'canceled'
     )
 
@@ -346,7 +346,7 @@ const actions = {
     commit(CLEAR_SELECTED_EPISODES)
   },
 
-  initEpisodes({ commit, dispatch, state, rootState, rootGetters }) {
+  initEpisodeStats({ commit, dispatch, state, rootState, rootGetters }) {
     const productionId = rootState.route.params.production_id
     const isTVShow = rootGetters.isTVShow
     dispatch('setLastProductionScreen', 'episodes')
@@ -363,7 +363,7 @@ const actions = {
             return dispatch('loadEpisodeRetakeStats', productionId)
           })
       } else {
-        return dispatch('computeEpisodeStats')
+        return dispatch('resetEpisodeStats')
       }
     }
   },
@@ -488,7 +488,7 @@ const actions = {
       .catch(console.error)
   },
 
-  computeEpisodeStats({ commit, dispatch, rootGetters }) {
+  resetEpisodeStats({ commit, dispatch, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     const isTVShow = rootGetters.isTVShow
@@ -737,8 +737,10 @@ const mutations = {
 
   [EDIT_EPISODE_END](state, newEpisode) {
     const episode = cache.episodeMap.get(newEpisode.id)
+    const episodeFromMain = state.episodes.find(e => e.id === newEpisode.id)
     if (episode) {
       Object.assign(episode, newEpisode)
+      Object.assign(episodeFromMain, newEpisode)
     }
     state.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {

@@ -144,7 +144,7 @@ export default {
     this.setDefaultListScrollPosition()
     this.isLoading = true
     this.isLoadingError = false
-    this.initEpisodes()
+    this.initEpisodeStats()
       .then(() => {
         this.isLoading = false
       })
@@ -180,11 +180,10 @@ export default {
 
   methods: {
     ...mapActions([
-      'computeEpisodeStats',
       'deleteEpisode',
       'editEpisode',
       'hideAssignations',
-      'initEpisodes',
+      'initEpisodeStats',
       'loadEpisodeStats',
       'loadEpisodeRetakeStats',
       'loadShots',
