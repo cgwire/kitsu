@@ -3,16 +3,7 @@
  * list.
  */
 export const searchMixin = {
-  emits: ['change'],
-
   methods: {
-    changeSearch(searchQuery) {
-      this.searchField.setValue(searchQuery.search_query)
-      this.searchField.$emit('change', searchQuery.search_query)
-      if (this.resizeHeaders) this.resizeHeaders()
-      if (this.applySearch) this.applySearch(searchQuery.search_query)
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeShotSearch(searchQuery).catch(console.error)
     },
@@ -21,23 +12,76 @@ export const searchMixin = {
       this.searchField?.focus(options)
     },
 
+    confirmBuildFilter(query) {
+      this.modals.isBuildFilterDisplayed = false
+      this.searchField.setValue(query)
+      this.onSearchChange()
+    },
+
+    onSearchChange(clearSelection = true) {
+      if (!this.searchField) return
+      const searchQuery = this.searchField.getValue() || ''
+      this.setSearchInUrl(searchQuery)
+      if (clearSelection) {
+        setTimeout(this.clearSelection, 10)
+      }
+    },
+
+    applySearch(search) {
+      const setSearchFunction = `set${this.entityTypeName}Search`
+      this.searchField.setValue(search)
+      if (this[setSearchFunction]) {
+        this[setSearchFunction](search || '')
+      }
+      if (this.resizeHeaders) this.resizeHeaders()
+    },
+
+    applySearchFromUrl() {
+      let searchQuery = ''
+      if (this.$route.query.search && this.$route.query.search.length > 0) {
+        searchQuery = `${this.$route.query.search}`
+      }
+      this.applySearch(searchQuery)
+    },
+
     setSearchFromUrl() {
       const searchQuery = this.searchField?.getValue()
       const searchFromUrl = this.$route.query.search
+      console.log(this.$route.query)
+      console.log('searchQuery', searchQuery, 'searchFromUrl', searchFromUrl)
       if (!searchQuery && searchFromUrl) {
         this.searchField?.setValue(searchFromUrl)
       }
     },
 
-    setSearchInUrl() {
-      const searchQuery = this.searchField?.getValue()
-      if (this.$route.query.search !== searchQuery) {
-        this.$router.push({
-          query: {
-            ...this.$route.query,
-            search: searchQuery
-          }
-        })
+    setSearchInUrl(query) {
+      const searchQuery = query || this.searchField?.getValue()
+      this.$router.push({
+        query: {
+          ...this.$route.query,
+          search: searchQuery
+        }
+      })
+    }
+  },
+
+  watch: {
+    $route(newRoute, previousRoute) {
+      if (
+        !this.$route.query ||
+        !this.type ||
+        previousRoute.query.task_id !== newRoute.query.task_id
+      ) {
+        return
+      }
+
+      const search = this.$route.query.search
+      const searchTextVariable = `${this.type}SearchText`
+      if (search !== this[searchTextVariable]) {
+        this.applySearchFromUrl()
+        if (this.clearSelection) {
+          this.clearSelection()
+        }
       }
     }
   }
