@@ -65,7 +65,7 @@
             <em>{{ $t('main.filter_group_empty') }}</em>
           </span>
           <template v-else>
-            <span
+            <div
               class="tag"
               :class="{
                 'is-shared': searchQuery.is_shared
@@ -73,12 +73,15 @@
               :key="searchQuery.id"
               :style="{ backgroundColor: `${group.color}23` }"
               :title="getSearchQueryTitle(searchQuery)"
-              @click="changeSearch(searchQuery)"
+              :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               v-for="searchQuery in group.queries"
             >
-              <span>
+              <router-link
+                class="flexrow filter-name"
+                :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
+              >
                 {{ searchQuery.name }}
-              </span>
+              </router-link>
               <button
                 class="edit"
                 :style="{
@@ -97,7 +100,7 @@
               >
                 <trash2-icon :size="8" />
               </button>
-            </span>
+            </div>
           </template>
         </div>
       </span>
@@ -109,16 +112,20 @@
       }"
       :key="searchQuery.id"
       :title="getSearchQueryTitle(searchQuery)"
-      @click="changeSearch(searchQuery)"
       v-for="searchQuery in userFilters"
     >
-      <span
-        class="dot"
-        :style="{ borderColor: getDepartment(searchQuery).color }"
-        :title="getDepartment(searchQuery).name"
-        v-if="searchQuery.is_shared && searchQuery.department_id"
-      ></span>
-      {{ searchQuery.name }}
+      <router-link
+        class="flexrow filter-name"
+        :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
+      >
+        <span
+          class="dot"
+          :style="{ borderColor: getDepartment(searchQuery).color }"
+          :title="getDepartment(searchQuery).name"
+          v-if="searchQuery.is_shared && searchQuery.department_id"
+        ></span>
+        {{ searchQuery.name }}
+      </router-link>
       <button
         class="edit"
         @click.stop="editSearch(searchQuery)"
@@ -213,6 +220,7 @@ export default {
     return {
       groupToEdit: {},
       searchQueryToEdit: {},
+      queryPaths: {},
       errors: {
         edit: false,
         group: false
@@ -227,6 +235,12 @@ export default {
       },
       toggleGroupId: null
     }
+  },
+
+  mounted() {
+    this.$nextTick(() => {
+      this.setQueryPaths()
+    })
   },
 
   computed: {
@@ -289,6 +303,23 @@ export default {
       'updateSearchFilter',
       'updateSearchFilterGroup'
     ]),
+
+    setQueryPaths() {
+      this.queries.forEach(query => {
+        this.queryPaths[query.id] = this.queryRoute(query)
+      })
+    },
+
+    queryRoute(searchQuery) {
+      const route = this.$route
+      return {
+        ...route,
+        query: {
+          ...route.query,
+          search: searchQuery.search_query
+        }
+      }
+    },
 
     changeSearch(searchQuery) {
       this.$emit('change-search', searchQuery)
@@ -381,6 +412,18 @@ export default {
 
     getDepartment(group) {
       return this.departmentMap.get(group.department_id)
+    }
+  },
+
+  watch: {
+    'queries.length'() {
+      this.$nextTick(() => {
+        this.setQueryPaths()
+      })
+    },
+
+    $route() {
+      this.setQueryPaths()
     }
   }
 }
@@ -518,5 +561,9 @@ export default {
   border: 4px solid;
   border-radius: 50%;
   margin-right: 0.5em;
+}
+
+.filter-name {
+  color: var(--text);
 }
 </style>
