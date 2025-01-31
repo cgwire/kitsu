@@ -5,7 +5,6 @@
         class="flexrow-item mt1"
         ref="sequence-search-field"
         :can-save="true"
-        @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: e01 s01 anim=wip"
       />
@@ -42,7 +41,6 @@
       <search-query-list
         :queries="sequenceSearchQueries"
         type="sequenceStat"
-        @change-search="changeSearch"
         @remove-search="removeSearchQuery"
       />
     </div>
@@ -67,6 +65,8 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
+import { searchMixin } from '@/components/mixins/search'
+
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
@@ -78,6 +78,8 @@ import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
 
 export default {
   name: 'sequence-stats',
+
+  mixins: [searchMixin],
 
   components: {
     ButtonSimple,
@@ -106,6 +108,20 @@ export default {
     }
   },
 
+  mounted() {
+    this.loadShots(() => {
+      this.initSequences()
+        .then(() => {
+          this.initialLoading = false
+          setTimeout(() => {
+            this.setSearchFromUrl()
+            this.onSearchChange()
+          }, 100) // wait for data to be ready
+        })
+        .catch(err => console.error(err))
+    })
+  },
+
   computed: {
     ...mapGetters([
       'currentEpisode',
@@ -126,19 +142,11 @@ export default {
       'shotValidationColumns',
       'taskTypeMap',
       'taskStatusMap'
-    ])
-  },
+    ]),
 
-  mounted() {
-    this.loadShots(() => {
-      this.initSequences()
-        .then(() => {
-          this.initialLoading = false
-        })
-        .catch(err => console.error(err))
-      this.setDefaultSearchText()
-      this.setDefaultListScrollPosition()
-    })
+    searchField() {
+      return this.$refs['sequence-search-field']
+    }
   },
 
   methods: {
@@ -163,12 +171,6 @@ export default {
       })
     },
 
-    setDefaultSearchText() {
-      if (this.sequenceSearchText.length > 0) {
-        this.$refs['sequence-search-field'].setValue(this.sequenceSearchText)
-      }
-    },
-
     setDefaultListScrollPosition() {
       if (this.$refs['sequence-list']) {
         this.$refs['sequence-list'].setScrollPosition(
@@ -183,15 +185,8 @@ export default {
 
     onSearchChange() {
       const searchQuery = this.$refs['sequence-search-field'].getValue()
+      this.setSearchInUrl()
       this.setSequenceStatsSearch(searchQuery)
-    },
-
-    changeSearch(searchQuery) {
-      this.$refs['sequence-search-field'].setValue(searchQuery.search_query)
-      this.$refs['sequence-search-field'].$emit(
-        'change',
-        searchQuery.search_query
-      )
     },
 
     saveSearchQuery(searchQuery) {
@@ -272,6 +267,11 @@ export default {
       handler() {
         this.computeSequenceStats()
       }
+    },
+
+    '$route.query.search'() {
+      this.setSearchFromUrl()
+      this.onSearchChange()
     }
   },
 

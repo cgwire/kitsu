@@ -59,7 +59,6 @@
       <search-query-list
         :queries="peopleSearchQueries"
         type="people"
-        @change-search="changeSearch"
         @remove-search="removeSearchQuery"
         v-if="!isPeopleLoading"
       />
@@ -514,8 +513,8 @@ export default {
       const searchQuery = this.searchField.getValue()
       if (searchQuery.length !== 1) {
         this.setPeopleSearch(searchQuery)
-        this.updateRoute()
       }
+      this.setSearchInUrl()
       this.tabs[0].label =
         this.$t('main.active') + ' (' + this.activePeople.length + ')'
       this.tabs[1].label =
@@ -620,6 +619,10 @@ export default {
 
     '$route.query.tab'() {
       this.activeTab = this.$route.query.tab || 'active'
+    },
+
+    '$route.query.search'() {
+      this.onSearchChange()
     }
   },
 

@@ -29,7 +29,6 @@
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
               can-save
-              @change="onSearchChange"
               @save="saveSearchQuery"
             />
             <combobox-production
@@ -60,7 +59,6 @@
             <search-query-list
               :queries="personTaskSearchQueries"
               type="person"
-              @change-search="changeSearch"
               @remove-search="removeSearchQuery"
             />
           </div>
@@ -674,11 +672,6 @@ export default {
         this.taskList?.resizeHeaders()
         this.haveDoneList?.resizeHeaders()
       })
-    },
-
-    changeSearch(searchQuery) {
-      this.searchField?.setValue(searchQuery.search_query)
-      this.onSearchChange(searchQuery.search_query)
     },
 
     saveSearchQuery(searchQuery) {

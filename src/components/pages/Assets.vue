@@ -72,7 +72,6 @@
               :is-group-enabled="true"
               :queries="assetSearchQueries"
               type="asset"
-              @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isAssetsLoading && !initialLoading"
             />
@@ -402,12 +401,11 @@ export default {
       searchQuery = `${this.$route.query.search}`
     }
     this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
-    this.onSearchChange()
     this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
     const finalize = () => {
       if (this.$refs['asset-list']) {
         this.searchField.setValue(searchQuery)
-        this.onSearchChange()
+        this.applySearchFromUrl()
         this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
         this.$nextTick(() => {
           this.$refs['asset-list']?.selectTaskFromQuery()
@@ -628,7 +626,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.onSearchChange(false)
+          this.applySearchFromUrl()
         })
         .catch(err => {
           console.error(err)
@@ -665,12 +663,6 @@ export default {
           this.loading.restore = false
           this.errors.restore = true
         })
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.searchField.setValue(query)
-      this.onSearchChange()
     },
 
     confirmCreateTasks({ form, selectionOnly }) {
@@ -836,21 +828,6 @@ export default {
       this.showImportModal()
     },
 
-    onSearchChange(clearSelection = true) {
-      const searchQuery = this.searchField?.getValue() || ''
-      if (
-        searchQuery.length !== 1 &&
-        searchQuery !== undefined &&
-        searchQuery !== 'undefined'
-      ) {
-        this.setAssetSearch(searchQuery)
-      }
-      this.setSearchInUrl()
-      if (clearSelection) {
-        this.clearSelection()
-      }
-    },
-
     saveSearchQuery(searchQuery) {
       if (this.loading.savingSearch) {
         return
@@ -994,7 +971,7 @@ export default {
         [fieldName]: value
       }
       await this.editAsset(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -1005,36 +982,24 @@ export default {
         }
       }
       await this.editAsset(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     async onAssetChanged(asset) {
       await this.editAsset(asset)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     reset() {
       this.initialLoading = true
       this.loadAssets().then(() => {
         this.initialLoading = false
-        this.setSearchFromUrl()
-        this.onSearchChange()
+        this.applySearchFromUrl()
       })
     }
   },
 
   watch: {
-    $route(newRoute, previousRoute) {
-      if (!this.$route.query) return
-      if (previousRoute.query.task_id !== newRoute.query.task_id) return
-      const search = this.$route.query.search
-      const actualSearch = this.$refs['asset-search-field']?.getValue()
-      if (search !== actualSearch) {
-        this.searchField.setValue(search)
-        this.onSearchChange()
-      }
-    },
-
     currentProduction() {
       this.$refs['asset-search-field']?.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)

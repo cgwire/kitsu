@@ -100,6 +100,8 @@
 import firstBy from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
+import { searchMixin } from '@/components/mixins/search'
+
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
@@ -112,6 +114,8 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'asset-library',
+
+  mixins: [searchMixin],
 
   components: {
     Combobox,
@@ -151,6 +155,9 @@ export default {
   mounted() {
     this.filters.productionId = this.$route.query.production || undefined
     this.searchField.setValue(this.$route.query.search || undefined)
+    this.$nextTick(() => {
+      this.onSearchChange()
+    })
   },
 
   computed: {
@@ -224,7 +231,7 @@ export default {
     onSearchChange() {
       const searchQuery = this.searchField.getValue() || ''
       this.setSharedAssetSearch(searchQuery)
-      this.updateRoute({ search: searchQuery })
+      this.setSearchInUrl()
     },
 
     updateRoute({ production, search }) {

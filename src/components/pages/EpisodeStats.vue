@@ -53,20 +53,20 @@
 
     <episode-stats-list
       ref="episode-list"
+      :count-mode="countMode"
+      :data-mode="dataMode"
+      :display-mode="displayMode"
       :entries="
         statusMode === 'running'
           ? displayedEpisodes.filter(e => e.status === 'running')
           : displayedEpisodes
       "
-      :is-loading="isLoading"
-      :is-error="isLoadingError"
-      :validation-columns="episodeValidationColumns"
       :episode-stats="episodeStats"
       :episode-retakes-stats="episodeRetakeStats"
-      :data-mode="dataMode"
-      :count-mode="countMode"
-      :display-mode="displayMode"
+      :is-loading="isLoading"
+      :is-error="isLoadingError"
       :show-all="episodeSearchText.length === 0"
+      :validation-columns="episodeValidationColumns"
       @field-changed="onFieldChanged"
       @scroll="saveScrollPosition"
     />
@@ -76,6 +76,8 @@
 <script>
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
+
+import { searchMixin } from '@/components/mixins/search'
 
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
@@ -88,6 +90,8 @@ import SearchField from '@/components/widgets/SearchField.vue'
 
 export default {
   name: 'episode-stats',
+
+  mixins: [searchMixin],
 
   components: {
     ButtonSimple,
@@ -140,13 +144,15 @@ export default {
   mounted() {
     const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
     this.dataMode = mode
-    this.setDefaultSearchText()
     this.setDefaultListScrollPosition()
     this.isLoading = true
     this.isLoadingError = false
+    this.setSearchFromUrl()
     this.initEpisodeStats()
       .then(() => {
         this.isLoading = false
+        this.setSearchInUrl()
+        this.onSearchChange()
       })
       .catch(err => {
         this.isLoading = false
@@ -173,6 +179,10 @@ export default {
       'taskTypeMap'
     ]),
 
+    searchField() {
+      return this.$refs['episode-search-field']
+    },
+
     isRetakeDataMode() {
       return this.dataMode === 'retakes'
     }
@@ -193,24 +203,15 @@ export default {
       'showAssignations'
     ]),
 
-    setDefaultSearchText() {
-      if (this.episodeSearchText.length > 0) {
-        this.$refs['episode-search-field'].setValue(this.episodeSearchText)
-      }
-    },
-
     setDefaultListScrollPosition() {
       this.$refs['episode-list'].setScrollPosition(
         this.episodeListScrollPosition
       )
     },
 
-    navigateToList() {
-      this.$router.push(this.episodesPath)
-    },
-
-    onSearchChange(event) {
-      const searchQuery = this.$refs['episode-search-field'].getValue()
+    onSearchChange() {
+      const searchQuery = this.searchField.getValue()
+      this.setSearchInUrl()
       this.setEpisodeSearch(searchQuery)
     },
 
@@ -276,7 +277,7 @@ export default {
 
   watch: {
     currentProduction() {
-      this.$refs['episode-search-field'].setValue('')
+      this.searchField.setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
       this.reset()
     },

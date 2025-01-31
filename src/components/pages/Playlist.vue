@@ -1387,8 +1387,6 @@ export default {
   socket: {
     events: {
       'playlist:new'(eventData) {
-        console.log('playlist:new', eventData)
-        console.log('playlist:new', this.playlistMap.get(eventData.playlist_id))
         if (!this.playlistMap.get(eventData.playlist_id)) {
           this.refreshPlaylist(eventData.playlist_id)
         }

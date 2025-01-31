@@ -65,7 +65,6 @@
             <search-query-list
               :queries="editSearchQueries"
               type="edit"
-              @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isEditsLoading && !initialLoading"
             />
@@ -378,21 +377,14 @@ export default {
   },
 
   mounted() {
-    let searchQuery = ''
     if (this.editSearchText.length > 0) {
       this.$refs['edit-search-field']?.setValue(this.editSearchText)
     }
-    if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = `${this.$route.query.search}`
-    }
-    if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
-    this.onSearchChange()
     this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
     const finalize = () => {
       if (this.$refs['edit-list']) {
-        this.$refs['edit-search-field'].setValue(searchQuery)
-        this.onSearchChange()
+        this.applySearchFromUrl()
         this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
         this.$refs['edit-list'].selectTaskFromQuery()
       }
@@ -605,7 +597,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.onSearchChange(false)
+          this.applySearchFromUrl()
         })
         .catch(err => {
           console.error(err)
@@ -829,12 +821,9 @@ export default {
     onSearchChange(clearSelection = true) {
       if (!this.searchField) return
       const searchQuery = this.searchField.getValue() || ''
+      this.setSearchInUrl()
       if (searchQuery.length !== 1 && !this.isLongEditList) {
         this.applySearch(searchQuery)
-      } else if (searchQuery.length === 0 && this.isLongEditList) {
-        this.applySearch('')
-      } else {
-        this.setSearchInUrl()
       }
       if (clearSelection) {
         this.clearSelection()
@@ -843,11 +832,6 @@ export default {
 
     saveScrollPosition(scrollPosition) {
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
-    applySearch(searchQuery) {
-      this.setEditSearch(searchQuery)
-      this.setSearchInUrl()
     },
 
     saveSearchQuery(searchQuery) {
@@ -944,7 +928,7 @@ export default {
         [fieldName]: value
       }
       await this.editEdit(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -955,22 +939,11 @@ export default {
         }
       }
       await this.editEdit(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     }
   },
 
   watch: {
-    $route(newRoute, previousRoute) {
-      if (!this.$route.query) return
-      if (previousRoute.query.task_id !== newRoute.query.task_id) return
-      const search = this.$route.query.search
-      const actualSearch = this.$refs['edit-search-field']?.getValue()
-      if (search !== actualSearch) {
-        this.searchField.setValue(search)
-        this.applySearch(search)
-      }
-    },
-
     currentProduction() {
       this.$refs['edit-search-field']?.setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)

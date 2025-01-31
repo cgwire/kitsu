@@ -47,8 +47,6 @@ export const searchMixin = {
     setSearchFromUrl() {
       const searchQuery = this.searchField?.getValue()
       const searchFromUrl = this.$route.query.search
-      console.log(this.$route.query)
-      console.log('searchQuery', searchQuery, 'searchFromUrl', searchFromUrl)
       if (!searchQuery && searchFromUrl) {
         this.searchField?.setValue(searchFromUrl)
       }

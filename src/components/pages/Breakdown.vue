@@ -313,7 +313,6 @@
             :is-group-enabled="true"
             :queries="breakdownSearchQueries"
             type="breakdown"
-            @change-search="changeSearch"
             @remove-search="removeSearchQuery"
           />
         </div>
@@ -547,6 +546,7 @@ export default {
 
     this.resetDisplayHeaders()
     this.resetColumnWidth()
+    this.setSearchFromUrl()
   },
 
   beforeUnmount() {
@@ -861,12 +861,13 @@ export default {
 
     confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
-      this.$refs['search-field'].setValue(query)
+      this.searchField.setValue(query)
       this.onSearchChange(query)
     },
 
     onSearchChange(searchQuery) {
       this.setAssetSearch(searchQuery)
+      this.setSearchInUrl(searchQuery)
       this.displayMoreAssets()
       this.displayMoreAssets()
     },
@@ -1654,6 +1655,12 @@ export default {
 
     displayedSequences() {
       this.$store.commit('CASTING_SET_SEQUENCES', this.displayedSequences)
+    },
+
+    '$route.query.search'() {
+      this.setSearchFromUrl()
+      const search = this.searchField.getValue()
+      this.onSearchChange(search)
     }
   },
 

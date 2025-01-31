@@ -42,14 +42,6 @@
               v-model="filters.sortBy"
             />
           </div>
-          <div class="query-list" v-if="false">
-            <search-query-list
-              :queries="conceptSearchQueries"
-              type="concept"
-              @change-search="changeSearch"
-              @remove-search="removeSearchQuery"
-            />
-          </div>
         </div>
         <table-info
           :is-loading="loading.loadingConcepts"
@@ -139,7 +131,6 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
-import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
@@ -156,7 +147,6 @@ export default {
     ConceptCard,
     PeopleField,
     SearchField,
-    SearchQueryList,
     TableInfo,
     TaskInfo
   },

@@ -45,7 +45,6 @@
             <search-query-list
               :queries="sequenceSearchQueries"
               type="sequence"
-              @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isSequencesLoading && !initialLoading"
             />
@@ -313,18 +312,9 @@ export default {
   },
 
   mounted() {
-    let searchQuery = ''
-    if (this.sequenceSearchText && this.sequenceSearchText.length > 0) {
-      this.searchField.setValue(this.sequenceSearchText)
-    }
-    if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = `${this.$route.query.search}`
-    }
-    if (searchQuery === 'undefined') searchQuery = ''
     this.$refs['sequence-list'].setScrollPosition(
       this.sequenceListScrollPosition
     )
-    this.onSearchChange()
     this.$refs['sequence-list'].setScrollPosition(
       this.sequenceListScrollPosition
     )
@@ -338,12 +328,15 @@ export default {
     const finalize = () => {
       this.initialLoading = false
       if (this.$refs['sequence-list']) {
-        this.$refs['sequence-search-field'].setValue(searchQuery)
-        this.onSearchChange()
         this.$refs['sequence-list'].setScrollPosition(
           this.sequenceListScrollPosition
         )
         this.$refs['sequence-list'].selectTaskFromQuery()
+
+        this.$nextTick(() => {
+          this.setSearchFromUrl()
+          this.onSearchChange()
+        })
       }
     }
 
@@ -395,6 +388,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    searchField() {
+      return this.$refs['sequence-search-field']
+    },
 
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
@@ -493,6 +490,7 @@ export default {
       this.initialLoading = false
       this.loadSequencesWithTasks(err => {
         if (err) console.error(err)
+        this.applySearchFromUrl()
         this.initialLoading = false
       })
     },
@@ -503,11 +501,6 @@ export default {
         form.production_id = this.openProductions[0].id
       }
       this.sequenceToEdit = form
-    },
-
-    applySearch(searchQuery) {
-      this.setSequenceSearch(searchQuery)
-      this.setSearchInUrl()
     },
 
     saveSearchQuery(searchQuery) {
@@ -568,7 +561,7 @@ export default {
         [fieldName]: value
       }
       await this.editSequence(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -579,7 +572,7 @@ export default {
         }
       }
       await this.editSequence(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     onEditClicked(sequence) {
@@ -600,7 +593,7 @@ export default {
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.onSearchChange(false)
+            this.applySearchFromUrl()
           })
           .catch(err => {
             console.error(err)
@@ -635,17 +628,6 @@ export default {
   },
 
   watch: {
-    $route(newRoute, previousRoute) {
-      if (!this.$route.query) return
-      if (previousRoute.query.task_id !== newRoute.query.task_id) return
-      const search = this.$route.query.search
-      const actualSearch = this.$refs['sequence-search-field'].getValue()
-      if (search !== actualSearch) {
-        this.searchField.setValue(search)
-        this.applySearch(search)
-      }
-    },
-
     currentProduction() {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
@@ -674,15 +656,7 @@ export default {
 
     isSequencesLoading() {
       if (!this.isSequencesLoading) {
-        let searchQuery = ''
-        if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = `${this.$route.query.search}`
-        }
         this.initialLoading = false
-        this.$refs['sequence-search-field'].setValue(searchQuery)
-        this.$nextTick(() => {
-          this.applySearch(searchQuery)
-        })
         if (this.$refs['sequence-list']) {
           this.$refs['sequence-list'].setScrollPosition(
             this.sequenceListScrollPosition

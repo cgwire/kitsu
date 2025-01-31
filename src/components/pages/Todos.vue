@@ -9,7 +9,7 @@
           :tabs="todoTabs"
         />
 
-        <div class="flexrow" v-if="!isActiveTab('daysoff')">
+        <div class="flexrow" v-show="!isActiveTab('daysoff')">
           <search-field
             class="flexrow-item search-field"
             ref="todos-search-field"
@@ -46,16 +46,11 @@
         </div>
         <div
           class="query-list"
-          v-if="
-            isActiveTab('todos') ||
-            isActiveTab('timesheets') ||
-            isActiveTab('board')
-          "
+          v-if="!isActiveTab('daysoff')"
         >
           <search-query-list
             :queries="todoSearchQueries"
             type="todo"
-            @change-search="changeSearch"
             @remove-search="removeSearchQuery"
           />
         </div>
@@ -153,6 +148,8 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
 
+import { searchMixin } from '@/components/mixins/search'
+
 import { sortTaskStatuses } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
@@ -170,6 +167,8 @@ import UserCalendar from '@/components/widgets/UserCalendar.vue'
 
 export default {
   name: 'todos',
+
+  mixins: [searchMixin],
 
   components: {
     Combobox,
@@ -213,17 +212,15 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     useHead({
       title: `${this.$t('tasks.my_tasks')} - Kitsu`
     })
     this.updateActiveTab()
-    if (this.todosSearchText.length > 0) {
-      this.$refs['todos-search-field'].setValue(this.todosSearchText)
-    }
-    this.$nextTick(() => {
-      this.loadData()
-    })
+    await this.$nextTick()
+    await this.loadData()
+    this.setSearchFromUrl()
+    this.onSearchChange()
   },
 
   afterDestroy() {
@@ -256,6 +253,10 @@ export default {
       'todosSearchText',
       'user'
     ]),
+
+    searchField() {
+      return this.$refs['todos-search-field']
+    },
 
     boardTasks() {
       const tasks = this.sortedTasks.concat(this.sortedDoneTasks)
@@ -463,25 +464,20 @@ export default {
       this.clearSelectedTasks()
     },
 
-    onSearchChange(text) {
-      this.setTodosSearch(text)
+    onSearchChange() {
+      this.setSearchInUrl()
+      this.setTodosSearch(this.searchField.getValue())
     },
 
-    changeSearch(searchQuery) {
-      this.$refs['todos-search-field'].setValue(searchQuery.search_query)
-      this.$refs['todos-search-field'].$emit('change', searchQuery.search_query)
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
+    async saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) return
+      try {
+        this.loading.savingSearch = true
+        await this.saveTodoSearch(searchQuery)
+        this.loading.savingSearch = false
+      } catch (error) {
+        console.error(error)
       }
-      this.loading.savingSearch = true
-      this.saveTodoSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
     },
 
     async removeSearchQuery(searchQuery) {
@@ -642,8 +638,9 @@ export default {
       this.updateActiveTab()
     },
 
-    $route() {
-      this.currentSection = this.$route.query.section || 'todos'
+    '$route.query.search'() {
+      this.setSearchFromUrl()
+      this.onSearchChange()
     }
   },
 

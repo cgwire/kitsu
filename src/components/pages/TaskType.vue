@@ -173,7 +173,6 @@
           <search-query-list
             :queries="searchQueries"
             type="taskType"
-            @change-search="changeSearch"
             @remove-search="removeSearchQuery"
             v-if="!loading.entities"
           />

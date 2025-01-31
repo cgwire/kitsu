@@ -45,7 +45,6 @@
             <search-query-list
               :queries="episodeSearchQueries"
               type="episode"
-              @change-search="changeSearch"
               @remove-search="removeSearchQuery"
               v-if="!isEpisodesLoading && !initialLoading"
             />
@@ -314,16 +313,8 @@ export default {
   },
 
   mounted() {
-    let searchQuery = ''
-    if (this.episodeSearchText && this.episodeSearchText.length > 0) {
-      this.searchField.setValue(this.episodeSearchText)
-    }
-    if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = `${this.$route.query.search}`
-    }
-    if (searchQuery === 'undefined') searchQuery = ''
+    this.setSearchFromUrl()
     this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
-    this.onSearchChange()
     this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
     if (!this.isCurrentUserManager && this.user.departments.length > 0) {
       this.selectedDepartment = 'MY_DEPARTMENTS'
@@ -335,7 +326,7 @@ export default {
     const finalize = () => {
       this.initialLoading = false
       if (this.$refs['episode-list']) {
-        this.$refs['episode-search-field'].setValue(searchQuery)
+        this.setSearchFromUrl()
         this.onSearchChange()
         this.$refs['episode-list'].setScrollPosition(
           this.episodeListScrollPosition
@@ -395,6 +386,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    searchField() {
+      return this.$refs['episode-search-field']
+    },
 
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
@@ -505,11 +500,6 @@ export default {
       this.episodeToEdit = form
     },
 
-    applySearch(searchQuery) {
-      this.setEpisodeSearch(searchQuery)
-      this.setSearchInUrl()
-    },
-
     saveSearchQuery(searchQuery) {
       if (this.loading.savingSearch) {
         return
@@ -568,7 +558,7 @@ export default {
         [fieldName]: value
       }
       await this.editEpisode(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -579,7 +569,7 @@ export default {
         }
       }
       await this.editEpisode(data)
-      this.onSearchChange(false)
+      this.applySearchFromUrl()
     },
 
     onEditClicked(episode) {
@@ -601,7 +591,7 @@ export default {
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.onSearchChange(false)
+            this.applySearchFromUrl()
           })
           .catch(err => {
             console.error(err)
@@ -632,19 +622,7 @@ export default {
   },
 
   watch: {
-    $route(newRoute, previousRoute) {
-      if (!this.$route.query) return
-      if (previousRoute.query.task_id !== newRoute.query.task_id) return
-      const search = this.$route.query.search
-      const actualSearch = this.$refs['episode-search-field'].getValue()
-      if (search !== actualSearch) {
-        this.searchField.setValue(search)
-        this.applySearch(search)
-      }
-    },
-
     currentProduction() {
-      this.$refs['episode-search-field'].setValue('')
       this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
@@ -652,14 +630,10 @@ export default {
 
     isEpisodesLoading() {
       if (!this.isEpisodesLoading) {
-        let searchQuery = ''
-        if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = `${this.$route.query.search}`
-        }
         this.initialLoading = false
-        this.$refs['episode-search-field'].setValue(searchQuery)
         this.$nextTick(() => {
-          this.applySearch(searchQuery)
+          this.setSearchFromUrl()
+          this.onSearchChange()
         })
         if (this.$refs['episode-list']) {
           this.$refs['episode-list'].setScrollPosition(

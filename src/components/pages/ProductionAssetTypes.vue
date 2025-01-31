@@ -49,6 +49,8 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import { searchMixin } from '@/components/mixins/search'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
@@ -56,6 +58,8 @@ import SearchField from '@/components/widgets/SearchField.vue'
 
 export default {
   name: 'production-asset-types',
+
+  mixins: [searchMixin],
 
   components: {
     ButtonSimple,
@@ -90,7 +94,11 @@ export default {
       'isTVShow',
       'taskStatusMap',
       'taskTypeMap'
-    ])
+    ]),
+
+    searchField() {
+      return this.$refs['asset-type-search-field']
+    }
   },
 
   mounted() {
@@ -123,13 +131,10 @@ export default {
       )
     },
 
-    navigateToList() {
-      this.$router.push(this.assetTypesPath)
-    },
-
-    onSearchChange(event) {
+    onSearchChange() {
       const searchQuery = this.$refs['asset-type-search-field'].getValue()
       this.setAssetTypeSearch(searchQuery)
+      this.setSearchInUrl(searchQuery)
     },
 
     saveScrollPosition(scrollPosition) {
@@ -160,11 +165,12 @@ export default {
 
     reset() {
       this.initialLoading = true
-      this.$refs['asset-type-search-field'].setValue('')
       this.loadAssets().then(() => {
         this.computeAssetTypeStats()
         this.setAssetTypeListScrollPosition(0)
         this.initialLoading = false
+        this.setSearchFromUrl()
+        this.onSearchChange()
       })
     }
   },
