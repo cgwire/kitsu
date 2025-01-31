@@ -44,10 +44,7 @@
             v-model="currentSort"
           />
         </div>
-        <div
-          class="query-list"
-          v-if="!isActiveTab('daysoff')"
-        >
+        <div class="query-list" v-if="!isActiveTab('daysoff')">
           <search-query-list
             :queries="todoSearchQueries"
             type="todo"

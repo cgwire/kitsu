@@ -243,12 +243,8 @@ const getters = {
     const groups = []
     const runnings = state.episodes.filter(e => e.status === 'running')
     const standbys = state.episodes.filter(e => e.status === 'standby')
-    const completes = state.episodes.filter(
-      e => e.status === 'complete'
-    )
-    const canceleds = state.episodes.filter(
-      e => e.status === 'canceled'
-    )
+    const completes = state.episodes.filter(e => e.status === 'complete')
+    const canceleds = state.episodes.filter(e => e.status === 'canceled')
 
     const tmpGroups = [runnings, standbys, completes, canceleds]
     tmpGroups.forEach(group => {
