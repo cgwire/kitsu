@@ -915,12 +915,6 @@ export default {
       this.changeEditSort(sortInfo)
     },
 
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.$refs['edit-search-field'].setValue(query)
-      this.applySearch(query)
-    },
-
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
