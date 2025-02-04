@@ -957,7 +957,7 @@ export default {
     },
 
     onAssetTypeClicked(assetType) {
-      this.searchField.setValue(`${this.assetSearchText} type=${assetType}`)
+      this.searchField.setValue(`${this.assetSearchText} type=[${assetType}]`)
       this.onSearchChange()
     },
 
