@@ -15,6 +15,7 @@ export const searchMixin = {
     confirmBuildFilter(query) {
       this.modals.isBuildFilterDisplayed = false
       this.searchField.setValue(query)
+      this.setSearchInUrl(query)
       this.onSearchChange()
     },
 

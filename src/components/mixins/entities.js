@@ -271,12 +271,6 @@ export const entitiesMixin = {
       )
     },
 
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.searchField.setValue(query)
-      this.applySearch(query)
-    },
-
     onKeepTaskPanelOpenChanged(keepOpen) {
       this.keepTaskPanelOpen = keepOpen
     },
