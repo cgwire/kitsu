@@ -463,7 +463,9 @@ export default {
 
     onSearchChange() {
       this.setSearchInUrl()
-      this.setTodosSearch(this.searchField.getValue())
+      if (this.searchField) {
+        this.setTodosSearch(this.searchField.getValue())
+      }
     },
 
     async saveSearchQuery(searchQuery) {
