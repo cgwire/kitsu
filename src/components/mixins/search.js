@@ -29,8 +29,8 @@ export const searchMixin = {
     },
 
     applySearch(search) {
+      this.searchField?.setValue(search)
       const setSearchFunction = `set${this.entityTypeName}Search`
-      this.searchField.setValue(search)
       if (this[setSearchFunction]) {
         this[setSearchFunction](search || '')
       }

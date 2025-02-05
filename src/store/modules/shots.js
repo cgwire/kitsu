@@ -225,7 +225,7 @@ const helpers = {
       assetTypes: [],
       taskTypes,
       taskStatuses,
-      descriptors: production.descriptors,
+      descriptors: production?.descriptors || [],
       persons,
       query
     })
