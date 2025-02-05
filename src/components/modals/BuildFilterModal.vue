@@ -465,7 +465,7 @@ export default {
     },
 
     isAssetsOnly() {
-      return this.currentProduction.production_type === 'assets'
+      return this.currentProduction?.production_type === 'assets'
     },
 
     assetTypeOptions() {
