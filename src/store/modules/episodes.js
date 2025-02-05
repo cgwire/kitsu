@@ -82,7 +82,7 @@ const helpers = {
       persons,
       query
     })
-    let result = indexSearch(cache.episodeIndex, keywords) || cache.episodes
+    let result = indexSearch(cache.episodeIndex, keywords) || state.episodes
     result = applyFilters(result, filters, taskMap)
     result = sortEpisodeResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
@@ -681,13 +681,13 @@ const mutations = {
     state.episodes = sortedEpisodes
     state.displayedEpisodes.push(episode)
     state.displayedEpisodes = sortByName(state.displayedEpisodes)
-    state.episodeIndex = buildEpisodeIndex(sortedEpisodes)
+    cache.episodeIndex = buildEpisodeIndex(sortedEpisodes)
     state.displayedEpisodesLength = sortedEpisodes.length
   },
 
   [UPDATE_EPISODE](state, episode) {
     Object.assign(cache.episodeMap.get(episode.id), episode)
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
   [REMOVE_EPISODE](state, episode) {
@@ -697,7 +697,7 @@ const mutations = {
       state.displayedEpisodes,
       episode
     )
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
   [SET_EPISODE_SEARCH](state, payload) {
@@ -738,7 +738,7 @@ const mutations = {
       Object.assign(episode, newEpisode)
       Object.assign(episodeFromMain, newEpisode)
     }
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {
       state.isEpisodeDescription = true
     }
@@ -783,7 +783,7 @@ const mutations = {
     })
     state.episodes = sortByName(episodes)
 
-    state.episodeIndex = buildEpisodeIndex(state.episodes)
+    cache.episodeIndex = buildEpisodeIndex(state.episodes)
     state.displayedEpisodes = state.episodes
     state.displayedEpisodesLength = state.episodes.length
 

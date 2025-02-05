@@ -130,14 +130,16 @@ export default {
   emits: ['delete-clicked', 'edit-clicked', 'update-priorities'],
 
   data() {
-    return {}
-  },
-
-  computed: {
-    taskStatuses() {
-      return this.entries
+    return {
+      taskStatuses: []
     }
   },
+
+  mounted() {
+    this.taskStatuses = this.entries
+  },
+
+  computed: {},
 
   methods: {
     async updateTaskStatusPriorities() {
