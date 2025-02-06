@@ -333,10 +333,9 @@ export default {
         )
         this.$refs['sequence-list'].selectTaskFromQuery()
 
-        this.$nextTick(() => {
-          this.setSearchFromUrl()
-          this.onSearchChange()
-        })
+        setTimeout(() => {
+          this.applySearchFromUrl()
+        }, 200)
       }
     }
 

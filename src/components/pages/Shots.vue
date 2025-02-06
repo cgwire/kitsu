@@ -446,14 +446,13 @@ export default {
       this.$nextTick(() => {
         // Needed to be sure the current production is set
         this.loadShots(() => {
-          this.$nextTick(() => {
-            // Needed to be sure the shots are loaded
+          // Needed to be sure the shots are fully loaded
+          setTimeout(() => {
             this.applySearchFromUrl()
-            this.onSearchChange()
             this.$nextTick(() => {
               this.$refs['shot-list']?.selectTaskFromQuery()
             })
-          })
+          }, 200)
         })
       })
     }
@@ -1159,8 +1158,6 @@ export default {
       if (!this.isTVShow) {
         this.loadShots(() => {
           this.initialLoading = false
-          this.setSearchFromUrl()
-          this.onSearchChange()
         })
       }
     },
@@ -1169,8 +1166,6 @@ export default {
       const finalize = () => {
         this.initialLoading = true
         this.loadShots(() => {
-          this.setSearchFromUrl()
-          this.onSearchChange()
           this.initialLoading = false
         })
       }
@@ -1191,15 +1186,7 @@ export default {
 
     isShotsLoading() {
       if (!this.isShotsLoading) {
-        let searchQuery = ''
-        if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = `${this.$route.query.search}`
-        }
         this.initialLoading = false
-        this.$refs['shot-search-field'].setValue(searchQuery)
-        this.$nextTick(() => {
-          this.onSearchChange()
-        })
         if (this.$refs['shot-list']) {
           this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
         }
