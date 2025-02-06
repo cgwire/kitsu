@@ -738,7 +738,7 @@ export default {
   },
 
   notifications: {
-    and_change_status: 'and changed the task status',
+    and_change_status: ' and changed the task status',
     all_statuses: 'Read and Unread',
     all_types: 'All types',
     all_notifications: 'All notifications',
@@ -867,7 +867,7 @@ export default {
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',
-    build_mp4: 'Build .mp4 (beta)',
+    build_mp4: 'Build .mp4',
     building: 'Building...',
     client_playlist: 'Client Playlist',
     comparing_missing_plan: 'Shot missing for current type',
