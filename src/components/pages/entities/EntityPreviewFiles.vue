@@ -57,6 +57,9 @@
             <th class="person">
               {{ $t('entities.preview_files.uploader') }}
             </th>
+            <th class="date">
+              {{ $t('entities.preview_files.uploaded_at') }}
+            </th>
             <th class="end-cell"></th>
           </tr>
         </thead>
@@ -99,6 +102,9 @@
               class="person"
               :person="personMap.get(previewFile.person_id)"
             />
+            <td class="date">
+              {{ previewFile.date }}
+            </td>
 
             <td class="download">
               <a
@@ -293,6 +299,9 @@ td.type {
 }
 .download {
   width: 40px;
+}
+.date {
+  width: 80px;
 }
 
 .original-name {
