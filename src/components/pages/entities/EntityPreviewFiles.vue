@@ -1,10 +1,38 @@
 <template>
   <div class="mt1 flexcolumn wrapper preview-files">
+    <div class="buttons flexrow mb1">
+      <span class="filler"></span>
+      <button-simple
+        class="flexrow-item"
+        icon="grid"
+        :is-on="contactSheetMode"
+        :title="$t('tasks.show_contact_sheet')"
+        @click="contactSheetMode = !contactSheetMode"
+      />
+    </div>
     <div class="has-text-centered" v-if="isLoading">
       <spinner />
     </div>
-    <div v-else-if="previewFiles.length > 0">
-      <table class="datatable">
+    <div v-else-if="previewFiles.length > 0 && !isLoading">
+      <div class="contact-sheet flexcolumn" v-if="contactSheetMode">
+        <div
+          :key="'task-type-group-' + index"
+          v-for="(taskTypePreviewFiles, index) in taskTypePreviewFileGroups"
+        >
+          <div class="flexrow-item mb1">
+            <task-type-name :task-type="getTaskType(taskTypePreviewFiles[0])" />
+          </div>
+
+          <div class="flexrow task-types-preview mb2">
+            <entity-preview-file-card
+              :key="previewFile.id"
+              :preview-file="previewFile"
+              v-for="previewFile in taskTypePreviewFiles"
+            />
+          </div>
+        </div>
+      </div>
+      <table class="datatable" v-else>
         <thead class="datatable-head">
           <tr class="datatable-row-header">
             <th class="thumbnail"></th>
@@ -98,24 +126,33 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { renderFileSize } from '@/lib/render'
 
+import preferences from '@/lib/preferences'
+
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import EntityPreviewFileCard from '@/components/pages/entities/EntityPreviewFileCard.vue'
 import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
 export default {
   name: 'entity-preview-files',
 
   components: {
+    ButtonSimple,
     DownloadIcon,
+    EntityPreviewFileCard,
     EntityThumbnail,
     PeopleNameCell,
     Spinner,
-    TaskTypeCell
+    TaskTypeCell,
+    TaskTypeName
   },
 
   data() {
     return {
+      contactSheetMode: false,
       isLoading: false,
       previewFiles: []
     }
@@ -131,6 +168,10 @@ export default {
   mounted() {
     if (!this.entity) return
     this.reset()
+    this.contactSheetMode = preferences.getBoolPreference(
+      'entity:preview-files-contact-sheet',
+      false
+    )
   },
 
   computed: {
@@ -140,11 +181,33 @@ export default {
       'personMap',
       'taskMap',
       'taskTypeMap'
-    ])
+    ]),
+
+    taskTypePreviewFileGroups() {
+      const taskTypePreviewFiles = new Map()
+      this.previewFiles.forEach(previewFile => {
+        const taskType = this.getTaskType(previewFile)
+        if (!taskTypePreviewFiles.has(taskType.id)) {
+          taskTypePreviewFiles.set(taskType.id, [])
+        }
+        taskTypePreviewFiles.get(taskType.id).push(previewFile)
+      })
+      return Array.from(taskTypePreviewFiles.values())
+    }
   },
 
   methods: {
     ...mapActions(['getEntityPreviewFiles']),
+
+    getPreviewValidationStyle(previewFile) {
+      let color = '#AAA'
+      if (previewFile.validation_status === 'validated') {
+        color = '#67BE48' // green
+      } else if (previewFile.validation_status === 'rejected') {
+        color = '#FF3860' // red
+      }
+      return { background: color }
+    },
 
     getTaskType(previewFile) {
       const task = this.taskMap.get(previewFile.task_id)
@@ -183,6 +246,13 @@ export default {
   watch: {
     entity() {
       if (this.entity) this.reset()
+    },
+
+    contactSheetMode() {
+      preferences.setPreference(
+        'entity:preview-files-contact-sheet',
+        this.contactSheetMode
+      )
     }
   }
 }
@@ -246,5 +316,17 @@ td.type {
 
 .datatable-row-header::after {
   display: none;
+}
+
+.preview-files {
+  flex: 1;
+}
+
+.contact-sheet {
+  flex-wrap: wrap;
+}
+
+.task-types-preview {
+  flex-wrap: wrap;
 }
 </style>
