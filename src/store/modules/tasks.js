@@ -158,6 +158,10 @@ const actions = {
     })
   },
 
+  loadTasks({}, filters) {
+    return tasksApi.getTasks(filters)
+  },
+
   loadOpenTasks({}, filters) {
     return tasksApi.getOpenTasks(filters)
   },
