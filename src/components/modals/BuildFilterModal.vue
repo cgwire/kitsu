@@ -101,7 +101,9 @@
             <combobox
               class="flexrow-item"
               :options="descriptorOptions"
-              @update:model-value="onDescriptorChanged(descriptorFilter)"
+              @update:model-value="
+                filterId => onDescriptorChanged(descriptorFilter, filterId)
+              "
               v-model="descriptorFilter.id"
             />
 
@@ -140,9 +142,9 @@
                 <metadata-field
                   class="flexrow-item"
                   label=""
-                  :key="`descriptor-value-${index}`"
                   :descriptor="getDescriptor(descriptorFilter.id)"
                   :entity="{}"
+                  :key="`descriptor-value-${index}`"
                   v-model="descriptorFilter.values[index]"
                   v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
                 />
@@ -585,9 +587,20 @@ export default {
         if (descriptorFilter.is_checklist) {
           value = descriptorFilter.values[0].text
           value += descriptorFilter.values[0].checked ? ':true' : ':false'
+        } else if (descriptorFilter.is_boolean) {
+          value = descriptorFilter.values[0]
         } else {
           if (descriptorFilter.operator === '=-') operator = '=[-'
-          value = descriptorFilter.values.join(',')
+          const values = descriptorFilter.values
+          if (values.length === 0 || values[0] === '') {
+            const options = this.getDescriptorChoiceOptions(
+              descriptorFilter.id,
+              descriptorFilter.is_checklist
+            )
+            value = options[0].value
+          } else {
+            value = descriptorFilter.values.join(',')
+          }
         }
         const descriptor = this.getDescriptor(descriptorFilter.id)
         query += ` [${descriptor.name}]${operator}${value}]`
@@ -688,8 +701,9 @@ export default {
 
     // Descriptors
 
-    onDescriptorChanged(descriptorFilter) {
-      const descriptor = this.getDescriptor(descriptorFilter.id)
+    onDescriptorChanged(descriptorFilter, filter) {
+      const descriptor = this.getDescriptor(filter)
+
       descriptorFilter.is_checklist = false
       if (descriptor.choices.length > 0) {
         const checklistValues = this.getDescriptorChecklistValues(descriptor)
