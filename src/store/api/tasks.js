@@ -7,6 +7,11 @@ export default {
     return client.pget(`/api/data/tasks/${taskId}/full`)
   },
 
+  getTasks(filters) {
+    const path = '/api/data/tasks'
+    return client.pget(buildQueryString(path, filters))
+  },
+
   getOpenTasks(filters) {
     const path = '/api/data/tasks/open-tasks'
     return client.pget(buildQueryString(path, filters))

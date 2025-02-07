@@ -142,9 +142,11 @@ const helpers = {
       project_id: asset.production_id,
       episode_id: asset.source_id,
       entity_name: `${asset.asset_type_name} / ${asset.name}`,
+      entity_type_id: asset.asset_type_id,
       entity_type_name: asset.asset_type_name,
       entity: {
         id: asset.id,
+        name: asset.name,
         preview_file_id: asset.preview_file_id
       }
     })
