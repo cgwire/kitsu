@@ -685,7 +685,7 @@ export default {
       isLoading: false,
       isMuted: false,
       isPlaying: false,
-      isOrdering: false,
+      isOrdering: true,
       isRepeating: false,
       isTyping: false,
       isWireframe: false,
@@ -755,6 +755,7 @@ export default {
       this.onObjectBackgroundSelected()
     }
     this.resetPencilConfiguration()
+    this.isOrdering = this.previews.length > 1
   },
 
   beforeUnmount() {
@@ -2122,6 +2123,7 @@ export default {
         }
       })
       this.setDefaultComparisonTaskType()
+      this.isOrdering = this.previews.length > 1
     },
 
     'currentPreview.revision'() {
