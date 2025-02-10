@@ -353,6 +353,7 @@ export default {
       size: 'Size',
       status: 'Status',
       task_type: 'Task type',
+      uploaded_at: 'Uploaded at',
       uploader: 'Uploaded by'
     },
 
