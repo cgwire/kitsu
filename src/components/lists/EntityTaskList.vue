@@ -250,6 +250,7 @@ export default {
 .duedate {
   max-width: 100px;
   min-width: 100px;
+  white-space: nowrap;
 }
 
 .status {
