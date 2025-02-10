@@ -5,6 +5,7 @@
         class="flexrow-item mt1"
         ref="sequence-search-field"
         :can-save="true"
+        @change="onSearchChange"
         @save="saveSearchQuery"
         placeholder="ex: e01 s01 anim=wip"
       />
