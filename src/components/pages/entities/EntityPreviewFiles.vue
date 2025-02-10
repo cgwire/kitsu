@@ -103,7 +103,7 @@
               :person="personMap.get(previewFile.person_id)"
             />
             <td class="date">
-              {{ previewFile.date }}
+              {{ formatDate(previewFile.created_at) }}
             </td>
 
             <td class="download">
@@ -131,7 +131,7 @@ import { DownloadIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { renderFileSize } from '@/lib/render'
-
+import { formatDate } from '@/lib/time'
 import preferences from '@/lib/preferences'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -233,6 +233,8 @@ export default {
     },
 
     renderFileSize,
+
+    formatDate,
 
     reset() {
       this.isLoading = true
