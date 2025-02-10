@@ -36,6 +36,7 @@
       :tasks="tasks"
       :is-loading="isLoading"
       :is-error="isLoadingError"
+      :unit="unit"
     />
   </div>
 </template>
@@ -96,6 +97,10 @@ export default {
     dayOffCount: {
       type: Number,
       default: 0
+    },
+    unit: {
+      type: String,
+      default: 'hour'
     }
   },
 
