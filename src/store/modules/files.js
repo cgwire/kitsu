@@ -1,10 +1,9 @@
 import filesApi from '@/store/api/files'
 
-import { RESET_ALL } from '@/store/mutation-types'
-
 import {
   SET_FILE_STATUSES,
-  SET_OUTPUT_FILE_TYPES
+  SET_OUTPUT_FILE_TYPES,
+  RESET_ALL
 } from '@/store/mutation-types'
 
 const initialState = {

@@ -126,9 +126,7 @@ export default {
 
     getDownloadPath(previewFileId) {
       const type = this.previewFile.extension === 'mp4' ? 'movies' : 'pictures'
-      return (
-        `/api/${type}/originals/preview-files/` + `${previewFileId}/download`
-      )
+      return `/api/${type}/originals/preview-files/${previewFileId}/download`
     },
 
     renderFileSize

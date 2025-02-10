@@ -427,9 +427,7 @@ export default {
             `${this.currentShot.name}`
           )
         } else {
-          return (
-            `${this.currentShot.sequence_name} / ` + `${this.currentShot.name}`
-          )
+          return `${this.currentShot.sequence_name} / ${this.currentShot.name}`
         }
       } else {
         return 'Loading...'

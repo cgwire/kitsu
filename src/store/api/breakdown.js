@@ -34,15 +34,12 @@ export default {
   },
 
   getEpisodeCasting(episode) {
-    const path =
-      `/api/data/projects/${episode.project_id}/entities/` +
-      `${episode.id}/casting`
+    const path = `/api/data/projects/${episode.project_id}/entities/${episode.id}/casting`
     return client.pget(path)
   },
 
   getShotCasting(shot) {
-    const path =
-      `/api/data/projects/${shot.project_id}/entities/` + `${shot.id}/casting`
+    const path = `/api/data/projects/${shot.project_id}/entities/${shot.id}/casting`
     return client.pget(path)
   },
 

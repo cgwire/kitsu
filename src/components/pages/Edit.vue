@@ -724,9 +724,7 @@ export default {
     title() {
       if (this.currentEdit) {
         if (this.currentEdit.episode_name) {
-          return (
-            `${this.currentEdit.episode_name} / ` + `${this.currentEdit.name}`
-          )
+          return `${this.currentEdit.episode_name} / ${this.currentEdit.name}`
         } else {
           return `${this.currentEdit.name}`
         }
