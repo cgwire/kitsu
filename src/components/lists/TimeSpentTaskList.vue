@@ -35,7 +35,9 @@
                     <td class="name">
                       {{ task.name }}
                     </td>
-                    <td class="duration">{{ task.duration / 60 }}</td>
+                    <td class="duration">
+                      {{ getDuration(task) }}
+                    </td>
                   </router-link>
                 </tr>
               </tbody>
@@ -51,8 +53,9 @@
 import { mapGetters } from 'vuex'
 import { firstBy } from 'thenby'
 
-import { sortByName } from '@/lib/sorting'
 import { getTaskPath } from '@/lib/path'
+import { sortByName } from '@/lib/sorting'
+import { hoursToDays } from '@/lib/time'
 
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -85,11 +88,19 @@ export default {
     isError: {
       type: Boolean,
       default: false
+    },
+    unit: {
+      type: String,
+      default: 'hour'
     }
   },
 
   computed: {
-    ...mapGetters(['productionMap', 'taskTypeMap']),
+    ...mapGetters(['organisation', 'productionMap', 'taskTypeMap']),
+
+    isHours() {
+      return this.unit === 'hour'
+    },
 
     projects() {
       const projects = {}
@@ -131,6 +142,13 @@ export default {
   },
 
   methods: {
+    getDuration(task) {
+      const duration = task.duration / 60
+      return this.isHours
+        ? duration
+        : hoursToDays(this.organisation, duration).toFixed(2)
+    },
+
     getTaskPath(task) {
       const project = this.productionMap.get(task.project_id)
       if (!project || project.project_status_name === 'Closed') {

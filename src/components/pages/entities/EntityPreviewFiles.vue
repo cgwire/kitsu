@@ -227,9 +227,7 @@ export default {
       if (!previewFile) return ''
 
       const type = previewFile.extension === 'mp4' ? 'movies' : 'pictures'
-      return (
-        `/api/${type}/originals/preview-files/` + `${previewFileId}/download`
-      )
+      return `/api/${type}/originals/preview-files/${previewFileId}/download`
     },
 
     renderFileSize,

@@ -1328,7 +1328,7 @@ export const annotationMixin = {
       if (!this.fabricCanvas) return
       this.fabricCanvas.discardActiveObject()
       const { mainObject, subObjects } = clipboard.pasteAnnotations()
-      if (subObjects.length > 0) {
+      if (subObjects?.length > 0) {
         subObjects.forEach(obj => {
           obj = this.applyGroupChanges(mainObject, obj)
           obj.group = null

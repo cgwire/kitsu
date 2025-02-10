@@ -206,7 +206,7 @@ const helpers = {
       entryIndex: cache.editIndex,
       taskTypes,
       taskStatuses,
-      descriptors: production.descriptors || [],
+      descriptors: production?.descriptors || [],
       persons,
       query
     })

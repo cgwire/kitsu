@@ -129,6 +129,7 @@ export default {
 <style lang="scss" scoped>
 .date {
   width: 100px;
+  white-space: nowrap;
 }
 .person {
   width: 200px;
