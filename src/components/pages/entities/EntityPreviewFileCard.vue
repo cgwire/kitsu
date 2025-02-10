@@ -72,7 +72,7 @@ import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
-  name: 'entity-preview-files',
+  name: 'entity-preview-file-card',
 
   components: {
     DownloadIcon,
