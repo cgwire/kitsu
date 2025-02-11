@@ -568,9 +568,9 @@ export default {
     assetNavOptions() {
       return [
         ...this.entityNavOptions.slice(0, 2),
-        { label: 'Concepts', value: 'concepts' },
+        { label: this.$t('main.label.concepts'), value: 'concepts' },
         ...this.entityNavOptions.slice(2),
-        { label: 'Output Files', value: 'output-files' }
+        { label: this.$t('main.label.output_files'), value: 'output-files' }
       ]
     },
 

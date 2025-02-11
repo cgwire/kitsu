@@ -675,11 +675,11 @@ export default {
         edit: false
       },
       entityNavOptions: [
-        { label: 'Infos', value: 'infos' },
-        { label: 'Schedule', value: 'schedule' },
-        { label: 'Preview Files', value: 'preview-files' },
-        { label: 'Activity', value: 'activity' },
-        { label: 'Timelog', value: 'time-logs' }
+        { label: this.$t('main.label.info'), value: 'infos' },
+        { label: this.$t('main.label.schedule'), value: 'schedule' },
+        { label: this.$t('main.label.preview_files'), value: 'preview-files' },
+        { label: this.$t('main.activity'), value: 'activity' },
+        { label: this.$t('main.label.timelog'), value: 'time-logs' }
       ],
       modals: {
         edit: false
