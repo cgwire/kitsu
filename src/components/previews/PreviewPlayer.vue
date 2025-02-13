@@ -755,7 +755,6 @@ export default {
       this.onObjectBackgroundSelected()
     }
     this.resetPencilConfiguration()
-    this.isOrdering = this.previews.length > 1
   },
 
   beforeUnmount() {
@@ -1090,11 +1089,12 @@ export default {
     },
 
     initPreferences() {
-      const isRepeating = localPreferences.getBoolPreference('player:repeating')
-      const isMuted = localPreferences.getBoolPreference('player:muted')
-      this.isRepeating = isRepeating
-      this.isMuted = isMuted
+      this.isRepeating = localPreferences.getBoolPreference('player:repeating')
+      this.isMuted = localPreferences.getBoolPreference('player:muted')
       this.isHd = Boolean(this.organisation.hd_by_default)
+      this.isOrdering =
+        this.previews.length > 1 &&
+        localPreferences.getPreference('player:ordering') !== 'false'
     },
 
     focus() {
@@ -2123,7 +2123,9 @@ export default {
         }
       })
       this.setDefaultComparisonTaskType()
-      this.isOrdering = this.previews.length > 1
+      this.isOrdering =
+        this.previews.length > 1 &&
+        localPreferences.getPreference('player:ordering') !== 'false'
     },
 
     'currentPreview.revision'() {
@@ -2205,6 +2207,7 @@ export default {
     },
 
     isOrdering() {
+      localPreferences.setPreference('player:ordering', this.isOrdering)
       this.$nextTick(() => {
         this.previewViewer.resize()
         this.comparisonViewer.resize()

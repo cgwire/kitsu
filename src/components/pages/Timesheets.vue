@@ -128,29 +128,29 @@ export default {
     return {
       detailOptions: [
         {
-          label: 'Day',
+          label: this.$t('main.day'),
           value: 'day'
         },
         {
-          label: 'Week',
+          label: this.$t('main.week'),
           value: 'week'
         },
         {
-          label: 'Month',
+          label: this.$t('main.month'),
           value: 'month'
         },
         {
-          label: 'Year',
+          label: this.$t('main.year'),
           value: 'year'
         }
       ],
       unitOptions: [
         {
-          label: 'Hour',
+          label: this.$t('main.hour'),
           value: 'hour'
         },
         {
-          label: 'Day',
+          label: this.$t('main.day'),
           value: 'day'
         }
       ],

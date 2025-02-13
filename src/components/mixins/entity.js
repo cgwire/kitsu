@@ -20,12 +20,12 @@ export const entityMixin = {
       currentSection: 'infos',
       zoomLevel: 1,
       entityNavOptions: [
-        { label: 'Infos', value: 'infos' },
-        { label: 'Chat', value: 'chat' },
-        { label: 'Casting', value: 'casting' },
-        { label: 'Schedule', value: 'schedule' },
-        { label: 'Preview Files', value: 'preview-files' },
-        { label: 'Timelog', value: 'time-logs' }
+        { label: this.$t('main.label.info'), value: 'infos' },
+        { label: this.$t('main.label.chat'), value: 'chat' },
+        { label: this.$t('main.label.casting'), value: 'casting' },
+        { label: this.$t('main.label.schedule'), value: 'schedule' },
+        { label: this.$t('main.label.preview_files'), value: 'preview-files' },
+        { label: this.$t('main.label.timelog'), value: 'time-logs' }
       ],
       zoomOptions: [
         { label: '1', value: 1 },

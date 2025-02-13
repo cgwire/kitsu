@@ -326,7 +326,7 @@ export default {
             name: '',
             episodeList: [
               { label: this.$t('main.all_assets'), value: 'all' },
-              { label: 'Main Pack', value: 'main' }
+              { label: this.$t('main.main_pack'), value: 'main' }
             ]
           }
         ].concat(this.episodeOptionGroups)
@@ -336,7 +336,7 @@ export default {
             name: '',
             episodeList: [
               { label: this.$t('main.all_assets'), value: 'all' },
-              { label: 'Main Pack', value: 'main' }
+              { label: this.$t('main.main_pack'), value: 'main' }
             ]
           }
         ].concat(this.episodeOptionGroups)
@@ -353,7 +353,7 @@ export default {
             name: '',
             episodeList: [
               { label: this.$t('shots.episodes'), value: 'all' },
-              { label: 'Main Pack', value: 'main' }
+              { label: this.$t('main.main_pack'), value: 'main' }
             ]
           }
         ].concat(this.episodeOptionGroups)
