@@ -440,7 +440,7 @@
             @next-clicked="onNextClicked"
             @previous-clicked="onPreviousClicked"
             @remove-preview-clicked="onRemovePreviewClicked"
-            @current-index-clicked="isOrdering = !isOrdering"
+            @current-index-clicked="toggleIsOrdering"
             v-if="currentPreview && !isConcept"
           />
 
@@ -1095,6 +1095,11 @@ export default {
       this.isOrdering =
         this.previews.length > 1 &&
         localPreferences.getPreference('player:ordering') !== 'false'
+    },
+
+    toggleIsOrdering() {
+      this.isOrdering = !this.isOrdering
+      localPreferences.setPreference('player:ordering', this.isOrdering)
     },
 
     focus() {
@@ -2207,7 +2212,6 @@ export default {
     },
 
     isOrdering() {
-      localPreferences.setPreference('player:ordering', this.isOrdering)
       this.$nextTick(() => {
         this.previewViewer.resize()
         this.comparisonViewer.resize()
