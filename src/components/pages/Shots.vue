@@ -626,7 +626,7 @@ export default {
         this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
         this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
       ) {
-        this.$refs['shot-search-field'].setValue('')
+        this.$refs['shot-search-field']?.setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
         this.initialLoading = true
         this.loadShots(() => {
