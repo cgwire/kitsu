@@ -361,7 +361,10 @@ export default {
               task.assignees.forEach(assigneeId => {
                 if (!tasksByType[task.entity_type_id][assigneeId]) {
                   tasksByType[task.entity_type_id][assigneeId] = []
-                  people[assigneeId] = this.personMap.get(assigneeId)
+                  people[assigneeId] = {
+                    ...this.personMap.get(assigneeId),
+                    daysOff: this.daysOffByPerson[assigneeId]
+                  }
                 }
 
                 // populate task with start and end dates
