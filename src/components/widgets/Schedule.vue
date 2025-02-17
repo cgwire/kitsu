@@ -138,6 +138,7 @@
                 <div
                   :key="childElement.id"
                   :style="childNameStyle(rootElement, index)"
+                  class="child"
                   v-for="(childElement, index) in rootElement.children"
                 >
                   <div class="child-name">
@@ -529,16 +530,21 @@
                       class="subchild"
                     >
                       <div
+                        class="day-off"
+                        :key="`dayoff-${dayOff.id}-${index}`"
+                        :style="dayOffStyle(dayOff)"
+                        :title="dayOff.description"
+                        v-for="(dayOff, index) in getDayOffRange(
+                          rootElement.people[personId].daysOff
+                        )"
+                      >
+                        <briefcase-icon class="day-off-icon" :size="14" />
+                      </div>
+                      <div
                         class="timebar"
                         :style="timebarSubchildStyle(task, rootElement)"
                         :key="index"
-                        :title="
-                          task.entity.name +
-                          ' ' +
-                          task.startDate.format('DD-MM') +
-                          ' - ' +
-                          task.endDate.format('DD-MM')
-                        "
+                        :title="`${task.entity.name} ${task.startDate.format('DD-MM')} - ${task.endDate.format('DD-MM')}`"
                         v-for="(task, index) in subchild"
                       >
                         {{ task.entity.name }}
@@ -1646,17 +1652,14 @@ export default {
     },
 
     timelineSubchildrenStyle(timeElement) {
+      const children = Object.values(timeElement.children ?? [])
+      const nbLines = children.reduce(
+        (acc, subChildren) => acc + this.getNbLines(subChildren),
+        0
+      )
+      const marginBottom = children.length * 10
       return {
-        height: `${
-          40 +
-          40 *
-            Object.values(timeElement.children ?? []).reduce(
-              (acc, subChildren) => {
-                return acc + this.getNbLines(subChildren)
-              },
-              0
-            )
-        }px`,
+        height: `${40 + 40 * nbLines + marginBottom + 2}px`,
         'padding-top': '13px'
       }
     },
@@ -1683,7 +1686,7 @@ export default {
             ? 'all-scroll'
             : 'ew-resize'
           : 'default',
-        top: `${4 + 34 * timeElement.line}px`,
+        top: `${5 + 38 * timeElement.line}px`,
         background: `color-mix(in srgb, ${timeElement.color || rootElement.color} 40%, transparent)`,
         'box-shadow': `inset 0 0 1px 2px ${timeElement.color || rootElement.color}`
       }
@@ -2325,8 +2328,8 @@ const setItemPositions = (
         .subchildren .subchild .timebar {
           position: absolute;
           color: var(--text-strong);
-          height: 30px;
-          line-height: 30px;
+          height: 34px;
+          line-height: 34px;
           font-size: 12px;
           padding: 0 5px;
 
@@ -2501,6 +2504,11 @@ const setItemPositions = (
 .children {
   position: relative;
   margin-bottom: 1em;
+}
+
+.child {
+  padding-bottom: 1px;
+  padding-top: 1px;
 }
 
 .child-name .entity-name span {
@@ -2745,6 +2753,7 @@ input[type='number'] {
   display: flex;
   padding: 5px 5px 5px 15px;
   margin-left: 40px;
+  margin-bottom: 10px;
   align-items: center;
   gap: 10px;
   border-top-left-radius: 15px;
@@ -2757,9 +2766,17 @@ input[type='number'] {
   position: relative;
 }
 
+.subchild + .subchild {
+  margin-top: 10px;
+}
+
 .subchild,
 .subchild-label {
-  border-bottom: 2px solid var(--background);
+  box-shadow: 0 0 1px 0 $dark-grey-lighter;
+
+  .dark & {
+    box-shadow: 0 0 1px 0 $white;
+  }
 }
 
 .subchild-label:nth-child(even),
@@ -2770,5 +2787,38 @@ input[type='number'] {
 .subchild-label:nth-child(odd),
 .subchild:nth-child(even) {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.subchild {
+  .day-off {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -1px;
+
+    .day-off-icon {
+      position: initial;
+    }
+  }
+
+  &:nth-child(odd) {
+    .day-off {
+      background-color: #c4c4c4;
+
+      .dark & {
+        background-color: #515357;
+      }
+    }
+  }
+
+  &:nth-child(even) {
+    .day-off {
+      background-color: #e2e2e2;
+
+      .dark & {
+        background-color: #414349;
+      }
+    }
+  }
 }
 </style>
