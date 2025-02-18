@@ -525,6 +525,12 @@ export const annotationMixin = {
             }
           }
         })
+        const preview = this.$options.annotatedPreview
+        this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
+          taskId: preview.task_id,
+          preview: preview,
+          annotations: this.annotations
+        })
       }
       const annotations = []
       this.annotations.forEach(a => annotations.push({ ...a }))
