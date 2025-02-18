@@ -308,6 +308,7 @@
         :silent="isCommentsHidden"
         :task="task"
         :player="this"
+        :show-assignees="isCurrentUserManager || isCurrentUserSupervisor"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
       />

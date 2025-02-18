@@ -357,31 +357,30 @@ const getters = {
 }
 
 const actions = {
-  getPending({ commit }, daily = false) {
-    return new Promise((resolve, reject) => {
-      const shots = []
-      cache.shots.forEach(shot => {
-        let isPending = false
-        shot.tasks.forEach(taskId => {
-          const task = tasksStore.state.taskMap.get(taskId)
-          if (!isPending) {
-            if (daily) {
-              if (task.last_comment_date) {
-                const lastCommentDate = moment(task.last_comment_date)
-                const yesterday = moment().subtract(1, 'days')
-                isPending =
-                  task.task_status_short_name === 'wfa' &&
-                  lastCommentDate.isAfter(yesterday)
-              }
-            } else {
-              isPending = task.task_status_short_name === 'wfa'
+  getPendingShots({ commit }, daily = false) {
+    const shots = []
+    cache.shots.forEach(shot => {
+      let isPending = false
+      shot.tasks.forEach(taskId => {
+        const task = tasksStore.state.taskMap.get(taskId)
+        if (!isPending) {
+          const taskStatus = helpers.getTaskStatus(task.task_status_id)
+          if (daily) {
+            if (task.last_comment_date) {
+              const lastCommentDate = moment(task.last_comment_date)
+              const yesterday = moment().subtract(1, 'days')
+              isPending =
+                taskStatus.is_feedback_request &&
+                lastCommentDate.isAfter(yesterday)
             }
+          } else {
+            isPending = taskStatus.is_feedback_request
           }
-        })
-        if (isPending) shots.push(shot)
+        }
       })
-      resolve(shots)
+      if (isPending) shots.push(shot)
     })
+    return shots
   },
 
   loadShots({ commit, dispatch, state, rootGetters }, callback) {

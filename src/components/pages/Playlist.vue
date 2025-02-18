@@ -263,9 +263,19 @@
                 }"
                 :disabled="isAdditionLoading"
                 @click="addDailyPending"
-                v-if="!isAssetPlaylist"
               >
                 {{ $t('playlists.build_daily') }}
+              </button>
+              <button
+                :class="{
+                  button: true,
+                  'add-sequence': true,
+                  'is-loading': loading.addDaily
+                }"
+                :disabled="isAdditionLoading"
+                @click="addAllPending"
+              >
+                {{ $t('playlists.build_weekly') }}
               </button>
               <button
                 :class="{
@@ -465,7 +475,7 @@ import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
 import { getPlaylistPath } from '@/lib/path'
 import { updateModelFromList, removeModelFromList } from '@/lib/models'
-import { sortShots } from '@/lib/sorting'
+import { sortAssets, sortShots } from '@/lib/sorting'
 
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
@@ -662,14 +672,14 @@ export default {
 
   methods: {
     ...mapActions([
-      'pushEntityToPlaylist',
       'changePlaylistOrder',
       'changePlaylistPreview',
       'changePlaylistType',
       'displayMoreAssets',
       'displayMoreShots',
       'editPlaylist',
-      'getPending',
+      'getPendingAssets',
+      'getPendingShots',
       'loadEpisodes',
       'loadMorePlaylists',
       'loadPlaylist',
@@ -681,6 +691,7 @@ export default {
       'refreshPlaylist',
       'removeEntityPreviewFromPlaylist',
       'resetSequences',
+      'pushEntityToPlaylist',
       'setAssetSearch',
       'setSequenceSearch',
       'setShotSearch',
@@ -1044,25 +1055,33 @@ export default {
       }
     },
 
-    addAllPending() {
+    async addAllPending() {
       this.$options.silent = true
       this.loading.addWeekly = true
-      this.getPending(false).then(shots => {
-        this.addEntities(shots.reverse(), () => {
-          this.loading.addWeekly = false
-          this.$options.silent = false
-        })
+      const getPending = this.isAssetPlaylist
+        ? this.getPendingAssets
+        : this.getPendingShots
+      const sortEntities = this.isAssetPlaylist ? sortAssets : sortShots
+      let entities = await getPending(false)
+      entities = sortEntities(entities).reverse()
+      this.addEntities(entities, () => {
+        this.loading.addWeekly = false
+        this.$options.silent = false
       })
     },
 
-    addDailyPending() {
+    async addDailyPending() {
       this.loading.addDaily = true
       this.$options.silent = true
-      this.getPending(true).then(shots => {
-        this.addEntities(sortShots(shots).reverse(), () => {
-          this.loading.addDaily = false
-          this.$options.silent = false
-        })
+      const getPending = this.isAssetPlaylist
+        ? this.getPendingAssets
+        : this.getPendingShots
+      const sortEntities = this.isAssetPlaylist ? sortAssets : sortShots
+      let entities = await getPending(true)
+      entities = sortEntities(entities).reverse()
+      this.addEntities(entities, () => {
+        this.loading.addDaily = false
+        this.$options.silent = false
       })
     },
 
