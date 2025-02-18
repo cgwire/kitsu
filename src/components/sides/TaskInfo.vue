@@ -998,7 +998,8 @@ export default {
     },
 
     onAnnotationChanged({ preview, additions, deletions, updates }) {
-      const taskId = this.task ? this.task.id : this.previousTaskId
+      let taskId = this.task ? this.task.id : this.previousTaskId
+      taskId = taskId || preview.task_id
       if (taskId) {
         this.updatePreviewAnnotation({
           taskId,
