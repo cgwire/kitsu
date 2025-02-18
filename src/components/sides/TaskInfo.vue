@@ -510,7 +510,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'isSavingCommentPreview',
       'currentEpisode',
       'currentProduction',
       'getTaskComment',
@@ -522,6 +521,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
+      'isSavingCommentPreview',
       'isSingleEpisode',
       'isTVShow',
       'nbSelectedTasks',
