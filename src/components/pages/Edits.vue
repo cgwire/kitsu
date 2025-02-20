@@ -29,6 +29,13 @@
               v-if="departments.length > 0"
             />
             <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+              <button-simple
+                class="flexrow-item"
+                icon="grid"
+                :is-on="contactSheetMode"
+                :title="$t('tasks.show_contact_sheet')"
+                @click="contactSheetMode = !contactSheetMode"
+              />
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
               <big-thumbnails-button class="flexrow-item" />
@@ -78,6 +85,7 @@
         />
         <edit-list
           ref="edit-list"
+          :contact-sheet-mode="contactSheetMode"
           :displayed-edits="displayedEdits"
           :is-loading="isEditsLoading || initialLoading"
           :is-error="isEditsLoadingError"
@@ -310,6 +318,7 @@ export default {
   data() {
     return {
       type: 'edit',
+      contactSheetMode: false,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],

@@ -9,11 +9,27 @@
     :style="cellStyle"
     @click="onClick"
   >
-    <div class="wrapper" v-if="!minimized">
+    <div
+      class="wrapper"
+      :style="wrapperStyle"
+      v-if="!minimized"
+    >
+      <div
+        class="wrapper status-wrapper"
+        :style="statusWrapperStyle"
+        v-if="!minimized"
+      >
+
       <template v-if="task">
-        <span class="tag" :title="taskStatus.name" :style="tagStyle">
+        <span
+          class="tag"
+          :title="taskStatus.name"
+          :style="tagStyle"
+          v-if="!contactSheet"
+        >
           {{ taskStatus.short_name }}
         </span>
+        <span class="filler" v-if="contactSheet"> </span>
         <span
           :class="{
             priority: true,
@@ -61,6 +77,7 @@
         <eye-icon :size="12" />
       </span>
     </div>
+    </div>
     <div class="wrapper" v-else>
       <span class="tag" :style="tagStyle"> &nbsp; </span>
     </div>
@@ -75,6 +92,8 @@ import colors from '@/lib/colors'
 import { sortPeople } from '@/lib/sorting'
 import { formatListMixin } from '@/components/mixins/format'
 
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+
 export default {
   name: 'validation-cell',
 
@@ -87,7 +106,8 @@ export default {
   },
 
   components: {
-    EyeIcon
+    EyeIcon,
+    EntityThumbnail
   },
 
   props: {
@@ -163,6 +183,10 @@ export default {
     canceled: {
       default: false,
       type: Boolean
+    },
+    contactSheet: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -226,6 +250,31 @@ export default {
       }
     },
 
+    wrapperStyle() {
+      if (!this.task || !this.contactSheet) return {}
+      const path = '/api/pictures/thumbnails/preview-files/' +
+        this.task.last_preview_file_id + '.png'
+      return {
+        'background-image': 'url(' + path + ')',
+        'height': '100px',
+        'width': '150px',
+      }
+    },
+
+    statusWrapperStyle() {
+      if (!this.task || !this.contactSheet) return {
+        'padding': '6px'
+      }
+      return {
+        'background-color': this.taskStatus.color + '44',
+        'height': '100px',
+        'width': '150px',
+        'padding': '6px',
+        'text-align:': 'right'
+      }
+    },
+
+
     taskStatus() {
       const taskStatusId = this.task?.task_status_id
       return this.taskStatusMap?.get(taskStatusId) || {}
@@ -274,6 +323,7 @@ export default {
 .validation {
   cursor: pointer;
   margin-bottom: 3px;
+  padding: 0;
 
   &.selected {
     background-color: #bfc1ff !important;
@@ -293,9 +343,10 @@ export default {
 }
 
 .wrapper {
-  position: relative;
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .avatar {
@@ -345,8 +396,8 @@ export default {
 
 .subscribed {
   position: absolute;
-  bottom: -10px;
-  right: -5px;
+  bottom: -4px;
+  right: 4px;
   color: $grey;
 }
 

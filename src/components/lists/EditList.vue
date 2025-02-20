@@ -317,6 +317,7 @@
                     'hidden-validation-cell': hiddenColumns[columnId],
                     'datatable-row-header': true
                   }"
+                  :contact-sheet="contactSheetMode"
                   :column="taskTypeMap.get(columnId)"
                   :column-y="j"
                   :entity="edit"
@@ -400,6 +401,7 @@
                     'validation-cell': !hiddenColumns[columnId],
                     'hidden-validation-cell': hiddenColumns[columnId]
                   }"
+                  :contact-sheet="contactSheetMode"
                   :key="`${columnId}-${edit.id}`"
                   :column="taskTypeMap.get(columnId)"
                   :entity="edit"
@@ -511,6 +513,10 @@ export default {
   ],
 
   props: {
+    contactSheetMode: {
+      type: Boolean,
+      default: false
+    },
     displayedEdits: {
       type: Array,
       default: () => []

@@ -27,6 +27,13 @@
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"
               />
+              <button-simple
+                class="flexrow-item"
+                icon="grid"
+                :is-on="contactSheetMode"
+                :title="$t('tasks.show_contact_sheet')"
+                @click="contactSheetMode = !contactSheetMode"
+              />
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
               <big-thumbnails-button class="flexrow-item" />
@@ -58,6 +65,7 @@
         />
         <episode-list
           ref="episode-list"
+          :contact-sheet-mode="contactSheetMode"
           :displayed-episodes="displayedEpisodes"
           :is-loading="isEpisodesLoading || initialLoading"
           :is-error="isEpisodesLoadingError"
@@ -248,6 +256,7 @@ export default {
   data() {
     return {
       type: 'episode',
+      contactSheetMode: false,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
