@@ -392,6 +392,9 @@ const csv = {
           let key = year
           if (detailLevel === 'day') {
             key = `${year}-${String(month).padStart(2, '0')}-${String(index).padStart(2, '0')}`
+          } else if (detailLevel === 'week') {
+            // in the case of week its in the format of 1999-1 not 1999-01
+            key = `${year}-${index}`
           } else {
             key = `${year}-${String(index).padStart(2, '0')}`
           }
