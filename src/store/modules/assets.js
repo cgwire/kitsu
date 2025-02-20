@@ -145,6 +145,7 @@ const helpers = {
       entity_type_name: asset.asset_type_name,
       entity: {
         id: asset.id,
+        name: asset.name,
         preview_file_id: asset.preview_file_id
       }
     })
