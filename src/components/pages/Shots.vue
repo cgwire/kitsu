@@ -82,7 +82,6 @@
                 icon="plus"
                 @click="showManageShots"
               />
-
             </div>
           </div>
 
