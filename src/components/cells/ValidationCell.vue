@@ -376,8 +376,8 @@ export default {
 
 .casting-status {
   position: absolute;
-  right: -5px;
-  top: -8px;
+  right: 4px;
+  top: -2px;
 
   &.casting-status-not-ready {
     opacity: 0.5;
