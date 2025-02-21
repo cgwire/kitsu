@@ -270,6 +270,7 @@
                     'hidden-validation-cell': hiddenColumns[columnId],
                     'datatable-row-header': true
                   }"
+                  :contact-sheet="contactSheetMode"
                   :column="taskTypeMap.get(columnId)"
                   :column-y="j"
                   :entity="sequence"
@@ -394,6 +395,7 @@
                     'validation-cell': !hiddenColumns[columnId],
                     'hidden-validation-cell': hiddenColumns[columnId]
                   }"
+                  :contact-sheet="contactSheetMode"
                   :key="`${columnId}-${sequence.id}`"
                   :column="taskTypeMap.get(columnId)"
                   :entity="sequence"
@@ -493,6 +495,10 @@ export default {
   ],
 
   props: {
+    contactSheetMode: {
+      type: Boolean,
+      default: false
+    },
     displayedSequences: {
       type: Array,
       default: () => []

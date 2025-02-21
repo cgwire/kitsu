@@ -151,6 +151,12 @@ export default {
       )
       this.$emit('update-priorities', taskStatusPriorities)
     }
+  },
+
+  watch: {
+    entries() {
+      this.taskStatuses = this.entries
+    }
   }
 }
 </script>

@@ -525,16 +525,24 @@ export const annotationMixin = {
             }
           }
         })
-        const preview = this.$options.annotatedPreview
+      }
+      this.updateAnnotationsInStore()
+      const annotations = []
+      this.annotations.forEach(a => annotations.push({ ...a }))
+      return annotations
+    },
+
+    updateAnnotationsInStore(preview) {
+      if (!preview) {
+        preview = this.$options.annotatedPreview
+      }
+      if (preview) {
         this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
           taskId: preview.task_id,
           preview: preview,
           annotations: this.annotations
         })
       }
-      const annotations = []
-      this.annotations.forEach(a => annotations.push({ ...a }))
-      return annotations
     },
 
     /*
@@ -1448,11 +1456,11 @@ export const annotationMixin = {
             if (obj._objects) {
               obj._objects.forEach(obj => {
                 tmpCanvas.add(obj)
-                obj.strokeWidth = 8 / scaleRatio
+                obj.strokeWidth = obj.strokeWidth / scaleRatio
               })
             } else {
               tmpCanvas.add(obj)
-              obj.strokeWidth = 8 / scaleRatio
+              obj.strokeWidth = obj.strokeWidth / scaleRatio
             }
           })
           tmpCanvas.setZoom(scaleRatio)

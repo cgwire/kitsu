@@ -330,6 +330,7 @@
                     'hidden-validation-cell': hiddenColumns[columnId],
                     'datatable-row-header': true
                   }"
+                  :contact-sheet="contactSheetMode"
                   :key="'sticky-validation-' + columnId + '-' + asset.id"
                   :canceled="asset.canceled"
                   :column="taskTypeMap.get(columnId)"
@@ -476,6 +477,7 @@
                   :key="'validation' + columnId + '-' + asset.id"
                   :canceled="asset.canceled"
                   :column="taskTypeMap.get(columnId)"
+                  :contact-sheet="contactSheetMode"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
                   :selected="
@@ -619,6 +621,10 @@ export default {
   },
 
   props: {
+    contactSheetMode: {
+      type: Boolean,
+      default: false
+    },
     displayedAssets: {
       type: Array,
       default: () => []

@@ -100,6 +100,7 @@
           :entity-type="entityType"
           :extendable="false"
           :is-preview="false"
+          :player="this"
           :root="false"
           :silent="isCommentsHidden"
           :task="task"
@@ -1391,6 +1392,7 @@ export default {
         this.clearFocus()
         this.previewViewer.resize()
         this.comparisonViewer.resize()
+        this.triggerResize()
       })
     },
 
@@ -1518,6 +1520,10 @@ export default {
     },
 
     // Annotations
+
+    triggerResize() {
+      window.dispatchEvent(new Event('resize'))
+    },
 
     onDeleteClicked() {
       this.clearFocus()
@@ -1741,11 +1747,11 @@ export default {
             if (obj._objects) {
               obj._objects.forEach(obj => {
                 tmpCanvas.add(obj)
-                obj.strokeWidth = 8 / scaleRatio
+                obj.strokeWidth = obj.strokeWidth / scaleRatio
               })
             } else {
               tmpCanvas.add(obj)
-              obj.strokeWidth = 8 / scaleRatio
+              obj.strokeWidth = obj.strokeWidth / scaleRatio
             }
           })
           tmpCanvas.setZoom(scaleRatio)

@@ -283,6 +283,7 @@
                   }"
                   :column="taskTypeMap.get(columnId)"
                   :column-y="j"
+                  :contact-sheet="contactSheetMode"
                   :entity="episode"
                   :is-assignees="isShowAssignations"
                   :is-static="true"
@@ -421,11 +422,12 @@
                   :ref="`validation-${i}-${
                     j + stickedDisplayedValidationColumns.length
                   }`"
+                  :key="`${columnId}-${episode.id}`"
                   :class="{
                     'validation-cell': !hiddenColumns[columnId],
                     'hidden-validation-cell': hiddenColumns[columnId]
                   }"
-                  :key="`${columnId}-${episode.id}`"
+                  :contact-sheet="contactSheetMode"
                   :column="taskTypeMap.get(columnId)"
                   :entity="episode"
                   :task-test="
@@ -521,6 +523,10 @@ export default {
   ],
 
   props: {
+    contactSheetMode: {
+      type: Boolean,
+      default: false
+    },
     displayedEpisodes: {
       type: Array,
       default: () => []

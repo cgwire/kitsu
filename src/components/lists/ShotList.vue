@@ -341,6 +341,7 @@
                   :canceled="shot.canceled"
                   :column="taskTypeMap.get(columnId)"
                   :column-y="j"
+                  :contact-sheet="contactSheetMode"
                   :entity="shot"
                   :is-assignees="isShowAssignations"
                   :is-casting-ready="isCastingReady(shot, columnId)"
@@ -621,6 +622,7 @@
                   :canceled="shot.canceled"
                   :key="`${columnId}-${shot.id}`"
                   :column="taskTypeMap.get(columnId)"
+                  :contact-sheet="contactSheetMode"
                   :entity="shot"
                   :task-test="
                     taskMap.get(
@@ -757,6 +759,10 @@ export default {
   },
 
   props: {
+    contactSheetMode: {
+      type: Boolean,
+      default: false
+    },
     displayedShots: {
       type: Array,
       default: () => []

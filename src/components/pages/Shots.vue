@@ -33,6 +33,13 @@
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"
               />
+              <button-simple
+                class="flexrow-item"
+                icon="grid"
+                :is-on="contactSheetMode"
+                :title="$t('tasks.show_contact_sheet')"
+                @click="contactSheetMode = !contactSheetMode"
+              />
               <show-assignations-button class="flexrow-item" />
               <show-infos-button class="flexrow-item" />
               <big-thumbnails-button class="flexrow-item" />
@@ -97,11 +104,12 @@
         />
         <shot-list
           ref="shot-list"
+          :contact-sheet-mode="contactSheetMode"
+          :department-filter="departmentFilter"
           :displayed-shots="displayedShotsBySequence"
           :is-loading="isShotsLoading || initialLoading"
           :is-error="isShotsLoadingError"
           :validation-columns="shotValidationColumns"
-          :department-filter="departmentFilter"
           @add-metadata="onAddMetadataClicked"
           @add-shots="showManageShots"
           @change-sort="onChangeSortClicked"
@@ -368,11 +376,12 @@ export default {
   data() {
     return {
       type: 'shot',
-      initialLoading: true,
+      contactSheetMode: false,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       formData: null,
       historyShot: {},
+      initialLoading: true,
       optionalColumns: [
         'Description',
         'Nb Frames',

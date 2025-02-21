@@ -66,20 +66,32 @@ export const searchMixin = {
 
   watch: {
     $route(newRoute, previousRoute) {
-      if (
-        !this.$route.query ||
-        !this.type ||
-        previousRoute.query.task_id !== newRoute.query.task_id
-      ) {
-        return
-      }
+      if (newRoute.query.episode_id !== previousRoute.query.episode_id) {
+        this.clearSelection()
+      } else {
+        if (
+          !this.$route.query ||
+          !this.type ||
+          previousRoute.query.task_id !== newRoute.query.task_id
+        ) {
+          if (
+            newRoute.query.task_id &&
+            previousRoute.query.task_id !== newRoute.query.task_id
+          ) {
+            const listName = `${this.type}-list`
+            this.clearSelection()
+            this.$refs[listName]?.selectTaskFromQuery()
+          }
+          return
+        }
 
-      const search = this.$route.query.search
-      const searchTextVariable = `${this.type}SearchText`
-      if (search !== this[searchTextVariable]) {
-        this.applySearchFromUrl()
-        if (this.clearSelection) {
-          this.clearSelection()
+        const search = this.$route.query.search
+        const searchTextVariable = `${this.type}SearchText`
+        if (search !== this[searchTextVariable]) {
+          this.applySearchFromUrl()
+          if (this.clearSelection) {
+            this.clearSelection()
+          }
         }
       }
     }
