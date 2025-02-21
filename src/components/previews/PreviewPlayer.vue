@@ -100,6 +100,7 @@
           :entity-type="entityType"
           :extendable="false"
           :is-preview="false"
+          :player="this"
           :root="false"
           :silent="isCommentsHidden"
           :task="task"
