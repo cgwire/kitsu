@@ -532,10 +532,8 @@ export const annotationMixin = {
       return annotations
     },
 
-    updateAnnotationsInStore(preview) {
-      if (!preview) {
-        preview = this.$options.annotatedPreview
-      }
+    updateAnnotationsInStore() {
+      const preview = this.currentPreview
       if (preview) {
         this.$store.commit('UPDATE_PREVIEW_ANNOTATION', {
           taskId: preview.task_id,
