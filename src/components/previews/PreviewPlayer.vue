@@ -1392,6 +1392,7 @@ export default {
         this.clearFocus()
         this.previewViewer.resize()
         this.comparisonViewer.resize()
+        this.triggerResize()
       })
     },
 
@@ -1519,6 +1520,10 @@ export default {
     },
 
     // Annotations
+
+    triggerResize() {
+      window.dispatchEvent(new Event('resize'))
+    },
 
     onDeleteClicked() {
       this.clearFocus()
