@@ -888,7 +888,7 @@ export default {
         this.currentPreviewDlPath = this.getOriginalDlPath()
         this.resetDraft()
         this.$nextTick(() => {
-          this.$refs['preview-player'].focus()
+          this.$refs['preview-player']?.focus()
         })
       }
     },
