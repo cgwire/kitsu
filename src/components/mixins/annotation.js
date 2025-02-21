@@ -1456,11 +1456,11 @@ export const annotationMixin = {
             if (obj._objects) {
               obj._objects.forEach(obj => {
                 tmpCanvas.add(obj)
-                obj.strokeWidth = 8 / scaleRatio
+                obj.strokeWidth = obj.strokeWidth / scaleRatio
               })
             } else {
               tmpCanvas.add(obj)
-              obj.strokeWidth = 8 / scaleRatio
+              obj.strokeWidth = obj.strokeWidth / scaleRatio
             }
           })
           tmpCanvas.setZoom(scaleRatio)
