@@ -1503,7 +1503,10 @@ export const playerMixin = {
         this.rawPlayer.setCurrentFrame(frame)
         this.onFrameUpdate(frame)
         this.syncComparisonPlayer()
-      }, 20)
+        this.$nextTick(() => {
+          this.reloadCurrentAnnotation()
+        })
+      }, 100)
     },
 
     // Annotation extraction
@@ -1541,6 +1544,7 @@ export const playerMixin = {
         const filename = `annotation ${index}.png`
         const frameNumber =
           roundToFrame(annotation.time, this.fps) / this.frameDuration
+        console.log('exctaing frame', frameNumber)
         await this.extractVideoFrame(canvas, frameNumber)
         await this.copyAnnotationCanvas(canvas, annotation)
         const file = await this.getFileFromCanvas(canvas, filename)
