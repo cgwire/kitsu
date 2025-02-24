@@ -1752,7 +1752,7 @@ export default {
         'border-left': `1px solid ${color}`
       }
       if (isMultiline) {
-        const nbLines = this.getNbLines(rootElement.children)
+        const nbLines = Math.max(1, this.getNbLines(rootElement.children))
         style.height = `${40 * nbLines + 10}px`
 
         if (setBackground) {
@@ -2290,6 +2290,8 @@ const setItemPositions = (
           width: auto;
 
           .timebar {
+            display: flex;
+            align-items: center;
             height: calc(100% - 3px);
             padding: 2px;
             overflow: hidden;

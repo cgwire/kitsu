@@ -14,15 +14,6 @@
           </label>
           <date-field :can-delete="false" utc v-model="selectedEndDate" />
         </div>
-        <!--
-        <text-field
-          class="flexrow-item overall-man-days"
-          type="number"
-          v-model="overallManDays"
-          :label="$t('schedule.overall_man_days')"
-          :disabled="!isCurrentUserAdmin"
-        />
-        -->
         <combobox-number
           class="flexrow-item zoom-level"
           :label="$t('schedule.zoom_level')"
@@ -39,6 +30,7 @@
         :is-loading="loading.schedule"
         :is-error="errors.schedule"
         :hide-man-days="true"
+        :multiline="isTVShow"
         :subchildren="!isTVShow"
         @item-changed="scheduleItemChanged"
         @estimation-changed="estimationChanged"
@@ -93,7 +85,6 @@ export default {
     return {
       currentTask: null,
       daysOffByPerson: [],
-      // overallManDays: 0,
       endDate: moment().add(6, 'months').endOf('day'),
       scheduleItems: [],
       startDate: moment().startOf('day'),
@@ -121,16 +112,13 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTypeMap',
       'currentEpisode',
       'currentProduction',
-      'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isTVShow',
       'organisation',
       'personMap',
-      'taskMap',
       'taskTypeMap',
       'user'
     ]),
@@ -232,56 +220,59 @@ export default {
       if (this.currentProduction.end_date) {
         this.endDate = parseDate(this.currentProduction.end_date)
       }
-      // this.overallManDays = this.currentProduction.man_days
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
       this.loadData()
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
-      return scheduleItems.map(item => {
-        let startDate, endDate
-        if (item.start_date) {
-          startDate = parseDate(item.start_date)
-        } else {
-          startDate = moment()
-        }
-        if (taskTypeElement && startDate.isBefore(taskTypeElement.startDate)) {
-          startDate = taskTypeElement.startDate.clone()
-        }
-        if (taskTypeElement && startDate.isAfter(taskTypeElement.endDate)) {
-          startDate = taskTypeElement.endDate.clone().add(-1, 'days')
-        }
-        if (item.end_date) {
-          endDate = parseDate(item.end_date)
-        } else {
-          endDate = startDate.clone().add(1, 'days')
-        }
-        if (endDate.isBefore(startDate)) {
-          endDate = startDate.clone().add(1, 'days')
-        }
-        const scheduleItem = {
-          ...item,
-          startDate,
-          endDate,
-          expanded: false,
-          loading: false,
-          editable: this.isInDepartment(
-            this.taskTypeMap.get(item.task_type_id)
-          ),
-          children: [],
-          parentElement: taskTypeElement
-        }
-        if (this.isTVShow) {
-          scheduleItem.route = getTaskTypeSchedulePath(
-            item.task_type_id,
-            this.currentProduction.id,
-            item.object_id,
-            taskTypeElement.for_entity
-          )
-        }
-        return scheduleItem
-      })
+      return scheduleItems
+        .map(item => {
+          let startDate
+          if (item.start_date) {
+            startDate = parseDate(item.start_date)
+          } else {
+            startDate = moment()
+          }
+          if (startDate.isAfter(this.endDate)) {
+            return
+          }
+          let endDate
+          if (item.end_date) {
+            endDate = parseDate(item.end_date)
+          } else {
+            endDate = startDate.clone().add(1, 'days')
+          }
+          if (endDate.isBefore(startDate)) {
+            endDate = startDate.clone().add(1, 'days')
+          }
+          if (endDate.isBefore(this.startDate)) {
+            return
+          }
+
+          const scheduleItem = {
+            ...item,
+            startDate,
+            endDate,
+            expanded: false,
+            loading: false,
+            editable: this.isInDepartment(
+              this.taskTypeMap.get(item.task_type_id)
+            ),
+            children: [],
+            parentElement: taskTypeElement
+          }
+          if (this.isTVShow) {
+            scheduleItem.route = getTaskTypeSchedulePath(
+              item.task_type_id,
+              this.currentProduction.id,
+              item.object_id,
+              taskTypeElement.for_entity
+            )
+          }
+          return scheduleItem
+        })
+        .filter(Boolean)
     },
 
     async expandTaskTypeElement(
@@ -297,17 +288,16 @@ export default {
           taskTypeElement.children = []
           taskTypeElement.people = []
 
-          const action =
-            taskTypeElement.for_entity === 'Shot'
-              ? this.isTVShow
-                ? 'loadEpisodeScheduleItems'
-                : 'loadSequenceScheduleItems'
-              : 'loadAssetTypeScheduleItems'
+          const loadScheduleItems = this.isTVShow
+            ? ['Asset', 'Shot'].includes(taskTypeElement.for_entity)
+              ? this.loadEpisodeScheduleItems
+              : this.loadSequenceScheduleItems
+            : this.loadAssetTypeScheduleItems
           const parameters = {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
           }
-          const scheduleItems = await this[action](parameters)
+          const scheduleItems = await loadScheduleItems(parameters)
 
           const children = this.convertScheduleItems(
             taskTypeElement,
@@ -315,8 +305,6 @@ export default {
           )
 
           if (this.isTVShow) {
-            // TODO: show episodes on schedule
-
             taskTypeElement.children = children
           } else {
             // load entities
@@ -526,15 +514,6 @@ export default {
       }
     },
 
-    // overallManDays() {
-    //   if (this.overallManDays !== this.currentProduction.man_days) {
-    //     this.editProduction({
-    //       ...this.currentProduction,
-    //       man_days: this.overallManDays
-    //     })
-    //   }
-    // },
-
     currentProduction() {
       this.reset()
     }
@@ -565,12 +544,6 @@ export default {
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
-  }
-
-  .overall-man-days {
-    width: 120px;
-    font-size: 0.9em;
-    margin-right: 1em;
   }
 }
 
