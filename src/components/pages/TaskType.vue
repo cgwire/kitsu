@@ -857,15 +857,11 @@ export default {
     },
 
     setCurrentScheduleItem() {
-      const isShots = this.$route.path.includes('shots')
-      if (this.isTVShow && isShots) {
+      if (this.isTVShow && !['all', 'main'].includes(this.currentEpisode.id)) {
         return this.loadEpisodeScheduleItems({
           production: this.currentProduction,
           taskType: this.currentTaskType
         }).then(items => {
-          if (!items) {
-            return []
-          }
           this.currentScheduleItem = items.find(
             item =>
               item.task_type_id === this.currentTaskType.id &&
@@ -875,9 +871,6 @@ export default {
         })
       }
       return this.loadScheduleItems(this.currentProduction).then(items => {
-        if (!items) {
-          return []
-        }
         this.currentScheduleItem = items.find(
           item => item.task_type_id === this.currentTaskType.id
         )
@@ -1213,7 +1206,7 @@ export default {
       for (const personId of personIds) {
         // load sequentially to avoid too many requests
         const daysOff = await this.loadAggregatedPersonDaysOff({
-          personId: personId
+          personId
         }).catch(
           () => [] // fallback if not allowed to fetch days off
         )
