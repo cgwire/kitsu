@@ -27,11 +27,11 @@
     "@fullcalendar/vue3": "6.1.15",
     "@google/model-viewer": "4.0.0",
     "@sentry/vue": "8.54.0",
-    "@unhead/vue": "1.11.18",
+    "@unhead/vue": "1.11.19",
     "@vuepic/vue-datepicker": "11.0.1",
     "async": "3.2.6",
     "bowser": "2.11.0",
-    "chart.js": "4.4.7",
+    "chart.js": "4.4.8",
     "chartkick": "5.0.1",
     "color-hash": "2.0.2",
     "color-string": "1.9.1",
@@ -50,7 +50,7 @@
     "textarea-caret": "3.1.0",
     "thenby": "1.3.4",
     "three": "0.173.0",
-    "uuid": "11.0.5",
+    "uuid": "11.1.0",
     "v-autosize": "2.0.1",
     "vue": "3.5.13",
     "vue-3-slider-component": "1.0.1",
@@ -64,7 +64,7 @@
     "vuedraggable": "4.1.0",
     "vuex": "4.1.0",
     "vuex-router-sync": "6.0.0-rc.1",
-    "wavesurfer.js": "7.9.0"
+    "wavesurfer.js": "7.9.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "5.2.1",
@@ -80,10 +80,10 @@
     "jsdom": "26.0.0",
     "lint-staged": "15.4.3",
     "localStorage": "1.0.4",
-    "prettier": "3.5.0",
-    "sass": "1.84.0",
-    "vite": "6.1.0",
-    "vitest": "3.0.5",
+    "prettier": "3.5.2",
+    "sass": "1.85.0",
+    "vite": "6.1.1",
+    "vitest": "3.0.7",
     "vitest-localstorage-mock": "0.1.2"
   },
   "engines": {

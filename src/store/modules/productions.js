@@ -521,6 +521,9 @@ const actions = {
   },
 
   refreshMetadataDescriptor({ commit, state }, descriptorId) {
+    if (!state.currentProduction) {
+      return
+    }
     return productionsApi
       .getMetadataDescriptor(state.currentProduction.id, descriptorId)
       .then(descriptor => {

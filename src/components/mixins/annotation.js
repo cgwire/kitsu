@@ -1347,7 +1347,7 @@ export const annotationMixin = {
           this.addObject(obj)
         })
         this.fabricCanvas.requestRenderAll()
-      } else {
+      } else if (mainObject) {
         this.addObject(mainObject)
         this.fabricCanvas.setActiveObject(mainObject)
         this.fabricCanvas.requestRenderAll()

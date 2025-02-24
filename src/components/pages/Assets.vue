@@ -460,7 +460,6 @@ export default {
       'assetSorting',
       'assetTypes',
       'assetValidationColumns',
-      'contactSheetMode',
       'currentEpisode',
       'currentProduction',
       'currentSection',
