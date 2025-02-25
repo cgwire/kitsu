@@ -292,7 +292,9 @@ export default {
             ? ['Asset', 'Shot'].includes(taskTypeElement.for_entity)
               ? this.loadEpisodeScheduleItems
               : this.loadSequenceScheduleItems
-            : this.loadAssetTypeScheduleItems
+            : taskTypeElement.for_entity === 'Shot'
+              ? this.loadSequenceScheduleItems
+              : this.loadAssetTypeScheduleItems
           const parameters = {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
