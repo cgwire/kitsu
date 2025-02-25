@@ -5,11 +5,13 @@
       label="name"
       :internal-search="false"
       :options="items"
+      :multiple="multiple"
       :placeholder="placeholder || $t('people.select_person')"
       :show-labels="false"
       :show-no-options="false"
       :show-no-results="false"
       track-by="name"
+      @remove="onSelect"
       @search-change="onSearchChange"
       @select="onSelect"
       v-model="item"
@@ -71,6 +73,10 @@ export default {
     placeholder: {
       type: String,
       default: ''
+    },
+    multiple: {
+      type: Boolean,
+      default: false
     },
     modelValue: {
       type: Object,
