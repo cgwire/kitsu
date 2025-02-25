@@ -210,6 +210,12 @@
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
           />
+
+          <task-list-numbers
+            :is-shots="entityType === 'Shot'"
+            :tasks="tasks"
+            v-if="!isLoading"
+          />
         </div>
 
         <div
@@ -309,6 +315,7 @@ import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import TaskList from '@/components/lists/TaskList.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
 
 const filters = {
   all(tasks) {
@@ -429,6 +436,7 @@ export default {
     ImportRenderModal,
     TaskList,
     TaskInfo,
+    TaskListNumbers,
     TaskTypeName
   },
 
@@ -1702,6 +1710,8 @@ export default {
 }
 
 .task-type-schedule {
+  display: flex;
+  flex-direction: column;
   flex: 1;
 }
 
