@@ -307,24 +307,7 @@
         </div>
       </div>
     </div>
-    <p class="has-text-centered nb-tasks" v-if="!isLoading">
-      {{ tasks.length }} {{ $tc('tasks.number', tasks.length) }} ({{
-        formatDuration(timeEstimated)
-      }}
-      {{
-        isDurationInHours()
-          ? $tc('main.hours_estimated', isTimeEstimatedPlural)
-          : $tc('main.days_estimated', isTimeEstimatedPlural)
-      }},
-      {{ formatDuration(timeSpent) }}
-      {{
-        isDurationInHours()
-          ? $tc('main.hours_spent', isTimeSpentPlural)
-          : $tc('main.days_spent', isTimeSpentPlural)
-      }}<span v-if="!isAssets"
-        >, {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span
-      >)
-    </p>
+    <task-list-numbers :is-shots="isShots" :tasks="tasks" v-if="!isLoading" />
   </div>
 </template>
 
@@ -349,6 +332,7 @@ import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
+import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
@@ -370,6 +354,7 @@ export default {
     EntityThumbnail,
     PeopleAvatarWithMenu,
     TableInfo,
+    TaskListNumbers,
     ValidationCell,
     ValidationTag
   },
@@ -477,33 +462,6 @@ export default {
 
     isShots() {
       return this.entityType === 'Shot'
-    },
-
-    timeSpent() {
-      return this.tasks.reduce((acc, task) => acc + task.duration, 0)
-    },
-
-    isTimeSpentPlural() {
-      return Math.floor((this.timeSpent ? this.timeSpent : 0) / 60 / 8) <= 1
-    },
-
-    timeEstimated() {
-      return this.tasks.reduce((acc, task) => acc + task.estimation, 0)
-    },
-
-    isTimeEstimatedPlural() {
-      return (
-        Math.floor((this.timeEstimated ? this.timeEstimated : 0) / 60 / 8) <= 1
-      )
-    },
-
-    nbFrames() {
-      let total = 0
-      this.tasks.forEach(task => {
-        const entity = this.shotMap.get(task.entity.id)
-        if (entity && entity.nb_frames) total += entity.nb_frames
-      })
-      return total
     },
 
     displayedTasks() {
@@ -966,6 +924,7 @@ export default {
 .status {
   min-width: 140px;
   width: 140px;
+  padding: 0;
 }
 
 .assignees {
@@ -1139,11 +1098,6 @@ td.retake-count {
 
   td.name {
     border-right: 1px solid var(--border);
-  }
-
-  td.status {
-    padding-left: 1em;
-    padding-right: 1em;
   }
 
   tr.task-line {
