@@ -1038,7 +1038,7 @@ export default {
     },
 
     onBodyScroll(event) {
-      if (this.$refs.body) return
+      if (!this.$refs.body) return
       const position = event.target
       this.$emit('scroll', position.scrollTop)
       const maxHeight =
