@@ -549,13 +549,13 @@
       >
         ({{ formatDuration(displayedAssetsTimeSpent) }}
         {{
-          isDurationInHours()
+          isDurationInHours
             ? $tc('main.hours_spent', displayedAssetsTimeSpent)
             : $tc('main.days_spent', displayedAssetsTimeSpent)
         }},
         {{ formatDuration(displayedAssetsEstimation) }}
         {{
-          isDurationInHours()
+          isDurationInHours
             ? $tc('main.hours_estimated', displayedAssetsEstimation)
             : $tc('main.man_days', displayedAssetsEstimation)
         }})
