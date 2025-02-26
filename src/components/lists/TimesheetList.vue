@@ -345,7 +345,7 @@ export default {
 
   methods: {
     onBodyScroll(event) {
-      if (this.$refs.body) return
+      if (!this.$refs.body) return
       const position = event.target
       const maxHeight =
         this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
