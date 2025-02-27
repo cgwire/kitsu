@@ -153,9 +153,9 @@
                   </div>
                   <div
                     :key="personId"
-                    v-for="(subchild, personId) in childElement.children"
+                    v-for="[personId] in childElement.children"
                     :style="{
-                      height: `${40 * getNbLines(childElement.children[personId])}px`
+                      height: `${40 * getNbLines(childElement.children.get(personId))}px`
                     }"
                     class="subchild-label"
                   >
@@ -401,7 +401,7 @@
                   :class="{
                     thinner: multiline
                   }"
-                  :title="`${rootElement.name} (${rootElement.startDate.format('DD-MM')} - ${rootElement.endDate.format('DD-MM')})`"
+                  :title="`${rootElement.name} (${rootElement.startDate.format('YYYY-MM-DD')} - ${rootElement.endDate.format('YYYY-MM-DD')})`"
                   :style="timebarStyle(rootElement, true)"
                 >
                   <div
@@ -465,7 +465,7 @@
                       selected: isSelected(childElement),
                       'timebar-subchildren': subchildren
                     }"
-                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('DD-MM')} - ${childElement.endDate.format('DD-MM')})`"
+                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('YYYY-MM-DD')} - ${childElement.endDate.format('YYYY-MM-DD')})`"
                     :style="
                       timebarChildStyle(childElement, rootElement, multiline)
                     "
@@ -515,15 +515,12 @@
                   </div>
 
                   <div
-                    v-if="
-                      subchildren &&
-                      Object.keys(childElement.children || {}).length
-                    "
+                    v-if="subchildren && childElement.children.size"
                     class="subchildren"
                   >
                     <div
                       :key="personId"
-                      v-for="(subchild, personId) in childElement.children"
+                      v-for="[personId, subchild] in childElement.children"
                       :style="{
                         height: `${40 * getNbLines(subchild)}px`
                       }"
@@ -544,7 +541,7 @@
                         class="timebar"
                         :style="timebarSubchildStyle(task, rootElement)"
                         :key="index"
-                        :title="`${task.entity.name} ${task.startDate.format('DD-MM')} - ${task.endDate.format('DD-MM')}`"
+                        :title="`${task.entity.name} (${task.startDate.format('YYYY-MM-DD')} - ${task.endDate.format('YYYY-MM-DD')})`"
                         v-for="(task, index) in subchild"
                       >
                         {{ task.entity.name }}
@@ -1016,9 +1013,8 @@ export default {
 
       if (this.subchildren) {
         rootElement.children.forEach(childElement => {
-          const group = Object.keys(childElement.children || {})
-          group.forEach(personId => {
-            setItemPositions(childElement.children[personId])
+          childElement.children.forEach(subchildElement => {
+            setItemPositions(subchildElement)
           })
         })
       }
@@ -1652,7 +1648,7 @@ export default {
     },
 
     timelineSubchildrenStyle(timeElement) {
-      const children = Object.values(timeElement.children ?? [])
+      const children = Array.from(timeElement.children.values())
       const nbLines = children.reduce(
         (acc, subChildren) => acc + this.getNbLines(subChildren),
         0
@@ -1746,13 +1742,12 @@ export default {
     },
 
     childrenStyle(rootElement, isMultiline = false, setBackground = false) {
-      const color = rootElement.color
       const style = {
-        'border-bottom': `1px solid ${color}`,
-        'border-left': `1px solid ${color}`
+        'border-bottom': `1px solid ${rootElement.color}`,
+        'border-left': `1px solid ${rootElement.color}`
       }
       if (isMultiline) {
-        const nbLines = Math.max(1, this.getNbLines(rootElement.children))
+        const nbLines = this.getNbLines(rootElement.children)
         style.height = `${40 * nbLines + 10}px`
 
         if (setBackground) {
@@ -2506,6 +2501,7 @@ const setItemPositions = (
 .children {
   position: relative;
   margin-bottom: 1em;
+  min-height: 40px;
 }
 
 .child {
