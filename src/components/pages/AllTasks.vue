@@ -60,7 +60,7 @@
     </template>
     <template #side>
       <task-info :task="selectedTasks.values().next().value">
-        <status-stats :stats="statusStats" />
+        <status-stats :stats="statusStats" v-if="!isLoading" />
       </task-info>
     </template>
   </page-layout>
