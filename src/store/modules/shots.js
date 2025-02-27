@@ -141,19 +141,22 @@ const helpers = {
     let timeSpent = 0
     let estimation = 0
     let nbFrames = 0
+    let nbDrawings = 0
     shots
       .filter(s => !s.canceled)
       .forEach(shot => {
         timeSpent += shot.timeSpent
         estimation += shot.estimation
         nbFrames += shot.nb_frames
+        nbDrawings += shot.nb_drawings || 0
       })
     Object.assign(state, {
       displayedShotsCount: shots.length,
       displayedShotsLength: shots.filter(s => !s.canceled).length,
       displayedShotsTimeSpent: timeSpent,
       displayedShotsEstimation: estimation,
-      displayedShotsFrames: nbFrames
+      displayedShotsFrames: nbFrames,
+      displayedShotsDrawings: nbDrawings
     })
   },
 
@@ -274,6 +277,7 @@ const initialState = {
   displayedShotsTimeSpent: 0,
   displayedShotsEstimation: 0,
   displayedShotsFrames: 0,
+  displayedShotsDrawings: 0,
   shotFilledColumns: {},
 
   shotCreated: '',
@@ -322,6 +326,7 @@ const getters = {
   displayedShotsTimeSpent: state => state.displayedShotsTimeSpent,
   displayedShotsEstimation: state => state.displayedShotsEstimation,
   displayedShotsFrames: state => state.displayedShotsFrames,
+  displayedShotsDrawings: state => state.displayedShotsDrawings,
   shotFilledColumns: state => state.shotFilledColumns,
 
   displayedShotsBySequence: state => {
@@ -872,11 +877,13 @@ const mutations = {
       shot.project_name = production.name
       shot.production_id = production.id
       shot.full_name = helpers.getShotName(shot)
+      shot.nb_drawings = shot.nb_drawings || 0
       shot.tasks.forEach(task => {
         helpers.populateTask(task, shot, production)
         timeSpent += task.duration
         estimation += task.estimation
         task.episode_id = shot.episode_id
+        shot.nb_drawings += task.nb_drawings || 0
 
         taskMap.set(task.id, task)
         validations.set(task.task_type_id, task.id)
@@ -1317,6 +1324,7 @@ const mutations = {
     if (shotToDelete.nb_frames) {
       state.displayedShotsFrames -= shotToDelete.nb_frames
     }
+    state.displayedShotsDrawings -= shotToDelete.nb_drawings || 0
   },
 
   [CANCEL_SHOT](state, shot) {

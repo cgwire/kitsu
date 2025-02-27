@@ -738,15 +738,17 @@ const mutations = {
     const sorting = state.sequenceSorting
     payload.sorting = sorting
     const result = helpers.buildResult(state, payload, false)
-
+    const descriptors = payload.production.descriptors
+      ? payload.production.descriptors.filter(
+        d => d.entity_type === 'Shot'
+      )
+      : []
     state.searchSequenceFilters = getFilters({
       entryIndex: shotStore.cache.shotIndex,
       assetTypes: [],
       taskTypes: [],
       taskStatuses: [],
-      descriptors: payload.production.descriptors.filter(
-        d => d.entity_type === 'Shot'
-      ),
+      descriptors,
       persons: [],
       query: payload.sequenceSearch
     })

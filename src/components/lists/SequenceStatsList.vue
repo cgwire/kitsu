@@ -47,6 +47,7 @@
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
+              :drawings-data="chartData('all', 'all', 'drawings')"
               :count-mode="countMode"
               :display-mode="displayMode"
             />
@@ -57,6 +58,7 @@
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
+              :drawings-data="chartData('all', columnId, 'drawings')"
               :count-mode="countMode"
               :display-mode="displayMode"
               v-for="columnId in validationColumns"

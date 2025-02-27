@@ -132,9 +132,13 @@
           </tr>
         </tbody>
       </table>
-      <div class="has-text-centered" v-if="isMore">
+      <div class="has-text-centered" v-if="isMore && !isLoading">
         <spinner class="mt2" v-if="isMoreLoading" />
-        <button class="button mt2" @click="$emit('more-clicked')" v-else>
+        <button
+          class="button mt2"
+          @click="$emit('more-clicked')"
+          v-else-if="!isLoading"
+        >
           {{ $t('main.load_more') }}
         </button>
       </div>

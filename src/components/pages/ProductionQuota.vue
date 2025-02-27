@@ -191,6 +191,7 @@ export default {
   },
 
   mounted() {
+    this.setCountModeOptions()
     this.loadRoute()
   },
 
@@ -198,6 +199,7 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isPaperProduction',
       'productionShotTaskTypes',
       'shotTaskTypes',
       'personMap'
@@ -353,6 +355,25 @@ export default {
 
     onSearchChange(searchText) {
       this.searchText = searchText
+    },
+
+    setCountModeOptions() {
+      if (this.isPaperProduction) {
+        this.countModeOptions = [
+          { label: this.$t('quota.drawings'), value: 'drawings' },
+          { label: this.$t('quota.count'), value: 'count' }
+        ]
+        this.countMode = 'drawings'
+        this.currentMode = this.countMode
+      } else {
+        this.countModeOptions = [
+          { label: this.$t('quota.frames'), value: 'frames' },
+          { label: this.$t('quota.seconds'), value: 'seconds' },
+          { label: this.$t('quota.count'), value: 'count' }
+        ]
+        this.countMode = 'frames'
+        this.currentMode = this.countMode
+      }
     }
   },
 
@@ -443,6 +464,7 @@ export default {
     },
 
     currentProduction() {
+      this.setCountModeOptions()
       this.isLoading = true
       this.loadShots(() => {
         this.loadRoute()
