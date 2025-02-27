@@ -359,7 +359,7 @@ export default {
         this.sequences = this.displayedSequences
         if (this.isTVShow) {
           this.selectEpisode(this.displayedEpisodes[0].id)
-        } else {
+        } else if (this.sequences.length > 0) {
           this.selectSequence(this.sequences[0].id)
         }
 
@@ -375,7 +375,9 @@ export default {
 
     selectedEpisodeId() {
       this.sequences = this.displayedSequences
-      this.selectSequence(this.sequences[0].id)
+      if (this.sequences.length > 0) {
+        this.selectSequence(this.sequences[0].id)
+      }
     }
   }
 }
