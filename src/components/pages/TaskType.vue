@@ -1227,7 +1227,7 @@ export default {
         personElement = {
           avatar: false,
           id: person.id,
-          name: 'Unassigned',
+          name: this.$t('main.unassigned'),
           color: '#888',
           priority: 1,
           expanded: true,
