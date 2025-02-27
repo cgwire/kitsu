@@ -13,9 +13,10 @@
       isDurationInHours
         ? $tc('main.hours_spent', formatDuration(timeSpent, false))
         : $tc('main.days_spent', formatDuration(timeSpent, false))
-    }}<span v-if="isShots"
-      >, {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span
-    >)
+    }}<span v-if="isShots && !isPaperProduction">,
+      {{ nbFrames }} {{ $tc('main.nb_frames', nbFrames) }}</span>
+      <span v-if="isShots && isPaperProduction">,
+      {{ nbDrawings }} {{ $tc('main.nb_drawings', nbDrawings) }}</span>)
   </p>
 </template>
 
@@ -46,7 +47,7 @@ export default {
   mounted() {},
 
   computed: {
-    ...mapGetters(['shotMap']),
+    ...mapGetters(['isPaperProduction', 'shotMap']),
 
     timeSpent() {
       return this.tasks.reduce((acc, task) => acc + task.duration, 0)

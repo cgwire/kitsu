@@ -454,15 +454,7 @@ export default {
     const finalize = () => {
       this.$nextTick(() => {
         // Needed to be sure the current production is set
-        this.loadShots(() => {
-          // Needed to be sure the shots are fully loaded
-          setTimeout(() => {
-            this.applySearchFromUrl()
-            this.$nextTick(() => {
-              this.$refs['shot-list']?.selectTaskFromQuery()
-            })
-          }, 200)
-        })
+        this.loadShots()
       })
     }
 
@@ -1196,6 +1188,10 @@ export default {
     isShotsLoading() {
       if (!this.isShotsLoading) {
         this.initialLoading = false
+        this.applySearchFromUrl()
+        this.$nextTick(() => {
+            this.$refs['shot-list']?.selectTaskFromQuery()
+        })
         if (this.$refs['shot-list']) {
           this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
         }

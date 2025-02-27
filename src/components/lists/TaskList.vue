@@ -29,8 +29,19 @@
             <th class="assignees" ref="th-assignees">
               {{ $t('tasks.fields.assignees') }}
             </th>
-            <th class="frames number-cell" ref="th-frames" v-if="isShots">
+            <th
+              ref="th-frames"
+              class="frames number-cell"
+              v-if="isShots && !isPaperProduction"
+            >
               {{ $t('tasks.fields.frames') }}
+            </th>
+            <th
+              ref="th-drawings"
+              class="drawings number-cell"
+              v-if="isShots && isPaperProduction"
+            >
+              {{ $t('tasks.fields.drawings') }}
             </th>
             <th class="difficulty number-cell" ref="th-difficulty">
               {{ $t('tasks.fields.difficulty') }}
@@ -123,8 +134,29 @@
                 />
               </div>
             </td>
-            <td class="frames number-cell" v-if="isShots">
+            <td
+              class="frames number-cell"
+              v-if="isShots && !isPaperProduction"
+            >
               {{ getEntity(task.entity.id).nb_frames }}
+            </td>
+            <td
+              class="drawings number-cell"
+              v-if="isShots && isPaperProduction"
+            >
+              <input
+                class="input"
+                min="0"
+                step="1"
+                type="number"
+                :ref="task.id + '-drawings'"
+                :value="task.nb_drawings"
+                @change="updateNbDrawings($event.target.value)"
+                v-if="isInDepartment(task) && selectionGrid[task.id]"
+              />
+              <span v-else>
+                {{ task.nb_drawings || 0 }}
+              </span>
             </td>
             <td class="difficulty number-cell">
               <combobox
@@ -418,13 +450,14 @@ export default {
 
   computed: {
     ...mapGetters([
+      'isCurrentUserManager',
+      'isCurrentUserSupervisor',
+      'isPaperProduction',
       'nbSelectedTasks',
       'personMap',
       'user',
       'selectedTasks',
       'taskMap',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
       'taskTypeMap'
     ]),
 
@@ -549,7 +582,10 @@ export default {
         (data.due_date !== undefined && taskDue !== data.due_date) ||
         (data.estimation !== undefined &&
           task.estimation !== data.estimation) ||
-        (data.difficulty !== undefined && task.difficulty !== data.difficulty)
+        (data.difficulty !== undefined &&
+          task.difficulty !== data.difficulty) ||
+        (data.nb_drawings !== undefined &&
+          task.nb_drawings !== data.nb_drawings)
       )
     },
 
@@ -668,13 +704,17 @@ export default {
     },
 
     updateDifficulty(difficulty) {
-      this.updateTasksDifficulty({ difficulty })
+      this.updateTasksData({ difficulty })
     },
 
-    updateTasksDifficulty({ difficulty }) {
+    updateNbDrawings(nbDrawings) {
+      this.updateTasksData({ nb_drawings: nbDrawings })
+    },
+
+    updateTasksData(data) {
+      console.log(data)
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
-        const data = { difficulty }
         if (this.isTaskChanged(task, data)) {
           this.updateTask({ taskId, data }).catch(console.error)
         }

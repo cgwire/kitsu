@@ -142,6 +142,7 @@ export default {
   },
 
   mounted() {
+    this.setCountOptions()
     const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
     this.dataMode = mode
     this.setDefaultListScrollPosition()
@@ -194,6 +195,7 @@ export default {
       'editEpisode',
       'hideAssignations',
       'initEpisodeStats',
+      'isPaperProduction',
       'loadEpisodeStats',
       'loadEpisodeRetakeStats',
       'loadShots',
@@ -202,6 +204,21 @@ export default {
       'setEpisodeListScrollPosition',
       'showAssignations'
     ]),
+
+    setCountOptions() {
+      if (this.isPaperProduction) {
+        this.countModeOptions = [
+          { label: 'shots', value: 'count' },
+          { label: 'drawings', value: 'drawings' }
+        ]
+      } else {
+        this.countModeOptions = [
+          { label: 'shots', value: 'count' },
+          { label: 'frames', value: 'frames' }
+        ]
+      }
+      this.countMode = this.countModeOptions[0].value
+    },
 
     setDefaultListScrollPosition() {
       this.$refs['episode-list'].setScrollPosition(

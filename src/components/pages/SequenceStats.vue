@@ -110,6 +110,7 @@ export default {
   },
 
   mounted() {
+    this.setCountOptions()
     this.loadShots(() => {
       this.initSequences()
         .then(() => {
@@ -129,6 +130,7 @@ export default {
       'currentProduction',
       'displayedSequences',
       'isCurrentUserManager',
+      'isPaperProduction',
       'isShotsLoading',
       'isShotsLoadingError',
       'isTVShow',
@@ -236,6 +238,21 @@ export default {
       const data = { id: entry.id }
       data[fieldName] = value
       this.editSequence(data)
+    },
+
+    setCountOptions() {
+      if (this.isPaperProduction) {
+        this.countModeOptions = [
+          { label: 'shots', value: 'count' },
+          { label: 'drawings', value: 'drawings' }
+        ]
+      } else {
+        this.countModeOptions = [
+          { label: 'shots', value: 'count' },
+          { label: 'frames', value: 'frames' }
+        ]
+      }
+      this.countMode = this.countModeOptions[0].value
     }
   },
 
@@ -243,6 +260,7 @@ export default {
     currentProduction() {
       this.$refs['sequence-search-field'].setValue('')
       this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.setCountOptions()
 
       if (!this.isTVShow) {
         this.loadShots(() => {

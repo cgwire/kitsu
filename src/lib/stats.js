@@ -9,7 +9,7 @@ export const getChartData = (
 ) => {
   if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
   const statusData = mainStats[entryId][columnId]
-  const valueField = dataType === 'count' ? 'count' : 'frames'
+  const valueField = dataType
   return Object.keys(statusData)
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
@@ -46,7 +46,7 @@ export const getRetakeChartData = (
   const statusData = { ...mainStats[entryId][columnId] }
   delete statusData.evolution
   delete statusData.max_retake_count
-  const valueField = dataType === 'count' ? 'count' : 'frames'
+  const valueField = dataType
   return [
     ['retake', statusData.retake[valueField] || 0, colorMap.retake],
     ['other', statusData.other[valueField] || 0, colorMap.other],
@@ -139,7 +139,8 @@ const computeTaskResult = (
           name: taskStatus.short_name,
           color: taskStatus.color,
           count: 0,
-          frames: 0
+          frames: 0,
+          drawings: 0
         }
       }
 
@@ -152,7 +153,8 @@ const computeTaskResult = (
           name: taskStatus.short_name,
           color: taskStatus.color,
           count: 0,
-          frames: 0
+          frames: 0,
+          drawings: 0
         }
       }
 
@@ -162,7 +164,8 @@ const computeTaskResult = (
           name: taskStatus.short_name,
           color: taskStatus.color,
           count: 0,
-          frames: 0
+          frames: 0,
+          drawings: 0
         }
       }
 
@@ -172,7 +175,8 @@ const computeTaskResult = (
           name: taskStatus.short_name,
           color: taskStatus.color,
           count: 0,
-          frames: 0
+          frames: 0,
+          drawings: 0
         }
       }
 
@@ -188,6 +192,14 @@ const computeTaskResult = (
         results[sequenceId].all[taskStatusId].frames += entity.nb_frames
         results.all[taskTypeId][taskStatusId].frames += entity.nb_frames
         results.all.all[taskStatusId].frames += entity.nb_frames
+      }
+
+      if (task.nb_drawings) {
+        const nbDrawings = task.nb_drawings || 0
+        results[sequenceId][taskTypeId][taskStatusId].drawings += nbDrawings
+        results[sequenceId].all[taskStatusId].drawings += nbDrawings
+        results.all[taskTypeId][taskStatusId].drawings += nbDrawings
+        results.all.all[taskStatusId].drawings += nbDrawings
       }
     }
   }
