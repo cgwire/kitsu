@@ -348,6 +348,9 @@ export default {
               } else {
                 task.entity_type_id = taskTypeElement.for_entity
               }
+              if (task.entity?.canceled) {
+                return
+              }
 
               if (!tasksByType[task.entity_type_id]) {
                 tasksByType[task.entity_type_id] = {}
