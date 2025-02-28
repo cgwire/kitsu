@@ -983,6 +983,10 @@ export default {
 
     isWeekMode() {
       return this.zoomLevel === 0
+    },
+
+    unitOfTime() {
+      return this.zoomLevel > 0 ? 'days' : 'weeks'
     }
   },
 
@@ -1004,17 +1008,25 @@ export default {
       return values.length ? Math.max(...values) + 1 : 0
     },
 
+    refreshAllItemPositions() {
+      this.hierarchy.forEach(rootElement => {
+        if (rootElement.expanded) {
+          this.refreshItemPositions(rootElement)
+        }
+      })
+    },
+
     refreshItemPositions(rootElement) {
       if (!rootElement?.children?.length) return
 
       if (this.multiline) {
-        setItemPositions(rootElement.children)
+        setItemPositions(rootElement.children, this.unitOfTime)
       }
 
       if (this.subchildren) {
         rootElement.children.forEach(childElement => {
           childElement.children.forEach(subchildElement => {
-            setItemPositions(subchildElement)
+            setItemPositions(subchildElement, this.unitOfTime)
           })
         })
       }
@@ -1552,7 +1564,7 @@ export default {
 
     // Helpers
 
-    dateDiff(startDate, endDate) {
+    dateDiff(startDate, endDate, unitOfTime = 'days') {
       if (
         startDate.isSame(endDate) ||
         !startDate.isValid() ||
@@ -1562,7 +1574,7 @@ export default {
       }
       const first = startDate.clone().utc().startOf('day')
       const last = endDate.clone().utc().endOf('day')
-      const diff = last.diff(first, 'days')
+      const diff = last.diff(first, unitOfTime)
       return diff
     },
 
@@ -1586,8 +1598,11 @@ export default {
 
     getDayOffLeft(dayOff) {
       const startDate = moment.utc(dayOff.date)
-      let startDiff = this.dateDiff(this.startDate, startDate) || 0
-      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      const startDiff = this.dateDiff(
+        this.startDate,
+        startDate,
+        this.unitOfTime
+      )
       return startDiff * this.cellWidth + 1
     },
 
@@ -1690,8 +1705,11 @@ export default {
 
     getTimebarLeft(timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      let startDiff = this.dateDiff(this.startDate, startDate) || 0
-      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      const startDiff = this.dateDiff(
+        this.startDate,
+        startDate,
+        this.unitOfTime
+      )
       return startDiff * this.cellWidth + 3
     },
 
@@ -1712,8 +1730,7 @@ export default {
         endDate = addBusinessDays(startDate, days - 1)
       }
 
-      let lengthDiff = this.dateDiff(startDate, endDate)
-      if (this.zoomLevel === 0) lengthDiff = Math.round(lengthDiff / 7)
+      const lengthDiff = this.dateDiff(startDate, endDate, this.unitOfTime)
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 6
       } else {
@@ -1811,8 +1828,11 @@ export default {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const milestoneDate = parseDate(milestone.date)
       if (startDate.isSameOrBefore(milestoneDate)) {
-        let lengthDiff = this.dateDiff(startDate, milestoneDate)
-        if (this.zoomLevel === 0) lengthDiff = lengthDiff / 7 - 1
+        const lengthDiff = this.dateDiff(
+          startDate,
+          milestoneDate,
+          this.unitOfTime
+        )
         return {
           left: `${(lengthDiff + 0.5) * this.cellWidth}px`
         }
@@ -1902,6 +1922,7 @@ export default {
     },
     zoomLevel() {
       this.resetScheduleSize()
+      this.refreshAllItemPositions()
       this.onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
     },
     isLoading() {
@@ -1932,19 +1953,33 @@ export default {
   }
 }
 
-const setItemPositions = (
-  items,
-  attributeName = 'line',
-  unitOfTime = 'days'
-) => {
+/**
+ * Set the position of items in the schedule, avoiding collisions.
+ * Add a `line` attribute to each item.
+ *
+ * @param {Array<Object>} items - The list of items to position.
+ * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
+ * @returns {Array<Object>} The list of items with updated positions.
+ */
+const setItemPositions = (items, unitOfTime = 'days') => {
+  const attributeName = 'line'
   const matrix = []
-  const minDate = moment.min(items.map(item => item.startDate))
-  const maxDate = moment.max(items.map(item => item.endDate))
+  const minDate = moment
+    .min(items.map(item => item.startDate))
+    .clone()
+    .startOf(unitOfTime)
+  const maxDate = moment
+    .max(items.map(item => item.endDate))
+    .clone()
+    .endOf(unitOfTime)
   const nbColumns = maxDate.diff(minDate, unitOfTime) + 1
 
   items.forEach(item => {
-    const start = item.startDate.diff(minDate, unitOfTime)
-    const end = item.endDate.diff(minDate, unitOfTime)
+    const start = item.startDate
+      .clone()
+      .startOf(unitOfTime)
+      .diff(minDate, unitOfTime)
+    const end = item.endDate.clone().endOf(unitOfTime).diff(minDate, unitOfTime)
     const line = getFreeLinePosition(item.id, start, end, matrix)
     item[attributeName] = line
   })
