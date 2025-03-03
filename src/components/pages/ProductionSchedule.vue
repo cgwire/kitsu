@@ -70,7 +70,9 @@ import Schedule from '@/components/widgets/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 import assetStore from '@/store/modules/assets'
+import assetTypeStore from '@/store/modules/assettypes'
 import shotStore from '@/store/modules/shots'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 export default {
   name: 'production-schedule',
@@ -119,7 +121,6 @@ export default {
       'isTVShow',
       'organisation',
       'personMap',
-      'taskTypeMap',
       'user'
     ]),
 
@@ -127,8 +128,16 @@ export default {
       return assetStore.cache.assetMap
     },
 
+    assetTypeMap() {
+      return assetTypeStore.cache.assetTypeMap
+    },
+
     shotMap() {
       return shotStore.cache.shotMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
     }
   },
 
@@ -299,7 +308,19 @@ export default {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
           }
-          const scheduleItems = await loadScheduleItems(parameters)
+          let scheduleItems = await loadScheduleItems(parameters)
+
+          if (taskTypeElement.for_entity === 'Asset') {
+            // filtering following custom asset types workflow
+            scheduleItems = scheduleItems.filter(scheduleItem => {
+              const assetType = this.assetTypeMap.get(scheduleItem.object_id)
+              return (
+                assetType &&
+                (!assetType.task_types.length ||
+                  assetType.task_types.includes(taskTypeElement.task_type_id))
+              )
+            })
+          }
 
           const children = this.convertScheduleItems(
             taskTypeElement,
@@ -334,6 +355,10 @@ export default {
             const tasksByType = {}
             const people = {}
             tasks.forEach(task => {
+              if (!task.start_date) {
+                return
+              }
+
               // link entity to task
               if (taskTypeElement.for_entity === 'Asset') {
                 task.entity = this.assetMap.get(task.entity_id)
@@ -344,25 +369,23 @@ export default {
               } else {
                 task.entity_type_id = taskTypeElement.for_entity
               }
+              if (task.entity?.canceled) {
+                return
+              }
 
               if (!tasksByType[task.entity_type_id]) {
                 tasksByType[task.entity_type_id] = {}
               }
-              task.assignees.forEach(assigneeId => {
-                if (!tasksByType[task.entity_type_id][assigneeId]) {
-                  tasksByType[task.entity_type_id][assigneeId] = []
-                  people[assigneeId] = {
-                    ...this.personMap.get(assigneeId),
-                    daysOff: this.daysOffByPerson[assigneeId]
-                  }
-                }
 
+              if (!task.assignees.length) {
+                task.assignees = ['unassigned']
+              }
+
+              task.assignees.forEach(assigneeId => {
                 // populate task with start and end dates
-                let startDate
-                if (task.start_date) {
-                  startDate = parseDate(task.start_date)
-                } else {
-                  startDate = moment()
+                const startDate = parseDate(task.start_date)
+                if (startDate.isAfter(this.endDate)) {
+                  return
                 }
                 task.startDate = startDate
 
@@ -388,14 +411,45 @@ export default {
                   const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
                   endDate = startDate.clone().add(nbDays, 'days')
                 }
+                if (endDate.isBefore(this.startDate)) {
+                  return
+                }
                 task.endDate = endDate
+
+                if (!tasksByType[task.entity_type_id][assigneeId]) {
+                  tasksByType[task.entity_type_id][assigneeId] = []
+                  people[assigneeId] =
+                    assigneeId !== 'unassigned'
+                      ? {
+                          ...this.personMap.get(assigneeId),
+                          daysOff: this.daysOffByPerson[assigneeId]
+                        }
+                      : {
+                          id: assigneeId,
+                          avatar: false,
+                          color: '#888',
+                          full_name: this.$t('main.unassigned')
+                        }
+                }
 
                 tasksByType[task.entity_type_id][assigneeId].push(task)
               })
             })
 
+            // sort grouped tasks by assignee name
+            const sortByName = ([keyA], [keyB]) => {
+              if (keyA === 'unassigned') return 1
+              if (keyB === 'unassigned') return -1
+              return people[keyA].full_name.localeCompare(
+                people[keyB].full_name
+              )
+            }
             children.forEach(child => {
-              child.children = tasksByType[child.object_id]
+              const items = tasksByType[child.object_id] || {}
+              const sortedChildren = new Map(
+                Object.entries(items).sort(sortByName)
+              )
+              child.children = sortedChildren
             })
 
             taskTypeElement.children = children

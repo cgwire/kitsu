@@ -153,9 +153,9 @@
                   </div>
                   <div
                     :key="personId"
-                    v-for="(subchild, personId) in childElement.children"
+                    v-for="[personId] in childElement.children"
                     :style="{
-                      height: `${40 * getNbLines(childElement.children[personId])}px`
+                      height: `${40 * getNbLines(childElement.children.get(personId))}px`
                     }"
                     class="subchild-label"
                   >
@@ -401,7 +401,7 @@
                   :class="{
                     thinner: multiline
                   }"
-                  :title="`${rootElement.name} (${rootElement.startDate.format('DD-MM')} - ${rootElement.endDate.format('DD-MM')})`"
+                  :title="`${rootElement.name} (${rootElement.startDate.format('YYYY-MM-DD')} - ${rootElement.endDate.format('YYYY-MM-DD')})`"
                   :style="timebarStyle(rootElement, true)"
                 >
                   <div
@@ -465,7 +465,7 @@
                       selected: isSelected(childElement),
                       'timebar-subchildren': subchildren
                     }"
-                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('DD-MM')} - ${childElement.endDate.format('DD-MM')})`"
+                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('YYYY-MM-DD')} - ${childElement.endDate.format('YYYY-MM-DD')})`"
                     :style="
                       timebarChildStyle(childElement, rootElement, multiline)
                     "
@@ -515,15 +515,12 @@
                   </div>
 
                   <div
-                    v-if="
-                      subchildren &&
-                      Object.keys(childElement.children || {}).length
-                    "
+                    v-if="subchildren && childElement.children.size"
                     class="subchildren"
                   >
                     <div
                       :key="personId"
-                      v-for="(subchild, personId) in childElement.children"
+                      v-for="[personId, subchild] in childElement.children"
                       :style="{
                         height: `${40 * getNbLines(subchild)}px`
                       }"
@@ -544,7 +541,7 @@
                         class="timebar"
                         :style="timebarSubchildStyle(task, rootElement)"
                         :key="index"
-                        :title="`${task.entity.name} ${task.startDate.format('DD-MM')} - ${task.endDate.format('DD-MM')}`"
+                        :title="`${task.entity.name} (${task.startDate.format('YYYY-MM-DD')} - ${task.endDate.format('YYYY-MM-DD')})`"
                         v-for="(task, index) in subchild"
                       >
                         {{ task.entity.name }}
@@ -986,6 +983,10 @@ export default {
 
     isWeekMode() {
       return this.zoomLevel === 0
+    },
+
+    unitOfTime() {
+      return this.zoomLevel > 0 ? 'days' : 'weeks'
     }
   },
 
@@ -1007,18 +1008,25 @@ export default {
       return values.length ? Math.max(...values) + 1 : 0
     },
 
+    refreshAllItemPositions() {
+      this.hierarchy.forEach(rootElement => {
+        if (rootElement.expanded) {
+          this.refreshItemPositions(rootElement)
+        }
+      })
+    },
+
     refreshItemPositions(rootElement) {
       if (!rootElement?.children?.length) return
 
       if (this.multiline) {
-        setItemPositions(rootElement.children)
+        setItemPositions(rootElement.children, this.unitOfTime)
       }
 
       if (this.subchildren) {
         rootElement.children.forEach(childElement => {
-          const group = Object.keys(childElement.children || {})
-          group.forEach(personId => {
-            setItemPositions(childElement.children[personId])
+          childElement.children.forEach(subchildElement => {
+            setItemPositions(subchildElement, this.unitOfTime)
           })
         })
       }
@@ -1465,24 +1473,23 @@ export default {
     },
 
     scrollToToday() {
-      setTimeout(() => {
-        const today = moment()
-        if (today.isAfter(this.startDate) && today.isBefore(this.endDate)) {
-          const todayPosition = this.getTimebarLeft({ startDate: today }) - 5
-          const newLeft = todayPosition - (this.schedule.offsetWidth / 2 - 300)
-          this.timelineContentWrapper.scrollLeft = newLeft
-          this.timelineHeader.scrollLeft = newLeft
-        }
-      }, 10)
+      const today = moment()
+      this.scrollToDate(today)
     },
 
     scrollToDate(date) {
       setTimeout(() => {
-        if (date.isAfter(this.startDate) && date.isBefore(this.endDate)) {
+        if (
+          this.schedule &&
+          date.isAfter(this.startDate) &&
+          date.isBefore(this.endDate)
+        ) {
           const datePosition = this.getTimebarLeft({ startDate: date }) - 5
           const newLeft = datePosition - (this.schedule.offsetWidth / 2 - 300)
           this.timelineContentWrapper.scrollLeft = newLeft
-          this.timelineHeader.scrollLeft = newLeft
+          if (this.timelineHeader) {
+            this.timelineHeader.scrollLeft = newLeft
+          }
         }
       }, 10)
     },
@@ -1556,7 +1563,7 @@ export default {
 
     // Helpers
 
-    dateDiff(startDate, endDate) {
+    dateDiff(startDate, endDate, unitOfTime = 'days') {
       if (
         startDate.isSame(endDate) ||
         !startDate.isValid() ||
@@ -1566,7 +1573,7 @@ export default {
       }
       const first = startDate.clone().utc().startOf('day')
       const last = endDate.clone().utc().endOf('day')
-      const diff = last.diff(first, 'days')
+      const diff = last.diff(first, unitOfTime)
       return diff
     },
 
@@ -1590,8 +1597,11 @@ export default {
 
     getDayOffLeft(dayOff) {
       const startDate = moment.utc(dayOff.date)
-      let startDiff = this.dateDiff(this.startDate, startDate) || 0
-      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      const startDiff = this.dateDiff(
+        this.startDate,
+        startDate,
+        this.unitOfTime
+      )
       return startDiff * this.cellWidth + 1
     },
 
@@ -1652,7 +1662,7 @@ export default {
     },
 
     timelineSubchildrenStyle(timeElement) {
-      const children = Object.values(timeElement.children ?? [])
+      const children = Array.from(timeElement.children.values())
       const nbLines = children.reduce(
         (acc, subChildren) => acc + this.getNbLines(subChildren),
         0
@@ -1694,8 +1704,11 @@ export default {
 
     getTimebarLeft(timeElement) {
       const startDate = timeElement.startDate || this.startDate
-      let startDiff = this.dateDiff(this.startDate, startDate) || 0
-      if (this.zoomLevel === 0) startDiff = Math.round(startDiff / 7 - 1)
+      const startDiff = this.dateDiff(
+        this.startDate,
+        startDate,
+        this.unitOfTime
+      )
       return startDiff * this.cellWidth + 3
     },
 
@@ -1716,8 +1729,7 @@ export default {
         endDate = addBusinessDays(startDate, days - 1)
       }
 
-      let lengthDiff = this.dateDiff(startDate, endDate)
-      if (this.zoomLevel === 0) lengthDiff = Math.round(lengthDiff / 7)
+      const lengthDiff = this.dateDiff(startDate, endDate, this.unitOfTime)
       if (lengthDiff > 0) {
         return (lengthDiff + 1) * this.cellWidth - 6
       } else {
@@ -1746,13 +1758,12 @@ export default {
     },
 
     childrenStyle(rootElement, isMultiline = false, setBackground = false) {
-      const color = rootElement.color
       const style = {
-        'border-bottom': `1px solid ${color}`,
-        'border-left': `1px solid ${color}`
+        'border-bottom': `1px solid ${rootElement.color}`,
+        'border-left': `1px solid ${rootElement.color}`
       }
       if (isMultiline) {
-        const nbLines = Math.max(1, this.getNbLines(rootElement.children))
+        const nbLines = this.getNbLines(rootElement.children)
         style.height = `${40 * nbLines + 10}px`
 
         if (setBackground) {
@@ -1816,8 +1827,11 @@ export default {
       const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
       const milestoneDate = parseDate(milestone.date)
       if (startDate.isSameOrBefore(milestoneDate)) {
-        let lengthDiff = this.dateDiff(startDate, milestoneDate)
-        if (this.zoomLevel === 0) lengthDiff = lengthDiff / 7 - 1
+        const lengthDiff = this.dateDiff(
+          startDate,
+          milestoneDate,
+          this.unitOfTime
+        )
         return {
           left: `${(lengthDiff + 0.5) * this.cellWidth}px`
         }
@@ -1907,6 +1921,7 @@ export default {
     },
     zoomLevel() {
       this.resetScheduleSize()
+      this.refreshAllItemPositions()
       this.onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
     },
     isLoading() {
@@ -1937,19 +1952,33 @@ export default {
   }
 }
 
-const setItemPositions = (
-  items,
-  attributeName = 'line',
-  unitOfTime = 'days'
-) => {
+/**
+ * Set the position of items in the schedule, avoiding collisions.
+ * Add a `line` attribute to each item.
+ *
+ * @param {Array<Object>} items - The list of items to position.
+ * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
+ * @returns {Array<Object>} The list of items with updated positions.
+ */
+const setItemPositions = (items, unitOfTime = 'days') => {
+  const attributeName = 'line'
   const matrix = []
-  const minDate = moment.min(items.map(item => item.startDate))
-  const maxDate = moment.max(items.map(item => item.endDate))
+  const minDate = moment
+    .min(items.map(item => item.startDate))
+    .clone()
+    .startOf(unitOfTime)
+  const maxDate = moment
+    .max(items.map(item => item.endDate))
+    .clone()
+    .endOf(unitOfTime)
   const nbColumns = maxDate.diff(minDate, unitOfTime) + 1
 
   items.forEach(item => {
-    const start = item.startDate.diff(minDate, unitOfTime)
-    const end = item.endDate.diff(minDate, unitOfTime)
+    const start = item.startDate
+      .clone()
+      .startOf(unitOfTime)
+      .diff(minDate, unitOfTime)
+    const end = item.endDate.clone().endOf(unitOfTime).diff(minDate, unitOfTime)
     const line = getFreeLinePosition(item.id, start, end, matrix)
     item[attributeName] = line
   })
@@ -2506,6 +2535,7 @@ const setItemPositions = (
 .children {
   position: relative;
   margin-bottom: 1em;
+  min-height: 40px;
 }
 
 .child {

@@ -648,6 +648,7 @@ export default {
     timeSpent: 'Time Spent',
     tutorials: 'Tutorials',
     type: 'Type',
+    unassigned: 'Unassigned',
     unstick: 'Unstick',
     user: 'User',
     week: 'Week',

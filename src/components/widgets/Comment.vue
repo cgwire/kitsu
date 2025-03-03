@@ -131,112 +131,110 @@
               </a>
             </p>
             <div class="replies">
-              <div>
-                <div
-                  :key="replyComment.id"
-                  class="reply-comment"
-                  v-for="replyComment in comment.replies || []"
-                >
-                  <div class="flexrow">
-                    <people-avatar
-                      class="flexrow-item"
-                      :size="18"
-                      :font-size="10"
+              <div
+                :key="replyComment.id"
+                class="reply-comment"
+                v-for="replyComment in comment.replies || []"
+              >
+                <div class="flexrow">
+                  <people-avatar
+                    class="flexrow-item"
+                    :size="18"
+                    :font-size="10"
+                    :person="personMap.get(replyComment.person_id)"
+                  />
+                  <strong class="flexrow-item">
+                    <people-name
                       :person="personMap.get(replyComment.person_id)"
                     />
-                    <strong class="flexrow-item">
-                      <people-name
-                        :person="personMap.get(replyComment.person_id)"
-                      />
-                    </strong>
-                    <span
-                      class="flexrow-item reply-date"
-                      :title="replyFullDate(replyComment.date)"
-                    >
-                      {{ replyShortDate(replyComment.date) }}
-                    </span>
-                    <span class="filler"> </span>
-                    <span
-                      class="flexrow-item reply-delete"
-                      :title="$t('main.delete')"
-                      @click="onDeleteReplyClicked(replyComment)"
-                      v-if="
-                        isCurrentUserAdmin || replyComment.person_id === user.id
-                      "
-                    >
-                      x
-                    </span>
-                  </div>
-                  <p
-                    v-html="
-                      renderComment(
-                        replyComment.text,
-                        replyComment.mentions || [],
-                        replyComment.department_mentions || [],
-                        personMap,
-                        departmentMap,
-                        uniqueClassName
-                      )
+                  </strong>
+                  <span
+                    class="flexrow-item reply-date"
+                    :title="replyFullDate(replyComment.date)"
+                  >
+                    {{ replyShortDate(replyComment.date) }}
+                  </span>
+                  <span class="filler"> </span>
+                  <span
+                    class="flexrow-item reply-delete"
+                    :title="$t('main.delete')"
+                    @click="onDeleteReplyClicked(replyComment)"
+                    v-if="
+                      isCurrentUserAdmin || replyComment.person_id === user.id
                     "
-                    class="comment-text"
-                  ></p>
+                  >
+                    x
+                  </span>
                 </div>
+                <p
+                  v-html="
+                    renderComment(
+                      replyComment.text,
+                      replyComment.mentions || [],
+                      replyComment.department_mentions || [],
+                      personMap,
+                      departmentMap,
+                      uniqueClassName
+                    )
+                  "
+                  class="comment-text"
+                ></p>
               </div>
-              <at-ta
-                :members="atOptions"
-                name-key="full_name"
-                :limit="2"
-                @update:value="onAtTextChanged"
-              >
-                <template #item="{ item }">
-                  <template v-if="item.isTime"> ⏱️ frame </template>
-                  <template v-else-if="item.isDepartment">
-                    <span
-                      class="mr05"
-                      :style="{
-                        background: item.color,
-                        width: '10px',
-                        height: '10px',
-                        'border-radius': '50%'
-                      }"
-                    >
-                      &nbsp;
-                    </span>
-                    {{ item.full_name }}
-                  </template>
-                  <template v-else>
-                    <div class="flexrow">
-                      <people-avatar
-                        class="flexrow-item"
-                        :person="item"
-                        :size="20"
-                        :font-size="11"
-                        :is-lazy="false"
-                        :is-link="false"
-                      />
-                      <span class="flexrow-item">
-                        {{ item.full_name }}
+              <template v-if="showReply">
+                <at-ta
+                  :members="atOptions"
+                  name-key="full_name"
+                  :limit="2"
+                  @update:value="onAtTextChanged"
+                >
+                  <template #item="{ item }">
+                    <template v-if="item.isTime"> ⏱️ frame </template>
+                    <template v-else-if="item.isDepartment">
+                      <span
+                        class="mr05"
+                        :style="{
+                          background: item.color,
+                          width: '10px',
+                          height: '10px',
+                          'border-radius': '50%'
+                        }"
+                      >
+                        &nbsp;
                       </span>
-                    </div>
+                      {{ item.full_name }}
+                    </template>
+                    <template v-else>
+                      <div class="flexrow">
+                        <people-avatar
+                          class="flexrow-item"
+                          :person="item"
+                          :size="20"
+                          :font-size="11"
+                          :is-lazy="false"
+                          :is-link="false"
+                        />
+                        <span class="flexrow-item">
+                          {{ item.full_name }}
+                        </span>
+                      </div>
+                    </template>
                   </template>
-                </template>
-                <textarea
-                  ref="reply"
-                  class="reply"
-                  @keyup.ctrl.enter="onReplyClicked"
-                  v-model="replyText"
-                  v-show="showReply"
-                />
-              </at-ta>
-              <div class="has-text-right">
-                <button-simple
-                  class="reply-button"
-                  :text="$t('main.reply')"
-                  :is-loading="isReplyLoading"
-                  @click="onReplyClicked"
-                  v-show="showReply"
-                />
-              </div>
+                  <textarea
+                    ref="reply"
+                    class="reply"
+                    @keyup.ctrl.enter="onReplyClicked"
+                    v-model="replyText"
+                  />
+                </at-ta>
+                <div class="has-text-right">
+                  <button-simple
+                    class="reply-button"
+                    :text="$t('main.reply')"
+                    :is-loading="isReplyLoading"
+                    @click="onReplyClicked"
+                  />
+                </div>
+              </template>
             </div>
 
             <div
@@ -259,7 +257,7 @@
               <span
                 class="flexrow-item reply-button"
                 @click="showReplyWidget"
-                v-if="!showReply"
+                v-if="!showReply && isReplyable"
               >
                 {{ $t('main.reply') }}
               </span>
@@ -451,6 +449,10 @@ export default {
       default: false
     },
     isPinnable: {
+      type: Boolean,
+      default: false
+    },
+    isReplyable: {
       type: Boolean,
       default: false
     },
@@ -730,7 +732,7 @@ export default {
     showReplyWidget() {
       this.showReply = true
       this.$nextTick(() => {
-        this.$refs.reply.focus()
+        this.$refs.reply?.focus()
       })
     },
 

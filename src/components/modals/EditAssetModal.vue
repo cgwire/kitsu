@@ -262,7 +262,7 @@ export default {
 
     resetForm() {
       if (!this.isEditing()) {
-        if (!this.form.entity_type_id && this.productionAssetTypes.length > 0) {
+        if (!this.form.entity_type_id && this.productionAssetTypeOptions[0]) {
           this.form.entity_type_id = this.productionAssetTypeOptions[0].value
         }
         if (this.openProductions.length > 0) {

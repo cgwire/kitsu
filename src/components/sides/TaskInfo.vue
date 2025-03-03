@@ -209,6 +209,11 @@
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
+                      :is-replyable="
+                        isAssigned ||
+                        isDepartmentSupervisor ||
+                        isCurrentUserManager
+                      "
                       :revision="currentRevision"
                       :task="task"
                       :team="currentTeam"
