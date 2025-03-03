@@ -1479,11 +1479,17 @@ export default {
 
     scrollToDate(date) {
       setTimeout(() => {
-        if (date.isAfter(this.startDate) && date.isBefore(this.endDate)) {
+        if (
+          this.schedule &&
+          date.isAfter(this.startDate) &&
+          date.isBefore(this.endDate)
+        ) {
           const datePosition = this.getTimebarLeft({ startDate: date }) - 5
           const newLeft = datePosition - (this.schedule.offsetWidth / 2 - 300)
           this.timelineContentWrapper.scrollLeft = newLeft
-          this.timelineHeader.scrollLeft = newLeft
+          if (this.timelineHeader) {
+            this.timelineHeader.scrollLeft = newLeft
+          }
         }
       }, 10)
     },
