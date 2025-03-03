@@ -1473,15 +1473,8 @@ export default {
     },
 
     scrollToToday() {
-      setTimeout(() => {
-        const today = moment()
-        if (today.isAfter(this.startDate) && today.isBefore(this.endDate)) {
-          const todayPosition = this.getTimebarLeft({ startDate: today }) - 5
-          const newLeft = todayPosition - (this.schedule.offsetWidth / 2 - 300)
-          this.timelineContentWrapper.scrollLeft = newLeft
-          this.timelineHeader.scrollLeft = newLeft
-        }
-      }, 10)
+      const today = moment()
+      this.scrollToDate(today)
     },
 
     scrollToDate(date) {
