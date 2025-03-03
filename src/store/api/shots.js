@@ -185,10 +185,24 @@ export default {
     return client.pget(`/api/data/shots/${shotId}/versions`)
   },
 
-  getQuotas(productionId, taskTypeId, detailLevel, computeMode) {
+  getQuotas(productionId, taskTypeId, personId, detailLevel, computeMode) {
+    if (personId) {
+      return client.pget(
+        `/api/data/projects/${productionId}/quotas/persons/` +
+          `${personId}?detail=${detailLevel}&count_mode=${computeMode}`
+      )
+    } else {
+      return client.pget(
+        `/api/data/projects/${productionId}/quotas/` +
+          `${taskTypeId}?detail=${detailLevel}&count_mode=${computeMode}`
+      )
+    }
+  },
+
+  getPeopleQuotas(productionId, personId, detailLevel, computeMode) {
     return client.pget(
-      `/api/data/projects/${productionId}/quotas/` +
-        `${taskTypeId}?detail=${detailLevel}&count_mode=${computeMode}`
+      `/api/data/projects/${productionId}/quotas/person/` +
+        `${personId}?detail=${detailLevel}&count_mode=${computeMode}`
     )
   },
 

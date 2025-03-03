@@ -1544,7 +1544,6 @@ export const playerMixin = {
         const filename = `annotation ${index}.png`
         const frameNumber =
           roundToFrame(annotation.time, this.fps) / this.frameDuration
-        console.log('exctaing frame', frameNumber)
         await this.extractVideoFrame(canvas, frameNumber)
         await this.copyAnnotationCanvas(canvas, annotation)
         const file = await this.getFileFromCanvas(canvas, filename)

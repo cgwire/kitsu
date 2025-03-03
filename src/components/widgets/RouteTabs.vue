@@ -8,8 +8,7 @@
       >
         <router-link
           :to="{
-            name: routeName,
-            query: { tab: tab.name }
+            query: { ...$route.query, tab: tab.name }
           }"
         >
           {{ tab.label }}

@@ -712,7 +712,6 @@ export default {
     },
 
     updateTasksData(data) {
-      console.log(data)
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
         if (this.isTaskChanged(task, data)) {

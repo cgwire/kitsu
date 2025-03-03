@@ -7,7 +7,7 @@
             <search-field
               ref="shot-search-field"
               :can-save="true"
-              @change="onSearchChange"
+              @change="onSearchTyped"
               @enter="onSearchChange"
               @save="saveSearchQuery"
               placeholder="ex: e01 s01 anim=wip"
@@ -528,6 +528,7 @@ export default {
       'shotsPath',
       'shotValidationColumns',
       'shotListScrollPosition',
+      'shots',
       'shotSorting',
       'taskTypeMap',
       'user'
@@ -1143,6 +1144,12 @@ export default {
       } finally {
         this.loading.getFrames = false
       }
+    },
+
+    onSearchTyped() {
+      if (this.shotMap.size < 800) {
+        this.onSearchChange()
+      }
     }
   },
 
@@ -1190,7 +1197,7 @@ export default {
         this.initialLoading = false
         this.applySearchFromUrl()
         this.$nextTick(() => {
-            this.$refs['shot-list']?.selectTaskFromQuery()
+          this.$refs['shot-list']?.selectTaskFromQuery()
         })
         if (this.$refs['shot-list']) {
           this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)

@@ -703,12 +703,13 @@ const actions = {
 
   computeQuota(
     { commit, state, rootGetters },
-    { taskTypeId, detailLevel, countMode, computeMode }
+    { taskTypeId, personId, detailLevel, countMode, computeMode }
   ) {
     const production = rootGetters.currentProduction
     return shotsApi.getQuotas(
       production.id,
       taskTypeId,
+      personId,
       detailLevel,
       computeMode
     )

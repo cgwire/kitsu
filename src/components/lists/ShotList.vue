@@ -441,6 +441,7 @@
                 class="drawings number-cell"
                 v-if="
                   isShowInfos &&
+                  isPaperProduction &&
                   metadataDisplayHeaders.drawings
                 "
               >

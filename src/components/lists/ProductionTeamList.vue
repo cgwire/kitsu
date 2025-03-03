@@ -16,7 +16,7 @@
             <th scope="col" class="role">
               {{ $t('people.list.role') }}
             </th>
-            <th scope="col" class="filler">
+            <th scope="col">
               {{ $t('people.list.departments') }}
             </th>
             <th scope="col" class="actions" v-if="isCurrentUserManager"></th>
