@@ -70,7 +70,9 @@ import Schedule from '@/components/widgets/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 import assetStore from '@/store/modules/assets'
+import assetTypeStore from '@/store/modules/assettypes'
 import shotStore from '@/store/modules/shots'
+import taskTypeStore from '@/store/modules/tasktypes'
 
 export default {
   name: 'production-schedule',
@@ -119,7 +121,6 @@ export default {
       'isTVShow',
       'organisation',
       'personMap',
-      'taskTypeMap',
       'user'
     ]),
 
@@ -127,8 +128,16 @@ export default {
       return assetStore.cache.assetMap
     },
 
+    assetTypeMap() {
+      return assetTypeStore.cache.assetTypeMap
+    },
+
     shotMap() {
       return shotStore.cache.shotMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
     }
   },
 
@@ -299,7 +308,19 @@ export default {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
           }
-          const scheduleItems = await loadScheduleItems(parameters)
+          let scheduleItems = await loadScheduleItems(parameters)
+
+          if (taskTypeElement.for_entity === 'Asset') {
+            // filtering following custom asset types workflow
+            scheduleItems = scheduleItems.filter(scheduleItem => {
+              const assetType = this.assetTypeMap.get(scheduleItem.object_id)
+              return (
+                assetType &&
+                (!assetType.task_types.length ||
+                  assetType.task_types.includes(taskTypeElement.task_type_id))
+              )
+            })
+          }
 
           const children = this.convertScheduleItems(
             taskTypeElement,
