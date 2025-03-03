@@ -254,7 +254,7 @@ export default {
         if (
           !this.shotMap.get(eventData.shot_id) &&
           this.currentProduction?.id === eventData.project_id &&
-          (!this.isTVShow || this.currentEpisode.id === eventData.episode_id)
+          (!this.isTVShow || this.currentEpisode?.id === eventData.episode_id)
         ) {
           setTimeout(() => {
             this.loadShot(eventData.shot_id)
