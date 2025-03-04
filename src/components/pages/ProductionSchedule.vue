@@ -308,21 +308,9 @@ export default {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
           }
-          let scheduleItems = await loadScheduleItems(parameters)
+          const scheduleItems = await loadScheduleItems(parameters)
 
-          if (taskTypeElement.for_entity === 'Asset') {
-            // filtering following custom asset types workflow
-            scheduleItems = scheduleItems.filter(scheduleItem => {
-              const assetType = this.assetTypeMap.get(scheduleItem.object_id)
-              return (
-                assetType &&
-                (!assetType.task_types.length ||
-                  assetType.task_types.includes(taskTypeElement.task_type_id))
-              )
-            })
-          }
-
-          const children = this.convertScheduleItems(
+          let children = this.convertScheduleItems(
             taskTypeElement,
             scheduleItems
           )
@@ -436,19 +424,41 @@ export default {
               })
             })
 
-            // sort grouped tasks by assignee name
-            const sortByName = ([keyA], [keyB]) => {
+            if (taskTypeElement.for_entity === 'Asset') {
+              // filtering following custom asset types workflow
+              children = children.filter(item => {
+                const assetType = this.assetTypeMap.get(item.object_id)
+                return (
+                  assetType &&
+                  (!assetType.task_types.length ||
+                    assetType.task_types.includes(taskTypeElement.task_type_id))
+                )
+              })
+            }
+
+            // sort grouped tasks
+            const sortEntitiesByUserName = ([keyA], [keyB]) => {
               if (keyA === 'unassigned') return 1
               if (keyB === 'unassigned') return -1
               return people[keyA].full_name.localeCompare(
                 people[keyB].full_name
               )
             }
+            const sortTasksByEntityName = (a, b) =>
+              a.entity?.name.localeCompare(b.entity?.name, undefined, {
+                numeric: true
+              })
             children.forEach(child => {
               const items = tasksByType[child.object_id] || {}
               const sortedChildren = new Map(
-                Object.entries(items).sort(sortByName)
+                Object.entries(items)
+                  .sort(sortEntitiesByUserName)
+                  .map(([key, tasks]) => [
+                    key,
+                    tasks.sort(sortTasksByEntityName)
+                  ])
               )
+
               child.children = sortedChildren
             })
 
