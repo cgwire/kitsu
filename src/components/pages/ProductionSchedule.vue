@@ -308,21 +308,9 @@ export default {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
           }
-          let scheduleItems = await loadScheduleItems(parameters)
+          const scheduleItems = await loadScheduleItems(parameters)
 
-          if (taskTypeElement.for_entity === 'Asset') {
-            // filtering following custom asset types workflow
-            scheduleItems = scheduleItems.filter(scheduleItem => {
-              const assetType = this.assetTypeMap.get(scheduleItem.object_id)
-              return (
-                assetType &&
-                (!assetType.task_types.length ||
-                  assetType.task_types.includes(taskTypeElement.task_type_id))
-              )
-            })
-          }
-
-          const children = this.convertScheduleItems(
+          let children = this.convertScheduleItems(
             taskTypeElement,
             scheduleItems
           )
@@ -435,6 +423,18 @@ export default {
                 tasksByType[task.entity_type_id][assigneeId].push(task)
               })
             })
+
+            if (taskTypeElement.for_entity === 'Asset') {
+              // filtering following custom asset types workflow
+              children = children.filter(item => {
+                const assetType = this.assetTypeMap.get(item.object_id)
+                return (
+                  assetType &&
+                  (!assetType.task_types.length ||
+                    assetType.task_types.includes(taskTypeElement.task_type_id))
+                )
+              })
+            }
 
             // sort grouped tasks by assignee name
             const sortByName = ([keyA], [keyB]) => {
