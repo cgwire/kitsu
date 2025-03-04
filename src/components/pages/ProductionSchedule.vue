@@ -436,19 +436,29 @@ export default {
               })
             }
 
-            // sort grouped tasks by assignee name
-            const sortByName = ([keyA], [keyB]) => {
+            // sort grouped tasks
+            const sortEntitiesByUserName = ([keyA], [keyB]) => {
               if (keyA === 'unassigned') return 1
               if (keyB === 'unassigned') return -1
               return people[keyA].full_name.localeCompare(
                 people[keyB].full_name
               )
             }
+            const sortTasksByEntityName = (a, b) =>
+              a.entity?.name.localeCompare(b.entity?.name, undefined, {
+                numeric: true
+              })
             children.forEach(child => {
               const items = tasksByType[child.object_id] || {}
               const sortedChildren = new Map(
-                Object.entries(items).sort(sortByName)
+                Object.entries(items)
+                  .sort(sortEntitiesByUserName)
+                  .map(([key, tasks]) => [
+                    key,
+                    tasks.sort(sortTasksByEntityName)
+                  ])
               )
+
               child.children = sortedChildren
             })
 
