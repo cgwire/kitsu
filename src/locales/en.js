@@ -619,6 +619,7 @@ export default {
     more_filters: 'More filters',
     move_action_bar: 'Move action bar',
     no_estimation: 'No estimation',
+    nb_drawings: 'drawing | drawings',
     nb_frames: 'frame | frames',
     on: 'On',
     optional: 'optional',
@@ -1121,6 +1122,7 @@ export default {
 
     style: {
       '2d': '2D Animation',
+      '2dpaper': '2D Animation (Paper)',
       '3d': '3D Animation',
       '2d3d': '2D/3D Animation',
       ar: 'Augmented Reality',
@@ -1382,6 +1384,7 @@ export default {
     details_seconds: 'Seconds',
     details_frames: 'Frames',
     done_date: 'Approval date',
+    drawings: 'Drawings',
     feedback_date: 'Feedback date',
     explanation_feedback: 'The shot is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
     explanation_done: 'The shot is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
@@ -1442,6 +1445,7 @@ export default {
     wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current shot.',
     fields: {
       description: 'Description',
+      nb_drawings: 'Drawings',
       nb_frames: 'Frames',
       episode: 'Episode',
       frame_in: 'In',
@@ -1469,6 +1473,7 @@ export default {
     count_mode: 'Count',
     data_mode: 'Data',
     display_mode: 'Display',
+    drawings: 'Drawings',
     episode_status: 'Episode status',
     frames: 'Frames',
     only_running: 'Only running',
@@ -1608,6 +1613,7 @@ export default {
       count: 'Count',
       difficulty: 'Difficulty',
       done_date: 'Approval date',
+      drawings: 'Drawings',
       due_date: 'Due date',
       duration: 'Duration',
       end_date: 'Feedback date',

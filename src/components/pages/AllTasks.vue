@@ -2,29 +2,36 @@
   <page-layout>
     <template #main>
       <div class="all-tasks">
-        <page-title
-          class="flexrow-item title mt1"
-          :text="$t('tasks.all_tasks')"
-        />
-
-        <div class="filters flexrow">
+        <div class="filters flexrow mt1">
           <combobox-production
-            class="flexrow-item"
+            class="flexrow-item mb0"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
           />
           <combobox-status
-            class="flexrow-item selector"
+            class="flexrow-item selector mb0"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
             v-model="filters.taskStatusId"
           />
           <combobox-task-type
-            class="flexrow-item selector"
+            class="flexrow-item selector mb0"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
+          />
+        </div>
+        <div class="filters flexrow mt1 mb1">
+          <combobox-studio
+            class="mr1"
+            :label="$t('people.fields.studio')"
+            v-model="filters.studioId"
+          />
+          <combobox-department
+            class="flexrow-item"
+            :label="$t('main.department')"
+            v-model="filters.departmentId"
           />
           <div class="flexrow-item selector">
             <label class="label person-label">
@@ -32,6 +39,7 @@
             </label>
             <people-field
               class="person-field"
+              :multiple="true"
               :people="personList"
               v-model="filters.person"
             />
@@ -52,7 +60,7 @@
     </template>
     <template #side>
       <task-info :task="selectedTasks.values().next().value">
-        <status-stats :stats="statusStats" />
+        <status-stats :stats="statusStats" v-if="!isLoading" />
       </task-info>
     </template>
   </page-layout>
@@ -64,11 +72,12 @@ import { mapGetters, mapActions } from 'vuex'
 import { sortPeople } from '@/lib/sorting'
 
 import AllTaskList from '@/components/lists/AllTaskList.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import PageLayout from '@/components/layouts/PageLayout.vue'
-import PageTitle from '@/components/widgets/PageTitle.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -78,11 +87,12 @@ export default {
 
   components: {
     AllTaskList,
+    ComboboxDepartment,
     ComboboxProduction,
     ComboboxTaskType,
     ComboboxStatus,
+    ComboboxStudio,
     PageLayout,
-    PageTitle,
     PeopleField,
     StatusStats,
     TaskInfo
@@ -92,6 +102,8 @@ export default {
     return {
       filters: {
         productionId: null,
+        departmentId: null,
+        studioId: null,
         taskStatusId: null,
         taskTypeId: null,
         person: null
@@ -180,7 +192,11 @@ export default {
         project_id: this.filters.productionId,
         task_status_id: this.filters.taskStatusId,
         task_type_id: this.filters.taskTypeId,
-        person_id: this.filters.person ? this.filters.person.id : null
+        person_id: this.filters.person
+          ? this.filters.person.map(person => person.id).join(',')
+          : null,
+        department_id: this.filters.departmentId,
+        studio_id: this.filters.studioId
       }
     },
 
@@ -267,6 +283,12 @@ export default {
         this.reload()
       },
       deep: true
+    },
+    'filters.person': {
+      handler() {
+        this.reload()
+      },
+      deep: true
     }
   },
 
@@ -299,6 +321,6 @@ export default {
 }
 
 .person-label {
-  margin-top: -23px;
+  margin-top: 0px;
 }
 </style>

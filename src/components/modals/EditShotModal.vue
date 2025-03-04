@@ -42,6 +42,7 @@
             type="number"
             v-model="form.nb_frames"
             @enter="runConfirmation"
+            v-if="!isPaperProduction"
           />
           <text-field
             ref="frameInField"
@@ -164,6 +165,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'isPaperProduction',
       'openProductions',
       'sequenceOptions',
       'sequences',

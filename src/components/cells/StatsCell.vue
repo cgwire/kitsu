@@ -68,6 +68,10 @@ export default {
       type: String,
       default: 'pie'
     },
+    drawingsData: {
+      type: Array,
+      default: () => []
+    },
     framesData: {
       type: Array,
       default: () => []
@@ -86,6 +90,8 @@ export default {
     selectedData() {
       if (this.countMode === 'frames') {
         return this.framesData
+      } else if (this.countMode === 'drawings') {
+        return this.drawingsData
       } else {
         return this.data
       }

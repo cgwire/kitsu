@@ -291,6 +291,11 @@ const getters = {
     return production && production.production_type === 'tvshow'
   },
 
+  isPaperProduction: state => {
+    const production = getters.currentProduction(state)
+    return production && production.production_style === '2dpaper'
+  },
+
   productionDepartmentIds: (state, getters) => {
     const departmentIds = {}
     return getters.productionTaskTypes.reduce((acc, type) => {
