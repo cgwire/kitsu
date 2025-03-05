@@ -365,7 +365,6 @@ const actions = {
           commit(ADD_PRODUCTION, production)
         }
       })
-      .catch(console.error)
   },
 
   newProduction({ commit, state }, data) {

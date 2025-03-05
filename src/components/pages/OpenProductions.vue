@@ -78,6 +78,7 @@
     >
       <div class="flexrow search-area" v-if="openProductions.length > 6">
         <search-field
+          ref="search-field"
           class="search-field ml1"
           @change="onSearchChange"
           v-focus
@@ -270,6 +271,7 @@ export default {
     },
 
     onSearchChange(search) {
+      console.log('search change')
       if (search === '') {
         this.filteredProductions = this.openProductions
       } else {
@@ -280,6 +282,17 @@ export default {
     hideContributions() {
       this.isContributions = false
       preferences.setPreference('open-productions:contributions', false)
+    }
+  },
+
+  watch: {
+    openProductions() {
+      if (this.openProductions.length > 6) {
+        const searchQuery = this.$refs['search-field'].getValue() || ''
+        this.onSearchChange(searchQuery)
+      } else {
+        this.filteredProductions = this.openProductions
+      }
     }
   },
 

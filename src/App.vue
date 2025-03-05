@@ -170,12 +170,20 @@ export default {
       'project:new'(eventData) {
         if (!this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
+            .catch(err => {
+              console.error(err)
+            })
         }
       },
 
       'project:update'(eventData) {
         if (this.productionMap.get(eventData.project_id)) {
           this.loadProduction(eventData.project_id)
+            .catch (err => {
+              this.$store.commit(
+                'REMOVE_PRODUCTION', { id: eventData.project_id }
+              )
+            })
         } else {
           this.loadOpenProductions()
         }
