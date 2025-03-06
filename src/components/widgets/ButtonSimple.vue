@@ -10,7 +10,7 @@
     :disabled="disabled"
     :title="title"
     :type="type"
-    @click="$emit('click')"
+    @click="$emit('click', $event)"
   >
     <grid-icon class="icon" v-if="icon === 'grid'" />
     <send-icon class="icon" v-else-if="icon === 'send'" />
