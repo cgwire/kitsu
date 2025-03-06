@@ -1,7 +1,9 @@
 <template>
   <div ref="page" class="columns fixed-page">
     <div class="column main-column">
+
       <div class="person page" v-if="person">
+
         <div ref="header" class="flexrow page-header">
           <div class="flexrow-item">
             <people-avatar
@@ -29,6 +31,7 @@
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
               can-save
+              @change="onSearchChange"
               @save="saveSearchQuery"
             />
             <combobox-production
@@ -111,7 +114,7 @@
             :day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
-            :hide-done="personTasksSearchText.length === 0"
+            :hide-done="false"
             :hide-day-off="!(isCurrentUserAdmin || user.id === person.id)"
             @date-changed="onDateChanged"
             @time-spent-change="onTimeSpentChange"
@@ -165,6 +168,7 @@ import {
 } from '@/lib/time'
 
 import { formatListMixin } from '@/components/mixins/format'
+import { searchMixin } from '@/components/mixins/search'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
@@ -183,7 +187,7 @@ import UserCalendar from '@/components/widgets/UserCalendar.vue'
 export default {
   name: 'person',
 
-  mixins: [formatListMixin],
+  mixins: [formatListMixin, searchMixin],
 
   components: {
     Combobox,
@@ -246,6 +250,9 @@ export default {
     }, 300)
     this.loadPerson(this.$route.params.person_id)
     window.addEventListener('resize', this.resetScheduleHeight)
+
+    this.setSearchFromUrl()
+    this.onSearchChange()
   },
 
   afterDestroy() {
@@ -622,6 +629,7 @@ export default {
     },
 
     onSearchChange(text) {
+      this.setSearchInUrl()
       this.setPersonTasksSearch(text)
     },
 
@@ -803,6 +811,13 @@ export default {
       if (this.person && this.person.id !== personId) {
         this.loadPerson(personId)
       }
+    },
+
+    '$route.query.search'() {
+      this.setSearchFromUrl()
+      this.$nextTick(() => {
+        this.onSearchChange(this.searchField?.getValue())
+      })
     },
 
     activeTab() {
