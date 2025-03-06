@@ -243,6 +243,7 @@
                       isDepartmentSupervisor || isCurrentUserManager
                     "
                     :is-replyable="
+                      user.id === comment.person?.id ||
                       isAssigned ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
