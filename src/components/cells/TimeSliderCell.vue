@@ -10,7 +10,7 @@
         :interval="0.25"
         :lazy="true"
         :min="0"
-        :max="maxHoursByDay"
+        :max="12"
         :marks="marks"
         :piecewise="true"
         :process-style="{ 'background-color': '#8F91EB' }"
@@ -87,10 +87,6 @@ export default {
       return this.organisation.hours_by_day || 8
     },
 
-    maxHoursByDay() {
-      return Math.min(this.hoursByDay + 4, 24)
-    },
-
     stepStyle() {
       return {
         display: 'block',
@@ -105,7 +101,7 @@ export default {
 
   methods: {
     setValue(value) {
-      this.value = value
+      this.value = value || 0
     }
   },
 
