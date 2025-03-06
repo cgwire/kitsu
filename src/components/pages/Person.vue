@@ -532,6 +532,7 @@ export default {
       'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
       'loadPersonTasks',
+      'loadPersonTimeSpents',
       'setPersonTasksSearch',
       'savePersonTasksSearch',
       'removePersonTasksSearch',
@@ -675,6 +676,15 @@ export default {
       }
     },
 
+    async loadTimeSpents() {
+      this.isTasksLoading = true
+      await this.loadPersonTimeSpents({
+        personId: this.person.id,
+        date: this.selectedDate
+      })
+      this.isTasksLoading = false
+    },
+
     resizeHeaders() {
       this.$nextTick(() => {
         this.taskList?.resizeHeaders()
@@ -738,9 +748,9 @@ export default {
       this.setTimeSpent(timeSpentInfo)
     },
 
-    onDateChanged(date) {
+    async onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
-      this.loadPerson(this.person.id)
+      await this.loadTimeSpents()
     },
 
     async onSetDayOff(dayOff) {

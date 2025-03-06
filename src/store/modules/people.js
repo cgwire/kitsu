@@ -390,6 +390,11 @@ const actions = {
     })
   },
 
+  async loadPersonTimeSpents({ commit }, { personId, date }) {
+    const timeSpents = await peopleApi.getTimeSpents(personId, date)
+    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
+  },
+
   loadAggregatedPersonTimeSpents(
     {},
     { personId, detailLevel, year, month, week, day, productionId, studioId }

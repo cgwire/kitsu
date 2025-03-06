@@ -11,19 +11,19 @@
 
         <div class="flexrow" v-show="!isActiveTab('daysoff')">
           <search-field
-            class="flexrow-item search-field"
             ref="todos-search-field"
+            class="flexrow-item search-field"
+            :can-save="true"
             @change="onSearchChange"
             @save="saveSearchQuery"
-            :can-save="true"
           />
 
           <combobox-production
-            v-if="isActiveTab('board')"
             class="flexrow-item production-field"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="productionId"
+            v-if="isActiveTab('board')"
           />
 
           <span class="filler"></span>
@@ -108,7 +108,7 @@
           ref="timesheet-list"
           :tasks="loggableTodos"
           :done-tasks="loggableDoneTasks"
-          :is-loading="isTodosLoading"
+          :is-loading="loading.timesheets || isTodosLoading"
           :is-error="isTodosLoadingError"
           :day-off-error="dayOffError"
           :time-spent-map="timeSpentMap"
@@ -193,6 +193,7 @@ export default {
         value: name
       })),
       loading: {
+        timesheets: false,
         savingSearch: false
       },
       productionId: undefined,
@@ -393,6 +394,7 @@ export default {
       'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
       'loadOpenProductions',
+      'loadUserTimeSpents',
       'loadTodos',
       'removeTodoSearch',
       'saveTodoSearch',
@@ -420,6 +422,12 @@ export default {
       this.daysOff = await this.loadAggregatedPersonDaysOff({
         personId: this.user.id
       })
+    },
+
+    async loadTimeSpents() {
+      this.isTasksLoading = true
+      await this.loadUserTimeSpents({ date: this.selectedDate })
+      this.isTasksLoading = false
     },
 
     resizeHeaders() {
@@ -488,8 +496,10 @@ export default {
     },
 
     async onDateChanged(date) {
+      this.loading.timesheets = true
       this.selectedDate = moment(date).format('YYYY-MM-DD')
-      await this.loadData(true)
+      await this.loadTimeSpents()
+      this.loading.timesheets = false
     },
 
     async onSetDayOff(dayOff) {

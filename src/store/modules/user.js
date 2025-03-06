@@ -300,6 +300,11 @@ const actions = {
     }
   },
 
+  async loadUserTimeSpents({ commit }, { date }) {
+    const timeSpents = await peopleApi.loadTimeSpents(date)
+    commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
+  },
+
   async loadTasksToCheck({ commit }) {
     const tasks = await peopleApi.loadTasksToCheck()
     commit(REGISTER_USER_TASKS, { tasks })
