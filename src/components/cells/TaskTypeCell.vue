@@ -5,6 +5,7 @@
       :production-id="productionId"
       :task-id="taskId"
       :disable="disable"
+      :is-link="false"
     />
   </td>
 </template>
