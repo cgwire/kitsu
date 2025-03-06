@@ -157,11 +157,13 @@ export default {
 .entity-name {
   max-width: 300px;
   width: 300px;
+  word-break: break-word;
 }
 
 .task-type {
-  max-width: 150px;
-  width: 150px;
+  max-width: 200px;
+  width: 200px;
+  overflow: auto hidden;
 }
 
 .revision {
