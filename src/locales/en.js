@@ -1338,6 +1338,7 @@ export default {
     new_edit: 'New edit',
     history: 'Edit values history',
     number: 'edit | edits',
+    restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this edit.',
     tasks: 'Tasks',
     title: 'Edits',
