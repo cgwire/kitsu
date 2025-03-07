@@ -3,7 +3,7 @@
     <div class="column main-column">
       <div class="todos page">
         <route-section-tabs
-          class="section-tabs"
+          class="section-tabs mt05"
           :active-tab="currentSection"
           :route="$route"
           :tabs="todoTabs"
@@ -688,6 +688,7 @@ export default {
 
 .query-list {
   margin-top: 0.5em;
+  margin-bottom: 1em;
 }
 
 .data-list {
