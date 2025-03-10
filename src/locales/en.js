@@ -154,6 +154,7 @@ export default {
     confirm_publish_button: 'Post comment without publishing files',
     comment_from_client: 'Comment from client',
     edit_title: 'Edit comment',
+    edited_by: 'Edited by {name}',
     empty_text: 'This comment is empty',
     edit_error: 'An error occurred while editing the comment. Please contact our support team.',
     error: 'An error occurred while posting comment',

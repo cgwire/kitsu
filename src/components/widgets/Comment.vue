@@ -262,9 +262,21 @@
                 {{ $t('main.reply') }}
               </span>
             </div>
-            <p class="pinned-text" v-if="comment.pinned">
+            <div class="pinned-text" v-if="comment.pinned">
               {{ $t('comments.pinned') }}
-            </p>
+            </div>
+            <div
+              class="edited-text"
+              v-if="
+                comment.editor_id && comment.editor_id !== comment.person_id
+              "
+            >
+              {{
+                $t('comments.edited_by', {
+                  name: personMap.get(comment.editor_id)?.full_name
+                })
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -894,9 +906,9 @@ article.comment {
   transform: scale(1.02);
 }
 
+.edited-text,
 .pinned-text {
   font-size: 0.8em;
-  margin: 0;
   text-align: right;
   color: $light-grey;
 }
@@ -953,15 +965,11 @@ article.comment {
 .like-button {
   align-items: center;
   background-color: transparent;
-  border: 0;
-  border-radius: 0.5rem;
   color: inherit;
   cursor: pointer;
   display: inline-flex;
   margin: 0;
   padding: 0.3rem 0;
-  width: 100%;
-  z-index: 10;
 
   span {
     margin-left: 0.3em;
@@ -1038,10 +1046,8 @@ p {
   color: var(--text);
   cursor: pointer;
   font-size: 0.8em;
-  padding: 0;
-  padding-right: 0.5em;
+  padding: 0 0.5em;
   text-align: right;
-  width: 60px;
 }
 
 textarea.reply {
