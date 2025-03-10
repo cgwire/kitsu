@@ -134,10 +134,7 @@
                 />
               </div>
             </td>
-            <td
-              class="frames number-cell"
-              v-if="isShots && !isPaperProduction"
-            >
+            <td class="frames number-cell" v-if="isShots && !isPaperProduction">
               {{ getEntity(task.entity.id).nb_frames }}
             </td>
             <td

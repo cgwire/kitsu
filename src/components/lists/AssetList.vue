@@ -687,7 +687,7 @@ export default {
         ['mouseleave', this.stopBrowsing],
         ['touchend', this.stopBrowsing],
         ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing],
+        ['keyup', this.stopBrowsing]
       ],
       offsets: {},
       lastSelectedAsset: null

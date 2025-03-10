@@ -184,7 +184,6 @@
               </td>
             </template>
           </tr>
-
         </tbody>
       </table>
     </div>
@@ -214,7 +213,6 @@ import {
 } from '@/lib/time'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
@@ -222,7 +220,6 @@ export default {
 
   components: {
     PeopleAvatar,
-    RouteTabs,
     TableInfo
   },
 
@@ -387,20 +384,22 @@ export default {
           detailLevel: this.detailLevel,
           countMode: this.countMode,
           computeMode: this.computeMode
-        }).then(quotas => {
-          this.quotaMap = quotas
-          this.quotaLength = Object.keys(this.quotaMap).length
-          this.calcAverageColumnX()
-          this.$nextTick(() => {
-            this.isLoading = false
-          })
-        }).catch(err => {
-          this.quotaMap = {}
-          this.quotaLength = 0
-          this.calcAverageColumnX()
-          this.isLoading = false
-          console.error(err)
         })
+          .then(quotas => {
+            this.quotaMap = quotas
+            this.quotaLength = Object.keys(this.quotaMap).length
+            this.calcAverageColumnX()
+            this.$nextTick(() => {
+              this.isLoading = false
+            })
+          })
+          .catch(err => {
+            this.quotaMap = {}
+            this.quotaLength = 0
+            this.calcAverageColumnX()
+            this.isLoading = false
+            console.error(err)
+          })
       }
     },
 
@@ -528,11 +527,13 @@ export default {
       )
       const persons = personIds.map(pId => this.personMap.get(pId))
       this.personIndex = buildNameIndex(persons)
-      this.personIds = personIds.sort((a, b) => {
-        const personAName = this.personMap.get(a).full_name
-        const personBName = this.personMap.get(b).full_name
-        return personAName.localeCompare(personBName)
-      }).concat(['total'])
+      this.personIds = personIds
+        .sort((a, b) => {
+          const personAName = this.personMap.get(a).full_name
+          const personBName = this.personMap.get(b).full_name
+          return personAName.localeCompare(personBName)
+        })
+        .concat(['total'])
     }
   },
 

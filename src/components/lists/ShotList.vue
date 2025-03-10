@@ -967,7 +967,8 @@ export default {
           : 0
 
       if (this.isPaperProduction) {
-        count += this.isShowInfos && this.metadataDisplayHeaders.drawings ? 1 : 0
+        count +=
+          this.isShowInfos && this.metadataDisplayHeaders.drawings ? 1 : 0
       } else {
         count += this.isShowInfos && this.metadataDisplayHeaders.frames ? 1 : 0
       }

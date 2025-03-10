@@ -1,9 +1,7 @@
 <template>
   <div ref="page" class="columns fixed-page">
     <div class="column main-column">
-
       <div class="person page" v-if="person">
-
         <div ref="header" class="flexrow page-header">
           <div class="flexrow-item">
             <people-avatar

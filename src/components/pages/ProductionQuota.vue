@@ -1,16 +1,10 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-        <route-tabs
-          :active-tab="activeTab"
-          :tabs="tabs"
-        />
+      <route-tabs :active-tab="activeTab" :tabs="tabs" />
 
       <div class="flexrow filters">
-        <div
-          class="flexrow-item"
-          v-if="activeTab === 'tasktypes'"
-        >
+        <div class="flexrow-item" v-if="activeTab === 'tasktypes'">
           <combobox-task-type
             class="flexrow-item"
             :label="$t('quota.type_label')"
@@ -103,12 +97,10 @@
 
       <quota
         ref="quota-list"
-        :task-type-id="activeTab === 'tasktypes'
-          ? params.taskTypeId
-          : null"
-        :person-id="activeTab === 'persons' && params.person
-          ? params.person.id
-          : null"
+        :task-type-id="activeTab === 'tasktypes' ? params.taskTypeId : null"
+        :person-id="
+          activeTab === 'persons' && params.person ? params.person.id : null
+        "
         :detail-level="detailLevelString"
         :year="currentYear"
         :month="currentMonth"
@@ -164,7 +156,6 @@ import SearchField from '@/components/widgets/SearchField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 const personMap = personStore.cache.personMap
-
 
 export default {
   name: 'production-quota',
@@ -233,7 +224,7 @@ export default {
       silent: false,
 
       searchText: '',
-      showInfo: false,
+      showInfo: false
     }
   },
 
@@ -279,26 +270,24 @@ export default {
     ]),
 
     taskTypeList() {
-      return [
-        ...this.productionShotTaskTypes
-      ]
+      return [...this.productionShotTaskTypes]
     },
 
     teamPersons() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          personMap.get(personId)
-        )
+        this.currentProduction.team.map(personId => personMap.get(personId))
       )
     },
 
     yearOptions() {
       const year = 2018
       const currentYear = moment().year()
-      return range(year, currentYear).map(year => ({
-        label: year,
-        value: `${year}`
-      })).reverse()
+      return range(year, currentYear)
+        .map(year => ({
+          label: year,
+          value: `${year}`
+        }))
+        .reverse()
     },
 
     monthOptions() {
@@ -460,12 +449,11 @@ export default {
     },
 
     getQuery() {
-      const taskTypeId = this.activeTab === 'tasktypes'
-        ? this.params.taskTypeId
-        : undefined
+      const taskTypeId =
+        this.activeTab === 'tasktypes' ? this.params.taskTypeId : undefined
       let personId = null
-      const isPersonTab = this.activeTab === 'persons' ||
-        this.$route.query.tab === 'persons'
+      const isPersonTab =
+        this.activeTab === 'persons' || this.$route.query.tab === 'persons'
       if (isPersonTab && this.params.person) {
         personId = this.params.person.indexOf
       } else if (isPersonTab) {
@@ -589,7 +577,7 @@ export default {
       this.activeTab = this.$route.query.tab || 'tasktypes'
       this.resetRouteQuery()
       this.loadRoute()
-    },
+    }
   },
 
   head() {

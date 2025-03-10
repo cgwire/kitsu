@@ -356,15 +356,13 @@ const actions = {
   },
 
   loadProduction({ commit, state }, productionId) {
-    return productionsApi
-      .getProduction(productionId)
-      .then(production => {
-        if (state.productionMap.get(production.id)) {
-          commit(UPDATE_PRODUCTION, production)
-        } else {
-          commit(ADD_PRODUCTION, production)
-        }
-      })
+    return productionsApi.getProduction(productionId).then(production => {
+      if (state.productionMap.get(production.id)) {
+        commit(UPDATE_PRODUCTION, production)
+      } else {
+        commit(ADD_PRODUCTION, production)
+      }
+    })
   },
 
   newProduction({ commit, state }, data) {

@@ -1,9 +1,6 @@
 <template>
   <div>
-    <label
-      class="label"
-      v-if="label"
-    >
+    <label class="label" v-if="label">
       {{ label }}
     </label>
     <div class="people-field" :class="{ small, wide }">
