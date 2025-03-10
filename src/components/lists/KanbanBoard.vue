@@ -245,10 +245,10 @@ export default {
     },
 
     checkStatusIsAllowed(taskStatus, task) {
-      return (
+      return Boolean(
         this.production ||
-        !task ||
-        taskStatus.productions.includes(task.project_id)
+          !task ||
+          taskStatus.productions.includes(task.project_id)
       )
     },
 
@@ -351,10 +351,12 @@ export default {
     },
 
     onCardDragEnter(event, taskStatus) {
-      const isAllowed = this.checkUserIsAllowed(taskStatus, this.user)
-      if (isAllowed) {
-        event.currentTarget.classList.add('droppable')
+      const isAllowed =
+        this.draggedTask && this.checkUserIsAllowed(taskStatus, this.user)
+      if (!isAllowed) {
+        return
       }
+      event.currentTarget.classList.add('droppable')
     },
 
     onCardDragOver(event) {
@@ -369,6 +371,7 @@ export default {
       event.currentTarget.classList.remove('droppable')
 
       const isAllowed =
+        this.draggedTask &&
         this.checkUserIsAllowed(taskStatus, this.user) &&
         this.checkStatusIsAllowed(taskStatus, this.draggedTask)
       if (!isAllowed) {

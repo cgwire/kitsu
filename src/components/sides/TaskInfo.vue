@@ -210,6 +210,7 @@
                         isDepartmentSupervisor || isCurrentUserManager
                       "
                       :is-replyable="
+                        user.id === comment.person?.id ||
                         isAssigned ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager
@@ -1225,8 +1226,8 @@ export default {
         this.taskPreviews.find(p => p.revision === parseInt(versionRevision))
       )
       setTimeout(() => {
-        this.$refs['preview-player'].setCurrentFrame(frame)
-        this.$refs['preview-player'].focus()
+        this.$refs['preview-player']?.setCurrentFrame(frame)
+        this.$refs['preview-player']?.focus()
       }, 20)
     },
 

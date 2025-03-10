@@ -36,7 +36,7 @@
           <tr
             :key="previewFile.id"
             class="datatable-row"
-            @click="event => redirectToTask(event, previewFile)"
+            @click="redirectToTask(previewFile)"
             v-for="previewFile in previewFiles"
           >
             <td class="date">
@@ -64,7 +64,7 @@
               <button-simple
                 class="mark-broken-button"
                 :text="$t('logs.preview_files.mark_broken')"
-                @click="$emit('mark-broken-clicked', previewFile.id)"
+                @click.stop="$emit('mark-broken-clicked', previewFile.id)"
                 v-if="previewFile.status === 'processing'"
               />
             </td>
@@ -115,30 +115,19 @@ export default {
 
   emits: ['mark-broken-clicked'],
 
-  data() {
-    return {
-      currentTask: null
-    }
-  },
-
   computed: {
-    ...mapGetters(['personMap', 'productionMap', 'taskTypeMap'])
+    ...mapGetters(['productionMap', 'taskTypeMap'])
   },
 
   methods: {
-    ...mapActions(['loadTask', 'markBroken']),
+    ...mapActions(['loadTask']),
 
     onBodyScroll(event) {
       const position = event.target
       this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
     },
 
-    async redirectToTask(event, previewFile) {
-      if (
-        event.target.parentNode.className === 'mark-broken-button button' ||
-        event.target.className === 'mark-broken-button button'
-      )
-        return
+    async redirectToTask(previewFile) {
       const task = await this.loadTask({ taskId: previewFile.task_id })
       return this.$router.push(
         getTaskPath(
@@ -168,11 +157,13 @@ export default {
 .entity-name {
   max-width: 300px;
   width: 300px;
+  word-break: break-word;
 }
 
 .task-type {
-  max-width: 150px;
-  width: 150px;
+  max-width: 200px;
+  width: 200px;
+  overflow: auto hidden;
 }
 
 .revision {
@@ -181,10 +172,6 @@ export default {
 }
 
 .status {
-}
-
-.avatar-wrapper {
-  margin-right: 0.5em;
 }
 
 .datatable-head {

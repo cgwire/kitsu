@@ -358,7 +358,7 @@ const mutations = {
   [CASTING_SET_SHOTS](state, shots) {
     const casting = {}
     const castingByType = {}
-    state.castingSequenceShots = shots
+    state.castingSequenceShots = shots.filter(shot => !shot.canceled)
     shots.forEach(shot => {
       casting[shot.id] = []
       castingByType[shot.id] = []
@@ -370,7 +370,7 @@ const mutations = {
   [CASTING_SET_ASSETS](state, assets) {
     const casting = {}
     const castingByType = {}
-    state.castingAssetTypeAssets = assets
+    state.castingAssetTypeAssets = assets.filter(asset => !asset.canceled)
     assets.forEach(asset => {
       casting[asset.id] = []
       castingByType[asset.id] = []
