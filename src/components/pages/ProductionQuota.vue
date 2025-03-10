@@ -310,7 +310,7 @@ export default {
 
     getCurrentPerson() {
       const personId = this.$route.params.person_id
-      if (personId && this.personMap) {
+      if (personId && personMap) {
         return personMap.get(personId)
       } else {
         return {}
