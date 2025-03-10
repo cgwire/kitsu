@@ -251,7 +251,7 @@ export default {
         event.altKey &&
         event.keyCode === 70
       ) {
-        this.searchField.focus()
+        this.searchField?.focus()
       } else if (event.keyCode === 40) {
         this.selectNext()
       } else if (event.keyCode === 38) {
