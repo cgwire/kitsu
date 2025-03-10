@@ -244,7 +244,7 @@ export default {
     new_status_automation: 'Add status automation',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Automations',
-    wrong_automation: 'This automation applies to a upstream task type. It is not permitted by Kitsu (to avoi infinite cycles). It will have no effect.',
+    wrong_automation: 'This automation applies to a upstream task type. It is not permitted by Kitsu (to avoid infinite cycles). It will have no effect.',
     fields: {
       entity_type: 'Entity Type',
       in_field_type: 'Input Field Type',
