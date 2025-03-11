@@ -232,6 +232,8 @@
           <tbody
             class="datatable-body"
             :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
+            @mousedown="startBrowsing"
+            @touchstart="startBrowsing"
             v-for="(group, k) in displayedAssets"
           >
             <tr class="datatable-type-header" v-if="group[0]">
@@ -549,13 +551,13 @@
       >
         ({{ formatDuration(displayedAssetsTimeSpent) }}
         {{
-          isDurationInHours()
+          isDurationInHours
             ? $tc('main.hours_spent', displayedAssetsTimeSpent)
             : $tc('main.days_spent', displayedAssetsTimeSpent)
         }},
         {{ formatDuration(displayedAssetsEstimation) }}
         {{
-          isDurationInHours()
+          isDurationInHours
             ? $tc('main.hours_estimated', displayedAssetsEstimation)
             : $tc('main.man_days', displayedAssetsEstimation)
         }})
@@ -568,6 +570,7 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { descriptorMixin } from '@/components/mixins/descriptors'
+import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
 import { formatListMixin } from '@/components/mixins/format'
 import { selectionListMixin } from '@/components/mixins/selection'
@@ -600,6 +603,7 @@ export default {
   mixins: [
     entityListMixin,
     descriptorMixin,
+    domMixin,
     formatListMixin,
     selectionListMixin
   ],
@@ -676,9 +680,29 @@ export default {
         timeSpent: true
       },
       stickedColumns: {},
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['keyup', this.stopBrowsing]
+      ],
       offsets: {},
       lastSelectedAsset: null
     }
+  },
+
+  mounted() {
+    this.stickedColumns =
+      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
+    this.addEvents(this.domEvents)
+  },
+
+  beforeUnmount() {
+    this.removeEvents(this.domEvents)
+    document.body.style.cursor = 'default'
   },
 
   computed: {
@@ -1034,11 +1058,6 @@ export default {
       // Map used for performance reasons, to avoid array traversals
       this.isSelectableMap = {}
     }
-  },
-
-  mounted() {
-    this.stickedColumns =
-      preferences.getObjectPreference(this.localStorageStickKey) || {}
   }
 }
 </script>

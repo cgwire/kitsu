@@ -94,6 +94,7 @@
                 :is-tooltip="true"
                 :entry="productionMap.get(entry.project_id)"
                 :only-avatar="true"
+                :is-link="false"
               />
             </td>
             <task-type-cell
@@ -101,6 +102,7 @@
               :production-id="entry.project_id"
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
+              :is-link="false"
             />
             <td
               class="name datatable-row-header"
@@ -824,11 +826,9 @@ export default {
           // Combo box should not trigger selection
           event.target.className.indexOf('selected-line') >= 0 ||
           event.target.className.indexOf('down-icon') >= 0 ||
-          event.target.className.indexOf('flexrow') >= 0 ||
           event.target.className.indexOf('c-mask') >= 0 ||
           event.target.className.indexOf('option-line') >= 0 ||
           event.target.className.indexOf('combobox') >= 0 ||
-          event.target.className === '' ||
           (event.target.parentNode &&
             ['HEADER'].includes(event.target.parentNode.nodeName)) ||
           ['cell day selected'].includes(event.target.className))
@@ -836,12 +836,12 @@ export default {
         return
       const isSelected = this.selectionGrid[task.id]
       const isManySelection = Object.keys(this.selectionGrid).length > 1
-      if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
+      if (event && !(event.ctrlKey || event.metaKey) && !event.shiftKey) {
         this.clearSelectedTasks()
         this.resetSelection()
       }
 
-      if (!event.shiftKey) {
+      if (event && !event.shiftKey) {
         if (isSelected && !isManySelection) {
           this.removeSelectedTask({ task })
           this.selectionGrid[task.id] = undefined

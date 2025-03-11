@@ -54,7 +54,7 @@
           :options="contractOptions"
           locale-key-prefix="people.contract."
           v-model="form.contract_type"
-          v-if="!isBot"
+          v-if="!isBot && form.role !== 'client'"
         />
         <div class="departments field">
           <label class="label">{{ $t('people.fields.departments') }}</label>

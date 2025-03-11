@@ -1,11 +1,12 @@
 <template>
-  <td>
+  <td @click="$emit('click')">
     <div class="flexrow">
       <people-avatar
         class="flexrow-item avatar-wrapper"
         :size="25"
         :font-size="14"
         :person="task.last_comment.person"
+        :is-link="false"
         v-if="task.last_comment.person"
       >
       </people-avatar>
@@ -15,7 +16,6 @@
         class="flexrow-item last-comment pointer"
         v-if="commentText && commentText.length > 0"
         v-html="renderMarkdown(commentText)"
-        @click="onClick"
       >
       </span>
       <span
@@ -36,13 +36,14 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 export default {
   name: 'last-comment-cell',
 
+  emits: ['click'],
+
   components: {
     PeopleAvatar
   },
 
   data() {
     return {
-      isOpen: false,
       timeout: null
     }
   },
@@ -67,11 +68,7 @@ export default {
   },
 
   methods: {
-    renderMarkdown,
-
-    onClick() {
-      this.isOpen = !this.isOpen
-    }
+    renderMarkdown
   }
 }
 </script>

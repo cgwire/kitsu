@@ -1,13 +1,26 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
+      <route-tabs :active-tab="activeTab" :tabs="tabs" />
+
       <div class="flexrow filters">
-        <div class="flexrow-item">
+        <div class="flexrow-item" v-if="activeTab === 'tasktypes'">
           <combobox-task-type
             class="flexrow-item"
             :label="$t('quota.type_label')"
-            :task-type-list="productionShotTaskTypes"
-            v-model="taskTypeId"
+            :task-type-list="taskTypeList"
+            :disabled="!params.person"
+            v-model="params.taskTypeId"
+          />
+        </div>
+        <div class="flexrow-item">
+          <people-field
+            ref="person-field"
+            class="person-field"
+            :label="$t('main.person')"
+            :people="teamPersons"
+            v-model="params.person"
+            v-if="activeTab === 'persons'"
           />
         </div>
         <div class="flexrow-item">
@@ -39,19 +52,19 @@
             class="flexrow-item"
             :label="$t('quota.count_label')"
             :options="countModeOptions"
-            v-model="countMode"
+            v-model="params.countMode"
           />
         </div>
         <combobox
           class="flexrow-item"
           :label="$t('quota.compute_mode')"
           :options="computeModeOptions"
-          v-model="computeMode"
+          v-model="params.computeMode"
         />
         <div class="flexrow-item">
           <info-question-mark
             class="mt2"
-            :text="$t('quota.explanation_' + computeMode)"
+            :text="$t('quota.explanation_' + params.computeMode)"
           />
         </div>
         <div class="filler"></div>
@@ -68,6 +81,7 @@
           ref="search-field"
           class="search-field flexrow-item"
           @change="onSearchChange"
+          v-if="activeTab === 'tasktypes'"
         />
 
         <span class="label flexrow-item">
@@ -83,15 +97,18 @@
 
       <quota
         ref="quota-list"
-        :task-type-id="taskTypeId"
+        :task-type-id="activeTab === 'tasktypes' ? params.taskTypeId : null"
+        :person-id="
+          activeTab === 'persons' && params.person ? params.person.id : null
+        "
         :detail-level="detailLevelString"
         :year="currentYear"
         :month="currentMonth"
         :week="currentWeek"
         :day="currentDay"
         :current-person="currentPerson"
-        :count-mode="currentMode"
-        :compute-mode="computeMode"
+        :count-mode="params.countMode"
+        :compute-mode="params.computeMode"
         :search-text="searchText"
         :max-quota="maxQuota"
       />
@@ -106,7 +123,7 @@
         :is-loading="isPersonShotsLoading"
         :is-loading-error="false"
         :shots="personShots"
-        :count-mode="countMode"
+        :count-mode="params.countMode"
         @close="hideSideInfo"
       />
     </div>
@@ -120,17 +137,25 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import { monthToString, range } from '@/lib/time'
 import { episodifyRoute } from '@/lib/path'
+import preferences from '@/lib/preferences'
+import { monthToString, range } from '@/lib/time'
+import { sortPeople } from '@/lib/sorting'
+
+import personStore from '@/store/modules/people'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import Quota from '@/components/pages/quota/Quota.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import TextField from '@/components/widgets/TextField.vue'
+
+const personMap = personStore.cache.personMap
 
 export default {
   name: 'production-quota',
@@ -140,16 +165,21 @@ export default {
     Combobox,
     ComboboxTaskType,
     InfoQuestionMark,
+    PeopleField,
     PeopleQuotaInfo,
     Quota,
+    RouteTabs,
     SearchField,
     TextField
   },
 
   data() {
     return {
-      taskTypeId: '',
-      countMode: 'frames',
+      activeTab: 'tasktypes',
+      tabs: [
+        { name: 'tasktypes', label: this.$t('task_types.title') },
+        { name: 'persons', label: this.$t('main.people') }
+      ],
       countModeOptions: [
         { label: this.$t('quota.frames'), value: 'frames' },
         { label: this.$t('quota.seconds'), value: 'seconds' },
@@ -166,7 +196,6 @@ export default {
         { label: this.$t('quota.weighted_done'), value: 'weighteddone' },
         { label: this.$t('quota.done_date'), value: 'done' }
       ],
-      computeMode: 'weighted',
       currentYear: moment().year(),
       currentMonth: moment().month() + 1,
       currentWeek: moment().week(),
@@ -174,23 +203,60 @@ export default {
       currentPerson: this.getCurrentPerson(),
       currentMode: 'frames',
 
-      detailLevelString: 'day',
       detailLevel: 'day',
 
       isLoading: false,
       isLoadingError: false,
       isPersonShotsLoading: false,
       maxQuota: 0,
-      monthString: `${moment().month() + 1}`,
 
+      detailLevelString: 'day',
+      monthString: `${moment().month() + 1}`,
+      yearString: `${moment().year()}`,
+
+      params: {
+        countMode: 'frames',
+        computeMode: 'weighted',
+        person: null,
+        taskTypeId: ''
+      },
       personShots: [],
+      silent: false,
+
       searchText: '',
-      showInfo: false,
-      yearString: `${moment().year()}`
+      showInfo: false
     }
   },
 
   mounted() {
+    this.setCountModeOptions()
+    const key = `quota:${this.currentProduction.id}:params`
+    const savedParams = preferences.getObjectPreference(key) || {}
+    const defaultParams = {
+      countMode: this.countModeOptions[0].value,
+      computeMode: this.computeModeOptions[0].value,
+      taskTypeId: this.productionShotTaskTypes[0].id
+    }
+    this.activeTab = this.$route.query.tab || 'tasktypes'
+    this.params = {
+      countMode:
+        this.$route.query.countMode ||
+        savedParams.countMode ||
+        defaultParams.countMode,
+      computeMode:
+        this.$route.query.computeMode ||
+        savedParams.computeMode ||
+        defaultParams.computeMode,
+      taskTypeId: this.$route.query.taskTypeId,
+      person: this.$route.query.personId
+        ? personMap.get(this.$route.query.personId)
+        : null
+    }
+    if (!this.params.taskTypeId && !this.params.person) {
+      this.params.taskTypeId =
+        savedParams.taskTypeId || defaultParams.taskTypeId
+    }
+    this.resetRouteQuery()
     this.loadRoute()
   },
 
@@ -198,18 +264,30 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isPaperProduction',
       'productionShotTaskTypes',
-      'shotTaskTypes',
-      'personMap'
+      'shotTaskTypes'
     ]),
+
+    taskTypeList() {
+      return [...this.productionShotTaskTypes]
+    },
+
+    teamPersons() {
+      return sortPeople(
+        this.currentProduction.team.map(personId => personMap.get(personId))
+      )
+    },
 
     yearOptions() {
       const year = 2018
       const currentYear = moment().year()
-      return range(year, currentYear).map(year => ({
-        label: year,
-        value: `${year}`
-      }))
+      return range(year, currentYear)
+        .map(year => ({
+          label: year,
+          value: `${year}`
+        }))
+        .reverse()
     },
 
     monthOptions() {
@@ -232,8 +310,8 @@ export default {
 
     getCurrentPerson() {
       const personId = this.$route.params.person_id
-      if (personId && this.personMap) {
-        return this.personMap.get(personId)
+      if (personId && personMap) {
+        return personMap.get(personId)
       } else {
         return {}
       }
@@ -254,13 +332,13 @@ export default {
         this.currentMode = this.countMode
       }
       if (taskTypeId) {
-        this.taskTypeId = taskTypeId
-      } else {
-        const key = `quota:${this.currentProduction.id}:task-type-id`
-        this.taskTypeId = localStorage.getItem(key) || this.shotTaskTypes[0].id
+        this.params.taskTypeId = taskTypeId
+      }
+      if (this.$route.query.personId) {
+        this.params.person = personMap.get(this.$route.query.personId)
       }
       if (computeMode) {
-        this.computeMode = computeMode
+        this.params.computeMode = computeMode
       }
       if (month) {
         this.currentMonth = Number(month)
@@ -283,12 +361,12 @@ export default {
         this.getPersonQuotaShots({
           personId: this.currentPerson.id,
           detailLevel: this.detailLevel,
-          taskTypeId: this.taskTypeId,
+          taskTypeId: this.params.taskTypeId,
           year,
           month,
           week,
           day,
-          computeMode: this.computeMode
+          computeMode: this.params.computeMode
         }).then(shots => {
           this.isPersonShotsLoading = false
           this.personShots = shots
@@ -316,12 +394,11 @@ export default {
 
     exportQuotas() {
       const quotas = this.$refs['quota-list'].quotaMap
-
       const nameData = ['quotas', this.detailLevel, this.currentYear]
       if (this.detailLevel === 'day') nameData.push(this.currentMonth)
       const name = stringHelpers.slugify(nameData.join('_'))
       const people = Object.keys(quotas)
-        .map(personId => this.personMap.get(personId))
+        .map(personId => personMap.get(personId))
         .sort((a, b) =>
           a.full_name.localeCompare(b.full_name, undefined, {
             numeric: true
@@ -341,22 +418,69 @@ export default {
       )
     },
 
-    resetRouteQuery() {
-      this.$router.push({
-        query: {
-          countMode: this.countMode,
-          computeMode: this.computeMode,
-          taskTypeId: this.taskTypeId
-        }
-      })
-    },
-
     onSearchChange(searchText) {
       this.searchText = searchText
+    },
+
+    setCountModeOptions() {
+      if (this.isPaperProduction) {
+        this.countModeOptions = [
+          { label: this.$t('quota.drawings'), value: 'drawings' },
+          { label: this.$t('quota.count'), value: 'count' }
+        ]
+        this.countMode = 'drawings'
+        this.currentMode = this.params.countMode
+      } else {
+        this.countModeOptions = [
+          { label: this.$t('quota.frames'), value: 'frames' },
+          { label: this.$t('quota.seconds'), value: 'seconds' },
+          { label: this.$t('quota.count'), value: 'count' }
+        ]
+        this.params.countMode = 'frames'
+        this.currentMode = this.params.countMode
+      }
+    },
+
+    resetRouteQuery() {
+      const query = this.getQuery()
+      const key = `quota:${this.currentProduction.id}:params`
+      preferences.setObjectPreference(key, this.params)
+      this.$router.push({ query })
+    },
+
+    getQuery() {
+      const taskTypeId =
+        this.activeTab === 'tasktypes' ? this.params.taskTypeId : undefined
+      let personId = null
+      const isPersonTab =
+        this.activeTab === 'persons' || this.$route.query.tab === 'persons'
+      if (isPersonTab && this.params.person) {
+        personId = this.params.person.indexOf
+      } else if (isPersonTab) {
+        personId = this.teamPersons[0].id
+      }
+      const query = {
+        countMode: this.params.countMode,
+        computeMode: this.params.computeMode,
+        tab: this.activeTab || 'tasktypes',
+        taskTypeId,
+        personId: personId ? personId : undefined
+      }
+      return query
     }
   },
 
   watch: {
+    'params.person'() {
+      if (!this.silent) {
+        this.silent = true
+        this.resetRouteQuery()
+        setTimeout(() => {
+          this.silent = false
+        }, 100)
+      }
+    },
+
     detailLevelString() {
       if (this.detailLevel !== this.detailLevelString) {
         const route = {
@@ -364,10 +488,7 @@ export default {
           params: {
             year: this.currentYear
           },
-          query: {
-            countMode: this.countMode,
-            computeMode: this.computeMode
-          }
+          query: this.getQuery()
         }
         if (this.detailLevelString === 'day') {
           route.params.month = this.currentMonth
@@ -385,10 +506,7 @@ export default {
           params: {
             year: year
           },
-          query: {
-            countMode: this.countMode,
-            computeMode: this.computeMode
-          }
+          query: this.getQuery()
         }
         if (this.detailLevelString === 'day') {
           route.params.month = `${Math.min(
@@ -406,45 +524,41 @@ export default {
           name: 'quota-day',
           params: {
             year: this.currentYear,
-            month: Number(this.monthString)
+            month: this.monthString
           },
-          query: {
-            countMode: this.countMode,
-            computeMode: this.computeMode,
-            taskTypeId: this.taskTypeId
-          }
+          query: this.getQuery()
         }
         this.$router.push(this.episodifyRoute(route))
       }
     },
 
-    countMode() {
-      if (this.currentMode !== this.countMode) {
-        if (this.$route.query.countMode !== this.countMode) {
-          this.resetRouteQuery()
-          this.currentMode = this.countMode
-        }
-      }
+    'params.countMode'() {
+      this.resetRouteQuery()
+      this.currentMode = this.params.countMode
     },
 
-    computeMode() {
-      if (this.$route.query.computeMode !== this.computeMode) {
+    'params.computeMode'() {
+      if (this.$route.query.computeMode !== this.params.computeMode) {
         this.resetRouteQuery()
         this.currentPerson = null
       }
     },
 
-    taskTypeId() {
-      const key = `quota:${this.currentProduction.id}:task-type-id`
-      localStorage.setItem(key, this.taskTypeId)
-      if (this.$route.query.taskTypeId !== this.taskTypeId) {
+    'params.taskTypeId'() {
+      if (!this.silent && this.params.taskTypeId) {
+        this.silent = true
         this.resetRouteQuery()
+        setTimeout(() => {
+          this.silent = false
+        }, 100)
       }
     },
 
     currentProduction() {
+      this.setCountModeOptions()
       this.isLoading = true
       this.loadShots(() => {
+        this.resetRouteQuery()
         this.loadRoute()
         this.isLoading = false
       })
@@ -453,12 +567,15 @@ export default {
     currentEpisode() {
       this.isLoading = true
       this.loadShots(() => {
+        this.resetRouteQuery()
         this.loadRoute()
         this.isLoading = false
       })
     },
 
     $route() {
+      this.activeTab = this.$route.query.tab || 'tasktypes'
+      this.resetRouteQuery()
       this.loadRoute()
     }
   },

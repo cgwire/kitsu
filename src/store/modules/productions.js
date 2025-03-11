@@ -291,6 +291,11 @@ const getters = {
     return production && production.production_type === 'tvshow'
   },
 
+  isPaperProduction: state => {
+    const production = getters.currentProduction(state)
+    return production && production.production_style === '2dpaper'
+  },
+
   productionDepartmentIds: (state, getters) => {
     const departmentIds = {}
     return getters.productionTaskTypes.reduce((acc, type) => {
@@ -351,16 +356,13 @@ const actions = {
   },
 
   loadProduction({ commit, state }, productionId) {
-    return productionsApi
-      .getProduction(productionId)
-      .then(production => {
-        if (state.productionMap.get(production.id)) {
-          commit(UPDATE_PRODUCTION, production)
-        } else {
-          commit(ADD_PRODUCTION, production)
-        }
-      })
-      .catch(console.error)
+    return productionsApi.getProduction(productionId).then(production => {
+      if (state.productionMap.get(production.id)) {
+        commit(UPDATE_PRODUCTION, production)
+      } else {
+        commit(ADD_PRODUCTION, production)
+      }
+    })
   },
 
   newProduction({ commit, state }, data) {

@@ -29,6 +29,7 @@
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
               can-save
+              @change="onSearchChange"
               @save="saveSearchQuery"
             />
             <combobox-production
@@ -111,7 +112,7 @@
             :day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
-            :hide-done="personTasksSearchText.length === 0"
+            :hide-done="false"
             :hide-day-off="!(isCurrentUserAdmin || user.id === person.id)"
             @date-changed="onDateChanged"
             @time-spent-change="onTimeSpentChange"
@@ -165,6 +166,7 @@ import {
 } from '@/lib/time'
 
 import { formatListMixin } from '@/components/mixins/format'
+import { searchMixin } from '@/components/mixins/search'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
@@ -183,7 +185,7 @@ import UserCalendar from '@/components/widgets/UserCalendar.vue'
 export default {
   name: 'person',
 
-  mixins: [formatListMixin],
+  mixins: [formatListMixin, searchMixin],
 
   components: {
     Combobox,
@@ -246,6 +248,9 @@ export default {
     }, 300)
     this.loadPerson(this.$route.params.person_id)
     window.addEventListener('resize', this.resetScheduleHeight)
+
+    this.setSearchFromUrl()
+    this.onSearchChange()
   },
 
   afterDestroy() {
@@ -525,6 +530,7 @@ export default {
       'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
       'loadPersonTasks',
+      'loadPersonTimeSpents',
       'setPersonTasksSearch',
       'savePersonTasksSearch',
       'removePersonTasksSearch',
@@ -622,6 +628,7 @@ export default {
     },
 
     onSearchChange(text) {
+      this.setSearchInUrl()
       this.setPersonTasksSearch(text)
     },
 
@@ -665,6 +672,15 @@ export default {
       } catch (error) {
         console.error(error)
       }
+    },
+
+    async loadTimeSpents() {
+      this.isTasksLoading = true
+      await this.loadPersonTimeSpents({
+        personId: this.person.id,
+        date: this.selectedDate
+      })
+      this.isTasksLoading = false
     },
 
     resizeHeaders() {
@@ -730,9 +746,9 @@ export default {
       this.setTimeSpent(timeSpentInfo)
     },
 
-    onDateChanged(date) {
+    async onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
-      this.loadPerson(this.person.id)
+      await this.loadTimeSpents()
     },
 
     async onSetDayOff(dayOff) {
@@ -803,6 +819,13 @@ export default {
       if (this.person && this.person.id !== personId) {
         this.loadPerson(personId)
       }
+    },
+
+    '$route.query.search'() {
+      this.setSearchFromUrl()
+      this.$nextTick(() => {
+        this.onSearchChange(this.searchField?.getValue())
+      })
     },
 
     activeTab() {

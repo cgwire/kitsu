@@ -102,22 +102,32 @@ export default {
 .datatable-body tr:first-child td {
   border-top: 0;
 }
+
 .name {
   width: 230px;
   min-width: 230px;
 }
+
 .email {
   width: 300px;
   min-width: 300px;
 }
+
 .phone {
   width: 200px;
   min-width: 200px;
 }
+
 .role {
+  width: 160px;
+  min-width: 160px;
+}
+
+.contract {
   width: 125px;
   min-width: 125px;
 }
+
 .actions {
   min-width: 100px;
 }

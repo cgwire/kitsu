@@ -41,14 +41,23 @@
         </thead>
         <tbody class="datatable-body" v-if="quotaLength > 0 && !isLoading">
           <tr
-            class="datatable-row"
-            v-for="key in filteredPersonIds"
             :key="'name-' + key"
+            class="datatable-row"
+            v-for="key in entryIds"
           >
             <th scope="row" class="name datatable-row-header">
-              <div class="flexrow">
+              <div class="flexrow" v-if="taskTypeId && key !== 'total'">
                 <people-avatar :size="30" :person="personMap.get(key)" />
                 {{ personMap.get(key).full_name }}
+              </div>
+              <div class="flexrow" v-else-if="taskTypeId && key === 'total'">
+                {{ $t('main.total') }}
+              </div>
+              <div class="flexrow" v-else-if="personId && key !== 'total'">
+                {{ taskTypeMap.get(key).name }}
+              </div>
+              <div class="flexrow" v-else-if="personId && key === 'total'">
+                {{ $t('main.total') }}
               </div>
             </th>
             <td
@@ -83,21 +92,16 @@
                         year: year,
                         month: month
                       },
-                      query: {
-                        countMode: countMode,
-                        computeMode: computeMode,
-                        taskTypeId: taskTypeId
-                      }
+                      query: $route.query
                     })
                   "
-                  v-if="getQuota(key, { year, month })"
+                  v-if="key !== 'total' && getQuota(key, { year, month })"
                 >
-                  {{
-                    countMode === 'seconds'
-                      ? getQuota(key, { year, month }).toFixed(2)
-                      : getQuota(key, { year, month })
-                  }}
+                  {{ getQuota(key, { year, month }) }}
                 </router-link>
+                <span v-else-if="key === 'total'">
+                  {{ getQuota(key, { year, month }) }}
+                </span>
                 <span v-else>-</span>
               </td>
             </template>
@@ -120,21 +124,16 @@
                         year: year,
                         week: week
                       },
-                      query: {
-                        countMode: countMode,
-                        computeMode: computeMode,
-                        taskTypeId: taskTypeId
-                      }
+                      query: $route.query
                     })
                   "
-                  v-if="getQuota(key, { year, week })"
+                  v-if="key !== 'total' && getQuota(key, { year, week })"
                 >
-                  {{
-                    countMode === 'seconds'
-                      ? getQuota(key, { year, week }).toFixed(2)
-                      : getQuota(key, { year, week })
-                  }}
+                  {{ getQuota(key, { year, week }) }}
                 </router-link>
+                <span v-else-if="key === 'total'">
+                  {{ getQuota(key, { year, week }) }}
+                </span>
                 <span v-else> - </span>
               </td>
             </template>
@@ -166,14 +165,21 @@
                       }
                     })
                   "
-                  v-if="getQuota(key, { year, month, day })"
+                  v-if="key !== 'total' && getQuota(key, { year, month, day })"
                 >
                   {{
                     countMode === 'seconds'
-                      ? getQuota(key, { year, month, day }).toFixed(2)
+                      ? getQuota(key, { year, month, day })
                       : getQuota(key, { year, month, day })
                   }}
                 </router-link>
+                <span v-else-if="key === 'total'">
+                  {{
+                    countMode === 'seconds'
+                      ? getQuota(key, { year, month, day })
+                      : getQuota(key, { year, month, day })
+                  }}
+                </span>
                 <span v-else> - </span>
               </td>
             </template>
@@ -198,6 +204,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 import { episodifyRoute } from '@/lib/path'
+import { sortTaskTypes } from '@/lib/sorting'
 import {
   monthToString,
   getMonthRange,
@@ -219,7 +226,11 @@ export default {
   props: {
     taskTypeId: {
       type: String,
-      required: true
+      required: false
+    },
+    personId: {
+      type: String,
+      required: false
     },
     detailLevel: {
       type: String,
@@ -228,7 +239,6 @@ export default {
     },
     countMode: {
       type: String,
-      default: 'frames',
       required: true
     },
     computeMode: {
@@ -296,7 +306,14 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentEpisode', 'isShotsLoading', 'shotMap', 'personMap']),
+    ...mapGetters([
+      'currentEpisode',
+      'currentProduction',
+      'isShotsLoading',
+      'personMap',
+      'shotMap',
+      'taskTypeMap'
+    ]),
 
     monthRange() {
       return getMonthRange(this.year, this.currentYear, this.currentMonth)
@@ -313,6 +330,21 @@ export default {
 
     weekRange() {
       return getWeekRange(this.year, this.currentYear, this.currentWeek)
+    },
+
+    entryIds() {
+      if (this.personId) {
+        return sortTaskTypes(
+          Object.keys(this.quotaMap)
+            .filter(key => key !== 'total')
+            .map(taskTypeId => this.taskTypeMap.get(taskTypeId)),
+          this.currentProduction
+        )
+          .map(taskType => taskType.id)
+          .concat(['total'])
+      } else {
+        return this.filteredPersonIds
+      }
     },
 
     filteredPersonIds() {
@@ -344,21 +376,30 @@ export default {
     },
 
     loadData() {
-      if (this.taskTypeId) {
+      if (this.taskTypeId || this.personId) {
         this.isLoading = true
         this.computeQuota({
           taskTypeId: this.taskTypeId,
+          personId: this.personId,
           detailLevel: this.detailLevel,
           countMode: this.countMode,
           computeMode: this.computeMode
-        }).then(quotas => {
-          this.quotaMap = quotas
-          this.quotaLength = Object.keys(this.quotaMap).length
-          this.calcAverageColumnX()
-          this.$nextTick(() => {
-            this.isLoading = false
-          })
         })
+          .then(quotas => {
+            this.quotaMap = quotas
+            this.quotaLength = Object.keys(this.quotaMap).length
+            this.calcAverageColumnX()
+            this.$nextTick(() => {
+              this.isLoading = false
+            })
+          })
+          .catch(err => {
+            this.quotaMap = {}
+            this.quotaLength = 0
+            this.calcAverageColumnX()
+            this.isLoading = false
+            console.error(err)
+          })
       }
     },
 
@@ -388,21 +429,31 @@ export default {
     },
 
     getQuota(personId, opt = {}) {
+      let quota = '-'
+      if (!personId) return quota
       if (opt.day) {
         const dayKey = `${opt.year}-${this.dateDigit(
           opt.month
         )}-${this.dateDigit(opt.day)}`
-        return this.quotaMap[personId].day[this.countMode][dayKey]
+        quota = this.quotaMap[personId].day[this.countMode][dayKey]
       } else if (opt.week) {
         const weekKey = `${opt.year}-${opt.week}`
-        return this.quotaMap[personId].week[this.countMode][weekKey]
+        quota = this.quotaMap[personId].week[this.countMode][weekKey]
       } else {
         const monthKey = `${opt.year}-${this.dateDigit(opt.month)}`
-        return this.quotaMap[personId].month[this.countMode][monthKey]
+        quota = this.quotaMap[personId].month[this.countMode][monthKey]
+      }
+      if (this.countMode === 'seconds') {
+        return quota ? quota.toFixed(2) : '-'
+      } else {
+        return quota || '-'
       }
     },
 
     getQuotaAverage(personId, opt = {}) {
+      if (!personId) {
+        return '-'
+      }
       let average = 0
       let total = 0
       let nbEntries
@@ -471,14 +522,18 @@ export default {
     },
 
     resetPersonIds() {
-      const personIds = Object.keys(this.quotaMap)
+      const personIds = Object.keys(this.quotaMap).filter(
+        personId => personId !== 'total'
+      )
       const persons = personIds.map(pId => this.personMap.get(pId))
       this.personIndex = buildNameIndex(persons)
-      this.personIds = personIds.sort((a, b) => {
-        const personAName = this.personMap.get(a).full_name
-        const personBName = this.personMap.get(b).full_name
-        return personAName.localeCompare(personBName)
-      })
+      this.personIds = personIds
+        .sort((a, b) => {
+          const personAName = this.personMap.get(a).full_name
+          const personBName = this.personMap.get(b).full_name
+          return personAName.localeCompare(personBName)
+        })
+        .concat(['total'])
     }
   },
 
@@ -494,17 +549,25 @@ export default {
     },
 
     computeMode() {
-      if (this.taskTypeId) {
+      if (this.taskTypeId || this.personId) {
         this.loadData()
       }
     },
 
     quotaMap() {
-      this.resetPersonIds()
+      if (this.taskTypeId) {
+        this.resetPersonIds()
+      }
     },
 
     taskTypeId() {
       if (this.taskTypeId) {
+        this.loadData()
+      }
+    },
+
+    personId() {
+      if (this.personId) {
         this.loadData()
       }
     }

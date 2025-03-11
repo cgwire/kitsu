@@ -357,9 +357,12 @@ export default {
       if (this.active) {
         this.shotPadding = '1'
         this.sequences = this.displayedSequences
-        if (this.selectedSequenceId) {
-          this.selectSequence(this.selectedSequenceId)
+        if (this.isTVShow) {
+          this.selectEpisode(this.displayedEpisodes[0].id)
+        } else if (this.sequences.length > 0) {
+          this.selectSequence(this.sequences[0].id)
         }
+
         setTimeout(() => {
           if (this.isTVShow) {
             this.$refs.addEpisodeInput.focus()
@@ -367,6 +370,13 @@ export default {
             this.$refs.addSequenceInput.focus()
           }
         }, 100)
+      }
+    },
+
+    selectedEpisodeId() {
+      this.sequences = this.displayedSequences
+      if (this.sequences.length > 0) {
+        this.selectSequence(this.sequences[0].id)
       }
     }
   }

@@ -129,9 +129,26 @@
             </th>
 
             <th
+              class="drawings number-cell"
+              scope="col"
+              v-if="
+                isShowInfos &&
+                isPaperProduction &&
+                metadataDisplayHeaders.drawings
+              "
+            >
+              {{ $t('shots.fields.nb_drawings') }}
+            </th>
+
+            <th
               class="frames number-cell"
               scope="col"
-              v-if="isFrames && isShowInfos && metadataDisplayHeaders.frames"
+              v-if="
+                isFrames &&
+                isShowInfos &&
+                !isPaperProduction &&
+                metadataDisplayHeaders.frames
+              "
             >
               {{ $t('shots.fields.nb_frames') }}
             </th>
@@ -419,6 +436,18 @@
                   {{ shot.nb_frames }}
                 </span>
               </td>
+
+              <td
+                class="drawings number-cell"
+                v-if="
+                  isShowInfos &&
+                  isPaperProduction &&
+                  metadataDisplayHeaders.drawings
+                "
+              >
+                {{ shot.nb_drawings }}
+              </td>
+
               <td
                 class="framein number-cell"
                 v-if="
@@ -695,6 +724,11 @@
         {{ displayedShotsFrames }}
         {{ $tc('main.nb_frames', displayedShotsFrames) }}
       </span>
+      <span v-if="isPaperProduction">
+        -
+        {{ displayedShotsDrawings }}
+        {{ $tc('main.nb_drawings', displayedShotsDrawings) }}
+      </span>
       <span
         v-show="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0"
       >
@@ -808,6 +842,7 @@ export default {
       lastSelectedShot: null,
       lastSelection: null,
       metadataDisplayHeaders: {
+        drawings: true,
         fps: true,
         frameIn: true,
         frameOut: true,
@@ -848,9 +883,10 @@ export default {
       'currentEpisode',
       'displayedShotsEstimation',
       'displayedShotsCount',
+      'displayedShotsDrawings',
+      'displayedShotsFrames',
       'displayedShotsLength',
       'displayedShotsTimeSpent',
-      'displayedShotsFrames',
       'isBigThumbnails',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
@@ -860,6 +896,7 @@ export default {
       'isFrames',
       'isFrameIn',
       'isFrameOut',
+      'isPaperProduction',
       'isMaxRetakes',
       'isResolution',
       'isSingleEpisode',
@@ -928,7 +965,13 @@ export default {
         this.metadataDisplayHeaders.estimation
           ? 1
           : 0
-      count += this.isShowInfos && this.metadataDisplayHeaders.frames ? 1 : 0
+
+      if (this.isPaperProduction) {
+        count +=
+          this.isShowInfos && this.metadataDisplayHeaders.drawings ? 1 : 0
+      } else {
+        count += this.isShowInfos && this.metadataDisplayHeaders.frames ? 1 : 0
+      }
       count +=
         this.isShowInfos &&
         this.isFrameIn &&
@@ -1266,6 +1309,12 @@ th.actions {
 }
 
 .frames {
+  min-width: 80px;
+  max-width: 80px;
+  width: 80px;
+}
+
+.drawings {
   min-width: 80px;
   max-width: 80px;
   width: 80px;

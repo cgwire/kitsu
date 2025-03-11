@@ -2,7 +2,10 @@
   <router-link
     :to="targetRoute"
     v-if="
-      productionId && !isCurrentUserClient && taskType.for_entity !== 'Concept'
+      isLink &&
+      productionId &&
+      !isCurrentUserClient &&
+      taskType.for_entity !== 'Concept'
     "
   >
     <span
@@ -48,6 +51,10 @@ export default {
   name: 'task-type-name',
 
   props: {
+    isLink: {
+      type: Boolean,
+      default: true
+    },
     deletable: {
       type: Boolean,
       default: false

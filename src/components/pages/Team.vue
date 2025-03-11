@@ -8,7 +8,6 @@
             class="flexrow-item add-people-field"
             :people="unlistedPeople"
             :placeholder="$t('people.add_member_to_team')"
-            @select="addPerson"
             v-model="person"
           />
           <button

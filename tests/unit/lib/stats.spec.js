@@ -9,37 +9,43 @@ const taskMap = new Map(Object.entries({
     id: 'task-1',
     entity_id: 'shot-1',
     task_status_id: 'task-status-1',
-    task_type_id: 'task-type-1'
+    task_type_id: 'task-type-1',
+    nb_drawings: 10
   },
   'task-2': {
     id: 'task-2',
     entity_id: 'shot-1',
     task_status_id: 'task-status-1',
-    task_type_id: 'task-type-2'
+    task_type_id: 'task-type-2',
+    nb_drawings: 10
   },
   'task-3': {
     id: 'task-3',
     entity_id: 'shot-2',
     task_status_id: 'task-status-2',
-    task_type_id: 'task-type-1'
+    task_type_id: 'task-type-1',
+    nb_drawings: 10
   },
   'task-4': {
     id: 'task-4',
     entity_id: 'shot-2',
     task_status_id: 'task-status-1',
-    task_type_id: 'task-type-2'
+    task_type_id: 'task-type-2',
+    nb_drawings: 10
   },
   'task-5': {
     id: 'task-5',
     entity_id: 'shot-3',
     task_status_id: 'task-status-1',
-    task_type_id: 'task-type-1'
+    task_type_id: 'task-type-1',
+    nb_drawings: 10
   },
   'task-6': {
     id: 'task-6',
     entity_id: 'shot-3',
     task_status_id: 'task-status-2',
-    task_type_id: 'task-type-2'
+    task_type_id: 'task-type-2',
+    nb_drawings: 10
   }
 }))
 const taskTypeMap = new Map(Object.entries({
@@ -81,41 +87,41 @@ const taskStatusMap = new Map(Object.entries({
 const expectedStatResult = {
   all: {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29 },
-      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40 },
+      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20 }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20 },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20 },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10 }
     }
   },
   'sequence-1': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30 },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10 },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20 },
     }
   },
   'sequence-2': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10 },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10 }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10 }
     },
     'task-type-2': {
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4 }
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10  }
     }
   }
 }

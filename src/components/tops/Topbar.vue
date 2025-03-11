@@ -14,14 +14,19 @@
           />
           <img class="studio-logo" src="@/assets/kitsu.png" v-else />
         </a>
-        <span class="studio-logo-wrapper nav-item" v-else>
+
+        <router-link
+          class="studio-logo-wrapper nav-item"
+          :to="{ name: 'open-productions' }"
+          v-else
+        >
           <img
             class="studio-logo"
             :src="logoPath"
             v-if="organisation?.has_avatar"
           />
           <img class="studio-logo" src="@/assets/kitsu.png" v-else />
-        </span>
+        </router-link>
 
         <div class="flexrow topbar-menu" v-if="isProductionContext">
           <div class="flexrow-item subitem">
