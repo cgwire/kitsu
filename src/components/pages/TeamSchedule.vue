@@ -321,9 +321,7 @@ export default {
       'openProductions',
       'organisation',
       'productionMap',
-      'studios',
-      'taskTypeMap',
-      'user'
+      'taskTypeMap'
     ]),
 
     daysOffByPerson() {
