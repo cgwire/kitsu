@@ -62,7 +62,7 @@ export const getTaskEntitiesPath = (task, episodeId) => {
       type = 'Asset'
     }
     const route = {
-      name: type.toLowerCase() + 's',
+      name: `${type.toLowerCase()}s`,
       params: {
         production_id: task.project_id
       },
@@ -131,7 +131,7 @@ export const getEntityPath = (
 
 const getProductionRoute = (name, productionId) => {
   return {
-    name: name,
+    name,
     params: {
       production_id: productionId
     }
