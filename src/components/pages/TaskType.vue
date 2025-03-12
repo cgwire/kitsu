@@ -214,7 +214,7 @@
           <task-list-numbers
             :is-shots="entityType === 'Shot'"
             :tasks="tasks"
-            v-if="!isLoading"
+            v-if="!loading.entities"
           />
         </div>
 
