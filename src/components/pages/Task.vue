@@ -237,7 +237,7 @@
                       isCurrentUserManager
                     "
                     :is-editable="
-                      user.id === comment.person?.id || isCurrentUserAdmin
+                      user.id === comment.person?.id || isCurrentUserManager
                     "
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
@@ -474,7 +474,6 @@ export default {
       'getTaskComments',
       'getTaskPreviews',
       'getTaskComment',
-      'isCurrentUserAdmin',
       'isCurrentUserArtist',
       'isCurrentUserClient',
       'isCurrentUserManager',
