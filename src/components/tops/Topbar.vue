@@ -557,6 +557,9 @@ export default {
     },
 
     getCurrentSectionFromRoute() {
+      if (this.$route.name === 'person') {
+        return 'person'
+      }
       let name = ''
       const segments = this.$route.path.split('/')
       if (this.isTVShow) name = segments[5]
@@ -611,7 +614,7 @@ export default {
       this.currentProductionId = routeProductionId
       this.currentEpisodeId = null
       this.clearEpisodes()
-      if (this.isTVShow) {
+      if (this.isTVShow && this.currentProjectSection !== 'person') {
         this.loadEpisodes()
           .then(episodes => {
             const query = this.$route.query

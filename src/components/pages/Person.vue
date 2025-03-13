@@ -24,7 +24,7 @@
             :tabs="todoTabs"
           />
 
-          <div ref="search" class="flexrow" v-if="!isActiveTab('calendar')">
+          <div ref="search" class="flexrow" v-show="!isActiveTab('calendar')">
             <search-field
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
@@ -198,8 +198,8 @@ export default {
     SearchField,
     SearchQueryList,
     TaskInfo,
-    TodosList,
     TimesheetList,
+    TodosList,
     UserCalendar
   },
 
@@ -209,6 +209,7 @@ export default {
       currentSort: 'entity_name',
       daysOff: [],
       dayOffError: false,
+      init: false,
       isTasksLoading: false,
       isTasksLoadingError: false,
       loading: {
@@ -237,20 +238,22 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.updateActiveTab()
-    if (this.personTasksSearchText.length > 0) {
-      this.searchField?.setValue(this.personTasksSearchText)
+    await this.loadPerson(this.$route.params.person_id)
+    if (!this.person) {
+      return
     }
     setTimeout(() => {
       this.searchField?.focus()
       this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
     }, 300)
-    this.loadPerson(this.$route.params.person_id)
     window.addEventListener('resize', this.resetScheduleHeight)
 
     this.setSearchFromUrl()
     this.onSearchChange()
+
+    this.init = true
   },
 
   afterDestroy() {
@@ -273,7 +276,6 @@ export default {
       'nbSelectedTasks',
       'personMap',
       'personTasksScrollPosition',
-      'personTasksSearchText',
       'personTaskSearchQueries',
       'personTaskSelectionGrid',
       'personTimeSpentMap',
@@ -624,12 +626,13 @@ export default {
     },
 
     isActiveTab(tab) {
-      return this.activeTab === tab
+      return this.init && this.activeTab === tab
     },
 
-    onSearchChange(text) {
-      this.setSearchInUrl()
-      this.setPersonTasksSearch(text)
+    onSearchChange(search) {
+      search = search || this.searchField?.getValue()
+      this.setSearchInUrl(search)
+      this.setPersonTasksSearch(search)
     },
 
     async loadPerson(personId) {
@@ -647,7 +650,7 @@ export default {
       this.isTasksLoading = true
       this.isTasksLoadingError = false
 
-      this.loadPersonTasks({
+      await this.loadPersonTasks({
         personId: this.person.id,
         date: this.selectedDate
       })
@@ -731,7 +734,8 @@ export default {
           this.$router.push({
             query: {
               productionId: this.productionId,
-              section: this.activeTab
+              section: this.activeTab,
+              search: this.$route.query.search
             }
           })
         }
@@ -812,20 +816,16 @@ export default {
   },
 
   watch: {
-    $route() {
-      const personId = this.$route.params.person_id
-
+    '$route.params.person_id'(personId) {
       this.updateActiveTab()
       if (this.person && this.person.id !== personId) {
         this.loadPerson(personId)
       }
     },
 
-    '$route.query.search'() {
-      this.setSearchFromUrl()
-      this.$nextTick(() => {
-        this.onSearchChange(this.searchField?.getValue())
-      })
+    '$route.query.search'(search) {
+      this.searchField?.setValue(search)
+      this.onSearchChange(search)
     },
 
     activeTab() {

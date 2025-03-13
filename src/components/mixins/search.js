@@ -58,7 +58,7 @@ export const searchMixin = {
       this.$router.push({
         query: {
           ...this.$route.query,
-          search: searchQuery
+          search: searchQuery || undefined
         }
       })
     }

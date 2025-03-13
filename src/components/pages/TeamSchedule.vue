@@ -216,9 +216,9 @@ import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
-import { getPersonTabPath } from '@/lib/path'
-import { addBusinessDays, minutesToDays, parseSimpleDate } from '@/lib/time'
 import colors from '@/lib/colors'
+import { getPersonPath } from '@/lib/path'
+import { addBusinessDays, minutesToDays, parseSimpleDate } from '@/lib/time'
 
 import { formatListMixin } from '@/components/mixins/format'
 
@@ -321,9 +321,7 @@ export default {
       'openProductions',
       'organisation',
       'productionMap',
-      'studios',
-      'taskTypeMap',
-      'user'
+      'taskTypeMap'
     ]),
 
     daysOffByPerson() {
@@ -506,7 +504,7 @@ export default {
           expanded: false,
           loading: false,
           editable: false,
-          route: getPersonTabPath(item.id, 'schedule'),
+          route: getPersonPath(item.id, 'schedule'),
           children: [],
           daysOff: this.daysOffByPerson[item.id]
         }

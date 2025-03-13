@@ -281,14 +281,7 @@ export const routes = [
       {
         path: 'people/:person_id',
         component: Person,
-        name: 'person',
-        children: [
-          {
-            path: ':tab',
-            component: Person,
-            name: 'person-tab'
-          }
-        ]
+        name: 'person'
       },
 
       {

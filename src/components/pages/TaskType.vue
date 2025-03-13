@@ -214,7 +214,7 @@
           <task-list-numbers
             :is-shots="entityType === 'Shot'"
             :tasks="tasks"
-            v-if="!isLoading"
+            v-if="!loading.entities"
           />
         </div>
 
@@ -281,6 +281,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
+import { getPersonPath } from '@/lib/path'
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
@@ -1258,13 +1259,7 @@ export default {
           children: [],
           editable: false,
           daysOff: this.daysOffByPerson[person.id],
-          route: {
-            name: 'person-tab',
-            params: {
-              person_id: person.id,
-              tab: 'schedule'
-            }
-          }
+          route: getPersonPath(person.id, 'schedule')
         }
       }
 
