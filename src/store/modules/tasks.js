@@ -197,7 +197,7 @@ const actions = {
 
   loadComment({ commit }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
-      // FIXME: currently the API returns a list of comment IDs
+      // The API returns a list of preview IDs instead of objects.
       comment.previews = comment.previews.map(id => ({ id }))
       commit(NEW_TASK_COMMENT_END, { comment })
       return comment
@@ -1211,9 +1211,10 @@ const mutations = {
     }
   },
 
-  [UPDATE_TASK](state, { task, nbAssetsReady, updatedAt }) {
+  [UPDATE_TASK](state, { task, nbAssetsReady, updatedAt, taskStatusId }) {
     if (nbAssetsReady) task.nb_assets_ready = nbAssetsReady
     if (updatedAt) task.updated_at = updatedAt
+    if (taskStatusId) task.task_status_id = taskStatusId
   },
 
   [EDIT_TASK_DATES](state, { taskId, data }) {

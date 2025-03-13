@@ -46,6 +46,7 @@ export default {
       'departmentMap',
       'editMap',
       'episodeMap',
+      'todoMap',
       'isCurrentUserAdmin',
       'isDataLoading',
       'isDarkTheme',
@@ -57,6 +58,7 @@ export default {
       'productionMap',
       'sequenceMap',
       'shotMap',
+      'taskComments',
       'taskMap',
       'taskStatusMap',
       'taskTypeMap',
@@ -415,11 +417,19 @@ export default {
 
       'comment:new'(eventData) {
         const commentId = eventData.comment_id
-        if (
-          !this.isSavingCommentPreview &&
-          this.taskMap.get(eventData.task_id)
-        ) {
-          this.loadComment({ commentId }).catch(console.error)
+        const task = this.taskMap.get(eventData.task_id)
+        if (!this.isSavingCommentPreview && task) {
+          if (
+            this.taskComments[eventData.task_id] ||
+            this.todoMap.get(eventData.task_id)
+          ) {
+            this.loadComment({ commentId }).catch(console.error)
+          } else {
+            this.$store.commit('UPDATE_TASK', {
+              task,
+              taskStatusId: eventData.task_status_id
+            })
+          }
         }
       },
 
