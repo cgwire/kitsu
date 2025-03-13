@@ -24,7 +24,7 @@
             :tabs="todoTabs"
           />
 
-          <div ref="search" class="flexrow" v-if="!isActiveTab('calendar')">
+          <div ref="search" class="flexrow" v-show="!isActiveTab('calendar')">
             <search-field
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
@@ -731,7 +731,8 @@ export default {
           this.$router.push({
             query: {
               productionId: this.productionId,
-              section: this.activeTab
+              section: this.activeTab,
+              search: this.$route.query.search
             }
           })
         }
