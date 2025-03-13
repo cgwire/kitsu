@@ -95,7 +95,7 @@ const actions = {
 
     // Create Task
     const conceptTaskType = rootGetters.taskTypes.find(
-      taskType => taskType.for_entity === 'Concept'
+      taskType => taskType.for_entity === 'Asset'
     )
     const task = await dispatch('createTask', {
       entityId: concept.id,
