@@ -615,9 +615,11 @@ export default {
 
     reloadEpisodeShotsIfNeeded() {
       if (
-        (this.isTVShow && this.displayedSequences.length === 0) ||
-        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
-        this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
+        ((this.isTVShow && this.displayedSequences.length === 0) ||
+          this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
+          this.displayedShots[0]?.episode_id !== this.currentEpisode?.id) &&
+        !this.isShotsLoading &&
+        !this.initialLoading
       ) {
         this.$refs['shot-search-field']?.setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
@@ -1159,23 +1161,19 @@ export default {
     },
 
     currentProduction() {
-      this.$refs['shot-search-field']?.setValue('')
-      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+      if (!this.initialLoading) {
+        this.$refs['shot-search-field']?.setValue('')
+        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
 
-      this.initialLoading = true
-      if (!this.isTVShow) {
-        this.loadShots(() => {
-          this.initialLoading = false
-        })
+        if (!this.isTVShow) {
+          this.loadShots()
+        }
       }
     },
 
     currentEpisode() {
       const finalize = () => {
-        this.initialLoading = true
-        this.loadShots(() => {
-          this.initialLoading = false
-        })
+        this.loadShots()
       }
       if (this.isTVShow && this.currentEpisode) {
         if (
