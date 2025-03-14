@@ -457,14 +457,14 @@ export default {
       if (isPersonTab && this.params.person) {
         personId = this.params.person.indexOf
       } else if (isPersonTab) {
-        personId = this.teamPersons[0].id
+        personId = this.teamPersons[0]?.id
       }
       const query = {
         countMode: this.params.countMode,
         computeMode: this.params.computeMode,
         tab: this.activeTab || 'tasktypes',
         taskTypeId,
-        personId: personId ? personId : undefined
+        personId: personId || undefined
       }
       return query
     }
