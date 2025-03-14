@@ -714,9 +714,7 @@ export default {
 
     isEstimationBurned(task) {
       return (
-        task.estimation &&
-        task.estimation > 0 &&
-        task.duration > task.estimation
+        this.isToCheck && task.estimation > 0 && task.duration > task.estimation
       )
     },
 
