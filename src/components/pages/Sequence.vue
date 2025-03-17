@@ -320,8 +320,7 @@ export default {
         edit: false
       },
       modals: {
-        edit: false,
-        preview: false
+        edit: false
       }
     }
   },
