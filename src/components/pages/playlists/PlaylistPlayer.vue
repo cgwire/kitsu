@@ -2075,7 +2075,7 @@ export default {
     resetHandles(entity) {
       if (this.playlist.for_entity === 'shot') {
         entity = entity || this.currentEntity
-        const shot = this.shotMap.get(entity.id)
+        const shot = this.shotMap.get(entity?.id)
         this.handleIn = shot?.data?.handle_in || 0
         this.handleOut = shot?.data?.handle_out || this.nbFrames
       }
