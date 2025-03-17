@@ -956,10 +956,13 @@ export default {
     },
 
     addEntity(entity, playlist, scrollRight = true) {
+      if (this.currentEntities[entity.id]) {
+        return Promise.resolve()
+      }
       return this.loadEntityPreviewFiles(entity)
-        .then(previewFiles => {
-          return this.addToStorePlaylistAndSave(previewFiles, entity, playlist)
-        })
+        .then(previewFiles =>
+          this.addToStorePlaylistAndSave(previewFiles, entity, playlist)
+        )
         .then(entity => {
           this.addToPlayerPlaylist(entity, playlist, scrollRight)
         })
