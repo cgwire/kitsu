@@ -73,7 +73,7 @@
             >
               <div class="flexrow" v-if="!isListToggled">
                 <light-entity-thumbnail
-                  class="flerxow-item playlist-thumbnail"
+                  class="playlist-thumbnail"
                   :preview-file-id="playlist.first_preview_file_id"
                   type="previews"
                   width="38px"
@@ -84,7 +84,7 @@
                   empty-height="30px"
                   :title="playlist.name"
                 />
-                <div class="flerxow-item ml05">
+                <div class="ml05">
                   {{ playlist.name }}
                   <span class="playlist-date">
                     {{ $t('playlists.updated_at') }}
@@ -559,7 +559,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'assetSearchText',
       'currentEpisode',
       'currentProduction',
@@ -577,10 +576,8 @@ export default {
       'playlistMap',
       'playlists',
       'playlistsPath',
-      'sequenceMap',
       'shotsByEpisode',
       'shotSearchText',
-      'shotMap',
       'taskMap',
       'taskStatusMap',
       'taskTypeMap'
