@@ -955,26 +955,29 @@ export default {
       }
     },
 
-    addEntity(entity, scrollRight = true) {
+    addEntity(entity, playlist, scrollRight = true) {
       return this.loadEntityPreviewFiles(entity)
         .then(previewFiles => {
-          return this.addToStorePlaylistAndSave(previewFiles, entity)
+          return this.addToStorePlaylistAndSave(previewFiles, entity, playlist)
         })
         .then(entity => {
-          this.addToPlayerPlaylist(entity, scrollRight)
+          this.addToPlayerPlaylist(entity, playlist, scrollRight)
         })
         .catch(err => console.error(err))
     },
 
-    addToStorePlaylistAndSave(previewFiles, entity) {
+    addToStorePlaylistAndSave(previewFiles, entity, playlist) {
       return this.pushEntityToPlaylist({
-        playlist: this.currentPlaylist,
-        previewFiles: previewFiles,
+        playlist,
+        previewFiles,
         entity: { ...entity }
       })
     },
 
-    addToPlayerPlaylist(entity, scrollRight = true) {
+    addToPlayerPlaylist(entity, playlist, scrollRight = true) {
+      if (playlist.id !== this.playlistPlayer.playlist.id) {
+        return
+      }
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
       this.currentEntities[playlistEntity.id] = playlistEntity
       this.playlistPlayer.entityList.push(playlistEntity)
@@ -986,13 +989,15 @@ export default {
     },
 
     addEntityToPlaylist(entity) {
-      if (!this.currentEntities[entity.id]) {
-        this.addEntity(entity).then(this.playlistPlayer.scrollToRight())
+      if (this.currentEntities[entity.id]) {
+        return
       }
+      const playlist = this.currentPlaylist
+      this.addEntity(entity, playlist).then(this.playlistPlayer.scrollToRight())
     },
 
     onNewEntityDropped(info) {
-      let entity = null
+      let entity
       if (this.isAssetPlaylist) {
         entity = assetStore.cache.assetMap.get(info.after)
       } else if (this.isSequencePlaylist) {
@@ -1003,7 +1008,8 @@ export default {
 
       if (entity && !this.currentEntities[entity.id]) {
         const notScrollRight = false
-        this.addEntity(entity, notScrollRight).then(() => {
+        const playlist = this.currentPlaylist
+        this.addEntity(entity, playlist, notScrollRight).then(() => {
           this.playlistPlayer.onEntityDropped(info)
         })
       }
@@ -1106,11 +1112,14 @@ export default {
       })
     },
 
-    addEntities(entities, callback) {
+    addEntities(entities, callback, playlist = undefined) {
+      if (!playlist) {
+        playlist = this.currentPlaylist
+      }
       if (entities && entities.length > 0) {
         const entity = entities.pop()
-        this.addEntity(entity).then(() => {
-          this.addEntities(entities, callback)
+        this.addEntity(entity, playlist).then(() => {
+          this.addEntities(entities, callback, playlist)
         })
       } else {
         callback()
