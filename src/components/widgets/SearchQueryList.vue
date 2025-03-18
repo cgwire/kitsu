@@ -247,12 +247,18 @@ export default {
     ...mapGetters([
       'currentProduction',
       'departmentMap',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'personMap'
     ]),
 
     sortedFilters() {
-      return sortByName([...this.queries])
+      const queries = this.queries.filter(
+        query =>
+          !this.isCurrentUserClient ||
+          (this.isCurrentUserClient && !query.is_shared)
+      )
+      return sortByName(queries)
     },
 
     userFilters() {
@@ -270,14 +276,17 @@ export default {
     },
 
     userFilterGroups() {
-      return sortByName([...this.groups]).map(group => {
-        return {
-          ...group,
-          queries: this.sortedFilters.filter(
-            query => query.search_filter_group_id === group.id
-          )
-        }
-      })
+      const groups = this.groups.filter(
+        group =>
+          !this.isCurrentUserClient ||
+          (this.isCurrentUserClient && !group.is_shared)
+      )
+      return sortByName(groups).map(group => ({
+        ...group,
+        queries: this.sortedFilters.filter(
+          query => query.search_filter_group_id === group.id
+        )
+      }))
     },
 
     groupOptions() {
