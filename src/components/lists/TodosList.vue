@@ -78,9 +78,8 @@
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
             :key="entry + '-' + i"
+            class="datatable-row datatable-row--selectable"
             :class="{
-              'datatable-row': true,
-              'datatable-row--selectable': true,
               selected: selectionGrid[entry.id]
             }"
             @click="selectTask($event, i, entry)"
@@ -157,9 +156,8 @@
               </template>
             </td>
             <td
+              class="duration number-cell"
               :class="{
-                duration: true,
-                'number-cell': true,
                 error: isEstimationBurned(entry)
               }"
             >
@@ -714,9 +712,7 @@ export default {
 
     isEstimationBurned(task) {
       return (
-        task.estimation &&
-        task.estimation > 0 &&
-        task.duration > task.estimation
+        this.isToCheck && task.estimation > 0 && task.duration > task.estimation
       )
     },
 

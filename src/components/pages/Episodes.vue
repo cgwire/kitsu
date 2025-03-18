@@ -324,7 +324,6 @@ export default {
   mounted() {
     this.setSearchFromUrl()
     this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
-    this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
     if (!this.isCurrentUserManager && this.user.departments.length > 0) {
       this.selectedDepartment = 'MY_DEPARTMENTS'
       this.departmentFilter = this.user.departments

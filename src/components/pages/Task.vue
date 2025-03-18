@@ -416,7 +416,6 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         deleteExtraPreview: false,
-        deleteTask: false,
         deleteComment: false,
         editComment: false
       },
@@ -425,7 +424,6 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         setPreview: false,
-        deleteTask: false,
         deleteComment: false,
         editComment: false
       },
@@ -435,7 +433,6 @@ export default {
         addPreview: false,
         addExtraPreview: false,
         setPreview: false,
-        deleteTask: false,
         deleteComment: false,
         editComment: false
       },

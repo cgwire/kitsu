@@ -82,7 +82,8 @@ const helpers = {
       persons,
       query
     })
-    let result = indexSearch(cache.episodeIndex, keywords) || state.episodes
+
+    let result = indexSearch(cache.episodeIndex, keywords) || cache.episodes
     result = applyFilters(result, filters, taskMap)
     result = sortEpisodeResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
@@ -635,6 +636,7 @@ const mutations = {
       cache.episodeMap.set(episode.id, episode)
     })
     episodes = sortByName(episodes)
+
     cache.episodes = episodes
     cache.result = episodes
     cache.episodeIndex = buildEpisodeIndex(episodes)
@@ -757,13 +759,9 @@ const mutations = {
     state.isEpisodesLoading = true
     state.isEpisodesLoadingError = false
 
-    state.displayedepisodes = []
-    state.displayedepisodesLength = 0
     state.episodeSearchQueries = []
     state.displayedEpisodes = []
     state.displayedEpisodesLength = 0
-
-    state.selectedepisodes = new Map()
   },
 
   [LOAD_EPISODES_ERROR](state) {
@@ -783,7 +781,10 @@ const mutations = {
     })
     state.episodes = sortByName(episodes)
 
+    cache.episodes = state.episodes
+    cache.result = state.episodes
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
+
     state.displayedEpisodes = state.episodes
     state.displayedEpisodesLength = state.episodes.length
 

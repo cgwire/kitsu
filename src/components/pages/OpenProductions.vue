@@ -287,7 +287,7 @@ export default {
   watch: {
     openProductions() {
       if (this.openProductions.length > 6) {
-        const searchQuery = this.$refs['search-field'].getValue() || ''
+        const searchQuery = this.$refs['search-field']?.getValue() || ''
         this.onSearchChange(searchQuery)
       } else {
         this.filteredProductions = this.openProductions

@@ -17,18 +17,23 @@ export const entitiesMixin = {
     const departmentId = preferences.getPreference(
       `${this.pageName}:department`
     )
-    if (departmentId) {
+    if (
+      departmentId &&
+      !this.isCurrentUserClient &&
+      (!this.user.departments.length ||
+        this.user.departments.includes(departmentId))
+    ) {
       this.selectedDepartment = departmentId
-    } else {
-      if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-        this.selectedDepartment = 'MY_DEPARTMENTS'
-      }
+    } else if (!this.isCurrentUserManager && this.user.departments.length) {
+      this.selectedDepartment = 'MY_DEPARTMENTS'
     }
     this.onSelectedDepartmentChanged()
   },
 
   computed: {
     ...mapGetters([
+      'isCurrentUserClient',
+      'isCurrentUserManager',
       'nbSelectedTasks',
       'selectedTasks',
       'nbSelectedValidations'
