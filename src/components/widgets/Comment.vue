@@ -308,7 +308,7 @@
           class="flexrow-item preview-status"
           :title="comment.previews[0].validation_status"
           :style="getPreviewValidationStyle(comment.previews[0])"
-          @click="changePreviewValidationStatus(comment.previews[0])"
+          @click="changePreviewValidationStatus(comment.previews)"
         >
           &nbsp;
         </span>
@@ -726,17 +726,19 @@ export default {
       return { background: color }
     },
 
-    changePreviewValidationStatus(previewFile) {
-      if (!this.isCurrentUserManager) return
-      let status = previewFile.status
-      if (previewFile.validation_status === 'validated') {
-        status = 'rejected'
-      } else if (previewFile.validation_status === 'rejected') {
-        status = 'neutral'
-      } else {
-        status = 'validated'
+    changePreviewValidationStatus(previewFiles) {
+      if (!this.isCurrentUserManager) {
+        return
       }
-      this.updatePreviewFileValidationStatus({ previewFile, status })
+      const statusMap = {
+        validated: 'rejected',
+        rejected: 'neutral',
+        neutral: 'validated'
+      }
+      const status = statusMap[previewFiles[0].validation_status] || 'validated'
+      previewFiles.forEach(previewFile => {
+        this.updatePreviewFileValidationStatus({ previewFile, status })
+      })
     },
 
     renderComment,
