@@ -1442,7 +1442,7 @@ export default {
     },
 
     onTimelineScroll(event) {
-      if (!event) return
+      if (!event?.target) return
       const position = event.target
       const newTop = position.scrollTop
       this.entityList.scrollTop = newTop

@@ -18,7 +18,7 @@
       </span>
     </div>
 
-    <div class="mt2 empty" v-if="!isLoading && events.length === 0">
+    <div class="mt2 empty" v-if="!isLoading && !events.length">
       {{ $t('logs.empty_list') }}
     </div>
     <div class="has-text-centered" v-if="isLoading">
@@ -26,47 +26,46 @@
     </div>
     <div class="log-list" v-else>
       <div
-        class="mt05 event-line"
+        class="event-line"
         :key="event.id"
         @click="selectLine(event)"
         v-for="event in events"
       >
-        <div>
-          <span class="date tag mr1">{{ formatDate(event.created_at) }} </span>
-          <span
-            class="type tag"
-            :title="event.name.split(':')[1]"
-            :data-status="formatType(event)"
-          >
-            {{ formatType(event) }}
-          </span>
-          <span class="name tag mr1">{{ event.name.split(':')[0] }}</span>
-        </div>
-        <ul v-show="selectedEvents[event.id]">
+        <span class="date tag mr1">{{ event.date }} </span>
+        <span
+          class="type tag"
+          :title="event.type"
+          :data-status="event.shortType"
+        >
+          {{ event.shortType }}
+        </span>
+        <span class="name tag mr1">{{ event.name }}</span>
+        <ul v-if="selectedEvents[event.id]">
           <li class="flexrow">
             <span class="key">user</span>
             <people-avatar
               class="flexrow-item"
               :size="20"
+              :font-size="10"
               :person="personMap.get(event.user_id)"
               v-if="event.user_id"
             />
             <people-name
               class="flexrow-item"
               :person="personMap.get(event.user_id)"
+              with-link
               v-if="event.user_id"
             />
           </li>
           <li
-            class="variable"
-            :key="event.id + '-' + key"
+            :key="`${event.id}-${key}`"
             v-for="key in Object.keys(event.data).sort()"
           >
             <span class="key">{{ key }}</span>
             <a :href="getLink(event, key)" v-if="isLink(key)">
               {{ event.data[key] }}
             </a>
-            <span v-else>{{ event.data[key] }}</span>
+            <template v-else>{{ event.data[key] }}</template>
           </li>
         </ul>
       </div>
@@ -114,7 +113,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['personMap', 'productionMap', 'user']),
+    ...mapGetters(['personMap', 'user']),
 
     today() {
       return moment().toDate()
@@ -123,10 +122,6 @@ export default {
 
   methods: {
     ...mapActions(['loadEvents']),
-
-    formatType(event) {
-      return event.name.split(':')[1].substring(0, 3)
-    },
 
     loadDayEvents() {
       const before = moment(this.currentDate).add(1, 'days')
@@ -138,12 +133,24 @@ export default {
         before: formatFullDateWithRevertedTimezone(before, this.timezone)
       })
         .then(events => {
-          this.isLoading = false
-          this.events = events
+          this.events = events.map(event => {
+            const [name, type] = event.name.split(':')
+            return {
+              id: event.id,
+              date: this.formatDate(event.created_at),
+              data: event.data,
+              name,
+              shortType: type.substring(0, 3),
+              type,
+              user_id: event.user_id
+            }
+          })
         })
         .catch(err => {
-          this.isLoading = false
           console.error(err)
+        })
+        .finally(() => {
+          this.isLoading = false
         })
     },
 
@@ -200,6 +207,9 @@ export default {
 }
 
 .log-list {
+  display: flex;
+  gap: 0.5em;
+  flex-direction: column;
   margin-bottom: 2em;
 }
 
@@ -212,6 +222,7 @@ export default {
 
   .date {
     font-weight: 500;
+    min-width: 140px;
   }
 
   .type {
@@ -249,6 +260,7 @@ export default {
   }
 
   ul {
+    cursor: default;
     color: var(--text);
     border-left: 3px solid $light-grey;
     list-style-type: none;
