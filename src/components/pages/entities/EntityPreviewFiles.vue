@@ -16,7 +16,7 @@
     <div v-else-if="previewFiles.length > 0 && !isLoading">
       <div class="contact-sheet flexcolumn" v-if="contactSheetMode">
         <div
-          :key="'task-type-group-' + index"
+          :key="`task-type-group-${index}`"
           v-for="(taskTypePreviewFiles, index) in taskTypePreviewFileGroups"
         >
           <div class="flexrow-item mb1">
@@ -204,16 +204,6 @@ export default {
 
   methods: {
     ...mapActions(['getEntityPreviewFiles']),
-
-    getPreviewValidationStyle(previewFile) {
-      let color = '#AAA'
-      if (previewFile.validation_status === 'validated') {
-        color = '#67BE48' // green
-      } else if (previewFile.validation_status === 'rejected') {
-        color = '#FF3860' // red
-      }
-      return { background: color }
-    },
 
     getTaskType(previewFile) {
       const task = this.taskMap.get(previewFile.task_id)

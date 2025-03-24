@@ -1923,7 +1923,7 @@ td.fps {
 }
 
 .modal-content p.is-danger {
-  color: #ff3860;
+  color: $red;
   font-style: italic;
   margin-bottom: 2em;
 }

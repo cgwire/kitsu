@@ -21,7 +21,7 @@
           class="card-file-name flexrow-item"
           :title="previewFile.original_name"
         >
-          {{ `${previewFile.original_name}` }}
+          {{ previewFile.original_name }}
         </span>
         <span class="filler"></span>
         <span class="card-extension flexrow-item mr0">
@@ -78,14 +78,6 @@ export default {
     PeopleAvatar
   },
 
-  data() {
-    return {
-      contactSheetMode: false,
-      isLoading: false,
-      previewFiles: []
-    }
-  },
-
   props: {
     previewFile: {
       type: Object,
@@ -98,7 +90,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'currentProduction',
       'isCurrentUserArtist',
       'personMap',
       'taskMap',
@@ -118,9 +109,7 @@ export default {
     },
 
     renderFileSize
-  },
-
-  watch: {}
+  }
 }
 </script>
 
