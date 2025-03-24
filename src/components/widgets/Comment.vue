@@ -284,10 +284,7 @@
         class="flexrow content-wrapper preview-info"
         v-if="comment.previews.length > 0 && !isConcept"
       >
-        <router-link
-          class="flexrow-item round-name revision"
-          :to="previewRoute"
-        >
+        <router-link class="round-name revision" :to="previewRoute">
           {{
             comment.pinned
               ? $t('comments.pinned_revision')
@@ -296,7 +293,7 @@
           {{ comment.previews[0].revision }}
         </router-link>
         <a
-          class="preview-link button flexrow-item"
+          class="preview-link button"
           :href="comment.links[0]"
           :title="$t('playlists.actions.open_link')"
           target="_blank"
@@ -306,12 +303,11 @@
         </a>
         <span
           class="flexrow-item preview-status"
+          :class="{ pointer: isCurrentUserManager }"
           :title="comment.previews[0].validation_status"
-          :style="getPreviewValidationStyle(comment.previews[0])"
+          :data-status="comment.previews[0].validation_status"
           @click="changePreviewValidationStatus(comment.previews)"
-        >
-          &nbsp;
-        </span>
+        ></span>
       </div>
     </article>
     <div class="empty-comment" v-else>
@@ -716,16 +712,6 @@ export default {
       })
     },
 
-    getPreviewValidationStyle(previewFile) {
-      let color = '#AAA'
-      if (previewFile.validation_status === 'validated') {
-        color = '#67BE48' // green
-      } else if (previewFile.validation_status === 'rejected') {
-        color = '#FF3860' // red
-      }
-      return { background: color }
-    },
-
     changePreviewValidationStatus(previewFiles) {
       if (!this.isCurrentUserManager) {
         return
@@ -1115,13 +1101,20 @@ textarea.reply {
 }
 
 .preview-status {
-  border-radius: 50%;
+  background: #aaa;
   border: 2px solid $grey;
-  cursor: pointer;
+  border-radius: 50%;
   height: 20px;
+  min-width: 20px;
   transition: background 0.3s ease;
   width: 20px;
-  min-width: 20px;
+
+  &[data-status='validated'] {
+    background: $light-green;
+  }
+  &[data-status='rejected'] {
+    background: $red;
+  }
 }
 
 @media screen and (max-width: 768px) {

@@ -32,10 +32,8 @@
         <span
           class="preview-status mr05"
           :title="previewFile.validation_status"
-          :style="getPreviewValidationStyle(previewFile)"
-        >
-          &nbsp;
-        </span>
+          :data-status="previewFile.validation_status"
+        ></span>
         <people-avatar
           class="person"
           :person="personMap.get(previewFile.person_id)"
@@ -109,16 +107,6 @@ export default {
   },
 
   methods: {
-    getPreviewValidationStyle(previewFile) {
-      let color = '#AAA'
-      if (previewFile.validation_status === 'validated') {
-        color = '#67BE48' // green
-      } else if (previewFile.validation_status === 'rejected') {
-        color = '#FF3860' // red
-      }
-      return { background: color }
-    },
-
     getTaskType(previewFile) {
       const task = this.taskMap.get(previewFile.task_id)
       return this.taskTypeMap.get(task.task_type_id)
@@ -175,13 +163,19 @@ export default {
   }
 
   .preview-status {
-    border-radius: 50%;
+    background: #aaa;
     border: 2px solid $grey;
-    cursor: pointer;
+    border-radius: 50%;
     height: 20px;
     min-width: 20px;
-    transition: background 0.3s ease;
     width: 20px;
+
+    &[data-status='validated'] {
+      background: $light-green;
+    }
+    &[data-status='rejected'] {
+      background: $red;
+    }
   }
 
   .card-file-size {
