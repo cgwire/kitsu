@@ -1,26 +1,27 @@
 <template>
-  <div class="wrapper flexrow">
-    <drag @drag="onDragged" :transfer-data="index">
-      <div
-        :class="{
-          'flerow-item': true,
-          'revision-preview': true,
-          selected: isSelected
-        }"
-        @click.prevent="onSelected"
-      >
-        <light-entity-thumbnail
-          width="150px"
-          height="103px"
-          :preview-file-id="previewFile.id"
-          v-if="hasThumbnail"
-        />
-        <span :title="originalName" v-else> .{{ previewFile.extension }} </span>
-      </div>
-    </drag>
-    <drop @drop="onDropped">
-      <div class="drop-area flexrow-item" ref="drop-area"></div>
-    </drop>
+  <div class="wrapper">
+    <div
+      class="revision-preview"
+      :class="{ selected: isSelected }"
+      draggable="true"
+      @click.prevent="onSelected"
+      @dragstart="onPreviewDragStart($event, index)"
+    >
+      <light-entity-thumbnail
+        width="150px"
+        height="103px"
+        :preview-file-id="previewFile.id"
+        v-if="hasThumbnail"
+      />
+      <span :title="originalName" v-else> .{{ previewFile.extension }} </span>
+    </div>
+    <div
+      ref="drop-area"
+      class="drop-area"
+      @dragover="onDragover"
+      @dragleave="onDragleave"
+      @drop="onDropped"
+    ></div>
   </div>
 </template>
 
@@ -30,8 +31,6 @@
  * given file for current revision.
  * It fires events about drag'n'drop reordering too.
  */
-import { mapGetters } from 'vuex'
-
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 
 export default {
@@ -58,13 +57,7 @@ export default {
 
   emits: ['preview-dropped', 'selected'],
 
-  mounted() {
-    this.setListeners()
-  },
-
   computed: {
-    ...mapGetters(['isCurrentUserManager']),
-
     dropArea() {
       return this.$refs['drop-area']
     },
@@ -83,27 +76,25 @@ export default {
       this.$emit('selected', this.index)
     },
 
-    setListeners() {
-      this.dropArea.addEventListener('dragover', this.onDragover)
-      this.dropArea.addEventListener('dragleave', this.onDragleave)
+    onPreviewDragStart(event, previewIndex) {
+      event.dataTransfer.setData('previewIndex', previewIndex)
     },
-
-    onDragged() {},
 
     onDragleave() {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
     },
 
-    onDragover() {
+    onDragover(event) {
+      event.preventDefault()
       this.dropArea.style.width = '60px'
     },
 
-    onDropped(previousIndex) {
+    onDropped(event) {
       this.dropArea.style.background = 'transparent'
       this.dropArea.style.width = '15px'
       this.$emit('preview-dropped', {
-        previousIndex,
+        previousIndex: event.dataTransfer.getData('previewIndex'),
         newIndex: this.index
       })
     }
@@ -113,16 +104,12 @@ export default {
 
 <style lang="scss" scoped>
 .wrapper {
+  display: flex;
   align-items: stretch;
-
-  .flexrow-item {
-    margin: 0;
-  }
 }
 
 .drop-area {
   width: 15px;
-  height: 100%;
   transition: width 0.3s ease;
 }
 
