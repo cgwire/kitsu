@@ -17,6 +17,7 @@
           <people-field
             ref="person-field"
             class="person-field"
+            :disabled="isCurrentUserArtist"
             :label="$t('main.person')"
             :people="teamPersons"
             v-model="params.person"
@@ -264,9 +265,11 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isCurrentUserArtist',
       'isPaperProduction',
       'productionShotTaskTypes',
-      'shotTaskTypes'
+      'shotTaskTypes',
+      'user'
     ]),
 
     taskTypeList() {
@@ -274,6 +277,9 @@ export default {
     },
 
     teamPersons() {
+      if (this.isCurrentUserArtist) {
+        return [personMap.get(this.user.id)]
+      }
       return sortPeople(
         this.currentProduction.team.map(personId => personMap.get(personId))
       )
