@@ -167,7 +167,6 @@ export default {
       'currentProduction',
       'displayedEpisodes',
       'episodesPath',
-      'isCurrentUserManager',
       'episodes',
       'episodeMap',
       'episodePath',
@@ -176,6 +175,7 @@ export default {
       'episodeSearchText',
       'episodeListScrollPosition',
       'episodeValidationColumns',
+      'isPaperProduction',
       'taskStatusMap',
       'taskTypeMap'
     ]),
@@ -195,7 +195,6 @@ export default {
       'editEpisode',
       'hideAssignations',
       'initEpisodeStats',
-      'isPaperProduction',
       'loadEpisodeStats',
       'loadEpisodeRetakeStats',
       'loadShots',
