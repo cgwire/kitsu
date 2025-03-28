@@ -12,9 +12,10 @@ export default {
     return item === null ? defaultValue : item === 'true'
   },
 
-  getIntPreference(key, defvalue = 0) {
+  getIntPreference(key, defaultValue = 0) {
     const item = this.getPreference(key)
-    return item ? parseInt(item) : defvalue
+    const value = parseInt(item)
+    return isNaN(value) ? defaultValue : value
   },
 
   setObjectPreference(key, data) {
