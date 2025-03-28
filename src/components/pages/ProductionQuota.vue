@@ -16,6 +16,7 @@
         <people-field
           ref="person-field"
           class="person-field flexrow-item"
+          :clearable="false"
           :disabled="isCurrentUserArtist"
           :label="$t('main.person')"
           :people="teamPersons"
