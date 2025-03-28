@@ -1,6 +1,6 @@
 [![Kitsu](https://zou.cg-wire.com/kitsu.png)](https://kitsu.cg-wire.com)
 
-# Kitsu, Collaboration Platform for Animation And VFX Studios
+# Kitsu, Collaboration Platform for Animation, VFX, and Video Game Studios
 
 Kitsu is a web application that allows you to collaborate on your creative productions and
 manage your deliveries. It improves the communication between all stakeholders.
@@ -25,7 +25,7 @@ You will find all the information you are looking for!
 
 Kitsu is written by CGWire, a company based in France. We help animation and VFX studios to collaborate better through efficient tooling.
 
-More than 70 studios around the world use Kitsu for their projects.
+More than 300 studios around the world use Kitsu for their projects.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
