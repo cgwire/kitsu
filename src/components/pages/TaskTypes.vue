@@ -8,12 +8,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs
-      class="mt2"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="task-types"
-    />
+    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <task-type-list
       :entries="listTaskTypes"

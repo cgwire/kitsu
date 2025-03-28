@@ -27,10 +27,6 @@ export default {
       type: String,
       default: ''
     },
-    routeName: {
-      type: String,
-      default: ''
-    },
     tabs: {
       type: Array,
       default: () => []

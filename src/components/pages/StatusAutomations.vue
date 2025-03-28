@@ -8,12 +8,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs
-      class="mt2"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="status-automations"
-    />
+    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <status-automation-list
       class="status-automation-list"
