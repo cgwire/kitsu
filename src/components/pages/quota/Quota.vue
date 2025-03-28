@@ -239,7 +239,6 @@ export default {
     },
     detailLevel: {
       type: String,
-      default: 'day',
       required: true
     },
     countMode: {
@@ -248,7 +247,6 @@ export default {
     },
     computeMode: {
       type: String,
-      default: 'weighted',
       required: true
     },
     year: {
@@ -256,14 +254,6 @@ export default {
       default: 0
     },
     month: {
-      type: Number,
-      default: 0
-    },
-    week: {
-      type: Number,
-      default: 0
-    },
-    day: {
       type: Number,
       default: 0
     },
@@ -281,15 +271,12 @@ export default {
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
       currentWeek: moment().week(),
-      detailsTitle: '',
       detailsMap: {},
-      isPanelShown: false,
       isLoading: true,
       isError: false,
       personIds: [],
       quotaMap: {},
       quotaLength: 0,
-      selected: undefined,
       averageColumnX: '12rem'
     }
   },
