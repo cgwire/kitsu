@@ -13,25 +13,22 @@
             v-model="params.taskTypeId"
           />
         </div>
-        <div class="flexrow-item">
-          <people-field
-            ref="person-field"
-            class="person-field"
-            :label="$t('main.person')"
-            :people="teamPersons"
-            v-model="params.person"
-            v-if="activeTab === 'persons'"
-          />
-        </div>
-        <div class="flexrow-item">
-          <combobox
-            class="flexrow-item"
-            :label="$t('quota.detail_label')"
-            :options="detailLevelOptions"
-            v-model="detailLevelString"
-          />
-        </div>
-
+        <people-field
+          ref="person-field"
+          class="person-field flexrow-item"
+          :clearable="false"
+          :disabled="isCurrentUserArtist"
+          :label="$t('main.person')"
+          :people="teamPersons"
+          v-model="params.person"
+          v-if="activeTab === 'persons'"
+        />
+        <combobox
+          class="flexrow-item"
+          :label="$t('quota.detail_label')"
+          :options="detailLevelOptions"
+          v-model="detailLevelString"
+        />
         <combobox
           class="flexrow-item"
           :label="$t('quota.month_label')"
@@ -39,34 +36,28 @@
           v-model="monthString"
           v-if="detailLevelString === 'day'"
         />
-
         <combobox
           class="flexrow-item"
           :label="$t('quota.year_label')"
           :options="yearOptions"
           v-model="yearString"
         />
-
-        <div class="flexrow-item">
-          <combobox
-            class="flexrow-item"
-            :label="$t('quota.count_label')"
-            :options="countModeOptions"
-            v-model="params.countMode"
-          />
-        </div>
+        <combobox
+          class="flexrow-item"
+          :label="$t('quota.count_label')"
+          :options="countModeOptions"
+          v-model="params.countMode"
+        />
         <combobox
           class="flexrow-item"
           :label="$t('quota.compute_mode')"
           :options="computeModeOptions"
           v-model="params.computeMode"
         />
-        <div class="flexrow-item">
-          <info-question-mark
-            class="mt2"
-            :text="$t('quota.explanation_' + params.computeMode)"
-          />
-        </div>
+        <info-question-mark
+          class="mt2 flexrow-item"
+          :text="$t(`quota.explanation_${params.computeMode}`)"
+        />
         <div class="filler"></div>
         <button-simple
           class="flexrow-item"
@@ -104,9 +95,6 @@
         :detail-level="detailLevelString"
         :year="currentYear"
         :month="currentMonth"
-        :week="currentWeek"
-        :day="currentDay"
-        :current-person="currentPerson"
         :count-mode="params.countMode"
         :compute-mode="params.computeMode"
         :search-text="searchText"
@@ -206,7 +194,6 @@ export default {
       detailLevel: 'day',
 
       isLoading: false,
-      isLoadingError: false,
       isPersonShotsLoading: false,
       maxQuota: 0,
 
@@ -264,9 +251,10 @@ export default {
     ...mapGetters([
       'currentEpisode',
       'currentProduction',
+      'isCurrentUserArtist',
       'isPaperProduction',
       'productionShotTaskTypes',
-      'shotTaskTypes'
+      'user'
     ]),
 
     taskTypeList() {
@@ -274,6 +262,9 @@ export default {
     },
 
     teamPersons() {
+      if (this.isCurrentUserArtist) {
+        return [personMap.get(this.user.id)]
+      }
       return sortPeople(
         this.currentProduction.team.map(personId => personMap.get(personId))
       )
@@ -310,11 +301,7 @@ export default {
 
     getCurrentPerson() {
       const personId = this.$route.params.person_id
-      if (personId && personMap) {
-        return personMap.get(personId)
-      } else {
-        return {}
-      }
+      return personMap?.get(personId) ?? {}
     },
 
     loadRoute() {
@@ -504,7 +491,7 @@ export default {
         const route = {
           name: `quota-${this.detailLevelString}`,
           params: {
-            year: year
+            year
           },
           query: this.getQuery()
         }

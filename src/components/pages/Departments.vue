@@ -8,12 +8,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs
-      class="mt2"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="departments"
-    />
+    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <department-list
       class="department-list"

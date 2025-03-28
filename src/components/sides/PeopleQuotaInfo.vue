@@ -165,6 +165,7 @@ export default {
         route.name = `episode-${route.name}`
         route.params.episode_id = this.currentEpisode.id
       }
+      route.query = this.$route.query
       return route
     }
   },

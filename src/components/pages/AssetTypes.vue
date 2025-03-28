@@ -8,12 +8,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs
-      class="mt2"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="asset-types"
-    />
+    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <asset-type-list
       class="asset-type-list"

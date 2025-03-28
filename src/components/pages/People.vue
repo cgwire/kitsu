@@ -64,12 +64,7 @@
       />
     </div>
 
-    <route-tabs
-      class="mb0"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="people"
-    />
+    <route-tabs class="mb0" :active-tab="activeTab" :tabs="tabs" />
 
     <people-list
       :entries="activeTab === 'active' ? activePeople : unactivePeople"

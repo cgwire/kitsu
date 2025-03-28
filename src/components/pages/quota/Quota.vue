@@ -88,11 +88,14 @@
                     episodifyRoute({
                       name: 'quota-month-person',
                       params: {
-                        person_id: key,
-                        year: year,
-                        month: month
+                        person_id: personId ?? key,
+                        year,
+                        month
                       },
-                      query: $route.query
+                      query: {
+                        ...$route.query,
+                        taskTypeId: personId ? key : null
+                      }
                     })
                   "
                   v-if="key !== 'total' && getQuota(key, { year, month })"
@@ -120,11 +123,14 @@
                     episodifyRoute({
                       name: 'quota-week-person',
                       params: {
-                        person_id: key,
-                        year: year,
-                        week: week
+                        person_id: personId ?? key,
+                        year,
+                        week
                       },
-                      query: $route.query
+                      query: {
+                        ...$route.query,
+                        taskTypeId: personId ? key : null
+                      }
                     })
                   "
                   v-if="key !== 'total' && getQuota(key, { year, week })"
@@ -153,15 +159,14 @@
                     episodifyRoute({
                       name: 'quota-day-person',
                       params: {
-                        person_id: key,
-                        year: year,
-                        month: month,
-                        day: day
+                        person_id: personId ?? key,
+                        year,
+                        month,
+                        day
                       },
                       query: {
-                        countMode: countMode,
-                        computeMode: computeMode,
-                        taskTypeId: taskTypeId
+                        ...$route.query,
+                        taskTypeId: personId ? key : null
                       }
                     })
                   "
@@ -234,7 +239,6 @@ export default {
     },
     detailLevel: {
       type: String,
-      default: 'day',
       required: true
     },
     countMode: {
@@ -243,7 +247,6 @@ export default {
     },
     computeMode: {
       type: String,
-      default: 'weighted',
       required: true
     },
     year: {
@@ -251,14 +254,6 @@ export default {
       default: 0
     },
     month: {
-      type: Number,
-      default: 0
-    },
-    week: {
-      type: Number,
-      default: 0
-    },
-    day: {
       type: Number,
       default: 0
     },
@@ -276,15 +271,12 @@ export default {
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
       currentWeek: moment().week(),
-      detailsTitle: '',
       detailsMap: {},
-      isPanelShown: false,
       isLoading: true,
       isError: false,
       personIds: [],
       quotaMap: {},
       quotaLength: 0,
-      selected: undefined,
       averageColumnX: '12rem'
     }
   },

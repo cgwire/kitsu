@@ -503,8 +503,10 @@ export default {
 
   mounted() {
     if (this.sideColumnParent) {
-      const panelWidth =
-        preferences.getIntPreference('task:panel-width') || DEFAULT_PANEL_WIDTH
+      const panelWidth = preferences.getIntPreference(
+        'task:panel-width',
+        DEFAULT_PANEL_WIDTH
+      )
       this.setWidth(panelWidth)
       this.refreshPreviewPlay()
     }

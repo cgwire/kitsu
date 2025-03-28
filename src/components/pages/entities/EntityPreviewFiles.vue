@@ -175,8 +175,7 @@ export default {
     if (!this.entity) return
     this.reset()
     this.contactSheetMode = preferences.getBoolPreference(
-      'entity:preview-files-contact-sheet',
-      false
+      'entity:preview-files-contact-sheet'
     )
   },
 

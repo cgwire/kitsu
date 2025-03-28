@@ -7,12 +7,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs
-      class="mt2"
-      :active-tab="activeTab"
-      :tabs="tabs"
-      route-name="backgrounds"
-    />
+    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <background-list
       :entries="backgroundsList"

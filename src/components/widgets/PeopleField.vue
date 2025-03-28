@@ -7,6 +7,8 @@
       <multiselect
         ref="multiselect"
         label="name"
+        :allow-empty="clearable"
+        :disabled="disabled"
         :internal-search="false"
         :options="items"
         :multiple="multiple"
@@ -25,7 +27,11 @@
         </template>
         <template #noResult></template>
       </multiselect>
-      <span class="clear-button" @click="clear" v-if="item">
+      <span
+        class="clear-button"
+        @click="clear"
+        v-if="item && clearable && !disabled"
+      >
         <x-icon :size="12" />
       </span>
     </div>
@@ -74,9 +80,25 @@ export default {
   },
 
   props: {
+    clearable: {
+      type: Boolean,
+      default: true
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    },
     label: {
       type: String,
       default: null
+    },
+    modelValue: {
+      type: Object,
+      default: () => {}
+    },
+    multiple: {
+      type: Boolean,
+      default: false
     },
     people: {
       type: Array,
@@ -85,14 +107,6 @@ export default {
     placeholder: {
       type: String,
       default: ''
-    },
-    multiple: {
-      type: Boolean,
-      default: false
-    },
-    modelValue: {
-      type: Object,
-      default: () => {}
     },
     small: {
       type: Boolean,
@@ -167,6 +181,10 @@ export default {
 <style lang="scss">
 .multiselect {
   color: var(--text);
+
+  &--disabled {
+    background: none;
+  }
 
   .multiselect__input,
   .multiselect__single {
