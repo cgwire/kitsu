@@ -304,7 +304,7 @@
         </div>
 
         <div
-          class="menu-item mr05"
+          class="menu-item mr05 cursor"
           :title="$t('main.clear_selection')"
           @click="clearSelection"
         >
