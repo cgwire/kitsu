@@ -303,11 +303,7 @@ export default {
 
     getCurrentPerson() {
       const personId = this.$route.params.person_id
-      if (personId && personMap) {
-        return personMap.get(personId)
-      } else {
-        return {}
-      }
+      return personMap?.get(personId) ?? {}
     },
 
     loadRoute() {
