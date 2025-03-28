@@ -2,9 +2,9 @@
 
 # Kitsu, Collaboration Platform for Animation And VFX Studios
 
-Kitsu is a web application to collaborate around your creative productions and
+Kitsu is a web application that allows you to collaborate on your creative productions and
 manage your deliveries. It improves the communication between all stakeholders.
-Which leads to better results, shipped faster.
+Which leads to better results and faster shipping.
 
 [![CI badge](https://github.com/cgwire/kitsu/actions/workflows/ci.yml/badge.svg)](https://github.com/cgwire/kitsu/actions/workflows/ci.yml)
 [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.com/invite/VbCxtKN)
@@ -20,15 +20,6 @@ For further information about features and installation, please refer to the
 There are many ways to contribute to Kitsu, from simple tasks to most complex ones. We created a
 [contributing guide](https://github.com/cgwire/kitsu/blob/main/CONTRIBUTING.md) explaining everything.
 You will find all the information you are looking for!
-
-## Sponsors
-
-* <a href="http://www.les-fees-speciales.coop"><img alt="Les Fées Spéciales" src="https://www.cg-wire.com/images/logo-les-fees-speciales.png" width=100 /></a>
-* <a href="https://www.cube-creative.com"><img alt="Cube Creative" src="https://www.cg-wire.com/images/logo-cube.png" width=100 /></a>
-* <a href="https://cloud.blender.org"><img alt="Blender Studio" src="https://www.cg-wire.com/images/logo-blender.png" width=100 /></a>
-* <a href="http://nousvoir.com/en/home"><img alt="TNZPV" src="https://www.cg-wire.com/images/logo-tnzpv.png" width=100 /></a>
-* <a href="http://leefilm.se"><img alt="Lee Film" src="https://www.cg-wire.com/images/logo-lee.png" width=100 /></a>
-* <a href="http://miyu.fr"><img alt="Miyu" src="https://www.cg-wire.com/images/logo-miyu.png" width=100 /></a>
 
 ## About authors
 
