@@ -105,8 +105,6 @@ export default {
       countMode: 'count',
       dataMode: 'retakes',
       displayMode: 'pie',
-      episodeToDelete: null,
-      episodeToEdit: null,
       isLoading: true,
       isLoadingError: false,
       statusMode: 'running',
@@ -125,19 +123,7 @@ export default {
       statusModeOptions: [
         { label: 'only_running', value: 'running' },
         { label: 'all', value: 'all' }
-      ],
-      errors: {
-        edit: false,
-        del: false
-      },
-      modals: {
-        isNewDisplayed: false,
-        isDeleteDisplayed: false
-      },
-      loading: {
-        edit: false,
-        del: false
-      }
+      ]
     }
   },
 
@@ -166,10 +152,7 @@ export default {
     ...mapGetters([
       'currentProduction',
       'displayedEpisodes',
-      'episodesPath',
-      'episodes',
       'episodeMap',
-      'episodePath',
       'episodeStats',
       'episodeRetakeStats',
       'episodeSearchText',
@@ -191,17 +174,12 @@ export default {
 
   methods: {
     ...mapActions([
-      'deleteEpisode',
       'editEpisode',
-      'hideAssignations',
       'initEpisodeStats',
       'loadEpisodeStats',
       'loadEpisodeRetakeStats',
-      'loadShots',
-      'setLastProductionScreen',
       'setEpisodeSearch',
-      'setEpisodeListScrollPosition',
-      'showAssignations'
+      'setEpisodeListScrollPosition'
     ]),
 
     setCountOptions() {
