@@ -307,7 +307,6 @@ import { selectionListMixin } from '@/components/mixins/selection'
 import { formatListMixin } from '@/components/mixins/format'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import { PAGE_SIZE } from '@/lib/pagination'
 import { sortPeople } from '@/lib/sorting'
 import {
   daysToMinutes,
@@ -384,7 +383,6 @@ export default {
 
   data() {
     return {
-      page: 1,
       colTypePosX: '',
       colNamePosX: '',
       lastSelection: null,
@@ -394,7 +392,6 @@ export default {
   },
 
   mounted() {
-    this.page = 1
     this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
     this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
@@ -422,7 +419,7 @@ export default {
     ]),
 
     displayedTasks() {
-      return this.tasks.slice(0, this.page * PAGE_SIZE)
+      return this.tasks
     },
 
     isDescriptionPresent() {
@@ -540,11 +537,6 @@ export default {
       if (!this.$refs.body) return
       const position = event.target
       this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.page++
-      }
     },
 
     getTaskType(entry) {
@@ -891,7 +883,6 @@ export default {
 
   watch: {
     tasks() {
-      this.page = 1
       this.resetSelection()
     },
 

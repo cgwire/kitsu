@@ -76,12 +76,12 @@
                   class="playlist-thumbnail"
                   :preview-file-id="playlist.first_preview_file_id"
                   type="previews"
-                  width="38px"
-                  height="30px"
-                  max-width="38px"
-                  max-height="30px"
-                  empty-width="38px"
-                  empty-height="30px"
+                  width="53px"
+                  height="35px"
+                  max-width="53px"
+                  max-height="35px"
+                  empty-width="53px"
+                  empty-height="35px"
                   :title="playlist.name"
                 />
                 <div class="ml05">

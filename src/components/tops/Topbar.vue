@@ -635,6 +635,7 @@ export default {
               },
               query
             })
+            this.updateCombosFromRoute()
           })
           .catch(console.error)
       } else {

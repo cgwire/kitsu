@@ -1473,6 +1473,15 @@ export default {
     },
 
     onPlayPreviousEntityClicked() {
+      const index = this.currentPreviewIndex
+      if (index > 0) {
+        this.onPreviousPreviewClicked()
+      } else {
+        this.onPlayPreviousEntity()
+      }
+    },
+
+    onPlayPreviousEntity() {
       this.clearFocus()
       this.playEntity(this.previousEntityIndex)
       this.sendUpdatePlayingStatus()
@@ -1485,8 +1494,12 @@ export default {
     },
 
     onPlayNextEntityClicked() {
-      this.onPlayNextEntity()
-      this.sendUpdatePlayingStatus()
+      const index = this.currentPreviewIndex
+      if (index < this.currentEntityPreviewLength - 1) {
+        this.onNextPreviewClicked()
+      } else {
+        this.onPlayNextEntity()
+      }
     },
 
     onPlayNext() {
