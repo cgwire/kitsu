@@ -1514,6 +1514,15 @@ export default {
       this.updateActiveTab()
     },
 
+    '$route.query.search'() {
+      const currentSearch = this.searchField.getValue()
+      const routeSearch = this.$route.query.search
+      if (routeSearch && routeSearch !== currentSearch) {
+        this.searchField.setValue(routeSearch)
+        this.onSearchChange(routeSearch)
+      }
+    },
+
     currentProduction() {
       this.initData(true)
     },
@@ -1613,20 +1622,16 @@ export default {
     events: {
       'task:update'(eventData) {
         if (
+          !this.isActiveTab('schedule') &&
           this.taskMap.get(eventData.task_id) &&
-          !this.isActiveTab('schedule')
+          this.selectedTasks === 0 &&
+          this.searchField &&
+          this.searchField.getValue() === ''
         ) {
-          setTimeout(() => {
-            this.resetTaskIndex()
-            this.$nextTick(() => {
-              if (
-                !this.selectedTasks.get(eventData.task_id) &&
-                this.searchField
-              ) {
-                this.onSearchChange(this.searchField.getValue())
-              }
-            })
-          }, 1000)
+          this.resetTaskIndex()
+          this.$nextTick(() => {
+            this.onSearchChange(this.searchField.getValue())
+          })
         }
       }
     }
