@@ -25,6 +25,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import { formatListMixin } from '@/components/mixins/format'
+import shotStore from '@/store/modules/shots'
 
 export default {
   name: 'checkbox',
@@ -46,10 +47,12 @@ export default {
     return {}
   },
 
-  mounted() {},
-
   computed: {
-    ...mapGetters(['isPaperProduction', 'shotMap']),
+    ...mapGetters(['isPaperProduction']),
+
+    shotMap() {
+      return shotStore.cache.shotMap
+    },
 
     timeSpent() {
       return this.tasks.reduce((acc, task) => acc + task.duration, 0)
@@ -68,12 +71,11 @@ export default {
     },
 
     nbFrames() {
-      let total = 0
-      this.tasks.forEach(task => {
+      return this.tasks.reduce((acc, task) => {
         const entity = this.shotMap.get(task.entity.id)
-        if (entity && entity.nb_frames) total += entity.nb_frames
-      })
-      return total
+        if (entity && entity.nb_frames) acc += entity.nb_frames
+        return acc
+      }, 0)
     },
 
     nbDrawings() {
