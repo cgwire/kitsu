@@ -320,7 +320,7 @@ export default {
           } else {
             // load entities
             if (taskTypeElement.for_entity === 'Asset') {
-              await this.loadAssets({ withTasks: false })
+              await this.loadAssets({ withShared: false, withTasks: false })
             }
             if (taskTypeElement.for_entity === 'Shot') {
               await this.loadShots()
