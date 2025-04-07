@@ -31,7 +31,8 @@ export const applyFilters = (entries, filters, taskMap) => {
       filters.forEach(filter => {
         if (isOk === false && !filters.union) return false
         if (isOk === true && filters.union) return true
-        isOk = applyFiltersFunctions[filter.type](entry, filter, taskMap)
+        isOk =
+          applyFiltersFunctions[filter.type](entry, filter, taskMap) || false
       })
       return isOk
     })
@@ -138,6 +139,7 @@ const applyFiltersFunctions = {
     const task = taskMap.get(entry.validations.get(filter.taskType.id))
     let isOk = true
     isOk = task && filter.taskStatuses.includes(task.task_status_id)
+    isOk = isOk || false
     if (filter.excluding) isOk = !isOk
     return isOk
   },
