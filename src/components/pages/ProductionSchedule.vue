@@ -235,53 +235,50 @@ export default {
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
-      return scheduleItems
-        .map(item => {
-          let startDate
-          if (item.start_date) {
-            startDate = parseDate(item.start_date)
-          } else {
-            startDate = moment()
-          }
-          if (startDate.isAfter(this.endDate)) {
-            return
-          }
-          let endDate
-          if (item.end_date) {
-            endDate = parseDate(item.end_date)
-          } else {
-            endDate = startDate.clone().add(1, 'days')
-          }
-          if (endDate.isBefore(startDate)) {
-            endDate = startDate.clone().add(1, 'days')
-          }
-          if (endDate.isBefore(this.startDate)) {
-            return
-          }
-
-          const scheduleItem = {
-            ...item,
-            startDate,
-            endDate,
-            expanded: false,
-            loading: false,
-            editable: this.isInDepartment(
-              this.taskTypeMap.get(item.task_type_id)
-            ),
-            children: [],
-            parentElement: taskTypeElement
-          }
-          if (this.isTVShow) {
-            scheduleItem.route = getTaskTypeSchedulePath(
-              item.task_type_id,
-              this.currentProduction.id,
-              item.object_id,
-              taskTypeElement.for_entity
-            )
-          }
-          return scheduleItem
-        })
-        .filter(Boolean)
+      return scheduleItems.map(item => {
+        let startDate
+        if (item.start_date) {
+          startDate = parseDate(item.start_date)
+        } else {
+          startDate = moment()
+        }
+        if (startDate.isBefore(this.startDate)) {
+          startDate = this.startDate.clone()
+        }
+        let endDate
+        if (item.end_date) {
+          endDate = parseDate(item.end_date)
+        } else {
+          endDate = startDate.clone().add(1, 'days')
+        }
+        if (endDate.isBefore(startDate)) {
+          endDate = startDate.clone().add(1, 'days')
+        }
+        if (endDate.isAfter(this.endDate)) {
+          endDate = this.endDate.clone()
+        }
+        const scheduleItem = {
+          ...item,
+          startDate,
+          endDate,
+          expanded: false,
+          loading: false,
+          editable: this.isInDepartment(
+            this.taskTypeMap.get(item.task_type_id)
+          ),
+          children: [],
+          parentElement: taskTypeElement
+        }
+        if (this.isTVShow) {
+          scheduleItem.route = getTaskTypeSchedulePath(
+            item.task_type_id,
+            this.currentProduction.id,
+            item.object_id,
+            taskTypeElement.for_entity
+          )
+        }
+        return scheduleItem
+      })
     },
 
     async expandTaskTypeElement(
@@ -314,13 +311,16 @@ export default {
             taskTypeElement,
             scheduleItems
           )
+          const childrenById = new Map(
+            children.map(child => [child.object_id, child])
+          )
 
           if (this.isTVShow) {
             taskTypeElement.children = children
           } else {
             // load entities
             if (taskTypeElement.for_entity === 'Asset') {
-              await this.loadAssets({ withTasks: false })
+              await this.loadAssets({ withShared: false, withTasks: false })
             }
             if (taskTypeElement.for_entity === 'Shot') {
               await this.loadShots()
@@ -370,10 +370,15 @@ export default {
               }
 
               task.assignees.forEach(assigneeId => {
+                const entityTypeItem = childrenById.get(task.entity_type_id)
+
                 // populate task with start and end dates
                 const startDate = parseDate(task.start_date)
                 if (startDate.isAfter(this.endDate)) {
                   return
+                }
+                if (startDate.isBefore(entityTypeItem.startDate)) {
+                  entityTypeItem.startDate = startDate.clone()
                 }
                 task.startDate = startDate
 
@@ -401,6 +406,9 @@ export default {
                 }
                 if (endDate.isBefore(this.startDate)) {
                   return
+                }
+                if (endDate.isAfter(entityTypeItem.endDate)) {
+                  entityTypeItem.endDate = endDate.clone()
                 }
                 task.endDate = endDate
 
