@@ -486,7 +486,7 @@
                     <div
                       class="timebar-center"
                       :class="{
-                        ellipsis: multiline,
+                        ellipsis: multiline || subchildren,
                         'has-text-centered': subchildren
                       }"
                       @mousedown="moveTimebar(childElement, $event)"
