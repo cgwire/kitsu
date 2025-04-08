@@ -1854,7 +1854,7 @@ export default {
           }
           return {
             preview_file_id: preview.id,
-            preview_file_extension: 'mp4'
+            preview_file_extension: preview.extension
           }
         })
       } else {
