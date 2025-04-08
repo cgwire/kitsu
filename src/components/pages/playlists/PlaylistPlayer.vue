@@ -2239,6 +2239,7 @@ export default {
         this.pause()
         this.resetComparison()
         this.rebuildEntityListToCompare()
+        this.rebuildComparisonOptions()
       }
       this.$nextTick().then(() => {
         this.triggerResize()
