@@ -220,6 +220,22 @@ export default {
         before: this.entity.id,
         after: event.dataTransfer.getData('entityId')
       })
+    },
+
+    setTaskTypeId(taskTypeId) {
+      this.$options.silent = true
+      this.taskTypeId = taskTypeId
+      this.$nextTick(() => {
+        this.$options.silent = false
+      })
+    },
+
+    setPreviewFileId(previewFileId) {
+      this.$options.silent = true
+      this.previewFileId = previewFileId
+      this.$nextTick(() => {
+        this.$options.silent = false
+      })
     }
   },
 
@@ -249,7 +265,9 @@ export default {
           return previewFile.id === this.previewFileId
         })
       }
-      this.$emit('preview-changed', this.entity, previewFile)
+      if (!this.$options.silent) {
+        this.$emit('preview-changed', this.entity, previewFile)
+      }
     },
 
     'entity.preview_file_id'() {

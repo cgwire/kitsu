@@ -1600,6 +1600,12 @@ export default {
     },
 
     onPreviewChanged(entity, previewFile) {
+      if (!previewFile) return
+      this.changePreviewFile(entity, previewFile)
+      this.updateRoomStatus()
+    },
+
+    changePreviewFile(entity, previewFile) {
       this.pause()
       const localEntity = this.entityList.find(s => s.id === entity.id)
       localEntity.preview_file_id = previewFile.id
