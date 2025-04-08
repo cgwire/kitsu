@@ -112,9 +112,7 @@
         <spinner class="mt2" v-else />
         <div
           class="load-more"
-          v-if="
-            playlists.length >= 20 && !loading.playlists && isMorePlalylists
-          "
+          v-if="playlists.length >= 20 && !loading.playlists && isMorePlaylists"
         >
           <button-simple
             :class="{
@@ -536,7 +534,7 @@ export default {
       currentEntities: {},
       isAddingEntity: false,
       isListToggled: false,
-      isMorePlalylists: true,
+      isMorePlaylists: true,
       page: 1,
       taskTypeId: '',
       sortedPlaylists: [],
@@ -845,7 +843,7 @@ export default {
             this.$options.silentMore = false
           }, 1000)
           if (playlists.length < 20) {
-            this.isMorePlalylists = false
+            this.isMorePlaylists = false
           }
         })
         .catch(err => {
