@@ -12,7 +12,7 @@
       'max-width': maxWidth,
       'max-height': maxHeight
     }"
-    v-if="previewFileId"
+    v-if="previewFileId && ['mp4', 'png'].includes(extension)"
   />
   <span
     class="thumbnail-picture thumbnail-empty"
@@ -31,6 +31,10 @@ export default {
 
   props: {
     previewFileId: {
+      default: '',
+      type: String
+    },
+    extension: {
       default: '',
       type: String
     },

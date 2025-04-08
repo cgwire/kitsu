@@ -18,6 +18,7 @@
         <light-entity-thumbnail
           width="150px"
           height="103px"
+          :extension="entity.preview_file_extension"
           :preview-file-id="previewFileId"
         />
       </div>
