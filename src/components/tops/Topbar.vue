@@ -620,6 +620,16 @@ export default {
             const query = this.$route.query
             if (this.currentProjectSection === 'assets') {
               this.currentEpisodeId = 'all'
+            } else if (
+              this.currentProjectSection === 'playlists' &&
+              routeEpisodeId === 'all'
+            ) {
+              this.currentEpisodeId = 'all'
+            } else if (
+              this.currentProjectSection === 'playlists' &&
+              routeEpisodeId === 'main'
+            ) {
+              this.currentEpisodeId = 'main'
             } else {
               let episode = episodes.find(({ id }) => id === routeEpisodeId)
               if (!episode) {
