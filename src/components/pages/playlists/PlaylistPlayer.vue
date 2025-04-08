@@ -1577,7 +1577,9 @@ export default {
           width: this.currentPreview.width,
           height: this.currentPreview.height
         }
-        this.loadAnnotation(this.getAnnotation(0))
+        if (!this.isPlaying) {
+          this.loadAnnotation(this.getAnnotation(0))
+        }
       }
     },
 
