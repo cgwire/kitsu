@@ -120,7 +120,8 @@
       "confirm_publish": "公開設定になっているプレビューファイルがありません。本当にコメントを公開しますか？",
       "confirm_publish_button": "ファイルを公開せずにコメントを投稿",
       "add_link": "URLを追加",
-      "pinned_revision": "ピン留め修正"
+      "pinned_revision": "ピン留め修正",
+      "edited_by": "{name}からの編集"
     },
     "custom_actions": {
       "create_error": "このカスタムアクションの保存中にエラーが発生しました。同じ名前のアクションがありませんか？",
@@ -199,7 +200,8 @@
         "size": "サイズ",
         "status": "ステータス",
         "task_type": "タスクタイプ",
-        "uploader": "アップロード元"
+        "uploader": "アップロード元",
+        "uploaded_at": "アップロード日付"
       },
       "nb_selected_assets": "{nbSelectedAssets}のアセットが選択済み | {nbSelectedAssets}のアセットが選択済み",
       "nb_selected_shots": "{nbSelectedShots}のショットが選択済み | {nbSelectedShots}のショットが選択済み",
@@ -362,7 +364,7 @@
       "main_pack": "メインパック",
       "maximize": "最大化",
       "nb_frames": "フレーム | フレーム",
-      "person": "人物",
+      "person": "メンバー",
       "profile": "プロフィール",
       "production": "オーバービュー",
       "remove": "削除",
@@ -493,7 +495,27 @@
       "no_results": "検索結果なし",
       "link": "リンク",
       "hours_spent": "滞在時間",
-      "hours_estimated": "時間 見積もり"
+      "hours_estimated": "時間 見積もり",
+      "created_by": "作者元",
+      "day": "日",
+      "hour": "時",
+      "label": {
+        "casting": "キャスティング",
+        "chat": "チャット",
+        "concepts": "コンセプト",
+        "info": "情報",
+        "output_files": "アウトプットファイル",
+        "preview_files": "ファイルプレビュー",
+        "schedule": "スケジュール",
+        "timelog": "タイムログ"
+      },
+      "month": "月",
+      "nb_drawings": "枚 | 枚",
+      "no_estimation": "推定なし",
+      "people": "メンバー",
+      "total": "総計",
+      "unassigned": "割り当てのない",
+      "year": "年"
     },
     "menu": {
       "assign_tasks": "タスクを割り当て",
@@ -574,7 +596,7 @@
       "delete_error": "このユーザーを削除する際にエラーが発生しました。このユーザーに関連するデータがある可能性があります。このユーザーに割り当てられているタスクはないか、またはこのユーザーが書いたコメントはないかを確認しましたか？",
       "delete_text": "本当に{personName}をデータベースから削除してもよろしいでしょうか？関連するコメントとプレビューの全てが完全に削除されます。以下にフルネームでユーザー名を入力して確定してください。",
       "edit_title": "ユーザーを編集",
-      "empty_team": "このプロジェクトチームにリストされている人はいません。",
+      "empty_team": "このプロジェクトチームにリストされているメンバーはいません。",
       "invite": "招待状を送信",
       "invite_error": "招待状の送信中にエラーが発生しました",
       "invite_success": "招待状は正常に送信されました",
@@ -584,7 +606,7 @@
       "running_tasks": "実行中のタスク",
       "select_person": "ユーザーを選択してください...",
       "team": "チーム",
-      "title": "人々",
+      "title": "メンバー",
       "unactive": "非アクティブ",
       "fields": {
         "first_name": "名前",
@@ -640,7 +662,7 @@
       },
       "import_from_production": "別のプロダクションからチームメンバーをインポート",
       "import_from_department": "部門をインポート",
-      "import_from_unlisted": "リストにない人物から追加"
+      "import_from_unlisted": "リストにないメンバーから追加"
     },
     "playlists": {
       "add_assets": "アセットを追加",
@@ -828,7 +850,8 @@
       "edit_error": "プロダクションの編集中にエラーが発生しました。サポートまでお問い合わせください。",
       "brief": {
         "title": "概要",
-        "empty": "概要はまだありません。作成しますか？"
+        "empty": "概要はまだありません。作成しますか？",
+        "edit_error": "概要の編集中にエラーが発生しました。"
       },
       "parameters": {
         "title": "パラメーター",
@@ -895,7 +918,8 @@
         "vfx": "VFX",
         "video_game": "ビデオゲーム",
         "vr": "仮想現実",
-        "immersive": "没入的な体験"
+        "immersive": "没入的な体験",
+        "2dpaper": "手書きアニメーション（紙工程）"
       },
       "homepage": {
         "assets": "アセット",
@@ -1070,7 +1094,7 @@
       "fields": {
         "name": "名前",
         "description": "説明",
-        "person": "人物",
+        "person": "メンバー",
         "placeholder": "SQ01"
       },
       "no_casting": "シーケンスのキャスティングが空です。",
@@ -1125,7 +1149,8 @@
       "explanation_done": "最後の承認で撮影は完了とみなされる。フレーム数はその日のノルマに加算される。",
       "explanation_weighted": "ショットは、最初のフィードバックリクエストで完了とみなされます。その後、アーティストのタイムシートに記録されたタスクに費やされた時間に基づいて、ノルマが加重される。\n\n 時間が記録されていない場合、それは仮定される：\n* タスクは最初のステータスがWIPに変更されたときに開始された。\n* タスクはフィードバック要求がなされた日に完了した。\n * 完了したフレームは、開始日と終了日の間のすべての営業日に均等に分配される。",
       "explanation_weighteddone": "ショットは最後の承認をもって完了とみなされる。そして、アーティストのタイムシートに記録されたタスクに費やされた時間に基づいて、ノルマが重み付けされる。\n\n もし時間が記録されていない場合、それは仮定される：\n* タスクは最初のステータスがWIPに変更されたときに開始された。\n* タスクは承認された日に完了した。\n * タスクは承認された日に完了した。",
-      "weighted_done": "加重（承認）"
+      "weighted_done": "加重（承認）",
+      "drawings": "枚"
     },
     "shots": {
       "casting": "場面割り当て",
@@ -1166,7 +1191,8 @@
         "person": "モディファイア",
         "max_retakes": "最大RTK",
         "resolution": "解像度",
-        "placeholder": "SH01"
+        "placeholder": "SH01",
+        "nb_drawings": "枚数"
       },
       "cancel_text": "{name}をアーカイブしたいですか？",
       "delete_for_selection": "選択したショットを削除 | 選択した{nbSelectedShots}ショットを削除",
@@ -1193,7 +1219,8 @@
       "status": "ステータス",
       "all": "全て",
       "only_running": "実行中のみ",
-      "episode_status": "エピソードステータス"
+      "episode_status": "エピソードステータス",
+      "drawings": "枚"
     },
     "tasks": {
       "add_preview": "新しいプレビューリビジョンのファイルを追加",
@@ -1281,7 +1308,8 @@
         "parent": "大人",
         "difficulty": "難易度",
         "done_date": "承認日",
-        "nb_frames": "フレーム"
+        "nb_frames": "フレーム",
+        "drawings": "枚"
       },
       "colors": {
         "title": "カラーリング",
@@ -1446,7 +1474,8 @@
       "cancel_text": "本当に{name}をアーカイブしますか？",
       "history": "編集された値の履歴",
       "restore_error": "この編集の復元中にエラーが発生しました。",
-      "edit_success": "修正は正常に保存された。"
+      "edit_success": "修正は正常に保存された。",
+      "restore_text": "{name} をアーカイブから本当に復元してもよろしいですか？"
     },
     "status_automations": {
       "change_ready_for": "「以下の準備が完了」を以下に変更",
@@ -1489,7 +1518,7 @@
     "team_schedule": {
       "title": "スケジュール",
       "title_main": "チームスケジュール",
-      "person_placeholder": "人物を選択..."
+      "person_placeholder": "メンバーを選択..."
     },
     "search": {
       "limit": "結果の最大数：",
