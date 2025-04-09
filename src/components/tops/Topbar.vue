@@ -618,6 +618,7 @@ export default {
         this.loadEpisodes()
           .then(episodes => {
             const query = this.$route.query
+            this.currentProjectSection = this.getCurrentSectionFromRoute()
             if (this.currentProjectSection === 'assets') {
               this.currentEpisodeId = 'all'
             } else if (
