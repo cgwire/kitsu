@@ -111,7 +111,7 @@
         </div>
         <spinner class="mt2" v-else />
         <div
-          class="load-more"
+          class="load-more pa1"
           v-if="playlists.length >= 20 && !loading.playlists && isMorePlaylists"
         >
           <button-simple
@@ -1822,9 +1822,5 @@ h2 {
       margin-top: 3px;
     }
   }
-}
-
-.load-more {
-  padding: 1em;
 }
 </style>
