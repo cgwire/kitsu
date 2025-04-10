@@ -441,8 +441,8 @@ export default {
         this.detailLevel,
         this.currentYear,
         this.currentMonth,
-        moment().month() + 1,
         moment().year(),
+        moment().month() + 1,
         moment().week()
       )
     },

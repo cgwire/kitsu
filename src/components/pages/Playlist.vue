@@ -111,7 +111,7 @@
         </div>
         <spinner class="mt2" v-else />
         <div
-          class="load-more pa1"
+          class="pa1"
           v-if="playlists.length >= 20 && !loading.playlists && isMorePlaylists"
         >
           <button-simple
