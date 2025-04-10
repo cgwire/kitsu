@@ -1604,6 +1604,7 @@ export default {
 
     onPreviewChanged(entity, previewFile) {
       if (!previewFile) return
+      this.currentPreviewIndex = 0
       this.changePreviewFile(entity, previewFile)
       this.updateRoomStatus()
     },
