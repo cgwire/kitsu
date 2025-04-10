@@ -110,6 +110,19 @@
           </router-link>
         </div>
         <spinner class="mt2" v-else />
+        <div
+          class="load-more pa1"
+          v-if="playlists.length >= 20 && !loading.playlists && isMorePlaylists"
+        >
+          <button-simple
+            :class="{
+              button: true,
+              'is-loading': loading.morePlaylists
+            }"
+            :text="$t('main.load_more')"
+            @click="onLoadMoreClicked"
+          />
+        </div>
         <error-text
           :text="$t('playlists.loading_error')"
           v-if="errors.playlistLoading"
@@ -521,6 +534,7 @@ export default {
       currentEntities: {},
       isAddingEntity: false,
       isListToggled: false,
+      isMorePlaylists: true,
       page: 1,
       taskTypeId: '',
       sortedPlaylists: [],
@@ -546,6 +560,7 @@ export default {
         addSequence: false,
         addWeekly: false,
         editPlaylist: false,
+        morePlaylists: false,
         playlist: false,
         playlists: false,
         playlistsInit: true
@@ -809,25 +824,34 @@ export default {
       const maxHeight = listEl.scrollHeight - listEl.offsetHeight
       const position = event.target
       if (maxHeight < position.scrollTop + 20) {
-        this.$options.silentMore = true
-        this.page++
-        this.loadMorePlaylists({
-          sortBy: this.currentSort,
-          page: this.page,
-          taskTypeId: this.taskTypeId
-        })
-          .then(playlists => {
-            setTimeout(() => {
-              this.$options.silentMore = false
-            }, 1000)
-          })
-          .catch(err => {
-            console.error(err)
-            this.$options.silentMore = false
-            this.errors.loadPlaylists = true
-            return Promise.reject(err)
-          })
+        this.onLoadMoreClicked()
       }
+    },
+
+    onLoadMoreClicked() {
+      this.$options.silentMore = true
+      this.page++
+      this.loading.morePlaylists = true
+      this.loadMorePlaylists({
+        sortBy: this.currentSort,
+        page: this.page,
+        taskTypeId: this.taskTypeId
+      })
+        .then(playlists => {
+          setTimeout(() => {
+            this.loading.morePlaylists = false
+            this.$options.silentMore = false
+          }, 1000)
+          if (playlists.length < 20) {
+            this.isMorePlaylists = false
+          }
+        })
+        .catch(err => {
+          console.error(err)
+          this.$options.silentMore = false
+          this.errors.loadPlaylists = true
+          return Promise.reject(err)
+        })
     },
 
     // Playlist build

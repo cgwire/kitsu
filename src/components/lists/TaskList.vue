@@ -788,7 +788,7 @@ export default {
       }
 
       if (!event.shiftKey) {
-        if (isSelected && !isManySelection) {
+        if (isSelected) {
           this.removeSelectedTask({ task })
           this.selectionGrid[task.id] = undefined
         } else if (!isSelected || isManySelection) {

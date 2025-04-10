@@ -1577,7 +1577,9 @@ export default {
           width: this.currentPreview.width,
           height: this.currentPreview.height
         }
-        this.loadAnnotation(this.getAnnotation(0))
+        if (!this.isPlaying) {
+          this.loadAnnotation(this.getAnnotation(0))
+        }
       }
     },
 
@@ -1600,6 +1602,12 @@ export default {
     },
 
     onPreviewChanged(entity, previewFile) {
+      if (!previewFile) return
+      this.changePreviewFile(entity, previewFile)
+      this.updateRoomStatus()
+    },
+
+    changePreviewFile(entity, previewFile) {
       this.pause()
       const localEntity = this.entityList.find(s => s.id === entity.id)
       localEntity.preview_file_id = previewFile.id
@@ -1846,7 +1854,7 @@ export default {
           }
           return {
             preview_file_id: preview.id,
-            preview_file_extension: 'mp4'
+            preview_file_extension: preview.extension
           }
         })
       } else {
@@ -2006,11 +2014,11 @@ export default {
     onRevisionToCompareChanged() {
       if (this.isComparing) {
         this.rebuildEntityListToCompare()
-        this.updateRoomStatus()
         this.$nextTick(() => {
           this.pause()
           this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
           this.rawPlayerComparison.setCurrentTimeRaw(this.currentTimeRaw)
+          this.updateRoomStatus()
         })
       }
     },
@@ -2231,6 +2239,7 @@ export default {
         this.pause()
         this.resetComparison()
         this.rebuildEntityListToCompare()
+        this.rebuildComparisonOptions()
       }
       this.$nextTick().then(() => {
         this.triggerResize()

@@ -88,6 +88,8 @@ export default {
 
 <style lang="scss" scoped>
 .preview-room {
+  align-items: center;
+  display: flex;
   font-size: 1.5em;
 }
 

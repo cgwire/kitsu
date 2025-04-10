@@ -40,7 +40,6 @@ export default {
 
   playlists: {
     add_shots: 'Add NFTs',
-    comparing_missing_plan: 'NFT missing for current type',
     no_shot_for_production: 'There is no NFT for this production',
     select_shot: 'Please select a NFT in the right column'
   },

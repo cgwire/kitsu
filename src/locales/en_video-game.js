@@ -72,7 +72,6 @@ export default {
     add_shots: 'Add maps',
     add_sequence: 'Add the whole level',
     add_episode: 'Add the whole chapter',
-    comparing_missing_plan: 'Map missing for current type',
     no_playlist: 'There is currently no playlist for this project or chapter.',
     no_sequence_for_episode: 'There is no level for this chapter',
     no_shot_for_production: 'There is no map for this production',

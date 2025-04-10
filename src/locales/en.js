@@ -890,7 +890,7 @@ export default {
     build_mp4: 'Build .mp4',
     building: 'Building...',
     client_playlist: 'Client Playlist',
-    comparing_missing_plan: 'Shot missing for current type',
+    comparing_missing_plan: 'Entity missing for current type',
     create_for_selection: 'Generate a playlist from selected tasks',
     create_title: 'Create playlist',
     created_at: 'Created at:',
