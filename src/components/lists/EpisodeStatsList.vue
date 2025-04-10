@@ -103,6 +103,7 @@
                   :style="getValidationStyle(columnId)"
                   :colors="chartColors(entry.id, columnId)"
                   :data="chartData(entry.id, columnId)"
+                  :frames-data="chartData(entry.id, columnId, 'frames')"
                   :drawings-data="chartData(entry.id, columnId, 'drawings')"
                   :count-mode="countMode"
                   :display-mode="displayMode"
@@ -164,6 +165,7 @@
                       chartRetakeMaxCount(entry.id, columnId) + 1 === takeNumber
                     "
                   />
+
                   <td
                     :key="takeNumber + entry.id + columnId"
                     :style="getValidationStyle(columnId)"

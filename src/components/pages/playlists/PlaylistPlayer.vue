@@ -1459,6 +1459,7 @@ export default {
 
     entityListClicked(entityIndex) {
       this.playEntity(entityIndex)
+      this.currentPreviewIndex = 0
       this.updateRoomStatus()
     },
 
