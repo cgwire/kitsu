@@ -254,6 +254,7 @@ export default {
     reset() {
       this.isLoading = true
       this.isLoadingError = false
+      this.setCountOptions()
       this.loadEpisodeStats(this.currentProduction.id)
         .then(() => {
           return this.loadEpisodeRetakeStats(this.currentProduction.id)
