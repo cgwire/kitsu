@@ -12,7 +12,7 @@
       'max-width': maxWidth,
       'max-height': maxHeight
     }"
-    v-if="previewFileId && isPreviewWithThumbnail"
+    v-if="isPreviewWithThumbnail"
   />
   <span
     class="thumbnail-picture thumbnail-empty"
@@ -31,11 +31,9 @@ export default {
 
   props: {
     previewFileId: {
-      default: '',
       type: String
     },
     extension: {
-      default: '',
       type: String
     },
     width: {
@@ -68,7 +66,10 @@ export default {
 
   computed: {
     isPreviewWithThumbnail() {
-      return ['mp4', 'png'].includes(this.extension)
+      return (
+        this.previewFileId &&
+        (!this.extension || ['mp4', 'png'].includes(this.extension))
+      )
     }
   }
 }
