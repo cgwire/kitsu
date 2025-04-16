@@ -376,6 +376,9 @@ export default {
       let ratio = 0
       if (entity.preview_file_extension === 'mp4') {
         ratio = entity.preview_file_duration / this.playlistDuration
+      } else if (entity.preview_nb_frames) {
+        const duration = entity.preview_nb_frames * this.frameDuration
+        ratio = duration / this.playlistDuration
       } else {
         ratio = (2 * this.fps * this.frameDuration) / this.playlistDuration
       }
