@@ -2294,9 +2294,16 @@ export default {
       })
     },
 
-    playlist() {
+    playlist(newPlaylist, oldPlaylist) {
+      if (oldPlaylist) {
+        if (this.room && this.room.people.includes(this.user.id)) {
+          this.leaveRoom()
+        }
+        this.closeRoom(oldPlaylist.id)
+      }
       this.endAnnotationSaving()
       this.room.id = this.playlist.id
+      this.openRoom(newPlaylist.id)
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()
