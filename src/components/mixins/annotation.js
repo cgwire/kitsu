@@ -1054,8 +1054,19 @@ export const annotationMixin = {
       this.clearCanvas()
       return this.resetCanvasSize().then(() => {
         if (this.fabricCanvas) this.fabricCanvas.renderAll()
+        this.resetCanvasVisibility()
         return Promise.resolve(this.fabricCanvas)
       })
+    },
+
+    resetCanvasVisibility() {
+      console.log('resetCanvasVisibility', this.isAnnotationsDisplayed)
+      if (this.isAnnotationsDisplayed) {
+        this.$refs['canvas-wrapper'].style.display = 'block'
+      } else if (this.$refs['canvas-wrapper']) {
+        console.log('hide canvas-wrapper')
+        this.$refs['canvas-wrapper'].style.display = 'none'
+      }
     },
 
     /*

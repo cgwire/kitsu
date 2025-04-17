@@ -1819,7 +1819,7 @@ h2 {
   .flexrow {
     align-items: flex-start;
     .thumbnail-picture {
-      margin-top: 3px;
+      margin-top: 1px;
     }
   }
 }

@@ -1186,7 +1186,6 @@ export default {
     pause() {
       if (this.isPlaying) {
         this.isPlaying = false
-
         if (this.is3DModel) {
           this.previewViewer.pauseModelAnimation()
         } else {

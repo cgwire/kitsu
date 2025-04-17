@@ -32,6 +32,7 @@
  * }, ...]
  */
 import { mapGetters } from 'vuex'
+import panzoom from 'panzoom'
 
 import { floorToFrame, roundToFrame } from '@/lib/video'
 
@@ -81,7 +82,11 @@ export default {
     isRepeating: {
       type: Boolean,
       default: false
-    }
+    },
+    panzoom: {
+      type: Boolean,
+      default: false
+    },
   },
 
   emits: [
@@ -89,6 +94,7 @@ export default {
     'frame-update',
     'max-duration-update',
     'metadata-loaded',
+    'panzoom-changed',
     'play-next',
     'repeat',
     'video-loaded'
@@ -100,6 +106,7 @@ export default {
       isLoading: true,
       isPlaying: false,
       nextPlayer: undefined,
+      panzoomInstances: [],
       playingIndex: 0
     }
   },
@@ -122,6 +129,8 @@ export default {
     this.player2.addEventListener('waiting', this.showLoading)
     this.player2.addEventListener('loadstart', this.showLoading)
     this.player2.addEventListener('error', this.hideLoading)
+
+    this.setupPanZoom()
   },
 
   beforeUnmount() {
@@ -138,6 +147,8 @@ export default {
     this.player2.removeEventListener('waiting', this.showLoading)
     this.player2.removeEventListener('loadstart', this.showLoading)
     this.player2.removeEventListener('error', this.hideLoading)
+
+    this.panzoomInstance?.dispose()
   },
 
   computed: {
@@ -165,6 +176,37 @@ export default {
   },
 
   methods: {
+    setupPanZoom() {
+      if (this.panzoom) {
+        const firstPanZoom = panzoom(this.$refs.player1, {
+          bounds: true,
+          boundsPadding: 0.2,
+          maxZoom: 5,
+          minZoom: 0.5
+        })
+        const secondPanZoom = panzoom(this.$refs.player2, {
+          bounds: true,
+          boundsPadding: 0.2,
+          maxZoom: 3,
+          minZoom: 0.5
+        })
+        firstPanZoom.on('zoom', () => {
+          if (this.$options.silent) return
+          const { x, y, scale } = firstPanZoom.getTransform()
+          this.$emit('panzoom-changed', { x, y, scale })
+        })
+        firstPanZoom.on('panend', () => {
+          if (this.$options.silent) return
+          const { x, y, scale } = firstPanZoom.getTransform()
+          this.$emit('panzoom-changed', { x, y, scale })
+        })
+        this.panzoomInstances = [firstPanZoom, secondPanZoom]
+        this.firstPanZoom = firstPanZoom
+        this.secondPanZoom = secondPanZoom
+        this.pausePanZoom()
+      }
+    },
+
     hideLoading() {
       this.isLoading = false
     },
@@ -421,8 +463,9 @@ export default {
           this.nextPlayer.currentTime = handleIn
             ? handleIn * this.frameDuration
             : 0
-          this.nextPlayer.style.display = 'block'
-          this.nextPlayer.play()
+          const [firstPanZoom, secondPanZoom] = this.panzoomInstances
+         this.nextPlayer.style.display = 'block'
+         this.nextPlayer.play()
         }
 
         this.switchPlayers()
@@ -554,7 +597,41 @@ export default {
         height: this.currentPlayer.videoHeight,
         width: this.currentPlayer.videoWidth
       }
-    }
+    },
+
+    pausePanZoom() {
+      this.panzoomInstances.forEach(panzoomInstance => {
+        panzoomInstance.pause()
+      })
+    },
+
+    resumePanZoom() {
+      this.panzoomInstances.forEach(panzoomInstance => {
+        panzoomInstance.resume()
+      })
+    },
+
+    resetPanZoom() {
+      this.panzoomInstances.forEach(panzoomInstance => {
+        panzoomInstance.moveTo(0, 0)
+        panzoomInstance.zoomAbs(0, 0, 1)
+      })
+    },
+
+    setPanZoom(x, y, scale) {
+      this.$options.silent = true
+      this.panzoomInstances.forEach(panzoomInstance => {
+        const actualScale = panzoomInstance.getTransform().scale
+        const zoomFactor = scale / actualScale
+        panzoomInstance.moveTo(x, y)
+        panzoomInstance.setTransformOrigin({ x, y })
+        panzoomInstance.zoomTo(x, y, zoomFactor)
+        panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
+        })
+      this.$nextTick(() => {
+        this.$options.silent = false
+      })
+    },
   },
 
   watch: {
@@ -587,7 +664,17 @@ export default {
         this.reloadCurrentEntity()
         if (this.isPlaying) this.play()
       }
-    }
+    },
+
+    zoomEnabled() {
+      if (this.panzoom) {
+        this.setPanZoom()
+      } else {
+        this.panzoomInstances.forEach(panzoomInstance => {
+          panzoomInstance.dispose()
+        })
+      }
+    },
   }
 }
 </script>
@@ -596,6 +683,7 @@ export default {
 .video-wrapper {
   height: 100%;
   position: relative;
+  overflow: hidden;
 
   video {
     margin: auto;
