@@ -51,10 +51,6 @@ export default {
     return {}
   },
 
-  mounted() {
-    this.openRoom()
-  },
-
   computed: {
     ...mapGetters(['personMap', 'user']),
 
@@ -80,7 +76,6 @@ export default {
 
     onLeaveClicked() {
       this.$emit('leave-room', this.room.id)
-      this.openRoom()
     }
   }
 }

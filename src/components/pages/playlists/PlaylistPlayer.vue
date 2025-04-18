@@ -326,7 +326,11 @@
       :is-full-screen="fullScreen || isEntitiesHidden"
       :movie-dimensions="movieDimensions"
       :nb-frames="
-        isCurrentPreviewMovie ? nbFrames : isCurrentPreviewPicture ? 48 : 0
+        isCurrentPreviewMovie
+          ? nbFrames
+          : isCurrentPreviewPicture && currentEntity.preview_nb_frames
+            ? currentEntity.preview_nb_frames
+            : Math.round(2 * fps)
       "
       :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
       :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
@@ -454,7 +458,12 @@
       <div class="separator"></div>
 
       <template v-if="isCurrentPreviewPicture">
-        {{ (framesSeenOfPicture + '').padStart(2, '0') }} / 48
+        {{ (framesSeenOfPicture + '').padStart(2, '0') }} /
+        {{
+          currentEntity.preview_nb_frames
+            ? currentEntity.preview_nb_frames
+            : Math.round(2 * fps)
+        }}
       </template>
 
       <div class="flexrow flexrow-item" v-if="currentEntityPreviewLength > 1">
@@ -972,7 +981,6 @@ import { defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
-import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
@@ -2109,7 +2117,7 @@ export default {
       let currentFrame = 0
       this.entityList.forEach((entity, index) => {
         const defaultNbFrames =
-          entity.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
+          entity.preview_nb_frames || 2 * this.fps * this.frameDuration
         this.framesPerImage[index] = defaultNbFrames
         const nbFrames =
           Math.round((entity.preview_file_duration || 0) * this.fps) ||
@@ -2294,9 +2302,16 @@ export default {
       })
     },
 
-    playlist() {
+    playlist(newPlaylist, oldPlaylist) {
+      if (oldPlaylist) {
+        if (this.room && this.room.people.includes(this.user.id)) {
+          this.leaveRoom()
+        }
+        this.closeRoom(oldPlaylist.id)
+      }
       this.endAnnotationSaving()
       this.room.id = this.playlist.id
+      this.openRoom(newPlaylist.id)
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
         this.updateProgressBar()

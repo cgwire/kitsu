@@ -12,22 +12,29 @@ export const previewRoomMixin = {
       return room?.id && room.id !== 'temp'
     },
 
-    openRoom() {
+    openRoom(playlistId) {
       this.$socket.emit('preview-room:open-playlist', {
-        playlist_id: this.room.id
+        playlist_id: playlistId || this.room.id,
+        user_id: this.user.id
+      })
+    },
+
+    closeRoom(playlistId) {
+      this.$socket.emit('preview-room:close-playlist', {
+        playlist_id: playlistId,
+        user_id: this.user.id
       })
     },
 
     joinRoom() {
       if (!this.isValidRoomId(this.room)) return
-
       if (this.isFullMode) this.isFullMode = false
 
       this.$socket.emit('preview-room:join', {
         user_id: this.user.id,
         playlist_id: this.room.id,
         is_playing: this.isPlaying,
-        current_entity_id: this.currentEntity.id,
+        current_entity_id: this.currentEntity?.id,
         current_entity_index: this.playingEntityIndex,
         current_preview_file_id: this.currentPreview
           ? this.currentPreview.id
@@ -49,12 +56,10 @@ export const previewRoomMixin = {
       })
     },
 
-    leaveRoom() {
-      if (!this.isValidRoomId(this.room) || !this.user) return
-
+    leaveRoom(playlistId) {
       this.$socket.emit('preview-room:leave', {
         user_id: this.user.id,
-        playlist_id: this.room.id
+        playlist_id: playlistId || this.room.id
       })
     },
 
@@ -307,7 +312,6 @@ export const previewRoomMixin = {
   socket: {
     events: {
       'preview-room:room-people-updated'(eventData) {
-        // someone joined the room
         if (!this.isValidRoomId(this.room)) return
         this.room.people = eventData.people
         if (this.joinedRoom) {
