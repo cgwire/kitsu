@@ -533,6 +533,7 @@ export default {
     all_assets: 'All assets',
     all_edits: 'All edits',
     all_shots: 'All shots',
+    apply: 'Apply',
     archived: 'Archived',
     attach_snapshots: 'Attach snapshots from your annotation',
     avatar: {
@@ -1368,7 +1369,23 @@ export default {
       edit_milestone: 'Edit milestone for',
       name: 'Name',
       error: 'An error occurred while adding or editing the milestone. Please try again.'
-    }
+    },
+    // production schedule
+    detail_level: 'Detail level',
+    detail_level_prev: 'Forecast',
+    detail_level_real: 'Real',
+    revision: 'Revision',
+    apply_to_prod: 'Apply to production',
+    assign: 'Assign to:',
+    reset_list: 'Reset list',
+    no_entity: 'No assignable entity',
+    no_assignee: 'No assignable person',
+    show_assigned: 'Show assigned entities',
+    force_unassign: 'Override previous assignments',
+    daily_quotas: 'Forced daily quotas:',
+    quotas_title: 'Auto estimated daily quotas:',
+    quotas_seconds: 'Quotas Seconds:',
+    quotas_counts: 'Quotas Counts:'
   },
 
   team_schedule: {
