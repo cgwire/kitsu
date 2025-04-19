@@ -690,11 +690,10 @@ const actions = {
     })
   },
 
-  unassignSelectedTasks({ commit, state }) {
-    const selectedTaskIds = Array.from(state.selectedTasks.keys())
+  unassignSelectedTasks({ commit, state }, { taskIds }) {
+    const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
     return tasksApi.unassignTasks(selectedTaskIds).then(() => {
       commit(UNASSIGN_TASKS, selectedTaskIds)
-      return selectedTaskIds
     })
   },
 
