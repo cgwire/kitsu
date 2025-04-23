@@ -151,6 +151,10 @@ export default {
         this.items = this.people
         this.index = buildNameIndex(this.people)
       }
+    },
+
+    modelValue() {
+      this.item = this.modelValue
     }
   }
 }
