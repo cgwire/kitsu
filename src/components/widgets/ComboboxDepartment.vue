@@ -4,6 +4,7 @@
       {{ label }}
     </label>
     <div
+      ref="combobox"
       class="department-combo"
       :class="{
         opened: showDepartmentList,
@@ -210,6 +211,10 @@ export default {
 
     toggleDepartmentList() {
       this.showDepartmentList = !this.showDepartmentList
+    },
+
+    focus() {
+      this.$refs.combobox.focus()
     }
   }
 }
