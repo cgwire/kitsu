@@ -9,7 +9,7 @@
       :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
       :disabled="disabled"
       :enable-time-picker="false"
-      :format="'yyyy-MM-dd'"
+      :format="format"
       hide-input-icon
       :locale="user.locale.substring(0, 2)"
       :min-date="minDate"
@@ -37,6 +37,10 @@ export default {
     disabled: {
       default: false,
       type: Boolean
+    },
+    format: {
+      default: 'yyyy-MM-dd',
+      type: String
     },
     label: {
       default: '',
