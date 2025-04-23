@@ -32,6 +32,12 @@ export const formatFullDate = date => {
   }
 }
 
+export const formatMonth = date => {
+  if (date && date.month === 1) return moment(date).format('YY-MM')
+  else if (date) return moment(date).format('MM')
+  else return ''
+}
+
 export const formatFullDateWithTimezone = (dateString, timezone) => {
   return moment.tz(dateString, 'UTC').tz(timezone).format('YYYY-MM-DD HH:mm:ss')
 }
