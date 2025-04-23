@@ -482,5 +482,13 @@ export default {
 
   clearPersonAvatar(person) {
     return client.pdel(`/api/actions/persons/${person.id}/clear-avatar`)
+  },
+
+  getSalaryScales() {
+    return client.pget('/api/data/salary-scales')
+  },
+
+  updateSalaryScale(scale) {
+    return client.pput(`/api/data/salary-scales/${scale.id}`, scale)
   }
 }

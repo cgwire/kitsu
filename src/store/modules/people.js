@@ -569,6 +569,51 @@ const actions = {
       day,
       computeMode
     )
+  },
+
+  async loadSalaryScale({ commit }) {
+    const scales = await peopleApi.getSalaryScales()
+    const fullScale = {}
+    scales.forEach(scale => {
+      fullScale[scale.department_id] = {
+        id: scale.id,
+        department_id: scale.department_id,
+        supervisor: {
+          senior: scale.senior_supervisor_salary,
+          mid: scale.mid_supervisor_salary,
+          junior: scale.junior_supervisor_salary
+        },
+        lead: {
+          senior: scale.senior_lead_salary,
+          mid: scale.mid_lead_salary,
+          junior: scale.junior_lead_salary
+        },
+        artist: {
+          senior: scale.senior_artist_salary,
+          mid: scale.mid_artist_salary,
+          junior: scale.junior_artist_salary
+        }
+      }
+    })
+    return fullScale
+  },
+
+  async updateSalaryScale({ commit }, salaryScale) {
+    console.log(salaryScale)
+    const scaleModel = {
+      id: salaryScale.id,
+      department_id: salaryScale.department_id,
+      senior_supervisor_salary: salaryScale.supervisor.senior,
+      mid_supervisor_salary: salaryScale.supervisor.mid,
+      junior_supervisor_salary: salaryScale.supervisor.junior,
+      senior_lead_salary: salaryScale.lead.senior,
+      mid_lead_salary: salaryScale.lead.mid,
+      junior_lead_salary: salaryScale.lead.junior,
+      senior_artist_salary: salaryScale.artist.senior,
+      mid_artist_salary: salaryScale.artist.mid,
+      junior_artist_salary: salaryScale.artist.junior
+    }
+    await peopleApi.updateSalaryScale(scaleModel)
   }
 }
 

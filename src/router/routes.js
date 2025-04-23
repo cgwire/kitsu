@@ -58,6 +58,7 @@ const Profile = () => import('@/components/pages/Profile.vue')
 const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const ResetChangePassword = () =>
   import('@/components/pages/ResetChangePassword.vue')
+const SalaryScale = () => import('@/components/pages/budget/SalaryScale.vue')
 const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
 const SequenceStats = () => import('@/components/pages/SequenceStats.vue')
@@ -86,6 +87,7 @@ const ADMIN_PAGES = [
   'newsfeed',
   'people',
   'productions',
+  'salary-scale',
   'task-status',
   'task-types',
   'team-schedule',
@@ -222,6 +224,12 @@ export const routes = [
         path: 'studios',
         name: 'studios',
         component: Studios
+      },
+
+      {
+        path: 'salary-scale',
+        name: 'salary-scale',
+        component: SalaryScale
       },
 
       {

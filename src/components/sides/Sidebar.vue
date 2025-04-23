@@ -161,6 +161,12 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'salary-scale' }">
+                <rows-4-icon class="nav-icon" />
+                {{ $t('budget.salary_scale_title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
               <router-link :to="{ name: 'custom-actions' }">
                 <kitsu-icon class="nav-icon" name="custom" />
                 {{ $t('custom_actions.title') }}
@@ -210,7 +216,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BotIcon, BuildingIcon, GlobeIcon } from 'lucide-vue-next'
+import { BotIcon, BuildingIcon, GlobeIcon, Rows4Icon } from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
@@ -220,7 +226,8 @@ export default {
     BotIcon,
     BuildingIcon,
     GlobeIcon,
-    KitsuIcon
+    KitsuIcon,
+    Rows4Icon
   },
 
   data() {
