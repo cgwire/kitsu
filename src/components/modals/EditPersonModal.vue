@@ -50,6 +50,26 @@
           v-model="form.role"
         />
         <combobox
+          :label="$t('people.fields.position')"
+          :options="positionOptions"
+          locale-key-prefix="people.position."
+          v-model="form.position"
+          v-if="isCurrentUserAdmin"
+        />
+        <combobox
+          :label="$t('people.fields.seniority')"
+          :options="seniorityOptions"
+          locale-key-prefix="people.seniority."
+          v-model="form.seniority"
+          v-if="isCurrentUserAdmin"
+        />
+        <text-field
+          type="number"
+          :label="$t('people.fields.daily_salary')"
+          v-model="form.daily_salary"
+          v-if="isCurrentUserAdmin"
+        />
+        <combobox
           :label="$t('people.fields.contract')"
           :options="contractOptions"
           locale-key-prefix="people.contract."
@@ -277,6 +297,16 @@ export default {
         { label: 'vendor', value: 'vendor' },
         { label: 'admin', value: 'admin' }
       ],
+      positionOptions: [
+        { label: 'artist', value: 'artist' },
+        { label: 'supervisor', value: 'supervisor' },
+        { label: 'lead', value: 'lead' },
+      ],
+      seniorityOptions: [
+        { label: 'senior', value: 'senior' },
+        { label: 'mid', value: 'mid' },
+        { label: 'junior', value: 'junior' }
+      ],
       selectedDepartment: null
     }
   },
@@ -367,6 +397,9 @@ export default {
           email: this.personToEdit.email,
           phone: this.personToEdit.phone,
           role: this.personToEdit.role,
+          position: this.personToEdit.position,
+          seniority: this.personToEdit.seniority,
+          daily_salary: this.personToEdit.daily_salary,
           contract_type: this.personToEdit.contract_type,
           active: this.personToEdit.active ? 'true' : 'false',
           departments: [...(this.personToEdit.departments || [])],
@@ -377,6 +410,9 @@ export default {
       } else {
         this.form = {
           role: 'user',
+          position: 'artist',
+          seniority: 'mid',
+          daily_salary: 0,
           contract_type: 'open-ended',
           active: 'true',
           departments: [],

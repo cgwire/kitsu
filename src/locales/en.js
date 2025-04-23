@@ -829,6 +829,7 @@ export default {
     fields: {
       active: 'Active',
       contract: 'Contract',
+      daily_salary: 'Daily rate',
       departments: 'Departments',
       email: 'Email',
       first_name: 'First name',
@@ -837,7 +838,9 @@ export default {
       password: 'New password',
       password_2: 'New password (repeat)',
       phone: 'Phone',
+      position: 'Position',
       role: 'Role',
+      seniority: 'Seniority',
       studio: 'Studio'
     },
     list: {
@@ -924,9 +927,9 @@ export default {
     fields: {
       name: 'Name',
       created_at: 'Creation date',
-      updated_at: 'Update date',
       for_entity: 'Select entity to display',
-      for_client: 'To be shared with'
+      for_client: 'To be shared with',
+      updated_at: 'Update date'
     },
     actions: {
       annotation: 'Annotation',
