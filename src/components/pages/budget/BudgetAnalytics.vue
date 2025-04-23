@@ -1,46 +1,43 @@
 <template>
-<div class="flexcolumn analytics-container">
-  <h3 class="has-text-centered stong mt1">Budget Analytics</h3>
+  <div class="flexcolumn analytics-container">
+    <h3 class="has-text-centered stong mt1">Budget Analytics</h3>
 
-  <div v-if="budgets.length > 0 && budgetDepartments.length > 0">
-    <p class="has-text-centered mt1 strong total">
-      {{ amount.toLocaleString() }} {{ currency || 'USD' }}
-    </p>
-    <p class="has-text-centered mt1">
-      {{ budgetDepartments.length }} departments -
-      {{ budgetEntries.length }} persons -
-      {{ monthsBetweenProductionDates.length }} months
-    </p>
+    <div v-if="budgets.length > 0 && budgetDepartments.length > 0">
+      <p class="has-text-centered mt1 strong total">
+        {{ amount.toLocaleString() }} {{ currency || 'USD' }}
+      </p>
+      <p class="has-text-centered mt1">
+        {{ budgetDepartments.length }} departments -
+        {{ budgetEntries.length }} persons -
+        {{ monthsBetweenProductionDates.length }} months
+      </p>
+    </div>
+    <div v-if="budgets.length === 0 || budgetDepartments.length === 0">
+      <p class="has-text-centered mt2">
+        {{ $t('budget.no_analytics_to_show') }}
+      </p>
+    </div>
+    <div class="mt1 flexcolumn" v-else>
+      <h4>
+        {{ $t('budget.cash_repartition') }}
+      </h4>
+      <pie-chart
+        class="mb1"
+        :legend="false"
+        :data="pieChartData"
+        :colors="pieChartColors"
+        height="240px"
+      ></pie-chart>
+      <h4>
+        {{ $t('budget.cash_evolution') }}
+      </h4>
+      <column-chart :legend="false" :data="columnChartData"></column-chart>
+    </div>
   </div>
-  <div v-if="budgets.length === 0 || budgetDepartments.length === 0">
-    <p class="has-text-centered mt2">
-      {{ $t('budget.no_analytics_to_show') }}
-    </p>
-  </div>
-  <div class="mt1 flexcolumn" v-else>
-    <h4>
-      {{ $t('budget.cash_repartition') }}
-    </h4>
-    <pie-chart
-      class="mb1"
-      :legend="false"
-      :data="pieChartData"
-      :colors="pieChartColors"
-      height="240px"
-    ></pie-chart>
-    <h4>
-      {{ $t('budget.cash_evolution') }}
-    </h4>
-    <column-chart
-      :legend="false"
-      :data="columnChartData"
-    ></column-chart>
-  </div>
-</div>
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   amount: {
     type: Number,
     default: 0

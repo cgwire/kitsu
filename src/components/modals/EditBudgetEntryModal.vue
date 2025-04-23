@@ -65,14 +65,14 @@
           v-model="form.months_duration"
           @enter="runConfirmation"
         />
-     </div>
+      </div>
       <div class="mt0">
         <span class="salary-label">End month:</span>
         <span class="salary-value">{{ endMonth }}</span>
-        <br>
+        <br />
         <span class="salary-label">Monthly salary:</span>
         <span class="salary-value">{{ monthlySalary }}</span>
-        <br>
+        <br />
         <span class="salary-label">Total:</span>
         <span class="salary-value">{{ totalSalary }}</span>
       </div>
@@ -99,7 +99,6 @@ import { parseSimpleDate, formatSimpleDate } from '@/lib/time'
 import BaseModal from '@/components/modals/BaseModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import DateField from '@/components/widgets/DateField.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import MonthField from '@/components/widgets/MonthField.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -114,7 +113,6 @@ export default {
     BaseModal,
     Combobox,
     ComboboxDepartment,
-    DateField,
     ModalFooter,
     MonthField,
     PeopleField,
@@ -175,11 +173,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'activePeople',
-      'currentProduction',
-      'personMap'
-    ]),
+    ...mapGetters(['activePeople', 'currentProduction', 'personMap']),
 
     isDisabled() {
       return !this.form.department_id || this.form.months_duration < 1
@@ -211,8 +205,9 @@ export default {
         return 0
       } else if (!this.form.person || !this.form.person.daily_salary) {
         const departmentScale = this.salaryScale[this.form.department_id]
-        return departmentScale[this.form.position || 'artist']
-                              [this.form.seniority || 'junior']
+        return departmentScale[this.form.position || 'artist'][
+          this.form.seniority || 'junior'
+        ]
       } else {
         return this.form.person.daily_salary
       }
@@ -233,8 +228,9 @@ export default {
 
     maxDuration() {
       const startDate = parseSimpleDate(this.form.start_date)
-      const projectEndDate = parseSimpleDate(this.currentProduction.end_date)
-        .endOf('month')
+      const projectEndDate = parseSimpleDate(
+        this.currentProduction.end_date
+      ).endOf('month')
       const maxDuration = projectEndDate.diff(startDate, 'months')
       return maxDuration > 0 ? maxDuration : 1
     }
@@ -272,7 +268,9 @@ export default {
     resetForm() {
       if (this.isEditing) {
         const person = this.personMap.get(this.budgetEntryToEdit.person_id)
-        console.log('edition', this.budgetEntryToEdit,
+        console.log(
+          'edition',
+          this.budgetEntryToEdit,
           parseSimpleDate(this.budgetEntryToEdit.start_date).toDate()
         )
         Object.assign(this.form, {
@@ -281,8 +279,9 @@ export default {
           person,
           position: this.budgetEntryToEdit.position,
           seniority: this.budgetEntryToEdit.seniority,
-          start_date: parseSimpleDate(this.budgetEntryToEdit.start_date)
-           .toDate(),
+          start_date: parseSimpleDate(
+            this.budgetEntryToEdit.start_date
+          ).toDate(),
           months_duration: this.budgetEntryToEdit.months_duration
         })
         this.form.person = person

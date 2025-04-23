@@ -300,7 +300,7 @@ export default {
       positionOptions: [
         { label: 'artist', value: 'artist' },
         { label: 'supervisor', value: 'supervisor' },
-        { label: 'lead', value: 'lead' },
+        { label: 'lead', value: 'lead' }
       ],
       seniorityOptions: [
         { label: 'senior', value: 'senior' },

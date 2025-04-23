@@ -1,199 +1,214 @@
 <template>
-<div class="budget-data">
+  <div class="budget-data">
+    <div class="has-text-centered mt2" v-if="isLoading">
+      <spinner />
+    </div>
 
-  <div class="has-text-centered mt2" v-if="isLoading">
-    <spinner />
-  </div>
+    <div class="flexrow mt2" v-else-if="isError">
+      <p class="list-error">
+        {{ $t('budget.budget_entries_error') }}
+      </p>
+    </div>
 
-  <div class="flexrow mt2" v-else-if="isError">
-    <p class="list-error">
-      {{ $t('budget.budget_entries_error') }}
-    </p>
-  </div>
+    <div class="mt2" v-else-if="budgetDepartments.length === 0">
+      <p class="has-text-centered mt1">
+        {{ $t('budget.no_budget_entries_found') }}
+      </p>
+      <p class="has-text-centered mt1">
+        <button-simple
+          :text="$t('budget.add_entry')"
+          @click="$emit('add-budget-entry')"
+        />
+      </p>
+    </div>
 
-  <div class="mt2" v-else-if="budgetDepartments.length === 0">
-    <p class="has-text-centered mt1">
-      {{ $t('budget.no_budget_entries_found') }}
-    </p>
-    <p class="has-text-centered mt1">
-      <button-simple
-        :text="$t('budget.add_entry')"
-        @click="$emit('add-budget-entry')"
-      />
-    </p>
-  </div>
-
-  <div class="data-list filler" v-else>
-    <div ref="body" class="datatable-wrapper flexcolumn filler">
-      <table class="datatable">
-        <thead class="datatable-head">
-          <tr>
-            <th
-              class="datatable-row-header department-header-header"
-              colspan="3"
-            >
-              <div class="flexrow">
-                <div class="flexrow-item">
-                  {{ $t('budget.fields.department') }}
-                </div>
-                <div class="filler"></div>
-                <button-simple
-                  :text="$t('budget.add_entry')"
-                  is-thin
-                  @click="$emit('add-budget-entry')"
-                />
-              </div>
-            </th>
-            <th
-              :key="month"
-              class="month datatable-row-header"
-              v-for="month in monthsBetweenProductionDates"
-            >
-              {{
-                month.month() === 0
-                  ? month.format('MMM / YY')
-                  : month.format('MMM')
-              }}
-            </th>
-            <th class="datatable-row-header has-text-right">
-              {{ $t('main.total') }} ({{ currency }})
-            </th>
-            <th class="actions datatable-row-header"></th>
-          </tr>
-        </thead>
-
-        <tbody
-          class="datatable-body"
-          @mousedown="startBrowsing"
-          @touchstart="startBrowsing"
-        >
-          <tr class="datatable-row">
-            <td class="datatable-row-header" colspan="3">
-              <div class="pa05">
-                {{ $t('main.total') }}
-              </div>
-            </td>
-            <td
-              :key="month"
-              class="month"
-              v-for="month in monthsBetweenProductionDates"
-            >
-              {{ totalEntry.monthCosts[month.format('YYYY-MM')]?.toLocaleString() }}
-            </td>
-            <td class="total-cost">
-              {{ totalEntry.total.toLocaleString() }}
-            </td>
-            <td class="actions"></td>
-          </tr>
-
-          <template
-            v-for="departmentEntry in budgetDepartments"
-            :key="departmentEntry.id"
-          >
-            <tr
-              class="datatable-row department-row pointer"
-              @click="toggleDepartment(departmentEntry.id)"
-            >
-              <td
-                class="datatable-row-header strong department-header"
+    <div class="data-list filler" v-else>
+      <div ref="body" class="datatable-wrapper flexcolumn filler">
+        <table class="datatable">
+          <thead class="datatable-head">
+            <tr>
+              <th
+                class="datatable-row-header department-header-header"
                 colspan="3"
               >
-                <div class="flexrow department-header-content"
-                  :style="getDepartmentStyle(departmentEntry.id, '99')">
-                  <chevron-right-icon
-                    class="flexrow-item"
-                    v-if="collapsedDepartments[departmentEntry.id]"
-                  />
-                  <chevron-down-icon
-                    class="flexrow-item"
-                    v-else
-                  />
+                <div class="flexrow">
                   <div class="flexrow-item">
-                    {{ departmentMap.get(departmentEntry.id).name }}
+                    {{ $t('budget.fields.department') }}
                   </div>
+                  <div class="filler"></div>
+                  <button-simple
+                    :text="$t('budget.add_entry')"
+                    is-thin
+                    @click="$emit('add-budget-entry')"
+                  />
+                </div>
+              </th>
+              <th
+                :key="month"
+                class="month datatable-row-header"
+                v-for="month in monthsBetweenProductionDates"
+              >
+                {{
+                  month.month() === 0
+                    ? month.format('MMM / YY')
+                    : month.format('MMM')
+                }}
+              </th>
+              <th class="datatable-row-header has-text-right">
+                {{ $t('main.total') }} ({{ currency }})
+              </th>
+              <th class="actions datatable-row-header"></th>
+            </tr>
+          </thead>
+
+          <tbody
+            class="datatable-body"
+            @mousedown="startBrowsing"
+            @touchstart="startBrowsing"
+          >
+            <tr class="datatable-row">
+              <td class="datatable-row-header" colspan="3">
+                <div class="pa05">
+                  {{ $t('main.total') }}
                 </div>
               </td>
               <td
                 :key="month"
                 class="month"
-                :style="getDepartmentStyle(departmentEntry.id, '33')"
                 v-for="month in monthsBetweenProductionDates"
               >
-                {{ departmentEntry.monthCosts[month.format('YYYY-MM')]?.toLocaleString() }}
+                {{
+                  totalEntry.monthCosts[
+                    month.format('YYYY-MM')
+                  ]?.toLocaleString()
+                }}
               </td>
-              <td
-                class="total-cost"
-                :style="getDepartmentStyle(departmentEntry.id, '33')"
-              >
-                {{ departmentEntry.total.toLocaleString() }}
+              <td class="total-cost">
+                {{ totalEntry.total.toLocaleString() }}
               </td>
-              <td
-                class="actions"
-                :style="getDepartmentStyle(departmentEntry.id, '33')"
-              >
-              </td>
+              <td class="actions"></td>
             </tr>
 
-            <template v-if="!collapsedDepartments[departmentEntry.id]">
+            <template
+              v-for="departmentEntry in budgetDepartments"
+              :key="departmentEntry.id"
+            >
               <tr
-                class="datatable-row"
-                :key="personEntry.id"
-                v-for="personEntry in departmentEntry.persons"
+                class="datatable-row department-row pointer"
+                @click="toggleDepartment(departmentEntry.id)"
               >
-                <td class="position datatable-row-header">
-                  {{ $t('budget.positions.' + personEntry.position || 'artist')}}
-                </td>
-                <td class="seniority datatable-row-header">
-                  {{ $t('budget.seniorities.' + personEntry.seniority || 'junior') }}
-                </td>
-                <td class="name datatable-row-header">
-                  <div class="flexrow">
-                    <people-avatar
+                <td
+                  class="datatable-row-header strong department-header"
+                  colspan="3"
+                >
+                  <div
+                    class="flexrow department-header-content"
+                    :style="getDepartmentStyle(departmentEntry.id, '99')"
+                  >
+                    <chevron-right-icon
                       class="flexrow-item"
-                      :person="personMap.get(personEntry.person_id)"
-                      :is-link="false"
-                      :font-size="12"
-                      :size="20"
-                      v-if="personEntry.person_id"
+                      v-if="collapsedDepartments[departmentEntry.id]"
                     />
-                    <people-name
-                      :person="personMap.get(personEntry.person_id)"
-                      v-if="personEntry.person_id"
-                    />
-                    <span class="new-hiring" v-else>
-                      {{ $t('budget.new_hiring') }}
-                    </span>
+                    <chevron-down-icon class="flexrow-item" v-else />
+                    <div class="flexrow-item">
+                      {{ departmentMap.get(departmentEntry.id).name }}
+                    </div>
                   </div>
                 </td>
                 <td
                   :key="month"
                   class="month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
                   v-for="month in monthsBetweenProductionDates"
                 >
-                  {{ personEntry.monthCosts[month.format('YYYY-MM')]?.toLocaleString() }}
+                  {{
+                    departmentEntry.monthCosts[
+                      month.format('YYYY-MM')
+                    ]?.toLocaleString()
+                  }}
                 </td>
-                <td class="total-cost">
-                  {{ personEntry.total.toLocaleString() }}
+                <td
+                  class="total-cost"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                >
+                  {{ departmentEntry.total.toLocaleString() }}
                 </td>
-                <row-actions-cell
+                <td
                   class="actions"
-                  :entry-id="personEntry.id"
-                  :hide-avatar="true"
-                  :hide-change-password="true"
-                  :hide-delete="false"
-                  :hide-refresh="true"
-                  @delete-clicked="$emit('delete-budget-entry', personEntry)"
-                  @edit-clicked="$emit('edit-budget-entry', personEntry)"
-                />
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                ></td>
               </tr>
-            </template>
-          </template>
 
-        </tbody>
-      </table>
+              <template v-if="!collapsedDepartments[departmentEntry.id]">
+                <tr
+                  class="datatable-row"
+                  :key="personEntry.id"
+                  v-for="personEntry in departmentEntry.persons"
+                >
+                  <td class="position datatable-row-header">
+                    {{
+                      $t('budget.positions.' + personEntry.position || 'artist')
+                    }}
+                  </td>
+                  <td class="seniority datatable-row-header">
+                    {{
+                      $t(
+                        'budget.seniorities.' + personEntry.seniority ||
+                          'junior'
+                      )
+                    }}
+                  </td>
+                  <td class="name datatable-row-header">
+                    <div class="flexrow">
+                      <people-avatar
+                        class="flexrow-item"
+                        :person="personMap.get(personEntry.person_id)"
+                        :is-link="false"
+                        :font-size="12"
+                        :size="20"
+                        v-if="personEntry.person_id"
+                      />
+                      <people-name
+                        :person="personMap.get(personEntry.person_id)"
+                        v-if="personEntry.person_id"
+                      />
+                      <span class="new-hiring" v-else>
+                        {{ $t('budget.new_hiring') }}
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    :key="month"
+                    class="month"
+                    v-for="month in monthsBetweenProductionDates"
+                  >
+                    {{
+                      personEntry.monthCosts[
+                        month.format('YYYY-MM')
+                      ]?.toLocaleString()
+                    }}
+                  </td>
+                  <td class="total-cost">
+                    {{ personEntry.total.toLocaleString() }}
+                  </td>
+                  <row-actions-cell
+                    class="actions"
+                    :entry-id="personEntry.id"
+                    :hide-avatar="true"
+                    :hide-change-password="true"
+                    :hide-delete="false"
+                    :hide-refresh="true"
+                    @delete-clicked="$emit('delete-budget-entry', personEntry)"
+                    @edit-clicked="$emit('edit-budget-entry', personEntry)"
+                  />
+                </tr>
+              </template>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -205,7 +220,6 @@ import { grabListMixin } from '@/components/mixins/grablist'
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
@@ -214,22 +228,14 @@ import Spinner from '@/components/widgets/Spinner.vue'
 export default {
   name: 'budget-list',
 
-  mixins: [
-    domMixin,
-    grabListMixin
-  ],
+  mixins: [domMixin, grabListMixin],
 
-  emits: [
-    'add-budget-entry',
-    'delete-budget-entry',
-    'edit-budget-entry'
-  ],
+  emits: ['add-budget-entry', 'delete-budget-entry', 'edit-budget-entry'],
 
   components: {
     ButtonSimple,
     ChevronDownIcon,
     ChevronRightIcon,
-    DepartmentName,
     PeopleName,
     PeopleAvatar,
     RowActionsCell,
@@ -239,19 +245,19 @@ export default {
   props: {
     budgets: {
       type: Array,
-      default: []
+      default: () => []
     },
     budgetEntries: {
       type: Array,
-      default: []
+      default: () => []
     },
     budgetDepartments: {
       type: Array,
-      default: []
+      default: () => []
     },
     monthsBetweenProductionDates: {
       type: Array,
-      default: []
+      default: () => []
     },
     currency: {
       type: String,
@@ -281,8 +287,8 @@ export default {
         ['mouseleave', this.stopBrowsing],
         ['touchend', this.stopBrowsing],
         ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing],
-      ],
+        ['keyup', this.stopBrowsing]
+      ]
     }
   },
 
@@ -296,10 +302,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'departmentMap',
-      'personMap'
-    ])
+    ...mapGetters(['departmentMap', 'personMap'])
   },
 
   methods: {

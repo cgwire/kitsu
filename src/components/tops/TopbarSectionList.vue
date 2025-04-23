@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon, HandCoinsIcon } from 'lucide-vue-next'
+import { HandCoinsIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'
@@ -66,7 +66,6 @@ export default {
   name: 'topbar-section-list',
 
   components: {
-    ChevronDownIcon,
     ComboboxMask,
     KitsuIcon,
     HandCoinsIcon

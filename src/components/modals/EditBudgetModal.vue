@@ -1,11 +1,6 @@
 <template>
-  <base-modal
-    :active="active"
-    :title="modalTitle"
-    @cancel="$emit('cancel')"
-  >
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
     <form @submit.prevent>
-
       <div class="field">
         <label class="label">
           {{ $t('budget.fields.revision') }}
@@ -104,14 +99,13 @@ export default {
         { label: 'CHF', value: 'CHF' },
         { label: 'JPY', value: 'JPY' },
         { label: 'CNY', value: 'CNY' },
-        { label: 'INR', value: 'INR' },
+        { label: 'INR', value: 'INR' }
       ]
     }
   },
 
   computed: {
-    ...mapGetters([
-    ]),
+    ...mapGetters([]),
 
     isDisabled() {
       return this.form.name.length === 0

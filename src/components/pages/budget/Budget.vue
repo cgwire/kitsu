@@ -2,92 +2,91 @@
   <page-layout>
     <template #main>
       <div class="flexcolumn page">
-
-          <budget-header
-            :budgets="budgets"
-            :budget-options="budgetOptions"
-            :budget="currentBudget"
-            :is-loading="loading.budgets"
-            :is-error="errors.budgets"
-            @change-budget="onChangeBudget"
-            @edit-budget="onEditBudgetClicked"
-            @delete-budget="onDeleteBudgetClicked"
-            @new-version="onNewBudgetVersionClicked"
-          />
-
-          <budget-list
-            :budget="currentBudget"
-            :budget-departments="budgetDepartments"
-            :budget-entries="budgetEntries"
-            :currency="currentBudget?.currency || 'USD'"
-            :is-loading="loading.entries"
-            :is-error="errors.entries"
-            :months-between-production-dates="monthsBetweenProductionDates"
-            :total-entry="totalEntry"
-            @add-budget-entry="onAddBudgetEntry"
-            @delete-budget-entry="deleteBudgetEntry"
-            @edit-budget-entry="editBudgetEntry"
-            v-if="currentBudget.id"
-          />
-
-          <edit-budget-modal
-            :active="modals.createBudget"
-            :budget-to-edit="budgetToEdit"
-            :last-revision="lastRevision"
-            :is-loading="loading.createBudget || loading.editBudget"
-            :is-error="errors.createBudget || errors.editBudget"
-            @cancel="modals.createBudget = false"
-            @confirm="createBudget"
-          />
-
-          <edit-budget-entry-modal
-            :active="modals.createBudgetEntry"
-            :budget-entry-to-edit="budgetEntryToEdit"
-            :salary-scale="salaryScale"
-            :is-loading="loading.createBudgetEntry"
-            :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
-            @cancel="modals.createBudgetEntry = false"
-            @confirm="confirmCreateBudgetEntry"
-          />
-
-          <hard-delete-modal
-            :active="modals.deleteBudget"
-            :error-text="$t('budget.delete_budget_error')"
-            :is-loading="loading.del"
-            :is-error="errors.deleteBudget"
-            :lock-text="currentBudget?.name"
-            :text="$t('budget.delete_budget_message')"
-            @cancel="modals.deleteBudget = false"
-            @confirm="deleteBudget"
-          />
-
-          <delete-modal
-            :active="modals.deleteBudgetEntry"
-            :error-text="$t('budget.delete_budget_entry_error')"
-            :is-loading="loading.deleteBudgetEntry"
-            :is-error="errors.deleteBudgetEntry"
-            :text="$t('budget.delete_budget_entry_message')"
-            @cancel="modals.deleteBudgetEntry = false"
-            @confirm="confirmDeleteBudgetEntry"
-          />
-        </div>
-      </template>
-
-      <template #side>
-        <budget-analytics
-          :amount="totalEntry.total"
-          :currency="currentBudget.currency"
+        <budget-header
           :budgets="budgets"
+          :budget-options="budgetOptions"
+          :budget="currentBudget"
+          :is-loading="loading.budgets"
+          :is-error="errors.budgets"
+          @change-budget="onChangeBudget"
+          @edit-budget="onEditBudgetClicked"
+          @delete-budget="onDeleteBudgetClicked"
+          @new-version="onNewBudgetVersionClicked"
+        />
+
+        <budget-list
+          :budget="currentBudget"
           :budget-departments="budgetDepartments"
           :budget-entries="budgetEntries"
+          :currency="currentBudget?.currency || 'USD'"
+          :is-loading="loading.entries"
+          :is-error="errors.entries"
           :months-between-production-dates="monthsBetweenProductionDates"
-          :pie-chart-data="pieChartData"
-          :pie-chart-colors="pieChartColors"
-          :column-chart-data="columnChartData"
+          :total-entry="totalEntry"
+          @add-budget-entry="onAddBudgetEntry"
+          @delete-budget-entry="deleteBudgetEntry"
+          @edit-budget-entry="editBudgetEntry"
+          v-if="currentBudget.id"
         />
-      </template>
-    </page-layout>
-  </template>
+
+        <edit-budget-modal
+          :active="modals.createBudget"
+          :budget-to-edit="budgetToEdit"
+          :last-revision="lastRevision"
+          :is-loading="loading.createBudget || loading.editBudget"
+          :is-error="errors.createBudget || errors.editBudget"
+          @cancel="modals.createBudget = false"
+          @confirm="createBudget"
+        />
+
+        <edit-budget-entry-modal
+          :active="modals.createBudgetEntry"
+          :budget-entry-to-edit="budgetEntryToEdit"
+          :salary-scale="salaryScale"
+          :is-loading="loading.createBudgetEntry"
+          :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
+          @cancel="modals.createBudgetEntry = false"
+          @confirm="confirmCreateBudgetEntry"
+        />
+
+        <hard-delete-modal
+          :active="modals.deleteBudget"
+          :error-text="$t('budget.delete_budget_error')"
+          :is-loading="loading.del"
+          :is-error="errors.deleteBudget"
+          :lock-text="currentBudget?.name"
+          :text="$t('budget.delete_budget_message')"
+          @cancel="modals.deleteBudget = false"
+          @confirm="deleteBudget"
+        />
+
+        <delete-modal
+          :active="modals.deleteBudgetEntry"
+          :error-text="$t('budget.delete_budget_entry_error')"
+          :is-loading="loading.deleteBudgetEntry"
+          :is-error="errors.deleteBudgetEntry"
+          :text="$t('budget.delete_budget_entry_message')"
+          @cancel="modals.deleteBudgetEntry = false"
+          @confirm="confirmDeleteBudgetEntry"
+        />
+      </div>
+    </template>
+
+    <template #side>
+      <budget-analytics
+        :amount="totalEntry.total"
+        :currency="currentBudget.currency"
+        :budgets="budgets"
+        :budget-departments="budgetDepartments"
+        :budget-entries="budgetEntries"
+        :months-between-production-dates="monthsBetweenProductionDates"
+        :pie-chart-data="pieChartData"
+        :pie-chart-colors="pieChartColors"
+        :column-chart-data="columnChartData"
+      />
+    </template>
+  </page-layout>
+</template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
@@ -99,28 +98,21 @@ import { formatMonth, parseSimpleDate } from '@/lib/time'
 import BudgetAnalytics from '@/components/pages/budget/BudgetAnalytics.vue'
 import BudgetHeader from '@/components/pages/budget/BudgetHeader.vue'
 import BudgetList from '@/components/pages/budget/BudgetList.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditBudgetModal from '@/components/modals/EditBudgetModal.vue'
 import EditBudgetEntryModal from '@/components/modals/EditBudgetEntryModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import PageLayout from '@/components/layouts/PageLayout.vue'
-import PageTitle from '@/components/widgets/PageTitle.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-import TextField from '@/components/widgets/TextField.vue'
-
 
 const helpers = {
-
   resetDepartmentTotals(departmentData) {
     departmentData.total = departmentData.persons.reduce(
-      (acc, person) => acc + person.total, 0
+      (acc, person) => acc + person.total,
+      0
     )
-    departmentData.monthCosts = departmentData.persons.reduce(
-      (acc, person) => {
-        Object.keys(person.monthCosts).forEach(month => {
-          acc[month] = (acc[month] || 0) + person.monthCosts[month]
+    departmentData.monthCosts = departmentData.persons.reduce((acc, person) => {
+      Object.keys(person.monthCosts).forEach(month => {
+        acc[month] = (acc[month] || 0) + person.monthCosts[month]
       })
       return acc
     }, {})
@@ -128,7 +120,7 @@ const helpers = {
 }
 
 export default {
-  name: 'Budget',
+  name: 'budget',
 
   mixins: [pageMixin],
 
@@ -136,16 +128,11 @@ export default {
     BudgetAnalytics,
     BudgetHeader,
     BudgetList,
-    ButtonSimple,
-    ComboboxStyled,
     DeleteModal,
     EditBudgetEntryModal,
     EditBudgetModal,
     HardDeleteModal,
-    PageLayout,
-    PageTitle,
-    Spinner,
-    TextField,
+    PageLayout
   },
 
   data() {
@@ -197,7 +184,6 @@ export default {
     )
   },
 
-
   computed: {
     ...mapGetters([
       'currentProduction',
@@ -216,8 +202,9 @@ export default {
       )
       const budgetDepartments = []
       Array.from(departmentIds).map(departmentId => {
-        const departmentEntries = this.budgetEntries
-          .filter(entry => entry.department_id === departmentId)
+        const departmentEntries = this.budgetEntries.filter(
+          entry => entry.department_id === departmentId
+        )
         const departmentData = {
           id: departmentId,
           monthCosts: {},
@@ -254,17 +241,15 @@ export default {
 
     totalEntry() {
       const total = this.budgetDepartments.reduce(
-        (acc, department) => acc + department.total, 0
+        (acc, department) => acc + department.total,
+        0
       )
-      const monthCosts = this.budgetDepartments.reduce(
-        (acc, department) => {
-          Object.keys(department.monthCosts).forEach(month => {
-            acc[month] = (acc[month] || 0) + department.monthCosts[month]
-          })
-          return acc
-        },
-        {}
-      )
+      const monthCosts = this.budgetDepartments.reduce((acc, department) => {
+        Object.keys(department.monthCosts).forEach(month => {
+          acc[month] = (acc[month] || 0) + department.monthCosts[month]
+        })
+        return acc
+      }, {})
       return {
         total,
         monthCosts: monthCosts
@@ -274,10 +259,7 @@ export default {
     pieChartData() {
       return this.budgetDepartments.map(departmentEntry => {
         const department = this.departmentMap.get(departmentEntry.id)
-        return [
-          department.name,
-          departmentEntry.total
-        ]
+        return [department.name, departmentEntry.total]
       })
     },
 
@@ -317,20 +299,20 @@ export default {
 
     sortDepartmentPersons(a, b) {
       const seniorityWeight = {
-        'junior': 1,
-        'mid': 2,
-        'senior': 3
+        junior: 1,
+        mid: 2,
+        senior: 3
       }
       const positionWeight = {
-        'artist': 1,
-        'supervisor': 2,
-        'lead': 3
+        artist: 1,
+        supervisor: 2,
+        lead: 3
       }
       const seniorityA = seniorityWeight[a.seniority]
       const seniorityB = seniorityWeight[b.seniority]
       const positionA = positionWeight[a.position]
       const positionB = positionWeight[b.position]
-      if (a.person_id===null && b.person_id === null) {
+      if (a.person_id === null && b.person_id === null) {
         if (positionA === positionB) {
           return seniorityB - seniorityA
         } else {
@@ -355,7 +337,6 @@ export default {
       }
     },
 
-
     async setSalaryScale() {
       this.salaryScale = await this.loadSalaryScale()
     },
@@ -378,7 +359,7 @@ export default {
       try {
         this.loading.createBudget = true
         if (budget.id) {
-          const editedBudget = await this.updateProductionBudget({
+          await this.updateProductionBudget({
             productionId: this.currentProduction.id,
             budget: {
               id: this.currentBudget.id,
@@ -386,8 +367,9 @@ export default {
               currency: budget.currency
             }
           })
-          const oldBudget =
-            this.budgets.find(b => b.id === this.currentBudget.id)
+          const oldBudget = this.budgets.find(
+            b => b.id === this.currentBudget.id
+          )
           if (oldBudget) {
             Object.assign(oldBudget, {
               name: budget.name,
@@ -436,9 +418,7 @@ export default {
     },
 
     postDeleteBudget(budget) {
-      this.budgets = this.budgets.filter(
-        b => b.id !== budget.id
-      )
+      this.budgets = this.budgets.filter(b => b.id !== budget.id)
       this.resetBudgetOptions()
       if (this.budgets.length > 0) {
         this.currentBudget = this.budgets[0]
@@ -462,7 +442,7 @@ export default {
     async runRemoteBudgetEntryCreation(budgetEntry) {
       try {
         this.loading.createBudgetEntry = true
-        const newBudgetEntry = await this.createProductionBudgetEntry({
+        await this.createProductionBudgetEntry({
           productionId: this.currentProduction.id,
           budgetId: this.currentBudget.id,
           budgetEntry: {
@@ -488,7 +468,7 @@ export default {
       try {
         this.loading.editBudgetEntry = true
         this.errors.editBudgetEntry = false
-        const editedBudgetEntry = await this.updateProductionBudgetEntry({
+        await this.updateProductionBudgetEntry({
           productionId: this.currentProduction.id,
           budgetId: this.currentBudget.id,
           budgetEntryId: budgetEntry.id,
@@ -513,8 +493,9 @@ export default {
     },
 
     afterEditBudgetEntry(budgetEntry) {
-      const oldBudgetEntry =
-        this.budgetEntries.find(b => b.id === budgetEntry.id)
+      const oldBudgetEntry = this.budgetEntries.find(
+        b => b.id === budgetEntry.id
+      )
       if (oldBudgetEntry) {
         Object.assign(oldBudgetEntry, budgetEntry)
       }
@@ -620,7 +601,7 @@ export default {
 
   socket: {
     events: {
-      'budget:create': async function(data) {
+      'budget:create': async function (data) {
         if (data.project_id !== this.currentProduction.id) return
         const budget = await this.loadProductionBudget({
           productionId: this.currentProduction.id,
@@ -630,19 +611,17 @@ export default {
         if (budget && !oldBudget) {
           this.budgets.unshift(budget)
           this.resetBudgetOptions()
-          this.currentBudget = this.currentBudget
         }
       },
 
-      'budget:update': async function(data) {
+      'budget:update': async function (data) {
         if (data.project_id !== this.currentProduction.id) return
         const budget = await this.loadProductionBudget({
           productionId: this.currentProduction.id,
           budgetId: data.budget_id
         })
         if (budget) {
-          const oldBudget =
-            this.budgets.find(b => b.id === budget.id)
+          const oldBudget = this.budgets.find(b => b.id === budget.id)
           if (oldBudget) {
             Object.assign(oldBudget, {
               name: budget.name,
@@ -653,7 +632,7 @@ export default {
         }
       },
 
-      'budget:delete': function(data) {
+      'budget:delete': function (data) {
         if (data.project_id !== this.currentProduction.id) return
         const oldBudget = this.budgets.find(b => b.id === data.budget_id)
         const isCurrentBudgetDeleted = this.currentBudget.id === data.budget_id
@@ -666,11 +645,12 @@ export default {
         }
       },
 
-      'budget-entry:create': async function(data) {
+      'budget-entry:create': async function (data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
-        const oldBudgetEntry =
-          this.budgetEntries.find(b => b.id === data.budget_entry_id)
+        const oldBudgetEntry = this.budgetEntries.find(
+          b => b.id === data.budget_entry_id
+        )
         if (oldBudgetEntry) return
         const budgetEntry = await this.loadProductionBudgetEntry({
           productionId: this.currentProduction.id,
@@ -680,11 +660,12 @@ export default {
         this.budgetEntries.push(budgetEntry)
       },
 
-      'budget-entry:update': async function(data) {
+      'budget-entry:update': async function (data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
-        const oldBudgetEntry =
-          this.budgetEntries.find(b => b.id === data.budget_entry_id)
+        const oldBudgetEntry = this.budgetEntries.find(
+          b => b.id === data.budget_entry_id
+        )
         if (!oldBudgetEntry) return
 
         const budgetEntry = await this.loadProductionBudgetEntry({
@@ -695,11 +676,12 @@ export default {
         this.afterEditBudgetEntry(budgetEntry)
       },
 
-      'budget-entry:delete': async function(data) {
+      'budget-entry:delete': async function (data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
-        const oldBudgetEntry =
-          this.budgetEntries.find(b => b.id === data.budget_entry_id)
+        const oldBudgetEntry = this.budgetEntries.find(
+          b => b.id === data.budget_entry_id
+        )
         if (!oldBudgetEntry) return
         this.postDeleteBudgetEntry({ id: data.budget_entry_id })
       }

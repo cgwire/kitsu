@@ -31,9 +31,7 @@ export default {
   },
 
   deleteProductionBudget(projectId, budgetId) {
-    return client.pdel(
-      `/api/data/projects/${projectId}/budgets/${budgetId}`
-    )
+    return client.pdel(`/api/data/projects/${projectId}/budgets/${budgetId}`)
   },
 
   getBudgetEntries(projectId, budgetId) {
@@ -59,7 +57,8 @@ export default {
       daily_salary: budgetEntry.daily_salary
     }
     return client.ppost(
-      `/api/data/projects/${projectId}/budgets/${budgetId}/entries`, data
+      `/api/data/projects/${projectId}/budgets/${budgetId}/entries`,
+      data
     )
   },
 

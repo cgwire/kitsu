@@ -18,13 +18,14 @@
                 </tr>
               </thead>
 
-              <tbody
-                class="datatable-body"
-              >
-                <template v-for="department in departments">
-                <tr class="datatable-row">
-                  <td rowspan="9">
-                    <department-name :department="department" />
+              <tbody class="datatable-body">
+                <template
+                  :key="department.id"
+                  v-for="department in departments"
+                >
+                  <tr class="datatable-row">
+                    <td rowspan="9">
+                      <department-name :department="department" />
                     </td>
                     <td rowspan="3">{{ $t('budget.positions.supervisor') }}</td>
                     <td>{{ $t('budget.seniorities.senior') }}</td>
@@ -32,12 +33,18 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'supervisor',
-                          'senior',
-                          value)"
-                        :value="salaryScale[department.id]?.supervisor.senior || 0"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'supervisor',
+                              'senior',
+                              value
+                            )
+                        "
+                        :value="
+                          salaryScale[department.id]?.supervisor.senior || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -47,11 +54,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'supervisor',
-                          'mid',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'supervisor',
+                              'mid',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.supervisor.mid || 0"
                       />
                     </td>
@@ -62,12 +73,18 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'supervisor',
-                          'junior',
-                          value)"
-                        :value="salaryScale[department.id]?.supervisor.junior || 0"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'supervisor',
+                              'junior',
+                              value
+                            )
+                        "
+                        :value="
+                          salaryScale[department.id]?.supervisor.junior || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -78,11 +95,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'lead',
-                          'senior',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'lead',
+                              'senior',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.lead.senior || 0"
                       />
                     </td>
@@ -93,11 +114,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'lead',
-                          'mid',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'lead',
+                              'mid',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.lead.mid || 0"
                       />
                     </td>
@@ -108,11 +133,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'lead',
-                          'junior',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'lead',
+                              'junior',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.lead.junior || 0"
                       />
                     </td>
@@ -124,11 +153,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'artist',
-                          'senior',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'artist',
+                              'senior',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.artist.senior || 0"
                       />
                     </td>
@@ -139,11 +172,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'artist',
-                          'mid',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'artist',
+                              'mid',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.artist.mid || 0"
                       />
                     </td>
@@ -154,11 +191,15 @@
                       <input
                         type="number"
                         class="input-editor"
-                        @input="value => modifySalaryScale(
-                          department.id,
-                          'artist',
-                          'junior',
-                          value)"
+                        @input="
+                          value =>
+                            modifySalaryScale(
+                              department.id,
+                              'artist',
+                              'junior',
+                              value
+                            )
+                        "
                         :value="salaryScale[department.id]?.artist.junior || 0"
                       />
                     </td>
@@ -181,7 +222,7 @@ import Spinner from '@/components/widgets/Spinner.vue'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'SalaryScale',
+  name: 'salary-scale',
 
   components: {
     DepartmentName,
