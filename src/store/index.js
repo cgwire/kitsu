@@ -6,6 +6,7 @@ import assets from '@/store/modules/assets'
 import assetTypes from '@/store/modules/assettypes'
 import backgrounds from '@/store/modules/backgrounds'
 import breakdown from '@/store/modules/breakdown'
+import budget from '@/store/modules/budget'
 import concepts from '@/store/modules/concepts'
 import customActions from '@/store/modules/customactions'
 import departments from '@/store/modules/departments'
@@ -35,6 +36,7 @@ const modules = {
   assetTypes,
   backgrounds,
   breakdown,
+  budget,
   concepts,
   customActions,
   departments,

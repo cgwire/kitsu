@@ -163,6 +163,7 @@ export const getProductionPath = (
       'schedule',
       'production-settings',
       'quota',
+      'budget',
       'team',
       'episodes',
       'episode-stats',

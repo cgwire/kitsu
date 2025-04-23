@@ -487,6 +487,9 @@ export default {
         if (isNotOnlyAssets) {
           options.push({ label: this.$t('quota.title'), value: 'quota' })
         }
+        if (this.isCurrentUserAdmin) {
+          options.push({ label: this.$t('budget.title'), value: 'budget' })
+        }
         options.push({ label: this.$t('people.team'), value: 'team' })
 
         if (this.isCurrentUserManager) {
@@ -762,6 +765,7 @@ export default {
         section !== 'schedule' &&
         section !== 'production-settings' &&
         section !== 'brief' &&
+        section !== 'budget' &&
         section !== 'episodes'
       if (isEpisodeContext) {
         route.name = `episode-${section}`
