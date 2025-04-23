@@ -5,7 +5,9 @@
       active,
       'is-on': isOn,
       'is-loading': isLoading,
-      'is-primary': isPrimary
+      'is-primary': isPrimary,
+      'is-big': isBig,
+      'is-thin': isThin
     }"
     :disabled="disabled"
     :title="title"
@@ -162,6 +164,10 @@ export default {
       default: '',
       type: String
     },
+    isBig: {
+      default: false,
+      type: Boolean
+    },
     isOn: {
       default: false,
       type: Boolean
@@ -175,6 +181,10 @@ export default {
       type: Boolean
     },
     isResponsive: {
+      default: false,
+      type: Boolean
+    },
+    isThin: {
       default: false,
       type: Boolean
     },
@@ -199,6 +209,18 @@ export default {
 <style lang="scss" scoped>
 .is-primary {
   border-radius: 2em;
+}
+
+.is-big {
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0.5em 1em;
+}
+
+.is-thin {
+  border-radius: 6px;
+  font-size: 0.8rem;
+  padding: 0.25em 0.5em;
 }
 
 .active {
