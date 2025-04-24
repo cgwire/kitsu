@@ -207,7 +207,7 @@ export default {
         const departmentScale = this.salaryScale[this.form.department_id]
         return departmentScale[this.form.position || 'artist'][
           this.form.seniority || 'junior'
-        ]
+        ].salary
       } else {
         return this.form.person.daily_salary
       }

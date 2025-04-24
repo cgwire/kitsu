@@ -43,7 +43,8 @@
                             )
                         "
                         :value="
-                          salaryScale[department.id]?.supervisor.senior || 0
+                          salaryScale[department.id]?.supervisor.senior
+                            .salary || 0
                         "
                       />
                     </td>
@@ -63,7 +64,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.supervisor.mid || 0"
+                        :value="
+                          salaryScale[department.id]?.supervisor.mid.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -83,7 +86,8 @@
                             )
                         "
                         :value="
-                          salaryScale[department.id]?.supervisor.junior || 0
+                          salaryScale[department.id]?.supervisor.junior
+                            .salary || 0
                         "
                       />
                     </td>
@@ -104,7 +108,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.lead.senior || 0"
+                        :value="
+                          salaryScale[department.id]?.lead.senior.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -123,7 +129,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.lead.mid || 0"
+                        :value="
+                          salaryScale[department.id]?.lead.mid.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -142,7 +150,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.lead.junior || 0"
+                        :value="
+                          salaryScale[department.id]?.lead.junior.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -162,7 +172,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.artist.senior || 0"
+                        :value="
+                          salaryScale[department.id]?.artist.senior.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -181,7 +193,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.artist.mid || 0"
+                        :value="
+                          salaryScale[department.id]?.artist.mid.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -200,7 +214,9 @@
                               value
                             )
                         "
-                        :value="salaryScale[department.id]?.artist.junior || 0"
+                        :value="
+                          salaryScale[department.id]?.artist.junior.salary || 0
+                        "
                       />
                     </td>
                   </tr>
@@ -252,13 +268,16 @@ export default {
     async setSalaryScale() {
       this.isLoading = true
       this.salaryScale = await this.loadSalaryScale()
+      console.log(this.salaryScale)
       this.isLoading = false
     },
 
     modifySalaryScale(departmentId, position, seniority, event) {
       const value = event.target.value
-      this.salaryScale[departmentId][position][seniority] = value
-      this.updateSalaryScale(this.salaryScale[departmentId])
+      console.log(this.salaryScale)
+      const scaleEntry = this.salaryScale[departmentId][position][seniority]
+      scaleEntry.salary = parseInt(value)
+      this.updateSalaryScale(scaleEntry)
     }
   }
 }

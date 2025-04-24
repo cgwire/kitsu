@@ -489,6 +489,10 @@ export default {
   },
 
   updateSalaryScale(scale) {
-    return client.pput(`/api/data/salary-scales/${scale.id}`, scale)
+    console.log(scale)
+    const data = {
+      salary: scale.salary
+    }
+    return client.pput(`/api/data/salary-scales/${scale.id}`, data)
   }
 }
