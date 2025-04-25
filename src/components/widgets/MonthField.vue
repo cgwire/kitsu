@@ -11,6 +11,7 @@
 </template>
 <script>
 import moment from 'moment'
+import { range } from '@/lib/time'
 
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 
@@ -42,24 +43,17 @@ export default {
     return {
       selectedMonth: null,
       selectedYear: null,
-      months: [
-        { value: 0, label: 'January' },
-        { value: 1, label: 'February' },
-        { value: 2, label: 'March' },
-        { value: 3, label: 'April' },
-        { value: 4, label: 'May' },
-        { value: 5, label: 'June' },
-        { value: 6, label: 'July' },
-        { value: 7, label: 'August' },
-        { value: 8, label: 'September' },
-        { value: 9, label: 'October' },
-        { value: 10, label: 'November' },
-        { value: 11, label: 'December' }
-      ]
+      months: []
     }
   },
 
   mounted() {
+    this.months = range(1, 12).map(month => ({
+      value: month - 1,
+      label: moment()
+        .month(month - 1)
+        .format('MMMM')
+    }))
     if (this.modelValue && this.modelValue.getMonth) {
       this.selectedMonth = this.modelValue.getMonth()
       this.selectedYear = this.modelValue.getFullYear()
@@ -111,7 +105,6 @@ export default {
 
   watch: {
     modelValue() {
-      console.log('modelValue', this.modelValue)
       this.$options.silent = true
       if (this.modelValue && this.modelValue.getMonth) {
         this.selectedMonth = this.modelValue.getMonth()
