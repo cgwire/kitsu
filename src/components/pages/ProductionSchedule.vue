@@ -1036,8 +1036,8 @@ export default {
       event.stopPropagation()
       event.dataTransfer.dropEffect = 'move'
       event.dataTransfer.effectAllowed = 'move'
-      event.dataTransfer.setData(`type-${type.task_type_id}`, true) // use for hack on drag over
-      event.dataTransfer.setData('typeId', type.task_type_id)
+      event.dataTransfer.setData(`task-type-${type.task_type_id}`, true) // use for hack on drag over (must be lowercase)
+      event.dataTransfer.setData('taskTypeId', type.task_type_id)
       event.dataTransfer.setData('entityId', item.id)
 
       item.children = this.filteredAssignments(item.children)

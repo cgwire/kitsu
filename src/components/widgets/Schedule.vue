@@ -1874,11 +1874,11 @@ export default {
     },
 
     onTaskDragEnter(event, rootElement) {
-      // HACK: the getData doesn't work on dragEnter, we use a "type-*" data key instead
-      const draggedItemType = event.dataTransfer.types.find(
-        type => type === `type-${rootElement.task_type_id}`
+      // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
+      const draggedItemTaskType = event.dataTransfer.types.find(
+        dataKey => dataKey === `task-type-${rootElement.task_type_id}`
       )
-      if (!draggedItemType) {
+      if (!draggedItemTaskType) {
         const item = this.draggedItems?.[0]
         const isAllowed = this.checkUserIsAllowed(item, rootElement)
         if (!isAllowed) {
@@ -1902,8 +1902,8 @@ export default {
       let item = this.draggedItems?.[0]
       if (!item) {
         const entityId = event.dataTransfer.getData('entityId')
-        const typeId = event.dataTransfer.getData('typeId')
-        if (entityId && typeId === rootElement.task_type_id) {
+        const taskTypeId = event.dataTransfer.getData('taskTypeId')
+        if (entityId && taskTypeId === rootElement.task_type_id) {
           item = { entity_id: entityId }
         }
       } else if (!this.checkUserIsAllowed(item, rootElement)) {
