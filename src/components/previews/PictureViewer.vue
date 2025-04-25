@@ -22,7 +22,11 @@
           <img ref="picture-gif" :src="pictureGifPath" />
         </div>
         <div v-show="!isGif">
-          <img ref="picture-big" :src="pictureDlPath" v-show="fullScreen || big" />
+          <img
+            ref="picture-big"
+            :src="pictureDlPath"
+            v-show="fullScreen || big"
+          />
           <img ref="picture" :src="picturePath" v-show="!fullScreen && !big" />
         </div>
       </div>
@@ -402,7 +406,7 @@ export default {
       panzoom.moveTo(x, y)
       panzoom.setTransformOrigin({ x, y })
       panzoom.zoomTo(x, y, zoomFactor)
-      panzoom.setTransformOrigin({ x: 0, y: 0})
+      panzoom.setTransformOrigin({ x: 0, y: 0 })
       this.$nextTick(() => {
         this.$options.silent = false
       })

@@ -2216,7 +2216,7 @@ export default {
 
     onPanZoomChanged({ x, y, scale }) {
       this.postPanZoomChanged(x, y, scale)
-    },
+    }
   },
 
   watch: {
@@ -2242,7 +2242,8 @@ export default {
     isDrawing() {
       if (this.isDrawing && this.isZoomEnabled) {
         this.isZoomEnabled = false
-      } if (!this.isDrawing && this.isLaserModeOn) {
+      }
+      if (!this.isDrawing && this.isLaserModeOn) {
         this.isLaserModeOn = false
       }
       if (this.isDrawing && !this.isAnnotationsDisplayed) {

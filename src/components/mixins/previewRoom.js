@@ -273,7 +273,8 @@ export const previewRoomMixin = {
       }
 
       // Waveform display has changed
-      if (this.exists(eventData.is_waveform_displayed) &&
+      if (
+        this.exists(eventData.is_waveform_displayed) &&
         eventData.is_waveform_displayed !== this.isWaveformDisplayed
       ) {
         this.isWaveformDisplayed = eventData.is_waveform_displayed

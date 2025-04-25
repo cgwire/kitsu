@@ -18,7 +18,7 @@
       :default-height="defaultHeight"
       :margin-bottom="marginBottom"
       @loaded="() => $emit('loaded')"
-      @panzoom-changed="($event) => $emit('panzoom-changed', $event)"
+      @panzoom-changed="$event => $emit('panzoom-changed', $event)"
       @size-changed="() => $emit('size-changed')"
     />
   </div>
@@ -152,11 +152,7 @@ export default {
 
     resetPanZoom() {
       this.previews.forEach(preview => {
-        const key =
-          'picture-' +
-          preview.id +
-          '-' +
-          preview.position
+        const key = 'picture-' + preview.id + '-' + preview.position
         if (
           preview.id === this.currentPreview.id &&
           preview.position === this.currentPreview.position
@@ -171,11 +167,7 @@ export default {
 
     pausePanZoom() {
       this.previews.forEach(preview => {
-        const key =
-          'picture-' +
-          preview.id +
-          '-' +
-          preview.position
+        const key = 'picture-' + preview.id + '-' + preview.position
         const previewPlayer = this.$refs[key]
         if (previewPlayer && previewPlayer[0]) {
           previewPlayer[0].pausePanZoom()
@@ -185,11 +177,7 @@ export default {
 
     resumePanZoom() {
       this.previews.forEach(preview => {
-        const key =
-          'picture-' +
-          preview.id +
-          '-' +
-          preview.position
+        const key = 'picture-' + preview.id + '-' + preview.position
         const previewPlayer = this.$refs[key]
         if (previewPlayer && previewPlayer[0]) {
           previewPlayer[0].resumePanZoom()
@@ -199,11 +187,7 @@ export default {
 
     setPanZoom(x, y, scale) {
       this.previews.forEach(preview => {
-        const key =
-          'picture-' +
-          preview.id +
-          '-' +
-          preview.position
+        const key = 'picture-' + preview.id + '-' + preview.position
         const previewPlayer = this.$refs[key]
         if (
           preview.id === this.currentPreview.id &&
@@ -214,9 +198,7 @@ export default {
           }
         }
       })
-    },
-
-
+    }
   },
 
   watch: {

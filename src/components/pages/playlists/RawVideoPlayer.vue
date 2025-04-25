@@ -86,7 +86,7 @@ export default {
     panzoom: {
       type: Boolean,
       default: false
-    },
+    }
   },
 
   emits: [
@@ -178,31 +178,31 @@ export default {
   methods: {
     setupPanZoom() {
       if (this.panzoom) {
-        const firstPanZoom = panzoom(this.$refs.player1, {
+        this.firstPanZoom = panzoom(this.$refs.player1, {
           bounds: true,
           boundsPadding: 0.2,
           maxZoom: 5,
           minZoom: 0.5
         })
-        const secondPanZoom = panzoom(this.$refs.player2, {
+        this.secondPanZoom = panzoom(this.$refs.player2, {
           bounds: true,
           boundsPadding: 0.2,
           maxZoom: 3,
           minZoom: 0.5
         })
-        firstPanZoom.on('zoom', () => {
-          if (this.$options.silent) return
-          const { x, y, scale } = firstPanZoom.getTransform()
-          this.$emit('panzoom-changed', { x, y, scale })
+        this.panzoomInstances = [this.firstPanZoom, this.secondPanZoom]
+        this.panzoomInstances.forEach(panzoomInstance => {
+          panzoomInstance.on('zoom', () => {
+            if (this.$options.silent) return
+            const { x, y, scale } = panzoomInstance.getTransform()
+            this.$emit('panzoom-changed', { x, y, scale })
+          })
+          panzoomInstance.on('panend', () => {
+            if (this.$options.silent) return
+            const { x, y, scale } = panzoomInstance.getTransform()
+            this.$emit('panzoom-changed', { x, y, scale })
+          })
         })
-        firstPanZoom.on('panend', () => {
-          if (this.$options.silent) return
-          const { x, y, scale } = firstPanZoom.getTransform()
-          this.$emit('panzoom-changed', { x, y, scale })
-        })
-        this.panzoomInstances = [firstPanZoom, secondPanZoom]
-        this.firstPanZoom = firstPanZoom
-        this.secondPanZoom = secondPanZoom
         this.pausePanZoom()
       }
     },
@@ -463,9 +463,8 @@ export default {
           this.nextPlayer.currentTime = handleIn
             ? handleIn * this.frameDuration
             : 0
-          const [firstPanZoom, secondPanZoom] = this.panzoomInstances
-         this.nextPlayer.style.display = 'block'
-         this.nextPlayer.play()
+          this.nextPlayer.style.display = 'block'
+          this.nextPlayer.play()
         }
 
         this.switchPlayers()
@@ -627,11 +626,11 @@ export default {
         panzoomInstance.setTransformOrigin({ x, y })
         panzoomInstance.zoomTo(x, y, zoomFactor)
         panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
-        })
+      })
       this.$nextTick(() => {
         this.$options.silent = false
       })
-    },
+    }
   },
 
   watch: {
@@ -674,7 +673,7 @@ export default {
           panzoomInstance.dispose()
         })
       }
-    },
+    }
   }
 }
 </script>
