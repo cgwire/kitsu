@@ -2472,6 +2472,9 @@ export default {
         this.resetHeight()
         this.loadWaveForm()
       }
+      this.$nextTick(() => {
+        this.updateRoomStatus()
+      })
     },
 
     isLaserModeOn() {

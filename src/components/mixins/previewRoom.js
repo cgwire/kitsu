@@ -44,6 +44,7 @@ export const previewRoomMixin = {
         is_repeating: this.isRepeating,
         is_laser_mode: this.isLaserModeOn,
         is_annotations_displayed: this.isAnnotationsDisplayed,
+        is_waveform_displayed: this.isWaveformDisplayed,
         is_zoom_enabled: this.isZoomEnabled,
         handle_in: this.handleIn,
         handle_out: this.handleOut,
@@ -91,6 +92,7 @@ export const previewRoomMixin = {
         is_repeating: this.isRepeating,
         is_laser_mode: this.isLaserModeOn,
         is_annotations_displayed: this.isAnnotationsDisplayed,
+        is_waveform_displayed: this.isWaveformDisplayed,
         is_zoom_enabled: this.isZoomEnabled,
         handle_in: this.handleIn,
         handle_out: this.handleOut,
@@ -268,6 +270,13 @@ export const previewRoomMixin = {
         } else {
           this.pause()
         }
+      }
+
+      // Waveform display has changed
+      if (this.exists(eventData.is_waveform_displayed) &&
+        eventData.is_waveform_displayed !== this.isWaveformDisplayed
+      ) {
+        this.isWaveformDisplayed = eventData.is_waveform_displayed
       }
 
       // Laser mode has changed
