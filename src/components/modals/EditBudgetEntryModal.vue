@@ -8,7 +8,6 @@
       <combobox-department
         ref="departmentField"
         :label="$t('budget.fields.department')"
-        :maxlength="30"
         v-model="form.department_id"
         @enter="runConfirmation"
         v-focus
@@ -18,7 +17,6 @@
         ref="peopleField"
         class="mt2"
         :label="$t('budget.fields.person')"
-        :maxlength="30"
         :people="activePeople"
         @select="onPersonChanged"
         @enter="runConfirmation"
@@ -29,7 +27,6 @@
         ref="combobox"
         class="mt2"
         :label="$t('budget.fields.position')"
-        :maxlength="30"
         :options="positionOptions"
         locale-key-prefix="people.position."
         v-model="form.position"
@@ -40,7 +37,6 @@
         ref="combobox"
         class="mt2"
         :label="$t('budget.fields.seniority')"
-        :maxlength="30"
         :options="seniorityOptions"
         v-model="form.seniority"
         @enter="runConfirmation"

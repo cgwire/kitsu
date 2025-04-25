@@ -140,11 +140,4 @@ export default {
   display: flex;
   gap: 1rem;
 }
-
-.month-select,
-.year-select {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
 </style>

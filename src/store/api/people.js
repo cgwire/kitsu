@@ -489,7 +489,6 @@ export default {
   },
 
   updateSalaryScale(scale) {
-    console.log(scale)
     const data = {
       salary: scale.salary
     }

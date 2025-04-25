@@ -72,7 +72,6 @@ export default {
       months_duration: budgetEntry.months_duration,
       daily_salary: budgetEntry.daily_salary
     }
-    console.log('updateBudgetEntry', data)
     return client.pput(
       `/api/data/projects/${projectId}/budgets/${budgetId}/entries/${budgetEntryId}`,
       data
