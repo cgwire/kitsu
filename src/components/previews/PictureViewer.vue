@@ -366,18 +366,30 @@ export default {
         })
       )
       this.panzoomBig = this.panzoomInstances[1]
-      this.panzoomInstances.forEach(panzoom => {
-        panzoom.on('zoom', () => {
-          if (this.$options.silent) return
-          const { x, y, scale } = panzoom.getTransform()
-          this.$emit('panzoom-changed', { x, y, scale })
-        })
-        this.panzoomBig.on('panend', () => {
-          if (this.$options.silent) return
-          const { x, y, scale } = panzoom.getTransform()
-          this.$emit('panzoom-changed', { x, y, scale })
-        })
+      this.panzoomGif = this.panzoomInstances[2]
+      this.panzoomBig.on('zoom', () => {
+        if (!this.big) return
+        this.emitPanZoom(this.panzoomBig)
       })
+      this.panzoomBig.on('panend', () => {
+        console.log(this.isBig)
+        if (!this.big) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+      this.panzoomGif.on('zoom', () => {
+        if (!this.isGif) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+      this.panzoomGif.on('panend', () => {
+        if (!this.isGif) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+    },
+
+    emitPanZoom(panzoom) {
+      if (this.$options.silent) return
+      const { x, y, scale } = panzoom.getTransform()
+      this.$emit('panzoom-changed', { x, y, scale })
     },
 
     resetPanZoom() {

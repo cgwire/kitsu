@@ -191,20 +191,30 @@ export default {
           minZoom: 0.5
         })
         this.panzoomInstances = [this.firstPanZoom, this.secondPanZoom]
-        this.panzoomInstances.forEach(panzoomInstance => {
-          panzoomInstance.on('zoom', () => {
-            if (this.$options.silent) return
-            const { x, y, scale } = panzoomInstance.getTransform()
-            this.$emit('panzoom-changed', { x, y, scale })
-          })
-          panzoomInstance.on('panend', () => {
-            if (this.$options.silent) return
-            const { x, y, scale } = panzoomInstance.getTransform()
-            this.$emit('panzoom-changed', { x, y, scale })
-          })
+        this.firstPanZoom.on('zoom', () => {
+          if (this.currentPlayer !== this.player1) return
+          this.emitPanZoomChanged(this.firstPanZoom)
+        })
+        this.firstPanZoom.on('panend', () => {
+          if (this.currentPlayer !== this.player1) return
+          this.emitPanZoomChanged(this.firstPanZoom)
+        })
+        this.secondPanZoom.on('zoom', () => {
+          if (this.currentPlayer !== this.player2) return
+          this.emitPanZoomChanged(this.secondPanZoom)
+        })
+        this.secondPanZoom.on('panend', () => {
+          if (this.currentPlayer !== this.player2) return
+          this.emitPanZoomChanged(this.secondPanZoom)
         })
         this.pausePanZoom()
       }
+    },
+
+    emitPanZoomChanged(panzoomInstance) {
+      if (this.$options.silent) return
+      const { x, y, scale } = panzoomInstance.getTransform()
+      this.$emit('panzoom-changed', { x, y, scale })
     },
 
     hideLoading() {

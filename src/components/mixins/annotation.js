@@ -1060,11 +1060,9 @@ export const annotationMixin = {
     },
 
     resetCanvasVisibility() {
-      console.log('resetCanvasVisibility', this.isAnnotationsDisplayed)
       if (this.isAnnotationsDisplayed) {
         this.$refs['canvas-wrapper'].style.display = 'block'
       } else if (this.$refs['canvas-wrapper']) {
-        console.log('hide canvas-wrapper')
         this.$refs['canvas-wrapper'].style.display = 'none'
       }
     },

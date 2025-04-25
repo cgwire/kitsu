@@ -371,12 +371,14 @@ export const previewRoomMixin = {
         this.people = eventData.people
         if (!this.joinedRoom) return
         if (eventData.only_newcomer && !this.newComer) return
+        if (eventData.user_id === this.user.id) return
         this.loadRoomCurrentState(eventData)
       },
 
       'preview-room:panzoom-changed'(eventData) {
         if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
         if (this.room.localId === eventData.data.local_id) return
+        if (eventData.user_id === this.user.id) return
         const x = eventData.data.x
         const y = eventData.data.y
         const zoom = eventData.data.zoom
