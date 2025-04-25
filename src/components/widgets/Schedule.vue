@@ -1903,11 +1903,12 @@ export default {
       if (!item) {
         const entityId = event.dataTransfer.getData('entityId')
         const taskTypeId = event.dataTransfer.getData('taskTypeId')
-        if (entityId && taskTypeId === rootElement.task_type_id) {
-          item = { entity_id: entityId }
+        if (!entityId || taskTypeId !== rootElement.task_type_id) {
+          return // invalid task type
         }
+        item = { entity_id: entityId }
       } else if (!this.checkUserIsAllowed(item, rootElement)) {
-        return
+        return // invalid user rights
       }
 
       const position =
