@@ -462,16 +462,24 @@
 
       <div class="separator"></div>
 
-      <template v-if="isCurrentPreviewPicture">
+      <div
+        class="flexrow-item"
+        :title="$t('playlists.actions.frame_number')"
+        v-if="isCurrentPreviewPicture"
+      >
         {{ (framesSeenOfPicture + '').padStart(2, '0') }} /
         {{
           currentEntity.preview_nb_frames
             ? currentEntity.preview_nb_frames
             : Math.round(2 * fps)
         }}
-      </template>
+      </div>
 
-      <div class="flexrow flexrow-item" v-if="currentEntityPreviewLength > 1">
+      <div
+        class="flexrow flexrow-item"
+        :class="{ mr0: isCurrentPreviewPicture }"
+        v-if="currentEntityPreviewLength > 1"
+      >
         <button-simple
           class="button playlist-button flexrow-item"
           icon="left"
@@ -497,7 +505,7 @@
         >
           <arrow-up-right-icon class="icon is-small" />
         </a>
-        <div class="separator"></div>
+        <div class="separator" v-if="!isCurrentPreviewPicture"></div>
       </div>
 
       <div
@@ -2216,6 +2224,13 @@ export default {
       if (this.isAnnotationsDisplayed && this.isZoomEnabled) {
         this.isZoomEnabled = false
       }
+      if (!this.isAnnotationsDisplayed) {
+        if (this.isDrawing) {
+          this.onAnnotateClicked()
+        } else if (this.isTyping) {
+          this.onTypeClicked()
+        }
+      }
       this.resetCanvasVisibility()
       this.updateRoomStatus()
     },
@@ -2223,6 +2238,11 @@ export default {
     isDrawing() {
       if (this.isDrawing && this.isZoomEnabled) {
         this.isZoomEnabled = false
+      } if (!this.isDrawing && this.isLaserModeOn) {
+        this.isLaserModeOn = false
+      }
+      if (this.isDrawing && !this.isAnnotationsDisplayed) {
+        this.isAnnotationsDisplayed = true
       }
     },
 
@@ -2230,15 +2250,25 @@ export default {
       if (this.isTyping && this.isZoomEnabled) {
         this.isZoomEnabled = false
       }
+      if (!this.isAnnotationsDisplayed) {
+        this.isAnnotationsDisplayed = true
+      }
     },
 
     isZoomEnabled() {
       if (this.isZoomEnabled) {
         this.resumePanZoom()
-        this.isAnnotationsDisplayed = false
-        this.isDrawing = false
-        this.isTyping = false
-        this.resetCanvasVisibility()
+        if (this.isDrawing) {
+          this.onAnnotateClicked()
+        } else if (this.isTyping) {
+          this.onTypeClicked()
+        }
+        this.$nextTick(() => {
+          if (this.isAnnotationsDisplayed) {
+            this.isAnnotationsDisplayed = false
+          }
+          this.resetCanvasVisibility()
+        })
       } else {
         this.pausePanZoom()
         this.resetPanZoom()
@@ -2445,6 +2475,9 @@ export default {
     },
 
     isLaserModeOn() {
+      if (!this.isDrawing && this.isLaserModeOn) {
+        this.onAnnotateClicked()
+      }
       this.updateRoomStatus()
     },
 
