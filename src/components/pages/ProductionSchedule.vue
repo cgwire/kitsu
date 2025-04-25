@@ -20,32 +20,6 @@
           :options="zoomOptions"
           v-model="zoomLevel"
         />
-        <!--
-        <combobox
-          class="flexrow-item ml1"
-          :label="$t('quota.detail_label')"
-          v-model="detailLevel"
-          :options="detailOptions"
-        />
-        <div class="flexrow-item ml1" v-if="detailLevel === 'prev'">
-          <label class="label">
-            {{ $t('schedule.revision') }}
-          </label>
-          <div class="flexrow">
-            <combobox
-              class="flexrow-item"
-              v-model="revision"
-              :options="revisionOptions"
-            />
-            <button-simple
-              class="flexrow-item"
-              :title="$t('main.save')"
-              icon="save"
-              @click="saveRevision"
-            />
-          </div>
-        </div>
-        -->
         <div class="filler"></div>
         <div class="flexrow">
           <button-simple
@@ -54,15 +28,6 @@
             :text="$t('schedule.today')"
             @click="scrollScheduleToToday"
           />
-          <!--
-          <button-simple
-            class="flexrow-item"
-            icon="save"
-            :text="$t('schedule.apply_to_prod')"
-            @click="applyToProduction"
-            v-if="detailLevel === 'prev'"
-          />
-          -->
         </div>
       </div>
 
@@ -340,7 +305,6 @@ import {
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
-// import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -363,7 +327,6 @@ export default {
     Checkbox,
     ChevronDownIcon,
     ChevronRightIcon,
-    // Combobox,
     ComboboxNumber,
     DateField,
     GripVerticalIcon,
@@ -407,17 +370,6 @@ export default {
         { label: '2', value: 2 },
         { label: '3', value: 3 }
       ],
-      // detailLevel: 'prev',
-      // detailOptions: [
-      //   { label: this.$t('schedule.detail_level_prev'), value: 'prev' },
-      //   { label: this.$t('schedule.detail_level_real'), value: 'real' }
-      // ],
-      // revision: 2,
-      // revisionOptions: [
-      //   { label: 'draft', value: 0 },
-      //   { label: 'V1', value: 1 },
-      //   { label: 'V2', value: 2 }
-      // ],
       loading: {
         schedule: false
       },
