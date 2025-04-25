@@ -903,6 +903,10 @@ a:hover {
   padding: 0;
 }
 
+.pa05 {
+  padding: 0.5em;
+}
+
 .pa1 {
   padding: 1em;
 }

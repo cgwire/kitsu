@@ -407,6 +407,7 @@
                   <div
                     class="timebar"
                     v-show="isVisible(rootElement)"
+                    @click="$emit('root-element-selected', rootElement)"
                     v-if="rootElement.editable"
                   >
                     <div
@@ -470,6 +471,7 @@
                       timebarChildStyle(childElement, rootElement, multiline)
                     "
                     v-show="subchildren || isVisible(childElement)"
+                    @click="$emit('item-selected', rootElement, childElement)"
                   >
                     <div
                       class="timebar-left-hand"
@@ -541,7 +543,7 @@
                         class="timebar"
                         :style="timebarSubchildStyle(task, rootElement)"
                         :key="index"
-                        :title="`${task.entity.name} (${task.startDate.format('YYYY-MM-DD')} - ${task.endDate.format('YYYY-MM-DD')})`"
+                        :title="`${task.entity.name} (${task.startDate.format('YYYY-MM-DD')} - ${task.endDate.format('YYYY-MM-DD')}) ${formatDuration(task.estimation)} ${$t('schedule.md')}`"
                         v-for="(task, index) in subchild"
                       >
                         {{ task.entity.name }}
@@ -734,8 +736,10 @@ export default {
     'item-assign',
     'item-changed',
     'item-drop',
+    'item-selected',
     'item-unassign',
-    'root-element-expanded'
+    'root-element-expanded',
+    'root-element-selected'
   ],
 
   mounted() {
@@ -1862,10 +1866,16 @@ export default {
     },
 
     onTaskDragEnter(event, rootElement) {
-      const item = this.draggedItems?.[0]
-      const isAllowed = this.checkUserIsAllowed(item, rootElement)
-      if (!isAllowed) {
-        return
+      // HACK: the getData doesn't work on dragEnter, we use a "type-*" data key instead
+      const draggedItemType = event.dataTransfer.types.find(
+        type => type === `type-${rootElement.task_type_id}`
+      )
+      if (!draggedItemType) {
+        const item = this.draggedItems?.[0]
+        const isAllowed = this.checkUserIsAllowed(item, rootElement)
+        if (!isAllowed) {
+          return
+        }
       }
       event.currentTarget.classList.add('droppable')
     },
@@ -1880,11 +1890,18 @@ export default {
 
     onTaskDrop(event, rootElement) {
       event.target.classList.remove('droppable')
-      const item = this.draggedItems?.[0]
 
-      if (!this.checkUserIsAllowed(item, rootElement)) {
+      let item = this.draggedItems?.[0]
+      if (!item) {
+        const entityId = event.dataTransfer.getData('entityId')
+        const typeId = event.dataTransfer.getData('typeId')
+        if (entityId && typeId === rootElement.task_type_id) {
+          item = { entity_id: entityId }
+        }
+      } else if (!this.checkUserIsAllowed(item, rootElement)) {
         return
       }
+
       const position =
         this.timelineContentWrapper.scrollLeft +
         this.getClientX(event) -
