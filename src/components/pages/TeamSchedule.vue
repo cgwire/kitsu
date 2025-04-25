@@ -799,7 +799,7 @@ export default {
   position: relative;
   top: -30px;
   right: -14px;
-  height: calc(100% + 30px + 14px);
+  height: calc(100% + 44px);
   margin-top: 0;
 
   // Hide the task selection counter
