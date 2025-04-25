@@ -87,7 +87,9 @@
 
     <div class="column side-column" v-if="selectedTaskType">
       <div class="side">
-        <a class="close-button" @click="closeSidePanel">x</a>
+        <a class="close-button" @click="closeSidePanel">
+          <x-icon class="align-middle" :size="16" />
+        </a>
         <h2 class="mt1">{{ $t('menu.assign_tasks') }}</h2>
         <div class="details">
           <task-type-name
@@ -319,7 +321,8 @@ import {
   ChevronRightIcon,
   GripVerticalIcon,
   ListRestartIcon,
-  TrashIcon
+  TrashIcon,
+  XIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
@@ -371,7 +374,8 @@ export default {
     Spinner,
     TrashIcon,
     TaskTypeName,
-    TextField
+    TextField,
+    XIcon
   },
 
   data() {
