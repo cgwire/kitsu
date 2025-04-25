@@ -541,9 +541,9 @@
                       </div>
                       <div
                         class="timebar"
-                        :style="timebarSubchildStyle(task, rootElement)"
                         :key="index"
-                        :title="`${task.entity.name} (${task.startDate.format('YYYY-MM-DD')} - ${task.endDate.format('YYYY-MM-DD')}) ${formatDuration(task.estimation)} ${$t('schedule.md')}`"
+                        :style="timebarSubchildStyle(task, rootElement)"
+                        :title="timebarSubchildTitle(task)"
                         v-for="(task, index) in subchild"
                       >
                         {{ task.entity.name }}
@@ -1704,6 +1704,14 @@ export default {
         background: `color-mix(in srgb, ${timeElement.color || rootElement.color} 40%, transparent)`,
         'box-shadow': `inset 0 0 1px 2px ${timeElement.color || rootElement.color}`
       }
+    },
+
+    timebarSubchildTitle(task) {
+      const name = task.entity.name
+      const startDate = task.startDate.format('YYYY-MM-DD')
+      const endDate = task.endDate.format('YYYY-MM-DD')
+      const estimation = this.formatDuration(task.estimation)
+      return `${name} (${startDate} - ${endDate}) ${estimation} ${this.$t('schedule.md')}`
     },
 
     getTimebarLeft(timeElement) {
