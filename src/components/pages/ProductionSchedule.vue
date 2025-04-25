@@ -300,7 +300,8 @@ import {
   getBusinessDays,
   getDatesFromStartDate,
   minutesToDays,
-  parseDate
+  parseDate,
+  parseSimpleDate
 } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -397,8 +398,8 @@ export default {
     ]),
 
     estimatedDailyQuota() {
-      const startDate = parseDate(this.assignments.startDate)
-      const endDate = parseDate(this.assignments.endDate)
+      const startDate = parseSimpleDate(this.assignments.startDate)
+      const endDate = parseSimpleDate(this.assignments.endDate)
       const nbDays = getBusinessDays(startDate, endDate)
       const nbEntities = this.draggedEntities.reduce(
         (sum, entity) => sum + (entity.children?.length ?? 0),
