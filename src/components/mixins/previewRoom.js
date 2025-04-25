@@ -362,7 +362,6 @@ export const previewRoomMixin = {
         this.room.people = eventData.people
         if (this.joinedRoom) {
           this.room.newComer = false
-          this.loadRoomCurrentState(eventData)
         }
       },
 

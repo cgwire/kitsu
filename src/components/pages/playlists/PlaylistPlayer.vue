@@ -2221,6 +2221,7 @@ export default {
 
   watch: {
     isAnnotationsDisplayed() {
+      this.$options.isRoomSilent = true
       if (this.isAnnotationsDisplayed && this.isZoomEnabled) {
         this.isZoomEnabled = false
       }
@@ -2231,8 +2232,11 @@ export default {
           this.onTypeClicked()
         }
       }
+      this.$options.isRoomSilent = false
       this.resetCanvasVisibility()
-      this.updateRoomStatus()
+      if (!this.$options.isRoomSilent) {
+        this.updateRoomStatus()
+      }
     },
 
     isDrawing() {
@@ -2258,6 +2262,7 @@ export default {
     isZoomEnabled() {
       if (this.isZoomEnabled) {
         this.resumePanZoom()
+        this.silentRoom = true
         if (this.isDrawing) {
           this.onAnnotateClicked()
         } else if (this.isTyping) {
@@ -2269,11 +2274,14 @@ export default {
           }
           this.resetCanvasVisibility()
         })
+        this.silentRoom = false
       } else {
         this.pausePanZoom()
         this.resetPanZoom()
       }
-      this.updateRoomStatus()
+      this.$nextTick(() => {
+        this.updateRoomStatus()
+      })
     },
 
     'objectModel.currentAnimation'() {
