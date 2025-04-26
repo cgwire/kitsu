@@ -268,13 +268,11 @@ export default {
     async setSalaryScale() {
       this.isLoading = true
       this.salaryScale = await this.loadSalaryScale()
-      console.log(this.salaryScale)
       this.isLoading = false
     },
 
     modifySalaryScale(departmentId, position, seniority, event) {
       const value = event.target.value
-      console.log(this.salaryScale)
       const scaleEntry = this.salaryScale[departmentId][position][seniority]
       scaleEntry.salary = parseInt(value)
       this.updateSalaryScale(scaleEntry)

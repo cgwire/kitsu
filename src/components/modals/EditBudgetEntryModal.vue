@@ -6,7 +6,6 @@
   >
     <form @submit.prevent>
       <combobox-department
-        ref="departmentField"
         :label="$t('budget.fields.department')"
         v-model="form.department_id"
         @enter="runConfirmation"
@@ -14,7 +13,6 @@
       />
 
       <people-field
-        ref="peopleField"
         class="mt2"
         :label="$t('budget.fields.person')"
         :people="activePeople"
@@ -24,7 +22,6 @@
       />
 
       <combobox
-        ref="combobox"
         class="mt2"
         :label="$t('budget.fields.position')"
         :options="positionOptions"
@@ -34,10 +31,10 @@
       />
 
       <combobox
-        ref="combobox"
         class="mt2"
         :label="$t('budget.fields.seniority')"
         :options="seniorityOptions"
+        locale-key-prefix="people.seniority."
         v-model="form.seniority"
         @enter="runConfirmation"
       />
@@ -53,7 +50,6 @@
 
         <text-field
           class="month-duration"
-          ref="textField"
           type="number"
           :min="1"
           :max="maxDuration"
@@ -63,13 +59,20 @@
         />
       </div>
       <div class="mt0">
-        <span class="salary-label">End month:</span>
+        <span class="salary-label">{{ $t('budget.fields.start_date') }}</span>
+        <span class="salary-value">{{
+          formatDate(form.start_date).substring(0, 7)
+        }}</span>
+        <br />
+        <span class="salary-label">{{ $t('budget.fields.end_date') }}</span>
         <span class="salary-value">{{ endMonth }}</span>
         <br />
-        <span class="salary-label">Monthly salary:</span>
+        <span class="salary-label">
+          {{ $t('budget.fields.monthly_salary') }}
+        </span>
         <span class="salary-value">{{ monthlySalary }}</span>
         <br />
-        <span class="salary-label">Total:</span>
+        <span class="salary-label">{{ $t('budget.fields.total_salary') }}</span>
         <span class="salary-value">{{ totalSalary }}</span>
       </div>
     </form>
@@ -101,7 +104,7 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 export default {
-  name: 'edit-asset-type-modal',
+  name: 'edit-budget-entry-modal',
 
   mixins: [modalMixin],
 
@@ -151,9 +154,9 @@ export default {
         months_duration: 1
       },
       positionOptions: [
-        { label: 'Artist', value: 'artist' },
-        { label: 'Supervisor', value: 'supervisor' },
-        { label: 'Lead', value: 'lead' }
+        { label: 'artist', value: 'artist' },
+        { label: 'supervisor', value: 'supervisor' },
+        { label: 'lead', value: 'lead' }
       ],
       refreshKeys: {
         endMonth: 0,
@@ -161,9 +164,9 @@ export default {
         totalSalary: 0
       },
       seniorityOptions: [
-        { label: 'Junior', value: 'junior' },
-        { label: 'Mid', value: 'mid' },
-        { label: 'Senior', value: 'senior' }
+        { label: 'junior', value: 'junior' },
+        { label: 'mid', value: 'mid' },
+        { label: 'senior', value: 'senior' }
       ]
     }
   },
@@ -193,7 +196,7 @@ export default {
       const projectEndDate = parseSimpleDate(this.currentProduction.end_date)
       let endDate = startDate.add('months', this.form.months_duration)
       endDate = moment.min(endDate, projectEndDate)
-      return formatSimpleDate(endDate).substring(0, 7)
+      return endDate.format('YYYY-MM')
     },
 
     dailySalary() {
@@ -236,7 +239,6 @@ export default {
     ...mapActions(['']),
 
     runConfirmation() {
-      console.log('runConfirmation', this.form)
       this.$emit('confirm', {
         ...this.form,
         person_id: this.form.person?.id,
@@ -264,11 +266,6 @@ export default {
     resetForm() {
       if (this.isEditing) {
         const person = this.personMap.get(this.budgetEntryToEdit.person_id)
-        console.log(
-          'edition',
-          this.budgetEntryToEdit,
-          parseSimpleDate(this.budgetEntryToEdit.start_date).toDate()
-        )
         Object.assign(this.form, {
           id: this.budgetEntryToEdit.id,
           department_id: this.budgetEntryToEdit.department_id,

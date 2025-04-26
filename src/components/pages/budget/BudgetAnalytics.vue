@@ -1,15 +1,17 @@
 <template>
   <div class="flexcolumn analytics-container">
-    <h3 class="has-text-centered stong mt1">Budget Analytics</h3>
+    <h3 class="has-text-centered strong mt1">
+      {{ $t('budget.analytics') }}
+    </h3>
 
     <div v-if="budgets.length > 0 && budgetDepartments.length > 0">
       <p class="has-text-centered mt1 strong total">
         {{ amount.toLocaleString() }} {{ currency || 'USD' }}
       </p>
       <p class="has-text-centered mt1">
-        {{ budgetDepartments.length }} departments -
-        {{ budgetEntries.length }} persons -
-        {{ monthsBetweenProductionDates.length }} months
+        {{ budgetDepartments.length }} {{ $t('budget.departments') }} -
+        {{ budgetEntries.length }} {{ $t('budget.persons') }} -
+        {{ monthsBetweenProductionDates.length }} {{ $t('budget.months') }}
       </p>
     </div>
     <div v-if="budgets.length === 0 || budgetDepartments.length === 0">
