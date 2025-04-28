@@ -903,6 +903,14 @@ a:hover {
   padding: 0;
 }
 
+.pa02 {
+  padding: 0.2em;
+}
+
+.pa03 {
+  padding: 0.3em;
+}
+
 .pa05 {
   padding: 0.5em;
 }
@@ -2022,6 +2030,16 @@ td.fps {
 .empty-list {
   margin-top: 2em;
   font-size: 1.5em;
+}
+
+.list-error {
+  background-color: $red;
+  border-radius: 0.5em;
+  color: white;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: auto;
+  padding: 1em 2em;
 }
 
 .entity-thumbnail {

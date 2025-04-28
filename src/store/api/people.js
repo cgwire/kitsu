@@ -53,6 +53,9 @@ export default {
       role: person.role,
       contract_type: person.contract_type,
       active: person.active,
+      position: person.position,
+      seniority: person.seniority,
+      daily_salary: person.daily_salary,
       departments: person.departments,
       studio_id: person.studio_id,
       is_bot: person.is_bot,
@@ -83,6 +86,9 @@ export default {
       role: person.role,
       contract_type: person.contract_type,
       active: person.active,
+      position: person.position,
+      seniority: person.seniority,
+      daily_salary: person.daily_salary,
       notifications_enabled: person.notifications_enabled === 'true',
       notifications_slack_enabled:
         person.notifications_slack_enabled === 'true',
@@ -476,5 +482,16 @@ export default {
 
   clearPersonAvatar(person) {
     return client.pdel(`/api/actions/persons/${person.id}/clear-avatar`)
+  },
+
+  getSalaryScales() {
+    return client.pget('/api/data/salary-scales')
+  },
+
+  updateSalaryScale(scale) {
+    const data = {
+      salary: scale.salary
+    }
+    return client.pput(`/api/data/salary-scales/${scale.id}`, data)
   }
 }

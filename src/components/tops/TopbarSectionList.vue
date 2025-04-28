@@ -8,10 +8,17 @@
     <div class="section-menu">
       <div class="flexrow unselectable" @click="toggleSectionList">
         <div class="selected-section-line flexrow-item flexrow">
-          <kitsu-icon class="section-icon" :name="currentSectionValue" />
+          <kitsu-icon
+            class="section-icon"
+            :name="currentSectionValue"
+            v-if="currentSectionValue !== 'budget'"
+          />
+          <hand-coins-icon
+            class="section-icon"
+            v-if="currentSectionValue === 'budget'"
+          />
           {{ currentSectionLabel }}
         </div>
-        <chevron-down-icon class="down-icon flexrow-item" />
       </div>
       <div class="select-input" ref="select" v-if="showSectionList">
         <div
@@ -25,7 +32,15 @@
             :to="getSectionPath(section)"
             v-if="section.value !== 'separator'"
           >
-            <kitsu-icon class="section-icon" :name="section.value" />
+            <kitsu-icon
+              class="section-icon"
+              :name="section.value"
+              v-if="section.value !== 'budget'"
+            />
+            <hand-coins-icon
+              class="section-icon"
+              v-if="section.value === 'budget'"
+            />
             <span class="flexrow-item">
               {{ section.label }}
             </span>
@@ -39,7 +54,7 @@
 </template>
 
 <script>
-import { ChevronDownIcon } from 'lucide-vue-next'
+import { HandCoinsIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'
@@ -51,9 +66,9 @@ export default {
   name: 'topbar-section-list',
 
   components: {
-    ChevronDownIcon,
     ComboboxMask,
-    KitsuIcon
+    KitsuIcon,
+    HandCoinsIcon
   },
 
   emits: ['input'],

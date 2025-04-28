@@ -569,6 +569,27 @@ const actions = {
       day,
       computeMode
     )
+  },
+
+  async loadSalaryScale({ commit }) {
+    const scaleEntries = await peopleApi.getSalaryScales()
+    const fullScale = {}
+    scaleEntries.forEach(
+      ({ id, department_id, position, seniority, salary }) => {
+        if (!fullScale[department_id]) {
+          fullScale[department_id] = {}
+        }
+        if (!fullScale[department_id][position]) {
+          fullScale[department_id][position] = {}
+        }
+        fullScale[department_id][position][seniority] = { salary, id }
+      }
+    )
+    return fullScale
+  },
+
+  async updateSalaryScale({ commit }, salaryScale) {
+    await peopleApi.updateSalaryScale(salaryScale)
   }
 }
 
