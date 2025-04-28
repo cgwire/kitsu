@@ -262,8 +262,8 @@ export default {
 
     onPersonChanged(person) {
       if (person) {
-        this.form.position = person.position
-        this.form.seniority = person.seniority
+        this.form.position = person.position || 'artist'
+        this.form.seniority = person.seniority || 'junior'
       } else {
         this.form.position = 'artist'
         this.form.seniority = 'junior'
@@ -281,8 +281,8 @@ export default {
           id: this.budgetEntryToEdit.id,
           department_id: this.budgetEntryToEdit.department_id,
           person,
-          position: this.budgetEntryToEdit.position,
-          seniority: this.budgetEntryToEdit.seniority,
+          position: this.budgetEntryToEdit.position || 'artist',
+          seniority: this.budgetEntryToEdit.seniority || 'junior',
           start_date: parseSimpleDate(
             this.budgetEntryToEdit.start_date
           ).toDate(),
