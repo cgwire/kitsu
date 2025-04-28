@@ -293,7 +293,11 @@ import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getTaskTypeSchedulePath } from '@/lib/path'
-import { sortPeople, sortTaskTypeScheduleItems } from '@/lib/sorting'
+import {
+  sortByName,
+  sortPeople,
+  sortTaskTypeScheduleItems
+} from '@/lib/sorting'
 import {
   addBusinessDays,
   daysToMinutes,
@@ -800,7 +804,7 @@ export default {
               child.children = sortedChildren
             })
 
-            taskTypeElement.children = children
+            taskTypeElement.children = sortByName(children)
             taskTypeElement.people = people
 
             // group all assigned entities by type
