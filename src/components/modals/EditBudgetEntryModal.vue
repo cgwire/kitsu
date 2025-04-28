@@ -6,6 +6,7 @@
   >
     <form @submit.prevent>
       <combobox-department
+        ref="departmentField"
         :label="$t('budget.fields.department')"
         v-model="form.department_id"
         @enter="runConfirmation"
@@ -15,7 +16,7 @@
       <people-field
         class="mt2"
         :label="$t('budget.fields.person')"
-        :people="activePeople"
+        :people="departmentPeople"
         @select="onPersonChanged"
         @enter="runConfirmation"
         v-model="form.person"
@@ -232,6 +233,16 @@ export default {
       ).endOf('month')
       const maxDuration = projectEndDate.diff(startDate, 'months')
       return maxDuration > 0 ? maxDuration : 1
+    },
+
+    departmentPeople() {
+      if (this.form.department_id) {
+        return this.activePeople.filter(person =>
+          person.departments.includes(this.form.department_id)
+        )
+      } else {
+        return this.activePeople
+      }
     }
   },
 
