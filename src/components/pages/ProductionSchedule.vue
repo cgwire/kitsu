@@ -8,7 +8,7 @@
           </label>
           <date-field :can-delete="false" utc v-model="selectedStartDate" />
         </div>
-        <div class="flexrow-item field">
+        <div class="flexrow-item">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
@@ -20,29 +20,257 @@
           :options="zoomOptions"
           v-model="zoomLevel"
         />
+        <div class="filler"></div>
+        <div class="flexrow">
+          <button-simple
+            class="flexrow-item"
+            icon="clock"
+            :text="$t('schedule.today')"
+            @click="scrollScheduleToToday"
+          />
+        </div>
       </div>
 
       <schedule
+        ref="schedule"
         :start-date="startDate"
         :end-date="endDate"
         :hierarchy="scheduleItems"
         :zoom-level="zoomLevel"
         :is-loading="loading.schedule"
         :is-error="errors.schedule"
-        :hide-man-days="true"
+        hide-man-days
         :multiline="isTVShow"
         :subchildren="!isTVShow"
-        @item-changed="scheduleItemChanged"
-        @estimation-changed="estimationChanged"
+        @item-changed="onScheduleItemChanged"
+        @item-drop="onScheduleItemDropped"
+        @item-selected="selectTaskTypeElement"
         @root-element-expanded="expandTaskTypeElement"
+        @root-element-selected="selectParentElement"
       />
     </div>
 
-    <div
-      class="column side-column is-hidden-mobile hide-small-screen"
-      v-if="currentTask"
-    >
-      <task-info :task="currentTask" :is-loading="false" />
+    <div class="column side-column" v-if="selectedTaskType">
+      <div class="side">
+        <a class="close-button" @click="closeSidePanel">
+          <x-icon class="align-middle" :size="16" />
+        </a>
+        <h2 class="mt1">{{ $t('menu.assign_tasks') }}</h2>
+        <div class="details">
+          <task-type-name
+            class="task-type"
+            :production-id="currentProduction.id"
+            :task-type="selectedTaskType"
+          />
+          <button-simple
+            icon="user-check"
+            :is-on="assignments.assigned"
+            :title="$t('schedule.show_assigned')"
+            @click="assignments.assigned = !assignments.assigned"
+            v-if="!assignments.item"
+          />
+        </div>
+        <div class="mt2" v-if="assignments.loading">
+          <spinner class="mauto" :size="20" />
+        </div>
+        <ul class="assignments mt1" v-else-if="!assignments.item">
+          <li
+            :key="entityType.id"
+            v-for="entityType in assignments.entityTypes"
+          >
+            <div
+              class="assignment-item"
+              draggable="true"
+              @dragstart="
+                onAssignmentItemDragStart($event, entityType, selectedTaskType)
+              "
+            >
+              <grip-vertical-icon class="icon" />
+              <span class="name">
+                {{ entityType.name }}
+                ({{ filteredAssignments(entityType.children).length }})
+              </span>
+              <span
+                class="expand"
+                @click="entityType.expanded = !entityType.expanded"
+              >
+                <chevron-right-icon v-if="!entityType.expanded" />
+                <chevron-down-icon v-else />
+              </span>
+            </div>
+            <ul class="assignments" v-if="entityType.expanded">
+              <li
+                :key="child.id"
+                v-for="child in filteredAssignments(entityType.children)"
+              >
+                <div
+                  class="assignment-item"
+                  draggable="true"
+                  @dragstart="
+                    onAssignmentItemDragStart(
+                      $event,
+                      { ...entityType, children: [child] },
+                      selectedTaskType
+                    )
+                  "
+                >
+                  <grip-vertical-icon class="icon" />
+                  <span class="name">{{ child.name }}</span>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <div class="assignments mt1" v-else>
+          <form class="mt1" @submit.prevent="saveAssignments()">
+            <div class="flexrow">
+              <div class="flexrow-item">
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.start_date')"
+                  utc
+                  v-model="assignments.startDate"
+                />
+              </div>
+              <div class="flexrow-item">
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.end_date')"
+                  utc
+                  v-model="assignments.endDate"
+                />
+              </div>
+            </div>
+            <div :key="item.id" v-for="item in draggedEntities">
+              <div
+                class="dragged-type"
+                :style="{
+                  background: selectedTaskType.color
+                }"
+              >
+                {{ item.name }}
+              </div>
+              <div v-if="!item.children.length">
+                {{ $t('schedule.no_entity') }}
+              </div>
+              <ul class="dragged-items" v-else>
+                <li
+                  class="dragged-item"
+                  :key="child.id"
+                  :style="{
+                    background: `color-mix(in srgb, ${selectedTaskType.color} 40%, transparent)`,
+                    'border-left': `4px solid ${selectedTaskType.color}`
+                  }"
+                  v-for="child in item.children"
+                >
+                  {{ item.name }} / {{ child.name }}
+                </li>
+              </ul>
+              <hr />
+            </div>
+            <table class="assignees">
+              <thead>
+                <tr>
+                  <td>
+                    {{ $t('schedule.assign') }}
+                    <a
+                      class="reset-assignees"
+                      :title="$t('schedule.reset_list')"
+                      @click="assignments.excludes = []"
+                      v-if="assignments.excludes.length"
+                    >
+                      <list-restart-icon
+                        class="align-middle"
+                        :size="18"
+                        :stroke-width="1.5"
+                      />
+                    </a>
+                  </td>
+                </tr>
+              </thead>
+              <tbody v-if="!availablePersons.length">
+                <tr>
+                  <td class="has-text-centered">
+                    {{ $t('schedule.no_assignee') }}
+                  </td>
+                </tr>
+              </tbody>
+              <tbody v-else>
+                <tr :key="person.id" v-for="person in availablePersons">
+                  <td class="assignee">
+                    <div class="person">
+                      <people-avatar
+                        :is-link="false"
+                        :font-size="14"
+                        :person="person"
+                        :size="28"
+                      />
+                      <people-name :person="person" />
+                    </div>
+                    <button-simple
+                      class="is-small"
+                      icon="minus"
+                      :title="
+                        $t('main.avatar.unassign', {
+                          personName: person.name
+                        })
+                      "
+                      type="button"
+                      @click="removeFromAssignments(person)"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <checkbox
+              class="pa05"
+              :disabled="!availablePersons.length"
+              :label="$t('schedule.force_unassign')"
+              :toggle="true"
+              v-model="assignments.unassign"
+            />
+            <div class="flexrow mt2">
+              <label class="mr05">
+                {{ $t('schedule.forced_daily_quotas') }}
+              </label>
+              <text-field
+                class="mb0 daily-quotas"
+                input-class=" is-small"
+                :step="0.01"
+                type="number"
+                v-model="assignments.forcedDailyQuota"
+              />
+              <a
+                class="reset-quotas ml05"
+                @click="assignments.forcedDailyQuota = null"
+                v-if="assignments.forcedDailyQuota"
+              >
+                <trash-icon class="align-middle" :size="14" />
+              </a>
+            </div>
+            <div class="mt2">
+              {{ $t('schedule.estimated_daily_quotas') }}
+              {{ estimatedDailyQuota.toFixed(2) }}
+            </div>
+            <div class="mt2 has-text-right">
+              <button-simple
+                class="mr1"
+                :disabled="assignments.saving"
+                :text="$t('main.cancel')"
+                type="button"
+                @click="assignments.item = null"
+              />
+              <button-simple
+                :disabled="!hasDraggedEntities || !availablePersons.length"
+                icon="user-check"
+                :is-loading="assignments.saving"
+                :text="$t('main.apply')"
+                type="submit"
+              />
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -52,22 +280,40 @@
  * Page to manage the schedule of the big steps of the production. It allows
  * to set milestones too.
  */
-import { mapGetters, mapActions } from 'vuex'
+
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  GripVerticalIcon,
+  ListRestartIcon,
+  TrashIcon,
+  XIcon
+} from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import { mapGetters, mapActions } from 'vuex'
 
 import { getTaskTypeSchedulePath } from '@/lib/path'
-import { sortTaskTypeScheduleItems } from '@/lib/sorting'
+import { sortPeople, sortTaskTypeScheduleItems } from '@/lib/sorting'
 import {
   addBusinessDays,
   daysToMinutes,
+  getBusinessDays,
+  getDatesFromStartDate,
   minutesToDays,
-  parseDate
+  parseDate,
+  parseSimpleDate
 } from '@/lib/time'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
@@ -76,22 +322,48 @@ import taskTypeStore from '@/store/modules/tasktypes'
 
 export default {
   name: 'production-schedule',
+
   components: {
+    ButtonSimple,
+    Checkbox,
+    ChevronDownIcon,
+    ChevronRightIcon,
     ComboboxNumber,
     DateField,
+    GripVerticalIcon,
+    ListRestartIcon,
+    PeopleAvatar,
+    PeopleName,
     Schedule,
-    TaskInfo
+    Spinner,
+    TrashIcon,
+    TaskTypeName,
+    TextField,
+    XIcon
   },
 
   data() {
     return {
-      currentTask: null,
+      assignments: {
+        assigned: false,
+        entityTypes: null,
+        excludes: [],
+        forcedDailyQuota: null,
+        item: null,
+        loading: false,
+        saving: false,
+        startDate: null,
+        endDate: null,
+        unassign: false
+      },
       daysOffByPerson: [],
+      draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
       scheduleItems: [],
       startDate: moment().startOf('day'),
       selectedStartDate: null,
       selectedEndDate: null,
+      selectedTaskType: null,
       zoomLevel: 1,
       zoomOptions: [
         { label: this.$t('main.week'), value: 0 },
@@ -121,28 +393,74 @@ export default {
       'isTVShow',
       'organisation',
       'personMap',
+      'productionAssetTypes',
       'user'
     ]),
 
+    estimatedDailyQuota() {
+      const startDate = parseSimpleDate(this.assignments.startDate)
+      const endDate = parseSimpleDate(this.assignments.endDate)
+      const nbDays = getBusinessDays(startDate, endDate)
+      const nbEntities = this.draggedEntities.reduce(
+        (sum, entity) => sum + (entity.children?.length ?? 0),
+        0
+      )
+      const nbAssignees = this.availablePersons.length
+
+      return nbDays && nbAssignees ? nbEntities / nbDays / nbAssignees : 0
+    },
+
     assetMap() {
       return assetStore.cache.assetMap
+    },
+
+    assets() {
+      return assetStore.cache.assets
     },
 
     assetTypeMap() {
       return assetTypeStore.cache.assetTypeMap
     },
 
+    availablePersons() {
+      const taskType = this.taskTypeMap.get(this.selectedTaskType.task_type_id)
+      return this.team.filter(
+        person =>
+          !this.assignments.excludes.includes(person.id) &&
+          person.role !== 'client' &&
+          (!person.departments.length ||
+            person.departments.includes(taskType?.department_id))
+      )
+    },
+
+    hasDraggedEntities() {
+      return this.draggedEntities.some(entity => entity.children.length)
+    },
+
     shotMap() {
       return shotStore.cache.shotMap
     },
 
+    shots() {
+      return shotStore.cache.shots
+    },
+
     taskTypeMap() {
       return taskTypeStore.cache.taskTypeMap
+    },
+
+    team() {
+      return sortPeople(
+        this.currentProduction.team
+          .map(personId => this.personMap.get(personId))
+          .filter(person => person && !person.is_bot)
+      )
     }
   },
 
   methods: {
     ...mapActions([
+      'assignSelectedTasks',
       'editProduction',
       'loadAggregatedPersonDaysOff',
       'loadAssets',
@@ -152,7 +470,9 @@ export default {
       'loadSequenceScheduleItems',
       'loadShots',
       'loadTasks',
-      'saveScheduleItem'
+      'saveScheduleItem',
+      'unassignSelectedTasks',
+      'updateTask'
     ]),
 
     loadData() {
@@ -223,6 +543,8 @@ export default {
     },
 
     reset() {
+      this.closeSidePanel()
+
       if (this.currentProduction.start_date) {
         this.startDate = parseDate(this.currentProduction.start_date)
       }
@@ -244,6 +566,9 @@ export default {
         }
         if (startDate.isBefore(this.startDate)) {
           startDate = this.startDate.clone()
+        }
+        if (startDate.isAfter(this.endDate)) {
+          startDate = this.endDate.clone()
         }
         let endDate
         if (item.end_date) {
@@ -283,16 +608,23 @@ export default {
 
     async expandTaskTypeElement(
       taskTypeElement,
-      refreshScheduleCallBack = null
+      refreshScheduleCallBack = null,
+      expanded = false,
+      resetAssignments = true,
+      tasks = null
     ) {
-      taskTypeElement.expanded = !taskTypeElement.expanded
+      taskTypeElement.expanded = expanded || !taskTypeElement.expanded
 
       if (taskTypeElement.expanded) {
         try {
           taskTypeElement.loading = true
 
+          this.selectedTaskType = taskTypeElement
+          this.assignments.loading = resetAssignments
+
           taskTypeElement.children = []
-          taskTypeElement.people = []
+          taskTypeElement.people = {}
+          taskTypeElement.entitiesByType = {}
 
           const loadScheduleItems = this.isTVShow
             ? ['Asset', 'Shot'].includes(taskTypeElement.for_entity)
@@ -326,12 +658,13 @@ export default {
               await this.loadShots()
             }
 
-            // load tasks
-            const tasks = await this.loadTasks({
-              project_id: this.currentProduction.id,
-              task_type_id: taskTypeElement.task_type_id,
-              relations: 'true'
-            })
+            if (!tasks) {
+              tasks = await this.loadTasks({
+                project_id: this.currentProduction.id,
+                task_type_id: taskTypeElement.task_type_id,
+                relations: 'true'
+              })
+            }
 
             // load days off of assignees
             const personIds = [
@@ -472,6 +805,20 @@ export default {
 
             taskTypeElement.children = children
             taskTypeElement.people = people
+
+            // group all assigned entities by type
+            taskTypeElement.entitiesByType = Object.fromEntries(
+              Object.entries(tasksByType).map(([entityTypeId, byAssignee]) => [
+                entityTypeId,
+                Object.entries(byAssignee)
+                  .flatMap(([assignee, items]) =>
+                    assignee !== 'unassigned'
+                      ? items.map(item => item.entity_id)
+                      : undefined
+                  )
+                  .filter(Boolean)
+              ])
+            )
           }
         } catch (err) {
           console.error(err)
@@ -484,6 +831,8 @@ export default {
         if (refreshScheduleCallBack) {
           refreshScheduleCallBack(taskTypeElement)
         }
+
+        this.selectTaskTypeElement(taskTypeElement, null, resetAssignments)
       }
     },
 
@@ -500,12 +849,13 @@ export default {
       }
     },
 
-    estimationChanged({ item, days }) {
-      item.man_days = daysToMinutes(this.organisation, days)
-      this.saveScheduleItem(item)
+    filteredAssignments(items) {
+      return this.assignments.assigned
+        ? items
+        : items.filter(item => !item.assigned)
     },
 
-    scheduleItemChanged(item) {
+    onScheduleItemChanged(item) {
       if (item.startDate && item.endDate && item.parentElement) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
@@ -513,11 +863,25 @@ export default {
       } else if (!item.parentElement) {
         const minDate = this.getMinDate(item)
         const maxDate = this.getMaxDate(item)
-        if (item.startDate.isAfter(minDate)) item.startDate = minDate
+        if (item.startDate.isAfter(minDate)) {
+          item.startDate = minDate
+        }
         if (item.endDate.isBefore(maxDate)) {
-          item.endDate = maxDate.add(-1, 'days')
+          item.endDate = maxDate
         }
       }
+
+      // update schedule item
+      const scheduleItem = this.scheduleItems.find(
+        scheduleItem => scheduleItem === item
+      )
+      if (scheduleItem) {
+        scheduleItem.startDate = item.startDate
+        scheduleItem.start_date = item.startDate.format('YYYY-MM-DD')
+        scheduleItem.endDate = item.endDate
+        scheduleItem.end_date = item.endDate.format('YYYY-MM-DD')
+      }
+
       this.saveScheduleItem(item)
     },
 
@@ -556,6 +920,251 @@ export default {
       } else {
         return false
       }
+    },
+
+    scrollScheduleToToday() {
+      this.$refs.schedule?.scrollToToday()
+    },
+
+    resetSidePanel() {
+      this.assignments = {
+        ...this.assignments,
+        entityTypes: null,
+        excludes: [],
+        forcedDailyQuota: null,
+        item: null,
+        loading: false,
+        saving: false,
+        startDate: null,
+        endDate: null,
+        unassign: false
+      }
+    },
+
+    selectParentElement(element) {
+      if (!element.expanded) {
+        this.expandTaskTypeElement(element, () => {
+          this.$refs.schedule?.refreshItemPositions(element)
+        })
+      } else {
+        this.selectTaskTypeElement(element)
+      }
+    },
+
+    async selectTaskTypeElement(
+      taskType,
+      selectedEntityType = undefined,
+      resetAssignments = true
+    ) {
+      this.selectedTaskType = taskType
+
+      if (resetAssignments) {
+        this.resetSidePanel()
+      }
+
+      // load entity types
+      this.assignments.loading = true
+      if (taskType.for_entity === 'Asset') {
+        await this.loadAssets({ withShared: false, withTasks: false })
+
+        this.assignments.entityTypes = this.productionAssetTypes
+          .filter(assetType => {
+            // filtering following custom asset types workflow
+            return (
+              !assetType.task_types.length ||
+              assetType.task_types.includes(taskType.task_type_id)
+            )
+          })
+          .map((assetType, index) => {
+            return {
+              id: assetType.id,
+              name: assetType.name,
+              for_entity: taskType.for_entity,
+              expanded: assetType.id === selectedEntityType?.object_id,
+              entity_type_id: assetType.id,
+              children: this.assets
+                .filter(
+                  asset =>
+                    asset.asset_type_id === assetType.id &&
+                    !asset.canceled &&
+                    !asset.shared
+                )
+                .map(asset => ({
+                  ...asset,
+                  assigned: taskType.entitiesByType[assetType.id]?.includes(
+                    asset.id
+                  )
+                }))
+            }
+          })
+      } else if (taskType.for_entity === 'Shot') {
+        await this.loadShots()
+
+        const shotsBySequence = this.shots.reduce((acc, shot) => {
+          if (!acc[shot.parent_id]) {
+            acc[shot.parent_id] = []
+          }
+          shot.assigned = taskType.entitiesByType[shot.parent_id]?.includes(
+            shot.id
+          )
+          acc[shot.parent_id].push(shot)
+          return acc
+        }, {})
+
+        this.assignments.entityTypes = Object.keys(shotsBySequence).map(
+          sequenceId => {
+            const shots = shotsBySequence[sequenceId]
+            return {
+              id: sequenceId,
+              name: shots[0].sequence_name,
+              for_entity: taskType.for_entity,
+              expanded: sequenceId === selectedEntityType?.object_id,
+              children: shots
+            }
+          }
+        )
+      }
+      this.assignments.loading = false
+    },
+
+    closeSidePanel() {
+      this.selectedTaskType = undefined
+      this.resetSidePanel()
+    },
+
+    onAssignmentItemDragStart(event, item, type) {
+      event.stopPropagation()
+      event.dataTransfer.dropEffect = 'move'
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData(`task-type-${type.task_type_id}`, true) // use for hack on drag over (must be lowercase)
+      event.dataTransfer.setData('taskTypeId', type.task_type_id)
+      event.dataTransfer.setData('entityId', item.id)
+
+      item.children = this.filteredAssignments(item.children)
+      this.draggedEntities = [item]
+    },
+
+    onScheduleItemDropped(event, item) {
+      this.assignments.item = item
+      const start_date = event.start_date || item.start_date
+      const end_date = parseDate(start_date).isAfter(item.end_date)
+        ? start_date
+        : item.end_date
+      this.assignments.startDate = start_date
+      this.assignments.endDate = end_date
+    },
+
+    removeFromAssignments(person) {
+      this.assignments.excludes.push(person.id)
+    },
+
+    async saveAssignments() {
+      this.assignments.saving = true
+
+      // load tasks
+      const tasks = await this.loadTasks({
+        project_id: this.currentProduction.id,
+        task_type_id: this.selectedTaskType.task_type_id,
+        relations: 'true'
+      })
+
+      const dailyQuota =
+        this.assignments.forcedDailyQuota ?? this.estimatedDailyQuota
+      const taskEstimation = 1 / dailyQuota
+
+      // assign each selected entity to each selected assignee
+      for (const taskType of this.draggedEntities) {
+        const startDate = parseDate(this.assignments.startDate)
+        const endDate = parseDate(this.assignments.endDate)
+
+        let cumulatedTasks = 0
+        let nextAssigneeIndex = 0
+        let nextStartDate = startDate.clone()
+
+        // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
+        for (const entity of taskType.children) {
+          const task = tasks.find(task => task.entity_id === entity.id)
+          if (!task) {
+            continue // no task found for this entity
+          }
+
+          if (this.assignments.unassign) {
+            await this.unassignSelectedTasks({ taskIds: [task.id] })
+          }
+
+          cumulatedTasks++
+
+          let taskStartDate = nextStartDate
+          let taskEndDate = null
+          let taskAssignee = null
+          while (nextAssigneeIndex < this.availablePersons.length) {
+            taskAssignee = this.availablePersons[nextAssigneeIndex]
+
+            taskStartDate = addBusinessDays(
+              taskStartDate,
+              0,
+              this.daysOffByPerson[taskAssignee.id]
+            )
+
+            const { due_date } = getDatesFromStartDate(
+              this.organisation,
+              startDate,
+              taskEndDate,
+              cumulatedTasks * taskEstimation,
+              this.daysOffByPerson[taskAssignee.id]
+            )
+            taskEndDate = parseDate(due_date)
+
+            if (taskEndDate.isAfter(endDate)) {
+              // try to assign the task to the next available person
+              nextAssigneeIndex++
+              cumulatedTasks = 1
+              taskStartDate = startDate.clone()
+              taskEndDate = null
+            } else {
+              await Promise.all([
+                // assign task to the current assignee
+                this.assignSelectedTasks({
+                  personId: taskAssignee.id,
+                  taskIds: [task.id]
+                }),
+                // save task dates & estimation
+                this.updateTask({
+                  taskId: task.id,
+                  data: {
+                    estimation: daysToMinutes(
+                      this.organisation,
+                      taskEstimation
+                    ),
+                    start_date: taskStartDate.format('YYYY-MM-DD'),
+                    due_date: taskEndDate.format('YYYY-MM-DD')
+                  }
+                })
+              ])
+              // set next start date
+              if ((cumulatedTasks * taskEstimation) % 1 !== 0) {
+                nextStartDate = taskEndDate.clone()
+              } else {
+                nextStartDate = taskEndDate.clone().add(1, 'days')
+              }
+              break // jump to next task
+            }
+          }
+        }
+
+        // refresh schedule
+        this.expandTaskTypeElement(
+          this.selectedTaskType,
+          () => {
+            this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
+          },
+          true,
+          false,
+          tasks
+        )
+      }
+
+      this.assignments.saving = false
     }
   },
 
@@ -636,5 +1245,140 @@ export default {
 
 .zoom-level {
   margin-top: -10px;
+}
+
+.ml2 {
+  margin-left: 2em;
+}
+
+.side-column {
+  position: relative;
+  top: -30px;
+  right: -14px;
+  height: calc(100% + 44px);
+  margin-top: 0;
+  padding: 0 1em 1em 1em;
+  background: var(--background-alt);
+  min-height: 100%;
+
+  .close-button {
+    position: absolute;
+    right: 1em;
+  }
+
+  .details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.assignments {
+  list-style-type: none;
+  margin-left: 0;
+
+  .assignments {
+    margin-left: 2em;
+  }
+
+  .assignment-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background-selectable);
+    border: 1px solid $grey;
+    margin-top: -1px;
+    padding: 1em 1em 1em 0.5em;
+    cursor: grab;
+
+    .icon {
+      color: $grey;
+      margin-right: 0.5em;
+    }
+
+    .name {
+      flex: 1;
+    }
+
+    .expand {
+      cursor: pointer;
+      opacity: 0.5;
+      height: 24px;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  li:nth-child(even) .assignment-item {
+    background: color-mix(in srgb, var(--background-selectable) 70%, white 30%);
+  }
+
+  .dragged-type {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px;
+    margin-bottom: 1em;
+    border-radius: 0.2em;
+    text-align: center;
+  }
+
+  .dragged-items {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5em;
+    list-style: none;
+    margin: 0;
+  }
+
+  .dragged-item {
+    padding: 0 0.7em;
+    border-radius: 0.2em;
+  }
+
+  .assignees {
+    .reset-assignees {
+      position: absolute;
+      right: 1.5em;
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+    td {
+      padding: 0.5em;
+    }
+    tbody {
+      background: var(--background);
+
+      tr {
+        border: 1px solid var(--border);
+      }
+    }
+    .assignee {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+
+  .daily-quotas {
+    width: 50px;
+  }
+  .reset-quotas {
+    opacity: 0.5;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 </style>
