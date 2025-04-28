@@ -446,6 +446,7 @@ export default {
     },
 
     onAddBudgetEntry() {
+      this.budgetEntryToEdit = {}
       this.modals.createBudgetEntry = true
     },
 
