@@ -292,7 +292,7 @@ export default {
       return this.monthsBetweenProductionDates.map(monthDate => {
         const monthKey = monthDate.format('YYYY-MM')
         const [year, month] = monthKey.split('-')
-        const label = month === '01' ? `${year.slice(2)}/${month}` : month
+        const label = `${month}/${year.slice(2)}`
         return [label, this.totalEntry.monthCosts[monthKey] || 0]
       })
     }
