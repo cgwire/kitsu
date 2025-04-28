@@ -298,11 +298,13 @@ export default {
         { label: 'admin', value: 'admin' }
       ],
       positionOptions: [
+        { label: '', value: null },
         { label: 'artist', value: 'artist' },
         { label: 'supervisor', value: 'supervisor' },
         { label: 'lead', value: 'lead' }
       ],
       seniorityOptions: [
+        { label: '', value: null },
         { label: 'senior', value: 'senior' },
         { label: 'mid', value: 'mid' },
         { label: 'junior', value: 'junior' }
