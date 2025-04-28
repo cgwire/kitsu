@@ -485,7 +485,7 @@ export const playerMixin = {
     },
 
     pause() {
-      this.showCanvas()
+      this.resetCanvasVisibility()
 
       if (this.isFullMode) {
         this.fullPlayer.pause()
@@ -543,7 +543,7 @@ export const playerMixin = {
                 this.playlistProgress = entity.start_duration
               }
             }
-            this.showCanvas()
+            this.resetCanvasVisibility()
           }
         })
       } else {
@@ -1456,7 +1456,7 @@ export const playerMixin = {
       if (!this.currentPreview) return Promise.resolve()
       this.annotations = this.currentPreview.annotations || []
       return this.resetCanvas().then(() => {
-        this.showCanvas()
+        this.resetCanvasVisibility()
         if (this.isCurrentPreviewPicture) {
           if (!this.isPlaying) this.loadAnnotation(this.getAnnotation(0))
         }

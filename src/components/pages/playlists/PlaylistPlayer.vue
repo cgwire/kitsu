@@ -67,10 +67,12 @@
         icon="plus"
         :text="addEntitiesText"
         @click="$emit('show-add-entities')"
-        v-if="
-          (isCurrentUserManager || isCurrentUserSupervisor) &&
-          !isAddingEntity &&
-          !isFullMode
+        :active="
+          !(
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            !isAddingEntity &&
+            !isFullMode
+          )
         "
       />
       <button-simple
@@ -154,7 +156,7 @@
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
-            :panzoom="false"
+            :panzoom="true"
             :preview="currentPreviewToCompare"
             :is-comparing="isComparing"
             high-quality
@@ -192,10 +194,12 @@
           :is-repeating="isRepeating"
           :current-preview-index="currentPreviewIndex"
           :muted="isMuted"
+          :panzoom="true"
           @entity-change="onPlayerPlayingEntityChange"
           @frame-update="onRawPlayerFrameUpdate"
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
+          @panzoom-changed="onPanZoomChanged"
           @play-next="onPlayNext"
           @repeat="onVideoRepeated"
           @video-loaded="onVideoLoaded"
@@ -264,12 +268,13 @@
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
-            :panzoom="false"
+            :panzoom="true"
             :current-preview="{
               ...currentPreview,
               position: currentPreviewIndex + 1
             }"
             :previews="picturePreviews"
+            @panzoom-changed="onPanZoomChanged"
             high-qualiy
           />
         </div>
@@ -457,16 +462,24 @@
 
       <div class="separator"></div>
 
-      <template v-if="isCurrentPreviewPicture">
+      <div
+        class="flexrow-item"
+        :title="$t('playlists.actions.frame_number')"
+        v-if="isCurrentPreviewPicture"
+      >
         {{ (framesSeenOfPicture + '').padStart(2, '0') }} /
         {{
           currentEntity.preview_nb_frames
             ? currentEntity.preview_nb_frames
             : Math.round(2 * fps)
         }}
-      </template>
+      </div>
 
-      <div class="flexrow flexrow-item" v-if="currentEntityPreviewLength > 1">
+      <div
+        class="flexrow flexrow-item"
+        :class="{ mr0: isCurrentPreviewPicture }"
+        v-if="currentEntityPreviewLength > 1"
+      >
         <button-simple
           class="button playlist-button flexrow-item"
           icon="left"
@@ -492,7 +505,7 @@
         >
           <arrow-up-right-icon class="icon is-small" />
         </a>
-        <div class="separator"></div>
+        <div class="separator" v-if="!isCurrentPreviewPicture"></div>
       </div>
 
       <div
@@ -693,6 +706,14 @@
             (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
           "
           @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+        />
+        <button-simple
+          class="playlist-button flexrow-item"
+          :active="isZoomEnabled"
+          icon="loupe"
+          :title="$t('playlists.actions.annotation_zoom_pan')"
+          @click="isZoomEnabled = !isZoomEnabled"
+          v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
         />
         <transition name="slide">
           <div class="annotation-tools" v-show="isTyping">
@@ -975,6 +996,7 @@ import {
   PlayIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import { v4 as uuidv4 } from 'uuid'
 import WaveSurfer from 'wavesurfer.js'
 
 import { defineAsyncComponent } from 'vue'
@@ -1098,6 +1120,7 @@ export default {
       isShowAnnotationsWhilePlaying: false,
       isWaveformDisplayed: false,
       isWireframe: false,
+      isZoomEnabled: false,
       movieDimensions: { width: 0, height: 0 },
       objectBackgroundUrl: null,
       pictureDefaultHeight: 0,
@@ -1149,6 +1172,7 @@ export default {
     }
     this.resetPlaylistFrameData()
     this.room.id = this.playlist.id
+    this.room.localId = uuidv4()
     this.$nextTick(() => {
       this.configureEvents()
       this.setupFabricCanvas()
@@ -2156,10 +2180,111 @@ export default {
 
     onEntityDragStart(event, entity) {
       event.dataTransfer.setData('entityId', entity.id)
+    },
+
+    resumePanZoom() {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayer.resumePanZoom()
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayer.resumePanZoom()
+      }
+    },
+
+    pausePanZoom() {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayer.pausePanZoom()
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayer.pausePanZoom()
+      }
+    },
+
+    resetPanZoom() {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayer.resetPanZoom()
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayer.resetPanZoom()
+      }
+    },
+
+    setPanZoom(x, y, scale) {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayer.setPanZoom(x, y, scale)
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayer.setPanZoom(x, y, scale)
+      }
+    },
+
+    onPanZoomChanged({ x, y, scale }) {
+      this.postPanZoomChanged(x, y, scale)
     }
   },
 
   watch: {
+    isAnnotationsDisplayed() {
+      this.$options.isRoomSilent = true
+      if (this.isAnnotationsDisplayed && this.isZoomEnabled) {
+        this.isZoomEnabled = false
+      }
+      if (!this.isAnnotationsDisplayed) {
+        if (this.isDrawing) {
+          this.onAnnotateClicked()
+        } else if (this.isTyping) {
+          this.onTypeClicked()
+        }
+      }
+      this.$options.isRoomSilent = false
+      this.resetCanvasVisibility()
+      if (!this.$options.isRoomSilent) {
+        this.updateRoomStatus()
+      }
+    },
+
+    isDrawing() {
+      if (this.isDrawing && this.isZoomEnabled) {
+        this.isZoomEnabled = false
+      }
+      if (!this.isDrawing && this.isLaserModeOn) {
+        this.isLaserModeOn = false
+      }
+      if (this.isDrawing && !this.isAnnotationsDisplayed) {
+        this.isAnnotationsDisplayed = true
+      }
+    },
+
+    isTyping() {
+      if (this.isTyping && this.isZoomEnabled) {
+        this.isZoomEnabled = false
+      }
+      if (!this.isAnnotationsDisplayed) {
+        this.isAnnotationsDisplayed = true
+      }
+    },
+
+    isZoomEnabled() {
+      if (this.isZoomEnabled) {
+        this.resumePanZoom()
+        this.silentRoom = true
+        if (this.isDrawing) {
+          this.onAnnotateClicked()
+        } else if (this.isTyping) {
+          this.onTypeClicked()
+        }
+        this.$nextTick(() => {
+          if (this.isAnnotationsDisplayed) {
+            this.isAnnotationsDisplayed = false
+          }
+          this.resetCanvasVisibility()
+        })
+        this.silentRoom = false
+      } else {
+        this.pausePanZoom()
+        this.resetPanZoom()
+      }
+      this.$nextTick(() => {
+        this.updateRoomStatus()
+      })
+    },
+
     'objectModel.currentAnimation'() {
       if (this.isCurrentPreviewModel && this.objectModel.isAnimation) {
         this.playModel()
@@ -2190,6 +2315,7 @@ export default {
         }
       })
       if (this.currentPreview) {
+        this.resetPanZoom()
         this.movieDimensions = {
           width: this.currentPreview.width,
           height: this.currentPreview.height
@@ -2229,6 +2355,8 @@ export default {
           } else {
             this.resetCanvas()
           }
+          this.resetPanZoom()
+          this.resetCanvasVisibility()
         })
       })
     },
@@ -2311,6 +2439,7 @@ export default {
       }
       this.endAnnotationSaving()
       this.room.id = this.playlist.id
+      this.room.localId = uuidv4()
       this.openRoom(newPlaylist.id)
       this.forClient = Boolean(this.playlist.for_client).toString()
       this.$nextTick(() => {
@@ -2352,9 +2481,15 @@ export default {
         this.resetHeight()
         this.loadWaveForm()
       }
+      this.$nextTick(() => {
+        this.updateRoomStatus()
+      })
     },
 
     isLaserModeOn() {
+      if (!this.isDrawing && this.isLaserModeOn) {
+        this.onAnnotateClicked()
+      }
       this.updateRoomStatus()
     },
 

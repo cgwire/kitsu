@@ -8,6 +8,7 @@
         preview.position === currentPreview.position
       "
       :key="preview.id"
+      :big="big"
       :preview="preview"
       :full-screen="fullScreen"
       :high-quality="highQuality"
@@ -17,6 +18,7 @@
       :default-height="defaultHeight"
       :margin-bottom="marginBottom"
       @loaded="() => $emit('loaded')"
+      @panzoom-changed="$event => $emit('panzoom-changed', $event)"
       @size-changed="() => $emit('size-changed')"
     />
   </div>
@@ -80,7 +82,7 @@ export default {
     }
   },
 
-  emits: ['loaded', 'size-changed'],
+  emits: ['loaded', 'panzoom-changed', 'size-changed'],
 
   data() {
     return {}
@@ -146,6 +148,56 @@ export default {
           previewPlayer[0].resetPicture()
         }
       }
+    },
+
+    resetPanZoom() {
+      this.previews.forEach(preview => {
+        const key = 'picture-' + preview.id + '-' + preview.position
+        if (
+          preview.id === this.currentPreview.id &&
+          preview.position === this.currentPreview.position
+        ) {
+          const previewPlayer = this.$refs[key]
+          if (previewPlayer && previewPlayer[0]) {
+            previewPlayer[0].resetPanZoom()
+          }
+        }
+      })
+    },
+
+    pausePanZoom() {
+      this.previews.forEach(preview => {
+        const key = 'picture-' + preview.id + '-' + preview.position
+        const previewPlayer = this.$refs[key]
+        if (previewPlayer && previewPlayer[0]) {
+          previewPlayer[0].pausePanZoom()
+        }
+      })
+    },
+
+    resumePanZoom() {
+      this.previews.forEach(preview => {
+        const key = 'picture-' + preview.id + '-' + preview.position
+        const previewPlayer = this.$refs[key]
+        if (previewPlayer && previewPlayer[0]) {
+          previewPlayer[0].resumePanZoom()
+        }
+      })
+    },
+
+    setPanZoom(x, y, scale) {
+      this.previews.forEach(preview => {
+        const key = 'picture-' + preview.id + '-' + preview.position
+        const previewPlayer = this.$refs[key]
+        if (
+          preview.id === this.currentPreview.id &&
+          preview.position === this.currentPreview.position
+        ) {
+          if (previewPlayer && previewPlayer[0]) {
+            previewPlayer[0].setPanZoom(x, y, scale)
+          }
+        }
+      })
     }
   },
 

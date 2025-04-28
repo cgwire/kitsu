@@ -22,8 +22,12 @@
           <img ref="picture-gif" :src="pictureGifPath" />
         </div>
         <div v-show="!isGif">
-          <img ref="picture-big" :src="pictureDlPath" v-show="fullScreen" />
-          <img ref="picture" :src="picturePath" v-show="!fullScreen" />
+          <img
+            ref="picture-big"
+            :src="pictureDlPath"
+            v-show="fullScreen || big"
+          />
+          <img ref="picture" :src="picturePath" v-show="!fullScreen && !big" />
         </div>
       </div>
       <spinner v-if="isLoading" />
@@ -87,7 +91,7 @@ export default {
     }
   },
 
-  emits: ['loaded', 'size-changed'],
+  emits: ['loaded', 'panzoom-changed', 'size-changed'],
 
   data() {
     return {
@@ -119,18 +123,7 @@ export default {
     this.pictureGif.addEventListener('load', this.endLoading)
     window.addEventListener('resize', this.onWindowResize)
     this.setPicturePath()
-
-    if (this.panzoom) {
-      const pictures = [this.picture, this.pictureBig, this.pictureGif]
-      this.panzoomInstances = pictures.map(picture =>
-        panzoom(picture, {
-          bounds: true,
-          boundsPadding: 0.2,
-          maxZoom: 5,
-          minZoom: 1
-        })
-      )
-    }
+    this.setupPanZoom()
   },
 
   beforeUnmount() {
@@ -360,23 +353,75 @@ export default {
       this.$refs.loupe.style['background-position'] = `-${bgX}px -${bgY}px`
     },
 
-    resetPanZoom() {
-      this.panzoomInstances.forEach(panzoom => {
-        panzoom.moveTo(0, 0)
-        panzoom.zoomAbs(0, 0, 1)
+    // Pan and Zoom
+
+    setupPanZoom() {
+      const pictures = [this.picture, this.pictureBig, this.pictureGif]
+      this.panzoomInstances = pictures.map(picture =>
+        panzoom(picture, {
+          bounds: true,
+          boundsPadding: 0.2,
+          maxZoom: 5,
+          minZoom: 1
+        })
+      )
+      this.panzoomBig = this.panzoomInstances[1]
+      this.panzoomGif = this.panzoomInstances[2]
+      this.panzoomBig.on('zoom', () => {
+        if (!this.big) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+      this.panzoomBig.on('panend', () => {
+        console.log(this.isBig)
+        if (!this.big) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+      this.panzoomGif.on('zoom', () => {
+        if (!this.isGif) return
+        this.emitPanZoom(this.panzoomBig)
+      })
+      this.panzoomGif.on('panend', () => {
+        if (!this.isGif) return
+        this.emitPanZoom(this.panzoomBig)
       })
     },
 
+    emitPanZoom(panzoom) {
+      if (this.$options.silent) return
+      const { x, y, scale } = panzoom.getTransform()
+      this.$emit('panzoom-changed', { x, y, scale })
+    },
+
+    resetPanZoom() {
+      this.setPanZoom(0, 0, 1)
+    },
+
     pausePanZoom() {
-      if (this.panzoomInstance) {
-        this.panzoomInstance.pause()
-      }
+      this.panzoomInstances.forEach(panzoom => panzoom.pause())
     },
 
     resumePanZoom() {
-      if (this.panzoomInstance) {
-        this.panzoomInstance.resume()
+      this.panzoomInstances.forEach(panzoom => panzoom.resume())
+    },
+
+    setPanZoom(x, y, scale) {
+      this.$options.silent = true
+      if (this.panzoomInstances.length === 0) return
+      let panzoom = this.panzoomInstances[1]
+      if (this.isGif) {
+        panzoom = this.panzoomInstances[2]
+      } else if (!this.big && !this.fullScreen) {
+        panzoom = this.panzoomInstances[0]
       }
+      const actualScale = panzoom.getTransform().scale
+      const zoomFactor = scale / actualScale
+      panzoom.moveTo(x, y)
+      panzoom.setTransformOrigin({ x, y })
+      panzoom.zoomTo(x, y, zoomFactor)
+      panzoom.setTransformOrigin({ x: 0, y: 0 })
+      this.$nextTick(() => {
+        this.$options.silent = false
+      })
     }
   },
 

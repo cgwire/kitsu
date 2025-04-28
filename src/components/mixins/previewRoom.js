@@ -43,6 +43,9 @@ export const previewRoomMixin = {
         current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
         is_laser_mode: this.isLaserModeOn,
+        is_annotations_displayed: this.isAnnotationsDisplayed,
+        is_waveform_displayed: this.isWaveformDisplayed,
+        is_zoom_enabled: this.isZoomEnabled,
         handle_in: this.handleIn,
         handle_out: this.handleOut,
         speed: this.speed,
@@ -88,6 +91,9 @@ export const previewRoomMixin = {
         current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
         is_laser_mode: this.isLaserModeOn,
+        is_annotations_displayed: this.isAnnotationsDisplayed,
+        is_waveform_displayed: this.isWaveformDisplayed,
+        is_zoom_enabled: this.isZoomEnabled,
         handle_in: this.handleIn,
         handle_out: this.handleOut,
         speed: this.speed,
@@ -99,7 +105,21 @@ export const previewRoomMixin = {
           comparison_preview_index: this.currentComparisonPreviewIndex
         }
       }
-      this.$socket.emit('preview-room:update-playing-status', data)
+      this.$socket.emit('preview-room:room-updated', data)
+    },
+
+    postPanZoomChanged(x, y, zoom) {
+      if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
+      this.$socket.emit('preview-room:panzoom-changed', {
+        playlist_id: this.room.id,
+        data: {
+          local_id: this.room.localId,
+          user_id: this.user.id,
+          x,
+          y,
+          zoom
+        }
+      })
     },
 
     postAnnotationAddition(time, serializedObj) {
@@ -107,6 +127,7 @@ export const previewRoomMixin = {
       this.$socket.emit('preview-room:add-annotation', {
         playlist_id: this.room.id,
         data: {
+          local_id: this.localId,
           user_id: this.user.id,
           time,
           obj: serializedObj
@@ -119,6 +140,7 @@ export const previewRoomMixin = {
       this.$socket.emit('preview-room:remove-annotation', {
         playlist_id: this.room.id,
         data: {
+          local_id: this.localId,
           user_id: this.user.id,
           time,
           obj: serializedObj
@@ -131,6 +153,7 @@ export const previewRoomMixin = {
       this.$socket.emit('preview-update-annotation', {
         playlist_id: this.room.id,
         data: {
+          local_id: this.localId,
           user_id: this.user.id,
           time,
           obj: serializedObj
@@ -249,12 +272,36 @@ export const previewRoomMixin = {
         }
       }
 
+      // Waveform display has changed
+      if (
+        this.exists(eventData.is_waveform_displayed) &&
+        eventData.is_waveform_displayed !== this.isWaveformDisplayed
+      ) {
+        this.isWaveformDisplayed = eventData.is_waveform_displayed
+      }
+
       // Laser mode has changed
       if (
         this.exists(eventData.is_laser_mode) &&
         eventData.is_laser_mode !== this.isLaserModeOn
       ) {
         this.isLaserModeOn = eventData.is_laser_mode
+      }
+
+      // Annotations display has changed
+      if (
+        this.exists(eventData.is_annotations_displayed) &&
+        eventData.is_annotations_displayed !== this.isAnnotationsDisplayed
+      ) {
+        this.isAnnotationsDisplayed = eventData.is_annotations_displayed
+      }
+
+      // Zoom mode has changed
+      if (
+        this.exists(eventData.is_zoom_enabled) &&
+        eventData.is_zoom_enabled !== this.isZoomEnabled
+      ) {
+        this.isZoomEnabled = eventData.is_zoom_enabled
       }
 
       // Handle in has changed
@@ -316,7 +363,6 @@ export const previewRoomMixin = {
         this.room.people = eventData.people
         if (this.joinedRoom) {
           this.room.newComer = false
-          this.loadRoomCurrentState(eventData)
         }
       },
 
@@ -325,7 +371,18 @@ export const previewRoomMixin = {
         this.people = eventData.people
         if (!this.joinedRoom) return
         if (eventData.only_newcomer && !this.newComer) return
+        if (eventData.user_id === this.user.id) return
         this.loadRoomCurrentState(eventData)
+      },
+
+      'preview-room:panzoom-changed'(eventData) {
+        if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
+        if (this.room.localId === eventData.data.local_id) return
+        if (eventData.user_id === this.user.id) return
+        const x = eventData.data.x
+        const y = eventData.data.y
+        const zoom = eventData.data.zoom
+        this.setPanZoom(x, y, zoom)
       },
 
       'preview-room:add-annotation'(eventData) {
