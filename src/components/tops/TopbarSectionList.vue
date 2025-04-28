@@ -15,6 +15,7 @@
           />
           <hand-coins-icon
             class="section-icon"
+            :stroke-width="1.5"
             v-if="currentSectionValue === 'budget'"
           />
           {{ currentSectionLabel }}
@@ -39,6 +40,7 @@
             />
             <hand-coins-icon
               class="section-icon"
+              :stroke-width="1.5"
               v-if="section.value === 'budget'"
             />
             <span class="flexrow-item">
