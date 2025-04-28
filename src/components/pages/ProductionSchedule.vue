@@ -610,8 +610,7 @@ export default {
       taskTypeElement,
       refreshScheduleCallBack = null,
       expanded = false,
-      resetAssignments = true,
-      tasks = null
+      resetAssignments = true
     ) {
       taskTypeElement.expanded = expanded || !taskTypeElement.expanded
 
@@ -658,13 +657,11 @@ export default {
               await this.loadShots()
             }
 
-            if (!tasks) {
-              tasks = await this.loadTasks({
-                project_id: this.currentProduction.id,
-                task_type_id: taskTypeElement.task_type_id,
-                relations: 'true'
-              })
-            }
+            const tasks = await this.loadTasks({
+              project_id: this.currentProduction.id,
+              task_type_id: taskTypeElement.task_type_id,
+              relations: 'true'
+            })
 
             // load days off of assignees
             const personIds = [
@@ -1159,8 +1156,7 @@ export default {
             this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
           },
           true,
-          false,
-          tasks
+          false
         )
       }
 
