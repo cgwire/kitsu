@@ -1642,6 +1642,15 @@
         "created_at": "Fecha de creación",
         "updated_at": "Fecha de actualización"
       }
+    },
+    "row_actions": {
+      "change_avatar": "Cambiar avatar",
+      "change_password": "Cambiar contraseña",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "history": "Historial",
+      "refresh": "Actualizar",
+      "restore": "Restaurar"
     }
   }
 }

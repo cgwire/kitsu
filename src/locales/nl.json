@@ -1642,6 +1642,15 @@
         "created_at": "Aanmaakdatum",
         "updated_at": "Datum bijwerken"
       }
+    },
+    "row_actions": {
+      "change_avatar": "Avatar wijzigen",
+      "change_password": "Wachtwoord wijzigen",
+      "delete": "Verwijderen",
+      "edit": "Bewerken",
+      "history": "Geschiedenis",
+      "refresh": "Vernieuwen",
+      "restore": "Herstellen"
     }
   }
 }

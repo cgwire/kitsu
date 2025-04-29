@@ -964,6 +964,15 @@
                 "name": "Név",
                 "color": "Szín"
             }
+        },
+        "row_actions": {
+            "change_avatar": "Avatar megváltoztatása",
+            "change_password": "Jelszó megváltoztatása",
+            "delete": "Törlés",
+            "edit": "Szerkesztés",
+            "history": "Előzmények",
+            "refresh": "Frissítés",
+            "restore": "Visszaállítás"
         }
     }
 }

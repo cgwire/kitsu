@@ -1671,6 +1671,15 @@
         "created_at": "作成日",
         "updated_at": "更新日"
       }
+    },
+    "row_actions": {
+      "change_avatar": "アバターを変更",
+      "change_password": "パスワードを変更",
+      "delete": "削除",
+      "edit": "編集",
+      "history": "履歴",
+      "refresh": "更新",
+      "restore": "復元"
     }
   }
 }

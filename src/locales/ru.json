@@ -1321,6 +1321,15 @@
             "match_details": "",
             "placeholder": "",
             "title": ""
+        },
+        "row_actions": {
+            "change_avatar": "Сменить аватар",
+            "change_password": "Сменить пароль",
+            "delete": "Удалить",
+            "edit": "Редактировать",
+            "history": "История",
+            "refresh": "Обновить",
+            "restore": "Восстановить"
         }
     }
 }

@@ -1642,6 +1642,15 @@
         "created_at": "생성 날짜",
         "updated_at": "업데이트 날짜"
       }
+    },
+    "row_actions": {
+      "change_avatar": "아바타 변경",
+      "change_password": "비밀번호 변경",
+      "delete": "삭제",
+      "edit": "편집",
+      "history": "기록",
+      "refresh": "새로 고침",
+      "restore": "복원"
     }
   }
 }
