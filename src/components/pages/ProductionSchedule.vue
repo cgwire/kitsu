@@ -39,6 +39,7 @@
         :zoom-level="zoomLevel"
         :is-loading="loading.schedule"
         :is-error="errors.schedule"
+        is-estimation-linked
         hide-man-days
         :multiline="isTVShow"
         :subchildren="!isTVShow"
@@ -762,6 +763,10 @@ export default {
                         }
                 }
 
+                task.editable = true
+                task.unresizable = false
+                task.parentElement = entityTypeItem
+
                 tasksByType[task.entity_type_id][assigneeId].push(task)
               })
             })
@@ -856,7 +861,60 @@ export default {
         : items.filter(item => !item.assigned)
     },
 
+    saveTaskChanged(task) {
+      return this.updateTask({
+        taskId: task.id,
+        data: {
+          estimation: task.estimation,
+          start_date: task.startDate.format('YYYY-MM-DD'),
+          due_date: task.endDate.format('YYYY-MM-DD')
+        }
+      })
+    },
+
     onScheduleItemChanged(item) {
+      if (item.type === 'Task') {
+        // update dates with weekends and days off
+        const daysOff = item.assignees
+          .flatMap(assigneeId => this.daysOffByPerson[assigneeId])
+          .filter(Boolean)
+        item.startDate = addBusinessDays(item.startDate, 0, daysOff)
+        item.endDate = addBusinessDays(
+          item.startDate,
+          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
+          daysOff
+        )
+        // update parents
+        if (item.startDate.isBefore(item.parentElement.startDate)) {
+          item.parentElement.startDate = item.startDate.clone()
+          this.updateScheduleItem(item.parentElement)
+          if (
+            item.parentElement.startDate.isBefore(
+              item.parentElement.parentElement.startDate
+            )
+          ) {
+            item.parentElement.parentElement.startDate =
+              item.parentElement.startDate.clone()
+            this.updateScheduleItem(item.parentElement.parentElement)
+          }
+        }
+        if (item.endDate.isAfter(item.parentElement.endDate)) {
+          item.parentElement.endDate = item.endDate.clone()
+          this.updateScheduleItem(item.parentElement)
+          if (
+            item.parentElement.endDate.isAfter(
+              item.parentElement.parentElement.endDate
+            )
+          ) {
+            item.parentElement.parentElement.endDate =
+              item.parentElement.endDate.clone()
+            this.updateScheduleItem(item.parentElement.parentElement)
+          }
+        }
+        this.saveTaskChanged(item)
+        return
+      }
+
       if (item.startDate && item.endDate && item.parentElement) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
@@ -872,7 +930,10 @@ export default {
         }
       }
 
-      // update schedule item
+      this.updateScheduleItem(item)
+    },
+
+    updateScheduleItem(item) {
       const scheduleItem = this.scheduleItems.find(
         scheduleItem => scheduleItem === item
       )
@@ -882,7 +943,6 @@ export default {
         scheduleItem.endDate = item.endDate
         scheduleItem.end_date = item.endDate.format('YYYY-MM-DD')
       }
-
       this.saveScheduleItem(item)
     },
 
