@@ -219,6 +219,8 @@ import { grabListMixin } from '@/components/mixins/grablist'
 
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
 
+import preferences from '@/lib/preferences'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -293,7 +295,9 @@ export default {
   },
 
   mounted() {
+    const key = `budget:collapsed-departments-${this.currentProduction.id}`
     this.addEvents(this.domEvents)
+    this.collapsedDepartments = preferences.getObjectPreference(key) || {}
   },
 
   beforeUnmount() {
@@ -302,7 +306,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['departmentMap', 'personMap'])
+    ...mapGetters(['currentProduction', 'departmentMap', 'personMap'])
   },
 
   methods: {
@@ -311,6 +315,9 @@ export default {
     toggleDepartment(departmentId) {
       this.collapsedDepartments[departmentId] =
         !this.collapsedDepartments[departmentId]
+
+      const key = `budget:collapsed-departments-${this.currentProduction.id}`
+      preferences.setObjectPreference(key, this.collapsedDepartments)
     },
 
     getDepartmentStyle(departmentId, opacity) {
