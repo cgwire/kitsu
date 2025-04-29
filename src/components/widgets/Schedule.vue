@@ -541,12 +541,43 @@
                       </div>
                       <div
                         class="timebar"
+                        :class="{ selected: isSelected(task) }"
                         :key="index"
                         :style="timebarSubchildStyle(task, rootElement)"
                         :title="timebarSubchildTitle(task)"
                         v-for="(task, index) in subchild"
                       >
-                        {{ task.entity.name }}
+                        <div
+                          class="timebar-left-hand"
+                          @mousedown="moveTimebarLeftSide(task, $event)"
+                          @touchstart="moveTimebarLeftSide(task, $event)"
+                          v-if="
+                            !isChangeDates &&
+                            selection.length === 1 &&
+                            isSelected(task) &&
+                            task.editable &&
+                            !task.unresizable
+                          "
+                        ></div>
+                        <div
+                          class="timebar-center ellipsis"
+                          @mousedown="moveTimebar(task, $event)"
+                          @touchstart="moveTimebar(task, $event)"
+                        >
+                          {{ task.entity.name }}
+                        </div>
+                        <div
+                          class="timebar-right-hand"
+                          @mousedown="moveTimebarRightSide(task, $event)"
+                          @touchstart="moveTimebarRightSide(task, $event)"
+                          v-if="
+                            !isChangeDates &&
+                            selection.length === 1 &&
+                            isSelected(task) &&
+                            task.editable &&
+                            !task.unresizable
+                          "
+                        ></div>
                       </div>
                     </div>
                   </div>
@@ -1021,7 +1052,9 @@ export default {
     },
 
     refreshItemPositions(rootElement) {
-      if (!rootElement?.children?.length) return
+      if (!rootElement?.children) {
+        return
+      }
 
       if (this.multiline) {
         setItemPositions(rootElement.children, this.unitOfTime)
@@ -1029,9 +1062,13 @@ export default {
 
       if (this.subchildren) {
         rootElement.children.forEach(childElement => {
-          childElement.children.forEach(subchildElement => {
-            setItemPositions(subchildElement, this.unitOfTime)
-          })
+          if (childElement.children) {
+            childElement.children.forEach(subchildElement => {
+              setItemPositions(subchildElement, this.unitOfTime)
+            })
+          } else {
+            setItemPositions(childElement, this.unitOfTime)
+          }
         })
       }
     },
@@ -1220,7 +1257,7 @@ export default {
               item.startDate.add(dateDiff)
               item.endDate.add(dateDiff)
             })
-            if (this.multiline) {
+            if (this.multiline || this.subchildren) {
               const parentElements = [
                 ...new Set(this.selection.map(item => item.parentElement))
               ]
@@ -1692,6 +1729,8 @@ export default {
     },
 
     timebarSubchildStyle(timeElement, rootElement) {
+      const color = timeElement.color || rootElement.color
+      const isSelected = this.isSelected(timeElement)
       return {
         left: `${this.getTimebarLeft(timeElement)}px`,
         width: `${this.getTimebarWidth(timeElement)}px`,
@@ -1701,8 +1740,8 @@ export default {
             : 'ew-resize'
           : 'default',
         top: `${5 + 38 * timeElement.line}px`,
-        background: `color-mix(in srgb, ${timeElement.color || rootElement.color} 40%, transparent)`,
-        'box-shadow': `inset 0 0 1px 2px ${timeElement.color || rootElement.color}`
+        background: `color-mix(in srgb, ${color} ${isSelected ? 80 : 40}%, transparent)`,
+        'box-shadow': `inset 0 0 1px 2px ${isSelected ? 'var(--background-selected)' : color}`
       }
     },
 
@@ -1991,6 +2030,9 @@ export default {
  * @returns {Array<Object>} The list of items with updated positions.
  */
 const setItemPositions = (items, unitOfTime = 'days') => {
+  if (!items?.length) {
+    return
+  }
   const attributeName = 'line'
   const matrix = []
   const minDate = moment
@@ -2393,11 +2435,6 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           line-height: 34px;
           font-size: 12px;
           padding: 0 5px;
-
-          // ellipsis
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
           white-space: nowrap;
         }
 

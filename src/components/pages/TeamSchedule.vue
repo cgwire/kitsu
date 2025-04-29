@@ -608,6 +608,11 @@ export default {
 
     async onScheduleItemChanged(item) {
       if (item.type === 'Task') {
+        item.startDate = addBusinessDays(
+          item.startDate,
+          0,
+          item.parentElement.daysOff
+        )
         if (item.estimation) {
           item.endDate = addBusinessDays(
             item.startDate,
