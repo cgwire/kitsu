@@ -210,7 +210,8 @@ export default {
           monthCosts: {},
           total: 0,
           duration: 0,
-          persons: []
+          persons: [],
+          start_date: null
         }
         departmentEntries.forEach(entry => {
           const monthlySalary = entry.daily_salary * 20
@@ -231,10 +232,27 @@ export default {
             months_duration: entry.months_duration,
             start_date: entry.start_date
           })
+          const startDate = moment(entry.start_date)
+          const departmentStartDate = moment(departmentData.start_date)
+          if (
+            !departmentData.start_date ||
+            startDate.isBefore(departmentStartDate)
+          ) {
+            departmentData.start_date = entry.start_date
+          }
           departmentData.persons.sort(this.sortDepartmentPersons)
         })
         helpers.resetDepartmentTotals(departmentData)
         budgetDepartments.push(departmentData)
+      })
+      budgetDepartments.sort((a, b) => {
+        if (a.start_date === b.start_date) {
+          const departmentA = this.departmentMap.get(a.id)
+          const departmentB = this.departmentMap.get(b.id)
+          return departmentA.name.localeCompare(departmentB.name)
+        } else {
+          return moment(a.start_date).isBefore(b.start_date) ? -1 : 1
+        }
       })
       return budgetDepartments
     },
@@ -274,7 +292,7 @@ export default {
       return this.monthsBetweenProductionDates.map(monthDate => {
         const monthKey = monthDate.format('YYYY-MM')
         const [year, month] = monthKey.split('-')
-        const label = month === '01' ? `${year.slice(2)}/${month}` : month
+        const label = `${month}/${year.slice(2)}`
         return [label, this.totalEntry.monthCosts[monthKey] || 0]
       })
     }
@@ -428,6 +446,7 @@ export default {
     },
 
     onAddBudgetEntry() {
+      this.budgetEntryToEdit = {}
       this.modals.createBudgetEntry = true
     },
 
