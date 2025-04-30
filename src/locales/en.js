@@ -1818,5 +1818,15 @@ export default {
   wrong_browser: {
     title: 'Your Browser is Not Supported by Kitsu',
     text: 'Kitsu can only be used with Firefox and Chrome browsers.'
-  }
+  },
+
+  row_actions: {
+    change_avatar: 'Change avatar',
+    change_password: 'Change password',
+    delete: 'Delete',
+    edit: "Edit",
+    history: 'History',
+    refresh: 'Refresh',
+    restore: 'Restore'
+  }  
 }
