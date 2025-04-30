@@ -1818,5 +1818,5 @@ export default {
   wrong_browser: {
     title: 'Your Browser is Not Supported by Kitsu',
     text: 'Kitsu can only be used with Firefox and Chrome browsers.'
-  }  
+  }
 }
