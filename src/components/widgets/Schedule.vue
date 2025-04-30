@@ -1632,7 +1632,8 @@ export default {
 
     dayOffStyle(dayOff) {
       return {
-        left: `${this.getDayOffLeft(dayOff)}px`
+        left: `${this.getDayOffLeft(dayOff)}px`,
+        width: `${this.cellWidth - 1}px`
       }
     },
 
@@ -2798,8 +2799,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 
   .day-off-icon {
     position: absolute;
-    left: 3px;
+    left: 0;
     top: 15px;
+    width: 100%;
     z-index: 100;
   }
 }
