@@ -17,14 +17,10 @@
         v-if="!minimized"
       >
         <template v-if="task">
-          <span
-            class="tag"
-            :title="taskStatus.name"
-            :style="tagStyle"
-          >
+          <span class="tag" :title="taskStatus.name" :style="tagStyle">
             {{ taskStatus.short_name }}
           </span>
-          <span class="filler" v-if="contactSheet"> </span>
+          <span class="filler" v-if="contactSheet"></span>
           <span
             :class="{
               priority: true,
@@ -254,7 +250,7 @@ export default {
         height: '100px',
         width: '150px',
         display: 'flex',
-        'flex-direction': this.contactSheet ? 'column' : 'row',
+        'flex-direction': this.contactSheet ? 'column' : 'row'
       }
     },
 
@@ -341,6 +337,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   position: relative;
+  width: 100%;
 }
 
 .full-wrapper {
