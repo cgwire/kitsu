@@ -956,7 +956,8 @@ export default {
         .sort((a, b) => b.revision - a.revision)
         .map(preview => ({
           value: preview.id,
-          label: `v${preview.revision}`
+          label: `v${preview.revision}`,
+          validation_status: preview.validation_status
         }))
     },
 
