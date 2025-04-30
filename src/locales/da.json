@@ -1642,15 +1642,6 @@
         "created_at": "Dato for oprettelse",
         "updated_at": "Dato for opdatering"
       }
-    },
-    "row_actions": {
-      "change_avatar": "Skift avatar",
-      "change_password": "Skift adgangskode",
-      "delete": "Slet",
-      "edit": "Rediger",
-      "history": "Historik",
-      "refresh": "Opdater",
-      "restore": "Gendan"
     }
   }
 }

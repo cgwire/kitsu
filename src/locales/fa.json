@@ -1642,15 +1642,6 @@
         "created_at": "",
         "updated_at": ""
       }
-    },
-    "row_actions": {
-      "change_avatar": "تغییر آواتار",
-      "change_password": "تغییر رمز عبور",
-      "delete": "حذف",
-      "edit": "ویرایش",
-      "history": "تاریخچه",
-      "refresh": "تازه‌سازی",
-      "restore": "بازیابی"
     }
   }
 }

@@ -1642,15 +1642,6 @@
         "created_at": "创建日期",
         "updated_at": "更新日期"
       }
-    },
-    "row_actions": {
-      "change_avatar": "更改头像",
-      "change_password": "更改密码",
-      "delete": "删除",
-      "edit": "编辑",
-      "history": "历史",
-      "refresh": "刷新",
-      "restore": "恢复"
     }
   }
 }
