@@ -25,7 +25,7 @@
         </div>
         <span
           class="preview-status"
-          :title="Validated"
+          :title="$t('tasks.validated')"
           v-if="selectedOption?.validation_status === 'validated'"
         ></span>
         <chevron-down-icon class="down-icon flexrow-item" />
@@ -54,7 +54,7 @@
           </span>
           <span
             class="preview-status"
-            :title="Validated"
+            :title="$t('tasks.validated')"
             v-if="option.validation_status === 'validated'"
           ></span>
         </div>
