@@ -770,14 +770,6 @@ export default {
   },
 
   watch: {
-    $route() {
-      const assetId = this.route.params.asset_id
-      if (this.currentAsset && this.currentAsset.id !== assetId) {
-        this.init()
-      }
-      this.currentSection = this.route.query.section || 'infos'
-    },
-
     currentSection() {
       if (this.currentSection === 'schedule' && this.scheduleItems.length > 0) {
         if (this.$refs['schedule-widget']) {
