@@ -197,9 +197,16 @@
                   </div>
                 </div>
               </template>
-              <div v-else>
-                {{ $t('assets.no_cast_in') }}
-              </div>
+            </div>
+            <div
+              class="mt1"
+              v-if="
+                currentAsset &&
+                currentAsset.castingAssetsByType &&
+                currentAsset.castingAssetsByType[0]?.length === 0
+              "
+            >
+              {{ $t('assets.no_cast_in') }}
             </div>
           </div>
           <table-info
