@@ -2,6 +2,7 @@
   <td class="actions has-text-right">
     <button
       class="button"
+      :title="$t('row_actions.history')"
       data-test="button-history"
       tabindex="-1"
       @click="$emit('history-clicked')"
@@ -12,6 +13,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.edit')"
       data-test="button-edit"
       tabindex="-1"
       @click="$emit('edit-clicked')"
@@ -22,6 +24,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.change_avatar')"
       data-test="button-avatar"
       tabindex="-1"
       @click="$emit('avatar-clicked')"
@@ -32,6 +35,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.change_password')"
       data-test="button-change-password"
       tabindex="-1"
       @click="$emit('change-password-clicked')"
@@ -42,6 +46,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.restore')"
       data-test="button-restore"
       tabindex="-1"
       @click="$emit('restore-clicked')"
@@ -52,6 +57,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.delete')"
       data-test="button-delete-admin"
       tabindex="-1"
       @click="$emit('delete-clicked')"
@@ -62,6 +68,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.delete')"
       data-test="button-delete"
       tabindex="-1"
       @click="$emit('delete-clicked')"
@@ -72,6 +79,7 @@
 
     <button
       class="button"
+      :title="$t('row_actions.refresh')"
       data-test="button-refresh"
       tabindex="-1"
       @click="$emit('refresh-clicked')"
