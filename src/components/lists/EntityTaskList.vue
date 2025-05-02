@@ -293,6 +293,10 @@ export default {
 .data-list {
   max-width: 500px;
   margin-top: 0;
+
+  .dark & {
+    border: 0;
+  }
 }
 
 .type {
