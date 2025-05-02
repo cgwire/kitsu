@@ -2093,6 +2093,8 @@ export default {
     },
 
     configureWaveForm() {
+      const element = document.getElementById('waveform')
+      if (!element) return
       try {
         this.wavesurfer = WaveSurfer.create({
           container: '#waveform',
@@ -2111,7 +2113,7 @@ export default {
     },
 
     loadWaveForm() {
-      if (this.isWaveformDisplayed) {
+      if (this.isWaveformDisplayed && this.isCurrentPreviewMovie) {
         this.wavesurfer.load(this.rawPlayer.currentPlayer)
       }
     },
