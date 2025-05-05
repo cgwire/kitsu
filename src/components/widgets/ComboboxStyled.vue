@@ -17,12 +17,17 @@
       <div class="flexrow" :title="selectedOptionLabel">
         <slot name="icon"></slot>
         <div
-          class="selected-line flexrow-item"
+          class="selected-line mr05"
           :class="{ placeholder: selectedOption?.placeholder }"
           v-if="!isCompact"
         >
           {{ selectedOptionLabel }}
         </div>
+        <span
+          class="preview-status"
+          :title="$t('tasks.validated')"
+          v-if="selectedOption?.validation_status === 'validated'"
+        ></span>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
       <div class="select-input" v-if="showList">
@@ -44,7 +49,14 @@
             no-preview
             v-if="isPreview"
           />
-          {{ option.optionLabel ?? getOptionLabel(option) }}
+          <span class="filler">
+            {{ option.optionLabel ?? getOptionLabel(option) }}
+          </span>
+          <span
+            class="preview-status"
+            :title="$t('tasks.validated')"
+            v-if="option.validation_status === 'validated'"
+          ></span>
         </div>
       </div>
     </div>
@@ -310,7 +322,7 @@ export default {
   z-index: 2000;
 
   .option-line {
-    padding-right: 27px;
+    padding-right: 0.4em;
     white-space: nowrap;
   }
 }
@@ -335,6 +347,15 @@ export default {
   .select-input {
     top: 29px;
   }
+}
+
+.preview-status {
+  background: $light-green;
+  border-radius: 50%;
+  height: 8px;
+  min-width: 8px;
+  width: 8px;
+  margin-right: 0.5em;
 }
 
 .reversed {
