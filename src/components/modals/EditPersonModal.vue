@@ -54,20 +54,20 @@
           :options="positionOptions"
           locale-key-prefix="people.position."
           v-model="form.position"
-          v-if="isCurrentUserAdmin"
+          v-if="isCurrentUserAdmin && !isBot"
         />
         <combobox
           :label="$t('people.fields.seniority')"
           :options="seniorityOptions"
           locale-key-prefix="people.seniority."
           v-model="form.seniority"
-          v-if="isCurrentUserAdmin"
+          v-if="isCurrentUserAdmin && !isBot"
         />
         <text-field
           type="number"
           :label="$t('people.fields.daily_salary')"
           v-model="form.daily_salary"
-          v-if="isCurrentUserAdmin"
+          v-if="isCurrentUserAdmin && !isBot"
         />
         <combobox
           :label="$t('people.fields.contract')"

@@ -28,13 +28,13 @@
             <th scope="col" class="contract" v-if="!isBots">
               {{ $t('people.list.contract') }}
             </th>
-            <th scope="col" class="position">
+            <th scope="col" class="position" v-if="!isBots">
               {{ $t('people.list.position') }}
             </th>
-            <th scope="col" class="seniority">
+            <th scope="col" class="seniority" v-if="!isBots">
               {{ $t('people.list.seniority') }}
             </th>
-            <th scope="col" class="salary">
+            <th scope="col" class="salary" v-if="!isBots">
               {{ $t('people.fields.daily_salary') }}
             </th>
             <th scope="col" class="actions"></th>
@@ -75,19 +75,21 @@
             <td class="contract" v-if="!isBots">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
-            <td class="position">
+            <td class="position" v-if="!isBots">
               {{
                 person.position ? $t(`people.position.${person.position}`) : ''
               }}
             </td>
-            <td class="seniority">
+            <td class="seniority" v-if="!isBots">
               {{
                 person.seniority
                   ? $t(`people.seniority.${person.seniority}`)
                   : ''
               }}
             </td>
-            <td class="salary">{{ person.daily_salary }}</td>
+            <td class="salary" v-if="!isBots">
+              {{ person.daily_salary }}
+            </td>
             <row-actions-cell
               :entry-id="person.id"
               :hide-avatar="!person.active"
