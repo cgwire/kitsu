@@ -96,6 +96,10 @@ export default {
     ]),
 
     onAssignation(eventData, assign = true) {
+      if (this.currentProduction?.id !== eventData.project_id) {
+        return
+      }
+
       const personId = eventData.person_id
       const selectedTaskIds = [eventData.task_id]
 

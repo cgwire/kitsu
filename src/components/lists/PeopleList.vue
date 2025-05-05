@@ -28,13 +28,13 @@
             <th scope="col" class="contract" v-if="!isBots">
               {{ $t('people.list.contract') }}
             </th>
-            <th scope="col" class="position">
+            <th scope="col" class="position" v-if="!isBots">
               {{ $t('people.list.position') }}
             </th>
-            <th scope="col" class="seniority">
+            <th scope="col" class="seniority" v-if="!isBots">
               {{ $t('people.list.seniority') }}
             </th>
-            <th scope="col" class="salary">
+            <th scope="col" class="salary" v-if="!isBots">
               {{ $t('people.fields.daily_salary') }}
             </th>
             <th scope="col" class="actions"></th>
@@ -75,19 +75,21 @@
             <td class="contract" v-if="!isBots">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
-            <td class="seniority">
+            <td class="position" v-if="!isBots">
+              {{
+                person.position ? $t(`people.position.${person.position}`) : ''
+              }}
+            </td>
+            <td class="seniority" v-if="!isBots">
               {{
                 person.seniority
                   ? $t(`people.seniority.${person.seniority}`)
                   : ''
               }}
             </td>
-            <td class="position">
-              {{
-                person.position ? $t(`people.position.${person.position}`) : ''
-              }}
+            <td class="salary" v-if="!isBots">
+              {{ person.daily_salary }}
             </td>
-            <td class="salary">{{ person.daily_salary }}</td>
             <row-actions-cell
               :entry-id="person.id"
               :hide-avatar="!person.active"
@@ -196,10 +198,6 @@ export default {
   computed: {
     ...mapGetters(['isCurrentUserAdmin']),
 
-    activePeople() {
-      return this.entries.filter(person => person.active)
-    },
-
     today() {
       return new Date().toJSON().slice(0, 10)
     },
@@ -208,10 +206,6 @@ export default {
       const date = new Date()
       date.setDate(date.getDate() + 7)
       return date.toJSON().slice(0, 10)
-    },
-
-    inactivePeople() {
-      return this.entries.filter(person => !person.active)
     },
 
     nbUsersDetails() {
@@ -284,11 +278,6 @@ export default {
   min-width: 180px;
 }
 
-.contract {
-  width: 160px;
-  min-width: 160px;
-}
-
 .departments {
   width: 180px;
   min-width: 180px;
@@ -303,7 +292,23 @@ export default {
   min-width: 180px;
 }
 
+.contract {
+  width: 160px;
+  min-width: 160px;
+}
+
+.position {
+  width: 160px;
+  min-width: 160px;
+}
+
+.seniority {
+  width: 160px;
+  min-width: 160px;
+}
+
 .salary {
+  width: 100px;
   max-width: 100px;
   text-align: right;
 }

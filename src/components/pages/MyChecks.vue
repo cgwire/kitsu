@@ -316,13 +316,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'clearSelectedTasks',
-      'loadTasksToCheck',
-      'removeTodoSearch',
-      'saveTodoSearch',
-      'setTodosSearch'
-    ]),
+    ...mapActions(['clearSelectedTasks', 'loadTasksToCheck']),
 
     buildSelectionGrid(tasks) {
       this.selectionGrid = buildSelectionGrid(tasks.length, 1)
@@ -380,14 +374,6 @@ export default {
           short_name: this.$t('news.all')
         }
       ].concat(sortByName(taskStatusList))
-    }
-  },
-
-  socket: {
-    events: {
-      'task:assign'(eventData) {},
-
-      'task:unassign'(eventData) {}
     }
   },
 
