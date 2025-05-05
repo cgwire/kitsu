@@ -196,10 +196,6 @@ export default {
   computed: {
     ...mapGetters(['isCurrentUserAdmin']),
 
-    activePeople() {
-      return this.entries.filter(person => person.active)
-    },
-
     today() {
       return new Date().toJSON().slice(0, 10)
     },
@@ -208,10 +204,6 @@ export default {
       const date = new Date()
       date.setDate(date.getDate() + 7)
       return date.toJSON().slice(0, 10)
-    },
-
-    inactivePeople() {
-      return this.entries.filter(person => !person.active)
     },
 
     nbUsersDetails() {
