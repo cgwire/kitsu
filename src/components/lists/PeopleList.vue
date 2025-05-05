@@ -244,20 +244,20 @@ export default {
 }
 
 .email {
-  width: 340px;
-  min-width: 340px;
+  width: 300px;
+  min-width: 300px;
   user-select: text;
 }
 
 .phone {
-  width: 200px;
-  min-width: 200px;
+  width: 140px;
+  min-width: 140px;
   user-select: text;
 }
 
 .expiration {
-  width: 200px;
-  min-width: 200px;
+  width: 150px;
+  min-width: 150px;
 
   .icon {
     display: none;
@@ -280,8 +280,8 @@ export default {
 }
 
 .role {
-  width: 200px;
-  min-width: 200px;
+  width: 180px;
+  min-width: 180px;
 }
 
 .contract {
@@ -290,8 +290,8 @@ export default {
 }
 
 .departments {
-  width: 200px;
-  min-width: 200px;
+  width: 180px;
+  min-width: 180px;
 
   .departments-element {
     padding: 5px;
@@ -299,16 +299,16 @@ export default {
 }
 
 .studio {
-  min-width: 200px;
+  width: 180px;
+  min-width: 180px;
 }
 
 .salary {
   max-width: 100px;
-  padding-right: 1.5rem;
   text-align: right;
 }
 
 .actions {
-  min-width: 200px;
+  min-width: 150px;
 }
 </style>
