@@ -83,54 +83,52 @@
           </template>
         </div>
 
-        <div class="flexrow infos" v-show="currentSection === 'infos'">
-          <div class="flexrow-item flexcolumn entity-infos">
-            <page-subtitle :text="$t('main.tasks')" />
-            <entity-task-list
-              class="task-list"
-              :entries="localTasks"
-              :is-loading="!currentAsset"
-              :is-error="false"
-              @task-selected="onTaskSelected"
-            />
-            <div class="flexrow">
-              <page-subtitle :text="$t('main.info')" />
-              <div class="filler"></div>
-              <div class="flexrow-item has-text-right">
-                <button-simple
-                  icon="edit"
-                  @click="modals.edit = true"
-                  v-if="isCurrentUserManager"
-                />
-              </div>
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
+          <page-subtitle :text="$t('main.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="localTasks"
+            :is-loading="!currentAsset"
+            :is-error="false"
+            @task-selected="onTaskSelected"
+          />
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
             </div>
+          </div>
 
-            <div class="table-body">
-              <table class="datatable no-header" v-if="currentAsset">
-                <tbody class="table-body">
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('assets.fields.description') }}
-                    </td>
-                    <description-cell :entry="currentAsset" :full="true" />
-                  </tr>
-                  <tr
-                    :key="descriptor.id"
-                    class="datatable-row"
-                    v-for="descriptor in assetMetadataDescriptors"
-                  >
-                    <td class="field-label">{{ descriptor.name }}</td>
-                    <td>
-                      {{
-                        currentAsset.data
-                          ? currentAsset.data[descriptor.field_name]
-                          : ''
-                      }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div class="table-body metadata-infos">
+            <table class="datatable no-header" v-if="currentAsset">
+              <tbody class="table-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('assets.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentAsset" :full="true" />
+                </tr>
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in assetMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    {{
+                      currentAsset.data
+                        ? currentAsset.data[descriptor.field_name]
+                        : ''
+                    }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -197,9 +195,16 @@
                   </div>
                 </div>
               </template>
-              <div v-else>
-                {{ $t('assets.no_cast_in') }}
-              </div>
+            </div>
+            <div
+              class="mt1"
+              v-if="
+                currentAsset &&
+                currentAsset.castingAssetsByType &&
+                currentAsset.castingAssetsByType[0]?.length === 0
+              "
+            >
+              {{ $t('assets.no_cast_in') }}
             </div>
           </div>
           <table-info
@@ -770,14 +775,6 @@ export default {
   },
 
   watch: {
-    $route() {
-      const assetId = this.route.params.asset_id
-      if (this.currentAsset && this.currentAsset.id !== assetId) {
-        this.init()
-      }
-      this.currentSection = this.route.query.section || 'infos'
-    },
-
     currentSection() {
       if (this.currentSection === 'schedule' && this.scheduleItems.length > 0) {
         if (this.$refs['schedule-widget']) {
@@ -811,7 +808,6 @@ export default {
     padding-bottom: 1em;
   }
 
-  .task-list,
   .table-body {
     border: 1px solid $dark-grey;
   }
@@ -933,10 +929,10 @@ h2.subtitle {
 }
 
 .task-list {
-  flex: unset;
+  flex: 1;
   margin-bottom: 3em;
   min-width: 100%;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .datatable-row {
@@ -1013,14 +1009,15 @@ h2.subtitle {
 }
 
 .infos {
+  height: 100%;
   margin-top: 1em;
   margin-bottom: 1em;
   max-height: 100%;
   overflow-y: auto;
 
-  .entity-infos {
-    align-self: flex-start;
-    flex: 1.5;
+  .metadata-infos {
+    flex: unset;
+    overflow: auto;
   }
 }
 

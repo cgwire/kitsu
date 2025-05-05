@@ -224,7 +224,7 @@ export const entityMixin = {
       const entityId = this.route.params[`${this.type}_id`]
       const currentEntity =
         this[`current${stringHelpers.capitalize(this.type)}`]
-      if (currentEntity && currentEntity !== entityId) {
+      if (currentEntity && currentEntity.id !== entityId) {
         this.init()
       }
       this.currentSection = this.route.query.section || 'infos'

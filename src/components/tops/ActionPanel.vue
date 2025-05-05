@@ -1311,7 +1311,7 @@ export default {
 
     clearAllAssignations() {
       this.loading.assignation = true
-      return this.unassignSelectedTasks()
+      return this.unassignSelectedTasks({})
         .then(() => {
           this.loading.assignation = false
         })

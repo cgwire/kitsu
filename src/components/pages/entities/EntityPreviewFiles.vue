@@ -1,7 +1,6 @@
 <template>
   <div class="mt1 flexcolumn wrapper preview-files">
     <div class="buttons flexrow mb1">
-      <span class="filler"></span>
       <button-simple
         class="flexrow-item"
         icon="grid"
@@ -317,6 +316,7 @@ td.type {
 }
 
 .preview-files {
+  margin-top: 0;
   flex: 1;
 }
 
