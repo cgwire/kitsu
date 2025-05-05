@@ -250,8 +250,8 @@ export default {
 }
 
 .phone {
-  width: 140px;
-  min-width: 140px;
+  width: 160px;
+  min-width: 160px;
   user-select: text;
 }
 
