@@ -75,16 +75,16 @@
             <td class="contract" v-if="!isBots">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
+            <td class="position">
+              {{
+                person.position ? $t(`people.position.${person.position}`) : ''
+              }}
+            </td>
             <td class="seniority">
               {{
                 person.seniority
                   ? $t(`people.seniority.${person.seniority}`)
                   : ''
-              }}
-            </td>
-            <td class="position">
-              {{
-                person.position ? $t(`people.position.${person.position}`) : ''
               }}
             </td>
             <td class="salary">{{ person.daily_salary }}</td>
@@ -284,11 +284,6 @@ export default {
   min-width: 180px;
 }
 
-.contract {
-  width: 160px;
-  min-width: 160px;
-}
-
 .departments {
   width: 180px;
   min-width: 180px;
@@ -303,7 +298,23 @@ export default {
   min-width: 180px;
 }
 
+.contract {
+  width: 160px;
+  min-width: 160px;
+}
+
+.position {
+  width: 160px;
+  min-width: 160px;
+}
+
+.seniority {
+  width: 160px;
+  min-width: 160px;
+}
+
 .salary {
+  width: 100px;
   max-width: 100px;
   text-align: right;
 }
