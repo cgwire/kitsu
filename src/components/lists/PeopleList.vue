@@ -256,8 +256,8 @@ export default {
 }
 
 .expiration {
-  width: 150px;
-  min-width: 150px;
+  width: 160px;
+  min-width: 160px;
 
   .icon {
     display: none;
