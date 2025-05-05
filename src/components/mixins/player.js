@@ -817,6 +817,7 @@ export const playerMixin = {
         this.pauseClicked()
         const annotation = this.getAnnotation(this.rawPlayer.getCurrentTime())
         if (annotation) this.loadAnnotation(annotation)
+        this.updateRoomStatus()
       }
     },
 
@@ -1116,8 +1117,6 @@ export const playerMixin = {
       )
       this.currentTime = this.formatTime(this.currentTimeRaw, this.fps)
       this.updateProgressBar()
-      const actions = this.onNextTimeUpdateActions
-      actions.forEach(action => action())
       if (this.isShowAnnotationsWhilePlaying) {
         const annotation = this.getAnnotation(this.currentTimeRaw)
         if (annotation) {
@@ -1141,7 +1140,11 @@ export const playerMixin = {
           this.onPlayNext()
         }
       }
-      this.onNextTimeUpdateActions = []
+      this.$nextTick(() => {
+        const actions = this.onNextTimeUpdateActions
+        actions.forEach(action => action())
+        this.onNextTimeUpdateActions = []
+      })
     },
 
     onMaxDurationUpdate(duration) {
