@@ -195,7 +195,7 @@ export default {
       this.refreshKeys.endMonth
       const startDate = parseSimpleDate(this.form.start_date)
       const projectEndDate = parseSimpleDate(this.currentProduction.end_date)
-      let endDate = startDate.add('months', this.form.months_duration)
+      let endDate = startDate.add(this.form.months_duration, 'months')
       endDate = moment.min(endDate, projectEndDate)
       return endDate.format('YYYY-MM')
     },
