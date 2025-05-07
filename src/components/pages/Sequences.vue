@@ -565,7 +565,6 @@ export default {
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
-        description: entry.description,
         [fieldName]: value
       }
       await this.editSequence(data)
