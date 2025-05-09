@@ -623,7 +623,7 @@ export default {
         try {
           taskTypeElement.loading = true
 
-          this.selectedTaskType = taskTypeElement
+          this.selectedTaskType = !this.isTVShow ? taskTypeElement : null
           this.assignments.loading = resetAssignments
 
           taskTypeElement.children = []
@@ -1017,6 +1017,10 @@ export default {
       selectedEntityType = undefined,
       resetAssignments = true
     ) {
+      if (this.isTVShow) {
+        return
+      }
+
       this.selectedTaskType = taskType
 
       if (resetAssignments) {
@@ -1100,7 +1104,7 @@ export default {
     },
 
     closeSidePanel() {
-      this.selectedTaskType = undefined
+      this.selectedTaskType = null
       this.resetSidePanel()
     },
 
