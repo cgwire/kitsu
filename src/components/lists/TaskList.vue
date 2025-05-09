@@ -151,9 +151,9 @@
                 @change="updateNbDrawings($event.target.value)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ task.nb_drawings || 0 }}
-              </span>
+              </template>
             </td>
             <td class="difficulty number-cell">
               <combobox
@@ -186,9 +186,9 @@
                 @change="updateEstimation($event.target.value)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDuration(task.estimation) }}
-              </span>
+              </template>
             </td>
             <td
               :class="{
@@ -200,9 +200,9 @@
               {{ formatDuration(task.duration) }}
             </td>
             <td class="retake-count number-cell">
-              <span v-for="index in task.retake_count" :key="index">
+              <template v-for="index in task.retake_count" :key="index">
                 &bull;
-              </span>
+              </template>
             </td>
             <td class="start-date">
               <date-field
@@ -213,9 +213,9 @@
                 @update:model-value="updateStartDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDate(task.start_date) }}
-              </span>
+              </template>
             </td>
             <td class="due-date">
               <date-field
@@ -226,9 +226,9 @@
                 @update:model-value="updateDueDate"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
-              <span v-else>
+              <template v-else>
                 {{ formatDate(task.due_date) }}
-              </span>
+              </template>
             </td>
             <td class="real-start-date">
               {{ formatDate(task.real_start_date) }}
