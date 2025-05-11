@@ -830,6 +830,15 @@ const mutations = {
       const copyNewEdit = { ...newEdit }
       copyNewEdit.data = { ...edit.data, ...newEdit.data }
       Object.assign(edit, copyNewEdit)
+
+      // Search for the edit in the displayed edits from state
+      // matching updated edit.id with state edit.id to replace with new edit values
+      state.displayedEdits = state.displayedEdits.map(stateEdit => {
+        if (stateEdit.id === newEdit.id) {
+          return { ...edit }
+        }
+        return stateEdit
+      })
     } else {
       cache.edits.push(newEdit)
       cache.edits = sortEdits(cache.edits)

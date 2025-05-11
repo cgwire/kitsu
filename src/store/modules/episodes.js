@@ -727,6 +727,12 @@ const mutations = {
     cache.episodes.push(episode)
     cache.episodes = sortByName(cache.episodes)
     state.displayedEpisodes = cache.episodes
+
+    // The line below is necessary to avoid an error in the case
+    // where a modification is made to an episode that has just been created.
+    // Otherwise, in EDIT_EPISODE_END, state.episodes.find returns undefined
+    state.episodes = cache.episodes
+
     helpers.setListStats(state, cache.episodes)
     cache.episodeMap.set(episode.id, episode)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
@@ -739,6 +745,15 @@ const mutations = {
     if (episode) {
       Object.assign(episode, newEpisode)
       Object.assign(episodeFromMain, newEpisode)
+
+      // Search for the episode in the displayed episodes from state
+      // matching updated episode.id with state episode.id to replace with new episode values
+      state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
+        if (stateEpisode.id === newEpisode.id) {
+          return { ...episode }
+        }
+        return stateEpisode
+      })
     }
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {
