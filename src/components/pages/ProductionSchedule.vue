@@ -1023,8 +1023,16 @@ export default {
         this.resetSidePanel()
       }
 
-      // load entity types
       this.assignments.loading = true
+
+      // load tasks
+      const tasks = await this.loadTasks({
+        project_id: this.currentProduction.id,
+        task_type_id: this.selectedTaskType.task_type_id,
+        relations: 'true'
+      })
+
+      // load entity types
       if (taskType.for_entity === 'Asset') {
         await this.loadAssets({ withShared: false, withTasks: false })
 
@@ -1048,7 +1056,8 @@ export default {
                   asset =>
                     asset.asset_type_id === assetType.id &&
                     !asset.canceled &&
-                    !asset.shared
+                    !asset.shared &&
+                    tasks.some(task => task.entity_id === asset.id)
                 )
                 .map(asset => ({
                   ...asset,
@@ -1061,16 +1070,18 @@ export default {
       } else if (taskType.for_entity === 'Shot') {
         await this.loadShots()
 
-        const shotsBySequence = this.shots.reduce((acc, shot) => {
-          if (!acc[shot.parent_id]) {
-            acc[shot.parent_id] = []
-          }
-          shot.assigned = taskType.entitiesByType[shot.parent_id]?.includes(
-            shot.id
-          )
-          acc[shot.parent_id].push(shot)
-          return acc
-        }, {})
+        const shotsBySequence = this.shots
+          .filter(shot => tasks.some(task => task.entity_id === shot.id))
+          .reduce((acc, shot) => {
+            if (!acc[shot.parent_id]) {
+              acc[shot.parent_id] = []
+            }
+            shot.assigned = taskType.entitiesByType[shot.parent_id]?.includes(
+              shot.id
+            )
+            acc[shot.parent_id].push(shot)
+            return acc
+          }, {})
 
         this.assignments.entityTypes = Object.keys(shotsBySequence).map(
           sequenceId => {
