@@ -10,7 +10,6 @@
     <trash-icon class="icon is-small" v-else-if="icon === 'delete'" />
     <rotate-ccw-icon class="icon is-small" v-else-if="icon === 'restore'" />
     <span
-      class="text"
       :class="{
         'is-hidden-touch': isResponsive
       }"
@@ -45,19 +44,16 @@ export default {
 
   props: {
     text: {
-      default: '',
       type: String
     },
     title: {
-      default: '',
       type: String
     },
     path: {
-      default: '',
+      required: true,
       type: [String, Object]
     },
     icon: {
-      default: '',
       type: String
     },
     isResponsive: {
