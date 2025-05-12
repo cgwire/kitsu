@@ -2322,7 +2322,7 @@ export default {
 .buttons .button {
   background: $dark-grey-2;
   border-radius: 0;
-  color: #bbb;
+  color: $light-grey-2;
   border: 0;
   margin: 0;
   transition: all 0.3s ease;

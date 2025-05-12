@@ -8,15 +8,15 @@
       v-if="isBigDisplay || !isMovie"
     />
 
-    <div
+    <span
       class="flexrow-item bar-element current-index"
       :title="$t('playlists.actions.files_position')"
       @click="$emit('current-index-clicked')"
       v-if="isBigDisplay || !isMovie"
     >
-      <span>{{ currentIndex }}</span>
-      <span v-if="fullScreen || !isMovie"> / {{ previews.length }}</span>
-    </div>
+      {{ currentIndex }}
+      <template v-if="fullScreen || !isMovie">/ {{ previews.length }}</template>
+    </span>
 
     <button-simple
       class="flexrow-item"
@@ -115,7 +115,7 @@ export default {
 .buttons .button {
   background: $dark-grey-2;
   border-radius: 0;
-  color: #bbb;
+  color: $light-grey-2;
   border: 0;
   margin: 0;
   transition: all 0.3s ease;
