@@ -246,13 +246,9 @@ export default {
         budgetDepartments.push(departmentData)
       })
       budgetDepartments.sort((a, b) => {
-        if (a.start_date === b.start_date) {
-          const departmentA = this.departmentMap.get(a.id)
-          const departmentB = this.departmentMap.get(b.id)
-          return departmentA.name.localeCompare(departmentB.name)
-        } else {
-          return moment(a.start_date).isBefore(b.start_date) ? -1 : 1
-        }
+        const departmentA = this.departmentMap.get(a.id)
+        const departmentB = this.departmentMap.get(b.id)
+        return departmentA.name.localeCompare(departmentB.name)
       })
       return budgetDepartments
     },
@@ -323,8 +319,8 @@ export default {
       }
       const positionWeight = {
         artist: 1,
-        supervisor: 2,
-        lead: 3
+        lead: 2,
+        supervisor: 3
       }
       const seniorityA = seniorityWeight[a.seniority]
       const seniorityB = seniorityWeight[b.seniority]
