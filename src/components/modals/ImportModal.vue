@@ -70,7 +70,7 @@
           :confirm-label="$t('main.csv.preview')"
           :error-text="$t('main.csv.error_upload')"
           :is-loading="isLoading"
-          :is-disabled="formData === undefined"
+          :is-disabled="!isValid"
           :is-error="isError"
           @confirm="onConfirmClicked"
           @cancel="$emit('cancel')"
@@ -81,9 +81,8 @@
 </template>
 
 <script>
-import { modalMixin } from '@/components/modals/base_modal'
-
 import FileUpload from '@/components/widgets/FileUpload.vue'
+import { modalMixin } from '@/components/modals/base_modal'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 
 export default {
@@ -143,11 +142,14 @@ export default {
     }
   },
 
-  mounted() {
-    this.formData = null
-  },
-
   computed: {
+    isValid() {
+      return (
+        (this.activeTab === 'file' && this.formData) ||
+        (this.activeTab === 'text' && this.pastedCode)
+      )
+    },
+
     pasteAreaPlaceholder() {
       return this.columns.join(';')
     }
@@ -166,6 +168,8 @@ export default {
 
     reset() {
       this.$refs.inputFile.reset()
+      this.activeTab = 'file'
+      this.formData = null
       this.pastedCode = ''
     }
   },
@@ -179,14 +183,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.error {
-  margin-top: 1em;
-}
-
 .tabs ul {
   margin-left: 0;
 }

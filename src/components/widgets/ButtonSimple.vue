@@ -189,11 +189,9 @@ export default {
       type: Boolean
     },
     text: {
-      default: '',
       type: String
     },
     title: {
-      default: '',
       type: String
     },
     type: {

@@ -33,11 +33,10 @@ export default {
 
   props: {
     text: {
-      default: '',
       type: String
     },
     path: {
-      default: '',
+      required: true,
       type: String
     },
     icon: {
@@ -45,7 +44,6 @@ export default {
       type: String
     },
     title: {
-      default: '',
       type: String
     },
     target: {

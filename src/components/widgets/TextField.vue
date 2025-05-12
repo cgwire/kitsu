@@ -21,10 +21,10 @@
         :value="modelValue"
         :disabled="disabled"
         :maxlength="maxlength"
-        :min="min"
+        :min="type === 'number' ? min || 0 : undefined"
         :max="max || undefined"
         :required="required"
-        :step="step || 'any'"
+        :step="step || type === 'number' ? 'any' : undefined"
         :readonly="readonly"
         @input="updateValue()"
         @keyup.enter="emitEnter()"
@@ -53,19 +53,15 @@ export default {
       type: Boolean
     },
     label: {
-      default: '',
       type: String
     },
     modelValue: {
-      default: '',
       type: [String, Number]
     },
     placeholder: {
-      default: '',
-      type: String
+      type: [String, Number]
     },
     type: {
-      default: 'text',
       type: String
     },
     inputClass: {
@@ -73,7 +69,6 @@ export default {
       type: String
     },
     buttonLabel: {
-      default: '',
       type: String
     },
     min: {
@@ -84,7 +79,6 @@ export default {
       type: Number
     },
     maxlength: {
-      default: 524288,
       type: Number
     },
     step: {

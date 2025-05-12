@@ -7,23 +7,26 @@
   >
     <div class="section-menu">
       <div class="flexrow unselectable" @click="toggleSectionList">
-        <div class="selected-section-line flexrow-item flexrow">
+        <div
+          class="selected-section-line flexrow-item flexrow"
+          v-if="currentSection"
+        >
           <kitsu-icon
             class="section-icon"
-            :name="currentSectionValue"
-            v-if="currentSectionValue !== 'budget'"
+            :name="currentSection.value"
+            v-if="currentSection.value !== 'budget'"
           />
           <hand-coins-icon
             class="section-icon"
             :stroke-width="1.5"
-            v-if="currentSectionValue === 'budget'"
+            v-else-if="currentSection.value === 'budget'"
           />
-          {{ currentSectionLabel }}
+          {{ currentSection.label }}
         </div>
       </div>
       <div class="select-input" ref="select" v-if="showSectionList">
         <div
-          :key="section.value + '-' + index"
+          :key="`${section.value}-${index}`"
           class="section-line"
           @click="selectSection(section)"
           v-for="(section, index) in sectionList"
@@ -41,7 +44,7 @@
             <hand-coins-icon
               class="section-icon"
               :stroke-width="1.5"
-              v-if="section.value === 'budget'"
+              v-else-if="section.value === 'budget'"
             />
             <span class="flexrow-item">
               {{ section.label }}
@@ -104,18 +107,10 @@ export default {
   computed: {
     ...mapGetters(['currentProduction']),
 
-    currentSectionLabel() {
-      const section = this.localSection
-      const sectionOption = this.sectionList.find(s => s.value === section)
-      if (sectionOption) return sectionOption.label
-      return null
-    },
-
-    currentSectionValue() {
-      const section = this.localSection
-      const sectionOption = this.sectionList.find(s => s.value === section)
-      if (sectionOption) return sectionOption.value
-      return null
+    currentSection() {
+      return this.sectionList.find(
+        section => section.value === this.localSection
+      )
     }
   },
 

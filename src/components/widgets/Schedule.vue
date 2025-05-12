@@ -64,6 +64,11 @@
               </span>
               <span
                 class="filler flexrow-item root-element-name ellipsis"
+                :style="{
+                  'border-left': rootElement.avatar
+                    ? null
+                    : `4px solid ${rootElement.color}`
+                }"
                 :title="rootElement.name"
                 v-if="!rootElement.route"
               >
@@ -71,12 +76,12 @@
               </span>
               <router-link
                 class="filler flexrow-item root-element-name ellipsis"
-                :title="rootElement.name"
                 :style="{
                   'border-left': rootElement.avatar
                     ? null
                     : `4px solid ${rootElement.color}`
                 }"
+                :title="rootElement.name"
                 :to="rootElement.route"
                 v-else
               >
