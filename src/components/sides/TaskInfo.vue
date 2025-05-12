@@ -160,7 +160,6 @@
               <div>
                 <add-comment
                   ref="add-comment"
-                  :user="user"
                   :team="currentTeam"
                   :task="task"
                   :task-status="taskStatuses"
