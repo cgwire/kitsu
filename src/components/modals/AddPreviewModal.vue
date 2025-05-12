@@ -70,7 +70,7 @@
             </p>
             <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
-              :ref="`video-${i}`"
+              :ref="`video-${index}`"
               :src="getURL(form)"
               preload="auto"
               class="is-fullwidth"
@@ -129,12 +129,11 @@
 </template>
 
 <script>
-import { modalMixin } from '@/components/modals/base_modal'
-
 import { AlertTriangleIcon } from 'lucide-vue-next'
 
 import files from '@/lib/files'
 
+import { modalMixin } from '@/components/modals/base_modal'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
 export default {
