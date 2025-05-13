@@ -1,3 +1,5 @@
+import './polyfills'
+
 import { createApp } from 'vue'
 import { createHead, VueHeadMixin } from '@unhead/vue'
 import { sync } from 'vuex-router-sync'

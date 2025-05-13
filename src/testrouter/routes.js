@@ -88,12 +88,12 @@ export const routes = [
     beforeEnter: (to, from, next) => {
       const browser = Bowser.getParser(window.navigator.userAgent)
       const isValidBrowser = browser.satisfies({
-        // see https://vitejs.dev/guide/build.html#browser-compatibility
+        // see https://vitejs.dev/guide/build.html#browser-compatibility + ES2020 support
         chrome: '>=87',
-        firefox: '>=78',
+        firefox: '>=79',
         edge: '>90',
-        vivaldi: '>2.8',
-        opera: '>=50',
+        vivaldi: '>=3.5',
+        opera: '>=73',
         safari: '>=14'
       })
       if (!isValidBrowser) {
