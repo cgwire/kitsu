@@ -807,6 +807,12 @@ const mutations = {
       const copyNewSequence = { ...newSequence }
       copyNewSequence.data = { ...sequence.data, ...newSequence.data }
       Object.assign(sequence, copyNewSequence)
+      state.displayedSequences = state.displayedSequences.map(stateSequence => {
+        if (stateSequence.id === newSequence.id) {
+          return { ...sequence }
+        }
+        return stateSequence
+      })
     }
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     if (sequence.description && !state.isSequenceDescription) {

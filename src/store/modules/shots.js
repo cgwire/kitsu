@@ -1017,6 +1017,12 @@ const mutations = {
       const copyNewShot = { ...newShot }
       copyNewShot.data = { ...shot.data, ...newShot.data }
       Object.assign(shot, copyNewShot)
+      state.displayedShots = state.displayedShots.map(stateShot => {
+        if (stateShot.id === newShot.id) {
+          return { ...shot }
+        }
+        return stateShot
+      })
     } else {
       cache.shots.push(newShot)
       cache.shots = sortShots(cache.shots)

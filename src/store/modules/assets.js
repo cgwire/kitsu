@@ -1106,6 +1106,12 @@ const mutations = {
       const copyNewAsset = { ...newAsset }
       copyNewAsset.data = { ...asset.data, ...newAsset.data }
       Object.assign(asset, copyNewAsset)
+      state.displayedAssets = state.displayedAssets.map(stateAsset => {
+        if (stateAsset.id === newAsset.id) {
+          return { ...asset }
+        }
+        return stateAsset
+      })
     } else {
       newAsset.validations = new Map()
       newAsset.tasks = []

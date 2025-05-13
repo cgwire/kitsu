@@ -726,7 +726,9 @@ const mutations = {
     cache.episodes = state.displayedEpisodes
     cache.episodes.push(episode)
     cache.episodes = sortByName(cache.episodes)
+    state.episodes = cache.episodes
     state.displayedEpisodes = cache.episodes
+
     helpers.setListStats(state, cache.episodes)
     cache.episodeMap.set(episode.id, episode)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
@@ -739,6 +741,12 @@ const mutations = {
     if (episode) {
       Object.assign(episode, newEpisode)
       Object.assign(episodeFromMain, newEpisode)
+      state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
+        if (stateEpisode.id === newEpisode.id) {
+          return { ...episode }
+        }
+        return stateEpisode
+      })
     }
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
     if (episode.description && !state.isEpisodeDescription) {

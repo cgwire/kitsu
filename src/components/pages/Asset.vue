@@ -634,7 +634,6 @@ export default {
     getCurrentAsset() {
       return new Promise((resolve, reject) => {
         const assetId = this.route.params.asset_id
-        this.currentAssetId = assetId
         if (!assetId) resolve(null)
         let asset = assetStore.cache.assetMap.get(assetId) || null
         if (!asset) {
@@ -676,6 +675,8 @@ export default {
           this.loading.edit = false
           this.errors.edit = true
         })
+      const asset = assetStore.cache.assetMap.get(form.id)
+      this.currentAsset = { ...asset }
     },
 
     resetData() {
