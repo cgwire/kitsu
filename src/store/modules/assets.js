@@ -1106,9 +1106,6 @@ const mutations = {
       const copyNewAsset = { ...newAsset }
       copyNewAsset.data = { ...asset.data, ...newAsset.data }
       Object.assign(asset, copyNewAsset)
-
-      // Search for the asset in the displayed assets from state
-      // matching updated asset.id with state asset.id to replace with new asset values
       state.displayedAssets = state.displayedAssets.map(stateAsset => {
         if (stateAsset.id === newAsset.id) {
           return { ...asset }

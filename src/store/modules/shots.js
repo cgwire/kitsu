@@ -1017,9 +1017,6 @@ const mutations = {
       const copyNewShot = { ...newShot }
       copyNewShot.data = { ...shot.data, ...newShot.data }
       Object.assign(shot, copyNewShot)
-
-      // Search for the Shot in the displayed Shots from state
-      // matching updated Shot.id with state Shot.id to replace with new Shot values
       state.displayedShots = state.displayedShots.map(stateShot => {
         if (stateShot.id === newShot.id) {
           return { ...shot }
