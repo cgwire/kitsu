@@ -88,7 +88,7 @@
     "vitest-localstorage-mock": "0.1.2"
   },
   "engines": {
-    "node": ">=18.12"
+    "node": ">=20.18"
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache"
