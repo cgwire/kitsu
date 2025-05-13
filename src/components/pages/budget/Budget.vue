@@ -15,10 +15,10 @@
         />
 
         <budget-list
-          :budget="currentBudget"
           :budget-departments="budgetDepartments"
           :budget-entries="budgetEntries"
           :currency="currentBudget?.currency || 'USD'"
+          :current-budget="currentBudget"
           :is-loading="loading.entries"
           :is-error="errors.entries"
           :months-between-production-dates="monthsBetweenProductionDates"
@@ -216,21 +216,29 @@ export default {
         departmentEntries.forEach(entry => {
           const monthlySalary = entry.daily_salary * 20
           const monthCosts = {}
+          let total = 0
+          entry.exceptions = entry.exceptions || {}
           for (let i = 0; i < entry.months_duration; i++) {
             const month = moment(entry.start_date).add(i, 'month')
-            monthCosts[month.format('YYYY-MM')] = monthlySalary
+            const monthKey = month.format('YYYY-MM')
+            const monthCost = entry.exceptions[monthKey] || monthlySalary
+            monthCosts[monthKey] = monthCost
+            total += monthCost
           }
           departmentData.persons.push({
             id: entry.id,
             person_id: entry.person_id,
             budget_entry_id: entry.id,
             department_id: entry.department_id,
-            monthCosts: monthCosts,
+            monthCosts,
             position: entry.position,
             seniority: entry.seniority,
-            total: entry.months_duration * monthlySalary,
+            total,
             months_duration: entry.months_duration,
-            start_date: entry.start_date
+            monthly_salary: monthlySalary,
+            daily_salary: entry.daily_salary,
+            start_date: entry.start_date,
+            exceptions: entry.exceptions
           })
           const startDate = moment(entry.start_date)
           const departmentStartDate = moment(departmentData.start_date)
@@ -266,7 +274,7 @@ export default {
       }, {})
       return {
         total,
-        monthCosts: monthCosts
+        monthCosts
       }
     },
 

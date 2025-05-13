@@ -182,11 +182,24 @@
                     class="month"
                     v-for="month in monthsBetweenProductionDates"
                   >
-                    {{
-                      personEntry.monthCosts[
+                    <input
+                      class="input-editor"
+                      type="number"
+                      :min="0"
+                      step="1"
+                      :value="getMonthCost(personEntry, month)"
+                      @change="
+                        addPersonException(
+                          personEntry,
+                          month,
+                          $event.target.value
+                        )
+                      "
+                      v-if="personEntry.monthCosts[
                         month.format('YYYY-MM')
-                      ]?.toLocaleString()
-                    }}
+                      ]"
+                    />
+                    <span v-else>&nbsp;</span>
                   </td>
                   <td class="total-cost">
                     {{ personEntry.total.toLocaleString() }}
@@ -245,10 +258,6 @@ export default {
   },
 
   props: {
-    budgets: {
-      type: Array,
-      default: () => []
-    },
     budgetEntries: {
       type: Array,
       default: () => []
@@ -257,13 +266,17 @@ export default {
       type: Array,
       default: () => []
     },
-    monthsBetweenProductionDates: {
-      type: Array,
-      default: () => []
-    },
     currency: {
       type: String,
       default: 'USD'
+    },
+    currentBudget: {
+      type: Object,
+      default: () => {}
+    },
+    monthsBetweenProductionDates: {
+      type: Array,
+      default: () => []
     },
     isLoading: {
       type: Boolean,
@@ -310,7 +323,15 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
+    ...mapActions(['updateProductionBudgetEntry']),
+
+    getMonthCost(personEntry, month) {
+      const monthKey = month.format('YYYY-MM')
+      personEntry.exceptions = personEntry.exceptions || {}
+      return parseInt(personEntry.exceptions[monthKey]) ||
+             parseInt(personEntry.monthCosts[monthKey]) ||
+             0
+    },
 
     toggleDepartment(departmentId) {
       this.collapsedDepartments[departmentId] =
@@ -324,6 +345,22 @@ export default {
       return {
         backgroundColor: this.departmentMap.get(departmentId).color + opacity
       }
+    },
+
+    addPersonException(personEntry, month, value) {
+      const exceptions = personEntry.exceptions || {}
+      exceptions[month.format('YYYY-MM')] = value
+      const budgetEntry = {
+        id: personEntry.budget_entry_id,
+        ...personEntry,
+        exceptions
+      }
+      this.updateProductionBudgetEntry({
+        productionId: this.currentProduction.id,
+        budgetId: this.currentBudget.id,
+        budgetEntryId: personEntry.budget_entry_id,
+        budgetEntry
+      })
     }
   }
 }
@@ -421,5 +458,20 @@ td.datatable-row-header.name {
     background: $dark-grey-light;
     color: $light-grey;
   }
+}
+
+.input-editor {
+  width: 100%;
+  text-align: right;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>
