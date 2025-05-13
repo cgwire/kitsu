@@ -14,7 +14,8 @@ export default defineConfig({
     })
   ],
   build: {
-    sourcemap: true
+    sourcemap: true,
+    target: 'es2020'
   },
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
