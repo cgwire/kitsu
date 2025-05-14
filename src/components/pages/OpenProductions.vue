@@ -23,7 +23,7 @@
             </li>
             <li>
               {{ $t('intro.second') }}
-              <a href="https://twitter.com/cgwirekitsu">X</a>
+              <a href="https://x.com/cgwirekitsu">X</a>
               {{ $t('main.or') }}
               <a href="https://www.linkedin.com/company/cgwire/">LinkedIn</a>
             </li>

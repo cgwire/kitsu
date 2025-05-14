@@ -4,7 +4,7 @@ Start developing for Kitsu using Docker on Windows, Linux and macOS.
 
 **Prerequisites**
 
-- [Node.js >= 18.12](https://nodejs.org/en/)
+- [Node.js >= 20.18](https://nodejs.org)
 - [Docker >= 1.13](https://store.docker.com/search?type=edition&offering=community)
 
 **Setup**
@@ -25,7 +25,7 @@ After 30 or so seconds, a browser window should appear with Kitsu up and running
 
 Kitsu is based on the Vue.js framework. The Vue.js documentation is exhaustive and very clear. We encourage you to read it before hacking significant piece of code.
 
-The architecture is based on [vuex](https://kitsu.cg-wire.com/development-environment/) and [vue-router](https://kitsu.cg-wire.com/development-environment/). Documentations are good too, again, we recommend to read it. The main idea is that:
+The architecture is based on [vuex](https://kitsu.cg-wire.com/installation/#architecture) and [vue-router](https://kitsu.cg-wire.com/installation/#architecture). Documentations are good too, again, we recommend to read it. The main idea is that:
 
 - URL routes gives the main context.
 - Views are described in components through HTML, CSS and small pieces of JavaScript.
@@ -39,5 +39,4 @@ The architecture is based on [vuex](https://kitsu.cg-wire.com/development-enviro
 
 Come talk to us!
 
-- [Forums](https://forum.cg-wire.com)
-- [Chat](http://cgwire.slack.com)
+- [Join the Kitsu Community Discord](https://discord.com/invite/VbCxtKN)
