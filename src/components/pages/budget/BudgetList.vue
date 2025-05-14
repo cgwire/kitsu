@@ -43,6 +43,12 @@
                   />
                 </div>
               </th>
+              <th class="datatable-row-header duration-header month">
+                {{ $t('budget.fields.base_salary') }}
+              </th>
+              <th class="datatable-row-header base-salary-header month">
+                {{ $t('budget.fields.duration') }}
+              </th>
               <th
                 :key="month"
                 class="month datatable-row-header"
@@ -67,10 +73,14 @@
             @touchstart="startBrowsing"
           >
             <tr class="datatable-row">
-              <td class="datatable-row-header" colspan="3">
+              <td class="datatable-row-header total-header" colspan="3">
                 <div class="pa05">
                   {{ $t('main.total') }}
                 </div>
+              </td>
+              <td class="month">
+              </td>
+              <td class="month">
               </td>
               <td
                 :key="month"
@@ -114,6 +124,16 @@
                       {{ departmentMap.get(departmentEntry.id).name }}
                     </div>
                   </div>
+                </td>
+                <td
+                  class="duration-header text-right month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                >
+                </td>
+                <td
+                  class="base-salary-header text-right month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                >
                 </td>
                 <td
                   :key="month"
@@ -176,6 +196,12 @@
                         {{ $t('budget.new_hiring') }}
                       </span>
                     </div>
+                  </td>
+                  <td class="base-salary-header text-right entry-data">
+                    {{ (personEntry.monthly_salary || 0).toLocaleString() }}
+                  </td>
+                  <td class="duration-header text-right entry-data">
+                    {{ personEntry.months_duration }}
                   </td>
                   <td
                     :key="month"
@@ -375,6 +401,7 @@ export default {
 .department-header-header {
   max-width: 400px;
   width: 400px;
+  min-width: 400px;
   z-index: 5;
 }
 
@@ -383,6 +410,7 @@ export default {
 }
 
 .department-header {
+  max-width: 400px;
   min-width: 400px;
   position: sticky;
   padding: 0;
@@ -392,6 +420,7 @@ export default {
   color: white;
   height: 100%;
   min-width: 400px;
+  max-width: 400px;
   padding: 0.6em 1em;
 }
 
@@ -407,6 +436,14 @@ td.month {
   max-width: 80px;
   min-width: 80px;
   width: 80px;
+}
+
+td.entry-data {
+  text-align: right;
+  max-width: 80px;
+  min-width: 80px;
+  width: 80px;
+  padding: 10px;
 }
 
 .position {
@@ -435,8 +472,6 @@ td.datatable-row-header.name {
 }
 
 .actions {
-  max-width: 120px;
-  width: 120px;
   min-width: 120px;
 }
 

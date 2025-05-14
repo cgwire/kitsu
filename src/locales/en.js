@@ -135,7 +135,6 @@ export default {
     cash_evolution: 'Expense evolution',
     cash_repartition: 'Expense repartition',
     departments: 'Departments',
-
     budgets_error: 'An error occurred while loading the budgets. Please contact our support team.',
     budget_entries_error: 'An error occurred while loading the budget entries. Please contact our support team.',
     create_budget: 'Create a new budget',
@@ -159,7 +158,10 @@ export default {
     salary_scale_title: 'Salary Scale',
     title: 'Budget',
     fields: {
+      base_salary: 'Salary',
       currency: 'Currency',
+      daily_salary: 'Daily Salary',
+      duration: 'Duration',
       department: 'Department',
       months_duration: 'Months Duration',
       name: 'Name',
@@ -1828,5 +1830,5 @@ export default {
     history: 'History',
     refresh: 'Refresh',
     restore: 'Restore'
-  }  
+  }
 }
