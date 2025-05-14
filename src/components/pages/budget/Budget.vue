@@ -9,8 +9,9 @@
           :is-loading="loading.budgets"
           :is-error="errors.budgets"
           @change-budget="onChangeBudget"
-          @edit-budget="onEditBudgetClicked"
           @delete-budget="onDeleteBudgetClicked"
+          @edit-budget="onEditBudgetClicked"
+          @export-budget="onExportBudgetClicked"
           @new-version="onNewBudgetVersionClicked"
         />
 
@@ -42,9 +43,9 @@
         <edit-budget-entry-modal
           :active="modals.createBudgetEntry"
           :budget-entry-to-edit="budgetEntryToEdit"
-          :salary-scale="salaryScale"
           :is-loading="loading.createBudgetEntry"
           :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
+          :salary-scale="salaryScale"
           @cancel="modals.createBudgetEntry = false"
           @confirm="confirmCreateBudgetEntry"
         />
@@ -94,6 +95,7 @@ import moment from 'moment'
 
 import { pageMixin } from '@/components/mixins/page'
 import { formatMonth, parseSimpleDate } from '@/lib/time'
+import csv from '@/lib/csv'
 
 import BudgetAnalytics from '@/components/pages/budget/BudgetAnalytics.vue'
 import BudgetHeader from '@/components/pages/budget/BudgetHeader.vue'
@@ -370,6 +372,26 @@ export default {
     onEditBudgetClicked() {
       this.budgetToEdit = this.currentBudget
       this.modals.createBudget = true
+    },
+
+    onExportBudgetClicked() {
+      const nameData = [
+        this.$t('budget.title').toLowerCase(),
+        this.currentProduction.name,
+        `v${this.currentBudget.revision}`,
+        this.currentBudget.name,
+        this.currentBudget.currency
+      ]
+      csv.generateBudget(
+        this.$t,
+        this.departmentMap,
+        this.personMap,
+        nameData,
+        this.currentBudget.currency,
+        this.monthsBetweenProductionDates,
+        this.totalEntry,
+        this.budgetDepartments
+      )
     },
 
     onNewBudgetVersionClicked() {
