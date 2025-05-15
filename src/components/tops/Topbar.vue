@@ -183,7 +183,7 @@
           </a>
         </li>
         <li>
-          <a href="https://twitter.com/cgwirekitsu" target="_blank"> X </a>
+          <a href="https://x.com/cgwirekitsu" target="_blank"> X </a>
         </li>
         <li>
           <a href="https://cgwire.canny.io" target="_blank">

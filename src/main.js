@@ -1,7 +1,7 @@
 import './polyfills'
 
 import { createApp } from 'vue'
-import { createHead, VueHeadMixin } from '@unhead/vue'
+import { createHead, VueHeadMixin } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
 import App from '@/App'
