@@ -25,7 +25,7 @@ Then you can access Kitsu through [http://localhost](http://localhost).
 
 Prior to setting up the Kitsu development environment, make sure you have the following elements installed:
 
-* [Node.js](https://nodejs.org/en/) >= 18.12
+* [Node.js](https://nodejs.org) >= 20.18
 * A [Zou development instance](https://zou.cg-wire.com/development/) up and running on port 5000
 * A [Zou Events development instance](https://zou.cg-wire.com/development/) up and running on port 5001 (optional)
 
@@ -85,9 +85,9 @@ npm run test:unit
 
 ## Architecture
 
-Kitsu is based on the [Vue.js](https://v2.vuejs.org/v2/guide/) framework. The Vue.js documentation is exhaustive and very clear. We encourage you to read it before making significant changes to the code.
+Kitsu is based on the [Vue.js](https://vuejs.org/guide/) framework. The Vue.js documentation is exhaustive and very clear. We encourage you to read it before making significant changes to the code.
 
-The architecture is based on [Vuex](https://v3.vuex.vuejs.org/) and [vue-router](https://v3.router.vuejs.org/). Their documentation is also very good, and we recommend reading it. The main idea is that:
+The architecture is based on [Vuex](https://vuex.vuejs.org) and [vue-router](https://router.vuejs.org). Their documentation is also very good, and we recommend reading it. The main idea is that:
 
 * URL routes give the main context.
 * Views are described in components through HTML, CSS, and small pieces of JavaScript.

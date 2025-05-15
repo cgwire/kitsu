@@ -25,7 +25,7 @@ docker run -d -p 80:80 --name cgwire cgwire/cgwire
 
 Kitsu の開発環境をセットアップする前に、以下の要素がインストールされていることを確認してください。
 
-* [Node.js](https://nodejs.org/en/) 18.12 以上
+* [Node.js](https://nodejs.org) 20.18 以上
 * [Zou 開発インスタンス](https://zou.cg-wire.com/development/) がポート 5000 で稼働している
 * [Zou Events 開発インスタンス](https://zou.cg-wire.com/development/) がポート 5001 で稼働している（オプション）
 
@@ -85,9 +85,9 @@ npm run test:unit
 
 ## アーキテクチャ
 
-Kitsu は [Vue.js](https://v2.vuejs.org/v2/guide/) フレームワークをベースとしています。Vue.js のドキュメントは網羅的で非常にわかりやすいです。コードに大幅な変更を加える前に、ぜひ一読されることをお勧めします。
+Kitsu は [Vue.js](https://vuejs.org/guide/) フレームワークをベースとしています。Vue.js のドキュメントは網羅的で非常にわかりやすいです。コードに大幅な変更を加える前に、ぜひ一読されることをお勧めします。
 
-アーキテクチャは [Vuex](https://v3.vuex.vuejs.org/) と [vue-router](https://v3.router.vuejs.org/) をベースとしています。 これらのドキュメントも非常に充実しており、ぜひお読みください。 主な考え方は以下の通りです。
+アーキテクチャは [Vuex](https://vuex.vuejs.org) と [vue-router](https://router.vuejs.org) をベースとしています。 これらのドキュメントも非常に充実しており、ぜひお読みください。 主な考え方は以下の通りです。
 
 * URL ルートが主なコンテキストを提供します。
 * ビューは、HTML、CSS、および少量の JavaScript からなるコンポーネントで記述されます。
