@@ -541,6 +541,7 @@ export default {
   },
 
   mounted() {
+    this.setOptionalImportColumns()
     this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
     const isAssets = this.$route.path.includes('assets')
@@ -579,6 +580,7 @@ export default {
       'episodesPath',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
+      'isPaperProduction',
       'isTVShow',
       'nbSelectedTasks',
       'organisation',
@@ -801,6 +803,18 @@ export default {
       'unsubscribeFromSequence',
       'uploadTaskTypeEstimations'
     ]),
+
+    setOptionalImportColumns() {
+      this.optionalColumns = [
+        'Estimation',
+        'Start date',
+        'Due date',
+        'Difficulty'
+      ]
+      if (this.isPaperProduction) {
+        this.optionalColumns.unshift('Drawings')
+      }
+    },
 
     initData(force) {
       this.resetTasks()
@@ -1524,6 +1538,7 @@ export default {
     },
 
     currentProduction() {
+      this.setOptionalImportColumns()
       this.initData(true)
     },
 

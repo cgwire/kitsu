@@ -879,8 +879,12 @@ export default {
         this.$t('tasks.fields.done_date'),
         this.$t('tasks.fields.last_comment_date')
       ]
-      if (!this.isAssets) {
-        headers.splice(4, 0, 'Frames')
+      if (this.isShots) {
+        if (this.isShots && !this.isPaperProduction) {
+          headers.splice(4, 0, this.$t('tasks.fields.frames'))
+        } else {
+          headers.splice(4, 0, this.$t('tasks.fields.drawings'))
+        }
       }
       const taskLines = [headers]
       this.tasks.forEach(task => {
@@ -911,8 +915,13 @@ export default {
           this.formatDate(task.done_date),
           this.formatDate(task.last_comment_date)
         ]
-        if (!this.isAssets) {
-          const value = this.getEntity(task.entity.id).nb_frames
+        if (this.isShots) {
+          let value = 0
+          if (this.isShots && !this.isPaperProduction) {
+            value = this.getEntity(task.entity.id).nb_frames
+          } else {
+            value = task.nb_drawings || 0
+          }
           line.splice(4, 0, value)
         }
         taskLines.push(line)

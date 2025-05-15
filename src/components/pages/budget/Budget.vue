@@ -9,16 +9,17 @@
           :is-loading="loading.budgets"
           :is-error="errors.budgets"
           @change-budget="onChangeBudget"
-          @edit-budget="onEditBudgetClicked"
           @delete-budget="onDeleteBudgetClicked"
+          @edit-budget="onEditBudgetClicked"
+          @export-budget="onExportBudgetClicked"
           @new-version="onNewBudgetVersionClicked"
         />
 
         <budget-list
-          :budget="currentBudget"
           :budget-departments="budgetDepartments"
           :budget-entries="budgetEntries"
           :currency="currentBudget?.currency || 'USD'"
+          :current-budget="currentBudget"
           :is-loading="loading.entries"
           :is-error="errors.entries"
           :months-between-production-dates="monthsBetweenProductionDates"
@@ -42,9 +43,9 @@
         <edit-budget-entry-modal
           :active="modals.createBudgetEntry"
           :budget-entry-to-edit="budgetEntryToEdit"
-          :salary-scale="salaryScale"
           :is-loading="loading.createBudgetEntry"
           :is-error="errors.createBudgetEntry || errors.editBudgetEntry"
+          :salary-scale="salaryScale"
           @cancel="modals.createBudgetEntry = false"
           @confirm="confirmCreateBudgetEntry"
         />
@@ -94,6 +95,7 @@ import moment from 'moment'
 
 import { pageMixin } from '@/components/mixins/page'
 import { formatMonth, parseSimpleDate } from '@/lib/time'
+import csv from '@/lib/csv'
 
 import BudgetAnalytics from '@/components/pages/budget/BudgetAnalytics.vue'
 import BudgetHeader from '@/components/pages/budget/BudgetHeader.vue'
@@ -216,21 +218,29 @@ export default {
         departmentEntries.forEach(entry => {
           const monthlySalary = entry.daily_salary * 20
           const monthCosts = {}
+          let total = 0
+          entry.exceptions = entry.exceptions || {}
           for (let i = 0; i < entry.months_duration; i++) {
             const month = moment(entry.start_date).add(i, 'month')
-            monthCosts[month.format('YYYY-MM')] = monthlySalary
+            const monthKey = month.format('YYYY-MM')
+            const monthCost = entry.exceptions[monthKey] || monthlySalary
+            monthCosts[monthKey] = monthCost
+            total += monthCost
           }
           departmentData.persons.push({
             id: entry.id,
             person_id: entry.person_id,
             budget_entry_id: entry.id,
             department_id: entry.department_id,
-            monthCosts: monthCosts,
+            monthCosts,
             position: entry.position,
             seniority: entry.seniority,
-            total: entry.months_duration * monthlySalary,
+            total,
             months_duration: entry.months_duration,
-            start_date: entry.start_date
+            monthly_salary: monthlySalary,
+            daily_salary: entry.daily_salary,
+            start_date: entry.start_date,
+            exceptions: entry.exceptions
           })
           const startDate = moment(entry.start_date)
           const departmentStartDate = moment(departmentData.start_date)
@@ -246,13 +256,9 @@ export default {
         budgetDepartments.push(departmentData)
       })
       budgetDepartments.sort((a, b) => {
-        if (a.start_date === b.start_date) {
-          const departmentA = this.departmentMap.get(a.id)
-          const departmentB = this.departmentMap.get(b.id)
-          return departmentA.name.localeCompare(departmentB.name)
-        } else {
-          return moment(a.start_date).isBefore(b.start_date) ? -1 : 1
-        }
+        const departmentA = this.departmentMap.get(a.id)
+        const departmentB = this.departmentMap.get(b.id)
+        return departmentA.name.localeCompare(departmentB.name)
       })
       return budgetDepartments
     },
@@ -270,7 +276,7 @@ export default {
       }, {})
       return {
         total,
-        monthCosts: monthCosts
+        monthCosts
       }
     },
 
@@ -323,8 +329,8 @@ export default {
       }
       const positionWeight = {
         artist: 1,
-        supervisor: 2,
-        lead: 3
+        lead: 2,
+        supervisor: 3
       }
       const seniorityA = seniorityWeight[a.seniority]
       const seniorityB = seniorityWeight[b.seniority]
@@ -366,6 +372,26 @@ export default {
     onEditBudgetClicked() {
       this.budgetToEdit = this.currentBudget
       this.modals.createBudget = true
+    },
+
+    onExportBudgetClicked() {
+      const nameData = [
+        this.$t('budget.title').toLowerCase(),
+        this.currentProduction.name,
+        `v${this.currentBudget.revision}`,
+        this.currentBudget.name,
+        this.currentBudget.currency
+      ]
+      csv.generateBudget(
+        this.$t,
+        this.departmentMap,
+        this.personMap,
+        nameData,
+        this.currentBudget.currency,
+        this.monthsBetweenProductionDates,
+        this.totalEntry,
+        this.budgetDepartments
+      )
     },
 
     onNewBudgetVersionClicked() {

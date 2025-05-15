@@ -48,6 +48,12 @@
       />
       <div class="filler"></div>
       <button-simple
+        class="flexrow-item"
+        icon="export"
+        :title="$t('main.csv.export_file')"
+        @click="$emit('export-budget')"
+      />
+      <button-simple
         :text="$t('budget.new_version')"
         icon="plus"
         @click="$emit('new-version')"
@@ -83,7 +89,13 @@ defineProps({
   }
 })
 
-defineEmits(['change-budget', 'delete-budget', 'edit-budget', 'new-version'])
+defineEmits([
+  'change-budget',
+  'delete-budget',
+  'edit-budget',
+  'new-version',
+  'export-budget'
+])
 </script>
 
 <style lang="scss" scoped>

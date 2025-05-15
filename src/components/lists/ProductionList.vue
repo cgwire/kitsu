@@ -246,12 +246,9 @@ export default {
 .fps,
 .ratio,
 .resolution {
-  width: 100px;
-  min-width: 100px;
-}
-
-.fps,
-.ratio {
+  width: 110px;
+  min-width: 110px;
+  padding: 10px;
   text-align: right;
 }
 </style>

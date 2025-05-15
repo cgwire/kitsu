@@ -4,14 +4,7 @@
     class="input-editor"
     :readonly="!isEditable"
     @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-    @keyup.ctrl="
-      event =>
-        onInputKeyUp(
-          event,
-          indexes.k ? getIndex(indexes.i, indexes.k) : indexes.i,
-          indexes.j
-        )
-    "
+    @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
     :value="getMetadataFieldValue(descriptor, entity)"
     v-if="!descriptor.data_type || descriptor.data_type === 'string'"
   />
@@ -23,14 +16,7 @@
     step="any"
     @keydown="onNumberFieldKeyDown"
     @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-    @keyup.ctrl="
-      event =>
-        onInputKeyUp(
-          event,
-          indexes.k ? getIndex(indexes.i, indexes.k) : indexes.i,
-          indexes.j
-        )
-    "
+    @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
     :value="getMetadataFieldValue(descriptor, entity)"
     v-else-if="descriptor.data_type === 'number'"
   />
@@ -39,14 +25,7 @@
     class="input-editor"
     :disabled="!isEditable"
     @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-    @keyup.ctrl="
-      event =>
-        onInputKeyUp(
-          event,
-          indexes.k ? getIndex(indexes.i, indexes.k) : indexes.i,
-          indexes.j
-        )
-    "
+    @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
     type="checkbox"
     :checked="getMetadataFieldValue(descriptor, entity) === 'true'"
     v-else-if="descriptor.data_type === 'boolean'"
@@ -87,14 +66,7 @@
   <span class="select" v-else-if="descriptor.data_type === 'list'">
     <select
       class="select-input"
-      @keyup.ctrl="
-        event =>
-          onInputKeyUp(
-            event,
-            indexes.k ? getIndex(indexes.i, indexes.k) : indexes.i,
-            indexes.j
-          )
-      "
+      @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
       @change="event => onMetadataFieldChanged(entity, descriptor, event)"
     >
       <option

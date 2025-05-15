@@ -58,6 +58,15 @@
           v-model="form.months_duration"
           @enter="runConfirmation"
         />
+
+        <text-field
+          class="month-duration"
+          type="number"
+          :min="0"
+          :label="$t('budget.fields.daily_salary')"
+          v-model="form.daily_salary"
+          @enter="runConfirmation"
+        />
       </div>
       <div class="mt0">
         <span class="salary-label">{{ $t('budget.fields.start_date') }}</span>
@@ -172,6 +181,10 @@ export default {
     }
   },
 
+  mounted() {
+    this.resetForm()
+  },
+
   computed: {
     ...mapGetters(['activePeople', 'currentProduction', 'personMap']),
 
@@ -255,8 +268,7 @@ export default {
         person_id: this.form.person?.id,
         duration: Math.min(this.form.months_duration, this.maxDuration),
         salary: this.monthlySalary,
-        total_salary: this.totalSalary,
-        daily_salary: this.dailySalary
+        total_salary: this.totalSalary
       })
     },
 
@@ -286,9 +298,14 @@ export default {
           start_date: parseSimpleDate(
             this.budgetEntryToEdit.start_date
           ).toDate(),
-          months_duration: this.budgetEntryToEdit.months_duration
+          months_duration: this.budgetEntryToEdit.months_duration,
+          daily_salary: this.budgetEntryToEdit.daily_salary
         })
         this.form.person = person
+        // Needed to bypass watcher
+        this.$nextTick(() => {
+          this.form.daily_salary = this.budgetEntryToEdit.daily_salary
+        })
       } else {
         this.form = {
           id: null,
@@ -299,7 +316,8 @@ export default {
           start_date: parseSimpleDate(this.currentProduction.start_date)
             .startOf('month')
             .toDate(),
-          months_duration: 1
+          months_duration: 1,
+          daily_salary: 0
         }
       }
     }
@@ -313,6 +331,10 @@ export default {
           this.$refs.departmentField.focus()
         }, 100)
       }
+    },
+
+    dailySalary() {
+      this.form.daily_salary = this.dailySalary
     },
 
     budgetEntryToEdit() {

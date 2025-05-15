@@ -135,7 +135,6 @@ export default {
     cash_evolution: 'Expense evolution',
     cash_repartition: 'Expense repartition',
     departments: 'Departments',
-
     budgets_error: 'An error occurred while loading the budgets. Please contact our support team.',
     budget_entries_error: 'An error occurred while loading the budget entries. Please contact our support team.',
     create_budget: 'Create a new budget',
@@ -149,17 +148,20 @@ export default {
     edit_budget: 'Edit current budget version',
     edit_budget_entry: 'Edit entry',
     edit_budget_entry_error: 'An error occurred while editing this budget entry. Please contact our support team.',
+    entries: 'Entries',
     months: 'Months',
     new_hiring: 'New hiring',
     new_version: 'New version',
     no_budget_found: 'There is no budget for this production. Do you want to create one?',
     no_budget_entries_found: 'There is no budget entry for this production. Do you want to create one?',
     no_analytics_to_show: 'There is no analytics to show for this production. Create a budget and add entries to see the analytics.',
-    persons: 'Persons',
     salary_scale_title: 'Salary Scale',
     title: 'Budget',
     fields: {
+      base_salary: 'Salary',
       currency: 'Currency',
+      daily_salary: 'Daily Salary',
+      duration: 'Duration',
       department: 'Department',
       months_duration: 'Months Duration',
       name: 'Name',
@@ -1828,5 +1830,5 @@ export default {
     history: 'History',
     refresh: 'Refresh',
     restore: 'Restore'
-  }  
+  }
 }
