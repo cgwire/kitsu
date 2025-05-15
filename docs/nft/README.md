@@ -945,7 +945,7 @@ If you see the white box, Kitsu will display how many assets are ready for this 
 
 ![Asset Status](../img/getting-started/asset_status_empty.png)
 
- ::: tip
+::: tip
 If you don't see any boxes, no assets are casted for this NFT Collection.
 :::
  
