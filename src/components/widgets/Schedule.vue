@@ -445,7 +445,8 @@
               </div>
 
               <div
-                class="children drop-item-target"
+                class="children"
+                :class="{ 'drop-item-target': reassignable && multiline }"
                 :data-root-element-id="rootElement.id"
                 :style="childrenStyle(rootElement, multiline)"
                 v-else-if="rootElement.expanded"
@@ -532,6 +533,9 @@
                         height: `${40 * getNbLines(subchild)}px`
                       }"
                       class="subchild"
+                      :class="{ 'drop-item-target': reassignable }"
+                      :data-entity-type-id="childElement.object_id"
+                      :data-person-id="personId"
                     >
                       <div
                         class="day-off"
@@ -1045,7 +1049,7 @@ export default {
 
     getNbLines(items = []) {
       const values = items.map(item => item.line || 0)
-      return values.length ? Math.max(...values) + 1 : 0
+      return values.length ? Math.max(...values) + 1 : 1
     },
 
     refreshAllItemPositions() {
@@ -1206,7 +1210,42 @@ export default {
           this.resetDroppableTargets()
         }
         const currentRootElement = this.currentElement.parentElement
-        if (target && currentRootElement.id !== target.dataset.rootElementId) {
+        if (
+          this.subchildren &&
+          target &&
+          target.dataset.personId &&
+          target.dataset.entityTypeId &&
+          !this.currentElement.assignees.includes(target.dataset.personId)
+        ) {
+          // check rights
+          if (
+            target.dataset.personId === 'unassigned' ||
+            target.dataset.entityTypeId !== this.currentElement.entity_type_id
+          ) {
+            return
+          }
+
+          target.classList.add('droppable')
+
+          this.selection.forEach(item => {
+            // update item assignation in element hierarchy
+            const previousAssigneeId = item.assignees[0]
+            const newAssigneeId = target.dataset.personId
+            item.assignees = item.assignees.filter(
+              assigneeId => assigneeId !== previousAssigneeId
+            )
+            item.assignees.push(newAssigneeId)
+
+            this.$emit('item-unassign', item, previousAssigneeId)
+            this.$emit('item-assign', item, newAssigneeId)
+            this.refreshItemPositions(currentRootElement)
+          })
+        } else if (
+          !this.subchildren &&
+          target &&
+          target.dataset.rootElementId &&
+          currentRootElement.id !== target.dataset.rootElementId
+        ) {
           const newRootElement = this.hierarchy.find(
             rootElement => rootElement.id === target.dataset.rootElementId
           )
@@ -2844,7 +2883,7 @@ input[type='number'] {
 }
 
 .droppable {
-  background-color: rgba(var(--background-selectable-rgb), 0.5);
+  background-color: rgba(var(--background-selectable-rgb), 0.5) !important;
 
   * {
     pointer-events: none;
