@@ -1836,6 +1836,17 @@ export default {
     // Children
 
     expandRootElement(rootElement) {
+      if (rootElement.expanded) {
+        // clear selected items when collapsing the root element
+        this.selection.forEach(item => {
+          const taskRootElementId =
+            item.parentElement?.parentElement?.id || item.parentElement?.id
+          if (taskRootElementId === rootElement.id) {
+            this.removeFromSelection(item)
+          }
+        })
+      }
+
       this.$emit(
         'root-element-expanded',
         rootElement,
