@@ -17,28 +17,32 @@
         "
       >
       </span>
-      <div
-        class="tooltip"
-        @dblclick="onDoubleClick"
-        @keyup.esc="onClick"
-        v-if="isOpen"
-      >
+      <teleport to="body">
         <div
-          class="tooltip-text"
+          class="tooltip"
+          :class="{ dark: isDarkTheme }"
+          @dblclick="onDoubleClick"
           @keyup.esc="onClick"
-          v-html="renderMarkdown(entry.description)"
-          v-if="!isEditing"
-        ></div>
-        <textarea
-          class="tooltip-editor"
-          ref="text"
-          :value="entry.description"
-          @keyup.esc="onClick"
-          @keyup.ctrl.enter="onDoubleClick"
-          v-else
+          v-if="isOpen"
+          :style="tooltipStyle"
         >
-        </textarea>
-      </div>
+          <div
+            class="tooltip-text"
+            @keyup.esc="onClick"
+            v-html="renderMarkdown(entry.description)"
+            v-if="!isEditing"
+          ></div>
+          <textarea
+            class="tooltip-editor"
+            ref="text"
+            :value="entry.description"
+            @keyup.esc="onClick"
+            @keyup.ctrl.enter="onDoubleClick"
+            v-else
+          >
+          </textarea>
+        </div>
+      </teleport>
     </template>
   </td>
 </template>
@@ -46,6 +50,7 @@
 <script>
 import { renderMarkdown } from '@/lib/render'
 import stringHelpers from '@/lib/string'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'description-cell',
@@ -53,7 +58,8 @@ export default {
   data() {
     return {
       isEditing: false,
-      isOpen: false
+      isOpen: false,
+      tooltipPosition: { top: 0, left: 0 }
     }
   },
 
@@ -74,6 +80,18 @@ export default {
 
   emits: ['description-changed'],
 
+  computed: {
+    ...mapGetters(['isDarkTheme']),
+    tooltipStyle() {
+      return {
+        position: 'absolute',
+        top: this.tooltipPosition.top + 'px',
+        left: this.tooltipPosition.left + 'px',
+        zIndex: 1000
+      }
+    }
+  },
+
   methods: {
     renderMarkdown,
 
@@ -85,6 +103,18 @@ export default {
           !event.target.closest('.description-cell .tooltip')) ||
         event.keyCode === 27
       ) {
+        if (!this.isOpen) {
+          const td = event.currentTarget
+          const rect = td.getBoundingClientRect()
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop
+          const scrollLeft =
+            window.pageXOffset || document.documentElement.scrollLeft
+          this.tooltipPosition = {
+            top: rect.top + scrollTop - 110,
+            left: rect.left + scrollLeft + rect.width / 2 - 160
+          }
+        }
         this.isOpen = !this.isOpen
         if (!this.isOpen && this.isEditing) {
           this.isEditing = false
@@ -113,13 +143,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .description-cell .tooltip {
-    background: $dark-grey-light;
-    box-shadow: 0 0 3px 0 $dark-grey-strong;
-    &::after {
-      border-color: $dark-grey-light transparent transparent;
-    }
+.dark.tooltip {
+  background: $dark-grey-light;
+  box-shadow: 0 0 3px 0 $dark-grey-strong;
+  &::after {
+    border-color: $dark-grey-light transparent transparent;
   }
 }
 
@@ -133,18 +161,15 @@ td {
   min-width: 100px;
 }
 
-.description-cell .tooltip {
+.tooltip {
   background-color: $white;
   border-radius: 0.5rem;
   display: block;
   font-size: 0.9em;
-  left: 50%;
   min-height: 100px;
   max-height: 200px;
   padding: 0.6rem;
   position: absolute;
-  top: -100px;
-  transform: translatex(-50%);
   width: 320px;
   box-shadow: 0 0 3px 0 $grey;
   z-index: 100;
@@ -159,7 +184,7 @@ td {
     height: 80px;
   }
 
-  textarea {
+  .tooltip-editor {
     box-shadow: inset 0 0 3px 0 $grey;
     padding: 0.5em;
     color: inherit;
@@ -174,11 +199,11 @@ td {
     }
   }
 
-  &:after {
+  &::after {
     position: absolute;
     top: 100px;
     left: 50%;
-    transform: translatex(-50%);
+    transform: translateX(-50%);
 
     height: 0;
     width: 0;
