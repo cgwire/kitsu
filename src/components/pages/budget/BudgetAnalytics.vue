@@ -10,7 +10,7 @@
       </p>
       <p class="has-text-centered mt1">
         {{ budgetDepartments.length }} {{ $t('budget.departments') }} -
-        {{ budgetEntries.length }} {{ $t('budget.persons') }} -
+        {{ budgetEntries.length }} {{ $t('budget.entries') }} -
         {{ monthsBetweenProductionDates.length }} {{ $t('budget.months') }}
       </p>
     </div>

@@ -117,6 +117,81 @@ const csv = {
     return entries
   },
 
+  generateBudget(
+    t,
+    departmentMap,
+    personMap,
+    nameData,
+    currency,
+    monthsBetweenProductionDates,
+    totalEntry,
+    budgetDepartments
+  ) {
+    const name = csv.generateName(nameData)
+    const headers = [
+      t('budget.fields.department'),
+      '',
+      '',
+      t('budget.fields.base_salary'),
+      t('budget.fields.duration'),
+      ...monthsBetweenProductionDates.map(month => {
+        if (month.month() === 0) {
+          return month.format('MMM / YY')
+        } else {
+          return month.format('MMM')
+        }
+      }),
+      `${t('main.total')} (${currency})`
+    ]
+    const totalLine = [
+      `${t('main.total')}`,
+      '',
+      '',
+      '',
+      '',
+      ...monthsBetweenProductionDates.map(month => {
+        return totalEntry.monthCosts[month.format('YYYY-MM')] || ''
+      }),
+      totalEntry.total
+    ]
+    const entries = [totalLine]
+    budgetDepartments.forEach(departmentEntry => {
+      const department = departmentMap.get(departmentEntry.id)
+      entries.push([
+        department.name,
+        '',
+        '',
+        departmentEntry.monthly_salary,
+        departmentEntry.months_duration,
+        ...monthsBetweenProductionDates.map(month => {
+          return departmentEntry.monthCosts[month.format('YYYY-MM')] || ''
+        }),
+        departmentEntry.total
+      ])
+      departmentEntry.persons.forEach(personEntry => {
+        entries.push([
+          `${t('budget.positions.' + personEntry.position)}`,
+          `${t('budget.seniorities.' + personEntry.seniority)}`,
+          personEntry.person_id
+            ? personMap.get(personEntry.person_id).name
+            : t('budget.new_hiring'),
+          personEntry.monthly_salary,
+          personEntry.months_duration,
+          ...monthsBetweenProductionDates.map(month => {
+            return personEntry.monthCosts[month.format('YYYY-MM')] || ''
+          }),
+          personEntry.total
+        ])
+      })
+    })
+    const lines = [headers, ...entries]
+    return csv.buildCsvFile(name, lines)
+  },
+
+  generateName(nameData) {
+    return stringHelpers.slugify(nameData.join('_'))
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',

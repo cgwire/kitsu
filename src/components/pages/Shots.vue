@@ -451,6 +451,7 @@ export default {
   },
 
   mounted() {
+    this.setOptionalImportColumns()
     const finalize = () => {
       this.$nextTick(() => {
         // Needed to be sure the current production is set
@@ -508,6 +509,7 @@ export default {
       'isFps',
       'isLongShotList',
       'isMaxRetakes',
+      'isPaperProduction',
       'isResolution',
       'isShotDescription',
       'isShotEstimation',
@@ -612,6 +614,21 @@ export default {
       'uploadShotFile',
       'uploadEdlFile'
     ]),
+
+    setOptionalImportColumns() {
+      const columns = [
+        this.$t('shots.fields.name'),
+        this.$t('shots.fields.description'),
+        this.$t('shots.fields.nb_frames'),
+        this.$t('shots.fields.frame_in'),
+        this.$t('shots.fields.frame_out'),
+        this.$t('shots.fields.fps')
+      ]
+      if (this.isPaperProduction) {
+        columns.splice(1, 1)
+      }
+      this.optionalColumns = columns
+    },
 
     reloadEpisodeShotsIfNeeded() {
       if (
@@ -1087,14 +1104,16 @@ export default {
       if (
         descriptor.field_name === 'frame_in' &&
         shot.data?.frame_out &&
-        parseInt(shot.data.frame_out) > parseInt(value)
+        parseInt(shot.data.frame_out) > parseInt(value) &&
+        !this.isPaperProduction
       ) {
         data.nb_frames = parseInt(shot.data.frame_out) - parseInt(value) + 1
       }
       if (
         descriptor.field_name === 'frame_out' &&
         shot.data?.frame_in &&
-        parseInt(shot.data.frame_in) < parseInt(value)
+        parseInt(shot.data.frame_in) < parseInt(value) &&
+        !this.isPaperProduction
       ) {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
@@ -1161,6 +1180,7 @@ export default {
     },
 
     currentProduction() {
+      this.setOptionalImportColumns()
       if (!this.initialLoading) {
         this.$refs['shot-search-field']?.setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)

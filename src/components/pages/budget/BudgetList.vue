@@ -43,6 +43,12 @@
                   />
                 </div>
               </th>
+              <th class="datatable-row-header base-salary-header month">
+                {{ $t('budget.fields.base_salary') }}
+              </th>
+              <th class="datatable-row-header duration-header month">
+                {{ $t('budget.fields.duration') }}
+              </th>
               <th
                 :key="month"
                 class="month datatable-row-header"
@@ -67,11 +73,13 @@
             @touchstart="startBrowsing"
           >
             <tr class="datatable-row">
-              <td class="datatable-row-header" colspan="3">
+              <td class="datatable-row-header total-header" colspan="3">
                 <div class="pa05">
                   {{ $t('main.total') }}
                 </div>
               </td>
+              <td class="month"></td>
+              <td class="month"></td>
               <td
                 :key="month"
                 class="month"
@@ -115,6 +123,14 @@
                     </div>
                   </div>
                 </td>
+                <td
+                  class="base-salary-header text-right month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                ></td>
+                <td
+                  class="duration-header text-right month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                ></td>
                 <td
                   :key="month"
                   class="month"
@@ -177,16 +193,33 @@
                       </span>
                     </div>
                   </td>
+                  <td class="base-salary-header text-right entry-data">
+                    {{ (personEntry.monthly_salary || 0).toLocaleString() }}
+                  </td>
+                  <td class="duration-header text-right entry-data">
+                    {{ personEntry.months_duration }}
+                  </td>
                   <td
                     :key="month"
                     class="month"
                     v-for="month in monthsBetweenProductionDates"
                   >
-                    {{
-                      personEntry.monthCosts[
-                        month.format('YYYY-MM')
-                      ]?.toLocaleString()
-                    }}
+                    <input
+                      class="input-editor"
+                      type="number"
+                      min="0"
+                      step="1"
+                      :value="getMonthCost(personEntry, month)"
+                      @change="
+                        addPersonException(
+                          personEntry,
+                          month,
+                          $event.target.value
+                        )
+                      "
+                      v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
+                    />
+                    <span v-else>&nbsp;</span>
                   </td>
                   <td class="total-cost">
                     {{ personEntry.total.toLocaleString() }}
@@ -245,10 +278,6 @@ export default {
   },
 
   props: {
-    budgets: {
-      type: Array,
-      default: () => []
-    },
     budgetEntries: {
       type: Array,
       default: () => []
@@ -257,13 +286,17 @@ export default {
       type: Array,
       default: () => []
     },
-    monthsBetweenProductionDates: {
-      type: Array,
-      default: () => []
-    },
     currency: {
       type: String,
       default: 'USD'
+    },
+    currentBudget: {
+      type: Object,
+      default: () => {}
+    },
+    monthsBetweenProductionDates: {
+      type: Array,
+      default: () => []
     },
     isLoading: {
       type: Boolean,
@@ -310,7 +343,17 @@ export default {
   },
 
   methods: {
-    ...mapActions([]),
+    ...mapActions(['updateProductionBudgetEntry']),
+
+    getMonthCost(personEntry, month) {
+      const monthKey = month.format('YYYY-MM')
+      personEntry.exceptions = personEntry.exceptions || {}
+      return (
+        parseInt(personEntry.exceptions[monthKey]) ||
+        parseInt(personEntry.monthCosts[monthKey]) ||
+        0
+      )
+    },
 
     toggleDepartment(departmentId) {
       this.collapsedDepartments[departmentId] =
@@ -324,6 +367,22 @@ export default {
       return {
         backgroundColor: this.departmentMap.get(departmentId).color + opacity
       }
+    },
+
+    addPersonException(personEntry, month, value) {
+      const exceptions = personEntry.exceptions || {}
+      exceptions[month.format('YYYY-MM')] = value
+      const budgetEntry = {
+        id: personEntry.budget_entry_id,
+        ...personEntry,
+        exceptions
+      }
+      this.updateProductionBudgetEntry({
+        productionId: this.currentProduction.id,
+        budgetId: this.currentBudget.id,
+        budgetEntryId: personEntry.budget_entry_id,
+        budgetEntry
+      })
     }
   }
 }
@@ -338,6 +397,7 @@ export default {
 .department-header-header {
   max-width: 400px;
   width: 400px;
+  min-width: 400px;
   z-index: 5;
 }
 
@@ -346,6 +406,7 @@ export default {
 }
 
 .department-header {
+  max-width: 400px;
   min-width: 400px;
   position: sticky;
   padding: 0;
@@ -355,6 +416,7 @@ export default {
   color: white;
   height: 100%;
   min-width: 400px;
+  max-width: 400px;
   padding: 0.6em 1em;
 }
 
@@ -370,6 +432,14 @@ td.month {
   max-width: 80px;
   min-width: 80px;
   width: 80px;
+}
+
+td.entry-data {
+  text-align: right;
+  max-width: 80px;
+  min-width: 80px;
+  width: 80px;
+  padding: 10px;
 }
 
 .position {
@@ -398,8 +468,6 @@ td.datatable-row-header.name {
 }
 
 .actions {
-  max-width: 120px;
-  width: 120px;
   min-width: 120px;
 }
 
@@ -421,5 +489,20 @@ td.datatable-row-header.name {
     background: $dark-grey-light;
     color: $light-grey;
   }
+}
+
+.input-editor {
+  width: 100%;
+  text-align: right;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
 }
 </style>
