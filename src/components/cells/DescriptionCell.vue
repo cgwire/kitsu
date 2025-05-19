@@ -48,9 +48,10 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 import { renderMarkdown } from '@/lib/render'
 import stringHelpers from '@/lib/string'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'description-cell',
@@ -82,12 +83,11 @@ export default {
 
   computed: {
     ...mapGetters(['isDarkTheme']),
+
     tooltipStyle() {
       return {
-        position: 'absolute',
         top: this.tooltipPosition.top + 'px',
-        left: this.tooltipPosition.left + 'px',
-        zIndex: 1000
+        left: this.tooltipPosition.left + 'px'
       }
     }
   },
@@ -103,7 +103,8 @@ export default {
           !event.target.closest('.description-cell .tooltip')) ||
         event.keyCode === 27
       ) {
-        if (!this.isOpen) {
+        this.isOpen = !this.isOpen
+        if (this.isOpen) {
           const td = event.currentTarget
           const rect = td.getBoundingClientRect()
           const scrollTop =
@@ -111,12 +112,10 @@ export default {
           const scrollLeft =
             window.pageXOffset || document.documentElement.scrollLeft
           this.tooltipPosition = {
-            top: rect.top + scrollTop - 110,
+            top: rect.top + scrollTop - 105,
             left: rect.left + scrollLeft + rect.width / 2 - 160
           }
-        }
-        this.isOpen = !this.isOpen
-        if (!this.isOpen && this.isEditing) {
+        } else if (this.isEditing) {
           this.isEditing = false
           const val = this.$refs.text.value
           this.$emit('description-changed', val)
@@ -146,12 +145,13 @@ export default {
 .dark.tooltip {
   background: $dark-grey-light;
   box-shadow: 0 0 3px 0 $dark-grey-strong;
+
   &::after {
-    border-color: $dark-grey-light transparent transparent;
+    border-top-color: $dark-grey-light;
   }
 }
 
-td {
+.description-cell {
   cursor: pointer;
   position: relative;
 }
@@ -172,7 +172,7 @@ td {
   position: absolute;
   width: 320px;
   box-shadow: 0 0 3px 0 $grey;
-  z-index: 100;
+  z-index: 1000;
 
   p {
     margin: 1em;
@@ -204,26 +204,12 @@ td {
     top: 100px;
     left: 50%;
     transform: translateX(-50%);
-
     height: 0;
     width: 0;
-
-    border: 0.5rem solid;
-    border-color: $white transparent transparent;
+    border: 0.5rem solid transparent;
+    border-top-color: $white;
     content: '';
   }
-}
-
-.c-mask {
-  position: fixed;
-  z-index: 100;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  background-color: #000;
-  opacity: 0;
 }
 
 .c-mask {
