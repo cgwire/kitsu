@@ -78,10 +78,8 @@
                   {{ $t('main.total') }}
                 </div>
               </td>
-              <td class="month">
-              </td>
-              <td class="month">
-              </td>
+              <td class="month"></td>
+              <td class="month"></td>
               <td
                 :key="month"
                 class="month"
@@ -128,13 +126,11 @@
                 <td
                   class="base-salary-header text-right month"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
-                >
-                </td>
+                ></td>
                 <td
                   class="duration-header text-right month"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
-                >
-                </td>
+                ></td>
                 <td
                   :key="month"
                   class="month"
@@ -221,9 +217,7 @@
                           $event.target.value
                         )
                       "
-                      v-if="personEntry.monthCosts[
-                        month.format('YYYY-MM')
-                      ]"
+                      v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
                     />
                     <span v-else>&nbsp;</span>
                   </td>
@@ -354,9 +348,11 @@ export default {
     getMonthCost(personEntry, month) {
       const monthKey = month.format('YYYY-MM')
       personEntry.exceptions = personEntry.exceptions || {}
-      return parseInt(personEntry.exceptions[monthKey]) ||
-             parseInt(personEntry.monthCosts[monthKey]) ||
-             0
+      return (
+        parseInt(personEntry.exceptions[monthKey]) ||
+        parseInt(personEntry.monthCosts[monthKey]) ||
+        0
+      )
     },
 
     toggleDepartment(departmentId) {

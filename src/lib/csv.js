@@ -134,15 +134,13 @@ const csv = {
       '',
       t('budget.fields.base_salary'),
       t('budget.fields.duration'),
-      ...monthsBetweenProductionDates.map(
-        month => {
-          if (month.month() === 0) {
-            return month.format('MMM / YY')
-          } else {
-            return month.format('MMM')
-          }
+      ...monthsBetweenProductionDates.map(month => {
+        if (month.month() === 0) {
+          return month.format('MMM / YY')
+        } else {
+          return month.format('MMM')
         }
-      ),
+      }),
       `${t('main.total')} (${currency})`
     ]
     const totalLine = [
