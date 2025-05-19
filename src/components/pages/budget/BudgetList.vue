@@ -43,10 +43,10 @@
                   />
                 </div>
               </th>
-              <th class="datatable-row-header duration-header month">
+              <th class="datatable-row-header base-salary-header month">
                 {{ $t('budget.fields.base_salary') }}
               </th>
-              <th class="datatable-row-header base-salary-header month">
+              <th class="datatable-row-header duration-header month">
                 {{ $t('budget.fields.duration') }}
               </th>
               <th
@@ -126,12 +126,12 @@
                   </div>
                 </td>
                 <td
-                  class="duration-header text-right month"
+                  class="base-salary-header text-right month"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
                 >
                 </td>
                 <td
-                  class="base-salary-header text-right month"
+                  class="duration-header text-right month"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
                 >
                 </td>
@@ -211,7 +211,7 @@
                     <input
                       class="input-editor"
                       type="number"
-                      :min="0"
+                      min="0"
                       step="1"
                       :value="getMonthCost(personEntry, month)"
                       @change="
