@@ -10,21 +10,23 @@
         </div>
         <chevron-down-icon class="ml05 down-icon flexrow-item" />
       </div>
-      <div
-        class="select-input"
-        :class="{ 'open-top': openTop }"
-        ref="select"
-        v-if="showTaskTypeList"
-      >
+      <teleport to="body">
         <div
-          class="task-type-line"
-          :key="taskType.id"
-          @click="selectTaskType(taskType)"
-          v-for="taskType in taskTypeList"
+          class="select-input"
+          :class="[{ 'open-top': openTop }, { dark: isDarkTheme }]"
+          :style="tooltipStyle"
+          v-if="showTaskTypeList"
         >
-          <task-type-name :task-type="taskType" />
+          <div
+            class="task-type-line"
+            :key="taskType.id"
+            @click="selectTaskType(taskType)"
+            v-for="taskType in taskTypeList"
+          >
+            <task-type-name :task-type="taskType" />
+          </div>
         </div>
-      </div>
+      </teleport>
     </div>
     <combobox-mask :displayed="showTaskTypeList" @click="toggleTaskTypeList" />
   </div>
@@ -50,7 +52,8 @@ export default {
 
   data() {
     return {
-      showTaskTypeList: false
+      showTaskTypeList: false,
+      tooltipPosition: { top: 0, left: 0 }
     }
   },
 
@@ -85,7 +88,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['taskTypeMap']),
+    ...mapGetters(['taskTypeMap', 'isDarkTheme']),
 
     currentTaskType() {
       if (this.modelValue) {
@@ -103,6 +106,13 @@ export default {
 
     defaultPlaceholder() {
       return this.$t('task_types.add_task_type_placeholder')
+    },
+
+    tooltipStyle() {
+      return {
+        top: this.tooltipPosition.top + 'px',
+        left: this.tooltipPosition.left + 'px'
+      }
     }
   },
 
@@ -112,8 +122,22 @@ export default {
       this.showTaskTypeList = false
     },
 
-    toggleTaskTypeList() {
+    toggleTaskTypeList(event) {
       this.showTaskTypeList = !this.showTaskTypeList
+
+      if (!this.showTaskTypeList) {
+        return
+      }
+
+      const curDiv = event.currentTarget
+      const rect = curDiv.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollLeft =
+        window.pageXOffset || document.documentElement.scrollLeft
+      this.tooltipPosition = {
+        top: rect.top + scrollTop + 35,
+        left: rect.left + scrollLeft
+      }
     }
   }
 }
@@ -176,7 +200,7 @@ export default {
   overflow-y: auto;
   position: absolute;
   width: 195px;
-  z-index: 300;
+  z-index: 1000;
 
   &.open-top {
     bottom: 41px;
