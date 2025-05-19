@@ -14,9 +14,8 @@
         <div
           class="select-input"
           :class="[{ 'open-top': openTop }, { dark: isDarkTheme }]"
-          ref="select"
-          v-if="showTaskTypeList"
           :style="tooltipStyle"
+          v-if="showTaskTypeList"
         >
           <div
             class="task-type-line"
@@ -111,10 +110,8 @@ export default {
 
     tooltipStyle() {
       return {
-        position: 'absolute',
         top: this.tooltipPosition.top + 'px',
-        left: this.tooltipPosition.left + 'px',
-        zIndex: 1000
+        left: this.tooltipPosition.left + 'px'
       }
     }
   },
@@ -127,6 +124,10 @@ export default {
 
     toggleTaskTypeList(event) {
       this.showTaskTypeList = !this.showTaskTypeList
+
+      if (!this.showTaskTypeList) {
+        return
+      }
 
       const curDiv = event.currentTarget
       const rect = curDiv.getBoundingClientRect()
@@ -199,7 +200,7 @@ export default {
   overflow-y: auto;
   position: absolute;
   width: 195px;
-  z-index: 300;
+  z-index: 1000;
 
   &.open-top {
     bottom: 41px;
