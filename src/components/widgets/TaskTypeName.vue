@@ -91,8 +91,9 @@ export default {
     ...mapGetters(['isCurrentUserClient']),
 
     color() {
-      if (this.taskType.color.toUpperCase() === '#000000') return '$grey-strong'
-      else return this.taskType.color
+      return this.taskType.color?.toUpperCase() === '#000000'
+        ? '$grey-strong'
+        : this.taskType.color
     },
 
     targetRoute() {

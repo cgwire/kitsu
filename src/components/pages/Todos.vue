@@ -140,7 +140,6 @@
 </template>
 
 <script>
-import { useHead } from 'unhead'
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
 import firstBy from 'thenby'
@@ -211,9 +210,6 @@ export default {
   },
 
   async mounted() {
-    useHead({
-      title: `${this.$t('tasks.my_tasks')} - Kitsu`
-    })
     this.updateActiveTab()
     await this.$nextTick()
     await this.loadData()

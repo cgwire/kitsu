@@ -541,6 +541,11 @@ export default {
   },
 
   mounted() {
+    if (!this.currentTaskType?.id) {
+      this.$router.push({ name: 'not-found' })
+      return
+    }
+
     this.setOptionalImportColumns()
     this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
@@ -1549,7 +1554,7 @@ export default {
     // Quickfix for the edge case where the backPath is not properly set
     // because it was set when the episode was not fully loaded.
     currentEpisode() {
-      if (this.currentEpisode && !this.backPath.params.episode_id) {
+      if (this.currentEpisode && !this.backPath.params?.episode_id) {
         this.$store.commit('RESET_PRODUCTION_PATH', {
           productionId: this.currentProduction.id,
           episodeId: this.currentEpisode.id

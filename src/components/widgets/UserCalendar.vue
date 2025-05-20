@@ -111,7 +111,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['productionMap', 'taskMap', 'taskStatusMap', 'taskTypeMap'])
+    ...mapGetters([
+      'isDarkTheme',
+      'productionMap',
+      'taskMap',
+      'taskStatusMap',
+      'taskTypeMap'
+    ])
   },
 
   methods: {

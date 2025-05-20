@@ -440,6 +440,10 @@ import TextField from '@/components/widgets/TextField.vue'
 import TimelineItem from '@/components/pages/production/TimelineItem.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+import assetTypeStore from '@/store/modules/assettypes'
+import taskStatusStore from '@/store/modules/taskstatus.js'
+import taskTypeStore from '@/store/modules/tasktypes'
+
 export default {
   name: 'new-production',
 
@@ -532,15 +536,24 @@ export default {
     ...mapGetters([
       'assetsCsvFormData',
       'assetTaskTypes',
-      'assetTypeMap',
       'assetTypes',
       'productionStatus',
       'shotsCsvFormData',
       'shotTaskTypes',
-      'taskStatus',
-      'taskStatusMap',
-      'taskTypeMap'
+      'taskStatus'
     ]),
+
+    assetTypeMap() {
+      return assetTypeStore.cache.assetTypeMap
+    },
+
+    taskStatusMap() {
+      return taskStatusStore.cache.taskStatusMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
+    },
 
     isTVShow() {
       return this.productionToCreate.settings.type === 'tvshow'
