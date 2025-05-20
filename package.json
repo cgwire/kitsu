@@ -26,7 +26,7 @@
     "@fullcalendar/multimonth": "6.1.17",
     "@fullcalendar/vue3": "6.1.17",
     "@google/model-viewer": "4.1.0",
-    "@sentry/vue": "9.20.0",
+    "@sentry/vue": "9.19.0",
     "@unhead/vue": "2.0.9",
     "@vuepic/vue-datepicker": "11.0.2",
     "async": "3.2.6",
