@@ -8,21 +8,29 @@
           :budget="currentBudget"
           :is-loading="loading.budgets"
           :is-error="errors.budgets"
+          :is-error-expenses="errors.expenses"
+          :is-loading-expenses="loading.expenses"
+          :is-showing-expenses="expenses.showing"
           @change-budget="onChangeBudget"
           @delete-budget="onDeleteBudgetClicked"
           @edit-budget="onEditBudgetClicked"
           @export-budget="onExportBudgetClicked"
+          @toggle-expenses="onToggleExpenses"
           @new-version="onNewBudgetVersionClicked"
         />
 
         <budget-list
           :budget-departments="budgetDepartments"
           :budget-entries="budgetEntries"
+          :costs-months="costsMonths"
           :currency="currentBudget?.currency || 'USD'"
           :current-budget="currentBudget"
-          :is-loading="loading.entries"
+          :expenses="expenses.data"
           :is-error="errors.entries"
+          :is-loading="loading.entries"
+          :is-showing-expenses="expenses.showing"
           :months-between-production-dates="monthsBetweenProductionDates"
+          :salary-scale="salaryScale"
           :total-entry="totalEntry"
           @add-budget-entry="onAddBudgetEntry"
           @delete-budget-entry="deleteBudgetEntry"
@@ -144,24 +152,31 @@ export default {
       budgetEntryToEdit: {},
       budgetOptions: [],
       budgetToEdit: {},
+      costsMonths: [],
       currentBudget: {},
       errors: {
         budgets: false,
         createBudget: false,
+        deleteBudget: false,
+        deleteBudgetEntry: false,
         editBudget: false,
         editBudgetEntry: false,
         entries: false,
-        deleteBudget: false,
-        deleteBudgetEntry: false
+        expenses: false
+      },
+      expenses: {
+        data: {},
+        showing: false
       },
       loading: {
         budgets: true,
         createBudget: false,
+        deleteBudget: false,
+        deleteBudgetEntry: false,
         editBudget: false,
         editBudgetEntry: false,
         entries: true,
-        deleteBudget: false,
-        deleteBudgetEntry: false
+        expenses: false
       },
       modals: {
         createBudget: false,
@@ -184,6 +199,14 @@ export default {
       this.currentProduction.start_date,
       this.currentProduction.end_date
     )
+    const months = this.getMonthsBetweenDates(
+      this.currentProduction.start_date,
+      moment()
+    ).map(month => month.format('YYYY-MM'))
+    this.costsMonths = months.reduce((acc, month) => {
+      acc[month] = true
+      return acc
+    }, {})
   },
 
   computed: {
@@ -310,6 +333,7 @@ export default {
       'createProductionBudget',
       'deleteProductionBudget',
       'deleteProductionBudgetEntry',
+      'loadExpenses',
       'loadProductionBudget',
       'loadProductionBudgets',
       'loadProductionBudgetEntry',
@@ -631,6 +655,24 @@ export default {
         current.add(1, 'month')
       }
       return months
+    },
+
+    async onToggleExpenses() {
+      if (!this.expenses.showing) {
+        try {
+          this.loading.expenses = true
+          this.expenses.data = await this.loadExpenses(
+            this.currentProduction.id
+          )
+          console.log(this.expenses)
+        } catch (error) {
+          console.error(error)
+          this.errors.expenses = true
+        } finally {
+          this.loading.expenses = false
+        }
+      }
+      this.expenses.showing = !this.expenses.showing
     }
   },
 

@@ -46,6 +46,20 @@
         icon="trash"
         @click="$emit('delete-budget')"
       />
+      <button-simple
+        class="mr05"
+        :active="isShowingExpenses"
+        :is-loading="isLoadingExpenses"
+        :text="
+          isShowingExpenses
+            ? $t('budget.hide_expenses')
+            : $t('budget.show_expenses')
+        "
+        @click="$emit('toggle-expenses')"
+      />
+      <span class="error" v-if="isErrorExpenses">
+        {{ $t('budget.expenses_error') }}
+      </span>
       <div class="filler"></div>
       <button-simple
         class="flexrow-item"
@@ -86,6 +100,18 @@ defineProps({
   isError: {
     type: Boolean,
     default: false
+  },
+  isErrorExpenses: {
+    type: Boolean,
+    default: true
+  },
+  isLoadingExpenses: {
+    type: Boolean,
+    default: false
+  },
+  isShowingExpenses: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -93,8 +119,9 @@ defineEmits([
   'change-budget',
   'delete-budget',
   'edit-budget',
-  'new-version',
-  'export-budget'
+  'export-budget',
+  'toggle-expenses',
+  'new-version'
 ])
 </script>
 

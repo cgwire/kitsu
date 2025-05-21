@@ -73,6 +73,10 @@ const actions = {
       budgetId,
       budgetEntryId
     )
+  },
+
+  async loadExpenses({ commit }, productionId) {
+    return await budgetApi.getExpenses(productionId)
   }
 }
 

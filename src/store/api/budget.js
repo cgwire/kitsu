@@ -83,5 +83,9 @@ export default {
     return client.pdel(
       `/api/data/projects/${projectId}/budgets/${budgetId}/entries/${budgetEntryId}`
     )
+  },
+
+  getExpenses(projectId) {
+    return client.pget(`/api/data/projects/${projectId}/budgets/time-spents`)
   }
 }
