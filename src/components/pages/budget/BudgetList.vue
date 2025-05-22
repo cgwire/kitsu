@@ -551,7 +551,6 @@ export default {
         if (!differences[department.id]) {
           differences[department.id] = { total: 0 }
         }
-        console.log(department.id)
         department.persons.forEach(person => {
           if (!person.person_id) return
           if (!differences[department.id][person.person_id]) {
