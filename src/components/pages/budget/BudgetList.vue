@@ -564,7 +564,6 @@ export default {
             this.convertedExpenses[department.id]?.[person.person_id]?.total ||
             0
           const personDifference = personTotal - expense || 0
-          console.log(person.person_id, personDifference, personTotal, expense)
           differences[department.id][person.person_id] += personDifference
           differences[department.id].total += personDifference
         })
