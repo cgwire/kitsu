@@ -599,7 +599,6 @@ export default {
         monthKey = month.format('YYYY-MM')
       }
       personEntry.exceptions = personEntry.exceptions || {}
-      personEntry.exceptions = personEntry.exceptions || {}
       return (
         parseInt(personEntry.exceptions[monthKey]) ||
         parseInt(personEntry.monthCosts[monthKey]) ||
