@@ -664,7 +664,6 @@ export default {
           this.expenses.data = await this.loadExpenses(
             this.currentProduction.id
           )
-          console.log(this.expenses)
         } catch (error) {
           console.error(error)
           this.errors.expenses = true
