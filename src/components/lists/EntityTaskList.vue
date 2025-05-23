@@ -106,7 +106,8 @@
             <td class="startdate">{{ entityStartDate }}</td>
             <td class="duedate">{{ entityDueDate }}</td>
             <td class="assignees">
-              {{ entityAssignees.length }} {{ $t('budget.persons') }}
+              {{ entityAssignees.length }}
+              {{ $tc('people.persons', entityAssignees.length) }}
             </td>
             <td class="end-cell"></td>
           </tr>
