@@ -12,7 +12,7 @@ import {
 import stringHelpers from '@/lib/string'
 
 /*
- * Common functions for shot, asset, edit, sequncen and edit pages.
+ * Common functions for asset, edit, episode, sequence and shot pages.
  */
 export const entityMixin = {
   data() {
@@ -27,6 +27,7 @@ export const entityMixin = {
         { label: this.$t('main.label.preview_files'), value: 'preview-files' },
         { label: this.$t('main.label.timelog'), value: 'time-logs' }
       ],
+      scheduleItems: [],
       zoomOptions: [
         { label: '1', value: 1 },
         { label: '2', value: 2 },
@@ -99,9 +100,31 @@ export const entityMixin = {
       } else {
         return parseDate(this.currentProduction.end_date)
       }
+    }
+  },
+
+  methods: {
+    ...mapActions(['addSelectedTask', 'clearSelectedTasks', 'updateTask']),
+
+    changeTab(tab) {
+      this.selectedTab = tab
     },
 
-    scheduleItems() {
+    onEditClicked() {
+      this.modals.edit = true
+    },
+
+    onTaskSelected(task) {
+      this.clearSelectedTasks()
+      if (!this.currentTask || this.currentTask.id !== task.id) {
+        this.addSelectedTask(task)
+        this.currentTask = task
+      } else {
+        this.currentTask = null
+      }
+    },
+
+    initScheduleItems() {
       let manDays = 0
       const rootElement = {
         avatar: false,
@@ -177,29 +200,7 @@ export const entityMixin = {
         endDate: rootEndDate,
         man_days: manDays
       })
-      return [rootElement]
-    }
-  },
-
-  methods: {
-    ...mapActions(['addSelectedTask', 'clearSelectedTasks', 'updateTask']),
-
-    changeTab(tab) {
-      this.selectedTab = tab
-    },
-
-    onEditClicked() {
-      this.modals.edit = true
-    },
-
-    onTaskSelected(task) {
-      this.clearSelectedTasks()
-      if (!this.currentTask || this.currentTask.id !== task.id) {
-        this.addSelectedTask(task)
-        this.currentTask = task
-      } else {
-        this.currentTask = null
-      }
+      this.scheduleItems = [rootElement]
     },
 
     saveTaskScheduleItem(item) {
@@ -237,6 +238,13 @@ export const entityMixin = {
             this.scheduleItems[0].startDate
           )
         }
+      }
+    },
+
+    currentTasks: {
+      immediate: true,
+      handler() {
+        this.initScheduleItems()
       }
     },
 
