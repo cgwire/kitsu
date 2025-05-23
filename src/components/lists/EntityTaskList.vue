@@ -67,7 +67,7 @@
             <td class="estimation">
               {{ getTaskEstimation(task) }}
             </td>
-            <td class="estimation">
+            <td class="duration">
               {{ getTaskDuration(task) }}
             </td>
             <td class="startdate">
@@ -102,11 +102,12 @@
             <td>{{ $t('main.total') }}</td>
             <td>{{ entityProgress }}</td>
             <td class="estimation">{{ formatDuration(entityEstimation) }}</td>
-            <td class="estimation">{{ formatDuration(entityDuration) }}</td>
+            <td class="duration">{{ formatDuration(entityDuration) }}</td>
             <td class="startdate">{{ entityStartDate }}</td>
             <td class="duedate">{{ entityDueDate }}</td>
             <td class="assignees">
-              {{ entityAssignees.length }} {{ $t('budget.persons') }}
+              {{ entityAssignees.length }}
+              {{ $tc('people.persons', entityAssignees.length) }}
             </td>
             <td class="end-cell"></td>
           </tr>
@@ -230,10 +231,7 @@ export default {
     },
 
     entityAssignees() {
-      return this.entries.reduce((acc, task) => {
-        const fullTask = this.getTask(task.id)
-        return [...acc, ...fullTask.assignees]
-      }, [])
+      return [...new Set(this.entries.flatMap(task => task.assignees))]
     }
   },
 
@@ -304,7 +302,8 @@ export default {
   min-width: 250px;
 }
 
-.estimation {
+.estimation,
+.duration {
   max-width: 50px;
   min-width: 50px;
   text-align: right;

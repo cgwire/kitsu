@@ -290,6 +290,7 @@ td.type {
 }
 .date {
   width: 80px;
+  white-space: nowrap;
 }
 
 .original-name {
