@@ -67,7 +67,7 @@
             <td class="estimation">
               {{ getTaskEstimation(task) }}
             </td>
-            <td class="estimation">
+            <td class="duration">
               {{ getTaskDuration(task) }}
             </td>
             <td class="startdate">
@@ -102,7 +102,7 @@
             <td>{{ $t('main.total') }}</td>
             <td>{{ entityProgress }}</td>
             <td class="estimation">{{ formatDuration(entityEstimation) }}</td>
-            <td class="estimation">{{ formatDuration(entityDuration) }}</td>
+            <td class="duration">{{ formatDuration(entityDuration) }}</td>
             <td class="startdate">{{ entityStartDate }}</td>
             <td class="duedate">{{ entityDueDate }}</td>
             <td class="assignees">
@@ -304,7 +304,8 @@ export default {
   min-width: 250px;
 }
 
-.estimation {
+.estimation,
+.duration {
   max-width: 50px;
   min-width: 50px;
   text-align: right;
