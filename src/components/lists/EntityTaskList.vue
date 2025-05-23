@@ -231,10 +231,7 @@ export default {
     },
 
     entityAssignees() {
-      return this.entries.reduce((acc, task) => {
-        const fullTask = this.getTask(task.id)
-        return [...acc, ...fullTask.assignees]
-      }, [])
+      return [...new Set(this.entries.flatMap(task => task.assignees))]
     }
   },
 
