@@ -201,7 +201,7 @@ export const getKeyWords = queryText => {
   } else {
     queryText = queryText.trim()
     queryText = queryText.replace(/"([^"]*)"/g, (match, p1) => {
-      return '"' + p1.replace(/ /g, '@') + '"'
+      return '"' + p1.replace(/ /g, '\u00A0') + '"'
     })
 
     return queryText
@@ -211,7 +211,7 @@ export const getKeyWords = queryText => {
       .replace(EQUAL_REGEX, '')
       .replace(MULTIPLE_REGEX, '')
       .split(' ')
-      .map(query => query.replace(/@/g, ' '))
+      .map(query => query.replace(/\u00A0/g, ' '))
       .map(query => {
         if (query[0] === '"') {
           query = query.substring(1)
