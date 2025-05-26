@@ -191,9 +191,9 @@ const applyFiltersFunctions = {
 /**
  * Extract keywords from a given text. Remove equality and exclusion
  * expressions.
- * Replace spaces inside quotes with '@' to allow searching for names containing spaces
+ * Replace spaces inside quotes with '\u00A0' to allow searching for names containing spaces
  *    (e.g., "my sequence" becomes "my@sequence")
- * The '@' will be removed after splitting on spaces
+ * The '\u00A0' will be removed after splitting on spaces
  */
 export const getKeyWords = queryText => {
   if (!queryText) {
