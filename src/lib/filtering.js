@@ -191,11 +191,19 @@ const applyFiltersFunctions = {
 /**
  * Extract keywords from a given text. Remove equality and exclusion
  * expressions.
+ * Replace spaces inside quotes with '@' to allow searching for names containing spaces
+ *    (e.g., "my sequence" becomes "my@sequence")
+ * The '@' will be removed after splitting on spaces
  */
 export const getKeyWords = queryText => {
   if (!queryText) {
     return []
   } else {
+    queryText = queryText.trim()
+    queryText = queryText.replace(/"([^"]*)"/g, (match, p1) => {
+      return '"' + p1.replace(/ /g, '@') + '"'
+    })
+
     return queryText
       .replace(UNION_REGEX, '')
       .replace(EQUAL_PRIORITY_REGEX, '')
@@ -203,6 +211,16 @@ export const getKeyWords = queryText => {
       .replace(EQUAL_REGEX, '')
       .replace(MULTIPLE_REGEX, '')
       .split(' ')
+      .map(query => query.replace(/@/g, ' '))
+      .map(query => {
+        if (query[0] === '"') {
+          query = query.substring(1)
+        }
+        if (query[query.length - 1] === '"') {
+          query = query.substring(0, query.length - 1)
+        }
+        return query.trim()
+      })
       .filter(query => {
         return query.length > 0 && query[0] !== '-' && query !== 'withthumbnail'
       })
