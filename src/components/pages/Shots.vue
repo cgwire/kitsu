@@ -966,6 +966,9 @@ export default {
     },
 
     onSequenceClicked(sequenceName) {
+      if (sequenceName.includes(' ')) {
+        sequenceName = `"${sequenceName}"`
+      }
       this.searchField.setValue(`${this.shotSearchText} ${sequenceName}`)
       this.onSearchChange()
     },
