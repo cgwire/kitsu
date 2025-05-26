@@ -436,7 +436,8 @@ export default {
         person =>
           !this.assignments.excludes.includes(person.id) &&
           person.role !== 'client' &&
-          (!person.departments.length ||
+          (['admin', 'manager'].includes(person.role) ||
+            !person.departments.length ||
             person.departments.includes(taskType?.department_id))
       )
     },
