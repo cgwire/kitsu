@@ -47,6 +47,7 @@
               <div class="flexrow-item has-text-right">
                 <button-simple
                   icon="edit"
+                  :title="$t('sequences.edit_title')"
                   @click="modals.edit = true"
                   v-if="isCurrentUserManager"
                 />
