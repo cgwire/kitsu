@@ -44,11 +44,16 @@
  */
 
 import { mapActions, mapGetters } from 'vuex'
+import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import { modalMixin } from '@/components/modals/base_modal'
 
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
+
+import assetStore from '@/store/modules/assets'
+import shotStore from '@/store/modules/shots'
+import sequenceStore from '@/store/modules/sequences'
 
 export default {
   name: 'view-playlist-modal',
@@ -123,17 +128,15 @@ export default {
     },
 
     isAssetPlaylist() {
-      if (this.currentPlaylist.shots.length > 0) {
-        return this.currentPlaylist.shots[0].sequence_name === undefined
-      }
-      return false
+      return this.currentEntityType === 'asset'
     },
 
     isSequencePlaylist() {
-      if (this.currentPlaylist.sequences.length > 0) {
-        return this.currentPlaylist.sequences[0].sequence_name === undefined
-      }
-      return false
+      return this.currentEntityType === 'sequence'
+    },
+
+    isShotPlaylist() {
+      return this.currentEntityType === 'shot'
     },
 
     currentEntityType() {
@@ -141,6 +144,26 @@ export default {
       if (this.$route.path.indexOf('asset') > 0) type = 'asset'
       if (this.$route.path.indexOf('sequence') > 0) type = 'sequence'
       return type
+    },
+
+    assetMap() {
+      return assetStore.cache.assetMap
+    },
+
+    shotMap() {
+      return shotStore.cache.shotMap
+    },
+
+    sequenceMap() {
+      return sequenceStore.cache.sequenceMap
+    },
+
+    frameDuration() {
+      return Math.round((1 / this.fps) * 10000) / 10000
+    },
+
+    fps() {
+      return parseFloat(this.currentProduction?.fps) || 25
     }
   },
 
@@ -180,6 +203,7 @@ export default {
       entities.forEach(entity => {
         this.previewFileEntityMap.set(entity.preview_file_id, entity)
         const previewFileGroups = Object.values(entity.preview_files)
+        this.convertEntityToPlaylistFormat(entity)
         previewFileGroups.forEach(previewFiles => {
           previewFiles.forEach(previewFile => {
             this.previewFileMap.set(previewFile.id, previewFile)
@@ -189,6 +213,72 @@ export default {
       })
       this.currentPlaylist.shots = Object.values(entityMap)
       this.currentEntities = entityMap
+    },
+
+    convertEntityToPlaylistFormat(entityInfo) {
+      let entity
+      if (this.isAssetPlaylist) {
+        entity = this.assetMap.get(entityInfo.id)
+      } else if (this.isSequencePlaylist) {
+        entity = this.sequenceMap.get(entityInfo.id)
+        if (this.currentEpisode) {
+          entity.episode_name = this.currentEpisode.name
+        }
+      } else {
+        entity = this.shotMap.get(entityInfo.id)
+      }
+      if (entity) {
+        const playlistEntity = {
+          id: entityInfo.id,
+          name: entity.name,
+          nb_frames:
+            entityInfo.nb_frames ||
+            entity.nb_frames ||
+            DEFAULT_NB_FRAMES_PICTURE,
+          parent_name:
+            entity.sequence_name ||
+            entity.episode_name ||
+            entity.asset_type_name,
+          preview_files: entityInfo.preview_files,
+          preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
+          preview_file_extension:
+            entityInfo.preview_file_extension || entity.preview_file_extension,
+          preview_file_revision:
+            entityInfo.preview_file_revision || entity.preview_file_revision,
+          preview_file_width:
+            entityInfo.preview_file_width || entity.preview_file_width,
+          preview_file_height:
+            entityInfo.preview_file_height || entity.preview_file_height,
+          preview_file_duration:
+            entityInfo.preview_file_duration || entity.preview_file_duration,
+          preview_file_task_id:
+            entityInfo.task_id ||
+            entityInfo.preview_file_task_id ||
+            entity.preview_file_task_id,
+          preview_file_annotations:
+            entityInfo.preview_file_annotations ||
+            entity.preview_file_annotations,
+          preview_file_previews:
+            entityInfo.preview_file_previews || entity.preview_file_previews,
+          preview_nb_frames:
+            entityInfo.nb_frames ||
+            entity.nb_frames ||
+            DEFAULT_NB_FRAMES_PICTURE
+        }
+        Object.assign(entityInfo, playlistEntity)
+        this.previewFileEntityMap.set(
+          playlistEntity.preview_file_id,
+          playlistEntity
+        )
+        const previews = playlistEntity.preview_file_previews || []
+        previews.forEach(preview => {
+          preview.duration = entity.preview_file_duration
+          this.previewFileMap.set(preview.id, preview)
+        })
+        return playlistEntity
+      } else {
+        return entityInfo
+      }
     },
 
     onSaveClicked() {
@@ -251,9 +341,9 @@ export default {
         this.isLoading = true
         this.loadTempPlaylist({ taskIds: this.currentTaskIds, sort: this.sort })
           .then(entities => {
+            this.currentPlaylist.for_entity = this.currentEntityType
             this.setupEntities(entities)
             this.isLoading = false
-            this.currentPlaylist.for_entity = this.currentEntityType
           })
           .catch(console.error)
       } else {
