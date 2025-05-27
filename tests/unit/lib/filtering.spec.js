@@ -15,6 +15,13 @@ describe('lib/filtering', () => {
       expect(keyWords).toEqual(['chars', 'bunny'])
     })
 
+    it('hold space query', () => {
+      const keyWords = getKeyWords(
+        'chars "bunny fat" modeling=wip -bunnyfat [multiple]'
+      )
+      expect(keyWords).toEqual(['chars', 'bunny fat'])
+    })
+
     it('no keyword query', () => {
       const keyWords = getKeyWords('modeling=wip -bunnyfat')
       expect(keyWords).toEqual([])
