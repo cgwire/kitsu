@@ -502,6 +502,11 @@ export default {
       'organisation'
     ]),
 
+    /* It converts the expenses to the budget format where there is an
+     * entry for each department and each person. It also calculates the totals
+     * for each person, department and for all the departments.
+     * It also converts the time spent to a cost.
+     */
     convertedExpenses() {
       const convertedExpenses = {}
       const expenses = this.expenses || {}
@@ -540,11 +545,85 @@ export default {
       return convertedExpenses
     },
 
+    /* It extends the budget departments with the expenses that don't have
+     * equivalent entries in the budget departments. It also adds the new
+     * departments to the budget departments if needed.
+     */
     extendedBudgetDepartments() {
       if (!this.isShowingExpenses) return this.budgetDepartments
-      return this.budgetDepartments
+
+      const existingDepartments = this.budgetDepartments.reduce(
+        (acc, department) => {
+          acc[department.id] = true
+          return acc
+        },
+        {}
+      )
+
+      const newDepartments = Object.keys(this.expenses)
+        .filter(departmentId => !existingDepartments[departmentId])
+        .map(departmentId => ({
+          id: departmentId,
+          monthCosts: {},
+          total: 0,
+          duration: 0,
+          persons: [],
+          start_date: null
+        }))
+
+      const extendedBudgetDepartments = [
+        ...this.budgetDepartments,
+        ...newDepartments
+      ]
+
+      const existingEntries = extendedBudgetDepartments.reduce(
+        (acc, department) => {
+          department.persons.forEach(entry => {
+            if (!acc[department.id]) {
+              acc[department.id] = {}
+            }
+            acc[department.id][entry.person_id] = true
+          })
+          return acc
+        },
+        {}
+      )
+
+      Object.keys(this.expenses).forEach(departmentId => {
+        if (departmentId === 'total') return
+        console.log(departmentId)
+        Object.keys(this.expenses[departmentId]).forEach(personId => {
+          if (personId === 'total') return
+          if (!existingEntries[departmentId]?.[personId]) {
+            const person = this.personMap.get(personId)
+            extendedBudgetDepartments
+              .find(department => department.id === departmentId)
+              .persons.push({
+                id: null,
+                person_id: personId,
+                budget_entry_id: null,
+                department_id: departmentId,
+                monthCosts: {},
+                position: person.position,
+                seniority: person.seniority,
+                total: 0,
+                months_duration: 0,
+                monthly_salary: 0,
+                daily_salary: person.daily_salary,
+                start_date: null,
+                exceptions: {}
+              })
+          }
+        })
+      })
+
+      return extendedBudgetDepartments
     },
 
+    /* It calculates the difference between the consumed budget and the
+     * expenses. It runs through all the departments and persons and
+     * calculates the difference for each person. It aggregates the
+     */
     differences() {
       const differences = {}
       this.budgetDepartments.forEach(department => {
@@ -575,6 +654,9 @@ export default {
   methods: {
     ...mapActions(['updateProductionBudgetEntry']),
 
+    /* It gets the daily rate of a person, and use the salary scale if
+     * no daily rate is available.
+     */
     getDailyRate(deparmentId, personId) {
       const person = this.personMap.get(personId)
       if (!person) return 0
@@ -585,11 +667,17 @@ export default {
       return person.daily_salary || salaryScale
     },
 
+    /* It converts the time spent to days then multiply it with the
+     * given daily rate.
+     */
     convertTimeSpentToCost(dailyRate, timeSpent) {
       const days = timeSpent / 60 / this.organisation.hours_by_day
       return Math.round(days * dailyRate)
     },
 
+    /* It gets the cost of a person for a given month, exceptions are
+     * prioritized over the month costs.
+     */
     getMonthCost(personEntry, month) {
       let monthKey = ''
       if (typeof month === 'string') {
@@ -605,6 +693,7 @@ export default {
       )
     },
 
+    /* It toggles the department visibility and save it to local storage. */
     toggleDepartment(departmentId) {
       this.collapsedDepartments[departmentId] =
         !this.collapsedDepartments[departmentId]
@@ -613,12 +702,14 @@ export default {
       preferences.setObjectPreference(key, this.collapsedDepartments)
     },
 
+    /* It sets the background with the color of the department. */
     getDepartmentStyle(departmentId, opacity) {
       return {
         backgroundColor: this.departmentMap.get(departmentId).color + opacity
       }
     },
 
+    /* It sets an salary exception for a person, for a given month. */
     addPersonException(personEntry, month, value) {
       const exceptions = personEntry.exceptions || {}
       exceptions[month.format('YYYY-MM')] = value
