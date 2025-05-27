@@ -591,7 +591,6 @@ export default {
 
       Object.keys(this.expenses).forEach(departmentId => {
         if (departmentId === 'total') return
-        console.log(departmentId)
         Object.keys(this.expenses[departmentId]).forEach(personId => {
           if (personId === 'total') return
           if (!existingEntries[departmentId]?.[personId]) {
