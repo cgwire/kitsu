@@ -169,7 +169,6 @@ export default {
       'openProductions',
       'sequenceOptions',
       'sequences',
-      'shots',
       'shotCreated',
       'shotMetadataDescriptors'
     ]),
