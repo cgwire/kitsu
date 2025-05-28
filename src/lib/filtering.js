@@ -28,12 +28,13 @@ export const applyFilters = (entries, filters, taskMap) => {
   if (filters && filters.length > 0) {
     const result = entries.filter(entry => {
       let isOk = null
-      filters.forEach(filter => {
-        if (isOk === false && !filters.union) return false
-        if (isOk === true && filters.union) return true
+      for (let i = 0; i < filters.length; i++) {
+        const filter = filters[i]
+        if (isOk === false && filters.union) break
+        if (isOk === true && !filters.union) break
         isOk =
           applyFiltersFunctions[filter.type](entry, filter, taskMap) || false
-      })
+      }
       return isOk
     })
     return result
@@ -546,14 +547,19 @@ export const getDepartmentFilters = (departments, queryText) => {
 export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   if (!queryText) return []
 
+  // create a deep copy of persons with slugified names to avoid reference issues
+  const shallowPersons = persons.map(person => ({
+    ...JSON.parse(JSON.stringify(person)),
+    name: string.slugify(person.name.toLowerCase())
+  }))
+
   const results = []
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const personIndex = new Map()
-    persons.forEach(person => {
-      const name = string.slugify(person.name.toLowerCase())
-      personIndex.set(name, person)
+    const personIndex = []
+    shallowPersons.forEach(person => {
+      personIndex.push(person)
     })
 
     rgxMatches.forEach(rgxMatch => {
@@ -568,16 +574,17 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
       const simplifiedValue = string.slugify(value.toLowerCase())
-      const person = personIndex.get(simplifiedValue)
-      if (person) {
-        results.push({
-          personId: person.id,
-          taskType,
-          value,
-          type: 'assignedto',
-          excluding
-        })
-      }
+      personIndex.forEach(person => {
+        if (person.name === simplifiedValue) {
+          results.push({
+            personId: person.id,
+            taskType,
+            value,
+            type: 'assignedto',
+            excluding
+          })
+        }
+      })
     })
   }
   return results
