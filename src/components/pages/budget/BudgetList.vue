@@ -49,46 +49,45 @@
               <th class="datatable-row-header duration-header month">
                 {{ $t('budget.fields.duration') }}
               </th>
-              <template
-                :key="month"
-                v-for="month in monthsBetweenProductionDates"
-              >
-                <th class="month datatable-row-header">
+              <template v-if="isShowingExpenses">
+                <th
+                  class="month datatable-row-header cost-column"
+                  :key="month"
+                  v-for="month in monthsBetweenStartAndNow"
+                >
                   {{
                     month.month() === 0
                       ? month.format('MMM / YY')
                       : month.format('MMM')
                   }}
                 </th>
+                <th class="datatable-row-header has-text-right cost-column">
+                  {{ $t('budget.costs') }}
+                </th>
+                <th class="datatable-row-header has-text-right cost-column">
+                  {{ $t('budget.remaining') }}
+                </th>
                 <th
-                  class="month datatable-row-header"
-                  v-if="
-                    costsMonths[month.format('YYYY-MM')] && isShowingExpenses
-                  "
+                  class="datatable-row-header has-text-right cost-column difference"
                 >
-                  {{ $t('budget.cost') }}
+                  {{ $t('budget.difference') }}
                 </th>
               </template>
+              <th
+                :key="month"
+                class="month datatable-row-header"
+                v-for="month in isShowingExpenses
+                  ? monthsBetweenNowAndEnd
+                  : monthsBetweenProductionDates"
+              >
+                {{
+                  month.month() === 0
+                    ? month.format('MMM / YY')
+                    : month.format('MMM')
+                }}
+              </th>
               <th class="datatable-row-header has-text-right">
                 {{ $t('main.total') }} ({{ currency }})
-              </th>
-              <th
-                class="datatable-row-header has-text-right"
-                v-if="isShowingExpenses"
-              >
-                {{ $t('budget.costs') }}
-              </th>
-              <th
-                class="datatable-row-header has-text-right"
-                v-if="isShowingExpenses"
-              >
-                {{ $t('budget.remaining') }}
-              </th>
-              <th
-                class="datatable-row-header has-text-right"
-                v-if="isShowingExpenses"
-              >
-                {{ $t('budget.difference') }}
               </th>
               <th class="actions datatable-row-header"></th>
             </tr>
@@ -107,42 +106,56 @@
               </td>
               <td class="month"></td>
               <td class="month"></td>
-              <template
-                :key="month"
-                v-for="month in monthsBetweenProductionDates"
-              >
-                <td class="month">
-                  {{
-                    totalEntry.monthCosts[
-                      month.format('YYYY-MM')
-                    ]?.toLocaleString()
-                  }}
-                </td>
+              <template v-if="isShowingExpenses">
                 <td
+                  :key="month"
                   class="month"
-                  v-if="
-                    costsMonths[month.format('YYYY-MM')] && isShowingExpenses
-                  "
+                  v-for="month in monthsBetweenStartAndNow"
                 >
                   {{
                     convertedExpenses[month.format('YYYY-MM')]?.toLocaleString()
                   }}
                 </td>
+                <td class="costs expenses" v-if="isShowingExpenses">
+                  {{ convertedExpenses.total?.toLocaleString() }}
+                </td>
+                <td class="remaining expenses" v-if="isShowingExpenses">
+                  {{
+                    (
+                      totalEntry.total - (convertedExpenses.total || 0)
+                    ).toLocaleString()
+                  }}
+                </td>
+                <td
+                  class="difference expenses"
+                  :class="{
+                    positive: differences.total > 0,
+                    negative: differences.total < 0
+                  }"
+                  v-if="isShowingExpenses"
+                >
+                  {{ differences.total > 0 ? '+' : '' }}
+                  {{ differences.total?.toLocaleString() || '' }}
+                </td>
               </template>
+
+              <td
+                class="month"
+                :key="month"
+                v-for="month in isShowingExpenses
+                  ? monthsBetweenNowAndEnd
+                  : monthsBetweenProductionDates"
+              >
+                {{
+                  totalEntry.monthCosts[
+                    month.format('YYYY-MM')
+                  ]?.toLocaleString()
+                }}
+              </td>
+
               <td class="total-cost">
                 {{ totalEntry.total.toLocaleString() }}
               </td>
-              <td class="costs" v-if="isShowingExpenses">
-                {{ convertedExpenses.total?.toLocaleString() }}
-              </td>
-              <td class="remaining" v-if="isShowingExpenses">
-                {{
-                  (
-                    totalEntry.total - (convertedExpenses.total || 0)
-                  ).toLocaleString()
-                }}
-              </td>
-              <td class="difference" v-if="isShowingExpenses">0</td>
               <td class="actions"></td>
             </tr>
 
@@ -180,26 +193,12 @@
                   class="duration-header text-right month"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
                 ></td>
-                <template
-                  :key="month"
-                  v-for="month in monthsBetweenProductionDates"
-                >
+                <template v-if="isShowingExpenses">
                   <td
+                    :key="month"
                     class="month"
                     :style="getDepartmentStyle(departmentEntry.id, '33')"
-                  >
-                    {{
-                      departmentEntry.monthCosts[
-                        month.format('YYYY-MM')
-                      ]?.toLocaleString()
-                    }}
-                  </td>
-                  <td
-                    class="month"
-                    :style="getDepartmentStyle(departmentEntry.id, '33')"
-                    v-if="
-                      costsMonths[month.format('YYYY-MM')] && isShowingExpenses
-                    "
+                    v-for="month in monthsBetweenStartAndNow"
                   >
                     {{
                       convertedExpenses[departmentEntry.id]?.[
@@ -207,42 +206,65 @@
                       ]?.toLocaleString()
                     }}
                   </td>
+                  <td
+                    class="costs expenses"
+                    :style="getDepartmentStyle(departmentEntry.id, '33')"
+                    v-if="isShowingExpenses"
+                  >
+                    {{
+                      convertedExpenses[
+                        departmentEntry.id
+                      ]?.total?.toLocaleString()
+                    }}
+                  </td>
+                  <td
+                    class="remaining expenses"
+                    :style="getDepartmentStyle(departmentEntry.id, '33')"
+                    v-if="isShowingExpenses"
+                  >
+                    {{
+                      (
+                        departmentEntry.total -
+                        (convertedExpenses[departmentEntry.id]?.total || 0)
+                      ).toLocaleString()
+                    }}
+                  </td>
+                  <td
+                    class="difference expenses"
+                    :class="{
+                      positive: differences[departmentEntry.id]?.total > 0,
+                      negative: differences[departmentEntry.id]?.total < 0
+                    }"
+                    :style="getDepartmentStyle(departmentEntry.id, '33')"
+                    v-if="isShowingExpenses"
+                  >
+                    {{ differences[departmentEntry.id]?.total > 0 ? '+' : '' }}
+                    {{
+                      differences[
+                        departmentEntry.id
+                      ]?.total?.toLocaleString() || ''
+                    }}
+                  </td>
                 </template>
+                <td
+                  :key="departmentEntry.id + '-' + month"
+                  class="month"
+                  :style="getDepartmentStyle(departmentEntry.id, '33')"
+                  v-for="month in isShowingExpenses
+                    ? monthsBetweenNowAndEnd
+                    : monthsBetweenProductionDates"
+                >
+                  {{
+                    departmentEntry.monthCosts[
+                      month.format('YYYY-MM')
+                    ]?.toLocaleString()
+                  }}
+                </td>
                 <td
                   class="total-cost"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
                 >
                   {{ departmentEntry.total.toLocaleString() }}
-                </td>
-                <td
-                  class="costs"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                  v-if="isShowingExpenses"
-                >
-                  {{
-                    convertedExpenses[
-                      departmentEntry.id
-                    ]?.total?.toLocaleString()
-                  }}
-                </td>
-                <td
-                  class="remaining"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                  v-if="isShowingExpenses"
-                >
-                  {{
-                    (
-                      departmentEntry.total -
-                      (convertedExpenses[departmentEntry.id]?.total || 0)
-                    ).toLocaleString()
-                  }}
-                </td>
-                <td
-                  class="difference"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                  v-if="isShowingExpenses"
-                >
-                  0
                 </td>
                 <td
                   class="actions"
@@ -294,34 +316,11 @@
                   <td class="duration-header text-right entry-data">
                     {{ personEntry.months_duration }}
                   </td>
-                  <template
-                    :key="month"
-                    v-for="month in monthsBetweenProductionDates"
-                  >
-                    <td class="month value-cell">
-                      <input
-                        class="input-editor"
-                        type="number"
-                        min="0"
-                        step="1"
-                        :value="getMonthCost(personEntry, month)"
-                        @change="
-                          addPersonException(
-                            personEntry,
-                            month,
-                            $event.target.value
-                          )
-                        "
-                        v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
-                      />
-                      <span v-else>&nbsp;</span>
-                    </td>
+                  <template v-if="isShowingExpenses">
                     <td
-                      class="month"
-                      v-if="
-                        costsMonths[month.format('YYYY-MM')] &&
-                        isShowingExpenses
-                      "
+                      :key="personEntry.id + '-' + month"
+                      class="costs"
+                      v-for="month in monthsBetweenStartAndNow"
                     >
                       {{
                         convertedExpenses[departmentEntry.id]?.[
@@ -329,40 +328,77 @@
                         ]?.[month.format('YYYY-MM')]?.toLocaleString()
                       }}
                     </td>
+                    <td class="costs expenses" v-if="isShowingExpenses">
+                      {{
+                        convertedExpenses[
+                          departmentEntry.id
+                        ]?.total?.toLocaleString()
+                      }}
+                    </td>
+                    <td class="remaining expenses" v-if="isShowingExpenses">
+                      {{
+                        (
+                          personEntry.total -
+                            convertedExpenses[departmentEntry.id]?.[
+                              personEntry.person_id
+                            ]?.total || 0
+                        ).toLocaleString()
+                      }}
+                    </td>
+                    <td
+                      class="difference expenses"
+                      :class="{
+                        positive:
+                          differences[departmentEntry.id]?.[
+                            personEntry.person_id
+                          ] > 0,
+                        negative:
+                          differences[departmentEntry.id]?.[
+                            personEntry.person_id
+                          ] < 0
+                      }"
+                      v-if="isShowingExpenses"
+                    >
+                      {{
+                        differences[departmentEntry.id]?.[
+                          personEntry.person_id
+                        ] > 0
+                          ? '+'
+                          : ''
+                      }}
+                      {{
+                        differences[departmentEntry.id]?.[
+                          personEntry.person_id
+                        ]?.toLocaleString() || ''
+                      }}
+                    </td>
                   </template>
+                  <td
+                    :key="personEntry.id + '-' + month"
+                    class="month value-cell"
+                    v-for="month in isShowingExpenses
+                      ? monthsBetweenNowAndEnd
+                      : monthsBetweenProductionDates"
+                  >
+                    <input
+                      class="input-editor"
+                      type="number"
+                      min="0"
+                      step="1"
+                      :value="getMonthCost(personEntry, month)"
+                      @change="
+                        addPersonException(
+                          personEntry,
+                          month,
+                          $event.target.value
+                        )
+                      "
+                      v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
+                    />
+                    <span v-else>&nbsp;</span>
+                  </td>
                   <td class="total-cost">
                     {{ personEntry.total.toLocaleString() }}
-                  </td>
-                  <td class="costs" v-if="isShowingExpenses">
-                    {{
-                      convertedExpenses[departmentEntry.id]?.[
-                        personEntry.person_id
-                      ]?.total.toLocaleString()
-                    }}
-                  </td>
-                  <td class="remaining" v-if="isShowingExpenses">
-                    {{
-                      (
-                        personEntry.total -
-                          convertedExpenses[departmentEntry.id]?.[
-                            personEntry.person_id
-                          ]?.total || 0
-                      ).toLocaleString()
-                    }}
-                  </td>
-                  <td class="difference" v-if="isShowingExpenses">
-                    {{
-                      differences[departmentEntry.id]?.[
-                        personEntry.person_id
-                      ] || 0
-                        ? '+'
-                        : '-'
-                    }}
-                    {{
-                      differences[departmentEntry.id]?.[
-                        personEntry.person_id
-                      ]?.toLocaleString() || ''
-                    }}
                   </td>
                   <row-actions-cell
                     class="actions"
@@ -453,6 +489,14 @@ export default {
     isShowingExpenses: {
       type: Boolean,
       default: false
+    },
+    monthsBetweenStartAndNow: {
+      type: Array,
+      default: () => []
+    },
+    monthsBetweenNowAndEnd: {
+      type: Array,
+      default: () => []
     },
     monthsBetweenProductionDates: {
       type: Array,
@@ -591,7 +635,6 @@ export default {
 
       Object.keys(this.expenses).forEach(departmentId => {
         if (departmentId === 'total') return
-        console.log(departmentId)
         Object.keys(this.expenses[departmentId]).forEach(personId => {
           if (personId === 'total') return
           if (!existingEntries[departmentId]?.[personId]) {
@@ -625,7 +668,7 @@ export default {
      * calculates the difference for each person. It aggregates the
      */
     differences() {
-      const differences = {}
+      const differences = { total: 0 }
       this.budgetDepartments.forEach(department => {
         if (!differences[department.id]) {
           differences[department.id] = { total: 0 }
@@ -646,6 +689,7 @@ export default {
           differences[department.id][person.person_id] += personDifference
           differences[department.id].total += personDifference
         })
+        differences.total += differences[department.id].total
       })
       return differences
     }
@@ -827,6 +871,10 @@ td.datatable-row-header.name {
   width: 100px;
 }
 
+.difference {
+  border-right: 3px solid $green;
+}
+
 .new-hiring {
   background: $light-grey-light;
   color: $dark-grey-2;
@@ -843,6 +891,23 @@ td.datatable-row-header.name {
 .input-editor {
   width: 100%;
   text-align: right;
+}
+
+.cost-column {
+  background-color: #8888cc;
+  color: white;
+}
+
+.expenses {
+  font-weight: bold;
+
+  &.positive {
+    color: $green;
+  }
+
+  &.negative {
+    color: $red;
+  }
 }
 
 input[type='number']::-webkit-outer-spin-button,

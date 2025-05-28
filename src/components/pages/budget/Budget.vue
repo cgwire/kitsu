@@ -29,6 +29,8 @@
           :is-error="errors.entries"
           :is-loading="loading.entries"
           :is-showing-expenses="expenses.showing"
+          :months-between-start-and-now="monthsBetweenStartAndNow"
+          :months-between-now-and-end="monthsBetweenNowAndEnd"
           :months-between-production-dates="monthsBetweenProductionDates"
           :salary-scale="salaryScale"
           :total-entry="totalEntry"
@@ -195,18 +197,7 @@ export default {
     await this.setSalaryScale()
     await this.loadBudgets()
     await this.loadBudgetEntries()
-    this.monthsBetweenProductionDates = this.getMonthsBetweenDates(
-      this.currentProduction.start_date,
-      this.currentProduction.end_date
-    )
-    const months = this.getMonthsBetweenDates(
-      this.currentProduction.start_date,
-      moment()
-    ).map(month => month.format('YYYY-MM'))
-    this.costsMonths = months.reduce((acc, month) => {
-      acc[month] = true
-      return acc
-    }, {})
+    this.resetMonths()
   },
 
   computed: {
@@ -216,6 +207,20 @@ export default {
       'departmentMap',
       'personMap'
     ]),
+
+    monthsBetweenStartAndNow() {
+      return this.getMonthsBetweenDates(
+        this.currentProduction.start_date,
+        moment().format('YYYY-MM-DD')
+      )
+    },
+
+    monthsBetweenNowAndEnd() {
+      return this.getMonthsBetweenDates(
+        moment().add(1, 'month').format('YYYY-MM-DD'),
+        this.currentProduction.end_date
+      )
+    },
 
     lastRevision() {
       return this.budgets.length > 0 ? this.budgets[0].revision : 0
@@ -344,6 +349,16 @@ export default {
     ]),
 
     formatMonth,
+
+    resetMonths() {
+      this.monthsBetweenProductionDates = this.getMonthsBetweenDates(
+        this.currentProduction.start_date,
+        this.currentProduction.end_date
+      )
+      this.costsMonths = this.monthsBetweenProductionDates.map(month => {
+        return month.format('YYYY-MM')
+      })
+    },
 
     sortDepartmentPersons(a, b) {
       const seniorityWeight = {
@@ -649,9 +664,8 @@ export default {
       const months = []
       const current = parseSimpleDate(startDate)
       const end = parseSimpleDate(endDate)
-
       while (current <= end) {
-        months.push(moment(current))
+        months.push(current.clone())
         current.add(1, 'month')
       }
       return months
@@ -678,6 +692,7 @@ export default {
   watch: {
     currentProduction() {
       this.loadBudgets()
+      this.resetMonths()
     },
 
     currentBudget() {
