@@ -30,8 +30,8 @@ export const applyFilters = (entries, filters, taskMap) => {
       let isOk = null
       for (let i = 0; i < filters.length; i++) {
         const filter = filters[i]
-        if (isOk === false && filters.union) break
-        if (isOk === true && !filters.union) break
+        if (isOk === false && !filters.union) break
+        if (isOk === true && filters.union) break
         isOk =
           applyFiltersFunctions[filter.type](entry, filter, taskMap) || false
       }
