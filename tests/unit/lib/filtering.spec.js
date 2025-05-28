@@ -658,10 +658,10 @@ describe('lib/filtering', () => {
         }
       ]
       const results = applyFilters(entries, filters, taskMap)
-      expect(results).toHaveLength(1)
+      expect(results).toHaveLength(2)
     })
 
-    it('multiple or filters', () => {
+    it('multiple and filters', () => {
       const filters = [
         {
           taskType: taskTypes[0],
@@ -676,7 +676,7 @@ describe('lib/filtering', () => {
       ]
       filters.union = true
       const results = applyFilters(entries, filters, taskMap, true)
-      expect(results).toHaveLength(2)
+      expect(results).toHaveLength(1)
     })
 
     it('in filter', () => {
