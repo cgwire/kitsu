@@ -206,7 +206,7 @@ export default {
 
 <style lang="scss" scoped>
 .is-primary {
-  border-radius: 2em;
+  border-radius: 10px;
 }
 
 .is-big {
