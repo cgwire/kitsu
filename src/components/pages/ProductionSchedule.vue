@@ -51,6 +51,7 @@
         @item-unassign="onScheduleItemUnassigned"
         @root-element-expanded="expandTaskTypeElement"
         @root-element-selected="selectParentElement"
+        @task-selected="selectTaskElement"
       />
     </div>
 
@@ -59,7 +60,13 @@
         <a class="close-button" @click="closeSidePanel">
           <x-icon class="align-middle" :size="16" />
         </a>
-        <h2 class="mt1">{{ $t('menu.assign_tasks') }}</h2>
+        <h2 class="mt1">
+          {{
+            assignments.item === 'task'
+              ? $t('schedule.edit_task')
+              : $t('menu.assign_tasks')
+          }}
+        </h2>
         <div class="details">
           <task-type-name
             class="task-type"
@@ -126,11 +133,12 @@
           </li>
         </ul>
         <div class="assignments mt1" v-else>
-          <form class="mt1" @submit.prevent="saveAssignments()">
+          <form class="mt1" @submit.prevent="submitAssignments()">
             <div class="flexrow">
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
+                  :disabled="assignments.item !== 'dropped'"
                   :label="$t('main.start_date')"
                   utc
                   v-model="assignments.startDate"
@@ -139,6 +147,7 @@
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
+                  :disabled="assignments.item !== 'dropped'"
                   :label="$t('main.end_date')"
                   utc
                   v-model="assignments.endDate"
@@ -232,8 +241,9 @@
               :label="$t('schedule.force_unassign')"
               :toggle="true"
               v-model="assignments.unassign"
+              v-if="assignments.item === 'dropped'"
             />
-            <div class="flexrow mt2">
+            <div class="flexrow mt2" v-if="assignments.item === 'dropped'">
               <label class="mr05">
                 {{ $t('schedule.forced_daily_quotas') }}
               </label>
@@ -252,25 +262,74 @@
                 <trash-icon class="align-middle" :size="14" />
               </a>
             </div>
-            <div class="mt2">
+            <div class="mt2" v-if="assignments.item === 'dropped'">
               {{ $t('schedule.estimated_daily_quotas') }}
               {{ estimatedDailyQuota.toFixed(2) }}
             </div>
+            <div class="flexrow mt2" v-if="assignments.item === 'task'">
+              <div class="flexrow-item">
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.start_date')"
+                  utc
+                  :with-margin="false"
+                  v-model="assignments.task.startDate"
+                />
+              </div>
+              <div class="flexrow-item">
+                <date-field
+                  :can-delete="false"
+                  disabled
+                  :label="$t('main.end_date')"
+                  utc
+                  :with-margin="false"
+                  v-model="assignments.task.endDate"
+                />
+              </div>
+            </div>
+            <div class="flexrow mt2" v-if="assignments.item === 'task'">
+              <text-field
+                class="mb0 estimation mr05"
+                input-class=" thin"
+                :label="$t('main.estimation')"
+                :step="0.01"
+                placeholder="0.00"
+                type="number"
+                :unit-label="$t('schedule.md')"
+                v-model="assignments.task.estimation"
+              />
+            </div>
             <div class="mt2 has-text-right">
-              <button-simple
-                class="mr1"
-                :disabled="assignments.saving"
-                :text="$t('main.cancel')"
-                type="button"
-                @click="assignments.item = null"
-              />
-              <button-simple
-                :disabled="!hasDraggedEntities || !availablePersons.length"
-                icon="user-check"
-                :is-loading="assignments.saving"
-                :text="$t('main.apply')"
-                type="submit"
-              />
+              <template v-if="assignments.item === 'dropped'">
+                <button-simple
+                  :disabled="!hasDraggedEntities || !availablePersons.length"
+                  :is-loading="assignments.saving"
+                  is-primary
+                  :text="$t('main.apply')"
+                  type="submit"
+                />
+                <button
+                  class="button is-link ml05"
+                  :disabled="assignments.saving"
+                  :text="$t('main.cancel')"
+                  type="button"
+                  @click="assignments.item = null"
+                >
+                  {{ $t('main.cancel') }}
+                </button>
+              </template>
+              <template v-if="assignments.item === 'task'">
+                <button-simple
+                  :disabled="!assignments.task.estimation"
+                  :is-loading="assignments.saving"
+                  is-primary
+                  :text="$t('main.apply')"
+                  type="submit"
+                />
+                <button class="button is-link ml05" @click="closeSidePanel">
+                  {{ $t('main.cancel') }}
+                </button>
+              </template>
             </div>
           </form>
         </div>
@@ -362,6 +421,7 @@ export default {
         saving: false,
         startDate: null,
         endDate: null,
+        task: {},
         unassign: false
       },
       daysOffByPerson: [],
@@ -877,7 +937,7 @@ export default {
       })
     },
 
-    onScheduleItemChanged(item) {
+    async onScheduleItemChanged(item) {
       if (item.type === 'Task') {
         // update dates with weekends and days off
         const daysOff = item.assignees
@@ -916,7 +976,7 @@ export default {
             this.updateScheduleItem(item.parentElement.parentElement)
           }
         }
-        this.saveTaskChanged(item)
+        await this.saveTaskChanged(item)
         return
       }
 
@@ -935,7 +995,7 @@ export default {
         }
       }
 
-      this.updateScheduleItem(item)
+      await this.updateScheduleItem(item)
     },
 
     updateScheduleItem(item) {
@@ -1003,6 +1063,7 @@ export default {
         saving: false,
         startDate: null,
         endDate: null,
+        task: {},
         unassign: false
       }
     },
@@ -1108,6 +1169,37 @@ export default {
       this.assignments.loading = false
     },
 
+    selectTaskElement(taskType, entityType, task, selection) {
+      if (selection.length !== 1) {
+        this.closeSidePanel()
+        return
+      }
+
+      this.resetSidePanel()
+
+      this.selectedTaskType = taskType
+      this.draggedEntities = [{ ...entityType, children: [{ ...task.entity }] }]
+
+      this.assignments.item = 'task'
+
+      const start_date = event.start_date || taskType.start_date
+      const end_date = parseDate(start_date).isAfter(taskType.end_date)
+        ? start_date
+        : taskType.end_date
+      this.assignments.startDate = start_date
+      this.assignments.endDate = end_date
+      this.assignments.task = {
+        ...task,
+        estimation: minutesToDays(this.organisation, task.estimation),
+        startDate: task.startDate.format('YYYY-MM-DD'),
+        endDate: task.endDate.format('YYYY-MM-DD')
+      }
+      this.assignments.excludes = this.team
+        .filter(person => !task.assignees.includes(person.id))
+        .map(person => person.id)
+      this.assignments.unassign = true
+    },
+
     closeSidePanel() {
       this.selectedTaskType = null
       this.resetSidePanel()
@@ -1126,7 +1218,7 @@ export default {
     },
 
     onScheduleItemDropped(event, item) {
-      this.assignments.item = item
+      this.assignments.item = 'dropped'
       const start_date = event.start_date || item.start_date
       const end_date = parseDate(start_date).isAfter(item.end_date)
         ? start_date
@@ -1137,6 +1229,14 @@ export default {
 
     removeFromAssignments(person) {
       this.assignments.excludes.push(person.id)
+    },
+
+    submitAssignments(event) {
+      if (this.assignments.item === 'dropped') {
+        this.saveAssignments()
+      } else if (this.assignments.item === 'task') {
+        this.saveTask()
+      }
     },
 
     async saveAssignments() {
@@ -1245,6 +1345,49 @@ export default {
       }
 
       this.assignments.saving = false
+    },
+
+    async saveTask() {
+      this.assignments.saving = true
+      try {
+        const task = {
+          ...this.assignments.task,
+          startDate: parseDate(this.assignments.task.startDate),
+          endDate: parseDate(this.assignments.task.endDate),
+          estimation: daysToMinutes(
+            this.organisation,
+            this.assignments.task.estimation
+          ),
+          assignees: this.availablePersons.map(person => person.id)
+        }
+        // update task and assignments
+        await this.onScheduleItemChanged(task)
+        await this.unassignSelectedTasks({ taskIds: [task.id] })
+        await Promise.all(
+          task.assignees.map(personId =>
+            this.assignSelectedTasks({
+              personId,
+              taskIds: [task.id]
+            })
+          )
+        )
+        // refresh task in side panel
+        this.assignments.task.startDate = task.startDate.format('YYYY-MM-DD')
+        this.assignments.task.endDate = task.endDate.format('YYYY-MM-DD')
+        // refresh schedule
+        this.expandTaskTypeElement(
+          this.selectedTaskType,
+          () => {
+            this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
+          },
+          true,
+          false
+        )
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.assignments.saving = false
+      }
     },
 
     async onScheduleItemAssigned(task, personId) {
@@ -1483,6 +1626,14 @@ export default {
 
     &:hover {
       opacity: 1;
+    }
+  }
+
+  .estimation {
+    :deep(.input) {
+      font-size: 1rem;
+      padding: 0 1rem;
+      width: 90px;
     }
   }
 }
