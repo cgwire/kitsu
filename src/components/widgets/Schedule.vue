@@ -1431,7 +1431,7 @@ export default {
         const estimation = getBusinessDays(
           item.startDate,
           item.endDate,
-          item.parentElement.daysOff
+          item.parentElement?.daysOff
         )
         item.estimation = daysToMinutes(this.organisation, estimation)
       }
