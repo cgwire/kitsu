@@ -109,9 +109,7 @@
           <div
             class="entity-header"
             ref="name-header"
-            :style="{
-              'min-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
-            }"
+            :style="{ 'min-width': nameHeaderMinWidth }"
           >
             <div>
               {{ $t('shots.fields.name') }}
@@ -750,6 +748,12 @@ export default {
       } else {
         return this.assetMetadataDescriptors
       }
+    },
+
+    nameHeaderMinWidth() {
+      return this.columnWidth.name
+        ? parseInt(this.columnWidth.name, 10) + 1 + 'px'
+        : '251px'
     }
   },
 
@@ -1829,8 +1833,8 @@ export default {
 }
 
 .descriptor-header {
-  min-width: 119px;
-  max-width: 119px;
+  min-width: 110px;
+  max-width: 110px;
 }
 
 .frames-header {
