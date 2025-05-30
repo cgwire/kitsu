@@ -572,6 +572,15 @@
                           class="timebar-center ellipsis"
                           @mousedown="moveTimebar(task, $event)"
                           @touchstart="moveTimebar(task, $event)"
+                          @click="
+                            $emit(
+                              'task-selected',
+                              rootElement,
+                              childElement,
+                              task,
+                              selection
+                            )
+                          "
                         >
                           {{ task.entity.name }}
                         </div>
@@ -779,7 +788,8 @@ export default {
     'item-selected',
     'item-unassign',
     'root-element-expanded',
-    'root-element-selected'
+    'root-element-selected',
+    'task-selected'
   ],
 
   mounted() {
@@ -1421,7 +1431,7 @@ export default {
         const estimation = getBusinessDays(
           item.startDate,
           item.endDate,
-          item.parentElement.daysOff
+          item.parentElement?.daysOff
         )
         item.estimation = daysToMinutes(this.organisation, estimation)
       }

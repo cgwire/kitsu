@@ -36,6 +36,9 @@
       >
         {{ buttonLabel }}
       </button>
+      <span class="unit flexrow-item" v-if="unitLabel">
+        {{ unitLabel }}
+      </span>
     </p>
     <p class="error" v-if="errored">
       {{ errorText }}
@@ -107,6 +110,9 @@ export default {
     required: {
       default: false,
       type: Boolean
+    },
+    unitLabel: {
+      type: String
     }
   },
 
@@ -173,6 +179,10 @@ input.input.thin {
 
 .button {
   font-size: 1.2em;
+  margin-left: 0.5rem;
+}
+
+.unit {
   margin-left: 0.5rem;
 }
 

@@ -169,7 +169,6 @@ export default {
       'openProductions',
       'sequenceOptions',
       'sequences',
-      'shots',
       'shotCreated',
       'shotMetadataDescriptors'
     ]),
@@ -191,9 +190,7 @@ export default {
     },
 
     maxRetakes() {
-      return this.shotToEdit.data
-        ? parseInt(this.shotToEdit.data.max_retakes)
-        : ''
+      return parseInt(this.shotToEdit.data?.max_retakes) || ''
     }
   },
 
