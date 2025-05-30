@@ -275,7 +275,10 @@ export default {
       },
 
       'shot:update'(eventData) {
-        if (this.shotMap.get(eventData.shot_id)) {
+        if (
+          this.shotMap.get(eventData.shot_id) &&
+          this.currentProduction?.id === eventData.project_id
+        ) {
           this.loadShot(eventData.shot_id)
         }
       },
