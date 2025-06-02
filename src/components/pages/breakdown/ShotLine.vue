@@ -198,6 +198,7 @@
               ]"
             />
             <label
+              class="ml05"
               :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
               :style="[
                 isCurrentUserManager ||
