@@ -1225,7 +1225,7 @@ export default {
           target &&
           target.dataset.personId &&
           target.dataset.entityTypeId &&
-          !this.currentElement.assignees.includes(target.dataset.personId)
+          !this.currentElement.assignees?.includes(target.dataset.personId)
         ) {
           // check rights
           if (
