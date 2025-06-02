@@ -177,8 +177,8 @@
             v-for="descriptor in visibleMetadataDescriptors"
             v-show="isShowInfosBreakdown"
           >
-            <div
-              class="mr1"
+            <span
+              class="descriptor-departments mr05"
               v-if="descriptorCurrentDepartments(descriptor).length"
             >
               <department-name
@@ -188,9 +188,9 @@
                 only-dot
                 v-for="department in descriptorCurrentDepartments(descriptor)"
               />
-            </div>
+            </span>
             <span
-              class="flexrow-item ellipsis descriptor-name filler"
+              class="ellipsis nowrap descriptor-name filler"
               :title="descriptor.name"
             >
               {{ descriptor.name }}
@@ -212,7 +212,9 @@
             class="asset-type-header"
             v-for="assetType in castingAssetTypes"
           >
-            {{ assetType }}
+            <span class="ellipsis nowrap" :title="assetType">
+              {{ assetType }}
+            </span>
           </div>
 
           <div class="actions filler"></div>
@@ -1835,6 +1837,11 @@ export default {
 .descriptor-header {
   min-width: 110px;
   max-width: 110px;
+}
+
+.descriptor-departments {
+  display: inline-flex;
+  gap: 2px;
 }
 
 .frames-header {
