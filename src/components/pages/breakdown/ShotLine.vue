@@ -12,7 +12,8 @@
     <div
       class="flexrow-item sticky"
       :style="{
-        'max-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
+        'max-width': columnWidth.name ? columnWidth.name + 'px' : '250px',
+        'min-width': columnWidth.name ? columnWidth.name + 'px' : '250px'
       }"
     >
       <p class="error has-text-left info-message" v-if="isSaveError">
