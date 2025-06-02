@@ -1140,6 +1140,15 @@ export const playerMixin = {
           this.onPlayNext()
         }
       }
+
+      if (
+        this.isCurrentPreviewMovie &&
+        this.wavesurfer &&
+        this.isWaveformDisplayed
+      ) {
+        const position = this.currentTimeRaw / this.maxDurationRaw
+        this.wavesurfer.seekTo(position)
+      }
       this.$nextTick(() => {
         const actions = this.onNextTimeUpdateActions
         actions.forEach(action => action())

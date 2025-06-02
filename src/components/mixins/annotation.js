@@ -1293,7 +1293,9 @@ export const annotationMixin = {
             this.mouseDrawingMaxPressure
         }
         this.clearUndoneStack()
-        this.saveAnnotations()
+        if (!this.isLaserModeOn) {
+          this.saveAnnotations()
+        }
       }
     },
 

@@ -1191,6 +1191,12 @@ export default {
     this.resetPencilConfiguration()
   },
 
+  beforeUnmount() {
+    if (this.wavesurfer) {
+      this.wavesurfer.destroy()
+    }
+  },
+
   computed: {
     ...mapGetters([
       'currentEpisode',
@@ -2100,21 +2106,44 @@ export default {
           container: '#waveform',
           waveColor: '#00B242', // green
           progressColor: '#008732', // dark-green,
+          backend: 'MediaElement', // or 'WebAudio'
+          mediaType: 'video',
           height: 60,
           fillParent: true,
           minPxPerSec: 1
         })
-        this.wavesurfer.on('seek', position => {
-          this.setCurrentTimeRaw(this.maxDurationRaw * position)
+        this.wavesurfer.on('error', error => {
+          console.error('Error loading audio:', error)
         })
+        this.wavesurfer.on('seeking', this.onWaveformSeeking)
       } catch (err) {
         console.error(err)
       }
     },
 
+    onWaveformSeeking(position) {
+      if (!this.$options.isWaveformSeekingSilent) {
+        this.$options.isWaveformSeekingSilent = true
+        this.setCurrentTimeRaw(position)
+        setTimeout(() => {
+          this.$options.isWaveformSeekingSilent = false
+        }, 500)
+      }
+    },
+
     loadWaveForm() {
       if (this.isWaveformDisplayed && this.isCurrentPreviewMovie) {
-        this.wavesurfer.load(this.rawPlayer.currentPlayer)
+        if (this.rawPlayer?.currentPlayer?.src) {
+          try {
+            if (this.wavesurfer) {
+              this.wavesurfer.destroy()
+            }
+            this.configureWaveForm()
+            this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
+          } catch (err) {
+            console.error('Error loading waveform:', err)
+          }
+        }
       }
     },
 
