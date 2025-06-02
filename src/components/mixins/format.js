@@ -42,7 +42,7 @@ export const formatListMixin = {
           maximumFractionDigits: 2
         })
       }
-      return duration
+      return Math.round(duration * 100) / 100 // Round to 2 decimal places
     },
 
     formatPriority(priority) {

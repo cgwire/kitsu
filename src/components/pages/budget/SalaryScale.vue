@@ -14,7 +14,7 @@
                   <th>{{ $t('budget.fields.department') }}</th>
                   <th>{{ $t('budget.fields.seniority') }}</th>
                   <th>{{ $t('budget.fields.position') }}</th>
-                  <th>{{ $t('budget.fields.salary') }}</th>
+                  <th>{{ $t('budget.fields.base_salary') }}</th>
                 </tr>
               </thead>
 
