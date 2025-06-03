@@ -45,40 +45,38 @@
         @touchstart="startProgressDrag"
       ></progress>
 
-      <template v-if="!empty">
-        <span
-          :key="`annotation-${index}`"
-          class="annotation-mark"
-          :style="{
-            left: getAnnotationPosition(annotation) + 'px',
-            width: Math.max(frameSize - 1, 5) + 'px'
-          }"
-          @mouseenter="isFrameNumberVisible = true"
-          @mouseleave="isFrameNumberVisible = true"
-          @touchstart="isFrameNumberVisible = true"
-          @touchend="isFrameNumberVisible = false"
-          @touchcancel="isFrameNumberVisible = false"
-          @click="_emitProgressEvent($event, annotation)"
-          v-for="(annotation, index) in annotations"
-        >
-        </span>
-        <span
-          :key="`annotation-comparison-${index}`"
-          class="annotation-mark comparison-mark"
-          :style="{
-            left: getAnnotationPosition(annotation) + 'px',
-            width: Math.max(frameSize - 1, 5) + 'px'
-          }"
-          @mouseenter="isFrameNumberVisible = true"
-          @mouseleave="isFrameNumberVisible = true"
-          @touchstart="isFrameNumberVisible = true"
-          @touchend="isFrameNumberVisible = false"
-          @touchcancel="isFrameNumberVisible = false"
-          @click="_emitProgressEvent($event, annotation)"
-          v-for="(annotation, index) in comparisonAnnotations"
-        >
-        </span>
-      </template>
+      <span
+        :key="`annotation-${index}`"
+        class="annotation-mark"
+        :style="{
+          left: getAnnotationPosition(annotation) + 'px',
+          width: Math.max(frameSize - 1, 5) + 'px'
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = true"
+        @touchstart="isFrameNumberVisible = true"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+        @click="_emitProgressEvent($event, annotation)"
+        v-for="(annotation, index) in annotations"
+      >
+      </span>
+      <span
+        :key="`annotation-comparison-${index}`"
+        class="annotation-mark comparison-mark"
+        :style="{
+          left: getAnnotationPosition(annotation) + 'px',
+          width: Math.max(frameSize - 1, 5) + 'px'
+        }"
+        @mouseenter="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = true"
+        @touchstart="isFrameNumberVisible = true"
+        @touchend="isFrameNumberVisible = false"
+        @touchcancel="isFrameNumberVisible = false"
+        @click="_emitProgressEvent($event, annotation)"
+        v-for="(annotation, index) in comparisonAnnotations"
+      >
+      </span>
     </div>
 
     <div class="frame-number-rail">
