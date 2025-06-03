@@ -21,9 +21,9 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          script_stop: true
           envs: HUSKY, NODE_OPTIONS
           script: |
+            set -e
             echo "Node.js $(node -v)"
             echo "npm v$(npm -v)"
             cd /opt/kitsu
