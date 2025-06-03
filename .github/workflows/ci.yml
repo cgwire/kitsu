@@ -27,6 +27,8 @@ jobs:
           npm ci
       - name: Run linter
         if: ${{ matrix.node == 'current' }}
+        env:
+          NODE_ENV: production
         run: |
           npm run lint -- --quiet
       - name: Run tests
