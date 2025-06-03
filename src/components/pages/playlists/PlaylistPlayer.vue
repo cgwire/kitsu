@@ -2122,7 +2122,7 @@ export default {
     },
 
     onWaveformSeeking(position) {
-      if (!this.$options.isWaveformSeekingSilent) {
+      if (!this.$options.isWaveformSeekingSilent && !this.isPlaying) {
         this.$options.isWaveformSeekingSilent = true
         this.setCurrentTimeRaw(position)
         setTimeout(() => {
@@ -2139,10 +2139,17 @@ export default {
               this.wavesurfer.destroy()
             }
             this.configureWaveForm()
-            this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
+            setTimeout(() => {
+              this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
+            }, 100)
+            // this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
           } catch (err) {
             console.error('Error loading waveform:', err)
           }
+        }
+      } else {
+        if (this.wavesurfer) {
+          this.wavesurfer.destroy()
         }
       }
     },
@@ -2365,6 +2372,10 @@ export default {
           this.loadWaveForm()
           if (this.isPlaying) this.play()
         })
+      } else {
+        if (this.wavesurfer && this.isWaveformDisplayed) {
+          this.wavesurfer.destroy()
+        }
       }
       if (this.currentEntity) {
         this.annotations = this.currentEntity.preview_file_annotations || []
