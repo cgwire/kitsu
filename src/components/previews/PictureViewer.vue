@@ -372,7 +372,6 @@ export default {
         this.emitPanZoom(this.panzoomBig)
       })
       this.panzoomBig.on('panend', () => {
-        console.log(this.isBig)
         if (!this.big) return
         this.emitPanZoom(this.panzoomBig)
       })
