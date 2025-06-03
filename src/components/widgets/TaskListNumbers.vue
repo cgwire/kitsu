@@ -28,7 +28,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import shotStore from '@/store/modules/shots'
 
 export default {
-  name: 'checkbox',
+  name: 'task-list-numbers',
 
   mixins: [formatListMixin],
 
@@ -41,10 +41,6 @@ export default {
       default: () => [],
       type: Array
     }
-  },
-
-  data() {
-    return {}
   },
 
   computed: {
@@ -81,10 +77,6 @@ export default {
     nbDrawings() {
       return this.tasks.reduce((acc, task) => acc + task.nb_drawings, 0)
     }
-  },
-
-  methods: {}
+  }
 }
 </script>
-
-<style scoped></style>
