@@ -1594,11 +1594,11 @@ export default {
       }
 
       // we've seen all the frames the picture should be visible
-      this.framesSeenOfPicture = 1
       const previews = this.currentEntity.preview_file_previews
       if (previews.length === this.currentPreviewIndex) {
         this.$nextTick(() => {
           this.onPlayNextEntity(true)
+          this.framesSeenOfPicture = 1
         })
       } else {
         this.currentPreviewIndex++
