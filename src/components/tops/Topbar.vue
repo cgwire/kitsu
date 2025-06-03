@@ -515,6 +515,11 @@ export default {
           { label: this.$t('sequences.title'), value: 'sequences' }
         ]
 
+        // Show only if there are task types for Edit in this production.
+        if (this.productionEditTaskTypes.length > 0) {
+          options.push({ label: this.$t('edits.title'), value: 'edits' })
+        }
+
         if (this.isTVShow) {
           options.push({ label: this.$t('episodes.title'), value: 'episodes' })
         }
