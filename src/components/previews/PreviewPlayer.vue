@@ -538,6 +538,7 @@
     <div
       class="flexrow revision-previews"
       ref="revision-previews"
+      @wheel="onSubPreviewsWheel"
       v-if="isOrdering"
     >
       <div
@@ -1121,6 +1122,14 @@ export default {
           this.syncComparisonViewer()
         }
         if (!this.isPlaying) this.loadAnnotation()
+      }
+    },
+
+    onSubPreviewsWheel(event) {
+      const isMouseWheelY = !event.deltaX
+      if (isMouseWheelY) {
+        event.preventDefault()
+        this.$refs['revision-previews'].scrollLeft += event.deltaY
       }
     },
 
