@@ -4,7 +4,6 @@ import {
   buildNameIndex,
   indexSearch
 } from '@/lib/indexing'
-import string from '@/lib/string'
 
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX =
@@ -41,6 +40,15 @@ export const applyFilters = (entries, filters, taskMap) => {
   } else {
     return entries
   }
+}
+
+/*
+ * Private function for filtering on names
+ * Simple hash to compare user name
+ * It removes spaces and lowercases the name
+ */
+const hashName = name => {
+  return name.toLowerCase().replace(/ /g, '')
 }
 
 const applyFiltersFunctions = {
@@ -550,7 +558,7 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   // create a deep copy of persons with slugified names to avoid reference issues
   const shallowPersons = persons.map(person => ({
     ...JSON.parse(JSON.stringify(person)),
-    name: string.slugify(person.name.toLowerCase())
+    name: hashName(person.name)
   }))
 
   const results = []
@@ -573,7 +581,8 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       value = cleanParenthesis(value)
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
-      const simplifiedValue = string.slugify(value.toLowerCase())
+      const simplifiedValue = hashName(value)
+
       personIndex.forEach(person => {
         if (person.name === simplifiedValue) {
           results.push({
