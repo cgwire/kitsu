@@ -2,13 +2,13 @@
   <div class="tabs">
     <ul>
       <li
-        :key="`task-type-tab-${tab.name}`"
+        :key="`route-tab-${tab.name}`"
         :class="{ 'is-active': tab.name === activeTab }"
         v-for="tab in tabs"
       >
         <router-link
           :to="{
-            query: { ...$route.query, tab: tab.name }
+            query: { ...$route.query, [routeKey]: tab.name }
           }"
         >
           {{ tab.label }}
@@ -30,6 +30,10 @@ export default {
     tabs: {
       type: Array,
       default: () => []
+    },
+    routeKey: {
+      type: String,
+      default: 'tab'
     }
   }
 }

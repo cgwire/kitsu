@@ -114,6 +114,10 @@ export default {
       type: Boolean,
       default: false
     },
+    forEntity: {
+      type: String,
+      default: 'Asset'
+    },
     isError: {
       type: Boolean,
       default: false
@@ -130,23 +134,6 @@ export default {
 
   emits: ['cancel', 'confirm'],
 
-  watch: {
-    taskTypeToEdit() {
-      if (this.taskTypeToEdit) {
-        this.form = {
-          name: this.taskTypeToEdit.name,
-          short_name: this.taskTypeToEdit.short_name,
-          description: this.taskTypeToEdit.description,
-          color: this.taskTypeToEdit.color,
-          for_entity: this.taskTypeToEdit.for_entity || 'Asset',
-          allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
-          department_id: this.taskTypeToEdit.department_id,
-          archived: String(this.taskTypeToEdit.archived === true)
-        }
-      }
-    }
-  },
-
   data() {
     return {
       form: {
@@ -162,9 +149,9 @@ export default {
       dedicatedToOptions: [
         { label: this.$t('assets.title'), value: 'Asset' },
         { label: this.$t('shots.title'), value: 'Shot' },
-        { label: this.$t('edits.title'), value: 'Edit' },
         { label: this.$t('sequences.title'), value: 'Sequence' },
-        { label: this.$t('episodes.title'), value: 'Episode' }
+        { label: this.$t('episodes.title'), value: 'Episode' },
+        { label: this.$t('edits.title'), value: 'Edit' }
       ]
     }
   },
@@ -189,6 +176,37 @@ export default {
         this.form.priority = this.newPriority(this.form.for_entity)
       }
       this.$emit('confirm', this.form)
+    }
+  },
+
+  watch: {
+    active() {
+      if (this.taskTypeToEdit) {
+        this.form = {
+          name: this.taskTypeToEdit.name,
+          short_name: this.taskTypeToEdit.short_name,
+          description: this.taskTypeToEdit.description,
+          color: this.taskTypeToEdit.color,
+          for_entity: this.taskTypeToEdit.for_entity || 'Asset',
+          allow_timelog: String(this.taskTypeToEdit.allow_timelog === true),
+          department_id: this.taskTypeToEdit.department_id,
+          archived: String(this.taskTypeToEdit.archived === true)
+        }
+      } else {
+        this.form = {
+          name: '',
+          short_name: '',
+          description: '',
+          color: '$grey',
+          for_entity: this.forEntity,
+          allow_timelog: 'false',
+          department_id: null,
+          archived: 'false'
+        }
+      }
+      this.$nextTick(() => {
+        this.form.for_entity = this.forEntity
+      })
     }
   }
 }

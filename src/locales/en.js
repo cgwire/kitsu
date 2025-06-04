@@ -362,31 +362,31 @@ export default {
 
   entities: {
     build_filter: {
-      asset_type: 'Asset type',
       all_types: 'All asset types',
+      asset_type: 'Asset type',
+      assets_ready: 'Ready',
+      assets_not_ready: 'Not ready',
       assignation: 'Assignment',
       assignation_exists_for: 'Assignments exists for',
       assigned_to: 'Assigned to',
+      checked: 'Checked',
       department: 'Department',
       descriptor: 'Metadata',
       equal: 'Equal',
       in: 'In',
       is_assets_ready: 'Assets are ready',
-      assets_ready: 'Ready',
-      assets_not_ready: 'Not ready',
       no_assignation_for: 'No assignment exists for',
       no_filter: 'No filter',
-      not_equal: 'Not equal',
       not_assigned_to: 'Not assigned to',
+      not_checked: 'Not checked',
+      not_equal: 'Not equal',
       status: 'Task status',
       thumbnail: 'Thumbnail presence',
       title: 'Filter on...',
       union_and: 'Match all the following filters',
       union_or: 'Match one of the following filters',
       with_thumbnail: 'With thumbnail',
-      without_thumbnail: 'Without thumbnail',
-      checked: 'Checked',
-      not_checked: 'Not checked'
+      without_thumbnail: 'Without thumbnail'
     },
 
     logs: {
@@ -421,6 +421,8 @@ export default {
       uploaded_at: 'Uploaded at',
       uploader: 'Uploaded by'
     },
+
+    title: 'Entities',
 
     thumbnails: {
       assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
