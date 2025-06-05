@@ -1,7 +1,7 @@
 <template>
   <div class="task-types page fixed-page">
     <list-page-header
-      :title="$t('task_types.title')"
+      :title="$t('task_types.library_title')"
       :new-entry-label="$t('task_types.new_task_type')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"

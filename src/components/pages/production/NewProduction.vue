@@ -159,17 +159,27 @@
                 @delete="deleteFromList(taskType, 'assetTaskTypes')"
               />
             </template>
-            <template #footer>
-              <combobox-task-type
-                class="is-inline inline-task-type-combo"
-                :task-type-list="availableAssetTaskTypes"
-                add-placeholder
-                @update:model-value="
-                  id =>
-                    productionToCreate.assetTaskTypes.push(taskTypeMap.get(id))
-                "
-                v-if="availableAssetTaskTypes.length"
-              />
+            <template #header>
+              <div class="flexrow mb1">
+                <combobox-task-type
+                  class="is-inline inline-task-type-combo flexrow-item mb0"
+                  :task-type-list="availableAssetTaskTypes"
+                  add-placeholder
+                  @update:model-value="
+                    id =>
+                      productionToCreate.assetTaskTypes.push(
+                        taskTypeMap.get(id)
+                      )
+                  "
+                  v-if="availableAssetTaskTypes.length"
+                />
+                <button
+                  class="button is-link flexrow-item"
+                  @click="onAddLibraryAssetTaskTypeClicked"
+                >
+                  {{ $t('task_types.add_task_type_to_library') }}
+                </button>
+              </div>
             </template>
           </draggable>
         </timeline-item>
@@ -191,17 +201,25 @@
                 @delete="deleteFromList(taskType, 'shotTaskTypes')"
               />
             </template>
-            <template #footer>
-              <combobox-task-type
-                class="is-inline inline-task-type-combo"
-                :task-type-list="availableShotTaskTypes"
-                add-placeholder
-                @update:model-value="
-                  id =>
-                    productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
-                "
-                v-if="availableShotTaskTypes.length"
-              />
+            <template #header>
+              <div class="flexrow mb1">
+                <combobox-task-type
+                  class="is-inline inline-task-type-combo flexrow-item mb0"
+                  :task-type-list="availableShotTaskTypes"
+                  add-placeholder
+                  @update:model-value="
+                    id =>
+                      productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
+                  "
+                  v-if="availableShotTaskTypes.length"
+                />
+                <button
+                  class="button is-link flexrow-item"
+                  @click="onAddLibraryShotTaskTypeClicked"
+                >
+                  {{ $t('task_types.add_task_type_to_library') }}
+                </button>
+              </div>
             </template>
           </draggable>
         </timeline-item>
@@ -212,6 +230,26 @@
           :is-completed="hasValidTaskStatuses"
         >
           <div class="flexrow">
+            <combobox-status
+              class="flexrow-item"
+              :task-status-list="availableTaskStatuses"
+              :with-margin="false"
+              big
+              add-placeholder
+              @update:model-value="
+                id =>
+                  productionToCreate.taskStatuses.push(taskStatusMap.get(id))
+              "
+              v-if="availableTaskStatuses.length > 0"
+            />
+            <button
+              class="button is-link flexrow-item"
+              @click="modals.isAddTaskStatusDisplayed = true"
+            >
+              {{ $t('task_status.add_task_status_to_library') }}
+            </button>
+          </div>
+          <div class="flexrow mt1">
             <validation-tag
               class="task-status flexrow-item"
               :task="{ task_status_id: taskStatus.id }"
@@ -220,17 +258,6 @@
               is-static
               @click="deleteFromList(taskStatus, 'taskStatuses')"
               v-for="taskStatus in productionToCreate.taskStatuses"
-            />
-            <combobox-status
-              class="flexrow-item"
-              :task-status-list="availableTaskStatuses"
-              :with-margin="false"
-              add-placeholder
-              @update:model-value="
-                id =>
-                  productionToCreate.taskStatuses.push(taskStatusMap.get(id))
-              "
-              v-if="availableTaskStatuses.length > 0"
             />
           </div>
         </timeline-item>
@@ -242,14 +269,6 @@
           v-if="!isShotsOnly"
         >
           <div class="flexrow asset-types mb1">
-            <span
-              :key="assetType.id"
-              class="asset-type-name flexrow-item"
-              @click="deleteFromList(assetType, 'assetTypes')"
-              v-for="assetType in productionToCreate.assetTypes"
-            >
-              {{ assetType.name }}
-            </span>
             <combobox
               class="flexrow-item"
               :options="availableAssetTypes"
@@ -262,6 +281,22 @@
               "
               v-if="availableAssetTypes.length > 1"
             />
+            <button
+              class="button is-link flexrow-item"
+              @click="modals.isAddAssetTypeDisplayed = true"
+            >
+              {{ $t('asset_types.add_asset_type_to_library') }}
+            </button>
+          </div>
+          <div class="flexrow mt1">
+            <span
+              :key="assetType.id"
+              class="asset-type-name flexrow-item"
+              @click="deleteFromList(assetType, 'assetTypes')"
+              v-for="assetType in productionToCreate.assetTypes"
+            >
+              {{ assetType.name }}
+            </span>
           </div>
         </timeline-item>
         <timeline-item
@@ -342,6 +377,31 @@
         </section>
       </div>
     </div>
+
+    <edit-task-type-modal
+      :active="modals.isAddTaskTypeDisplayed"
+      :is-loading="loading.creatingTaskType"
+      :is-error="errors.creatingTaskType"
+      :for-entity="taskTypeForEntity"
+      @cancel="modals.isAddTaskTypeDisplayed = false"
+      @confirm="createTaskType"
+    />
+
+    <edit-task-status-modal
+      :active="modals.isAddTaskStatusDisplayed"
+      :is-loading="loading.creatingTaskStatus"
+      :is-error="errors.creatingTaskStatus"
+      @cancel="modals.isAddTaskStatusDisplayed = false"
+      @confirm="createTaskStatus"
+    />
+
+    <edit-asset-type-modal
+      :active="modals.isAddAssetTypeDisplayed"
+      :is-loading="loading.creatingAssetType"
+      :is-error="errors.creatingAssetType"
+      @cancel="modals.isAddAssetTypeDisplayed = false"
+      @confirm="createAssetType"
+    />
 
     <import-render-modal
       :active="modals.isAssetsImportRenderDisplayed"
@@ -431,6 +491,9 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
+import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
+import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import ManageShotsModal from '@/components/modals/ManageShotsModal.vue'
@@ -454,6 +517,9 @@ export default {
     ComboboxTaskType,
     ComboboxStatus,
     DateField,
+    EditAssetTypeModal,
+    EditTaskStatusModal,
+    EditTaskTypeModal,
     ImportModal,
     ImportRenderModal,
     ManageShotsModal,
@@ -469,6 +535,7 @@ export default {
       errors: {
         creatingProduction: false,
         creatingProductionError: '',
+        creatingTaskType: false,
         importingAssets: false,
         importingAssetsError: null,
         importingShots: false,
@@ -477,11 +544,15 @@ export default {
       loading: {
         createProduction: false,
         importingAssets: false,
-        importingShots: false
+        importingShots: false,
+        creatingTaskType: false
       },
       modals: {
         isAddAssetsDisplayed: false,
+        isAddAssetTypeDisplayed: false,
         isAddShotsDisplayed: false,
+        isAddTaskStatusDisplayed: false,
+        isAddTaskTypeDisplayed: false,
         isAssetsImportDisplayed: false,
         isAssetsImportRenderDisplayed: false,
         isShotsImportDisplayed: false,
@@ -518,6 +589,7 @@ export default {
         'Frame Out',
         'FPS'
       ],
+      taskTypeForEntity: 'Asset',
       genericColumns: [
         'metadata_column_name => text value',
         'task_type_name => task_status_name',
@@ -716,7 +788,7 @@ export default {
       )
       return [
         {
-          name: '+ Asset Type',
+          name: '+ Add Asset Type',
           id: '-'
         },
         ...assetTypes
@@ -781,7 +853,10 @@ export default {
       'addTaskStatusToProduction',
       'addTaskTypeToProduction',
       'loadContext',
+      'newAssetType',
       'newProduction',
+      'newTaskStatus',
+      'newTaskType',
       'setProduction',
       'uploadAssetFile',
       'uploadShotFile'
@@ -818,21 +893,17 @@ export default {
       await func.runPromiseAsSeries(
         this.productionToCreate.assetTaskTypes
           .concat(this.productionToCreate.shotTaskTypes)
-          .map(
-            // add task types
-            async (taskType, index) => {
-              const finalIndex =
-                taskType.for_entity === 'Shot'
-                  ? index - this.productionToCreate.assetTaskTypes.length
-                  : index
-              return await this.addTaskTypeToProduction({
-                taskTypeId: taskType.id,
-                priority: finalIndex + 1
-              })
-            }
-          )
+          .map(async (taskType, index) => {
+            const finalIndex =
+              taskType.for_entity === 'Shot'
+                ? index - this.productionToCreate.assetTaskTypes.length
+                : index
+            return await this.addTaskTypeToProduction({
+              taskTypeId: taskType.id,
+              priority: finalIndex + 1
+            })
+          })
           .concat(
-            // add task statuses
             this.productionToCreate.taskStatuses.map(async taskStatus => {
               return await this.addTaskStatusToProduction(taskStatus.id)
             })
@@ -876,6 +947,51 @@ export default {
             this.errors.importingShotsError = err
           })
       }
+    },
+
+    createTaskType(taskType) {
+      this.loading.creatingTaskType = true
+      this.errors.creatingTaskType = false
+      this.newTaskType(taskType)
+        .then(() => {
+          this.loading.creatingTaskType = false
+          this.modals.isAddTaskTypeDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.creatingTaskType = false
+          this.errors.creatingTaskType = true
+        })
+    },
+
+    createTaskStatus(taskStatus) {
+      this.loading.creatingTaskStatus = true
+      this.errors.creatingTaskStatus = false
+      this.newTaskStatus(taskStatus)
+        .then(() => {
+          this.loading.creatingTaskStatus = false
+          this.modals.isAddTaskStatusDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.creatingTaskStatus = false
+          this.errors.creatingTaskStatus = true
+        })
+    },
+
+    createAssetType(assetType) {
+      this.loading.creatingAssetType = true
+      this.errors.creatingAssetType = false
+      this.newAssetType(assetType)
+        .then(() => {
+          this.loading.creatingAssetType = false
+          this.modals.isAddAssetTypeDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.loading.creatingAssetType = false
+          this.errors.creatingAssetType = true
+        })
     },
 
     createProductionRoute(createdProduction) {
@@ -1022,6 +1138,16 @@ export default {
       this.productionToCreate.shotsToCreate.push(shot)
       shot.id = this.productionToCreate.shotsToCreate.length - 1
       callback(shot)
+    },
+
+    onAddLibraryAssetTaskTypeClicked() {
+      this.taskTypeForEntity = 'Asset'
+      this.modals.isAddTaskTypeDisplayed = true
+    },
+
+    onAddLibraryShotTaskTypeClicked() {
+      this.taskTypeForEntity = 'Shot'
+      this.modals.isAddTaskTypeDisplayed = true
     }
   }
 }

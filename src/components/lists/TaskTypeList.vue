@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
     <div class="datatable-wrapper">
-      <table class="datatable multi-section">
+      <table class="datatable">
         <thead class="datatable-head" v-if="entries.length > 0">
           <tr>
             <th scope="col" class="department">

@@ -1,7 +1,7 @@
 <template>
   <div class="asset-types page fixed-page">
     <list-page-header
-      :title="$t('asset_types.title')"
+      :title="$t('asset_types.library_title')"
       :new-entry-label="$t('asset_types.new_asset_type')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"
