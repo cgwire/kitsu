@@ -1471,7 +1471,8 @@ export default {
     show_assigned: 'Show assigned entities',
     force_unassign: 'Override previous assignments',
     forced_daily_quotas: 'Forced daily quotas:',
-    estimated_daily_quotas: 'Auto estimated daily quotas:'
+    estimated_daily_quotas: 'Auto estimated daily quotas:',
+    edit_task: 'Edit task'
   },
 
   team_schedule: {

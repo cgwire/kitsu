@@ -26,7 +26,7 @@
     "@fullcalendar/multimonth": "6.1.17",
     "@fullcalendar/vue3": "6.1.17",
     "@google/model-viewer": "4.1.0",
-    "@sentry/vue": "9.24.0",
+    "@sentry/vue": "9.27.0",
     "@unhead/vue": "2.0.10",
     "@vuepic/vue-datepicker": "11.0.2",
     "async": "3.2.6",
@@ -37,7 +37,7 @@
     "color-string": "1.9.1",
     "core-js": "3.42.0",
     "fabric": "cgwire/fabric.js",
-    "lucide-vue-next": "0.511.0",
+    "lucide-vue-next": "0.513.0",
     "marked": "15.0.12",
     "marked-emoji": "2.0.0",
     "moment": "2.30.1",
@@ -84,7 +84,7 @@
     "prettier": "3.5.3",
     "sass": "1.89.1",
     "vite": "6.3.5",
-    "vitest": "3.1.4",
+    "vitest": "3.2.2",
     "vitest-localstorage-mock": "0.1.2"
   },
   "engines": {
