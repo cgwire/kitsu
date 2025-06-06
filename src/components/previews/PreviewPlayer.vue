@@ -81,7 +81,7 @@
               :is-muted="true"
               :is-repeating="isRepeating"
               :margin-bottom="marginBottom"
-              :preview="previewToCompare"
+              :preview="comparisonPreview"
               :style="{
                 opacity: overlayOpacity
               }"
@@ -221,7 +221,7 @@
 
         <div class="flexrow flexrow-item" v-if="!isConcept">
           <button-simple
-            class="ml1"
+            :class="{ ml1: isMovie || isSound }"
             :active="isComparing"
             icon="compare"
             :title="$t('playlists.actions.split_screen')"
@@ -251,8 +251,31 @@
             :is-dark="true"
             :thin="true"
             v-model="comparisonMode"
-            v-if="isComparing && fullScreen"
+            v-if="isComparing && (!light || isComparisonEnabled)"
           />
+          <div
+            class="flexrow flexrow-item comparison-list"
+            v-if="
+              isComparing &&
+              (!light || isComparisonEnabled) &&
+              comparisonPreviewLength > 0
+            "
+          >
+            <button-simple
+              class="button playlist-button flexrow-item"
+              icon="left"
+              @click="onPreviousComparisonClicked"
+            />
+            <span class="flexrow-item comparison-index">
+              {{ comparisonPreviewIndex + 1 }} /
+              {{ comparisonPreviewLength }}
+            </span>
+            <button-simple
+              class="button playlist-button flexrow-item"
+              icon="right"
+              @click="onNextComparisonClicked"
+            />
+          </div>
         </div>
 
         <div class="filler"></div>
@@ -515,6 +538,7 @@
     <div
       class="flexrow revision-previews"
       ref="revision-previews"
+      @wheel="onSubPreviewsWheel"
       v-if="isOrdering"
     >
       <div
@@ -668,6 +692,7 @@ export default {
     return {
       annotations: [],
       availableAnimations: [],
+      comparisonPreviewIndex: 0,
       current3DAnimation: null,
       currentFrame: 0,
       currentIndex: 1,
@@ -774,6 +799,25 @@ export default {
       'selectedConcepts',
       'user'
     ]),
+
+    comparisonPreview() {
+      if (
+        this.previewToCompare?.previews.length > 0 &&
+        this.comparisonPreviewIndex > 0
+      ) {
+        return this.previewToCompare.previews[this.comparisonPreviewIndex - 1]
+      }
+      return this.previewToCompare
+    },
+
+    comparisonPreviewLength() {
+      if (this.previewToCompare) {
+        const previews = this.previewToCompare.previews
+        return previews ? previews.length + 1 : 0
+      } else {
+        return 0
+      }
+    },
 
     // Elements
 
@@ -1078,6 +1122,14 @@ export default {
           this.syncComparisonViewer()
         }
         if (!this.isPlaying) this.loadAnnotation()
+      }
+    },
+
+    onSubPreviewsWheel(event) {
+      const isMouseWheelY = !event.deltaX
+      if (isMouseWheelY) {
+        event.preventDefault()
+        this.$refs['revision-previews'].scrollLeft += event.deltaY
       }
     },
 
@@ -1481,6 +1533,18 @@ export default {
       } else {
         this.previewToCompareId = null
       }
+    },
+
+    onPreviousComparisonClicked() {
+      const index = this.comparisonPreviewIndex - 1
+      this.comparisonPreviewIndex =
+        index < 0 ? this.comparisonPreviewLength - 1 : index
+    },
+
+    onNextComparisonClicked() {
+      const index = this.comparisonPreviewIndex + 1
+      this.comparisonPreviewIndex =
+        index > this.comparisonPreviewLength - 1 ? 0 : index
     },
 
     resetPreviewFileMap() {
@@ -2149,6 +2213,7 @@ export default {
     },
 
     previewToCompare() {
+      this.comparisonPreviewIndex = 0
       this.$nextTick(() => {
         this.previewViewer.resize()
         this.comparisonViewer.resize()

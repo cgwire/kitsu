@@ -33,6 +33,7 @@
       <div
         ref="select"
         :class="{
+          big: big,
           'select-input': true,
           'open-top': openTop
         }"
@@ -86,6 +87,10 @@ export default {
   },
 
   props: {
+    big: {
+      default: false,
+      type: Boolean
+    },
     colorOnly: {
       default: false,
       type: Boolean
@@ -145,7 +150,7 @@ export default {
         return this.taskStatusMap.get(this.modelValue)
       } else if (this.addPlaceholder) {
         return {
-          short_name: '+ status',
+          short_name: '+ add status',
           color: '#999'
         }
       } else {
@@ -155,6 +160,7 @@ export default {
 
     comboStyles() {
       return {
+        width: this.big ? '150px' : '120px',
         background: this.colorOnly
           ? this.backgroundColor(this.currentStatus)
           : this.isDarkTheme
@@ -287,6 +293,10 @@ export default {
   top: 38px;
   left: 0;
   overflow-y: auto;
+
+  &.big {
+    width: 150px;
+  }
 
   &.open-top {
     top: auto;

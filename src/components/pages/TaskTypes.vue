@@ -1,7 +1,7 @@
 <template>
   <div class="task-types page fixed-page">
     <list-page-header
-      :title="$t('task_types.title')"
+      :title="$t('task_types.library_title')"
       :new-entry-label="$t('task_types.new_task_type')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"
@@ -9,6 +9,8 @@
     />
 
     <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
+
+    <route-tabs :active-tab="entityTab" :tabs="entityTabs" route-key="entity" />
 
     <task-type-list
       :entries="listTaskTypes"
@@ -21,9 +23,9 @@
 
     <edit-task-type-modal
       :active="modals.edit"
+      :for-entity="forEntity"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :task-types="taskTypes"
       :task-type-to-edit="taskTypeToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditTaskType"
@@ -68,6 +70,7 @@ export default {
   data() {
     return {
       activeTab: 'active',
+      entityTab: 'assets',
       errors: {
         taskTypes: false,
         departments: false,
@@ -94,6 +97,28 @@ export default {
           label: this.$t('main.archived')
         }
       ],
+      entityTabs: [
+        {
+          name: 'assets',
+          label: this.$t('assets.title')
+        },
+        {
+          name: 'shots',
+          label: this.$t('shots.title')
+        },
+        {
+          name: 'sequences',
+          label: this.$t('sequences.title')
+        },
+        {
+          name: 'episodes',
+          label: this.$t('episodes.title')
+        },
+        {
+          name: 'edits',
+          label: this.$t('edits.title')
+        }
+      ],
       taskTypeToDelete: { color: '#999999' },
       taskTypeToEdit: null
     }
@@ -101,6 +126,12 @@ export default {
 
   computed: {
     ...mapGetters(['archivedTaskTypes', 'departmentMap', 'taskTypes']),
+
+    forEntity() {
+      return stringHelpers.capitalize(
+        this.entityTab.substring(0, this.entityTab.length - 1)
+      )
+    },
 
     isActiveTab() {
       return this.activeTab === 'active'
@@ -110,13 +141,16 @@ export default {
       const taskTypes = this.isActiveTab
         ? this.taskTypes
         : this.archivedTaskTypes
-
-      return taskTypes.filter(taskType => taskType.for_entity !== 'Concept')
+      const forEntity = this.entityTab.substring(0, this.entityTab.length - 1)
+      return taskTypes.filter(
+        taskType => taskType.for_entity.toLowerCase() === forEntity
+      )
     }
   },
 
   mounted() {
     this.activeTab = this.$route.query.tab || 'active'
+    this.entityTab = this.$route.query.entity || 'assets'
     this.loading.taskTypes = true
     this.errors.taskTypes = false
     this.loading.departments = true
@@ -260,6 +294,7 @@ export default {
   watch: {
     $route() {
       this.activeTab = this.$route.query.tab || 'active'
+      this.entityTab = this.$route.query.entity || 'assets'
     }
   },
 

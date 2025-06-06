@@ -1,7 +1,7 @@
 <template>
   <div class="task-status page fixed-page">
     <list-page-header
-      :title="$t('task_status.title')"
+      :title="$t('task_status.library_title')"
       :new-entry-label="$t('task_status.new_task_status')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"
@@ -10,13 +10,9 @@
 
     <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
+    <route-tabs :active-tab="entityTab" :tabs="entityTabs" route-key="entity" />
+
     <div class="column">
-      <h2>
-        {{ $t('task_status.title_entities') }}
-        <span class="help-tooltip" :title="$t('task_status.help.entities')">
-          <help-circle-icon class="icon is-small" />
-        </span>
-      </h2>
       <task-status-list
         :entries="taskStatusList"
         :is-loading="loading.list"
@@ -24,8 +20,8 @@
         @edit-clicked="onEditClicked"
         @delete-clicked="onDeleteClicked"
         @update-priorities="updatePriorities"
+        v-if="entityTab === 'entities'"
       />
-      <h2>{{ $t('task_status.title_concepts') }}</h2>
       <task-status-list
         :entries="conceptStatusList"
         :is-loading="loading.list"
@@ -33,6 +29,7 @@
         @edit-clicked="onEditClicked"
         @delete-clicked="onDeleteClicked"
         @update-priorities="updatePriorities"
+        v-if="entityTab === 'concepts'"
       />
     </div>
 
@@ -58,7 +55,6 @@
 </template>
 
 <script>
-import { HelpCircleIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
@@ -76,7 +72,6 @@ export default {
   components: {
     DeleteModal,
     EditTaskStatusModal,
-    HelpCircleIcon,
     ListPageHeader,
     RouteTabs,
     TaskStatusList
@@ -85,6 +80,17 @@ export default {
   data() {
     return {
       activeTab: 'active',
+      entityTab: 'entities',
+      entityTabs: [
+        {
+          name: 'entities',
+          label: this.$t('entities.title')
+        },
+        {
+          name: 'concepts',
+          label: this.$t('concepts.title')
+        }
+      ],
       taskStatusToDelete: null,
       taskStatusToEdit: { color: '#000000' },
       modals: {
@@ -116,6 +122,7 @@ export default {
 
   mounted() {
     this.activeTab = this.$route.query.tab || 'active'
+    this.entityTab = this.$route.query.entity || 'entities'
   },
 
   computed: {
@@ -250,6 +257,7 @@ export default {
   watch: {
     $route() {
       this.activeTab = this.$route.query.tab || 'active'
+      this.entityTab = this.$route.query.entity || 'entities'
     }
   },
 

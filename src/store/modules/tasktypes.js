@@ -259,8 +259,8 @@ const mutations = {
       )
       Object.assign(taskType, newTaskType)
     } else {
-      state.taskTypes.push(newTaskType)
       cache.taskTypeMap.set(newTaskType.id, newTaskType)
+      state.taskTypes.push(newTaskType)
     }
     state.taskTypes = sortTaskTypes(state.taskTypes)
   },

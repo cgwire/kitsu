@@ -24,7 +24,7 @@
             @enter="confirmClicked"
             v-model="form.name"
             v-focus
-            v-if="taskStatusToEdit.short_name !== 'todo'"
+            v-if="taskStatusToEdit?.short_name !== 'todo'"
           />
           <text-field
             ref="shortNameField"
@@ -33,7 +33,7 @@
             :maxlength="8"
             @enter="confirmClicked"
             v-model="form.short_name"
-            v-if="taskStatusToEdit.short_name !== 'todo'"
+            v-if="taskStatusToEdit?.short_name !== 'todo'"
           />
           <textarea-field
             input-class="task-status-description"
@@ -88,7 +88,7 @@
             :column="5"
             :label="$t('task_status.fields.color')"
             v-model="form.color"
-            v-if="taskStatusToEdit.short_name !== 'todo'"
+            v-if="taskStatusToEdit?.short_name !== 'todo'"
           />
           <combobox-boolean
             :label="$t('main.archived')"

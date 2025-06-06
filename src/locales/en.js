@@ -38,12 +38,14 @@ export default {
   },
 
   asset_types: {
+    add_asset_type_to_library: 'Add an asset type to the library',
     all_asset_types: 'All asset types',
     create_error: 'An error occurred while saving this asset type. Are you sure there is no asset type with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this asset type. There may be existing data currently linked to it. Are you sure this asset type has no asset linked to it?',
     edit_title: 'Edit asset type',
     include_all: 'Includes all asset task types',
+    library_title: 'Asset Types Library',
     new_asset_type: 'Add an asset type',
     number: 'asset type | asset types',
     title: 'Asset Types',
@@ -60,6 +62,7 @@ export default {
     create_error: 'An error occurred while saving this background. Are you sure there is no background with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this background. There may be existing data currently linked to it. Are you sure this background has no task linked to it?',
+    library_title: '3D Backgrounds Library',
     name: 'background',
     number: 'background | backgrounds',
     edit_background: 'Edit background',
@@ -362,31 +365,31 @@ export default {
 
   entities: {
     build_filter: {
-      asset_type: 'Asset type',
       all_types: 'All asset types',
+      asset_type: 'Asset type',
+      assets_ready: 'Ready',
+      assets_not_ready: 'Not ready',
       assignation: 'Assignment',
       assignation_exists_for: 'Assignments exists for',
       assigned_to: 'Assigned to',
+      checked: 'Checked',
       department: 'Department',
       descriptor: 'Metadata',
       equal: 'Equal',
       in: 'In',
       is_assets_ready: 'Assets are ready',
-      assets_ready: 'Ready',
-      assets_not_ready: 'Not ready',
       no_assignation_for: 'No assignment exists for',
       no_filter: 'No filter',
-      not_equal: 'Not equal',
       not_assigned_to: 'Not assigned to',
+      not_checked: 'Not checked',
+      not_equal: 'Not equal',
       status: 'Task status',
       thumbnail: 'Thumbnail presence',
       title: 'Filter on...',
       union_and: 'Match all the following filters',
       union_or: 'Match one of the following filters',
       with_thumbnail: 'With thumbnail',
-      without_thumbnail: 'Without thumbnail',
-      checked: 'Checked',
-      not_checked: 'Not checked'
+      without_thumbnail: 'Without thumbnail'
     },
 
     logs: {
@@ -421,6 +424,8 @@ export default {
       uploaded_at: 'Uploaded at',
       uploader: 'Uploaded by'
     },
+
+    title: 'Entities',
 
     thumbnails: {
       assets_pattern: '"AssetType AssetName" eg. Environment_Forest.',
@@ -1119,13 +1124,13 @@ export default {
       placeholder_resolution2: '1080',
       production_settings: 'Set your production parameters',
       production_settings_description: 'Define your production type, the format of your video previews and schedule your production.',
-      select_asset_task_type: 'Select asset task type',
+      select_asset_task_type: 'Select asset task types',
       select_asset_task_type_description: 'These task types define the building steps of your assets.',
-      select_shot_task_type: 'Select shot task type',
+      select_shot_task_type: 'Select shot task types',
       select_shot_task_type_description: 'These task types define the building steps of your shots.',
-      select_edit_task_type: 'Select edit task type',
+      select_edit_task_type: 'Select edit task types',
       select_edit_task_type_description: 'These task types define the building steps of your edits.',
-      select_task_status: 'Select task status',
+      select_task_status: 'Select task statuses',
       select_task_status_description: 'Select the task statuses you will use during the production.',
       start_and_end_dates: 'Start and end dates',
       shots_to_import: 'shots to import'
@@ -1336,10 +1341,12 @@ export default {
   },
 
   task_status: {
+    add_task_status_to_library: 'Add a task status to the library',
     create_error: 'An error occurred while saving this task status. Are you sure there is no task status with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this task status. There may be existing data currently linked to it. Are you sure this task status has no task linked to it?',
     edit_title: 'Edit task status',
+    library_title: 'Task Status Library',
     name: 'task status',
     number: 'task status | task status',
     new_task_status: 'Add a task status',
@@ -1365,11 +1372,13 @@ export default {
   },
 
   task_types: {
-    add_task_type_placeholder: '+ Task type',
+    add_task_type_placeholder: '+ Add Task type',
+    add_task_type_to_library: 'Add a task type to the library',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this task type. There may be existing data currently linked to it. Are you sure this task type has no task linked to it?',
     edit_title: 'Edit task type',
     create_error: 'An error occurred while creating the task type. Please, check that there is no task type with a similar name.',
+    library_title: 'Task Type Library',
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
