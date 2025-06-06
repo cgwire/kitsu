@@ -1098,10 +1098,19 @@ export default {
     getTasks(entities) {
       const tasks = []
       entities.forEach(entity => {
-        const entityTasks = entity.tasks || []
-        entityTasks.forEach(taskId => {
+        if (
+          entity.canceled ||
+          !entity.tasks?.length ||
+          (this.isTVShow &&
+            !['all', entity.episode_id || 'main'].includes(
+              this.currentEpisode?.id
+            ))
+        ) {
+          return
+        }
+        entity.tasks.forEach(taskId => {
           const task = this.taskMap.get(taskId.id || taskId)
-          if (task && !entity.canceled) {
+          if (task) {
             // Hack to allow filtering on linked entity metadata.
             this.$store.commit('SET_TASK_EXTRA_DATA', {
               task,
