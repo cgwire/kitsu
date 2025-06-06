@@ -1378,7 +1378,7 @@ export default {
     delete_error: 'An error occurred while deleting this task type. There may be existing data currently linked to it. Are you sure this task type has no task linked to it?',
     edit_title: 'Edit task type',
     create_error: 'An error occurred while creating the task type. Please, check that there is no task type with a similar name.',
-    library_title: 'Task Types Library',
+    library_title: 'Task Type Library',
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
