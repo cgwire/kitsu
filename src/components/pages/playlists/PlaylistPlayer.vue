@@ -2142,7 +2142,6 @@ export default {
             setTimeout(() => {
               this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
             }, 100)
-            // this.wavesurfer.load(this.rawPlayer.currentPlayer.src)
           } catch (err) {
             console.error('Error loading waveform:', err)
           }
