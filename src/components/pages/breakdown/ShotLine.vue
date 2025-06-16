@@ -75,7 +75,7 @@
         :value="entity.nb_frames"
         type="number"
         min="0"
-        @input="event => onNbFramesChanged(entity, event.target.value)"
+        @input="event => onNbFramesChanged(entity, event)"
         v-if="isCurrentUserManager"
       />
       <span class="metadata-value selectable" v-else>
@@ -356,14 +356,7 @@ export default {
     }
   },
 
-  emits: [
-    'add-one',
-    'click',
-    'description-changed',
-    'edit-label',
-    'remove-one',
-    'standby-changed'
-  ],
+  emits: ['add-one', 'click', 'edit-label', 'field-changed', 'remove-one'],
 
   computed: {
     ...mapGetters([
@@ -412,11 +405,27 @@ export default {
     },
 
     onDescriptionChanged(entity, event) {
-      this.$emit('description-changed', entity, event.target.value)
+      this.$emit('field-changed', {
+        entry: entity,
+        fieldName: 'description',
+        value: event.target.value
+      })
+    },
+
+    onNbFramesChanged(entity, event) {
+      this.$emit('field-changed', {
+        entry: entity,
+        fieldName: 'nb_frames',
+        value: event.target.value
+      })
     },
 
     onStandbyChanged(entity, event) {
-      this.$emit('standby-changed', entity, event.target.checked)
+      this.$emit('field-changed', {
+        entry: entity,
+        fieldName: 'is_casting_standby',
+        value: event.target.checked
+      })
     },
 
     renderMarkdown,
