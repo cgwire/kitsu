@@ -245,11 +245,10 @@
               :column-width="columnWidth"
               @add-one="addOneAsset"
               @click="selectEntity"
-              @description-changed="onDescriptionChanged"
               @edit-label="onEditLabelClicked"
+              @field-changed="onFieldChanged"
               @metadata-changed="onMetadataChanged"
               @remove-one="removeOneAssetFromSelection"
-              @standby-changed="onStandbyChanged"
               v-for="entity in castingEntities"
             />
           </div>
@@ -1275,48 +1274,32 @@ export default {
       return castingToPaste
     },
 
-    onMetadataChanged({ entry, descriptor, value }) {
-      const metadata = {}
-      metadata[descriptor.field_name] = value
+    async editEntity(data) {
+      if (this.isEpisodeCasting) {
+        await this.editEpisode(data)
+      } else if (this.isShotCasting) {
+        await this.editShot(data)
+      } else {
+        await this.editAsset(data)
+      }
+    },
+
+    async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
-        data: metadata
+        [fieldName]: value
       }
-      if (this.isEpisodeCasting) {
-        this.editEpisode(data)
-      } else if (this.isShotCasting) {
-        this.editShot(data)
-      } else {
-        this.editAsset(data)
-      }
+      await this.editEntity(data)
     },
 
-    onDescriptionChanged(entity, value) {
+    async onMetadataChanged({ entry, descriptor, value }) {
       const data = {
-        id: entity.id,
-        description: value
+        id: entry.id,
+        data: {
+          [descriptor.field_name]: value
+        }
       }
-      if (this.isEpisodeCasting) {
-        this.editEpisode(data)
-      } else if (this.isShotCasting) {
-        this.editShot(data)
-      } else {
-        this.editAsset(data)
-      }
-    },
-
-    onStandbyChanged(entity, value) {
-      const data = {
-        id: entity.id,
-        is_casting_standby: value
-      }
-      if (this.isEpisodeCasting) {
-        this.editEpisode(data)
-      } else if (this.isShotCasting) {
-        this.editShot(data)
-      } else {
-        this.editAsset(data)
-      }
+      await this.editEntity(data)
     },
 
     descriptorCurrentDepartments(descriptor) {
