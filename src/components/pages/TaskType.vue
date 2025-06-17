@@ -100,12 +100,6 @@
                 locale-key-prefix="tasks."
                 v-model="difficultyFilter"
               />
-              <combobox-status
-                class="flexrow-item"
-                :label="$t('news.task_status')"
-                :task-status-list="productionTaskStatuses"
-                v-model="taskStatusFilter"
-              />
             </div>
             <div class="filler"></div>
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
@@ -313,7 +307,6 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
@@ -435,7 +428,6 @@ export default {
     CornerLeftUpIcon,
     ComboboxNumber,
     ComboboxStyled,
-    ComboboxStatus,
     DateField,
     EstimationHelper,
     Schedule,
@@ -598,7 +590,6 @@ export default {
       'nbSelectedTasks',
       'organisation',
       'personMap',
-      'productionTaskStatuses',
       'selectedTasks',
       'sequencesPath',
       'sequenceSubscriptions',
