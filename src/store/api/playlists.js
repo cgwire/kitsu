@@ -61,7 +61,7 @@ export default {
     }
     if (playlist.shots) data.shots = playlist.shots
     if (playlist.for_entity) data.for_entity = playlist.for_entity
-    if (playlist.task_type_id) data.task_type_id = playlist.task_type_id
+    data.task_type_id = playlist.task_type_id || null
     client.put(`/api/data/playlists/${playlist.id}`, data, callback)
   },
 
