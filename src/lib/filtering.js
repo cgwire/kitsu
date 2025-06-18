@@ -4,7 +4,6 @@ import {
   buildNameIndex,
   indexSearch
 } from '@/lib/indexing'
-import string from '@/lib/string'
 
 const UNION_REGEX = /\+\(.*\)/
 const EQUAL_REGEX =
@@ -28,18 +27,28 @@ export const applyFilters = (entries, filters, taskMap) => {
   if (filters && filters.length > 0) {
     const result = entries.filter(entry => {
       let isOk = null
-      filters.forEach(filter => {
-        if (isOk === false && !filters.union) return false
-        if (isOk === true && filters.union) return true
+      for (let i = 0; i < filters.length; i++) {
+        const filter = filters[i]
+        if (isOk === false && !filters.union) break
+        if (isOk === true && filters.union) break
         isOk =
           applyFiltersFunctions[filter.type](entry, filter, taskMap) || false
-      })
+      }
       return isOk
     })
     return result
   } else {
     return entries
   }
+}
+
+/*
+ * Private function for filtering on names
+ * Simple hash to compare user name
+ * It removes spaces and lowercases the name
+ */
+const hashName = name => {
+  return name.toLowerCase().replace(/ /g, '')
 }
 
 const applyFiltersFunctions = {
@@ -546,14 +555,19 @@ export const getDepartmentFilters = (departments, queryText) => {
 export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   if (!queryText) return []
 
+  // create a deep copy of persons with slugified names to avoid reference issues
+  const shallowPersons = persons.map(person => ({
+    ...JSON.parse(JSON.stringify(person)),
+    name: hashName(person.name)
+  }))
+
   const results = []
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const personIndex = new Map()
-    persons.forEach(person => {
-      const name = string.slugify(person.name.toLowerCase())
-      personIndex.set(name, person)
+    const personIndex = []
+    shallowPersons.forEach(person => {
+      personIndex.push(person)
     })
 
     rgxMatches.forEach(rgxMatch => {
@@ -567,17 +581,19 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       value = cleanParenthesis(value)
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
-      const simplifiedValue = string.slugify(value.toLowerCase())
-      const person = personIndex.get(simplifiedValue)
-      if (person) {
-        results.push({
-          personId: person.id,
-          taskType,
-          value,
-          type: 'assignedto',
-          excluding
-        })
-      }
+      const simplifiedValue = hashName(value)
+
+      personIndex.forEach(person => {
+        if (person.name === simplifiedValue) {
+          results.push({
+            personId: person.id,
+            taskType,
+            value,
+            type: 'assignedto',
+            excluding
+          })
+        }
+      })
     })
   }
   return results
