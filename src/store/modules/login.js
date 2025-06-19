@@ -4,11 +4,8 @@ import {
   LOGIN_RUN,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
-  LOGOUT_SUCCESS,
-  LOGOUT_FAILURE,
   DATA_LOADING_START,
   DATA_LOADING_END,
-  TOGGLE_USER_MENU,
   RESET_ALL
 } from '@/store/mutation-types'
 import auth from '@/lib/auth'
@@ -61,18 +58,10 @@ const actions = {
     })
   },
 
-  logout({ commit, state }, callback) {
-    auth.logout(err => {
-      if (err) {
-        commit(LOGOUT_FAILURE)
-        callback(null, false)
-      } else {
-        commit(RESET_ALL)
-        commit(LOGOUT_SUCCESS)
-        commit(TOGGLE_USER_MENU)
-        callback(null, true)
-      }
-    })
+  async logout({ commit, state }) {
+    this.$socket.disconnect()
+    await auth.logout()
+    commit(RESET_ALL)
   },
 
   resetPassword({ commit }, email) {
@@ -116,11 +105,6 @@ const mutations = {
   [LOGIN_FAILURE](state) {
     state.isLoginLoading = false
     state.isLoginError = true
-  },
-
-  [LOGOUT_SUCCESS](state) {
-    state.isLoginLoading = false
-    state.isLoginError = false
   },
 
   [DATA_LOADING_START](state) {

@@ -50,6 +50,9 @@ app.directive('focus', {
   }
 })
 
+// Inject the socket into the store.
+store.$socket = app.config.globalProperties.$socket
+
 app.config.compilerOptions.whitespace = 'preserve'
 
 app.mount('#app')

@@ -51,15 +51,12 @@ const auth = {
       })
   },
 
-  logout(callback) {
-    superagent.get('/api/auth/logout').end((err, res) => {
-      if (err) {
-        console.error(err)
-        callback(err)
-      }
+  async logout() {
+    try {
+      await superagent.get('/api/auth/logout')
+    } finally {
       store.commit(USER_LOGOUT)
-      callback()
-    })
+    }
   },
 
   resetPassword(email) {

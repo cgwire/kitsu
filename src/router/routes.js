@@ -1,4 +1,5 @@
 import Bowser from 'bowser'
+import { nextTick } from 'vue'
 
 import auth from '@/lib/auth'
 import lang from '@/lib/lang'
@@ -879,6 +880,20 @@ export const routes = [
     path: '/login',
     component: Login,
     name: 'login'
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    beforeEnter: (to, from, next) => {
+      next('/login')
+      nextTick(async () => {
+        try {
+          await store.dispatch('logout')
+        } catch (error) {
+          console.error('An error occurred while logout', error)
+        }
+      })
+    }
   },
   {
     path: '/first-connection',
