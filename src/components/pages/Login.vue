@@ -12,7 +12,10 @@
           <img src="../../assets/kitsu-text-dark.svg" v-if="isDarkTheme" />
           <img src="../../assets/kitsu-text.svg" v-else />
         </div>
-        <form v-if="!(isMissingOTP || isWrongOTP)">
+        <form
+          @submit.prevent="confirmLogIn"
+          v-if="!(isMissingOTP || isWrongOTP)"
+        >
           <div class="field" v-if="mainConfig?.saml_enabled">
             <p class="control">
               <a
@@ -31,9 +34,9 @@
               <input
                 class="input is-medium email"
                 type="email"
+                autocomplete="username"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
-                @keyup.enter="confirmLogIn"
                 v-model="email"
                 v-focus
               />
@@ -47,9 +50,9 @@
               <input
                 class="input is-medium password"
                 type="password"
+                autocomplete="current-password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
-                @keyup.enter="confirmLogIn"
                 v-model="password"
               />
               <span class="icon">
@@ -173,7 +176,7 @@ export default {
       this.isMissingOTP = false
       this.isServerError = false
       this.logIn({
-        twoFactorPayload: twoFactorPayload,
+        twoFactorPayload,
         callback: (err, success) => {
           if (err) {
             if (err.default_password) {
