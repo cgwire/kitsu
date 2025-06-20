@@ -12,10 +12,7 @@
           <img src="../../assets/kitsu-text-dark.svg" v-if="isDarkTheme" />
           <img src="../../assets/kitsu-text.svg" v-else />
         </div>
-        <form
-          @submit.prevent="confirmLogIn"
-          v-if="!(isMissingOTP || isWrongOTP)"
-        >
+        <form v-if="!(isMissingOTP || isWrongOTP)">
           <div class="field" v-if="mainConfig?.saml_enabled">
             <p class="control">
               <a
@@ -37,6 +34,7 @@
                 autocomplete="username"
                 :placeholder="$t('login.fields.email')"
                 @input="updateEmail"
+                @keyup.enter="confirmLogIn"
                 v-model="email"
                 v-focus
               />
@@ -53,6 +51,7 @@
                 autocomplete="current-password"
                 :placeholder="$t('login.fields.password')"
                 @input="updatePassword"
+                @keyup.enter="confirmLogIn"
                 v-model="password"
               />
               <span class="icon">
