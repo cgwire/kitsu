@@ -72,6 +72,19 @@
               />
             </div>
             <div class="flexrow-item flexrow" v-if="isActiveTab('tasks')">
+              <combobox-status
+                class="flexrow-item selector"
+                :label="$t('news.task_status')"
+                :task-status-list="taskStatusList"
+                v-model="taskStatusIdFilter"
+              />
+              <combobox-styled
+                class="flexrow-item"
+                :label="$t('tasks.fields.difficulty')"
+                :options="difficultyOptions"
+                locale-key-prefix="tasks."
+                v-model="difficultyFilter"
+              />
               <combobox-styled
                 class="flexrow-item"
                 :label="$t('tasks.due_date')"
@@ -282,7 +295,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
 import { getPersonPath } from '@/lib/path'
-import { sortPeople } from '@/lib/sorting'
+import { sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
   addBusinessDays,
@@ -304,9 +317,10 @@ import { formatListMixin } from '@/components/mixins/format'
 import { searchMixin } from '@/components/mixins/search'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import DateField from '@/components/widgets/DateField.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
@@ -427,6 +441,7 @@ export default {
     ButtonSimple,
     CornerLeftUpIcon,
     ComboboxNumber,
+    ComboboxStatus,
     ComboboxStyled,
     DateField,
     EstimationHelper,
@@ -449,13 +464,18 @@ export default {
       currentScheduleItem: null,
       currentTask: null,
       contactSheetMode: false,
+      dataMatchers: ['Parent', 'Entity'],
+      difficultyFilter: '-1',
       dueDateFilter: 'all',
       entityType: 'Asset',
       estimationFilter: 'all',
+      importCsvFormData: {},
+      optionalColumns: ['Estimation', 'Start date', 'Due date', 'Difficulty'],
+      parsedCSV: [],
       priorityFilter: '-1',
-      difficultyFilter: '-1',
-      tasks: [],
       selection: {},
+      tasks: [],
+      taskStatusIdFilter: null,
       difficultyOptions: [
         { label: 'all_tasks', value: '-1' },
         { label: 'difficulty.very_easy', value: '1' },
@@ -491,6 +511,10 @@ export default {
         importing: false,
         savingSearch: false
       },
+      modals: {
+        isImportRenderDisplayed: false,
+        importing: false
+      },
       priorityOptions: [
         { label: 'all_tasks', value: '-1' },
         { label: 'priority.normal', value: '0' },
@@ -518,15 +542,7 @@ export default {
           { label: 'Status', value: 'status' },
           { label: 'Late', value: 'late' }
         ]
-      },
-      modals: {
-        isImportRenderDisplayed: false,
-        importing: false
-      },
-      parsedCSV: [],
-      importCsvFormData: {},
-      optionalColumns: ['Estimation', 'Start date', 'Due date', 'Difficulty'],
-      dataMatchers: ['Parent', 'Entity']
+      }
     }
   },
 
@@ -590,6 +606,7 @@ export default {
       'nbSelectedTasks',
       'organisation',
       'personMap',
+      'productionTaskStatuses',
       'selectedTasks',
       'sequencesPath',
       'sequenceSubscriptions',
@@ -599,6 +616,16 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    taskStatusList() {
+      return [
+        {
+          id: '',
+          color: '#999',
+          short_name: this.$t('news.all')
+        }
+      ].concat(sortByName([...this.productionTaskStatuses]))
+    },
 
     taskTypeStartDate() {
       return moment(this.schedule.taskTypeStartDate).utc()
@@ -851,6 +878,7 @@ export default {
             this.estimationFilter = this.$route.query.late || 'all'
             this.priorityFilter = this.$route.query.priority || '-1'
             this.difficultyFilter = this.$route.query.difficulty || '-1'
+            this.taskStatusIdFilter = this.$route.query.task_status_id || ''
 
             const taskId = this.$route.query.task_id
             const task = this.taskMap.get(taskId)
@@ -1004,6 +1032,11 @@ export default {
           t => t.difficulty === parseInt(this.difficultyFilter)
         )
       }
+      if (this.taskStatusIdFilter !== null && this.taskStatusIdFilter !== '') {
+        this.tasks = this.tasks.filter(
+          t => t.task_status_id === this.taskStatusIdFilter
+        )
+      }
     },
 
     saveSearchQuery(searchQuery) {
@@ -1029,8 +1062,16 @@ export default {
       const late = this.estimationFilter
       const priority = this.priorityFilter
       const difficulty = this.difficultyFilter
+      const taskStatusId = this.taskStatusIdFilter || null
       this.$router.push({
-        query: { search, duedate, late, priority, difficulty }
+        query: {
+          search,
+          duedate,
+          late,
+          priority,
+          difficulty,
+          task_status_id: taskStatusId
+        }
       })
     },
 
@@ -1571,6 +1612,10 @@ export default {
       }
     },
 
+    difficultyFilter() {
+      this.applyTaskFilters()
+    },
+
     dueDateFilter() {
       this.applyTaskFilters()
     },
@@ -1583,7 +1628,7 @@ export default {
       this.applyTaskFilters()
     },
 
-    difficultyFilter() {
+    taskStatusIdFilter() {
       this.applyTaskFilters()
     },
 

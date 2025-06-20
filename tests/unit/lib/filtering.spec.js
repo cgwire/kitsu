@@ -418,7 +418,7 @@ describe('lib/filtering', () => {
       })
       expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('assignedto')
-      expect(filters[0].personId).toEqual('person-1')
+      expect(filters[0].personIds[0]).toEqual('person-1')
       expect(filters[0].taskType.id).toEqual('task-type-2')
       expect(filters[0].excluding).toEqual(false)
     })
