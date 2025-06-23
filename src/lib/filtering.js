@@ -76,7 +76,6 @@ const applyFiltersFunctions = {
       filter.personIds.forEach(personId => {
         isOk = task?.assignees.includes(personId) || isOk
       })
-      console.log('task', isOk, task.assignees, filter.pesonIds)
     } else {
       isOk =
         entry.tasks?.some(taskId => {
