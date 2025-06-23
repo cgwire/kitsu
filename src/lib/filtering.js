@@ -73,7 +73,9 @@ const applyFiltersFunctions = {
     if (filter.taskType) {
       const taskId = entry.validations.get(filter.taskType.id)
       const task = taskMap.get(taskId)
-      isOk = task?.assignees.includes(filter.personId)
+      filter.personIds.forEach(personId => {
+        isOk = task?.assignees.includes(personId) || isOk
+      })
     } else {
       isOk =
         entry.tasks?.some(taskId => {
@@ -565,9 +567,12 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
   const rgxMatches = queryText.match(EQUAL_ASSIGNATION_REGEX)
   if (rgxMatches) {
     const taskTypeNameIndex = buildTaskTypeIndex(taskTypes)
-    const personIndex = []
+    const personIndex = {}
     shallowPersons.forEach(person => {
-      personIndex.push(person)
+      if (!personIndex[person.name]) {
+        personIndex[person.name] = []
+      }
+      personIndex[person.name].push(person.id)
     })
 
     rgxMatches.forEach(rgxMatch => {
@@ -583,17 +588,15 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       if (excluding) value = value.substring(1)
       const simplifiedValue = hashName(value)
 
-      personIndex.forEach(person => {
-        if (person.name === simplifiedValue) {
-          results.push({
-            personId: person.id,
-            taskType,
-            value,
-            type: 'assignedto',
-            excluding
-          })
-        }
-      })
+      if (personIndex[simplifiedValue]) {
+        results.push({
+          personIds: personIndex[simplifiedValue],
+          taskType,
+          value,
+          type: 'assignedto',
+          excluding
+        })
+      }
     })
   }
   return results
