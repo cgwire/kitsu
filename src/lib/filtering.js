@@ -70,7 +70,6 @@ const applyFiltersFunctions = {
 
   assignedto(entry, filter, taskMap) {
     let isOk = false
-    console.log('filter', filter)
     if (filter.taskType) {
       const taskId = entry.validations.get(filter.taskType.id)
       const task = taskMap.get(taskId)
