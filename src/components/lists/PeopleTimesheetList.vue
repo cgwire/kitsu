@@ -337,9 +337,9 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.month === month &&
-        this.$route.params.day === day
+        parseInt(this.$route.params.year) === year &&
+        parseInt(this.$route.params.month) === month &&
+        parseInt(this.$route.params.day) === day
       )
     },
 
@@ -347,8 +347,8 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.week === week
+        parseInt(this.$route.params.year) === year &&
+        parseInt(this.$route.params.week) === week
       )
     },
 
@@ -356,8 +356,8 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year &&
-        this.$route.params.month === month
+        parseInt(this.$route.params.year) === year &&
+        parseInt(this.$route.params.month) === month
       )
     },
 
@@ -365,7 +365,7 @@ export default {
       return (
         this.$route.params.person_id &&
         this.$route.params.person_id === personId &&
-        this.$route.params.year === year
+        parseInt(this.$route.params.year) === year
       )
     },
 
