@@ -603,7 +603,6 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       }
     })
   }
-  console.log(results)
   return results
 }
 
