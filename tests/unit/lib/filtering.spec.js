@@ -790,7 +790,7 @@ describe('lib/filtering', () => {
       const filters = [
         {
           type: 'assignedto',
-          personId: 'person-1',
+          personIds: ['person-1'],
           excluding: false
         }
       ]
