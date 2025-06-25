@@ -7,6 +7,7 @@ const sanitizeTaskStatus = taskStatus => {
     description: taskStatus.description,
     for_concept: Boolean(taskStatus.for_concept === 'true'),
     is_default: Boolean(taskStatus.is_default === 'true'),
+    is_wip: Boolean(taskStatus.is_wip === 'true'),
     is_done: Boolean(taskStatus.is_done === 'true'),
     is_retake: Boolean(taskStatus.is_retake === 'true'),
     is_artist_allowed: Boolean(taskStatus.is_artist_allowed === 'true'),

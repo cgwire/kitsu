@@ -1361,10 +1361,11 @@ export default {
       for_concept: 'For concept',
       is_artist_allowed: 'Is artist allowed',
       is_client_allowed: 'Is client allowed',
+      is_default: 'Is default',
       is_done: 'Is done',
       is_feedback_request: 'Is feedback request',
       is_retake: 'Has retake value',
-      is_default: 'Is default',
+      is_wip: 'Is WIP',
       name: 'Name',
       short_name: 'Short name',
       description: 'Description'
