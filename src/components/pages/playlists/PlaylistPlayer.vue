@@ -2053,12 +2053,14 @@ export default {
 
     onRevisionToCompareChanged() {
       if (this.isComparing) {
-        this.rebuildEntityListToCompare()
         this.$nextTick(() => {
-          this.pause()
-          this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
-          this.rawPlayerComparison.setCurrentTimeRaw(this.currentTimeRaw)
-          this.updateRoomStatus()
+          this.rebuildEntityListToCompare()
+          this.$nextTick(() => {
+            this.pause()
+            this.rawPlayerComparison.loadEntity(this.playingEntityIndex)
+            this.rawPlayerComparison.setCurrentTimeRaw(this.currentTimeRaw)
+            this.updateRoomStatus()
+          })
         })
       }
     },
