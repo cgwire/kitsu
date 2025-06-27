@@ -159,8 +159,9 @@
             :panzoom="true"
             :preview="currentPreviewToCompare"
             :is-comparing="isComparing"
-            high-quality
+            @panzoom-changed="onComparisonPanZoomChanged"
             @loaded="onPictureLoaded"
+            high-quality
             v-show="isComparing && isPictureComparison"
           />
 
@@ -168,6 +169,7 @@
             ref="picture-video-player-comparison"
             class="picture-preview"
             :src="currentComparisonPreviewPath"
+            @panzoom-changed="onComparisonPanZoomChanged"
             controls
             loop
             muted
@@ -1889,6 +1891,7 @@ export default {
           let preview = previewFiles.find(
             p => `${p.revision}` === this.revisionToCompare
           )
+
           if (!preview) {
             preview = entity.preview_files[key][0]
           }
@@ -2253,8 +2256,20 @@ export default {
       }
     },
 
+    setComparisonPanZoom(x, y, scale) {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayerComparison.setPanZoom(x, y, scale)
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayerComparison.setPanZoom(x, y, scale)
+      }
+    },
+
     onPanZoomChanged({ x, y, scale }) {
       this.postPanZoomChanged(x, y, scale)
+    },
+
+    onComparisonPanZoomChanged({ x, y, scale }) {
+      this.postComparisonPanZoomChanged(x, y, scale)
     }
   },
 
