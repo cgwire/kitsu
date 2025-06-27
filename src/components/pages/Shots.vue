@@ -1171,7 +1171,7 @@ export default {
     },
 
     onSearchTyped() {
-      if (this.shotMap.size < 800) {
+      if (this.shotMap.size < 800 || this.searchField?.getValue() === '') {
         this.onSearchChange()
       }
     }
