@@ -77,6 +77,10 @@ export const playerMixin = {
       return this.$refs['picture-player']
     },
 
+    picturePlayerComparison() {
+      return this.$refs['picture-player-comparison']
+    },
+
     soundPlayer() {
       return this.$refs['sound-player']
     },

@@ -126,6 +126,20 @@ export const previewRoomMixin = {
       })
     },
 
+    postComparisonPanZoomChanged(x, y, zoom) {
+      if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
+      this.$socket.emit('preview-room:comparison-panzoom-changed', {
+        playlist_id: this.room.id,
+        data: {
+          local_id: this.room.localId,
+          user_id: this.user.id,
+          x,
+          y,
+          zoom
+        }
+      })
+    },
+
     postAnnotationAddition(time, serializedObj) {
       if (!this.isValidRoomId(this.room)) return
       this.$socket.emit('preview-room:add-annotation', {
@@ -372,6 +386,7 @@ export const previewRoomMixin = {
 
       'preview-room:room-updated'(eventData) {
         if (!this.isValidRoomId(this.room)) return
+        if (this.room.localId === eventData.local_id) return
         this.people = eventData.people
         if (!this.joinedRoom) return
         if (this.room.localId === eventData.local_id) return
@@ -386,6 +401,15 @@ export const previewRoomMixin = {
         const y = eventData.data.y
         const zoom = eventData.data.zoom
         this.setPanZoom(x, y, zoom)
+      },
+
+      'preview-room:comparison-panzoom-changed'(eventData) {
+        if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
+        if (this.room.localId === eventData.local_id) return
+        const x = eventData.data.x
+        const y = eventData.data.y
+        const zoom = eventData.data.zoom
+        this.setComparisonPanZoom(x, y, zoom)
       },
 
       'preview-room:add-annotation'(eventData) {
