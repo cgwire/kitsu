@@ -544,6 +544,7 @@ export default {
       'shotMap',
       'nbSelectedValidations',
       'taskEntityPreviews',
+      'taskMap',
       'taskTypeMap',
       'user'
     ]),

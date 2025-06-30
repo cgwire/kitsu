@@ -207,6 +207,19 @@
                       </span>
                       {{ item.full_name }}
                     </template>
+                    <template v-else-if="item.isTaskType">
+                      <span
+                        class="mr05"
+                        :style="{
+                          background: item.color,
+                          width: '10px',
+                          height: '10px'
+                        }"
+                      >
+                        &nbsp;
+                      </span>
+                      {{ item.full_name }}
+                    </template>
                     <template v-else>
                       <div class="flexrow">
                         <people-avatar
