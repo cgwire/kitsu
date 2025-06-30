@@ -87,6 +87,7 @@
                   comment.department_mentions || [],
                   personMap,
                   departmentMap,
+                  taskTypes,
                   uniqueClassName
                 )
               "
@@ -174,6 +175,7 @@
                       replyComment.department_mentions || [],
                       personMap,
                       departmentMap,
+                      taskTypes,
                       uniqueClassName
                     )
                   "
@@ -182,7 +184,9 @@
               </div>
               <template v-if="showReply">
                 <at-ta
-                  :members="atOptions"
+                  :ats="['#', '@']"
+                  :members="[...membersForAts['@'], ...membersForAts['#']]"
+                  :filter-match="atOptionsFilter"
                   name-key="full_name"
                   :limit="2"
                   @update:value="onAtTextChanged"
@@ -411,7 +415,7 @@ export default {
 
   data() {
     return {
-      atOptions: [],
+      membersForAts: { '@': [], '#': [] },
       checklist: [],
       isReplyLoading: false,
       menuVisible: false,
@@ -463,6 +467,10 @@ export default {
     isReplyable: {
       type: Boolean,
       default: false
+    },
+    taskTypes: {
+      type: Array,
+      default: () => []
     },
     team: {
       type: Array,
@@ -755,6 +763,15 @@ export default {
         .catch(console.error)
     },
 
+    atOptionsFilter(name, chunk, at, v) {
+      // filter the list by the given at symbol
+      const option_at = v?.isTaskType ? '#' : '@'
+      // @ for team, # for task type
+      if (at !== option_at) return false
+      // match at lower-case
+      return name.toLowerCase().indexOf(chunk.toLowerCase()) > -1
+    },
+
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
         this.replyText = replaceTimeWithTimecode(
@@ -781,19 +798,43 @@ export default {
         this.onChecklistChanged()
       }
     },
+    taskTypes: {
+      deep: true,
+      immediate: true,
+      handler(values) {
+        const taskTypeOptions = values.map(taskType => {
+          return {
+            isTaskType: true,
+            full_name: taskType.name,
+            color: taskType.color,
+            id: taskType.id,
+            url: taskType.url
+          }
+        })
+        taskTypeOptions.push({
+          isTaskType: true,
+          color: '#000',
+          full_name: 'All'
+        })
+        this.membersForAts['#'] = taskTypeOptions
+      }
+    },
 
     team: {
       deep: true,
       immediate: true,
       handler() {
+        let teamOptions = []
         if (this.isCurrentUserClient) {
-          this.atOptions = this.team.filter(person =>
-            ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
-          )
+          teamOptions = [
+            ...this.team.filter(person =>
+              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+            )
+          ]
         } else {
-          this.atOptions = [...this.team]
+          teamOptions = [...this.team]
         }
-        this.atOptions = this.atOptions.concat(
+        teamOptions = teamOptions.concat(
           this.productionDepartmentIds.map(departmentId => {
             const department = this.departmentMap.get(departmentId)
             return {
@@ -804,10 +845,11 @@ export default {
             }
           })
         )
-        this.atOptions.push({
+        teamOptions.push({
           isTime: true,
           full_name: 'frame'
         })
+        this.membersForAts['@'] = teamOptions
       }
     }
   }
@@ -820,6 +862,9 @@ export default {
 .dark {
   .comment-text {
     color: $white-grey;
+  }
+  .comment-footer {
+    color: $grey;
   }
 
   .content .client-comment {
@@ -872,6 +917,9 @@ article.comment {
     word-break: break-word;
     hyphens: auto;
     hyphenate-limit-chars: 8 6 2;
+  }
+  .comment-footer {
+    color: $grey;
   }
 }
 

@@ -161,6 +161,7 @@
                 <add-comment
                   ref="add-comment"
                   :team="currentTeam"
+                  :task-types="currentTaskTypes"
                   :task="task"
                   :task-status="taskStatuses"
                   :is-loading="loading.addComment"
@@ -217,6 +218,7 @@
                       :revision="currentRevision"
                       :task="task"
                       :team="currentTeam"
+                      :task-types="currentTaskTypes"
                       @ack-comment="onAckComment"
                       @duplicate-comment="onDuplicateComment"
                       @pin-comment="onPinComment"
@@ -273,6 +275,7 @@
           :is-error="errors.editComment"
           :revision="currentRevision"
           :team="currentTeam"
+          :task-types="currentTaskTypes"
           @confirm="confirmEditTaskComment"
           @cancel="onCancelEditComment"
         />
@@ -571,6 +574,47 @@ export default {
       return sortPeople(
         production.team.map(personId => this.personMap.get(personId))
       )
+    },
+
+    // get current task types for this project filtered by current task entity type (Shot or Asset)
+    currentTaskTypes() {
+      if (!this.task || !this.currentProduction) return []
+
+      // task types for this project
+      const task_types = this.currentProduction.task_types
+
+      // get the current task entity type eg. 'Shot' or 'Asset'
+      const current_task_type = this.taskTypeMap.get(this.task.task_type_id)
+      const task_type_entity = current_task_type.for_entity
+      const task_type_entity_slug = task_type_entity.toLowerCase() + 's'
+
+      // lets get a map of all tasks that are the same entity
+      // where the key is the task type id
+      const entity_tasks = {}
+      for (const keyValue of this.taskMap) {
+        const task = keyValue[1]
+        if (task.entity_id === this.task.entity_id)
+          entity_tasks[task.task_type_id] = task
+      }
+
+      const filtered = task_types
+        // get all task type objects
+        .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+
+        // filter down to just those that match this task entity type Shot, Asset etc.
+        .filter(taskType => taskType.for_entity === task_type_entity)
+
+        // filter to tasks that exist
+        .filter(taskType => entity_tasks[taskType.id])
+
+        // add a url that points to the task
+        .map(taskType => {
+          const task = entity_tasks[taskType.id]
+          if (task)
+            taskType.url = `/productions/${task.project_id}/episodes/${task.episode_id || 'all'}/${task_type_entity_slug}/tasks/${task.id}`
+          return taskType
+        })
+      return filtered
     },
 
     title() {
