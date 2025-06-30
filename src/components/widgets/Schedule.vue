@@ -777,6 +777,10 @@ export default {
     reassignable: {
       type: Boolean,
       default: false
+    },
+    type: {
+      type: String,
+      validator: value => ['prev', 'real'].includes(value)
     }
   },
 
@@ -934,6 +938,10 @@ export default {
         index++
       })
       return weekIndex
+    },
+
+    isRealSchedule() {
+      return this.type === 'real'
     },
 
     totalManDays() {
@@ -1804,8 +1812,10 @@ export default {
       const name = task.entity.name
       const startDate = task.startDate.format('YYYY-MM-DD')
       const endDate = task.endDate.format('YYYY-MM-DD')
-      const estimation = this.formatDuration(task.estimation)
-      return `${name} (${startDate} - ${endDate}) ${estimation} ${this.$t('schedule.md')}`
+      const duration = this.isRealSchedule
+        ? this.formatDuration(task.duration)
+        : this.formatDuration(task.estimation)
+      return `${name} (${startDate} - ${endDate}) ${duration} ${this.$t('schedule.md')}`
     },
 
     getTimebarLeft(timeElement) {

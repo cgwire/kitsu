@@ -20,6 +20,13 @@
           :options="zoomOptions"
           v-model="zoomLevel"
         />
+        <combobox
+          class="flexrow-item ml1"
+          :label="$t('quota.detail_label')"
+          v-model="detailLevel"
+          :options="detailOptions"
+          @update:model-value="onDetailLevelChanged"
+        />
         <div class="filler"></div>
         <div class="flexrow">
           <button-simple
@@ -42,8 +49,9 @@
         is-estimation-linked
         hide-man-days
         :multiline="isTVShow"
-        :reassignable="true"
+        :reassignable="detailLevel !== 'real'"
         :subchildren="!isTVShow"
+        :type="detailLevel"
         @item-assign="onScheduleItemAssigned"
         @item-changed="onScheduleItemChanged"
         @item-drop="onScheduleItemDropped"
@@ -55,7 +63,10 @@
       />
     </div>
 
-    <div class="column side-column" v-if="selectedTaskType">
+    <div
+      class="column side-column"
+      v-if="selectedTaskType && detailLevel !== 'real'"
+    >
       <div class="side">
         <a class="close-button" @click="closeSidePanel">
           <x-icon class="align-middle" :size="16" />
@@ -373,6 +384,7 @@ import {
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -395,6 +407,7 @@ export default {
     Checkbox,
     ChevronDownIcon,
     ChevronRightIcon,
+    Combobox,
     ComboboxNumber,
     DateField,
     GripVerticalIcon,
@@ -438,6 +451,11 @@ export default {
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
+      ],
+      detailLevel: 'prev',
+      detailOptions: [
+        { label: this.$t('schedule.detail_level_prev'), value: 'prev' },
+        { label: this.$t('schedule.detail_level_real'), value: 'real' }
       ],
       loading: {
         schedule: false
@@ -591,7 +609,8 @@ export default {
               priority: taskType.priority,
               startDate,
               endDate,
-              editable: this.isInDepartment(taskType),
+              editable:
+                this.isInDepartment(taskType) && this.detailLevel !== 'real',
               expanded: false,
               loading: false,
               route:
@@ -658,9 +677,9 @@ export default {
           endDate,
           expanded: false,
           loading: false,
-          editable: this.isInDepartment(
-            this.taskTypeMap.get(item.task_type_id)
-          ),
+          editable:
+            this.isInDepartment(this.taskTypeMap.get(item.task_type_id)) &&
+            this.detailLevel !== 'real',
           children: [],
           parentElement: taskTypeElement
         }
@@ -773,7 +792,16 @@ export default {
                 const entityTypeItem = childrenById.get(task.entity_type_id)
 
                 // populate task with start and end dates
-                const startDate = parseDate(task.start_date)
+
+                let startDate
+                if (this.detailLevel === 'real') {
+                  if (!task.real_start_date) {
+                    return
+                  }
+                  startDate = parseDate(task.real_start_date)
+                } else {
+                  startDate = parseDate(task.start_date)
+                }
                 if (startDate.isAfter(this.endDate)) {
                   return
                 }
@@ -783,7 +811,11 @@ export default {
                 task.startDate = startDate
 
                 let endDate
-                if (task.due_date) {
+                if (this.detailLevel === 'real') {
+                  endDate = task.done_date
+                    ? parseDate(task.done_date)
+                    : moment.tz()
+                } else if (task.due_date) {
                   endDate = parseDate(task.due_date)
                 } else if (task.end_date) {
                   endDate = parseDate(task.end_date)
@@ -828,7 +860,7 @@ export default {
                         }
                 }
 
-                task.editable = true
+                task.editable = this.detailLevel !== 'real'
                 task.unresizable = false
                 task.parentElement = entityTypeItem
 
@@ -1412,6 +1444,23 @@ export default {
       await this.unassignPersonFromTask({
         person: { id: personId },
         task
+      })
+    },
+
+    onDetailLevelChanged(detailLevel) {
+      this.scheduleItems.forEach(item => {
+        if (!item.expanded) {
+          return
+        }
+        // refresh schedule
+        this.expandTaskTypeElement(
+          item,
+          () => {
+            this.$refs.schedule?.refreshItemPositions(item)
+          },
+          true,
+          false
+        )
       })
     }
   },
