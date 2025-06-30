@@ -559,7 +559,11 @@ export const playerMixin = {
             this.setAnnotationDrawingMode(true)
           }, 100)
         }
-        if (this.isPlaying && this.isPicture(entity.preview_file_extension)) {
+        if (
+          this.isPlaying &&
+          entity &&
+          this.isPicture(entity.preview_file_extension)
+        ) {
           this.playPicture()
         }
       }
