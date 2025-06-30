@@ -22,7 +22,7 @@
             input-class="task-status-name"
             :label="$t('task_status.fields.name')"
             @enter="confirmClicked"
-            v-model="form.name"
+            v-model.trim="form.name"
             v-focus
             v-if="taskStatusToEdit?.short_name !== 'todo'"
           />
@@ -32,7 +32,7 @@
             :label="$t('task_status.fields.short_name')"
             :maxlength="8"
             @enter="confirmClicked"
-            v-model="form.short_name"
+            v-model.trim="form.short_name"
             v-if="taskStatusToEdit?.short_name !== 'todo'"
           />
           <textarea-field
@@ -214,6 +214,14 @@ export default {
 
   methods: {
     confirmClicked() {
+      if (!this.form.name?.length && this.$refs.nameField) {
+        this.$refs.nameField.focus()
+        return
+      }
+      if (!this.form.short_name?.length && this.$refs.shortNameField) {
+        this.$refs.shortNameField.focus()
+        return
+      }
       this.$emit('confirm', this.form)
     },
 
