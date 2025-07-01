@@ -71,6 +71,12 @@ export default {
     this.setupDarkTheme()
     this.setupCrisp(config)
     this.setupSentry(config)
+    const logoutChannel = new BroadcastChannel('logout')
+    logoutChannel.onmessage = event => {
+      if (event.data === 'logout') {
+        this.$router.push({ name: 'logout' })
+      }
+    }
   },
 
   methods: {
