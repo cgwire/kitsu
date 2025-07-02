@@ -94,7 +94,7 @@
 
               <div
                 class="set-main-preview flexrow-item flexrow pull-right"
-                v-if="$refs['preview-player']"
+                v-if="currentPreview"
               >
                 <button
                   class="button flexrow-item"
