@@ -389,8 +389,7 @@ export default {
     if (this.editSearchText.length > 0) {
       this.$refs['edit-search-field']?.setValue(this.editSearchText)
     }
-    this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
-    this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
+    this.$refs['edit-list']?.setScrollPosition(this.editListScrollPosition)
     const finalize = () => {
       if (this.$refs['edit-list']) {
         this.applySearchFromUrl()
