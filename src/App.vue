@@ -25,6 +25,7 @@ import { mapGetters, mapActions } from 'vuex'
 import PreviewModal from '@/components/modals/PreviewModal.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+import auth from '@/lib/auth'
 import crisp from '@/lib/crisp'
 import localPreferences from '@/lib/preferences'
 import sentry from '@/lib/sentry'
@@ -71,6 +72,7 @@ export default {
     this.setupDarkTheme()
     this.setupCrisp(config)
     this.setupSentry(config)
+    this.setupAuthChannel()
   },
 
   methods: {
@@ -138,6 +140,19 @@ export default {
           dsn: config.sentry.dsn,
           sampleRate: config.sentry.sampleRate
         })
+      }
+    },
+
+    setupAuthChannel() {
+      if (auth.getBroadcastChannel()) {
+        auth.getBroadcastChannel().onmessage = event => {
+          if (this.$route.name !== 'login' && event.data === 'logout') {
+            this.$router.push({
+              name: 'login',
+              query: { redirect: this.$route.fullPath }
+            })
+          }
+        }
       }
     }
   },

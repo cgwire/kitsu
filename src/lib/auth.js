@@ -8,6 +8,8 @@ import {
   USER_LOGIN_FAIL
 } from '@/store/mutation-types.js'
 
+let channel
+
 const auth = {
   logIn(payload, callback) {
     superagent
@@ -56,6 +58,7 @@ const auth = {
       await superagent.get('/api/auth/logout')
     } finally {
       store.commit(USER_LOGOUT)
+      this.postBroadcastMessage('logout')
     }
   },
 
@@ -137,6 +140,18 @@ const auth = {
 
   isPasswordValid(password, password2) {
     return password.length > 6 && password === password2
+  },
+
+  getBroadcastChannel() {
+    if (!channel && 'BroadcastChannel' in window) {
+      channel = new BroadcastChannel('auth')
+    }
+    return channel
+  },
+
+  postBroadcastMessage(message) {
+    const channel = this.getBroadcastChannel()
+    channel?.postMessage(message)
   }
 }
 export default auth
