@@ -97,12 +97,9 @@
                 v-if="$refs['preview-player']"
               >
                 <button
-                  :class="{
-                    button: true,
-                    'flexrow-item': true
-                  }"
-                  v-if="isHookupButtonVisible"
+                  class="button flexrow-item"
                   @click="showHookupPlaylistModal"
+                  v-if="isHookupButtonVisible"
                 >
                   <kitsu-icon
                     name="playlists"
@@ -110,9 +107,8 @@
                   />
                 </button>
                 <button
+                  class="button flexrow-item"
                   :class="{
-                    button: true,
-                    'flexrow-item': true,
                     'is-loading': loading.setPreview
                   }"
                   @click="setPreview"
@@ -976,9 +972,8 @@ export default {
     hideHookupPlaylistModal() {
       this.modals.hookupPlaylist = false
     },
-    showHookupPlaylistModal() {
-      // use a method instead of computed property for hookupPlaylistTaskIds so that it is only calculated if the modal is opened
 
+    showHookupPlaylistModal() {
       // create a playlist with the previous, current and next task
       const current_task_id = this.task.id
 
@@ -991,7 +986,11 @@ export default {
             task.task_type_id === this.task.task_type_id
         )
         // sort the tasks by entity_name
-        .sort((a, b) => a.entity_name.localeCompare(b.entity_name))
+        .sort((a, b) =>
+          a.entity_name.localeCompare(b.entity_name, undefined, {
+            numeric: true
+          })
+        )
 
       const current_task_index = tasks.findIndex(
         task => task.id === current_task_id
