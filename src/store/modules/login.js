@@ -62,8 +62,6 @@ const actions = {
     this.$socket.disconnect()
     await auth.logout()
     commit(RESET_ALL)
-    const logoutChannel = new BroadcastChannel('logout')
-    logoutChannel.postMessage('logout')
   },
 
   resetPassword({ commit }, email) {
