@@ -94,15 +94,25 @@
 
               <div
                 class="set-main-preview flexrow-item flexrow pull-right"
-                v-if="isCurrentUserManager && $refs['preview-player']"
+                v-if="$refs['preview-player']"
               >
                 <button
+                  class="button flexrow-item"
+                  @click="showHookupPlaylistModal"
+                  v-if="isHookupButtonVisible"
+                >
+                  <kitsu-icon
+                    name="playlists"
+                    :title="$t('tasks.hookup_playlist')"
+                  />
+                </button>
+                <button
+                  class="button flexrow-item"
                   :class="{
-                    button: true,
-                    'flexrow-item': true,
                     'is-loading': loading.setPreview
                   }"
                   @click="setPreview"
+                  v-if="isCurrentUserManager"
                 >
                   <image-icon class="icon" />
                   <span class="text">
@@ -113,6 +123,12 @@
                   {{ $t('tasks.set_preview_error') }}
                 </span>
               </div>
+              <view-playlist-modal
+                :active="modals.hookupPlaylist"
+                :task-ids="hookupPlaylistTaskIds"
+                sort
+                @cancel="hideHookupPlaylistModal"
+              />
             </div>
 
             <div class="preview-area mt1">
@@ -363,6 +379,7 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -370,6 +387,7 @@ import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 
 export default {
   name: 'task',
@@ -385,6 +403,7 @@ export default {
     DeleteModal,
     EditCommentModal,
     EntityThumbnail,
+    KitsuIcon,
     ImageIcon,
     PageSubtitle,
     PeopleAvatar,
@@ -392,7 +411,8 @@ export default {
     Spinner,
     SubscribeButton,
     TaskTypeName,
-    ValidationTag
+    ValidationTag,
+    ViewPlaylistModal
   },
 
   provide() {
@@ -407,6 +427,7 @@ export default {
       previewForms: [],
       currentFrame: 0,
       currentTask: null,
+      hookupPlaylistTaskIds: [],
       selectedTab: 'validation',
       taskLoading: {
         isLoading: true,
@@ -417,7 +438,8 @@ export default {
         addExtraPreview: false,
         deleteExtraPreview: false,
         deleteComment: false,
-        editComment: false
+        editComment: false,
+        hookupPlaylist: false
       },
       loading: {
         addComment: false,
@@ -784,6 +806,11 @@ export default {
       return this.user.departments.includes(this.taskType?.department_id)
     },
 
+    isHookupButtonVisible() {
+      // only show the hookup button for shots
+      return this.task?.entity_type_name === 'Shot'
+    },
+
     taskType() {
       return this.taskTypeMap.get(this.task?.task_type_id)
     },
@@ -940,6 +967,49 @@ export default {
           this.errors.addComment = !isRetakeError
           this.errors.addCommentMaxRetakes = isRetakeError
         })
+    },
+
+    hideHookupPlaylistModal() {
+      this.modals.hookupPlaylist = false
+    },
+
+    showHookupPlaylistModal() {
+      // create a playlist with the previous, current and next task
+      const current_task_id = this.task.id
+
+      const tasks = Array.from(this.taskMap.values())
+        // get all tasks for this entity
+        .filter(
+          task =>
+            task.episode_id === this.task.episode_id &&
+            task.sequence_name === this.task.sequence_name &&
+            task.task_type_id === this.task.task_type_id
+        )
+        // sort the tasks by entity_name
+        .sort((a, b) =>
+          a.entity_name.localeCompare(b.entity_name, undefined, {
+            numeric: true
+          })
+        )
+
+      const current_task_index = tasks.findIndex(
+        task => task.id === current_task_id
+      )
+
+      const previous_task_id =
+        current_task_index > 0 ? tasks[current_task_index - 1].id : null
+
+      const next_task_id =
+        current_task_index < tasks.length - 1
+          ? tasks[current_task_index + 1].id
+          : null
+
+      this.hookupPlaylistTaskIds = [current_task_id]
+      if (previous_task_id) this.hookupPlaylistTaskIds.unshift(previous_task_id)
+      if (next_task_id) this.hookupPlaylistTaskIds.push(next_task_id)
+
+      // open the playlist
+      this.modals.hookupPlaylist = true
     },
 
     reset({ keepPreviewFiles = false } = {}) {
