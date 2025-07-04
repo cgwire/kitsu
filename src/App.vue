@@ -2417,5 +2417,18 @@ th.validation-cell {
   ::-webkit-scrollbar-thumb:active {
     background-color: #5e6169;
   }
+  .block {
+    ::-webkit-scrollbar-thumb {
+      background-color: #53565e;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: #5e6169;
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background-color: #5e6169;
+    }
+  }
 }
 </style>
