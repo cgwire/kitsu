@@ -105,7 +105,7 @@
             </div>
           </div>
 
-          <div class="table-body metadata-infos">
+          <div class="table-body entity-infos">
             <table class="datatable no-header" v-if="currentAsset">
               <tbody class="table-body">
                 <tr class="datatable-row">
@@ -930,13 +930,6 @@ h2.subtitle {
   padding-top: 3px;
 }
 
-.task-list {
-  flex: 1;
-  margin-bottom: 3em;
-  min-width: 100%;
-  overflow: hidden;
-}
-
 .datatable-row {
   user-select: text;
 }
@@ -1011,15 +1004,24 @@ h2.subtitle {
 }
 
 .infos {
-  height: 100%;
+  flex: 1;
   margin-top: 1em;
-  margin-bottom: 1em;
-  max-height: 100%;
   overflow-y: auto;
 
-  .metadata-infos {
-    flex: unset;
-    overflow: auto;
+  .task-list {
+    width: 100%;
+    flex: none;
+    margin-bottom: 2em;
+
+    :deep(.task-list-body) {
+      overflow: unset;
+    }
+  }
+  .data-list {
+    width: 100%;
+  }
+  .entity-infos {
+    flex: none;
   }
 }
 

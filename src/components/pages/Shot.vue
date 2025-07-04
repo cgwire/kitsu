@@ -82,7 +82,7 @@
               />
             </div>
           </div>
-          <div class="table-body">
+          <div class="table-body entity-infos">
             <table class="datatable no-header" v-if="currentShot">
               <tbody class="datatable-body">
                 <tr class="datatable-row">
@@ -714,18 +714,8 @@ h2.subtitle {
   align-items: center;
 }
 
-.data-list {
-  max-width: 100%;
-}
-
 .back-link {
   padding-top: 3px;
-}
-
-.task-list {
-  width: 100%;
-  flex: none;
-  margin-bottom: 2em;
 }
 
 .datatable-row {
@@ -806,9 +796,21 @@ h2.subtitle {
   margin-top: 1em;
   overflow-y: auto;
 
+  .task-list {
+    width: 100%;
+    flex: none;
+    margin-bottom: 2em;
+
+    :deep(.task-list-body) {
+      overflow: unset;
+    }
+  }
+
+  .data-list {
+    width: 100%;
+  }
   .entity-infos {
-    align-self: flex-start;
-    flex: 1;
+    flex: none;
   }
 }
 
