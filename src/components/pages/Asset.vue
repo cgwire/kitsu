@@ -2,18 +2,6 @@
   <div class="columns fixed-page asset xyz-in" xyz="fade">
     <div class="page column main-column">
       <div class="page-header flexrow">
-        <!--router-link
-        class="flexrow-item has-text-centered back-link ml1"
-        :to="previousAssetPath"
-      >
-        <chevron-left-icon />
-      </router-link>
-      <router-link
-        class="flexrow-item has-text-centered back-link"
-        :to="nextAssetPath"
-      >
-        <chevron-right-icon />
-      </router-link-->
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
           :to="assetsPath"
@@ -35,7 +23,7 @@
         </div>
         <div class="filler"></div>
         <div
-          class="ready-for flexrow block mr0"
+          class="ready-for flexrow block mr0 flexrow-item mt1 mb0"
           v-if="
             currentAsset &&
             currentAsset.ready_for &&
@@ -51,6 +39,20 @@
             :current-production-id="currentProduction.id"
           />
         </div>
+        <router-link
+          class="flexrow-item has-text-centered back-link ml1"
+          :to="previousEntityPath"
+          v-if="previousEntityPath && entityList.length > 1"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <router-link
+          class="flexrow-item has-text-centered back-link"
+          :to="nextEntityPath"
+          v-if="nextEntityPath && entityList.length > 1"
+        >
+          <chevron-right-icon />
+        </router-link>
       </div>
 
       <div class="asset-data block">
@@ -365,7 +367,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'lucide-vue-next'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CornerLeftUpIcon
+} from 'lucide-vue-next'
 
 import assetStore from '@/store/modules/assets'
 
@@ -400,10 +406,12 @@ export default {
 
   components: {
     ButtonSimple,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     ConceptCard,
     ComboboxNumber,
-    CornerLeftUpIcon,
     ComboboxStatus,
+    CornerLeftUpIcon,
     DescriptionCell,
     EditAssetModal,
     EntityChat,
@@ -499,58 +507,6 @@ export default {
       return castIn.reduce((acc, shots) => {
         return acc + shots.length
       }, 0)
-    },
-
-    previousAssetPath() {
-      const assets = Array.from(this.assetMap.values())
-      if (assets.length === 0) return { name: 'open-productions' }
-      const currentIndex = assets.findIndex(asset => {
-        return asset && this.currentAsset && asset.id === this.currentAsset.id
-      })
-      const index = currentIndex !== 0 ? currentIndex - 1 : assets.length - 1
-      const asset = assets[index]
-      if (!asset) return { name: 'open-productions' }
-      const route = {
-        name: 'asset',
-        params: {
-          production_id: this.currentProduction.id,
-          asset_id: asset.id
-        },
-        query: {
-          search: ''
-        }
-      }
-      if (this.currentEpisode) {
-        route.name = 'episode-asset'
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
-    },
-
-    nextAssetPath() {
-      const assets = Array.from(this.assetMap.values())
-      if (assets.length === 0) return { name: 'open-productions' }
-      const currentIndex = assets.findIndex(asset => {
-        return asset && this.currentAsset && asset.id === this.currentAsset.id
-      })
-      const index = currentIndex === assets.length - 1 ? 0 : currentIndex + 1
-      const asset = assets[index]
-      if (!asset) return { name: 'open-productions' }
-      const route = {
-        name: 'asset',
-        params: {
-          production_id: this.currentProduction.id,
-          asset_id: asset.id
-        },
-        query: {
-          search: ''
-        }
-      }
-      if (this.currentEpisode) {
-        route.name = 'episode-asset'
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
     },
 
     assetsPath() {
@@ -817,6 +773,11 @@ export default {
   .wrapper {
     background: $dark-grey-2;
   }
+}
+
+.ready-for {
+  margin-top: 0em;
+  margin-bottom: 0em;
 }
 
 .main-column {

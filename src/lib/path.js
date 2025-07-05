@@ -113,12 +113,12 @@ export const getEntityPath = (
     }
   }
 
-  if (episodeId) {
+  if (episodeId && section !== 'episode') {
     route.name = `episode-${section}`
     route.params.episode_id = episodeId
   }
 
-  if (['shot', 'asset', 'edit', 'sequence'].includes(section)) {
+  if (['shot', 'asset', 'edit', 'sequence', 'episode'].includes(section)) {
     route.params[`${section}_id`] = entityId
   }
 

@@ -47,6 +47,13 @@
             :is-loading="loading.markAll"
             :text="$t('notifications.mark_all_as_read')"
             @click="markAllNotificationsRead"
+            v-if="
+              parameters.taskTypeId === '' &&
+              parameters.taskStatusId === '' &&
+              parameters.typeMode === '' &&
+              [null, 'unread'].includes(parameters.statusMode) &&
+              parameters.watchingMode === null
+            "
           />
         </div>
         <div

@@ -21,6 +21,21 @@
         <div class="entity-title flexrow-item">
           {{ title }}
         </div>
+        <div class="filler"></div>
+        <router-link
+          class="flexrow-item has-text-centered back-link ml1"
+          :to="previousEntityPath"
+          v-if="previousEntityPath && entityList.length > 1"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <router-link
+          class="flexrow-item has-text-centered back-link"
+          :to="nextEntityPath"
+          v-if="nextEntityPath && entityList.length > 1"
+        >
+          <chevron-right-icon />
+        </router-link>
       </div>
 
       <div class="entity-data block">
@@ -326,7 +341,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'lucide-vue-next'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CornerLeftUpIcon
+} from 'lucide-vue-next'
 
 import shotStore from '@/store/modules/shots'
 
@@ -359,6 +378,8 @@ export default {
   components: {
     ButtonSimple,
     ComboboxNumber,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     CornerLeftUpIcon,
     DescriptionCell,
     EditShotModal,

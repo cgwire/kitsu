@@ -46,6 +46,20 @@
             v-if="isValidRoomId(currentEdit) && currentPreview?.id"
           />
         </div>
+        <router-link
+          class="flexrow-item has-text-centered back-link ml1"
+          :to="previousEntityPath"
+          v-if="previousEntityPath && entityList.length > 1"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <router-link
+          class="flexrow-item has-text-centered back-link"
+          :to="nextEntityPath"
+          v-if="nextEntityPath && entityList.length > 1"
+        >
+          <chevron-right-icon />
+        </router-link>
       </div>
 
       <div ref="container" class="edit player block">
@@ -578,6 +592,8 @@
 import { mapGetters, mapActions } from 'vuex'
 import {
   ArrowUpRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CornerLeftUpIcon,
   DownloadIcon
 } from 'lucide-vue-next'
@@ -631,6 +647,8 @@ export default {
   components: {
     ArrowUpRightIcon,
     ButtonSimple,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     CornerLeftUpIcon,
     ColorPicker,
     ComboboxStyled,
@@ -689,22 +707,7 @@ export default {
   },
 
   mounted() {
-    this.resetData()
-    this.$options.scrubbing = false
-    this.isHd = Boolean(this.organisation.hd_by_default)
-    if (this.picturePlayer) {
-      this.picturePlayer.addEventListener('load', async () => {
-        const wasPlaying = this.isPlaying
-        await this.resetPictureCanvas()
-        this.isPlaying = wasPlaying
-      })
-    }
-    this.$nextTick(() => {
-      this.configureEvents()
-      this.setupFabricCanvas()
-      this.setPlayerSpeed(1)
-      this.onFrameUpdate(1)
-    })
+    this.init()
   },
 
   computed: {
@@ -750,6 +753,25 @@ export default {
       'loadTaskEntityPreviewFiles',
       'updatePreviewAnnotation'
     ]),
+
+    init() {
+      this.resetData()
+      this.$options.scrubbing = false
+      this.isHd = Boolean(this.organisation.hd_by_default)
+      if (this.picturePlayer) {
+        this.picturePlayer.addEventListener('load', async () => {
+          const wasPlaying = this.isPlaying
+          await this.resetPictureCanvas()
+          this.isPlaying = wasPlaying
+        })
+      }
+      this.$nextTick(() => {
+        this.configureEvents()
+        this.setupFabricCanvas()
+        this.setPlayerSpeed(1)
+        this.onFrameUpdate(1)
+      })
+    },
 
     resetPreviewFileMap() {
       this.previewFileMap.clear()
