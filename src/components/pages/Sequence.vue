@@ -21,6 +21,21 @@
         <div class="flexrow-item">
           <page-title :text="title" class="entity-title" />
         </div>
+        <div class="filler"></div>
+        <router-link
+          class="flexrow-item has-text-centered back-link ml1"
+          :to="previousEntityPath"
+          v-if="previousEntityPath && entityList.length > 1"
+        >
+          <chevron-left-icon />
+        </router-link>
+        <router-link
+          class="flexrow-item has-text-centered back-link"
+          :to="nextEntityPath"
+          v-if="nextEntityPath && entityList.length > 1"
+        >
+          <chevron-right-icon />
+        </router-link>
       </div>
 
       <div class="sequence-data block">
@@ -252,7 +267,11 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { CornerLeftUpIcon } from 'lucide-vue-next'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CornerLeftUpIcon
+} from 'lucide-vue-next'
 
 import sequenceStore from '@/store/modules/sequences'
 
@@ -285,6 +304,8 @@ export default {
 
   components: {
     ButtonSimple,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     ComboboxNumber,
     CornerLeftUpIcon,
     DescriptionCell,
