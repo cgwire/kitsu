@@ -1,6 +1,8 @@
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
+import { getEntityPath } from '@/lib/path'
+import stringHelpers from '@/lib/string'
 import {
   daysToMinutes,
   getBusinessDays,
@@ -9,7 +11,12 @@ import {
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
-import stringHelpers from '@/lib/string'
+
+import assetsStore from '@/store/modules/assets'
+import editsStore from '@/store/modules/edits'
+import episodesStore from '@/store/modules/episodes'
+import sequencesStore from '@/store/modules/sequences'
+import shotsStore from '@/store/modules/shots'
 
 /*
  * Common functions for asset, edit, episode, sequence and shot pages.
@@ -39,6 +46,26 @@ export const entityMixin = {
   computed: {
     ...mapGetters(['organisation']),
 
+    assetList() {
+      return assetsStore.cache.assets
+    },
+
+    editList() {
+      return editsStore.cache.edits
+    },
+
+    episodeList() {
+      return episodesStore.cache.episodes
+    },
+
+    sequenceList() {
+      return sequencesStore.cache.sequences
+    },
+
+    shotList() {
+      return shotsStore.cache.shots
+    },
+
     entityTabs() {
       return this.entityNavOptions.map(option => {
         return {
@@ -46,6 +73,54 @@ export const entityMixin = {
           name: option.value
         }
       })
+    },
+
+    currentEntity() {
+      return this[`current${stringHelpers.capitalize(this.type)}`]
+    },
+
+    entityList() {
+      return this[`${this.type}List`] || []
+    },
+
+    previousEntity() {
+      if (!this.currentEntity) return null
+      const entityIndex = this.getEntityIndex(this.currentEntity.id)
+      if (entityIndex === -1) return null
+      return entityIndex > 0
+        ? this.entityList[entityIndex - 1]
+        : this.entityList[this.entityList.length - 1]
+    },
+
+    nextEntity() {
+      if (!this.currentEntity) return null
+      const entityIndex = this.getEntityIndex(this.currentEntity.id)
+      if (entityIndex === -1) return null
+      return entityIndex < this.entityList.length - 1
+        ? this.entityList[entityIndex + 1]
+        : this.entityList[0]
+    },
+
+    previousEntityPath() {
+      const entity = this.previousEntity
+      if (!entity) return null
+      return getEntityPath(
+        entity.id,
+        this.currentProduction.id,
+        this.type,
+        this.currentEpisode?.id
+      )
+    },
+
+    nextEntityPath() {
+      const entity = this.nextEntity
+      if (!entity) return null
+      return getEntityPath(
+        entity.id,
+        this.currentProduction.id,
+        this.type,
+        this.currentEpisode?.id
+      )
     },
 
     thumbnailPath() {
@@ -105,6 +180,10 @@ export const entityMixin = {
 
   methods: {
     ...mapActions(['addSelectedTask', 'clearSelectedTasks', 'updateTask']),
+
+    getEntityIndex(entityId) {
+      return this.entityList.findIndex(entity => entity.id === entityId)
+    },
 
     changeTab(tab) {
       this.selectedTab = tab
