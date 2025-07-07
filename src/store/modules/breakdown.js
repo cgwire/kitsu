@@ -78,7 +78,7 @@ const getters = {
 }
 
 const actions = {
-  setCastingForProductionEpisodes({ commit, rootState }, episodeId) {
+  setCastingForProductionEpisodes({ commit, rootState }) {
     const production = rootState.productions.currentProduction
     if (!production) return Promise.resolve()
 
@@ -87,7 +87,7 @@ const actions = {
     )
     commit(CASTING_SET_FOR_EPISODES, episodes)
     return breakdownApi
-      .getProductionEpisodesCasting(production.id, episodeId)
+      .getProductionEpisodesCasting(production.id)
       .then(casting => {
         commit(CASTING_SET_CASTING, { casting, production })
       })
