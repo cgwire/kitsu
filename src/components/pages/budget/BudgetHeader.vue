@@ -30,7 +30,7 @@
       <h3 class="selected-budget flexrow-item">
         <combobox-styled
           :options="budgetOptions"
-          :value="budget"
+          :model-value="budget"
           @change="value => $emit('change-budget', value)"
         />
       </h3>

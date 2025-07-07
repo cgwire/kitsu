@@ -134,7 +134,7 @@ export default {
 
   budget: {
     add_entry: 'Add an entry',
-    analytics: 'Bugdget Analytics',
+    analytics: 'Budget Analytics',
     cash_evolution: 'Expense evolution',
     cash_repartition: 'Expense repartition',
     cost: 'Cost',
