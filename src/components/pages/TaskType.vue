@@ -22,12 +22,18 @@
               @click="contactSheetMode = !contactSheetMode"
               v-if="isActiveTab('tasks')"
             />
-            <div class="flexrow-item">
+            <div
+              class="flexrow-item"
+              v-if="
+                !isActiveTab('schedule') &&
+                !isActiveTab('estimation') &&
+                isSupervisorInDepartment
+              "
+            >
               <button-simple
                 icon="import"
                 :title="$t('main.csv.import_file')"
                 @click="showImportModal"
-                v-if="!isActiveTab('schedule') && !isActiveTab('estimation')"
               />
             </div>
             <div class="flexrow-item">
@@ -640,7 +646,8 @@ export default {
       return (
         this.isCurrentUserManager ||
         (this.isCurrentUserSupervisor &&
-          departments.includes((this.currentTaskType || {}).department_id))
+          (!departments.length ||
+            departments.includes((this.currentTaskType || {}).department_id)))
       )
     },
 
