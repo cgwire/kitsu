@@ -205,10 +205,12 @@ export default {
           value: episode.id
         }
       })
-      options.unshift({
-        label: this.$t('main.main_pack'),
-        value: 'null'
-      })
+      if (this.currentProduction.production_style !== 'video-game') {
+        options.unshift({
+          label: this.$t('main.main_pack'),
+          value: 'null'
+        })
+      }
       return options
     }
   },
