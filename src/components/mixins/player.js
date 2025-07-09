@@ -880,6 +880,7 @@ export const playerMixin = {
       const RIGHTKEY = 39
       const PREVANNKEY = ','
       const NEXTANNKEY = '.'
+      const OKEY = 'o'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (
@@ -964,6 +965,10 @@ export const playerMixin = {
           event.preventDefault()
           event.stopPropagation()
           this.onPreviousDrawingClicked()
+        } else if (event.altKey && event.key === OKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.toggleFullOverlayComparison()
         } else if (
           (event.ctrlKey || event.metaKey) &&
           event.altKey &&
@@ -995,6 +1000,21 @@ export const playerMixin = {
           this.resizeAnnotations()
         }, 200)
       }
+    },
+
+    async toggleFullOverlayComparison() {
+      if (!this.isComparing) {
+        this.isComparing = true
+        await this.$nextTick()
+        await this.$nextTick()
+      }
+      this.$nextTick(() => {
+        if (this.comparisonMode === 'overlay100') {
+          this.comparisonMode = 'overlay0'
+        } else {
+          this.comparisonMode = 'overlay100'
+        }
+      })
     },
 
     reloadAnnotations(current = true) {

@@ -1040,7 +1040,7 @@ export default {
       if (this.isComparing && this.isComparisonOverlay) {
         switch (this.comparisonMode) {
           case 'overlay0':
-            return 1
+            return 0
           case 'overlay25':
             return 0.25
           case 'overlay50':
@@ -1048,7 +1048,7 @@ export default {
           case 'overlay75':
             return 0.75
           case 'overlay100':
-            return 0
+            return 1
           default:
             return 1
         }
@@ -1887,6 +1887,7 @@ export default {
     onKeyDown(event) {
       const PREVANNKEY = ','
       const NEXTANNKEY = '.'
+      const OKEY = 'o'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
         if (event.keyCode === 46 || event.keyCode === 8) {
@@ -1934,6 +1935,10 @@ export default {
         } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
           // ctrl + v
           this.pasteAnnotations()
+        } else if (event.altKey && event.key === OKEY) {
+          event.preventDefault()
+          event.stopPropagation()
+          this.toggleFullOverlayComparison()
         } else if (event.code === 27) {
           // Esc
           if (this.fullScreen) {
@@ -1941,6 +1946,21 @@ export default {
           }
         }
       }
+    },
+
+    async toggleFullOverlayComparison() {
+      if (!this.isComparing) {
+        this.isComparing = true
+        await this.$nextTick()
+        await this.$nextTick()
+      }
+      this.$nextTick(() => {
+        if (this.comparisonMode === 'overlay100') {
+          this.comparisonMode = 'overlay0'
+        } else {
+          this.comparisonMode = 'overlay100'
+        }
+      })
     },
 
     onCommentClicked() {
