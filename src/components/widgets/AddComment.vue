@@ -39,9 +39,11 @@
       </div>
 
       <at-ta
-        :members="atOptions"
+        :ats="['#', '@']"
+        :members="[...membersForAts['@'], ...membersForAts['#']]"
         name-key="full_name"
         :limit="2"
+        :filter-match="atOptionsFilter"
         @update:value="onAtTextChanged"
         v-if="mode === 'status' || showCommentArea"
       >
@@ -55,6 +57,19 @@
                 width: '10px',
                 height: '10px',
                 'border-radius': '50%'
+              }"
+            >
+              &nbsp;
+            </span>
+            {{ item.full_name }}
+          </template>
+          <template v-else-if="item.isTaskType">
+            <span
+              class="mr05"
+              :style="{
+                background: item.color,
+                width: '10px',
+                height: '10px'
               }"
             >
               &nbsp;
@@ -379,7 +394,7 @@ export default {
 
   data() {
     return {
-      atOptions: [],
+      membersForAts: { '@': [], '#': [] },
       isDragging: false,
       errors: {
         addCommentAttachment: false
@@ -420,6 +435,10 @@ export default {
       default: () => {}
     },
     taskStatus: {
+      type: Array,
+      default: () => []
+    },
+    taskTypes: {
       type: Array,
       default: () => []
     },
@@ -808,6 +827,15 @@ export default {
       ).filter(Boolean)
     },
 
+    atOptionsFilter(name, chunk, at, v) {
+      // filter the list by the given at symbol
+      const option_at = v?.isTaskType ? '#' : '@'
+      // @ for team, # for task type
+      if (at !== option_at) return false
+      // match at lower-case
+      return name.toLowerCase().indexOf(chunk.toLowerCase()) > -1
+    },
+
     onAtTextChanged(input) {
       if (input.includes('@frame')) {
         this.text = replaceTimeWithTimecode(
@@ -867,20 +895,43 @@ export default {
       }
     },
 
+    taskTypes: {
+      deep: true,
+      immediate: true,
+      handler(values) {
+        const taskTypeOptions = values.map(taskType => {
+          return {
+            isTaskType: true,
+            full_name: taskType.name,
+            color: taskType.color,
+            id: taskType.id,
+            url: taskType.url
+          }
+        })
+        taskTypeOptions.push({
+          isTaskType: true,
+          color: '#000',
+          full_name: 'All'
+        })
+        this.membersForAts['#'] = taskTypeOptions
+      }
+    },
+
     team: {
       deep: true,
       immediate: true,
       handler() {
+        let teamOptions = []
         if (this.isCurrentUserClient) {
-          this.atOptions = [
+          teamOptions = [
             ...this.team.filter(person =>
               ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
             )
           ]
         } else {
-          this.atOptions = [...this.team]
+          teamOptions = [...this.team]
         }
-        this.atOptions = this.atOptions.concat(
+        teamOptions = teamOptions.concat(
           this.productionDepartmentIds.map(departmentId => {
             const department = this.departmentMap.get(departmentId)
             return {
@@ -891,10 +942,12 @@ export default {
             }
           })
         )
-        this.atOptions.push({
+        teamOptions.push({
           isTime: true,
+          at: '@',
           full_name: 'frame'
         })
+        this.membersForAts['@'] = teamOptions
       }
     }
   }
