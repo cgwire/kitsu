@@ -1018,7 +1018,7 @@ h2.subtitle {
     }
   }
   .data-list {
-    width: 100%;
+    max-width: 100%;
   }
   .entity-infos {
     flex: none;
