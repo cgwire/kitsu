@@ -399,17 +399,23 @@ const actions = {
     return shotsApi
       .getSequencesWithTasks(production, episode)
       .then(sequences => {
-        commit(SET_SEQUENCES_WITH_TASKS, {
-          sequences,
-          episodeMap,
-          personMap,
-          production,
-          routeSequenceId,
-          taskMap,
-          taskTypeMap,
-          taskStatusMap,
-          userFilters
-        })
+        if (
+          !isTVShow ||
+          sequences.length === 0 ||
+          sequences[0].episode_id === rootGetters.currentEpisode.id
+        ) {
+          commit(SET_SEQUENCES_WITH_TASKS, {
+            sequences,
+            episodeMap,
+            personMap,
+            production,
+            routeSequenceId,
+            taskMap,
+            taskTypeMap,
+            taskStatusMap,
+            userFilters
+          })
+        }
         return Promise.resolve(sequences)
       })
   },

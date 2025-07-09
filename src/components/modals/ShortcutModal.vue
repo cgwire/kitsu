@@ -137,6 +137,10 @@ export default {
             {
               keys: ['Alt', '←'],
               text: this.$t('keyboard.plaltleft')
+            },
+            {
+              keys: ['Alt', 'o'],
+              text: this.$t('keyboard.plalto')
             }
           ]
         },

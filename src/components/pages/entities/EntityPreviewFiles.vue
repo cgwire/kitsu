@@ -66,7 +66,7 @@
           <tr
             :key="previewFile.id"
             class="datatable-row"
-            v-for="previewFile in previewFiles"
+            v-for="previewFile in taskTypePreviewFileGroups.flat()"
           >
             <td class="thumbnail">
               <entity-thumbnail
@@ -74,6 +74,8 @@
                 :preview-file-id="previewFile.id"
                 :empty-width="60"
                 :width="60"
+                :empty-height="40"
+                :height="40"
               />
             </td>
 
@@ -132,6 +134,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { renderFileSize } from '@/lib/render'
 import { formatDate } from '@/lib/time'
 import preferences from '@/lib/preferences'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -196,7 +199,23 @@ export default {
         }
         taskTypePreviewFiles.get(taskType.id).push(previewFile)
       })
-      return Array.from(taskTypePreviewFiles.values())
+      return Array.from(taskTypePreviewFiles.keys())
+        .sort((a, b) => {
+          const taskTypeA = this.taskTypeMap.get(a)
+          const taskTypeB = this.taskTypeMap.get(b)
+          const priorityA = getTaskTypePriorityOfProd(
+            taskTypeA,
+            this.currentProduction
+          )
+          const priorityB = getTaskTypePriorityOfProd(
+            taskTypeB,
+            this.currentProduction
+          )
+          return priorityB - priorityA
+        })
+        .map(taskTypeId => {
+          return taskTypePreviewFiles.get(taskTypeId)
+        })
     }
   },
 

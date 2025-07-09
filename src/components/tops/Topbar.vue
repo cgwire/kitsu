@@ -328,25 +328,11 @@ export default {
         section = this.currentProjectSection
       }
       if (this.assetSections.includes(section)) {
-        return [
-          {
-            name: '',
-            episodeList: [
-              { label: this.$t('main.all_assets'), value: 'all' },
-              { label: this.$t('main.main_pack'), value: 'main' }
-            ]
-          }
-        ].concat(this.episodeOptionGroups)
+        const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
+        return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
       } else if (['playlists'].includes(section)) {
-        return [
-          {
-            name: '',
-            episodeList: [
-              { label: this.$t('main.all_assets'), value: 'all' },
-              { label: this.$t('main.main_pack'), value: 'main' }
-            ]
-          }
-        ].concat(this.episodeOptionGroups)
+        const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
+        return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
       } else if (['edits'].includes(section)) {
         return [
           {
@@ -355,15 +341,8 @@ export default {
           }
         ].concat(this.episodeOptionGroups)
       } else if (['breakdown'].includes(section)) {
-        return [
-          {
-            name: '',
-            episodeList: [
-              { label: this.$t('shots.episodes'), value: 'all' },
-              { label: this.$t('main.main_pack'), value: 'main' }
-            ]
-          }
-        ].concat(this.episodeOptionGroups)
+        const episodeList = this.getBaseEpisodeOptionGroups('shots.episodes')
+        return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
       } else {
         return this.episodeOptionGroups
       }
@@ -573,6 +552,14 @@ export default {
       if (name === 'asset-types') name = 'assetTypes'
       if (name === 'news-feed') name = 'newsFeed'
       return name
+    },
+
+    getBaseEpisodeOptionGroups(allLabel) {
+      const episodeList = [{ label: this.$t(allLabel), value: 'all' }]
+      if (this.currentProduction.production_style !== 'video-game') {
+        episodeList.push({ label: this.$t('main.main_pack'), value: 'main' })
+      }
+      return episodeList
     },
 
     updateContext(productionId) {

@@ -242,13 +242,7 @@
                           0,
                           10
                         )}-${index}`"
-                        :previews="[
-                          {
-                            id: news.preview_file_id,
-                            extension: news.preview_file_extension,
-                            annotations: news.preview_file_annotations
-                          }
-                        ]"
+                        :previews="news.preview_files"
                         :task="{
                           id: news.task_id,
                           project_id: news.project_id,
