@@ -431,19 +431,25 @@ const actions = {
         return shotsApi.getShots(production, episode)
       })
       .then(shots => {
-        const sequenceMap = sequenceStore.cache.sequenceMap
-        const taskMap = rootGetters.taskMap
-        commit(LOAD_SHOTS_END, {
-          production,
-          shots,
-          userFilters,
-          userFilterGroups,
-          taskTypeMap,
-          taskMap,
-          personMap,
-          sequenceMap,
-          episodeMap
-        })
+        if (
+          !isTVShow ||
+          shots.length === 0 ||
+          shots[0].episode_id === rootGetters.currentEpisode.id
+        ) {
+          const sequenceMap = sequenceStore.cache.sequenceMap
+          const taskMap = rootGetters.taskMap
+          commit(LOAD_SHOTS_END, {
+            production,
+            shots,
+            userFilters,
+            userFilterGroups,
+            taskTypeMap,
+            taskMap,
+            personMap,
+            sequenceMap,
+            episodeMap
+          })
+        }
         if (callback) callback()
       })
       .catch(err => {
