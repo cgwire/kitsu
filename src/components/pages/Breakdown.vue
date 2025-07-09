@@ -809,7 +809,7 @@ export default {
 
     async reloadEntities() {
       this.isLoading = true
-      if (this.currentEpisode.id !== 'main') {
+      if (!this.isTVShow || this.currentEpisode?.id !== 'main') {
         await this.loadSequences()
         await this.loadShots()
       }
