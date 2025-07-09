@@ -4,7 +4,7 @@ Start developing for Kitsu using Docker on Windows, Linux and macOS.
 
 **Prerequisites**
 
-- [Node.js >= 20.18](https://nodejs.org)
+- [Node.js >= 20.19](https://nodejs.org)
 - [Docker >= 1.13](https://store.docker.com/search?type=edition&offering=community)
 
 **Setup**
