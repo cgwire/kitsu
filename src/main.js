@@ -4,6 +4,8 @@ import { createApp } from 'vue'
 import { createHead, VueHeadMixin } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
+import 'bulma/css/bulma.css'
+
 import App from '@/App'
 import i18n from '@/lib/i18n'
 import resizableColumn from '@/directives/resizable-column'
