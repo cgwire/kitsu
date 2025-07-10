@@ -128,6 +128,9 @@ export const entitiesMixin = {
     },
 
     selectableDepartments(forEntity) {
+      if (!this.currentProduction) {
+        return []
+      }
       return this.currentProduction.task_types
         .map(taskTypeId => {
           const taskType = this.taskTypeMap.get(taskTypeId)
