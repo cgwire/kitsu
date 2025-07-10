@@ -199,8 +199,8 @@ export default {
   },
 
   watch: {
-    $route() {
-      this.activeTab = this.$route.query.tab
+    '$route.query.tab'() {
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 

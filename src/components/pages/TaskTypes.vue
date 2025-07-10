@@ -292,7 +292,7 @@ export default {
   },
 
   watch: {
-    $route() {
+    '$route.query'() {
       this.activeTab = this.$route.query.tab || 'active'
       this.entityTab = this.$route.query.entity || 'assets'
     }
