@@ -51,7 +51,7 @@
                 />
               </div>
             </th>
-            <template v-if="isShowInfos">
+            <template v-if="displaySettings.showInfos">
               <metadata-header
                 :ref="`editor-${j}`"
                 :key="descriptor.id"
@@ -94,7 +94,9 @@
               scope="col"
               class="description selectable"
               v-if="
-                !isCurrentUserClient && isShowInfos && isSequenceDescription
+                !isCurrentUserClient &&
+                displaySettings.showInfos &&
+                isSequenceDescription
               "
             >
               {{ $t('sequences.fields.description') }}
@@ -103,12 +105,12 @@
             <th
               scope="col"
               class="resolution"
-              v-if="isSequenceResolution && isShowInfos"
+              v-if="isSequenceResolution && displaySettings.showInfos"
             >
               {{ $t('shots.fields.resolution') }}
             </th>
 
-            <template v-if="isShowInfos">
+            <template v-if="displaySettings.showInfos">
               <metadata-header
                 :key="descriptor.id"
                 :descriptor="descriptor"
@@ -124,7 +126,7 @@
               ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 isSequenceTime &&
                 metadataDisplayHeaders.timeSpent
               "
@@ -138,7 +140,7 @@
               ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 isSequenceEstimation &&
                 metadataDisplayHeaders.estimation
               "
@@ -188,14 +190,17 @@
                 namespace="sequences"
                 v-model="metadataDisplayHeaders"
                 v-show="columnSelectorDisplayed"
-                v-if="isShowInfos"
+                v-if="displaySettings.showInfos"
               />
 
               <button-simple
                 class="is-small is-pulled-right mr05"
                 icon="down"
                 @click="toggleColumnSelector"
-                v-if="sequenceMetadataDescriptors.length > 0 && isShowInfos"
+                v-if="
+                  sequenceMetadataDescriptors.length > 0 &&
+                  displaySettings.showInfos
+                "
               />
             </th>
           </tr>
@@ -220,10 +225,10 @@
                 <div class="flexrow">
                   <entity-thumbnail
                     :entity="sequence"
-                    :width="isBigThumbnails ? 150 : 50"
-                    :height="isBigThumbnails ? 100 : 33"
-                    :empty-width="isBigThumbnails ? 150 : 50"
-                    :empty-height="isBigThumbnails ? 100 : 34"
+                    :width="displaySettings.bigThumbnails ? 150 : 50"
+                    :height="displaySettings.bigThumbnails ? 100 : 33"
+                    :empty-width="displaySettings.bigThumbnails ? 150 : 50"
+                    :empty-height="displaySettings.bigThumbnails ? 100 : 34"
                   />
                   <router-link
                     tabindex="-1"
@@ -236,7 +241,7 @@
               </th>
 
               <!-- Metadata stick -->
-              <template v-if="isShowInfos && !isLoading">
+              <template v-if="displaySettings.showInfos && !isLoading">
                 <td
                   :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
@@ -270,11 +275,11 @@
                     'hidden-validation-cell': hiddenColumns[columnId],
                     'datatable-row-header': true
                   }"
-                  :contact-sheet="contactSheetMode"
+                  :contact-sheet="displaySettings.contactSheetMode"
                   :column="taskTypeMap.get(columnId)"
                   :column-y="j"
                   :entity="sequence"
-                  :is-assignees="isShowAssignations"
+                  :is-assignees="displaySettings.showAssignations"
                   :is-static="true"
                   :left="
                     offsets['validation-' + j]
@@ -300,11 +305,16 @@
                   value => onDescriptionChanged(sequence, value)
                 "
                 v-if="
-                  !isCurrentUserClient && isShowInfos && isSequenceDescription
+                  !isCurrentUserClient &&
+                  displaySettings.showInfos &&
+                  isSequenceDescription
                 "
               />
 
-              <td class="resolution" v-if="isSequenceResolution && isShowInfos">
+              <td
+                class="resolution"
+                v-if="isSequenceResolution && displaySettings.showInfos"
+              >
                 <input
                   :class="{
                     'input-editor': true,
@@ -342,7 +352,7 @@
               </td>
 
               <!-- other Metadata cells -->
-              <template v-if="isShowInfos">
+              <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
                   :title="
@@ -366,7 +376,7 @@
                 class="time-spent selectable"
                 v-if="
                   !isCurrentUserClient &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   isSequenceTime &&
                   metadataDisplayHeaders.timeSpent
                 "
@@ -378,7 +388,7 @@
                 class="estimation selectable"
                 v-if="
                   !isCurrentUserClient &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   isSequenceEstimation &&
                   metadataDisplayHeaders.estimation
                 "
@@ -395,7 +405,7 @@
                     'validation-cell': !hiddenColumns[columnId],
                     'hidden-validation-cell': hiddenColumns[columnId]
                   }"
-                  :contact-sheet="contactSheetMode"
+                  :contact-sheet="displaySettings.contactSheetMode"
                   :key="`${columnId}-${sequence.id}`"
                   :column="taskTypeMap.get(columnId)"
                   :entity="sequence"
@@ -412,7 +422,7 @@
                   "
                   :row-x="i"
                   :column-y="j"
-                  :is-assignees="isShowAssignations"
+                  :is-assignees="displaySettings.showAssignations"
                   @select="onTaskSelected"
                   @unselect="onTaskUnselected"
                   v-for="(columnId, j) in nonStickedDisplayedValidationColumns"
@@ -495,9 +505,9 @@ export default {
   ],
 
   props: {
-    contactSheetMode: {
-      type: Boolean,
-      default: false
+    displaySettings: {
+      type: Object,
+      default: () => ({})
     },
     displayedSequences: {
       type: Array,
@@ -564,7 +574,7 @@ export default {
       'displayedSequencesEstimation',
       'displayedSequencesLength',
       'displayedSequencesTimeSpent',
-      'isBigThumbnails',
+      'displaySettings.bigThumbnails',
       'isCurrentUserAdmin',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -574,8 +584,6 @@ export default {
       'isSequenceEstimation',
       'isSequenceResolution',
       'isSequenceTime',
-      'isShowAssignations',
-      'isShowInfos',
       'nbSelectedTasks',
       'selectedTasks',
       'sequenceMap',
@@ -610,21 +618,21 @@ export default {
       let count = 2
       count +=
         !this.isCurrentUserClient &&
-        this.isShowInfos &&
+        this.displaySettings.showInfos &&
         this.isSequenceDescription
           ? 1
           : 0
       count += this.visibleMetadataDescriptors.length
       count +=
         !this.isCurrentUserClient &&
-        this.isShowInfos &&
+        this.displaySettings.showInfos &&
         this.isSequenceTime &&
         this.metadataDisplayHeaders.timeSpent
           ? 1
           : 0
       count +=
         !this.isCurrentUserClient &&
-        this.isShowInfos &&
+        this.displaySettings.showInfos &&
         this.isSequenceEstimation &&
         this.metadataDisplayHeaders.estimation
           ? 1
@@ -637,7 +645,7 @@ export default {
       return this.validationColumns.filter(columnId => {
         return (
           this.sequenceFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.isShowInfos)
+          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
         )
       })
     },
@@ -686,10 +694,6 @@ export default {
     },
 
     isLoading() {
-      this.updateOffsets()
-    },
-
-    isBigThumbnails() {
       this.updateOffsets()
     }
   }

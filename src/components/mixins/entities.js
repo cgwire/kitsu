@@ -10,6 +10,12 @@ import preferences from '@/lib/preferences'
 export const entitiesMixin = {
   data() {
     return {
+      displaySettings: {
+        bigThumbnails: false,
+        contactSheetMode: false,
+        showAssignations: true,
+        showInfos: true
+      },
       keepTaskPanelOpen: false
     }
   },
@@ -34,6 +40,10 @@ export const entitiesMixin = {
       this.selectedDepartment = 'MY_DEPARTMENTS'
     }
     this.onSelectedDepartmentChanged()
+
+    this.displaySettings =
+      preferences.getObjectPreference(`${this.type}s:display_settings`) ||
+      this.displaySettings
   },
 
   computed: {
@@ -298,6 +308,16 @@ export const entitiesMixin = {
   watch: {
     selectedDepartment() {
       this.onSelectedDepartmentChanged()
+    },
+
+    displaySettings: {
+      deep: true,
+      handler(newSettings) {
+        preferences.setObjectPreference(
+          `${this.type}s:display_settings`,
+          newSettings
+        )
+      }
     }
   }
 }

@@ -33,18 +33,13 @@
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"
               />
-              <button-simple
-                class="flexrow-item"
-                icon="grid"
-                :is-on="contactSheetMode"
-                :title="$t('tasks.show_contact_sheet')"
-                @click="contactSheetMode = !contactSheetMode"
-              />
-              <show-assignations-button class="flexrow-item" />
-              <show-infos-button class="flexrow-item" />
-              <big-thumbnails-button class="flexrow-item" />
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
+              <combobox-display-options
+                class="flexrow-item"
+                :type="type"
+                v-model="displaySettings"
+              />
               <button-simple
                 class="flexrow-item"
                 :title="$t('entities.thumbnails.title')"
@@ -104,9 +99,9 @@
         />
         <shot-list
           ref="shot-list"
-          :contact-sheet-mode="contactSheetMode"
           :department-filter="departmentFilter"
           :displayed-shots="displayedShotsBySequence"
+          :display-settings="displaySettings"
           :is-loading="isShotsLoading || initialLoading"
           :is-error="isShotsLoadingError"
           :validation-columns="shotValidationColumns"
@@ -318,10 +313,10 @@ import { entitiesMixin } from '@/components/mixins/entities'
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
-import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditShotModal from '@/components/modals/EditShotModal.vue'
@@ -335,8 +330,6 @@ import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SetFramesFromTaskTypePreviewsModal from '@/components/modals/SetFramesFromTaskTypePreviewsModal.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import ShowAssignationsButton from '@/components/widgets/ShowAssignationsButton.vue'
-import ShowInfosButton from '@/components/widgets/ShowInfosButton.vue'
 import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
 import ShotList from '@/components/lists/ShotList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -349,10 +342,10 @@ export default {
   components: {
     AddMetadataModal,
     AddThumbnailsModal,
-    BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
     ComboboxDepartment,
+    ComboboxDisplayOptions,
     CreateTasksModal,
     DeleteModal,
     EditShotModal,
@@ -367,8 +360,6 @@ export default {
     SetFramesFromTaskTypePreviewsModal,
     SortingInfo,
     ShotHistoryModal,
-    ShowAssignationsButton,
-    ShowInfosButton,
     ShotList,
     TaskInfo
   },
@@ -376,9 +367,15 @@ export default {
   data() {
     return {
       type: 'shot',
-      contactSheetMode: false,
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
+      displaySettings: {
+        bigThumbnails: false,
+        contactSheetMode: false,
+        inOutTimecode: false,
+        showAssignations: true,
+        showInfos: true
+      },
       formData: null,
       historyShot: {},
       initialLoading: true,
@@ -516,7 +513,6 @@ export default {
       'isShotTime',
       'isShotsLoading',
       'isShotsLoadingError',
-      'isShowAssignations',
       'isTVShow',
       'openProductions',
       'productionShotTaskTypes',

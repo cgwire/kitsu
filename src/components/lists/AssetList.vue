@@ -50,7 +50,7 @@
               scope="col"
               class="episode"
               ref="th-episode"
-              v-if="isTVShow && isShowInfos"
+              v-if="isTVShow && displaySettings.showInfos"
             >
               {{ $t('assets.fields.episode') }}
             </th>
@@ -102,7 +102,7 @@
               :title="$t('assets.fields.ready_for')"
               v-if="
                 isCurrentUserManager &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 !isAssetsOnly &&
                 metadataDisplayHeaders.readyFor
               "
@@ -114,7 +114,11 @@
               scope="col"
               class="description"
               ref="th-description"
-              v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+              v-if="
+                !isCurrentUserClient &&
+                displaySettings.showInfos &&
+                isAssetDescription
+              "
             >
               {{ $t('assets.fields.description') }}
             </th>
@@ -125,7 +129,7 @@
               ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 isAssetTime &&
                 metadataDisplayHeaders.timeSpent
               "
@@ -140,7 +144,7 @@
               ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 isAssetEstimation &&
                 metadataDisplayHeaders.estimation
               "
@@ -153,14 +157,14 @@
               class="resolution"
               v-if="
                 isAssetResolution &&
-                isShowInfos &&
+                displaySettings.showInfos &&
                 metadataDisplayHeaders.resolution
               "
             >
               {{ $t('shots.fields.resolution') }}
             </th>
 
-            <template v-if="isShowInfos">
+            <template v-if="displaySettings.showInfos">
               <metadata-header
                 :key="'header' + descriptor.id"
                 :descriptor="descriptor"
@@ -215,14 +219,14 @@
                 namespace="assets"
                 v-model="metadataDisplayHeaders"
                 v-show="columnSelectorDisplayed"
-                v-if="isShowInfos"
+                v-if="displaySettings.showInfos"
               />
 
               <button-simple
                 class="is-small is-pulled-right mr05"
                 icon="down"
                 @click="toggleColumnSelector"
-                v-if="isShowInfos"
+                v-if="displaySettings.showInfos"
               />
             </th>
           </tr>
@@ -277,10 +281,10 @@
                   <entity-thumbnail
                     class="entity-thumbnail flexrow-item"
                     :entity="asset"
-                    :width="isBigThumbnails ? 150 : 50"
-                    :height="isBigThumbnails ? 100 : 30"
-                    :empty-width="isBigThumbnails ? 150 : 50"
-                    :empty-height="isBigThumbnails ? 100 : 32"
+                    :width="displaySettings.bigThumbnails ? 150 : 50"
+                    :height="displaySettings.bigThumbnails ? 100 : 30"
+                    :empty-width="displaySettings.bigThumbnails ? 150 : 50"
+                    :empty-height="displaySettings.bigThumbnails ? 100 : 32"
                   />
                   <router-link
                     tabindex="-1"
@@ -297,7 +301,7 @@
                 </div>
               </th>
 
-              <td class="episode" v-if="isTVShow && isShowInfos">
+              <td class="episode" v-if="isTVShow && displaySettings.showInfos">
                 <div class="flexrow" :title="assetEpisodes(asset, true)">
                   {{ assetEpisodes(asset, false) }}
                 </div>
@@ -332,7 +336,7 @@
                     'hidden-validation-cell': hiddenColumns[columnId],
                     'datatable-row-header': true
                   }"
-                  :contact-sheet="contactSheetMode"
+                  :contact-sheet="displaySettings.contactSheetMode"
                   :key="'sticky-validation-' + columnId + '-' + asset.id"
                   :canceled="asset.canceled"
                   :column="taskTypeMap.get(columnId)"
@@ -343,7 +347,7 @@
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
-                  :is-assignees="isShowAssignations"
+                  :is-assignees="displaySettings.showAssignations"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`
@@ -360,7 +364,7 @@
                 class="task-type-name ready-for"
                 v-if="
                   isCurrentUserManager &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   !isAssetsOnly &&
                   metadataDisplayHeaders.readyFor
                 "
@@ -382,7 +386,11 @@
                   value => onDescriptionChanged(asset, value)
                 "
                 :editable="isCurrentUserManager && !asset.shared"
-                v-if="!isCurrentUserClient && isShowInfos && isAssetDescription"
+                v-if="
+                  !isCurrentUserClient &&
+                  displaySettings.showInfos &&
+                  isAssetDescription
+                "
                 :entry="asset"
               />
 
@@ -390,7 +398,7 @@
                 class="time-spent selectable number-cell"
                 v-if="
                   !isCurrentUserClient &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   isAssetTime &&
                   metadataDisplayHeaders.timeSpent
                 "
@@ -402,7 +410,7 @@
                 class="estimation selectable number-cell"
                 v-if="
                   !isCurrentUserClient &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   isAssetEstimation &&
                   metadataDisplayHeaders.estimation
                 "
@@ -414,7 +422,7 @@
                 class="resolution"
                 v-if="
                   isAssetResolution &&
-                  isShowInfos &&
+                  displaySettings.showInfos &&
                   metadataDisplayHeaders.resolution
                 "
               >
@@ -449,7 +457,7 @@
               </td>
 
               <!-- other Metadata cells -->
-              <template v-if="isShowInfos">
+              <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
@@ -479,7 +487,7 @@
                   :key="'validation' + columnId + '-' + asset.id"
                   :canceled="asset.canceled"
                   :column="taskTypeMap.get(columnId)"
-                  :contact-sheet="contactSheetMode"
+                  :contact-sheet="displaySettings.contactSheetMode"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
                   :selected="
@@ -493,7 +501,7 @@
                   :column-y="j"
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
-                  :is-assignees="isShowAssignations"
+                  :is-assignees="displaySettings.showAssignations"
                   :selectable="isSelectable(asset, columnId)"
                   :disabled="!isSelectable(asset, columnId)"
                   @select="onTaskSelected"
@@ -629,6 +637,10 @@ export default {
       type: Boolean,
       default: false
     },
+    displaySettings: {
+      type: Object,
+      default: () => {}
+    },
     displayedAssets: {
       type: Array,
       default: () => []
@@ -723,12 +735,10 @@ export default {
       'organisation',
       'isAssetDescription',
       'isAssetResolution',
-      'isBigThumbnails',
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isShowAssignations',
-      'isShowInfos',
       'isAssetEstimation',
       'isAssetTime',
       'isTVShow',
@@ -778,20 +788,22 @@ export default {
       let count = 1
       count += this.isTVShow ? 1 : 0
       count +=
-        !this.isCurrentUserClient && this.isShowInfos && this.isAssetDescription
+        !this.isCurrentUserClient &&
+        this.displaySettings.showInfos &&
+        this.isAssetDescription
           ? 1
           : 0
       count += this.visibleMetadataDescriptors.length
       count +=
         !this.isCurrentUserClient &&
-        this.isShowInfos &&
+        this.displaySettings.showInfos &&
         this.isAssetTime &&
         this.metadataDisplayHeaders.timeSpent
           ? 1
           : 0
       count +=
         !this.isCurrentUserClient &&
-        this.isShowInfos &&
+        this.displaySettings.showInfos &&
         this.isAssetEstimation &&
         this.metadataDisplayHeaders.estimation
           ? 1
@@ -804,7 +816,7 @@ export default {
       return this.validationColumns.filter(columnId => {
         return (
           this.assetFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.isShowInfos)
+          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
         )
       })
     },
@@ -1005,7 +1017,7 @@ export default {
         let offset = this.$refs['th-name'].clientWidth
         this.offsets = {}
 
-        if (this.isShowInfos) {
+        if (this.displaySettings.showInfos) {
           for (
             let metadataCol = 0;
             metadataCol < this.stickedVisibleMetadataDescriptors.length;
@@ -1050,7 +1062,7 @@ export default {
       this.updateOffsets()
     },
 
-    isBigThumbnails() {
+    'displaySettings.bigThumbnails'() {
       this.updateOffsets()
     },
 
