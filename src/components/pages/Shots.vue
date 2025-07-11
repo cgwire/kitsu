@@ -479,7 +479,7 @@ export default {
     } else {
       if (!this.isShotsLoading) this.initialLoading = false
       this.onSearchChange()
-      this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
+      this.$refs['shot-list']?.setScrollPosition(this.shotListScrollPosition)
       this.$nextTick(() => {
         this.$refs['shot-list']?.selectTaskFromQuery()
         this.applySearchFromUrl()
@@ -1220,9 +1220,7 @@ export default {
         this.$nextTick(() => {
           this.$refs['shot-list']?.selectTaskFromQuery()
         })
-        if (this.$refs['shot-list']) {
-          this.$refs['shot-list'].setScrollPosition(this.shotListScrollPosition)
-        }
+        this.$refs['shot-list']?.setScrollPosition(this.shotListScrollPosition)
       }
     }
   },

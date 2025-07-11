@@ -461,10 +461,12 @@ export default {
 
       // Show these sections to studio members only.
       if (!this.isCurrentUserClient) {
-        options = options.concat([
-          { label: 'separator', value: 'separator' },
-          { label: this.$t('schedule.title'), value: 'schedule' }
-        ])
+        if (!this.isCurrentUserVendor) {
+          options = options.concat([
+            { label: 'separator', value: 'separator' },
+            { label: this.$t('schedule.title'), value: 'schedule' }
+          ])
+        }
         if (isNotOnlyAssets) {
           options.push({ label: this.$t('quota.title'), value: 'quota' })
         }

@@ -70,23 +70,9 @@
                     : `4px solid ${rootElement.color}`
                 }"
                 :title="rootElement.name"
-                v-if="!rootElement.route"
               >
                 {{ rootElement.name }}
               </span>
-              <router-link
-                class="filler flexrow-item root-element-name ellipsis"
-                :style="{
-                  'border-left': rootElement.avatar
-                    ? null
-                    : `4px solid ${rootElement.color}`
-                }"
-                :title="rootElement.name"
-                :to="rootElement.route"
-                v-else
-              >
-                {{ rootElement.name }}
-              </router-link>
               <department-name
                 class="ml05"
                 :department="departmentMap.get(departmentId)"
@@ -95,8 +81,16 @@
                 only-dot
                 v-for="departmentId in rootElement.departments"
               />
+              <router-link
+                class="root-element-link flexrow-item"
+                :title="rootElement.name"
+                :to="rootElement.route"
+                v-if="rootElement.route"
+              >
+                <link-icon :size="12" v-if="rootElement.route" />
+              </router-link>
               <input
-                class="flexrow-item mr1 man-day-input"
+                class="man-day-input flexrow-item mr1"
                 type="number"
                 step="any"
                 placeholder="0"
@@ -629,6 +623,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   EditIcon,
+  LinkIcon,
   PlusIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
@@ -666,6 +661,7 @@ export default {
     DepartmentName,
     EditIcon,
     EditMilestoneModal,
+    LinkIcon,
     PeopleAvatar,
     PlusIcon,
     ProductionName,
@@ -2325,6 +2321,11 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     color: white;
     cursor: pointer;
     margin-right: 0.5em;
+  }
+
+  .root-element-link,
+  .root-element-link + * {
+    margin-left: 0.5em;
   }
 
   &.child-line {

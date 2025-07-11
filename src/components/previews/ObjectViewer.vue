@@ -25,8 +25,6 @@
 </template>
 
 <script>
-import('@google/model-viewer')
-
 export default {
   name: 'object-viewer',
 
@@ -61,6 +59,13 @@ export default {
   },
 
   emits: ['model-loaded'],
+
+  async mounted() {
+    if (!customElements.get('model-viewer')) {
+      // lazy load model-viewer
+      await import('@google/model-viewer')
+    }
+  },
 
   methods: {
     /**
