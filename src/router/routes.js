@@ -2,12 +2,14 @@ import Bowser from 'bowser'
 import { nextTick } from 'vue'
 
 import auth from '@/lib/auth'
-import lang from '@/lib/lang'
-import timezone from '@/lib/timezone'
 import init from '@/lib/init'
+import lang from '@/lib/lang'
+import sentry from '@/lib/sentry'
+import timezone from '@/lib/timezone'
 
-import userStore from '@/store/modules/user'
+import peopleStore from '@/store/modules/people'
 import taskTypeStore from '@/store/modules/tasktypes'
+import userStore from '@/store/modules/user'
 import store from '@/store'
 
 import Assets from '@/components/pages/Assets.vue'
@@ -124,6 +126,10 @@ export const routes = [
         } else {
           timezone.setTimezone()
           lang.setLocale(userStore.state.user.locale)
+          sentry.setContext(
+            peopleStore.state.organisation,
+            userStore.state.user
+          )
           if (store.state.productions.openProductions.length === 0) {
             init(err => {
               if (err) {
@@ -161,6 +167,10 @@ export const routes = [
         } else {
           timezone.setTimezone()
           lang.setLocale(userStore.state.user.locale)
+          sentry.setContext(
+            peopleStore.state.organisation,
+            userStore.state.user
+          )
           const isProhibited =
             !userStore.getters.isCurrentUserAdmin(userStore.state) &&
             to &&
