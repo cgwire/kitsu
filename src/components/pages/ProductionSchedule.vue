@@ -15,17 +15,17 @@
           <date-field :can-delete="false" utc v-model="selectedEndDate" />
         </div>
         <combobox-number
-          class="flexrow-item zoom-level"
+          class="flexrow-item zoom-level nowrap"
           :label="$t('schedule.zoom_level')"
           :options="zoomOptions"
           v-model="zoomLevel"
         />
         <combobox
           class="flexrow-item ml1"
-          :label="$t('quota.detail_label')"
-          v-model="detailLevel"
-          :options="detailOptions"
-          @update:model-value="onDetailLevelChanged"
+          :label="$t('schedule.mode')"
+          v-model="mode"
+          :options="modeOptions"
+          @update:model-value="onModeChanged"
         />
         <div class="filler"></div>
         <div class="flexrow">
@@ -34,6 +34,14 @@
             icon="clock"
             :text="$t('schedule.today')"
             @click="scrollScheduleToToday"
+          />
+          <button-simple
+            :active="isSidePanelOpen && assignments.type !== 'task'"
+            class="flexrow-item"
+            icon="list"
+            :text="$t('menu.assign_tasks')"
+            @click="toggleSidePanel"
+            v-if="!isLockedSchedule && !isTVShow"
           />
         </div>
       </div>
@@ -49,9 +57,9 @@
         is-estimation-linked
         hide-man-days
         :multiline="isTVShow"
-        :reassignable="detailLevel !== 'real'"
+        :reassignable="!isLockedSchedule"
         :subchildren="!isTVShow"
-        :type="detailLevel"
+        :type="mode"
         @item-assign="onScheduleItemAssigned"
         @item-changed="onScheduleItemChanged"
         @item-drop="onScheduleItemDropped"
@@ -65,37 +73,46 @@
 
     <div
       class="column side-column"
-      v-if="selectedTaskType && detailLevel !== 'real'"
+      v-if="isSidePanelOpen && !isLockedSchedule && !isTVShow"
     >
       <div class="side">
-        <a class="close-button" @click="closeSidePanel">
+        <a class="close-button" @click="toggleSidePanel">
           <x-icon class="align-middle" :size="16" />
         </a>
         <h2 class="mt1">
           {{
-            assignments.item === 'task'
+            assignments.type === 'task'
               ? $t('schedule.edit_task')
               : $t('menu.assign_tasks')
           }}
         </h2>
         <div class="details">
-          <task-type-name
-            class="task-type"
-            :production-id="currentProduction.id"
-            :task-type="selectedTaskType"
+          <combobox-task-type
+            class="mb05"
+            add-placeholder
+            :placeholder="$t('schedule.select_task_type')"
+            :label="$t('news.task_type')"
+            :task-type-list="availableTaskTypes"
+            :model-value="selectedTaskType?.task_type_id"
+            @update:model-value="onSelectTaskType"
           />
           <button-simple
+            class="mt2 mb05"
             icon="user-check"
             :is-on="assignments.assigned"
             :title="$t('schedule.show_assigned')"
             @click="assignments.assigned = !assignments.assigned"
-            v-if="!assignments.item"
+            v-if="
+              !assignments.loading &&
+              assignments.entityTypes?.length &&
+              !assignments.type
+            "
           />
         </div>
         <div class="mt2" v-if="assignments.loading">
           <spinner class="mauto" :size="20" />
         </div>
-        <ul class="assignments mt1" v-else-if="!assignments.item">
+        <ul class="assignments parent mt1" v-else-if="!assignments.type">
           <li
             :key="entityType.id"
             v-for="entityType in assignments.entityTypes"
@@ -106,6 +123,7 @@
               @dragstart="
                 onAssignmentItemDragStart($event, entityType, selectedTaskType)
               "
+              @click="onAssignmentItemSelected(entityType)"
             >
               <grip-vertical-icon class="icon" />
               <span class="name">
@@ -114,13 +132,13 @@
               </span>
               <span
                 class="expand"
-                @click="entityType.expanded = !entityType.expanded"
+                @click.stop="entityType.expanded = !entityType.expanded"
               >
                 <chevron-right-icon v-if="!entityType.expanded" />
                 <chevron-down-icon v-else />
               </span>
             </div>
-            <ul class="assignments" v-if="entityType.expanded">
+            <ul class="assignments children" v-if="entityType.expanded">
               <li
                 :key="child.id"
                 v-for="child in filteredAssignments(entityType.children)"
@@ -134,6 +152,12 @@
                       { ...entityType, children: [child] },
                       selectedTaskType
                     )
+                  "
+                  @click="
+                    onAssignmentItemSelected({
+                      ...entityType,
+                      children: [child]
+                    })
                   "
                 >
                   <grip-vertical-icon class="icon" />
@@ -149,7 +173,7 @@
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
-                  :disabled="assignments.item !== 'dropped'"
+                  :disabled="assignments.type !== 'entity'"
                   :label="$t('main.start_date')"
                   utc
                   v-model="assignments.startDate"
@@ -158,7 +182,7 @@
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
-                  :disabled="assignments.item !== 'dropped'"
+                  :disabled="assignments.type !== 'entity'"
                   :label="$t('main.end_date')"
                   utc
                   v-model="assignments.endDate"
@@ -252,9 +276,9 @@
               :label="$t('schedule.force_unassign')"
               :toggle="true"
               v-model="assignments.unassign"
-              v-if="assignments.item === 'dropped'"
+              v-if="assignments.type === 'entity'"
             />
-            <div class="flexrow mt2" v-if="assignments.item === 'dropped'">
+            <div class="flexrow mt2" v-if="assignments.type === 'entity'">
               <label class="mr05">
                 {{ $t('schedule.forced_daily_quotas') }}
               </label>
@@ -273,11 +297,11 @@
                 <trash-icon class="align-middle" :size="14" />
               </a>
             </div>
-            <div class="mt2" v-if="assignments.item === 'dropped'">
+            <div class="mt2" v-if="assignments.type === 'entity'">
               {{ $t('schedule.estimated_daily_quotas') }}
               {{ estimatedDailyQuota.toFixed(2) }}
             </div>
-            <div class="flexrow mt2" v-if="assignments.item === 'task'">
+            <div class="flexrow mt2" v-if="assignments.type === 'task'">
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
@@ -298,7 +322,7 @@
                 />
               </div>
             </div>
-            <div class="flexrow mt2" v-if="assignments.item === 'task'">
+            <div class="flexrow mt2" v-if="assignments.type === 'task'">
               <text-field
                 class="mb0 estimation mr05"
                 input-class=" thin"
@@ -311,7 +335,7 @@
               />
             </div>
             <div class="mt2 has-text-right">
-              <template v-if="assignments.item === 'dropped'">
+              <template v-if="assignments.type === 'entity'">
                 <button-simple
                   :disabled="!hasDraggedEntities || !availablePersons.length"
                   :is-loading="assignments.saving"
@@ -322,14 +346,14 @@
                 <button
                   class="button is-link ml05"
                   :disabled="assignments.saving"
-                  :text="$t('main.cancel')"
+                  :text="$t('main.back')"
                   type="button"
-                  @click="assignments.item = null"
+                  @click="assignments.type = null"
                 >
-                  {{ $t('main.cancel') }}
+                  {{ $t('main.back') }}
                 </button>
               </template>
-              <template v-if="assignments.item === 'task'">
+              <template v-if="assignments.type === 'task'">
                 <button-simple
                   :disabled="!assignments.task.estimation"
                   :is-loading="assignments.saving"
@@ -386,12 +410,12 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 import assetStore from '@/store/modules/assets'
@@ -409,6 +433,7 @@ export default {
     ChevronRightIcon,
     Combobox,
     ComboboxNumber,
+    ComboboxTaskType,
     DateField,
     GripVerticalIcon,
     ListRestartIcon,
@@ -417,7 +442,6 @@ export default {
     Schedule,
     Spinner,
     TrashIcon,
-    TaskTypeName,
     TextField,
     XIcon
   },
@@ -429,17 +453,19 @@ export default {
         entityTypes: null,
         excludes: [],
         forcedDailyQuota: null,
-        item: null,
         loading: false,
         saving: false,
         startDate: null,
         endDate: null,
         task: {},
+        type: null,
         unassign: false
       },
+      availableTaskTypes: [],
       daysOffByPerson: [],
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
+      isSidePanelOpen: false,
       scheduleItems: [],
       startDate: moment().startOf('day'),
       selectedStartDate: null,
@@ -524,6 +550,10 @@ export default {
       return this.draggedEntities.some(entity => entity.children.length)
     },
 
+    isLockedSchedule() {
+      return this.mode === 'real' || !this.isCurrentUserManager
+    },
+
     shotMap() {
       return shotStore.cache.shotMap
     },
@@ -565,7 +595,9 @@ export default {
 
     loadData() {
       this.loading.schedule = true
-      this.loadScheduleItems(this.currentProduction)
+      this.availableTaskTypes = []
+
+      return this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
           const scheduleStartDate = parseDate(this.selectedStartDate)
           const scheduleEndDate = parseDate(this.selectedEndDate)
@@ -609,8 +641,7 @@ export default {
               priority: taskType.priority,
               startDate,
               endDate,
-              editable:
-                this.isInDepartment(taskType) && this.detailLevel !== 'real',
+              editable: this.isInDepartment(taskType) && !this.isLockedSchedule,
               expanded: false,
               loading: false,
               route:
@@ -623,6 +654,12 @@ export default {
             this.currentProduction,
             this.taskTypeMap
           )
+
+          this.availableTaskTypes = this.scheduleItems.map(item => ({
+            ...this.taskTypeMap.get(item.task_type_id),
+            name: item.name
+          }))
+
           this.loading.schedule = false
         })
         .catch(err => {
@@ -679,7 +716,7 @@ export default {
           loading: false,
           editable:
             this.isInDepartment(this.taskTypeMap.get(item.task_type_id)) &&
-            this.detailLevel !== 'real',
+            !this.isLockedSchedule,
           children: [],
           parentElement: taskTypeElement
         }
@@ -794,7 +831,7 @@ export default {
                 // populate task with start and end dates
 
                 let startDate
-                if (this.detailLevel === 'real') {
+                if (this.mode === 'real') {
                   if (!task.real_start_date) {
                     return
                   }
@@ -811,7 +848,7 @@ export default {
                 task.startDate = startDate
 
                 let endDate
-                if (this.detailLevel === 'real') {
+                if (this.mode === 'real') {
                   endDate = task.done_date
                     ? parseDate(task.done_date)
                     : moment.tz()
@@ -860,7 +897,7 @@ export default {
                         }
                 }
 
-                task.editable = this.detailLevel !== 'real'
+                task.editable = !this.isLockedSchedule
                 task.unresizable = false
                 task.parentElement = entityTypeItem
 
@@ -1090,13 +1127,30 @@ export default {
         entityTypes: null,
         excludes: [],
         forcedDailyQuota: null,
-        item: null,
         loading: false,
         saving: false,
         startDate: null,
         endDate: null,
         task: {},
+        type: null,
         unassign: false
+      }
+    },
+
+    toggleSidePanel() {
+      if (this.isSidePanelOpen && this.assignments.type === 'task') {
+        this.assignments.type = null
+        this.isSidePanelOpen = false
+      }
+
+      this.isSidePanelOpen = !this.isSidePanelOpen
+
+      if (
+        this.isSidePanelOpen &&
+        this.assignments.type !== 'task' &&
+        !this.assignments.entityTypes
+      ) {
+        this.selectTaskTypeElement(this.selectedTaskType)
       }
     },
 
@@ -1108,6 +1162,21 @@ export default {
       } else {
         this.selectTaskTypeElement(element)
       }
+    },
+
+    onSelectTaskType(taskTypeId) {
+      this.selectedTaskType = this.scheduleItems.find(
+        item => item.task_type_id === taskTypeId
+      )
+      // refresh schedule
+      this.expandTaskTypeElement(
+        this.selectedTaskType,
+        () => {
+          this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
+        },
+        true,
+        false
+      )
     },
 
     async selectTaskTypeElement(
@@ -1209,10 +1278,11 @@ export default {
 
       this.resetSidePanel()
 
+      this.isSidePanelOpen = true
       this.selectedTaskType = taskType
       this.draggedEntities = [{ ...entityType, children: [{ ...task.entity }] }]
 
-      this.assignments.item = 'task'
+      this.assignments.type = 'task'
 
       const start_date = event.start_date || taskType.start_date
       const end_date = parseDate(start_date).isAfter(taskType.end_date)
@@ -1233,8 +1303,17 @@ export default {
     },
 
     closeSidePanel() {
-      this.selectedTaskType = null
+      this.isSidePanelOpen = false
       this.resetSidePanel()
+    },
+
+    onAssignmentItemSelected(item) {
+      this.assignments.type = 'entity'
+      this.assignments.startDate = item.start_date
+      this.assignments.endDate = item.end_date
+
+      item.children = this.filteredAssignments(item.children)
+      this.draggedEntities = [item]
     },
 
     onAssignmentItemDragStart(event, item, type) {
@@ -1250,7 +1329,7 @@ export default {
     },
 
     onScheduleItemDropped(event, item) {
-      this.assignments.item = 'dropped'
+      this.assignments.type = 'entity'
       const start_date = event.start_date || item.start_date
       const end_date = parseDate(start_date).isAfter(item.end_date)
         ? start_date
@@ -1264,9 +1343,9 @@ export default {
     },
 
     submitAssignments(event) {
-      if (this.assignments.item === 'dropped') {
+      if (this.assignments.type === 'entity') {
         this.saveAssignments()
-      } else if (this.assignments.item === 'task') {
+      } else if (this.assignments.type === 'task') {
         this.saveTask()
       }
     },
@@ -1447,7 +1526,7 @@ export default {
       })
     },
 
-    onDetailLevelChanged(detailLevel) {
+    onModeChanged(mode) {
       this.scheduleItems.forEach(item => {
         if (!item.expanded) {
           return
@@ -1574,10 +1653,6 @@ export default {
   list-style-type: none;
   margin-left: 0;
 
-  .assignments {
-    margin-left: 2em;
-  }
-
   .assignment-item {
     display: flex;
     align-items: center;
@@ -1586,11 +1661,12 @@ export default {
     border: 1px solid $grey;
     margin-top: -1px;
     padding: 1em 1em 1em 0.5em;
-    cursor: grab;
+    cursor: pointer;
 
     .icon {
       color: $grey;
       margin-right: 0.5em;
+      cursor: grab;
     }
 
     .name {
@@ -1608,8 +1684,34 @@ export default {
     }
   }
 
-  li:nth-child(even) .assignment-item {
-    background: color-mix(in srgb, var(--background-selectable) 70%, white 30%);
+  // odd/event items background
+  &.parent {
+    $alt-background: color-mix(
+      in srgb,
+      var(--background-selectable) 70%,
+      white 30%
+    );
+    > li:nth-child(odd) {
+      > .assignment-item {
+        background: $alt-background;
+      }
+      .assignments.children {
+        > li:nth-child(even) > .assignment-item {
+          background: $alt-background;
+        }
+      }
+    }
+    > li:nth-child(even) {
+      .assignments.children {
+        > li:nth-child(odd) > .assignment-item {
+          background: $alt-background;
+        }
+      }
+    }
+  }
+
+  &.children {
+    margin-left: 2em;
   }
 
   .dragged-type {
