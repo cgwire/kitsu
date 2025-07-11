@@ -18,13 +18,6 @@
               icon="filter"
               @click="modals.isBuildFilterDisplayed = true"
             />
-            <button-simple
-              class="flexrow-item"
-              icon="assets"
-              :is-on="showSharedAssets"
-              :title="$t('breakdown.show_library')"
-              @click="showSharedAssets = !showSharedAssets"
-            />
             <div class="flexrow-item filler"></div>
             <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
               <combobox-department
@@ -35,16 +28,11 @@
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"
               />
-              <button-simple
+              <combobox-display-options
                 class="flexrow-item"
-                icon="grid"
-                :is-on="contactSheetMode"
-                :title="$t('tasks.show_contact_sheet')"
-                @click="contactSheetMode = !contactSheetMode"
+                :type="type"
+                v-model="displaySettings"
               />
-              <show-assignations-button class="flexrow-item" />
-              <show-infos-button class="flexrow-item" />
-              <big-thumbnails-button class="flexrow-item" />
             </div>
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
@@ -92,12 +80,12 @@
         />
         <asset-list
           ref="asset-list"
-          :contact-sheet-mode="contactSheetMode"
           :displayed-assets="
-            showSharedAssets
+            displaySettings.showSharedAssets
               ? displayedAssetsByType
               : displayedAssetsByTypeWithoutShared
           "
+          :display-settings="displaySettings"
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
           :department-filter="departmentFilter"
@@ -279,10 +267,10 @@ import { entitiesMixin } from '@/components/mixins/entities'
 import AssetList from '@/components/lists/AssetList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
-import BigThumbnailsButton from '@/components/widgets/BigThumbnailsButton.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
@@ -292,8 +280,6 @@ import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import ShowAssignationsButton from '@/components/widgets/ShowAssignationsButton.vue'
-import ShowInfosButton from '@/components/widgets/ShowInfosButton.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 export default {
@@ -305,10 +291,10 @@ export default {
     AssetList,
     AddMetadataModal,
     AddThumbnailsModal,
-    BigThumbnailsButton,
     BuildFilterModal,
     ButtonSimple,
     ComboboxDepartment,
+    ComboboxDisplayOptions,
     CreateTasksModal,
     DeleteModal,
     EditAssetModal,
@@ -317,8 +303,6 @@ export default {
     ImportRenderModal,
     SearchField,
     SearchQueryList,
-    ShowAssignationsButton,
-    ShowInfosButton,
     SortingInfo,
     TaskInfo
   },
@@ -342,7 +326,13 @@ export default {
       deleteAllTasksLockText: null,
       descriptorToEdit: {},
       departmentFilter: [],
-      showSharedAssets: true,
+      displaySettings: {
+        bigThumbnails: false,
+        contactSheetMode: false,
+        showAssignations: true,
+        showInfos: true,
+        showSharedAssets: true
+      },
       optionalColumns: ['Description', 'Ready for'],
       pageName: 'Assets',
       parsedCSV: [],

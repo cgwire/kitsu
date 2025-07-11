@@ -723,6 +723,7 @@ export default {
       const entity = this.entityList.find(
         entity => entity.id === this.task.entity_id
       )
+      if (!entity) return null
       entity.tasks = entity.tasks || []
       const tasksLength = entity.tasks.length
       const taskIndex = entity.tasks.findIndex(
@@ -744,6 +745,7 @@ export default {
       const entity = this.entityList.find(
         entity => entity.id === this.task.entity_id
       )
+      if (!entity) return null
       entity.tasks = entity.tasks || []
       const tasksLength = entity.tasks.length
       const taskIndex = entity.tasks.findIndex(

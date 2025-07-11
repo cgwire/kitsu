@@ -614,6 +614,10 @@ export const entityListMixin = {
   watch: {
     nbSelectedTasks() {
       this.updateTaskInQuery()
+    },
+
+    'displaySettings.bigThumbnails'() {
+      this.updateOffsets()
     }
   }
 }
