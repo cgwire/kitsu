@@ -10,12 +10,29 @@
             <corner-left-up-icon />
           </router-link>
 
-          <task-type-name
-            class="flexrow-item task-type block"
-            :task-type="taskType"
-            :production-id="currentProduction.id"
-            v-if="taskType"
-          />
+          <div class="flexrow-item block flexrow task-type">
+            <router-link
+              class="flexrow-item mt05"
+              :to="previousEntityTaskPath"
+              v-if="previousEntityTaskPath"
+            >
+              <chevron-left-icon />
+            </router-link>
+
+            <router-link
+              class="flexrow-item mt05"
+              :to="nextEntityTaskPath"
+              v-if="nextEntityTaskPath"
+            >
+              <chevron-right-icon />
+            </router-link>
+            <task-type-name
+              class="flexrow-item"
+              :task-type="taskType"
+              :production-id="currentProduction.id"
+              v-if="taskType"
+            />
+          </div>
 
           <span class="flexrow-item ml2">
             <entity-thumbnail
@@ -76,7 +93,7 @@
               :to="previousTaskPath"
               v-if="previousTaskPath"
             >
-              <chevron-left-icon />
+              <chevron-up-icon />
             </router-link>
 
             <router-link
@@ -84,7 +101,7 @@
               :to="nextTaskPath"
               v-if="nextTaskPath"
             >
-              <chevron-right-icon />
+              <chevron-down-icon />
             </router-link>
           </div>
         </div>
@@ -379,8 +396,10 @@
 
 <script>
 import {
+  ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronUpIcon,
   CornerLeftUpIcon,
   ImageIcon
 } from 'lucide-vue-next'
@@ -424,8 +443,10 @@ export default {
   components: {
     AddComment,
     AddPreviewModal,
+    ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    ChevronUpIcon,
     ComboboxStyled,
     Comment,
     CornerLeftUpIcon,
@@ -695,6 +716,48 @@ export default {
     },
 
     /*
+     * Get the path to the previous task in the current entity.
+     */
+    previousEntityTaskPath() {
+      if (!this.task) return null
+      const entity = this.entityList.find(
+        entity => entity.id === this.task.entity_id
+      )
+      entity.tasks = entity.tasks || []
+      const tasksLength = entity.tasks.length
+      const taskIndex = entity.tasks.findIndex(
+        taskId => taskId === this.task.id
+      )
+      const previousTaskIndex = taskIndex - 1
+      const previousTaskId =
+        previousTaskIndex < 0
+          ? entity.tasks[tasksLength - 1]
+          : entity.tasks[previousTaskIndex]
+      return previousTaskId ? this.taskPath({ id: previousTaskId }) : null
+    },
+
+    /*
+     * Get the path to the next task in the current entity.
+     */
+    nextEntityTaskPath() {
+      if (!this.task) return null
+      const entity = this.entityList.find(
+        entity => entity.id === this.task.entity_id
+      )
+      entity.tasks = entity.tasks || []
+      const tasksLength = entity.tasks.length
+      const taskIndex = entity.tasks.findIndex(
+        taskId => taskId === this.task.id
+      )
+      const nextTaskIndex = taskIndex + 1
+      const nextTaskId =
+        nextTaskIndex >= tasksLength
+          ? entity.tasks[0]
+          : entity.tasks[nextTaskIndex]
+      return nextTaskId ? this.taskPath({ id: nextTaskId }) : null
+    },
+
+    /*
      * Get the path to the previous task. The previous task is the fist task
      * found in the previous entities with the same task type.
      */
@@ -716,6 +779,10 @@ export default {
       return taskId ? this.taskPath({ id: taskId }) : null
     },
 
+    /*
+     * Get the path to the next task. The next task is the fist task
+     * found in the next entities with the same task type.
+     */
     nextTaskPath() {
       if (!this.task) return null
 
