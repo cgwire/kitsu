@@ -392,6 +392,8 @@ export default {
       without_thumbnail: 'Without thumbnail'
     },
 
+    display_options: 'Display Settings',
+
     logs: {
       no_logs: 'There are no time logs for this entity.'
     },
@@ -1552,6 +1554,7 @@ export default {
     restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this shot.',
     sequences: 'Sequences',
+    show_timecode: 'Show in and out as timecodes',
     tasks: 'Shot Tasks',
     title: 'Shots',
     wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current shot.',
@@ -1702,7 +1705,7 @@ export default {
     small_thumbnails: 'Show small thumbnails',
     smaller: 'Reduce task panel',
     select_file: 'Please select the file from your hard drive you want to attach to your comment or message:',
-    show_contact_sheet: 'Display tasks as a contact sheet',
+    show_contact_sheet: 'Display as a contact sheet',
     subscribe_notifications: 'Subscribe to notifications',
     subscribe_to_tasks: 'Subscribe to selected task notifications | Subscribe to the {nbSelectedTasks} selected tasks notifications',
     unsubscribe_notifications: 'Unsubscribe from notifications',
