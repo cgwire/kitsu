@@ -246,7 +246,7 @@
               @click="onPreviousPreviewClicked"
             />
             <span
-              class="ml05 mr05"
+              class="ml05 mr05 nowrap"
               :title="$t('playlists.actions.files_position')"
             >
               {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}

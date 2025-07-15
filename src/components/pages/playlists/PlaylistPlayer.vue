@@ -489,7 +489,10 @@
           :disabled="isPlaying"
           @click="onPreviousPreviewClicked"
         />
-        <span class="ml05 mr05" :title="$t('playlists.actions.files_position')">
+        <span
+          class="ml05 mr05 nowrap"
+          :title="$t('playlists.actions.files_position')"
+        >
           {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}
         </span>
         <button-simple
