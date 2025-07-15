@@ -1,8 +1,8 @@
 <template>
-  <div class="asset-types page fixed-page">
+  <div class="software-licenses page fixed-page">
     <list-page-header
-      :title="$t('asset_types.library_title')"
-      :new-entry-label="$t('asset_types.new_asset_type')"
+      :title="$t('software_licenses.title')"
+      :new-entry-label="$t('software_licenses.new_software_license')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
@@ -10,22 +10,22 @@
 
     <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
-    <asset-type-list
-      class="asset-type-list"
-      :entries="assetTypesList"
+    <software-license-list
+      class="software-license-list"
+      :entries="softwareLicensesList"
       :is-loading="loading.list"
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
     />
 
-    <edit-asset-type-modal
+    <edit-software-license-modal
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :asset-type-to-edit="assetTypeToEdit"
+      :software-license-to-edit="softwareLicenseToEdit"
       @cancel="modals.edit = false"
-      @confirm="confirmEditAssetType"
+      @confirm="confirmEditSoftwareLicense"
     />
 
     <delete-modal
@@ -33,9 +33,9 @@
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
-      :error-text="$t('asset_types.delete_error')"
+      :error-text="$t('software_licenses.delete_error')"
       @cancel="modals.del = false"
-      @confirm="confirmDeleteAssetType"
+      @confirm="confirmDeleteSoftwareLicense"
     />
   </div>
 </template>
@@ -46,19 +46,19 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import AssetTypeList from '@/components/lists/AssetTypeList.vue'
+import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
-import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
+import EditSoftwareLicenseModal from '@/components/modals/EditSoftwareLicenseModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 export default {
-  name: 'asset-types',
+  name: 'software-licenses',
 
   components: {
-    AssetTypeList,
+    SoftwareLicenseList,
     DeleteModal,
-    EditAssetTypeModal,
+    EditSoftwareLicenseModal,
     ListPageHeader,
     RouteTabs
   },
@@ -66,8 +66,8 @@ export default {
   data() {
     return {
       activeTab: 'active',
-      assetTypeToDelete: null,
-      assetTypeToEdit: {},
+      softwareLicenseToDelete: null,
+      softwareLicenseToEdit: {},
       choices: [],
       errors: {
         del: false,
@@ -102,9 +102,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTypes',
-      'archivedAssetTypes',
-      'getAssetType',
+      'softwareLicenses',
+      'archivedSoftwareLicenses',
+      'getSoftwareLicense',
       'taskTypeMap'
     ]),
 
@@ -112,14 +112,18 @@ export default {
       return this.activeTab === 'active'
     },
 
-    assetTypesList() {
-      return this.isActiveTab ? this.assetTypes : this.archivedAssetTypes
+    softwareLicensesList() {
+      return this.isActiveTab
+        ? this.softwareLicenses
+        : this.archivedSoftwareLicenses
     },
 
     deleteText() {
-      const assetType = this.assetTypeToDelete
-      if (assetType) {
-        return this.$t('asset_types.delete_text', { name: assetType.name })
+      const softwareLicense = this.softwareLicenseToDelete
+      if (softwareLicense) {
+        return this.$t('software_licenses.delete_text', {
+          name: softwareLicense.name
+        })
       } else {
         return ''
       }
@@ -128,16 +132,17 @@ export default {
 
   methods: {
     ...mapActions([
-      'deleteAssetType',
-      'editAssetType',
-      'newAssetType'
+      'deleteSoftwareLicense',
+      'editSoftwareLicense',
+      'newSoftwareLicense',
+      'loadSoftwareLicenses'
     ]),
 
-    confirmEditAssetType(form) {
-      let action = 'newAssetType'
-      if (this.assetTypeToEdit && this.assetTypeToEdit.id) {
-        action = 'editAssetType'
-        form.id = this.assetTypeToEdit.id
+    confirmEditSoftwareLicense(form) {
+      let action = 'newSoftwareLicense'
+      if (this.softwareLicenseToEdit && this.softwareLicenseToEdit.id) {
+        action = 'editSoftwareLicense'
+        form.id = this.softwareLicenseToEdit.id
       }
 
       this.loading.edit = true
@@ -157,7 +162,7 @@ export default {
     confirmDeleteAssetType() {
       this.loading.del = true
       this.errors.del = false
-      this.deleteAssetType(this.assetTypeToDelete)
+      this.deleteSoftwareLicense(this.softwareLicenseToDelete)
         .then(() => {
           this.loading.del = false
           this.modals.del = false
@@ -170,65 +175,63 @@ export default {
     },
 
     onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('asset_types.title'))
+      const name = stringHelpers.slugify(this.$t('software_licenses.title'))
       const headers = [
-        this.$t('main.type'),
-        this.$t('asset_types.fields.name'),
-        this.$t('asset_types.fields.short_name'),
-        this.$t('asset_types.fields.description'),
-        this.$t('asset_types.fields.task_types')
+        this.$t('software_licenses.fields.name'),
+        this.$t('software_licenses.fields.short_name'),
+        this.$t('software_licenses.fields.version'),
+        this.$t('software_licenses.fields.file_extension'),
+        this.$t('software_licenses.fields.monthly_cost'),
+        this.$t('software_licenses.fields.inventory_amount'),
       ]
       const entries = [headers].concat(
-        this.assetTypes.map(assetType => [
-          assetType.type,
-          assetType.name,
-          assetType.short_name,
-          assetType.description,
-          assetType.task_types.length
-            ? assetType.task_types
-                .map(taskTypeId => this.taskTypeMap.get(taskTypeId)?.name)
-                .join(', ')
-            : this.$t('asset_types.include_all')
+        this.softwareLicenses.map(softwareLicense => [
+          softwareLicense.name,
+          softwareLicense.short_name,
+          softwareLicense.version,
+          softwareLicense.file_extension,
+          softwareLicense.monthly_cost,
+          softwareLicense.inventory_amount,
         ])
       )
       csv.buildCsvFile(name, entries)
     },
 
     onNewClicked() {
-      this.assetTypeToEdit = {}
+      this.softwareLicenseToEdit = {}
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onEditClicked(assetType) {
-      this.assetTypeToEdit = assetType
+    onEditClicked(softwareLicense) {
+      this.softwareLicenseToEdit = softwareLicense
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onDeleteClicked(assetType) {
-      this.assetTypeToDelete = assetType
+    onDeleteClicked(softwareLicense) {
+      this.softwareLicenseToDelete = softwareLicense
       this.errors.del = false
       this.modals.del = true
     }
   },
 
   watch: {
-    '$route.query.tab'() {
+    $route() {
       this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
   head() {
     return {
-      title: `${this.$t('asset_types.title')} - Kitsu`
+      title: `${this.$t('software_licenses.title')} - Kitsu`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.asset-type-list {
+.software-license-list {
   margin-top: 0;
 }
 </style>

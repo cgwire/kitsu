@@ -178,7 +178,6 @@ export default {
         })
     },
 
-    // Delete
     onDeleteClicked(department) {
       this.departmentToDelete = department
       this.modals.del = true

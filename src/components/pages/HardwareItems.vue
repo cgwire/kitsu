@@ -1,8 +1,8 @@
 <template>
-  <div class="asset-types page fixed-page">
+  <div class="hardware-items page fixed-page">
     <list-page-header
-      :title="$t('asset_types.library_title')"
-      :new-entry-label="$t('asset_types.new_asset_type')"
+      :title="$t('hardware_items.title')"
+      :new-entry-label="$t('hardware_items.new_hardware_item')"
       :is-exportable="isActiveTab"
       @export-clicked="onExportClicked"
       @new-clicked="onNewClicked"
@@ -10,22 +10,22 @@
 
     <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
-    <asset-type-list
-      class="asset-type-list"
-      :entries="assetTypesList"
+    <hardware-item-list
+      class="hardware-item-list"
+      :entries="hardwareItemsList"
       :is-loading="loading.list"
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
     />
 
-    <edit-asset-type-modal
+    <edit-hardware-item-modal
       :active="modals.edit"
       :is-loading="loading.edit"
       :is-error="errors.edit"
-      :asset-type-to-edit="assetTypeToEdit"
+      :hardware-item-to-edit="hardwareItemToEdit"
       @cancel="modals.edit = false"
-      @confirm="confirmEditAssetType"
+      @confirm="confirmEditHardwareItem"
     />
 
     <delete-modal
@@ -33,9 +33,9 @@
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
-      :error-text="$t('asset_types.delete_error')"
+      :error-text="$t('hardware_items.delete_error')"
       @cancel="modals.del = false"
-      @confirm="confirmDeleteAssetType"
+      @confirm="confirmDeleteHardwareItem"
     />
   </div>
 </template>
@@ -46,19 +46,19 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import AssetTypeList from '@/components/lists/AssetTypeList.vue'
+import HardwareItemList from '@/components/lists/HardwareItemList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
-import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
+import EditHardwareItemModal from '@/components/modals/EditHardwareItemModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 export default {
-  name: 'asset-types',
+  name: 'hardware-items',
 
   components: {
-    AssetTypeList,
+    HardwareItemList,
     DeleteModal,
-    EditAssetTypeModal,
+    EditHardwareItemModal,
     ListPageHeader,
     RouteTabs
   },
@@ -66,8 +66,8 @@ export default {
   data() {
     return {
       activeTab: 'active',
-      assetTypeToDelete: null,
-      assetTypeToEdit: {},
+      hardwareItemToDelete: null,
+      hardwareItemToEdit: {},
       choices: [],
       errors: {
         del: false,
@@ -102,9 +102,9 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetTypes',
-      'archivedAssetTypes',
-      'getAssetType',
+      'hardwareItems',
+      'archivedHardwareItems',
+      'getHardwareItem',
       'taskTypeMap'
     ]),
 
@@ -112,32 +112,43 @@ export default {
       return this.activeTab === 'active'
     },
 
-    assetTypesList() {
-      return this.isActiveTab ? this.assetTypes : this.archivedAssetTypes
+    hardwareItemsList() {
+      return this.isActiveTab
+        ? this.hardwareItems
+        : this.archivedHardwareItems
     },
 
     deleteText() {
-      const assetType = this.assetTypeToDelete
-      if (assetType) {
-        return this.$t('asset_types.delete_text', { name: assetType.name })
+      const hardwareItem = this.hardwareItemToDelete
+      if (hardwareItem) {
+        return this.$t('hardware_items.delete_text', {
+          name: hardwareItem.name
+        })
       } else {
         return ''
       }
+    },
+
+    modalTitle() {
+      return this.isEditing
+        ? this.$t('hardware_items.edit_title')
+        : this.$t('hardware_items.new_hardware_item')
     }
   },
 
   methods: {
     ...mapActions([
-      'deleteAssetType',
-      'editAssetType',
-      'newAssetType'
+      'deleteHardwareItem',
+      'editHardwareItem',
+      'newHardwareItem',
+      'loadHardwareItems'
     ]),
 
-    confirmEditAssetType(form) {
-      let action = 'newAssetType'
-      if (this.assetTypeToEdit && this.assetTypeToEdit.id) {
-        action = 'editAssetType'
-        form.id = this.assetTypeToEdit.id
+    confirmEditHardwareItem(form) {
+      let action = 'newHardwareItem'
+      if (this.hardwareItemToEdit && this.hardwareItemToEdit.id) {
+        action = 'editHardwareItem'
+        form.id = this.hardwareItemToEdit.id
       }
 
       this.loading.edit = true
@@ -154,10 +165,10 @@ export default {
         })
     },
 
-    confirmDeleteAssetType() {
+    confirmDeleteHardwareItem() {
       this.loading.del = true
       this.errors.del = false
-      this.deleteAssetType(this.assetTypeToDelete)
+      this.deleteHardwareItem(this.hardwareItemToDelete)
         .then(() => {
           this.loading.del = false
           this.modals.del = false
@@ -170,65 +181,59 @@ export default {
     },
 
     onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('asset_types.title'))
+      const name = stringHelpers.slugify(this.$t('hardware_items.title'))
       const headers = [
-        this.$t('main.type'),
-        this.$t('asset_types.fields.name'),
-        this.$t('asset_types.fields.short_name'),
-        this.$t('asset_types.fields.description'),
-        this.$t('asset_types.fields.task_types')
+        this.$t('hardware_items.fields.name'),
+        this.$t('hardware_items.fields.short_name'),
+        this.$t('hardware_items.fields.monthly_cost'),
+        this.$t('hardware_items.fields.inventory_amount'),
       ]
       const entries = [headers].concat(
-        this.assetTypes.map(assetType => [
-          assetType.type,
-          assetType.name,
-          assetType.short_name,
-          assetType.description,
-          assetType.task_types.length
-            ? assetType.task_types
-                .map(taskTypeId => this.taskTypeMap.get(taskTypeId)?.name)
-                .join(', ')
-            : this.$t('asset_types.include_all')
+        this.hardwareItems.map(hardwareItem => [
+          hardwareItem.name,
+          hardwareItem.short_name,
+          hardwareItem.monthly_cost,
+          hardwareItem.inventory_amount,
         ])
       )
       csv.buildCsvFile(name, entries)
     },
 
     onNewClicked() {
-      this.assetTypeToEdit = {}
+      this.hardwareItemToEdit = {}
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onEditClicked(assetType) {
-      this.assetTypeToEdit = assetType
+    onEditClicked(hardwareItem) {
+      this.hardwareItemToEdit = hardwareItem
       this.errors.edit = false
       this.modals.edit = true
     },
 
-    onDeleteClicked(assetType) {
-      this.assetTypeToDelete = assetType
+    onDeleteClicked(hardwareItem) {
+      this.hardwareItemToDelete = hardwareItem
       this.errors.del = false
       this.modals.del = true
     }
   },
 
   watch: {
-    '$route.query.tab'() {
+    $route() {
       this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
   head() {
     return {
-      title: `${this.$t('asset_types.title')} - Kitsu`
+      title: `${this.$t('hardware_items.title')} - Kitsu`
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.asset-type-list {
+.software-license-list {
   margin-top: 0;
 }
 </style>
