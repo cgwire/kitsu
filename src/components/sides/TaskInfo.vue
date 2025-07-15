@@ -1009,6 +1009,13 @@ export default {
       let taskId = this.task ? this.task.id : this.previousTaskId
       taskId = taskId || preview.task_id
       if (taskId) {
+        console.log('annotation changed', {
+          taskId,
+          preview,
+          additions,
+          deletions,
+          updates
+        })
         this.updatePreviewAnnotation({
           taskId,
           preview,

@@ -479,6 +479,23 @@ export default {
     }
   },
 
+  hardware_items: {
+    create_error: 'An error occurred while creating the hardware item.',
+    delete_error: 'An error occurred while deleting the hardware item.',
+    delete_text: 'Are you sure you want to delete this hardware item?',
+    edit_title: 'Edit Hardware Item',
+    new_hardware_item: 'New Hardware Item',
+    number: 'hardware item | hardware items',
+    title: 'Hardware Items',
+
+    fields: {
+      name: 'Name',
+      inventory_amount: 'Inventory Amount',
+      short_name: 'Short Name',
+      monthly_cost: 'Monthly Cost',
+    }
+  },
+
   keyboard: {
     altdown: 'Move task selection down',
     altj: 'Select the previous preview',
@@ -1144,14 +1161,6 @@ export default {
       start_and_end_dates: 'Start and end dates',
       shots_to_import: 'shots to import'
     },
-    home: {
-      create_new: 'Create a new production',
-      empty: 'You don\'t have any open productions. How about creating a new one?',
-      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
-      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
-      title: 'My Productions',
-      welcome: 'Welcome to Kitsu'
-    },
 
     fields: {
       code: 'Short Name',
@@ -1172,6 +1181,15 @@ export default {
       status: 'Status',
       style: 'Style',
       type: 'Type'
+    },
+
+    home: {
+      create_new: 'Create a new production',
+      empty: 'You don\'t have any open productions. How about creating a new one?',
+      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
+      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
+      title: 'My Productions',
+      welcome: 'Welcome to Kitsu'
     },
 
     metadata: {
@@ -1810,6 +1828,26 @@ export default {
     match_details: 'match found in {target}',
     placeholder: 'Search for an entity in the database...',
     title: 'Entity Search'
+  },
+
+  software_licenses: {
+    create_error: 'An error occurred while creating the software license.',
+    delete_error: 'An error occurred while deleting the software license.',
+    delete_text: 'Are you sure you want to delete this software license?',
+    edit_title: 'Edit Software License',
+    new_software_license: 'New Software License',
+    number: 'software license | software licenses',
+    title: 'Software Licenses',
+
+    fields: {
+      extension: 'Extension',
+      name: 'Name',
+      monthly_cost: 'Monthly Cost',
+      inventory_amount: 'Inventory Amount',
+      short_name: 'Short Name',
+      status: 'Status',
+      version: 'Version'
+    }
   },
 
   timesheets: {

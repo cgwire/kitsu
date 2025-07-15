@@ -1416,6 +1416,7 @@ export const annotationMixin = {
      */
     startAnnotationSaving(preview, annotations) {
       this.notSaved = true
+      console.log('start saving routine')
       this.$options.annotatedPreview = preview
       this.$options.annotationToSave = setTimeout(() => {
         this.endAnnotationSaving()
@@ -1428,6 +1429,7 @@ export const annotationMixin = {
      */
     endAnnotationSaving() {
       if (this.notSaved) {
+        console.log('end saving routine')
         const preview = this.$options.annotatedPreview
         this.$options.changesToSave = {
           preview,

@@ -188,6 +188,7 @@ export default {
   },
 
   updatePreviewAnnotation(preview, additions, updates, deletions) {
+    console.log('Updating preview annotations', { additions, updates, deletions })
     return client.pput(
       `/api/actions/preview-files/${preview.id}/update-annotations`,
       { additions, updates, deletions }
