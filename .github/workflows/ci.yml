@@ -15,12 +15,12 @@ jobs:
       HUSKY: 0
     steps:
       - uses: actions/checkout@v4
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-      - name: Install dependencies
+      - name: Install npm dependencies
         run: |
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
@@ -34,3 +34,6 @@ jobs:
       - name: Run tests
         run: |
           npm run test:unit
+      - name: Build application
+        run: |
+          npm run build
