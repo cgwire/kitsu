@@ -24,63 +24,24 @@ import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'show-infos-button',
+
   components: {
     KitsuIcon
   },
 
-  props: {
-    isBreakdown: {
-      default: false,
-      type: Boolean
-    }
-  },
-
   computed: {
-    ...mapGetters(['isShowInfos', 'isShowInfosBreakdown']),
+    ...mapGetters(['isShowInfosBreakdown']),
 
     buttonIsOn() {
-      if (this.isBreakdown) {
-        return this.isShowInfosBreakdown
-      } else {
-        return this.isShowInfos
-      }
+      return this.isShowInfosBreakdown
     }
   },
 
   methods: {
-    ...mapActions([
-      'showInfos',
-      'showInfosBreakdown',
-      'hideInfos',
-      'hideInfosBreakdown'
-    ]),
+    ...mapActions(['hideInfosBreakdown', 'showInfosBreakdown']),
 
     toggleInfos() {
-      if (!this.isBreakdown) {
-        if (this.isShowInfos) {
-          this.hideInfos()
-        } else {
-          this.showInfos()
-        }
-      } else {
-        if (this.isShowInfosBreakdown) {
-          this.hideInfosBreakdown()
-        } else {
-          this.showInfosBreakdown()
-        }
-      }
-    }
-  },
-
-  mounted() {
-    if (!this.isBreakdown) {
-      if (localStorage.getItem('show-infos') === 'false') {
-        this.hideInfos()
-      } else {
-        this.showInfos()
-      }
-    } else {
-      if (localStorage.getItem('show-infos-breakdown') === 'false') {
+      if (this.isShowInfosBreakdown) {
         this.hideInfosBreakdown()
       } else {
         this.showInfosBreakdown()
@@ -88,10 +49,15 @@ export default {
     }
   },
 
+  mounted() {
+    if (localStorage.getItem('show-infos-breakdown') === 'false') {
+      this.hideInfosBreakdown()
+    } else {
+      this.showInfosBreakdown()
+    }
+  },
+
   watch: {
-    isShowInfos() {
-      localStorage.setItem('show-infos', this.isShowInfos, { expires: '1M' })
-    },
     isShowInfosBreakdown() {
       const value = this.isShowInfosBreakdown.toString()
       localStorage.setItem('show-infos-breakdown', value, {

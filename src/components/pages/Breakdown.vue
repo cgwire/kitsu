@@ -28,7 +28,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
-          <show-infos-button class="flexrow-item" :is-breakdown="true" />
+          <show-infos-button class="flexrow-item" />
           <button-simple
             class="flexrow-item"
             :title="
