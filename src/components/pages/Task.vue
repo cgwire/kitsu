@@ -411,6 +411,7 @@ import { sortPeople } from '@/lib/sorting'
 
 import { formatListMixin } from '@/components/mixins/format'
 import { taskMixin } from '@/components/mixins/task'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 
 import AddComment from '@/components/widgets/AddComment.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
@@ -522,16 +523,16 @@ export default {
     this.clearSelectedTasks()
   },
 
-  mounted() {
-    this.loadTaskData().then(() => {
-      this.reset()
-    })
-    this.$nextTick(() => {
-      if (this.$refs['task-columns']) {
-        this.$refs['task-columns'].scrollTop = 100
-        window.scrollTo(0, 0)
-      }
-    })
+  async mounted() {
+    await this.loadTaskData()
+    await this.$nextTick()
+    await this[`load${this.currentType}s`]()
+    this.reset()
+    await this.$nextTick()
+    if (this.$refs['task-columns']) {
+      this.$refs['task-columns'].scrollTop = 100
+      window.scrollTo(0, 0)
+    }
   },
 
   computed: {
@@ -724,16 +725,24 @@ export default {
         entity => entity.id === this.task.entity_id
       )
       if (!entity) return null
-      entity.tasks = entity.tasks || []
-      const tasksLength = entity.tasks.length
-      const taskIndex = entity.tasks.findIndex(
-        taskId => taskId === this.task.id
-      )
+      let tasks = entity.tasks || []
+      tasks = tasks.sort((a, b) => {
+        const taskA = this.taskMap.get(a)
+        const taskB = this.taskMap.get(b)
+        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        return (
+          getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
+          getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
+        )
+      })
+      const tasksLength = tasks.length
+      const taskIndex = tasks.findIndex(taskId => taskId === this.task.id)
       const previousTaskIndex = taskIndex - 1
       const previousTaskId =
         previousTaskIndex < 0
-          ? entity.tasks[tasksLength - 1]
-          : entity.tasks[previousTaskIndex]
+          ? tasks[tasksLength - 1]
+          : tasks[previousTaskIndex]
       return previousTaskId ? this.taskPath({ id: previousTaskId }) : null
     },
 
@@ -746,16 +755,22 @@ export default {
         entity => entity.id === this.task.entity_id
       )
       if (!entity) return null
-      entity.tasks = entity.tasks || []
-      const tasksLength = entity.tasks.length
-      const taskIndex = entity.tasks.findIndex(
-        taskId => taskId === this.task.id
-      )
+      let tasks = entity.tasks || []
+      tasks = tasks.sort((a, b) => {
+        const taskA = this.taskMap.get(a)
+        const taskB = this.taskMap.get(b)
+        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        return (
+          getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
+          getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
+        )
+      })
+      const tasksLength = tasks.length
+      const taskIndex = tasks.findIndex(taskId => taskId === this.task.id)
       const nextTaskIndex = taskIndex + 1
       const nextTaskId =
-        nextTaskIndex >= tasksLength
-          ? entity.tasks[0]
-          : entity.tasks[nextTaskIndex]
+        nextTaskIndex >= tasksLength ? tasks[0] : tasks[nextTaskIndex]
       return nextTaskId ? this.taskPath({ id: nextTaskId }) : null
     },
 
@@ -904,10 +919,12 @@ export default {
       'deleteTaskComment',
       'editTaskComment',
       'loadComment',
-      'loadEpisodes',
-      'loadTask',
-      'loadShots',
       'loadAssets',
+      'loadEdits',
+      'loadEpisodes',
+      'loadSequences',
+      'loadShots',
+      'loadTask',
       'loadPreviewFileFormData',
       'loadTaskComments',
       'refreshComment',
