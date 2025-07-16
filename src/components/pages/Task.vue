@@ -407,11 +407,11 @@ import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortPeople } from '@/lib/sorting'
 
 import { formatListMixin } from '@/components/mixins/format'
 import { taskMixin } from '@/components/mixins/task'
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
 
 import AddComment from '@/components/widgets/AddComment.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
@@ -588,7 +588,7 @@ export default {
 
     currentType() {
       const genericNames = ['Shot', 'Episode', 'Sequence', 'Edit']
-      if (genericNames.includes(this.task.entity_type_name)) {
+      if (genericNames.includes(this.task?.entity_type_name)) {
         return this.task.entity_type_name
       } else {
         return 'Asset'
@@ -729,8 +729,8 @@ export default {
       tasks = tasks.sort((a, b) => {
         const taskA = this.taskMap.get(a)
         const taskB = this.taskMap.get(b)
-        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
-        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        const taskTypeA = this.taskTypeMap.get(taskA?.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB?.task_type_id)
         return (
           getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
           getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
@@ -759,8 +759,8 @@ export default {
       tasks = tasks.sort((a, b) => {
         const taskA = this.taskMap.get(a)
         const taskB = this.taskMap.get(b)
-        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
-        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        const taskTypeA = this.taskTypeMap.get(taskA?.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB?.task_type_id)
         return (
           getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
           getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
