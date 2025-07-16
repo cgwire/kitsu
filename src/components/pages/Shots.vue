@@ -33,13 +33,13 @@
                 v-model="selectedDepartment"
                 v-if="departments.length > 0"
               />
-            </div>
-            <div class="flexrow" v-if="isCurrentUserManager">
               <combobox-display-options
                 class="flexrow-item"
                 :type="type"
                 v-model="displaySettings"
               />
+            </div>
+            <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
                 class="flexrow-item"
                 :title="$t('entities.thumbnails.title')"
