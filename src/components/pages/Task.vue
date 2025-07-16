@@ -407,11 +407,11 @@ import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortPeople } from '@/lib/sorting'
 
 import { formatListMixin } from '@/components/mixins/format'
 import { taskMixin } from '@/components/mixins/task'
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
 
 import AddComment from '@/components/widgets/AddComment.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
@@ -588,7 +588,7 @@ export default {
 
     currentType() {
       const genericNames = ['Shot', 'Episode', 'Sequence', 'Edit']
-      if (genericNames.includes(this.task.entity_type_name)) {
+      if (genericNames.includes(this.task?.entity_type_name)) {
         return this.task.entity_type_name
       } else {
         return 'Asset'
