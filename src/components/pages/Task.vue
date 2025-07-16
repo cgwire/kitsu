@@ -729,8 +729,8 @@ export default {
       tasks = tasks.sort((a, b) => {
         const taskA = this.taskMap.get(a)
         const taskB = this.taskMap.get(b)
-        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
-        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        const taskTypeA = this.taskTypeMap.get(taskA?.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB?.task_type_id)
         return (
           getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
           getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
@@ -759,8 +759,8 @@ export default {
       tasks = tasks.sort((a, b) => {
         const taskA = this.taskMap.get(a)
         const taskB = this.taskMap.get(b)
-        const taskTypeA = this.taskTypeMap.get(taskA.task_type_id)
-        const taskTypeB = this.taskTypeMap.get(taskB.task_type_id)
+        const taskTypeA = this.taskTypeMap.get(taskA?.task_type_id)
+        const taskTypeB = this.taskTypeMap.get(taskB?.task_type_id)
         return (
           getTaskTypePriorityOfProd(taskTypeA, this.currentProduction) -
           getTaskTypePriorityOfProd(taskTypeB, this.currentProduction)
