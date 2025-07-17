@@ -29,7 +29,7 @@
         >
           <toggle-button
             :label="option.label"
-            :modelValue="modelValue[option.value]"
+            :model-value="modelValue[option.value]"
           />
         </div>
       </div>

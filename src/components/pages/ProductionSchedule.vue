@@ -478,10 +478,10 @@ export default {
         { label: '2', value: 2 },
         { label: '3', value: 3 }
       ],
-      detailLevel: 'prev',
-      detailOptions: [
-        { label: this.$t('schedule.detail_level_prev'), value: 'prev' },
-        { label: this.$t('schedule.detail_level_real'), value: 'real' }
+      mode: 'prev',
+      modeOptions: [
+        { label: this.$t('schedule.mode_prev'), value: 'prev' },
+        { label: this.$t('schedule.mode_real'), value: 'real' }
       ],
       loading: {
         schedule: false
