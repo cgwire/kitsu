@@ -145,6 +145,23 @@ export default {
           ]
         },
         {
+          label: 'keyboard.object_viewer',
+          shortcuts: [
+            {
+              keys: ['Ctrl', 'Mouse Left Click', 'Drag Horizontal'],
+              text: this.$t('keyboard.rotate_hdr')
+            },
+            {
+              keys: ['Mouse Middle Click', 'Drag Horizontal'],
+              text: this.$t('keyboard.rotate_hdr')
+            },
+            {
+              keys: ['Alt', 'Mouse Left Click', 'Drag Vertical'],
+              text: this.$t('keyboard.change_fov')
+            }
+          ]
+        },
+        {
           label: 'keyboard.annotations',
           shortcuts: [
             {
