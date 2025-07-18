@@ -371,7 +371,7 @@ export default {
     scrollToSelection() {
       const item = this.flattenResults[this.selectedIndex]
       if (item) {
-        document.getElementById(`result-link-${item.id}`).scrollIntoView(false)
+        document.getElementById(`result-link-${item.id}`)?.scrollIntoView(false)
       }
     },
 
@@ -382,7 +382,7 @@ export default {
     onResultSelected() {
       const item = this.flattenResults[this.selectedIndex]
       if (item) {
-        document.getElementById(`result-link-${item.id}`).click()
+        document.getElementById(`result-link-${item.id}`)?.click()
       }
     },
 
