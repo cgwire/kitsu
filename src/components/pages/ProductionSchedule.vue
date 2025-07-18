@@ -1285,7 +1285,7 @@ export default {
 
       this.assignments.type = 'task'
 
-      const start_date = event.start_date || taskType.start_date
+      const start_date = taskType.start_date
       const end_date = parseDate(start_date).isAfter(taskType.end_date)
         ? start_date
         : taskType.end_date
