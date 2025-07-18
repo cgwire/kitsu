@@ -303,12 +303,12 @@ export default {
       if (
         (event.ctrlKey || event.metaKey) &&
         event.altKey &&
-        event.keyCode === 70
+        event.code === 'KeyF'
       ) {
         this.searchField?.focus()
-      } else if (event.keyCode === 40) {
+      } else if (event.key === 'ArrowDown') {
         this.selectNext()
-      } else if (event.keyCode === 38) {
+      } else if (event.key === 'ArrowUp') {
         this.selectPrevious()
       }
     },
