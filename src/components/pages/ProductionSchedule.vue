@@ -1148,7 +1148,8 @@ export default {
       if (
         this.isSidePanelOpen &&
         this.assignments.type !== 'task' &&
-        !this.assignments.entityTypes
+        !this.assignments.entityTypes &&
+        this.selectedTaskType
       ) {
         this.selectTaskTypeElement(this.selectedTaskType)
       }
@@ -1215,7 +1216,7 @@ export default {
               assetType.task_types.includes(taskType.task_type_id)
             )
           })
-          .map((assetType, index) => {
+          .map(assetType => {
             return {
               id: assetType.id,
               name: assetType.name,
@@ -1284,7 +1285,7 @@ export default {
 
       this.assignments.type = 'task'
 
-      const start_date = event.start_date || taskType.start_date
+      const start_date = taskType.start_date
       const end_date = parseDate(start_date).isAfter(taskType.end_date)
         ? start_date
         : taskType.end_date
@@ -1308,9 +1309,10 @@ export default {
     },
 
     onAssignmentItemSelected(item) {
+      const today = moment().utc().toDate()
       this.assignments.type = 'entity'
-      this.assignments.startDate = item.start_date
-      this.assignments.endDate = item.end_date
+      this.assignments.startDate = item.start_date || today
+      this.assignments.endDate = item.end_date || today
 
       item.children = this.filteredAssignments(item.children)
       this.draggedEntities = [item]

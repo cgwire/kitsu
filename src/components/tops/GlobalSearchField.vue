@@ -180,21 +180,11 @@ export default {
   },
 
   mounted() {
-    window.addEventListener('keydown', event => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.altKey &&
-        event.keyCode === 70
-      ) {
-        if (this.$refs['global-search-field']) {
-          this.$refs['global-search-field'].focus()
-        }
-      } else if (this.isSearchActive && event.keyCode === 40) {
-        this.selectNext()
-      } else if (this.isSearchActive && event.keyCode === 38) {
-        this.selectPrevious()
-      }
-    })
+    window.addEventListener('keydown', this.onKeyDown)
+  },
+
+  unmounted() {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -248,6 +238,20 @@ export default {
     onBlur(event) {
       if (!event.relatedTarget?.id.startsWith('result-link-')) {
         this.isSearchActive = false
+      }
+    },
+
+    onKeyDown(event) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.altKey &&
+        event.code === 'KeyF'
+      ) {
+        this.$refs['global-search-field']?.focus()
+      } else if (this.isSearchActive && event.key === 'ArrowDown') {
+        this.selectNext()
+      } else if (this.isSearchActive && event.key === 'ArrowUp') {
+        this.selectPrevious()
       }
     }
   },

@@ -245,25 +245,17 @@ export default {
   },
 
   mounted() {
-    window.addEventListener('keydown', event => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.altKey &&
-        event.keyCode === 70
-      ) {
-        this.searchField?.focus()
-      } else if (event.keyCode === 40) {
-        this.selectNext()
-      } else if (event.keyCode === 38) {
-        this.selectPrevious()
-      }
-    })
+    window.addEventListener('keydown', this.onKeyDown)
 
     if (this.$route.query.search) {
       this.searchQuery = this.$route.query.search
     }
 
     this.searchField.focus()
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.onKeyDown)
   },
 
   computed: {
@@ -306,6 +298,20 @@ export default {
 
   methods: {
     ...mapActions(['searchData']),
+
+    onKeyDown(event) {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.altKey &&
+        event.code === 'KeyF'
+      ) {
+        this.searchField?.focus()
+      } else if (event.key === 'ArrowDown') {
+        this.selectNext()
+      } else if (event.key === 'ArrowUp') {
+        this.selectPrevious()
+      }
+    },
 
     search() {
       this.isLoading = true
@@ -371,7 +377,7 @@ export default {
     scrollToSelection() {
       const item = this.flattenResults[this.selectedIndex]
       if (item) {
-        document.getElementById(`result-link-${item.id}`).scrollIntoView(false)
+        document.getElementById(`result-link-${item.id}`)?.scrollIntoView(false)
       }
     },
 
@@ -382,7 +388,7 @@ export default {
     onResultSelected() {
       const item = this.flattenResults[this.selectedIndex]
       if (item) {
-        document.getElementById(`result-link-${item.id}`).click()
+        document.getElementById(`result-link-${item.id}`)?.click()
       }
     },
 
