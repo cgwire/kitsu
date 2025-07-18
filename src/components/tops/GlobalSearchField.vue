@@ -183,6 +183,10 @@ export default {
     window.addEventListener('keydown', this.onKeyDown)
   },
 
+  unmounted() {
+    window.removeEventListener('keydown', this.onKeyDown)
+  },
+
   computed: {
     ...mapGetters(['productionMap']),
 
