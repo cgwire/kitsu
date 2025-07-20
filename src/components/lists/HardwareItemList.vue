@@ -86,8 +86,7 @@ export default {
     ...mapGetters(['taskTypeMap'])
   },
 
-  methods: {
-  }
+  methods: {}
 }
 </script>
 

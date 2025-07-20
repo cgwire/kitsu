@@ -182,7 +182,7 @@ export default {
         this.$t('software_licenses.fields.version'),
         this.$t('software_licenses.fields.file_extension'),
         this.$t('software_licenses.fields.monthly_cost'),
-        this.$t('software_licenses.fields.inventory_amount'),
+        this.$t('software_licenses.fields.inventory_amount')
       ]
       const entries = [headers].concat(
         this.softwareLicenses.map(softwareLicense => [
@@ -191,7 +191,7 @@ export default {
           softwareLicense.version,
           softwareLicense.file_extension,
           softwareLicense.monthly_cost,
-          softwareLicense.inventory_amount,
+          softwareLicense.inventory_amount
         ])
       )
       csv.buildCsvFile(name, entries)

@@ -25,9 +25,7 @@ const getters = {
   hardwareItemMap: state => cache.hardwareItemMap,
 
   getHardwareItem: (state, getters) => id => {
-    return state.hardwareItems.find(
-      hardwareItem => hardwareItem.id === id
-    )
+    return state.hardwareItems.find(hardwareItem => hardwareItem.id === id)
   },
 
   getHardwareItemOptions: state =>
@@ -45,39 +43,31 @@ const actions = {
   },
 
   loadHardwareItem({ commit, state }, hardwareItemId) {
-    hardwareItemsApi
-      .getHardwareItem(hardwareItemId)
-      .then(hardwareItem => {
-        commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-        Promise.resolve(hardwareItem)
-      })
+    hardwareItemsApi.getHardwareItem(hardwareItemId).then(hardwareItem => {
+      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
+      Promise.resolve(hardwareItem)
+    })
   },
 
   newHardwareItem({ commit, state }, data) {
-    return hardwareItemsApi
-      .newHardwareItem(data)
-      .then(hardwareItem => {
-        commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-        Promise.resolve(hardwareItem)
-      })
+    return hardwareItemsApi.newHardwareItem(data).then(hardwareItem => {
+      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
+      Promise.resolve(hardwareItem)
+    })
   },
 
   editHardwareItem({ commit, state }, data) {
-    return hardwareItemsApi
-      .updateHardwareItem(data)
-      .then(hardwareItem => {
-        commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
-        Promise.resolve(hardwareItem)
-      })
+    return hardwareItemsApi.updateHardwareItem(data).then(hardwareItem => {
+      commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
+      Promise.resolve(hardwareItem)
+    })
   },
 
   deleteHardwareItem({ commit, state }, hardwareItem) {
-    return hardwareItemsApi
-      .deleteHardwareItem(hardwareItem)
-      .then(() => {
-        commit(DELETE_HARDWARE_ITEM_END, hardwareItem)
-        Promise.resolve(hardwareItem)
-      })
+    return hardwareItemsApi.deleteHardwareItem(hardwareItem).then(() => {
+      commit(DELETE_HARDWARE_ITEM_END, hardwareItem)
+      Promise.resolve(hardwareItem)
+    })
   }
 }
 
@@ -91,9 +81,7 @@ const mutations = {
   },
 
   [EDIT_HARDWARE_ITEM_END](state, newHardwareItem) {
-    const hardwareItem = getters.getHardwareItem(state)(
-      newHardwareItem.id
-    )
+    const hardwareItem = getters.getHardwareItem(state)(newHardwareItem.id)
 
     if (hardwareItem && hardwareItem.id) {
       Object.assign(hardwareItem, newHardwareItem)

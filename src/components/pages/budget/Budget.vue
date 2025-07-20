@@ -11,11 +11,13 @@
           :is-error-expenses="errors.expenses"
           :is-loading-expenses="loading.expenses"
           :is-showing-expenses="expenses.showing"
+          :is-showing-items="items.showing"
           @change-budget="onChangeBudget"
           @delete-budget="onDeleteBudgetClicked"
           @edit-budget="onEditBudgetClicked"
           @export-budget="onExportBudgetClicked"
           @toggle-expenses="onToggleExpenses"
+          @toggle-items="onToggleItems"
           @new-version="onNewBudgetVersionClicked"
         />
 
@@ -29,6 +31,9 @@
           :is-error="errors.entries"
           :is-loading="loading.entries"
           :is-showing-expenses="expenses.showing"
+          :is-showing-items="items.showing"
+          :linked-hardware-items="linkedHardwareItems"
+          :linked-software-licenses="linkedSoftwareLicenses"
           :months-between-start-and-now="monthsBetweenStartAndNow"
           :months-between-now-and-end="monthsBetweenNowAndEnd"
           :months-between-production-dates="monthsBetweenProductionDates"
@@ -156,6 +161,8 @@ export default {
       budgetToEdit: {},
       costsMonths: [],
       currentBudget: {},
+      linkedHardwareItems: [],
+      linkedSoftwareLicenses: [],
       errors: {
         budgets: false,
         createBudget: false,
@@ -165,6 +172,10 @@ export default {
         editBudgetEntry: false,
         entries: false,
         expenses: false
+      },
+      items: {
+        data: {},
+        showing: false
       },
       expenses: {
         data: {},
@@ -197,6 +208,8 @@ export default {
     await this.setSalaryScale()
     await this.loadBudgets()
     await this.loadBudgetEntries()
+    this.linkedHardwareItems = await this.loadLinkedHardwareItems()
+    this.linkedSoftwareLicenses = await this.loadLinkedSoftwareLicenses()
     this.resetMonths()
   },
 
@@ -339,6 +352,8 @@ export default {
       'deleteProductionBudget',
       'deleteProductionBudgetEntry',
       'loadExpenses',
+      'loadLinkedHardwareItems',
+      'loadLinkedSoftwareLicenses',
       'loadProductionBudget',
       'loadProductionBudgets',
       'loadProductionBudgetEntry',
@@ -686,6 +701,10 @@ export default {
         }
       }
       this.expenses.showing = !this.expenses.showing
+    },
+
+    onToggleItems() {
+      this.items.showing = !this.items.showing
     }
   },
 

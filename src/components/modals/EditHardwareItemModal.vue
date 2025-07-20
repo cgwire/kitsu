@@ -35,7 +35,6 @@
         v-model="form.archived"
         v-if="isEditing"
       />
-
     </form>
 
     <modal-footer
@@ -52,10 +51,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import { sortByName } from '@/lib/sorting'
-
 import BaseModal from '@/components/modals/BaseModal.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -67,7 +63,6 @@ export default {
 
   components: {
     BaseModal,
-    Combobox,
     ComboboxBoolean,
     ModalFooter,
     TextField
@@ -108,10 +103,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'hardwareItems',
-      'hardwareItemMap'
-    ]),
+    ...mapGetters(['hardwareItems', 'hardwareItemMap']),
 
     isEditing() {
       return this.hardwareItemToEdit && this.hardwareItemToEdit.id
@@ -119,7 +111,9 @@ export default {
 
     modalTitle() {
       return this.isEditing
-        ? this.$t('hardware_items.edit_title') + ' ' + this.hardwareItemToEdit.name
+        ? this.$t('hardware_items.edit_title') +
+            ' ' +
+            this.hardwareItemToEdit.name
         : this.$t('hardware_items.new_hardware_item')
     }
   },
@@ -177,5 +171,4 @@ export default {
   color: #ff3860;
   font-style: italic;
 }
-
 </style>

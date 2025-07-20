@@ -228,7 +228,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BotIcon, BuildingIcon, ComputerIcon, EggIcon, GlobeIcon, Rows4Icon } from 'lucide-vue-next'
+import {
+  BotIcon,
+  BuildingIcon,
+  ComputerIcon,
+  EggIcon,
+  GlobeIcon,
+  Rows4Icon
+} from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 

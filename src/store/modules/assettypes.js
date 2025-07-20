@@ -35,7 +35,6 @@ const getters = {
 }
 
 const actions = {
-
   loadAssetType({ commit, state }, assetTypeId) {
     return assetTypesApi.getAssetType(assetTypeId).then(assetType => {
       commit(EDIT_ASSET_TYPE_END, assetType)

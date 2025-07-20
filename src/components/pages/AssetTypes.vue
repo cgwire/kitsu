@@ -127,11 +127,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'deleteAssetType',
-      'editAssetType',
-      'newAssetType'
-    ]),
+    ...mapActions(['deleteAssetType', 'editAssetType', 'newAssetType']),
 
     confirmEditAssetType(form) {
       let action = 'newAssetType'
