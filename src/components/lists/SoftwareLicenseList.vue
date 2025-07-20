@@ -98,8 +98,7 @@ export default {
     ...mapGetters(['taskTypeMap'])
   },
 
-  methods: {
-  }
+  methods: {}
 }
 </script>
 
@@ -138,6 +137,4 @@ export default {
   width: 100px;
   padding: 1em;
 }
-
-
 </style>

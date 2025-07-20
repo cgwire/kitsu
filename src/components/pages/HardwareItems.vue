@@ -113,9 +113,7 @@ export default {
     },
 
     hardwareItemsList() {
-      return this.isActiveTab
-        ? this.hardwareItems
-        : this.archivedHardwareItems
+      return this.isActiveTab ? this.hardwareItems : this.archivedHardwareItems
     },
 
     deleteText() {
@@ -186,14 +184,14 @@ export default {
         this.$t('hardware_items.fields.name'),
         this.$t('hardware_items.fields.short_name'),
         this.$t('hardware_items.fields.monthly_cost'),
-        this.$t('hardware_items.fields.inventory_amount'),
+        this.$t('hardware_items.fields.inventory_amount')
       ]
       const entries = [headers].concat(
         this.hardwareItems.map(hardwareItem => [
           hardwareItem.name,
           hardwareItem.short_name,
           hardwareItem.monthly_cost,
-          hardwareItem.inventory_amount,
+          hardwareItem.inventory_amount
         ])
       )
       csv.buildCsvFile(name, entries)

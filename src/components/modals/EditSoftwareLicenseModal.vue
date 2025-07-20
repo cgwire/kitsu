@@ -48,7 +48,6 @@
         v-model="form.archived"
         v-if="isEditing"
       />
-
     </form>
 
     <modal-footer
@@ -65,10 +64,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
-import { sortByName } from '@/lib/sorting'
-
 import BaseModal from '@/components/modals/BaseModal.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -80,7 +76,6 @@ export default {
 
   components: {
     BaseModal,
-    Combobox,
     ComboboxBoolean,
     ModalFooter,
     TextField
@@ -121,10 +116,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'softwareLicenses',
-      'softwareLicenseMap'
-    ]),
+    ...mapGetters(['softwareLicenses', 'softwareLicenseMap']),
 
     isEditing() {
       return this.softwareLicenseToEdit && this.softwareLicenseToEdit.id
@@ -132,7 +124,9 @@ export default {
 
     modalTitle() {
       return this.isEditing
-        ? this.$t('software_licenses.edit_title') + ' ' + this.softwareLicenseToEdit.name
+        ? this.$t('software_licenses.edit_title') +
+            ' ' +
+            this.softwareLicenseToEdit.name
         : this.$t('software_licenses.new_software_license')
     }
   },
