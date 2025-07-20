@@ -166,6 +166,7 @@ export default {
     remaining: 'Remaining',
     salary_scale_title: 'Salary Scale',
     show_expenses: 'Show real costs',
+    show_items: 'Count hardware and software',
     title: 'Budget',
     fields: {
       base_salary: 'Salary',
@@ -334,13 +335,21 @@ export default {
 
   departments: {
     all_asset_types: 'All departments',
+    available_items: 'Available Items',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this department.',
     edit_title: 'Edit department',
+    hardware_used_by_artists: 'Hardware used by artists',
+    linked_hardware: 'Linked hardware',
+    linked_items: 'Linked Items',
+    linked_software: 'Linked software',
+    no_items_linked: 'No items linked to this department.',
     no_department: 'No department',
     new_departments: 'Add a department',
     number: 'department | departments',
+    select_department: 'Select a department to link items.',
+    software_used_by_artists: 'Software used by artists',
     title: 'Departments',
     fields: {
       name: 'Name',

@@ -54,6 +54,30 @@ const actions = {
     await departmentsApi.deleteDepartment(department)
     commit(DELETE_DEPARTMENTS_END, department)
     return department
+  },
+
+  loadLinkedHardwareItems() {
+    return departmentsApi.loadLinkedHardwareItems()
+  },
+
+  loadLinkedSoftwareLicenses() {
+    return departmentsApi.loadLinkedSoftwareLicenses()
+  },
+
+  linkHardwareItem({ commit }, data) {
+    return departmentsApi.linkHardwareItem(data)
+  },
+
+  linkSoftwareLicense({ commit }, data) {
+    return departmentsApi.linkSoftwareLicense(data)
+  },
+
+  unlinkHardwareItem({ commit }, data) {
+    return departmentsApi.unlinkHardwareItem(data)
+  },
+
+  unlinkSoftwareLicense({ commit }, data) {
+    return departmentsApi.unlinkSoftwareLicense(data)
   }
 }
 
