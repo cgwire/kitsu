@@ -933,7 +933,13 @@ export const annotationMixin = {
           stroke: this.shapeColor,
           fill: 'rgba(128, 128, 128, 0.25)',
           width: 1,
-          height: 1
+          height: 1,
+          strokeWidth:
+            this.pencilWidth === 'big'
+              ? 10
+              : this.pencilWidth === 'medium'
+                ? 5
+                : 2
         })
       } else if (this.shape === 'circle') {
         this.drawingShape = new fabric.Circle({
@@ -941,7 +947,13 @@ export const annotationMixin = {
           top: posY,
           stroke: this.shapeColor,
           fill: 'rgba(128, 128, 128, 0.25)',
-          radius: 1
+          radius: 1,
+          strokeWidth:
+            this.pencilWidth === 'big'
+              ? 10
+              : this.pencilWidth === 'medium'
+                ? 5
+                : 2
         })
       } else {
         console.error('Unknown shape type:', this.shape)
@@ -1028,7 +1040,6 @@ export const annotationMixin = {
       console.log('endDrawingShape', this.shape, this.drawingShape)
       this.drawingShape.set({
         stroke: this.shapeColor,
-        strokeWidth: 2,
         fill: 'transparent'
       })
       this.drawingShape.setCoords()
