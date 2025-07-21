@@ -317,6 +317,12 @@
                 class="annotation-tools"
                 v-show="isDrawingShape && (!light || fullScreen)"
               >
+                <pencil-picker
+                  :pencil="pencilWidth"
+                  :sizes="pencilPalette"
+                  @toggle-palette="onPickPencilWidth"
+                  @change="onChangePencilWidth"
+                />
                 <color-picker
                   :color="textColor"
                   @toggle-palette="onPickShapeColor"
