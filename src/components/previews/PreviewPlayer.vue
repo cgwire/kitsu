@@ -315,6 +315,33 @@
             <transition name="slide">
               <div
                 class="annotation-tools"
+                v-show="isDrawingShape && (!light || fullScreen)"
+              >
+                <color-picker
+                  :color="textColor"
+                  @toggle-palette="onPickShapeColor"
+                  @change="onChangeShapeColor"
+                />
+                <shape-picker
+                  :shape="shape"
+                  @toggle-palette="onPickShape"
+                  @change="onChangeShape"
+                />
+              </div>
+            </transition>
+
+            <button-simple
+              class="flexrow-item"
+              icon="shapes"
+              :active="isDrawingShape"
+              :title="$t('playlists.actions.annotation_shape')"
+              @click="onShapeAnnotateClicked"
+              v-if="!readOnly && (!light || fullScreen) && !isConcept"
+            />
+
+            <transition name="slide">
+              <div
+                class="annotation-tools"
                 v-show="isTyping && (!light || fullScreen)"
               >
                 <color-picker
@@ -593,6 +620,7 @@ import { domMixin } from '@/components/mixins/dom'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import BrowsingBar from '@/components/previews/BrowsingBar.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
+import ShapePicker from '@/components/widgets/ShapePicker.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
@@ -621,6 +649,7 @@ export default {
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
+    ShapePicker,
     TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
@@ -707,6 +736,7 @@ export default {
       isCommentsHidden: true,
       isComparing: false,
       isDrawing: false,
+      isDrawingShape: false,
       isHd: false,
       isLoading: false,
       isMuted: false,
@@ -729,6 +759,13 @@ export default {
         ? Object.keys(this.entityPreviewFiles)[0]
         : null,
       textColor: '#ff3860',
+      shape: 'rectangle',
+      shapeColor: '#ff3860',
+      shapeStartPos: null,
+      SHAPES_ICON_MAPPING: {
+        rectangle: 'rectangle-horizontal',
+        circle: 'circle'
+      },
       videoDuration: 0,
       width: 0,
       isZoomPan: false,
@@ -1604,6 +1641,20 @@ export default {
         this.isTyping = false
         this.isDrawing = true
       }
+    },
+
+    onShapeAnnotateClicked() {
+      this.clearFocus()
+      this.onDrawShapeClicked()
+      // if (this.isDrawingShape) {
+      //   this.isDrawingShape = false
+      // } else {
+      //   this._resetColor()
+      //   this._resetPencil()
+      //   this.isTyping = false
+      //   this.isDrawing = false
+      //   this.isDrawingShape = true
+      // }
     },
 
     onTypeClicked() {
