@@ -15,7 +15,7 @@
         {{ $t('playlists.client_playlist') }}
       </div>
       <span class="flexrow-item playlist-name">
-        {{ playlist.name }}
+        {{ playlist.name || '&nbsp;' }}
       </span>
       <span
         class="flexrow-item time-indicator"
@@ -74,6 +74,7 @@
             !isFullMode
           )
         "
+        v-if="!isLoading"
       />
       <button-simple
         @click="$emit('edit-clicked')"
