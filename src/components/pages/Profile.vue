@@ -1167,6 +1167,10 @@ export default {
     window.addEventListener('keydown', this.onKeyDown, false)
   },
 
+  unmounted() {
+    window.removeEventListener('keydown', this.onKeyDown, false)
+  },
+
   head() {
     return {
       title: `${this.$t('profile.title')} - Kitsu`
