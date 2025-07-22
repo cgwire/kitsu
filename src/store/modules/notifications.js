@@ -4,6 +4,8 @@ import { sortByDate } from '@/lib/sorting'
 import {
   CLEAR_NOTIFICATIONS,
   INCREMENT_NOTIFICATION_COUNTER,
+  DECREMENT_NOTIFICATION_COUNTER,
+  RESET_NOTIFICATION_COUNTER,
   LOAD_MORE_NOTIFICATIONS_END,
   LOAD_NOTIFICATION_END,
   LOAD_NOTIFICATIONS_END,
@@ -71,9 +73,22 @@ const actions = {
     commit(INCREMENT_NOTIFICATION_COUNTER)
   },
 
+  decrementNotificationCounter({ commit }) {
+    commit(DECREMENT_NOTIFICATION_COUNTER)
+  },
+
+  resetNotificationCounter({ commit }) {
+    commit(RESET_NOTIFICATION_COUNTER)
+  },
+
   markAllNotificationsAsRead({ commit }) {
     commit(MARK_ALL_NOTIFICATIONS_AS_READ)
     return notificationsApi.markAllNotificationsAsRead()
+  },
+
+  markAllNotificationsAsReadLocal({ commit }) {
+    commit(MARK_ALL_NOTIFICATIONS_AS_READ)
+    return true
   },
 
   toggleNotificationReadStatus({ commit }, notification) {
@@ -82,6 +97,11 @@ const actions = {
       notification.id,
       notification.read
     )
+  },
+
+  toggleNotificationReadStatusLocal({ commit }, notification) {
+    this.$store.commit('TOGGLE_NOTIFICATION_READ_STATUS', notification)
+    return notification
   }
 }
 
@@ -130,6 +150,17 @@ const mutations = {
 
   [INCREMENT_NOTIFICATION_COUNTER](state) {
     state.notificationCount = state.notificationCount + 1
+  },
+
+  [DECREMENT_NOTIFICATION_COUNTER](state) {
+    state.notificationCount = state.notificationCount - 1
+    if (state.notificationCount < 0) {
+      state.notificationCount = 0
+    }
+  },
+
+  [RESET_NOTIFICATION_COUNTER](state) {
+    state.notificationCount = 0
   },
 
   [TOGGLE_NOTIFICATION_READ_STATUS](state, notification) {
