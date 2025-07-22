@@ -39,6 +39,7 @@ import {
   LOAD_SHOTS_START,
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
+  END_SHOTS_LOADING,
   SORT_VALIDATION_COLUMNS,
   SET_CURRENT_EPISODE,
   LOAD_SHOT_END,
@@ -449,6 +450,8 @@ const actions = {
             sequenceMap,
             episodeMap
           })
+        } else {
+          commit(END_SHOTS_LOADING)
         }
         if (callback) callback()
       })
@@ -961,6 +964,10 @@ const mutations = {
 
     state.shotSearchQueries = userFilters.shot?.[production.id] || []
     state.shotSearchFilterGroups = userFilterGroups?.shot?.[production.id] || []
+  },
+
+  [END_SHOTS_LOADING](state) {
+    state.isShotsLoading = false
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery }) {
