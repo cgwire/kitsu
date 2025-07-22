@@ -1,7 +1,7 @@
 /*
  * Build a simple index based on entry names.
  */
-export const buildNameIndex = (entries, split = true) => {
+export const buildNameIndex = (entries, split = true, withEmail = false) => {
   const index = Object.create(null)
   const entryIndex = Object.create(null)
   entries.forEach(entry => {
@@ -10,6 +10,11 @@ export const buildNameIndex = (entries, split = true) => {
       if (entry.name || entry.full_name) {
         if (split) {
           words = entry.name.toLowerCase().split(' ')
+          if (withEmail && entry.email) {
+            words = words
+              .concat(entry.email.toLowerCase().split('@')[0].split('.'))
+              .concat([entry.email.toLowerCase().split('@')[1].split('.')[0]])
+          }
         } else {
           words = [entry.name]
         }
@@ -20,6 +25,13 @@ export const buildNameIndex = (entries, split = true) => {
     }
   })
   return index
+}
+
+/*
+ * Build a simple index based on entry names and the email field..
+ */
+export const buildPeopleIndex = (entries, split = true) => {
+  return buildNameIndex(entries, split, true)
 }
 
 /*

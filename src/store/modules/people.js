@@ -3,7 +3,7 @@ import colors from '@/lib/colors'
 import { clearSelectionGrid } from '@/lib/selection'
 import { populateTask } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
-import { indexSearch, buildTaskIndex, buildNameIndex } from '@/lib/indexing'
+import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import auth from '@/lib/auth'
 
@@ -615,7 +615,7 @@ const mutations = {
       cache.personMap.set(person.id, person)
     })
     state.displayedPeople = cache.people
-    cache.peopleIndex = buildNameIndex(cache.people)
+    cache.peopleIndex = buildPeopleIndex(cache.people)
 
     state.peopleSearchQueries = userFilters.people?.all || []
   },
@@ -630,7 +630,7 @@ const mutations = {
       }
       delete cache.personMap.get(person.id)
     }
-    cache.peopleIndex = buildNameIndex(cache.people)
+    cache.peopleIndex = buildPeopleIndex(cache.people)
     if (state.peopleSearchText) {
       const keywords = getKeyWords(state.peopleSearchText)
       state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
@@ -652,7 +652,7 @@ const mutations = {
       }
       cache.personMap.set(person.id, person)
       cache.people = sortPeople(cache.people)
-      cache.peopleIndex = buildNameIndex(cache.people)
+      cache.peopleIndex = buildPeopleIndex(cache.people)
       if (state.peopleSearchText) {
         const keywords = getKeyWords(state.peopleSearchText)
         state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
