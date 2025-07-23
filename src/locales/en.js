@@ -498,10 +498,11 @@ export default {
     title: 'Hardware Items',
 
     fields: {
-      name: 'Name',
       inventory_amount: 'Inventory Amount',
-      short_name: 'Short Name',
       monthly_cost: 'Monthly Cost',
+      name: 'Name',
+      remaining_amount: 'Remaining Amount',
+      short_name: 'Short Name'
     }
   },
 

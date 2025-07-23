@@ -15,6 +15,7 @@
       :entries="hardwareItemsList"
       :is-loading="loading.list"
       :is-error="errors.list"
+      :remaining-hardware-items="remainingHardwareItems"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
     />
@@ -66,9 +67,10 @@ export default {
   data() {
     return {
       activeTab: 'active',
+      choices: [],
       hardwareItemToDelete: null,
       hardwareItemToEdit: {},
-      choices: [],
+      linkedHardwareItems: {},
       errors: {
         del: false,
         edit: false,
@@ -96,8 +98,9 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.activeTab = this.$route.query.tab || 'active'
+    this.linkedHardwareItems = await this.loadLinkedHardwareItems()
   },
 
   computed: {
@@ -105,6 +108,8 @@ export default {
       'hardwareItems',
       'archivedHardwareItems',
       'getHardwareItem',
+      'linkedHardwareItems',
+      'activePeople',
       'taskTypeMap'
     ]),
 
@@ -131,6 +136,33 @@ export default {
       return this.isEditing
         ? this.$t('hardware_items.edit_title')
         : this.$t('hardware_items.new_hardware_item')
+    },
+
+    usedAmounts() {
+      const usedAmounts = {}
+      this.activePeople.forEach(person => {
+        person.departments.forEach(departmentId => {
+          const departmentItems = this.linkedHardwareItems[departmentId] || []
+          departmentItems.forEach(item => {
+            if (!usedAmounts[item.id]) {
+              usedAmounts[item.id] = 0
+            }
+            usedAmounts[item.id] += 1
+          })
+        })
+      })
+      return usedAmounts
+    },
+
+    remainingHardwareItems() {
+      const remainingAmounts = {}
+
+      this.hardwareItems.forEach(hardwareItem => {
+        remainingAmounts[hardwareItem.id] =
+          hardwareItem.inventory_amount -
+          (this.usedAmounts[hardwareItem.id] || 0)
+      })
+      return remainingAmounts
     }
   },
 
@@ -139,7 +171,8 @@ export default {
       'deleteHardwareItem',
       'editHardwareItem',
       'newHardwareItem',
-      'loadHardwareItems'
+      'loadHardwareItems',
+      'loadLinkedHardwareItems'
     ]),
 
     confirmEditHardwareItem(form) {
