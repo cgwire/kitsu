@@ -109,33 +109,10 @@ export default {
   border-top: 0;
 }
 
-.name {
-  width: 300px;
-  padding: 1em;
-}
-
-.short-name {
-  width: 100px;
-  padding: 1em;
-}
-
-.monthly-cost {
-  width: 100px;
-  padding: 1em;
-}
-
-.inventory-amount {
-  width: 100px;
-  padding: 1em;
-}
-
+// Styles spécifiques au composant si nécessaire
 .remaining-amount {
-  width: 100px;
-  padding: 1em;
-
   &.negative {
     color: red;
-    font-weight: bold;
   }
 }
 </style>
