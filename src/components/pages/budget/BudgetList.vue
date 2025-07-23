@@ -268,6 +268,7 @@
 
               <template v-if="!collapsedDepartments[departmentEntry.id]">
                 <tr class="datatable-row" v-if="isShowingItems">
+                  <!-- Hardware items -->
                   <td class="datatable-row-header" colspan="3">
                     {{ $t('hardware_items.title') }}
                   </td>
@@ -289,16 +290,75 @@
                   </td>
                   <td class="actions"></td>
                 </tr>
+                <!-- Software licenses -->
                 <tr class="datatable-row" v-if="isShowingItems">
                   <td class="datatable-row-header" colspan="3">
                     {{ $t('software_licenses.title') }}
                   </td>
                   <td></td>
                   <td></td>
+                  <template v-if="isShowingExpenses">
+                    <td
+                      :key="'software-' + departmentEntry.id + '-' + month"
+                      class="costs"
+                      v-for="month in monthsBetweenStartAndNow"
+                    >
+                      {{
+                        convertedExpenses[departmentEntry.id]?.[
+                          'software-licenses'
+                        ]?.[month.format('YYYY-MM')]?.toLocaleString()
+                      }}
+                    </td>
+                    <td class="costs expenses" v-if="isShowingExpenses">
+                      {{
+                        convertedExpenses[
+                          'software-licenses'
+                        ]?.total?.toLocaleString()
+                      }}
+                    </td>
+                    <td class="remaining expenses" v-if="isShowingExpenses">
+                      {{
+                        (
+                          (softwareLicensesCosts[departmentEntry.id]?.total ||
+                            0) -
+                          (convertedExpenses['software-licenses']?.total || 0)
+                        ).toLocaleString()
+                      }}
+                    </td>
+                    <td
+                      class="difference expenses"
+                      :class="{
+                        positive:
+                          differences[departmentEntry.id]?.[
+                            'software-licenses'
+                          ] > 0,
+                        negative:
+                          differences[departmentEntry.id]?.[
+                            'software-licenses'
+                          ] < 0
+                      }"
+                      v-if="isShowingExpenses"
+                    >
+                      {{
+                        differences[departmentEntry.id]?.[
+                          'software-licenses'
+                        ] > 0
+                          ? '+'
+                          : ''
+                      }}
+                      {{
+                        differences[departmentEntry.id]?.[
+                          'software-licenses'
+                        ]?.toLocaleString() || ''
+                      }}
+                    </td>
+                  </template>
                   <td
                     :key="'software-' + departmentEntry.id + '-' + month"
                     class="costs"
-                    v-for="month in monthsBetweenProductionDates"
+                    v-for="month in isShowingExpenses
+                      ? monthsBetweenNowAndEnd
+                      : monthsBetweenProductionDates"
                   >
                     {{
                       softwareLicensesCosts[departmentEntry.id]?.[
