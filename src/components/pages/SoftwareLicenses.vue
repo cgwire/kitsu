@@ -15,6 +15,7 @@
       :entries="softwareLicensesList"
       :is-loading="loading.list"
       :is-error="errors.list"
+      :remaining-software-licenses="remainingSoftwareLicenses"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
     />
@@ -66,6 +67,7 @@ export default {
   data() {
     return {
       activeTab: 'active',
+      linkedSoftwareLicenses: {},
       softwareLicenseToDelete: null,
       softwareLicenseToEdit: {},
       choices: [],
@@ -96,16 +98,17 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.activeTab = this.$route.query.tab || 'active'
+    this.linkedSoftwareLicenses = await this.loadLinkedSoftwareLicenses()
   },
 
   computed: {
     ...mapGetters([
+      'activePeople',
       'softwareLicenses',
       'archivedSoftwareLicenses',
-      'getSoftwareLicense',
-      'taskTypeMap'
+      'getSoftwareLicense'
     ]),
 
     isActiveTab() {
@@ -116,6 +119,31 @@ export default {
       return this.isActiveTab
         ? this.softwareLicenses
         : this.archivedSoftwareLicenses
+    },
+
+    usedAmounts() {
+      const usedAmounts = {}
+      this.activePeople.forEach(person => {
+        person.departments.forEach(departmentId => {
+          const departmentItems =
+            this.linkedSoftwareLicenses[departmentId] || []
+          departmentItems.forEach(item => {
+            if (!usedAmounts[item.id]) {
+              usedAmounts[item.id] = 0
+            }
+            usedAmounts[item.id] += 1
+          })
+        })
+      })
+      return usedAmounts
+    },
+    remainingSoftwareLicenses() {
+      const remainingAmounts = {}
+      this.softwareLicenses.forEach(license => {
+        remainingAmounts[license.id] =
+          license.inventory_amount - (this.usedAmounts[license.id] || 0)
+      })
+      return remainingAmounts
     },
 
     deleteText() {
@@ -135,6 +163,7 @@ export default {
       'deleteSoftwareLicense',
       'editSoftwareLicense',
       'newSoftwareLicense',
+      'loadLinkedSoftwareLicenses',
       'loadSoftwareLicenses'
     ]),
 

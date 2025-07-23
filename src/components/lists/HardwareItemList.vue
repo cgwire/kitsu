@@ -16,6 +16,9 @@
             <th scope="col" class="inventory-amount number-cell">
               {{ $t('hardware_items.fields.inventory_amount') }}
             </th>
+            <th scope="col" class="remaining-amount number-cell">
+              {{ $t('hardware_items.fields.remaining_amount') }}
+            </th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -32,6 +35,12 @@
             </td>
             <td class="inventory-amount number-cell">
               {{ entry.inventory_amount }}
+            </td>
+            <td
+              :class="{ negative: remainingHardwareItems[entry.id] < 0 }"
+              class="remaining-amount number-cell"
+            >
+              {{ remainingHardwareItems[entry.id] }}
             </td>
             <row-actions-cell
               :entry-id="entry.id"
@@ -77,6 +86,10 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    remainingHardwareItems: {
+      type: Object,
+      default: () => {}
     }
   },
 
@@ -114,5 +127,15 @@ export default {
 .inventory-amount {
   width: 100px;
   padding: 1em;
+}
+
+.remaining-amount {
+  width: 100px;
+  padding: 1em;
+
+  &.negative {
+    color: red;
+    font-weight: bold;
+  }
 }
 </style>
