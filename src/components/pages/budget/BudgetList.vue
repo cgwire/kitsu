@@ -26,6 +26,7 @@
       <div ref="body" class="datatable-wrapper flexcolumn filler">
         <table class="datatable">
           <thead class="datatable-head">
+            <!-- Headers -->
             <tr>
               <th
                 class="datatable-row-header department-header-header"
@@ -92,12 +93,12 @@
               <th class="actions datatable-row-header"></th>
             </tr>
           </thead>
-
           <tbody
             class="datatable-body"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
           >
+            <!-- Total row -->
             <tr class="datatable-row">
               <td class="datatable-row-header total-header" colspan="3">
                 <div class="pa05">
@@ -155,6 +156,7 @@
               <td class="actions"></td>
             </tr>
 
+            <!-- Departments rows -->
             <template
               v-for="departmentEntry in extendedBudgetDepartments"
               :key="departmentEntry.id"
@@ -309,6 +311,8 @@
                   </td>
                   <td class="actions"></td>
                 </tr>
+
+                <!-- Persons rows -->
                 <tr
                   class="datatable-row"
                   :key="personEntry.id"
