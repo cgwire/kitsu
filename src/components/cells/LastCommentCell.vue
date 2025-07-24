@@ -10,7 +10,6 @@
         v-if="task.last_comment.person"
       >
       </people-avatar>
-      <span class="no-avatar" v-else> &nbsp; </span>
 
       <span
         class="flexrow-item last-comment pointer"
