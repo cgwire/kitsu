@@ -3,7 +3,7 @@ import colors from '@/lib/colors'
 import { clearSelectionGrid } from '@/lib/selection'
 import { populateTask } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
-import { indexSearch, buildTaskIndex, buildNameIndex } from '@/lib/indexing'
+import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import auth from '@/lib/auth'
 
@@ -372,22 +372,30 @@ const actions = {
     })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
 
-    const [tasks, doneTasks, timeSpents, dayOff] = await Promise.all([
+    const [tasks, timeSpents, dayOff] = await Promise.all([
       peopleApi.getPersonTasks(personId).catch(() => []),
-      peopleApi.getPersonDoneTasks(personId).catch(() => []),
       peopleApi.getTimeSpents(personId, date),
       peopleApi.getDayOff(personId, date)
     ])
-
-    commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-    commit(PERSON_SET_DAY_OFF, dayOff)
+    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents || [])
+    commit(PERSON_SET_DAY_OFF, dayOff || {})
     commit(LOAD_PERSON_TASKS_END, {
       personId,
       tasks,
       userFilters,
       taskTypeMap
     })
+  },
+
+  async loadPersonDoneTasks({ commit }, personId) {
+    const doneTasks = await peopleApi
+      .getPersonDoneTasks(personId)
+      .catch(err => {
+        console.error('Error loading done tasks:', err)
+        return []
+      })
+    commit(LOAD_PERSON_DONE_TASKS_END, doneTasks || [])
+    return doneTasks
   },
 
   async loadPersonTimeSpents({ commit }, { personId, date }) {
@@ -615,7 +623,7 @@ const mutations = {
       cache.personMap.set(person.id, person)
     })
     state.displayedPeople = cache.people
-    cache.peopleIndex = buildNameIndex(cache.people)
+    cache.peopleIndex = buildPeopleIndex(cache.people)
 
     state.peopleSearchQueries = userFilters.people?.all || []
   },
@@ -630,7 +638,7 @@ const mutations = {
       }
       delete cache.personMap.get(person.id)
     }
-    cache.peopleIndex = buildNameIndex(cache.people)
+    cache.peopleIndex = buildPeopleIndex(cache.people)
     if (state.peopleSearchText) {
       const keywords = getKeyWords(state.peopleSearchText)
       state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
@@ -652,7 +660,7 @@ const mutations = {
       }
       cache.personMap.set(person.id, person)
       cache.people = sortPeople(cache.people)
-      cache.peopleIndex = buildNameIndex(cache.people)
+      cache.peopleIndex = buildPeopleIndex(cache.people)
       if (state.peopleSearchText) {
         const keywords = getKeyWords(state.peopleSearchText)
         state.displayedPeople = indexSearch(cache.peopleIndex, keywords)

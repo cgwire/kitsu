@@ -287,19 +287,25 @@ const actions = {
       commit(USER_LOAD_TODOS_START)
       try {
         const tasks = await peopleApi.loadTodos()
-        const doneTasks = await peopleApi.loadDone()
         const timeSpents = await peopleApi.loadTimeSpents(date)
         const dayOff = await peopleApi.getDayOff(state.user.id, date)
         commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
-        commit(REGISTER_USER_TASKS, { tasks: tasks.concat(doneTasks) })
-        commit(USER_LOAD_DONE_TASKS_END, doneTasks)
+        commit(REGISTER_USER_TASKS, { tasks })
         commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
         commit(PERSON_SET_DAY_OFF, dayOff)
+        return tasks
       } catch (err) {
         console.error(err)
         commit(USER_LOAD_TODOS_ERROR)
       }
     }
+  },
+
+  async loadDoneTasks({ commit, state, rootGetters }) {
+    const doneTasks = await peopleApi.loadDone()
+    commit(USER_LOAD_DONE_TASKS_END, doneTasks)
+    commit(REGISTER_USER_TASKS, { tasks: doneTasks })
+    return doneTasks
   },
 
   async loadUserTimeSpents({ commit }, { date }) {

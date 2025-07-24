@@ -78,8 +78,8 @@
           <todos-list
             ref="done-list"
             :tasks="displayedPersonDoneTasks"
-            :is-loading="isTasksLoading"
-            :is-error="isTasksLoadingError"
+            :is-loading="isDoneTasksLoading"
+            :is-error="isDoneTasksLoadingError"
             :done="true"
             :selection-grid="personTaskSelectionGrid"
             v-else-if="isActiveTab('done')"
@@ -98,6 +98,7 @@
           <user-calendar
             ref="user-calendar"
             class="calendar"
+            :is-loading="isTasksLoading"
             :days-off="daysOff"
             :tasks="sortedTasks"
             v-if="isActiveTab('calendar')"
@@ -210,6 +211,8 @@ export default {
       daysOff: [],
       dayOffError: false,
       init: false,
+      isDoneTasksLoading: false,
+      isDoneTasksLoadingError: false,
       isTasksLoading: false,
       isTasksLoadingError: false,
       loading: {
@@ -238,12 +241,9 @@ export default {
     }
   },
 
-  async mounted() {
+  mounted() {
     this.updateActiveTab()
-    await this.loadPerson(this.$route.params.person_id)
-    if (!this.person) {
-      return
-    }
+    this.loadPerson(this.$route.params.person_id)
     setTimeout(() => {
       this.searchField?.focus()
       this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
@@ -515,7 +515,7 @@ export default {
         },
         {
           label: `${this.$t('tasks.validated')} (${
-            this.displayedPersonDoneTasks.length
+            this.isDoneTasksLoading ? '…' : this.displayedPersonDoneTasks.length
           })`,
           name: 'done'
         },
@@ -531,6 +531,7 @@ export default {
     ...mapActions([
       'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
+      'loadPersonDoneTasks',
       'loadPersonTasks',
       'loadPersonTimeSpents',
       'setPersonTasksSearch',
@@ -643,32 +644,36 @@ export default {
         return
       }
 
-      if (this.person.is_bot || !this.isCurrentUserAllowed) {
-        return
-      }
+      if (this.person.is_bot || !this.isCurrentUserAllowed) return
 
       this.isTasksLoading = true
+      this.isDoneTasksLoading = true
       this.isTasksLoadingError = false
 
-      await this.loadPersonTasks({
-        personId: this.person.id,
-        date: this.selectedDate
-      })
-        .then(() => {
-          setTimeout(() => {
-            this.$nextTick(() => {
-              this.taskList?.setScrollPosition(this.personTasksScrollPosition)
-            })
-            this.resizeHeaders()
-          }, 0)
+      try {
+        await this.loadPersonTasks({
+          personId: this.person.id,
+          date: this.selectedDate
         })
-        .catch(err => {
-          console.error(err)
-          this.isTasksLoadingError = true
-        })
-        .finally(() => {
-          this.isTasksLoading = false
-        })
+        setTimeout(() => {
+          this.$nextTick(() => {
+            this.taskList?.setScrollPosition(this.personTasksScrollPosition)
+          })
+          this.resizeHeaders()
+        }, 0)
+
+        this.isTasksLoading = false
+        try {
+          await this.loadPersonDoneTasks(this.person.id)
+          this.isDoneTasksLoading = false
+        } catch (error) {
+          this.isDoneTasksLoadingError = true
+          this.isDoneTasksLoading = false
+        }
+      } catch (error) {
+        this.isTasksLoading = false
+        this.isTasksLoadingError = true
+      }
 
       try {
         this.daysOff = await this.loadAggregatedPersonDaysOff({ personId })

@@ -921,15 +921,8 @@ export default {
     }
   },
 
-  mounted() {
-    this.stickedColumns =
-      preferences.getObjectPreference(this.localStorageStickKey) || {}
-    this.addEvents(this.domEvents)
-  },
-
   beforeUnmount() {
     this.removeEvents(this.domEvents)
-    document.body.style.cursor = 'default'
   },
 
   computed: {
@@ -1448,5 +1441,9 @@ td.metadata-descriptor {
   height: 3.1rem;
   max-width: 120px;
   padding: 0;
+}
+
+.datatable .datatable-row td.number-cell {
+  padding-right: 0.75rem;
 }
 </style>

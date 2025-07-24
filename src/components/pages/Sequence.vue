@@ -416,48 +416,40 @@ export default {
       'loadSequenceCasting'
     ]),
 
-    init() {
-      this.loadCurrentSequence()
-        .then(sequence => {
-          this.currentSequence = sequence
-          this.currentSection = this.route.query.section || 'infos'
-          this.casting.isLoading = true
-          this.casting.isError = false
-          if (this.currentSequence) {
-            this.loadSequenceCasting(this.currentSequence)
-              .then(() => {
-                this.casting.isLoading = false
-              })
-              .catch(err => {
-                this.casting.isLoading = false
-                this.casting.isError = true
-                console.error(err)
-              })
-          } else {
-            this.resetData()
+    async init() {
+      try {
+        this.currentSequence = await this.loadCurrentSequence()
+        this.currentSection = this.route.query.section || 'infos'
+        this.casting.isLoading = true
+        this.casting.isError = false
+        if (this.currentSequence) {
+          try {
+            await this.loadSequenceCasting(this.currentSequence)
+            this.casting.isLoading = false
+          } catch (err) {
+            this.casting.isLoading = false
+            this.casting.isError = true
+            console.error(err)
           }
-        })
-        .catch(console.error)
+        } else {
+          this.resetData()
+        }
+      } catch (err) {
+        console.error(err)
+      }
     },
 
-    loadCurrentSequence() {
-      return new Promise((resolve, reject) => {
-        const sequenceId = this.route.params.sequence_id
-        const sequence = this.sequenceMap.get(sequenceId) || null
-        if (!sequence || !sequence.validations) {
-          return this.loadEpisodes()
-            .then(() => {
-              return this.loadSequencesWithTasks()
-            })
-            .then(() => {
-              const sequence =
-                sequenceStore.cache.sequenceMap.get(sequenceId) || null
-              return resolve(sequence)
-            })
-        } else {
-          return resolve(sequence)
+    async loadCurrentSequence() {
+      const sequenceId = this.route.params.sequence_id
+      let sequence = this.sequenceMap.get(sequenceId) || null
+      if (!sequence || !sequence.validations) {
+        if (this.isTVShow) {
+          await this.loadEpisodes()
         }
-      })
+        await this.loadSequencesWithTasks()
+        sequence = sequenceStore.cache.sequenceMap.get(sequenceId) || null
+      }
+      return sequence
     },
 
     confirmEditSequence(form) {
@@ -647,6 +639,7 @@ h2.subtitle {
 
 .task-list {
   width: 100%;
+  margin-bottom: 2em;
 }
 
 .datatable-row {
@@ -711,6 +704,7 @@ h2.subtitle {
 .infos {
   margin-top: 1em;
   margin-bottom: 1em;
+  height: 100%;
   max-height: 100%;
   overflow-y: auto;
 

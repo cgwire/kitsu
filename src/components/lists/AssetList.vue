@@ -706,17 +706,6 @@ export default {
     }
   },
 
-  mounted() {
-    this.stickedColumns =
-      JSON.parse(localStorage.getItem(this.localStorageStickKey)) || {}
-    this.addEvents(this.domEvents)
-  },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
-    document.body.style.cursor = 'default'
-  },
-
   computed: {
     ...mapGetters([
       'assets',

@@ -97,6 +97,7 @@ export default {
 .number {
   position: absolute;
   left: 20px;
+  top: 3px;
   background: $orange-light;
   border: 2px solid $orange;
   color: $orange;

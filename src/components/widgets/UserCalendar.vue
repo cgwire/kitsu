@@ -1,5 +1,8 @@
 <template>
-  <div class="user-calendar mt1">
+  <div class="loading-wrapper" v-if="isLoading">
+    <spinner />
+  </div>
+  <div class="user-calendar mt1" v-else>
     <full-calendar
       ref="calendar"
       class="app-calendar"
@@ -68,6 +71,7 @@ import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
   name: 'user-calendar',
@@ -76,7 +80,8 @@ export default {
     BriefcaseIcon,
     EntityThumbnail,
     FullCalendar,
-    ProductionName
+    ProductionName,
+    Spinner
   },
 
   props: {
@@ -87,6 +92,10 @@ export default {
     daysOff: {
       type: Array,
       default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: true
     }
   },
 
