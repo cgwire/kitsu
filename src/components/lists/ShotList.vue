@@ -1449,4 +1449,8 @@ td.metadata-descriptor {
   max-width: 120px;
   padding: 0;
 }
+
+.datatable .datatable-row td.number-cell {
+  padding-right: 0.75rem;
+}
 </style>
