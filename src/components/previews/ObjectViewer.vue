@@ -168,25 +168,27 @@ export default {
 
     // Skybox rotation methods
     startPanHDR(thisX) {
-      this.panningHDR = true
       const modelViewer = this.$refs['model-viewer']
       if (!modelViewer) return
-      this.lastX = thisX
+
       const orbit = modelViewer.getCameraOrbit()
-      // this.lockOrbit = orbit
-      this.lockCameraTarget = modelViewer.getCameraTarget()
       const { radius } = orbit
+      this.panningHDR = true
+      this.lastX = thisX
+      this.lockCameraTarget = modelViewer.getCameraTarget()
+
       // Calculate radians per pixel based on the model viewer's width
       this.radiansPerPixel =
         (-1 * radius) / modelViewer.getBoundingClientRect().width
     },
 
     updatePanHDR(thisX) {
-      // To rotate the skybox, we rotate the camera and adjust the turntabke rotation to make the illusion of rotating the skybox
+      // To rotate the skybox, we rotate the camera and adjust the turntabke
+      // rotation to make the illusion of rotating the skybox
       const modelViewer = this.$refs['model-viewer']
       if (!modelViewer) return
 
-      const delta = (thisX - this.lastX) * this.radiansPerPixel * 0.1
+      const delta = (thisX - this.lastX) * this.radiansPerPixel * 2
       if (delta === 0) {
         return
       }
@@ -209,12 +211,14 @@ export default {
     },
 
     startChangingFocale(thisY) {
-      this.changingFocale = true
       const modelViewer = this.$refs['model-viewer']
+
       if (!modelViewer) return
-      this.lastY = thisY
       const orbit = modelViewer.getCameraOrbit()
-      // Store orbit to lock it while changing focal length
+      this.changingFocale = true
+      this.lastY = thisY
+
+      // Store orbit to lock it while changing focal length.
       this.lockOrbit = orbit
       const { radius } = orbit
       this.radiansPerPixel =
@@ -225,7 +229,7 @@ export default {
       const modelViewer = this.$refs['model-viewer']
       if (!modelViewer) return
 
-      const delta = (thisY - this.lastY) * this.radiansPerPixel * 1
+      const delta = (thisY - this.lastY) * this.radiansPerPixel * 15
       this.lastY = thisY
       this.overlayText = `Fov: ${Math.floor(this.fieldOfView)} deg`
       this.fieldOfView += delta
@@ -235,8 +239,9 @@ export default {
         this.fieldOfView = 100
       }
       modelViewer.fieldOfView = `${Math.floor(this.fieldOfView)}deg`
-      // Reset the camera orbit to the locked one, because dragging will cause the orbit to change
-      // and we want to keep the orbit locked while changing focal length
+      // Reset the camera orbit to the locked one, because dragging will cause
+      // the orbit to change and we want to keep the orbit locked while
+      // changing focal length.
       modelViewer.cameraOrbit = this.lockOrbit
     },
 
@@ -249,6 +254,7 @@ export default {
     },
 
     // Event handlers
+
     handleMouseDown(event) {
       if (event.button === 0 && event.altKey) {
         this.startChangingFocale(event.clientY)
@@ -305,7 +311,7 @@ export default {
     handleTouchMove(event) {
       const { targetTouches } = event
 
-      // Handle 2-finger skybox rotation
+      // Handle 2 - finger skybox rotation
       if (this.panningHDR && targetTouches.length === 2) {
         const thisX =
           0.5 * (targetTouches[0].clientX + targetTouches[1].clientX)
@@ -314,7 +320,7 @@ export default {
         return
       }
 
-      // Handle 3-finger focal length change
+      // Handle 3 - finger focal length change
       if (this.changingFocale && targetTouches.length === 3) {
         const thisY =
           (targetTouches[0].clientY +
@@ -362,14 +368,13 @@ export default {
           'touchmove',
           this.handleTouchMove,
           true
-        ) // Listen on model-viewer for touchmove
+        )
         modelViewerElement.addEventListener(
           'touchend',
           this.handleTouchEnd,
           true
         )
       }
-      // mousemove and mouseup are on window/self in the example
       window.addEventListener('mousemove', this.handleMouseMove, true)
       window.addEventListener('mouseup', this.handleMouseUp, true)
     },
