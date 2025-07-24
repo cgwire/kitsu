@@ -1,7 +1,7 @@
 <template>
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+      <table class="datatable" v-if="!isLoading">
         <thead class="datatable-head">
           <tr>
             <th
@@ -394,11 +394,13 @@ export default {
   mounted() {
     this.resizeHeaders()
     window.addEventListener('keydown', this.onKeyDown, false)
-    this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
-    this.colNamePosX =
-      this.$refs['th-prod'].offsetWidth +
-      this.$refs['th-type'].offsetWidth +
-      'px'
+    if (this.$refs['th-prod']) {
+      this.colTypePosX = this.$refs['th-prod'].offsetWidth + 'px'
+      this.colNamePosX =
+        this.$refs['th-prod'].offsetWidth +
+        this.$refs['th-type'].offsetWidth +
+        'px'
+    }
   },
 
   beforeUnmount() {

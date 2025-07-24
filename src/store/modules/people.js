@@ -372,22 +372,30 @@ const actions = {
     })
     commit(LOAD_PERSON_DONE_TASKS_END, [])
 
-    const [tasks, doneTasks, timeSpents, dayOff] = await Promise.all([
+    const [tasks, timeSpents, dayOff] = await Promise.all([
       peopleApi.getPersonTasks(personId).catch(() => []),
-      peopleApi.getPersonDoneTasks(personId).catch(() => []),
       peopleApi.getTimeSpents(personId, date),
       peopleApi.getDayOff(personId, date)
     ])
-
-    commit(LOAD_PERSON_DONE_TASKS_END, doneTasks)
-    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
-    commit(PERSON_SET_DAY_OFF, dayOff)
+    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents || [])
+    commit(PERSON_SET_DAY_OFF, dayOff || {})
     commit(LOAD_PERSON_TASKS_END, {
       personId,
       tasks,
       userFilters,
       taskTypeMap
     })
+  },
+
+  async loadPersonDoneTasks({ commit }, personId) {
+    const doneTasks = await peopleApi
+      .getPersonDoneTasks(personId)
+      .catch(err => {
+        console.error('Error loading done tasks:', err)
+        return []
+      })
+    commit(LOAD_PERSON_DONE_TASKS_END, doneTasks || [])
+    return doneTasks
   },
 
   async loadPersonTimeSpents({ commit }, { personId, date }) {

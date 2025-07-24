@@ -80,7 +80,7 @@
           ref="done-list"
           class="done-list"
           :tasks="sortedDoneTasks"
-          :is-loading="isTodosLoading"
+          :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
           :done="true"
@@ -101,6 +101,7 @@
           ref="user-calendar"
           :days-off="daysOff"
           :tasks="sortedTasks"
+          :is-loading="isTodosLoading"
           v-if="isActiveTab('calendar')"
         />
 
@@ -192,6 +193,7 @@ export default {
         value: name
       })),
       loading: {
+        doneTasks: false,
         timesheets: false,
         savingSearch: false
       },
@@ -333,7 +335,7 @@ export default {
         },
         {
           label: `${this.$t('tasks.validated')} (${
-            this.sortedDoneTasks.length
+            this.loading.doneTasks ? '…' : this.sortedDoneTasks.length
           })`,
           name: 'done'
         },
@@ -392,6 +394,7 @@ export default {
       'loadOpenProductions',
       'loadUserTimeSpents',
       'loadTodos',
+      'loadDoneTasks',
       'removeTodoSearch',
       'saveTodoSearch',
       'setDayOff',
@@ -406,9 +409,13 @@ export default {
     },
 
     async loadData(forced = false) {
+      this.loading.doneTasks = true
       await this.loadTodos({
         date: this.selectedDate,
         forced
+      })
+      this.loadDoneTasks().then(() => {
+        this.loading.doneTasks = false
       })
       this.$nextTick(() => {
         this.todoList?.setScrollPosition(this.todoListScrollPosition)
