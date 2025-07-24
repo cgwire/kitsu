@@ -205,7 +205,11 @@
             </th>
           </tr>
         </thead>
-        <tbody class="datatable-body">
+        <tbody
+          class="datatable-body"
+          @mousedown="startBrowsing"
+          @touchstart="startBrowsing"
+        >
           <template v-if="!isLoading && isListVisible">
             <tr
               class="datatable-row"
@@ -547,7 +551,16 @@ export default {
         timeSpent: true
       },
       offsets: {},
-      stickedColumns: {}
+      stickedColumns: {},
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['keyup', this.stopBrowsing]
+      ]
     }
   },
 

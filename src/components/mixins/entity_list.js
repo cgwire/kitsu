@@ -27,11 +27,16 @@ export const entityListMixin = {
     window.addEventListener('keyup', this.onKeyUp, false)
     this.stickedColumns =
       preferences.getObjectPreference(this.localStorageStickKey) || {}
+    if (this.domEvents) this.addEvents(this.domEvents)
   },
 
   beforeUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('keyup', this.onKeyUp)
+    if (this.domEvents) {
+      this.removeEvents(this.domEvents)
+      document.body.style.cursor = 'default'
+    }
   },
 
   data() {
