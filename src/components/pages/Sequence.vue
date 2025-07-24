@@ -639,6 +639,7 @@ h2.subtitle {
 
 .task-list {
   width: 100%;
+  margin-bottom: 2em;
 }
 
 .datatable-row {
@@ -703,6 +704,7 @@ h2.subtitle {
 .infos {
   margin-top: 1em;
   margin-bottom: 1em;
+  height: 100%;
   max-height: 100%;
   overflow-y: auto;
 
