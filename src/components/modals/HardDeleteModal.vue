@@ -51,12 +51,14 @@
 <script>
 import { modalMixin } from '@/components/modals/base_modal'
 
+import Combobox from '@/components/widgets/Combobox.vue'
+
 export default {
   name: 'hard-delete-modal',
 
   mixins: [modalMixin],
 
-  components: {},
+  components: { Combobox },
 
   emits: ['cancel', 'confirm'],
 
