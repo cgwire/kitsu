@@ -26,6 +26,7 @@
       <div ref="body" class="datatable-wrapper flexcolumn filler">
         <table class="datatable">
           <thead class="datatable-head">
+            <!-- Headers -->
             <tr>
               <th
                 class="datatable-row-header department-header-header"
@@ -92,12 +93,12 @@
               <th class="actions datatable-row-header"></th>
             </tr>
           </thead>
-
           <tbody
             class="datatable-body"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
           >
+            <!-- Total row -->
             <tr class="datatable-row">
               <td class="datatable-row-header total-header" colspan="3">
                 <div class="pa05">
@@ -146,19 +147,16 @@
                   ? monthsBetweenNowAndEnd
                   : monthsBetweenProductionDates"
               >
-                {{
-                  totalEntry.monthCosts[
-                    month.format('YYYY-MM')
-                  ]?.toLocaleString()
-                }}
+                {{ getTotalMonthCost(month) }}
               </td>
 
               <td class="total-cost">
-                {{ totalEntry.total.toLocaleString() }}
+                {{ getTotalMonthCost('total') }}
               </td>
               <td class="actions"></td>
             </tr>
 
+            <!-- Departments rows -->
             <template
               v-for="departmentEntry in extendedBudgetDepartments"
               :key="departmentEntry.id"
@@ -254,17 +252,13 @@
                     ? monthsBetweenNowAndEnd
                     : monthsBetweenProductionDates"
                 >
-                  {{
-                    departmentEntry.monthCosts[
-                      month.format('YYYY-MM')
-                    ]?.toLocaleString()
-                  }}
+                  {{ getDepartmentMonthCost(departmentEntry, month) || '' }}
                 </td>
                 <td
                   class="total-cost"
                   :style="getDepartmentStyle(departmentEntry.id, '33')"
                 >
-                  {{ departmentEntry.total.toLocaleString() }}
+                  {{ getDepartmentMonthCost(departmentEntry, 'total') || '' }}
                 </td>
                 <td
                   class="actions"
@@ -273,6 +267,112 @@
               </tr>
 
               <template v-if="!collapsedDepartments[departmentEntry.id]">
+                <tr class="datatable-row" v-if="isShowingItems">
+                  <!-- Hardware items -->
+                  <td class="datatable-row-header" colspan="3">
+                    {{ $t('hardware_items.title') }}
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td
+                    :key="hardware - departmentEntry.id + '-' + month"
+                    class="costs"
+                    v-for="month in monthsBetweenProductionDates"
+                  >
+                    {{
+                      hardwareItemsCosts[departmentEntry.id]?.[
+                        month.format('YYYY-MM')
+                      ] || ''
+                    }}
+                  </td>
+                  <td class="total-cost">
+                    {{ hardwareItemsCosts[departmentEntry.id]?.total }}
+                  </td>
+                  <td class="actions"></td>
+                </tr>
+                <!-- Software licenses -->
+                <tr class="datatable-row" v-if="isShowingItems">
+                  <td class="datatable-row-header" colspan="3">
+                    {{ $t('software_licenses.title') }}
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <template v-if="isShowingExpenses">
+                    <td
+                      :key="'software-' + departmentEntry.id + '-' + month"
+                      class="costs"
+                      v-for="month in monthsBetweenStartAndNow"
+                    >
+                      {{
+                        convertedExpenses[departmentEntry.id]?.[
+                          'software-licenses'
+                        ]?.[month.format('YYYY-MM')]?.toLocaleString()
+                      }}
+                    </td>
+                    <td class="costs expenses" v-if="isShowingExpenses">
+                      {{
+                        convertedExpenses[
+                          'software-licenses'
+                        ]?.total?.toLocaleString()
+                      }}
+                    </td>
+                    <td class="remaining expenses" v-if="isShowingExpenses">
+                      {{
+                        (
+                          (softwareLicensesCosts[departmentEntry.id]?.total ||
+                            0) -
+                          (convertedExpenses['software-licenses']?.total || 0)
+                        ).toLocaleString()
+                      }}
+                    </td>
+                    <td
+                      class="difference expenses"
+                      :class="{
+                        positive:
+                          differences[departmentEntry.id]?.[
+                            'software-licenses'
+                          ] > 0,
+                        negative:
+                          differences[departmentEntry.id]?.[
+                            'software-licenses'
+                          ] < 0
+                      }"
+                      v-if="isShowingExpenses"
+                    >
+                      {{
+                        differences[departmentEntry.id]?.[
+                          'software-licenses'
+                        ] > 0
+                          ? '+'
+                          : ''
+                      }}
+                      {{
+                        differences[departmentEntry.id]?.[
+                          'software-licenses'
+                        ]?.toLocaleString() || ''
+                      }}
+                    </td>
+                  </template>
+                  <td
+                    :key="'software-' + departmentEntry.id + '-' + month"
+                    class="costs"
+                    v-for="month in isShowingExpenses
+                      ? monthsBetweenNowAndEnd
+                      : monthsBetweenProductionDates"
+                  >
+                    {{
+                      softwareLicensesCosts[departmentEntry.id]?.[
+                        month.format('YYYY-MM')
+                      ] || ''
+                    }}
+                  </td>
+                  <td class="total-cost">
+                    {{ softwareLicensesCosts[departmentEntry.id]?.total || '' }}
+                  </td>
+                  <td class="actions"></td>
+                </tr>
+
+                <!-- Persons rows -->
                 <tr
                   class="datatable-row"
                   :key="personEntry.id"
@@ -316,6 +416,7 @@
                   <td class="duration-header text-right entry-data">
                     {{ personEntry.months_duration }}
                   </td>
+
                   <template v-if="isShowingExpenses">
                     <td
                       :key="personEntry.id + '-' + month"
@@ -489,6 +590,18 @@ export default {
     isShowingExpenses: {
       type: Boolean,
       default: false
+    },
+    isShowingItems: {
+      type: Boolean,
+      default: false
+    },
+    linkedHardwareItems: {
+      type: Array,
+      default: () => []
+    },
+    linkedSoftwareLicenses: {
+      type: Array,
+      default: () => []
     },
     monthsBetweenStartAndNow: {
       type: Array,
@@ -692,11 +805,84 @@ export default {
         differences.total += differences[department.id].total
       })
       return differences
+    },
+
+    hardwareItemsCosts() {
+      return this.getItemCosts(this.linkedHardwareItems)
+    },
+
+    softwareLicensesCosts() {
+      return this.getItemCosts(this.linkedSoftwareLicenses)
     }
   },
 
   methods: {
     ...mapActions(['updateProductionBudgetEntry']),
+
+    /*
+     * It calculates the cost of the items for each department and each month.
+     * It returns an object with the cost of the items for each department and
+     * each month.
+     */
+    getItemCosts(linkedItems) {
+      const itemCosts = {}
+      this.budgetDepartments.forEach(department => {
+        const items = linkedItems[department.id] || []
+        const monthlyDepartmentCost = items.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+
+        if (!itemCosts[department.id]) {
+          itemCosts[department.id] = { total: 0 }
+        }
+        this.monthsBetweenProductionDates.forEach(month => {
+          itemCosts[department.id][month.format('YYYY-MM')] = 0
+          department.persons.forEach(person => {
+            const personCost = this.getMonthCost(person, month)
+            if (personCost > 0) {
+              itemCosts[department.id][month.format('YYYY-MM')] +=
+                monthlyDepartmentCost
+              itemCosts[department.id].total += monthlyDepartmentCost
+            }
+          })
+        })
+      })
+      return itemCosts
+    },
+
+    /*
+     * It returns the total cost for a given month: salaries and items.
+     * 'total' is a valid key to get the total cost for all the months.
+     */
+    getTotalMonthCost(month) {
+      const monthKey = month === 'total' ? month : month.format('YYYY-MM')
+      let cost = this.totalEntry.monthCosts[monthKey] || 0
+      if (this.isShowingItems) {
+        cost += this.budgetDepartments.reduce((acc, departmentEntry) => {
+          return (
+            acc +
+            (this.hardwareItemsCosts[departmentEntry.id]?.[monthKey] || 0) +
+            (this.softwareLicensesCosts[departmentEntry.id]?.[monthKey] || 0)
+          )
+        }, 0)
+      }
+      return cost ? cost.toLocaleString() : ''
+    },
+
+    /*
+     * It returns the total cost for a given department and a given month:
+     * salaries and items.
+     * 'total' is a valid key to get the total cost for all the months.
+     */
+    getDepartmentMonthCost(departmentEntry, month) {
+      const monthKey = month === 'total' ? month : month.format('YYYY-MM')
+      let cost = departmentEntry.monthCosts[monthKey] || 0
+      if (this.isShowingItems) {
+        cost += this.hardwareItemsCosts[departmentEntry.id]?.[monthKey] || 0
+        cost += this.softwareLicensesCosts[departmentEntry.id]?.[monthKey] || 0
+      }
+      return cost ? cost.toLocaleString() : ''
+    },
 
     /* It gets the daily rate of a person, and use the salary scale if
      * no daily rate is available.

@@ -43,6 +43,7 @@ const Episode = () => import('@/components/pages/Episode.vue')
 const Episodes = () => import('@/components/pages/Episodes.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
 const FirstConnection = () => import('@/components/pages/FirstConnection.vue')
+const HardwareItems = () => import('@/components/pages/HardwareItems.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
@@ -68,6 +69,7 @@ const Sequences = () => import('@/components/pages/Sequences.vue')
 const SequenceStats = () => import('@/components/pages/SequenceStats.vue')
 const ServerDown = () => import('@/components/pages/ServerDown.vue')
 const Settings = () => import('@/components/pages/Settings.vue')
+const SoftwareLicenses = () => import('@/components/pages/SoftwareLicenses.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
 const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
@@ -254,6 +256,18 @@ export const routes = [
         name: 'status-automations',
         path: 'status-automations',
         component: StatusAutomations
+      },
+
+      {
+        name: 'software-licenses',
+        path: 'software-licenses',
+        component: SoftwareLicenses
+      },
+
+      {
+        name: 'hardware-items',
+        path: 'hardware-items',
+        component: HardwareItems
       },
 
       {
