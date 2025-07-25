@@ -897,6 +897,7 @@ export default {
     team: 'Team',
     title: 'People',
     unactive: 'Inactive',
+    email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',
     change_password_error: 'An error occurred while changing password. Please verify the new password.',
