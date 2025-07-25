@@ -699,7 +699,8 @@ export default {
         }))
 
       const fromScheduleVersion = this.scheduleVersions.find(
-        version => version.id === this.currentProduction.from_schedule_version
+        version =>
+          version.id === this.currentProduction.from_schedule_version_id
       )
       const referenceVersion = {
         label: fromScheduleVersion
