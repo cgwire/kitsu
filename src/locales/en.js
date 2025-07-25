@@ -1493,7 +1493,7 @@ export default {
     delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
     delete_version_message: 'Are you sure you want to delete this schedule version? Type the version name below to confirm.',
     versions: {
-      reference: 'current',
+      reference: 'Reference forecast',
       from: 'from',
       locked: 'locked',
       canceled: 'canceled'

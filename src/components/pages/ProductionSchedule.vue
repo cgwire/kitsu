@@ -1839,7 +1839,7 @@ export default {
       this.loading.applyScheduleVersion = true
       this.errors.applyScheduleVersion = false
       try {
-        await this.applyScheduleVersionToProduction(this.version2)
+        await this.applyScheduleVersionToProduction(this.version)
         this.modals.applyScheduleVersion = false
       } catch (err) {
         console.error(err)
