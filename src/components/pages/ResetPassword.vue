@@ -15,7 +15,7 @@
               type="email"
               :placeholder="$t('login.fields.email')"
               @keyup.enter="confirmResetPassword"
-              v-model="email"
+              v-model.trim="email"
               v-focus
             />
             <span class="icon">
@@ -24,32 +24,29 @@
           </p>
         </div>
 
-        <p class="control">
+        <p class="control" v-if="!isSuccess">
           <a
             class="button main-button is-fullwidth"
             :class="{
               'is-loading': isLoading
             }"
             @click="confirmResetPassword"
-            v-if="!isSuccess"
           >
             {{ $t('login.reset_password') }}
           </a>
         </p>
-        <p class="error" v-if="isError">
-          {{ $t('login.reset_password_failed') }}
-        </p>
         <p class="success" v-if="isSuccess">
           {{ $t('login.reset_password_succeed') }}
         </p>
+        <p class="error" v-else-if="isInactive">
+          {{ $t('login.reset_password_inactive') }}
+        </p>
+        <p class="error" v-else-if="isError">
+          {{ $t('login.reset_password_failed') }}
+        </p>
         <p class="has-text-centered">
           <router-link :to="{ name: 'login' }">
-            <span v-if="isSuccess">
-              {{ $t('login.back_to_login') }}
-            </span>
-            <span v-else>
-              {{ $t('login.login_page') }}
-            </span>
+            {{ isSuccess ? $t('login.back_to_login') : $t('login.login_page') }}
           </router-link>
         </p>
       </div>
@@ -73,6 +70,7 @@ export default {
     return {
       email: '',
       isLoading: false,
+      isInactive: false,
       isError: false,
       isSuccess: false
     }
@@ -80,27 +78,28 @@ export default {
 
   mounted() {
     this.email = this.$store.state.login.email
-    this.isLoading = false
-    this.isSuccess = false
   },
 
   methods: {
     ...mapActions(['resetPassword']),
 
-    confirmResetPassword() {
+    async confirmResetPassword() {
       this.isLoading = true
+      this.isInactive = false
       this.isError = false
       this.isSuccess = false
-      this.resetPassword(this.email)
-        .then(() => {
-          this.isLoading = false
-          this.isSuccess = true
-        })
-        .catch(() => {
-          this.isLoading = false
+      try {
+        await this.resetPassword(this.email)
+        this.isSuccess = true
+      } catch (error) {
+        if (error.body?.message?.includes('inactive')) {
+          this.isInactive = true
+        } else {
           this.isError = true
-          this.isSuccess = false
-        })
+        }
+      } finally {
+        this.isLoading = false
+      }
     }
   },
 
@@ -119,7 +118,7 @@ export default {
   border-radius: 4px;
 
   &::placeholder {
-    color: #999;
+    color: $grey;
   }
 
   &:focus {

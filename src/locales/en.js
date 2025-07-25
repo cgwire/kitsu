@@ -549,6 +549,7 @@ export default {
     reset_change_password_title: 'Enter a new password',
     reset_password: 'Reset Password',
     reset_password_failed: 'Resetting your password failed. Please verify your email.',
+    reset_password_inactive: 'Resetting your password failed. The user with this email is inactive.',
     reset_password_succeed: 'Resetting your password succeeded. Please check your inbox.',
     reset_password_title: 'Enter your email to reset your password',
     retry_fido_challenge: 'Retry FIDO challenge',

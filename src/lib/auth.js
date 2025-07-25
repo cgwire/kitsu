@@ -1,5 +1,6 @@
 import superagent from 'superagent'
 import store from '@/store'
+import client from '@/store/api/client'
 import {
   DATA_LOADING_START,
   SET_ORGANISATION,
@@ -63,27 +64,18 @@ const auth = {
   },
 
   resetPassword(email) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post('/api/auth/reset-password')
-        .send({ email })
-        .end((err, res) => {
-          if (err) reject(err)
-          else resolve()
-        })
-    })
+    const data = { email }
+    return client.ppost('/api/auth/reset-password', data)
   },
 
   resetChangePassword(email, token, password, password2) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .put('/api/auth/reset-password')
-        .send({ email, token, password, password2 })
-        .end((err, res) => {
-          if (err) reject(err)
-          else resolve()
-        })
-    })
+    const data = {
+      email,
+      token,
+      password,
+      password2
+    }
+    return client.pput('/api/auth/reset-password', data)
   },
 
   isServerLoggedIn(callback) {
