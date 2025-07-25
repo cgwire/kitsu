@@ -268,6 +268,7 @@ export default {
   },
 
   mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.selectedStudio = this.$route.query.studio || ''
