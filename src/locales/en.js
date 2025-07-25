@@ -1496,15 +1496,13 @@ export default {
       reference: 'current',
       from: 'from',
       locked: 'locked',
-      canceled: 'canceled',
+      canceled: 'canceled'
     },
     fields: {
       create_from_version: 'Create new or from a version',
       new: 'new schedule',
       name: 'version name',
-      locked: 'locked version',
-      // created_at: 'Creation date',
-      // updated_at: 'Update date',
+      locked: 'locked version'
     }
   },
 
