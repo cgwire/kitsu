@@ -267,15 +267,14 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.activeTab = this.$route.query.tab || 'active'
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.selectedStudio = this.$route.query.studio || ''
     this.setSearchFromUrl()
-    this.loadPeople(() => {
-      this.onSearchChange()
-    })
+    await this.loadPeople()
+    this.onSearchChange()
   },
 
   computed: {
@@ -371,27 +370,27 @@ export default {
       })
     },
 
-    uploadImportFile(data, toUpdate) {
+    async uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
       const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
-      this.loading.importing = true
-      this.errors.importing = false
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
 
-      this.uploadPersonFile(toUpdate)
-        .then(() => {
-          this.$store.dispatch('loadPeople')
-          this.hideImportRenderModal()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.importing = false
-          this.errors.importing = true
-        })
+      this.loading.importing = true
+      this.errors.importing = false
+      try {
+        await this.uploadPersonFile(toUpdate)
+        this.hideImportRenderModal()
+        await this.loadPeople()
+      } catch (err) {
+        console.error(err)
+        this.errors.importing = true
+      } finally {
+        this.loading.importing = false
+      }
     },
 
     resetImport() {

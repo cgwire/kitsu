@@ -247,23 +247,17 @@ const actions = {
     commit(SET_ORGANISATION, { has_avatar: false })
   },
 
-  loadPeople({ commit, rootGetters }, callback) {
+  async loadPeople({ commit, rootGetters }) {
     commit(LOAD_PEOPLE_START)
-    peopleApi.getPeople((err, people) => {
-      if (err) {
-        commit(LOAD_PEOPLE_ERROR)
-      } else {
-        const peopleList = people.map(person => {
-          person.departments = person.departments || ''
-          return person
-        })
-        commit(LOAD_PEOPLE_END, {
-          people: peopleList,
-          userFilters: rootGetters.userFilters
-        })
-      }
-      if (callback) callback(err)
-    })
+    try {
+      const people = await peopleApi.getPeople()
+      commit(LOAD_PEOPLE_END, {
+        people,
+        userFilters: rootGetters.userFilters
+      })
+    } catch (err) {
+      commit(LOAD_PEOPLE_ERROR)
+    }
   },
 
   async loadPerson({ commit }, personId) {
