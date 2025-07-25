@@ -435,6 +435,7 @@ export default {
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
+          this.onSearchChange()
         })
         .catch(err => {
           const isUserLimitReached =
@@ -456,6 +457,7 @@ export default {
         .then(() => {
           this.loading.createAndInvite = false
           this.modals.edit = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -468,7 +470,6 @@ export default {
           }
           this.loading.createAndInvite = false
         })
-      this.onSearchChange()
     },
 
     confirmInvite(form) {
@@ -479,6 +480,7 @@ export default {
         .then(() => {
           this.loading.invite = false
           this.success.invite = true
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -486,7 +488,6 @@ export default {
           this.success.invite = false
           this.errors.invite = true
         })
-      this.onSearchChange()
     },
 
     confirmDeletePeople() {
@@ -496,6 +497,7 @@ export default {
         .then(() => {
           this.loading.del = false
           this.modals.del = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -505,16 +507,16 @@ export default {
     },
 
     onSearchChange() {
-      if (!this.searchField) return
-      const searchQuery = this.searchField.getValue()
-      if (searchQuery.length !== 1) {
-        this.setPeopleSearch(searchQuery)
+      if (this.searchField) {
+        const searchQuery = this.searchField.getValue()
+        if (searchQuery.length !== 1) {
+          this.setPeopleSearch(searchQuery)
+        }
+        this.setSearchInUrl()
       }
-      this.setSearchInUrl()
-      this.tabs[0].label =
-        this.$t('main.active') + ' (' + this.activePeople.length + ')'
-      this.tabs[1].label =
-        this.$t('people.unactive') + ' (' + this.unactivePeople.length + ')'
+      // refresh tabs
+      this.tabs[0].label = `${this.$t('main.active')} (${this.activePeople.length})`
+      this.tabs[1].label = `${this.$t('people.unactive')} (${this.unactivePeople.length})`
     },
 
     onAvatarClicked(person) {
