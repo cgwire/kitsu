@@ -47,6 +47,7 @@
     <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
+    <calendar-plus-icon class="icon" v-else-if="icon === 'calendar-plus'" />
     <file-digit-icon
       class="icon"
       :stroke-width="1.2"
@@ -72,6 +73,7 @@
 
 <script>
 import {
+  CalendarPlusIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -114,6 +116,7 @@ export default {
   name: 'button-simple',
 
   components: {
+    CalendarPlusIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
     ChevronRightIcon,

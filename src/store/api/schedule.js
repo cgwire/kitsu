@@ -91,5 +91,110 @@ export default {
     }
     if (manDays) data.man_days = parseInt(manDays)
     return client.pput(`/api/data/schedule-items/${scheduleItem.id}`, data)
+  },
+
+  getScheduleVersions(production) {
+    return client.pget(
+      `/api/data/production-schedule-versions?project_id=${production.id}`
+    )
+  },
+
+  getScheduleVersion(version) {
+    return client.pget(`/api/data/production-schedule-versions/${version.id}`)
+  },
+
+  createScheduleVersion(production, version) {
+    const data = {
+      project_id: production.id,
+      name: version.name,
+      from: version.from
+    }
+    return client.ppost(`/api/data/production-schedule-versions/`, data)
+  },
+
+  updateScheduleVersion(version) {
+    const data = {
+      name: version.name,
+      canceled: version.canceled,
+      locked: version.locked
+    }
+    return client.pput(
+      `/api/data/production-schedule-versions/${version.id}`,
+      data
+    )
+  },
+
+  deleteScheduleVersion(version) {
+    return client.pdel(`/api/data/production-schedule-versions/${version.id}`)
+  },
+
+  createTasksFromProduction(version) {
+    return client.ppost(
+      `/api/actions/production-schedule-versions/${version.id}/set-task-links-from-production`
+    )
+  },
+
+  createTasksFromScheduleVersion(version, fromVersion) {
+    const data = {
+      production_schedule_version_id: fromVersion.id
+    }
+    return client.ppost(
+      `/api/actions/production-schedule-versions/${version.id}/set-task-links-from-production-schedule-version`,
+      data
+    )
+  },
+
+  getTasksFromScheduleVersion(version, taskType = null) {
+    let url = `/api/data/production-schedule-versions/${version.id}/task-links?relations=true`
+    if (taskType?.id) {
+      url += `&task_type_id=${taskType.id}`
+    }
+    return client.pget(url)
+  },
+
+  getTaskFromScheduleVersion(taskLink) {
+    return client.pget(
+      `/api/data/production-schedule-version-task-links/${taskLink.id}`
+    )
+  },
+
+  createTaskFromScheduleVersion(taskLink) {
+    const data = {
+      task_id: taskLink.taskId,
+      production_schedule_version_id: taskLink.version,
+      start_date: taskLink.startDate,
+      due_date: taskLink.dueDate,
+      estimation: taskLink.estimation,
+      assignees: taskLink.assignees
+    }
+    return client.ppost(
+      `/api/data/production-schedule-version-task-links`,
+      data
+    )
+  },
+
+  updateTaskFromScheduleVersion(taskLink) {
+    const data = {
+      start_date: taskLink.startDate,
+      due_date: taskLink.dueDate,
+      estimation: taskLink.estimation,
+      assignees: taskLink.assignees
+    }
+    return client.pput(
+      `/api/data/production-schedule-version-task-links/${taskLink.id}`,
+      data
+    )
+  },
+
+  deleteTaskFromScheduleVersion(taskLink) {
+    return client.pdel(
+      `/api/data/production-schedule-version-task-links/${taskLink.id}`
+    )
+  },
+
+  applyScheduleVersionToProduction(version) {
+    return client.ppost(
+      `/api/actions/production-schedule-versions/${version.id}/apply-to-production`
+    )
   }
 }

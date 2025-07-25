@@ -1472,6 +1472,8 @@ export default {
     mode_real: 'Real',
     version: 'Version',
     apply_to_prod: 'Apply to production',
+    apply_to_prod_confirm: 'Are you sure you want to apply this schedule version to the current production? This will override the current task values.',
+    apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
     assign: 'Assign to:',
     reset_list: 'Reset list',
     no_entity: 'No assignable entity',
@@ -1481,7 +1483,29 @@ export default {
     force_unassign: 'Override previous assignments',
     forced_daily_quotas: 'Forced daily quotas:',
     estimated_daily_quotas: 'Auto estimated daily quotas:',
-    edit_task: 'Edit task'
+    edit_task: 'Edit task',
+    new_version: 'New version',
+    create_version: 'Create schedule version',
+    edit_version: 'Edit schedule version',
+    edit_version_error: 'An error occurred while saving the schedule version. Please try again.',
+    edit_version_exist: 'A version with a similar name already exist.',
+    delete_version: 'Delete schedule version',
+    delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
+    delete_version_message: 'Are you sure you want to delete this schedule version? Type the version name below to confirm.',
+    versions: {
+      reference: 'current',
+      from: 'from',
+      locked: 'locked',
+      canceled: 'canceled',
+    },
+    fields: {
+      create_from_version: 'Create new or from a version',
+      new: 'new schedule',
+      name: 'version name',
+      locked: 'locked version',
+      // created_at: 'Creation date',
+      // updated_at: 'Update date',
+    }
   },
 
   team_schedule: {

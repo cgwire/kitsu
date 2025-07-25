@@ -3,16 +3,20 @@
     <div class="column main-column">
       <div class="flexrow project-dates">
         <div class="flexrow-item">
-          <label class="label">
-            {{ $t('main.start_date') }}
-          </label>
-          <date-field :can-delete="false" utc v-model="selectedStartDate" />
+          <date-field
+            :can-delete="false"
+            :label="$t('main.start_date')"
+            utc
+            v-model="selectedStartDate"
+          />
         </div>
         <div class="flexrow-item">
-          <label class="label">
-            {{ $t('main.end_date') }}
-          </label>
-          <date-field :can-delete="false" utc v-model="selectedEndDate" />
+          <date-field
+            :can-delete="false"
+            :label="$t('main.end_date')"
+            utc
+            v-model="selectedEndDate"
+          />
         </div>
         <combobox-number
           class="flexrow-item zoom-level nowrap"
@@ -27,8 +31,49 @@
           :options="modeOptions"
           @update:model-value="onModeChanged"
         />
+        <div class="flexrow-item ml1" v-if="mode === 'prev'">
+          <label class="label">
+            {{ $t('schedule.version') }}
+          </label>
+          <div class="flexrow">
+            <combobox
+              class="flexrow-item"
+              v-model="version"
+              :options="versionOptions"
+              @update:model-value="onVersionChanged"
+            />
+            <button-simple
+              class="ml05"
+              icon="calendar-plus"
+              :title="$t('schedule.new_version')"
+              @click="openEditScheduleVersion()"
+            />
+            <button-simple
+              class="ml05"
+              :disabled="version === 'ref'"
+              icon="pencil"
+              :title="$t('schedule.edit_version')"
+              @click="openEditScheduleVersion(currentVersion)"
+            />
+            <button-simple
+              class="ml05"
+              :disabled="version === 'ref'"
+              icon="trash"
+              :title="$t('schedule.delete_version')"
+              @click="openDeleteScheduleVersion(version)"
+            />
+          </div>
+        </div>
         <div class="filler"></div>
-        <div class="flexrow">
+        <div class="flexrow" style="margin-top: 23px">
+          <button-simple
+            class="flexrow-item"
+            :disabled="version === 'ref'"
+            icon="save"
+            :text="$t('schedule.apply_to_prod')"
+            @click="modals.applyScheduleVersion = true"
+            v-if="!isTVShow && mode === 'prev'"
+          />
           <button-simple
             class="flexrow-item"
             icon="clock"
@@ -38,10 +83,11 @@
           <button-simple
             :active="isSidePanelOpen && assignments.type !== 'task'"
             class="flexrow-item"
+            :disabled="isLockedSchedule"
             icon="list"
             :text="$t('menu.assign_tasks')"
             @click="toggleSidePanel"
-            v-if="!isLockedSchedule && !isTVShow"
+            v-if="!isTVShow"
           />
         </div>
       </div>
@@ -68,6 +114,7 @@
         @root-element-expanded="expandTaskTypeElement"
         @root-element-selected="selectParentElement"
         @task-selected="selectTaskElement"
+        @task-unselected="closeSidePanel()"
       />
     </div>
 
@@ -361,7 +408,7 @@
                   :text="$t('main.apply')"
                   type="submit"
                 />
-                <button class="button is-link ml05" @click="closeSidePanel">
+                <button class="button is-link ml05" @click="closeSidePanel()">
                   {{ $t('main.cancel') }}
                 </button>
               </template>
@@ -371,6 +418,40 @@
       </div>
     </div>
   </div>
+
+  <edit-schedule-version-modal
+    :schedule-version-to-edit="scheduleVersionToEdit"
+    :version="version"
+    :version-options="scheduleVersions"
+    :is-loading="loading.editScheduleVersion"
+    :is-error="errors.editScheduleVersion"
+    @cancel="modals.editScheduleVersion = false"
+    @confirm="editVersion"
+    v-if="modals.editScheduleVersion"
+  />
+
+  <hard-delete-modal
+    active
+    :error-text="$t('schedule.delete_version_error')"
+    :is-loading="loading.delete"
+    :is-error="errors.deleteScheduleVersion"
+    :lock-text="scheduleVersionToEdit?.name"
+    :text="$t('schedule.delete_version_message')"
+    @cancel="modals.deleteScheduleVersion = false"
+    @confirm="deleteVersion(scheduleVersionToEdit)"
+    v-if="modals.deleteScheduleVersion"
+  />
+
+  <confirm-modal
+    active
+    :text="$t('schedule.apply_to_prod_confirm')"
+    :error-text="$t('schedule.apply_to_prod_error')"
+    :is-loading="loading.applyScheduleVersion"
+    :is-error="errors.applyScheduleVersion"
+    @cancel="modals.applyScheduleVersion = false"
+    @confirm="applyToProduction()"
+    v-if="modals.applyScheduleVersion"
+  />
 </template>
 
 <script>
@@ -388,6 +469,7 @@ import {
   XIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getTaskTypeSchedulePath } from '@/lib/path'
@@ -411,7 +493,10 @@ import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import EditScheduleVersionModal from '@/components/modals/EditScheduleVersionModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
@@ -434,8 +519,11 @@ export default {
     Combobox,
     ComboboxNumber,
     ComboboxTaskType,
+    ConfirmModal,
     DateField,
+    EditScheduleVersionModal,
     GripVerticalIcon,
+    HardDeleteModal,
     ListRestartIcon,
     PeopleAvatar,
     PeopleName,
@@ -483,11 +571,23 @@ export default {
         { label: this.$t('schedule.mode_prev'), value: 'prev' },
         { label: this.$t('schedule.mode_real'), value: 'real' }
       ],
+      scheduleVersionToEdit: {},
+      version: 'ref',
       loading: {
-        schedule: false
+        schedule: false,
+        editScheduleVersion: false,
+        applyScheduleVersion: false
       },
       errors: {
-        schedule: false
+        schedule: false,
+        editScheduleVersion: false,
+        deleteScheduleVersion: false,
+        applyScheduleVersion: false
+      },
+      modals: {
+        editScheduleVersion: false,
+        deleteScheduleVersion: false,
+        applyScheduleVersion: false
       }
     }
   },
@@ -506,6 +606,7 @@ export default {
       'organisation',
       'personMap',
       'productionAssetTypes',
+      'scheduleVersions',
       'user'
     ]),
 
@@ -546,12 +647,20 @@ export default {
       )
     },
 
+    currentVersion() {
+      return this.scheduleVersions.find(version => version.id === this.version)
+    },
+
     hasDraggedEntities() {
       return this.draggedEntities.some(entity => entity.children.length)
     },
 
     isLockedSchedule() {
-      return this.mode === 'real' || !this.isCurrentUserManager
+      return (
+        this.mode === 'real' ||
+        this.currentVersion?.locked ||
+        !this.isCurrentUserManager
+      )
     },
 
     shotMap() {
@@ -572,30 +681,69 @@ export default {
           .map(personId => this.personMap.get(personId))
           .filter(person => person && !person.is_bot)
       )
+    },
+
+    isVersioned() {
+      return this.mode === 'prev' && this.version !== 'ref'
+    },
+
+    versionOptions() {
+      const options = this.scheduleVersions
+        .filter(version => !version.canceled)
+        .sort(firstBy('created_at'))
+        .map(version => ({
+          label: version.locked
+            ? `${version.name} (${this.$t('schedule.versions.locked')})`
+            : version.name,
+          value: version.id
+        }))
+
+      const fromScheduleVersion = this.scheduleVersions.find(
+        version => version.id === this.currentProduction.from_schedule_version
+      )
+      const referenceVersion = {
+        label: fromScheduleVersion
+          ? `${this.$t('schedule.versions.reference')} (${this.$t('schedule.versions.from')} ${fromScheduleVersion.name})`
+          : this.$t('schedule.versions.reference'),
+        value: 'ref',
+        separator: true
+      }
+
+      return [referenceVersion, ...options]
     }
   },
 
   methods: {
     ...mapActions([
+      'applyScheduleVersionToProduction',
       'assignSelectedTasks',
+      'createScheduleVersion',
+      'createScheduleVersionedTask',
+      'deleteScheduleVersion',
       'editProduction',
       'loadAggregatedPersonDaysOff',
       'loadAssets',
       'loadAssetTypeScheduleItems',
       'loadEpisodeScheduleItems',
       'loadScheduleItems',
+      'loadScheduleVersions',
       'loadSequenceScheduleItems',
       'loadShots',
       'loadTasks',
+      'loadTasksFromScheduleVersion',
       'saveScheduleItem',
       'unassignPersonFromTask',
       'unassignSelectedTasks',
+      'updateScheduleVersion',
+      'updateScheduleVersionedTask',
       'updateTask'
     ]),
 
-    loadData() {
+    async loadData() {
       this.loading.schedule = true
       this.availableTaskTypes = []
+
+      await this.loadScheduleVersions()
 
       return this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
@@ -668,7 +816,7 @@ export default {
         })
     },
 
-    reset() {
+    async reset() {
       this.closeSidePanel()
 
       if (this.currentProduction.start_date) {
@@ -679,7 +827,8 @@ export default {
       }
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
-      this.loadData()
+      this.version = 'ref'
+      await this.loadData()
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
@@ -783,11 +932,44 @@ export default {
               await this.loadShots()
             }
 
-            const tasks = await this.loadTasks({
+            let tasks = await this.loadTasks({
               project_id: this.currentProduction.id,
               task_type_id: taskTypeElement.task_type_id,
               relations: 'true'
             })
+
+            // Update tasks for versioned schedules
+            if (this.isVersioned) {
+              const taskType = this.taskTypeMap.get(
+                taskTypeElement.task_type_id
+              )
+              const versionedTasks = await this.loadTasksFromScheduleVersion({
+                version: { id: this.version },
+                taskType
+              })
+              const versionedTaskMap = new Map(
+                versionedTasks.map(versionedTask => [
+                  versionedTask.task_id,
+                  versionedTask
+                ])
+              )
+              tasks = tasks
+                .map(task => {
+                  const versioned = versionedTaskMap.get(task.id)
+                  if (!versioned?.start_date) {
+                    return null
+                  }
+                  return {
+                    ...task,
+                    versionedTaskId: versioned.id,
+                    start_date: versioned.start_date,
+                    due_date: versioned.due_date,
+                    estimation: versioned.estimation,
+                    assignees: versioned.assignees
+                  }
+                })
+                .filter(Boolean)
+            }
 
             // load days off of assignees
             const personIds = [
@@ -996,14 +1178,24 @@ export default {
     },
 
     saveTaskChanged(task) {
-      return this.updateTask({
-        taskId: task.id,
-        data: {
+      if (this.isVersioned) {
+        return this.updateScheduleVersionedTask({
+          id: task.versionedTaskId,
           estimation: task.estimation,
-          start_date: task.startDate.format('YYYY-MM-DD'),
-          due_date: task.endDate.format('YYYY-MM-DD')
-        }
-      })
+          startDate: task.startDate.format('YYYY-MM-DD'),
+          dueDate: task.endDate.format('YYYY-MM-DD'),
+          assignees: task.assignees
+        })
+      } else {
+        return this.updateTask({
+          taskId: task.id,
+          data: {
+            estimation: task.estimation,
+            start_date: task.startDate.format('YYYY-MM-DD'),
+            due_date: task.endDate.format('YYYY-MM-DD')
+          }
+        })
+      }
     },
 
     async onScheduleItemChanged(item) {
@@ -1052,7 +1244,9 @@ export default {
       if (item.startDate && item.endDate && item.parentElement) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
-        this.saveScheduleItem(item.parentElement)
+        if (!this.isVersioned) {
+          this.saveScheduleItem(item.parentElement)
+        }
       } else if (!item.parentElement) {
         const minDate = this.getMinDate(item)
         const maxDate = this.getMaxDate(item)
@@ -1067,7 +1261,7 @@ export default {
       await this.updateScheduleItem(item)
     },
 
-    updateScheduleItem(item) {
+    async updateScheduleItem(item) {
       const scheduleItem = this.scheduleItems.find(
         scheduleItem => scheduleItem === item
       )
@@ -1077,7 +1271,9 @@ export default {
         scheduleItem.endDate = item.endDate
         scheduleItem.end_date = item.endDate.format('YYYY-MM-DD')
       }
-      this.saveScheduleItem(item)
+      if (!this.isVersioned) {
+        await this.saveScheduleItem(item)
+      }
     },
 
     getMinDate(parentElement) {
@@ -1344,7 +1540,7 @@ export default {
       this.assignments.excludes.push(person.id)
     },
 
-    submitAssignments(event) {
+    submitAssignments() {
       if (this.assignments.type === 'entity') {
         this.saveAssignments()
       } else if (this.assignments.type === 'task') {
@@ -1382,8 +1578,26 @@ export default {
             continue // no task found for this entity
           }
 
+          let versionedTask
+          if (this.isVersioned) {
+            const versionedTasks = await this.loadTasksFromScheduleVersion({
+              version: { id: this.version },
+              taskType: { id: task.task_type_id }
+            })
+            versionedTask = versionedTasks.find(t => t.task_id === task.id) ?? {
+              taskId: task.id,
+              version: this.version,
+              assignees: []
+            }
+            task.versionedTaskId = versionedTask.id
+          }
+
           if (this.assignments.unassign) {
-            await this.unassignSelectedTasks({ taskIds: [task.id] })
+            if (this.isVersioned) {
+              versionedTask.assignees = []
+            } else {
+              await this.unassignSelectedTasks({ taskIds: [task.id] })
+            }
           }
 
           cumulatedTasks++
@@ -1416,25 +1630,42 @@ export default {
               taskStartDate = startDate.clone()
               taskEndDate = null
             } else {
-              await Promise.all([
-                // assign task to the current assignee
-                this.assignSelectedTasks({
-                  personId: taskAssignee.id,
-                  taskIds: [task.id]
-                }),
-                // save task dates & estimation
-                this.updateTask({
-                  taskId: task.id,
-                  data: {
-                    estimation: daysToMinutes(
-                      this.organisation,
-                      taskEstimation
-                    ),
-                    start_date: taskStartDate.format('YYYY-MM-DD'),
-                    due_date: taskEndDate.format('YYYY-MM-DD')
-                  }
-                })
-              ])
+              if (this.isVersioned) {
+                versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
+                versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
+                versionedTask.estimation = daysToMinutes(
+                  this.organisation,
+                  taskEstimation
+                )
+                versionedTask.assignees.push(taskAssignee.id)
+
+                // save versioned task
+                if (!versionedTask.id) {
+                  await this.createScheduleVersionedTask(versionedTask)
+                } else {
+                  await this.updateScheduleVersionedTask(versionedTask)
+                }
+              } else {
+                await Promise.all([
+                  // assign task to the current assignee
+                  this.assignSelectedTasks({
+                    personId: taskAssignee.id,
+                    taskIds: [task.id]
+                  }),
+                  // save task dates & estimation
+                  this.updateTask({
+                    taskId: task.id,
+                    data: {
+                      estimation: daysToMinutes(
+                        this.organisation,
+                        taskEstimation
+                      ),
+                      start_date: taskStartDate.format('YYYY-MM-DD'),
+                      due_date: taskEndDate.format('YYYY-MM-DD')
+                    }
+                  })
+                ])
+              }
               // set next start date
               if ((cumulatedTasks * taskEstimation) % 1 !== 0) {
                 nextStartDate = taskEndDate.clone()
@@ -1475,15 +1706,17 @@ export default {
         }
         // update task and assignments
         await this.onScheduleItemChanged(task)
-        await this.unassignSelectedTasks({ taskIds: [task.id] })
-        await Promise.all(
-          task.assignees.map(personId =>
-            this.assignSelectedTasks({
-              personId,
-              taskIds: [task.id]
-            })
+        if (!this.isVersioned) {
+          await this.unassignSelectedTasks({ taskIds: [task.id] })
+          await Promise.all(
+            task.assignees.map(personId =>
+              this.assignSelectedTasks({
+                personId,
+                taskIds: [task.id]
+              })
+            )
           )
-        )
+        }
         // refresh task in side panel
         this.assignments.task.startDate = task.startDate.format('YYYY-MM-DD')
         this.assignments.task.endDate = task.endDate.format('YYYY-MM-DD')
@@ -1509,10 +1742,17 @@ export default {
       task.parentElement.children.get(personId).push(task)
 
       // save change
-      await this.assignSelectedTasks({
-        personId,
-        taskIds: [task.id]
-      })
+      if (this.isVersioned) {
+        return this.updateScheduleVersionedTask({
+          id: task.versionedTaskId,
+          assignees: task.assignees
+        })
+      } else {
+        await this.assignSelectedTasks({
+          personId,
+          taskIds: [task.id]
+        })
+      }
     },
 
     async onScheduleItemUnassigned(task, personId) {
@@ -1522,13 +1762,29 @@ export default {
       tasks.splice(tasks.indexOf(task), 1)
 
       // save change
-      await this.unassignPersonFromTask({
-        person: { id: personId },
-        task
-      })
+      if (this.isVersioned) {
+        return this.updateScheduleVersionedTask({
+          id: task.versionedTaskId,
+          assignees: task.assignees
+        })
+      } else {
+        await this.unassignPersonFromTask({
+          person: { id: personId },
+          task
+        })
+      }
     },
 
-    onModeChanged(mode) {
+    onModeChanged() {
+      this.refreshSchedule()
+    },
+
+    onVersionChanged() {
+      this.closeSidePanel()
+      this.refreshSchedule()
+    },
+
+    refreshSchedule() {
       this.scheduleItems.forEach(item => {
         if (!item.expanded) {
           return
@@ -1543,6 +1799,55 @@ export default {
           false
         )
       })
+    },
+
+    openEditScheduleVersion(scheduleVersion = {}) {
+      this.scheduleVersionToEdit = scheduleVersion
+      this.modals.editScheduleVersion = true
+    },
+
+    openDeleteScheduleVersion(versionId) {
+      this.scheduleVersionToEdit = this.scheduleVersions.find(
+        ({ id }) => id === versionId
+      )
+      this.modals.deleteScheduleVersion = true
+    },
+
+    async editVersion(version) {
+      this.modals.editScheduleVersion = false
+      if (!version.id) {
+        const newVersion = await this.createScheduleVersion(version)
+        this.version = newVersion.id
+      } else {
+        await this.updateScheduleVersion(version)
+      }
+      this.scheduleVersionToEdit = {}
+    },
+
+    async deleteVersion(version) {
+      this.modals.deleteScheduleVersion = false
+      await this.deleteScheduleVersion(version)
+      if (this.version === version.id) {
+        this.version = 'ref' // reset to reference version
+        this.onVersionChanged()
+      }
+      this.scheduleVersionToEdit = {}
+    },
+
+    async applyToProduction() {
+      this.loading.applyScheduleVersion = true
+      this.errors.applyScheduleVersion = false
+      try {
+        await this.applyScheduleVersionToProduction(this.version2)
+        this.modals.applyScheduleVersion = false
+      } catch (err) {
+        console.error(err)
+        this.errors.applyScheduleVersion = true
+      } finally {
+        this.loading.applyScheduleVersion = false
+      }
+      // refresh version list
+      await this.loadScheduleVersions()
     }
   },
 
@@ -1582,9 +1887,7 @@ export default {
 
   head() {
     return {
-      title:
-        `${this.currentProduction.name} ` +
-        `| ${this.$t('schedule.title')} - Kitsu`
+      title: `${this.currentProduction.name} | ${this.$t('schedule.title')} - Kitsu`
     }
   }
 }
@@ -1599,7 +1902,7 @@ export default {
 }
 
 .project-dates {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid $white-grey;
   padding-bottom: 1em;
 
   .field {
