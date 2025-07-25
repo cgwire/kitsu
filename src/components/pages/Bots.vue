@@ -171,13 +171,12 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.setSearchFromUrl()
-    this.loadPeople(() => {
-      this.onSearchChange()
-    })
+    await this.loadPeople()
+    this.onSearchChange()
   },
 
   watch: {

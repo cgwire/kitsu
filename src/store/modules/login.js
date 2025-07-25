@@ -32,11 +32,11 @@ const getters = {
 }
 
 const actions = {
-  changeEmail({ commit, state }, email) {
+  changeEmail({ commit }, email) {
     commit(CHANGE_EMAIL, email)
   },
 
-  changePassword({ commit, state }, password) {
+  changePassword({ commit }, password) {
     commit(CHANGE_PASSWORD, password)
   },
 
@@ -58,28 +58,19 @@ const actions = {
     })
   },
 
-  async logout({ commit, state }) {
+  async logout({ commit }) {
     this.$socket.disconnect()
     await auth.logout()
     commit(RESET_ALL)
   },
 
-  resetPassword({ commit }, email) {
-    return new Promise((resolve, reject) => {
-      auth.resetPassword(email).then(resolve).catch(reject)
-    })
+  resetPassword({}, email) {
+    return auth.resetPassword(email)
   },
 
-  resetChangePassword({ commit }, { email, token, password, password2 }) {
-    return new Promise((resolve, reject) => {
-      auth
-        .resetChangePassword(email, token, password, password2)
-        .then(() => {
-          commit(LOGIN_SUCCESS)
-          resolve()
-        })
-        .catch(reject)
-    })
+  async resetChangePassword({ commit }, { email, token, password, password2 }) {
+    await auth.resetChangePassword(email, token, password, password2)
+    commit(LOGIN_SUCCESS)
   }
 }
 

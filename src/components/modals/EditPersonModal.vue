@@ -26,6 +26,7 @@
         <text-field
           type="email"
           :errored="form.email && !isValidEmail"
+          :error-text="isUniqEmail ? '' : $t('people.email_exist_error')"
           :label="$t('people.fields.email')"
           :disabled="personToEdit.is_generated_from_ldap"
           v-model.trim="form.email"
@@ -282,6 +283,9 @@ export default {
         email: '',
         phone: '',
         role: 'user',
+        position: 'artist',
+        seniority: 'mid',
+        daily_salary: 0,
         contract_type: 'open-ended',
         active: 'true',
         departments: [],
@@ -346,13 +350,16 @@ export default {
         return true
       }
 
-      const isExist = this.people.some(
+      return this.isUniqEmail
+    },
+
+    isUniqEmail() {
+      return !this.people.some(
         person =>
           !person.is_bot &&
           person.email === this.form.email &&
           (!this.personToEdit || this.personToEdit.email !== person.email)
       )
-      return !isExist
     },
 
     isValidForm() {
@@ -430,7 +437,7 @@ export default {
       if (this.active) {
         this.resetForm()
         setTimeout(() => {
-          this.$refs['name-field'].focus()
+          this.$refs['name-field']?.focus()
         }, 100)
       }
     }

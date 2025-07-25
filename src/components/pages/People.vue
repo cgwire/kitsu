@@ -267,14 +267,14 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.selectedStudio = this.$route.query.studio || ''
     this.setSearchFromUrl()
-    this.loadPeople(() => {
-      this.onSearchChange()
-    })
+    await this.loadPeople()
+    this.onSearchChange()
   },
 
   computed: {
@@ -370,27 +370,27 @@ export default {
       })
     },
 
-    uploadImportFile(data, toUpdate) {
+    async uploadImportFile(data, toUpdate) {
       const formData = new FormData()
       const filename = 'import.csv'
       const csvContent = csv.turnEntriesToCsvString(data)
       const file = new File([csvContent], filename, { type: 'text/csv' })
 
       formData.append('file', file)
-      this.loading.importing = true
-      this.errors.importing = false
       this.$store.commit('PERSON_CSV_FILE_SELECTED', formData)
 
-      this.uploadPersonFile(toUpdate)
-        .then(() => {
-          this.$store.dispatch('loadPeople')
-          this.hideImportRenderModal()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.importing = false
-          this.errors.importing = true
-        })
+      this.loading.importing = true
+      this.errors.importing = false
+      try {
+        await this.uploadPersonFile(toUpdate)
+        this.hideImportRenderModal()
+        await this.loadPeople()
+      } catch (err) {
+        console.error(err)
+        this.errors.importing = true
+      } finally {
+        this.loading.importing = false
+      }
     },
 
     resetImport() {
@@ -434,6 +434,7 @@ export default {
         .then(() => {
           this.loading.edit = false
           this.modals.edit = false
+          this.onSearchChange()
         })
         .catch(err => {
           const isUserLimitReached =
@@ -455,6 +456,7 @@ export default {
         .then(() => {
           this.loading.createAndInvite = false
           this.modals.edit = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -467,7 +469,6 @@ export default {
           }
           this.loading.createAndInvite = false
         })
-      this.onSearchChange()
     },
 
     confirmInvite(form) {
@@ -478,6 +479,7 @@ export default {
         .then(() => {
           this.loading.invite = false
           this.success.invite = true
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -485,7 +487,6 @@ export default {
           this.success.invite = false
           this.errors.invite = true
         })
-      this.onSearchChange()
     },
 
     confirmDeletePeople() {
@@ -495,6 +496,7 @@ export default {
         .then(() => {
           this.loading.del = false
           this.modals.del = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -504,16 +506,16 @@ export default {
     },
 
     onSearchChange() {
-      if (!this.searchField) return
-      const searchQuery = this.searchField.getValue()
-      if (searchQuery.length !== 1) {
-        this.setPeopleSearch(searchQuery)
+      if (this.searchField) {
+        const searchQuery = this.searchField.getValue()
+        if (searchQuery.length !== 1) {
+          this.setPeopleSearch(searchQuery)
+        }
+        this.setSearchInUrl()
       }
-      this.setSearchInUrl()
-      this.tabs[0].label =
-        this.$t('main.active') + ' (' + this.activePeople.length + ')'
-      this.tabs[1].label =
-        this.$t('people.unactive') + ' (' + this.unactivePeople.length + ')'
+      // refresh tabs
+      this.tabs[0].label = `${this.$t('main.active')} (${this.activePeople.length})`
+      this.tabs[1].label = `${this.$t('people.unactive')} (${this.unactivePeople.length})`
     },
 
     onAvatarClicked(person) {

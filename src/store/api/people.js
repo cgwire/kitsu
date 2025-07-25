@@ -36,8 +36,8 @@ export default {
     })
   },
 
-  getPeople(callback) {
-    client.get('/api/data/persons?relations=true', callback)
+  getPeople() {
+    return client.pget('/api/data/persons?relations=true')
   },
 
   getPerson(personId) {
