@@ -38,6 +38,9 @@
     <edit2-icon class="icon" v-else-if="icon === 'pencil'" />
     <layers-icon class="icon" v-else-if="icon === 'layers'" />
     <list-icon class="icon" v-else-if="icon === 'list'" />
+    <shapes-icon class="icon" v-else-if="icon === 'shapes'" />
+    <rectangle-horizontal-icon class="icon" v-else-if="icon === 'rectangle'" />
+    <circle-icon class="icon" v-else-if="icon === 'circle'" />
     <triangle-icon class="icon" v-else-if="icon === 'triangle'" />
     <music-icon class="icon" v-else-if="icon === 'music'" />
     <square-icon class="icon" v-else-if="icon === 'eraser'" />
@@ -77,6 +80,7 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CircleIcon,
   ClockIcon,
   CodepenIcon,
   CornerLeftDownIcon,
@@ -100,8 +104,10 @@ import {
   PaperclipIcon,
   PauseIcon,
   PlusIcon,
+  RectangleHorizontalIcon,
   SaveIcon,
   SendIcon,
+  ShapesIcon,
   SkipBackIcon,
   SkipForwardIcon,
   SquareIcon,
@@ -144,8 +150,11 @@ export default {
     PaperclipIcon,
     PauseIcon,
     PlusIcon,
+    RectangleHorizontalIcon,
+    CircleIcon,
     SaveIcon,
     SendIcon,
+    ShapesIcon,
     SkipBackIcon,
     SkipForwardIcon,
     SquareIcon,
