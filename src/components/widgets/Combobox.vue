@@ -19,14 +19,19 @@
           @keyup.enter="emitEnter()"
           @change="updateValue"
         >
-          <option
-            :key="`${i}-${option.label}-${option.value}`"
-            :value="option.label || option.value"
-            :selected="modelValue === option.value || null"
-            v-for="(option, i) in options"
+          <template
+            v-for="(option, index) in options"
+            :key="`${index}-${option.label}-${option.value}`"
           >
-            {{ getOptionLabel(option) }}
-          </option>
+            <option
+              :value="option.label || option.value"
+              :selected="modelValue === option.value || null"
+              :disabled="option.disabled"
+            >
+              {{ getOptionLabel(option) }}
+            </option>
+            <hr v-if="option.separator" />
+          </template>
         </select>
       </span>
     </p>
@@ -111,6 +116,10 @@ export default {
         return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
       }
       return option.label
+    },
+
+    focus() {
+      this.$refs.select?.focus()
     }
   }
 }

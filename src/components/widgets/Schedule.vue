@@ -789,7 +789,8 @@ export default {
     'item-unassign',
     'root-element-expanded',
     'root-element-selected',
-    'task-selected'
+    'task-selected',
+    'task-unselected'
   ],
 
   mounted() {
@@ -1200,7 +1201,7 @@ export default {
     },
 
     resetDroppableTargets() {
-      this.schedule.querySelectorAll('.droppable').forEach(element => {
+      this.schedule?.querySelectorAll('.droppable').forEach(element => {
         element.classList.remove('droppable')
       })
     },
@@ -1647,6 +1648,7 @@ export default {
         }
         if (target) {
           this.resetSelection()
+          this.$emit('task-unselected')
         }
       }
       this.resetDroppableTargets()
