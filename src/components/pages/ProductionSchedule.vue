@@ -1776,6 +1776,7 @@ export default {
     },
 
     onModeChanged() {
+      this.closeSidePanel()
       this.refreshSchedule()
     },
 
