@@ -382,6 +382,19 @@
               {{ $tc('tasks.assign', nbSelectedTasks, { nbSelectedTasks }) }}
             </button>
           </div>
+          <div class="flexrow-item mb05 disclaimer">
+            <router-link
+              :to="{
+                name: 'team',
+                params: {
+                  production_id: currentProduction.id
+                }
+              }"
+              target="_blank"
+            >
+              {{ $t('tasks.assignation_disclaimer') }}
+            </router-link>
+          </div>
           <div
             class="flexrow-item is-wide flexrow"
             v-if="
@@ -938,6 +951,7 @@ export default {
       'assetMap',
       'assetCustomActions',
       'assetsByType',
+      'currentProduction',
       'isCurrentUserArtist',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -1856,6 +1870,12 @@ export default {
 .spinner {
   margin: auto;
   margin-top: 0.5em;
+}
+
+.disclaimer {
+  font-size: 0.8em;
+  font-style: italic;
+  text-align: center;
 }
 
 .tags {

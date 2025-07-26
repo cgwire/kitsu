@@ -110,6 +110,7 @@
         <table class="datatable" v-else>
           <thead>
             <tr>
+              <th class="th-grab"></th>
               <th class="th-name">{{ $t('task_status.fields.name') }}</th>
               <th class="th-short-name">
                 {{ $t('task_status.fields.short_name') }}
@@ -133,6 +134,9 @@
           >
             <template #item="{ element: taskStatus }">
               <tr class="datatable-row task-status">
+                <td class="grab">
+                  <grip-vertical-icon />
+                </td>
                 <td>
                   {{ taskStatus.name }}
                 </td>
@@ -181,6 +185,8 @@ import { mapGetters, mapActions } from 'vuex'
 
 import { sortTaskStatuses } from '@/lib/sorting'
 
+import { GripVerticalIcon } from 'lucide-vue-next'
+
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
@@ -200,6 +206,7 @@ export default {
     Combobox,
     ComboboxStatus,
     draggable,
+    GripVerticalIcon,
     ProductionBackgrounds,
     ProductionBoard,
     ProductionBrief,
@@ -443,5 +450,12 @@ th {
 
 .task-status[draggable='true'] {
   cursor: grabbing;
+}
+
+.grab {
+  cursor: grab;
+  padding-top: 1em;
+  width: 40px;
+  color: $grey;
 }
 </style>

@@ -12,9 +12,26 @@
         <p>{{ text }}</p>
         <form @submit.prevent class="widden">
           <combobox-task-type
+            class="mb1"
             :task-type-list="getApplicableTaskTypes()"
             v-model="form.task_type_id"
           />
+          <div class="disclaimer">
+            <router-link
+              :to="{
+                name: 'production-settings',
+                params: {
+                  production_id: currentProduction.id
+                },
+                query: {
+                  tab: 'taskTypes'
+                }
+              }"
+              target="_blank"
+            >
+              {{ $t('tasks.create_tasks_disclaimer') }}
+            </router-link>
+          </div>
         </form>
         <div class="flexrow">
           <div class="filler"></div>
@@ -130,6 +147,7 @@ export default {
 
   computed: {
     ...mapGetters([
+      'currentProduction',
       'productionAssetTaskTypes',
       'productionEditTaskTypes',
       'productionEpisodeTaskTypes',
@@ -209,5 +227,10 @@ export default {
 
 .flexrow-item {
   margin-right: 0;
+}
+
+.disclaimer {
+  font-size: 0.8em;
+  font-style: italic;
 }
 </style>
