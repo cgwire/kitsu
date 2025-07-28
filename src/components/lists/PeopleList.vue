@@ -91,6 +91,7 @@
               {{ person.daily_salary }}
             </td>
             <row-actions-cell
+              class="datatable-row-footer"
               :entry-id="person.id"
               :hide-avatar="!person.active"
               :hide-change-password="isBots || !person.active"
