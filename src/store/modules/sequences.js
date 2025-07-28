@@ -77,7 +77,9 @@ const helpers = {
     },
     applySequenceFilters = true
   ) {
-    const taskTypes = Array.from(taskTypeMap.values())
+    const taskTypes = Array.from(taskTypeMap.values()).filter(
+      taskType => taskType.for_entity === 'Sequence'
+    )
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = sequenceSearch
     const keywords = getKeyWords(query) || []
