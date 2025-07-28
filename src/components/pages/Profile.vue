@@ -162,18 +162,21 @@
           {{ $t('profile.password_title') }}
         </h2>
         <text-field
+          autocomplete="current-password"
           :label="$t('people.fields.old_password')"
           :disabled="user.is_generated_from_ldap"
           type="password"
           v-model="passwordForm.oldPassword"
         />
         <text-field
+          autocomplete="new-password"
           :label="$t('people.fields.password')"
           :disabled="user.is_generated_from_ldap"
           type="password"
           v-model="passwordForm.password"
         />
         <text-field
+          autocomplete="new-password"
           :label="$t('people.fields.password_2')"
           :disabled="user.is_generated_from_ldap"
           type="password"

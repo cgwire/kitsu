@@ -13,6 +13,7 @@
             <input
               class="input is-medium email"
               type="password"
+              autocomplete="new-password"
               :placeholder="$t('login.fields.password')"
               @keyup.enter="confirmResetChangePassword"
               v-model="password"
@@ -26,6 +27,7 @@
             <input
               class="input is-medium email"
               type="password"
+              autocomplete="new-password"
               :placeholder="$t('login.fields.password2')"
               @keyup.enter="confirmResetChangePassword"
               v-model="password2"
