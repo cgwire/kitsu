@@ -406,10 +406,12 @@ export default {
       try {
         await this.clearPersonAvatar(this.personToEdit)
         this.modals.avatar = false
+        this.onSearchChange()
       } catch (err) {
         this.errors.avatar = true
+      } finally {
+        this.loading.deletingAvatar = false
       }
-      this.loading.deletingAvatar = false
     },
 
     async updateAvatar(formData) {
@@ -417,10 +419,12 @@ export default {
       try {
         await this.uploadPersonAvatar({ person: this.personToEdit, formData })
         this.modals.avatar = false
+        this.onSearchChange()
       } catch (err) {
         this.errors.avatar = true
+      } finally {
+        this.loading.updatingAvatar = false
       }
-      this.loading.updatingAvatar = false
     },
 
     confirmEditPeople(form) {
