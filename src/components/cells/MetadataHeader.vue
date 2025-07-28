@@ -21,11 +21,11 @@
       </span>
 
       <span
-        class="metadata-menu-button header-icon"
+        class="metadata-menu-button header-icon pointer"
         @click="$emit('show-metadata-header-menu', $event)"
         v-if="!noMenu"
       >
-        <chevron-down-icon :size="12" />
+        <chevron-down-icon :size="14" />
       </span>
     </div>
   </th>
@@ -90,10 +90,11 @@ th.metadata-descriptor {
 }
 
 .metadata-menu-button {
-  background: var(--background);
+  background: var(--background-alt);
   border-radius: 50%;
-  height: 15px;
-  width: 15px;
+  height: 16px;
+  width: 16px;
+  padding: 1px;
   position: absolute;
   right: 0;
 }

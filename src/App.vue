@@ -1373,13 +1373,11 @@ textarea.input:focus {
   }
 
   th:hover .header-icon {
-    opacity: 100;
+    visibility: visible;
   }
 
   .header-icon {
-    width: 15px;
-    cursor: pointer;
-    opacity: 0;
+    visibility: hidden;
   }
 }
 
@@ -1599,7 +1597,7 @@ tbody:last-child .empty-line:last-child {
     }
 
     &:hover .header-icon {
-      opacity: 1;
+      visibility: visible;
     }
 
     .descriptor-name {
@@ -1642,9 +1640,7 @@ tbody:last-child .empty-line:last-child {
     z-index: 4;
   }
   .header-icon {
-    width: 15px;
-    cursor: pointer;
-    opacity: 0;
+    visibility: hidden;
   }
 }
 

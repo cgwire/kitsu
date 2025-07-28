@@ -6,7 +6,7 @@
       'hidden-validation-cell': hiddenColumns[columnId],
       'datatable-row-header': isStick
     }"
-    :style="{ left: left }"
+    :style="{ left }"
   >
     <div class="flexrow validation-content" :style="validationStyle">
       <department-name
@@ -36,10 +36,10 @@
         {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
       </span>
       <span
-        class="metadata-menu-button header-icon"
+        class="metadata-menu-button header-icon pointer"
         @click="$emit('show-header-menu', $event)"
       >
-        <chevron-down-icon :size="12" />
+        <chevron-down-icon :size="14" />
       </span>
     </div>
   </th>
@@ -145,18 +145,12 @@ th.metadata-descriptor {
   margin-right: 0;
 }
 
-.header-icon {
-  background: var(--background);
-  border-radius: 50%;
-  height: 18px;
-  padding: 1px;
-}
-
 .metadata-menu-button {
   background: var(--background);
   border-radius: 50%;
-  height: 15px;
-  width: 15px;
+  height: 16px;
+  width: 16px;
+  padding: 1px;
   position: absolute;
   right: 5px;
 }
