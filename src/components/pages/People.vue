@@ -77,7 +77,7 @@
     />
 
     <import-render-modal
-      :active="modals.isImportRenderDisplayed"
+      active
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
       :parsed-csv="parsedCSV"
@@ -93,7 +93,7 @@
 
     <import-modal
       ref="import-modal"
-      :active="modals.importModal"
+      active
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
       :form-data="personCsvFormData"
@@ -101,10 +101,11 @@
       :optional-columns="optionalCsvColumns"
       @cancel="hideImportModal"
       @confirm="renderImport"
+      v-if="modals.importModal"
     />
 
     <edit-avatar-modal
-      :active="modals.avatar"
+      active
       :error-text="$t('people.edit_avatar_error')"
       :is-deleting="loading.deletingAvatar"
       :is-error="errors.avatar"
@@ -113,6 +114,7 @@
       @close="modals.avatar = false"
       @delete="deleteAvatar"
       @update="updateAvatar"
+      v-if="modals.avatar"
     />
 
     <edit-person-modal
@@ -132,14 +134,15 @@
     />
 
     <change-password-modal
-      :active="modals.changePassword"
+      active
       :person="personToChangePassword"
       @cancel="modals.changePassword = false"
       @confirm="modals.changePassword = false"
+      v-if="modals.changePassword"
     />
 
     <hard-delete-modal
-      :active="modals.del"
+      active
       :error-text="$t('people.delete_error')"
       :is-loading="loading.del"
       :is-error="errors.del"
@@ -147,6 +150,7 @@
       :text="deleteText"
       @cancel="modals.del = false"
       @confirm="confirmDeletePeople"
+      v-if="modals.del"
     />
   </div>
 </template>
@@ -285,7 +289,6 @@ export default {
       'isPeopleLoadingError',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
-      'people',
       'peopleSearchQueries',
       'personCsvFormData',
       'studioMap'
@@ -397,7 +400,7 @@ export default {
       this.errors.importing = false
       this.hideImportRenderModal()
       this.$store.commit('PERSON_CSV_FILE_SELECTED', null)
-      this.$refs['import-modal'].reset()
+      this.$refs['import-modal']?.reset()
       this.showImportModal()
     },
 
