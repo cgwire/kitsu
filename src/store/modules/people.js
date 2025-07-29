@@ -630,7 +630,7 @@ const mutations = {
       if (personToDeleteIndex >= 0) {
         cache.people.splice(personToDeleteIndex, 1)
       }
-      delete cache.personMap.get(person.id)
+      cache.personMap.delete(person.id)
     }
     cache.peopleIndex = buildPeopleIndex(cache.people)
     if (state.peopleSearchText) {

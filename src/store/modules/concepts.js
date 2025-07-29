@@ -215,7 +215,7 @@ const mutations = {
     if (conceptIndex >= 0) {
       state.concepts.splice(conceptIndex, 1)
     }
-    delete state.conceptMap.get(concept.id)
+    state.conceptMap.delete(concept.id)
   },
 
   [ADD_SELECTED_CONCEPTS](state, concepts) {

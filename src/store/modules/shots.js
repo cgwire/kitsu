@@ -469,7 +469,7 @@ const actions = {
    * event. If the shot was updated a few times ago, it is not reloaded.
    */
   loadShot({ commit, state, rootGetters }, shotId) {
-    const shot = rootGetters.shotMap.get(shotId)
+    const shot = cache.shotMap.get(shotId)
     if (shot?.lock) return
 
     const personMap = rootGetters.personMap
