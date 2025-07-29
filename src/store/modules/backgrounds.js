@@ -127,7 +127,7 @@ const mutations = {
     if (backgroundToDeleteIndex >= 0) {
       state.backgrounds.splice(backgroundToDeleteIndex, 1)
     }
-    delete cache.backgroundMap.get(backgroundToDelete.id)
+    cache.backgroundMap.delete(backgroundToDelete.id)
   },
 
   [RESET_ALL](state) {

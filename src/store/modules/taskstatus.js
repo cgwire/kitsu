@@ -189,7 +189,7 @@ const mutations = {
     if (taskStatusToDeleteIndex >= 0) {
       state.taskStatuses.splice(taskStatusToDeleteIndex, 1)
     }
-    delete cache.taskStatusMap.get(taskStatusToDelete.id)
+    cache.taskStatusMap.delete(taskStatusToDelete.id)
   },
 
   [RESET_ALL](state) {

@@ -1074,14 +1074,15 @@ const mutations = {
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
-  [REMOVE_SEQUENCE](state, sequence) {
-    delete cache.sequenceMap.get(sequence.id)
-    cache.sequences = removeModelFromList(cache.sequences, sequence)
+  [REMOVE_SEQUENCE](state, sequenceToDelete) {
+    cache.sequenceMap.delete(sequenceToDelete.id)
+    cache.sequences = removeModelFromList(cache.sequences, sequenceToDelete)
+    cache.result = removeModelFromList(cache.result, sequenceToDelete)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = removeModelFromList(
       state.displayedSequences,
-      sequence
+      sequenceToDelete
     )
-    state.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
   [LOCK_SEQUENCE](state, sequence) {

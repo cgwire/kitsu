@@ -702,14 +702,15 @@ const mutations = {
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
-  [REMOVE_EPISODE](state, episode) {
-    delete cache.episodeMap.get(episode.id)
-    state.episodes = removeModelFromList(state.episodes, episode)
+  [REMOVE_EPISODE](state, episodeToDelete) {
+    cache.episodeMap.delete(episodeToDelete.id)
+    cache.episodes = removeModelFromList(cache.episodes, episodeToDelete)
+    cache.result = removeModelFromList(cache.episodes, episodeToDelete)
+    cache.episodeIndex = buildEpisodeIndex(cache.episodes)
     state.displayedEpisodes = removeModelFromList(
       state.displayedEpisodes,
-      episode
+      episodeToDelete
     )
-    cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
 
   [SET_EPISODE_SEARCH](state, payload) {
