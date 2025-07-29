@@ -880,7 +880,7 @@ tr .actions p {
 
 tr td.actions button,
 tr td.actions a {
-  opacity: 0;
+  visibility: hidden;
   color: #999;
 }
 
@@ -890,7 +890,29 @@ tr th.actions a {
 
 tr:hover .actions button,
 tr:hover .actions a {
-  opacity: 1;
+  visibility: visible;
+}
+tr:hover .actions.datatable-row-footer {
+  position: sticky;
+  right: 0;
+  border-left: 1px solid rgba(var(--border-rgb), 0.5);
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    right: calc(100% + 1px);
+    top: 0;
+    bottom: 0;
+    width: 0.75rem;
+    background: linear-gradient(
+      270deg,
+      rgba(var(--border-rgb), 0.4) 0%,
+      rgba(var(--border-rgb), 0.3) 20%,
+      rgba(var(--border-rgb), 0.2) 50%,
+      rgba(var(--border-rgb), 0) 100%
+    );
+  }
 }
 
 a {
@@ -1351,13 +1373,11 @@ textarea.input:focus {
   }
 
   th:hover .header-icon {
-    opacity: 100;
+    visibility: visible;
   }
 
   .header-icon {
-    width: 15px;
-    cursor: pointer;
-    opacity: 0;
+    visibility: hidden;
   }
 }
 
@@ -1577,7 +1597,7 @@ tbody:last-child .empty-line:last-child {
     }
 
     &:hover .header-icon {
-      opacity: 1;
+      visibility: visible;
     }
 
     .descriptor-name {
@@ -1620,9 +1640,7 @@ tbody:last-child .empty-line:last-child {
     z-index: 4;
   }
   .header-icon {
-    width: 15px;
-    cursor: pointer;
-    opacity: 0;
+    visibility: hidden;
   }
 }
 
@@ -1643,7 +1661,8 @@ tbody:last-child .empty-line:last-child {
   }
 
   &:hover,
-  &:hover .datatable-row-header {
+  &:hover .datatable-row-header,
+  &:hover .datatable-row-footer {
     background-color: var(--background-hover);
   }
 
@@ -1656,7 +1675,8 @@ tbody:last-child .empty-line:last-child {
     cursor: pointer;
 
     &:hover,
-    &:hover .datatable-row-header {
+    &:hover .datatable-row-header,
+    &:hover .datatable-row-footer {
       background: var(--background-selectable);
     }
   }
@@ -1666,7 +1686,8 @@ tbody:last-child .empty-line:last-child {
     & .datatable-row-header,
     &:hover,
     &:hover .datatable-row-header--no-bd,
-    &:hover .datatable-row-header {
+    &:hover .datatable-row-header,
+    &:hover .datatable-row-footer {
       background-color: var(--background-selected);
     }
   }

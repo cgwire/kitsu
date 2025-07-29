@@ -77,7 +77,6 @@
               {{ formatBoolean(statusAutomation.import_last_revision) }}
             </td>
             <row-actions-cell
-              :entry-id="statusAutomation.id"
               @edit-clicked="$emit('edit-clicked', statusAutomation)"
               @delete-clicked="$emit('delete-clicked', statusAutomation)"
               v-if="isEditable"

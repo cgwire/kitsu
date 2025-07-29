@@ -16,16 +16,17 @@
             ? 'input flexrow-item errored' + inputClass
             : 'input flexrow-item' + inputClass
         "
-        :placeholder="placeholder"
-        :type="type"
-        :value="modelValue"
+        :autocomplete="autocomplete"
         :disabled="disabled"
         :maxlength="maxlength"
         :min="type === 'number' ? min || 0 : undefined"
         :max="max || undefined"
+        :placeholder="placeholder"
+        :readonly="readonly"
         :required="required"
         :step="step || type === 'number' ? 'any' : undefined"
-        :readonly="readonly"
+        :type="type"
+        :value="modelValue"
         @input="updateValue()"
         @keyup.enter="emitEnter()"
       />
@@ -51,6 +52,9 @@ export default {
   name: 'text-field',
 
   props: {
+    autocomplete: {
+      type: String
+    },
     disabled: {
       default: false,
       type: Boolean

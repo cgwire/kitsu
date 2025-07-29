@@ -34,7 +34,6 @@
             </td>
             <boolean-cell class="is-default" :value="entry.is_default" />
             <row-actions-cell
-              :entry-id="entry.id"
               :hide-delete="entry.is_default === true"
               @edit-clicked="$emit('edit-clicked', entry)"
               @delete-clicked="$emit('delete-clicked', entry)"

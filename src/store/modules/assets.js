@@ -226,7 +226,9 @@ const helpers = {
     { assetSearch, production, sorting, taskStatusMap, taskTypeMap, persons }
   ) {
     const taskMap = tasksStore.state.taskMap
-    const taskTypes = Array.from(taskTypeMap.values())
+    const taskTypes = Array.from(taskTypeMap.values()).filter(
+      taskType => taskType.for_entity === 'Asset'
+    )
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
     const keywords = getKeyWords(query) || []

@@ -429,16 +429,21 @@ export default {
   },
 
   watch: {
-    personToEdit() {
-      this.resetForm()
+    personToEdit: {
+      immediate: true,
+      handler() {
+        this.resetForm()
+      }
     },
 
-    active() {
-      if (this.active) {
-        this.resetForm()
-        setTimeout(() => {
-          this.$refs['name-field']?.focus()
-        }, 100)
+    active: {
+      immediate: true,
+      handler() {
+        if (this.active) {
+          setTimeout(() => {
+            this.$refs['name-field']?.focus()
+          }, 100)
+        }
       }
     }
   }

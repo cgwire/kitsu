@@ -92,6 +92,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+
 import {
   CameraIcon,
   ClockIcon,
@@ -118,9 +119,7 @@ export default {
   props: {
     entry: {
       type: Object,
-      default: () => {
-        return {}
-      }
+      default: () => ({})
     },
     hideAvatar: {
       type: Boolean,

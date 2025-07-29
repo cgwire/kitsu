@@ -69,7 +69,9 @@ const helpers = {
       taskMap
     }
   ) {
-    const taskTypes = Array.from(taskTypeMap.values())
+    const taskTypes = Array.from(taskTypeMap.values()).filter(
+      taskType => taskType.for_entity === 'Episode'
+    )
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = episodeSearch
     const keywords = getKeyWords(query) || []

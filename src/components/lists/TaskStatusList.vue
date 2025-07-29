@@ -70,7 +70,6 @@
                 :value="taskStatus.is_feedback_request"
               />
               <row-actions-cell
-                :entry-id="taskStatus.id"
                 :hide-delete="
                   taskStatus.is_default === true || taskStatus.for_concept
                 "

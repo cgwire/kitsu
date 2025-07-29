@@ -15,6 +15,7 @@
 
         <form @submit.prevent>
           <text-field
+            autocomplete="new-password"
             :disabled="person.is_generated_from_ldap"
             :label="$t('people.fields.password')"
             ref="first-password"
@@ -23,6 +24,7 @@
             v-model="form.password"
           />
           <text-field
+            autocomplete="new-password"
             :disabled="person.is_generated_from_ldap"
             :label="$t('people.fields.password_2')"
             type="password"

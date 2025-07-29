@@ -58,7 +58,7 @@
     </div>
 
     <edit-avatar-modal
-      :active="modals.avatar"
+      active
       :error-text="$t('bots.edit_avatar_error')"
       :is-deleting="loading.deletingAvatar"
       :is-error="errors.avatar"
@@ -67,10 +67,11 @@
       @close="modals.avatar = false"
       @delete="deleteAvatar"
       @update="updateAvatar"
+      v-if="modals.avatar"
     />
 
     <edit-person-modal
-      :active="modals.edit"
+      active
       :is-bot="true"
       :is-error="errors.edit"
       :is-loading="loading.edit"
@@ -78,18 +79,20 @@
       :person-to-edit="personToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditPeople"
+      v-if="modals.edit"
     />
 
     <new-token-modal
-      :active="modals.newToken"
+      active
       :person="personToEdit"
       @cancel="modals.newToken = false"
       @close="modals.newToken = false"
       @generate-token="confirmGenerateToken"
+      v-if="modals.newToken"
     />
 
     <hard-delete-modal
-      :active="modals.del"
+      active
       :error-text="$t('people.delete_error')"
       :is-loading="loading.del"
       :is-error="errors.del"
@@ -97,6 +100,7 @@
       :text="deleteText"
       @cancel="modals.del = false"
       @confirm="confirmDeletePeople"
+      v-if="modals.del"
     />
   </div>
 </template>
