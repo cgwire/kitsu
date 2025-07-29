@@ -378,7 +378,7 @@ const actions = {
    * event. If the edit was updated a few times ago, it is not reloaded.
    */
   loadEdit({ commit, state, rootGetters }, editId) {
-    const edit = rootGetters.editMap.get(editId)
+    const edit = cache.editMap.get(editId)
     if (edit?.lock) return
 
     const personMap = rootGetters.personMap

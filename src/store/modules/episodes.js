@@ -51,6 +51,8 @@ import {
   SET_PREVIEW,
   UPDATE_EPISODE,
   UPDATE_METADATA_DESCRIPTOR_END,
+  LOCK_EPISODE,
+  UNLOCK_EPISODE,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -368,6 +370,9 @@ const actions = {
   },
 
   loadEpisode({ commit, state }, episodeId) {
+    const episode = cache.episodeMap.get(episodeId)
+    if (episode?.lock) return
+
     return shotsApi
       .getEpisode(episodeId)
       .then(episode => {
@@ -440,9 +445,12 @@ const actions = {
   },
 
   editEpisode({ commit, state }, data) {
-    return shotsApi.updateEpisode(data).then(episode => {
-      commit(EDIT_EPISODE_END, episode)
-      return Promise.resolve(episode)
+    commit(LOCK_EPISODE, data)
+    commit(EDIT_EPISODE_END, data)
+    return shotsApi.updateEpisode(data).finally(() => {
+      setTimeout(() => {
+        commit(UNLOCK_EPISODE, data)
+      }, 2000)
     })
   },
 
@@ -1004,6 +1012,20 @@ const mutations = {
         delete data[previousDescriptorFieldName]
         episode.data = data
       })
+    }
+  },
+
+  [LOCK_EPISODE](state, episode) {
+    episode = cache.episodeMap.get(episode.id)
+    if (episode) {
+      episode.lock = !episode.lock ? 1 : episode.lock + 1
+    }
+  },
+
+  [UNLOCK_EPISODE](state, episode) {
+    episode = cache.episodeMap.get(episode.id)
+    if (episode) {
+      episode.lock = !episode.lock ? 0 : episode.lock - 1
     }
   }
 }
