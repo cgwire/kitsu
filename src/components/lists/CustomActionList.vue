@@ -34,7 +34,6 @@
               {{ formatBoolean(customAction.is_ajax) }}
             </td>
             <row-actions-cell
-              :entry-id="customAction.id"
               @edit-clicked="$emit('edit-clicked', customAction)"
               @delete-clicked="$emit('delete-clicked', customAction)"
             />

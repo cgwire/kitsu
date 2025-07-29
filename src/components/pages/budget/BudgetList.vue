@@ -402,7 +402,6 @@
                   </td>
                   <row-actions-cell
                     class="actions"
-                    :entry-id="personEntry.id"
                     :hide-avatar="true"
                     :hide-change-password="true"
                     :hide-delete="false"
