@@ -23,6 +23,7 @@
           :label="$t('schedule.zoom_level')"
           :options="zoomOptions"
           v-model="zoomLevel"
+          @update:model-value="onZoomLevelChanged"
         />
         <combobox
           class="flexrow-item ml1"
@@ -508,6 +509,10 @@ import assetTypeStore from '@/store/modules/assettypes'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
+export const DEFAULT_MODE = 'prev'
+export const DEFAULT_VERSION = 'ref'
+export const DEFAULT_ZOOM = 1
+
 export default {
   name: 'production-schedule',
 
@@ -559,20 +564,20 @@ export default {
       selectedStartDate: null,
       selectedEndDate: null,
       selectedTaskType: null,
-      zoomLevel: 1,
+      zoomLevel: DEFAULT_ZOOM,
       zoomOptions: [
         { label: this.$t('main.week'), value: 0 },
         { label: '1', value: 1 },
         { label: '2', value: 2 },
         { label: '3', value: 3 }
       ],
-      mode: 'prev',
+      mode: DEFAULT_MODE,
       modeOptions: [
         { label: this.$t('schedule.mode_prev'), value: 'prev' },
         { label: this.$t('schedule.mode_real'), value: 'real' }
       ],
       scheduleVersionToEdit: {},
-      version: 'ref',
+      version: DEFAULT_VERSION,
       loading: {
         schedule: false,
         editScheduleVersion: false,
@@ -706,7 +711,7 @@ export default {
         label: fromScheduleVersion
           ? `${this.$t('schedule.versions.reference')} (${this.$t('schedule.versions.from')} ${fromScheduleVersion.name})`
           : this.$t('schedule.versions.reference'),
-        value: 'ref',
+        value: DEFAULT_VERSION,
         separator: true
       }
 
@@ -739,6 +744,24 @@ export default {
       'updateScheduleVersionedTask',
       'updateTask'
     ]),
+
+    updateRoute({ mode, version, zoom }) {
+      const query = { ...this.$route.query }
+
+      if (mode !== undefined) {
+        query.mode = mode || undefined
+      }
+      if (version !== undefined) {
+        query.version = version || undefined
+      }
+      if (zoom !== undefined) {
+        query.zoom = String(zoom)
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
+        this.$router.push({ query })
+      }
+    },
 
     async loadData() {
       this.loading.schedule = true
@@ -828,8 +851,22 @@ export default {
       }
       this.selectedStartDate = this.startDate.toDate()
       this.selectedEndDate = this.endDate.toDate()
-      this.version = 'ref'
+
       await this.loadData()
+
+      const mode = this.$route.query.mode
+      const version = this.$route.query.version
+      const zoom = Number(this.$route.query.zoom)
+
+      this.mode = this.modeOptions.map(o => o.value).includes(mode)
+        ? mode
+        : DEFAULT_MODE
+      this.version = this.versionOptions.map(o => o.value).includes(version)
+        ? version
+        : DEFAULT_VERSION
+      this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
+        ? zoom
+        : DEFAULT_ZOOM
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
@@ -1776,12 +1813,18 @@ export default {
       }
     },
 
-    onModeChanged() {
+    onZoomLevelChanged(zoom) {
+      this.updateRoute({ zoom })
+    },
+
+    onModeChanged(mode) {
+      this.updateRoute({ mode })
       this.closeSidePanel()
       this.refreshSchedule()
     },
 
-    onVersionChanged() {
+    onVersionChanged(version) {
+      this.updateRoute({ version })
       this.closeSidePanel()
       this.refreshSchedule()
     },
@@ -1830,8 +1873,8 @@ export default {
       this.modals.deleteScheduleVersion = false
       await this.deleteScheduleVersion(version)
       if (this.version === version.id) {
-        this.version = 'ref' // reset to reference version
-        this.onVersionChanged()
+        this.version = DEFAULT_VERSION
+        this.onVersionChanged(this.version)
       }
       this.scheduleVersionToEdit = {}
     },

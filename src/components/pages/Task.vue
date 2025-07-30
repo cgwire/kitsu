@@ -914,7 +914,6 @@ export default {
       'changeCommentPreview',
       'clearSelectedTasks',
       'deleteAttachment',
-      'deleteTask',
       'deleteTaskPreview',
       'deleteTaskComment',
       'editTaskComment',

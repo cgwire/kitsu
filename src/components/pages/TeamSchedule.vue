@@ -242,6 +242,8 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 
+export const DEFAULT_ZOOM = 1
+
 export default {
   name: 'team-schedule',
 
@@ -282,7 +284,7 @@ export default {
       startDate: moment(),
       unassignedTasks: [],
       totalUnassignedTasks: 0,
-      zoomLevel: 1,
+      zoomLevel: DEFAULT_ZOOM,
       zoomOptions: [
         { label: '1', value: 1 },
         { label: '2', value: 2 },
@@ -310,8 +312,10 @@ export default {
   mounted() {
     this.selectedDepartment = this.$route.query.department || undefined
     this.selectedStudio = this.$route.query.studio || undefined
-    const zoom = parseInt(this.$route.query.zoom) || 1
-    this.zoomLevel = Math.min(Math.max(zoom, 1), 4)
+    const zoom = Number(this.$route.query.zoom)
+    this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
+      ? zoom
+      : DEFAULT_ZOOM
 
     this.init()
   },

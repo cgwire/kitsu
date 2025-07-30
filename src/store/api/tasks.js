@@ -128,8 +128,8 @@ export default {
     return client.ppost(url, {})
   },
 
-  deleteTask(task, callback) {
-    client.del(`/api/data/tasks/${task.id}?force=true`, callback)
+  deleteTask(task) {
+    return client.pdel(`/api/data/tasks/${task.id}?force=true`)
   },
 
   deleteAllTasks(projectId, taskTypeId, taskIds) {
