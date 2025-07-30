@@ -321,10 +321,13 @@ const actions = {
         (taskId, next) => {
           const task = state.taskMap.get(taskId)
           if (task) {
-            tasksApi.deleteTask(task, err => {
-              if (!err) commit(DELETE_TASK_END, task)
-              next(err)
-            })
+            tasksApi
+              .deleteTask(task)
+              .then(() => {
+                commit(DELETE_TASK_END, task)
+                next()
+              })
+              .catch(next)
           } else {
             next()
           }
@@ -430,15 +433,6 @@ const actions = {
   updateTask({ commit }, { taskId, data }) {
     commit(EDIT_TASK_DATES, { taskId, data })
     return tasksApi.updateTask(taskId, data)
-  },
-
-  deleteTask({ commit }, { task, callback }) {
-    tasksApi.deleteTask(task, err => {
-      if (!err) {
-        commit(DELETE_TASK_END, task)
-      }
-      if (callback) callback(err)
-    })
   },
 
   editTaskComment({ commit }, { taskId, comment }) {
