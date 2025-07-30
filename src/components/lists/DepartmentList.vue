@@ -8,6 +8,12 @@
               {{ $t('departments.fields.name') }}
             </th>
             <th scope="col">{{ $t('departments.fields.color') }}</th>
+            <th scope="col">
+              {{ $t('departments.hardware_used_by_artists') }}
+            </th>
+            <th scope="col">
+              {{ $t('departments.software_used_by_artists') }}
+            </th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -20,6 +26,20 @@
               <div>
                 <span :style="{ background: entry.color }"> </span>
               </div>
+            </td>
+            <td class="items">
+              {{
+                (linkedHardwareItems[entry.id] || [])
+                  .map(item => item.name)
+                  .join(', ')
+              }}
+            </td>
+            <td class="items">
+              {{
+                (linkedSoftwareLicenses[entry.id] || [])
+                  .map(item => item.name)
+                  .join(', ')
+              }}
             </td>
             <row-actions-cell
               @edit-clicked="$emit('edit-clicked', entry)"
@@ -41,15 +61,35 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'department-list',
-
-  props: ['entries', 'isLoading', 'isError'],
+  emits: ['delete-clicked', 'edit-clicked'],
 
   components: {
     RowActionsCell,
     TableInfo
   },
 
-  emits: ['delete-clicked', 'edit-clicked']
+  props: {
+    entries: {
+      type: Array,
+      required: true
+    },
+    isLoading: {
+      type: Boolean,
+      required: true
+    },
+    isError: {
+      type: Boolean,
+      required: true
+    },
+    linkedHardwareItems: {
+      type: Array,
+      required: true
+    },
+    linkedSoftwareLicenses: {
+      type: Array,
+      required: true
+    }
+  }
 }
 </script>
 
@@ -65,6 +105,12 @@ export default {
   width: 20px;
   height: 20px;
   border-radius: 10px;
+}
+
+.items {
+  padding: 1em;
+  min-width: 200px;
+  max-width: 200px;
 }
 
 .datatable-body tr:first-child th,

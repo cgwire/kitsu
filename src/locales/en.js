@@ -166,6 +166,7 @@ export default {
     remaining: 'Remaining',
     salary_scale_title: 'Salary Scale',
     show_expenses: 'Show real costs',
+    show_items: 'Count hardware and software',
     title: 'Budget',
     fields: {
       base_salary: 'Salary',
@@ -334,13 +335,21 @@ export default {
 
   departments: {
     all_asset_types: 'All departments',
+    available_items: 'Available Items',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this department.',
     edit_title: 'Edit department',
+    hardware_used_by_artists: 'Hardware used by artists',
+    linked_hardware: 'Linked hardware',
+    linked_items: 'Linked Items',
+    linked_software: 'Linked software',
+    no_items_linked: 'No items linked to this department.',
     no_department: 'No department',
     new_departments: 'Add a department',
     number: 'department | departments',
+    select_department: 'Select a department to link items.',
+    software_used_by_artists: 'Software used by artists',
     title: 'Departments',
     fields: {
       name: 'Name',
@@ -476,6 +485,24 @@ export default {
       'complete': 'Complete',
       'standby': 'Stand By',
       'running': 'Running'
+    }
+  },
+
+  hardware_items: {
+    create_error: 'An error occurred while creating the hardware item.',
+    delete_error: 'An error occurred while deleting the hardware item.',
+    delete_text: 'Are you sure you want to delete this hardware item?',
+    edit_title: 'Edit Hardware Item',
+    new_hardware_item: 'New Hardware Item',
+    number: 'hardware item | hardware items',
+    title: 'Hardware Items',
+
+    fields: {
+      inventory_amount: 'Inventory Amount',
+      monthly_cost: 'Monthly Cost',
+      name: 'Name',
+      remaining_amount: 'Remaining Amount',
+      short_name: 'Short Name'
     }
   },
 
@@ -1144,14 +1171,6 @@ export default {
       start_and_end_dates: 'Start and end dates',
       shots_to_import: 'shots to import'
     },
-    home: {
-      create_new: 'Create a new production',
-      empty: 'You don\'t have any open productions. How about creating a new one?',
-      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
-      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
-      title: 'My Productions',
-      welcome: 'Welcome to Kitsu'
-    },
 
     fields: {
       code: 'Short Name',
@@ -1172,6 +1191,15 @@ export default {
       status: 'Status',
       style: 'Style',
       type: 'Type'
+    },
+
+    home: {
+      create_new: 'Create a new production',
+      empty: 'You don\'t have any open productions. How about creating a new one?',
+      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
+      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
+      title: 'My Productions',
+      welcome: 'Welcome to Kitsu'
     },
 
     metadata: {
@@ -1810,6 +1838,26 @@ export default {
     match_details: 'match found in {target}',
     placeholder: 'Search for an entity in the database...',
     title: 'Entity Search'
+  },
+
+  software_licenses: {
+    create_error: 'An error occurred while creating the software license.',
+    delete_error: 'An error occurred while deleting the software license.',
+    delete_text: 'Are you sure you want to delete this software license?',
+    edit_title: 'Edit Software License',
+    new_software_license: 'New Software License',
+    number: 'software license | software licenses',
+    title: 'Software Licenses',
+
+    fields: {
+      extension: 'Extension',
+      name: 'Name',
+      monthly_cost: 'Monthly Cost',
+      inventory_amount: 'Inventory Amount',
+      short_name: 'Short Name',
+      status: 'Status',
+      version: 'Version'
+    }
   },
 
   timesheets: {

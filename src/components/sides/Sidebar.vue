@@ -167,6 +167,18 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'software-licenses' }">
+                <egg-icon class="nav-icon" />
+                {{ $t('software_licenses.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
+              <router-link :to="{ name: 'hardware-items' }">
+                <computer-icon class="nav-icon" />
+                {{ $t('hardware_items.title') }}
+              </router-link>
+            </p>
+            <p @click="toggleSidebar()">
               <router-link :to="{ name: 'custom-actions' }">
                 <kitsu-icon class="nav-icon" name="custom" />
                 {{ $t('custom_actions.title') }}
@@ -216,7 +228,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import { BotIcon, BuildingIcon, GlobeIcon, Rows4Icon } from 'lucide-vue-next'
+import {
+  BotIcon,
+  BuildingIcon,
+  ComputerIcon,
+  EggIcon,
+  GlobeIcon,
+  Rows4Icon
+} from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
@@ -225,6 +244,8 @@ export default {
   components: {
     BotIcon,
     BuildingIcon,
+    ComputerIcon,
+    EggIcon,
     GlobeIcon,
     KitsuIcon,
     Rows4Icon
