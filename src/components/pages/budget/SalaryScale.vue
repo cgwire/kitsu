@@ -272,9 +272,9 @@ export default {
     },
 
     modifySalaryScale(departmentId, position, seniority, event) {
-      const value = event.target.value
+      const salary = Math.trunc(event.target.valueAsNumber || 0)
       const scaleEntry = this.salaryScale[departmentId][position][seniority]
-      scaleEntry.salary = parseInt(value)
+      scaleEntry.salary = salary
       this.updateSalaryScale(scaleEntry)
     }
   }
