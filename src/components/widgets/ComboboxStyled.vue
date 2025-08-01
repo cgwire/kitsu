@@ -175,7 +175,7 @@ export default {
       this.showList = !this.showList
       if (this.showList) {
         this.$nextTick(() => {
-          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
+          this.$refs.select?.scrollTo({ top: this.lastScrollPosition, left: 0 })
         })
       }
     },
@@ -205,13 +205,14 @@ export default {
     showList() {
       if (this.showList && this.isReversed) {
         this.$nextTick(() => {
+          if (!this.$refs.select?.children) return
           let list = null
           for (const child of this.$refs.select.children) {
             if (child.className !== 'flexrow') {
               list = child
             }
           }
-          list.scrollTo({ top: this.optionList.length * 60 })
+          list?.scrollTo({ top: this.optionList.length * 60 })
         })
       }
     },

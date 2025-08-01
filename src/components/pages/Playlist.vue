@@ -1007,7 +1007,7 @@ export default {
       this.playlistPlayer.entityList.push(playlistEntity)
       if (scrollRight) {
         this.$nextTick(() => {
-          this.playlistPlayer.scrollToRight()
+          this.playlistPlayer?.scrollToRight()
         })
       }
     },
