@@ -3,7 +3,7 @@
     <template v-if="!minimized">
       <router-link
         class="tag dynamic"
-        :to="taskPath(task)"
+        :to="taskPath"
         :style="tagStyle"
         :title="taskStatus.name"
         v-if="!isStatic && !isCurrentUserClient"
@@ -27,7 +27,7 @@
           veryhigh: task.priority === 2,
           emergency: task.priority === 3
         }"
-        :title="formatPriority(task.priority)"
+        :title="formatPriority"
         v-if="isPriority && !isCurrentUserClient && task.priority > 0"
       >
         {{ priority }}
@@ -35,7 +35,7 @@
     </template>
     <template v-else>
       <router-link
-        :to="taskPath(task)"
+        :to="taskPath"
         class="tag dynamic"
         :style="tagStyle"
         :title="taskStatus.name"
@@ -172,11 +172,10 @@ export default {
           cursor: isStatic ? 'pointer' : this.cursor
         }
       }
-    }
-  },
+    },
 
-  methods: {
-    taskPath(task) {
+    taskPath() {
+      const task = this.task
       const productionId = this.task.project_id
         ? this.task.project_id
         : this.currentProduction.id
@@ -199,7 +198,8 @@ export default {
       return route
     },
 
-    formatPriority(priority) {
+    formatPriority() {
+      const priority = this.task.priority
       let label = priority + ''
       if (priority === 0) {
         label = 'normal'

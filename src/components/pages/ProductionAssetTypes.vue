@@ -132,7 +132,7 @@ export default {
     },
 
     onSearchChange() {
-      const searchQuery = this.$refs['asset-type-search-field'].getValue()
+      const searchQuery = this.$refs['asset-type-search-field']?.getValue()
       this.setAssetTypeSearch(searchQuery)
       this.setSearchInUrl(searchQuery)
     },
