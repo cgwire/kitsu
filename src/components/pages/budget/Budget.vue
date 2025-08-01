@@ -3,7 +3,6 @@
     <template #main>
       <div class="flexcolumn page">
         <budget-header
-          :budgets="budgets"
           :budget-options="budgetOptions"
           :budget="currentBudget"
           :is-loading="loading.budgets"

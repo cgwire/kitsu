@@ -82,10 +82,6 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 defineProps({
-  budgets: {
-    type: Array,
-    default: () => []
-  },
   budgetOptions: {
     type: Array,
     default: () => []
