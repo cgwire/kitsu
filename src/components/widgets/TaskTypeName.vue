@@ -92,7 +92,7 @@ export default {
 
     color() {
       return this.taskType.color?.toUpperCase() === '#000000'
-        ? '$grey-strong'
+        ? '#666'
         : this.taskType.color
     },
 

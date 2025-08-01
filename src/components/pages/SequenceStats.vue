@@ -187,7 +187,7 @@ export default {
     },
 
     onSearchChange() {
-      const searchQuery = this.$refs['sequence-search-field'].getValue()
+      const searchQuery = this.$refs['sequence-search-field']?.getValue()
       this.setSearchInUrl()
       this.setSequenceStatsSearch(searchQuery)
     },
