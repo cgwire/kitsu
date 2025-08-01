@@ -6,7 +6,7 @@
         :to="taskPath"
         :style="tagStyle"
         :title="taskStatus.name"
-        v-if="!isStatic && !isCurrentUserClient"
+        v-if="!isStatic && !isCurrentUserClient && taskPath"
       >
         {{ taskStatus.short_name }}
       </router-link>
@@ -39,7 +39,7 @@
         class="tag dynamic"
         :style="tagStyle"
         :title="taskStatus.name"
-        v-if="!isStatic && !isCurrentUserClient"
+        v-if="!isStatic && !isCurrentUserClient && taskPath"
       >
         &nbsp;
       </router-link>
@@ -175,6 +175,7 @@ export default {
     },
 
     taskPath() {
+      if (!this.currentProduction?.id) return
       const task = this.task
       const productionId = this.task.project_id
         ? this.task.project_id
