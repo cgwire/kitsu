@@ -100,7 +100,7 @@ const actions = {
   },
 
   toggleNotificationReadStatusLocal({ commit }, notification) {
-    this.$store.commit('TOGGLE_NOTIFICATION_READ_STATUS', notification)
+    commit('TOGGLE_NOTIFICATION_READ_STATUS', notification)
     return notification
   }
 }
