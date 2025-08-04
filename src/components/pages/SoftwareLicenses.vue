@@ -137,6 +137,7 @@ export default {
       })
       return usedAmounts
     },
+
     remainingSoftwareLicenses() {
       const remainingAmounts = {}
       this.softwareLicenses.forEach(license => {
@@ -188,7 +189,7 @@ export default {
         })
     },
 
-    confirmDeleteAssetType() {
+    confirmDeleteSoftwareLicense() {
       this.loading.del = true
       this.errors.del = false
       this.deleteSoftwareLicense(this.softwareLicenseToDelete)
