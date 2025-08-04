@@ -33,7 +33,6 @@
             <topbar-production-list
               :episode-id="currentEpisodeId"
               :production-list="openProductions"
-              :production="currentProduction"
               :section="currentSectionOption"
             />
           </div>
