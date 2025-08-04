@@ -104,14 +104,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'hardwareItems',
-      'archivedHardwareItems',
-      'getHardwareItem',
-      'linkedHardwareItems',
-      'activePeople',
-      'taskTypeMap'
-    ]),
+    ...mapGetters(['activePeople', 'hardwareItems', 'archivedHardwareItems']),
 
     isActiveTab() {
       return this.activeTab === 'active'
@@ -130,12 +123,6 @@ export default {
       } else {
         return ''
       }
-    },
-
-    modalTitle() {
-      return this.isEditing
-        ? this.$t('hardware_items.edit_title')
-        : this.$t('hardware_items.new_hardware_item')
     },
 
     usedAmounts() {
@@ -250,7 +237,7 @@ export default {
   },
 
   watch: {
-    $route() {
+    '$route.query.tab'() {
       this.activeTab = this.$route.query.tab || 'active'
     }
   },
