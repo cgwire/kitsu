@@ -209,8 +209,8 @@ export default {
       const headers = [
         this.$t('software_licenses.fields.name'),
         this.$t('software_licenses.fields.short_name'),
+        this.$t('software_licenses.fields.extension'),
         this.$t('software_licenses.fields.version'),
-        this.$t('software_licenses.fields.file_extension'),
         this.$t('software_licenses.fields.monthly_cost'),
         this.$t('software_licenses.fields.inventory_amount')
       ]
@@ -218,8 +218,8 @@ export default {
         this.softwareLicenses.map(softwareLicense => [
           softwareLicense.name,
           softwareLicense.short_name,
-          softwareLicense.version,
           softwareLicense.file_extension,
+          softwareLicense.version,
           softwareLicense.monthly_cost,
           softwareLicense.inventory_amount
         ])
