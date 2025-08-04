@@ -47,9 +47,9 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import HardwareItemList from '@/components/lists/HardwareItemList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditHardwareItemModal from '@/components/modals/EditHardwareItemModal.vue'
+import HardwareItemList from '@/components/lists/HardwareItemList.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
@@ -57,9 +57,9 @@ export default {
   name: 'hardware-items',
 
   components: {
-    HardwareItemList,
     DeleteModal,
     EditHardwareItemModal,
+    HardwareItemList,
     ListPageHeader,
     RouteTabs
   },

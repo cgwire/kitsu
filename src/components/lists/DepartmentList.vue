@@ -29,15 +29,13 @@
             </td>
             <td class="items">
               {{
-                (linkedHardwareItems[entry.id] || [])
-                  .map(item => item.name)
-                  .join(', ')
+                linkedHardwareItems[entry.id]?.map(item => item.name).join(', ')
               }}
             </td>
             <td class="items">
               {{
-                (linkedSoftwareLicenses[entry.id] || [])
-                  .map(item => item.name)
+                linkedSoftwareLicenses[entry.id]
+                  ?.map(item => item.name)
                   .join(', ')
               }}
             </td>
@@ -55,12 +53,14 @@
     </p>
   </div>
 </template>
+
 <script>
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 export default {
   name: 'department-list',
+
   emits: ['delete-clicked', 'edit-clicked'],
 
   components: {
@@ -94,17 +94,22 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.name {
+  width: 300px;
+  padding: 1em;
+}
+
 .color {
   width: 20px;
   height: 20px;
   text-align: center;
-}
 
-.color span {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
+  span {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+  }
 }
 
 .items {
@@ -116,10 +121,5 @@ export default {
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
-}
-
-.name {
-  width: 300px;
-  padding: 1em;
 }
 </style>

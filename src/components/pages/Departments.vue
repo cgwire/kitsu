@@ -183,7 +183,6 @@ export default {
       'loadSoftwareLicenses',
       'loadLinkedHardwareItems',
       'loadLinkedSoftwareLicenses',
-      'newDepartment',
       'unlinkHardwareItem',
       'unlinkSoftwareLicense'
     ]),

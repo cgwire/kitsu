@@ -47,21 +47,21 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditSoftwareLicenseModal from '@/components/modals/EditSoftwareLicenseModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
+import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 
 export default {
   name: 'software-licenses',
 
   components: {
-    SoftwareLicenseList,
     DeleteModal,
     EditSoftwareLicenseModal,
     ListPageHeader,
-    RouteTabs
+    RouteTabs,
+    SoftwareLicenseList
   },
 
   data() {
