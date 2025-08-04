@@ -492,7 +492,7 @@ export default {
   },
 
   hardware_items: {
-    create_error: 'An error occurred while creating the hardware item.',
+    create_error: 'An error occurred while saving the hardware item.',
     delete_error: 'An error occurred while deleting the hardware item.',
     delete_text: 'Are you sure you want to delete this hardware item?',
     edit_title: 'Edit Hardware Item',
@@ -1846,7 +1846,7 @@ export default {
   },
 
   software_licenses: {
-    create_error: 'An error occurred while creating the software license.',
+    create_error: 'An error occurred while saving the software license.',
     delete_error: 'An error occurred while deleting the software license.',
     delete_text: 'Are you sure you want to delete this software license?',
     edit_title: 'Edit Software License',
