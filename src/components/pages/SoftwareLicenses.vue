@@ -205,6 +205,7 @@ export default {
     onExportClicked() {
       const name = stringHelpers.slugify(this.$t('software_licenses.title'))
       const headers = [
+        this.$t('main.type'),
         this.$t('software_licenses.fields.name'),
         this.$t('software_licenses.fields.short_name'),
         this.$t('software_licenses.fields.extension'),
@@ -214,6 +215,7 @@ export default {
       ]
       const entries = [headers].concat(
         this.softwareLicenses.map(softwareLicense => [
+          softwareLicense.type,
           softwareLicense.name,
           softwareLicense.short_name,
           softwareLicense.file_extension,

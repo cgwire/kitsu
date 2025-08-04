@@ -201,6 +201,7 @@ export default {
     onExportClicked() {
       const name = stringHelpers.slugify(this.$t('hardware_items.title'))
       const headers = [
+        this.$t('main.type'),
         this.$t('hardware_items.fields.name'),
         this.$t('hardware_items.fields.short_name'),
         this.$t('hardware_items.fields.monthly_cost'),
@@ -208,6 +209,7 @@ export default {
       ]
       const entries = [headers].concat(
         this.hardwareItems.map(hardwareItem => [
+          hardwareItem.type,
           hardwareItem.name,
           hardwareItem.short_name,
           hardwareItem.monthly_cost,
