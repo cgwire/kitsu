@@ -82,8 +82,8 @@ export default {
       activeTab: 'active',
       departmentToEdit: null,
       departmentToDelete: null,
-      linkedHardwareItems: [],
-      linkedSoftwareLicenses: [],
+      linkedHardwareItems: {},
+      linkedSoftwareLicenses: {},
       errors: {
         departments: false,
         edit: false,

@@ -82,11 +82,11 @@ export default {
       required: true
     },
     linkedHardwareItems: {
-      type: Array,
+      type: Object,
       required: true
     },
     linkedSoftwareLicenses: {
-      type: Array,
+      type: Object,
       required: true
     }
   }

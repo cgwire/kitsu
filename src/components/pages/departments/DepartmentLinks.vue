@@ -57,42 +57,38 @@
 </template>
 
 <script setup>
-import { computed, defineEmits, ref, watch, onMounted } from 'vue'
+import { computed, defineEmits, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
 const store = useStore()
+
 const props = defineProps({
-  type: {
-    type: String,
+  items: {
+    type: Array,
     required: true
   },
   linkedItems: {
-    type: Array,
+    type: Object,
     required: true
-  },
-  items: {
-    type: Array,
-    required: true,
-    default: () => []
   }
 })
+
 const emit = defineEmits(['link-item', 'unlink-item'])
 
 // Data
 
 const selectedDepartment = ref(null)
-const departmentLinkedItems = ref([])
-
-// Hooks
-
-onMounted(async () => {})
 
 // Computed
 
 const departments = computed(() => {
   return store.getters.departments
+})
+
+const departmentLinkedItems = computed(() => {
+  return props.linkedItems[selectedDepartment.value?.id] || []
 })
 
 const availableItems = computed(() => {
@@ -103,11 +99,8 @@ const availableItems = computed(() => {
 // Methods
 
 const selectDepartment = department => {
-  if (selectedDepartment.value === department) {
-    selectedDepartment.value = null
-  } else {
-    selectedDepartment.value = department
-  }
+  selectedDepartment.value =
+    selectedDepartment.value === department ? null : department
 }
 
 const selectItem = item => {
@@ -116,10 +109,6 @@ const selectItem = item => {
     departmentId: selectedDepartment.value.id,
     itemId: item.id
   })
-  if (!departmentLinkedItems.value) {
-    departmentLinkedItems.value = []
-  }
-  departmentLinkedItems.value.push(item)
 }
 
 const removeItem = item => {
@@ -128,20 +117,7 @@ const removeItem = item => {
     departmentId: selectedDepartment.value.id,
     itemId: item.id
   })
-  departmentLinkedItems.value = departmentLinkedItems.value.filter(
-    i => i.id !== item.id
-  )
 }
-
-// Watchers
-
-watch(selectedDepartment, newVal => {
-  if (selectedDepartment.value === null) {
-    departmentLinkedItems.value = []
-  } else {
-    departmentLinkedItems.value = props.linkedItems[newVal.id] || []
-  }
-})
 </script>
 
 <style scoped>
