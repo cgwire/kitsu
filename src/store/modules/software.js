@@ -22,9 +22,9 @@ const getters = {
     state.softwareLicenses.filter(license => !license.archived),
   archivedSoftwareLicenses: state =>
     state.softwareLicenses.filter(license => license.archived),
-  softwareLicenseMap: state => cache.softwareLicenseMap,
+  softwareLicenseMap: () => cache.softwareLicenseMap,
 
-  getSoftwareLicense: (state, getters) => id => {
+  getSoftwareLicense: state => id => {
     return state.softwareLicenses.find(
       softwareLicense => softwareLicense.id === id
     )
@@ -37,14 +37,14 @@ const getters = {
 }
 
 const actions = {
-  loadSoftwareLicenses({ commit, state }) {
+  loadSoftwareLicenses({ commit }) {
     softwareLicensesApi.getSoftwareLicenses().then(softwareLicenses => {
       commit(LOAD_SOFTWARE_LICENSES_END, softwareLicenses)
       Promise.resolve(softwareLicenses)
     })
   },
 
-  loadSoftwareLicense({ commit, state }, softwareLicenseId) {
+  loadSoftwareLicense({ commit }, softwareLicenseId) {
     softwareLicensesApi
       .getSoftwareLicense(softwareLicenseId)
       .then(softwareLicense => {
@@ -53,7 +53,7 @@ const actions = {
       })
   },
 
-  newSoftwareLicense({ commit, state }, data) {
+  newSoftwareLicense({ commit }, data) {
     return softwareLicensesApi
       .newSoftwareLicense(data)
       .then(softwareLicense => {
@@ -62,7 +62,7 @@ const actions = {
       })
   },
 
-  editSoftwareLicense({ commit, state }, data) {
+  editSoftwareLicense({ commit }, data) {
     return softwareLicensesApi
       .updateSoftwareLicense(data)
       .then(softwareLicense => {
@@ -71,7 +71,7 @@ const actions = {
       })
   },
 
-  deleteSoftwareLicense({ commit, state }, softwareLicense) {
+  deleteSoftwareLicense({ commit }, softwareLicense) {
     return softwareLicensesApi
       .deleteSoftwareLicense(softwareLicense)
       .then(() => {

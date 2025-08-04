@@ -164,8 +164,7 @@ export default {
       'deleteSoftwareLicense',
       'editSoftwareLicense',
       'newSoftwareLicense',
-      'loadLinkedSoftwareLicenses',
-      'loadSoftwareLicenses'
+      'loadLinkedSoftwareLicenses'
     ]),
 
     confirmEditSoftwareLicense(form) {

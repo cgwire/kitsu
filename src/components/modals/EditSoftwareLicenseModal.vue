@@ -17,15 +17,15 @@
       />
 
       <text-field
-        :label="$t('software_licenses.fields.version')"
-        @enter="runConfirmation"
-        v-model="form.version"
-      />
-
-      <text-field
         :label="$t('software_licenses.fields.extension')"
         @enter="runConfirmation"
         v-model="form.file_extension"
+      />
+
+      <text-field
+        :label="$t('software_licenses.fields.version')"
+        @enter="runConfirmation"
+        v-model="form.version"
       />
 
       <text-field
@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
@@ -116,10 +116,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['softwareLicenses', 'softwareLicenseMap']),
-
     isEditing() {
-      return this.softwareLicenseToEdit && this.softwareLicenseToEdit.id
+      return Boolean(this.softwareLicenseToEdit?.id)
     },
 
     modalTitle() {
@@ -143,8 +141,8 @@ export default {
         this.form = {
           name: this.softwareLicenseToEdit.name,
           short_name: this.softwareLicenseToEdit.short_name,
-          version: this.softwareLicenseToEdit.version,
           file_extension: this.softwareLicenseToEdit.file_extension,
+          version: this.softwareLicenseToEdit.version,
           monthly_cost: this.softwareLicenseToEdit.monthly_cost,
           inventory_amount: this.softwareLicenseToEdit.inventory_amount,
           archived: String(this.softwareLicenseToEdit.archived === true)
@@ -153,8 +151,8 @@ export default {
         this.form = {
           name: '',
           short_name: '',
-          version: '',
           file_extension: '',
+          version: '',
           monthly_cost: 0,
           inventory_amount: 0,
           archived: 'false'
@@ -167,7 +165,7 @@ export default {
     active() {
       if (this.active) {
         setTimeout(() => {
-          this.$refs.nameField.focus()
+          this.$refs.nameField?.focus()
         }, 100)
       }
     },

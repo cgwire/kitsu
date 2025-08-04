@@ -12,6 +12,7 @@
 
       <text-field
         :label="$t('hardware_items.fields.short_name')"
+        @enter="runConfirmation"
         v-model="form.short_name"
       />
 
@@ -48,7 +49,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
@@ -103,10 +104,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['hardwareItems', 'hardwareItemMap']),
-
     isEditing() {
-      return this.hardwareItemToEdit && this.hardwareItemToEdit.id
+      return Boolean(this.hardwareItemToEdit?.id)
     },
 
     modalTitle() {
@@ -150,7 +149,7 @@ export default {
     active() {
       if (this.active) {
         setTimeout(() => {
-          this.$refs.nameField.focus()
+          this.$refs.nameField?.focus()
         }, 100)
       }
     },

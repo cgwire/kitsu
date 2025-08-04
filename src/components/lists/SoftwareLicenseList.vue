@@ -73,8 +73,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
@@ -105,13 +103,7 @@ export default {
     }
   },
 
-  emits: ['delete-clicked', 'edit-clicked'],
-
-  computed: {
-    ...mapGetters(['taskTypeMap'])
-  },
-
-  methods: {}
+  emits: ['delete-clicked', 'edit-clicked']
 }
 </script>
 
@@ -121,21 +113,14 @@ export default {
   border-top: 0;
 }
 
-// Styles spécifiques au composant si nécessaire
-.extension {
-  width: 100px;
-  padding: 1em;
-}
-
+.extension,
 .version {
   width: 100px;
   padding: 1em;
 }
 
-.remaining-amount {
-  &.negative {
-    color: red;
-    font-weight: bold;
-  }
+.remaining-amount.negative {
+  color: $red;
+  font-weight: bold;
 }
 </style>

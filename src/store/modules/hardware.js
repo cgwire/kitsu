@@ -22,9 +22,9 @@ const getters = {
     state.hardwareItems.filter(hardwareItem => !hardwareItem.archived),
   archivedHardwareItems: state =>
     state.hardwareItems.filter(hardwareItem => hardwareItem.archived),
-  hardwareItemMap: state => cache.hardwareItemMap,
+  hardwareItemMap: () => cache.hardwareItemMap,
 
-  getHardwareItem: (state, getters) => id => {
+  getHardwareItem: state => id => {
     return state.hardwareItems.find(hardwareItem => hardwareItem.id === id)
   },
 
@@ -35,35 +35,35 @@ const getters = {
 }
 
 const actions = {
-  loadHardwareItems({ commit, state }) {
+  loadHardwareItems({ commit }) {
     hardwareItemsApi.getHardwareItems().then(hardwareItems => {
       commit(LOAD_HARDWARE_ITEMS_END, hardwareItems)
       Promise.resolve(hardwareItems)
     })
   },
 
-  loadHardwareItem({ commit, state }, hardwareItemId) {
+  loadHardwareItem({ commit }, hardwareItemId) {
     hardwareItemsApi.getHardwareItem(hardwareItemId).then(hardwareItem => {
       commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
       Promise.resolve(hardwareItem)
     })
   },
 
-  newHardwareItem({ commit, state }, data) {
+  newHardwareItem({ commit }, data) {
     return hardwareItemsApi.newHardwareItem(data).then(hardwareItem => {
       commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
       Promise.resolve(hardwareItem)
     })
   },
 
-  editHardwareItem({ commit, state }, data) {
+  editHardwareItem({ commit }, data) {
     return hardwareItemsApi.updateHardwareItem(data).then(hardwareItem => {
       commit(EDIT_HARDWARE_ITEM_END, hardwareItem)
       Promise.resolve(hardwareItem)
     })
   },
 
-  deleteHardwareItem({ commit, state }, hardwareItem) {
+  deleteHardwareItem({ commit }, hardwareItem) {
     return hardwareItemsApi.deleteHardwareItem(hardwareItem).then(() => {
       commit(DELETE_HARDWARE_ITEM_END, hardwareItem)
       Promise.resolve(hardwareItem)
