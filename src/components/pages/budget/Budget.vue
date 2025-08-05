@@ -485,11 +485,12 @@ export default {
     async deleteBudget() {
       this.loading.deleteBudget = true
       try {
+        const budget = this.currentBudget
         await this.deleteProductionBudget({
           productionId: this.currentProduction.id,
-          budgetId: this.currentBudget.id
+          budgetId: budget.id
         })
-        this.postDeleteBudget(this.currentBudget)
+        this.postDeleteBudget(budget)
         this.modals.deleteBudget = false
       } catch (error) {
         console.error(error)
