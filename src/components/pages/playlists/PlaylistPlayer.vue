@@ -326,9 +326,7 @@
       ref="video-progress"
       class="video-progress pull-bottom"
       :annotations="annotations"
-      :entity-ist="entityList"
       :empty="!isCurrentPreviewMovie"
-      :fps="fps"
       :frame-duration="frameDuration"
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
@@ -1106,7 +1104,6 @@ export default {
 
   data() {
     return {
-      buildLaunched: false,
       comparisonEntityMissing: false,
       comparisonMode: 'sidebyside',
       currentBackground: null,

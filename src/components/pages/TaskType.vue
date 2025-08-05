@@ -1726,7 +1726,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .page-header {
   margin-top: 1em;
   margin-right: 0;

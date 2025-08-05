@@ -939,7 +939,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .thumbnail {
   min-width: 63px;
   max-width: 63px;

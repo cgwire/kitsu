@@ -62,6 +62,9 @@ export default {
     label: {
       type: String
     },
+    modelModifiers: {
+      default: () => ({})
+    },
     modelValue: {
       type: [String, Number]
     },
@@ -128,6 +131,9 @@ export default {
       if (this.type === 'number') {
         return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
       } else {
+        if (this.modelModifiers.trim && typeof input.value === 'string') {
+          return input.value.trim()
+        }
         return input.value
       }
     },

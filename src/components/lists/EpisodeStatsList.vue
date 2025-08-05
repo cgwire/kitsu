@@ -295,8 +295,6 @@ export default {
       'episodeStats',
       'episodeRetakeStats',
       'isCurrentUserClient',
-      'isCurrentUserManager',
-      'isSingleEpisode',
       'isTVShow',
       'taskTypeMap'
     ]),

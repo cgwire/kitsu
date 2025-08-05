@@ -51,7 +51,6 @@
           <combobox-department
             class="flexrow-item"
             :label="$t('people.import_from_department')"
-            :department-list="departments"
             :with-empty-choice="false"
             v-model="importDepartmentId"
           />

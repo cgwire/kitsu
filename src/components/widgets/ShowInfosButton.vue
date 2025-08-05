@@ -60,15 +60,13 @@ export default {
   watch: {
     isShowInfosBreakdown() {
       const value = this.isShowInfosBreakdown.toString()
-      localStorage.setItem('show-infos-breakdown', value, {
-        expires: '1M'
-      })
+      localStorage.setItem('show-infos-breakdown', value)
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .button {
   border-radius: 10px;
   padding: 0 10px;

@@ -120,7 +120,7 @@ const removeItem = item => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .columns {
   display: flex;
   gap: 2rem;

@@ -135,7 +135,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .date-selector {
   display: flex;
   gap: 1rem;
