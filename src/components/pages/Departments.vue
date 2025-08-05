@@ -8,15 +8,27 @@
       @new-clicked="onNewClicked"
     />
 
-    <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
+    <route-tabs class="tabs" :active-tab="activeTab" :tabs="tabs" />
 
     <department-list
       class="department-list"
       :entries="departmentList"
       :is-loading="loading.departments"
       :is-error="errors.departments"
+      :linked-hardware-items="linkedHardwareItems"
+      :linked-software-licenses="linkedSoftwareLicenses"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
+      v-if="activeTab === 'active' || activeTab === 'archived'"
+    />
+
+    <department-links
+      :type="activeTab"
+      :linked-items="linkedItems"
+      :items="items"
+      @link-item="onLinkItem"
+      @unlink-item="onUnlinkItem"
+      v-if="activeTab === 'linked-hardware' || activeTab === 'linked-software'"
     />
 
     <edit-departments-modal
@@ -47,6 +59,7 @@ import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import DepartmentLinks from '@/components/pages/departments/DepartmentLinks.vue'
 import DepartmentList from '@/components/lists/DepartmentList.vue'
 import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
@@ -57,6 +70,7 @@ export default {
 
   components: {
     DeleteModal,
+    DepartmentLinks,
     DepartmentList,
     EditDepartmentsModal,
     ListPageHeader,
@@ -68,6 +82,8 @@ export default {
       activeTab: 'active',
       departmentToEdit: null,
       departmentToDelete: null,
+      linkedHardwareItems: {},
+      linkedSoftwareLicenses: {},
       errors: {
         departments: false,
         edit: false,
@@ -90,6 +106,14 @@ export default {
         {
           name: 'archived',
           label: this.$t('main.archived')
+        },
+        {
+          name: 'linked-hardware',
+          label: this.$t('departments.linked_hardware')
+        },
+        {
+          name: 'linked-software',
+          label: this.$t('departments.linked_software')
         }
       ]
     }
@@ -101,6 +125,10 @@ export default {
     this.errors.departments = false
     try {
       await this.loadDepartments()
+      await this.loadHardwareItems()
+      await this.loadSoftwareLicenses()
+      this.linkedHardwareItems = await this.loadLinkedHardwareItems()
+      this.linkedSoftwareLicenses = await this.loadLinkedSoftwareLicenses()
     } catch (error) {
       console.error(error)
       this.errors.departments = true
@@ -109,7 +137,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['departments', 'archivedDepartments']),
+    ...mapGetters([
+      'departments',
+      'archivedDepartments',
+      'hardwareItems',
+      'softwareLicenses'
+    ]),
 
     isActiveTab() {
       return this.activeTab === 'active'
@@ -125,11 +158,34 @@ export default {
             name: this.departmentToDelete.name
           })
         : ''
+    },
+
+    linkedItems() {
+      return this.activeTab === 'linked-hardware'
+        ? this.linkedHardwareItems
+        : this.linkedSoftwareLicenses
+    },
+
+    items() {
+      return this.activeTab === 'linked-hardware'
+        ? this.hardwareItems
+        : this.softwareLicenses
     }
   },
 
   methods: {
-    ...mapActions(['deleteDepartment', 'loadDepartments', 'newDepartment']),
+    ...mapActions([
+      'deleteDepartment',
+      'linkHardwareItem',
+      'linkSoftwareLicense',
+      'loadDepartments',
+      'loadHardwareItems',
+      'loadSoftwareLicenses',
+      'loadLinkedHardwareItems',
+      'loadLinkedSoftwareLicenses',
+      'unlinkHardwareItem',
+      'unlinkSoftwareLicense'
+    ]),
 
     onExportClicked() {
       const name = stringHelpers.slugify(this.$t('departments.title'))
@@ -178,7 +234,6 @@ export default {
         })
     },
 
-    // Delete
     onDeleteClicked(department) {
       this.departmentToDelete = department
       this.modals.del = true
@@ -194,6 +249,51 @@ export default {
       } catch (e) {
         this.loading.del = false
         this.errors.del = true
+      }
+    },
+
+    onLinkItem(data) {
+      if (this.activeTab === 'linked-hardware') {
+        this.linkHardwareItem({
+          hardwareItemId: data.itemId,
+          departmentId: data.departmentId
+        })
+        const item = this.hardwareItems.find(i => i.id === data.itemId)
+        if (!this.linkedHardwareItems[data.departmentId]) {
+          this.linkedHardwareItems[data.departmentId] = []
+        }
+        this.linkedHardwareItems[data.departmentId].push(item)
+      } else if (this.activeTab === 'linked-software') {
+        this.linkSoftwareLicense({
+          softwareLicenseId: data.itemId,
+          departmentId: data.departmentId
+        })
+        const item = this.softwareLicenses.find(i => i.id === data.itemId)
+        if (!this.linkedSoftwareLicenses[data.departmentId]) {
+          this.linkedSoftwareLicenses[data.departmentId] = []
+        }
+        this.linkedSoftwareLicenses[data.departmentId].push(item)
+      }
+    },
+
+    onUnlinkItem(data) {
+      if (this.activeTab === 'linked-hardware') {
+        this.unlinkHardwareItem({
+          hardwareItemId: data.itemId,
+          departmentId: data.departmentId
+        })
+        this.linkedHardwareItems[data.departmentId] = this.linkedHardwareItems[
+          data.departmentId
+        ].filter(i => i.id !== data.itemId)
+      } else if (this.activeTab === 'linked-software') {
+        this.unlinkSoftwareLicense({
+          softwareLicenseId: data.itemId,
+          departmentId: data.departmentId
+        })
+        this.linkedSoftwareLicenses[data.departmentId] =
+          this.linkedSoftwareLicenses[data.departmentId].filter(
+            i => i.id !== data.itemId
+          )
       }
     }
   },
@@ -215,5 +315,10 @@ export default {
 <style lang="scss" scoped>
 .department-list {
   margin-top: 0;
+}
+
+.tabs {
+  min-height: 30px;
+  margin-top: 1em;
 }
 </style>

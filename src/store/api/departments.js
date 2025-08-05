@@ -29,5 +29,47 @@ export default {
 
   deleteDepartment(department) {
     return client.pdel(`/api/data/departments/${department.id}`)
+  },
+
+  loadLinkedHardwareItems() {
+    return client.pget(`/api/data/departments/hardware-items`)
+  },
+
+  loadLinkedSoftwareLicenses() {
+    return client.pget(`/api/data/departments/software-licenses`)
+  },
+
+  linkHardwareItem(data) {
+    const { departmentId, hardwareItemId } = data
+    return client.ppost(
+      `/api/data/departments/${departmentId}/hardware-items`,
+      {
+        hardware_item_id: hardwareItemId
+      }
+    )
+  },
+
+  linkSoftwareLicense(data) {
+    const { departmentId, softwareLicenseId } = data
+    return client.ppost(
+      `/api/data/departments/${departmentId}/software-licenses`,
+      {
+        software_id: softwareLicenseId
+      }
+    )
+  },
+
+  unlinkHardwareItem(data) {
+    const { departmentId, hardwareItemId } = data
+    return client.pdel(
+      `/api/data/departments/${departmentId}/hardware-items/${hardwareItemId}`
+    )
+  },
+
+  unlinkSoftwareLicense(data) {
+    const { departmentId, softwareLicenseId } = data
+    return client.pdel(
+      `/api/data/departments/${departmentId}/software-licenses/${softwareLicenseId}`
+    )
   }
 }

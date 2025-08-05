@@ -100,9 +100,10 @@
 
 <script>
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { modalMixin } from '@/components/modals/base_modal'
+
 import { parseSimpleDate, formatSimpleDate } from '@/lib/time'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
@@ -169,9 +170,7 @@ export default {
         { label: 'lead', value: 'lead' }
       ],
       refreshKeys: {
-        endMonth: 0,
-        monthlySalary: 0,
-        totalSalary: 0
+        endMonth: 0
       },
       seniorityOptions: [
         { label: 'junior', value: 'junior' },
@@ -260,8 +259,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['']),
-
     runConfirmation() {
       this.$emit('confirm', {
         ...this.form,
@@ -273,13 +270,8 @@ export default {
     },
 
     onPersonChanged(person) {
-      if (person) {
-        this.form.position = person.position || 'artist'
-        this.form.seniority = person.seniority || 'junior'
-      } else {
-        this.form.position = 'artist'
-        this.form.seniority = 'junior'
-      }
+      this.form.position = person?.position || 'artist'
+      this.form.seniority = person?.seniority || 'junior'
     },
 
     formatDate(date) {

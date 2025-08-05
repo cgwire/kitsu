@@ -1,5 +1,8 @@
 <template>
   <tr class="datatable-row" :key="taskType.id">
+    <td class="grab">
+      <grip-vertical-icon class="grab" />
+    </td>
     <task-type-cell :task-type="taskType" />
     <td class="short-name">
       {{ taskType.short_name }}
@@ -20,6 +23,7 @@ import moment from 'moment'
 import { mapGetters } from 'vuex'
 
 import { parseDate } from '@/lib/time'
+import { GripVerticalIcon } from 'lucide-vue-next'
 
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
@@ -27,6 +31,7 @@ export default {
   name: 'production-task-type',
 
   components: {
+    GripVerticalIcon,
     TaskTypeCell
   },
 
@@ -133,7 +138,16 @@ export default {
   margin-bottom: 0;
   width: 105px;
 }
+
 .priority {
   padding-left: 2rem;
+}
+
+.grab {
+  cursor: grab;
+  margin: 0;
+  width: 30px;
+  color: $grey;
+  margin-top: 0.3em;
 }
 </style>

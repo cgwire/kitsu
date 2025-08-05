@@ -35,19 +35,10 @@ const getters = {
 }
 
 const actions = {
-  loadAssetTypes({ commit, state }, callback) {
-    commit(LOAD_ASSET_TYPES_START)
-    assetTypesApi.getAssetTypes((err, assetTypes) => {
-      if (err) commit(LOAD_ASSET_TYPES_ERROR)
-      else commit(LOAD_ASSET_TYPES_END, assetTypes)
-      if (callback) callback(err)
-    })
-  },
-
   loadAssetType({ commit, state }, assetTypeId) {
-    assetTypesApi.getAssetType(assetTypeId, (err, assetType) => {
-      if (err) console.error(err)
-      else commit(EDIT_ASSET_TYPE_END, assetType)
+    return assetTypesApi.getAssetType(assetTypeId).then(assetType => {
+      commit(EDIT_ASSET_TYPE_END, assetType)
+      Promise.resolve(assetType)
     })
   },
 

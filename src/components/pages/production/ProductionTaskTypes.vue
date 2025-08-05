@@ -564,4 +564,8 @@ h2 {
 .pointer {
   cursor: pointer;
 }
+
+.grab {
+  cursor: grab;
+}
 </style>

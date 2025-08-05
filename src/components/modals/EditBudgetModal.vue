@@ -5,7 +5,6 @@
         <label class="label">
           {{ $t('budget.fields.revision') }}
         </label>
-
         <p class="revision-number">
           v{{ isEditing ? budgetToEdit.revision : lastRevision + 1 }}
         </p>
@@ -39,13 +38,12 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 
 export default {
   name: 'edit-budget-modal',
@@ -78,7 +76,7 @@ export default {
     },
     lastRevision: {
       type: Number,
-      default: 1
+      default: 0
     }
   },
 
@@ -105,8 +103,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters([]),
-
     isDisabled() {
       return this.form.name.length === 0
     },
@@ -123,8 +119,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['']),
-
     runConfirmation() {
       this.$emit('confirm', this.form)
     }
@@ -166,9 +160,5 @@ export default {
 .revision-number {
   font-size: 1.4rem;
   font-weight: bold;
-}
-
-.task-types {
-  flex-wrap: wrap;
 }
 </style>

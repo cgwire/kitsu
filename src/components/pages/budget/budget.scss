@@ -1,0 +1,133 @@
+@use '@/variables.scss';
+
+$green: #00B242;
+$dark-grey-light: #3D4048;
+$dark-grey-2: #36393F;
+$light-grey: #CCC;
+$light-grey-light: #DDD;
+$red: #FF3860;
+
+
+th.month {
+  text-align: center;
+  max-width: 80px;
+  min-width: 80px;
+  width: 80px;
+}
+
+td.month {
+  text-align: right;
+  max-width: 80px;
+  min-width: 80px;
+  width: 80px;
+}
+
+td.entry-data {
+  text-align: right;
+  max-width: 80px;
+  min-width: 80px;
+  width: 80px;
+  padding: 10px;
+}
+
+.position {
+  max-width: 100px;
+  min-width: 100px;
+  width: 100px;
+}
+
+.seniority {
+  max-width: 100px;
+  min-width: 100px;
+  width: 100px;
+}
+
+.name {
+  max-width: 200px;
+  width: 200px;
+}
+
+td.datatable-row-header.seniority {
+  left: 100px;
+}
+
+td.datatable-row-header.name {
+  left: 200px;
+}
+
+.actions {
+  min-width: 120px;
+}
+
+.total-cost {
+  font-weight: bold;
+  text-align: right;
+  max-width: 100px;
+  width: 100px;
+}
+
+.costs,
+.remaining,
+.difference {
+  text-align: right;
+  max-width: 100px;
+  width: 100px;
+}
+
+.difference {
+  border-right: 3px solid $green;
+}
+
+.new-hiring {
+  background: $light-grey-light;
+  color: $dark-grey-2;
+  padding: 0.5em 1em;
+  border-radius: 5px;
+  font-size: 0.8rem;
+
+  .dark & {
+    background: $dark-grey-light;
+    color: $light-grey;
+  }
+}
+
+.input-editor {
+  width: 100%;
+  text-align: right;
+}
+
+.cost-column {
+  background-color: #8888cc;
+  color: white;
+}
+
+.expenses {
+  font-weight: bold;
+}
+
+.negative {
+    color: $red;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.datatable-wrapper {
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.data-list {
+  margin-top: 2em;
+}
+
+.difference {
+  border-right: 3px solid $green;
+}

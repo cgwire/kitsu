@@ -2,47 +2,45 @@ import budgetApi from '@/store/api/budget'
 
 import { RESET_ALL } from '@/store/mutation-types'
 
-const initialState = {
-  budgets: []
-}
+const initialState = {}
 const state = { ...initialState }
 
 const getters = {}
 
 const actions = {
-  async loadProductionBudgets({ commit }, productionId) {
+  async loadProductionBudgets({}, productionId) {
     return await budgetApi.getProductionBudgets(productionId)
   },
 
-  async loadProductionBudget({ commit }, { productionId, budgetId }) {
+  async loadProductionBudget({}, { productionId, budgetId }) {
     return await budgetApi.getProductionBudget(productionId, budgetId)
   },
 
-  async createProductionBudget({ commit }, { productionId, budget }) {
+  async createProductionBudget({}, { productionId, budget }) {
     return await budgetApi.createProductionBudget(productionId, budget)
   },
 
-  async updateProductionBudget({ commit }, { productionId, budget }) {
+  async updateProductionBudget({}, { productionId, budget }) {
     return await budgetApi.updateProductionBudget(productionId, budget)
   },
 
-  async deleteProductionBudget({ commit }, { productionId, budgetId }) {
+  async deleteProductionBudget({}, { productionId, budgetId }) {
     return await budgetApi.deleteProductionBudget(productionId, budgetId)
   },
 
-  async loadProductionBudgetEntries({ commit }, { productionId, budgetId }) {
+  async loadProductionBudgetEntries({}, { productionId, budgetId }) {
     return await budgetApi.getBudgetEntries(productionId, budgetId)
   },
 
   async loadProductionBudgetEntry(
-    { commit },
+    {},
     { productionId, budgetId, budgetEntryId }
   ) {
     return await budgetApi.getBudgetEntry(productionId, budgetId, budgetEntryId)
   },
 
   async createProductionBudgetEntry(
-    { commit },
+    {},
     { productionId, budgetId, budgetEntry }
   ) {
     return await budgetApi.createBudgetEntry(
@@ -53,7 +51,7 @@ const actions = {
   },
 
   async updateProductionBudgetEntry(
-    { commit },
+    {},
     { productionId, budgetId, budgetEntryId, budgetEntry }
   ) {
     return await budgetApi.updateBudgetEntry(
@@ -65,7 +63,7 @@ const actions = {
   },
 
   async deleteProductionBudgetEntry(
-    { commit },
+    {},
     { productionId, budgetId, budgetEntryId }
   ) {
     return await budgetApi.deleteBudgetEntry(
@@ -75,7 +73,7 @@ const actions = {
     )
   },
 
-  async loadExpenses({ commit }, productionId) {
+  async loadExpenses({}, productionId) {
     return await budgetApi.getExpenses(productionId)
   }
 }

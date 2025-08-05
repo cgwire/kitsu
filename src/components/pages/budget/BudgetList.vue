@@ -25,391 +25,107 @@
     <div class="data-list filler" v-else>
       <div ref="body" class="datatable-wrapper flexcolumn filler">
         <table class="datatable">
-          <thead class="datatable-head">
-            <tr>
-              <th
-                class="datatable-row-header department-header-header"
-                colspan="3"
-              >
-                <div class="flexrow">
-                  <div class="flexrow-item">
-                    {{ $t('budget.fields.department') }}
-                  </div>
-                  <div class="filler"></div>
-                  <button-simple
-                    is-thin
-                    :text="$t('budget.add_entry')"
-                    @click="$emit('add-budget-entry')"
-                  />
-                </div>
-              </th>
-              <th class="datatable-row-header base-salary-header month">
-                {{ $t('budget.fields.base_salary') }}
-              </th>
-              <th class="datatable-row-header duration-header month">
-                {{ $t('budget.fields.duration') }}
-              </th>
-              <template v-if="isShowingExpenses">
-                <th
-                  class="month datatable-row-header cost-column"
-                  :key="month"
-                  v-for="month in monthsBetweenStartAndNow"
-                >
-                  {{
-                    month.month() === 0
-                      ? month.format('MMM / YY')
-                      : month.format('MMM')
-                  }}
-                </th>
-                <th class="datatable-row-header has-text-right cost-column">
-                  {{ $t('budget.costs') }}
-                </th>
-                <th class="datatable-row-header has-text-right cost-column">
-                  {{ $t('budget.remaining') }}
-                </th>
-                <th
-                  class="datatable-row-header has-text-right cost-column difference"
-                >
-                  {{ $t('budget.difference') }}
-                </th>
-              </template>
-              <th
-                :key="month"
-                class="month datatable-row-header"
-                v-for="month in isShowingExpenses
-                  ? monthsBetweenNowAndEnd
-                  : monthsBetweenProductionDates"
-              >
-                {{
-                  month.month() === 0
-                    ? month.format('MMM / YY')
-                    : month.format('MMM')
-                }}
-              </th>
-              <th class="datatable-row-header has-text-right">
-                {{ $t('main.total') }} ({{ currency }})
-              </th>
-              <th class="actions datatable-row-header"></th>
-            </tr>
-          </thead>
-
+          <budget-list-header
+            :is-showing-expenses="isShowingExpenses"
+            :months-between-start-and-now="monthsBetweenStartAndNow"
+            :months-between-now-and-end="monthsBetweenNowAndEnd"
+            :months-between-production-dates="monthsBetweenProductionDates"
+            @add-budget-entry="$emit('add-budget-entry')"
+          />
           <tbody
             class="datatable-body"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
           >
-            <tr class="datatable-row">
-              <td class="datatable-row-header total-header" colspan="3">
-                <div class="pa05">
-                  {{ $t('main.total') }}
-                </div>
-              </td>
-              <td class="month"></td>
-              <td class="month"></td>
-              <template v-if="isShowingExpenses">
-                <td
-                  :key="month"
-                  class="month"
-                  v-for="month in monthsBetweenStartAndNow"
-                >
-                  {{
-                    convertedExpenses[month.format('YYYY-MM')]?.toLocaleString()
-                  }}
-                </td>
-                <td class="costs expenses" v-if="isShowingExpenses">
-                  {{ convertedExpenses.total?.toLocaleString() }}
-                </td>
-                <td class="remaining expenses" v-if="isShowingExpenses">
-                  {{
-                    (
-                      totalEntry.total - (convertedExpenses.total || 0)
-                    ).toLocaleString()
-                  }}
-                </td>
-                <td
-                  class="difference expenses"
-                  :class="{
-                    positive: differences.total > 0,
-                    negative: differences.total < 0
-                  }"
-                  v-if="isShowingExpenses"
-                >
-                  {{ differences.total > 0 ? '+' : '' }}
-                  {{ differences.total?.toLocaleString() || '' }}
-                </td>
-              </template>
-
-              <td
-                class="month"
-                :key="month"
-                v-for="month in isShowingExpenses
-                  ? monthsBetweenNowAndEnd
-                  : monthsBetweenProductionDates"
-              >
-                {{
-                  totalEntry.monthCosts[
-                    month.format('YYYY-MM')
-                  ]?.toLocaleString()
-                }}
-              </td>
-
-              <td class="total-cost">
-                {{ totalEntry.total.toLocaleString() }}
-              </td>
-              <td class="actions"></td>
-            </tr>
+            <budget-total-row
+              :total-entry="totalEntry"
+              :is-showing-expenses="isShowingExpenses"
+              :is-showing-items="isShowingItems"
+              :months-between-start-and-now="monthsBetweenStartAndNow"
+              :months-between-now-and-end="monthsBetweenNowAndEnd"
+              :months-between-production-dates="monthsBetweenProductionDates"
+              :converted-expenses="convertedExpenses"
+              :hardware-items-costs="hardwareItemsCosts"
+              :software-licenses-costs="softwareLicensesCosts"
+              :done-previsional="doneSubset"
+              :remaining-previsional="remainingPrevisional"
+            />
 
             <template
               v-for="departmentEntry in extendedBudgetDepartments"
               :key="departmentEntry.id"
             >
-              <tr
-                class="datatable-row department-row pointer"
-                @click="toggleDepartment(departmentEntry.id)"
-              >
-                <td
-                  class="datatable-row-header strong department-header"
-                  colspan="3"
-                >
-                  <div
-                    class="flexrow department-header-content"
-                    :style="getDepartmentStyle(departmentEntry.id, '99')"
-                  >
-                    <chevron-right-icon
-                      class="flexrow-item"
-                      v-if="collapsedDepartments[departmentEntry.id]"
-                    />
-                    <chevron-down-icon class="flexrow-item" v-else />
-                    <div class="flexrow-item">
-                      {{ departmentMap.get(departmentEntry.id).name }}
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="base-salary-header text-right month"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                ></td>
-                <td
-                  class="duration-header text-right month"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                ></td>
-                <template v-if="isShowingExpenses">
-                  <td
-                    :key="month"
-                    class="month"
-                    :style="getDepartmentStyle(departmentEntry.id, '33')"
-                    v-for="month in monthsBetweenStartAndNow"
-                  >
-                    {{
-                      convertedExpenses[departmentEntry.id]?.[
-                        month.format('YYYY-MM')
-                      ]?.toLocaleString()
-                    }}
-                  </td>
-                  <td
-                    class="costs expenses"
-                    :style="getDepartmentStyle(departmentEntry.id, '33')"
-                    v-if="isShowingExpenses"
-                  >
-                    {{
-                      convertedExpenses[
-                        departmentEntry.id
-                      ]?.total?.toLocaleString()
-                    }}
-                  </td>
-                  <td
-                    class="remaining expenses"
-                    :style="getDepartmentStyle(departmentEntry.id, '33')"
-                    v-if="isShowingExpenses"
-                  >
-                    {{
-                      (
-                        departmentEntry.total -
-                        (convertedExpenses[departmentEntry.id]?.total || 0)
-                      ).toLocaleString()
-                    }}
-                  </td>
-                  <td
-                    class="difference expenses"
-                    :class="{
-                      positive: differences[departmentEntry.id]?.total > 0,
-                      negative: differences[departmentEntry.id]?.total < 0
-                    }"
-                    :style="getDepartmentStyle(departmentEntry.id, '33')"
-                    v-if="isShowingExpenses"
-                  >
-                    {{ differences[departmentEntry.id]?.total > 0 ? '+' : '' }}
-                    {{
-                      differences[
-                        departmentEntry.id
-                      ]?.total?.toLocaleString() || ''
-                    }}
-                  </td>
-                </template>
-                <td
-                  :key="departmentEntry.id + '-' + month"
-                  class="month"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                  v-for="month in isShowingExpenses
-                    ? monthsBetweenNowAndEnd
-                    : monthsBetweenProductionDates"
-                >
-                  {{
-                    departmentEntry.monthCosts[
-                      month.format('YYYY-MM')
-                    ]?.toLocaleString()
-                  }}
-                </td>
-                <td
-                  class="total-cost"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                >
-                  {{ departmentEntry.total.toLocaleString() }}
-                </td>
-                <td
-                  class="actions"
-                  :style="getDepartmentStyle(departmentEntry.id, '33')"
-                ></td>
-              </tr>
+              <budget-department-row
+                :department-entry="departmentEntry"
+                :is-showing-expenses="isShowingExpenses"
+                :is-showing-items="isShowingItems"
+                :months-between-start-and-now="monthsBetweenStartAndNow"
+                :months-between-now-and-end="monthsBetweenNowAndEnd"
+                :months-between-production-dates="monthsBetweenProductionDates"
+                :converted-expenses="convertedExpenses"
+                :hardware-items-costs="hardwareItemsCosts"
+                :software-licenses-costs="softwareLicensesCosts"
+                :collapsed-departments="collapsedDepartments"
+                :department-map="departmentMap"
+                :done-previsional="doneSubset"
+                :remaining-previsional="remainingPrevisional"
+                :toggle-department="toggleDepartment"
+              />
 
               <template v-if="!collapsedDepartments[departmentEntry.id]">
-                <tr
-                  class="datatable-row"
+                <budget-hardware-item-row
+                  :key="departmentEntry.id"
+                  :department-entry="departmentEntry"
+                  :is-showing-expenses="isShowingExpenses"
+                  :months-between-start-and-now="monthsBetweenStartAndNow"
+                  :months-between-now-and-end="monthsBetweenNowAndEnd"
+                  :months-between-production-dates="
+                    monthsBetweenProductionDates
+                  "
+                  :converted-expenses="convertedExpenses"
+                  :hardware-items-costs="hardwareItemsCosts"
+                  :done-previsional="doneSubset"
+                  :remaining-previsional="remainingPrevisional"
+                  v-if="isShowingItems"
+                />
+
+                <budget-software-license-row
+                  :key="departmentEntry.id"
+                  :department-entry="departmentEntry"
+                  :is-showing-expenses="isShowingExpenses"
+                  :months-between-start-and-now="monthsBetweenStartAndNow"
+                  :months-between-now-and-end="monthsBetweenNowAndEnd"
+                  :months-between-production-dates="
+                    monthsBetweenProductionDates
+                  "
+                  :converted-expenses="convertedExpenses"
+                  :software-licenses-costs="softwareLicensesCosts"
+                  :done-previsional="doneSubset"
+                  :remaining-previsional="remainingPrevisional"
+                  v-if="isShowingItems"
+                />
+
+                <budget-person-row
                   :key="personEntry.id"
+                  :department-entry="departmentEntry"
+                  :person-entry="personEntry"
+                  :is-showing-expenses="isShowingExpenses"
+                  :months-between-start-and-now="monthsBetweenStartAndNow"
+                  :months-between-now-and-end="monthsBetweenNowAndEnd"
+                  :months-between-production-dates="
+                    monthsBetweenProductionDates
+                  "
+                  :converted-expenses="convertedExpenses"
+                  :person-map="personMap"
+                  :done-previsional="doneSubset"
+                  :remaining-previsional="remainingPrevisional"
+                  @delete-budget-entry="
+                    $emit('delete-budget-entry', personEntry)
+                  "
+                  @edit-budget-entry="$emit('edit-budget-entry', personEntry)"
+                  @add-person-exception="addPersonException($event)"
                   v-for="personEntry in departmentEntry.persons"
-                >
-                  <td class="position datatable-row-header">
-                    {{
-                      $t('budget.positions.' + personEntry.position || 'artist')
-                    }}
-                  </td>
-                  <td class="seniority datatable-row-header">
-                    {{
-                      $t(
-                        'budget.seniorities.' + personEntry.seniority ||
-                          'junior'
-                      )
-                    }}
-                  </td>
-                  <td class="name datatable-row-header">
-                    <div class="flexrow">
-                      <people-avatar
-                        class="flexrow-item"
-                        :person="personMap.get(personEntry.person_id)"
-                        :is-link="false"
-                        :font-size="12"
-                        :size="20"
-                        v-if="personEntry.person_id"
-                      />
-                      <people-name
-                        :person="personMap.get(personEntry.person_id)"
-                        v-if="personEntry.person_id"
-                      />
-                      <span class="new-hiring" v-else>
-                        {{ $t('budget.new_hiring') }}
-                      </span>
-                    </div>
-                  </td>
-                  <td class="base-salary-header text-right entry-data">
-                    {{ (personEntry.monthly_salary || 0).toLocaleString() }}
-                  </td>
-                  <td class="duration-header text-right entry-data">
-                    {{ personEntry.months_duration }}
-                  </td>
-                  <template v-if="isShowingExpenses">
-                    <td
-                      :key="personEntry.id + '-' + month"
-                      class="costs"
-                      v-for="month in monthsBetweenStartAndNow"
-                    >
-                      {{
-                        convertedExpenses[departmentEntry.id]?.[
-                          personEntry.person_id
-                        ]?.[month.format('YYYY-MM')]?.toLocaleString()
-                      }}
-                    </td>
-                    <td class="costs expenses" v-if="isShowingExpenses">
-                      {{
-                        convertedExpenses[
-                          departmentEntry.id
-                        ]?.total?.toLocaleString()
-                      }}
-                    </td>
-                    <td class="remaining expenses" v-if="isShowingExpenses">
-                      {{
-                        (
-                          personEntry.total -
-                            convertedExpenses[departmentEntry.id]?.[
-                              personEntry.person_id
-                            ]?.total || 0
-                        ).toLocaleString()
-                      }}
-                    </td>
-                    <td
-                      class="difference expenses"
-                      :class="{
-                        positive:
-                          differences[departmentEntry.id]?.[
-                            personEntry.person_id
-                          ] > 0,
-                        negative:
-                          differences[departmentEntry.id]?.[
-                            personEntry.person_id
-                          ] < 0
-                      }"
-                      v-if="isShowingExpenses"
-                    >
-                      {{
-                        differences[departmentEntry.id]?.[
-                          personEntry.person_id
-                        ] > 0
-                          ? '+'
-                          : ''
-                      }}
-                      {{
-                        differences[departmentEntry.id]?.[
-                          personEntry.person_id
-                        ]?.toLocaleString() || ''
-                      }}
-                    </td>
-                  </template>
-                  <td
-                    :key="personEntry.id + '-' + month"
-                    class="month value-cell"
-                    v-for="month in isShowingExpenses
-                      ? monthsBetweenNowAndEnd
-                      : monthsBetweenProductionDates"
-                  >
-                    <input
-                      class="input-editor"
-                      type="number"
-                      min="0"
-                      step="1"
-                      :value="getMonthCost(personEntry, month)"
-                      @change="
-                        addPersonException(
-                          personEntry,
-                          month,
-                          $event.target.value
-                        )
-                      "
-                      v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
-                    />
-                    <span v-else>&nbsp;</span>
-                  </td>
-                  <td class="total-cost">
-                    {{ personEntry.total.toLocaleString() }}
-                  </td>
-                  <row-actions-cell
-                    class="actions"
-                    :hide-avatar="true"
-                    :hide-change-password="true"
-                    :hide-delete="false"
-                    :hide-refresh="true"
-                    @delete-clicked="$emit('delete-budget-entry', personEntry)"
-                    @edit-clicked="$emit('edit-budget-entry', personEntry)"
-                  />
-                </tr>
+                />
               </template>
             </template>
           </tbody>
@@ -425,14 +141,15 @@ import { mapGetters, mapActions } from 'vuex'
 import { domMixin } from '@/components/mixins/dom'
 import { grabListMixin } from '@/components/mixins/grablist'
 
-import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
-
 import preferences from '@/lib/preferences'
 
+import BudgetListHeader from '@/components/pages/budget/BudgetListHeader.vue'
+import BudgetHardwareItemRow from '@/components/pages/budget/BudgetHardwareItemRow.vue'
+import BudgetSoftwareLicenseRow from '@/components/pages/budget/BudgetSoftwareLicenseRow.vue'
+import BudgetPersonRow from '@/components/pages/budget/BudgetPersonRow.vue'
+import BudgetTotalRow from '@/components/pages/budget/BudgetTotalRow.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import PeopleName from '@/components/widgets/PeopleName.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import BudgetDepartmentRow from '@/components/pages/budget/BudgetDepartmentRow.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
@@ -443,31 +160,20 @@ export default {
   emits: ['add-budget-entry', 'delete-budget-entry', 'edit-budget-entry'],
 
   components: {
+    BudgetListHeader,
+    BudgetPersonRow,
+    BudgetHardwareItemRow,
+    BudgetSoftwareLicenseRow,
+    BudgetTotalRow,
+    BudgetDepartmentRow,
     ButtonSimple,
-    ChevronDownIcon,
-    ChevronRightIcon,
-    PeopleName,
-    PeopleAvatar,
-    RowActionsCell,
     Spinner
   },
 
   props: {
-    budgetEntries: {
-      type: Array,
-      default: () => []
-    },
     budgetDepartments: {
       type: Array,
       default: () => []
-    },
-    costsMonths: {
-      type: Object,
-      default: () => {}
-    },
-    currency: {
-      type: String,
-      default: 'USD'
     },
     currentBudget: {
       type: Object,
@@ -488,6 +194,18 @@ export default {
     isShowingExpenses: {
       type: Boolean,
       default: false
+    },
+    isShowingItems: {
+      type: Boolean,
+      default: false
+    },
+    linkedHardwareItems: {
+      type: Object,
+      required: true
+    },
+    linkedSoftwareLicenses: {
+      type: Object,
+      required: true
     },
     monthsBetweenStartAndNow: {
       type: Array,
@@ -556,30 +274,77 @@ export default {
       let total = 0
       Object.keys(expenses).forEach(departmentId => {
         let departmentTotal = 0
-        convertedExpenses[departmentId] = {}
+        convertedExpenses[departmentId] = {
+          'software-licenses': { total: 0 },
+          'hardware-items': { total: 0 }
+        }
+        const licenses = this.linkedSoftwareLicenses[departmentId] || []
+        const items = this.linkedHardwareItems[departmentId] || []
+        const monthlySoftwareLicensesCosts = licenses.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+        const monthlyHardwareItemsCosts = items.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
 
         Object.keys(expenses[departmentId]).forEach(personId => {
           let personTotal = 0
+          let personTotalWithItems = 0
+
           const dailyRate = this.getDailyRate(departmentId, personId)
 
           convertedExpenses[departmentId][personId] = {}
           Object.keys(expenses[departmentId][personId]).forEach(month => {
+            if (month === 'total') return
+
+            // Salaries
             const timeSpent = expenses[departmentId][personId][month]
-            const cost = this.convertTimeSpentToCost(dailyRate, timeSpent)
+            const { cost, ratio } = this.convertTimeSpentToCost(
+              dailyRate,
+              timeSpent
+            )
             convertedExpenses[departmentId][personId][month] = cost
             if (!convertedExpenses[departmentId][month]) {
               convertedExpenses[departmentId][month] = 0
             }
-            convertedExpenses[departmentId][month] += cost
+
+            // Hardware and software
+            let costWithItems = cost
+            if (this.isShowingItems && cost > 0) {
+              if (
+                !convertedExpenses[departmentId]['software-licenses'][month]
+              ) {
+                convertedExpenses[departmentId]['software-licenses'][month] = 0
+              }
+              if (!convertedExpenses[departmentId]['hardware-items'][month]) {
+                convertedExpenses[departmentId]['hardware-items'][month] = 0
+              }
+              const softwareCost = Math.round(
+                monthlySoftwareLicensesCosts * ratio
+              )
+              const hardwareCost = Math.round(monthlyHardwareItemsCosts * ratio)
+              convertedExpenses[departmentId]['software-licenses'][month] +=
+                softwareCost
+              convertedExpenses[departmentId]['software-licenses'].total +=
+                softwareCost
+              convertedExpenses[departmentId]['hardware-items'][month] +=
+                hardwareCost
+              convertedExpenses[departmentId]['hardware-items'].total +=
+                hardwareCost
+              costWithItems += softwareCost + hardwareCost
+            }
+
+            convertedExpenses[departmentId][month] += costWithItems
             if (!convertedExpenses[month]) {
               convertedExpenses[month] = 0
             }
-            convertedExpenses[month] += cost
+            convertedExpenses[month] += costWithItems
             personTotal += cost
+            personTotalWithItems += costWithItems
           })
 
           convertedExpenses[departmentId][personId].total = personTotal
-          departmentTotal += personTotal
+          departmentTotal += personTotalWithItems
         })
         convertedExpenses[departmentId].total = departmentTotal
         total += departmentTotal
@@ -662,40 +427,97 @@ export default {
       return extendedBudgetDepartments
     },
 
-    /* It calculates the difference between the consumed budget and the
-     * expenses. It runs through all the departments and persons and
-     * calculates the difference for each person. It aggregates the
-     */
-    differences() {
-      const differences = { total: 0 }
-      this.budgetDepartments.forEach(department => {
-        if (!differences[department.id]) {
-          differences[department.id] = { total: 0 }
-        }
-        department.persons.forEach(person => {
-          if (!person.person_id) return
-          if (!differences[department.id][person.person_id]) {
-            differences[department.id][person.person_id] = 0
-          }
-          let personTotal = 0
-          Object.keys(this.costsMonths).forEach(month => {
-            personTotal += this.getMonthCost(person, month)
-          })
-          const expense =
-            this.convertedExpenses[department.id]?.[person.person_id]?.total ||
-            0
-          const personDifference = personTotal - expense || 0
-          differences[department.id][person.person_id] += personDifference
-          differences[department.id].total += personDifference
-        })
-        differences.total += differences[department.id].total
-      })
-      return differences
+    remainingPrevisional() {
+      return this.getPrevisionalSubset(this.monthsBetweenNowAndEnd)
+    },
+
+    doneSubset() {
+      return this.getPrevisionalSubset(this.monthsBetweenStartAndNow)
+    },
+
+    hardwareItemsCosts() {
+      return this.getItemCosts(this.linkedHardwareItems)
+    },
+
+    softwareLicensesCosts() {
+      return this.getItemCosts(this.linkedSoftwareLicenses)
     }
   },
 
   methods: {
     ...mapActions(['updateProductionBudgetEntry']),
+
+    getPrevisionalSubset(months) {
+      const subset = { total: 0 }
+      this.budgetDepartments.forEach(department => {
+        if (!subset[department.id]) {
+          subset[department.id] = { total: 0 }
+        }
+        department.persons.forEach(person => {
+          if (!person.budget_entry_id) {
+            return
+          }
+
+          if (!subset[department.id][person.budget_entry_id]) {
+            subset[department.id][person.budget_entry_id] = 0
+          }
+          let personTotal = 0
+          months.forEach(month => {
+            personTotal += this.getMonthCost(person, month)
+          })
+          subset[department.id][person.budget_entry_id] = personTotal
+          subset[department.id].total += personTotal
+        })
+        if (this.isShowingItems) {
+          let softwareCosts = 0
+          let hardwareCosts = 0
+          months.forEach(month => {
+            softwareCosts +=
+              this.softwareLicensesCosts[department.id][
+                month.format('YYYY-MM')
+              ] || 0
+            hardwareCosts +=
+              this.hardwareItemsCosts[department.id][month.format('YYYY-MM')] ||
+              0
+          })
+          subset[department.id]['software-licenses'] = softwareCosts
+          subset[department.id]['hardware-items'] = hardwareCosts
+          subset[department.id].total += softwareCosts + hardwareCosts
+        }
+        subset.total += subset[department.id].total
+      })
+      return subset
+    },
+    /*
+     * It calculates the cost of the items for each department and each month.
+     * It returns an object with the cost of the items for each department and
+     * each month.
+     */
+    getItemCosts(linkedItems) {
+      const itemCosts = {}
+      this.budgetDepartments.forEach(department => {
+        const items = linkedItems[department.id] || []
+        const monthlyDepartmentCost = items.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+
+        if (!itemCosts[department.id]) {
+          itemCosts[department.id] = { total: 0 }
+        }
+        this.monthsBetweenProductionDates.forEach(month => {
+          itemCosts[department.id][month.format('YYYY-MM')] = 0
+          department.persons.forEach(person => {
+            const personCost = this.getMonthCost(person, month)
+            if (personCost > 0) {
+              itemCosts[department.id][month.format('YYYY-MM')] +=
+                monthlyDepartmentCost
+              itemCosts[department.id].total += monthlyDepartmentCost
+            }
+          })
+        })
+      })
+      return itemCosts
+    },
 
     /* It gets the daily rate of a person, and use the salary scale if
      * no daily rate is available.
@@ -715,7 +537,8 @@ export default {
      */
     convertTimeSpentToCost(dailyRate, timeSpent) {
       const days = timeSpent / 60 / this.organisation.hours_by_day
-      return Math.round(days * dailyRate)
+      const ratio = days / 20
+      return { cost: Math.round(days * dailyRate), ratio }
     },
 
     /* It gets the cost of a person for a given month, exceptions are
@@ -745,15 +568,9 @@ export default {
       preferences.setObjectPreference(key, this.collapsedDepartments)
     },
 
-    /* It sets the background with the color of the department. */
-    getDepartmentStyle(departmentId, opacity) {
-      return {
-        backgroundColor: this.departmentMap.get(departmentId).color + opacity
-      }
-    },
-
     /* It sets an salary exception for a person, for a given month. */
-    addPersonException(personEntry, month, value) {
+    addPersonException({ personEntry, month, value }) {
+      value = parseInt(value)
       const exceptions = personEntry.exceptions || {}
       exceptions[month.format('YYYY-MM')] = value
       const budgetEntry = {
@@ -772,150 +589,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-.datatable-wrapper {
-  border-bottom-right-radius: 10px;
-  border-bottom-left-radius: 10px;
-}
-
-.department-header-header {
-  max-width: 400px;
-  width: 400px;
-  min-width: 400px;
-  z-index: 5;
-}
-
-.data-list {
-  margin-top: 2em;
-}
-
-.department-header {
-  max-width: 400px;
-  min-width: 400px;
-  position: sticky;
-  padding: 0;
-}
-
-.department-header-content {
-  color: white;
-  height: 100%;
-  min-width: 400px;
-  max-width: 400px;
-  padding: 0.6em 1em;
-}
-
-th.month {
-  text-align: center;
-  max-width: 80px;
-  min-width: 80px;
-  width: 80px;
-}
-
-td.month {
-  text-align: right;
-  max-width: 80px;
-  min-width: 80px;
-  width: 80px;
-}
-
-td.entry-data {
-  text-align: right;
-  max-width: 80px;
-  min-width: 80px;
-  width: 80px;
-  padding: 10px;
-}
-
-.position {
-  max-width: 100px;
-  min-width: 100px;
-  width: 100px;
-}
-
-.seniority {
-  max-width: 100px;
-  min-width: 100px;
-  width: 100px;
-}
-
-.name {
-  max-width: 200px;
-  width: 200px;
-}
-
-td.datatable-row-header.seniority {
-  left: 100px;
-}
-
-td.datatable-row-header.name {
-  left: 200px;
-}
-
-.actions {
-  min-width: 120px;
-}
-
-.total-cost {
-  font-weight: bold;
-  text-align: right;
-  max-width: 100px;
-  width: 100px;
-}
-
-.costs,
-.remaining,
-.difference {
-  text-align: right;
-  max-width: 100px;
-  width: 100px;
-}
-
-.difference {
-  border-right: 3px solid $green;
-}
-
-.new-hiring {
-  background: $light-grey-light;
-  color: $dark-grey-2;
-  padding: 0.5em 1em;
-  border-radius: 5px;
-  font-size: 0.8rem;
-
-  .dark & {
-    background: $dark-grey-light;
-    color: $light-grey;
-  }
-}
-
-.input-editor {
-  width: 100%;
-  text-align: right;
-}
-
-.cost-column {
-  background-color: #8888cc;
-  color: white;
-}
-
-.expenses {
-  font-weight: bold;
-
-  &.positive {
-    color: $green;
-  }
-
-  &.negative {
-    color: $red;
-  }
-}
-
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-</style>
+<style lang="scss" scoped></style>

@@ -50,12 +50,14 @@
         class="mr05"
         :active="isShowingExpenses"
         :is-loading="isLoadingExpenses"
-        :text="
-          isShowingExpenses
-            ? $t('budget.hide_expenses')
-            : $t('budget.show_expenses')
-        "
+        :text="$t('budget.show_expenses')"
         @click="$emit('toggle-expenses')"
+      />
+      <button-simple
+        class="mr05"
+        :active="isShowingItems"
+        :text="$t('budget.show_items')"
+        @click="$emit('toggle-items')"
       />
       <span class="error" v-if="isErrorExpenses">
         {{ $t('budget.expenses_error') }}
@@ -108,6 +110,10 @@ defineProps({
   isShowingExpenses: {
     type: Boolean,
     default: false
+  },
+  isShowingItems: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -116,8 +122,9 @@ defineEmits([
   'delete-budget',
   'edit-budget',
   'export-budget',
+  'new-version',
   'toggle-expenses',
-  'new-version'
+  'toggle-items'
 ])
 </script>
 

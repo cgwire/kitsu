@@ -58,9 +58,7 @@ export default {
 
   mixins: [modalMixin],
 
-  components: {
-    Combobox
-  },
+  components: { Combobox },
 
   emits: ['cancel', 'confirm'],
 

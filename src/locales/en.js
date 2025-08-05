@@ -138,7 +138,7 @@ export default {
     cash_evolution: 'Expense evolution',
     cash_repartition: 'Expense repartition',
     cost: 'Cost',
-    costs: 'Costs',
+    costs: 'Real Costs',
     departments: 'Departments',
     expenses_error: 'An error occurred while loading the real costs. Please contact our support team.',
     budgets_error: 'An error occurred while loading the budgets. Please contact our support team.',
@@ -156,6 +156,7 @@ export default {
     edit_budget_entry: 'Edit entry',
     edit_budget_entry_error: 'An error occurred while editing this budget entry. Please contact our support team.',
     entries: 'Entries',
+    gap: 'Gap',
     hide_expenses: 'Hide real costs',
     months: 'Months',
     new_hiring: 'New hiring',
@@ -164,8 +165,11 @@ export default {
     no_budget_entries_found: 'There is no budget entry for this production. Do you want to create one?',
     no_analytics_to_show: 'There is no analytics to show for this production. Create a budget and add entries to see the analytics.',
     remaining: 'Remaining',
+    previsional_costs: 'Estimated',
+    remaining_and_costs: 'Rem. + Costs',
     salary_scale_title: 'Salary Scale',
     show_expenses: 'Show real costs',
+    show_items: 'Count hardware and software',
     title: 'Budget',
     fields: {
       base_salary: 'Salary',
@@ -334,13 +338,21 @@ export default {
 
   departments: {
     all_asset_types: 'All departments',
+    available_items: 'Available Items',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this department.',
     edit_title: 'Edit department',
+    hardware_used_by_artists: 'Hardware used by artists',
+    linked_hardware: 'Linked hardware',
+    linked_items: 'Linked Items',
+    linked_software: 'Linked software',
+    no_items_linked: 'No items linked to this department.',
     no_department: 'No department',
     new_departments: 'Add a department',
     number: 'department | departments',
+    select_department: 'Select a department to link items.',
+    software_used_by_artists: 'Software used by artists',
     title: 'Departments',
     fields: {
       name: 'Name',
@@ -476,6 +488,24 @@ export default {
       'complete': 'Complete',
       'standby': 'Stand By',
       'running': 'Running'
+    }
+  },
+
+  hardware_items: {
+    create_error: 'An error occurred while saving the hardware item.',
+    delete_error: 'An error occurred while deleting the hardware item.',
+    delete_text: 'Are you sure you want to delete this hardware item?',
+    edit_title: 'Edit Hardware Item',
+    new_hardware_item: 'New Hardware Item',
+    number: 'hardware item | hardware items',
+    title: 'Hardware Items',
+
+    fields: {
+      inventory_amount: 'Inventory Amount',
+      monthly_cost: 'Monthly Cost',
+      name: 'Name',
+      remaining_amount: 'Remaining Amount',
+      short_name: 'Short Name'
     }
   },
 
@@ -1144,14 +1174,6 @@ export default {
       start_and_end_dates: 'Start and end dates',
       shots_to_import: 'shots to import'
     },
-    home: {
-      create_new: 'Create a new production',
-      empty: 'You don\'t have any open productions. How about creating a new one?',
-      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
-      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
-      title: 'My Productions',
-      welcome: 'Welcome to Kitsu'
-    },
 
     fields: {
       code: 'Short Name',
@@ -1172,6 +1194,15 @@ export default {
       status: 'Status',
       style: 'Style',
       type: 'Type'
+    },
+
+    home: {
+      create_new: 'Create a new production',
+      empty: 'You don\'t have any open productions. How about creating a new one?',
+      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
+      no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
+      title: 'My Productions',
+      welcome: 'Welcome to Kitsu'
     },
 
     metadata: {
@@ -1633,6 +1664,7 @@ export default {
     all_tasks: 'All tasks',
     auto_revision: 'Restore automatic revision number',
     assign: 'Assign to the selected task | Assign to the {nbSelectedTasks} selected tasks ',
+    assignation_disclaimer: 'If people are missing from the list, it means they are not listed in the team.',
     assign_explaination: 'Select a person to assign...',
     assignation_warning: 'Warning: you won\'t see the result because you are hiding assignments',
     back_to_list: 'back to list',
@@ -1653,6 +1685,7 @@ export default {
     comment_image: 'Attach files',
     create_for_selection: 'Create a task for each empty cell',
     create_tasks: 'Add tasks',
+    create_tasks_disclaimer: 'If your task type is missing, verify it is listed in the Task Types section of the production settings.',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explaination: 'You are about to create a new task for each shot of the current project for the given task type. Do you want to continue?',
     create_tasks_shot_failed: 'A server error occurred while proceeding creations.',
@@ -1810,6 +1843,26 @@ export default {
     match_details: 'match found in {target}',
     placeholder: 'Search for an entity in the database...',
     title: 'Entity Search'
+  },
+
+  software_licenses: {
+    create_error: 'An error occurred while saving the software license.',
+    delete_error: 'An error occurred while deleting the software license.',
+    delete_text: 'Are you sure you want to delete this software license?',
+    edit_title: 'Edit Software License',
+    new_software_license: 'New Software License',
+    number: 'software license | software licenses',
+    title: 'Software Licenses',
+
+    fields: {
+      extension: 'Extension',
+      name: 'Name',
+      monthly_cost: 'Monthly Cost',
+      inventory_amount: 'Inventory Amount',
+      short_name: 'Short Name',
+      status: 'Status',
+      version: 'Version'
+    }
   },
 
   timesheets: {
