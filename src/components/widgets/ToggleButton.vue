@@ -29,7 +29,7 @@ defineProps({
 defineEmits(['update:modelValue'])
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .toggle-container {
   display: inline-flex;
   align-items: center;

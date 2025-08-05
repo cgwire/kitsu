@@ -311,7 +311,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .all-tasks {
   display: flex;
   flex-direction: column;

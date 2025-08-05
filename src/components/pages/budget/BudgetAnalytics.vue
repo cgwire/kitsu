@@ -79,7 +79,7 @@ defineProps({
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .analytics-container {
   background-color: var(--background-panel);
   border-radius: 10px;
