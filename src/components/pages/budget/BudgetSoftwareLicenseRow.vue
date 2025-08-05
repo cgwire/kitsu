@@ -134,14 +134,15 @@ const departmentSoftwareLicenseExpense = computed(() => {
 
 const departmentSoftwareLicenseRemainingPrevisional = computed(() => {
   return (
-    props.remainingPrevisional[props.departmentEntry.id]['software-licenses'] ||
-    0
+    props.remainingPrevisional[props.departmentEntry.id]?.[
+      'software-licenses'
+    ] || 0
   )
 })
 
 const departmentSoftwareLicenseDonePrevisional = computed(() => {
   return (
-    props.donePrevisional[props.departmentEntry.id]['software-licenses'] || 0
+    props.donePrevisional[props.departmentEntry.id]?.['software-licenses'] || 0
   )
 })
 

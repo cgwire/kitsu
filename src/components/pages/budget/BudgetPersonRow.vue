@@ -1,10 +1,10 @@
 <template>
   <tr class="datatable-row" :key="personEntry.id">
     <td class="position datatable-row-header">
-      {{ $t('budget.positions.' + personEntry.position || 'artist') }}
+      {{ $t('budget.positions.' + (personEntry.position || 'artist')) }}
     </td>
     <td class="seniority datatable-row-header">
-      {{ $t('budget.seniorities.' + personEntry.seniority || 'junior') }}
+      {{ $t('budget.seniorities.' + (personEntry.seniority || 'junior')) }}
     </td>
     <td class="name datatable-row-header">
       <div class="flexrow">
@@ -118,6 +118,7 @@ import { computed, defineProps } from 'vue'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 
 defineEmits([
   'delete-budget-entry',
@@ -128,10 +129,6 @@ defineEmits([
 const props = defineProps({
   personEntry: {
     type: Object,
-    required: true
-  },
-  isShowingItems: {
-    type: Boolean,
     required: true
   },
   departmentEntry: {
@@ -155,10 +152,6 @@ const props = defineProps({
     required: true
   },
   convertedExpenses: {
-    type: Object,
-    required: true
-  },
-  differences: {
     type: Object,
     required: true
   },

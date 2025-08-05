@@ -30,7 +30,6 @@
             :months-between-start-and-now="monthsBetweenStartAndNow"
             :months-between-now-and-end="monthsBetweenNowAndEnd"
             :months-between-production-dates="monthsBetweenProductionDates"
-            :currency="currency"
             @add-budget-entry="$emit('add-budget-entry')"
           />
           <tbody
@@ -41,11 +40,13 @@
             <budget-total-row
               :total-entry="totalEntry"
               :is-showing-expenses="isShowingExpenses"
+              :is-showing-items="isShowingItems"
               :months-between-start-and-now="monthsBetweenStartAndNow"
               :months-between-now-and-end="monthsBetweenNowAndEnd"
               :months-between-production-dates="monthsBetweenProductionDates"
               :converted-expenses="convertedExpenses"
-              :differences="differences"
+              :hardware-items-costs="hardwareItemsCosts"
+              :software-licenses-costs="softwareLicensesCosts"
               :done-previsional="doneSubset"
               :remaining-previsional="remainingPrevisional"
             />
@@ -62,7 +63,6 @@
                 :months-between-now-and-end="monthsBetweenNowAndEnd"
                 :months-between-production-dates="monthsBetweenProductionDates"
                 :converted-expenses="convertedExpenses"
-                :differences="differences"
                 :hardware-items-costs="hardwareItemsCosts"
                 :software-licenses-costs="softwareLicensesCosts"
                 :collapsed-departments="collapsedDepartments"
@@ -83,7 +83,6 @@
                     monthsBetweenProductionDates
                   "
                   :converted-expenses="convertedExpenses"
-                  :differences="differences"
                   :hardware-items-costs="hardwareItemsCosts"
                   :done-previsional="doneSubset"
                   :remaining-previsional="remainingPrevisional"
@@ -100,7 +99,6 @@
                     monthsBetweenProductionDates
                   "
                   :converted-expenses="convertedExpenses"
-                  :differences="differences"
                   :software-licenses-costs="softwareLicensesCosts"
                   :done-previsional="doneSubset"
                   :remaining-previsional="remainingPrevisional"
@@ -111,7 +109,6 @@
                   :key="personEntry.id"
                   :department-entry="departmentEntry"
                   :person-entry="personEntry"
-                  :is-showing-items="isShowingItems"
                   :is-showing-expenses="isShowingExpenses"
                   :months-between-start-and-now="monthsBetweenStartAndNow"
                   :months-between-now-and-end="monthsBetweenNowAndEnd"
@@ -119,12 +116,13 @@
                     monthsBetweenProductionDates
                   "
                   :converted-expenses="convertedExpenses"
-                  :differences="differences"
                   :person-map="personMap"
                   :done-previsional="doneSubset"
                   :remaining-previsional="remainingPrevisional"
-                  @delete-clicked="$emit('delete-budget-entry', personEntry)"
-                  @edit-clicked="$emit('edit-budget-entry', personEntry)"
+                  @delete-budget-entry="
+                    $emit('delete-budget-entry', personEntry)
+                  "
+                  @edit-budget-entry="$emit('edit-budget-entry', personEntry)"
                   @add-person-exception="addPersonException($event)"
                   v-for="personEntry in departmentEntry.persons"
                 />
@@ -173,21 +171,9 @@ export default {
   },
 
   props: {
-    budgetEntries: {
-      type: Array,
-      default: () => []
-    },
     budgetDepartments: {
       type: Array,
       default: () => []
-    },
-    costsMonths: {
-      type: Object,
-      default: () => {}
-    },
-    currency: {
-      type: String,
-      default: 'USD'
     },
     currentBudget: {
       type: Object,
@@ -214,12 +200,12 @@ export default {
       default: false
     },
     linkedHardwareItems: {
-      type: Array,
-      default: () => []
+      type: Object,
+      required: true
     },
     linkedSoftwareLicenses: {
-      type: Array,
-      default: () => []
+      type: Object,
+      required: true
     },
     monthsBetweenStartAndNow: {
       type: Array,
@@ -439,44 +425,6 @@ export default {
       })
 
       return extendedBudgetDepartments
-    },
-
-    /* It calculates the difference between the consumed budget and the
-     * expenses. It runs through all the departments and persons and
-     * calculates the difference for each person. It aggregates the
-     */
-    differences() {
-      const differences = { total: 0 }
-      this.budgetDepartments.forEach(department => {
-        if (!differences[department.id]) {
-          differences[department.id] = { total: 0 }
-        }
-        department.persons.forEach(person => {
-          if (!person.person_id) return
-          if (!differences[department.id][person.person_id]) {
-            differences[department.id][person.person_id] = 0
-          }
-          let personTotal = 0
-          Object.keys(this.costsMonths).forEach(month => {
-            personTotal += this.getMonthCost(person, month)
-          })
-          const expense =
-            this.convertedExpenses[department.id]?.[person.person_id]?.total ||
-            0
-          const personDifference = personTotal - expense || 0
-          differences[department.id][person.person_id] += personDifference
-          differences[department.id].total += personDifference
-        })
-        differences[department.id]['software-licenses'] =
-          this.softwareLicensesCosts[department.id].total -
-            this.convertedExpenses[department.id]?.['software-licenses']
-              ?.total || 0
-        differences[department.id]['hardware-items'] =
-          this.hardwareItemsCosts[department.id].total -
-          this.convertedExpenses[department.id]?.['hardware-items']?.total
-        differences.total += differences[department.id].total
-      })
-      return differences
     },
 
     remainingPrevisional() {

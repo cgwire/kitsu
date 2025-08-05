@@ -3,7 +3,6 @@
     <template #main>
       <div class="flexcolumn page">
         <budget-header
-          :budgets="budgets"
           :budget-options="budgetOptions"
           :budget="currentBudget"
           :is-loading="loading.budgets"
@@ -16,16 +15,13 @@
           @delete-budget="onDeleteBudgetClicked"
           @edit-budget="onEditBudgetClicked"
           @export-budget="onExportBudgetClicked"
+          @new-version="onNewBudgetVersionClicked"
           @toggle-expenses="onToggleExpenses"
           @toggle-items="onToggleItems"
-          @new-version="onNewBudgetVersionClicked"
         />
 
         <budget-list
           :budget-departments="budgetDepartments"
-          :budget-entries="budgetEntries"
-          :costs-months="costsMonths"
-          :currency="currentBudget?.currency || 'USD'"
           :current-budget="currentBudget"
           :expenses="expenses.data"
           :is-error="errors.entries"
@@ -109,7 +105,7 @@ import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 
 import { pageMixin } from '@/components/mixins/page'
-import { formatMonth, parseSimpleDate } from '@/lib/time'
+import { parseSimpleDate } from '@/lib/time'
 import csv from '@/lib/csv'
 
 import BudgetAnalytics from '@/components/pages/budget/BudgetAnalytics.vue'
@@ -159,10 +155,9 @@ export default {
       budgetEntryToEdit: {},
       budgetOptions: [],
       budgetToEdit: {},
-      costsMonths: [],
       currentBudget: {},
-      linkedHardwareItems: [],
-      linkedSoftwareLicenses: [],
+      linkedHardwareItems: {},
+      linkedSoftwareLicenses: {},
       errors: {
         budgets: false,
         createBudget: false,
@@ -174,7 +169,6 @@ export default {
         expenses: false
       },
       items: {
-        data: {},
         showing: false
       },
       expenses: {
@@ -194,7 +188,6 @@ export default {
       modals: {
         createBudget: false,
         createBudgetEntry: false,
-        editBudgetEntry: false,
         deleteBudget: false,
         deleteBudgetEntry: false
       },
@@ -214,12 +207,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departments',
-      'departmentMap',
-      'personMap'
-    ]),
+    ...mapGetters(['currentProduction', 'departmentMap', 'personMap']),
 
     monthsBetweenStartAndNow() {
       return this.getMonthsBetweenDates(
@@ -236,7 +224,7 @@ export default {
     },
 
     lastRevision() {
-      return this.budgets.length > 0 ? this.budgets[0].revision : 0
+      return this.budgets?.[0]?.revision || 0
     },
 
     budgetDepartments() {
@@ -363,16 +351,11 @@ export default {
       'updateProductionBudgetEntry'
     ]),
 
-    formatMonth,
-
     resetMonths() {
       this.monthsBetweenProductionDates = this.getMonthsBetweenDates(
         this.currentProduction.start_date,
         this.currentProduction.end_date
       )
-      this.costsMonths = this.monthsBetweenProductionDates.map(month => {
-        return month.format('YYYY-MM')
-      })
     },
 
     sortDepartmentPersons(a, b) {
@@ -456,6 +439,7 @@ export default {
     async createBudget(budget) {
       try {
         this.loading.createBudget = true
+        this.errors.createBudget = false
         if (budget.id) {
           await this.updateProductionBudget({
             productionId: this.currentProduction.id,
@@ -518,11 +502,7 @@ export default {
     postDeleteBudget(budget) {
       this.budgets = this.budgets.filter(b => b.id !== budget.id)
       this.resetBudgetOptions()
-      if (this.budgets.length > 0) {
-        this.currentBudget = this.budgets[0]
-      } else {
-        this.currentBudget = {}
-      }
+      this.currentBudget = this.budgets?.[0] || {}
     },
 
     onAddBudgetEntry() {
@@ -541,6 +521,7 @@ export default {
     async runRemoteBudgetEntryCreation(budgetEntry) {
       try {
         this.loading.createBudgetEntry = true
+        this.errors.createBudgetEntry = false
         await this.createProductionBudgetEntry({
           productionId: this.currentProduction.id,
           budgetId: this.currentBudget.id,
@@ -639,7 +620,7 @@ export default {
           this.currentProduction.id
         )
         this.budgets.sort((a, b) => b.revision - a.revision)
-        this.currentBudget = this.budgets.length > 0 ? this.budgets[0] : {}
+        this.currentBudget = this.budgets?.[0] || {}
         this.resetBudgetOptions()
       } catch (error) {
         console.error(error)
@@ -690,6 +671,7 @@ export default {
       if (!this.expenses.showing) {
         try {
           this.loading.expenses = true
+          this.errors.expenses = false
           this.expenses.data = await this.loadExpenses(
             this.currentProduction.id
           )

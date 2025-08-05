@@ -1,6 +1,5 @@
 <template>
   <tr class="datatable-row">
-    <!-- Hardware items -->
     <td class="datatable-row-header" colspan="3">
       {{ $t('hardware_items.title') }}
     </td>
@@ -45,7 +44,7 @@
       </td>
     </template>
     <td
-      :key="hardware - departmentEntry.id + '-' + month"
+      :key="'hardware-' + departmentEntry.id + '-' + month"
       class="costs"
       v-for="month in isShowingExpenses
         ? monthsBetweenNowAndEnd
@@ -133,12 +132,15 @@ const departmentHardwareItemExpense = computed(() => {
 })
 
 const departmentHardwareItemDonePrevisional = computed(() => {
-  return props.donePrevisional[props.departmentEntry.id]['hardware-items'] || 0
+  return (
+    props.donePrevisional[props.departmentEntry.id]?.['hardware-items'] || 0
+  )
 })
 
 const departmentHardwareItemRemainingPrevisional = computed(() => {
   return (
-    props.remainingPrevisional[props.departmentEntry.id]['hardware-items'] || 0
+    props.remainingPrevisional[props.departmentEntry.id]?.['hardware-items'] ||
+    0
   )
 })
 

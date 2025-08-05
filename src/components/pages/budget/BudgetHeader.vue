@@ -56,7 +56,6 @@
       <button-simple
         class="mr05"
         :active="isShowingItems"
-        :is-loading="isLoadingItems"
         :text="$t('budget.show_items')"
         @click="$emit('toggle-items')"
       />
@@ -85,10 +84,6 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 defineProps({
-  budgets: {
-    type: Array,
-    default: () => []
-  },
   budgetOptions: {
     type: Array,
     default: () => []

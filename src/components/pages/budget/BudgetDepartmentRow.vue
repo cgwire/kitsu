@@ -158,10 +158,6 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  differences: {
-    type: Object,
-    required: true
-  },
   hardwareItemsCosts: {
     type: Object,
     required: true
@@ -232,13 +228,6 @@ const getDepartmentMonthCost = (departmentEntry, month) => {
 <style lang="scss" scoped>
 @use '@/components/pages/budget/budget.scss';
 
-.department-header-header {
-  max-width: 400px;
-  width: 400px;
-  min-width: 400px;
-  z-index: 5;
-}
-
 .department-header {
   max-width: 400px;
   min-width: 400px;
@@ -247,7 +236,7 @@ const getDepartmentMonthCost = (departmentEntry, month) => {
 }
 
 .department-header-content {
-  color: white;
+  color: $white;
   height: 100%;
   min-width: 400px;
   max-width: 400px;

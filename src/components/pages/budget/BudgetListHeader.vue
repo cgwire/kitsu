@@ -105,10 +105,6 @@ defineProps({
   monthsBetweenProductionDates: {
     type: Array,
     required: true
-  },
-  currency: {
-    type: String,
-    required: true
   }
 })
 </script>
@@ -119,21 +115,6 @@ defineProps({
   width: 400px;
   min-width: 400px;
   z-index: 5;
-}
-
-.department-header {
-  max-width: 400px;
-  min-width: 400px;
-  position: sticky;
-  padding: 0;
-}
-
-.department-header-content {
-  color: white;
-  height: 100%;
-  min-width: 400px;
-  max-width: 400px;
-  padding: 0.6em 1em;
 }
 
 .total-column {
