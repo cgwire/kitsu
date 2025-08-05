@@ -153,7 +153,6 @@ export default {
       budgets: [],
       budgetEntries: [],
       budgetEntryToEdit: {},
-      budgetOptions: [],
       budgetToEdit: {},
       currentBudget: {},
       linkedHardwareItems: {},
@@ -221,6 +220,13 @@ export default {
         moment().add(1, 'month').format('YYYY-MM-DD'),
         this.currentProduction.end_date
       )
+    },
+
+    budgetOptions() {
+      return this.budgets.map(budget => ({
+        label: `v${budget.revision} - ${budget.name}`,
+        value: budget
+      }))
     },
 
     lastRevision() {
@@ -467,7 +473,6 @@ export default {
           this.budgets.unshift(newBudget)
           this.currentBudget = newBudget
         }
-        this.resetBudgetOptions()
         this.modals.createBudget = false
       } catch (error) {
         console.error(error)
@@ -490,7 +495,8 @@ export default {
           productionId: this.currentProduction.id,
           budgetId: budget.id
         })
-        this.postDeleteBudget(budget)
+        this.budgets = this.budgets.filter(b => b.id !== budget.id)
+        this.currentBudget = this.budgets?.[0] || {}
         this.modals.deleteBudget = false
       } catch (error) {
         console.error(error)
@@ -498,12 +504,6 @@ export default {
       } finally {
         this.loading.deleteBudget = false
       }
-    },
-
-    postDeleteBudget(budget) {
-      this.budgets = this.budgets.filter(b => b.id !== budget.id)
-      this.resetBudgetOptions()
-      this.currentBudget = this.budgets?.[0] || {}
     },
 
     onAddBudgetEntry() {
@@ -622,7 +622,6 @@ export default {
         )
         this.budgets.sort((a, b) => b.revision - a.revision)
         this.currentBudget = this.budgets?.[0] || {}
-        this.resetBudgetOptions()
       } catch (error) {
         console.error(error)
         this.errors.budgets = true
@@ -646,15 +645,6 @@ export default {
       } finally {
         this.loading.entries = false
       }
-    },
-
-    resetBudgetOptions() {
-      this.budgetOptions = this.budgets.map(budget => {
-        return {
-          label: `v${budget.revision} - ${budget.name}`,
-          value: budget
-        }
-      })
     },
 
     getMonthsBetweenDates(startDate, endDate) {
@@ -698,13 +688,13 @@ export default {
     },
 
     currentBudget() {
-      this.loadBudgetEntries()
+      // this.loadBudgetEntries()
     }
   },
 
   socket: {
     events: {
-      'budget:create': async function (data) {
+      async 'budget:create'(data) {
         if (data.project_id !== this.currentProduction.id) return
         const budget = await this.loadProductionBudget({
           productionId: this.currentProduction.id,
@@ -713,11 +703,10 @@ export default {
         const oldBudget = this.budgets.find(b => b.id === budget.id)
         if (budget && !oldBudget) {
           this.budgets.unshift(budget)
-          this.resetBudgetOptions()
         }
       },
 
-      'budget:update': async function (data) {
+      async 'budget:update'(data) {
         if (data.project_id !== this.currentProduction.id) return
         const budget = await this.loadProductionBudget({
           productionId: this.currentProduction.id,
@@ -730,25 +719,23 @@ export default {
               name: budget.name,
               currency: budget.currency
             })
-            this.resetBudgetOptions()
           }
         }
       },
 
-      'budget:delete': function (data) {
+      async 'budget:delete'(data) {
         if (data.project_id !== this.currentProduction.id) return
         const oldBudget = this.budgets.find(b => b.id === data.budget_id)
         const isCurrentBudgetDeleted = this.currentBudget.id === data.budget_id
         if (oldBudget) {
           this.budgets = this.budgets.filter(b => b.id !== data.budget_id)
-          this.resetBudgetOptions()
           if (isCurrentBudgetDeleted) {
-            this.currentBudget = this.budgets[0]
+            this.currentBudget = this.budgets?.[0] || {}
           }
         }
       },
 
-      'budget-entry:create': async function (data) {
+      async 'budget-entry:create'(data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
         const oldBudgetEntry = this.budgetEntries.find(
@@ -763,7 +750,7 @@ export default {
         this.budgetEntries.push(budgetEntry)
       },
 
-      'budget-entry:update': async function (data) {
+      async 'budget-entry:update'(data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
         const oldBudgetEntry = this.budgetEntries.find(
@@ -779,7 +766,7 @@ export default {
         this.afterEditBudgetEntry(budgetEntry)
       },
 
-      'budget-entry:delete': async function (data) {
+      async 'budget-entry:delete'(data) {
         if (data.project_id !== this.currentProduction.id) return
         if (data.budget_id !== this.currentBudget.id) return
         const oldBudgetEntry = this.budgetEntries.find(
