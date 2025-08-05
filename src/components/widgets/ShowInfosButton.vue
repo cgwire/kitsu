@@ -60,9 +60,7 @@ export default {
   watch: {
     isShowInfosBreakdown() {
       const value = this.isShowInfosBreakdown.toString()
-      localStorage.setItem('show-infos-breakdown', value, {
-        expires: '1M'
-      })
+      localStorage.setItem('show-infos-breakdown', value)
     }
   }
 }

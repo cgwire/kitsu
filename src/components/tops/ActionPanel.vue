@@ -1535,9 +1535,7 @@ export default {
     },
 
     selectBar(barName) {
-      localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName, {
-        expires: '1M'
-      })
+      localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName)
       if (this.selectedBar !== barName) {
         this.selectedBar = barName
       } else {
