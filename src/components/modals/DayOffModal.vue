@@ -62,7 +62,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { AlertTriangleIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 
@@ -118,8 +117,6 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['user']),
-
     isEditing() {
       return Boolean(this.dayOffToEdit?.id)
     }

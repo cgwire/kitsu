@@ -61,8 +61,6 @@
           ? displayedEpisodes.filter(e => e.status === 'running')
           : displayedEpisodes
       "
-      :episode-stats="episodeStats"
-      :episode-retakes-stats="episodeRetakeStats"
       :is-loading="isLoading"
       :is-error="isLoadingError"
       :show-all="episodeSearchText.length === 0"
