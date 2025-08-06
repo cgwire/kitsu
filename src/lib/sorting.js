@@ -1,4 +1,4 @@
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 
 import {
   getTaskStatusPriorityOfProd,

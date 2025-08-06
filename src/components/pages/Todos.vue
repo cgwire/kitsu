@@ -143,7 +143,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment-timezone'
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 
 import { searchMixin } from '@/components/mixins/search'
 

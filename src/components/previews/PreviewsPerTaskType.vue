@@ -32,7 +32,7 @@
  * Widget displaying entity's revisions of previews per task type.
  * It allows to select a given revision for a given task type for current entity.
  */
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 import { mapGetters } from 'vuex'
 
 import editStore from '@/store/modules/edits'

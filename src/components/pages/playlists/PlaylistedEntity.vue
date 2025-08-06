@@ -74,7 +74,7 @@
  * It fires events about drag'n'drop reordering too.
  */
 import { XIcon } from 'lucide-vue-next'
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 import { mapGetters } from 'vuex'
 
 import Combobox from '@/components/widgets/Combobox.vue'

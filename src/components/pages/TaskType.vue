@@ -295,7 +295,7 @@ import taskStatusStore from '@/store/modules/taskstatus.js'
 
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
