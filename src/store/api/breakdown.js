@@ -19,7 +19,7 @@ export default {
     return client.pget(path)
   },
 
-  updateCasting(productionId, entityId, casting, callback) {
+  updateCasting(productionId, entityId, casting) {
     const path = `/api/data/projects/${productionId}/entities/${entityId}/casting`
     return client.pput(path, casting)
   },
