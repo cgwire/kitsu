@@ -1939,7 +1939,7 @@ export default {
           event.preventDefault()
           event.stopPropagation()
           this.toggleFullOverlayComparison()
-        } else if (event.code === 27) {
+        } else if (event.code === 'Escape') {
           // Esc
           if (this.fullScreen) {
             this.onFullScreenChange()
