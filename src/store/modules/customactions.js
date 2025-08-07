@@ -3,7 +3,6 @@ import { sortByName } from '@/lib/sorting'
 
 import {
   LOAD_CUSTOM_ACTIONS_START,
-  LOAD_CUSTOM_ACTIONS_ERROR,
   LOAD_CUSTOM_ACTIONS_END,
   EDIT_CUSTOM_ACTION_END,
   DELETE_CUSTOM_ACTION_END,
@@ -37,7 +36,7 @@ const getters = {
   editCustomAction: state => state.editCustomAction,
   deleteCustomAction: state => state.deleteCustomAction,
 
-  customAction: (state, getters, rootState) => id => {
+  customAction: state => id => {
     return state.customActions.find(customAction => customAction.id === id)
   },
 
@@ -59,38 +58,33 @@ const getters = {
 }
 
 const actions = {
-  loadCustomActions({ commit, state }, callback) {
+  loadCustomActions({ commit }) {
     commit(LOAD_CUSTOM_ACTIONS_START)
-    customActionsApi.getCustomActions((err, customActions) => {
-      if (err) commit(LOAD_CUSTOM_ACTIONS_ERROR)
-      else commit(LOAD_CUSTOM_ACTIONS_END, customActions)
-      if (callback) callback(err)
+    return customActionsApi.getCustomActions().then(customActions => {
+      commit(LOAD_CUSTOM_ACTIONS_END, customActions)
     })
   },
 
-  newCustomAction({ commit, state }, data) {
+  newCustomAction({ commit }, data) {
     return customActionsApi.newCustomAction(data).then(customAction => {
       commit(EDIT_CUSTOM_ACTION_END, customAction)
-      Promise.resolve(customAction)
     })
   },
 
-  editCustomAction({ commit, state }, data) {
+  editCustomAction({ commit }, data) {
     return customActionsApi.updateCustomAction(data).then(customAction => {
       commit(EDIT_CUSTOM_ACTION_END, customAction)
-      Promise.resolve(customAction)
     })
   },
 
-  deleteCustomAction({ commit, state }, customAction) {
+  deleteCustomAction({ commit }, customAction) {
     return customActionsApi.deleteCustomAction(customAction).then(() => {
       commit(DELETE_CUSTOM_ACTION_END, customAction)
-      Promise.resolve(customAction)
     })
   },
 
-  postCustomAction({ commit }, { data, url }) {
-    customActionsApi.postCustomAction(url, data)
+  postCustomAction({}, { data, url }) {
+    return customActionsApi.postCustomAction(url, data)
   }
 }
 

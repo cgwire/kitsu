@@ -93,15 +93,16 @@ export default {
     }
   },
 
-  created() {
+  async created() {
     this.loading.list = true
     this.errors.list = false
-    this.loadCustomActions(err => {
+    try {
+      await this.loadCustomActions()
+    } catch {
+      this.errors.list = true
+    } finally {
       this.loading.list = false
-      if (err) {
-        this.errors.list = true
-      }
-    })
+    }
   },
 
   methods: {
