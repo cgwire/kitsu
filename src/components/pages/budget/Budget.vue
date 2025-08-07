@@ -688,7 +688,7 @@ export default {
     },
 
     currentBudget() {
-      // this.loadBudgetEntries()
+      this.loadBudgetEntries()
     }
   },
 

@@ -153,7 +153,7 @@
 
 <script>
 import moment from 'moment-timezone'
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 import colors from '@/lib/colors'

@@ -97,7 +97,7 @@
 </template>
 
 <script>
-import firstBy from 'thenby'
+import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 import { searchMixin } from '@/components/mixins/search'

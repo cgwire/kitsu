@@ -2,14 +2,16 @@ import client from '@/store/api/client'
 import superagent from 'superagent'
 
 export default {
-  getCustomActions(callback) {
-    client.get('/api/data/custom-actions', callback)
+  getCustomActions() {
+    return client.pget('/api/data/custom-actions')
   },
 
   newCustomAction(customAction) {
     const data = {
       name: customAction.name,
-      url: customAction.url
+      url: customAction.url,
+      entity_type: customAction.entityType,
+      is_ajax: customAction.isAjax === 'true'
     }
     return client.ppost('/api/data/custom-actions/', data)
   },
@@ -29,15 +31,6 @@ export default {
   },
 
   postCustomAction(url, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(url)
-        .withCredentials()
-        .send(data)
-        .end((err, res) => {
-          if (err) reject(err)
-          else resolve()
-        })
-    })
+    return superagent.post(url).withCredentials().send(data)
   }
 }
