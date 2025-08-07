@@ -9,7 +9,9 @@ export default {
   newCustomAction(customAction) {
     const data = {
       name: customAction.name,
-      url: customAction.url
+      url: customAction.url,
+      entity_type: customAction.entityType,
+      is_ajax: customAction.isAjax === 'true'
     }
     return client.ppost('/api/data/custom-actions/', data)
   },
