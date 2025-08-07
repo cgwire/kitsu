@@ -124,13 +124,15 @@ export default {
       this.errors.edit = false
       this[action](form)
         .then(() => {
-          this.loading.edit = false
           this.modals.edit = false
         })
         .catch(err => {
           console.error(err)
           this.errors.edit = true
           this.modals.isNewDisplayed = false
+        })
+        .finally(() => {
+          this.loading.edit = false
         })
     },
 
@@ -139,12 +141,13 @@ export default {
       this.errors.del = false
       this.deleteCustomAction(this.customActionToDelete)
         .then(() => {
-          this.loading.del = false
           this.modals.del = false
         })
         .catch(err => {
           console.error(err)
           this.errors.del = true
+        })
+        .finally(() => {
           this.loading.del = false
         })
     },

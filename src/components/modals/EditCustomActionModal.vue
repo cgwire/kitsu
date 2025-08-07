@@ -22,6 +22,7 @@
             :label="$t('custom_actions.fields.name')"
             v-model="form.name"
             v-focus
+            @enter="confirmClicked"
           />
 
           <text-field
@@ -49,6 +50,7 @@
 
         <modal-footer
           :error-text="$t('custom_actions.create_error')"
+          :is-loading="isLoading"
           :is-error="isError"
           @confirm="confirmClicked"
           @cancel="$emit('cancel')"
@@ -128,8 +130,9 @@ export default {
     confirmClicked() {
       this.$emit('confirm', this.form)
     },
+
     isEditing() {
-      return this.customActionToEdit && this.customActionToEdit.id
+      return Boolean(this.customActionToEdit?.id)
     }
   },
 

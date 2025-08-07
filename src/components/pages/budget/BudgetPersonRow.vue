@@ -101,12 +101,6 @@
       {{ personTotalGap.toLocaleString() }}
     </td>
     <row-actions-cell
-      class="actions"
-      :entry-id="personEntry.id"
-      :hide-avatar="true"
-      :hide-change-password="true"
-      :hide-delete="false"
-      :hide-refresh="true"
       @delete-clicked="$emit('delete-budget-entry', personEntry)"
       @edit-clicked="$emit('edit-budget-entry', personEntry)"
     />
