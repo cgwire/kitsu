@@ -48,5 +48,21 @@ export default {
 
   filenameWithoutExtension(filename) {
     return filename.replace(/\.[^/.]+$/, '')
+  },
+
+  insertInTextArea(textarea, text) {
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const textBefore = textarea.value.substring(0, start)
+    const textAfter = textarea.value.substring(end)
+    const newText = textBefore + text + textAfter
+    const newPosition = start + text.length
+    setTimeout(() => {
+      textarea.setSelectionRange(newPosition, newPosition)
+      textarea.focus()
+    }, 0)
+    return newText
   }
 }

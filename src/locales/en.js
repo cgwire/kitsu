@@ -215,6 +215,7 @@ export default {
     add_attachment: 'Add attachment',
     add_checklist: 'Add checklist',
     add_comment: 'Leave a comment...',
+    add_emoji: 'Add an emoji',
     add_link: 'Add a URL link',
     add_preview: 'Add preview revisions to publish',
     attachments: 'Attachments',

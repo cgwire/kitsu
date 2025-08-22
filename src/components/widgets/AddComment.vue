@@ -213,6 +213,7 @@
         </div>
 
         <div class="flexrow button-row mt1">
+          <emoji-button @select="onSelectEmoji" v-if="mode === 'status'" />
           <button-simple
             :class="{
               'flexrow-item': true,
@@ -349,6 +350,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 const REVISION_NUMBER_REGEX = /v(\d+)/gi
@@ -363,6 +365,7 @@ export default {
     Checklist,
     ConfirmModal,
     ComboboxStatus,
+    EmojiButton,
     PeopleAvatar
   },
 
@@ -829,6 +832,11 @@ export default {
 
     hideAnnotationLoading() {
       this.attachmentModal.hideAnnotationLoading()
+    },
+
+    onSelectEmoji(emoji) {
+      const textarea = this.$refs['comment-textarea']
+      this.text = strings.insertInTextArea(textarea, emoji.i)
     }
   },
 
@@ -1075,6 +1083,7 @@ article.add-comment {
 }
 
 .post-area {
+  position: relative;
   padding: 0 0.5em 0.2em 0.5em;
 }
 

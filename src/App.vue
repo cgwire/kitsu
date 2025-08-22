@@ -2363,6 +2363,38 @@ th.validation-cell {
   height: 43px;
 }
 
+#app .v3-emoji-picker.v3-color-theme-dark .v3-sticky {
+  text-transform: uppercase;
+  font-size: 0.8em;
+  color: var(--text);
+}
+
+#app .dark .v3-emoji-picker.v3-color-theme-dark {
+  background: var(--background-alt);
+  border: 2px solid var(--border);
+}
+#app .dark .v3-emoji-picker.v3-color-theme-dark .v3-sticky {
+  background: var(--background-alt);
+}
+#app
+  .dark
+  .v3-emoji-picker
+  .v3-body
+  .v3-body-inner
+  .v3-group
+  .v3-emojis
+  button:hover {
+  background: var(--background);
+}
+
+#app .dark .v3-emoji-picker .v3-search input {
+  background: var(--background);
+}
+
+#app .v3-emoji-picker .v3-footer .v3-tone .v3-icon {
+  border-radius: 50%;
+}
+
 @media screen and (max-width: 768px) {
   .level-left + .level-right {
     display: flex;

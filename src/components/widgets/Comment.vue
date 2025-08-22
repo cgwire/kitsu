@@ -226,7 +226,12 @@
                     v-model="replyText"
                   />
                 </at-ta>
-                <div class="has-text-right">
+                <div class="flexrow">
+                  <emoji-button
+                    class="ml05 flexrow-item"
+                    @select="onSelectEmoji"
+                  />
+                  <span class="filler"></span>
                   <button-simple
                     class="reply-button"
                     :text="$t('main.reply')"
@@ -379,12 +384,14 @@ import { getDownloadAttachmentPath, pluralizeEntityType } from '@/lib/path'
 import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
+import stringHelpers from '@/lib/string'
 
 import { domMixin } from '@/components/mixins/dom'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import CommentMenu from '@/components/widgets/CommentMenu.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
+import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
@@ -401,6 +408,7 @@ export default {
     ChevronDownIcon,
     CopyIcon,
     CommentMenu,
+    EmojiButton,
     LinkIcon,
     PaperclipIcon,
     PeopleAvatar,
@@ -764,6 +772,11 @@ export default {
           this.fps
         )
       }
+    },
+
+    onSelectEmoji(emoji) {
+      const textarea = this.$refs['reply']
+      this.replyText = stringHelpers.insertInTextArea(textarea, emoji.i)
     }
   },
 

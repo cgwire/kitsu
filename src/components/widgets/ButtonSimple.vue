@@ -48,6 +48,7 @@
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
     <calendar-plus-icon class="icon" v-else-if="icon === 'calendar-plus'" />
+    <smile-icon class="icon" v-else-if="icon === 'smile'" />
     <file-digit-icon
       class="icon"
       :stroke-width="1.2"
@@ -104,6 +105,7 @@ import {
   SendIcon,
   SkipBackIcon,
   SkipForwardIcon,
+  SmileIcon,
   SquareIcon,
   TriangleIcon,
   XIcon,
@@ -148,6 +150,7 @@ export default {
     SendIcon,
     SkipBackIcon,
     SkipForwardIcon,
+    SmileIcon,
     SquareIcon,
     TriangleIcon,
     XIcon,

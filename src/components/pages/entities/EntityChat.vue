@@ -56,6 +56,7 @@
           >
           </textarea>
           <div class="buttons">
+            <emoji-button @select="onSelectEmoji" />
             <button-simple
               class="attach-button"
               icon="attach"
@@ -112,11 +113,13 @@ import { XIcon } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
+import stringHelpers from '@/lib/string'
 import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import EntityChatDays from '@/components/pages/entities/EntityChatDays.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -128,8 +131,9 @@ export default {
 
   components: {
     AddAttachmentModal,
-    ConfirmModal,
     ButtonSimple,
+    ConfirmModal,
+    EmojiButton,
     EntityChatDays,
     PeopleAvatar,
     Spinner,
@@ -321,6 +325,13 @@ export default {
 
     removeAttachment(form) {
       this.attachments = this.attachments.filter(f => f !== form)
+    },
+
+    onSelectEmoji(emoji) {
+      this.currentMessage = stringHelpers.insertInTextArea(
+        this.$refs.messageBox,
+        emoji.i
+      )
     }
   },
 
