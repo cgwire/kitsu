@@ -154,6 +154,13 @@ export default {
     }
   },
 
+  watch: {
+    '$route.query.entity_id'() {
+      console.log('cool')
+      this.selectFromQuery()
+    }
+  },
+
   socket: {
     events: {
       async 'chat:joined'(eventData) {
