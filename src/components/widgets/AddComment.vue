@@ -482,6 +482,11 @@ export default {
         }
       })
     })
+    window.addEventListener('paste', this.onPaste, false)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('paste', this.onPaste, false)
   },
 
   computed: {
@@ -759,6 +764,20 @@ export default {
         this.addCommentAttachment(forms)
       }
       this.isDragging = false
+    },
+
+    /*
+     * When a file is pasted in the comment area, it adds it to the attachments.
+     */
+    onPaste(event) {
+      if (this.modals.addCommentAttachment) return
+      if (this.$refs['comment-textarea'] !== document.activeElement) return
+      const files = event.clipboardData.files
+      if (files.length > 0) {
+        const form = new FormData()
+        form.append('file', files[0])
+        this.addCommentAttachment([form])
+      }
     },
 
     onAddCommentAttachmentClicked() {
