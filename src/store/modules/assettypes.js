@@ -35,28 +35,24 @@ const getters = {
 }
 
 const actions = {
-  loadAssetType({ commit }, assetTypeId) {
-    return assetTypesApi.getAssetType(assetTypeId).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-    })
+  async loadAssetType({ commit }, assetTypeId) {
+    const assetType = await assetTypesApi.getAssetType(assetTypeId)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  newAssetType({ commit }, data) {
-    return assetTypesApi.newAssetType(data).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-    })
+  async newAssetType({ commit }, data) {
+    const assetType = await assetTypesApi.newAssetType(data)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  editAssetType({ commit }, data) {
-    return assetTypesApi.updateAssetType(data).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-    })
+  async editAssetType({ commit }, data) {
+    const assetType = await assetTypesApi.updateAssetType(data)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  deleteAssetType({ commit }, assetType) {
-    return assetTypesApi.deleteAssetType(assetType).then(() => {
-      commit(DELETE_ASSET_TYPE_END, assetType)
-    })
+  async deleteAssetType({ commit }, assetType) {
+    await assetTypesApi.deleteAssetType(assetType)
+    commit(DELETE_ASSET_TYPE_END, assetType)
   }
 }
 
