@@ -498,8 +498,7 @@ export default {
         editLabel: false,
         importing: false,
         importingError: null,
-        remove: false,
-        stay: false
+        remove: false
       },
       loading: {
         edit: false,
@@ -698,10 +697,6 @@ export default {
         }
       })
       return castingAssetTypes.sort()
-    },
-
-    editLabelModal() {
-      return this.$refs['edit-label-modal']
     },
 
     filteredCasting() {
