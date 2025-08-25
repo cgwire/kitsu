@@ -1651,7 +1651,7 @@ export default {
 
     '$route.query.search'() {
       this.setSearchFromUrl()
-      if (this.searchField) return
+      if (!this.searchField) return
       const search = this.searchField.getValue()
       this.onSearchChange(search)
     }
