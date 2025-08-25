@@ -840,7 +840,7 @@ export default {
         let teamOptions = []
         if (this.isCurrentUserClient) {
           teamOptions = [
-            ...this.team.filter(person =>
+            this.team.filter(person =>
               ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
             )
           ]
