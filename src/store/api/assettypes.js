@@ -2,11 +2,11 @@ import client from '@/store/api/client'
 
 export default {
   getAssetTypes() {
-    client.pget('/api/data/asset-types')
+    return client.pget('/api/data/asset-types')
   },
 
   getAssetType(assetTypeId) {
-    client.pget(`/api/data/entity-types/${assetTypeId}`)
+    return client.pget(`/api/data/entity-types/${assetTypeId}`)
   },
 
   newAssetType(assetType) {
