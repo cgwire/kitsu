@@ -22,9 +22,9 @@ const state = { ...initialState }
 const getters = {
   assetTypes: state => state.assetTypes.filter(type => !type.archived),
   archivedAssetTypes: state => state.assetTypes.filter(type => type.archived),
-  assetTypeMap: state => cache.assetTypeMap,
+  assetTypeMap: () => cache.assetTypeMap,
 
-  getAssetType: (state, getters) => id => {
+  getAssetType: state => id => {
     return state.assetTypes.find(assetType => assetType.id === id)
   },
 
@@ -35,31 +35,27 @@ const getters = {
 }
 
 const actions = {
-  loadAssetType({ commit, state }, assetTypeId) {
+  loadAssetType({ commit }, assetTypeId) {
     return assetTypesApi.getAssetType(assetTypeId).then(assetType => {
       commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
     })
   },
 
-  newAssetType({ commit, state }, data) {
+  newAssetType({ commit }, data) {
     return assetTypesApi.newAssetType(data).then(assetType => {
       commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
     })
   },
 
-  editAssetType({ commit, state }, data) {
+  editAssetType({ commit }, data) {
     return assetTypesApi.updateAssetType(data).then(assetType => {
       commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
     })
   },
 
-  deleteAssetType({ commit, state }, assetType) {
+  deleteAssetType({ commit }, assetType) {
     return assetTypesApi.deleteAssetType(assetType).then(() => {
       commit(DELETE_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
     })
   }
 }
