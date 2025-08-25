@@ -578,6 +578,9 @@
                 'is-loading': loading.taskDeletion
               }"
               @click="confirmTaskDeletion"
+              :disabled="
+                deleteConfirmationText.trim().toLowerCase() !== 'delete'
+              "
             >
               {{
                 $tc('tasks.delete_for_selection', nbSelectedTasks, {
@@ -586,6 +589,18 @@
               }}
             </button>
           </div>
+          <div class="flexrow-item">
+            <label class="label is-warning">
+              To permanently delete the selected tasks type 'delete':
+            </label>
+            <input
+              class="input"
+              type="text"
+              v-model="deleteConfirmationText"
+              @keyup.enter="confirmTaskDeletion"
+            />
+          </div>
+
           <div class="flexrow-item error" v-if="errors.taskDeletion">
             {{ $t('tasks.delete_error') }}
           </div>
@@ -882,6 +897,7 @@ export default {
       availableTaskStatuses: [],
       customAction: {},
       customActions: [],
+      deleteConfirmationText: '',
       isUseCurrentFrame: false,
       person: null,
       priority: '0',
@@ -1364,11 +1380,15 @@ export default {
     },
 
     confirmTaskDeletion() {
+      if (this.deleteConfirmationText.trim().toLowerCase() !== 'delete') {
+        return
+      }
       this.loading.taskDeletion = true
       this.errors.taskDeletion = false
       this.deleteSelectedTasks()
         .then(() => {
           this.loading.taskDeletion = false
+          this.deleteConfirmationText = ''
         })
         .catch(err => {
           console.error(err)
@@ -1874,6 +1894,11 @@ export default {
   font-size: 0.8em;
   font-style: italic;
   text-align: center;
+}
+
+.is-warning {
+  margin-top: 0.5em;
+  color: $red;
 }
 
 .tags {
