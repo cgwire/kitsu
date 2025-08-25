@@ -65,8 +65,6 @@ const checkPosition = () => {
   const spaceBelow = viewportHeight - buttonRect.bottom
   const spaceAbove = buttonRect.top
 
-  console.log('spaceBelow', spaceBelow, 'spaceAbove', spaceAbove)
-
   if (spaceBelow < pickerHeight + 20 && spaceAbove >= pickerHeight + 20) {
     isPickerUp.value = true
   } else {

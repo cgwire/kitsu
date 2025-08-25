@@ -22,9 +22,9 @@ const state = { ...initialState }
 const getters = {
   assetTypes: state => state.assetTypes.filter(type => !type.archived),
   archivedAssetTypes: state => state.assetTypes.filter(type => type.archived),
-  assetTypeMap: state => cache.assetTypeMap,
+  assetTypeMap: () => cache.assetTypeMap,
 
-  getAssetType: (state, getters) => id => {
+  getAssetType: state => id => {
     return state.assetTypes.find(assetType => assetType.id === id)
   },
 
@@ -35,32 +35,24 @@ const getters = {
 }
 
 const actions = {
-  loadAssetType({ commit, state }, assetTypeId) {
-    return assetTypesApi.getAssetType(assetTypeId).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
-    })
+  async loadAssetType({ commit }, assetTypeId) {
+    const assetType = await assetTypesApi.getAssetType(assetTypeId)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  newAssetType({ commit, state }, data) {
-    return assetTypesApi.newAssetType(data).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
-    })
+  async newAssetType({ commit }, data) {
+    const assetType = await assetTypesApi.newAssetType(data)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  editAssetType({ commit, state }, data) {
-    return assetTypesApi.updateAssetType(data).then(assetType => {
-      commit(EDIT_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
-    })
+  async editAssetType({ commit }, data) {
+    const assetType = await assetTypesApi.updateAssetType(data)
+    commit(EDIT_ASSET_TYPE_END, assetType)
   },
 
-  deleteAssetType({ commit, state }, assetType) {
-    return assetTypesApi.deleteAssetType(assetType).then(() => {
-      commit(DELETE_ASSET_TYPE_END, assetType)
-      Promise.resolve(assetType)
-    })
+  async deleteAssetType({ commit }, assetType) {
+    await assetTypesApi.deleteAssetType(assetType)
+    commit(DELETE_ASSET_TYPE_END, assetType)
   }
 }
 
