@@ -575,7 +575,7 @@
             :error-text="$t('tasks.delete_for_selection_error')"
             :is-loading="loading.taskDeletion"
             :is-error="errors.taskDeletion"
-            :require-hard-delete-confirmation="allTasksCanceled"
+            :require-hard-delete-confirmation="true"
             :hard-delete-lock-text="
               $t('tasks.delete_for_selection_hard_lock_text')
             "
