@@ -1863,6 +1863,7 @@ export default {
       if (!version.id) {
         const newVersion = await this.createScheduleVersion(version)
         this.version = newVersion.id
+        this.onVersionChanged(this.version)
       } else {
         await this.updateScheduleVersion(version)
       }
