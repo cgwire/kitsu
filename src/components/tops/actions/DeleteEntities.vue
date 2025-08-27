@@ -13,7 +13,7 @@
     </div>
   </div>
   <hard-delete-modal
-    :active="modals.deleteConfirmation"
+    active
     :error-text="errorText"
     :is-loading="isLoading"
     :is-error="isError"
@@ -21,7 +21,7 @@
     :lock-text="hardDeleteLockTextComputed"
     @cancel="modals.deleteConfirmation = false"
     @confirm="confirm"
-    vif="modals.deleteConfirmation"
+    v-if="modals.deleteConfirmation"
   />
 </template>
 
