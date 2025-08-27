@@ -305,7 +305,9 @@
             :key="entity.id"
             v-for="entity in Array.from(selectedEntities.values())"
           >
-            <span :class="{ canceled: entity.canceled }">{{ entity.full_name }}</span>
+            <span :class="{ canceled: entity.canceled }">{{
+              entity.full_name
+            }}</span>
           </div>
         </div>
       </div>
