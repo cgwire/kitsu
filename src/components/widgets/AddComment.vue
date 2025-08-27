@@ -1120,17 +1120,6 @@ article.add-comment {
   background-color: $light-green;
 }
 
-.button-row {
-  .button:hover {
-    transform: scale(1.2);
-    transition: transform 0.1s linear;
-
-    &.post-button:hover {
-      transform: none;
-    }
-  }
-}
-
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
