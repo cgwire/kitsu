@@ -63,9 +63,12 @@ export default {
     )
   },
 
-  addAttachmentToComment(comment, files) {
+  addAttachmentToComment(comment, files, replyId) {
     const attachments = new FormData()
     const taskId = comment.object_id
+    if (replyId) {
+      attachments.set('reply_id', replyId)
+    }
     files.forEach((attachment, index) => {
       attachments.append(`file-${index}`, attachment.get('file'))
     })
@@ -229,9 +232,17 @@ export default {
     return client.ppost(path, {})
   },
 
-  replyToComment(comment, text) {
+  replyToComment(comment, text, attachments) {
+    let replyData = { text }
+    if (attachments?.length) {
+      replyData = new FormData()
+      attachments.forEach((attachment, index) => {
+        replyData.append(`file-${index}`, attachment.get('file'))
+      })
+      replyData.set('text', text)
+    }
     const path = `/api/data/tasks/${comment.object_id}/comments/${comment.id}/reply`
-    return client.ppost(path, { text })
+    return client.ppost(path, replyData)
   },
 
   deleteReply(comment, reply) {
