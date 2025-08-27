@@ -1094,7 +1094,6 @@ export default {
       const allShotsCanceled = Array.from(this.selectedShots.values()).every(
         shot => shot.canceled
       )
-      console.log('allShotsCanceled', this.selectedShots)
       return allShotsCanceled
     },
 
