@@ -1303,8 +1303,8 @@ export default {
     },
 
     descriptorCurrentDepartments(descriptor) {
-      const departemts = descriptor.departments || []
-      return departemts.map(departmentId =>
+      const departments = descriptor.departments || []
+      return departments.map(departmentId =>
         this.departmentMap.get(departmentId)
       )
     },
