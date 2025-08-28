@@ -778,11 +778,10 @@ const actions = {
     return tasksApi.ackComment(comment)
   },
 
-  replyToComment({ commit }, { comment, text }) {
-    return tasksApi.replyToComment(comment, text).then(reply => {
-      commit(ADD_REPLY_TO_COMMENT, { comment, reply })
-      return reply
-    })
+  async replyToComment({ commit }, { comment, text, attachments }) {
+    const reply = await tasksApi.replyToComment(comment, text, attachments)
+    commit(ADD_REPLY_TO_COMMENT, { comment, reply })
+    return reply
   },
 
   deleteReply({ commit }, { comment, reply }) {
@@ -1320,6 +1319,12 @@ const mutations = {
     if (!comment.replies) comment.replies = []
     if (!comment.replies.find(r => r.id === reply.id)) {
       comment.replies.push(reply)
+      if (!comment.attachment_files) {
+        comment.attachment_files = []
+      }
+      comment.attachment_files = comment.attachment_files.concat(
+        reply.attachment_files
+      )
     }
   },
 
