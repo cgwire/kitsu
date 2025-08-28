@@ -571,24 +571,22 @@
         </div>
 
         <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-tasks'">
-          <div class="flexrow is-wide">
-            <button
-              class="button is-danger confirm-button is-wide"
-              :class="{
-                'is-loading': loading.taskDeletion
-              }"
-              @click="confirmTaskDeletion"
-            >
-              {{
-                $tc('tasks.delete_for_selection', nbSelectedTasks, {
-                  nbSelectedTasks
-                })
-              }}
-            </button>
-          </div>
-          <div class="flexrow-item error" v-if="errors.taskDeletion">
-            {{ $t('tasks.delete_error') }}
-          </div>
+          <delete-entities
+            :error-text="$t('tasks.delete_for_selection_error')"
+            :is-loading="loading.taskDeletion"
+            :is-error="errors.taskDeletion"
+            :require-hard-delete-confirmation="true"
+            :hard-delete-lock-text="
+              $t('tasks.delete_for_selection_hard_lock_text')
+            "
+            :hard-delete-text="$t('tasks.delete_for_selection_hard_text')"
+            :text="
+              $tc('tasks.delete_for_selection', nbSelectedTasks, {
+                nbSelectedTasks
+              })
+            "
+            @confirm="confirmTaskDeletion"
+          />
         </div>
 
         <div class="flexcolumn filler" v-if="selectedBar === 'custom-actions'">
@@ -682,6 +680,11 @@
                 nbSelectedAssets
               })
             "
+            :require-hard-delete-confirmation="allAssetsCanceled"
+            :hard-delete-lock-text="
+              $tc('assets.delete_for_selection_hard_lock_text')
+            "
+            :hard-delete-text="$tc('assets.delete_for_selection_hard_text')"
             @confirm="confirmAssetDeletion"
           />
         </div>
@@ -696,6 +699,11 @@
                 nbSelectedShots
               })
             "
+            :require-hard-delete-confirmation="allShotsCanceled"
+            :hard-delete-lock-text="
+              $t('shots.delete_for_selection_hard_lock_text')
+            "
+            :hard-delete-text="$t('shots.delete_for_selection_hard_text')"
             @confirm="confirmShotDeletion"
           />
         </div>
@@ -710,6 +718,11 @@
                 nbSelectedEdits
               })
             "
+            :require-hard-delete-confirmation="allEditsCanceled"
+            :hard-delete-lock-text="
+              $t('edits.delete_for_selection_hard_lock_text')
+            "
+            :hard-delete-text="$t('edits.delete_for_selection_hard_text')"
             @confirm="confirmEditDeletion"
           />
         </div>
@@ -727,6 +740,7 @@
                 nbSelectedEpisodes
               })
             "
+            :require-hard-delete-confirmation="true"
             @confirm="confirmEpisodeDeletion"
           />
         </div>
@@ -744,6 +758,11 @@
                 nbSelectedConcepts
               })
             "
+            :require-hard-delete-confirmation="true"
+            :hard-delete-lock-text="
+              $t('concepts.delete_for_selection_hard_lock_text')
+            "
+            :hard-delete-text="$t('concepts.delete_for_selection_hard_text')"
             @confirm="confirmConceptDeletion"
           />
         </div>
@@ -1065,6 +1084,36 @@ export default {
       return this.selectedConcepts.size
     },
 
+    allAssetsCanceled() {
+      return Array.from(this.selectedAssets.values()).every(
+        asset => asset.canceled
+      )
+    },
+
+    allShotsCanceled() {
+      const allShotsCanceled = Array.from(this.selectedShots.values()).every(
+        shot => shot.canceled
+      )
+      return allShotsCanceled
+    },
+
+    allEditsCanceled() {
+      return Array.from(this.selectedEdits.values()).every(
+        edit => edit.canceled
+      )
+    },
+
+    allConceptsCanceled() {
+      return Array.from(this.selectedConcepts.values()).every(
+        concept => concept.canceled
+      )
+    },
+
+    allSequencesCanceled() {
+      return Array.from(this.selectedSequences.values()).every(
+        sequence => sequence.canceled
+      )
+    },
     isHidden() {
       return (
         (this.nbSelectedTasks === 0 &&
@@ -1369,6 +1418,7 @@ export default {
       this.deleteSelectedTasks()
         .then(() => {
           this.loading.taskDeletion = false
+          this.clearSelectedTasks()
         })
         .catch(err => {
           console.error(err)
