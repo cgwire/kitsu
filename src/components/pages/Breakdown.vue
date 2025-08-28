@@ -824,8 +824,8 @@ export default {
         if (this.assetTypeId) {
           this.setCastingAssetType(this.assetTypeId)
         } else if (
-          this.episodeId &&
-          !['main', 'all'].includes(this.episodeId)
+          !this.isTVShow ||
+          (this.episodeId && !['main', 'all'].includes(this.episodeId))
         ) {
           this.setCastingSequence(this.sequenceId || 'all')
         }
