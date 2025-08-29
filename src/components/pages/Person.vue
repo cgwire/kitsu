@@ -77,31 +77,31 @@
 
           <todos-list
             ref="done-list"
-            :tasks="displayedPersonDoneTasks"
+            done
+            :empty-text="$t('people.no_task_assigned')"
             :is-loading="isDoneTasksLoading"
             :is-error="isDoneTasksLoadingError"
-            :done="true"
             :selection-grid="personTaskSelectionGrid"
+            :tasks="sortedDoneTasks"
             v-else-if="isActiveTab('done')"
           />
 
           <kanban-board
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
+            :production="selectedProduction"
             :statuses="boardStatuses"
             :tasks="boardTasks"
             :user="user"
-            :production="selectedProduction"
             v-else-if="isActiveTab('board')"
           />
 
           <user-calendar
-            ref="user-calendar"
             class="calendar"
             :is-loading="isTasksLoading"
             :days-off="daysOff"
-            :tasks="sortedTasks"
-            v-if="isActiveTab('calendar')"
+            :tasks="sortedAllTasks"
+            v-else-if="isActiveTab('calendar')"
           />
 
           <timesheet-list
@@ -326,59 +326,18 @@ export default {
     },
 
     sortedTasks() {
-      const isName = this.currentSort === 'entity_name'
-      const isPriority = this.currentSort === 'priority'
-      const isDueDate = this.currentSort === 'due_date'
-      const isStartDate = this.currentSort === 'start_date'
-      const tasks = [...this.displayedPersonTasks]
-      if (isName) {
-        return tasks.sort(
-          firstBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('full_entity_name')
-        )
-      } else if (isPriority) {
-        return tasks.sort(
-          firstBy('priority', -1)
-            .thenBy((a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else if (isDueDate) {
-        return tasks.sort(
-          firstBy((a, b) => {
-            if (!a.due_date) return 1
-            else if (!b.due_date) return -1
-            else return a.due_date.localeCompare(b.due_date)
-          })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else if (isStartDate) {
-        return tasks.sort(
-          firstBy((a, b) => {
-            if (!a.start_date) return 1
-            else if (!b.start_date) return -1
-            else return a.start_date.localeCompare(b.start_date)
-          })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else {
-        return tasks.sort(
-          firstBy(this.currentSort, -1)
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      }
+      return this.sortTasks([...this.displayedPersonTasks])
+    },
+
+    sortedDoneTasks() {
+      return this.sortTasks([...this.displayedPersonDoneTasks])
+    },
+
+    sortedAllTasks() {
+      return this.sortTasks([
+        ...this.displayedPersonTasks,
+        ...this.displayedPersonDoneTasks
+      ])
     },
 
     tasksStartDate() {
@@ -403,7 +362,7 @@ export default {
 
     scheduleItems() {
       const rootMap = new Map()
-      this.sortedTasks.forEach(task => {
+      this.sortedAllTasks.forEach(task => {
         if (!rootMap.get(task.project_id)) {
           const project = this.productionMap.get(task.project_id)
           const rootElement = this.buildProjectScheduleItem(project)
@@ -438,7 +397,7 @@ export default {
     },
 
     boardTasks() {
-      const tasks = this.sortedTasks.concat(this.displayedPersonDoneTasks)
+      const tasks = this.sortedAllTasks
       if (this.selectedProduction) {
         return tasks.filter(
           task => task.project_id === this.selectedProduction.id
@@ -543,6 +502,62 @@ export default {
       'unsetDayOff',
       'updateTask'
     ]),
+
+    sortTasks(tasks) {
+      const isName = this.currentSort === 'entity_name'
+      const isPriority = this.currentSort === 'priority'
+      const isDueDate = this.currentSort === 'due_date'
+      const isStartDate = this.currentSort === 'start_date'
+
+      if (isName) {
+        return tasks.sort(
+          firstBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('full_entity_name')
+        )
+      } else if (isPriority) {
+        return tasks.sort(
+          firstBy('priority', -1)
+            .thenBy((a, b) => {
+              if (!a.due_date) return 1
+              else if (!b.due_date) return -1
+              else return a.due_date.localeCompare(b.due_date)
+            })
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else if (isDueDate) {
+        return tasks.sort(
+          firstBy((a, b) => {
+            if (!a.due_date) return 1
+            else if (!b.due_date) return -1
+            else return a.due_date.localeCompare(b.due_date)
+          })
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else if (isStartDate) {
+        return tasks.sort(
+          firstBy((a, b) => {
+            if (!a.start_date) return 1
+            else if (!b.start_date) return -1
+            else return a.start_date.localeCompare(b.start_date)
+          })
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      } else {
+        return tasks.sort(
+          firstBy(this.currentSort, -1)
+            .thenBy('project_name')
+            .thenBy('task_type_name')
+            .thenBy('entity_name')
+        )
+      }
+    },
 
     onAssignation(eventData) {
       if (this.person.id === eventData.person_id) {
