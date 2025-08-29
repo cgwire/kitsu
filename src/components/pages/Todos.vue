@@ -79,29 +79,28 @@
         <todos-list
           ref="done-list"
           class="done-list"
-          :tasks="sortedDoneTasks"
+          done
           :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
-          :done="true"
+          :tasks="sortedDoneTasks"
           v-if="isActiveTab('done')"
         />
 
         <kanban-board
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
+          :production="selectedProduction"
           :statuses="boardStatuses"
           :tasks="boardTasks"
           :user="user"
-          :production="selectedProduction"
           v-if="isActiveTab('board')"
         />
 
         <user-calendar
-          ref="user-calendar"
           :days-off="daysOff"
-          :tasks="sortedTasks"
           :is-loading="isTodosLoading"
+          :tasks="sortedTasks"
           v-if="isActiveTab('calendar')"
         />
 
@@ -246,7 +245,6 @@ export default {
       'todoListScrollPosition',
       'todoSearchQueries',
       'todoSelectionGrid',
-      'todosSearchText',
       'user'
     ]),
 

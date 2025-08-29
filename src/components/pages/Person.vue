@@ -78,9 +78,10 @@
           <todos-list
             ref="done-list"
             :tasks="displayedPersonDoneTasks"
+            done
+            :empty-text="$t('people.no_task_assigned')"
             :is-loading="isDoneTasksLoading"
             :is-error="isDoneTasksLoadingError"
-            :done="true"
             :selection-grid="personTaskSelectionGrid"
             v-else-if="isActiveTab('done')"
           />
@@ -88,20 +89,19 @@
           <kanban-board
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
+            :production="selectedProduction"
             :statuses="boardStatuses"
             :tasks="boardTasks"
             :user="user"
-            :production="selectedProduction"
             v-else-if="isActiveTab('board')"
           />
 
           <user-calendar
-            ref="user-calendar"
             class="calendar"
             :is-loading="isTasksLoading"
             :days-off="daysOff"
             :tasks="sortedTasks"
-            v-if="isActiveTab('calendar')"
+            v-else-if="isActiveTab('calendar')"
           />
 
           <timesheet-list
