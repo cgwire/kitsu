@@ -770,7 +770,8 @@ export default {
       shapeStartPos: null,
       SHAPES_ICON_MAPPING: {
         rectangle: 'rectangle-horizontal',
-        circle: 'circle'
+        circle: 'circle',
+        arrow: 'arrow'
       },
       videoDuration: 0,
       width: 0,
@@ -880,6 +881,10 @@ export default {
 
     canvasWrapper() {
       return this.$refs['canvas-wrapper']
+    },
+
+    canvas() {
+      return this.$refs['annotation-canvas']
     },
 
     canvasComparisonWrapper() {
@@ -1386,6 +1391,7 @@ export default {
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
+      console.log('setupFabricCanvas', width, height)
 
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
@@ -1740,6 +1746,7 @@ export default {
     },
 
     saveAnnotations() {
+      console.log('saveAnnotations')
       let currentTime = 0
       if (this.isMovie) {
         currentTime = this.currentFrame * this.frameDuration
@@ -1752,6 +1759,7 @@ export default {
         this.currentFrame,
         annotation
       )
+      console.log('  annotations:', annotations)
 
       if (!this.readOnly) {
         const preview = this.currentPreview
