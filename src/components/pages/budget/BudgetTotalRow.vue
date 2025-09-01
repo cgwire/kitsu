@@ -68,11 +68,19 @@
 import { computed } from 'vue'
 
 const props = defineProps({
+  budgetDepartments: {
+    type: Array,
+    default: () => []
+  },
   totalEntry: {
     type: Object,
     required: true
   },
   isShowingExpenses: {
+    type: Boolean,
+    required: true
+  },
+  isShowingItems: {
     type: Boolean,
     required: true
   },

@@ -38,6 +38,7 @@
             @touchstart="startBrowsing"
           >
             <budget-total-row
+              :budget-departments="budgetDepartments"
               :total-entry="totalEntry"
               :is-showing-expenses="isShowingExpenses"
               :is-showing-items="isShowingItems"
