@@ -39,8 +39,7 @@
                   [],
                   [],
                   personMap,
-                  departmentMap,
-                  ''
+                  departmentMap
                 )
               "
             ></div>

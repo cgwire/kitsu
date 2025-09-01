@@ -49,6 +49,7 @@ export const renderComment = (
   departmentMentions,
   personMap,
   departmentMap,
+  taskTypes = [],
   className = ''
 ) => {
   let html = renderMarkdown(input)
@@ -70,6 +71,23 @@ export const renderComment = (
     })
   }
 
+  if (taskTypes) {
+    // replace #TaskType with a link to the task within the same entity
+    taskTypes.forEach(taskType => {
+      const task_name = encodeHtmlEntities(taskType.name)
+      if (taskType.url)
+        html = html.replaceAll(
+          `#${task_name}`,
+          `<a class="mention mention-task" href="${taskType.url}">#${task_name}</a>`
+        )
+    })
+    // replace #All with a link to the shot
+    html = html.replaceAll(
+      '#All',
+      `<a class="mention mention-task" href="#">#All</a>`
+    )
+  }
+
   return html.replaceAll(
     TIME_CODE_REGEX,
     (match, version, hours, minutes, seconds, sep, subframes, frame) => {
@@ -86,6 +104,32 @@ export const renderMarkdown = (input, options = {}) => {
   if (!input?.length) return ''
   const html = marked.parse(input)
   return sanitize(html, options)
+}
+
+/**
+ * Encode HTML entities in JavaScript
+ * example task name: "Light & Render" => "Light &amp; Render"
+ * @param {string} str - string to encode
+ * @returns {string} - encoded string
+ */
+const encodeHtmlEntities = str => {
+  return str.replace(
+    /[&<>'"]/g,
+    tag =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      })[tag]
+  )
+
+  // // -- more complex version if needed --
+  // var el = document.createElement("div");
+  // el.innerText = el.textContent = str;
+  // str = el.innerHTML;
+  // return str;
 }
 
 export const replaceTimeWithTimecode = (
