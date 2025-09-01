@@ -245,15 +245,14 @@
                         {{ item.full_name }}
                       </template>
                       <template v-else-if="item.isTaskType">
-                        <span
-                          class="mr05"
-                          :style="{
-                            'border-left': '6px solid ' + item.color,
-                            'padding-left': '8px'
+                        <task-type-name
+                          :task-type="{
+                            color: item.color,
+                            name: item.full_name
                           }"
-                        >
-                          {{ item.full_name }}
-                        </span>
+                          :is-link="false"
+                          thin
+                        />
                       </template>
                       <template v-else>
                         <div class="flexrow">
@@ -478,6 +477,7 @@ import Checklist from '@/components/widgets/Checklist.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 export default {
@@ -499,7 +499,8 @@ export default {
     PeopleAvatar,
     PeopleName,
     ThumbsUpIcon,
-    ValidationTag
+    ValidationTag,
+    TaskTypeName
   },
 
   data() {

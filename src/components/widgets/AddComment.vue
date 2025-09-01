@@ -64,15 +64,14 @@
             {{ item.full_name }}
           </template>
           <template v-else-if="item.isTaskType">
-            <span
-              class="mr05"
-              :style="{
-                'border-left': '6px solid ' + item.color,
-                'padding-left': '8px'
+            <task-type-name
+              :task-type="{
+                color: item.color,
+                name: item.full_name
               }"
-            >
-              {{ item.full_name }}
-            </span>
+              :is-link="false"
+              thin
+            />
           </template>
           <template v-else>
             <div class="flexrow">
@@ -365,6 +364,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const REVISION_NUMBER_REGEX = /v(\d+)/gi
 
@@ -379,7 +379,8 @@ export default {
     ConfirmModal,
     ComboboxStatus,
     EmojiButton,
-    PeopleAvatar
+    PeopleAvatar,
+    TaskTypeName
   },
 
   emits: [

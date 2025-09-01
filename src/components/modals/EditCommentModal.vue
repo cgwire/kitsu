@@ -49,17 +49,14 @@
                   {{ item.full_name }}
                 </template>
                 <template v-else-if="item.isTaskType">
-                  <span
-                    class="mr05"
-                    :style="{
-                      background: item.color,
-                      width: '10px',
-                      height: '10px'
+                  <task-type-name
+                    :task-type="{
+                      color: item.color,
+                      name: item.full_name
                     }"
-                  >
-                    &nbsp;
-                  </span>
-                  {{ item.full_name }}
+                    :is-link="false"
+                    thin
+                  />
                 </template>
                 <template v-else>
                   <div class="flexrow">
@@ -187,6 +184,7 @@ import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'edit-comment-modal',
@@ -200,6 +198,7 @@ export default {
     FileUpload,
     ModalFooter,
     PeopleAvatar,
+    TaskTypeName,
     TextField,
     XIcon
   },
