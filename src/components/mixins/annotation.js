@@ -11,6 +11,10 @@ import { markRaw } from 'vue'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
+import { registerArrowFabricShape } from '@/lib/arrowshape'
+
+// Register custom Arrow shape with Fabric.js
+registerArrowFabricShape()
 
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
@@ -744,6 +748,30 @@ export const annotationMixin = {
           canvas.add(psstroke)
           this.$options.silentAnnnotation = false
         }
+      } else if (obj.type === 'arrow') {
+        // Handle custom Arrow object
+        const points = [
+          obj.x1 * scaleMultiplierX,
+          obj.y1 * scaleMultiplierY,
+          obj.x2 * scaleMultiplierX,
+          obj.y2 * scaleMultiplierY
+        ]
+        const arrow = new fabric.Arrow(points, {
+          ...base,
+          arrowHeadSize: obj.arrowHeadSize || 15,
+          arrowHeadWidth: obj.arrowHeadWidth || 12,
+          stroke: obj.stroke,
+          strokeWidth: obj.strokeWidth
+        })
+
+        arrow.set('id', obj.id)
+        arrow.set('canvasWidth', canvasWidth)
+        arrow.set('canvasHeight', canvasHeight)
+        this.addSerialization(arrow)
+        this.$options.silentAnnnotation = true
+        canvas.add(arrow)
+        this.$options.silentAnnnotation = false
+        return arrow
       }
       return path || text || psstroke
     },
@@ -872,7 +900,6 @@ export const annotationMixin = {
      * Enable / disable the drawing mode. Differentiate text from path drawing.
      */
     onAnnotateClicked() {
-      console.log('onAnnotateClicked', this.isDrawing)
       this.showCanvas()
       if (this.isDrawing) {
         this.fabricCanvas.isDrawingMode = false
@@ -897,7 +924,6 @@ export const annotationMixin = {
     },
 
     onDrawShapeClicked() {
-      console.log('onDrawShapeClicked', this.isDrawingShape)
       // this.showCanvas()
       if (this.isDrawingShape) {
         this.disableCurrentTool()
@@ -909,7 +935,6 @@ export const annotationMixin = {
           this.fabricCanvas.selection = false
           this.fabricCanvas.skipTargetFind = true
         }
-        console.log('addEventListener', this.canvasWrapper)
         this.canvasWrapper.addEventListener('mousedown', this.startDrawingShape)
         this.canvasWrapper.addEventListener(
           'mousemove',
@@ -925,7 +950,6 @@ export const annotationMixin = {
       const posX = this.getClientX(event) - offsetCanvas.x
       const posY = this.getClientY(event) - offsetCanvas.y
       this.shapeStartPos = { x: posX, y: posY }
-      console.log('startDrawingShape', this.shape, posX, posY, this.shapeColor)
       if (this.shape === 'rectangle') {
         this.drawingShape = new fabric.Rect({
           left: posX,
@@ -955,11 +979,65 @@ export const annotationMixin = {
                 ? 5
                 : 2
         })
+      } else if (this.shape === 'arrow') {
+        this.drawingShape = this.createArrowShape({
+          start: [posX, posY],
+          end: [posX, posY],
+          stroke: this.shapeColor,
+          fill: 'rgba(128, 128, 128, 0.25)',
+          strokeWidth:
+            this.pencilWidth === 'big'
+              ? 10
+              : this.pencilWidth === 'medium'
+                ? 5
+                : 2
+        })
       } else {
         console.error('Unknown shape type:', this.shape)
         return
       }
       this.fabricCanvas.add(this.drawingShape)
+    },
+
+    createArrowShape(options) {
+      const { start, end, stroke, strokeWidth } = options
+      const x1 = start[0]
+      const y1 = start[1]
+      const x2 = end[0]
+      const y2 = end[1]
+
+      // Create custom Arrow object
+      const arrow = new fabric.Arrow([x1, y1, x2, y2], {
+        stroke: stroke || this.shapeColor,
+        strokeWidth:
+          strokeWidth ||
+          (this.pencilWidth === 'big'
+            ? 10
+            : this.pencilWidth === 'medium'
+              ? 5
+              : 2),
+        fill: 'transparent',
+        arrowHeadSize: 15,
+        arrowHeadWidth: 12
+      })
+      return arrow
+    },
+
+    updateArrowShape(options) {
+      const { start, end } = options
+      if (this.drawingShape && this.shape === 'arrow') {
+        // Update the arrow coordinates using the custom method
+        this.drawingShape.set({
+          x1: start[0],
+          y1: start[1],
+          x2: end[0],
+          y2: end[1]
+        })
+        this.drawingShape.setCoords()
+
+        // Force a re-render
+        this.fabricCanvas.renderAll()
+      }
     },
 
     updateDrawingShape(event) {
@@ -968,7 +1046,6 @@ export const annotationMixin = {
       const offsetCanvas = canvas.getBoundingClientRect()
       const posX = this.getClientX(event) - offsetCanvas.x
       const posY = this.getClientY(event) - offsetCanvas.y
-      // console.log('updateDrawingShape', this.shape, posX, posY)
       if (this.shape === 'rectangle') {
         const deltaX = posX - this.shapeStartPos.x
         const deltaY = posY - this.shapeStartPos.y
@@ -1013,19 +1090,15 @@ export const annotationMixin = {
         } else {
           top = this.shapeStartPos.y
         }
-        console.log({
-          deltaX,
-          deltaY,
-          left,
-          top,
-          delta,
-          radius
-        })
         this.drawingShape.set({
           left: left,
           top: top,
           radius: radius * 0.5
         })
+      } else if (this.shape === 'arrow') {
+        const start = [this.shapeStartPos.x, this.shapeStartPos.y]
+        const end = [posX, posY]
+        this.updateArrowShape({ start, end })
       } else {
         console.error('Unknown shape type:', this.shape)
         return
@@ -1037,7 +1110,6 @@ export const annotationMixin = {
 
     endDrawingShape() {
       if (!this.drawingShape) return
-      console.log('endDrawingShape', this.shape, this.drawingShape)
       this.drawingShape.set({
         stroke: this.shapeColor,
         fill: 'transparent'
@@ -1168,6 +1240,11 @@ export const annotationMixin = {
         const group = movedObject
         group._objects.forEach(groupObj => {
           const canvasObj = this.getObjectById(groupObj.id)
+          if (canvasObj === undefined) {
+            console.log(groupObj)
+            throw new Error('Cannot find object in canvas' + groupObj.id)
+          }
+          console.log(groupObj.id, canvasObj)
           this.setObjectData(canvasObj)
           const targetObj = canvasObj.serialize()
           const point = new fabric.Point(groupObj.left, groupObj.top)

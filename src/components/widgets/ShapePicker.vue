@@ -12,6 +12,7 @@
     >
       <rectangle-horizontal-icon class="icon" v-if="shape === 'rectangle'" />
       <circle-icon class="icon" v-else-if="shape === 'circle'" />
+      <arrow-up-right-icon class="icon" v-else-if="shape === 'arrow'" />
     </button>
     <div
       v-show="isOpen"
@@ -25,19 +26,27 @@
       <button class="shape-button" @click="onShapePicked('circle')">
         <circle-icon class="icon" />
       </button>
+      <button class="shape-button" @click="onShapePicked('arrow')">
+        <arrow-up-right-icon class="icon" />
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-import { RectangleHorizontalIcon, CircleIcon } from 'lucide-vue-next'
+import {
+  RectangleHorizontalIcon,
+  CircleIcon,
+  ArrowUpRightIcon
+} from 'lucide-vue-next'
 
 export default {
   name: 'shape-picker',
 
   components: {
     RectangleHorizontalIcon,
-    CircleIcon
+    CircleIcon,
+    ArrowUpRightIcon
   },
 
   props: {
