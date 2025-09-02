@@ -215,6 +215,7 @@ export default {
 
   comments: {
     add_attachment: 'Add attachment',
+    add_attachment_to_reply: 'Add attachment to reply',
     add_checklist: 'Add checklist',
     add_comment: 'Leave a comment...',
     add_emoji: 'Add an emoji',
