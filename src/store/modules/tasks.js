@@ -1319,12 +1319,10 @@ const mutations = {
     if (!comment.replies) comment.replies = []
     if (!comment.replies.find(r => r.id === reply.id)) {
       comment.replies.push(reply)
-      if (!comment.attachment_files) {
-        comment.attachment_files = []
-      }
-      comment.attachment_files = comment.attachment_files.concat(
-        reply.attachment_files
-      )
+      comment.attachment_files = [
+        ...(comment.attachment_files || []),
+        ...(reply.attachment_files || [])
+      ]
     }
   },
 
