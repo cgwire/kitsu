@@ -21,7 +21,7 @@
               :to="{
                 name: 'production-settings',
                 params: {
-                  production_id: currentProduction.id
+                  production_id: currentProduction?.id
                 },
                 query: {
                   tab: 'taskTypes'
