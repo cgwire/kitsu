@@ -240,15 +240,15 @@ export default {
     name,
     color,
     productionId,
-    entityType,
+    isShared,
     departmentId
   ) {
     const data = {
       list_type: listType,
       name,
       color,
+      is_shared: isShared,
       project_id: productionId,
-      entity_type: entityType,
       department_id: departmentId
     }
     return client.ppost('/api/data/user/filter-groups', data)
