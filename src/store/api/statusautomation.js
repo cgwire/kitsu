@@ -2,12 +2,12 @@ import client from '@/store/api/client'
 import superagent from 'superagent'
 
 export default {
-  getStatusAutomations(callback) {
-    client.get('/api/data/status-automations', callback)
+  getStatusAutomations() {
+    return client.pget('/api/data/status-automations')
   },
 
-  getStatusAutomation(statusAutomationId, callback) {
-    client.get(`/api/data/status-automations/${statusAutomationId}`, callback)
+  getStatusAutomation(statusAutomationId) {
+    return client.pget(`/api/data/status-automations/${statusAutomationId}`)
   },
 
   newStatusAutomation(statusAutomation) {

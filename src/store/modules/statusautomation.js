@@ -40,13 +40,15 @@ const getters = {
 }
 
 const actions = {
-  loadStatusAutomations({ commit, state }, callback) {
+  async loadStatusAutomations({ commit }) {
     commit(LOAD_STATUS_AUTOMATIONS_START)
-    statusAutomationsApi.getStatusAutomations((err, statusAutomations) => {
-      if (err) commit(LOAD_STATUS_AUTOMATIONS_ERROR)
-      else commit(LOAD_STATUS_AUTOMATIONS_END, statusAutomations)
-      if (callback) callback(err)
-    })
+    try {
+      const statusAutomations =
+        await statusAutomationsApi.getStatusAutomations()
+      commit(LOAD_STATUS_AUTOMATIONS_END, statusAutomations)
+    } catch (err) {
+      commit(LOAD_STATUS_AUTOMATIONS_ERROR)
+    }
   },
 
   newStatusAutomation({ commit, state }, data) {
