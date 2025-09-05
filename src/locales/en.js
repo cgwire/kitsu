@@ -91,7 +91,10 @@ export default {
   bots: {
     active_bots: 'active bot | active bots',
     bots: 'bot | bots',
+    confirm_edit: 'Save bot changes',
     copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    create: 'Create bot',
+    departments_empty: 'This bot isn\'t linked to any department.',
     edit_avatar_error: 'An error occurred while updating the bot avatar.',
     edit_title: 'Edit bot',
     new_bot: 'Add a new bot',
