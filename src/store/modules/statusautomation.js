@@ -51,31 +51,24 @@ const actions = {
     }
   },
 
-  newStatusAutomation({ commit, state }, data) {
-    return statusAutomationsApi
-      .newStatusAutomation(data)
-      .then(statusAutomation => {
-        commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
+  async newStatusAutomation({ commit }, data) {
+    const statusAutomation =
+      await statusAutomationsApi.newStatusAutomation(data)
+    commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   },
 
-  editStatusAutomation({ commit, state }, data) {
-    return statusAutomationsApi
-      .updateStatusAutomation(data)
-      .then(statusAutomation => {
-        commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
+  async editStatusAutomation({ commit }, data) {
+    const statusAutomation =
+      await statusAutomationsApi.updateStatusAutomation(data)
+    commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   },
 
-  deleteStatusAutomation({ commit, state }, statusAutomation) {
-    return statusAutomationsApi
-      .deleteStatusAutomation(statusAutomation)
-      .then(() => {
-        commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
+  async deleteStatusAutomation({ commit }, statusAutomation) {
+    await statusAutomationsApi.deleteStatusAutomation(statusAutomation)
+    commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   },
 
   postStatusAutomation({ commit }, { data, url }) {
