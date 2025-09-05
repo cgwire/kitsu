@@ -1,5 +1,4 @@
 import client from '@/store/api/client'
-import superagent from 'superagent'
 
 export default {
   getStatusAutomations() {
@@ -44,18 +43,5 @@ export default {
 
   deleteStatusAutomation(statusAutomation) {
     return client.pdel(`/api/data/status-automations/${statusAutomation.id}`)
-  },
-
-  postStatusAutomation(url, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(url)
-        .withCredentials()
-        .send(data)
-        .end((err, res) => {
-          if (err) reject(err)
-          else resolve()
-        })
-    })
   }
 }

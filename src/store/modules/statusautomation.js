@@ -24,7 +24,7 @@ const getters = {
   statusAutomations: state => state.statusAutomations.filter(s => !s.archived),
   archivedStatusAutomations: state =>
     state.statusAutomations.filter(s => s.archived),
-  statusAutomationMap: state => cache.statusAutomationMap,
+  statusAutomationMap: () => cache.statusAutomationMap,
 
   // Used to know if the automation will apply in the current production.
   isStatusAutomationDisabled:
@@ -69,10 +69,6 @@ const actions = {
     await statusAutomationsApi.deleteStatusAutomation(statusAutomation)
     commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
     return statusAutomation
-  },
-
-  postStatusAutomation({ commit }, { data, url }) {
-    statusAutomationsApi.postStatusAutomation(url, data)
   }
 }
 
