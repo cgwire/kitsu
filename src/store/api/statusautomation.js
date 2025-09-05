@@ -1,13 +1,12 @@
 import client from '@/store/api/client'
-import superagent from 'superagent'
 
 export default {
-  getStatusAutomations(callback) {
-    client.get('/api/data/status-automations', callback)
+  getStatusAutomations() {
+    return client.pget('/api/data/status-automations')
   },
 
-  getStatusAutomation(statusAutomationId, callback) {
-    client.get(`/api/data/status-automations/${statusAutomationId}`, callback)
+  getStatusAutomation(statusAutomationId) {
+    return client.pget(`/api/data/status-automations/${statusAutomationId}`)
   },
 
   newStatusAutomation(statusAutomation) {
@@ -44,18 +43,5 @@ export default {
 
   deleteStatusAutomation(statusAutomation) {
     return client.pdel(`/api/data/status-automations/${statusAutomation.id}`)
-  },
-
-  postStatusAutomation(url, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(url)
-        .withCredentials()
-        .send(data)
-        .end((err, res) => {
-          if (err) reject(err)
-          else resolve()
-        })
-    })
   }
 }

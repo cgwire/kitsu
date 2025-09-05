@@ -91,7 +91,10 @@ export default {
   bots: {
     active_bots: 'active bot | active bots',
     bots: 'bot | bots',
+    confirm_edit: 'Save bot changes',
     copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    create: 'Create bot',
+    departments_empty: 'This bot isn\'t linked to any department.',
     edit_avatar_error: 'An error occurred while updating the bot avatar.',
     edit_title: 'Edit bot',
     new_bot: 'Add a new bot',
@@ -152,7 +155,7 @@ export default {
     delete_budget_entry_error: 'An error occurred while deleting this budget entry. Please contact our support team.',
     delete_budget_entry_message: 'Are you sure you want to delete this budget entry?',
     delete_budget_error: 'An error occurred while deleting this budget. Please contact our support team.',
-    delete_budget_message: 'Are you sure you want to delete this budget? Type the budget name below to confirm.',
+    delete_budget_message: 'Are you sure you want to delete the budget {name}? Please confirm by typing the budget name below.',
     difference: 'Difference',
     edit_budget: 'Edit current budget version',
     edit_budget_entry: 'Edit entry',
@@ -1539,7 +1542,7 @@ export default {
     edit_version_exist: 'A version with a similar name already exist.',
     delete_version: 'Delete schedule version',
     delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
-    delete_version_message: 'Are you sure you want to delete this schedule version? Type the version name below to confirm.',
+    delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',
     versions: {
       reference: 'Reference forecast',
       from: 'from',

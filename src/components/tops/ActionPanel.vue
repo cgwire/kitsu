@@ -216,8 +216,7 @@
             isTaskSelection &&
             !isCurrentViewEpisode &&
             !isCurrentViewConcept &&
-            customActions &&
-            customActions.length > 0
+            customActions?.length
           "
         ></div>
 
@@ -229,13 +228,11 @@
           :title="$t('menu.run_custom_action')"
           @click="selectBar('custom-actions')"
           v-if="
-            (isCurrentUserManager || isSupervisorInDepartment) &&
             !isEntitySelection &&
             isTaskSelection &&
             !isCurrentViewEpisode &&
             !isCurrentViewConcept &&
-            customActions &&
-            customActions.length > 0
+            customActions?.length
           "
         >
           <play-circle-icon />

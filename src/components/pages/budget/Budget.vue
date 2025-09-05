@@ -67,7 +67,11 @@
           :is-loading="loading.del"
           :is-error="errors.deleteBudget"
           :lock-text="currentBudget?.name"
-          :text="$t('budget.delete_budget_message')"
+          :text="
+            $t('budget.delete_budget_message', {
+              name: currentBudget?.name
+            })
+          "
           @cancel="modals.deleteBudget = false"
           @confirm="deleteBudget"
         />

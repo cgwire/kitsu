@@ -437,7 +437,11 @@
     :is-loading="loading.delete"
     :is-error="errors.deleteScheduleVersion"
     :lock-text="scheduleVersionToEdit?.name"
-    :text="$t('schedule.delete_version_message')"
+    :text="
+      $t('schedule.delete_version_message', {
+        name: scheduleVersionToEdit?.name
+      })
+    "
     @cancel="modals.deleteScheduleVersion = false"
     @confirm="deleteVersion(scheduleVersionToEdit)"
     v-if="modals.deleteScheduleVersion"
