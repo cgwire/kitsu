@@ -100,8 +100,10 @@ const mutations = {
   },
 
   [EDIT_STATUS_AUTOMATION_END](state, newAutomation) {
-    const automation = cache.statusAutomationMap.get(newAutomation.id)
-    if (automation && automation.id) {
+    const automation = state.statusAutomations.find(
+      ({ id }) => id === newAutomation.id
+    )
+    if (automation?.id) {
       Object.assign(automation, newAutomation)
     } else {
       state.statusAutomations.push(newAutomation)
