@@ -124,12 +124,12 @@ export default {
 
     setupCrisp(config) {
       if (config.crisp_token?.length) {
+        crisp.init(config.crisp_token)
         const supportChat = localPreferences.getBoolPreference(
           'support:show',
           true
         )
         this.setSupportChat(supportChat)
-        crisp.init(config.crisp_token)
       }
     },
 
