@@ -20,14 +20,18 @@
                   :style="getValidationStyle(columnId)"
                 >
                   <router-link
-                    class="flexrow-item"
+                    class="flexrow-item ellipsis"
                     :title="taskTypeMap.get(columnId).name"
                     :to="taskTypePath(columnId)"
                     v-if="!isCurrentUserClient"
                   >
                     {{ taskTypeMap.get(columnId).name }}
                   </router-link>
-                  <span class="flexrow-item" v-else>
+                  <span
+                    class="flexrow-item ellipsis"
+                    :title="taskTypeMap.get(columnId).name"
+                    v-else
+                  >
                     {{ taskTypeMap.get(columnId).name }}
                   </span>
                 </div>
