@@ -2323,7 +2323,7 @@ th.validation-cell {
   padding: 0.5em;
 }
 
-// Ludice Icons
+// Lucide Icons
 .icon-1x {
   width: 1em;
   height: 1em;
