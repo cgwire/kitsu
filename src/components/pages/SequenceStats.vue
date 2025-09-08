@@ -129,13 +129,11 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedSequences',
-      'isCurrentUserManager',
       'isPaperProduction',
       'isShotsLoading',
       'isShotsLoadingError',
       'isTVShow',
       'searchSequenceFilters',
-      'sequences',
       'sequenceMap',
       'sequencesPath',
       'sequenceStats',
@@ -155,15 +153,12 @@ export default {
   methods: {
     ...mapActions([
       'computeSequenceStats',
-      'hideAssignations',
       'initSequences',
       'loadShots',
       'removeSequenceSearch',
       'saveSequenceSearch',
-      'setLastProductionScreen',
-      'setSequenceStatsSearch',
       'setSequenceListScrollPosition',
-      'showAssignations'
+      'setSequenceStatsSearch'
     ]),
 
     reloadData() {
@@ -175,11 +170,9 @@ export default {
     },
 
     setDefaultListScrollPosition() {
-      if (this.$refs['sequence-list']) {
-        this.$refs['sequence-list'].setScrollPosition(
-          this.sequenceListScrollPosition
-        )
-      }
+      this.$refs['sequence-list']?.setScrollPosition(
+        this.sequenceListScrollPosition
+      )
     },
 
     navigateToList() {
