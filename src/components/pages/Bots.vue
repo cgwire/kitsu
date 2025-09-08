@@ -35,8 +35,10 @@
 
     <div class="query-list"></div>
 
+    <route-tabs class="mb0" :active-tab="activeTab" :tabs="tabs" />
+
     <people-list
-      :entries="currentPeople"
+      :entries="activeTab === 'active' ? activePeople : unactivePeople"
       :is-bots="true"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
@@ -119,6 +121,7 @@ import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import NewTokenModal from '@/components/modals/NewTokenModal.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import PeopleList from '@/components/lists/PeopleList.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
 export default {
@@ -136,11 +139,13 @@ export default {
     NewTokenModal,
     PageTitle,
     PeopleList,
+    RouteTabs,
     SearchField
   },
 
   data() {
     return {
+      activeTab: 'active',
       role: 'all',
       roleOptions: [
         { label: 'all', value: 'all' },
@@ -171,11 +176,22 @@ export default {
       },
       personToDelete: {},
       personToEdit: { role: 'user' },
-      selectedDepartment: ''
+      selectedDepartment: '',
+      tabs: [
+        {
+          name: 'active',
+          label: this.$t('main.active')
+        },
+        {
+          name: 'unactive',
+          label: this.$t('people.unactive')
+        }
+      ]
     }
   },
 
   async mounted() {
+    this.activeTab = this.$route.query.tab || 'active'
     this.role = this.$route.query.role || 'all'
     this.selectedDepartment = this.$route.query.department || ''
     this.setSearchFromUrl()
@@ -198,6 +214,10 @@ export default {
 
     role() {
       this.updateRoute()
+    },
+
+    '$route.query.tab'() {
+      this.activeTab = this.$route.query.tab || 'active'
     }
   },
 
@@ -229,6 +249,14 @@ export default {
 
     searchField() {
       return this.$refs['search-field']
+    },
+
+    activePeople() {
+      return this.currentPeople.filter(person => person.active)
+    },
+
+    unactivePeople() {
+      return this.currentPeople.filter(person => !person.active)
     }
   },
 
@@ -249,6 +277,7 @@ export default {
       try {
         await this.clearPersonAvatar(this.personToEdit)
         this.modals.avatar = false
+        this.onSearchChange()
       } catch (err) {
         this.errors.avatar = true
       }
@@ -260,6 +289,7 @@ export default {
       try {
         await this.uploadPersonAvatar({ person: this.personToEdit, formData })
         this.modals.avatar = false
+        this.onSearchChange()
       } catch (err) {
         this.errors.avatar = true
       }
@@ -290,6 +320,7 @@ export default {
             this.updatePersonToEdit(person)
             this.modals.newToken = true
           }
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -311,6 +342,7 @@ export default {
         .then(() => {
           this.loading.del = false
           this.modals.del = false
+          this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
@@ -320,12 +352,16 @@ export default {
     },
 
     onSearchChange() {
-      if (!this.searchField) return
-      const searchQuery = this.searchField.getValue()
-      if (searchQuery.length !== 1) {
-        this.setPeopleSearch(searchQuery)
-        this.updateRoute()
+      if (this.searchField) {
+        const searchQuery = this.searchField.getValue()
+        if (searchQuery?.length !== 1) {
+          this.setPeopleSearch(searchQuery)
+        }
+        this.setSearchInUrl()
       }
+      // refresh tabs
+      this.tabs[0].label = `${this.$t('main.active')} (${this.activePeople.length})`
+      this.tabs[1].label = `${this.$t('people.unactive')} (${this.unactivePeople.length})`
     },
 
     onAvatarClicked(person) {

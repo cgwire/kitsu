@@ -24,7 +24,7 @@ const getters = {
   statusAutomations: state => state.statusAutomations.filter(s => !s.archived),
   archivedStatusAutomations: state =>
     state.statusAutomations.filter(s => s.archived),
-  statusAutomationMap: state => cache.statusAutomationMap,
+  statusAutomationMap: () => cache.statusAutomationMap,
 
   // Used to know if the automation will apply in the current production.
   isStatusAutomationDisabled:
@@ -40,44 +40,35 @@ const getters = {
 }
 
 const actions = {
-  loadStatusAutomations({ commit, state }, callback) {
+  async loadStatusAutomations({ commit }) {
     commit(LOAD_STATUS_AUTOMATIONS_START)
-    statusAutomationsApi.getStatusAutomations((err, statusAutomations) => {
-      if (err) commit(LOAD_STATUS_AUTOMATIONS_ERROR)
-      else commit(LOAD_STATUS_AUTOMATIONS_END, statusAutomations)
-      if (callback) callback(err)
-    })
+    try {
+      const statusAutomations =
+        await statusAutomationsApi.getStatusAutomations()
+      commit(LOAD_STATUS_AUTOMATIONS_END, statusAutomations)
+    } catch (err) {
+      commit(LOAD_STATUS_AUTOMATIONS_ERROR)
+    }
   },
 
-  newStatusAutomation({ commit, state }, data) {
-    return statusAutomationsApi
-      .newStatusAutomation(data)
-      .then(statusAutomation => {
-        commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
+  async newStatusAutomation({ commit }, data) {
+    const statusAutomation =
+      await statusAutomationsApi.newStatusAutomation(data)
+    commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   },
 
-  editStatusAutomation({ commit, state }, data) {
-    return statusAutomationsApi
-      .updateStatusAutomation(data)
-      .then(statusAutomation => {
-        commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
+  async editStatusAutomation({ commit }, data) {
+    const statusAutomation =
+      await statusAutomationsApi.updateStatusAutomation(data)
+    commit(EDIT_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   },
 
-  deleteStatusAutomation({ commit, state }, statusAutomation) {
-    return statusAutomationsApi
-      .deleteStatusAutomation(statusAutomation)
-      .then(() => {
-        commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
-        Promise.resolve(statusAutomation)
-      })
-  },
-
-  postStatusAutomation({ commit }, { data, url }) {
-    statusAutomationsApi.postStatusAutomation(url, data)
+  async deleteStatusAutomation({ commit }, statusAutomation) {
+    await statusAutomationsApi.deleteStatusAutomation(statusAutomation)
+    commit(DELETE_STATUS_AUTOMATION_END, statusAutomation)
+    return statusAutomation
   }
 }
 
@@ -100,8 +91,10 @@ const mutations = {
   },
 
   [EDIT_STATUS_AUTOMATION_END](state, newAutomation) {
-    const automation = cache.statusAutomationMap.get(newAutomation.id)
-    if (automation && automation.id) {
+    const automation = state.statusAutomations.find(
+      ({ id }) => id === newAutomation.id
+    )
+    if (automation?.id) {
       Object.assign(automation, newAutomation)
     } else {
       state.statusAutomations.push(newAutomation)

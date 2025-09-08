@@ -514,8 +514,8 @@ export default {
 
     onSearchChange() {
       if (this.searchField) {
-        const searchQuery = this.searchField.getValue()
-        if (searchQuery.length !== 1) {
+        const searchQuery = this.searchField?.getValue()
+        if (searchQuery?.length !== 1) {
           this.setPeopleSearch(searchQuery)
         }
         this.setSearchInUrl()
@@ -625,7 +625,8 @@ export default {
       this.activeTab = this.$route.query.tab || 'active'
     },
 
-    '$route.query.search'() {
+    '$route.query.search'(search) {
+      this.searchField?.setValue(search)
       this.onSearchChange()
     }
   },

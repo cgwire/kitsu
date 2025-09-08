@@ -1649,10 +1649,8 @@ export default {
       this.$store.commit('CASTING_SET_SEQUENCES', this.displayedSequences)
     },
 
-    '$route.query.search'() {
-      this.setSearchFromUrl()
-      if (!this.searchField) return
-      const search = this.searchField.getValue()
+    '$route.query.search'(search) {
+      this.searchField?.setValue(search)
       this.onSearchChange(search)
     }
   },

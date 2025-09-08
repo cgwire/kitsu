@@ -648,8 +648,8 @@ export default {
       this.updateActiveTab()
     },
 
-    '$route.query.search'() {
-      this.setSearchFromUrl()
+    '$route.query.search'(search) {
+      this.searchField?.setValue(search)
       this.onSearchChange()
     }
   },

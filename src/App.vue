@@ -124,12 +124,12 @@ export default {
 
     setupCrisp(config) {
       if (config.crisp_token?.length) {
+        crisp.init(config.crisp_token)
         const supportChat = localPreferences.getBoolPreference(
           'support:show',
           true
         )
         this.setSupportChat(supportChat)
-        crisp.init(config.crisp_token)
       }
     },
 
@@ -2323,7 +2323,7 @@ th.validation-cell {
   padding: 0.5em;
 }
 
-// Ludice Icons
+// Lucide Icons
 .icon-1x {
   width: 1em;
   height: 1em;
