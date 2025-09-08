@@ -354,7 +354,7 @@ export default {
     onSearchChange() {
       if (this.searchField) {
         const searchQuery = this.searchField.getValue()
-        if (searchQuery.length !== 1) {
+        if (searchQuery?.length !== 1) {
           this.setPeopleSearch(searchQuery)
         }
         this.setSearchInUrl()

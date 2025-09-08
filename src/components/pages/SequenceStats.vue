@@ -55,7 +55,7 @@
       :is-error="isShotsLoadingError"
       :validation-columns="shotValidationColumns"
       :sequence-stats="sequenceStats"
-      :show-all="sequenceSearchText.length === 0"
+      :show-all="!sequenceSearchText"
       @field-changed="onFieldChanged"
       @scroll="saveScrollPosition"
     />
@@ -288,8 +288,8 @@ export default {
       }
     },
 
-    '$route.query.search'() {
-      this.setSearchFromUrl()
+    '$route.query.search'(search) {
+      this.searchField?.setValue(search)
       this.onSearchChange()
     }
   },
