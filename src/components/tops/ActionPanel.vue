@@ -214,7 +214,6 @@
           v-if="
             !isEntitySelection &&
             isTaskSelection &&
-            !isCurrentViewEpisode &&
             !isCurrentViewConcept &&
             customActions?.length
           "
@@ -230,7 +229,6 @@
           v-if="
             !isEntitySelection &&
             isTaskSelection &&
-            !isCurrentViewEpisode &&
             !isCurrentViewConcept &&
             customActions?.length
           "
@@ -963,11 +961,10 @@ export default {
 
   computed: {
     ...mapGetters([
-      'allCustomActions',
       'assetMap',
-      'assetCustomActions',
       'assetsByType',
       'currentProduction',
+      'getCustomActionsByType',
       'isCurrentUserArtist',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
@@ -980,7 +977,6 @@ export default {
       'selectedEdits',
       'selectedShots',
       'selectedTasks',
-      'shotCustomActions',
       'taskMap',
       'taskStatusForCurrentUser',
       'taskTypeMap',
@@ -1036,11 +1032,7 @@ export default {
     },
 
     defaultCustomAction() {
-      if (this.customActions.length > 0) {
-        return this.customActions[0]
-      } else {
-        return {}
-      }
+      return this.customActions?.[0] ?? {}
     },
 
     isTaskSelection() {
@@ -1715,26 +1707,28 @@ export default {
     nbSelectedTasks: {
       immediate: true,
       handler() {
-        this.selectedTaskIds = Array.from(this.selectedTasks.keys())
         if (this.nbSelectedTasks > 0) {
-          let isShotSelected = false
-          let isAssetSelected = false
           this.setAvailableStatuses()
-          this.selectedTaskIds.forEach(taskId => {
-            const task = this.selectedTasks.get(taskId)
-            if (task && task.sequence_name) {
-              isShotSelected = true
-            } else {
-              isAssetSelected = true
-            }
-          })
-          if (isShotSelected && isAssetSelected) {
-            this.customActions = this.allCustomActions
-          } else if (isShotSelected) {
-            this.customActions = this.shotCustomActions
-          } else {
-            this.customActions = this.assetCustomActions
+
+          const selectedTypes = {
+            Asset: false,
+            Shot: false,
+            Sequence: false,
+            Edit: false,
+            Episode: false
           }
+          this.selectedTasks.forEach(task => {
+            const type = this.taskTypeMap.get(task.task_type_id)
+            selectedTypes[type?.for_entity] = true
+          })
+
+          this.customActions = this.getCustomActionsByType(
+            selectedTypes.Asset,
+            selectedTypes.Shot,
+            selectedTypes.Sequence,
+            selectedTypes.Edit,
+            selectedTypes.Episode
+          )
 
           if (this.customActions.length > 0) {
             const isUrlSelected =

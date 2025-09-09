@@ -10,19 +10,7 @@ import {
 } from '@/store/mutation-types'
 
 const initialState = {
-  customActions: [],
-  isCustomActionsLoading: false,
-  isCustomActionsLoadingError: false,
-
-  editCustomAction: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteCustomAction: {
-    isLoading: false,
-    isError: false
-  }
+  customActions: []
 }
 
 const state = { ...initialState }
@@ -30,31 +18,16 @@ const state = { ...initialState }
 const getters = {
   customActions: state => state.customActions,
 
-  isCustomActionsLoading: state => state.isCustomActionsLoading,
-  isCustomActionsLoadingError: state => state.isCustomActionsLoadingError,
-
-  editCustomAction: state => state.editCustomAction,
-  deleteCustomAction: state => state.deleteCustomAction,
-
-  customAction: state => id => {
-    return state.customActions.find(customAction => customAction.id === id)
-  },
-
-  allCustomActions: state => {
-    return state.customActions.filter(action => action.entity_type === 'all')
-  },
-
-  assetCustomActions: state => {
-    return state.customActions.filter(action =>
-      ['all', 'asset'].includes(action.entity_type)
+  getCustomActionsByType: state => (asset, shot, sequence, edit, episode) =>
+    state.customActions.filter(
+      action =>
+        action.entity_type === 'all' ||
+        (asset && action.entity_type === 'asset') ||
+        (shot && action.entity_type === 'shot') ||
+        (sequence && action.entity_type === 'sequence') ||
+        (edit && action.entity_type === 'edit') ||
+        (episode && action.entity_type === 'episode')
     )
-  },
-
-  shotCustomActions: state => {
-    return state.customActions.filter(action =>
-      ['all', 'shot'].includes(action.entity_type)
-    )
-  }
 }
 
 const actions = {
@@ -99,14 +72,15 @@ const mutations = {
   },
 
   [EDIT_CUSTOM_ACTION_END](state, newCustomAction) {
-    const customAction = getters.customAction(state)(newCustomAction.id)
-
-    if (customAction && customAction.id) {
+    const customAction = state.customActions.find(
+      ({ id }) => id === newCustomAction.id
+    )
+    if (customAction?.id) {
       Object.assign(customAction, newCustomAction)
     } else {
       state.customActions.push(newCustomAction)
-      state.customActions = sortByName(state.customActions)
     }
+    state.customActions = sortByName(state.customActions)
   },
 
   [DELETE_CUSTOM_ACTION_END](state, customActionToDelete) {
