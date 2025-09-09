@@ -305,8 +305,11 @@ export default {
     },
     entity_types: {
       all: 'All',
+      asset: 'Asset',
       shot: 'Shot',
-      asset: 'Asset'
+      sequence: 'Sequence',
+      edit: 'Edit',
+      episode: 'Episode',
     }
   },
 

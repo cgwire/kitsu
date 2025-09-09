@@ -10,19 +10,7 @@ import {
 } from '@/store/mutation-types'
 
 const initialState = {
-  customActions: [],
-  isCustomActionsLoading: false,
-  isCustomActionsLoadingError: false,
-
-  editCustomAction: {
-    isLoading: false,
-    isError: false
-  },
-
-  deleteCustomAction: {
-    isLoading: false,
-    isError: false
-  }
+  customActions: []
 }
 
 const state = { ...initialState }
@@ -30,57 +18,38 @@ const state = { ...initialState }
 const getters = {
   customActions: state => state.customActions,
 
-  isCustomActionsLoading: state => state.isCustomActionsLoading,
-  isCustomActionsLoadingError: state => state.isCustomActionsLoadingError,
-
-  editCustomAction: state => state.editCustomAction,
-  deleteCustomAction: state => state.deleteCustomAction,
-
-  customAction: state => id => {
-    return state.customActions.find(customAction => customAction.id === id)
-  },
-
-  allCustomActions: state => {
-    return state.customActions.filter(action => action.entity_type === 'all')
-  },
-
-  assetCustomActions: state => {
-    return state.customActions.filter(action =>
-      ['all', 'asset'].includes(action.entity_type)
+  getCustomActionsByType: state => (asset, shot, sequence, edit, episode) =>
+    state.customActions.filter(
+      action =>
+        action.entity_type === 'all' ||
+        (asset && action.entity_type === 'asset') ||
+        (shot && action.entity_type === 'shot') ||
+        (sequence && action.entity_type === 'sequence') ||
+        (edit && action.entity_type === 'edit') ||
+        (episode && action.entity_type === 'episode')
     )
-  },
-
-  shotCustomActions: state => {
-    return state.customActions.filter(action =>
-      ['all', 'shot'].includes(action.entity_type)
-    )
-  }
 }
 
 const actions = {
-  loadCustomActions({ commit }) {
+  async loadCustomActions({ commit }) {
     commit(LOAD_CUSTOM_ACTIONS_START)
-    return customActionsApi.getCustomActions().then(customActions => {
-      commit(LOAD_CUSTOM_ACTIONS_END, customActions)
-    })
+    const customActions = await customActionsApi.getCustomActions()
+    commit(LOAD_CUSTOM_ACTIONS_END, customActions)
   },
 
-  newCustomAction({ commit }, data) {
-    return customActionsApi.newCustomAction(data).then(customAction => {
-      commit(EDIT_CUSTOM_ACTION_END, customAction)
-    })
+  async newCustomAction({ commit }, data) {
+    const customAction = await customActionsApi.newCustomAction(data)
+    commit(EDIT_CUSTOM_ACTION_END, customAction)
   },
 
-  editCustomAction({ commit }, data) {
-    return customActionsApi.updateCustomAction(data).then(customAction => {
-      commit(EDIT_CUSTOM_ACTION_END, customAction)
-    })
+  async editCustomAction({ commit }, data) {
+    const customAction = await customActionsApi.updateCustomAction(data)
+    commit(EDIT_CUSTOM_ACTION_END, customAction)
   },
 
-  deleteCustomAction({ commit }, customAction) {
-    return customActionsApi.deleteCustomAction(customAction).then(() => {
-      commit(DELETE_CUSTOM_ACTION_END, customAction)
-    })
+  async deleteCustomAction({ commit }, customAction) {
+    await customActionsApi.deleteCustomAction(customAction)
+    commit(DELETE_CUSTOM_ACTION_END, customAction)
   },
 
   postCustomAction({}, { data, url }) {
@@ -99,14 +68,15 @@ const mutations = {
   },
 
   [EDIT_CUSTOM_ACTION_END](state, newCustomAction) {
-    const customAction = getters.customAction(state)(newCustomAction.id)
-
-    if (customAction && customAction.id) {
+    const customAction = state.customActions.find(
+      ({ id }) => id === newCustomAction.id
+    )
+    if (customAction?.id) {
       Object.assign(customAction, newCustomAction)
     } else {
       state.customActions.push(newCustomAction)
-      state.customActions = sortByName(state.customActions)
     }
+    state.customActions = sortByName(state.customActions)
   },
 
   [DELETE_CUSTOM_ACTION_END](state, customActionToDelete) {

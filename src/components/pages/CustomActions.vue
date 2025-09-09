@@ -16,22 +16,24 @@
     />
 
     <edit-custom-action-modal
-      :active="modals.edit"
+      active
       :is-loading="loading.edit"
       :is-error="errors.edit"
       :custom-action-to-edit="customActionToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditCustomAction"
+      v-if="modals.edit"
     />
 
     <delete-modal
-      :active="modals.del"
+      active
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
       :error-text="$t('custom_actions.delete_error')"
       @cancel="modals.del = false"
       @confirm="confirmDeleteCustomAction"
+      v-if="modals.del"
     />
   </div>
 </template>
