@@ -1047,16 +1047,6 @@ export default {
       )
     },
 
-    isAssigned() {
-      if (!this.isCurrentUserArtist) return
-      if (this.nbSelectedTasks === 0) return
-      const selectedTasks = Array.from(this.selectedTasks.values())
-      const isAssigned = selectedTasks.some(task => {
-        return task.assignees.includes(this.user.id)
-      })
-      return isAssigned
-    },
-
     nbSelectedAssets() {
       return this.selectedAssets.size
     },
@@ -1092,17 +1082,6 @@ export default {
       )
     },
 
-    allConceptsCanceled() {
-      return Array.from(this.selectedConcepts.values()).every(
-        concept => concept.canceled
-      )
-    },
-
-    allSequencesCanceled() {
-      return Array.from(this.selectedSequences.values()).every(
-        sequence => sequence.canceled
-      )
-    },
     isHidden() {
       return (
         (this.nbSelectedTasks === 0 &&
@@ -1166,10 +1145,6 @@ export default {
 
     isCurrentViewPerson() {
       return this.$route.path.includes('people/')
-    },
-
-    isCurrentViewPersonTasks() {
-      return this.$route.path.includes('todos')
     },
 
     isCurrentViewTaskType() {
