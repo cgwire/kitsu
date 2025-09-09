@@ -31,29 +31,25 @@ const getters = {
 }
 
 const actions = {
-  loadCustomActions({ commit }) {
+  async loadCustomActions({ commit }) {
     commit(LOAD_CUSTOM_ACTIONS_START)
-    return customActionsApi.getCustomActions().then(customActions => {
-      commit(LOAD_CUSTOM_ACTIONS_END, customActions)
-    })
+    const customActions = await customActionsApi.getCustomActions()
+    commit(LOAD_CUSTOM_ACTIONS_END, customActions)
   },
 
-  newCustomAction({ commit }, data) {
-    return customActionsApi.newCustomAction(data).then(customAction => {
-      commit(EDIT_CUSTOM_ACTION_END, customAction)
-    })
+  async newCustomAction({ commit }, data) {
+    const customAction = await customActionsApi.newCustomAction(data)
+    commit(EDIT_CUSTOM_ACTION_END, customAction)
   },
 
-  editCustomAction({ commit }, data) {
-    return customActionsApi.updateCustomAction(data).then(customAction => {
-      commit(EDIT_CUSTOM_ACTION_END, customAction)
-    })
+  async editCustomAction({ commit }, data) {
+    const customAction = await customActionsApi.updateCustomAction(data)
+    commit(EDIT_CUSTOM_ACTION_END, customAction)
   },
 
-  deleteCustomAction({ commit }, customAction) {
-    return customActionsApi.deleteCustomAction(customAction).then(() => {
-      commit(DELETE_CUSTOM_ACTION_END, customAction)
-    })
+  async deleteCustomAction({ commit }, customAction) {
+    await customActionsApi.deleteCustomAction(customAction)
+    commit(DELETE_CUSTOM_ACTION_END, customAction)
   },
 
   postCustomAction({}, { data, url }) {
