@@ -488,6 +488,10 @@ const actions = {
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
+    const taskStatusMap = rootGetters.taskStatusMap
+    const persons = rootGetters.people
+    const sorting = state.assetSorting
+
     return assetsApi
       .getAsset(assetId)
       .then(asset => {
@@ -499,8 +503,10 @@ const actions = {
           })
           commit(ADD_ASSET, {
             asset,
+            taskStatusMap,
             taskTypeMap,
             taskMap,
+            persons,
             personMap,
             production
           })
@@ -1029,7 +1035,7 @@ const mutations = {
     state.unsharedAssets = assets
   },
 
-  [ADD_ASSET](state, { taskTypeMap, taskMap, personMap, production, asset }) {
+  [ADD_ASSET](state, { taskStatusMap, taskTypeMap, taskMap, persons, personMap, production, asset }) {
     asset.tasks = sortTasks(asset.tasks, taskTypeMap)
     asset.validations = new Map()
     asset.production_id = asset.project_id
@@ -1045,18 +1051,43 @@ const mutations = {
     )
     cache.assets.push(asset)
     cache.assets = sortAssets(cache.assets)
-
-    state.displayedAssets.push(asset)
-    state.displayedAssets = sortAssets(state.displayedAssets)
-    helpers.setListStats(state, cache.assets)
-    state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-
-    const maxX = state.displayedAssets.length
-    const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
     cache.assetMap.set(asset.id, asset)
-
     cache.assetIndex = buildAssetIndex(cache.assets)
+    
+    // Test the new asset only against existing filters
+    const taskTypes = Array.from(taskTypeMap.values())
+    const taskStatuses = Array.from(taskStatusMap.values())
+    const addedAssetIndex = buildAssetIndex(
+      [asset],
+      taskTypes,
+      taskStatuses,
+      production?.descriptors || [],
+      persons
+    )
+    const query = state.assetSearchText
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters({
+      entryIndex: addedAssetIndex,
+      assetTypes: [],
+      taskTypes,
+      taskStatuses,
+      descriptors: production?.descriptors || [],
+      persons,
+      query
+    })
+    let result = indexSearch(addedAssetIndex, keywords)
+    result = applyFilters(result, filters, taskMap)
+        
+    if (result && result.length > 0) {
+      state.displayedAssets.push(asset)
+      state.displayedAssets = sortAssets(state.displayedAssets)
+      helpers.setListStats(state, cache.assets)
+      state.assetFilledColumns = getFilledColumns(state.displayedAssets)
+
+      const maxX = state.displayedAssets.length
+      const maxY = state.nbValidationColumns
+      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+    }
   },
 
   [UPDATE_ASSET](state, asset) {

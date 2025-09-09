@@ -476,6 +476,9 @@ const actions = {
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
+    const persons = rootGetters.people
+    const sorting = state.shotSorting
+    const taskStatusMap = rootGetters.taskStatusMap
     return shotsApi
       .getShot(shotId)
       .then(shot => {
@@ -486,11 +489,13 @@ const actions = {
             commit(NEW_TASK_END, { task })
           })
           commit(ADD_SHOT, {
-            shot,
+            taskStatusMap,
             taskTypeMap,
             taskMap,
+            persons,
             personMap,
-            production
+            production,
+            shot,
           })
         }
       })
@@ -1279,7 +1284,7 @@ const mutations = {
     state.shotSelectionGrid = tmpGrid
   },
 
-  [ADD_SHOT](state, { taskTypeMap, taskMap, personMap, production, shot }) {
+  [ADD_SHOT](state, { taskStatusMap, taskTypeMap, taskMap, persons, personMap, production, shot }) {
     const taskIds = []
     const validations = new Map()
     let timeSpent = 0
@@ -1310,17 +1315,44 @@ const mutations = {
     cache.shots.push(shot)
     cache.shots = sortShots(cache.shots)
     cache.shotMap.set(shot.id, shot)
+    cache.shotIndex = buildShotIndex(cache.shots)
 
-    state.displayedShots.push(shot)
-    state.displayedShots = sortShots(state.displayedShots)
-    state.displayedShotsCount = cache.shots.length
-    state.displayedShotsLength = cache.shots.filter(s => !s.canceled).length
-    state.shotFilledColumns = getFilledColumns(state.displayedShots)
+    // Test the new shot only against existing filters
+    const taskTypes = Array.from(taskTypeMap.values())
+    const taskStatuses = Array.from(taskStatusMap.values())
+    const addedShotIndex = buildShotIndex(
+      [shot],
+      taskTypes,
+      taskStatuses,
+      production?.descriptors || [],
+      persons
+    )
+    const query = state.shotSearchText
+    const keywords = getKeyWords(query) || []
+    const filters = getFilters({
+      entryIndex: addedShotIndex,
+      assetTypes: [],
+      taskTypes,
+      taskStatuses,
+      descriptors: production?.descriptors || [],
+      persons,
+      query
+    })
+    let result = indexSearch(addedShotIndex, keywords)
+    result = applyFilters(result, filters, taskMap)
+    
+    if (result && result.length > 0) {
+      cache.result.push(shot)
+      state.displayedShots.push(shot)
+      state.displayedShots = sortShots(state.displayedShots)
+      state.displayedShotsCount = cache.shots.length
+      state.displayedShotsLength = cache.shots.filter(s => !s.canceled).length
+      state.shotFilledColumns = getFilledColumns(state.displayedShots)
 
-    const maxX = state.displayedShots.length
-    const maxY = state.nbValidationColumns
-    state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
-    cache.shotMap.set(shot.id, shot)
+      const maxX = state.displayedShots.length
+      const maxY = state.nbValidationColumns
+      state.shotSelectionGrid = buildSelectionGrid(maxX, maxY)
+    }
   },
 
   [UPDATE_SHOT](state, shot) {
