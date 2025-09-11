@@ -96,6 +96,8 @@
         :budget-departments="budgetDepartments"
         :budget-entries="budgetEntries"
         :months-between-production-dates="monthsBetweenProductionDates"
+        :hardware-items="hardwareItemsCosts"
+        :software-licenses="softwareLicensesCosts"
         :pie-chart-data="pieChartData"
         :pie-chart-colors="pieChartColors"
         :column-chart-data="columnChartData"

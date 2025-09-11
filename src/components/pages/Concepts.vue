@@ -61,7 +61,7 @@
             @dragleave="onFileDragLeave"
             v-if="isDraggingFile"
           >
-            Drop new concepts
+            {{ $t('concepts.drop_new_concepts') }}
           </div>
           <ul class="items">
             <li
@@ -114,6 +114,7 @@
 </template>
 
 <script>
+import assetsStore from '@/store/modules/assets.js'
 import { mapGetters, mapActions } from 'vuex'
 import { firstBy } from 'thenby'
 
@@ -197,7 +198,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'currentProduction',
       'displayedConcepts',
       'isDarkTheme',
@@ -206,6 +206,10 @@ export default {
       'selectedConcepts',
       'taskStatusMap'
     ]),
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
 
     publishers() {
       const publishers = new Map()

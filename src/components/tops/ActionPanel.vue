@@ -834,6 +834,7 @@ import {
 } from 'lucide-vue-next'
 import { mapGetters, mapActions } from 'vuex'
 
+import assetsStore from '@/store/modules/assets.js'
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
 
@@ -961,7 +962,6 @@ export default {
 
   computed: {
     ...mapGetters([
-      'assetMap',
       'assetsByType',
       'currentProduction',
       'getCustomActionsByType',
@@ -982,6 +982,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
 
     minimized() {
       return this.selectedBar === ''

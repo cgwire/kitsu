@@ -489,6 +489,7 @@ export default {
       })
       return subset
     },
+
     /*
      * It calculates the cost of the items for each department and each month.
      * It returns an object with the cost of the items for each department and
