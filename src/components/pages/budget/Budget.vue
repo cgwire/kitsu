@@ -30,6 +30,8 @@
           :is-showing-items="items.showing"
           :linked-hardware-items="linkedHardwareItems"
           :linked-software-licenses="linkedSoftwareLicenses"
+          :hardware-items-costs="hardwareItemsCosts"
+          :software-licenses-costs="softwareLicensesCosts"
           :months-between-start-and-now="monthsBetweenStartAndNow"
           :months-between-now-and-end="monthsBetweenNowAndEnd"
           :months-between-production-dates="monthsBetweenProductionDates"
@@ -96,6 +98,8 @@
         :budget-departments="budgetDepartments"
         :budget-entries="budgetEntries"
         :months-between-production-dates="monthsBetweenProductionDates"
+        :hardware-items="hardwareItemsCosts"
+        :software-licenses="softwareLicensesCosts"
         :pie-chart-data="pieChartData"
         :pie-chart-colors="pieChartColors"
         :column-chart-data="columnChartData"
@@ -303,13 +307,22 @@ export default {
     },
 
     totalEntry() {
-      const total = this.budgetDepartments.reduce(
+      let total = this.budgetDepartments.reduce(
         (acc, department) => acc + department.total,
         0
       )
+      if (this.items.showing) {
+        total +=
+          this.hardwareItemsCosts.total + this.softwareLicensesCosts.total
+      }
       const monthCosts = this.budgetDepartments.reduce((acc, department) => {
         Object.keys(department.monthCosts).forEach(month => {
           acc[month] = (acc[month] || 0) + department.monthCosts[month]
+          if (this.items.showing) {
+            acc[month] += this.hardwareItemsCosts[department.id]?.[month] || 0
+            acc[month] +=
+              this.softwareLicensesCosts[department.id]?.[month] || 0
+          }
         })
         return acc
       }, {})
@@ -317,6 +330,14 @@ export default {
         total,
         monthCosts
       }
+    },
+
+    hardwareItemsCosts() {
+      return this.getItemCosts(this.linkedHardwareItems)
+    },
+
+    softwareLicensesCosts() {
+      return this.getItemCosts(this.linkedSoftwareLicenses)
     },
 
     pieChartData() {
@@ -360,6 +381,56 @@ export default {
       'updateProductionBudget',
       'updateProductionBudgetEntry'
     ]),
+
+    /*
+     * It calculates the cost of the items for each department and each month.
+     * It returns an object with the cost of the items for each department and
+     * each month.
+     */
+    getItemCosts(linkedItems) {
+      const itemCosts = { total: 0 }
+      this.budgetDepartments.forEach(department => {
+        const items = linkedItems[department.id] || []
+        const monthlyDepartmentCost = items.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+
+        if (!itemCosts[department.id]) {
+          itemCosts[department.id] = { total: 0 }
+        }
+        this.monthsBetweenProductionDates.forEach(month => {
+          itemCosts[department.id][month.format('YYYY-MM')] = 0
+          department.persons.forEach(person => {
+            const personCost = this.getMonthCost(person, month)
+            if (personCost > 0) {
+              itemCosts[department.id][month.format('YYYY-MM')] +=
+                monthlyDepartmentCost
+              itemCosts[department.id].total += monthlyDepartmentCost
+              itemCosts.total += monthlyDepartmentCost
+            }
+          })
+        })
+      })
+      return itemCosts
+    },
+
+    /* It gets the cost of a person for a given month, exceptions are
+     * prioritized over the month costs.
+     */
+    getMonthCost(personEntry, month) {
+      let monthKey = ''
+      if (typeof month === 'string') {
+        monthKey = month
+      } else {
+        monthKey = month.format('YYYY-MM')
+      }
+      personEntry.exceptions = personEntry.exceptions || {}
+      return (
+        parseInt(personEntry.exceptions[monthKey]) ||
+        parseInt(personEntry.monthCosts[monthKey]) ||
+        0
+      )
+    },
 
     resetMonths() {
       this.monthsBetweenProductionDates = this.getMonthsBetweenDates(

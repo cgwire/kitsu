@@ -271,6 +271,7 @@ export default {
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected concepts? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_for_selection_hard_lock_text: 'DELETE',
+    drop_new_concepts: 'Drop new concept files here',
     empty: 'There are no concepts for this production',
     multiple_delete_error: 'An error occurred while deleting a concept. There may be existing data currently linked to it. Are you sure there is no task linked to a selected concept?',
     no_concept_selected: 'No concept selected',

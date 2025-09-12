@@ -131,19 +131,10 @@ const totalGap = computed(() => {
  */
 const getTotalMonthCost = month => {
   const monthKey = month === 'total' ? month : month.format('YYYY-MM')
-  let cost =
+  const cost =
     month === 'total'
       ? props.totalEntry.total
       : props.totalEntry.monthCosts[monthKey] || 0
-  if (props.isShowingItems) {
-    cost += props.budgetDepartments.reduce((acc, departmentEntry) => {
-      return (
-        acc +
-        (props.hardwareItemsCosts[departmentEntry.id]?.[monthKey] || 0) +
-        (props.softwareLicensesCosts[departmentEntry.id]?.[monthKey] || 0)
-      )
-    }, 0)
-  }
   return cost ? cost.toLocaleString() : ''
 }
 </script>
