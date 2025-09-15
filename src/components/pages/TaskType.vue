@@ -124,14 +124,8 @@
 
             <div
               class="flexrow-item flexrow align-start ml1"
-              v-if="isActiveTab('tasks') || isActiveTab('schedule')"
+              v-if="isActiveTab('schedule')"
             >
-              <combobox-styled
-                class="flexrow-item nowrap"
-                :label="$t('tasks.auto_fill_estimation')"
-                :options="autoFillEstimationOptions"
-                v-model="autoFillEstimation"
-              />
               <div class="flexrow-item field ml1">
                 <label class="label">
                   {{ $t('tasks.data_display') }}
