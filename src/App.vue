@@ -1890,6 +1890,23 @@ td.fps {
   text-overflow: ellipsis;
 }
 
+@mixin ellipsis-line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ellipsis-2-lines {
+  @include ellipsis-line-clamp(2);
+}
+.ellipsis-3-lines {
+  @include ellipsis-line-clamp(3);
+}
+.ellipsis-4-lines {
+  @include ellipsis-line-clamp(4);
+}
+
 .header-icon {
   min-width: 15px;
 }

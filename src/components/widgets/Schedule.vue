@@ -179,13 +179,18 @@
                     :style="childNameStyle(rootElement, j)"
                   >
                     <router-link
+                      class="filler flexrow-item child-element-name ellipsis-2-lines"
+                      :title="childElement.name"
                       :to="childElement.route"
-                      class="filler flexrow-item child-element-name"
                       v-if="childElement.route"
                     >
                       {{ childElement.name }}
                     </router-link>
-                    <span class="filler flexrow-item" v-else>
+                    <span
+                      class="filler flexrow-item ellipsis-2-lines"
+                      :title="childElement.name"
+                      v-else
+                    >
                       {{ childElement.name }}
                     </span>
                     <span
