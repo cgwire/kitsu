@@ -383,6 +383,11 @@
             >
               <div
                 class="day-off"
+                :class="{
+                  'day-off-sub-zone':
+                    subStartDate?.diff(dayOff.date, 'days') > 0 ||
+                    subEndDate?.diff(dayOff.date, 'days') < 0
+                }"
                 :key="`dayoff-${dayOff.id}-${index}`"
                 :style="dayOffStyle(dayOff)"
                 :title="dayOff.description"
@@ -2974,6 +2979,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .dark & {
     color: $white;
     background-color: #43474d;
+  }
+
+  &.day-off-sub-zone {
+    background-color: initial;
   }
 
   .day-off-icon {
