@@ -1731,7 +1731,7 @@ export default {
       }
     },
 
-    selectedTasks() {
+    'selectedTasks.size'() {
       this.selectedTaskIds = Array.from(this.selectedTasks.keys())
     },
 
