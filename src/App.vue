@@ -814,6 +814,7 @@ h2 {
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
+    white-space: nowrap;
   }
 }
 
