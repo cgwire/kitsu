@@ -124,12 +124,12 @@ export default {
 
     setupCrisp(config) {
       if (config.crisp_token?.length) {
+        crisp.init(config.crisp_token)
         const supportChat = localPreferences.getBoolPreference(
           'support:show',
           true
         )
         this.setSupportChat(supportChat)
-        crisp.init(config.crisp_token)
       }
     },
 
@@ -814,6 +814,7 @@ h2 {
     background-color: $grey-strong;
     border: 1px solid $white;
     border-radius: 3px;
+    white-space: nowrap;
   }
 }
 
@@ -1890,6 +1891,23 @@ td.fps {
   text-overflow: ellipsis;
 }
 
+@mixin ellipsis-line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ellipsis-2-lines {
+  @include ellipsis-line-clamp(2);
+}
+.ellipsis-3-lines {
+  @include ellipsis-line-clamp(3);
+}
+.ellipsis-4-lines {
+  @include ellipsis-line-clamp(4);
+}
+
 .header-icon {
   min-width: 15px;
 }
@@ -2323,7 +2341,7 @@ th.validation-cell {
   padding: 0.5em;
 }
 
-// Ludice Icons
+// Lucide Icons
 .icon-1x {
   width: 1em;
   height: 1em;

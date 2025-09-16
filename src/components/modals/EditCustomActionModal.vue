@@ -20,7 +20,7 @@
           <text-field
             ref="nameField"
             :label="$t('custom_actions.fields.name')"
-            v-model="form.name"
+            v-model.trim="form.name"
             v-focus
             @enter="confirmClicked"
           />
@@ -121,6 +121,18 @@ export default {
         {
           label: 'shot',
           value: 'shot'
+        },
+        {
+          label: 'sequence',
+          value: 'sequence'
+        },
+        {
+          label: 'edit',
+          value: 'edit'
+        },
+        {
+          label: 'episode',
+          value: 'episode'
         }
       ]
     }
@@ -137,22 +149,28 @@ export default {
   },
 
   watch: {
-    customActionToEdit() {
-      if (this.customActionToEdit) {
-        this.form = {
-          name: this.customActionToEdit.name,
-          url: this.customActionToEdit.url,
-          entityType: this.customActionToEdit.entity_type,
-          isAjax: Boolean(this.customActionToEdit.is_ajax).toString()
+    customActionToEdit: {
+      immediate: true,
+      handler() {
+        if (this.customActionToEdit) {
+          this.form = {
+            name: this.customActionToEdit.name,
+            url: this.customActionToEdit.url,
+            entityType: this.customActionToEdit.entity_type,
+            isAjax: Boolean(this.customActionToEdit.is_ajax).toString()
+          }
         }
       }
     },
 
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 100)
+    active: {
+      immediate: true,
+      handler() {
+        if (this.active) {
+          this.$nextTick(() => {
+            this.$refs.nameField?.focus()
+          })
+        }
       }
     }
   }

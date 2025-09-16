@@ -91,7 +91,10 @@ export default {
   bots: {
     active_bots: 'active bot | active bots',
     bots: 'bot | bots',
+    confirm_edit: 'Save bot changes',
     copy_token_warning: 'Make sure you copy the token below. You will not be able to see it again.',
+    create: 'Create bot',
+    departments_empty: 'This bot isn\'t linked to any department.',
     edit_avatar_error: 'An error occurred while updating the bot avatar.',
     edit_title: 'Edit bot',
     new_bot: 'Add a new bot',
@@ -152,7 +155,7 @@ export default {
     delete_budget_entry_error: 'An error occurred while deleting this budget entry. Please contact our support team.',
     delete_budget_entry_message: 'Are you sure you want to delete this budget entry?',
     delete_budget_error: 'An error occurred while deleting this budget. Please contact our support team.',
-    delete_budget_message: 'Are you sure you want to delete this budget? Type the budget name below to confirm.',
+    delete_budget_message: 'Are you sure you want to delete the budget {name}? Please confirm by typing the budget name below.',
     difference: 'Difference',
     edit_budget: 'Edit current budget version',
     edit_budget_entry: 'Edit entry',
@@ -268,6 +271,7 @@ export default {
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected concepts? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_for_selection_hard_lock_text: 'DELETE',
+    drop_new_concepts: 'Drop new concept files here',
     empty: 'There are no concepts for this production',
     multiple_delete_error: 'An error occurred while deleting a concept. There may be existing data currently linked to it. Are you sure there is no task linked to a selected concept?',
     no_concept_selected: 'No concept selected',
@@ -302,8 +306,11 @@ export default {
     },
     entity_types: {
       all: 'All',
+      asset: 'Asset',
       shot: 'Shot',
-      asset: 'Asset'
+      sequence: 'Sequence',
+      edit: 'Edit',
+      episode: 'Episode',
     }
   },
 
@@ -1539,7 +1546,7 @@ export default {
     edit_version_exist: 'A version with a similar name already exist.',
     delete_version: 'Delete schedule version',
     delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
-    delete_version_message: 'Are you sure you want to delete this schedule version? Type the version name below to confirm.',
+    delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',
     versions: {
       reference: 'Reference forecast',
       from: 'from',
@@ -1720,6 +1727,7 @@ export default {
     create_tasks_sequence_failed: 'A server error occurred while proceeding creations.',
     current: 'Tasks',
     current_status: 'Current status:',
+    data_display: 'Data Display',
     delete_all_text: 'Are you sure you want to delete all tasks for given {name}? Please, confirm by typing the task type name of the tasks you want to delete in the text field.',
     delete_all_error: 'Deleting all tasks for given task type failed.',
     delete_error: 'An error occurred while deleting task.',

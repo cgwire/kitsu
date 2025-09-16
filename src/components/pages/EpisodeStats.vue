@@ -4,8 +4,8 @@
       <search-field
         class="flexrow-item mt1"
         ref="episode-search-field"
-        @change="onSearchChange"
         placeholder="ex: e01 s01, anim=wip"
+        @change="onSearchChange"
       />
       <combobox
         class="mb0 flexrow-item"

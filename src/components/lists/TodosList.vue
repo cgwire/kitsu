@@ -479,7 +479,11 @@ export default {
 
     isEpisodeVisible() {
       return this.displayedTasks.some(
-        task => task.source_id || task.episode_names?.length > 0
+        task =>
+          task.source_id ||
+          task.episode_names?.length > 0 ||
+          (!['Shot', 'Sequence', 'Edit'].includes(task.entity_type_name) &&
+            task.episode_id)
       )
     }
   },

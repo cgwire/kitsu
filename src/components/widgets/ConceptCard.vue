@@ -44,9 +44,9 @@
 
 <script>
 import { mapGetters } from 'vuex'
-
 import { getEntityPath } from '@/lib/path'
 
+import assetsStore from '@/store/modules/assets.js'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
@@ -75,6 +75,10 @@ export default {
       'personMap',
       'taskStatusMap'
     ]),
+
+    assetMap() {
+      return assetsStore.cache.assetMap
+    },
 
     linkedEntities() {
       return this.concept.entity_concept_links

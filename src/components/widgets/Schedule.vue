@@ -179,13 +179,18 @@
                     :style="childNameStyle(rootElement, j)"
                   >
                     <router-link
+                      class="filler flexrow-item child-element-name ellipsis-2-lines"
+                      :title="childElement.name"
                       :to="childElement.route"
-                      class="filler flexrow-item child-element-name"
                       v-if="childElement.route"
                     >
                       {{ childElement.name }}
                     </router-link>
-                    <span class="filler flexrow-item" v-else>
+                    <span
+                      class="filler flexrow-item ellipsis-2-lines"
+                      :title="childElement.name"
+                      v-else
+                    >
                       {{ childElement.name }}
                     </span>
                     <span
@@ -383,6 +388,11 @@
             >
               <div
                 class="day-off"
+                :class="{
+                  'day-off-sub-zone':
+                    subStartDate?.diff(dayOff.date, 'days') > 0 ||
+                    subEndDate?.diff(dayOff.date, 'days') < 0
+                }"
                 :key="`dayoff-${dayOff.id}-${index}`"
                 :style="dayOffStyle(dayOff)"
                 :title="dayOff.description"
@@ -460,6 +470,50 @@
                   v-for="childElement in rootElement.children"
                   v-show="!rootElement.loading"
                 >
+                  <template v-if="withStatuses">
+                    <span
+                      class="status-date status-date-wip"
+                      :class="{
+                        'status-date-gap':
+                          childElement.real_start_date.slice(0, 10) ===
+                            childElement.end_date?.slice(0, 10) ||
+                          childElement.real_start_date.slice(0, 10) ===
+                            childElement.done_date?.slice(0, 10)
+                      }"
+                      :style="dateStatusStyle(childElement.real_start_date)"
+                      :title="statuses.wip.name"
+                      v-if="childElement.real_start_date"
+                    >
+                    </span>
+                    <span
+                      class="status-date status-date-wfa"
+                      :class="{
+                        'status-date-gap':
+                          childElement.end_date.slice(0, 10) ===
+                            childElement.real_start_date?.slice(0, 10) ||
+                          childElement.end_date.slice(0, 10) ===
+                            childElement.done_date?.slice(0, 10)
+                      }"
+                      :style="dateStatusStyle(childElement.end_date)"
+                      :title="statuses.wfa.name"
+                      v-if="childElement.end_date"
+                    >
+                    </span>
+                    <span
+                      class="status-date status-date-done"
+                      :class="{
+                        'status-date-gap':
+                          childElement.done_date.slice(0, 10) ===
+                            childElement.real_start_date?.slice(0, 10) ||
+                          childElement.done_date.slice(0, 10) ===
+                            childElement.end_date?.slice(0, 10)
+                      }"
+                      :style="dateStatusStyle(childElement.done_date)"
+                      :title="statuses.done.name"
+                      v-if="childElement.done_date"
+                    >
+                    </span>
+                  </template>
                   <div
                     class="timebar"
                     :class="{
@@ -472,6 +526,7 @@
                     "
                     v-show="subchildren || isVisible(childElement)"
                     @click="$emit('item-selected', rootElement, childElement)"
+                    v-if="withEstimations"
                   >
                     <div
                       class="timebar-left-hand"
@@ -754,6 +809,14 @@ export default {
       type: Boolean,
       default: true
     },
+    withEstimations: {
+      type: Boolean,
+      default: true
+    },
+    withStatuses: {
+      type: Boolean,
+      default: false
+    },
     hideRoot: {
       type: Boolean,
       default: false
@@ -812,8 +875,17 @@ export default {
       'milestones',
       'openProductions',
       'organisation',
-      'taskMap'
+      'taskMap',
+      'taskStatuses'
     ]),
+
+    statuses() {
+      return {
+        wip: this.taskStatuses.find(status => status.is_wip) ?? {},
+        wfa: this.taskStatuses.find(status => status.is_feedback_request) ?? {},
+        done: this.taskStatuses.find(status => status.is_done) ?? {}
+      }
+    },
 
     currentMilestones() {
       const localMilestones = {}
@@ -1692,13 +1764,19 @@ export default {
 
     dayOffStyle(dayOff) {
       return {
-        left: `${this.getDayOffLeft(dayOff)}px`,
+        left: `${this.getLeftPosition(dayOff.date)}px`,
         width: `${this.cellWidth - 1}px`
       }
     },
 
-    getDayOffLeft(dayOff) {
-      const startDate = moment.utc(dayOff.date)
+    dateStatusStyle(date) {
+      return {
+        left: `${this.getLeftPosition(date) + this.cellWidth / 2 - 3}px`
+      }
+    },
+
+    getLeftPosition(date) {
+      const startDate = moment.utc(date)
       const startDiff = this.dateDiff(
         this.startDate,
         startDate,
@@ -2297,6 +2375,39 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 }
 
+.status-date {
+  position: absolute;
+  top: 2px;
+  width: 4px;
+  height: 36px;
+  z-index: 100;
+
+  .dark & {
+    box-shadow: $grey 0 0 1px 1px;
+  }
+
+  &-wip {
+    background-color: blue;
+    text-align: left;
+
+    &.status-date-gap {
+      transform: translateX(calc(-100% - 2px));
+    }
+  }
+  &-wfa {
+    background-color: purple;
+    text-align: center;
+  }
+  &-done {
+    background-color: green;
+    text-align: right;
+
+    &.status-date-gap {
+      transform: translateX(calc(100% + 2px));
+    }
+  }
+}
+
 .entity-name-list {
   padding-top: 85px;
 
@@ -2873,6 +2984,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .dark & {
     color: $white;
     background-color: #43474d;
+  }
+
+  &.day-off-sub-zone {
+    background-color: initial;
   }
 
   .day-off-icon {

@@ -66,8 +66,8 @@
             </ul>
           </div>
 
-          <div class="flexcolumn-item flexrow search-options mb1">
-            <div class="flexrow-item">
+          <div class="flexcolumn-item flexrow align-start mb1">
+            <div class="flexrow-item search-options">
               <search-field
                 ref="task-search-field"
                 :can-save="true"
@@ -82,6 +82,7 @@
                 class="flexrow-item selector"
                 :label="$t('news.task_status')"
                 :task-status-list="taskStatusList"
+                :with-margin="false"
                 v-model="taskStatusIdFilter"
               />
               <combobox-styled
@@ -120,6 +121,28 @@
                 v-model="difficultyFilter"
               />
             </div>
+
+            <div
+              class="flexrow-item flexrow align-start ml1"
+              v-if="isActiveTab('schedule')"
+            >
+              <div class="flexrow-item field ml1">
+                <label class="label">
+                  {{ $t('tasks.data_display') }}
+                </label>
+                <div class="mt05 nowrap">
+                  <label class="label">
+                    <input type="checkbox" v-model="dataDisplay.estimations" />
+                    {{ $t('tasks.fields.estimation') }}
+                  </label>
+                  <label class="label">
+                    <input type="checkbox" v-model="dataDisplay.statuses" />
+                    {{ $t('tasks.fields.task_status') }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <div class="filler"></div>
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
               <combobox-styled
@@ -178,7 +201,7 @@
             </div>
             <div class="flexrow-item zoom-level" v-if="isActiveTab('schedule')">
               <combobox-number
-                class="mt0"
+                class="mt0 nowrap"
                 :label="$t('schedule.zoom_level')"
                 :options="schedule.zoomOptions"
                 no-field
@@ -225,6 +248,8 @@
             :height="schedule.scheduleHeight"
             :is-loading="loading.entities"
             :is-estimation-linked="true"
+            :with-estimations="dataDisplay.estimations"
+            :with-statuses="dataDisplay.statuses"
             @item-changed="saveTaskScheduleItem"
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
@@ -470,6 +495,10 @@ export default {
       currentScheduleItem: null,
       currentTask: null,
       contactSheetMode: false,
+      dataDisplay: {
+        estimations: true,
+        statuses: true
+      },
       dataMatchers: ['Parent', 'Entity'],
       difficultyFilter: '-1',
       dueDateFilter: 'all',
@@ -1218,27 +1247,29 @@ export default {
     updateEstimation({ taskId, days, item, daysOff }) {
       const estimation = daysToMinutes(this.organisation, days)
       const task = this.taskMap.get(taskId)
-      let data = { estimation }
       if (!task.start_date) task.start_date = formatSimpleDate(moment())
       const startDate = parseDate(task.start_date)
       const dueDate = task.due_date ? parseDate(task.due_date) : null
-      data = getDatesFromStartDate(
-        this.organisation,
-        startDate,
-        dueDate,
-        minutesToDays(this.organisation, estimation),
-        daysOff
-      )
-      data.estimation = estimation
+      const data = {
+        ...getDatesFromStartDate(
+          this.organisation,
+          startDate,
+          dueDate,
+          minutesToDays(this.organisation, estimation),
+          daysOff
+        ),
+        estimation
+      }
       if (item) {
         item.start_date = data.start_date
         item.startDate = parseDate(data.start_date)
         item.end_date = data.due_date
         item.endDate = parseDate(data.due_date)
-      }
-      if (item && item.startDate && item.endDate) {
-        item.parentElement.startDate = this.getMinDate(item.parentElement)
-        item.parentElement.endDate = this.getMaxDate(item.parentElement)
+
+        if (item.startDate && item.endDate) {
+          item.parentElement.startDate = this.getMinDate(item.parentElement)
+          item.parentElement.endDate = this.getMaxDate(item.parentElement)
+        }
       }
       this.updateTask({ taskId, data }).catch(console.error)
     },
@@ -1287,7 +1318,7 @@ export default {
     },
 
     async loadDaysOff(personIds) {
-      this.daysOffByPerson = []
+      this.daysOffByPerson = {}
       for (const personId of personIds) {
         // load sequentially to avoid too many requests
         const daysOff = await this.loadAggregatedPersonDaysOff({
@@ -1732,8 +1763,16 @@ export default {
   margin-right: 0;
 }
 
+.align-start {
+  align-items: flex-start;
+}
+
 .search-options {
-  align-items: flex-end;
+  margin-top: 23px;
+}
+
+.ml2 {
+  margin-left: 2em;
 }
 
 .tabs ul {

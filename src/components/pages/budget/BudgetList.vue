@@ -208,6 +208,14 @@ export default {
       type: Object,
       required: true
     },
+    hardwareItemsCosts: {
+      type: Object,
+      required: true
+    },
+    softwareLicensesCosts: {
+      type: Object,
+      required: true
+    },
     monthsBetweenStartAndNow: {
       type: Array,
       default: () => []
@@ -434,14 +442,6 @@ export default {
 
     doneSubset() {
       return this.getPrevisionalSubset(this.monthsBetweenStartAndNow)
-    },
-
-    hardwareItemsCosts() {
-      return this.getItemCosts(this.linkedHardwareItems)
-    },
-
-    softwareLicensesCosts() {
-      return this.getItemCosts(this.linkedSoftwareLicenses)
     }
   },
 
@@ -488,36 +488,6 @@ export default {
         subset.total += subset[department.id].total
       })
       return subset
-    },
-    /*
-     * It calculates the cost of the items for each department and each month.
-     * It returns an object with the cost of the items for each department and
-     * each month.
-     */
-    getItemCosts(linkedItems) {
-      const itemCosts = {}
-      this.budgetDepartments.forEach(department => {
-        const items = linkedItems[department.id] || []
-        const monthlyDepartmentCost = items.reduce((acc, item) => {
-          return acc + item.monthly_cost
-        }, 0)
-
-        if (!itemCosts[department.id]) {
-          itemCosts[department.id] = { total: 0 }
-        }
-        this.monthsBetweenProductionDates.forEach(month => {
-          itemCosts[department.id][month.format('YYYY-MM')] = 0
-          department.persons.forEach(person => {
-            const personCost = this.getMonthCost(person, month)
-            if (personCost > 0) {
-              itemCosts[department.id][month.format('YYYY-MM')] +=
-                monthlyDepartmentCost
-              itemCosts[department.id].total += monthlyDepartmentCost
-            }
-          })
-        })
-      })
-      return itemCosts
     },
 
     /* It gets the daily rate of a person, and use the salary scale if

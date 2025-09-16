@@ -126,16 +126,17 @@ export default {
     }
   },
 
-  created() {
+  async created() {
     this.activeTab = this.$route.query.tab || 'active'
     this.loading.list = true
     this.errors.list = false
-    this.loadStatusAutomations(err => {
+    try {
+      await this.loadStatusAutomations()
+    } catch (err) {
+      this.errors.list = true
+    } finally {
       this.loading.list = false
-      if (err) {
-        this.errors.list = true
-      }
-    })
+    }
   },
 
   methods: {

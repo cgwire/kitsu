@@ -888,6 +888,18 @@ export default {
       this.updateProgressBar()
     },
 
+    onPreviousPreviewClicked() {
+      const index = this.currentPreviewIndex - 1
+      this.currentPreviewIndex =
+        index < 0 ? this.currentEntityPreviewLength - 1 : index
+    },
+
+    onNextPreviewClicked() {
+      const index = this.currentPreviewIndex + 1
+      this.currentPreviewIndex =
+        index > this.currentEntityPreviewLength - 1 ? 0 : index
+    },
+
     onPreviewChanged(entity, previewFile) {
       this.pause()
       if (!previewFile) {
