@@ -901,7 +901,6 @@ export default {
       person: null,
       priority: '0',
       selectedBar: '',
-      selectedTaskIds: [],
       taskStatusId: '',
       statusComment: '',
       modals: {
@@ -1187,6 +1186,10 @@ export default {
 
     selectedPersonId() {
       return this.person ? this.person.id : null
+    },
+
+    selectedTaskIds() {
+      return Array.from(this.selectedTasks.keys())
     },
 
     isInDepartment() {
@@ -1731,13 +1734,8 @@ export default {
       }
     },
 
-    'selectedTasks.size'() {
-      this.selectedTaskIds = Array.from(this.selectedTasks.keys())
-    },
-
     $route(oldRoute, newRoute) {
       if (oldRoute.name !== newRoute.name) {
-        this.selectedTaskIds = Array.from(this.selectedTasks.keys())
         if (this.nbSelectedTasks > 0) {
           this.clearSelectedTasks()
         }
