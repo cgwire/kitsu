@@ -492,6 +492,12 @@ export default {
       if (this.videoViewer) {
         this.videoViewer.resumePanZoom()
       }
+    },
+
+    setSpeed(rate) {
+      if (this.videoViewer) {
+        this.videoViewer.setSpeed(rate)
+      }
     }
   },
 

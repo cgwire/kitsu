@@ -530,12 +530,7 @@
           @click="isHd = !isHd"
           v-if="isCurrentPreviewMovie"
         />
-        <button-simple
-          class="button playlist-button flexrow-item"
-          @click="onSpeedClicked"
-          :title="$t('playlists.actions.speed')"
-          :text="speedTextMap[speed - 1]"
-        />
+        <speed-button class="playlist-button flexrow-item" v-model="speed" />
         <button-simple
           class="button playlist-button flexrow-item mr0"
           :active="isShowAnnotationsWhilePlaying"
@@ -1028,6 +1023,7 @@ import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import SpeedButton from '@/components/widgets/SpeedButton.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
@@ -1058,6 +1054,7 @@ export default {
     SelectTaskTypeModal,
     SoundViewer,
     Spinner,
+    SpeedButton,
     TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
@@ -1159,8 +1156,7 @@ export default {
       forClientOptions: [
         { label: this.$t('playlists.for_client'), value: 'true' },
         { label: this.$t('playlists.for_studio'), value: 'false' }
-      ],
-      speedTextMap: ['x0.25', 'x0.50', 'x1.00', 'x1.50', 'x2.00']
+      ]
     }
   },
 

@@ -190,6 +190,7 @@
             @click="onToggleSoundClicked"
             v-else
           />
+          <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
 
           <span
             class="flexrow-item time-indicator"
@@ -598,6 +599,7 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
+import SpeedButton from '@/components/widgets/SpeedButton.vue'
 const TaskInfo = () => import('@/components/sides/TaskInfo.vue')
 import VideoProgress from '@/components/previews/VideoProgress.vue'
 
@@ -621,6 +623,7 @@ export default {
     PencilPicker,
     PreviewViewer,
     RevisionPreview,
+    SpeedButton,
     TaskInfo: defineAsyncComponent(TaskInfo),
     VideoProgress
   },
@@ -725,6 +728,7 @@ export default {
       pencilPalette: ['big', 'medium', 'small'],
       previewToCompare: null,
       previewToCompareId: null,
+      speed: 3,
       taskTypeId: this.entityPreviewFIles
         ? Object.keys(this.entityPreviewFiles)[0]
         : null,
@@ -1583,6 +1587,11 @@ export default {
       return defaultId ? background.id === defaultId : background.is_default
     },
 
+    setPlayerSpeed(rate) {
+      this.previewViewer.setSpeed(rate)
+      this.comparisonViewer.setSpeed(rate)
+    },
+
     // Annotations
 
     triggerResize() {
@@ -2347,6 +2356,12 @@ export default {
       } else {
         this.previewViewer.pauseZoom()
       }
+    },
+
+    speed() {
+      const rates = [0.25, 0.5, 1, 1.5, 2]
+      const rate = rates[this.speed - 1]
+      this.setPlayerSpeed(rate)
     }
   }
 }
