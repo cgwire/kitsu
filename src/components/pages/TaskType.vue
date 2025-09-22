@@ -1273,9 +1273,7 @@ export default {
         estimation
       }
       if (item) {
-        item.start_date = data.start_date
         item.startDate = parseDate(data.start_date)
-        item.end_date = data.due_date
         item.endDate = parseDate(data.due_date)
 
         if (item.startDate && item.endDate) {
