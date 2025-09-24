@@ -305,6 +305,12 @@ export default {
     return client.pget(`/api/data/persons/${personId}/time-spents/${date}`)
   },
 
+  getTimeSpentsByPeriod(personId, startDate, endDate) {
+    return client.pget(
+      `/api/data/persons/${personId}/time-spents/?start_date=${startDate}&end_date=${endDate}`
+    )
+  },
+
   setTimeSpent(taskId, personId, date, hours) {
     // Date is a string with following format: YYYYY-MM-DD.
     const url = `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`

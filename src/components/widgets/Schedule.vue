@@ -514,15 +514,41 @@
                     >
                     </span>
                   </template>
+
+                  <template v-if="withTimesheets && rootElement.timesheet">
+                    <div
+                      class="timesheet"
+                      :style="
+                        timesheetStyle(
+                          timesheet,
+                          childElement,
+                          rootElement,
+                          withEstimations
+                        )
+                      "
+                      :title="`${formatDuration(timesheet.duration)} ${$tc('main.days_spent', formatDuration(timesheet.duration, false))}`"
+                      :key="timesheet.id"
+                      v-for="timesheet in rootElement.timesheet.filter(
+                        ({ task_id }) => task_id === childElement.id
+                      )"
+                    ></div>
+                  </template>
+
                   <div
                     class="timebar"
                     :class="{
                       selected: isSelected(childElement),
-                      'timebar-subchildren': subchildren
+                      'timebar-subchildren': subchildren,
+                      'with-timesheets': withTimesheets
                     }"
                     :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('YYYY-MM-DD')} - ${childElement.endDate.format('YYYY-MM-DD')})`"
                     :style="
-                      timebarChildStyle(childElement, rootElement, multiline)
+                      timebarChildStyle(
+                        childElement,
+                        rootElement,
+                        multiline,
+                        withTimesheets && 25
+                      )
                     "
                     v-show="subchildren || isVisible(childElement)"
                     @click="$emit('item-selected', rootElement, childElement)"
@@ -814,6 +840,10 @@ export default {
       default: true
     },
     withStatuses: {
+      type: Boolean,
+      default: false
+    },
+    withTimesheets: {
       type: Boolean,
       default: false
     },
@@ -1854,7 +1884,13 @@ export default {
       }
     },
 
-    timebarChildStyle(timeElement, rootElement, multiline = false) {
+    timebarChildStyle(
+      timeElement,
+      rootElement,
+      multiline = false,
+      opacity = undefined
+    ) {
+      const color = timeElement.color || rootElement.color
       return {
         left: !multiline && `${this.getTimebarLeft(timeElement)}px`,
         width: `${this.getTimebarWidth(timeElement)}px`,
@@ -1863,7 +1899,18 @@ export default {
             ? 'all-scroll'
             : 'ew-resize'
           : 'default',
-        background: timeElement.color || rootElement.color
+        background: opacity
+          ? `color-mix(in srgb, ${color}, white ${opacity}%)` // lighter color
+          : color
+      }
+    },
+
+    timesheetStyle(timesheet, timeElement, rootElement, withEstimations) {
+      return {
+        top: withEstimations ? '7px' : '18px',
+        left: `${this.getTimebarLeft(timesheet, true)}px`,
+        width: `${this.getTimebarWidth(timesheet)}px`,
+        background: timesheet.color || timeElement.color || rootElement.color
       }
     },
 
@@ -2649,6 +2696,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             top: 13px;
             font-size: 0.6em;
 
+            &.with-timesheets {
+              top: 19px;
+            }
+
             &.timebar-subchildren {
               top: 0;
               height: 20px;
@@ -2669,6 +2720,14 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
           .timebar-right-hand {
             right: -12px;
+          }
+
+          .timesheet {
+            position: absolute;
+            height: 6px;
+            border-radius: 2px;
+            z-index: 101;
+            transition: top 0.2s;
           }
         }
       }

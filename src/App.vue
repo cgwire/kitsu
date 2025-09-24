@@ -1896,6 +1896,7 @@ td.fps {
   -webkit-line-clamp: $lines;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ellipsis-2-lines {
