@@ -392,12 +392,9 @@ export default {
   },
 
   mounted() {
-    let searchQuery = ''
-    if (this.assetSearchText.length > 0) {
+    const searchQuery = this.$route.query.search ?? ''
+    if (this.assetSearchText) {
       this.$refs['asset-search-field']?.setValue(this.assetSearchText)
-    }
-    if (this.$route.query.search && this.$route.query.search.length > 0) {
-      searchQuery = `${this.$route.query.search}`
     }
     this.$refs['asset-list']?.setScrollPosition(this.assetListScrollPosition)
     const finalize = () => {

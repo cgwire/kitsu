@@ -1841,7 +1841,8 @@ export default {
       start_date_short: 'Start date',
       task_status: 'Status',
       task_status_short_name: 'Status',
-      task_type: 'Type'
+      task_type: 'Type',
+      timesheets: 'Timesheets'
     },
     colors: {
       title: 'Coloring',

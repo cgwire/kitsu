@@ -397,6 +397,10 @@ const actions = {
     commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
   },
 
+  loadPersonTimeSpentsByPeriod({}, { personId, startDate, endDate }) {
+    return peopleApi.getTimeSpentsByPeriod(personId, startDate, endDate)
+  },
+
   loadAggregatedPersonTimeSpents(
     {},
     { personId, detailLevel, year, month, week, day, productionId, studioId }

@@ -369,7 +369,7 @@ export default {
       // @ for team, # for task type
       if (at !== option_at) return false
       // match at lower-case
-      return name.toLowerCase().indexOf(chunk.toLowerCase()) > -1
+      return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
     },
 
     onAtTextChanged(input) {

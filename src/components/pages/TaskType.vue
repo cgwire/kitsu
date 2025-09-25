@@ -139,6 +139,14 @@
                     <input type="checkbox" v-model="dataDisplay.statuses" />
                     {{ $t('tasks.fields.task_status') }}
                   </label>
+                  <label class="label">
+                    <input
+                      type="checkbox"
+                      v-model="dataDisplay.timesheets"
+                      @change="onTimesheetsDisplayChange"
+                    />
+                    {{ $t('tasks.fields.timesheets') }}
+                  </label>
                 </div>
               </div>
             </div>
@@ -250,6 +258,7 @@
             :is-estimation-linked="true"
             :with-estimations="dataDisplay.estimations"
             :with-statuses="dataDisplay.statuses"
+            :with-timesheets="dataDisplay.timesheets"
             @item-changed="saveTaskScheduleItem"
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
@@ -490,14 +499,16 @@ export default {
   data() {
     return {
       activeTab: 'tasks',
-      daysOffByPerson: [],
+      daysOffByPerson: {},
+      timesheetByPerson: {},
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
       contactSheetMode: false,
       dataDisplay: {
         estimations: true,
-        statuses: true
+        statuses: true,
+        timesheets: false
       },
       dataMatchers: ['Parent', 'Entity'],
       difficultyFilter: '-1',
@@ -861,6 +872,7 @@ export default {
       'initTaskType',
       'loadAggregatedPersonDaysOff',
       'loadEpisodeScheduleItems',
+      'loadPersonTimeSpentsByPeriod',
       'loadScheduleItems',
       'removeTaskSearch',
       'saveScheduleItem',
@@ -1261,9 +1273,7 @@ export default {
         estimation
       }
       if (item) {
-        item.start_date = data.start_date
         item.startDate = parseDate(data.start_date)
-        item.end_date = data.due_date
         item.endDate = parseDate(data.due_date)
 
         if (item.startDate && item.endDate) {
@@ -1276,6 +1286,12 @@ export default {
 
     // Schedule
 
+    onTimesheetsDisplayChange() {
+      if (this.dataDisplay.timesheets) {
+        this.resetScheduleItems()
+      }
+    },
+
     async resetScheduleItems() {
       const taskAssignationMap = this.buildAssignationMap()
 
@@ -1283,6 +1299,12 @@ export default {
         id => id !== 'unassigned' && taskAssignationMap[id].length > 0
       )
       await this.loadDaysOff(assignees)
+
+      if (this.currentScheduleItem && this.dataDisplay.timesheets) {
+        const startDate = this.currentScheduleItem.start_date
+        const endDate = this.currentScheduleItem.end_date
+        await this.loadTimesheets(assignees, startDate, endDate)
+      }
 
       const scheduleItems = this.team
         .map(person => this.buildPersonElement(person, taskAssignationMap))
@@ -1330,6 +1352,49 @@ export default {
       }
     },
 
+    async loadTimesheets(personIds, startDate, endDate) {
+      this.timesheetByPerson = {}
+      for (const personId of personIds) {
+        // load sequentially to avoid too many requests
+        const timesheet = await this.loadPersonTimeSpentsByPeriod({
+          personId,
+          startDate,
+          endDate
+        }).catch(
+          () => [] // fallback if not allowed to fetch timesheets
+        )
+        timesheet.forEach(entry => {
+          entry.task = this.tasks.find(task => task.id === entry.task_id)
+          entry.startDate = parseDate(entry.date)
+          entry.endDate = parseDate(entry.date)
+        })
+
+        // merge consecutive timesheet entries with duration >= one organisation day
+        const mergedTimesheet = []
+        const oneDay = this.organisation.hours_by_day * 60
+        for (const entry of timesheet) {
+          const previous = mergedTimesheet.length
+            ? mergedTimesheet[mergedTimesheet.length - 1]
+            : null
+          if (
+            previous?.duration >= oneDay &&
+            entry.startDate.diff(previous.startDate, 'days') === 1
+          ) {
+            // merge with previous
+            mergedTimesheet[mergedTimesheet.length - 1] = {
+              ...previous,
+              duration: previous.duration + entry.duration,
+              endDate: entry.endDate
+            }
+          } else {
+            mergedTimesheet.push(entry)
+          }
+        }
+
+        this.timesheetByPerson[personId] = mergedTimesheet
+      }
+    },
+
     buildPersonElement(person, taskAssignationMap) {
       if (!person) return null
 
@@ -1349,7 +1414,8 @@ export default {
           expanded: true,
           loading: false,
           children: [],
-          editable: false
+          editable: false,
+          timesheet: []
         }
       } else {
         personElement = {
@@ -1366,6 +1432,7 @@ export default {
           children: [],
           editable: false,
           daysOff: this.daysOffByPerson[person.id],
+          timesheet: this.timesheetByPerson[person.id],
           route: getPersonPath(person.id, 'schedule')
         }
       }
