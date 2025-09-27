@@ -1117,7 +1117,7 @@ export default {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
       await this.editShot(data)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     showEDLImportModal() {
