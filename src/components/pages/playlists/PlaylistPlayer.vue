@@ -74,7 +74,7 @@
             !isFullMode
           )
         "
-        v-if="!isLoading"
+        v-if="!isLoading && isCurrentUserManager"
       />
       <button-simple
         @click="$emit('edit-clicked')"
