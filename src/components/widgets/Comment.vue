@@ -899,7 +899,10 @@ export default {
           this.showReply = false
           this.replyAttachments = []
         })
-        .catch(console.error)
+        .catch(error => {
+          console.error(error)
+          this.isReplyLoading = false
+        })
     },
 
     onDeleteReplyClicked(reply) {
