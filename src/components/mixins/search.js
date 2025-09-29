@@ -28,7 +28,8 @@ export const searchMixin = {
       }
     },
 
-    applySearch(search) {
+    applySearch(search, force = true) {
+      if (search === this.searchField?.getValue() && !force) return
       this.searchField?.setValue(search)
       const setSearchFunction = `set${this.entityTypeName}Search`
       if (this[setSearchFunction]) {
@@ -37,12 +38,12 @@ export const searchMixin = {
       if (this.resizeHeaders) this.resizeHeaders()
     },
 
-    applySearchFromUrl() {
+    applySearchFromUrl(force = true) {
       let searchQuery = ''
       if (this.$route.query.search && this.$route.query.search.length > 0) {
         searchQuery = `${this.$route.query.search}`
       }
-      this.applySearch(searchQuery)
+      this.applySearch(searchQuery, force)
     },
 
     setSearchFromUrl() {

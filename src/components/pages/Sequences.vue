@@ -560,7 +560,7 @@ export default {
         [fieldName]: value
       }
       await this.editSequence(data)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -571,7 +571,7 @@ export default {
         }
       }
       await this.editSequence(data)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     onEditClicked(sequence) {
@@ -592,7 +592,7 @@ export default {
           .then(() => {
             this.loading.edit = false
             this.modals.isNewDisplayed = false
-            this.applySearchFromUrl()
+            this.applySearchFromUrl(false)
           })
           .catch(err => {
             console.error(err)

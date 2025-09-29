@@ -1,7 +1,7 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="flexrow project-dates">
+      <div class="flexrow date-filters">
         <div class="flexrow-item">
           <label class="label">
             {{ $t('main.start_date') }}
@@ -28,28 +28,7 @@
           :options="zoomOptions"
           v-model="zoomLevel"
         />
-        <combobox-department
-          class="flexrow-item"
-          :label="$t('main.department')"
-          v-model="selectedDepartment"
-        />
-        <combobox-studio
-          class="flexrow-item"
-          :label="$t('main.studio')"
-          v-model="selectedStudio"
-        />
-        <div class="flexrow-item people-filter">
-          <label class="label">
-            {{ $t('main.person') }}
-          </label>
-          <people-field
-            ref="people-field"
-            :people="selectablePeople"
-            :placeholder="$t('team_schedule.person_placeholder')"
-            wide
-            v-model="selectedPerson"
-          />
-        </div>
+
         <div class="filler"></div>
         <div class="flexrow">
           <button-simple
@@ -64,6 +43,36 @@
             icon="list"
             :text="$t('tasks.unassigned_tasks')"
             @click="toggleTaskSidePanel"
+          />
+        </div>
+      </div>
+      <div class="flexrow filters">
+        <combobox-studio
+          class="flexrow-item"
+          :label="$t('main.studio')"
+          v-model="selectedStudio"
+        />
+        <combobox-department
+          class="flexrow-item"
+          :label="$t('main.department')"
+          v-model="selectedDepartment"
+        />
+        <combobox-production
+          class="flexrow-item"
+          :label="$t('main.production')"
+          :production-list="productionList"
+          v-model="selectedProduction"
+        />
+        <div class="flexrow-item people-filter">
+          <label class="label">
+            {{ $t('main.person') }}
+          </label>
+          <people-field
+            ref="people-field"
+            :people="selectablePeople"
+            :placeholder="$t('team_schedule.person_placeholder')"
+            wide
+            v-model="selectedPerson"
           />
         </div>
       </div>
@@ -279,6 +288,7 @@ export default {
       selectedDepartment: null,
       selectedEndDate: null,
       selectedPerson: null,
+      selectedProduction: null,
       selectedStartDate: null,
       selectedStudio: null,
       startDate: moment(),
@@ -312,6 +322,7 @@ export default {
   mounted() {
     this.selectedDepartment = this.$route.query.department || undefined
     this.selectedStudio = this.$route.query.studio || undefined
+    this.selectedProduction = this.$route.query.production || undefined
     const zoom = Number(this.$route.query.zoom)
     this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
       ? zoom
@@ -355,6 +366,12 @@ export default {
         selectablePeople = selectablePeople.filter(
           person => person.studio_id === this.selectedStudio
         )
+      }
+      if (this.selectedProduction) {
+        selectablePeople = selectablePeople.filter(person => {
+          const production = this.productionMap.get(this.selectedProduction)
+          return production.team.includes(person.id)
+        })
       }
       return selectablePeople
     },
@@ -734,6 +751,11 @@ export default {
       this.refreshSchedule()
     },
 
+    selectedProduction() {
+      this.updateRoute({ production_id: this.selectedProduction })
+      this.refreshSchedule()
+    },
+
     zoomLevel(value) {
       this.updateRoute({ zoom: value })
     },
@@ -760,25 +782,27 @@ export default {
 @use 'sass:color';
 
 .dark {
-  .project-dates {
+  .filters {
     color: $white-grey;
     border-bottom: 1px solid $grey;
   }
 }
 
-.project-dates {
+.date-filters {
+  padding-bottom: 1em;
+  .field {
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+}
+
+.filters {
   border-bottom: 1px solid #eee;
   padding-bottom: 1em;
 
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
-  }
-
-  .overall-man-days {
-    width: 120px;
-    font-size: 0.9em;
-    margin-right: 1em;
   }
 }
 

@@ -512,6 +512,12 @@ export default {
       if (this.panzoomInstance) {
         this.panzoomInstance.resume()
       }
+    },
+
+    setSpeed(rate) {
+      if (this.video) {
+        this.video.playbackRate = rate
+      }
     }
   },
 

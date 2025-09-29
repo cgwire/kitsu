@@ -23,7 +23,6 @@
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="productionId"
-            v-if="isActiveTab('board')"
           />
 
           <span class="filler"></span>
@@ -253,13 +252,7 @@ export default {
     },
 
     boardTasks() {
-      const tasks = this.sortedTasks.concat(this.sortedDoneTasks)
-      if (this.selectedProduction) {
-        return tasks.filter(
-          task => task.project_id === this.selectedProduction.id
-        )
-      }
-      return tasks
+      return this.sortedTasks.concat(this.sortedDoneTasks)
     },
 
     boardStatuses() {
@@ -369,19 +362,23 @@ export default {
     },
 
     sortedTasks() {
-      return this.sortTasks(
-        this.displayedTodos,
-        this.currentFilter,
-        this.currentSort
-      )
+      let tasksToSort = this.displayedTodos
+      if (this.productionId) {
+        tasksToSort = tasksToSort.filter(
+          task => task.project_id === this.productionId
+        )
+      }
+      return this.sortTasks(tasksToSort, this.currentFilter, this.currentSort)
     },
 
     sortedDoneTasks() {
-      return this.sortTasks(
-        this.displayedDoneTasks,
-        this.currentFilter,
-        this.currentSort
-      )
+      let tasksToSort = this.displayedDoneTasks
+      if (this.productionId) {
+        tasksToSort = tasksToSort.filter(
+          task => task.project_id === this.productionId
+        )
+      }
+      return this.sortTasks(tasksToSort, this.currentFilter, this.currentSort)
     }
   },
 

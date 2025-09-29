@@ -62,10 +62,22 @@
       </div>
 
       <div v-else-if="task">
-        <div class="pa1 pb0">
+        <div class="flexrow extra-buttons pa05">
+          <div class="filler"></div>
+          <div
+            class="pointer"
+            :title="$t('main.csv.export_file')"
+            @click="onExportClick"
+            v-if="!withActions"
+          >
+            <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
+          </div>
+        </div>
+
+        <div class="pa1 pb0 pt0">
           <div class="flexrow header-title" v-if="!isConceptTask">
             <task-type-name
-              class="flexrow-item task-type"
+              class="flexrow-item task-type mr1"
               :task-type="currentTaskType"
               :production-id="task.project_id"
               v-if="currentTaskType"
@@ -213,7 +225,8 @@
                         user.id === comment.person?.id ||
                         isAssigned ||
                         isDepartmentSupervisor ||
-                        isCurrentUserManager
+                        isCurrentUserManager ||
+                        isClientFromSameStudio(comment.person)
                       "
                       :revision="currentRevision"
                       :task="task"
@@ -357,6 +370,7 @@ import Comment from '@/components/widgets/Comment.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -378,6 +392,7 @@ export default {
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
+    KitsuIcon,
     PeopleAvatar,
     PreviewPlayer,
     Spinner,
@@ -1161,6 +1176,14 @@ export default {
       this.modals.deleteComment = false
     },
 
+    isClientFromSameStudio(person) {
+      return (
+        this.isCurrentUserClient &&
+        this.user.studio_id === person.studio_id &&
+        person.role === 'client'
+      )
+    },
+
     async saveComment(comment) {
       try {
         await this.editTaskComment({
@@ -1799,5 +1822,15 @@ export default {
 .no-selection-separator {
   background-color: var(--border-alt);
   margin: 1em;
+}
+
+.task-type {
+  margin-right: 1em;
+}
+
+.extra-buttons {
+  img {
+    width: 16px;
+  }
 }
 </style>

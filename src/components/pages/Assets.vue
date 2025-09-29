@@ -621,7 +621,7 @@ export default {
         .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
-          this.applySearchFromUrl()
+          this.applySearchFromUrl(false)
         })
         .catch(err => {
           console.error(err)
@@ -966,7 +966,7 @@ export default {
         [fieldName]: value
       }
       await this.editAsset(data)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     async onMetadataChanged({ entry, descriptor, value }) {
@@ -977,12 +977,12 @@ export default {
         }
       }
       await this.editAsset(data)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     async onAssetChanged(asset) {
       await this.editAsset(asset)
-      this.applySearchFromUrl()
+      this.applySearchFromUrl(false)
     },
 
     reset() {

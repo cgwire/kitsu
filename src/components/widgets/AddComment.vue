@@ -302,6 +302,13 @@
           />
         </div>
 
+        <toggle-button
+          class="mb05"
+          :label="$t('comments.add_frame_to_comment')"
+          v-model="isFrameAddition"
+          v-if="isCurrentUserClient"
+        />
+
         <div class="error pull-right" v-if="isError">
           <em>{{ $t('comments.error') }}</em>
         </div>
@@ -355,6 +362,7 @@ import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
 import { getDownloadAttachmentPath } from '@/lib/path'
 import { replaceTimeWithTimecode } from '@/lib/render'
+import preferences from '@/lib/preferences'
 import strings from '@/lib/string'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
@@ -365,6 +373,7 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+import ToggleButton from '@/components/widgets/ToggleButton.vue'
 
 const REVISION_NUMBER_REGEX = /v(\d+)/gi
 
@@ -380,7 +389,8 @@ export default {
     ComboboxStatus,
     EmojiButton,
     PeopleAvatar,
-    TaskTypeName
+    TaskTypeName,
+    ToggleButton
   },
 
   emits: [
@@ -396,6 +406,7 @@ export default {
 
   data() {
     return {
+      isFrameAddition: false,
       membersForAts: { '@': [], '#': [] },
       isDragging: false,
       errors: {
@@ -476,6 +487,14 @@ export default {
   },
 
   mounted() {
+    if (!this.isCurrentUserClient) {
+      this.isFrameAddition = false
+    } else {
+      this.isFrameAddition = preferences.getBoolPreference(
+        'comments:add-frame-when-posting',
+        false
+      )
+    }
     const production = this.productionMap.get(this.task.project_id)
     this.mode =
       production?.is_publish_default_for_artists && this.isCurrentUserArtist
@@ -661,6 +680,16 @@ export default {
         return
       }
 
+      if (this.isFrameAddition) {
+        text = '@frame \n\n' + text
+        text = replaceTimeWithTimecode(
+          text,
+          this.revision,
+          this.frame + 1,
+          this.fps
+        )
+      }
+
       this.$store.commit('CLEAR_UPLOAD_PROGRESS')
       if (this.mode === 'publish') {
         if (!this.showCommentArea) text = ''
@@ -669,7 +698,6 @@ export default {
       } else {
         checklist = checklist.filter(item => item.text.length)
       }
-      text = replaceTimeWithTimecode(text, this.revision, this.time, this.fps)
 
       revision = Number(revision)
       if (isNaN(revision) || revision < 1) {
@@ -910,6 +938,12 @@ export default {
       }
     },
 
+    isFrameAddition(value) {
+      if (this.isCurrentUserClient) {
+        preferences.setPreference('comments:add-frame-when-posting', value)
+      }
+    },
+
     previewForms: {
       deep: true,
       immediate: true,
@@ -957,22 +991,25 @@ export default {
         } else {
           teamOptions = [...this.team]
         }
-        teamOptions = teamOptions.concat(
-          this.productionDepartmentIds.map(departmentId => {
-            const department = this.departmentMap.get(departmentId)
-            return {
-              isDepartment: true,
-              full_name: department.name,
-              color: department.color,
-              id: departmentId
-            }
-          })
-        )
+        if (!this.isCurrentUserClient) {
+          teamOptions = teamOptions.concat(
+            this.productionDepartmentIds.map(departmentId => {
+              const department = this.departmentMap.get(departmentId)
+              return {
+                isDepartment: true,
+                full_name: department.name,
+                color: department.color,
+                id: departmentId
+              }
+            })
+          )
+        }
         teamOptions.push({
           isTime: true,
           at: '@',
           full_name: 'frame'
         })
+        console.log(teamOptions)
         this.membersForAts['@'] = teamOptions
       }
     }
