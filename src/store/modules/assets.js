@@ -490,7 +490,6 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const taskStatusMap = rootGetters.taskStatusMap
     const persons = rootGetters.people
-    const sorting = state.assetSorting
 
     return assetsApi
       .getAsset(assetId)
@@ -1035,7 +1034,18 @@ const mutations = {
     state.unsharedAssets = assets
   },
 
-  [ADD_ASSET](state, { taskStatusMap, taskTypeMap, taskMap, persons, personMap, production, asset }) {
+  [ADD_ASSET](
+    state,
+    {
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      persons,
+      personMap,
+      production,
+      asset
+    }
+  ) {
     asset.tasks = sortTasks(asset.tasks, taskTypeMap)
     asset.validations = new Map()
     asset.production_id = asset.project_id
@@ -1053,7 +1063,7 @@ const mutations = {
     cache.assets = sortAssets(cache.assets)
     cache.assetMap.set(asset.id, asset)
     cache.assetIndex = buildAssetIndex(cache.assets)
-    
+
     // Test the new asset only against existing filters
     const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
@@ -1077,7 +1087,7 @@ const mutations = {
     })
     let result = indexSearch(addedAssetIndex, keywords)
     result = applyFilters(result, filters, taskMap)
-        
+
     if (result && result.length > 0) {
       state.displayedAssets.push(asset)
       state.displayedAssets = sortAssets(state.displayedAssets)

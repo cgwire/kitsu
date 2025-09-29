@@ -1009,7 +1009,6 @@ export default {
           at: '@',
           full_name: 'frame'
         })
-        console.log(teamOptions)
         this.membersForAts['@'] = teamOptions
       }
     }
