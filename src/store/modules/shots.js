@@ -477,8 +477,8 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
     const persons = rootGetters.people
-    const sorting = state.shotSorting
     const taskStatusMap = rootGetters.taskStatusMap
+
     return shotsApi
       .getShot(shotId)
       .then(shot => {
@@ -495,7 +495,7 @@ const actions = {
             persons,
             personMap,
             production,
-            shot,
+            shot
           })
         }
       })
@@ -1284,7 +1284,18 @@ const mutations = {
     state.shotSelectionGrid = tmpGrid
   },
 
-  [ADD_SHOT](state, { taskStatusMap, taskTypeMap, taskMap, persons, personMap, production, shot }) {
+  [ADD_SHOT](
+    state,
+    {
+      taskStatusMap,
+      taskTypeMap,
+      taskMap,
+      persons,
+      personMap,
+      production,
+      shot
+    }
+  ) {
     const taskIds = []
     const validations = new Map()
     let timeSpent = 0
@@ -1340,7 +1351,7 @@ const mutations = {
     })
     let result = indexSearch(addedShotIndex, keywords)
     result = applyFilters(result, filters, taskMap)
-    
+
     if (result && result.length > 0) {
       cache.result.push(shot)
       state.displayedShots.push(shot)
