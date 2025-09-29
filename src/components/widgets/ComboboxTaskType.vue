@@ -1,12 +1,16 @@
 <template>
-  <div class="field">
+  <div :class="{ field: withMargin }">
     <label class="label" v-if="label.length > 0">
       {{ label }}
     </label>
-    <div class="task-type-combo" :class="{ shy }">
+    <div class="task-type-combo" :class="{ disabled, shy }">
       <div class="flexrow selector" @click="toggleTaskTypeList">
         <div class="selected-task-type-line flexrow-item">
-          <task-type-name :task-type="currentTaskType" v-if="currentTaskType" />
+          <task-type-name
+            class="ellipsis-2-lines"
+            :task-type="currentTaskType"
+            v-if="currentTaskType"
+          />
         </div>
         <chevron-down-icon class="ml05 down-icon flexrow-item" />
       </div>
@@ -20,7 +24,7 @@
           <div
             class="task-type-line"
             :key="taskType.id"
-            @click="selectTaskType(taskType)"
+            @click="!disabled && selectTaskType(taskType)"
             v-for="taskType in taskTypeList"
           >
             <task-type-name :task-type="taskType" />
@@ -48,7 +52,7 @@ export default {
     TaskTypeName
   },
 
-  emits: ['update:modelValue'],
+  emits: ['change', 'update:modelValue'],
 
   data() {
     return {
@@ -58,6 +62,10 @@ export default {
   },
 
   props: {
+    disabled: {
+      default: false,
+      type: Boolean
+    },
     label: {
       default: '',
       type: String
@@ -83,6 +91,10 @@ export default {
     },
     openTop: {
       default: false,
+      type: Boolean
+    },
+    withMargin: {
+      default: true,
       type: Boolean
     }
   },
@@ -119,10 +131,15 @@ export default {
   methods: {
     selectTaskType(taskType) {
       this.$emit('update:modelValue', taskType.id)
+      this.$emit('change', taskType.id)
       this.showTaskTypeList = false
     },
 
     toggleTaskTypeList(event) {
+      if (this.disabled) {
+        return
+      }
+
       this.showTaskTypeList = !this.showTaskTypeList
 
       if (!this.showTaskTypeList) {
@@ -161,16 +178,29 @@ export default {
   margin: 0;
   padding: 0.15em;
   position: relative;
-}
 
-.task-type-combo:hover {
-  border: 1px solid $green;
+  &.disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:hover {
+    border: 1px solid $green;
+  }
 }
 
 .selected-task-type-line {
   background: var(--background);
-  padding: 0.4em;
   flex: 1;
+  margin: 0;
+  padding: 0.4em;
+  max-width: calc(100% - 27px);
+
+  .task-type-name {
+    align-content: center;
+    white-space: normal;
+  }
 }
 
 .task-type-line {
@@ -190,6 +220,10 @@ export default {
   margin-right: 0.4em;
   color: $green;
   cursor: pointer;
+
+  .disabled & {
+    color: $grey;
+  }
 }
 
 .select-input {
