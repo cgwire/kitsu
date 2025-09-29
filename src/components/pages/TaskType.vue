@@ -126,28 +126,36 @@
               class="flexrow-item flexrow align-start ml1"
               v-if="isActiveTab('schedule')"
             >
-              <div class="flexrow-item field ml1">
-                <label class="label">
-                  {{ $t('tasks.data_display') }}
-                </label>
-                <div class="mt05 nowrap">
-                  <label class="label">
-                    <input type="checkbox" v-model="dataDisplay.estimations" />
-                    {{ $t('tasks.fields.estimation') }}
-                  </label>
-                  <label class="label">
-                    <input type="checkbox" v-model="dataDisplay.statuses" />
-                    {{ $t('tasks.fields.task_status') }}
-                  </label>
-                  <label class="label">
-                    <input
-                      type="checkbox"
-                      v-model="dataDisplay.timesheets"
-                      @change="onTimesheetsDisplayChange"
-                    />
-                    {{ $t('tasks.fields.timesheets') }}
-                  </label>
-                </div>
+              <combobox-options
+                class="flexrow-item display-options"
+                :options="dataDisplayOptions"
+                :title="$t('tasks.data_display')"
+                v-model="dataDisplay"
+                @change="onDataDisplayChange"
+              />
+
+              <div
+                class="flexrow-item flexrow ml1"
+                v-if="dataDisplay.beforeAfterTasks"
+              >
+                <combobox-task-type
+                  class="flexrow-item"
+                  :disabled="taskTypeListBeforeFilter.length < 2"
+                  :label="$t('tasks.fields.tasks_before')"
+                  :task-type-list="taskTypeListBeforeFilter"
+                  :with-margin="false"
+                  v-model="schedule.taskTypeBefore"
+                  @change="resetScheduleItems()"
+                />
+                <combobox-task-type
+                  class="flexrow-item"
+                  :disabled="taskTypeListAfterFilter.length < 2"
+                  :label="$t('tasks.fields.tasks_after')"
+                  :task-type-list="taskTypeListAfterFilter"
+                  :with-margin="false"
+                  v-model="schedule.taskTypeAfter"
+                  @change="resetScheduleItems()"
+                />
               </div>
             </div>
 
@@ -257,6 +265,7 @@
             :is-loading="loading.entities"
             :is-estimation-linked="true"
             :with-estimations="dataDisplay.estimations"
+            :with-ghosts="dataDisplay.beforeAfterTasks"
             :with-statuses="dataDisplay.statuses"
             :with-timesheets="dataDisplay.timesheets"
             @item-changed="saveTaskScheduleItem"
@@ -326,6 +335,7 @@ import episodesStore from '@/store/modules/episodes.js'
 import sequencesStore from '@/store/modules/sequences.js'
 import shotsStore from '@/store/modules/shots.js'
 import taskStatusStore from '@/store/modules/taskstatus.js'
+import taskTypeStore from '@/store/modules/tasktypes.js'
 
 import { CornerLeftUpIcon } from 'lucide-vue-next'
 import moment from 'moment'
@@ -357,9 +367,11 @@ import { formatListMixin } from '@/components/mixins/format'
 import { searchMixin } from '@/components/mixins/search'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
@@ -369,8 +381,8 @@ import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import TaskList from '@/components/lists/TaskList.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const filters = {
   all(tasks) {
@@ -481,15 +493,17 @@ export default {
     ButtonSimple,
     CornerLeftUpIcon,
     ComboboxNumber,
+    ComboboxOptions,
     ComboboxStatus,
     ComboboxStyled,
+    ComboboxTaskType,
     DateField,
     EstimationHelper,
+    ImportModal,
+    ImportRenderModal,
     Schedule,
     SearchField,
     SearchQueryList,
-    ImportModal,
-    ImportRenderModal,
     TaskList,
     TaskInfo,
     TaskListNumbers,
@@ -508,8 +522,27 @@ export default {
       dataDisplay: {
         estimations: true,
         statuses: true,
-        timesheets: false
+        timesheets: false,
+        beforeAfterTasks: false
       },
+      dataDisplayOptions: [
+        {
+          label: this.$t('tasks.fields.estimation'),
+          value: 'estimations'
+        },
+        {
+          label: this.$t('tasks.fields.task_status'),
+          value: 'statuses'
+        },
+        {
+          label: this.$t('tasks.fields.timesheets'),
+          value: 'timesheets'
+        },
+        {
+          label: this.$t('tasks.fields.before_after_tasks'),
+          value: 'beforeAfterTasks'
+        }
+      ],
       dataMatchers: ['Parent', 'Entity'],
       difficultyFilter: '-1',
       dueDateFilter: 'all',
@@ -574,6 +607,8 @@ export default {
         endDate: null,
         scheduleItems: [],
         scheduleHeight: 800,
+        taskTypeAfter: null,
+        taskTypeBefore: null,
         taskTypeEndDate: null,
         taskTypeStartDate: null,
         zoomLevel: 1,
@@ -640,11 +675,14 @@ export default {
   computed: {
     ...mapGetters([
       'assetsPath',
+      'assetValidationColumns',
       'currentEpisode',
       'currentProduction',
       'currentTaskType',
       'editsPath',
+      'editValidationColumns',
       'episodesPath',
+      'episodeValidationColumns',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isPaperProduction',
@@ -654,12 +692,14 @@ export default {
       'personMap',
       'productionTaskStatuses',
       'selectedTasks',
-      'sequencesPath',
       'sequenceSubscriptions',
+      'sequencesPath',
+      'sequenceValidationColumns',
       'shotsByEpisode',
       'shotsPath',
-      'taskSearchQueries',
+      'shotValidationColumns',
       'taskMap',
+      'taskSearchQueries',
       'user'
     ]),
 
@@ -671,6 +711,47 @@ export default {
           short_name: this.$t('news.all')
         }
       ].concat(sortByName([...this.productionTaskStatuses]))
+    },
+
+    taskTypeList() {
+      const type = this.entityType.toLowerCase()
+      return this[`${type}ValidationColumns`].map(taskTypeId =>
+        this.taskTypeMap.get(taskTypeId)
+      )
+    },
+
+    taskTypeListBeforeFilter() {
+      const currentIndex = this.taskTypeList.findIndex(
+        taskType => taskType.id === this.currentTaskType.id
+      )
+      const results = [{ id: null, name: this.$t('tasks.fields.no_task_type') }]
+      if (currentIndex !== -1) {
+        results.push(...this.taskTypeList.slice(0, currentIndex).reverse())
+      }
+      return results
+    },
+
+    taskTypeListAfterFilter() {
+      const currentIndex = this.taskTypeList.findIndex(
+        taskType => taskType.id === this.currentTaskType.id
+      )
+      const results = [{ id: null, name: this.$t('tasks.fields.no_task_type') }]
+      if (currentIndex !== -1) {
+        results.push(...this.taskTypeList.slice(currentIndex + 1))
+      }
+      return results
+    },
+
+    currentTaskTypeBefore() {
+      return this.taskTypeList.find(
+        taskType => taskType.id === this.schedule.taskTypeBefore
+      )
+    },
+
+    currentTaskTypeAfter() {
+      return this.taskTypeList.find(
+        taskType => taskType.id === this.schedule.taskTypeAfter
+      )
     },
 
     taskTypeStartDate() {
@@ -717,6 +798,10 @@ export default {
 
     taskStatusMap() {
       return taskStatusStore.cache.taskStatusMap
+    },
+
+    taskTypeMap() {
+      return taskTypeStore.cache.taskTypeMap
     },
 
     productionStartDate() {
@@ -1286,8 +1371,19 @@ export default {
 
     // Schedule
 
-    onTimesheetsDisplayChange() {
-      if (this.dataDisplay.timesheets) {
+    onDataDisplayChange(item) {
+      if (item.key === 'timesheets' && item.value) {
+        this.resetScheduleItems()
+        return
+      }
+
+      if (item.key === 'beforeAfterTasks' && item.value) {
+        if (!this.schedule.taskTypeBefore) {
+          this.schedule.taskTypeBefore = this.taskTypeListBeforeFilter[1]?.id
+        }
+        if (!this.schedule.taskTypeAfter) {
+          this.schedule.taskTypeAfter = this.taskTypeListAfterFilter[1]?.id
+        }
         this.resetScheduleItems()
       }
     },
@@ -1307,13 +1403,23 @@ export default {
       }
 
       const scheduleItems = this.team
-        .map(person => this.buildPersonElement(person, taskAssignationMap))
+        .map(person =>
+          this.buildPersonElement(
+            person,
+            taskAssignationMap,
+            this.dataDisplay.beforeAfterTasks
+          )
+        )
         .filter(Boolean)
         .filter(item => item.children.length > 0)
 
       if (taskAssignationMap.unassigned.length > 0) {
         scheduleItems.push(
-          this.buildPersonElement({ id: 'unassigned' }, taskAssignationMap)
+          this.buildPersonElement(
+            { id: 'unassigned' },
+            taskAssignationMap,
+            this.dataDisplay.beforeAfterTasks
+          )
         )
       }
       this.schedule.scheduleItems = scheduleItems
@@ -1395,7 +1501,7 @@ export default {
       }
     },
 
-    buildPersonElement(person, taskAssignationMap) {
+    buildPersonElement(person, taskAssignationMap, withBeforeAfter = false) {
       if (!person) return null
 
       let manDays = 0
@@ -1491,7 +1597,7 @@ export default {
           maxEndDate = endDate.clone()
         }
 
-        return {
+        const data = {
           ...task,
           name: task.entity_name,
           startDate,
@@ -1505,6 +1611,88 @@ export default {
           color: this.getTaskElementColor(task, endDate),
           children: []
         }
+
+        if (withBeforeAfter) {
+          const entity = this.entityMap.get(task.entity_id)
+          const siblingElements = entity?.tasks
+            .map(taskId => this.taskMap.get(taskId))
+            .filter(Boolean)
+
+          if (this.schedule.taskTypeBefore) {
+            data.previousElement = siblingElements.find(
+              item => item.task_type_id === this.schedule.taskTypeBefore
+            )
+          }
+          if (this.schedule.taskTypeAfter) {
+            data.nextElement = siblingElements.find(
+              item => item.task_type_id === this.schedule.taskTypeAfter
+            )
+          }
+        }
+
+        if (data.previousElement) {
+          const task = data.previousElement
+          let startDate
+          if (task.start_date) {
+            startDate = parseDate(task.start_date)
+          } else if (task.real_start_date) {
+            startDate = parseDate(task.real_start_date)
+          }
+          let endDate
+          if (task.due_date) {
+            endDate = parseDate(task.due_date)
+          } else if (task.end_date) {
+            endDate = parseDate(task.end_date)
+          } else if (task.estimation) {
+            endDate = addBusinessDays(
+              task.startDate,
+              Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
+              personElement.daysOff
+            )
+          }
+
+          if (startDate && endDate) {
+            data.previousElement.name = `[${this.currentTaskTypeBefore.name}] ${task.entity_name}`
+            data.previousElement.startDate = startDate
+            data.previousElement.endDate = endDate
+            data.previousElement.color = this.getTaskElementColor(task, endDate)
+          } else {
+            data.previousElement = null
+          }
+        }
+
+        if (data.nextElement) {
+          const task = data.nextElement
+          let startDate
+          if (task.start_date) {
+            startDate = parseDate(task.start_date)
+          } else if (task.real_start_date) {
+            startDate = parseDate(task.real_start_date)
+          }
+          let endDate
+          if (task.due_date) {
+            endDate = parseDate(task.due_date)
+          } else if (task.end_date) {
+            endDate = parseDate(task.end_date)
+          } else if (task.estimation) {
+            endDate = addBusinessDays(
+              task.startDate,
+              Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
+              personElement.daysOff
+            )
+          }
+
+          if (startDate && endDate) {
+            data.nextElement.name = `[${this.currentTaskTypeAfter.name}] ${task.entity_name}`
+            data.nextElement.startDate = startDate
+            data.nextElement.endDate = endDate
+            data.nextElement.color = this.getTaskElementColor(task, endDate)
+          } else {
+            data.nextElement = null
+          }
+        }
+
+        return data
       })
 
       return {
@@ -1835,6 +2023,11 @@ export default {
 }
 
 .search-options {
+  margin-top: 23px;
+  width: 325px;
+}
+
+.display-options {
   margin-top: 23px;
 }
 

@@ -535,11 +535,46 @@
                   </template>
 
                   <div
+                    class="timebar timebar-ghost timebar-ghost-before"
+                    :title="`${childElement.previousElement.name} (${childElement.previousElement.startDate.format('YYYY-MM-DD')} - ${childElement.previousElement.endDate.format('YYYY-MM-DD')})`"
+                    :class="{
+                      'with-timesheets': withTimesheets
+                    }"
+                    :style="
+                      timebarChildStyle(
+                        childElement.previousElement,
+                        rootElement,
+                        multiline,
+                        50
+                      )
+                    "
+                    v-if="withGhosts && childElement.previousElement"
+                  ></div>
+
+                  <div
+                    class="timebar timebar-ghost timebar-ghost-after"
+                    :title="`${childElement.nextElement.name} (${childElement.nextElement.startDate.format('YYYY-MM-DD')} - ${childElement.nextElement.endDate.format('YYYY-MM-DD')})`"
+                    :class="{
+                      'with-timesheets': withTimesheets
+                    }"
+                    :style="
+                      timebarChildStyle(
+                        childElement.nextElement,
+                        rootElement,
+                        multiline,
+                        50
+                      )
+                    "
+                    v-if="withGhosts && childElement.nextElement"
+                  ></div>
+
+                  <div
                     class="timebar"
                     :class="{
                       selected: isSelected(childElement),
                       'timebar-subchildren': subchildren,
-                      'with-timesheets': withTimesheets
+                      'with-timesheets': withTimesheets,
+                      invalid: isOverlapping(childElement)
                     }"
                     :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${childElement.startDate.format('YYYY-MM-DD')} - ${childElement.endDate.format('YYYY-MM-DD')})`"
                     :style="
@@ -547,7 +582,8 @@
                         childElement,
                         rootElement,
                         multiline,
-                        withTimesheets && 25
+                        withTimesheets && 25,
+                        isDarkTheme ? 'black' : 'white'
                       )
                     "
                     v-show="subchildren || isVisible(childElement)"
@@ -838,6 +874,10 @@ export default {
     withEstimations: {
       type: Boolean,
       default: true
+    },
+    withGhosts: {
+      type: Boolean,
+      default: false
     },
     withStatuses: {
       type: Boolean,
@@ -1559,6 +1599,16 @@ export default {
       }
     },
 
+    isOverlapping(item) {
+      return (
+        this.withGhosts &&
+        ((item.previousElement &&
+          item.startDate.isSameOrBefore(item.previousElement.endDate)) ||
+          (item.nextElement &&
+            item.endDate.isSameOrAfter(item.nextElement.startDate)))
+      )
+    },
+
     isSelected(item) {
       return this.selection.some(({ id }) => id === item.id)
     },
@@ -1888,9 +1938,10 @@ export default {
       timeElement,
       rootElement,
       multiline = false,
-      opacity = undefined
+      opacityPercentage = 0,
+      opacityColor = 'transparent'
     ) {
-      const color = timeElement.color || rootElement.color
+      const elementColor = timeElement.color || rootElement.color
       return {
         left: !multiline && `${this.getTimebarLeft(timeElement)}px`,
         width: `${this.getTimebarWidth(timeElement)}px`,
@@ -1899,9 +1950,9 @@ export default {
             ? 'all-scroll'
             : 'ew-resize'
           : 'default',
-        background: opacity
-          ? `color-mix(in srgb, ${color}, white ${opacity}%)` // lighter color
-          : color
+        background: opacityPercentage
+          ? `color-mix(in srgb, ${elementColor}, ${opacityColor} ${opacityPercentage}%)` // lighter color
+          : elementColor
       }
     },
 
@@ -2696,8 +2747,23 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             top: 13px;
             font-size: 0.6em;
 
+            &.invalid {
+              box-shadow: 0 0 4px 2px $red;
+            }
+
             &.with-timesheets {
-              top: 19px;
+              top: 18px;
+            }
+
+            &.timebar-ghost {
+              position: absolute;
+
+              &-before {
+                margin-top: -7px;
+              }
+              &-after {
+                margin-top: 7px;
+              }
             }
 
             &.timebar-subchildren {
