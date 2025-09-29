@@ -225,7 +225,8 @@
                         user.id === comment.person?.id ||
                         isAssigned ||
                         isDepartmentSupervisor ||
-                        isCurrentUserManager
+                        isCurrentUserManager ||
+                        isClientFromSameStudio(comment.person)
                       "
                       :revision="currentRevision"
                       :task="task"
@@ -1173,6 +1174,14 @@ export default {
 
     onCancelDeleteComment() {
       this.modals.deleteComment = false
+    },
+
+    isClientFromSameStudio(person) {
+      return (
+        this.isCurrentUserClient &&
+        this.user.studio_id === person.studio_id &&
+        person.role === 'client'
+      )
     },
 
     async saveComment(comment) {
