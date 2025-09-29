@@ -1061,6 +1061,9 @@ const mutations = {
 
   [UPDATE_ASSET](state, asset) {
     Object.assign(cache.assetMap.get(asset.id), asset)
+    const cachedAsset = state.displayedAssets.find(a => a.id === asset.id)
+    Object.assign(cachedAsset, asset)
+    state.displayedAssets = [...state.displayedAssets]
     cache.assetIndex = buildAssetIndex(cache.assets)
   },
 
