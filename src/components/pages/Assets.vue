@@ -570,6 +570,18 @@ export default {
       'uploadAssetFile'
     ]),
 
+    setOptionalImportColumns() {
+      const columns = [
+        this.$t('assets.fields.description'),
+        this.$t('assets.fields.ready_for'),
+        this.$t('shots.fields.resolution')
+      ]
+      if (this.isPaperProduction) {
+        columns.splice(1, 1)
+      }
+      this.optionalColumns = columns
+    },
+
     showNewModal() {
       this.assetToEdit = {}
       this.modals.isNewDisplayed = true
@@ -1000,6 +1012,7 @@ export default {
 
   watch: {
     currentProduction() {
+      this.setOptionalImportColumns()
       this.$refs['asset-search-field']?.setValue('')
       this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
       this.initialLoading = true

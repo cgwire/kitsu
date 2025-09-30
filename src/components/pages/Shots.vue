@@ -614,12 +614,12 @@ export default {
 
     setOptionalImportColumns() {
       const columns = [
-        this.$t('shots.fields.name'),
         this.$t('shots.fields.description'),
         this.$t('shots.fields.nb_frames'),
         this.$t('shots.fields.frame_in'),
         this.$t('shots.fields.frame_out'),
-        this.$t('shots.fields.fps')
+        this.$t('shots.fields.fps'),
+        this.$t('shots.fields.resolution')
       ]
       if (this.isPaperProduction) {
         columns.splice(1, 1)
