@@ -221,6 +221,7 @@ export default {
     add_attachment_to_reply: 'Add attachment to reply',
     add_checklist: 'Add checklist',
     add_comment: 'Leave a comment...',
+    add_frame_to_comment: 'Add current frame to comment',
     add_emoji: 'Add an emoji',
     add_link: 'Add a URL link',
     add_preview: 'Add preview revisions to publish',
