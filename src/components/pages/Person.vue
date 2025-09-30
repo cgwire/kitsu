@@ -301,13 +301,13 @@ export default {
     },
 
     loggablePersonTasks() {
-      return this.displayedPersonTasks.filter(task => {
+      return this.sortedTasks.filter(task => {
         return this.taskTypeMap.get(task.task_type_id).allow_timelog
       })
     },
 
     loggableDoneTasks() {
-      return this.displayedPersonDoneTasks.filter(task => {
+      return this.sortedDoneTasks.filter(task => {
         return this.taskTypeMap.get(task.task_type_id).allow_timelog
       })
     },
@@ -873,8 +873,8 @@ export default {
     productionId() {
       this.$router.push({
         query: {
-          productionId: this.productionId,
-          tab: this.activeTab
+          ...this.$route.query,
+          productionId: this.productionId
         }
       })
     },
