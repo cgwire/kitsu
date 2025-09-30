@@ -8,12 +8,23 @@
     >
       <folder-plus-icon :size="12" />
     </span>
+    <span
+      class="tag folder mr1"
+      :class="{
+        active: isEditing
+      }"
+      @click="isEditing = !isEditing"
+      :title="$t('main.edit_mode_on')"
+    >
+      <pencil-icon :size="12" />
+    </span>
     <template v-if="isGroupEnabled">
       <span
         class="tag group"
         :class="{
           open: toggleGroupId === group.id,
-          'is-shared': group.is_shared
+          'is-shared': group.is_shared,
+          'is-editing': isEditing
         }"
         :key="`group-${group.id}`"
         :style="{
@@ -47,7 +58,7 @@
           <button
             class="del"
             :style="{ backgroundColor: `${group.color}53` }"
-            @click.stop="removeGroup(group)"
+            @click.stop="confirmRemoveGroup(group)"
             v-if="
               !group.queries.length &&
               (!group.is_shared || isCurrentUserManager)
@@ -68,7 +79,8 @@
             <div
               class="tag"
               :class="{
-                'is-shared': searchQuery.is_shared
+                'is-shared': searchQuery.is_shared,
+                'is-editing': isEditing
               }"
               :key="searchQuery.id"
               :style="{ backgroundColor: `${group.color}23` }"
@@ -95,7 +107,7 @@
               <button
                 class="del"
                 :style="{ backgroundColor: `${group.color}53` }"
-                @click.stop="removeSearch(searchQuery)"
+                @click.stop="confirmRemoveSearch(searchQuery)"
                 v-if="!searchQuery.is_shared || isCurrentUserManager"
               >
                 <trash2-icon :size="8" />
@@ -108,7 +120,8 @@
     <span
       class="tag"
       :class="{
-        'is-shared': searchQuery.is_shared
+        'is-shared': searchQuery.is_shared,
+        'is-editing': isEditing
       }"
       :key="searchQuery.id"
       :title="getSearchQueryTitle(searchQuery)"
@@ -135,12 +148,22 @@
       </button>
       <button
         class="del"
-        @click.stop="removeSearch(searchQuery)"
+        @click.stop="confirmRemoveSearch(searchQuery)"
         v-if="!searchQuery.is_shared || isCurrentUserManager"
       >
         <trash2-icon :size="8" />
       </button>
     </span>
+
+    <confirm-modal
+      :active="modals.remove"
+      :is-loading="loading.remove"
+      :is-error="errors.remove"
+      :text="removeText"
+      @cancel="modals.remove = false"
+      @confirm="removeSearch"
+    />
+
     <edit-search-filter-modal
       :active="modals.edit"
       :group-options="groupOptions"
@@ -151,6 +174,7 @@
       @cancel="modals.edit = false"
       @confirm="confirmEditSearch"
     />
+
     <edit-search-filter-group-modal
       :active="modals.group"
       :is-loading="loading.group"
@@ -172,6 +196,7 @@ import {
   ChevronUpIcon,
   Edit2Icon,
   FolderPlusIcon,
+  PencilIcon,
   Trash2Icon
 } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
@@ -179,6 +204,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
@@ -188,10 +214,12 @@ export default {
   components: {
     ChevronDownIcon,
     ChevronUpIcon,
+    ConfirmModal,
     Edit2Icon,
     EditSearchFilterModal,
     EditSearchFilterGroupModal,
     FolderPlusIcon,
+    PencilIcon,
     Trash2Icon
   },
 
@@ -219,19 +247,25 @@ export default {
   data() {
     return {
       groupToEdit: {},
-      searchQueryToEdit: {},
+      groupToRemove: {},
+      isEditing: false,
       queryPaths: {},
+      searchQueryToEdit: {},
+      searchQueryToRemove: {},
       errors: {
         edit: false,
-        group: false
+        group: false,
+        remove: false
       },
       loading: {
         edit: false,
-        group: false
+        group: false,
+        remove: false
       },
       modals: {
         edit: false,
-        group: false
+        group: false,
+        remove: false
       },
       toggleGroupId: null
     }
@@ -298,6 +332,18 @@ export default {
           is_shared: group.is_shared
         }))
       ]
+    },
+
+    removeText() {
+      if (this.searchQueryToRemove.id) {
+        return this.$t('main.remove_search_query', {
+          name: this.searchQueryToRemove.name
+        })
+      } else {
+        return this.$t('main.remove_search_filter_group', {
+          name: this.groupToRemove.name
+        })
+      }
     }
   },
 
@@ -388,17 +434,40 @@ export default {
       this.modals.group = false
     },
 
-    removeSearch(searchQuery) {
-      this.$emit('remove-search', searchQuery)
+    confirmRemoveSearch(searchQuery) {
+      this.searchQueryToRemove = searchQuery
+      this.groupToRemove = {}
+      this.modals.remove = true
     },
 
-    async removeGroup(filterGroup) {
+    removeSearch() {
+      if (this.searchQueryToRemove.id) {
+        this.$emit('remove-search', this.searchQueryToRemove)
+      } else {
+        this.removeGroup()
+      }
+      this.modals.remove = false
+      this.searchQueryToRemove = {}
+      this.groupToRemove = {}
+    },
+
+    confirmRemoveGroup(filterGroup) {
+      this.groupToRemove = filterGroup
+      this.searchQueryToRemove = {}
+      this.modals.remove = true
+    },
+
+    async removeGroup() {
       try {
         await this[
           `remove${stringHelpers.capitalize(this.type)}SearchFilterGroup`
-        ](filterGroup)
+        ](this.groupToRemove)
+        this.modals.remove = false
       } catch (err) {
         console.error(err)
+        this.errors.remove = true
+      } finally {
+        this.loading.remove = false
       }
     },
 
@@ -506,38 +575,8 @@ export default {
   transform: scale(1.03);
 }
 
-.search-queries .group.tag:hover, // avoid bug  (overflow)
-.search-queries .tag.empty:hover {
-  transform: none;
-}
-
 .search-queries .del {
   display: none;
-}
-
-.search-queries .tag:hover .del,
-.search-queries .tag:hover .edit {
-  display: inline-block;
-}
-
-.search-queries .group.tag:hover .del,
-.search-queries .group.tag:hover .edit {
-  display: none;
-}
-
-.search-queries .group.tag.open .group-header:hover .del,
-.search-queries .group.tag.open .group-header:hover .edit {
-  display: inline-block;
-}
-
-.search-queries .group.tag .tag:hover .del,
-.search-queries .group.tag .tag:hover .edit {
-  display: inline-block;
-}
-
-.search-queries .del:hover,
-.search-queries .edit:hover {
-  background: $dark-grey-lighter;
 }
 
 .search-queries .edit,
@@ -550,6 +589,17 @@ export default {
   height: 14px;
   width: 14px;
   line-height: 8px;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.search-queries .is-editing {
+  .edit,
+  .del {
+    display: inline-block;
+  }
 }
 
 .search-queries .edit {
@@ -574,5 +624,9 @@ export default {
 
 .filter-name {
   color: var(--text);
+}
+
+.search-queries .tag.active {
+  box-shadow: inset 0 0 4px 2px #444;
 }
 </style>
