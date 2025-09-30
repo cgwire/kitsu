@@ -581,13 +581,14 @@ export default {
         shotsToCreate: [],
         taskStatuses: []
       },
-      assetsOptionalColumns: ['Description', 'Ready for'],
+      assetsOptionalColumns: ['Description', 'Ready for', 'Resolution'],
       shotsOptionalColumns: [
         'Description',
         'Nb Frames',
         'Frame In',
         'Frame Out',
-        'FPS'
+        'FPS',
+        'Resolution'
       ],
       taskTypeForEntity: 'Asset',
       genericColumns: [

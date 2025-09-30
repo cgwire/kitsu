@@ -384,7 +384,8 @@ export default {
         'Nb Frames',
         'Frame In',
         'Frame Out',
-        'FPS'
+        'FPS',
+        'Resolution'
       ],
       genericColumns: [
         'Metadata column name (text value)',

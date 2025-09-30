@@ -333,7 +333,7 @@ export default {
         showInfos: true,
         showSharedAssets: true
       },
-      optionalColumns: ['Description', 'Ready for'],
+      optionalColumns: ['Description', 'Ready for', 'Resolution'],
       pageName: 'Assets',
       parsedCSV: [],
       selectedDepartment: 'ALL',
@@ -461,6 +461,7 @@ export default {
       'isCurrentUserClient',
       'isCurrentUserManager',
       'isTVShow',
+      'isAssetResolution',
       'openProductions',
       'productionAssetTaskTypes',
       'selectedAssets',
@@ -942,6 +943,9 @@ export default {
         }
         if (this.isAssetEstimation) {
           headers.push(this.$t('main.estimation_short'))
+        }
+        if (this.isAssetResolution) {
+          headers.push(this.$t('shots.fields.resolution'))
         }
         this.assetValidationColumns.forEach(taskTypeId => {
           headers.push(this.taskTypeMap.get(taskTypeId).name)

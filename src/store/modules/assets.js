@@ -757,6 +757,7 @@ const actions = {
       if (state.isAssetEstimation) {
         assetLine.push(minutesToDays(organisation, asset.estimation).toFixed(2))
       }
+      if (state.isAssetResolution) assetLine.push(asset.data.resolution)
       state.assetValidationColumns.forEach(validationColumn => {
         const task = rootGetters.taskMap.get(
           asset.validations.get(validationColumn)
