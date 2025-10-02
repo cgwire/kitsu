@@ -84,5 +84,13 @@ export default {
     let path = `/api/data/projects/${production.id}/playlists/temp`
     if (sort) path += '?sort=true'
     return client.ppost(path, { task_ids: taskIds })
+  },
+
+  notifyClients(playlist, studioId) {
+    const data = { studio_id: studioId }
+    return client.ppost(
+      `/api/data/playlists/${playlist.id}/notify-clients`,
+      data
+    )
   }
 }

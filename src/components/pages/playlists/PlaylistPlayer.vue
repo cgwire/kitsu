@@ -64,6 +64,13 @@
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"
+        icon="bell"
+        text="Notify clients"
+        @click="onNotifyClientClicked"
+        v-if="!isLoading && isCurrentUserManager"
+      />
+      <button-simple
+        class="playlist-button topbar-button flexrow-item full-button"
         icon="plus"
         :text="addEntitiesText"
         @click="$emit('show-add-entities')"
@@ -958,6 +965,16 @@
       </template>
     </div>
 
+    <notify-client-modal
+      :active="modals.notifyClients"
+      :playlist="playlist"
+      :is-loading="loading.notifyClients"
+      :is-error="errors.notifyClients"
+      :is-success="success.notifyClients"
+      @confirm="confirmNotifyClients"
+      @cancel="modals.notifyClients = false"
+    />
+
     <delete-modal
       :active="modals.delete"
       :is-loading="loading.deletePlaylist"
@@ -1014,6 +1031,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import MultiPictureViewer from '@/components/previews/MultiPictureViewer.vue'
+import NotifyClientModal from '@/components/modals/NotifyClientModal.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
@@ -1046,6 +1064,7 @@ export default {
     PencilPicker,
     PictureViewer,
     MultiPictureViewer,
+    NotifyClientModal,
     PlayIcon,
     PlaylistProgress,
     PlaylistedEntity,
@@ -1144,14 +1163,20 @@ export default {
       },
       modals: {
         delete: false,
+        notifyClients: false,
         taskType: false
       },
       loading: {
-        deletePlaylist: false
+        deletePlaylist: false,
+        notifyClients: false
       },
       errors: {
-        playlists: false,
-        deletePlaylist: false
+        deletePlaylist: false,
+        notifyClients: false,
+        playlists: false
+      },
+      success: {
+        notifyClients: false
       },
       forClientOptions: [
         { label: this.$t('playlists.for_client'), value: 'true' },
@@ -1425,10 +1450,35 @@ export default {
     ...mapActions([
       'changePlaylistType',
       'deletePlaylist',
+      'notifyClients',
       'removeBuildJob',
       'runPlaylistBuild',
       'editShot'
     ]),
+
+    onNotifyClientsClicked() {
+      this.modals.notifyClients = true
+      this.success.notifyClients = false
+      this.errors.notifyClients = false
+    },
+
+    async confirmNotifyClients({ studioId }) {
+      this.loading.notifyClients = true
+      this.errors.notifyClients = false
+      this.success.notifyClients = false
+      try {
+        await this.notifyClients({
+          playlist: this.playlist,
+          studioId
+        })
+        this.success.notifyClients = true
+      } catch (err) {
+        console.error(err)
+        this.errors.notifyClients = true
+      } finally {
+        this.loading.notifyClients = false
+      }
+    },
 
     getBuildPath(job) {
       return `/api/data/playlists/${this.playlist.id}/jobs/${job.id}/build/mp4`
