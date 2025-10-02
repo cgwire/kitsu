@@ -85,7 +85,6 @@
               :key="searchQuery.id"
               :style="{ backgroundColor: `${group.color}23` }"
               :title="getSearchQueryTitle(searchQuery)"
-              :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               v-for="searchQuery in group.queries"
             >
               <router-link
@@ -548,7 +547,7 @@ export default {
     padding: 0.5rem 0;
     position: absolute;
     top: 100%;
-    z-index: 1000;
+    z-index: 2000;
 
     .tag {
       margin: 0 0.5em;
@@ -571,8 +570,9 @@ export default {
   transform: scale(1.1);
 }
 
-.search-queries .group.tag.open .tag:hover {
-  transform: scale(1.03);
+.search-queries .group.tag:hover, // avoid bug (overflow)
+.search-queries .tag.empty:hover {
+  transform: none;
 }
 
 .search-queries .del {
