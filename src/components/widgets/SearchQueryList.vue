@@ -570,10 +570,6 @@ export default {
   transform: scale(1.1);
 }
 
-.search-queries .group.tag.open .tag:hover {
-  transform: scale(1.03);
-}
-
 .search-queries .group.tag:hover, // avoid bug (overflow)
 .search-queries .tag.empty:hover {
   transform: none;
