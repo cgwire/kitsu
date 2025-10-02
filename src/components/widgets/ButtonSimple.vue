@@ -14,7 +14,8 @@
     :type="type"
     @click="$emit('click', $event)"
   >
-    <grid-icon class="icon" v-if="icon === 'grid'" />
+    <bell class="icon" v-if="icon === 'bell'" />
+    <grid-icon class="icon" v-else-if="icon === 'grid'" />
     <send-icon class="icon" v-else-if="icon === 'send'" />
     <paperclip-icon class="icon" v-else-if="icon === 'attach'" />
     <corner-left-down-icon class="icon" v-else-if="icon === 'undo'" />
@@ -74,6 +75,7 @@
 
 <script>
 import {
+  Bell,
   CalendarPlusIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -118,6 +120,7 @@ export default {
   name: 'button-simple',
 
   components: {
+    Bell,
     CalendarPlusIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
