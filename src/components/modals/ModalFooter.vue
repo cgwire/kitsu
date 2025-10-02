@@ -83,6 +83,6 @@ export default {
 
 .success {
   margin-top: 1em;
-  color: #00b242;
+  color: $green;
 }
 </style>

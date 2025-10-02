@@ -88,6 +88,10 @@ export default {
     withEmptyChoice: {
       default: true,
       type: Boolean
+    },
+    emptyChoiceLabel: {
+      default: null,
+      type: String
     }
   },
 
@@ -102,7 +106,7 @@ export default {
           {
             color: '#aaa',
             id: null,
-            name: this.$t('studios.no_studio')
+            name: this.emptyChoiceLabel || this.$t('studios.no_studio')
           },
           ...studios
         ]

@@ -223,6 +223,10 @@ const actions = {
   updatePreviewFileValidationStatus({ commit }, { previewFile, status }) {
     commit(UPDATE_PREVIEW_VALIDATION_STATUS, { previewFile, status })
     return playlistsApi.updatePreviewFileValidationStatus(previewFile, status)
+  },
+
+  notifyClients({ commit }, { playlist, studioId }) {
+    return playlistsApi.notifyClients(playlist, studioId)
   }
 }
 
