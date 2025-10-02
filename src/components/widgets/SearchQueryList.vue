@@ -85,7 +85,6 @@
               :key="searchQuery.id"
               :style="{ backgroundColor: `${group.color}23` }"
               :title="getSearchQueryTitle(searchQuery)"
-              :to="queryPaths[searchQuery.id] || { name: 'open-productions' }"
               v-for="searchQuery in group.queries"
             >
               <router-link
