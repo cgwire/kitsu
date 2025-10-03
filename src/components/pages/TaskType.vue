@@ -113,13 +113,6 @@
                 locale-key-prefix="tasks."
                 v-model="priorityFilter"
               />
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('tasks.fields.difficulty')"
-                :options="difficultyOptions"
-                locale-key-prefix="tasks."
-                v-model="difficultyFilter"
-              />
             </div>
 
             <div
