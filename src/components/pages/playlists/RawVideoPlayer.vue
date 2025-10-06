@@ -640,6 +640,12 @@ export default {
       this.$nextTick(() => {
         this.$options.silent = false
       })
+    },
+
+    setVolume(volume) {
+      if (!this.currentPlayer) return
+      this.currentPlayer.volume = volume / 100
+      this.nextPlayer.volume = volume / 100
     }
   },
 

@@ -19,6 +19,9 @@
     <p class="error mt1 has-text-left" v-if="isError">
       {{ errorText }}
     </p>
+    <p class="success mt1 has-text-left" v-if="isSuccess">
+      {{ successText }}
+    </p>
   </div>
 </template>
 
@@ -50,6 +53,14 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    isSuccess: {
+      type: Boolean,
+      default: false
+    },
+    successText: {
+      type: String,
+      default: ''
     }
   },
 
@@ -68,5 +79,10 @@ export default {
 
 .error {
   margin-top: 1em;
+}
+
+.success {
+  margin-top: 1em;
+  color: $green;
 }
 </style>

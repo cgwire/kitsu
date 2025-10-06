@@ -130,7 +130,7 @@
                 v-if="currentPreview"
               >
                 <button
-                  class="button flexrow-item"
+                  class="button flexrow-item playlist-button"
                   @click="showHookupPlaylistModal"
                   v-if="isHookupButtonVisible"
                 >
@@ -140,7 +140,7 @@
                   />
                 </button>
                 <button
-                  class="button flexrow-item"
+                  class="button flexrow-item mr0"
                   :class="{
                     'is-loading': loading.setPreview
                   }"
@@ -1709,6 +1709,16 @@ export default {
   background: #46494f;
   border-color: $dark-grey;
   box-shadow: 0 0 6px #333;
+}
+
+.set-main-preview {
+  margin-right: 0;
+}
+
+.playlist-button {
+  img {
+    width: 20px;
+  }
 }
 
 h2.subtitle {

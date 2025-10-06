@@ -498,6 +498,12 @@ export default {
       if (this.videoViewer) {
         this.videoViewer.setSpeed(rate)
       }
+    },
+
+    setVolume(volume) {
+      if (this.videoViewer) {
+        this.videoViewer.setVolume(volume)
+      }
     }
   },
 

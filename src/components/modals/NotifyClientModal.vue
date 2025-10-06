@@ -1,0 +1,149 @@
+<template>
+  <base-modal
+    :active="active"
+    :title="$t('playlists.notify_clients')"
+    @cancel="$emit('cancel')"
+  >
+    <p class="mb2">
+      {{ $t('playlists.notify_clients_description') }}
+    </p>
+
+    <combobox-studio
+      class="mt1 mb1"
+      ref="studioField"
+      :label="$t('main.studio')"
+      :empty-choice-label="$t('playlists.all_studios')"
+      v-model="form.studio_id"
+    />
+
+    <p class="mb1 field-title" v-if="clients.length > 0">
+      {{ $t('playlists.clients_to_notify') }}
+    </p>
+    <p class="empty" v-else>
+      {{ $t('playlists.no_clients_to_notify') }}
+    </p>
+
+    <div class="flexcolumn">
+      <div :key="client.id" class="flexrow mb1" v-for="client in clients">
+        <people-avatar
+          class="flexrow-item"
+          :person="client"
+          :size="30"
+          :is-link="false"
+          v-if="client"
+        />
+        <people-name
+          class="flexrow-item"
+          :person="client"
+          :is-link="false"
+          v-if="client"
+        />
+      </div>
+    </div>
+
+    <modal-footer
+      :error-text="$t('playlists.notify_clients_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      :is-success="isSuccess"
+      :success-text="$t('playlists.notify_clients_success')"
+      @confirm="runConfirmation"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+
+import { modalMixin } from '@/components/modals/base_modal'
+
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
+import PeopleAvatar from '../widgets/PeopleAvatar.vue'
+import PeopleName from '../widgets/PeopleName.vue'
+
+export default {
+  name: 'edit-budget-modal',
+
+  mixins: [modalMixin],
+
+  components: {
+    BaseModal,
+    ComboboxStudio,
+    ModalFooter,
+    PeopleAvatar,
+    PeopleName
+  },
+
+  props: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+    playlist: {
+      type: Object,
+      default: () => {}
+    },
+    isError: {
+      type: Boolean,
+      default: false
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
+    },
+    isSuccess: {
+      type: Boolean,
+      default: false
+    }
+  },
+
+  emits: ['cancel', 'confirm'],
+
+  data() {
+    return {
+      form: {
+        studio_id: ''
+      }
+    }
+  },
+
+  computed: {
+    ...mapGetters(['currentProduction', 'personMap']),
+
+    clients() {
+      return this.currentProduction.team
+        .map(personId => this.personMap.get(personId))
+        .filter(person => person.role === 'client')
+        .filter(
+          person =>
+            !this.form.studio_id || person.studio_id === this.form.studio_id
+        )
+    }
+  },
+
+  methods: {
+    runConfirmation() {
+      this.$emit('confirm', {
+        studio_id: this.form.studio_id
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.empty {
+  font-style: italic;
+}
+
+.field-title {
+  color: #eee;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 2em;
+  text-transform: uppercase;
+}
+</style>
