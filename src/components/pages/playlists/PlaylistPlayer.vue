@@ -1458,7 +1458,6 @@ export default {
     ]),
 
     onNotifyClientsClicked() {
-      console.log('ok')
       this.modals.notifyClients = true
       this.success.notifyClients = false
       this.errors.notifyClients = false
