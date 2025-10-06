@@ -522,7 +522,6 @@ export default {
 
     setVolume(volume) {
       if (this.video) {
-        console.log('setVolume', volume)
         this.video.volume = volume / 100
       }
     }
