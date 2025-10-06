@@ -113,13 +113,6 @@
                 locale-key-prefix="tasks."
                 v-model="priorityFilter"
               />
-              <combobox-styled
-                class="flexrow-item"
-                :label="$t('tasks.fields.difficulty')"
-                :options="difficultyOptions"
-                locale-key-prefix="tasks."
-                v-model="difficultyFilter"
-              />
             </div>
 
             <div
@@ -957,7 +950,8 @@ export default {
       'initTaskType',
       'loadAggregatedPersonDaysOff',
       'loadEpisodeScheduleItems',
-      'loadPersonTimeSpentsByPeriod',
+      'loadProductionDaysOff',
+      'loadProductionTimeSpents',
       'loadScheduleItems',
       'removeTaskSearch',
       'saveScheduleItem',
@@ -1389,17 +1383,28 @@ export default {
     },
 
     async resetScheduleItems() {
+      if (!this.currentScheduleItem) return
+
       const taskAssignationMap = this.buildAssignationMap()
+      const startDate = this.currentScheduleItem.start_date
+      const endDate = this.currentScheduleItem.end_date
 
-      const assignees = Object.keys(taskAssignationMap).filter(
-        id => id !== 'unassigned' && taskAssignationMap[id].length > 0
+      this.daysOffByPerson = await this.loadProductionDaysOff({
+        startDate,
+        endDate
+      }).catch(
+        () => ({}) // fallback if not allowed to fetch days off
       )
-      await this.loadDaysOff(assignees)
 
-      if (this.currentScheduleItem && this.dataDisplay.timesheets) {
-        const startDate = this.currentScheduleItem.start_date
-        const endDate = this.currentScheduleItem.end_date
-        await this.loadTimesheets(assignees, startDate, endDate)
+      if (this.dataDisplay.timesheets) {
+        const assignees = Object.keys(taskAssignationMap).filter(
+          id => id !== 'unassigned' && taskAssignationMap[id].length > 0
+        )
+        this.timesheetByPerson = await this.loadTimesheets(
+          assignees,
+          startDate,
+          endDate
+        )
       }
 
       const scheduleItems = this.team
@@ -1410,8 +1415,7 @@ export default {
             this.dataDisplay.beforeAfterTasks
           )
         )
-        .filter(Boolean)
-        .filter(item => item.children.length > 0)
+        .filter(item => item?.children.length > 0)
 
       if (taskAssignationMap.unassigned.length > 0) {
         scheduleItems.push(
@@ -1445,30 +1449,19 @@ export default {
       return taskAssignationMap
     },
 
-    async loadDaysOff(personIds) {
-      this.daysOffByPerson = {}
-      for (const personId of personIds) {
-        // load sequentially to avoid too many requests
-        const daysOff = await this.loadAggregatedPersonDaysOff({
-          personId
-        }).catch(
-          () => [] // fallback if not allowed to fetch days off
-        )
-        this.daysOffByPerson[personId] = daysOff
-      }
-    },
-
     async loadTimesheets(personIds, startDate, endDate) {
-      this.timesheetByPerson = {}
+      const timesheets = await this.loadProductionTimeSpents({
+        taskType: this.currentTaskType,
+        startDate,
+        endDate
+      }).catch(
+        () => ({}) // fallback if not allowed to fetch timesheets
+      )
+
+      const timesheetByPerson = {}
       for (const personId of personIds) {
-        // load sequentially to avoid too many requests
-        const timesheet = await this.loadPersonTimeSpentsByPeriod({
-          personId,
-          startDate,
-          endDate
-        }).catch(
-          () => [] // fallback if not allowed to fetch timesheets
-        )
+        const timesheet =
+          timesheets[personId]?.sort(firstBy('date').thenBy('task_id')) || []
         timesheet.forEach(entry => {
           entry.task = this.tasks.find(task => task.id === entry.task_id)
           entry.startDate = parseDate(entry.date)
@@ -1483,8 +1476,11 @@ export default {
             ? mergedTimesheet[mergedTimesheet.length - 1]
             : null
           if (
-            previous?.duration >= oneDay &&
-            entry.startDate.diff(previous.startDate, 'days') === 1
+            previous &&
+            previous.task_id === entry.task_id &&
+            (previous.date === entry.date ||
+              (previous.duration >= oneDay &&
+                entry.startDate.diff(previous.startDate, 'days') === 1))
           ) {
             // merge with previous
             mergedTimesheet[mergedTimesheet.length - 1] = {
@@ -1497,8 +1493,9 @@ export default {
           }
         }
 
-        this.timesheetByPerson[personId] = mergedTimesheet
+        timesheetByPerson[personId] = mergedTimesheet
       }
+      return timesheetByPerson
     },
 
     buildPersonElement(person, taskAssignationMap, withBeforeAfter = false) {

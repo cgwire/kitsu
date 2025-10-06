@@ -15,6 +15,7 @@
       }"
       @click="isEditing = !isEditing"
       :title="$t('main.edit_mode_on')"
+      v-if="userFilters.length || (isGroupEnabled && userFilterGroups.length)"
     >
       <pencil-icon :size="12" />
     </span>
@@ -543,6 +544,7 @@ export default {
     flex-direction: column;
     left: 0;
     max-height: 200px;
+    overflow-x: hidden;
     overflow-y: auto;
     padding: 0.5rem 0;
     position: absolute;
