@@ -15,7 +15,7 @@
       }"
       @click="isEditing = !isEditing"
       :title="$t('main.edit_mode_on')"
-      v-if="userFilters.length || (isGroupEnabled && userFilterGroups.length)"
+      v-if="userFilters.length > 0 || (isGroupEnabled && userFilterGroups.length > 0)"
     >
       <pencil-icon :size="12" />
     </span>
@@ -629,6 +629,10 @@ export default {
 }
 
 .search-queries .tag.active {
-  box-shadow: inset 0 0 4px 2px #444;
+  box-shadow: inset 0 0 4px 2px #ddd;
+
+  .dark & {
+    box-shadow: inset 0 0 4px 2px #444;
+  }
 }
 </style>
