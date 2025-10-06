@@ -40,7 +40,8 @@ export const playerMixin = {
       playingPreviewFileId: null,
       speed: 3,
       task: null,
-      textColor: '#ff3860'
+      textColor: '#ff3860',
+      volume: 50
     }
   },
 

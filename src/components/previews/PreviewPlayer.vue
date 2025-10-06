@@ -176,20 +176,13 @@
             v-if="(!light || fullScreen) && isMovie"
           />
 
-          <button-simple
+          <button-sound
             class="flexrow-item"
-            :title="$t('playlists.actions.unmute')"
-            icon="soundoff"
-            @click="onToggleSoundClicked"
-            v-if="isMuted"
+            @change-sound="onToggleSoundClicked"
+            v-model="isMuted"
+            v-model:volume="volume"
           />
-          <button-simple
-            class="flexrow-item"
-            :title="$t('playlists.actions.mute')"
-            icon="soundon"
-            @click="onToggleSoundClicked"
-            v-else
-          />
+
           <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
 
           <span
@@ -592,6 +585,7 @@ import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import BrowsingBar from '@/components/previews/BrowsingBar.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -614,6 +608,7 @@ export default {
     ArrowUpRightIcon,
     BrowsingBar,
     ButtonSimple,
+    ButtonSound,
     ColorPicker,
     Combobox,
     ComboboxStyled,
@@ -718,6 +713,7 @@ export default {
       isRepeating: false,
       isTyping: false,
       isWireframe: false,
+      isZoomPan: false,
       maxDuration: '00:00:00:00',
       movieDimensions: {
         width: 1920,
@@ -734,8 +730,8 @@ export default {
         : null,
       textColor: '#ff3860',
       videoDuration: 0,
+      volume: 50,
       width: 0,
-      isZoomPan: false,
       comparisonMode: 'sidebyside',
       comparisonModeOptions: [
         {
@@ -785,6 +781,13 @@ export default {
       this.onObjectBackgroundSelected()
     }
     this.resetPencilConfiguration()
+    if (this.isMuted) {
+      this.previewViewer.setVolume(0)
+    } else {
+      this.volume =
+        localPreferences.getPreference('player:volume') || this.volume
+      this.previewViewer.setVolume(this.volume)
+    }
   },
 
   beforeUnmount() {
@@ -2362,6 +2365,11 @@ export default {
       const rates = [0.25, 0.5, 1, 1.5, 2]
       const rate = rates[this.speed - 1]
       this.setPlayerSpeed(rate)
+    },
+
+    volume() {
+      this.previewViewer.setVolume(this.volume)
+      localPreferences.setPreference('player:volume', this.volume)
     }
   }
 }

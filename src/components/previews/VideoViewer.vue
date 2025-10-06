@@ -518,6 +518,13 @@ export default {
       if (this.video) {
         this.video.playbackRate = rate
       }
+    },
+
+    setVolume(volume) {
+      if (this.video) {
+        console.log('setVolume', volume)
+        this.video.volume = volume / 100
+      }
     }
   },
 

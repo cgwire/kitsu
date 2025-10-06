@@ -547,19 +547,11 @@
             isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying
           "
         />
-        <button-simple
+        <button-sound
           class="flexrow-item playlist-button"
-          :title="$t('playlists.actions.unmute')"
-          icon="soundoff"
-          @click="onToggleSoundClicked"
-          v-if="isMuted"
-        />
-        <button-simple
-          class="flexrow-item playlist-button"
-          :title="$t('playlists.actions.mute')"
-          icon="soundon"
-          @click="onToggleSoundClicked"
-          v-else
+          @change-sound="onToggleSoundClicked"
+          v-model="isMuted"
+          v-model:volume="volume"
         />
         <button-simple
           class="button playlist-button flexrow-item"
@@ -1020,6 +1012,7 @@ import { defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
+import preferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
@@ -1027,6 +1020,7 @@ import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -1055,6 +1049,7 @@ export default {
   components: {
     ArrowUpRightIcon,
     ButtonSimple,
+    ButtonSound,
     ColorPicker,
     Combobox,
     ComboboxStyled,
@@ -1214,6 +1209,11 @@ export default {
     this.isMounted = true
 
     this.resetPencilConfiguration()
+
+    this.volume = preferences.getPreference('player:volume') || this.volume
+    this.$nextTick(() => {
+      this.rawPlayer.setVolume(this.volume)
+    })
   },
 
   beforeUnmount() {
@@ -2535,6 +2535,7 @@ export default {
           this.loadAnnotation(this.getAnnotation(0))
         }
       })
+      this.rawPlayer.setVolume(this.volume)
     },
 
     playlist(newPlaylist, oldPlaylist) {
@@ -2610,6 +2611,11 @@ export default {
         this.$options.fullPlayingPath = ''
         this.onFrameUpdate(0)
       }
+    },
+
+    volume() {
+      this.rawPlayer.setVolume(this.volume)
+      preferences.setPreference('player:volume', this.volume)
     }
   },
 

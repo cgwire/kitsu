@@ -1057,6 +1057,7 @@ export default {
     last_creation: 'Last creations',
     last_modification: 'Last modifications',
     loading_error: 'A server error occurred. Playlists cannot be loaded.',
+    mute: 'Mute',
     new_playlist: 'Add a playlist',
     notify_clients: 'Notify clients',
     notify_clients_description: 'Inform clients of the selected studio that your playlist is ready. This operation will create a notification for them.',
@@ -1073,8 +1074,10 @@ export default {
     select_playlist: 'Please select a playlist in the left column',
     select_task_type: 'Change task type for all entities',
     title: 'Playlists',
+    unmute: 'Unmute',
     updated_at: 'Updated at:',
     remove: 'remove',
+    volume_level: 'Volume: {level}%',
     fields: {
       name: 'Name',
       created_at: 'Creation date',
