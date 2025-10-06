@@ -15,7 +15,10 @@
       }"
       @click="isEditing = !isEditing"
       :title="$t('main.edit_mode_on')"
-      v-if="userFilters.length > 0 || (isGroupEnabled && userFilterGroups.length > 0)"
+      v-if="
+        userFilters.length > 0 ||
+        (isGroupEnabled && userFilterGroups.length > 0)
+      "
     >
       <pencil-icon :size="12" />
     </span>
