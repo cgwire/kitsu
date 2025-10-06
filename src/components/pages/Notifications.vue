@@ -72,6 +72,7 @@
           :class="{
             notification: true,
             'mention-notification': isMention(notification),
+            'playlist-ready-notification': isPlaylistReady(notification),
             unread: !notification.read,
             selected: isSelected(notification)
           }"
@@ -807,6 +808,20 @@ a {
     .dark & {
       border: 4px solid #6065a1; //;var(--background-selectable);
     }
+
+    &.playlist-ready-notification {
+      border: 4px solid #f0c5d1;
+    }
+  }
+}
+
+.dark {
+  .notification.playlist-ready-notification:hover {
+    border: 4px solid transparent;
+  }
+
+  .notification.playlist-ready-notification.unread:hover {
+    border: 4px solid #906571;
   }
 }
 
