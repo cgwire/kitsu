@@ -236,7 +236,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen ? `-${height + 30}px` : '0px'
+      const top = `-${height + 30}px`
 
       return {
         height: `${height}px`,
@@ -421,7 +421,7 @@ export default {
         Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
         this.width - frameWidth - 10
       )
-      const top = this.isFullScreen ? `-${height}px` : '30px'
+      const top = `-${height}px`
 
       return {
         height: `${height}px`,
