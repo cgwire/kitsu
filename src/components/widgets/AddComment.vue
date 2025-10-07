@@ -306,7 +306,7 @@
           class="mb05"
           :label="$t('comments.add_frame_to_comment')"
           v-model="isFrameAddition"
-          v-if="isCurrentUserClient"
+          v-if="isCurrentUserClient && isMovie"
         />
 
         <div class="error pull-right" v-if="isError">
@@ -983,11 +983,9 @@ export default {
       handler() {
         let teamOptions = []
         if (this.isCurrentUserClient) {
-          teamOptions = [
-            this.team.filter(person =>
-              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
-            )
-          ]
+          teamOptions = this.team.filter(person =>
+            ['admin', 'manager', 'client'].includes(person.role)
+          )
         } else {
           teamOptions = [...this.team]
         }
