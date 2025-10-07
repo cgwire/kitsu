@@ -6,11 +6,7 @@
     <div class="task-type-combo" :class="{ disabled, shy }">
       <div class="flexrow selector" @click="toggleTaskTypeList">
         <div class="selected-task-type-line flexrow-item">
-          <task-type-name
-            class="ellipsis-2-lines"
-            :task-type="currentTaskType"
-            v-if="currentTaskType"
-          />
+          <task-type-name :task-type="currentTaskType" v-if="currentTaskType" />
         </div>
         <chevron-down-icon class="ml05 down-icon flexrow-item" />
       </div>
