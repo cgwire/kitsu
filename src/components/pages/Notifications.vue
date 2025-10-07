@@ -172,18 +172,21 @@
                   :is-link="false"
                   v-if="personMap.get(notification.author_id)"
                 />
-                <entity-thumbnail
-                  class="flexrow-item"
-                  :entity="{
-                    preview_file_id: notification.entity_preview_file_id
-                  }"
-                  :height="40"
-                />
-                <task-type-name
-                  class="task-type-name flexrow-item ml1"
-                  :task-type="buildTaskTypeFromNotification(notification)"
-                  :production-id="notification.project_id"
-                />
+                <div class="flexrow-item">
+                  <entity-thumbnail
+                    :entity="{
+                      preview_file_id: notification.entity_preview_file_id
+                    }"
+                    :height="40"
+                  />
+                </div>
+                <div class="flexrow-item">
+                  <task-type-name
+                    class="task-type-name"
+                    :task-type="buildTaskTypeFromNotification(notification)"
+                    :production-id="notification.project_id"
+                  />
+                </div>
                 <router-link
                   class="flexrow-item"
                   :to="entityPath(notification)"
