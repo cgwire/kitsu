@@ -33,7 +33,7 @@
         :ref="`checklist-entry-${index}`"
         rows="1"
         :placeholder="$t('comments.task_placeholder')"
-        @keypress.enter.prevent="addChecklistEntry(index)"
+        @keydown.enter.prevent="addChecklistEntry(index)"
         @keyup.backspace="removeChecklistEntry(index)"
         @keyup.up="focusPrevious(index)"
         @keyup.down="focusNext(index)"
