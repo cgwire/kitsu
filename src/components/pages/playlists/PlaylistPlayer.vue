@@ -67,7 +67,7 @@
         icon="bell"
         :text="$t('playlists.notify_clients')"
         @click="onNotifyClientsClicked"
-        v-if="!isLoading && isCurrentUserManager"
+        v-if="!isLoading && isCurrentUserManager && playlist.for_client"
       />
       <button-simple
         class="playlist-button topbar-button flexrow-item full-button"

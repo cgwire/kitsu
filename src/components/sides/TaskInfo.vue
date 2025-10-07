@@ -68,7 +68,7 @@
             class="pointer"
             :title="$t('main.csv.export_file')"
             @click="onExportClick"
-            v-if="!withActions"
+            v-if="!withActions && !isCurrentUserClient"
           >
             <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
           </div>
