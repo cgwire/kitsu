@@ -86,7 +86,7 @@
               <div class="flexrow notification-header">
                 <monitor-play-icon
                   class="icon flexrow-item"
-                  :title="$t('notifications.is_playlist_ready')"
+                  :title="$t('notifications.playlist_is_ready')"
                 />
                 <people-avatar
                   class="flexrow-item"
@@ -106,18 +106,7 @@
                   {{ $t('notifications.playlist_ready_text') }}
                 </span>
                 <span class="flexrow-item">
-                  <router-link
-                    :to="{
-                      name: notification.episode_id
-                        ? 'episode-playlist'
-                        : 'playlist',
-                      params: {
-                        production_id: notification.project_id,
-                        playlist_id: notification.playlist_id,
-                        episode_id: notification.episode_id
-                      }
-                    }"
-                  >
+                  <router-link :to="playlistPath(notification)">
                     {{ notification.playlist_name }}
                   </router-link>
                 </span>
@@ -607,6 +596,29 @@ export default {
     personName(notification) {
       const person = this.personMap.get(notification.author_id)
       return person ? person.full_name : ''
+    },
+
+    playlistPath(notification) {
+      const production = this.productionMap.get(notification.project_id)
+      const params = {
+        production_id: notification.project_id,
+        playlist_id: notification.playlist_id
+      }
+
+      const isTVShow = production.production_type === 'tvshow'
+      if (isTVShow) {
+        if (notification.episode_id) {
+          params.episode_id = notification.episode_id
+        }
+        if (notification.playlist_for_entity === 'asset') {
+          params.episode_id = notification.playlist_is_for_all ? 'all' : 'main'
+        }
+      }
+
+      return {
+        name: isTVShow ? 'episode-playlist' : 'playlist',
+        params
+      }
     },
 
     buildTaskFromNotification(notification) {
