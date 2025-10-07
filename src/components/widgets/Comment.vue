@@ -1003,25 +1003,25 @@ export default {
       handler() {
         let teamOptions = []
         if (this.isCurrentUserClient) {
-          teamOptions = [
-            this.team.filter(person =>
-              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
-            )
-          ]
+          teamOptions = this.team.filter(person =>
+            ['admin', 'manager', 'client'].includes(person.role)
+          )
         } else {
           teamOptions = [...this.team]
         }
-        teamOptions = teamOptions.concat(
-          this.productionDepartmentIds.map(departmentId => {
-            const department = this.departmentMap.get(departmentId)
-            return {
-              isDepartment: true,
-              full_name: department.name,
-              color: department.color,
-              id: departmentId
-            }
-          })
-        )
+        if (!this.isCurrentUserClient) {
+          teamOptions = teamOptions.concat(
+            this.productionDepartmentIds.map(departmentId => {
+              const department = this.departmentMap.get(departmentId)
+              return {
+                isDepartment: true,
+                full_name: department.name,
+                color: department.color,
+                id: departmentId
+              }
+            })
+          )
+        }
         teamOptions.push({
           isTime: true,
           full_name: 'frame'
