@@ -1212,7 +1212,7 @@ export default {
 
     this.volume = preferences.getPreference('player:volume') || this.volume
     this.$nextTick(() => {
-      this.rawPlayer.setVolume(this.volume)
+      this.rawPlayer?.setVolume(this.volume)
     })
   },
 
