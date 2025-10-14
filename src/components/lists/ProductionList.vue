@@ -79,6 +79,7 @@
               <td :colspan="7" class="datatable-row-stats">
                 <production-stats :stats="productionStatsMap[entry.id] || {}" />
               </td>
+              <td class="actions"></td>
             </tr>
           </template>
         </tbody>
