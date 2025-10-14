@@ -462,13 +462,33 @@
       {{ $tc('sequences.number', displayedSequencesLength) }}
       <span
         v-if="
-          displayedSequencesTimeSpent > 0 && displayedSequencesEstimation > 0
+          displayedSequencesTimeSpent > 0 || displayedSequencesEstimation > 0
         "
       >
         ({{ formatDuration(displayedSequencesTimeSpent) }}
-        {{ $tc('main.days_spent', displayedSequencesTimeSpent) }},
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_spent',
+                formatDuration(displayedSequencesTimeSpent, false)
+              )
+            : $tc(
+                'main.days_spent',
+                formatDuration(displayedSequencesTimeSpent, false)
+              )
+        }},
         {{ formatDuration(displayedSequencesEstimation) }}
-        {{ $tc('main.man_days', displayedSequencesEstimation) }})
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_estimated',
+                formatDuration(displayedSequencesEstimation, false)
+              )
+            : $tc(
+                'main.man_days',
+                formatDuration(displayedSequencesEstimation, false)
+              )
+        }})
       </span>
     </p>
   </div>

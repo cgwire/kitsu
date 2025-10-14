@@ -476,12 +476,33 @@
     </div>
 
     <p class="has-text-centered nb-edits" v-if="!isEmptyList && !isLoading">
-      {{ displayedEditsLength }} {{ $tc('edits.number', displayedEditsLength) }}
+      {{ displayedEditsLength }}
+      {{ $tc('edits.number', displayedEditsLength) }}
       <span v-if="displayedEditsTimeSpent > 0 || displayedEditsEstimation > 0">
         ({{ formatDuration(displayedEditsTimeSpent) }}
-        {{ $tc('main.days_spent', displayedEditsTimeSpent) }},
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_spent',
+                formatDuration(displayedEditsTimeSpent, false)
+              )
+            : $tc(
+                'main.days_spent',
+                formatDuration(displayedEditsTimeSpent, false)
+              )
+        }},
         {{ formatDuration(displayedEditsEstimation) }}
-        {{ $tc('main.man_days', displayedEditsEstimation) }})
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_estimated',
+                formatDuration(displayedEditsEstimation, false)
+              )
+            : $tc(
+                'main.man_days',
+                formatDuration(displayedEditsEstimation, false)
+              )
+        }})
       </span>
     </p>
   </div>

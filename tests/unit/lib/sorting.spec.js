@@ -248,9 +248,9 @@ describe('lib/sorting', () => {
 
   it('sortProductions', () => {
     const entries = [
-      { project_status_name: 'closed', name: 'Big Buck Bunny', id: 3 },
-      { project_status_name: 'open', name: 'Cosmos Landromat', id: 2 },
-      { project_status_name: 'open', name: 'Agent 327', id: 1 }
+      { project_status_name: 'Closed', name: 'Big Buck Bunny', id: 3 },
+      { project_status_name: 'Open', name: 'Cosmos Landromat', id: 2 },
+      { project_status_name: 'Open', name: 'Agent 327', id: 1 }
     ]
     let results = sortProductions(entries)
     expect(results).toHaveLength(3)
@@ -344,7 +344,7 @@ describe('lib/sorting', () => {
 
   it('sortValidationColumns', () => {
     const production = {
-      project_status_name: 'open',
+      project_status_name: 'Open',
       name: 'Big Buck Bunny',
       id: 3,
       task_types_priority: {

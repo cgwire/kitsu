@@ -526,7 +526,7 @@
                           withEstimations
                         )
                       "
-                      :title="`${formatDuration(timesheet.duration)} ${$tc('main.days_spent', formatDuration(timesheet.duration, false))}`"
+                      :title="`${formatDuration(timesheet.duration)} ${isDurationInHours ? $tc('main.hours_spent', formatDuration(timesheet.duration, false)) : $tc('main.days_spent', formatDuration(timesheet.duration, false))}`"
                       :key="timesheet.id"
                       v-for="timesheet in rootElement.timesheet.filter(
                         ({ task_id }) => task_id === childElement.id

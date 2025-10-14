@@ -37,7 +37,7 @@ yarn.lock
 # Optional REPL history
 .node_repl_history
 
-# Vue template artifacts to ignore
+# Vue template artifacts to ignore
 .DS_Store
 dist/
 selenium-debug.log

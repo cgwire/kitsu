@@ -145,12 +145,27 @@
       <table-info :is-loading="isLoading" :is-error="isError" />
     </div>
     <p class="has-text-centered nb-tasks" v-if="!isLoading">
-      {{ stats.total }} {{ $tc('tasks.number', stats.total) }} ({{
-        formatDuration(stats.total_estimation)
+      {{ stats.total }}
+      {{ $tc('tasks.number', stats.total) }}
+      ({{ formatDuration(stats.total_duration) }}
+      {{
+        isDurationInHours
+          ? $tc('main.hours_spent', formatDuration(stats.total_duration, false))
+          : $tc('main.days_spent', formatDuration(stats.total_duration, false))
       }}
-      {{ $tc('main.days_estimated', isTimeEstimatedPlural) }},
-      {{ formatDuration(stats.total_duration) }}
-      {{ $tc('main.days_spent', isTimeSpentPlural) }})
+      /
+      {{ formatDuration(stats.total_estimation) }}
+      {{
+        isDurationInHours
+          ? $tc(
+              'main.hours_estimated',
+              formatDuration(stats.total_estimation, false)
+            )
+          : $tc(
+              'main.days_estimated',
+              formatDuration(stats.total_estimatio, false)
+            )
+      }})
     </p>
   </div>
 </template>
@@ -246,24 +261,6 @@ export default {
       'isCurrentUserSupervisor',
       'taskTypeMap'
     ]),
-
-    isTimeSpentPlural() {
-      return (
-        Math.floor(
-          (this.stats.total_duration ? this.stats.total_duration : 0) / 60 / 8
-        ) >= 1
-      )
-    },
-
-    isTimeEstimatedPlural() {
-      return (
-        Math.floor(
-          (this.stats.total_estimation ? this.stats.total_estimation : 0) /
-            60 /
-            8
-        ) >= 1
-      )
-    },
 
     nbFrames() {
       let total = 0
