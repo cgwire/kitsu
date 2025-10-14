@@ -51,7 +51,7 @@ describe('Task types store', () => {
 
     test('currentTaskType', () => {
       const rootState = {
-        route: { params: { task_type_id: 'task-type-2' } }
+        route: { params: { task_type_id: 'task-type-2' } }
       }
       expect(store.getters.currentTaskType(state, null, rootState))
         .toStrictEqual(taskTypes[1])
