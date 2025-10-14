@@ -783,13 +783,31 @@
         {{ displayedShotsDrawings }}
         {{ $tc('main.nb_drawings', displayedShotsDrawings) }}
       </span>
-      <span
-        v-show="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0"
-      >
+      <span v-if="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0">
         ({{ formatDuration(displayedShotsTimeSpent) }}
-        {{ $tc('main.days_spent', displayedShotsTimeSpent) }},
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_spent',
+                formatDuration(displayedShotsTimeSpent, false)
+              )
+            : $tc(
+                'main.days_spent',
+                formatDuration(displayedShotsTimeSpent, false)
+              )
+        }},
         {{ formatDuration(displayedShotsEstimation) }}
-        {{ $tc('main.man_days', displayedShotsEstimation) }})
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_estimated',
+                formatDuration(displayedShotsEstimation, false)
+              )
+            : $tc(
+                'main.man_days',
+                formatDuration(displayedShotsEstimation, false)
+              )
+        }})
       </span>
     </p>
   </div>

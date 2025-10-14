@@ -58,14 +58,6 @@ export default {
       return this.tasks.reduce((acc, task) => acc + task.estimation, 0)
     },
 
-    isTimeSpentPlural() {
-      return this.timeSpent
-    },
-
-    isTimeEstimatedPlural() {
-      return this.timeEstimated
-    },
-
     nbFrames() {
       return this.tasks.reduce((acc, task) => {
         const entity = this.shotMap.get(task.entity.id)

@@ -496,12 +496,32 @@
       {{ displayedEpisodesLength }}
       {{ $tc('episodes.number', displayedEpisodesLength) }}
       <span
-        v-if="displayedEpisodesTimeSpent > 0 && displayedEpisodesEstimation > 0"
+        v-if="displayedEpisodesTimeSpent > 0 || displayedEpisodesEstimation > 0"
       >
         ({{ formatDuration(displayedEpisodesTimeSpent) }}
-        {{ $tc('main.days_spent', displayedEpisodesTimeSpent) }},
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_spent',
+                formatDuration(displayedEpisodesTimeSpent, false)
+              )
+            : $tc(
+                'main.days_spent',
+                formatDuration(displayedEpisodesTimeSpent, false)
+              )
+        }},
         {{ formatDuration(displayedEpisodesEstimation) }}
-        {{ $tc('main.man_days', displayedEpisodesEstimation) }})
+        {{
+          isDurationInHours
+            ? $tc(
+                'main.hours_estimated',
+                formatDuration(displayedEpisodesEstimation, false)
+              )
+            : $tc(
+                'main.man_days',
+                formatDuration(displayedEpisodesEstimation, false)
+              )
+        }})
       </span>
     </p>
   </div>

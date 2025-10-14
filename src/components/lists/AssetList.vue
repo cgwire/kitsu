@@ -555,19 +555,31 @@
       {{ displayedAssetsLength }}
       {{ $tc('assets.number', displayedAssetsLength) }}
       <span
-        v-show="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
+        v-if="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
       >
         ({{ formatDuration(displayedAssetsTimeSpent) }}
         {{
           isDurationInHours
-            ? $tc('main.hours_spent', displayedAssetsTimeSpent)
-            : $tc('main.days_spent', displayedAssetsTimeSpent)
+            ? $tc(
+                'main.hours_spent',
+                formatDuration(displayedAssetsTimeSpent, false)
+              )
+            : $tc(
+                'main.days_spent',
+                formatDuration(displayedAssetsTimeSpent, false)
+              )
         }},
         {{ formatDuration(displayedAssetsEstimation) }}
         {{
           isDurationInHours
-            ? $tc('main.hours_estimated', displayedAssetsEstimation)
-            : $tc('main.man_days', displayedAssetsEstimation)
+            ? $tc(
+                'main.hours_estimated',
+                formatDuration(displayedAssetsEstimation, false)
+              )
+            : $tc(
+                'main.man_days',
+                formatDuration(displayedAssetsEstimation, false)
+              )
         }})
       </span>
     </p>
