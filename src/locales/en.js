@@ -603,6 +603,8 @@ export default {
     reset_password_title: 'Enter your email to reset your password',
     retry_fido_challenge: 'Retry FIDO challenge',
     send_email_otp: 'Resend OTP by email',
+    set_password_title: 'Welcome to Kitsu!',
+    set_password: 'Set your password',
     title: 'Log in to Kitsu',
     too_many_failed_login_attemps: 'Too many failed login attempts, please wait one minute.',
     unable_to_verify_email_otp: 'Unable to verify with email?',

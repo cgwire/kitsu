@@ -16,8 +16,7 @@
         <form @submit.prevent>
           <combobox-task-type
             :task-type-list="taskTypeList"
-            :value="taskTypeId"
-            @update:model-value="onTaskTypeChanged"
+            v-model="taskTypeId"
           />
         </form>
 
@@ -91,10 +90,6 @@ export default {
   },
 
   methods: {
-    onTaskTypeChanged(taskTypeId) {
-      this.taskTypeId = taskTypeId
-    },
-
     runConfirmation() {
       this.$emit('confirm', this.taskTypeId)
     }

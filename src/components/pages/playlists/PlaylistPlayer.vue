@@ -1080,8 +1080,8 @@ export default {
       default: () => {}
     },
     entities: {
-      type: Object,
-      default: () => {}
+      type: Array,
+      default: () => []
     },
     isLoading: {
       type: Boolean,
@@ -1186,7 +1186,7 @@ export default {
     this.$options.scrubbing = false
     this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.entities) {
-      this.entityList = Object.values(this.entities)
+      this.entityList = this.entities
     } else {
       this.entityList = []
     }
@@ -1551,14 +1551,21 @@ export default {
       this.updateRoomStatus()
     },
 
-    removeEntity(entity) {
-      this.$emit('remove-entity', entity)
+    removeEntity({ entity, previewFileId }) {
+      this.$emit('remove-entity', {
+        entity,
+        previewFileId
+      })
       this.$options.silent = true
-      const entityIndex = this.entityList.findIndex(s => s.id === entity.id)
+      /*
+      const entityIndex = this.entityList.findIndex(
+        s => s.id === entity.id && s.preview_file_id === previewFileId
+      )
       this.entityList.splice(entityIndex, 1)
       setTimeout(() => {
         this.$options.silent = false
       }, 1000)
+      */
     },
 
     onPlayPreviousEntityClicked() {
@@ -1690,16 +1697,18 @@ export default {
       }
     },
 
-    onPreviewChanged(entity, previewFile) {
+    onPreviewChanged({ entity, previewFile, previousPreviewFileId }) {
       if (!previewFile) return
       this.currentPreviewIndex = 0
-      this.changePreviewFile(entity, previewFile)
-      this.updateRoomStatus()
+      this.changePreviewFile(entity, previewFile, previousPreviewFileId)
+      this.updateRoomStatus(previousPreviewFileId)
     },
 
-    changePreviewFile(entity, previewFile) {
+    changePreviewFile(entity, previewFile, previousPreviewFileId) {
       this.pause()
-      const localEntity = this.entityList.find(s => s.id === entity.id)
+      const localEntity = this.entityList.find(
+        s => s.id === entity.id && s.preview_file_id === previousPreviewFileId
+      )
       localEntity.preview_file_id = previewFile.id
       localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension
@@ -1720,7 +1729,11 @@ export default {
           this.rawPlayer.reloadCurrentEntity()
         }
       }
-      this.$emit('preview-changed', entity, previewFile.id)
+      this.$emit('preview-changed', {
+        entity,
+        previewFileId: previewFile.id,
+        previousPreviewFileId: previousPreviewFileId
+      })
       this.clearCanvas()
       this.updateTaskPanel()
     },
@@ -1736,12 +1749,12 @@ export default {
     onEntityDropped(info) {
       const playlistEl = this.$refs['playlisted-entities']
       const scrollLeft = playlistEl.scrollLeft
-      const entityToMove = this.entityList.find(s => s.id === info.after)
+      const entityToMove = this.findEntity(info.after)
       if (!entityToMove) {
         this.$emit('new-entity-dropped', info)
       } else {
-        const toMoveIndex = this.entityList.findIndex(s => s.id === info.after)
-        let targetIndex = this.entityList.findIndex(s => s.id === info.before)
+        const toMoveIndex = this.findEntityIndex(info.after)
+        let targetIndex = this.findEntityIndex(info.before)
         if (toMoveIndex > targetIndex) targetIndex += 1
         this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
         this.$nextTick(() => {
@@ -1751,14 +1764,36 @@ export default {
       }
     },
 
+    findEntity(entityInfo) {
+      const entityId = entityInfo.entity_id
+      const previewFileId = entityInfo.preview_file_id
+      return this.entityList.find(
+        s => s.id === entityId && s.preview_file_id === previewFileId
+      )
+    },
+
+    findEntityIndex(entityInfo) {
+      const entityId = entityInfo.entity_id
+      const previewFileId = entityInfo.preview_file_id
+      return this.entityList.findIndex(
+        s => s.id === entityId && s.preview_file_id === previewFileId
+      )
+    },
+
     moveSelectedEntityToLeft() {
       const toMoveIndex = this.playingEntityIndex
       const targetIndex = this.previousEntityIndex
       const entityToMove = this.currentEntity
       this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
       const info = {
-        before: this.entityList[targetIndex].id,
-        after: this.entityList[toMoveIndex].id
+        before: {
+          entity_id: this.entityList[targetIndex].id,
+          preview_file_id: this.entityList[targetIndex].preview_file_id
+        },
+        after: {
+          entity_id: this.entityList[toMoveIndex].id,
+          preview_file_id: this.entityList[toMoveIndex].preview_file_id
+        }
       }
       this.$emit('order-change', info)
     },
@@ -1769,8 +1804,14 @@ export default {
       const entityToMove = this.currentEntity
       this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
       const info = {
-        before: this.entityList[toMoveIndex].id,
-        after: this.entityList[targetIndex].id
+        before: {
+          entity_id: this.entityList[toMoveIndex].id,
+          preview_file_id: this.entityList[toMoveIndex].preview_file_id
+        },
+        after: {
+          entity_id: this.entityList[targetIndex].id,
+          preview_file_id: this.entityList[targetIndex].preview_file_id
+        }
       }
       this.$emit('order-change', info)
     },
@@ -2270,6 +2311,7 @@ export default {
 
     onEntityDragStart(event, entity) {
       event.dataTransfer.setData('entityId', entity.id)
+      event.dataTransfer.setData('previewFileId', entity.preview_file_id)
     },
 
     resumePanZoom() {
@@ -2318,6 +2360,44 @@ export default {
 
     onComparisonPanZoomChanged({ x, y, scale }) {
       this.postComparisonPanZoomChanged(x, y, scale)
+    },
+
+    resetPlaylist() {
+      this.currentPreviewIndex = 0
+      this.currentComparisonPreviewuIndex = 0
+      this.entityList = this.entities
+      this.resetPlaylistFrameData()
+
+      this.playingEntityIndex = 0
+      this.pause()
+      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
+      this.currentTimeRaw = 0
+      this.updateProgressBar()
+      this.updateTaskPanel()
+      this.rebuildComparisonOptions()
+      this.clearCanvas()
+      this.annotations = []
+      this.movieDimensions = {
+        width: 0,
+        height: 0
+      }
+      this.isComparing = false
+      if (this.entityList.length === 0) {
+        this.clearPlayer()
+      }
+      this.resetHeight()
+      this.resetCanvas().then(() => {
+        if (this.currentPreview !== null) {
+          this.resetHandles()
+          this.movieDimensions = {
+            width: this.currentPreview.width,
+            height: this.currentPreview.height
+          }
+          this.annotations = this.currentEntity.preview_file_annotations
+          this.loadAnnotation(this.getAnnotation(0))
+        }
+      })
+      this.rawPlayer.setVolume(this.volume)
     }
   },
 
@@ -2499,42 +2579,9 @@ export default {
       }
     },
 
-    entities() {
-      this.currentPreviewIndex = 0
-      this.currentComparisonPreviewuIndex = 0
-      this.entityList = Object.values(this.entities)
-      this.resetPlaylistFrameData()
-
-      this.playingEntityIndex = 0
-      this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
-      this.currentTimeRaw = 0
-      this.updateProgressBar()
-      this.updateTaskPanel()
-      this.rebuildComparisonOptions()
-      this.clearCanvas()
-      this.annotations = []
-      this.movieDimensions = {
-        width: 0,
-        height: 0
-      }
-      this.isComparing = false
-      if (this.entityList.length === 0) {
-        this.clearPlayer()
-      }
-      this.resetHeight()
-      this.resetCanvas().then(() => {
-        if (this.currentPreview !== null) {
-          this.resetHandles()
-          this.movieDimensions = {
-            width: this.currentPreview.width,
-            height: this.currentPreview.height
-          }
-          this.annotations = this.currentEntity.preview_file_annotations
-          this.loadAnnotation(this.getAnnotation(0))
-        }
-      })
-      this.rawPlayer.setVolume(this.volume)
+    entities(entities, oldEntities) {
+      if (!this.oldEntities || this.oldEntities.length === 0)
+        this.resetPlaylist()
     },
 
     playlist(newPlaylist, oldPlaylist) {

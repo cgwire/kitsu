@@ -59,7 +59,11 @@ export default {
     if (playlist.for_client !== undefined) {
       data.for_client = playlist.for_client
     }
-    if (playlist.shots) data.shots = playlist.shots
+    if (playlist.shots)
+      data.shots = playlist.shots.map(shot => ({
+        entity_id: shot.entity_id,
+        preview_file_id: shot.preview_file_id
+      }))
     if (playlist.for_entity) data.for_entity = playlist.for_entity
     data.task_type_id = playlist.task_type_id || null
     client.put(`/api/data/playlists/${playlist.id}`, data, callback)
