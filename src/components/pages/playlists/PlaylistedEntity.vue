@@ -124,16 +124,34 @@ export default {
       'taskTypeMap',
       'taskStatusMap',
       'isCurrentUserManager',
-      'isCurrentUserSupervisor'
+      'isCurrentUserSupervisor',
+      'playlistEntryMap'
     ]),
 
     dropArea() {
       return this.$refs['drop-area']
     },
 
+    previewFiles() {
+      const previewFiles = { ...this.entity.preview_files }
+      Object.keys(previewFiles).forEach(taskTypeId => {
+        previewFiles[taskTypeId] = previewFiles[taskTypeId].filter(
+          previewFile => {
+            return (
+              !this.playlistEntryMap.has(
+                `${this.entity.id}-${previewFile.id}`
+              ) || previewFile.id === this.entity.preview_file_id
+            )
+          }
+        )
+      })
+      return previewFiles
+    },
+
     taskTypeOptions() {
-      return this.entity.preview_files
-        ? Object.keys(this.entity.preview_files)
+      return this.previewFiles
+        ? Object.keys(this.previewFiles)
+            .filter(id => this.previewFiles[id].length > 0)
             .map(id => this.taskTypeMap.get(id))
             .sort(firstBy('priority', 1).thenBy('name'))
             .map(taskType => {
@@ -146,7 +164,7 @@ export default {
     },
 
     previewFileOptions() {
-      const previewFiles = this.entity.preview_files[this.taskTypeId] || []
+      const previewFiles = this.previewFiles[this.taskTypeId] || []
       return previewFiles.map(previewFile => ({
         label: `v${previewFile.revision}`,
         value: previewFile.id
@@ -199,7 +217,10 @@ export default {
     onRemoveClick(event) {
       event.preventDefault()
       event.stopPropagation()
-      this.$emit('remove-entity', this.entity)
+      this.$emit('remove-entity', {
+        entity: this.entity,
+        previewFileId: this.previewFileId
+      })
     },
 
     setListeners() {},
@@ -218,8 +239,14 @@ export default {
     onDropped(event) {
       this.dropArea.style.width = '15px'
       this.$emit('entity-dropped', {
-        before: this.entity.id,
-        after: event.dataTransfer.getData('entityId')
+        before: {
+          entity_id: this.entity.id,
+          preview_file_id: this.previewFileId
+        },
+        after: {
+          entity_id: event.dataTransfer.getData('entityId'),
+          preview_file_id: event.dataTransfer.getData('previewFileId')
+        }
       })
     },
 
@@ -258,7 +285,7 @@ export default {
       }
     },
 
-    previewFileId() {
+    previewFileId(newValue, oldValue) {
       let previewFile = null
       const previewFiles = this.entity.preview_files[this.taskTypeId]
       if (previewFiles && previewFiles.length > 0) {
@@ -267,7 +294,11 @@ export default {
         })
       }
       if (!this.$options.silent) {
-        this.$emit('preview-changed', this.entity, previewFile)
+        this.$emit('preview-changed', {
+          entity: this.entity,
+          previewFile: previewFile,
+          previousPreviewFileId: oldValue
+        })
       }
     },
 
