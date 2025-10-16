@@ -120,7 +120,6 @@ export default {
 
   computed: {
     isNew() {
-      console.log(this.$route.query.type)
       return this.$route.query.type === 'new'
     }
   },

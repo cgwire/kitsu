@@ -14,12 +14,12 @@ export default {
     return client.pget(path)
   },
 
-  getPlaylist(production, playlist, callback) {
+  getPlaylist(production, playlist) {
     const path = `/api/data/projects/${production.id}/playlists/${playlist.id}`
-    return client.pget(path, callback)
+    return client.pget(path)
   },
 
-  getEntityPreviewFiles(entity, callback) {
+  getEntityPreviewFiles(entity) {
     const path = `/api/data/playlists/entities/${entity.id}/preview-files`
     return client.pget(path)
   },
@@ -53,7 +53,7 @@ export default {
     return client.ppost('/api/data/playlists/', data)
   },
 
-  updatePlaylist(playlist, callback) {
+  updatePlaylist(playlist) {
     const data = {}
     if (playlist.name) data.name = playlist.name
     if (playlist.for_client !== undefined) {
@@ -66,14 +66,14 @@ export default {
       }))
     if (playlist.for_entity) data.for_entity = playlist.for_entity
     data.task_type_id = playlist.task_type_id || null
-    client.put(`/api/data/playlists/${playlist.id}`, data, callback)
+    return client.pput(`/api/data/playlists/${playlist.id}`, data)
   },
 
-  deletePlaylist(playlist, callback) {
-    return client.del(`/api/data/playlists/${playlist.id}`, callback)
+  deletePlaylist(playlist) {
+    return client.pdel(`/api/data/playlists/${playlist.id}`)
   },
 
-  deleteBuildJob(job, callback) {
+  deleteBuildJob(job) {
     const path = `/api/data/playlists/${job.playlist_id}/jobs/${job.id}`
     return client.pdel(path)
   },
