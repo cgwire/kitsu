@@ -1500,18 +1500,21 @@ export default {
       this.modals.delete = false
     },
 
-    confirmRemovePlaylist() {
+    async confirmRemovePlaylist() {
       this.loading.deletePlaylist = true
       this.errors.deletePlaylist = false
-      this.deletePlaylist({
-        playlist: this.playlist,
-        callback: err => {
-          if (err) this.errors.deletePlaylist = true
-          this.loading.deletePlaylist = false
-          this.$emit('playlist-deleted')
-          this.modals.delete = false
-        }
-      })
+      try {
+        await this.deletePlaylist({
+          playlist: this.playlist
+        })
+        this.$emit('playlist-deleted')
+        this.modals.delete = false
+      } catch (err) {
+        console.error(err)
+        this.errors.deletePlaylist = true
+      } finally {
+        this.loading.deletePlaylist = false
+      }
     },
 
     scrollToEntity(index) {
@@ -1557,15 +1560,6 @@ export default {
         previewFileId
       })
       this.$options.silent = true
-      /*
-      const entityIndex = this.entityList.findIndex(
-        s => s.id === entity.id && s.preview_file_id === previewFileId
-      )
-      this.entityList.splice(entityIndex, 1)
-      setTimeout(() => {
-        this.$options.silent = false
-      }, 1000)
-      */
     },
 
     onPlayPreviousEntityClicked() {
@@ -1734,6 +1728,7 @@ export default {
         previewFileId: previewFile.id,
         previousPreviewFileId: previousPreviewFileId
       })
+
       this.clearCanvas()
       this.updateTaskPanel()
     },

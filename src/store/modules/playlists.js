@@ -45,6 +45,9 @@ const helpers = {
         found = true
       }
     }
+    if (!found) {
+      previewFile = null
+    }
     return previewFile
   }
 }
@@ -132,85 +135,74 @@ const actions = {
     return playlistsApi.getEntityPreviewFiles(entity)
   },
 
-  newPlaylist({ commit }, data) {
+  async newPlaylist({ commit }, data) {
     commit(EDIT_PLAYLIST_START, data)
-    return playlistsApi.newPlaylist(data).then(playlist => {
-      commit(EDIT_PLAYLIST_END, playlist)
-      return Promise.resolve(playlist)
-    })
+    const playlist = await playlistsApi.newPlaylist(data)
+    commit(EDIT_PLAYLIST_END, playlist)
+    return playlist
   },
 
-  editPlaylist({ commit, rootGetters }, { data, callback }) {
+  async editPlaylist({ commit, rootGetters }, { data }) {
     if (!rootGetters.isCurrentUserClient) {
       commit(EDIT_PLAYLIST_START)
-      return playlistsApi.updatePlaylist(data, (err, playlist) => {
-        if (err) commit(EDIT_PLAYLIST_ERROR)
-        else commit(EDIT_PLAYLIST_END, playlist)
-        if (callback) callback(err, playlist)
-      })
-    } else {
-      if (callback) callback()
+      try {
+        const playlist = await playlistsApi.updatePlaylist(data)
+        commit(EDIT_PLAYLIST_END, playlist)
+        return playlist
+      } catch (err) {
+        console.error(err)
+        commit(EDIT_PLAYLIST_ERROR)
+        return null
+      }
     }
   },
 
-  deletePlaylist({ commit }, { playlist, callback }) {
+  async deletePlaylist({ commit }, { playlist }) {
     commit(DELETE_PLAYLIST_START)
-    playlistsApi.deletePlaylist(playlist, err => {
-      if (err) commit(DELETE_PLAYLIST_ERROR)
-      else commit(DELETE_PLAYLIST_END, playlist)
-      if (callback) callback(err)
-    })
+    await playlistsApi.deletePlaylist(playlist)
+    commit(DELETE_PLAYLIST_END, playlist)
+    return playlist
   },
 
-  pushEntityToPlaylist(
+  async pushEntityToPlaylist(
     { commit, dispatch },
-    { playlist, entity, previewFiles, task, callback }
+    { playlist, entity, previewFiles, task, entityMap }
   ) {
-    return new Promise((resolve, reject) => {
-      commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
+    commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
+    if (!entity.preview_file_id && entityMap[entity.id]) {
+      return null
+    } else {
       commit(ADD_ENTITY_TO_PLAYLIST, { playlist, entity, task })
-      dispatch('editPlaylist', {
-        data: playlist,
-        callback: err => {
-          if (err) reject(err)
-          resolve(entity)
-        }
-      })
-    })
+      await dispatch('editPlaylist', { data: playlist })
+      return entity
+    }
   },
 
   removeEntityPreviewFromPlaylist(
     { commit, dispatch },
     { playlist, entity, previewFileId }
   ) {
-    const callback = () => {
-      Promise.resolve()
-    }
     commit(REMOVE_ENTITY_FROM_PLAYLIST, { playlist, entity, previewFileId })
-    dispatch('editPlaylist', { data: playlist, callback })
+    dispatch('editPlaylist', { data: playlist })
   },
 
   changePlaylistOrder({ commit, dispatch }, { playlist, info }) {
-    const callback = () => Promise.resolve()
-    if (!playlist) return callback()
+    if (!playlist) return null
     commit(CHANGE_PLAYLIST_ORDER, { playlist, info })
-    dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   changePlaylistPreview(
     { commit, dispatch },
     { playlist, entity, previewFileId, previousPreviewFileId }
   ) {
-    const callback = () => {
-      Promise.resolve()
-    }
     commit(CHANGE_PLAYLIST_PREVIEW, {
       playlist,
       entityId: entity.id,
       previewFileId,
       previousPreviewFileId
     })
-    return dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   removeBuildJob({ commit }, job) {
@@ -234,9 +226,9 @@ const actions = {
     return playlistsApi.runPlaylistBuild(playlist, full)
   },
 
-  changePlaylistType({ commit, dispatch }, { playlist, taskTypeId, callback }) {
+  changePlaylistType({ commit, dispatch }, { playlist, taskTypeId }) {
     commit(CHANGE_PLAYLIST_TYPE, { playlist, taskTypeId })
-    return dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   loadTempPlaylist({ commit, dispatch, rootGetters }, { taskIds, sort }) {
@@ -356,6 +348,8 @@ const mutations = {
         entity.preview_file_duration = preview.duration
         entity.preview_file_annotations = preview.annotations
         entity.preview_file_task_id = preview.task_id
+      } else {
+        entity.preview_file_id = null
       }
     }
     entity.preview_files = previewFiles
