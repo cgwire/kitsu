@@ -96,7 +96,7 @@
                 placeholder="0"
                 @input="
                   $emit('estimation-changed', {
-                    days: $event.target.value,
+                    days: $event.target.valueAsNumber || 0,
                     item: rootElement,
                     daysOff: rootElement.daysOff
                   })
@@ -1084,15 +1084,10 @@ export default {
     },
 
     totalManDays() {
-      return this.hierarchy.reduce((acc, timeElement) => {
-        let value = acc
-        let manDays = timeElement.man_days
-        if (timeElement.man_days) {
-          if (typeof manDays === 'string') manDays = parseInt(manDays)
-          value = acc + manDays
-        }
-        return value
-      }, 0)
+      return this.hierarchy.reduce(
+        (acc, timeElement) => acc + (timeElement.man_days || 0),
+        0
+      )
     },
 
     // References
@@ -1239,6 +1234,17 @@ export default {
       }
     },
 
+    refreshManDays(rootElement) {
+      if (!rootElement?.children) {
+        return
+      }
+
+      rootElement.man_days = rootElement.children.reduce(
+        (acc, child) => acc + (child.man_days || 0),
+        0
+      )
+    },
+
     isVisible(timeElement) {
       const isStartDateOk = timeElement.startDate.isSameOrAfter(this.startDate)
       const isEndDateOk = timeElement.endDate.isSameOrBefore(
@@ -1278,18 +1284,11 @@ export default {
     },
 
     onChildEstimationChanged(event, childElement, rootElement) {
-      const estimation = Number(event.target.value)
+      const estimation = event.target.valueAsNumber || 0
       if (this.isEstimationLinked) {
         childElement.man_days = daysToMinutes(this.organisation, estimation)
         childElement.estimation = childElement.man_days
-        rootElement.man_days = rootElement.children.reduce((acc, child) => {
-          let value = acc
-          const manDays = child.man_days
-          if (child.man_days) {
-            value = acc + manDays
-          }
-          return value
-        }, 0)
+        this.refreshManDays(rootElement)
 
         if (estimation > 0) {
           childElement.endDate = addBusinessDays(
@@ -1780,6 +1779,7 @@ export default {
           this.selection.forEach(item => {
             this.$emit('item-changed', item)
             this.refreshItemPositions(item.parentElement)
+            this.refreshManDays(item.parentElement)
           })
           // clear selection after moving a single item
           if (this.isChangeDates && this.selection.length === 1) {
