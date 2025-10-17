@@ -241,6 +241,8 @@ export default {
   },
 
   mounted() {
+    this.productionId = this.$route.query.productionId || undefined
+
     this.updateActiveTab()
     this.loadPerson(this.$route.params.person_id)
     setTimeout(() => {
