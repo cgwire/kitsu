@@ -1559,7 +1559,6 @@ export default {
         entity,
         previewFileId
       })
-      this.$options.silent = true
     },
 
     onPlayPreviousEntityClicked() {
@@ -2265,6 +2264,7 @@ export default {
     resetPlaylistFrameData() {
       let playlistDuration = 0
       let currentFrame = 0
+      console.log('resetPlaylistFrameData', this.entityList)
       this.entityList.forEach((entity, index) => {
         const defaultNbFrames =
           entity.preview_nb_frames || 2 * this.fps * this.frameDuration
@@ -2575,8 +2575,9 @@ export default {
     },
 
     entities(entities, oldEntities) {
-      if (!this.oldEntities || this.oldEntities.length === 0)
+      if (!this.oldEntities || this.oldEntities.length === 0) {
         this.resetPlaylist()
+      }
     },
 
     playlist(newPlaylist, oldPlaylist) {
