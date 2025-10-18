@@ -4,7 +4,11 @@
       <div class="box has-text-left">
         <div class="has-text-centered">
           <h1 class="title">
-            {{ $t('login.reset_change_password_title') }}
+            {{
+              isNew
+                ? $t('login.set_password_title')
+                : $t('login.reset_change_password_title')
+            }}
           </h1>
         </div>
 
@@ -48,7 +52,11 @@
             @click="confirmResetChangePassword"
             v-if="!isSuccess"
           >
-            {{ $t('login.reset_change_password') }}
+            {{
+              isNew
+                ? $t('login.set_password')
+                : $t('login.reset_change_password')
+            }}
           </a>
         </p>
         <p class="error" v-show="isFormError">
@@ -110,6 +118,13 @@ export default {
     this.secondsLeft = 5
   },
 
+  computed: {
+    isNew() {
+      console.log(this.$route.query.type)
+      return this.$route.query.type === 'new'
+    }
+  },
+
   methods: {
     ...mapActions(['resetChangePassword']),
 
@@ -156,6 +171,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.box {
+  border-radius: 1em;
+}
+
 .input {
   height: 3em;
   padding: 1.5em;

@@ -112,6 +112,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.box {
+  border-radius: 1em;
+}
+
 .input {
   height: 3em;
   padding: 1.5em;
