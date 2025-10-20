@@ -1454,8 +1454,8 @@ export default {
           if (dateDiff && this.isValidItemDates(newStartDate, newEndDate)) {
             // update all selected items
             this.selection.forEach(item => {
-              item.startDate.add(dateDiff)
-              item.endDate.add(dateDiff)
+              item.startDate = item.startDate.clone().add(dateDiff)
+              item.endDate = item.endDate.clone().add(dateDiff)
             })
             if (this.multiline || this.subchildren) {
               const parentElements = [
