@@ -705,11 +705,14 @@ export default {
       this.$refs.schedule?.scrollToToday()
     },
 
-    updateRoute({ department, studio, zoom }) {
+    updateRoute({ department, production, studio, zoom }) {
       const query = { ...this.$route.query }
 
       if (department !== undefined) {
         query.department = department || undefined
+      }
+      if (production !== undefined) {
+        query.production = production || undefined
       }
       if (studio !== undefined) {
         query.studio = studio || undefined
@@ -751,8 +754,8 @@ export default {
       this.refreshSchedule()
     },
 
-    selectedProduction() {
-      this.updateRoute({ production_id: this.selectedProduction })
+    selectedProduction(value) {
+      this.updateRoute({ production: value })
       this.refreshSchedule()
     },
 

@@ -4,10 +4,10 @@ import { mapGetters, mapActions } from 'vuex'
 import { getEntityPath } from '@/lib/path'
 import stringHelpers from '@/lib/string'
 import {
-  daysToMinutes,
-  getBusinessDays,
+  addBusinessDays,
   getFirstStartDate,
   getLastEndDate,
+  minutesToDays,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
@@ -283,14 +283,20 @@ export const entityMixin = {
     },
 
     saveTaskScheduleItem(item) {
-      const daysLength = getBusinessDays(item.startDate, item.endDate)
-      const estimation = daysToMinutes(this.organisation, daysLength)
-      item.man_days = estimation
+      if (item.estimation) {
+        item.endDate = addBusinessDays(
+          item.startDate,
+          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
+          item.parentElement.daysOff
+        )
+      }
+      item.man_days = item.estimation || 0
+
       if (item.startDate && item.endDate) {
         this.updateTask({
           taskId: item.id,
           data: {
-            estimation,
+            estimation: item.estimation,
             start_date: item.startDate.format('YYYY-MM-DD'),
             due_date: item.endDate.format('YYYY-MM-DD')
           }
