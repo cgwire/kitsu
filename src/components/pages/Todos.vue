@@ -449,21 +449,20 @@ export default {
         ? currentSection
         : 'todos'
 
-      if (this.currentSection === 'board') {
-        const currentProduction = this.openProductions.find(
-          ({ id }) => id === this.$route.query.productionId
-        )
-        if (currentProduction) {
-          this.productionId = currentProduction.id
-        } else {
-          this.$router.push({
-            query: {
-              productionId: this.productionId,
-              section: this.currentSection
-            }
-          })
-        }
+      const currentProduction = this.openProductions.find(
+        ({ id }) => id === this.$route.query.productionId
+      )
+      if (currentProduction) {
+        this.productionId = currentProduction.id
+      } else {
+        this.$router.push({
+          query: {
+            productionId: this.productionId,
+            section: this.currentSection
+          }
+        })
       }
+
       this.clearSelectedTasks()
     },
 
