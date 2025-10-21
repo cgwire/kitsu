@@ -1022,9 +1022,6 @@ export default {
     },
 
     addEntityToPlaylist(entity) {
-      /*if (this.currentEntities[entity.id]) {
-        return
-      }*/
       this.$options.silent = true
       const playlist = this.currentPlaylist
       this.addEntity(entity, playlist).then(() => {
@@ -1048,12 +1045,15 @@ export default {
         const notScrollRight = false
         const playlist = this.currentPlaylist
         this.addEntity(entity, playlist, notScrollRight).then(() => {
-          this.$options.silent = false
           this.playlistPlayer.onEntityDropped(info)
-          this.$options.silent = false
+          setTimeout(() => {
+            this.$options.silent = false
+          }, 2000)
         })
       } else {
-        this.$options.silent = false
+        setTimeout(() => {
+          this.$options.silent = false
+        }, 2000)
       }
     },
 

@@ -35,20 +35,15 @@ const helpers = {
       ? previewFileList.filter(p => p.task_type_id === taskTypeId)
       : previewFileList
 
-    let previewFile = null
-    let found = false
-    while (previewFiles.length > 0 && !found) {
-      previewFile = previewFiles.shift()
-      const key = `${entity.id}-${previewFile.id}`
-      if (!state.playlistEntryMap.has(key)) {
-        state.playlistEntryMap.set(key, previewFile)
-        found = true
-      }
+    const previewFile = previewFiles.find(
+      file => !state.playlistEntryMap.has(`${entity.id}-${file.id}`)
+    )
+
+    if (previewFile) {
+      state.playlistEntryMap.set(`${entity.id}-${previewFile.id}`, previewFile)
     }
-    if (!found) {
-      previewFile = null
-    }
-    return previewFile
+
+    return previewFile || null
   }
 }
 

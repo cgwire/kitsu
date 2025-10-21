@@ -2359,7 +2359,7 @@ export default {
 
     resetPlaylist() {
       this.currentPreviewIndex = 0
-      this.currentComparisonPreviewuIndex = 0
+      this.currentComparisonPreviewIndex = 0
       this.entityList = this.entities
       this.resetPlaylistFrameData()
 
