@@ -85,7 +85,7 @@ export default {
     return {
       previewFileMap: new Map(),
       previewFileEntityMap: new Map(),
-      currentEntities: {},
+      currentEntities: [],
       currentPlaylist: {
         id: 'temp',
         name: 'Temporary playlist',
@@ -209,10 +209,11 @@ export default {
             this.previewFileMap.set(previewFile.id, previewFile)
           })
         })
-        entityMap[entity.id] = entity
+        entityMap[entity.id + '-' + entity.preview_file_id] = entity
       })
+      this.$store.commit('SET_PLAYLIST_ENTRY_MAP', entityMap)
       this.currentPlaylist.shots = Object.values(entityMap)
-      this.currentEntities = entityMap
+      this.currentEntities = Object.values(entityMap)
     },
 
     convertEntityToPlaylistFormat(entityInfo) {
@@ -335,7 +336,7 @@ export default {
   watch: {
     active() {
       if (this.active) {
-        this.currentEntities = {}
+        this.currentEntities = []
         this.previewFileMap = new Map()
         this.previewFileEntityMap = new Map()
         this.isLoading = true
@@ -349,7 +350,7 @@ export default {
       } else {
         this.playlistPlayer.pause()
         this.playlistPlayer.clearCanvas()
-        this.currentEntities = {}
+        this.currentEntities = []
       }
     }
   }

@@ -207,7 +207,7 @@
         <playlist-player
           ref="playlist-player"
           :playlist="currentPlaylist"
-          :entities="currentEntities"
+          :entities="currentEntitiesList"
           :is-loading="loading.playlist"
           :is-adding-entity="isAddingEntity"
           :current-entity-type="currentEntityType"
@@ -343,7 +343,7 @@
                   <div
                     :class="{
                       'addition-shot': true,
-                      playlisted: currentEntities[asset.id] !== undefined
+                      playlisted: currentEntitiesMap[asset.id] !== undefined
                     }"
                     :key="asset.id"
                     draggable="true"
@@ -422,7 +422,7 @@
                     <div
                       :class="{
                         'addition-shot': true,
-                        playlisted: currentEntities[shot.id] !== undefined
+                        playlisted: currentEntitiesMap[shot.id] !== undefined
                       }"
                       draggable="true"
                       @dragstart="onEntityDragStart($event, shot)"
@@ -531,7 +531,8 @@ export default {
     return {
       currentPlaylist: { name: '' },
       currentSort: 'updated_at',
-      currentEntities: {},
+      currentEntitiesMap: {},
+      currentEntitiesList: [],
       isAddingEntity: false,
       isListToggled: false,
       isMorePlaylists: true,
@@ -857,15 +858,18 @@ export default {
     // Playlist build
 
     rebuildCurrentEntities() {
-      this.currentEntities = {}
-      const tmpEntities = {}
+      this.currentEntitiesMap = {}
+      this.currentEntitiesList = []
+      const tmpEntitiesList = []
+
       this.previewFileMap = new Map()
       this.previewFileEntityMap = new Map()
       if (this.currentPlaylist && this.currentPlaylist.shots) {
         this.currentPlaylist.shots.forEach(entity => {
           const playlistEntity = this.convertEntityToPlaylistFormat(entity)
           if (playlistEntity) {
-            tmpEntities[playlistEntity.id] = playlistEntity
+            tmpEntitiesList.push(playlistEntity)
+            this.currentEntitiesMap[playlistEntity.id] = playlistEntity
             this.previewFileEntityMap.set(
               entity.preview_file_id,
               playlistEntity
@@ -882,7 +886,7 @@ export default {
         })
       }
       this.$nextTick(() => {
-        this.currentEntities = tmpEntities
+        this.currentEntitiesList = tmpEntitiesList
       })
     },
 
@@ -899,6 +903,7 @@ export default {
 
     convertEntityToPlaylistFormat(entityInfo) {
       let entity
+      if (!entityInfo) return null
       if (this.isAssetPlaylist) {
         entity = assetStore.cache.assetMap.get(entityInfo.id)
       } else if (this.isSequencePlaylist) {
@@ -957,17 +962,15 @@ export default {
       }
     },
 
-    setCurrentPlaylist(callback) {
+    async setCurrentPlaylist() {
       const playlistId = this.$route.params.playlist_id
       const playlist = this.playlistMap.get(playlistId)
       if (playlist) {
         this.loading.playlist = true
-        this.loadPlaylist(playlist).then(loadedPlaylist => {
-          this.currentPlaylist = ref(loadedPlaylist)
-          this.rebuildCurrentEntities()
-          this.loading.playlist = false
-          if (callback) callback()
-        })
+        const loadedPlaylist = await this.loadPlaylist(playlist)
+        this.currentPlaylist = ref(loadedPlaylist)
+        this.rebuildCurrentEntities()
+        this.loading.playlist = false
       } else {
         this.currentPlaylist = {
           name: ''
@@ -976,25 +979,28 @@ export default {
       }
     },
 
-    addEntity(entity, playlist, scrollRight = true) {
-      if (this.currentEntities[entity.id]) {
-        return Promise.resolve()
-      }
-      return this.loadEntityPreviewFiles(entity)
-        .then(previewFiles =>
-          this.addToStorePlaylistAndSave(previewFiles, entity, playlist)
+    async addEntity(entity, playlist) {
+      try {
+        const previewFiles = await this.loadEntityPreviewFiles(entity)
+        const playlistEntity = await this.addToStorePlaylistAndSave(
+          previewFiles,
+          entity,
+          playlist
         )
-        .then(entity => {
-          this.addToPlayerPlaylist(entity, playlist, scrollRight)
-        })
-        .catch(err => console.error(err))
+        await this.addToPlayerPlaylist(playlistEntity, playlist)
+        return playlistEntity
+      } catch (err) {
+        console.error(err)
+        return null
+      }
     },
 
     addToStorePlaylistAndSave(previewFiles, entity, playlist) {
       return this.pushEntityToPlaylist({
         playlist,
         previewFiles,
-        entity: { ...entity }
+        entity: { ...entity },
+        entityMap: this.currentEntitiesMap
       })
     },
 
@@ -1003,8 +1009,11 @@ export default {
         return
       }
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
-      this.currentEntities[playlistEntity.id] = playlistEntity
-      this.playlistPlayer.entityList.push(playlistEntity)
+      if (!playlistEntity) return
+      // this.playlistPlayer.entityList.push(playlistEntity)
+      this.currentEntitiesList.push(playlistEntity)
+      this.currentEntitiesMap[playlistEntity.id] = playlistEntity
+
       if (scrollRight) {
         this.$nextTick(() => {
           this.playlistPlayer?.scrollToRight()
@@ -1013,15 +1022,17 @@ export default {
     },
 
     addEntityToPlaylist(entity) {
-      if (this.currentEntities[entity.id]) {
-        return
-      }
+      this.$options.silent = true
       const playlist = this.currentPlaylist
-      this.addEntity(entity, playlist).then(this.playlistPlayer.scrollToRight())
+      this.addEntity(entity, playlist).then(() => {
+        this.$options.silent = false
+        this.playlistPlayer.scrollToRight()
+      })
     },
 
     onNewEntityDropped(info) {
       let entity
+      this.$options.silent = true
       if (this.isAssetPlaylist) {
         entity = assetStore.cache.assetMap.get(info.after)
       } else if (this.isSequencePlaylist) {
@@ -1030,23 +1041,36 @@ export default {
         entity = shotStore.cache.shotMap.get(info.after)
       }
 
-      if (entity && !this.currentEntities[entity.id]) {
+      if (entity && !this.currentEntitiesMap[entity.id]) {
         const notScrollRight = false
         const playlist = this.currentPlaylist
         this.addEntity(entity, playlist, notScrollRight).then(() => {
           this.playlistPlayer.onEntityDropped(info)
+          setTimeout(() => {
+            this.$options.silent = false
+          }, 2000)
         })
+      } else {
+        setTimeout(() => {
+          this.$options.silent = false
+        }, 2000)
       }
     },
 
-    removeEntity(entity) {
-      this.removeEntityPreviewFromPlaylist({
+    async removeEntity({ entity, previewFileId }) {
+      this.$options.silent = true
+      this.currentEntitiesList = this.currentEntitiesList.filter(
+        e => e.id !== entity.id || e.preview_file_id !== previewFileId
+      )
+      this.currentEntitiesMap[entity.id] = undefined
+      await this.removeEntityPreviewFromPlaylist({
         playlist: this.currentPlaylist,
         entity,
-        callback: () => {
-          delete this.currentEntities[entity.id]
-        }
+        previewFileId
       })
+      setTimeout(() => {
+        this.$options.silent = false
+      }, 2000)
     },
 
     clearCurrentPlaylist() {
@@ -1153,19 +1177,28 @@ export default {
     // Save data
 
     /* When a preview is modified, the change is persisted */
-    onPreviewChanged(entity, previewFileId) {
-      this.changePlaylistPreview({
+    async onPreviewChanged({ entity, previewFileId, previousPreviewFileId }) {
+      this.$options.silent = true
+      await this.changePlaylistPreview({
         playlist: this.currentPlaylist,
         entity,
-        previewFileId
+        previewFileId,
+        previousPreviewFileId
       })
+      setTimeout(() => {
+        this.$options.silent = false
+      }, 2000)
     },
 
     onOrderChange(info) {
+      this.$options.silent = true
       this.changePlaylistOrder({
         playlist: this.currentPlaylist,
         info
       })
+      setTimeout(() => {
+        this.$options.silent = false
+      }, 2000)
     },
 
     onAnnotationChanged({ preview, additions, deletions, updates }) {
@@ -1250,34 +1283,37 @@ export default {
 
     confirmEditPlaylist(form) {
       if (this.playlistToEdit.id) {
+        this.$options.silent = true
         form.id = this.currentPlaylist.id
         this.runEditPlaylist(form)
+        setTimeout(() => {
+          this.$options.silent = false
+        }, 2000)
       } else {
         this.runAddPlaylist(form)
       }
     },
 
-    runEditPlaylist(form) {
+    async runEditPlaylist(form) {
       this.loading.editPlaylist = true
       this.errors.editPlaylist = false
-      this.editPlaylist({
-        data: {
-          id: form.id,
-          for_client: form.for_client,
-          for_entity: form.for_entity,
-          name: form.name,
-          task_type_id: form.task_type_id
-        },
-        callback: (err, playlist) => {
-          if (err) {
-            this.errors.editPlaylist = true
-          } else {
-            this.modals.isEditDisplayed = false
-            Object.assign(this.currentPlaylist, playlist)
+      try {
+        const playlist = await this.editPlaylist({
+          data: {
+            id: form.id,
+            for_client: form.for_client,
+            for_entity: form.for_entity,
+            name: form.name,
+            task_type_id: form.task_type_id
           }
-          this.loading.editPlaylist = false
-        }
-      })
+        })
+        this.modals.isEditDisplayed = false
+        Object.assign(this.currentPlaylist, playlist)
+      } catch (err) {
+        this.errors.editPlaylist = true
+      } finally {
+        this.loading.editPlaylist = false
+      }
     },
 
     goFirstPlaylist() {
@@ -1307,14 +1343,21 @@ export default {
       this.isAddingEntity = !this.isAddingEntity
     },
 
-    onTaskTypeChanged(taskTypeId) {
-      this.changePlaylistType({
-        playlist: this.currentPlaylist,
-        taskTypeId,
-        callback: () => {
-          this.rebuildCurrentEntities()
-        }
-      })
+    async onTaskTypeChanged(taskTypeId) {
+      this.$options.silent = true
+      try {
+        await this.changePlaylistType({
+          playlist: this.currentPlaylist,
+          taskTypeId
+        })
+        this.rebuildCurrentEntities()
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setTimeout(() => {
+          this.$options.silent = false
+        }, 2000)
+      }
     },
 
     onBodyScroll(event) {
@@ -1385,6 +1428,7 @@ export default {
   },
 
   mounted() {
+    this.$options.silent = false
     // Next tick needed to ensure that current production is properly set.
     this.$nextTick(() => {
       this.reloadAll()
@@ -1449,8 +1493,16 @@ export default {
       },
 
       'playlist:update'(eventData) {
-        if (this.playlistMap.get(eventData.playlist_id)) {
-          this.refreshPlaylist(eventData.playlist_id)
+        if (
+          this.playlistMap.get(eventData.playlist_id) &&
+          !this.$options.silent
+        ) {
+          this.refreshPlaylist(eventData.playlist_id).then(playlist => {
+            this.currentPlaylist = ref(playlist)
+            this.$nextTick(() => {
+              this.rebuildCurrentEntities()
+            })
+          })
         }
       },
 

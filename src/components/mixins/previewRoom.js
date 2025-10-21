@@ -79,7 +79,7 @@ export const previewRoomMixin = {
       }
     },
 
-    updateRoomStatus() {
+    updateRoomStatus(previousPreviewFileId = null) {
       if (!this.isValidRoomId(this.room) || !this.joinedRoom) return
       const data = {
         user_id: this.user.id,
@@ -92,6 +92,7 @@ export const previewRoomMixin = {
         current_preview_file_id: this.currentPreview
           ? this.currentPreview.id
           : null,
+        previous_preview_file_id: previousPreviewFileId,
         current_frame: this.currentFrameMovieOrPicture,
         is_repeating: this.isRepeating,
         is_laser_mode: this.isLaserModeOn,
@@ -219,7 +220,10 @@ export const previewRoomMixin = {
         eventData.current_preview_file_index === 0
       ) {
         const previewFileId = eventData.current_preview_file_id
-        const entity = this.entities[eventData.current_entity_id]
+        const entity = this.findEntity({
+          entity_id: eventData.current_entity_id,
+          preview_file_id: eventData.previous_preview_file_id
+        })
         const previewFile = this.getPreviewFileFromEntity(entity, previewFileId)
         const task = this.taskMap.get(previewFile.task_id)
         const taskTypeId = task.task_type_id

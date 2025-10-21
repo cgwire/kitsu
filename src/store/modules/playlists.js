@@ -23,16 +23,36 @@ import {
   ADD_NEW_JOB,
   MARK_JOB_AS_DONE,
   REMOVE_BUILD_JOB,
+  SET_PLAYLIST_ENTRY_MAP,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
   RESET_ALL
 } from '@/store/mutation-types'
 
+const helpers = {
+  getEntityPreviewFile(entity, previewFileList, taskTypeId) {
+    const previewFiles = taskTypeId
+      ? previewFileList.filter(p => p.task_type_id === taskTypeId)
+      : previewFileList
+
+    const previewFile = previewFiles.find(
+      file => !state.playlistEntryMap.has(`${entity.id}-${file.id}`)
+    )
+
+    if (previewFile) {
+      state.playlistEntryMap.set(`${entity.id}-${previewFile.id}`, previewFile)
+    }
+
+    return previewFile || null
+  }
+}
+
 const initialState = {
   playlists: [],
   playlistMap: new Map(),
   previewFileMap: new Map(),
-  previewFileEntityMap: new Map()
+  previewFileEntityMap: new Map(),
+  playlistEntryMap: new Map()
 }
 
 const state = { ...initialState }
@@ -40,6 +60,7 @@ const state = { ...initialState }
 const getters = {
   playlists: state => state.playlists,
   playlistMap: state => state.playlistMap,
+  playlistEntryMap: state => state.playlistEntryMap,
   previewFileMap: state => state.previewFileMap
 }
 
@@ -109,81 +130,79 @@ const actions = {
     return playlistsApi.getEntityPreviewFiles(entity)
   },
 
-  newPlaylist({ commit }, data) {
+  async newPlaylist({ commit }, data) {
     commit(EDIT_PLAYLIST_START, data)
-    return playlistsApi.newPlaylist(data).then(playlist => {
-      commit(EDIT_PLAYLIST_END, playlist)
-      return Promise.resolve(playlist)
-    })
+    const playlist = await playlistsApi.newPlaylist(data)
+    commit(EDIT_PLAYLIST_END, playlist)
+    return playlist
   },
 
-  editPlaylist({ commit, rootGetters }, { data, callback }) {
+  async editPlaylist({ commit, rootGetters }, { data }) {
     if (!rootGetters.isCurrentUserClient) {
       commit(EDIT_PLAYLIST_START)
-      return playlistsApi.updatePlaylist(data, (err, playlist) => {
-        if (err) commit(EDIT_PLAYLIST_ERROR)
-        else commit(EDIT_PLAYLIST_END, playlist)
-        if (callback) callback(err, playlist)
-      })
-    } else {
-      if (callback) callback()
+      try {
+        const playlist = await playlistsApi.updatePlaylist(data)
+        commit(EDIT_PLAYLIST_END, playlist)
+        return playlist
+      } catch (err) {
+        console.error(err)
+        commit(EDIT_PLAYLIST_ERROR)
+        return null
+      }
     }
   },
 
-  deletePlaylist({ commit }, { playlist, callback }) {
+  async deletePlaylist({ commit }, { playlist }) {
     commit(DELETE_PLAYLIST_START)
-    playlistsApi.deletePlaylist(playlist, err => {
-      if (err) commit(DELETE_PLAYLIST_ERROR)
-      else commit(DELETE_PLAYLIST_END, playlist)
-      if (callback) callback(err)
-    })
+    await playlistsApi.deletePlaylist(playlist)
+    commit(DELETE_PLAYLIST_END, playlist)
+    return playlist
   },
 
-  pushEntityToPlaylist(
+  async pushEntityToPlaylist(
     { commit, dispatch },
-    { playlist, entity, previewFiles, task, callback }
+    { playlist, entity, previewFiles, task, entityMap }
   ) {
-    return new Promise((resolve, reject) => {
-      commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
+    commit(LOAD_ENTITY_PREVIEW_FILES_END, { playlist, entity, previewFiles })
+    if (!entity.preview_file_id && entityMap[entity.id]) {
+      return null
+    } else {
       commit(ADD_ENTITY_TO_PLAYLIST, { playlist, entity, task })
-      dispatch('editPlaylist', {
-        data: playlist,
-        callback: err => {
-          if (err) reject(err)
-          resolve(entity)
-        }
-      })
-    })
+      await dispatch('editPlaylist', { data: playlist })
+      return entity
+    }
   },
 
   removeEntityPreviewFromPlaylist(
     { commit, dispatch },
-    { playlist, entity, callback }
+    { playlist, entity, previewFileId }
   ) {
-    commit(REMOVE_ENTITY_FROM_PLAYLIST, { playlist, entity })
-    dispatch('editPlaylist', { data: playlist, callback })
+    commit(REMOVE_ENTITY_FROM_PLAYLIST, { playlist, entity, previewFileId })
+    dispatch('editPlaylist', { data: playlist })
   },
 
-  changePlaylistOrder({ commit, dispatch }, { playlist, info, callback }) {
+  changePlaylistOrder({ commit, dispatch }, { playlist, info }) {
+    if (!playlist) return null
     commit(CHANGE_PLAYLIST_ORDER, { playlist, info })
-    dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   changePlaylistPreview(
     { commit, dispatch },
-    { playlist, entity, previewFileId, callback }
+    { playlist, entity, previewFileId, previousPreviewFileId }
   ) {
     commit(CHANGE_PLAYLIST_PREVIEW, {
       playlist,
       entityId: entity.id,
-      previewFileId
+      previewFileId,
+      previousPreviewFileId
     })
-    dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   removeBuildJob({ commit }, job) {
     commit(REMOVE_BUILD_JOB, job)
-    playlistsApi.deleteBuildJob(job)
+    return playlistsApi.deleteBuildJob(job)
   },
 
   removeBuildJobFromList({ commit }, job) {
@@ -202,9 +221,9 @@ const actions = {
     return playlistsApi.runPlaylistBuild(playlist, full)
   },
 
-  changePlaylistType({ commit, dispatch }, { playlist, taskTypeId, callback }) {
+  changePlaylistType({ commit, dispatch }, { playlist, taskTypeId }) {
     commit(CHANGE_PLAYLIST_TYPE, { playlist, taskTypeId })
-    return dispatch('editPlaylist', { data: playlist, callback })
+    return dispatch('editPlaylist', { data: playlist })
   },
 
   loadTempPlaylist({ commit, dispatch, rootGetters }, { taskIds, sort }) {
@@ -246,6 +265,7 @@ const mutations = {
     state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
     state.previewFileMap.clear()
     state.previewFileEntityMap.clear()
+    state.playlistEntryMap.clear()
     if (playlist.shots) {
       playlist.shots.forEach(entity => {
         state.previewFileEntityMap.set(entity.preview_file_id, entity)
@@ -255,6 +275,8 @@ const mutations = {
             state.previewFileMap.set(previewFile.id, previewFile)
           })
         })
+        const key = `${entity.entity_id}-${entity.preview_file_id}`
+        state.playlistEntryMap.set(key, entity)
       })
     }
   },
@@ -307,29 +329,30 @@ const mutations = {
 
     // We get the latest preview file uploaded
     if (previewFileList.length > 0) {
-      let preview = previewFileList[0]
-
-      // if the playlist is typed, we use the latest for this type.
-      if (playlist.task_type_id) {
-        previewFileList = previewFileList.filter(
-          p => p.task_type_id === playlist.task_type_id
-        )
-        if (previewFileList.length > 0) preview = previewFileList[0]
+      const preview = helpers.getEntityPreviewFile(
+        entity,
+        previewFileList,
+        playlist.task_type_id
+      )
+      if (preview) {
+        entity.preview_file_id = preview.id
+        entity.preview_file_extension = preview.extension
+        entity.preview_file_revision = preview.revision
+        entity.preview_file_width = preview.width
+        entity.preview_file_height = preview.height
+        entity.preview_file_duration = preview.duration
+        entity.preview_file_annotations = preview.annotations
+        entity.preview_file_task_id = preview.task_id
+      } else {
+        entity.preview_file_id = null
       }
-      entity.preview_file_id = preview.id
-      entity.preview_file_extension = preview.extension
-      entity.preview_file_revision = preview.revision
-      entity.preview_file_width = preview.width
-      entity.preview_file_height = preview.height
-      entity.preview_file_duration = preview.duration
-      entity.preview_file_annotations = preview.annotations
-      entity.preview_file_task_id = preview.task_id
     }
     entity.preview_files = previewFiles
   },
 
   [ADD_ENTITY_TO_PLAYLIST](state, { playlist, entity }) {
     if (!playlist.shots) playlist.shots = []
+
     playlist.shots.push({
       entity_id: entity.id,
       preview_file_task_id: entity.preview_file_task_id,
@@ -345,23 +368,34 @@ const mutations = {
     })
   },
 
-  [REMOVE_ENTITY_FROM_PLAYLIST](state, { playlist, entity }) {
+  [REMOVE_ENTITY_FROM_PLAYLIST](state, { playlist, entity, previewFileId }) {
     if (!playlist.shots) playlist.shots = []
     const entityPlaylistToDeleteIndex = playlist.shots.findIndex(
-      entityPlaylist => entityPlaylist.entity_id === entity.id
+      entityPlaylist =>
+        entityPlaylist.entity_id === entity.id &&
+        entityPlaylist.preview_file_id === previewFileId
     )
-    playlist.shots.splice(entityPlaylistToDeleteIndex, 1)
+    if (entityPlaylistToDeleteIndex >= 0) {
+      playlist.shots.splice(entityPlaylistToDeleteIndex, 1)
+      state.playlistEntryMap.delete(`${entity.id}-${previewFileId}`)
+    }
   },
 
   [CHANGE_PLAYLIST_ORDER](state, { playlist, info }) {
     const entityToMove = playlist.shots.find(
-      entityPlaylist => entityPlaylist.entity_id === info.after
+      entityPlaylist =>
+        entityPlaylist.entity_id === info.after.entity_id &&
+        entityPlaylist.preview_file_id === info.after.preview_file_id
     )
     const entityToMoveIndex = playlist.shots.findIndex(
-      entityPlaylist => entityPlaylist.entity_id === info.after
+      entityPlaylist =>
+        entityPlaylist.entity_id === info.after.entity_id &&
+        entityPlaylist.preview_file_id === info.after.preview_file_id
     )
     let targetShotIndex = playlist.shots.findIndex(
-      entityPlaylist => entityPlaylist.entity_id === info.before
+      entityPlaylist =>
+        entityPlaylist.entity_id === info.before.entity_id &&
+        entityPlaylist.preview_file_id === info.before.preview_file_id
     )
     if (entityToMoveIndex >= 0 && targetShotIndex >= 0) {
       playlist.shots.splice(entityToMoveIndex, 1)
@@ -370,12 +404,22 @@ const mutations = {
     }
   },
 
-  [CHANGE_PLAYLIST_PREVIEW](state, { playlist, entityId, previewFileId }) {
-    let entityToChange = playlist.shots.find(e => e.entity_id === entityId)
+  [CHANGE_PLAYLIST_PREVIEW](
+    state,
+    { playlist, entityId, previewFileId, previousPreviewFileId }
+  ) {
+    let entityToChange = playlist.shots.find(
+      e =>
+        e.entity_id === entityId && e.preview_file_id === previousPreviewFileId
+    )
     if (!entityToChange) {
-      entityToChange = playlist.shots.find(e => e.id === entityId)
+      entityToChange = playlist.shots.find(
+        e => e.id === entityId && e.preview_file_id === previousPreviewFileId
+      )
     }
     if (entityToChange) {
+      state.playlistEntryMap.delete(`${entityId}-${previousPreviewFileId}`)
+      state.playlistEntryMap.set(`${entityId}-${previewFileId}`, entityToChange)
       entityToChange.preview_file_id = previewFileId
     }
   },
@@ -409,21 +453,30 @@ const mutations = {
     if (playlist) {
       playlist.shots.forEach(entity => {
         if (entity.preview_files[taskTypeId]) {
-          const previewFile = entity.preview_files[taskTypeId][0]
-          entity.preview_file_id = previewFile.id
-          entity.preview_file_task_id = previewFile.task_id
-          entity.preview_file_extension = previewFile.extension
-          entity.preview_file_revision = previewFile.revision
-          entity.preview_file_width = previewFile.width
-          entity.preview_file_height = previewFile.height
-          entity.preview_file_duration = previewFile.duration
-          entity.preview_file_annotations = previewFile.annotations
-          entity.extension = previewFile.extension
-          entity.revision = previewFile.revision
-          entity.width = previewFile.width
-          entity.height = previewFile.height
-          entity.duration = previewFile.duration
-          entity.annotations = previewFile.annotations
+          const previewFile = helpers.getEntityPreviewFile(
+            entity,
+            entity.preview_files[taskTypeId]
+          )
+          if (previewFile) {
+            state.playlistEntryMap.delete(
+              `${entity.id}-${entity.preview_file_id}`
+            )
+            entity.preview_file_id = previewFile.id
+            entity.preview_file_task_id = previewFile.task_id
+            entity.preview_file_extension = previewFile.extension
+            entity.preview_file_revision = previewFile.revision
+            entity.preview_file_width = previewFile.width
+            entity.preview_file_height = previewFile.height
+            entity.preview_file_duration = previewFile.duration
+            entity.preview_file_annotations = previewFile.annotations
+            entity.extension = previewFile.extension
+            entity.revision = previewFile.revision
+            entity.width = previewFile.width
+            entity.height = previewFile.height
+            entity.duration = previewFile.duration
+            entity.annotations = previewFile.annotations
+            state.playlistEntryMap.set(`${entity.id}-${previewFile.id}`, entity)
+          }
         }
       })
     }
@@ -437,7 +490,12 @@ const mutations = {
     })
   },
 
+  [SET_PLAYLIST_ENTRY_MAP](state, playlistEntryMap) {
+    state.playlistEntryMap = new Map(Object.entries(playlistEntryMap))
+  },
+
   [RESET_ALL](state) {
+    state.playlistEntryMap.clear()
     Object.assign(state, { ...initialState })
   }
 }
