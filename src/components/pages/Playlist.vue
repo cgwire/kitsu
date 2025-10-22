@@ -1062,7 +1062,10 @@ export default {
       this.currentEntitiesList = this.currentEntitiesList.filter(
         e => e.id !== entity.id || e.preview_file_id !== previewFileId
       )
-      this.currentEntitiesMap[entity.id] = undefined
+      const entityEntry = this.currentEntitiesList.find(e => e.id === entity.id)
+      if (!entityEntry) {
+        this.currentEntitiesMap[entity.id] = undefined
+      }
       await this.removeEntityPreviewFromPlaylist({
         playlist: this.currentPlaylist,
         entity,

@@ -1702,6 +1702,7 @@ export default {
       const localEntity = this.entityList.find(
         s => s.id === entity.id && s.preview_file_id === previousPreviewFileId
       )
+      if (!localEntity) return
       localEntity.preview_file_id = previewFile.id
       localEntity.preview_file_task_id = previewFile.task_id
       localEntity.preview_file_extension = previewFile.extension

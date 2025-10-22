@@ -290,7 +290,7 @@ export default {
       this.modals.edit = true
     },
 
-    savePlaylist(form) {
+    async savePlaylist(form) {
       const newPlaylist = {
         name: form.name,
         production_id: this.currentProduction.id,
@@ -304,32 +304,32 @@ export default {
       }
       this.errors.edit = false
       this.loading.edit = true
-      this.newPlaylist(newPlaylist)
-        .then(playlist => {
-          Object.assign(this.currentPlaylist, {
-            id: playlist.id,
-            name: playlist.name,
-            for_client: playlist.for_client,
-            for_entity: playlist.for_entity,
-            is_for_all: playlist.is_for_all
-          })
-          this.editPlaylist({
-            data: this.currentPlaylist,
-            callback: err => {
-              if (err) {
-                this.errors.edit = true
-              } else {
-                this.modals.edit = false
-              }
-              this.loading.edit = false
-              this.loadPlaylists({})
-            }
-          })
+      try {
+        const playlist = await this.newPlaylist(newPlaylist)
+        Object.assign(this.currentPlaylist, {
+          id: playlist.id,
+          name: playlist.name,
+          for_client: playlist.for_client,
+          for_entity: playlist.for_entity,
+          is_for_all: playlist.is_for_all
         })
-        .catch(err => {
-          console.error(err)
-          this.errors.edit = true
+        const playlistToSave = { ...this.currentPlaylist }
+        playlistToSave.shots = this.currentPlaylist.shots.map(shot => {
+          return {
+            entity_id: shot.id,
+            preview_file_id: shot.preview_file_id
+          }
         })
+        await this.editPlaylist({
+          data: playlistToSave
+        })
+        this.modals.edit = false
+        this.loadPlaylists({})
+      } catch (err) {
+        console.error(err)
+        this.errors.edit = true
+        this.loading.edit = false
+      }
     }
   },
 
