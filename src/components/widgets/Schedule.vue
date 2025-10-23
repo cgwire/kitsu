@@ -1235,7 +1235,7 @@ export default {
     },
 
     refreshManDays(rootElement) {
-      if (!rootElement?.children) {
+      if (this.hideManDays || !rootElement?.children?.length) {
         return
       }
 
