@@ -569,6 +569,10 @@ export default {
       errors: {
         editPlaylist: false,
         playlistLoading: false
+      },
+      lockSystem: {
+        isSilent: false,
+        operationCount: 0
       }
     }
   },
@@ -710,6 +714,21 @@ export default {
       'setShotSearch',
       'updatePreviewAnnotation'
     ]),
+
+    setSilent() {
+      this.lockSystem.operationCount++
+      this.lockSystem.isSilent = true
+    },
+
+    clearSilent() {
+      setTimeout(() => {
+        this.lockSystem.operationCount--
+        if (this.lockSystem.operationCount <= 0) {
+          this.lockSystem.isSilent = false
+          this.lockSystem.operationCount = 0
+        }
+      }, 2000)
+    },
 
     // Helpers
 
@@ -1010,7 +1029,6 @@ export default {
       }
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)
       if (!playlistEntity) return
-      // this.playlistPlayer.entityList.push(playlistEntity)
       this.currentEntitiesList.push(playlistEntity)
       this.currentEntitiesMap[playlistEntity.id] = playlistEntity
 
@@ -1022,17 +1040,17 @@ export default {
     },
 
     addEntityToPlaylist(entity) {
-      this.$options.silent = true
+      this.setSilent()
       const playlist = this.currentPlaylist
       this.addEntity(entity, playlist).then(() => {
-        this.$options.silent = false
+        this.clearSilent()
         this.playlistPlayer.scrollToRight()
       })
     },
 
     onNewEntityDropped(info) {
       let entity
-      this.$options.silent = true
+      this.setSilent()
       if (this.isAssetPlaylist) {
         entity = assetStore.cache.assetMap.get(info.after)
       } else if (this.isSequencePlaylist) {
@@ -1046,19 +1064,15 @@ export default {
         const playlist = this.currentPlaylist
         this.addEntity(entity, playlist, notScrollRight).then(() => {
           this.playlistPlayer.onEntityDropped(info)
-          setTimeout(() => {
-            this.$options.silent = false
-          }, 2000)
+          this.clearSilent()
         })
       } else {
-        setTimeout(() => {
-          this.$options.silent = false
-        }, 2000)
+        this.clearSilent()
       }
     },
 
     async removeEntity({ entity, previewFileId }) {
-      this.$options.silent = true
+      this.setSilent()
       this.currentEntitiesList = this.currentEntitiesList.filter(
         e => e.id !== entity.id || e.preview_file_id !== previewFileId
       )
@@ -1071,9 +1085,7 @@ export default {
         entity,
         previewFileId
       })
-      setTimeout(() => {
-        this.$options.silent = false
-      }, 2000)
+      this.clearSilent()
     },
 
     clearCurrentPlaylist() {
@@ -1089,12 +1101,12 @@ export default {
     // Addition Helpers
 
     addCurrentSelection() {
-      this.$options.silent = true
+      this.setSilent()
       const entities = this.isAssetPlaylist
         ? this.displayedAssets
         : this.displayedShots
       this.addEntities([...entities].reverse(), () => {
-        this.$options.silent = false
+        this.clearSilent()
       })
     },
 
@@ -1105,15 +1117,15 @@ export default {
           .filter(s => s.sequence_id === sequenceId)
           .sort(firstBy('name'))
           .reverse()
-        this.$options.silent = true
+        this.setSilent()
         this.addEntities(shots, () => {
-          this.$options.silent = false
+          this.clearSilent()
         })
       }
     },
 
     async addAllPending() {
-      this.$options.silent = true
+      this.setSilent()
       this.loading.addWeekly = true
       const getPending = this.isAssetPlaylist
         ? this.getPendingAssets
@@ -1123,13 +1135,13 @@ export default {
       entities = sortEntities(entities).reverse()
       this.addEntities(entities, () => {
         this.loading.addWeekly = false
-        this.$options.silent = false
+        this.clearSilent()
       })
     },
 
     async addDailyPending() {
       this.loading.addDaily = true
-      this.$options.silent = true
+      this.setSilent()
       const getPending = this.isAssetPlaylist
         ? this.getPendingAssets
         : this.getPendingShots
@@ -1138,28 +1150,28 @@ export default {
       entities = sortEntities(entities).reverse()
       this.addEntities(entities, () => {
         this.loading.addDaily = false
-        this.$options.silent = false
+        this.clearSilent()
       })
     },
 
     addEpisodePending() {
       this.loading.addEpisode = true
-      this.$options.silent = true
+      this.setSilent()
       let shots = [].concat(...this.shotsByEpisode)
       shots = sortShots(shots).reverse()
       this.addEntities(shots, () => {
         this.loading.addEpisode = false
-        this.$options.silent = false
+        this.clearSilent()
       })
     },
 
     addMovie() {
       this.loading.addMovie = true
-      this.$options.silent = true
+      this.setSilent()
       const shots = sortShots(Array.from(shotStore.cache.shotMap.values()))
       this.addEntities(shots.reverse(), () => {
         this.loading.addMovie = false
-        this.$options.silent = false
+        this.clearSilent()
       })
     },
 
@@ -1181,27 +1193,23 @@ export default {
 
     /* When a preview is modified, the change is persisted */
     async onPreviewChanged({ entity, previewFileId, previousPreviewFileId }) {
-      this.$options.silent = true
+      this.setSilent()
       await this.changePlaylistPreview({
         playlist: this.currentPlaylist,
         entity,
         previewFileId,
         previousPreviewFileId
       })
-      setTimeout(() => {
-        this.$options.silent = false
-      }, 2000)
+      this.clearSilent()
     },
 
     onOrderChange(info) {
-      this.$options.silent = true
+      this.setSilent()
       this.changePlaylistOrder({
         playlist: this.currentPlaylist,
         info
       })
-      setTimeout(() => {
-        this.$options.silent = false
-      }, 2000)
+      this.clearSilent()
     },
 
     onAnnotationChanged({ preview, additions, deletions, updates }) {
@@ -1286,12 +1294,11 @@ export default {
 
     confirmEditPlaylist(form) {
       if (this.playlistToEdit.id) {
-        this.$options.silent = true
+        this.setSilent()
         form.id = this.currentPlaylist.id
-        this.runEditPlaylist(form)
-        setTimeout(() => {
-          this.$options.silent = false
-        }, 2000)
+        this.runEditPlaylist(form).finally(() => {
+          this.clearSilent()
+        })
       } else {
         this.runAddPlaylist(form)
       }
@@ -1347,7 +1354,7 @@ export default {
     },
 
     async onTaskTypeChanged(taskTypeId) {
-      this.$options.silent = true
+      this.setSilent('onTaskTypeChanged')
       try {
         await this.changePlaylistType({
           playlist: this.currentPlaylist,
@@ -1357,9 +1364,7 @@ export default {
       } catch (err) {
         console.error(err)
       } finally {
-        setTimeout(() => {
-          this.$options.silent = false
-        }, 2000)
+        this.clearSilent()
       }
     },
 
@@ -1431,7 +1436,6 @@ export default {
   },
 
   mounted() {
-    this.$options.silent = false
     // Next tick needed to ensure that current production is properly set.
     this.$nextTick(() => {
       this.reloadAll()
@@ -1498,7 +1502,8 @@ export default {
       'playlist:update'(eventData) {
         if (
           this.playlistMap.get(eventData.playlist_id) &&
-          !this.$options.silent
+          !this.lockSystem.isSilent &&
+          !this.isAddingEntity
         ) {
           this.refreshPlaylist(eventData.playlist_id).then(playlist => {
             this.currentPlaylist = ref(playlist)
