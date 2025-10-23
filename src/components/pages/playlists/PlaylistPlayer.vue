@@ -1692,6 +1692,7 @@ export default {
 
     onPreviewChanged({ entity, previewFile, previousPreviewFileId }) {
       if (!previewFile) return
+      if (this.$options.silent) return
       this.currentPreviewIndex = 0
       this.changePreviewFile(entity, previewFile, previousPreviewFileId)
       this.updateRoomStatus(previousPreviewFileId)
@@ -1751,9 +1752,13 @@ export default {
         const toMoveIndex = this.findEntityIndex(info.after)
         let targetIndex = this.findEntityIndex(info.before)
         if (toMoveIndex > targetIndex) targetIndex += 1
+        this.$options.silent = true
         this.moveSelectedEntity(entityToMove, toMoveIndex, targetIndex)
         this.$nextTick(() => {
           playlistEl.scrollLeft = scrollLeft
+          setTimeout(() => {
+            this.$options.silent = false
+          }, 500)
         })
         this.$emit('order-change', info)
       }
@@ -1816,7 +1821,11 @@ export default {
       if (this.playingEntityIndex >= 0) {
         if (toMoveIndex >= 0 && targetIndex >= 0) {
           this.entityList.splice(toMoveIndex, 1)
-          this.entityList.splice(targetIndex, 0, entityToMove)
+          this.entityList = [
+            ...this.entityList.slice(0, targetIndex),
+            entityToMove,
+            ...this.entityList.slice(targetIndex)
+          ]
         }
         this.$nextTick(() => {
           this.playingEntityIndex = targetIndex
