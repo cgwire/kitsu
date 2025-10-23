@@ -147,9 +147,10 @@ const actions = {
     })
   },
 
-  async loadScheduleVersions({ commit, rootState }) {
-    const production = rootState.productions.currentProduction
-    const scheduleVersions = await scheduleApi.getScheduleVersions(production)
+  async loadScheduleVersions({ commit }, production) {
+    const scheduleVersions = production
+      ? await scheduleApi.getScheduleVersions(production)
+      : []
     commit(SET_SCHEDULE_VERSIONS, scheduleVersions)
     return scheduleVersions
   },
@@ -160,8 +161,7 @@ const actions = {
     return scheduleVersion
   },
 
-  async createScheduleVersion({ commit, rootState }, version) {
-    const production = rootState.productions.currentProduction
+  async createScheduleVersion({ commit }, { production, version }) {
     const newVersion = await scheduleApi.createScheduleVersion(
       production,
       version

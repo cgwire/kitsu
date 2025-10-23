@@ -771,7 +771,7 @@ export default {
       this.loading.schedule = true
       this.availableTaskTypes = []
 
-      await this.loadScheduleVersions()
+      await this.loadScheduleVersions(this.currentProduction)
 
       return this.loadScheduleItems(this.currentProduction)
         .then(scheduleItems => {
@@ -1853,7 +1853,10 @@ export default {
     async editVersion(version) {
       this.modals.editScheduleVersion = false
       if (!version.id) {
-        const newVersion = await this.createScheduleVersion(version)
+        const newVersion = await this.createScheduleVersion({
+          production: this.currentProduction,
+          version
+        })
         this.version = newVersion.id
         this.onVersionChanged(this.version)
       } else {
@@ -1885,7 +1888,7 @@ export default {
         this.loading.applyScheduleVersion = false
       }
       // refresh version list
-      await this.loadScheduleVersions()
+      await this.loadScheduleVersions(this.currentProduction)
     }
   },
 
@@ -1918,7 +1921,8 @@ export default {
       }
     },
 
-    currentProduction() {
+    currentProduction(value) {
+      if (!value) return
       this.reset()
     }
   },
