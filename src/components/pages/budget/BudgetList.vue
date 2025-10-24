@@ -498,7 +498,7 @@ export default {
       if (!person) return 0
       const salaryScale =
         person.seniority && person.position
-          ? this.salaryScale[deparmentId][person.position][person.seniority]
+          ? this.salaryScale[deparmentId]?.[person.position]?.[person.seniority]
           : 0
       return person.daily_salary || salaryScale
     },
@@ -507,7 +507,15 @@ export default {
      * given daily rate.
      */
     convertTimeSpentToCost(dailyRate, timeSpent) {
-      const days = timeSpent / 60 / this.organisation.hours_by_day
+      const validTimeSpent = Number(timeSpent) || 0
+      const validDailyRate = Number(dailyRate) || 0
+      const hoursByDay = Number(this.organisation?.hours_by_day) || 8
+
+      if (validTimeSpent <= 0 || validDailyRate <= 0 || hoursByDay <= 0) {
+        return { cost: 0, ratio: 0 }
+      }
+
+      const days = validTimeSpent / 60 / hoursByDay
       const ratio = days / 20
       return { cost: Math.round(days * dailyRate), ratio }
     },

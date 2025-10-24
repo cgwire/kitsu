@@ -119,10 +119,14 @@ const props = defineProps({
 })
 
 const totalGap = computed(() => {
-  return props.isShowingExpenses
-    ? props.totalEntry.total -
-        (props.convertedExpenses.total + props.remainingPrevisional.total)
-    : 0
+  if (!props.isShowingExpenses) return 0
+
+  const totalEntryTotal = Number(props.totalEntry?.total) || 0
+  const convertedExpensesTotal = Number(props.convertedExpenses?.total) || 0
+  const remainingPrevisionalTotal =
+    Number(props.remainingPrevisional?.total) || 0
+
+  return totalEntryTotal - (convertedExpensesTotal + remainingPrevisionalTotal)
 })
 
 /*
@@ -131,11 +135,13 @@ const totalGap = computed(() => {
  */
 const getTotalMonthCost = month => {
   const monthKey = month === 'total' ? month : month.format('YYYY-MM')
-  const cost =
+  const rawCost =
     month === 'total'
-      ? props.totalEntry.total
-      : props.totalEntry.monthCosts[monthKey] || 0
-  return cost ? cost.toLocaleString() : ''
+      ? props.totalEntry?.total
+      : props.totalEntry?.monthCosts?.[monthKey]
+
+  const cost = Number(rawCost) || 0
+  return cost > 0 ? cost.toLocaleString() : ''
 }
 </script>
 
