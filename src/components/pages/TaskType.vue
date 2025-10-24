@@ -1564,9 +1564,9 @@ export default {
           endDate = parseDate(task.due_date)
         } else if (task.end_date) {
           endDate = parseDate(task.end_date)
-        } else if (task.estimation) {
+        } else {
           endDate = addBusinessDays(
-            task.startDate,
+            startDate,
             Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
             personElement.daysOff
           )
@@ -1576,11 +1576,6 @@ export default {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
         }
-        if (!endDate.isSameOrAfter(startDate)) {
-          const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-          endDate = startDate.clone().add(nbDays, 'days')
-        }
-
         if (endDate.isAfter(this.schedule.endDate)) {
           endDate = this.schedule.endDate.clone().add(-1, 'days')
           if (startDate.isAfter(endDate)) {
@@ -1642,9 +1637,9 @@ export default {
             endDate = parseDate(task.due_date)
           } else if (task.end_date) {
             endDate = parseDate(task.end_date)
-          } else if (task.estimation) {
+          } else {
             endDate = addBusinessDays(
-              task.startDate,
+              startDate,
               Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
               personElement.daysOff
             )
@@ -1673,9 +1668,9 @@ export default {
             endDate = parseDate(task.due_date)
           } else if (task.end_date) {
             endDate = parseDate(task.end_date)
-          } else if (task.estimation) {
+          } else {
             endDate = addBusinessDays(
-              task.startDate,
+              startDate,
               Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
               personElement.daysOff
             )
