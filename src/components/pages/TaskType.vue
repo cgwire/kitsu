@@ -1338,26 +1338,28 @@ export default {
     updateEstimation({ taskId, days, item, daysOff }) {
       const estimation = daysToMinutes(this.organisation, days)
       const task = this.taskMap.get(taskId)
-      if (!task.start_date) task.start_date = formatSimpleDate(moment())
-      const startDate = parseDate(task.start_date)
-      const dueDate = task.due_date ? parseDate(task.due_date) : null
-      const data = {
-        ...getDatesFromStartDate(
-          this.organisation,
-          startDate,
-          dueDate,
-          minutesToDays(this.organisation, estimation),
-          daysOff
-        ),
-        estimation
-      }
-      if (item) {
-        item.startDate = parseDate(data.start_date)
-        item.endDate = parseDate(data.due_date)
+      let data = { estimation }
+      if (task.start_date) {
+        const startDate = parseDate(task.start_date)
+        const dueDate = task.due_date ? parseDate(task.due_date) : null
+        data = {
+          ...data,
+          ...getDatesFromStartDate(
+            this.organisation,
+            startDate,
+            dueDate,
+            minutesToDays(this.organisation, estimation),
+            daysOff
+          )
+        }
+        if (item) {
+          item.startDate = parseDate(data.start_date)
+          item.endDate = parseDate(data.due_date)
 
-        if (item.startDate && item.endDate) {
-          item.parentElement.startDate = this.getMinDate(item.parentElement)
-          item.parentElement.endDate = this.getMaxDate(item.parentElement)
+          if (item.startDate && item.endDate) {
+            item.parentElement.startDate = this.getMinDate(item.parentElement)
+            item.parentElement.endDate = this.getMaxDate(item.parentElement)
+          }
         }
       }
       this.updateTask({ taskId, data }).catch(console.error)
@@ -1562,9 +1564,9 @@ export default {
           endDate = parseDate(task.due_date)
         } else if (task.end_date) {
           endDate = parseDate(task.end_date)
-        } else if (task.estimation) {
+        } else {
           endDate = addBusinessDays(
-            task.startDate,
+            startDate,
             Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
             personElement.daysOff
           )
@@ -1574,11 +1576,6 @@ export default {
           const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
           endDate = startDate.clone().add(nbDays, 'days')
         }
-        if (!endDate.isSameOrAfter(startDate)) {
-          const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-          endDate = startDate.clone().add(nbDays, 'days')
-        }
-
         if (endDate.isAfter(this.schedule.endDate)) {
           endDate = this.schedule.endDate.clone().add(-1, 'days')
           if (startDate.isAfter(endDate)) {
@@ -1640,9 +1637,9 @@ export default {
             endDate = parseDate(task.due_date)
           } else if (task.end_date) {
             endDate = parseDate(task.end_date)
-          } else if (task.estimation) {
+          } else {
             endDate = addBusinessDays(
-              task.startDate,
+              startDate,
               Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
               personElement.daysOff
             )
@@ -1671,9 +1668,9 @@ export default {
             endDate = parseDate(task.due_date)
           } else if (task.end_date) {
             endDate = parseDate(task.end_date)
-          } else if (task.estimation) {
+          } else {
             endDate = addBusinessDays(
-              task.startDate,
+              startDate,
               Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
               personElement.daysOff
             )

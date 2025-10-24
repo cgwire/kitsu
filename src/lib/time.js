@@ -292,15 +292,14 @@ export const getDayOffRange = (daysOff = []) => {
   }, [])
 }
 
-export const daysToMinutes = (organisation, days) => {
-  const nbHoursByDay = organisation.hours_by_day
-  return Math.floor(days * nbHoursByDay * 60)
+export const daysToMinutes = (organisation, days = 0) => {
+  return Math.floor(days * organisation.hours_by_day * 60)
 }
 
-export const minutesToDays = (organisation, minutes) => {
+export const minutesToDays = (organisation, minutes = 0) => {
   return minutes / 60 / organisation.hours_by_day
 }
 
-export const hoursToDays = (organisation, hours) => {
+export const hoursToDays = (organisation, hours = 0) => {
   return hours / organisation.hours_by_day
 }

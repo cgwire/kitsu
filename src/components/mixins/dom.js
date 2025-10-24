@@ -52,11 +52,19 @@ export const domMixin = {
     },
 
     getClientX(event) {
-      return event.touches?.[0].clientX || event.clientX
+      return (
+        event.touches?.[0]?.clientX ??
+        event.changedTouches?.[0]?.clientX ??
+        event.clientX
+      )
     },
 
     getClientY(event) {
-      return event.touches?.[0].clientY || event.clientY
+      return (
+        event.touches?.[0]?.clientY ??
+        event.changedTouches?.[0]?.clientY ??
+        event.clientY
+      )
     }
   }
 }
