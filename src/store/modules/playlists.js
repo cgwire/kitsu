@@ -398,9 +398,11 @@ const mutations = {
         entityPlaylist.preview_file_id === info.before.preview_file_id
     )
     if (entityToMoveIndex >= 0 && targetShotIndex >= 0) {
-      playlist.shots.splice(entityToMoveIndex, 1)
+      const tmpShots = [...playlist.shots]
+      tmpShots.splice(entityToMoveIndex, 1)
       if (entityToMoveIndex > targetShotIndex) targetShotIndex++
-      playlist.shots.splice(targetShotIndex, 0, entityToMove)
+      tmpShots.splice(targetShotIndex, 0, entityToMove)
+      playlist.shots = tmpShots
     }
   },
 

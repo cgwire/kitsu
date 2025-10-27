@@ -1820,12 +1820,10 @@ export default {
       if (!this.currentEntity) return
       if (this.playingEntityIndex >= 0) {
         if (toMoveIndex >= 0 && targetIndex >= 0) {
-          this.entityList.splice(toMoveIndex, 1)
-          this.entityList = [
-            ...this.entityList.slice(0, targetIndex),
-            entityToMove,
-            ...this.entityList.slice(targetIndex)
-          ]
+          const tmpEntityList = [...this.entityList]
+          tmpEntityList.splice(toMoveIndex, 1)
+          tmpEntityList.splice(targetIndex, 0, entityToMove)
+          this.entityList = tmpEntityList
         }
         this.$nextTick(() => {
           this.playingEntityIndex = targetIndex
