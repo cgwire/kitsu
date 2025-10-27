@@ -1823,12 +1823,15 @@ export default {
           const tmpEntityList = [...this.entityList]
           tmpEntityList.splice(toMoveIndex, 1)
           tmpEntityList.splice(targetIndex, 0, entityToMove)
-          this.entityList = tmpEntityList
+          this.entityList = []
+          this.$nextTick(() => {
+            this.entityList = tmpEntityList
+            this.$nextTick(() => {
+              this.playingEntityIndex = targetIndex
+              this.scrollToEntity(this.playingEntityIndex)
+            })
+          })
         }
-        this.$nextTick(() => {
-          this.playingEntityIndex = targetIndex
-          this.scrollToEntity(this.playingEntityIndex)
-        })
       }
     },
 
