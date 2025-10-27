@@ -254,7 +254,6 @@
             :sub-end-date="taskTypeEndDate"
             :hierarchy="schedule.scheduleItems"
             :zoom-level="schedule.zoomLevel"
-            :height="schedule.scheduleHeight"
             :is-loading="loading.entities"
             :is-estimation-linked="true"
             :with-estimations="dataDisplay.estimations"
@@ -599,7 +598,6 @@ export default {
         startDate: null,
         endDate: null,
         scheduleItems: [],
-        scheduleHeight: 800,
         taskTypeAfter: null,
         taskTypeBefore: null,
         taskTypeEndDate: null,
@@ -657,12 +655,10 @@ export default {
       this.initData(false)
       this.resetScheduleScroll()
     }, 100)
-    window.addEventListener('resize', this.resetScheduleHeight)
   },
 
   beforeUnmount() {
     this.clearSelectedTasks()
-    window.removeEventListener('resize', this.resetScheduleHeight)
   },
 
   computed: {
@@ -932,10 +928,6 @@ export default {
           .map(personId => this.personMap.get(personId))
           .filter(person => person && !person.is_bot)
       )
-    },
-
-    scheduleWidget() {
-      return this.$refs['schedule-widget']
     },
 
     searchField() {
@@ -1759,19 +1751,6 @@ export default {
       personElement.expanded = !personElement.expanded
     },
 
-    resetScheduleHeight() {
-      this.$nextTick(() => {
-        if (this.isActiveTab('schedule')) {
-          const pageHeight = this.$refs.page.offsetHeight
-          const headerHeight = this.$refs.header.offsetHeight
-          this.schedule.scheduleHeight = pageHeight - headerHeight + 20
-          if (this.$refs['schedule-widget']) {
-            this.$refs['schedule-widget'].resetScheduleSize()
-          }
-        }
-      })
-    },
-
     showImportModal() {
       this.modals.importing = true
     },
@@ -1933,7 +1912,6 @@ export default {
     activeTab() {
       if (this.isActiveTab('schedule')) {
         this.resetScheduleItems()
-        this.resetScheduleHeight()
         this.$nextTick(() => {
           this.resetScheduleScroll()
         })

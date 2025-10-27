@@ -1,6 +1,10 @@
 <template>
   <div class="schedule-wrapper">
-    <div :class="scheduleClass" ref="schedule">
+    <div
+      ref="schedule"
+      class="schedule unselectable"
+      :class="`zoom-level-${zoomLevel}`"
+    >
       <div
         ref="entity-list"
         class="entities"
@@ -230,6 +234,9 @@
         <div
           ref="timeline-header"
           class="timeline-header"
+          :class="{
+            'without-milestones': !withMilestones
+          }"
           @mousedown="startBrowsingX"
           @touchstart="startBrowsingX"
           v-if="zoomLevel > 0"
@@ -302,6 +309,9 @@
         <div
           ref="timeline-header"
           class="timeline-header"
+          :class="{
+            'without-milestones': !withMilestones
+          }"
           @mousedown="startBrowsingX"
           @touchstart="startBrowsingX"
           v-else
@@ -1055,10 +1065,6 @@ export default {
       return this.daysAvailable
     },
 
-    nbDisplayedDays() {
-      return this.displayedDays.length
-    },
-
     displayedDaysIndex() {
       let index = 0
       const dayIndex = {}
@@ -1121,15 +1127,6 @@ export default {
     },
 
     // Styles
-
-    scheduleClass() {
-      const className = {
-        schedule: true,
-        unselectable: true
-      }
-      className[`zoom-level-${this.zoomLevel}`] = true
-      return className
-    },
 
     timelineStyle() {
       const firstDay = this.daysAvailable[0]
@@ -1254,17 +1251,12 @@ export default {
     },
 
     resetScheduleSize() {
-      if (this.height) this.schedule.style.height = `${this.height}px`
       if (this.timelineContent) {
         if (this.zoomLevel > 0) {
-          this.timelineContent.style.width = `${this.nbDisplayedDays * this.cellWidth}px`
+          this.timelineContent.style.width = `${this.displayedDays.length * this.cellWidth}px`
         } else {
           this.timelineContent.style.width = `${this.weeksAvailable.length * this.cellWidth}px`
         }
-        let contentHeight = this.schedule.offsetHeight - 250
-        if (!this.withMilestones) contentHeight += 40
-        this.timelineContentWrapper.style.height = `${contentHeight}px`
-        this.entityList.style.height = `${this.schedule.offsetHeight - 169}px`
       }
     },
 
@@ -2455,7 +2447,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   right: 0;
   left: 0;
   bottom: 0;
-  height: 97vh;
+  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: row;
@@ -2565,6 +2557,11 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     padding-bottom: 0;
     overflow: hidden;
     z-index: 0;
+    min-height: 85px;
+
+    &.without-milestones {
+      min-height: 54px;
+    }
 
     .day {
       display: inline-block;
