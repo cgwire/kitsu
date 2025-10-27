@@ -341,16 +341,22 @@
                 </h2>
                 <div class="addition-entities">
                   <div
+                    :key="asset.id"
                     :class="{
                       'addition-shot': true,
                       playlisted: currentEntitiesMap[asset.id] !== undefined
                     }"
-                    :key="asset.id"
                     draggable="true"
                     @dragstart="onEntityDragStart($event, asset)"
                     @click.prevent="addEntityToPlaylist(asset)"
                     v-for="asset in typeAssets.filter(a => !a.canceled)"
                   >
+                    <div
+                      class="entity-loading-spinner"
+                      v-if="entityLoading[asset.id]"
+                    >
+                      <spinner />
+                    </div>
                     <light-entity-thumbnail
                       :preview-file-id="asset.preview_file_id"
                       width="150px"
@@ -364,11 +370,11 @@
             <div v-else-if="isSequencePlaylist">
               <div class="addition-entities">
                 <div
+                  :key="sequence.id"
                   :class="{
                     'addition-shot': true,
                     playlisted: currentEntities[sequence.id] !== undefined
                   }"
-                  :key="sequence.id"
                   draggable="true"
                   @dragstart="onEntityDragStart($event, sequence)"
                   @click.prevent="addEntityToPlaylist(sequence)"
@@ -376,6 +382,12 @@
                     s => !s.canceled
                   )"
                 >
+                  <div
+                    class="entity-loading-spinner"
+                    v-if="entityLoading[sequence.id]"
+                  >
+                    <spinner />
+                  </div>
                   <light-entity-thumbnail
                     :preview-file-id="sequence.preview_file_id"
                     width="150px"
@@ -428,6 +440,12 @@
                       @dragstart="onEntityDragStart($event, shot)"
                       @click.prevent="addEntityToPlaylist(shot)"
                     >
+                      <div
+                        class="entity-loading-spinner"
+                        v-if="entityLoading[shot.id]"
+                      >
+                        <spinner />
+                      </div>
                       <light-entity-thumbnail
                         :preview-file-id="shot.preview_file_id"
                         width="150px"
@@ -533,6 +551,7 @@ export default {
       currentSort: 'updated_at',
       currentEntitiesMap: {},
       currentEntitiesList: [],
+      entityLoading: {},
       isAddingEntity: false,
       isListToggled: false,
       isMorePlaylists: true,
@@ -999,6 +1018,7 @@ export default {
     },
 
     async addEntity(entity, playlist) {
+      this.entityLoading[entity.id] = true
       try {
         const previewFiles = await this.loadEntityPreviewFiles(entity)
         const playlistEntity = await this.addToStorePlaylistAndSave(
@@ -1007,9 +1027,11 @@ export default {
           playlist
         )
         await this.addToPlayerPlaylist(playlistEntity, playlist)
+        this.entityLoading[entity.id] = false
         return playlistEntity
       } catch (err) {
         console.error(err)
+        this.entityLoading[entity.id] = false
         return null
       }
     },
@@ -1882,5 +1904,22 @@ h2 {
       margin-top: 1px;
     }
   }
+}
+
+.addition-shot {
+  position: relative;
+}
+
+.entity-loading-spinner {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 5px;
+  bottom: 22px;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  right: 20px;
+  position: absolute;
+  top: 0;
 }
 </style>
