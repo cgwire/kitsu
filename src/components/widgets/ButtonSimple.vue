@@ -7,6 +7,7 @@
       'is-loading': isLoading,
       'is-primary': isPrimary,
       'is-big': isBig,
+      'is-medium': isMedium,
       'is-thin': isThin
     }"
     :disabled="disabled"
@@ -177,6 +178,10 @@ export default {
       default: false,
       type: Boolean
     },
+    isMedium: {
+      default: false,
+      type: Boolean
+    },
     isOn: {
       default: false,
       type: Boolean
@@ -222,6 +227,11 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   padding: 0.5em 1em;
+}
+
+.is-medium {
+  font-size: 1rem;
+  height: 40px;
 }
 
 .is-thin {
