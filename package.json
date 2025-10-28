@@ -7,17 +7,18 @@
   "license": "AGPL-3.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "format": "prettier --write --list-different src/**/*.{js,vue}",
-    "lint": "eslint --ext .js,.vue src/",
-    "lint:fix": "npm run lint -- --fix",
-    "preview": "vite preview",
-    "test": "npm run test:unit",
-    "test:unit": "vitest tests/unit",
-    "prepare": "husky"
-  },
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "format": "prettier --write --list-different src/**/*.{js,vue}",
+  "lint": "eslint --ext .js,.vue src/",
+  "lint:fix": "npm run lint -- --fix",
+  "preview": "vite preview",
+  "start": "vite preview --port 10000 --host",
+  "test": "npm run test:unit",
+  "test:unit": "vitest tests/unit",
+  "prepare": "husky"
+},
   "dependencies": {
     "@animxyz/vue3": "0.6.7",
     "@arch-inc/fabricjs-psbrush": "0.0.20",
