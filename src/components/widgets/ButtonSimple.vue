@@ -49,7 +49,16 @@
     <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
-    <calendar-plus-icon class="icon" v-else-if="icon === 'calendar-plus'" />
+    <calendar-icon
+      class="icon"
+      :stroke-width="1.5"
+      v-else-if="icon === 'calendar'"
+    />
+    <calendar-plus-icon
+      class="icon"
+      :stroke-width="1.5"
+      v-else-if="icon === 'calendar-plus'"
+    />
     <smile-icon class="icon" v-else-if="icon === 'smile'" />
     <file-digit-icon
       class="icon"
@@ -77,6 +86,7 @@
 <script>
 import {
   Bell,
+  CalendarIcon,
   CalendarPlusIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -122,6 +132,7 @@ export default {
 
   components: {
     Bell,
+    CalendarIcon,
     CalendarPlusIcon,
     ChevronDownIcon,
     ChevronLeftIcon,

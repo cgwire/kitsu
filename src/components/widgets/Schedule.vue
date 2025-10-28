@@ -10,6 +10,7 @@
         class="entities"
         @mousedown="startBrowsingY"
         @touchstart="startBrowsingY"
+        v-show="!hideEntities"
       >
         <div
           class="has-text-right total-man-days mr0"
@@ -131,6 +132,7 @@
 
             <div
               class="children"
+              :class="{ mb0: hideRoot }"
               :style="childrenStyle(rootElement, multiline, true)"
               v-if="rootElement.expanded"
             >
@@ -469,6 +471,12 @@
                 @dragleave="onTaskDragLeave"
                 @drop="onTaskDrop($event, rootElement)"
               >
+                <div
+                  class="entity-line child-line hidden"
+                  v-if="invertLinesColor"
+                >
+                  <!-- to invert odd/event line color -->
+                </div>
                 <div
                   class="entity-line child-line"
                   :class="{ multiline }"
@@ -849,9 +857,9 @@ export default {
       type: Boolean,
       default: true
     },
-    height: {
-      type: Number,
-      default: 0
+    hideEntities: {
+      type: Boolean,
+      default: false
     },
     hideManDays: {
       type: Boolean,
@@ -860,6 +868,10 @@ export default {
     hierarchy: {
       default: () => [],
       type: Array
+    },
+    invertLinesColor: {
+      type: Boolean,
+      default: false
     },
     subEndDate: {
       type: Object,
@@ -932,6 +944,7 @@ export default {
     'item-unassign',
     'root-element-expanded',
     'root-element-selected',
+    'scroll',
     'task-selected',
     'task-unselected'
   ],
@@ -1691,6 +1704,13 @@ export default {
       this.entityList.scrollTop = newTop
       const newLeft = position.scrollLeft
       this.timelineHeader.scrollLeft = newLeft
+
+      this.$emit('scroll', { top: position.scrollTop })
+    },
+
+    setScrollPosition(top) {
+      this.timelineContentWrapper.scrollTop = top
+      this.entityList.scrollTop = top
     },
 
     scrollScheduleLeft(event) {
@@ -1711,8 +1731,7 @@ export default {
         event.movementY || this.getClientY(event) - this.initialClientY
       const newTop = previousTop - movementY
       this.initialClientY = this.getClientY(event)
-      this.timelineContentWrapper.scrollTop = newTop
-      this.entityList.scrollTop = newTop
+      this.setScrollPosition(newTop)
     },
 
     scrollToToday() {
@@ -2915,6 +2934,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   position: relative;
   margin-bottom: 1em;
   min-height: 40px;
+}
+.timeline-element:last-child .children {
+  margin-bottom: 0;
 }
 
 .child {
