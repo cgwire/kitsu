@@ -541,12 +541,15 @@ export default {
   .group-list {
     align-items: flex-start;
     background-color: var(--background-alt);
+    border: inherit;
+    border-top-right-radius: 1em;
     border-bottom-left-radius: 1em;
     border-bottom-right-radius: 1em;
     display: flex;
     flex-direction: column;
-    left: 0;
+    left: -1px;
     max-height: 200px;
+    min-width: calc(100% + 2px + 1em);
     overflow-x: hidden;
     overflow-y: auto;
     padding: 0.5rem 0;
@@ -572,7 +575,7 @@ export default {
 }
 
 .search-queries .tag:hover {
-  transform: scale(1.1);
+  transform: scale(1.03);
 }
 
 .search-queries .group.tag:hover, // avoid bug (overflow)
