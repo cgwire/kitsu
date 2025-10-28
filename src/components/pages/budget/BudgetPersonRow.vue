@@ -182,7 +182,7 @@ const personRemainingPrevisional = computed(() => {
 const personExpense = computed(() => {
   return (
     props.convertedExpenses[props.personEntry.department_id]?.[
-      props.personEntry.budget_entry_id
+      props.personEntry.person_id
     ] || { total: 0 }
   )
 })
