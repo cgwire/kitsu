@@ -1,11 +1,16 @@
 <template>
   <div class="schedule-wrapper">
-    <div :class="scheduleClass" ref="schedule">
+    <div
+      ref="schedule"
+      class="schedule unselectable"
+      :class="`zoom-level-${zoomLevel}`"
+    >
       <div
         ref="entity-list"
         class="entities"
         @mousedown="startBrowsingY"
         @touchstart="startBrowsingY"
+        v-show="!hideEntities"
       >
         <div
           class="has-text-right total-man-days mr0"
@@ -127,6 +132,7 @@
 
             <div
               class="children"
+              :class="{ mb0: hideRoot }"
               :style="childrenStyle(rootElement, multiline, true)"
               v-if="rootElement.expanded"
             >
@@ -230,6 +236,9 @@
         <div
           ref="timeline-header"
           class="timeline-header"
+          :class="{
+            'without-milestones': !withMilestones
+          }"
           @mousedown="startBrowsingX"
           @touchstart="startBrowsingX"
           v-if="zoomLevel > 0"
@@ -302,6 +311,9 @@
         <div
           ref="timeline-header"
           class="timeline-header"
+          :class="{
+            'without-milestones': !withMilestones
+          }"
           @mousedown="startBrowsingX"
           @touchstart="startBrowsingX"
           v-else
@@ -459,6 +471,12 @@
                 @dragleave="onTaskDragLeave"
                 @drop="onTaskDrop($event, rootElement)"
               >
+                <div
+                  class="entity-line child-line hidden"
+                  v-if="invertLinesColor"
+                >
+                  <!-- to invert odd/event line color -->
+                </div>
                 <div
                   class="entity-line child-line"
                   :class="{ multiline }"
@@ -839,9 +857,9 @@ export default {
       type: Boolean,
       default: true
     },
-    height: {
-      type: Number,
-      default: 0
+    hideEntities: {
+      type: Boolean,
+      default: false
     },
     hideManDays: {
       type: Boolean,
@@ -850,6 +868,10 @@ export default {
     hierarchy: {
       default: () => [],
       type: Array
+    },
+    invertLinesColor: {
+      type: Boolean,
+      default: false
     },
     subEndDate: {
       type: Object,
@@ -922,6 +944,7 @@ export default {
     'item-unassign',
     'root-element-expanded',
     'root-element-selected',
+    'scroll',
     'task-selected',
     'task-unselected'
   ],
@@ -1055,10 +1078,6 @@ export default {
       return this.daysAvailable
     },
 
-    nbDisplayedDays() {
-      return this.displayedDays.length
-    },
-
     displayedDaysIndex() {
       let index = 0
       const dayIndex = {}
@@ -1121,15 +1140,6 @@ export default {
     },
 
     // Styles
-
-    scheduleClass() {
-      const className = {
-        schedule: true,
-        unselectable: true
-      }
-      className[`zoom-level-${this.zoomLevel}`] = true
-      return className
-    },
 
     timelineStyle() {
       const firstDay = this.daysAvailable[0]
@@ -1254,17 +1264,12 @@ export default {
     },
 
     resetScheduleSize() {
-      if (this.height) this.schedule.style.height = `${this.height}px`
       if (this.timelineContent) {
         if (this.zoomLevel > 0) {
-          this.timelineContent.style.width = `${this.nbDisplayedDays * this.cellWidth}px`
+          this.timelineContent.style.width = `${this.displayedDays.length * this.cellWidth}px`
         } else {
           this.timelineContent.style.width = `${this.weeksAvailable.length * this.cellWidth}px`
         }
-        let contentHeight = this.schedule.offsetHeight - 250
-        if (!this.withMilestones) contentHeight += 40
-        this.timelineContentWrapper.style.height = `${contentHeight}px`
-        this.entityList.style.height = `${this.schedule.offsetHeight - 169}px`
       }
     },
 
@@ -1699,6 +1704,13 @@ export default {
       this.entityList.scrollTop = newTop
       const newLeft = position.scrollLeft
       this.timelineHeader.scrollLeft = newLeft
+
+      this.$emit('scroll', { top: position.scrollTop })
+    },
+
+    setScrollPosition(top) {
+      this.timelineContentWrapper.scrollTop = top
+      this.entityList.scrollTop = top
     },
 
     scrollScheduleLeft(event) {
@@ -1719,8 +1731,7 @@ export default {
         event.movementY || this.getClientY(event) - this.initialClientY
       const newTop = previousTop - movementY
       this.initialClientY = this.getClientY(event)
-      this.timelineContentWrapper.scrollTop = newTop
-      this.entityList.scrollTop = newTop
+      this.setScrollPosition(newTop)
     },
 
     scrollToToday() {
@@ -2455,7 +2466,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   right: 0;
   left: 0;
   bottom: 0;
-  height: 97vh;
+  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: row;
@@ -2565,6 +2576,11 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     padding-bottom: 0;
     overflow: hidden;
     z-index: 0;
+    min-height: 85px;
+
+    &.without-milestones {
+      min-height: 54px;
+    }
 
     .day {
       display: inline-block;
@@ -2918,6 +2934,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   position: relative;
   margin-bottom: 1em;
   min-height: 40px;
+}
+.timeline-element:last-child .children {
+  margin-bottom: 0;
 }
 
 .child {

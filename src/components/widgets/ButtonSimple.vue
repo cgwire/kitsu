@@ -7,6 +7,7 @@
       'is-loading': isLoading,
       'is-primary': isPrimary,
       'is-big': isBig,
+      'is-medium': isMedium,
       'is-thin': isThin
     }"
     :disabled="disabled"
@@ -48,7 +49,16 @@
     <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
-    <calendar-plus-icon class="icon" v-else-if="icon === 'calendar-plus'" />
+    <calendar-icon
+      class="icon"
+      :stroke-width="1.5"
+      v-else-if="icon === 'calendar'"
+    />
+    <calendar-plus-icon
+      class="icon"
+      :stroke-width="1.5"
+      v-else-if="icon === 'calendar-plus'"
+    />
     <smile-icon class="icon" v-else-if="icon === 'smile'" />
     <file-digit-icon
       class="icon"
@@ -76,6 +86,7 @@
 <script>
 import {
   Bell,
+  CalendarIcon,
   CalendarPlusIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -121,6 +132,7 @@ export default {
 
   components: {
     Bell,
+    CalendarIcon,
     CalendarPlusIcon,
     ChevronDownIcon,
     ChevronLeftIcon,
@@ -177,6 +189,10 @@ export default {
       default: false,
       type: Boolean
     },
+    isMedium: {
+      default: false,
+      type: Boolean
+    },
     isOn: {
       default: false,
       type: Boolean
@@ -222,6 +238,11 @@ export default {
   font-size: 1.5rem;
   font-weight: bold;
   padding: 0.5em 1em;
+}
+
+.is-medium {
+  font-size: 1rem;
+  height: 40px;
 }
 
 .is-thin {
