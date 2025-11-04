@@ -1716,7 +1716,7 @@ export default {
           loading: false,
           man_days: estimation,
           editable: this.isSupervisorInDepartment,
-          unresizable: true,
+          unresizable: false,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),
           children: []
@@ -1836,12 +1836,15 @@ export default {
           item.parentElement.daysOff
         )
       }
+      item.man_days = item.estimation || 0
+
       if (item.startDate && item.endDate) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
         this.updateTask({
           taskId: item.id,
           data: {
+            estimation: item.estimation,
             start_date: item.startDate.format('YYYY-MM-DD'),
             due_date: item.endDate.format('YYYY-MM-DD')
           }
