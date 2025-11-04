@@ -1087,6 +1087,7 @@ td.retake-count {
 
 .datatable-wrapper {
   min-height: calc(100% - 50px);
+  transition: margin-top 0.3s ease;
 
   &.with-schedule {
     margin-top: 54px;
