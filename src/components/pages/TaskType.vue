@@ -19,7 +19,7 @@
               icon="grid"
               :is-on="contactSheetMode"
               :title="$t('tasks.show_contact_sheet')"
-              @click="contactSheetMode = !contactSheetMode"
+              @click="toggleContactSheetMode()"
               v-if="isActiveTab('tasks')"
             />
             <div
@@ -170,7 +170,7 @@
               is-medium
               :text="$t('schedule.title')"
               @click="toggleSchedule()"
-              v-if="isActiveTab('tasks')"
+              v-if="isActiveTab('tasks') && !contactSheetMode"
             />
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
               <combobox-styled
@@ -286,7 +286,7 @@
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
             @scroll="onScheduleScroll"
-            v-if="isScheduleVisible"
+            v-if="isScheduleVisible && !contactSheetMode"
           />
         </task-list>
 
@@ -1258,6 +1258,11 @@ export default {
 
     onScheduleScroll({ top }) {
       this.$refs['task-list']?.setScrollPosition(top)
+    },
+
+    toggleContactSheetMode() {
+      this.contactSheetMode = !this.contactSheetMode
+      this.isScheduleVisible = false
     },
 
     toggleSchedule() {
