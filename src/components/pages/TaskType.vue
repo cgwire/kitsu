@@ -1267,7 +1267,7 @@ export default {
 
     toggleSchedule() {
       this.isScheduleVisible = !this.isScheduleVisible
-      this.resetScheduleItems()
+      this.resetScheduleItems(true)
     },
 
     updateTaskInQuery() {
@@ -1952,18 +1952,20 @@ export default {
     },
 
     resetScheduleScroll() {
-      if (this.$refs['schedule-widget']) {
-        const today = moment()
-        if (
-          today.isBefore(moment(this.schedule.taskTypeStartDate)) ||
-          today.isAfter(moment(this.schedule.taskTypeEndDate))
-        ) {
-          this.$refs['schedule-widget'].scrollToDate(
-            moment(this.schedule.taskTypeStartDate).add(20, 'days')
-          )
-        } else {
-          this.$refs['schedule-widget'].scrollToToday()
-        }
+      if (!this.$refs['schedule-widget']) return
+
+      const today = moment()
+      if (
+        today.isBefore(moment(this.schedule.taskTypeStartDate)) ||
+        today.isAfter(moment(this.schedule.taskTypeEndDate))
+      ) {
+        const date = moment(this.schedule.taskTypeStartDate).add(
+          this.isScheduleVisible ? 0 : 20,
+          'days'
+        )
+        this.$refs['schedule-widget'].scrollToDate(date)
+      } else {
+        this.$refs['schedule-widget'].scrollToToday()
       }
     }
   },
