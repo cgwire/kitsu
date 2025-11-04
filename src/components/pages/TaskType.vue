@@ -2030,6 +2030,7 @@ export default {
     currentSort() {
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
+      this.resetScheduleItems()
       this.clearSelectedTasks()
       this.updateTaskInQuery()
     },
