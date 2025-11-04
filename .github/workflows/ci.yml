@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22, current]
+        node: [20, 22, 24, current]
     env:
       NODE_OPTIONS: '--max_old_space_size=8192'
       HUSKY: 0
