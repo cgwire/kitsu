@@ -422,7 +422,7 @@
                   :class="{
                     thinner: multiline
                   }"
-                  :title="`${rootElement.name} (${rootElement.startDate.format('YYYY-MM-DD')} - ${rootElement.endDate.format('YYYY-MM-DD')})`"
+                  :title="`${rootElement.name} (${rootElement.startDate?.format('YYYY-MM-DD')} - ${rootElement.endDate?.format('YYYY-MM-DD')})`"
                   :style="timebarStyle(rootElement, true)"
                 >
                   <div
