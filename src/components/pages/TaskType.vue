@@ -19,7 +19,7 @@
               icon="grid"
               :is-on="contactSheetMode"
               :title="$t('tasks.show_contact_sheet')"
-              @click="contactSheetMode = !contactSheetMode"
+              @click="toggleContactSheetMode()"
               v-if="isActiveTab('tasks')"
             />
             <div
@@ -170,7 +170,7 @@
               is-medium
               :text="$t('schedule.title')"
               @click="toggleSchedule()"
-              v-if="isActiveTab('tasks')"
+              v-if="isActiveTab('tasks') && !contactSheetMode"
             />
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
               <combobox-styled
@@ -286,7 +286,7 @@
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
             @scroll="onScheduleScroll"
-            v-if="isScheduleVisible"
+            v-if="isScheduleVisible && !contactSheetMode"
           />
         </task-list>
 
@@ -1260,9 +1260,14 @@ export default {
       this.$refs['task-list']?.setScrollPosition(top)
     },
 
+    toggleContactSheetMode() {
+      this.contactSheetMode = !this.contactSheetMode
+      this.isScheduleVisible = false
+    },
+
     toggleSchedule() {
       this.isScheduleVisible = !this.isScheduleVisible
-      this.resetScheduleItems()
+      this.resetScheduleItems(true)
     },
 
     updateTaskInQuery() {
@@ -1520,6 +1525,7 @@ export default {
           id: '',
           color: 'transparent',
           children: [],
+          timesheet: [],
           expanded: true
         }
       ]
@@ -1535,8 +1541,8 @@ export default {
         )
         scheduleItems[0].startDate = scheduleItem.startDate
         scheduleItems[0].endDate = scheduleItem.endDate
-        scheduleItems[0].timesheet = scheduleItem.timesheet
         scheduleItems[0].children.push(...scheduleItem.children)
+        scheduleItems[0].timesheet.push(...scheduleItem.timesheet)
       })
 
       this.schedule.scheduleItems = scheduleItems
@@ -1711,7 +1717,7 @@ export default {
           loading: false,
           man_days: estimation,
           editable: this.isSupervisorInDepartment,
-          unresizable: true,
+          unresizable: false,
           parentElement: personElement,
           color: this.getTaskElementColor(task, endDate),
           children: []
@@ -1831,12 +1837,15 @@ export default {
           item.parentElement.daysOff
         )
       }
+      item.man_days = item.estimation || 0
+
       if (item.startDate && item.endDate) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
         this.updateTask({
           taskId: item.id,
           data: {
+            estimation: item.estimation,
             start_date: item.startDate.format('YYYY-MM-DD'),
             due_date: item.endDate.format('YYYY-MM-DD')
           }
@@ -1947,18 +1956,20 @@ export default {
     },
 
     resetScheduleScroll() {
-      if (this.$refs['schedule-widget']) {
-        const today = moment()
-        if (
-          today.isBefore(moment(this.schedule.taskTypeStartDate)) ||
-          today.isAfter(moment(this.schedule.taskTypeEndDate))
-        ) {
-          this.$refs['schedule-widget'].scrollToDate(
-            moment(this.schedule.taskTypeStartDate).add(20, 'days')
-          )
-        } else {
-          this.$refs['schedule-widget'].scrollToToday()
-        }
+      if (!this.$refs['schedule-widget']) return
+
+      const today = moment()
+      if (
+        today.isBefore(moment(this.schedule.taskTypeStartDate)) ||
+        today.isAfter(moment(this.schedule.taskTypeEndDate))
+      ) {
+        const date = moment(this.schedule.taskTypeStartDate).add(
+          this.isScheduleVisible ? 0 : 20,
+          'days'
+        )
+        this.$refs['schedule-widget'].scrollToDate(date)
+      } else {
+        this.$refs['schedule-widget'].scrollToToday()
       }
     }
   },
@@ -2020,6 +2031,7 @@ export default {
     currentSort() {
       this.sortTasks()
       this.$refs['task-list'].resetSelection()
+      this.resetScheduleItems()
       this.clearSelectedTasks()
       this.updateTaskInQuery()
     },

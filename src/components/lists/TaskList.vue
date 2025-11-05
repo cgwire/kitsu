@@ -1035,6 +1035,7 @@ td.retake-count {
   font-weight: bold;
   font-size: 1.6em;
   padding-left: 2px;
+  white-space: nowrap;
 }
 
 .empty {
@@ -1086,6 +1087,7 @@ td.retake-count {
 
 .datatable-wrapper {
   min-height: calc(100% - 50px);
+  transition: margin-top 0.3s ease;
 
   &.with-schedule {
     margin-top: 54px;
@@ -1095,6 +1097,10 @@ td.retake-count {
 
     .datatable .datatable-row:last-child td:last-child {
       border-bottom-right-radius: 0;
+    }
+
+    td {
+      height: 40px;
     }
   }
 }
