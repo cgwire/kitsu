@@ -1525,6 +1525,7 @@ export default {
           id: '',
           color: 'transparent',
           children: [],
+          timesheet: [],
           expanded: true
         }
       ]
@@ -1540,8 +1541,8 @@ export default {
         )
         scheduleItems[0].startDate = scheduleItem.startDate
         scheduleItems[0].endDate = scheduleItem.endDate
-        scheduleItems[0].timesheet = scheduleItem.timesheet
         scheduleItems[0].children.push(...scheduleItem.children)
+        scheduleItems[0].timesheet.push(...scheduleItem.timesheet)
       })
 
       this.schedule.scheduleItems = scheduleItems
