@@ -1312,17 +1312,20 @@ export default {
     },
 
     updatePositionBarPosition(event) {
-      if (!this.timelineContentWrapper) return
-      let position =
-        this.timelineContentWrapper.scrollLeft + this.getClientX(event)
-      position -= 332
-      position = Math.floor(position / this.cellWidth) * this.cellWidth
-      if (
-        this.getClientX(event) - 320 <
-        this.timelineContentWrapper.offsetWidth
-      ) {
-        this.timelinePosition.style.left = `${position}px`
-      }
+      if (!this.timelineContentWrapper || !this.timelinePosition) return
+
+      const cursorX =
+        this.getClientX(event) -
+        this.timelineContentWrapper.getBoundingClientRect().left
+
+      if (cursorX <= 0 || cursorX >= this.timelineContentWrapper.offsetWidth)
+        return
+
+      const left =
+        Math.floor(
+          (this.timelineContentWrapper.scrollLeft + cursorX) / this.cellWidth
+        ) * this.cellWidth
+      this.timelinePosition.style.left = `${left}px`
     },
 
     isValidItemDates(startDate, endDate) {
