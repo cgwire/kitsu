@@ -31,6 +31,7 @@
         >
           <div
             :key="`entity-${rootElement.id}`"
+            class="timeline-element"
             v-for="rootElement in hierarchy"
           >
             <div
@@ -2478,6 +2479,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 .entities {
   background: white;
   min-width: 300px;
+  padding-bottom: 20px; //hack due to custom scrollbar
   overflow: hidden;
   z-index: 2;
 
@@ -2576,6 +2578,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     white-space: nowrap;
     position: relative;
     margin-left: 2px;
+    padding-right: 20px; //hack due to custom scrollbar
     padding-bottom: 0;
     overflow: hidden;
     z-index: 0;
