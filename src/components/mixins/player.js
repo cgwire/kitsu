@@ -134,7 +134,8 @@ export const playerMixin = {
         !this.isCurrentPreviewMovie &&
         !this.isCurrentPreviewPicture &&
         !this.isCurrentPreviewSound &&
-        !this.isCurrentPreviewModel
+        !this.isCurrentPreviewModel &&
+        !this.isCurrentPreviewPdf
       )
     },
 

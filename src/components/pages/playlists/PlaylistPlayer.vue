@@ -241,6 +241,13 @@
           v-if="isCurrentPreviewSound && !isLoading"
         />
 
+        <pdf-viewer
+          ref="pdf-player"
+          :preview="currentPreview"
+          :default-height="pictureDefaultHeight"
+          v-if="isCurrentPreviewPdf && !isLoading"
+        />
+
         <p
           :style="{ width: '100%' }"
           class="preview-standard-file has-text-centered"
@@ -1032,6 +1039,7 @@ import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
@@ -1057,6 +1065,7 @@ export default {
     DownloadIcon,
     GlobeIcon,
     ObjectViewer,
+    PdfViewer,
     PencilPicker,
     PictureViewer,
     MultiPictureViewer,
