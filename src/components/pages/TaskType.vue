@@ -1654,7 +1654,7 @@ export default {
           children: [],
           editable: false,
           daysOff: this.daysOffByPerson[person.id],
-          timesheet: this.timesheetByPerson[person.id],
+          timesheet: this.timesheetByPerson[person.id] ?? [],
           route: getPersonPath(person.id, 'schedule')
         }
       }
