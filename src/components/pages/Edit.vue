@@ -153,7 +153,11 @@
               class="canvas-wrapper"
               ref="canvas-wrapper"
               oncontextmenu="return false;"
-              v-show="!isCurrentPreviewFile"
+              v-show="
+                !isCurrentPreviewFile &&
+                isAnnotationsDisplayed &&
+                !isCurrentPreviewModel
+              "
             >
               <canvas
                 id="edit-annotation-canvas"
@@ -400,6 +404,13 @@
               icon="remove"
               :title="$t('playlists.actions.annotation_delete')"
               @click="onDeleteClicked"
+            />
+            <button-simple
+              class="player-button flexrow-item"
+              :active="isAnnotationsDisplayed"
+              icon="pen"
+              :title="$t('playlists.actions.toggle_annotations')"
+              @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
             />
           </div>
           <div class="separator"></div>
@@ -661,6 +672,7 @@ export default {
       type: 'edit',
       currentEdit: null,
       currentSection: 'infos',
+      isAnnotationsDisplayed: true,
       isLoading: true,
       isError: false,
       movieDimensions: { width: 0, height: 0 },
