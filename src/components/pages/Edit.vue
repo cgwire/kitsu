@@ -269,27 +269,7 @@
           </div>
 
           <div class="flexrow flexrow-item" v-if="isCurrentPreviewMovie">
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x1.00"
-              v-if="speed === 3"
-            />
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x0.50"
-              v-else-if="speed === 2"
-            />
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x0.25"
-              v-else
-            />
+            <speed-button class="player-button flexrow-item" v-model="speed" />
 
             <button-simple
               class="flexrow-item player-button"
@@ -627,6 +607,7 @@ import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
+import SpeedButton from '@/components/widgets/SpeedButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -669,6 +650,7 @@ export default {
     RawVideoPlayer,
     SoundViewer,
     Schedule,
+    SpeedButton,
     Spinner,
     TaskInfo,
     VideoProgress
