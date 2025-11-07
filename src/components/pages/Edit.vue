@@ -120,7 +120,7 @@
               >
                 <download-icon class="icon" />
                 <span class="text">
-                  {{ $t('tasks.download_pdf_file', { extension: extension }) }}
+                  {{ $t('tasks.download_pdf_file', { extension }) }}
                 </span>
               </a>
             </p>
@@ -210,14 +210,14 @@
             "
           >
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="playClicked"
               :title="$t('playlists.actions.play')"
               icon="play"
               v-if="!isPlaying"
             />
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="pauseClicked"
               :title="$t('playlists.actions.pause')"
               icon="pause"
@@ -243,7 +243,7 @@
             v-if="currentEntityPreviewLength > 1"
           >
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               icon="left"
               :title="$t('playlists.actions.files_previous')"
               :disabled="isPlaying"
@@ -256,7 +256,7 @@
               {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}
             </span>
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               icon="right"
               :title="$t('playlists.actions.files_next')"
               :disabled="isPlaying"
@@ -291,7 +291,7 @@
             />
 
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               :active="isRepeating"
               :title="$t('playlists.actions.looping')"
               icon="repeat"
@@ -318,13 +318,13 @@
               ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
             </span>
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="onPreviousFrameClicked"
               :title="$t('playlists.actions.previous_frame')"
               icon="left"
             />
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="onNextFrameClicked"
               :title="$t('playlists.actions.next_frame')"
               icon="right"
@@ -415,7 +415,7 @@
           </div>
           <div class="separator"></div>
           <button-simple
-            class="button player-button flexrow-item"
+            class="player-button flexrow-item"
             :active="!isCommentsHidden"
             :title="$t('playlists.actions.comments')"
             @click="onCommentClicked"
@@ -432,7 +432,7 @@
           />
 
           <button-simple
-            class="button player-button flexrow-item"
+            class="player-button flexrow-item"
             :title="$t('playlists.actions.fullscreen')"
             @click="onFullscreenClicked"
             icon="maximize"
