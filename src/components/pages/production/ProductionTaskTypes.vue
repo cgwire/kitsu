@@ -505,7 +505,8 @@ td p {
 }
 
 .column {
-  max-width: 400px;
+  flex-basis: 400px;
+  flex-grow: 0;
 }
 
 td.name {

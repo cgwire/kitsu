@@ -120,7 +120,7 @@
               >
                 <download-icon class="icon" />
                 <span class="text">
-                  {{ $t('tasks.download_pdf_file', { extension: extension }) }}
+                  {{ $t('tasks.download_pdf_file', { extension }) }}
                 </span>
               </a>
             </p>
@@ -153,7 +153,11 @@
               class="canvas-wrapper"
               ref="canvas-wrapper"
               oncontextmenu="return false;"
-              v-show="!isCurrentPreviewFile"
+              v-show="
+                !isCurrentPreviewFile &&
+                isAnnotationsDisplayed &&
+                !isCurrentPreviewModel
+              "
             >
               <canvas
                 id="edit-annotation-canvas"
@@ -206,14 +210,14 @@
             "
           >
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="playClicked"
               :title="$t('playlists.actions.play')"
               icon="play"
               v-if="!isPlaying"
             />
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="pauseClicked"
               :title="$t('playlists.actions.pause')"
               icon="pause"
@@ -239,7 +243,7 @@
             v-if="currentEntityPreviewLength > 1"
           >
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               icon="left"
               :title="$t('playlists.actions.files_previous')"
               :disabled="isPlaying"
@@ -252,7 +256,7 @@
               {{ currentPreviewIndex + 1 }} / {{ currentEntityPreviewLength }}
             </span>
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               icon="right"
               :title="$t('playlists.actions.files_next')"
               :disabled="isPlaying"
@@ -269,27 +273,7 @@
           </div>
 
           <div class="flexrow flexrow-item" v-if="isCurrentPreviewMovie">
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x1.00"
-              v-if="speed === 3"
-            />
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x0.50"
-              v-else-if="speed === 2"
-            />
-            <button-simple
-              class="button player-button flexrow-item"
-              @click="onSpeedClicked"
-              :title="$t('playlists.actions.speed')"
-              text="x0.25"
-              v-else
-            />
+            <speed-button class="player-button flexrow-item" v-model="speed" />
 
             <button-simple
               class="flexrow-item player-button"
@@ -307,7 +291,7 @@
             />
 
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               :active="isRepeating"
               :title="$t('playlists.actions.looping')"
               icon="repeat"
@@ -334,13 +318,13 @@
               ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
             </span>
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="onPreviousFrameClicked"
               :title="$t('playlists.actions.previous_frame')"
               icon="left"
             />
             <button-simple
-              class="button player-button flexrow-item"
+              class="player-button flexrow-item"
               @click="onNextFrameClicked"
               :title="$t('playlists.actions.next_frame')"
               icon="right"
@@ -421,10 +405,17 @@
               :title="$t('playlists.actions.annotation_delete')"
               @click="onDeleteClicked"
             />
+            <button-simple
+              class="player-button flexrow-item"
+              :active="isAnnotationsDisplayed"
+              icon="pen"
+              :title="$t('playlists.actions.toggle_annotations')"
+              @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
+            />
           </div>
           <div class="separator"></div>
           <button-simple
-            class="button player-button flexrow-item"
+            class="player-button flexrow-item"
             :active="!isCommentsHidden"
             :title="$t('playlists.actions.comments')"
             @click="onCommentClicked"
@@ -441,7 +432,7 @@
           />
 
           <button-simple
-            class="button player-button flexrow-item"
+            class="player-button flexrow-item"
             :title="$t('playlists.actions.fullscreen')"
             @click="onFullscreenClicked"
             icon="maximize"
@@ -627,6 +618,7 @@ import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
+import SpeedButton from '@/components/widgets/SpeedButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -669,6 +661,7 @@ export default {
     RawVideoPlayer,
     SoundViewer,
     Schedule,
+    SpeedButton,
     Spinner,
     TaskInfo,
     VideoProgress
@@ -679,6 +672,7 @@ export default {
       type: 'edit',
       currentEdit: null,
       currentSection: 'infos',
+      isAnnotationsDisplayed: true,
       isLoading: true,
       isError: false,
       movieDimensions: { width: 0, height: 0 },

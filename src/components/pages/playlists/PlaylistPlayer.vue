@@ -1184,6 +1184,9 @@ export default {
   mounted() {
     if (this.isMounted) return
     this.$options.scrubbing = false
+    if (this.isCurrentUserClient) {
+      this.isCommentsHidden = false
+    }
     this.isHd = Boolean(this.organisation.hd_by_default)
     if (this.entities) {
       this.entityList = this.entities
