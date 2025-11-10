@@ -198,8 +198,8 @@ export default {
 
   computed: {
     ...mapGetters([
+      'concepts',
       'currentProduction',
-      'displayedConcepts',
       'isDarkTheme',
       'isTVShow',
       'personMap',
@@ -257,7 +257,7 @@ export default {
     },
 
     filteredConcepts() {
-      let concepts = [...this.displayedConcepts]
+      let concepts = [...this.concepts]
 
       if (this.filters.taskStatusId) {
         concepts = concepts.filter(
@@ -445,6 +445,19 @@ export default {
         const productionId = this.$route.params.production_id
         if (this.currentProduction?.id === productionId) {
           this.reset()
+        }
+      }
+    }
+  },
+
+  socket: {
+    events: {
+      'task:status-changed'(eventData) {
+        const concept = this.concepts.find(
+          concept => concept.tasks[0].id === eventData.task_id
+        )
+        if (concept) {
+          concept.tasks[0].task_status_id = eventData.new_task_status_id
         }
       }
     }
