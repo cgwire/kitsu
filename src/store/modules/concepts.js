@@ -40,7 +40,6 @@ const initialState = {
   conceptMap: new Map(),
   conceptSearchText: '',
   conceptSearchQueries: [],
-  displayedConcepts: [],
   linkedConcepts: [],
   selectedConcepts: new Map()
 }
@@ -52,7 +51,6 @@ const state = {
 const getters = {
   concepts: state => state.concepts,
   conceptMap: state => state.conceptMap,
-  displayedConcepts: state => state.displayedConcepts,
   linkedConcepts: state => state.linkedConcepts,
   selectedConcepts: state => state.selectedConcepts
 }
@@ -182,20 +180,17 @@ const mutations = {
   [LOAD_CONCEPTS_START](state) {
     state.concepts = []
     state.conceptMap = new Map()
-    state.displayedConcepts = []
   },
 
   [LOAD_CONCEPTS_ERROR](state) {
     state.concepts = []
     state.conceptMap = new Map()
-    state.displayedConcepts = []
   },
 
   [LOAD_CONCEPTS_END](state, { concepts }) {
     concepts.forEach(helpers.populateConcept)
     state.concepts = concepts
     state.conceptMap = new Map(concepts.map(concept => [concept.id, concept]))
-    state.displayedConcepts = concepts
   },
 
   [EDIT_CONCEPT_END](state, newConcept) {

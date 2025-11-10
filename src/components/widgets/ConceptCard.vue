@@ -90,7 +90,7 @@ export default {
       return this.concept.tasks?.length
     },
 
-    taskStatus(concept) {
+    taskStatus() {
       return this.taskStatusMap.get(this.concept.tasks[0].task_status_id)
     }
   },
