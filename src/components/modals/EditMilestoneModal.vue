@@ -96,6 +96,9 @@ export default {
 
   mounted() {
     this.reset()
+    this.$nextTick(() => {
+      this.$refs.nameField.focus()
+    })
   },
 
   computed: {
@@ -126,9 +129,9 @@ export default {
     active() {
       if (this.active) {
         this.reset()
-        this.$nextTick(() => {
+        setTimeout(() => {
           this.$refs.nameField.focus()
-        })
+        }, 1000)
       }
     }
   }
