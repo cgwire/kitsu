@@ -48,16 +48,6 @@
                 taskListObject.entity === activeTab
               "
             >
-              <!--
-              <thead>
-                <tr>
-                  <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-                  <th class="th-short-name">
-                    {{ $t('task_status.fields.short_name') }}
-                  </th>
-                </tr>
-              </thead>
-              -->
               <draggable
                 class="datatable-body"
                 item-key="taskType.id"

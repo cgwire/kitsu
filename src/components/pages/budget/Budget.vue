@@ -414,7 +414,8 @@ export default {
       return itemCosts
     },
 
-    /* It gets the cost of a person for a given month, exceptions are
+    /*
+     * It gets the cost of a person for a given month, exceptions are
      * prioritized over the month costs.
      */
     getMonthCost(personEntry, month) {
