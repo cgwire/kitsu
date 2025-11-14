@@ -663,15 +663,6 @@ export default {
       })
     },
 
-    conceptPath(concept) {
-      return {
-        name: 'concepts',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-    },
-
     shotPath(shot) {
       return {
         name: shot.episode_id ? 'episode-shot' : 'shot',
