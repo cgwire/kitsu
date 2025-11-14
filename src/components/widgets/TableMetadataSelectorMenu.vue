@@ -9,7 +9,8 @@
     <ul>
       <li
         :key="descriptor.field_name"
-        v-for="descriptor in filteredMetadataDescriptors"
+        class="immutable-column"
+        v-for="descriptor in filteredFixedColumns"
       >
         <label class="checkbox">
           <input
@@ -25,13 +26,83 @@
           {{ descriptor.name }}
         </label>
       </li>
+      <li
+        class="column-separator immutable-column"
+        v-if="filteredMetadataDescriptors.length > 0"
+      >
+        <hr />
+      </li>
+
+      <draggable
+        v-if="isCurrentUserManager"
+        v-model="sortedMetadataDescriptors"
+        item-key="field_name"
+        handle=".drag-handle"
+        @end="onDragEnd"
+      >
+        <template #item="{ element: descriptor }">
+          <li>
+            <div class="flexrow">
+              <span class="drag-handle">
+                <grip-vertical-icon />
+              </span>
+              <label class="checkbox">
+                <input
+                  type="checkbox"
+                  :checked="
+                    modelValue && modelValue[descriptor.field_name] !== false
+                  "
+                  @change="
+                    setMetadataDisplayValue(
+                      descriptor.field_name,
+                      $event.target.checked
+                    )
+                  "
+                />
+                {{ descriptor.name }}
+              </label>
+            </div>
+          </li>
+        </template>
+      </draggable>
+      <template v-else>
+        <li
+          :key="descriptor.field_name"
+          v-for="descriptor in filteredMetadataDescriptors"
+        >
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              :checked="
+                modelValue && modelValue[descriptor.field_name] !== false
+              "
+              @change="
+                setMetadataDisplayValue(
+                  descriptor.field_name,
+                  $event.target.checked
+                )
+              "
+            />
+            {{ descriptor.name }}
+          </label>
+        </li>
+      </template>
     </ul>
   </div>
 </template>
 
 <script>
+import draggable from 'vuedraggable'
+import { GripVerticalIcon } from 'lucide-vue-next'
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'table-metadata-selector-menu',
+
+  components: {
+    draggable,
+    GripVerticalIcon
+  },
 
   props: {
     descriptors: {
@@ -67,7 +138,8 @@ export default {
         resolution: this.$t('shots.fields.resolution'),
         stdby: this.$t('breakdown.fields.standby'),
         maxRetakes: this.$t('shots.fields.max_retakes')
-      }
+      },
+      sortedMetadataDescriptors: []
     }
   },
 
@@ -88,34 +160,74 @@ export default {
       }
     }
     this.$emit('update:modelValue', localMetadataDisplayHeaders)
+    this.sortedMetadataDescriptors = [...this.filteredMetadataDescriptors]
+  },
+
+  watch: {
+    filteredMetadataDescriptors: {
+      handler(newValue) {
+        if (
+          this.sortedMetadataDescriptors.length === 0 ||
+          this.sortedMetadataDescriptors.length !== newValue.length
+        ) {
+          this.sortedMetadataDescriptors = [...newValue]
+        }
+      },
+      immediate: true
+    }
   },
 
   computed: {
+    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+
     localStorageKey() {
       return `metadataDisplayHeaders:${this.namespace}`
     },
 
-    metadataDescriptors() {
-      const fixedColumns = []
+    fixedColumns() {
+      const fixed = []
       for (const headerName in this.modelValue) {
         if (this.fieldToName[headerName]) {
-          fixedColumns.push({
+          fixed.push({
             field_name: headerName,
-            name: this.fieldToName[headerName]
+            name: this.fieldToName[headerName],
+            isFixed: true
           })
         }
       }
-      return [...fixedColumns, ...this.descriptors]
+      return fixed
+    },
+
+    filteredFixedColumns() {
+      return this.fixedColumns.filter(descriptor => {
+        return !this.exclude[descriptor.field_name]
+      })
     },
 
     filteredMetadataDescriptors() {
-      return this.metadataDescriptors.filter(descriptor => {
+      const filtered = this.descriptors.filter(descriptor => {
         return !this.exclude[descriptor.field_name]
       })
+      return filtered.sort((a, b) => {
+        const positionA = a.position ?? 1000
+        const positionB = b.position ?? 1000
+        if (positionA !== positionB) {
+          return positionA - positionB
+        }
+        const nameA = a.name || ''
+        const nameB = b.name || ''
+        return nameA.localeCompare(nameB)
+      })
+    },
+
+    entityType() {
+      const descriptorWithEntityType = this.descriptors.find(d => d.entity_type)
+      return descriptorWithEntityType?.entity_type || null
     }
   },
 
   methods: {
+    ...mapActions(['reorderMetadataDescriptors']),
     setMetadataDisplayValue(metadataName, isSelected) {
       const localMetadataDisplayHeaders = { ...this.modelValue }
       localMetadataDisplayHeaders[metadataName] = isSelected
@@ -124,6 +236,25 @@ export default {
         JSON.stringify(localMetadataDisplayHeaders)
       )
       this.$emit('update:modelValue', localMetadataDisplayHeaders)
+    },
+
+    onDragEnd() {
+      const descriptorIds = this.sortedMetadataDescriptors
+        .filter(d => d.id)
+        .map(d => d.id)
+
+      if (
+        this.currentProduction?.id &&
+        this.entityType &&
+        descriptorIds.length > 0
+      ) {
+        this.reorderMetadataDescriptors({
+          entityType: this.entityType,
+          descriptorIds
+        }).catch(err => {
+          console.error('Failed to reorder metadata descriptors:', err)
+        })
+      }
     }
   }
 }
@@ -170,10 +301,74 @@ export default {
 
   li {
     padding: 0.8em;
+    transition: background-color 0.2s ease;
+
+    &.immutable-column {
+      cursor: default;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    &.column-separator {
+      hr {
+        margin: 0;
+      }
+    }
+
+    &:not(.immutable-column) {
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+    }
+
+    .drag-handle {
+      cursor: grab;
+      display: inline-flex;
+      align-items: center;
+      color: var(--text);
+      opacity: 0.5;
+      margin-right: 0.5em;
+      flex-shrink: 0;
+      user-select: none;
+      transition: opacity 0.2s ease;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      &:active {
+        cursor: grabbing;
+      }
+
+      svg {
+        pointer-events: none;
+      }
+    }
+
+    .flexrow {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
   }
 
   .checkbox {
     width: 100%;
+    cursor: pointer;
+
+    input {
+      cursor: pointer;
+    }
+  }
+}
+
+.dark .column-menu {
+  li {
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 </style>

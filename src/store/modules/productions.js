@@ -133,11 +133,20 @@ const entityMetadataDescriptors = entityType => (state, getters) => {
   if (!state.currentProduction || !state.currentProduction.descriptors) {
     return []
   } else {
-    return sortByName(
-      state.currentProduction.descriptors.filter(
-        d => d.entity_type === entityType
-      )
+    const descriptors = state.currentProduction.descriptors.filter(
+      d => d.entity_type === entityType
     )
+    return descriptors.sort((a, b) => {
+      const positionA = a.position ?? 1000
+      const positionB = b.position ?? 1000
+      if (positionA !== positionB) {
+        return positionA - positionB
+      } else {
+        const nameA = a.name || ''
+        const nameB = b.name || ''
+        return nameA.localeCompare(nameB)
+      }
+    })
   }
 }
 
@@ -549,6 +558,24 @@ const actions = {
             descriptor
           })
         }
+      })
+  },
+
+  reorderMetadataDescriptors({ commit, state }, { entityType, descriptorIds }) {
+    return productionsApi
+      .reorderMetadataDescriptors(
+        state.currentProduction.id,
+        entityType,
+        descriptorIds
+      )
+      .then(updatedDescriptors => {
+        updatedDescriptors.forEach(descriptor => {
+          commit(UPDATE_METADATA_DESCRIPTOR_END, {
+            production: state.currentProduction,
+            descriptor
+          })
+        })
+        return updatedDescriptors
       })
   },
 

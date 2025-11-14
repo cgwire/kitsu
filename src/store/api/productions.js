@@ -202,5 +202,16 @@ export default {
         }
       )
     })
+  },
+
+  reorderMetadataDescriptors(productionId, entityType, descriptorIds) {
+    const data = {
+      entity_type: entityType,
+      descriptor_ids: descriptorIds
+    }
+    return client.ppost(
+      `/api/data/projects/${productionId}/metadata-descriptors/reorder`,
+      data
+    )
   }
 }
