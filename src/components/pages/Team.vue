@@ -153,9 +153,9 @@ export default {
 
     teamPersons() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
+        this.currentProduction.team
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean)
       )
     },
 

@@ -589,7 +589,7 @@ export default {
     },
 
     getCurrentAsset() {
-      return new Promise((resolve, reject) => {
+      return new Promise(resolve => {
         const assetId = this.route.params.asset_id
         if (!assetId) resolve(null)
         let asset = assetStore.cache.assetMap.get(assetId) || null
@@ -597,14 +597,16 @@ export default {
           if (assetId) {
             return this.loadAsset(assetId).then(() => {
               asset = assetStore.cache.assetMap.get(assetId)
-              this.localTasks = asset.tasks.map(taskId =>
-                this.taskMap.get(taskId)
-              )
+              this.localTasks = asset.tasks
+                .map(taskId => this.taskMap.get(taskId))
+                .filter(Boolean)
               return resolve(asset)
             })
           }
         } else {
-          this.localTasks = asset.tasks.map(taskId => this.taskMap.get(taskId))
+          this.localTasks = asset.tasks
+            .map(taskId => this.taskMap.get(taskId))
+            .filter(Boolean)
           return resolve(asset)
         }
       })
@@ -659,15 +661,6 @@ export default {
             console.error(err)
           })
       })
-    },
-
-    conceptPath(concept) {
-      return {
-        name: 'concepts',
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
     },
 
     shotPath(shot) {

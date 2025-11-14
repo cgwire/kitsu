@@ -197,7 +197,9 @@ export default {
 
     assignees() {
       return sortPeople(
-        this.task?.assignees.map(personId => this.personMap.get(personId)) || []
+        this.task?.assignees
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean) || []
       )
     },
 

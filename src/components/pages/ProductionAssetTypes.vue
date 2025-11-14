@@ -36,7 +36,7 @@
       :validation-columns="assetValidationColumns"
       :asset-type-stats="assetTypeStats"
       :display-mode="displayMode"
-      :show-all="assetTypeSearchText.length === 0"
+      :show-all="!assetTypeSearchText"
       @scroll="saveScrollPosition"
     />
   </div>
@@ -120,7 +120,7 @@ export default {
     ]),
 
     setDefaultSearchText() {
-      if (this.assetTypeSearchText.length > 0) {
+      if (this.assetTypeSearchText) {
         this.$refs['asset-type-search-field'].setValue(this.assetTypeSearchText)
       }
     },
