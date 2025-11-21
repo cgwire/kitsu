@@ -26,45 +26,27 @@ const getters = {
 }
 
 const actions = {
-  loadScheduleItems({ commit }, production) {
-    return scheduleApi
-      .getScheduleItems(production)
-      .then(scheduleItems => {
-        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
-        return Promise.resolve(scheduleItems)
-      })
-      .catch(console.error)
+  async loadScheduleItems({ commit }, production) {
+    const scheduleItems = await scheduleApi.getScheduleItems(production)
+    commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
+    return scheduleItems
   },
 
-  loadAllScheduleItems({ commit }, production) {
-    return scheduleApi
-      .getAllScheduleItems(production)
-      .then(scheduleItems => {
-        commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
-      })
-      .catch(console.error)
+  async loadAllScheduleItems({ commit }, production) {
+    const scheduleItems = await scheduleApi.getAllScheduleItems(production)
+    commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
   },
 
   loadAssetTypeScheduleItems({}, { production, taskType }) {
-    return scheduleApi
-      .getAssetTypeScheduleItems(production, taskType)
-      .catch(console.error)
+    return scheduleApi.getAssetTypeScheduleItems(production, taskType)
   },
 
   loadSequenceScheduleItems({}, { production, taskType }) {
-    return scheduleApi
-      .getSequenceScheduleItems(production, taskType)
-      .catch(console.error)
+    return scheduleApi.getSequenceScheduleItems(production, taskType)
   },
 
   loadEpisodeScheduleItems({}, { production, taskType }) {
-    if (!taskType.id) {
-      return Promise.reject(new Error('Wrong task type for loading schedule'))
-    } else {
-      return scheduleApi
-        .getEpisodeScheduleItems(production, taskType)
-        .catch(console.error)
-    }
+    return scheduleApi.getEpisodeScheduleItems(production, taskType)
   },
 
   createScheduleItem({ commit, state }, scheduleItem) {
