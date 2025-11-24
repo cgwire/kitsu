@@ -182,9 +182,9 @@ const getters = {
       return rootState.assetTypes.assetTypes
     } else {
       return sortByName(
-        state.currentProduction.asset_types.map(id =>
-          assetTypeStore.cache.assetTypeMap.get(id)
-        )
+        state.currentProduction.asset_types
+          .map(id => assetTypeStore.cache.assetTypeMap.get(id))
+          .filter(Boolean)
       )
     }
   },
@@ -195,9 +195,9 @@ const getters = {
 
   getProductionBackgrounds: (state, rootState) => id => {
     const production = state.productionMap.get(id)
-    const backgrounds = production?.preview_background_files?.map(id =>
-      rootState.backgroundMap.get(id)
-    )
+    const backgrounds = production?.preview_background_files
+      ?.map(id => rootState.backgroundMap.get(id))
+      .filter(Boolean)
     return backgrounds ? sortByName(backgrounds) : []
   },
 
@@ -206,9 +206,9 @@ const getters = {
       return rootState.taskStatus.taskStatuses
     } else {
       return sortByName(
-        state.currentProduction.task_statuses.map(id =>
-          taskStatusCache.taskStatusMap.get(id)
-        )
+        state.currentProduction.task_statuses
+          .map(id => taskStatusCache.taskStatusMap.get(id))
+          .filter(Boolean)
       )
     }
   },
@@ -219,9 +219,9 @@ const getters = {
       return rootState.taskStatus.taskStatuses
     } else {
       return sortByName(
-        production.task_statuses.map(id =>
-          taskStatusCache.taskStatusMap.get(id)
-        )
+        production.task_statuses
+          .map(id => taskStatusCache.taskStatusMap.get(id))
+          .filter(Boolean)
       )
     }
   },
@@ -230,9 +230,9 @@ const getters = {
     if (helpers.isEmptyArray(state.currentProduction, 'status_automations')) {
       return []
     } else {
-      return state.currentProduction.status_automations.map(id =>
-        statusAutomationsStore.cache.statusAutomationMap.get(id)
-      )
+      return state.currentProduction.status_automations
+        .map(id => statusAutomationsStore.cache.statusAutomationMap.get(id))
+        .filter(Boolean)
     }
   },
 
@@ -249,9 +249,9 @@ const getters = {
       return rootState.taskTypes.taskTypes
     } else {
       return sortByName(
-        state.currentProduction.task_types.map(id =>
-          taskTypesCache.taskTypeMap.get(id)
-        )
+        state.currentProduction.task_types
+          .map(id => taskTypesCache.taskTypeMap.get(id))
+          .filter(Boolean)
       )
     }
   },
@@ -262,7 +262,9 @@ const getters = {
       return rootState.taskTypes.taskTypes
     } else {
       return sortByName(
-        production.task_types.map(id => taskTypesCache.taskTypeMap.get(id))
+        production.task_types
+          .map(id => taskTypesCache.taskTypeMap.get(id))
+          .filter(Boolean)
       )
     }
   },
