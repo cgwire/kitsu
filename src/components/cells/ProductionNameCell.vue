@@ -1,5 +1,5 @@
 <template>
-  <div class="flexrow production-name" :title="productionInfo">
+  <div class="flexrow production-name" :title="productionInfo" v-if="entry">
     <router-link
       class="flexrow flexrow-item"
       :to="productionRoute"
