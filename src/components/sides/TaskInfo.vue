@@ -620,7 +620,7 @@ export default {
         .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
 
         // filter down to just those that match this task entity type Shot, Asset etc.
-        .filter(taskType => taskType.for_entity === task_type_entity)
+        .filter(taskType => taskType?.for_entity === task_type_entity)
 
         // filter to tasks that exist
         .filter(taskType => entity_tasks[taskType.id])
