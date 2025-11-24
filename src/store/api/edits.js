@@ -1,7 +1,7 @@
 import client from '@/store/api/client'
 
 export default {
-  getEdit(editId, callback) {
+  getEdit(editId) {
     return client.getModel('edits', editId)
   },
 
@@ -19,10 +19,6 @@ export default {
   getEpisodes(production) {
     const path = `/api/data/projects/${production.id}/episodes`
     return client.pget(path)
-  },
-
-  getEditType(callback) {
-    client.get('/api/data/edit-type', callback)
   },
 
   newEdit(edit) {
@@ -58,7 +54,7 @@ export default {
     }
   },
 
-  restoreEdit(edit, callback) {
+  restoreEdit(edit) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${edit.id}`, data)
   },

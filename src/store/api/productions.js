@@ -1,8 +1,8 @@
 import client from '@/store/api/client'
 
 export default {
-  getProductions(callback) {
-    client.get('/api/data/projects/all', callback)
+  getProductions() {
+    return client.pget('/api/data/projects/all')
   },
 
   getProduction(productionId) {
@@ -13,8 +13,8 @@ export default {
     return client.pget('/api/data/projects/open')
   },
 
-  getProductionStatus(callback) {
-    client.get('/api/data/project-status', callback)
+  getProductionStatus() {
+    return client.pget('/api/data/project-status')
   },
 
   getProductionStats() {

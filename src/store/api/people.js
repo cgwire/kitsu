@@ -136,13 +136,13 @@ export default {
     return client.ppost(`/api/pictures/thumbnails/persons/${userId}`, formData)
   },
 
-  changePassword(form, callback) {
+  changePassword(form) {
     const data = {
       old_password: form.oldPassword,
       password: form.password,
       password_2: form.password2
     }
-    client.post('/api/auth/change-password', data, callback)
+    return client.ppost('/api/auth/change-password', data)
   },
 
   preEnableTOTP() {
@@ -269,8 +269,8 @@ export default {
     return client.pdel(`/api/data/user/filter-groups/${filterGroup.id}`)
   },
 
-  getUserSearchFilters(callback) {
-    client.get('/api/data/user/filters', callback)
+  getUserSearchFilters() {
+    return client.pget('/api/data/user/filters')
   },
 
   updateFilter(searchFilter) {

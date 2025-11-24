@@ -177,25 +177,18 @@ const actions = {
       })
   },
 
-  checkNewPasswordValidityAndSave({ commit, state }, { form, callback }) {
-    if (auth.isPasswordValid(form.password, form.password2)) {
-      actions.changeUserPassword({ commit, state }, { form, callback })
-    } else {
+  async checkNewPasswordValidityAndSave({ commit }, { form }) {
+    if (!auth.isPasswordValid(form.password, form.password2)) {
       commit(USER_CHANGE_PASSWORD_UNVALID)
-      if (callback) callback()
+      return
     }
-  },
-
-  changeUserPassword({ commit }, payload) {
     commit(USER_CHANGE_PASSWORD_LOADING)
-    peopleApi.changePassword(payload.form, err => {
-      if (err) {
-        commit(USER_CHANGE_PASSWORD_ERROR)
-      } else {
-        commit(USER_CHANGE_PASSWORD_SUCCESS)
-      }
-      if (payload.callback) payload.callback()
-    })
+    try {
+      await peopleApi.changePassword(form)
+      commit(USER_CHANGE_PASSWORD_SUCCESS)
+    } catch (err) {
+      commit(USER_CHANGE_PASSWORD_ERROR)
+    }
   },
 
   preEnableTOTP({ state }) {
@@ -343,19 +336,15 @@ const actions = {
     commit(UPDATE_USER_FILTER, searchFilter)
   },
 
-  loadUserSearchFilters({ commit }, callback) {
-    peopleApi.getUserSearchFilters((err, searchFilters) => {
-      if (err) commit(LOAD_USER_FILTERS_ERROR)
-      else commit(LOAD_USER_FILTERS_END, searchFilters)
-      callback(err)
-    })
-    // return peopleApi.getUserSearchFilters()
-    // .then((searchFilters) => {
-    //   commit(LOAD_USER_FILTERS_END, searchFilters);
-    // })
-    // .catch((err) => {
-    //   commit(LOAD_USER_FILTERS_ERROR);
-    // })
+  async loadUserSearchFilters({ commit }) {
+    try {
+      const searchFilters = await peopleApi.getUserSearchFilters()
+      commit(LOAD_USER_FILTERS_END, searchFilters)
+      return searchFilters
+    } catch (err) {
+      commit(LOAD_USER_FILTERS_ERROR)
+      throw err
+    }
   },
 
   saveTodoSearch({ commit, rootGetters }, searchQuery) {

@@ -820,17 +820,17 @@ export default {
       lang.setLocale(this.form.locale)
     },
 
-    passwordChangeRequested() {
-      this.checkNewPasswordValidityAndSave({
-        form: this.passwordForm,
-        callback: () => {
-          this.passwordForm = {
-            oldPassword: '',
-            password: '',
-            password2: ''
-          }
-        }
+    async passwordChangeRequested() {
+      await this.checkNewPasswordValidityAndSave({
+        form: this.passwordForm
       })
+      if (this.changePassword.isSuccess) {
+        this.passwordForm = {
+          oldPassword: '',
+          password: '',
+          password2: ''
+        }
+      }
     },
 
     enableTOTPRequested() {

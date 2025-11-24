@@ -336,13 +336,14 @@ const getters = {
 }
 
 const actions = {
-  loadProductionStatus({ commit, state }, callback) {
+  async loadProductionStatus({ commit }) {
     commit(LOAD_PRODUCTION_STATUS_START)
-    productionsApi.getProductionStatus((err, productionStatus) => {
-      if (err) commit(LOAD_PRODUCTION_STATUS_ERROR)
-      else commit(LOAD_PRODUCTION_STATUS_END, productionStatus)
-      if (callback) callback(err)
-    })
+    try {
+      const productionStatus = await productionsApi.getProductionStatus()
+      commit(LOAD_PRODUCTION_STATUS_END, productionStatus)
+    } catch (err) {
+      commit(LOAD_PRODUCTION_STATUS_ERROR)
+    }
   },
 
   async loadOpenProductions({ commit }) {
@@ -355,13 +356,14 @@ const actions = {
     }
   },
 
-  loadProductions({ commit, state }, callback) {
+  async loadProductions({ commit }) {
     commit(LOAD_PRODUCTIONS_START)
-    productionsApi.getProductions((err, productions) => {
-      if (err) commit(LOAD_PRODUCTIONS_ERROR)
-      else commit(LOAD_PRODUCTIONS_END, productions)
-      if (callback) callback(err)
-    })
+    try {
+      const productions = await productionsApi.getProductions()
+      commit(LOAD_PRODUCTIONS_END, productions)
+    } catch (err) {
+      commit(LOAD_PRODUCTIONS_ERROR)
+    }
   },
 
   loadProduction({ commit, state }, productionId) {

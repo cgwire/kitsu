@@ -1,7 +1,7 @@
 import client from '@/store/api/client'
 
 export default {
-  getShot(shotId, callback) {
+  getShot(shotId) {
     return client.getModel('shots', shotId)
   },
 
@@ -16,7 +16,7 @@ export default {
     return client.getModel('sequences', sequenceId)
   },
 
-  getSequences(production, episode, callback) {
+  getSequences(production, episode) {
     let path = `/api/data/projects/${production.id}/sequences`
     if (episode) path = `/api/data/episodes/${episode.id}/sequences`
     return client.pget(path)
@@ -40,10 +40,6 @@ export default {
   getEpisodesWithTasks(production) {
     const path = `/api/data/episodes/with-tasks?project_id=${production.id}`
     return client.pget(path)
-  },
-
-  getShotType(callback) {
-    client.get('/api/data/shot-type', callback)
   },
 
   newShot(shot) {
@@ -151,7 +147,7 @@ export default {
     return client.pdel(`/api/data/episodes/${episode.id}?force=true`)
   },
 
-  restoreShot(shot, callback) {
+  restoreShot(shot) {
     const data = { canceled: false }
     return client.pput(`/api/data/entities/${shot.id}`, data)
   },

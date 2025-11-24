@@ -143,7 +143,6 @@ export default {
     ...mapActions([
       'deleteStatusAutomation',
       'editStatusAutomation',
-      'loadTaskStatuses',
       'loadStatusAutomations',
       'newStatusAutomation'
     ]),
