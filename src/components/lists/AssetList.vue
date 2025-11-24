@@ -180,7 +180,6 @@
                 :key="'header' + columnId"
                 :hidden-columns="hiddenColumns"
                 :column-id="columnId"
-                :title="taskTypeMap.get(columnId).name"
                 :validation-style="getValidationStyle(columnId)"
                 type="assets"
                 @show-header-menu="
