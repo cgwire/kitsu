@@ -68,7 +68,23 @@
           {{ formatDuration(taskTypeStatsMap[taskType.id].total_duration) }}
           /
           {{ formatDuration(taskTypeStatsMap[taskType.id].total_estimation) }}
-          {{ $tc('main.days') }}
+          {{
+            isDurationInHours
+              ? $tc(
+                  'main.hours',
+                  formatDuration(
+                    taskTypeStatsMap[taskType.id].total_estimation,
+                    false
+                  )
+                )
+              : $tc(
+                  'main.days',
+                  formatDuration(
+                    taskTypeStatsMap[taskType.id].total_estimation,
+                    false
+                  )
+                )
+          }}
         </div>
         <div class="color-wrapper flexrow-item">
           <div
