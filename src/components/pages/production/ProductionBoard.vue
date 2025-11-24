@@ -101,7 +101,7 @@ export default {
 
     getActiveRoles(taskStatus) {
       return (
-        this.currentProduction.task_statuses_link[taskStatus.id]
+        this.currentProduction.task_statuses_link?.[taskStatus.id]
           ?.roles_for_board || []
       )
     },
