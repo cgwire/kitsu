@@ -899,11 +899,12 @@ export default {
 
     currentTeam() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
+        this.currentProduction.team
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean)
       )
     },
+
     // get current task types for this project filtered by current task entity type (Shot or Asset)
     currentTaskTypes() {
       if (!this.task || !this.currentProduction) return []

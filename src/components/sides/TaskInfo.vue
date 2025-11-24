@@ -590,7 +590,9 @@ export default {
       const production = this.productionMap.get(this.task.project_id)
       if (!production) return []
       return sortPeople(
-        production.team.map(personId => this.personMap.get(personId))
+        production.team
+          .map(personId => this.personMap.get(personId + 1))
+          .filter(Boolean)
       )
     },
 
