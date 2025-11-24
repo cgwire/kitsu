@@ -4,7 +4,7 @@ describe('auth', () => {
   test('isPasswordValid', () => {
     expect(auth.isPasswordValid('', '')).toBeFalsy()
     expect(auth.isPasswordValid('abc', 'abc')).toBeFalsy()
-    expect(auth.isPasswordValid('abcdefg', 'abcdefgh')).toBeFalsy()
-    expect(auth.isPasswordValid('abcdefg', 'abcdefg')).toBeTruthy()
+    expect(auth.isPasswordValid('abcdefgh', 'abc')).toBeFalsy()
+    expect(auth.isPasswordValid('abcdefgh', 'abcdefgh')).toBeTruthy()
   })
 })
