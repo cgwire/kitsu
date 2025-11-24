@@ -26,11 +26,11 @@
     "@fullcalendar/multimonth": "6.1.19",
     "@fullcalendar/vue3": "6.1.19",
     "@google/model-viewer": "4.1.0",
-    "@sentry/vue": "10.26.0",
+    "@sentry/vue": "10.27.0",
     "@unhead/vue": "2.0.19",
     "@vuepic/vue-datepicker": "11.0.3",
     "async": "3.2.6",
-    "bowser": "2.12.1",
+    "bowser": "2.13.0",
     "bulma": "0.3.1",
     "chart.js": "4.5.1",
     "chartkick": "5.0.1",
@@ -85,7 +85,7 @@
     "prettier": "3.6.2",
     "sass": "1.94.2",
     "vite": "7.2.4",
-    "vitest": "4.0.12",
+    "vitest": "4.0.13",
     "vitest-localstorage-mock": "0.1.2"
   },
   "engines": {
