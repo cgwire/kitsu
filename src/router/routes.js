@@ -145,11 +145,10 @@ export const routes = [
               }
             })
           } else {
+            store.commit('DATA_LOADING_END')
             if (!userStore.getters.isCurrentUserArtist(userStore.state)) {
-              store.commit('DATA_LOADING_END')
               next({ name: 'open-productions' })
             } else {
-              store.commit('DATA_LOADING_END')
               next({ name: 'todos' })
             }
           }
