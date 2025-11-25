@@ -1,28 +1,25 @@
 <template>
-  <span
+  <router-link
     class="avatar has-text-centered"
     :class="{ bot: person.is_bot }"
     :style="style"
+    :title="person.full_name"
+    :to="{
+      name: 'person',
+      params: {
+        person_id: person.id
+      }
+    }"
     v-if="person?.id && isLink"
   >
-    <router-link
-      :to="{
-        name: 'person',
-        params: {
-          person_id: person.id
-        }
-      }"
-      :title="person.full_name"
-    >
-      <img
-        :loading="isLazy ? 'lazy' : undefined"
-        alt=""
-        :src="person.avatarPath"
-        v-if="person.has_avatar"
-      />
-      <template v-else>{{ person.initials }}</template>
-    </router-link>
-  </span>
+    <img
+      :loading="isLazy ? 'lazy' : undefined"
+      alt=""
+      :src="person.avatarPath"
+      v-if="person.has_avatar"
+    />
+    <template v-else>{{ person.initials }}</template>
+  </router-link>
 
   <span
     class="avatar has-text-centered"
