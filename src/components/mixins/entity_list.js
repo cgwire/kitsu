@@ -216,22 +216,19 @@ export const entityListMixin = {
 
           for (let i = startX; i <= endX; i++) {
             for (let j = startY; j <= endY; j++) {
-              const ref = `validation-${i}-${j}`
-              const validationCell = this.$refs[ref][0]
-              if (!grid[i][j]) {
+              const validationCell = this.$refs[`validation-${i}-${j}`]?.[0]
+              const isSelectedCell = grid?.[i]?.[j]
+              if (validationCell?.selectable && !isSelectedCell) {
                 let y = validationCell.columnY
                 if (!sticked) y += columnOffset
 
-                // Add cell to selection
-                if (validationCell.selectable) {
-                  selection.push({
-                    entity: validationCell.entity,
-                    column: validationCell.column,
-                    task: validationCell.task,
-                    x: validationCell.rowX,
-                    y
-                  })
-                }
+                selection.push({
+                  entity: validationCell.entity,
+                  column: validationCell.column,
+                  task: validationCell.task,
+                  x: validationCell.rowX,
+                  y
+                })
               }
             }
           }

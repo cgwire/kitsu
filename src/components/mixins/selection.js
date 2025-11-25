@@ -53,10 +53,9 @@ export const selectionListMixin = {
     },
 
     select(i, j) {
-      const ref = 'validation-' + i + '-' + j
-      const validationCell = this.$refs[ref]
-      if (validationCell) validationCell[0].$el.click()
-      return validationCell ? validationCell[0] : 0
+      const validationCell = this.$refs[`validation-${i}-${j}`]?.[0]
+      validationCell?.$el.click()
+      return validationCell
     },
 
     scrollToValidationCell(validationCell) {
