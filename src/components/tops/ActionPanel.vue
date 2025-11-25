@@ -1609,14 +1609,9 @@ export default {
       if (this.selectedTasks.size === 0) {
         availableTaskStatuses = []
       } else if (this.isCurrentViewTodos) {
-        const productions = new Map()
-        this.selectedTasks.forEach(task => {
-          const project = this.productionMap.get(task.project_id)
-          productions.set(task.project_id, project)
-        })
-        const statusLists = Array.from(productions.values()).map(
-          p => p.task_statuses
-        )
+        const statusLists = Array.from(this.selectedTasks.values())
+          .map(task => this.productionMap.get(task.project_id)?.task_statuses)
+          .filter(Boolean)
         const availableStatus = new Set(intersection(statusLists))
         availableTaskStatuses = this.taskStatusForCurrentUser.filter(status =>
           availableStatus.has(status.id)
