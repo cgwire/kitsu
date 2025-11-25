@@ -837,15 +837,6 @@ export default {
       }
     },
 
-    windowTitle() {
-      if (this.task) {
-        const taskTypeName = this.task.task_type_name
-        return `${this.title} / ${taskTypeName}`
-      } else {
-        return 'Loading...'
-      }
-    },
-
     deleteText() {
       if (this.task) {
         const taskType = this.taskTypeMap.get(this.task.task_type_id)
