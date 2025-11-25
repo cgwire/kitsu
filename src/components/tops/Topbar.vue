@@ -728,7 +728,7 @@ export default {
     pushContextRoute(section) {
       const isAssetSection = this.assetSections.includes(section)
       const production = this.productionMap.get(this.currentProductionId)
-      const isTVShow = production.production_type === 'tvshow'
+      const isTVShow = production?.production_type === 'tvshow'
       let episodeId = this.currentEpisodeId
       if (!episodeId && isTVShow) {
         if (isAssetSection) {
@@ -736,7 +736,7 @@ export default {
         } else if (this.episodes.length > 0) {
           episodeId = this.episodes[0].id
         } else {
-          episodeId = production.first_episode_id
+          episodeId = production?.first_episode_id
         }
       }
       let route = {
