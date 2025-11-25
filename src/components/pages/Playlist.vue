@@ -373,7 +373,7 @@
                   :key="sequence.id"
                   :class="{
                     'addition-shot': true,
-                    playlisted: currentEntities[sequence.id] !== undefined
+                    playlisted: currentEntitiesMap[sequence.id] !== undefined
                   }"
                   draggable="true"
                   @dragstart="onEntityDragStart($event, sequence)"
