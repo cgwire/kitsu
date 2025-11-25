@@ -3,7 +3,7 @@
     class="avatar has-text-centered"
     :class="{ bot: person.is_bot }"
     :style="style"
-    v-if="isLink && person.id"
+    v-if="person?.id && isLink"
   >
     <router-link
       :to="{
@@ -29,7 +29,7 @@
     :class="{ bot: person.is_bot }"
     :title="person.full_name"
     :style="style"
-    v-else
+    v-else-if="person"
   >
     <img
       :loading="isLazy ? 'lazy' : undefined"
