@@ -47,7 +47,7 @@
 
           <h1 class="title flexrow-item">
             <router-link :to="taskEntityPath">
-              {{ task ? title : 'Loading...' }}
+              {{ title }}
             </router-link>
           </h1>
 
@@ -833,7 +833,7 @@ export default {
         }
         return `${entityName}`
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 

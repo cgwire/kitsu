@@ -727,7 +727,7 @@ export default {
           return `${this.currentEdit.name}`
         }
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 

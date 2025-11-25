@@ -374,7 +374,7 @@ export default {
       if (this.currentEpisode) {
         return `${this.currentEpisode.name}`
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 
