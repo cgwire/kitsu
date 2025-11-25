@@ -16,7 +16,7 @@
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
-        <tbody class="datatable-body" v-if="entries.length > 0">
+        <tbody class="datatable-body" v-if="entries.length">
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
             <td class="name">
               {{ entry.name }}
@@ -27,7 +27,7 @@
             <td class="short-name">
               {{ entry.short_name }}
             </td>
-            <td class="task-types" v-if="(entry.task_types || []).length > 0">
+            <td class="task-types" v-if="entry.task_types?.length">
               <span
                 :key="taskType.id"
                 class="task-type-name flexrow-item"
@@ -98,10 +98,11 @@ export default {
   },
 
   methods: {
-    sortTaskTypes(taskTypeIds = []) {
-      const taskTypes = taskTypeIds.map(taskTypeId =>
-        this.taskTypeMap.get(taskTypeId)
-      )
+    sortTaskTypes(taskTypeIds) {
+      const taskTypes =
+        taskTypeIds
+          ?.map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+          .filter(Boolean) || []
       return sortTaskTypes(taskTypes)
     }
   }
