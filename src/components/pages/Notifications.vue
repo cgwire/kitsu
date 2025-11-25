@@ -571,6 +571,10 @@ export default {
     entityPath(notification) {
       const taskType = this.taskTypeMap.get(notification.task_type_id)
 
+      if (!taskType) {
+        return this.$router.currentRoute
+      }
+
       const route = {
         name: 'task',
         params: {
