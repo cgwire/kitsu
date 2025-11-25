@@ -826,7 +826,7 @@ export default {
     },
 
     localStorageStickKey() {
-      return `stick-assets-${this.currentProduction.id}`
+      return `stick-assets-${this.currentProduction?.id}`
     },
 
     readyForTaskTypes() {
@@ -841,7 +841,7 @@ export default {
     },
 
     isAssetsOnly() {
-      return this.currentProduction.production_type === 'assets'
+      return this.currentProduction?.production_type === 'assets'
     },
 
     formatDurationInHours() {
@@ -965,7 +965,7 @@ export default {
       const route = {
         name: section,
         params: {
-          production_id: this.currentProduction.id
+          production_id: this.currentProduction?.id
         }
       }
 

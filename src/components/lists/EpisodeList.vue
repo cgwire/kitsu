@@ -728,7 +728,7 @@ export default {
     },
 
     localStorageStickKey() {
-      return `stick-episodes-${this.currentProduction.id}`
+      return `stick-episodes-${this.currentProduction?.id}`
     }
   },
 
@@ -750,7 +750,7 @@ export default {
       const route = {
         name: section,
         params: {
-          production_id: this.currentProduction.id
+          production_id: this.currentProduction?.id
         }
       }
       if (episodeId) {
