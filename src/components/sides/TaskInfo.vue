@@ -588,10 +588,10 @@ export default {
     currentTeam() {
       if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
-      if (!production) return []
+      if (!production?.team) return []
       return sortPeople(
         production.team
-          .map(personId => this.personMap.get(personId + 1))
+          .map(personId => this.personMap.get(personId))
           .filter(Boolean)
       )
     },
