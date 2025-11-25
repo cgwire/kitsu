@@ -84,7 +84,7 @@
             />
             <div class="title flexrow-item filler">
               <router-link :to="taskEntityPath">
-                {{ task ? title : 'Loading...' }}
+                {{ title }}
               </router-link>
             </div>
           </div>
@@ -588,9 +588,11 @@ export default {
     currentTeam() {
       if (!this.task) return []
       const production = this.productionMap.get(this.task.project_id)
-      if (!production) return []
+      if (!production?.team) return []
       return sortPeople(
-        production.team.map(personId => this.personMap.get(personId))
+        production.team
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean)
       )
     },
 
@@ -620,7 +622,7 @@ export default {
         .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
 
         // filter down to just those that match this task entity type Shot, Asset etc.
-        .filter(taskType => taskType.for_entity === task_type_entity)
+        .filter(taskType => taskType?.for_entity === task_type_entity)
 
         // filter to tasks that exist
         .filter(taskType => entity_tasks[taskType.id])
@@ -640,7 +642,7 @@ export default {
         const entityName = this.task.full_entity_name || this.task.entity_name
         return `${entityName}`
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 

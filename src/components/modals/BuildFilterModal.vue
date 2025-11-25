@@ -587,8 +587,6 @@ export default {
         if (descriptorFilter.is_checklist) {
           value = descriptorFilter.values[0].text
           value += descriptorFilter.values[0].checked ? ':true' : ':false'
-        } else if (descriptorFilter.is_boolean) {
-          value = descriptorFilter.values[0]
         } else {
           if (descriptorFilter.operator === '=-') operator = '=[-'
           const values = descriptorFilter.values
@@ -597,7 +595,7 @@ export default {
               descriptorFilter.id,
               descriptorFilter.is_checklist
             )
-            value = options[0].value
+            value = options[0]?.value ?? ''
           } else {
             value = descriptorFilter.values.join(',')
           }

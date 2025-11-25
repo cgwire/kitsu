@@ -2,8 +2,8 @@
   <th
     scope="col"
     :class="{
-      'validation-cell': !hiddenColumns[columnId],
-      'hidden-validation-cell': hiddenColumns[columnId],
+      'validation-cell': !isHiddenColumn,
+      'hidden-validation-cell': isHiddenColumn,
       'datatable-row-header': isStick
     }"
     :style="{ left }"
@@ -18,22 +18,18 @@
       />
       <router-link
         class="flexrow-item datatable-dropdown ellipsis task-type-name"
-        :title="
-          !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : null
-        "
+        :title="!isHiddenColumn ? currentTaskType.name : null"
         :to="taskTypePath(columnId)"
         v-if="!isCurrentUserClient"
       >
-        {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
+        {{ !isHiddenColumn ? currentTaskType.name : '' }}
       </router-link>
       <span
         class="flexrow-item datatable-dropdown ellipsis task-type-name"
-        :title="
-          !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : null
-        "
+        :title="!isHiddenColumn ? currentTaskType.name : null"
         v-else
       >
-        {{ !hiddenColumns[columnId] ? taskTypeMap.get(columnId).name : '' }}
+        {{ !isHiddenColumn ? currentTaskType.name : '' }}
       </span>
       <span
         class="metadata-menu-button header-icon pointer"
@@ -68,8 +64,7 @@ export default {
       default: false
     },
     left: {
-      type: String,
-      default: '0px'
+      type: String
     },
     type: {
       type: String,
@@ -90,16 +85,21 @@ export default {
     ]),
 
     currentDepartment() {
-      return this.departmentMap.get(
-        this.taskTypeMap.get(this.columnId).department_id
-      )
+      return this.departmentMap.get(this.currentTaskType.department_id)
+    },
+
+    currentTaskType() {
+      return this.taskTypeMap.get(this.columnId) ?? {}
+    },
+
+    isHiddenColumn() {
+      return this.hiddenColumns[this.columnId]
     }
   },
   methods: {
     taskTypePath(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
       let route = {}
-      if (taskType.for_entity === 'Episode') {
+      if (this.currentTaskType.for_entity === 'Episode') {
         route = {
           name: 'episodes-task-type',
           params: {

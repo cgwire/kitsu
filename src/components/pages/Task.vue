@@ -29,7 +29,7 @@
             <task-type-name
               class="flexrow-item"
               :task-type="taskType"
-              :production-id="currentProduction.id"
+              :production-id="currentProduction?.id"
               v-if="taskType"
             />
           </div>
@@ -47,7 +47,7 @@
 
           <h1 class="title flexrow-item">
             <router-link :to="taskEntityPath">
-              {{ task ? title : 'Loading...' }}
+              {{ title }}
             </router-link>
           </h1>
 
@@ -833,16 +833,7 @@ export default {
         }
         return `${entityName}`
       } else {
-        return 'Loading...'
-      }
-    },
-
-    windowTitle() {
-      if (this.task) {
-        const taskTypeName = this.task.task_type_name
-        return `${this.title} / ${taskTypeName}`
-      } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 
@@ -899,11 +890,12 @@ export default {
 
     currentTeam() {
       return sortPeople(
-        this.currentProduction.team.map(personId =>
-          this.personMap.get(personId)
-        )
+        this.currentProduction?.team
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean) || []
       )
     },
+
     // get current task types for this project filtered by current task entity type (Shot or Asset)
     currentTaskTypes() {
       if (!this.task || !this.currentProduction) return []
@@ -930,7 +922,7 @@ export default {
         .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
 
         // filter down to just those that match this task entity type Shot, Asset etc.
-        .filter(taskType => taskType.for_entity === task_type_entity)
+        .filter(taskType => taskType?.for_entity === task_type_entity)
 
         // filter to tasks that exist
         .filter(taskType => entity_tasks[taskType.id])

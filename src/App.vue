@@ -3,9 +3,9 @@
     <div
       class="has-text-centered mt2 loading-info xyz-in"
       xyz="fade"
-      v-if="user && isDataLoading"
+      v-if="isDataLoading"
     >
-      <span>{{ $t('main.loading_data') }}...</span>
+      {{ $t('main.loading_data') }}...
       <spinner class="mt2" />
     </div>
     <router-view v-else />

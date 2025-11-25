@@ -86,7 +86,7 @@ export const previewRoomMixin = {
         local_id: this.room.localId,
         playlist_id: this.room.id,
         is_playing: this.isPlaying,
-        current_entity_id: this.currentEntity.id,
+        current_entity_id: this.currentEntity?.id,
         current_entity_index: this.playingEntityIndex,
         current_preview_file_index: this.currentPreviewIndex,
         current_preview_file_id: this.currentPreview

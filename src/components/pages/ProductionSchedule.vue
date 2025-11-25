@@ -835,11 +835,8 @@ export default {
             ...this.taskTypeMap.get(item.task_type_id),
             name: item.name
           }))
-
-          this.loading.schedule = false
         })
-        .catch(err => {
-          console.error(err)
+        .finally(() => {
           this.loading.schedule = false
         })
     },

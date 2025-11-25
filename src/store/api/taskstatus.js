@@ -20,12 +20,12 @@ const sanitizeTaskStatus = taskStatus => {
 }
 
 export default {
-  getTaskStatuses(callback) {
-    client.get('/api/data/task-status', callback)
+  getTaskStatuses() {
+    return client.pget('/api/data/task-status')
   },
 
-  getTaskStatus(taskStatusId, callback) {
-    client.get(`/api/data/task-status/${taskStatusId}`, callback)
+  getTaskStatus(taskStatusId) {
+    return client.pget(`/api/data/task-status/${taskStatusId}`)
   },
 
   newTaskStatus(taskStatus) {

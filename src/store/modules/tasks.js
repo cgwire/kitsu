@@ -1332,6 +1332,7 @@ const mutations = {
   },
 
   [REMOVE_TASK_COMMENT](state, { task, comment }) {
+    if (!state.taskComments[task.id]) return
     state.taskComments[task.id] = state.taskComments[task.id].filter(
       c => c.id !== comment.id
     )

@@ -375,7 +375,7 @@ export default {
           return `${this.currentSequence.name}`
         }
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 

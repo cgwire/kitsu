@@ -1,8 +1,8 @@
 import client from '@/store/api/client'
 
 export default {
-  getProductions(callback) {
-    client.get('/api/data/projects/all', callback)
+  getProductions() {
+    return client.pget('/api/data/projects/all')
   },
 
   getProduction(productionId) {
@@ -13,8 +13,8 @@ export default {
     return client.pget('/api/data/projects/open')
   },
 
-  getProductionStatus(callback) {
-    client.get('/api/data/project-status', callback)
+  getProductionStatus() {
+    return client.pget('/api/data/project-status')
   },
 
   getProductionStats() {
@@ -138,70 +138,46 @@ export default {
   },
 
   addMetadataDescriptor(productionId, descriptor) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        name: descriptor.name,
-        data_type: descriptor.data_type,
-        choices: descriptor.values,
-        for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type,
-        departments: descriptor.departments
-      }
-      client.post(
-        `/api/data/projects/${productionId}/metadata-descriptors`,
-        data,
-        (err, descriptor) => {
-          if (err) reject(err)
-          else resolve(descriptor)
-        }
-      )
-    })
+    const data = {
+      name: descriptor.name,
+      data_type: descriptor.data_type,
+      choices: descriptor.values,
+      for_client: descriptor.for_client === 'true',
+      entity_type: descriptor.entity_type,
+      departments: descriptor.departments
+    }
+    return client.ppost(
+      `/api/data/projects/${productionId}/metadata-descriptors`,
+      data
+    )
   },
 
   getMetadataDescriptor(productionId, descriptorId) {
-    return new Promise((resolve, reject) => {
-      client.get(
-        `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
-        (err, descriptor) => {
-          if (err) reject(err)
-          else resolve(descriptor)
-        }
-      )
-    })
+    return client.pget(
+      `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`
+    )
   },
 
   updateMetadataDescriptor(productionId, descriptor) {
-    return new Promise((resolve, reject) => {
-      const data = {
-        id: descriptor.id,
-        name: descriptor.name,
-        data_type: descriptor.data_type,
-        choices: descriptor.values,
-        for_client: descriptor.for_client === 'true',
-        entity_type: descriptor.entity_type,
-        departments: descriptor.departments
-      }
-      client.put(
-        `/api/data/projects/${productionId}/metadata-descriptors/${descriptor.id}`,
-        data,
-        (err, descriptor) => {
-          if (err) reject(err)
-          else resolve(descriptor)
-        }
-      )
-    })
+    const data = {
+      id: descriptor.id,
+      name: descriptor.name,
+      data_type: descriptor.data_type,
+      choices: descriptor.values,
+      for_client: descriptor.for_client === 'true',
+      entity_type: descriptor.entity_type,
+      departments: descriptor.departments
+    }
+    return client.pput(
+      `/api/data/projects/${productionId}/metadata-descriptors/${descriptor.id}`,
+      data
+    )
   },
 
   deleteMetadataDescriptor(productionId, descriptorId) {
-    return new Promise((resolve, reject) => {
-      client.del(
-        `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`,
-        err => {
-          if (err) reject(err)
-          else resolve()
-        }
-      )
-    })
+    return client.pdel(
+      `/api/data/projects/${productionId}/metadata-descriptors/${descriptorId}`
+    )
   },
 
   reorderMetadataDescriptors(productionId, entityType, descriptorIds) {

@@ -6,7 +6,7 @@ import { sync } from 'vuex-router-sync'
 
 import 'bulma/css/bulma.css'
 
-import App from '@/App'
+import App from '@/App.vue'
 import i18n from '@/lib/i18n'
 import resizableColumn from '@/directives/resizable-column'
 import router from '@/router'

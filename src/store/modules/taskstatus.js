@@ -85,20 +85,20 @@ const getters = {
 }
 
 const actions = {
-  loadTaskStatuses({ commit, state }, callback) {
+  async loadTaskStatuses({ commit }) {
     commit(LOAD_TASK_STATUSES_START)
-    taskStatusApi.getTaskStatuses((err, taskStatus) => {
-      if (err) commit(LOAD_TASK_STATUSES_ERROR)
-      else commit(LOAD_TASK_STATUSES_END, taskStatus)
-      if (callback) callback(err)
-    })
+    try {
+      const taskStatuses = await taskStatusApi.getTaskStatuses()
+      commit(LOAD_TASK_STATUSES_END, taskStatuses)
+    } catch (err) {
+      commit(LOAD_TASK_STATUSES_ERROR)
+      throw err
+    }
   },
 
-  loadTaskStatus({ commit, state }, taskStatusId) {
-    taskStatusApi.getTaskStatus(taskStatusId, (err, taskStatus) => {
-      if (err) console.error(err)
-      else commit(EDIT_TASK_STATUS_END, taskStatus)
-    })
+  async loadTaskStatus({ commit }, taskStatusId) {
+    const taskStatus = await taskStatusApi.getTaskStatus(taskStatusId)
+    commit(EDIT_TASK_STATUS_END, taskStatus)
   },
 
   newTaskStatus({ commit, state }, form) {

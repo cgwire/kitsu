@@ -59,7 +59,7 @@ const getters = {
 }
 
 const actions = {
-  async loadNews({ commit, state }, params) {
+  async loadNews({ commit }, params) {
     commit(CLEAR_NEWS)
     const newsList = await newsApi.getLastNews(params)
     commit(ADD_PREVIOUS_NEWS, newsList.data)
@@ -67,14 +67,14 @@ const actions = {
     commit(NEWS_SET_STATS, newsList.stats)
   },
 
-  async loadMoreNews({ commit, state }, params) {
+  async loadMoreNews({ commit }, params) {
     const newsList = await newsApi.getLastNews(params)
     commit(ADD_PREVIOUS_NEWS, newsList.data)
   },
 
-  async loadSingleNews({ commit, state }, { productionId, newsId }) {
+  async loadSingleNews({ commit }, { productionId, newsId }) {
     const news = await newsApi.getNews(productionId, newsId)
-    return commit(ADD_FIRST_NEWS, news)
+    commit(ADD_FIRST_NEWS, news)
   }
 }
 

@@ -688,7 +688,7 @@ export default {
     },
 
     localStorageStickKey() {
-      return `stick-sequences-${this.currentProduction.id}`
+      return `stick-sequences-${this.currentProduction?.id}`
     }
   },
 
@@ -707,7 +707,7 @@ export default {
     },
 
     getPath(section, sequenceId) {
-      const productionId = this.currentProduction.id
+      const productionId = this.currentProduction?.id
       const episodeId = this.currentEpisode ? this.currentEpisode.id : null
       return getEntityPath(sequenceId, productionId, section, episodeId)
     }

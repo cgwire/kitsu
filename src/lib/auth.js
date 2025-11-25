@@ -1,8 +1,10 @@
 import superagent from 'superagent'
+
 import store from '@/store'
 import client from '@/store/api/client'
 import {
   DATA_LOADING_START,
+  DATA_LOADING_END,
   SET_ORGANISATION,
   USER_LOGIN,
   USER_LOGOUT,
@@ -104,15 +106,17 @@ const auth = {
   requireAuth(to, from, next) {
     const finalize = () => {
       if (!store.state.user.isAuthenticated) {
+        store.commit(DATA_LOADING_END)
         next({
           name: 'login',
           query: { redirect: to.fullPath }
         })
       } else {
-        store.commit(DATA_LOADING_START)
         next()
       }
     }
+
+    store.commit(DATA_LOADING_START)
 
     if (store.state.user.user === null) {
       auth.isServerLoggedIn(err => {
@@ -131,7 +135,7 @@ const auth = {
   },
 
   isPasswordValid(password, password2) {
-    return password.length > 6 && password === password2
+    return password.length >= 8 && password === password2
   },
 
   getBroadcastChannel() {

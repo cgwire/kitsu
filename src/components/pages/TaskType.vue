@@ -895,7 +895,7 @@ export default {
         }
         return `${this.currentProduction.name} / ${this.currentTaskType.name}`
       }
-      return 'Loading...'
+      return this.$t('main.loading')
     },
 
     // Paths

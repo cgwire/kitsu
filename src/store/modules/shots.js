@@ -82,7 +82,8 @@ import async from 'async'
 const cache = {
   shots: [],
   shotMap: new Map(),
-  shotIndex: []
+  shotIndex: {},
+  result: []
 }
 
 const helpers = {

@@ -485,7 +485,7 @@ export default {
           `${this.currentAsset.name}`
         )
       } else {
-        return 'Loading...'
+        return this.$t('main.loading')
       }
     },
 
