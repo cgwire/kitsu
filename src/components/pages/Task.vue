@@ -29,7 +29,7 @@
             <task-type-name
               class="flexrow-item"
               :task-type="taskType"
-              :production-id="currentProduction.id"
+              :production-id="currentProduction?.id"
               v-if="taskType"
             />
           </div>
@@ -899,9 +899,9 @@ export default {
 
     currentTeam() {
       return sortPeople(
-        this.currentProduction.team
+        this.currentProduction?.team
           .map(personId => this.personMap.get(personId))
-          .filter(Boolean)
+          .filter(Boolean) || []
       )
     },
 
