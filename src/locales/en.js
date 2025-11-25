@@ -909,6 +909,7 @@ export default {
     only_comments: 'Only comments',
     only_mentions: 'Only mentions',
     only_non_watching: 'Only non-watching',
+    only_playlists_ready: 'Only ready playlists',
     only_read: 'Only read',
     only_replies: 'Only replies',
     only_unread: 'Only unread',
