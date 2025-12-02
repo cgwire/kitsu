@@ -995,7 +995,7 @@ export const playerMixin = {
     onWindowResize() {
       const now = new Date().getTime()
       this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 600) {
+      if (now - this.lastCall > 100) {
         this.lastCall = now
         setTimeout(() => {
           this.resetHeight()
