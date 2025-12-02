@@ -13,11 +13,21 @@
         v-show="!hideEntities"
       >
         <div
-          class="has-text-right total-man-days mr0"
+          class="total-man-days"
           :class="{
             'without-milestones': !withMilestones
           }"
         >
+          <div class="actions">
+            <button
+              class="button is-small is-link"
+              :title="$t('main.expand_all')"
+              @click="$emit('expand-all')"
+              v-if="showExpandAll"
+            >
+              <list-chevrons-up-down-icon :size="15" />
+            </button>
+          </div>
           <span class="total-value" v-if="!hideManDays">
             {{ formatDuration(totalManDays) }} {{ $t('schedule.md') }}
           </span>
@@ -760,6 +770,7 @@ import {
   ChevronRightIcon,
   EditIcon,
   LinkIcon,
+  ListChevronsUpDownIcon,
   PlusIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
@@ -798,6 +809,7 @@ export default {
     EditIcon,
     EditMilestoneModal,
     LinkIcon,
+    ListChevronsUpDownIcon,
     PeopleAvatar,
     PlusIcon,
     ProductionName,
@@ -874,6 +886,10 @@ export default {
       type: Boolean,
       default: false
     },
+    showExpandAll: {
+      type: Boolean,
+      default: false
+    },
     subEndDate: {
       type: Object,
       default: null
@@ -938,6 +954,7 @@ export default {
 
   emits: [
     'estimation-changed',
+    'expand-all',
     'item-assign',
     'item-changed',
     'item-drop',
@@ -2243,6 +2260,13 @@ export default {
         rootElement,
         this.multiline ? this.refreshItemPositions : undefined
       )
+    },
+
+    exportData() {
+      return {
+        header: this.daysAvailable,
+        hierarchy: this.hierarchy
+      }
     }
   },
 
@@ -2380,17 +2404,17 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .child-element-name {
-    color: white;
+    color: $white;
   }
 
   .timeline {
     .timeline-header {
       background: transparent;
-      color: white;
+      color: $white;
 
       .day {
         .day-number {
-          color: white;
+          color: $white;
         }
 
         .day-name {
@@ -2398,14 +2422,14 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           padding-bottom: 0;
           &.new-month,
           &.new-week {
-            border-left: 2px solid white;
+            border-left: 2px solid $white;
           }
         }
 
         .month-name {
           background: $dark-grey-2;
-          border-left: 2px solid white;
-          color: white;
+          border-left: 2px solid $white;
+          color: $white;
         }
       }
     }
@@ -2419,7 +2443,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         }
 
         .milestone-vertical-line {
-          border-left: 1px dashed white;
+          border-left: 1px dashed $white;
         }
       }
     }
@@ -2427,12 +2451,12 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 
   .expand,
   .man-day-input {
-    color: white;
+    color: $white;
   }
 
   .total-man-days {
     background: $dark-grey-2;
-    color: white;
+    color: $white;
   }
 
   .entity-name {
@@ -2477,7 +2501,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 }
 
 .entities {
-  background: white;
+  background: $white;
   min-width: 300px;
   padding-bottom: 20px; //hack due to custom scrollbar
   overflow: hidden;
@@ -2545,7 +2569,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .expand {
-    color: white;
+    color: $white;
     cursor: pointer;
     margin-right: 0.5em;
   }
@@ -2632,14 +2656,14 @@ const setItemPositions = (items, unitOfTime = 'days') => {
       }
 
       .day-off-icon {
-        color: white;
+        color: $white;
         position: absolute;
         top: -1px;
         z-index: 10000;
       }
 
       .month-name {
-        background: white;
+        background: $white;
         border-left: 2px solid black;
         bottom: 0;
         color: black;
@@ -2956,22 +2980,29 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 
   .filler {
     margin: 0;
-    margin: 0;
   }
 }
 
 .total-man-days {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
   position: absolute;
-  background: white;
-  border-top-left-radius: 10px;
+  background: $white;
   height: 85px;
-  margin-right: 0.5em;
-  margin-bottom: 0;
   min-width: 300px;
-  padding-bottom: 0;
+  padding-bottom: 2px;
+  padding-left: 5px;
   padding-right: 5px;
-  padding-top: 55px;
   z-index: 2;
+
+  .actions .button {
+    opacity: 0.5;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 
   .total-value {
     font-size: 20px;
@@ -3020,7 +3051,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     min-width: 100px;
     text-align: center;
     top: -5px;
-    background: white;
+    background: $white;
     z-index: 100;
     transform: translateX(-50%);
   }
@@ -3045,7 +3076,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 
   .milestone-tooltip:after {
     border-color: rgba(255, 255, 255, 0);
-    border-top-color: #ffffff;
+    border-top-color: $white;
     border-width: 5px;
     margin-left: -5px;
   }
@@ -3085,7 +3116,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     .button {
       background: black;
       border: none;
-      color: white;
+      color: $white;
       height: 20px;
       margin-top: -2px;
       padding: 0;
