@@ -15,7 +15,7 @@
     :type="type"
     @click="$emit('click', $event)"
   >
-    <bell class="icon" v-if="icon === 'bell'" />
+    <bell-icon class="icon" v-if="icon === 'bell'" />
     <grid-icon class="icon" v-else-if="icon === 'grid'" />
     <send-icon class="icon" v-else-if="icon === 'send'" />
     <paperclip-icon class="icon" v-else-if="icon === 'attach'" />
@@ -49,6 +49,11 @@
     <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
+    <file-down-icon
+      class="icon"
+      :stroke-width="1.5"
+      v-else-if="icon === 'export'"
+    />
     <calendar-icon
       class="icon"
       :stroke-width="1.5"
@@ -85,7 +90,7 @@
 
 <script>
 import {
-  Bell,
+  BellIcon,
   CalendarIcon,
   CalendarPlusIcon,
   ChevronDownIcon,
@@ -101,6 +106,7 @@ import {
   Edit2Icon,
   GlobeIcon,
   GridIcon,
+  FileDownIcon,
   FilmIcon,
   ImageIcon,
   KeyIcon,
@@ -131,7 +137,7 @@ export default {
   name: 'button-simple',
 
   components: {
-    Bell,
+    BellIcon,
     CalendarIcon,
     CalendarPlusIcon,
     ChevronDownIcon,
@@ -145,6 +151,7 @@ export default {
     EditIcon,
     Edit2Icon,
     FileDigitIcon,
+    FileDownIcon,
     FilmIcon,
     GlobeIcon,
     GridIcon,

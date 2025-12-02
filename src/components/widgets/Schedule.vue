@@ -2260,6 +2260,13 @@ export default {
         rootElement,
         this.multiline ? this.refreshItemPositions : undefined
       )
+    },
+
+    exportData() {
+      return {
+        header: this.daysAvailable,
+        hierarchy: this.hierarchy
+      }
     }
   },
 

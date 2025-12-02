@@ -69,6 +69,14 @@
         <div class="flexrow" style="margin-top: 23px">
           <button-simple
             class="flexrow-item"
+            :disabled="loading.exportSchedule || loading.expandSchedule"
+            icon="export"
+            :is-loading="loading.exportSchedule"
+            :title="$t('schedule.export')"
+            @click="exportSchedule()"
+          />
+          <button-simple
+            class="flexrow-item"
             :disabled="version === 'ref'"
             icon="save"
             :text="$t('schedule.apply_to_prod')"
@@ -467,6 +475,8 @@
  * to set milestones too.
  */
 
+import ExcelJS from 'exceljs'
+import FileSaver from 'file-saver'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -479,6 +489,7 @@ import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
+import colors from '@/lib/colors'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import {
   sortByName,
@@ -490,10 +501,13 @@ import {
   daysToMinutes,
   getBusinessDays,
   getDatesFromStartDate,
+  getDayOffRange,
   minutesToDays,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
+
+import { formatListMixin } from '@/components/mixins/format'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -521,6 +535,8 @@ export const DEFAULT_ZOOM = 1
 
 export default {
   name: 'production-schedule',
+
+  mixins: [formatListMixin],
 
   components: {
     ButtonSimple,
@@ -587,7 +603,9 @@ export default {
       loading: {
         schedule: false,
         editScheduleVersion: false,
-        applyScheduleVersion: false
+        applyScheduleVersion: false,
+        expandSchedule: false,
+        exportSchedule: false
       },
       errors: {
         schedule: false,
@@ -1766,16 +1784,16 @@ export default {
     },
 
     async onScheduleExpandAll() {
-      if (this.expanding) return
+      if (this.loading.expandSchedule) return
 
-      this.expanding = true
+      this.loading.expandSchedule = true
       if (!this.expandAll) {
         await this.expandAllScheduleItems()
       } else {
         this.collapseAllScheduleItems()
       }
       this.expandAll = !this.expandAll
-      this.expanding = false
+      this.loading.expandSchedule = false
     },
 
     async onScheduleItemAssigned(task, personId) {
@@ -1923,6 +1941,247 @@ export default {
       this.scheduleItems.forEach(element => {
         element.expanded = false
       })
+    },
+
+    async exportSchedule(expandAll = true) {
+      this.loading.exportSchedule = true
+
+      try {
+        if (expandAll) {
+          await this.expandAllScheduleItems()
+        }
+
+        const data = this.$refs.schedule?.exportData()
+
+        const workbook = new ExcelJS.Workbook()
+        const sheet = workbook.addWorksheet(this.$t('schedule.title'))
+
+        // init header
+        const header = ['', 'Task Type', 'Entity', 'Assignee', 'Description']
+        const dates = data.header.map(item => item.format('YYYY-MM-DD'))
+        const headerRow = sheet.addRow([...header, ...dates])
+
+        headerRow.font = { bold: true }
+        headerRow.eachCell(cell => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDDDDDD' } // grey light
+          }
+          cell.border = {
+            bottom: { style: 'thin' }
+          }
+        })
+        const datesColumn = header.length + 1
+
+        // level 1: Task Types
+        let startRowLevel1 = 2
+        let endRowLevel1 = null
+        data.hierarchy.forEach(item => {
+          endRowLevel1 = startRowLevel1
+
+          const row = sheet.addRow([null, item.name])
+          row.getCell(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: item.color.slice(1) }
+          }
+          row.getCell(2).alignment = { vertical: 'top' }
+          row.getCell(2).note =
+            `${item.name}\n${item.start_date} - ${item.end_date}`
+          row.height = 30
+
+          // fill timebar
+          const start = dates.indexOf(item.start_date)
+          const end = dates.indexOf(item.end_date)
+          const color = item.color.slice(1)
+          const color2 = colors.lightenColor(item.color, 0.2).hex().slice(1)
+          for (let i = start; i > -1 && i <= end; i++) {
+            const cell = row.getCell(5 + i)
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: color }
+            }
+          }
+
+          endRowLevel1++
+
+          // level 2: Entity Types
+          let startRowLevel2 = endRowLevel1
+          let endRowLevel2 = null
+          item.children.forEach(type => {
+            endRowLevel2 = startRowLevel2
+
+            const row = sheet.addRow([null, null, type.name, ''])
+            row.getCell(3).alignment = { vertical: 'top' }
+            row.getCell(3).note =
+              `${type.name}\n${type.start_date} - ${type.end_date}`
+
+            // fill timebar
+            const start = dates.indexOf(type.start_date)
+            const end = dates.indexOf(type.end_date)
+            for (let i = start; i > -1 && i <= end; i++) {
+              const cell = row.getCell(datesColumn + i)
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: color2 }
+              }
+            }
+
+            endRowLevel1++
+            endRowLevel2++
+
+            // level 3: Persons
+            let startRowLevel3 = endRowLevel2
+            let endRowLevel3 = null
+            type.children.forEach((tasks, assigneeId) => {
+              endRowLevel3 = startRowLevel3
+              const isAssigned = assigneeId !== 'unassigned'
+
+              const assignee = isAssigned
+                ? this.personMap.get(assigneeId)
+                : {
+                    id: assigneeId,
+                    avatar: false,
+                    color: '#888',
+                    full_name: this.$t('main.unassigned')
+                  }
+
+              const row = sheet.addRow([
+                null,
+                null,
+                null,
+                assignee.full_name,
+                isAssigned ? this.$t('days_off.title') : null
+              ])
+              row.getCell(4).alignment = { vertical: 'top' }
+              row.getCell(5).alignment = { vertical: 'middle' }
+
+              // fill days off
+              const daysOff = getDayOffRange(this.daysOffByPerson[assigneeId])
+              daysOff.forEach(dayOff => {
+                const index = dates.findIndex(date => date === dayOff.date)
+                if (index !== -1) {
+                  const cell = row.getCell(datesColumn + index)
+                  cell.note = `${this.$t('days_off.title')}\n${dayOff.description}`
+                  cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFAAAAAA' } // grey dark
+                  }
+                }
+              })
+
+              endRowLevel1++
+              endRowLevel2++
+              endRowLevel3++
+
+              // level 4: Tasks
+              tasks.forEach(task => {
+                const duration =
+                  this.mode === 'real'
+                    ? this.formatDuration(task.duration)
+                    : this.formatDuration(task.estimation)
+
+                const row = sheet.addRow([
+                  null,
+                  null,
+                  null,
+                  null,
+                  `${task.entity.name} (${duration}md)`
+                ])
+
+                // fill task timebar
+                const start_date = task.startDate.format('YYYY-MM-DD')
+                const end_date = task.endDate.format('YYYY-MM-DD')
+                const startIndex = dates.indexOf(start_date)
+                const endIndex = dates.indexOf(end_date)
+                for (let i = startIndex; i > -1 && i <= endIndex; i++) {
+                  const cell = row.getCell(datesColumn + i)
+                  cell.note = `${task.entity.name}\n${start_date} - ${end_date}\n${duration} ${this.$t('schedule.md')}`
+                  cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: color }
+                  }
+                }
+
+                endRowLevel1++
+                endRowLevel2++
+                endRowLevel3++
+              })
+
+              // group cells of level 3
+              sheet.mergeCells(startRowLevel3, 4, endRowLevel3 - 1, 4)
+
+              startRowLevel3 = endRowLevel3
+            })
+
+            // group cells of level 2
+            sheet.mergeCells(startRowLevel2, 3, endRowLevel2 - 1, 3)
+
+            startRowLevel2 = endRowLevel2
+          })
+
+          // group cells of level 1
+          sheet.mergeCells(startRowLevel1, 1, endRowLevel1 - 1, 1)
+          sheet.mergeCells(startRowLevel1, 2, endRowLevel1 - 1, 2)
+
+          // stylize borders
+          sheet.getRow(endRowLevel1 - 1).border = {
+            bottom: {
+              style: 'medium',
+              color: { argb: color }
+            }
+          }
+
+          startRowLevel1 = endRowLevel1
+        })
+
+        // customize columns size
+        sheet.getColumn(1).width = 5
+        for (let i = 0; i < dates.length; i++) {
+          sheet.getColumn(header.length + 1 + i).width = 10
+        }
+        const ajustColumnWidth = (
+          columnIndex,
+          minWidth = 10,
+          maxWidth = 100
+        ) => {
+          const column = sheet.getColumn(columnIndex)
+          let maxLength = minWidth
+          column.eachCell({ includeEmpty: false }, cell => {
+            const cellValue = cell.value ? cell.value.toString() : ''
+            if (cellValue.length > maxLength) {
+              maxLength = cellValue.length
+            }
+          })
+          column.width = Math.min(maxLength, maxWidth)
+        }
+        ajustColumnWidth(2) // task type
+        ajustColumnWidth(3) // entity
+        ajustColumnWidth(4) // assignee
+        ajustColumnWidth(5) // description
+
+        // generate an XLSX file
+        const buffer = await workbook.xlsx.writeBuffer()
+        const filename = `Kitsu - ${this.currentProduction.name} - ${this.$t('schedule.title')}`
+        const mode = this.modeOptions.find(
+          ({ value }) => value === this.mode
+        )?.label
+        const version = this.versionOptions.find(
+          ({ value }) => value === this.version
+        )?.label
+        const release = this.isVersioned ? `${mode} - ${version}` : mode
+        FileSaver.saveAs(new Blob([buffer]), `${filename} (${release}).xlsx`)
+      } catch (err) {
+        console.error(err)
+        alert(this.$t('schedule.export_error'))
+      } finally {
+        this.loading.exportSchedule = false
+      }
     }
   },
 
