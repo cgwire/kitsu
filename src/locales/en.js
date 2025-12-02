@@ -701,6 +701,7 @@ export default {
     end_date: 'End date',
     estimation: 'Estimation',
     estimation_short: 'Est.',
+    expand_all: 'Expand all',
     files_selected: 'files selected',
     filter_group: 'Filter Group',
     filter_group_add: 'Add A Filter Group',

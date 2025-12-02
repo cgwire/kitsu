@@ -105,8 +105,10 @@
         hide-man-days
         :multiline="isTVShow"
         :reassignable="!isLockedSchedule"
+        show-expand-all
         :subchildren="!isTVShow"
         :type="mode"
+        @expand-all="onScheduleExpandAll"
         @item-assign="onScheduleItemAssigned"
         @item-changed="onScheduleItemChanged"
         @item-drop="onScheduleItemDropped"
@@ -1763,6 +1765,19 @@ export default {
       }
     },
 
+    async onScheduleExpandAll() {
+      if (this.expanding) return
+
+      this.expanding = true
+      if (!this.expandAll) {
+        await this.expandAllScheduleItems()
+      } else {
+        this.collapseAllScheduleItems()
+      }
+      this.expandAll = !this.expandAll
+      this.expanding = false
+    },
+
     async onScheduleItemAssigned(task, personId) {
       // update task to refresh the schedule
       task.assignees.push(personId)
@@ -1886,6 +1901,28 @@ export default {
       }
       // refresh version list
       await this.loadScheduleVersions(this.currentProduction)
+    },
+
+    async expandAllScheduleItems() {
+      // run sequentially to avoid overloading the server
+      for (const element of this.scheduleItems) {
+        if (!element.expanded) {
+          await this.expandTaskTypeElement(
+            element,
+            () => {
+              this.$refs.schedule?.refreshItemPositions(element)
+            },
+            true,
+            false
+          )
+        }
+      }
+    },
+
+    collapseAllScheduleItems() {
+      this.scheduleItems.forEach(element => {
+        element.expanded = false
+      })
     }
   },
 
