@@ -744,9 +744,10 @@ h2.subtitle {
 }
 
 .task-list {
-  width: 100%;
-  flex: none;
-  margin-bottom: 2em;
+  flex: 1;
+  margin-bottom: 3em;
+  min-width: 100%;
+  overflow: hidden;
 }
 
 .datatable-row {
@@ -823,13 +824,15 @@ h2.subtitle {
 }
 
 .infos {
-  flex: 1;
+  height: 100%;
   margin-top: 1em;
+  margin-bottom: 1em;
+  max-height: 100%;
   overflow-y: auto;
 
-  .entity-infos {
-    align-self: flex-start;
-    flex: 1;
+  .metadata-infos {
+    flex: unset;
+    overflow: auto;
   }
 }
 
