@@ -234,13 +234,14 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      active
       entity-type="Asset"
       parent="assets"
-      :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @confirm="confirmAddThumbnails"
       @cancel="hideAddThumbnailsModal"
+      v-if="modals.isAddThumbnailsDisplayed"
     />
 
     <build-filter-modal
