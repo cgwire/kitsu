@@ -4,7 +4,7 @@ name: 'Kitsu CI'
 on: [push, pull_request]
 
 jobs:
-  ci:
+  test:
     name: Test with Node ${{ matrix.node }}
     runs-on: ubuntu-latest
     strategy:
@@ -19,6 +19,37 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
+<<<<<<< HEAD
+          cache: 'npm'
+      - name: Cache Vitest
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.vitest
+          key: vitest-${{ matrix.node }}-${{ hashFiles('package-lock.json') }}
+=======
+          cache: npm
+>>>>>>> e5f355516 ([ci] remove useless caching steps for Vitest and Vite in CI workflow)
+      - name: Install npm dependencies
+        run: |
+          echo "Node.js $(node -v)"
+          echo "npm v$(npm -v)"
+          npm ci
+      - name: Run tests
+        run: |
+          npm run test:unit
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: '--max_old_space_size=8192'
+      HUSKY: 0
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: current
           cache: 'npm'
       - name: Install npm dependencies
         run: |
@@ -26,14 +57,36 @@ jobs:
           echo "npm v$(npm -v)"
           npm ci
       - name: Run linter
-        if: ${{ matrix.node == 'current' }}
+        run: npm run lint -- --quiet
         env:
           NODE_ENV: production
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: '--max_old_space_size=8192'
+      HUSKY: 0
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: current
+<<<<<<< HEAD
+          cache: 'npm'
+      - name: Cache Vite
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.vite
+          key: vite-${{ hashFiles('package-lock.json') }}
+=======
+          cache: npm
+>>>>>>> e5f355516 ([ci] remove useless caching steps for Vitest and Vite in CI workflow)
+      - name: Install npm dependencies
         run: |
-          npm run lint -- --quiet
-      - name: Run tests
-        run: |
-          npm run test:unit
+          echo "Node.js $(node -v)"
+          echo "npm v$(npm -v)"
+          npm ci
       - name: Build application
-        run: |
-          npm run build
+        run: npm run build
