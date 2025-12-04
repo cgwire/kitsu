@@ -55,9 +55,22 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    threads: false,
     environment: 'jsdom',
     setupFiles: ['vitest-localstorage-mock', 'tests/unit.setup.js'],
-    mockReset: false
+    mockReset: false,
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: false,
+        isolate: true
+      }
+    },
+    deps: {
+      optimizer: {
+        web: {
+          include: ['vue', 'vuex', 'vue-router', '@vue/test-utils']
+        }
+      }
+    }
   }
 })
