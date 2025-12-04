@@ -632,13 +632,13 @@ export default {
     isValidForm() {
       return Boolean(
         this.mode === 'status' ||
-          (this.mode === 'publish' &&
-            this.previewForms.length &&
-            (this.nextRevision === undefined ||
-              this.nextRevision > this.revision) &&
-            (!this.showLinkField ||
-              !this.link ||
-              this.$refs['input-link']?.checkValidity()))
+        (this.mode === 'publish' &&
+          this.previewForms.length &&
+          (this.nextRevision === undefined ||
+            this.nextRevision > this.revision) &&
+          (!this.showLinkField ||
+            !this.link ||
+            this.$refs['input-link']?.checkValidity()))
       )
     }
   },

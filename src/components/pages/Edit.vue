@@ -152,7 +152,7 @@
             <div
               class="canvas-wrapper"
               ref="canvas-wrapper"
-              oncontextmenu="return false;"
+              oncontextmenu="return false"
               v-show="
                 !isCurrentPreviewFile &&
                 isAnnotationsDisplayed &&

@@ -3,7 +3,7 @@
     <div
       ref="picture-wrapper"
       class="picture-wrapper"
-      oncontextmenu="return false;"
+      oncontextmenu="return false"
     >
       <div
         v-show="!isLoading"

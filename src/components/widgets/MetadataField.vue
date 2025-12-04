@@ -128,7 +128,7 @@ export default {
     isEditable() {
       return Boolean(
         this.isCurrentUserManager ||
-          this.isSupervisorInDepartments(this.descriptor.departments)
+        this.isSupervisorInDepartments(this.descriptor.departments)
       )
     }
   },

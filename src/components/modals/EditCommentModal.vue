@@ -284,8 +284,8 @@ export default {
     isValidForm() {
       return Boolean(
         !this.isPreviewsComment ||
-          !this.form.link ||
-          this.$refs['input-link']?.checkValidity()
+        !this.form.link ||
+        this.$refs['input-link']?.checkValidity()
       )
     }
   },
