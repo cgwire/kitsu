@@ -6,6 +6,7 @@ import i18n from '@/lib/i18n'
 import auth from '@/lib/auth'
 
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
+import FileUpload from '@/components/widgets/FileUpload.vue'
 
 const router = createRouter({
   history: createMemoryHistory(),
@@ -44,6 +45,9 @@ describe('AddThumbnailsModal', () => {
       global: {
         mocks: {
           $store: store,
+        },
+        stubs: {
+          'file-upload': FileUpload
         }
       },
       props: {

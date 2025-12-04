@@ -1,7 +1,7 @@
 <template>
   <div
+    class="modal"
     :class="{
-      modal: true,
       'is-active': active
     }"
   >
@@ -40,10 +40,20 @@
           :multiple="true"
         />
 
-        <label class="label mt2" v-if="thumbnailList.length > 0">
+        <div class="warning" v-if="invalidForms.length">
+          <label class="label mt2">
+            {{ $t('entities.thumbnails.invalid_files') }}
+          </label>
+          <ul class="invalid-files">
+            <li v-for="(form, index) in invalidForms" :key="index">
+              {{ form.get('file').name }}
+            </li>
+          </ul>
+        </div>
+
+        <label class="label mt2" v-if="thumbnailList.length">
           {{ $t('entities.thumbnails.selected_files') }}
         </label>
-
         <div
           class="thumbnail-line flexrow"
           :key="thumbnailInfo.id"
@@ -51,7 +61,7 @@
         >
           <img
             class="flexrow-item"
-            src="../../assets/icons/movie-thumbnail.png"
+            src="@/assets/icons/movie-thumbnail.png"
             width="150"
             height="100"
             v-if="!thumbnailInfo.src"
@@ -75,6 +85,7 @@
 
         <modal-footer
           :error-text="$t('entities.thumbnails.error')"
+          :is-error="isError"
           :is-loading="isLoading"
           :is-disabled="!isFormFilled"
           @confirm="confirm"
@@ -146,8 +157,7 @@ export default {
       forms: [],
       loading: {},
       taskTypeId: null,
-      uploaded: {},
-      thumbnailList: []
+      uploaded: {}
     }
   },
 
@@ -190,6 +200,40 @@ export default {
     },
     isShots() {
       return this.entityType === 'Shot'
+    },
+
+    validForms() {
+      return this.forms.filter(form => {
+        const filename = this.slugifyFilename(form)
+        const asset = this.entityMap[filename]
+        return asset && asset.validations.get(this.taskTypeId)
+      })
+    },
+
+    invalidForms() {
+      return this.forms.filter(form => !this.validForms.includes(form))
+    },
+
+    thumbnailList() {
+      return this.validForms.map(form => {
+        const asset = this.entityMap[this.slugifyFilename(form)]
+        const url = this.prepareImagePreview(form)
+        let parentName = ''
+        if (this.isAssets) {
+          parentName = asset.asset_type_name
+        } else if (this.isEdits) {
+          parentName = asset.episode_name
+        } else if (this.isShots) {
+          parentName = asset.sequence_name
+        }
+        form.asset = asset
+        return {
+          parentName,
+          name: asset.name,
+          id: asset.id,
+          src: url
+        }
+      })
     }
   },
 
@@ -198,17 +242,14 @@ export default {
       if (this.taskTypeList.length > 0) {
         this.taskTypeId = this.taskTypeList[0].id
       }
-      if (this.$refs['preview-field'].reset) {
-        // Needed for tests
-        this.$refs['preview-field'].reset()
-      }
-      this.thumbnailList = []
+      this.$refs['preview-field'].reset()
+      this.forms = []
       this.loading = {}
       this.uploaded = {}
     },
 
     confirm() {
-      return this.$emit('confirm', this.forms.map(this.addTaskInformation))
+      return this.$emit('confirm', this.validForms.map(this.addTaskInformation))
     },
 
     addEntityToEntityMap(entity) {
@@ -251,39 +292,7 @@ export default {
         cachedEntities = shotStore.cache.shots
       }
       cachedEntities.forEach(this.addEntityToEntityMap)
-      this.forms = this.filterForms(forms)
-      this.buildThumbnailList()
-    },
-
-    filterForms(forms) {
-      return forms.filter(form => {
-        const filename = this.slugifyFilename(form)
-        const asset = this.entityMap[filename]
-        return asset && asset.validations.get(this.taskTypeId)
-      })
-    },
-
-    buildThumbnailList() {
-      this.thumbnailList = this.forms.map(form => {
-        const asset = this.entityMap[this.slugifyFilename(form)]
-        const url = this.prepareImagePreview(form)
-        let parentName = ''
-        if (this.isAssets) {
-          parentName = asset.asset_type_name
-        } else if (this.isEdits) {
-          parentName = asset.episode_name
-        } else if (this.isShots) {
-          parentName = asset.sequence_name
-        }
-        form.asset = asset
-        return {
-          parentName,
-          name: asset.name,
-          id: asset.id,
-          src: url
-        }
-      })
-      return this.thumbnailList
+      this.forms = forms
     },
 
     slugifyFilename(form) {
@@ -301,8 +310,9 @@ export default {
     },
 
     markLoading(assetId) {
-      this.loading = {}
-      this.loading[assetId] = true
+      this.loading = {
+        [assetId]: true
+      }
     },
 
     markUploaded(assetId) {
@@ -321,6 +331,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.invalid-files {
+  margin-left: 1.5em;
+}
+
 .thumbnail-line {
   margin-top: 1em;
   img {
