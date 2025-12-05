@@ -29,7 +29,7 @@
         class="event-line"
         :key="event.id"
         @click="selectLine(event)"
-        v-for="event in events"
+        v-for="event in displayedEvents"
       >
         <span class="date tag mr1">{{ event.date }} </span>
         <span
@@ -69,6 +69,12 @@
           </li>
         </ul>
       </div>
+      <div class="has-text-centered mt1" v-if="hasMoreEvents">
+        <button-simple
+          :text="$t('main.load_more')"
+          @click="displayLimit += PAGE_SIZE"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -100,11 +106,14 @@ export default {
   },
 
   data() {
+    const PAGE_SIZE = 1000
     return {
+      PAGE_SIZE,
       currentDate: new Date(),
       events: [],
       isLoading: true,
-      selectedEvents: {}
+      selectedEvents: {},
+      displayLimit: PAGE_SIZE
     }
   },
 
@@ -117,6 +126,14 @@ export default {
 
     today() {
       return moment().toDate()
+    },
+
+    displayedEvents() {
+      return this.events.slice(0, this.displayLimit)
+    },
+
+    hasMoreEvents() {
+      return this.events.length > this.displayLimit
     }
   },
 
@@ -127,6 +144,7 @@ export default {
       const before = moment(this.currentDate).add(1, 'days')
       const after = moment(this.currentDate)
       this.selectedEvents = {}
+      this.displayLimit = this.PAGE_SIZE
       this.isLoading = true
       this.loadEvents({
         after: formatFullDateWithRevertedTimezone(after, this.timezone),
