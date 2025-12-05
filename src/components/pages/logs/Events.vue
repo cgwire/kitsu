@@ -40,7 +40,7 @@
           {{ event.shortType }}
         </span>
         <span class="name tag mr1">{{ event.name }}</span>
-        <ul v-if="selectedEvents[event.id]">
+        <ul v-if="selectedEvents[event.id]" @click.stop>
           <li class="flexrow">
             <span class="key">user</span>
             <people-avatar
@@ -226,13 +226,19 @@ export default {
 
 .log-list {
   display: flex;
-  gap: 0.5em;
   flex-direction: column;
   margin-bottom: 2em;
 }
 
 .event-line {
   cursor: pointer;
+  padding: 0.25em;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: var(--background-selectable);
+  }
 
   .tag {
     border-radius: 4px;
@@ -289,6 +295,14 @@ export default {
       font-weight: 500;
       width: 170px;
       display: inline-block;
+    }
+
+    a {
+      color: var(--text);
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }
