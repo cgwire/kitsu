@@ -1,88 +1,67 @@
 ---
-name: 'Kitsu CI'
+name: Kitsu CI
 
 on: [push, pull_request]
 
+env:
+  NODE_OPTIONS: --max_old_space_size=8192
+  HUSKY: 0
+
 jobs:
   test:
-    name: Test with Node ${{ matrix.node }}
+    name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [20, 22, 24, current]
-    env:
-      NODE_OPTIONS: '--max_old_space_size=8192'
-      HUSKY: 0
     steps:
-      - uses: actions/checkout@v6
+      - name: Git checkout
+        uses: actions/checkout@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-<<<<<<< HEAD
-          cache: 'npm'
-      - name: Cache Vitest
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.vitest
-          key: vitest-${{ matrix.node }}-${{ hashFiles('package-lock.json') }}
-=======
           cache: npm
->>>>>>> e5f355516 ([ci] remove useless caching steps for Vitest and Vite in CI workflow)
       - name: Install npm dependencies
         run: |
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
           npm ci
       - name: Run tests
-        run: |
-          npm run test:unit
+        run: npm run test:unit
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: '--max_old_space_size=8192'
-      HUSKY: 0
     steps:
-      - uses: actions/checkout@v6
+      - name: Git checkout
+        uses: actions/checkout@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: current
-          cache: 'npm'
+          cache: npm
       - name: Install npm dependencies
         run: |
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
           npm ci
       - name: Run linter
-        run: npm run lint -- --quiet
         env:
           NODE_ENV: production
+        run: npm run lint -- --quiet
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      NODE_OPTIONS: '--max_old_space_size=8192'
-      HUSKY: 0
     steps:
-      - uses: actions/checkout@v6
+      - name: Git checkout
+        uses: actions/checkout@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: current
-<<<<<<< HEAD
-          cache: 'npm'
-      - name: Cache Vite
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.vite
-          key: vite-${{ hashFiles('package-lock.json') }}
-=======
           cache: npm
->>>>>>> e5f355516 ([ci] remove useless caching steps for Vitest and Vite in CI workflow)
       - name: Install npm dependencies
         run: |
           echo "Node.js $(node -v)"
