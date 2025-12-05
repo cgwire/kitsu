@@ -20,6 +20,7 @@
           @save-clicked="onSaveClicked"
           @annotation-changed="onAnnotationChanged"
           @annotations-refreshed="onAnnotationsRefreshed"
+          @preview-changed="onPreviewChanged"
           v-if="!isPlaylistPage"
         />
       </div>
@@ -169,12 +170,24 @@ export default {
 
   methods: {
     ...mapActions([
+      'changePlaylistPreview',
       'editPlaylist',
       'loadPlaylists',
       'loadTempPlaylist',
       'newPlaylist',
       'updatePreviewAnnotation'
     ]),
+
+    /* When a preview is modified, the change is persisted */
+    async onPreviewChanged({ entity, previewFileId, previousPreviewFileId }) {
+      await this.changePlaylistPreview({
+        playlist: this.currentPlaylist,
+        entity,
+        previewFileId,
+        previousPreviewFileId,
+        remote: false
+      })
+    },
 
     onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id

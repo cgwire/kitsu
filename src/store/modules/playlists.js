@@ -189,7 +189,7 @@ const actions = {
 
   changePlaylistPreview(
     { commit, dispatch },
-    { playlist, entity, previewFileId, previousPreviewFileId }
+    { playlist, entity, previewFileId, previousPreviewFileId, remote = true }
   ) {
     commit(CHANGE_PLAYLIST_PREVIEW, {
       playlist,
@@ -197,7 +197,12 @@ const actions = {
       previewFileId,
       previousPreviewFileId
     })
-    return dispatch('editPlaylist', { data: playlist })
+
+    if (remote) {
+      return dispatch('editPlaylist', { data: playlist })
+    } else {
+      return Promise.resolve()
+    }
   },
 
   removeBuildJob({ commit }, job) {
@@ -419,8 +424,8 @@ const mutations = {
         e => e.id === entityId && e.preview_file_id === previousPreviewFileId
       )
     }
+    state.playlistEntryMap.delete(`${entityId}-${previousPreviewFileId}`)
     if (entityToChange) {
-      state.playlistEntryMap.delete(`${entityId}-${previousPreviewFileId}`)
       state.playlistEntryMap.set(`${entityId}-${previewFileId}`, entityToChange)
       entityToChange.preview_file_id = previewFileId
     }
