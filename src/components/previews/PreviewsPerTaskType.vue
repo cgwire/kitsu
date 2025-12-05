@@ -14,7 +14,7 @@
       v-if="previewFileOptions.length"
       v-model="previewFileId"
     />
-    <span class="text flexrow-item" v-else>Selected task has no previews.</span>
+    <span class="flexrow-item" v-else>{{ $t('tasks.no_preview') }}</span>
 
     <div class="flexrow-item" v-if="taskStatus">
       <validation-tag

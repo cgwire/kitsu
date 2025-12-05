@@ -833,7 +833,7 @@ export default {
       return [
         {
           id: null,
-          name: 'No task type',
+          name: this.$t('tasks.fields.no_task_type'),
           color: '#CCC'
         },
         ...sortTaskTypes(this.productionShotTaskTypes, this.currentProduction)
