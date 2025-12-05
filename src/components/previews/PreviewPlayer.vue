@@ -6,7 +6,7 @@
           <div
             class="canvas-wrapper"
             ref="canvas-wrapper"
-            oncontextmenu="return false;"
+            oncontextmenu="return false"
             @click="onCanvasClicked"
             v-show="!isZoomPan && isAnnotationsDisplayed"
           >
@@ -16,7 +16,7 @@
           <div
             class="canvas-comparison-wrapper"
             ref="canvas-comparison-wrapper"
-            oncontextmenu="return false;"
+            oncontextmenu="return false"
             @click="onCanvasClicked"
             v-show="
               !isZoomPan &&

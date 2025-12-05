@@ -1,3 +1,4 @@
+---
 name: Deploy Kitsu to staging environment
 
 on:
@@ -5,23 +6,24 @@ on:
     branches:
       - main
 
+env:
+  NODE_OPTIONS: --max_old_space_size=8192
+  HUSKY: 0
+
 jobs:
-  build:
+  deploy:
     if: github.repository_owner == 'cgwire'
-    name: Build
+    name: Deploy to staging
     runs-on: ubuntu-latest
     steps:
       - name: Update Kitsu on staging server
         uses: appleboy/ssh-action@v1
-        env:
-          HUSKY: 0
-          NODE_OPTIONS: '--max_old_space_size=8192'
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          envs: HUSKY, NODE_OPTIONS
+          envs: HUSKY,NODE_OPTIONS
           script: |
             set -e
             echo "Node.js $(node -v)"

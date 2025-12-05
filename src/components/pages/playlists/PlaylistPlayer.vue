@@ -69,34 +69,29 @@
         @click="onNotifyClientsClicked"
         v-if="!isLoading && isCurrentUserManager && playlist.for_client"
       />
-      <button-simple
-        class="playlist-button topbar-button flexrow-item full-button"
-        icon="plus"
-        :text="addEntitiesText"
-        @click="$emit('show-add-entities')"
-        :active="
-          !(
-            (isCurrentUserManager || isCurrentUserSupervisor) &&
-            !isAddingEntity &&
-            !isFullMode
-          )
-        "
-        v-if="!isLoading && isCurrentUserManager"
-      />
-      <button-simple
-        @click="$emit('edit-clicked')"
-        class="edit-button playlist-button flexrow-item"
-        :title="$t('playlists.actions.edit')"
-        icon="edit"
-        v-if="isCurrentUserManager || isCurrentUserSupervisor"
-      />
-      <button-simple
-        @click="showDeleteModal"
-        class="delete-button playlist-button flexrow-item"
-        :title="$t('playlists.actions.delete')"
-        icon="trash"
-        v-if="isCurrentUserManager || isCurrentUserSupervisor"
-      />
+
+      <template v-if="isAllowToEdit">
+        <button-simple
+          class="playlist-button topbar-button flexrow-item full-button"
+          icon="plus"
+          :text="addEntitiesText"
+          @click="$emit('show-add-entities')"
+          :active="isAddingEntity || isFullMode"
+          v-if="!isLoading"
+        />
+        <button-simple
+          @click="$emit('edit-clicked')"
+          class="edit-button playlist-button flexrow-item"
+          :title="$t('playlists.actions.edit')"
+          icon="edit"
+        />
+        <button-simple
+          @click="showDeleteModal"
+          class="delete-button playlist-button flexrow-item"
+          :title="$t('playlists.actions.delete')"
+          icon="trash"
+        />
+      </template>
     </div>
 
     <div class="flexrow filler" v-show="!isAddingEntity || isLoading">
@@ -303,7 +298,7 @@
         <div
           class="canvas-wrapper"
           ref="canvas-wrapper"
-          oncontextmenu="return false;"
+          oncontextmenu="return false"
           v-show="
             !isCurrentPreviewFile &&
             isAnnotationsDisplayed &&
@@ -1244,6 +1239,7 @@ export default {
       'isCurrentUserSupervisor',
       'isTVShow',
       'organisation',
+      'personMap',
       'previewFileMap',
       'productionBackgrounds',
       'shotMap',
@@ -1285,6 +1281,17 @@ export default {
         }
       })
       return picturePreviews
+    },
+
+    isAllowToEdit() {
+      if (this.isCurrentUserManager) {
+        return true
+      }
+      if (this.isCurrentUserSupervisor) {
+        const creator = this.personMap.get(this.playlist.created_by)
+        return !creator || creator.id === this.user.id
+      }
+      return false
     },
 
     isMovieComparison() {

@@ -1,6 +1,5 @@
 <template>
   <div
-    class="file-upload-wrapper"
     ref="wrapper"
     @drop="onDrop"
     @dragover="onDragover"
@@ -109,6 +108,7 @@ export default {
 
   methods: {
     filesChange(name, files) {
+      this.uploadedFiles = []
       const forms = []
       for (let i = 0, numFiles = files.length; i < numFiles; i++) {
         const file = files[i]
@@ -127,6 +127,7 @@ export default {
         this.$emit('fileselected', forms[0])
       }
     },
+
     reset() {
       this.isSaving = false
       this.isInitial = true
@@ -156,12 +157,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.file-upload-wrapper {
-}
 .dropbox {
   display: flex;
   align-items: center;
 }
+
 .file-upload-status {
   margin-left: 0.5rem;
   font-style: italic;

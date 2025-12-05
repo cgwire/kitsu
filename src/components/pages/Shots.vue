@@ -272,13 +272,14 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      active
       entity-type="Shot"
       parent="shots"
-      :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @cancel="hideAddThumbnailsModal"
       @confirm="confirmAddThumbnails"
+      v-if="modals.isAddThumbnailsDisplayed"
     />
 
     <shot-history-modal

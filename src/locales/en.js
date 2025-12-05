@@ -462,6 +462,7 @@ export default {
       error: 'An error occurred while uploading thumbnails',
       explanation: 'Adding a thumbnail requires setting a new preview. To set several thumbnails at the same time, you must first choose a task type to create the new previews. The thumbnails will be set from these new previews.',
       explanation_two: 'Then, you need to select the files you want to upload. To find the right entities, the file names must match the following pattern:',
+      invalid_files: 'Invalid files (not matching pattern)',
       select_files: 'Select Files',
       selected_files: 'Selected Files',
       select_task_type: 'Select Task Type',

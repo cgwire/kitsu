@@ -224,13 +224,14 @@
 
     <add-thumbnails-modal
       ref="add-thumbnails-modal"
+      active
       entity-type="Edit"
       :parent="isTVShow ? 'edits_tvshow' : 'edits'"
-      :active="modals.isAddThumbnailsDisplayed"
       :is-loading="loading.addThumbnails"
       :is-error="errors.addThumbnails"
       @cancel="hideAddThumbnailsModal"
       @confirm="confirmAddThumbnails"
+      v-if="modals.isAddThumbnailsDisplayed"
     />
 
     <edit-history-modal

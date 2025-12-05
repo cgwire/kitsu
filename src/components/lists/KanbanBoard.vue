@@ -247,8 +247,8 @@ export default {
     checkStatusIsAllowed(taskStatus, task) {
       return Boolean(
         this.production ||
-          !task ||
-          taskStatus.productions.includes(task.project_id)
+        !task ||
+        taskStatus.productions.includes(task.project_id)
       )
     },
 

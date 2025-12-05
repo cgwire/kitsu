@@ -1,39 +1,71 @@
 ---
-name: 'Kitsu CI'
+name: Kitsu CI
 
 on: [push, pull_request]
 
+env:
+  NODE_OPTIONS: --max_old_space_size=8192
+  HUSKY: 0
+
 jobs:
-  ci:
-    name: Test with Node ${{ matrix.node }}
+  test:
+    name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [20, 22, 24, current]
-    env:
-      NODE_OPTIONS: '--max_old_space_size=8192'
-      HUSKY: 0
     steps:
-      - uses: actions/checkout@v6
+      - name: Git checkout
+        uses: actions/checkout@v6
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
+          cache: npm
+      - name: Install npm dependencies
+        run: |
+          echo "Node.js $(node -v)"
+          echo "npm v$(npm -v)"
+          npm ci
+      - name: Run tests
+        run: npm run test:unit
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: current
+          cache: npm
       - name: Install npm dependencies
         run: |
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
           npm ci
       - name: Run linter
-        if: ${{ matrix.node == 'current' }}
         env:
           NODE_ENV: production
+        run: npm run lint -- --quiet
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: current
+          cache: npm
+      - name: Install npm dependencies
         run: |
-          npm run lint -- --quiet
-      - name: Run tests
-        run: |
-          npm run test:unit
+          echo "Node.js $(node -v)"
+          echo "npm v$(npm -v)"
+          npm ci
       - name: Build application
-        run: |
-          npm run build
+        run: npm run build
