@@ -2,7 +2,7 @@
   <page-layout>
     <template #main>
       <div class="flexcolumn page">
-        <page-title class="mt1" text="Salary Scale" />
+        <page-title class="mt1" :text="$t('budget.salary_scale_title')" />
         <div class="has-text-centered" v-if="isLoading">
           <spinner />
         </div>

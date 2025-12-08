@@ -5,25 +5,22 @@
       class="flexrow-item"
       :options="taskTypeOptions"
       v-model="taskTypeId"
-      v-if="taskTypeOptions.length > 0"
+      v-if="taskTypeOptions.length"
     />
-
     <combobox-styled
       class="flexrow-item"
       :options="previewFileOptions"
       v-if="previewFileOptions.length"
       v-model="previewFileId"
     />
-    <span class="text flexrow-item" v-else>Selected task has no previews.</span>
-
-    <div class="flexrow-item" v-if="taskStatus">
-      <validation-tag
-        class="flexrow-item"
-        :task="{ task_status_id: taskStatus.id }"
-        :is-static="true"
-        :thin="false"
-      />
-    </div>
+    <span class="flexrow-item" v-else>{{ $t('tasks.no_preview') }}</span>
+    <validation-tag
+      class="flexrow-item"
+      :task="{ task_status_id: taskStatus.id }"
+      :is-static="true"
+      :thin="false"
+      v-if="taskStatus"
+    />
   </div>
 </template>
 
@@ -58,10 +55,6 @@ export default {
   },
 
   props: {
-    index: {
-      default: 0,
-      type: Number
-    },
     entity: {
       default: () => {},
       type: Object
@@ -73,12 +66,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'taskMap',
-      'taskTypeMap',
-      'taskStatusMap',
-      'isCurrentUserManager'
-    ]),
+    ...mapGetters(['taskMap', 'taskTypeMap', 'taskStatusMap']),
 
     taskTypeOptions() {
       const entity = editStore.cache.editMap.get(this.entity.id)
@@ -86,12 +74,10 @@ export default {
         .map(taskId => this.taskMap.get(taskId))
         .map(task => this.taskTypeMap.get(task.task_type_id))
         .sort(firstBy('priority', 1).thenBy('name'))
-        .map(taskType => {
-          return {
-            label: taskType.name,
-            value: taskType.id
-          }
-        })
+        .map(taskType => ({
+          label: taskType.name,
+          value: taskType.id
+        }))
     },
 
     previewFileOptions() {
@@ -124,16 +110,16 @@ export default {
     getTaskTypeIdForPreviewFile(taskTypeIds, previewFileId) {
       return taskTypeIds.find(taskTypeId => {
         const previewFiles = this.entity.preview_files[taskTypeId]
-        return previewFiles.some(previewFile => {
-          return previewFile.id === previewFileId
-        })
+        return previewFiles.some(
+          previewFile => previewFile.id === previewFileId
+        )
       })
     },
 
     setCurrentParameters() {
       // Find task type matching current preview.
       const taskTypeIds = Object.keys(this.entity.preview_files)
-      if (taskTypeIds.length > 0) {
+      if (taskTypeIds.length) {
         if (this.entity.preview_file_id) {
           this.taskTypeId = this.getTaskTypeIdForPreviewFile(
             taskTypeIds,
@@ -153,10 +139,10 @@ export default {
       // matching this task type, it selects the first preview available for
       // this task type.
       const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles && previewFiles.length > 0) {
-        const isPreviewFile = previewFiles.some(previewFile => {
-          return previewFile.id === this.entity.preview_file_id
-        })
+      if (previewFiles?.length) {
+        const isPreviewFile = previewFiles.some(
+          previewFile => previewFile.id === this.entity.preview_file_id
+        )
         if (isPreviewFile) {
           this.previewFileId = this.entity.preview_file_id
         } else {
@@ -170,15 +156,15 @@ export default {
     previewFileId() {
       let previewFile = null
       const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles && previewFiles.length > 0) {
-        previewFile = previewFiles.find(previewFile => {
-          return previewFile.id === this.previewFileId
-        })
+      if (previewFiles?.length) {
+        previewFile = previewFiles.find(
+          previewFile => previewFile.id === this.previewFileId
+        )
       }
       this.$emit('preview-changed', this.entity, previewFile)
     },
 
-    'entity.preview_file_id': function () {
+    'entity.preview_file_id'() {
       if (this.previewFileId !== this.entity.preview_file_id) {
         this.previewFileId = this.entity.preview_file_id
       }
@@ -186,12 +172,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.field {
-  margin-bottom: 0;
-}
-.text {
-  color: var(--text);
-}
-</style>

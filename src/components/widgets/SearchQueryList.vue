@@ -479,16 +479,11 @@ export default {
     },
 
     getSearchQueryTitle(searchQuery) {
-      if (searchQuery.is_shared) {
-        let title = 'Shared by '
-        const person = this.personMap.get(searchQuery.person_id)
-        if (person) {
-          title += person.full_name
-        }
-        return title
-      } else {
-        return null
+      if (!searchQuery.is_shared) {
+        return
       }
+      const person = this.personMap.get(searchQuery.person_id)
+      return this.$t('main.shared_by', { name: person?.full_name })
     },
 
     getDepartment(group) {

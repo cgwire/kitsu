@@ -2,6 +2,7 @@ export default {
 
   assets: {
     cast_in: 'Cast in',
+    casted_in_shots: 'Casted in {nbShots} shots',
     cancel_text: 'Are you sure you want to archive {name}?',
     delete_error: 'An error occurred while deleting this asset. There may be existing data currently linked to it. Are you sure this asset type has no task linked to it?',
     delete_for_selection: 'Delete the selected asset | Delete the {nbSelectedAssets} selected assets',
@@ -767,6 +768,7 @@ export default {
     reload: 'Reload',
     remaining: 'Remaining',
     reply: 'Reply',
+    shared_by: 'Shared by {name}',
     save: 'Save',
     search_query: 'Search query',
     search_query_edit: 'Edit search filter',

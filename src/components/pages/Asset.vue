@@ -149,7 +149,9 @@
                 currentAsset.castInShotsBySequence[0].length > 0
               "
             >
-              <em>Casted in {{ nbShotsCastedIn }} shots</em>
+              <em>{{
+                $t('assets.casted_in_shots', { nbShots: nbShotsCastedIn })
+              }}</em>
               <template
                 v-if="
                   currentAsset.castInShotsBySequence.length > 0 &&
