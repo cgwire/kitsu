@@ -15,6 +15,7 @@
               isInDepartment ||
               isCurrentViewTodos) &&
             !isEntitySelection &&
+            !isCurrentViewConcept &&
             isTaskSelection
           "
         >
