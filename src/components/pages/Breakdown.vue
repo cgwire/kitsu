@@ -336,7 +336,6 @@
                 @add-one="addOneAsset"
                 @add-ten="addTenAssets"
                 v-for="asset in typeAssets"
-                v-show="libraryDisplayed || !asset.shared"
               />
             </div>
           </div>
@@ -618,8 +617,7 @@ export default {
       const result = []
       this.assetsByType.forEach(typeGroup => {
         let newGroup = typeGroup.filter(
-          asset =>
-            !asset.canceled && (!asset.is_shared || this.libraryDisplayed)
+          asset => !asset.canceled && (!asset.shared || this.libraryDisplayed)
         )
         if (this.isTVShow && this.isOnlyCurrentEpisode) {
           newGroup = typeGroup.filter(asset => {

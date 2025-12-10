@@ -8,17 +8,23 @@
         :label="$t('logs.current_date_label')"
         v-model="currentDate"
       />
+      <people-field
+        class="flexrow-item field"
+        :label="$t('main.user')"
+        :people="people"
+        v-model="selectedPerson"
+      />
       <button-simple
         class="flexrow-item small"
         icon="refresh"
         @click="loadDayEvents"
       />
       <span class="flexrow-item nb-events">
-        {{ events.length }} {{ $t('logs.events') }}
+        {{ filteredEvents.length }} {{ $t('logs.events') }}
       </span>
     </div>
 
-    <div class="mt2 empty" v-if="!isLoading && !events.length">
+    <div class="mt2 empty" v-if="!isLoading && !filteredEvents.length">
       {{ $t('logs.empty_list') }}
     </div>
     <div class="has-text-centered" v-if="isLoading">
@@ -89,6 +95,7 @@ import { timeMixin } from '@/components/mixins/time'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -101,6 +108,7 @@ export default {
     ButtonSimple,
     DateField,
     PeopleAvatar,
+    PeopleField,
     PeopleName,
     Spinner
   },
@@ -113,6 +121,7 @@ export default {
       events: [],
       isLoading: true,
       selectedEvents: {},
+      selectedPerson: null,
       displayLimit: PAGE_SIZE
     }
   },
@@ -122,18 +131,28 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['personMap', 'user']),
+    ...mapGetters(['people', 'personMap', 'user']),
 
     today() {
       return moment().toDate()
     },
 
+    filteredEvents() {
+      let events = this.events
+      if (this.selectedPerson) {
+        events = events.filter(
+          event => event.user_id === this.selectedPerson.id
+        )
+      }
+      return events
+    },
+
     displayedEvents() {
-      return this.events.slice(0, this.displayLimit)
+      return this.filteredEvents.slice(0, this.displayLimit)
     },
 
     hasMoreEvents() {
-      return this.events.length > this.displayLimit
+      return this.filteredEvents.length > this.displayLimit
     }
   },
 
