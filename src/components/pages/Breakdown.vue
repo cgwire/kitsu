@@ -336,7 +336,6 @@
                 @add-one="addOneAsset"
                 @add-ten="addTenAssets"
                 v-for="asset in typeAssets"
-                v-show="libraryDisplayed || !asset.shared"
               />
             </div>
           </div>
