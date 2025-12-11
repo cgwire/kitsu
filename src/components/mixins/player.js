@@ -1237,6 +1237,10 @@ export const playerMixin = {
 
     resetCanvasSize() {
       return this.$nextTick().then(() => {
+        if (!this.zoomEnabled) {
+          this.resetPanZoom()
+        }
+
         if (this.isCurrentPreviewMovie && this.isAnnotationCanvas()) {
           if (this.canvas) {
             // Video Ratio
