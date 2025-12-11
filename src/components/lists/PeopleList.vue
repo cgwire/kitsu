@@ -281,10 +281,6 @@ export default {
 .departments {
   width: 180px;
   min-width: 180px;
-
-  .departments-element {
-    padding: 5px;
-  }
 }
 
 .studio {
