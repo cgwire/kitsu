@@ -97,11 +97,7 @@ export default {
     },
 
     isMovie() {
-      if (this.previews.length < this.currentIndex) {
-        return false
-      } else {
-        return this.previews[this.currentIndex - 1].extension === 'mp4'
-      }
+      return this.previews[this.currentIndex - 1]?.extension === 'mp4'
     }
   }
 }
