@@ -1,35 +1,27 @@
 <template>
-  <span class="studio-name" :class="{ 'no-padding': noPadding }">
-    <span
-      class="square"
-      :style="{ backgroundColor: studio.color }"
-      :title="onlyDot ? studio.name : undefined"
-    ></span>
-    <span class="name" v-if="!onlyDot">
+  <span class="studio-name" :class="{ 'no-padding': noPadding }" v-if="studio">
+    <span class="square" :title="onlySquare ? studio.name : null"></span>
+    <span class="name" v-if="!onlySquare">
       {{ studio.name }}
     </span>
   </span>
 </template>
 
-<script>
-export default {
-  name: 'studio-name',
-
-  props: {
-    noPadding: {
-      type: Boolean,
-      default: false
-    },
-    onlyDot: {
-      type: Boolean,
-      default: false
-    },
-    studio: {
-      type: Object,
-      required: true
-    }
+<script setup>
+defineProps({
+  noPadding: {
+    type: Boolean,
+    default: false
+  },
+  onlySquare: {
+    type: Boolean,
+    default: false
+  },
+  studio: {
+    type: Object,
+    required: true
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -48,6 +40,7 @@ export default {
   display: inline-block;
   width: 10px;
   height: 10px;
+  background-color: v-bind('studio?.color');
 }
 
 .name {
