@@ -1288,7 +1288,7 @@ export default {
       this.$refs['preview-player'].displayFirst()
       this.deleteTaskPreview({
         taskId: this.task.id,
-        commentId: comment.id,
+        commentId: comment?.id,
         previewId: this.currentExtraPreviewId
       })
         .then(() => {
