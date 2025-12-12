@@ -179,13 +179,6 @@ const getters = {
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => cache.peopleIndex,
   personMap: state => cache.personMap,
-  personEmailMap: state => {
-    const emailMap = new Map()
-    cache.people.forEach(person => {
-      emailMap.set(person.email, person)
-    })
-    return emailMap
-  },
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
