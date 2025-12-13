@@ -40,7 +40,7 @@
     "exceljs": "4.4.0",
     "fabric": "cgwire/fabric.js",
     "file-saver": "2.0.5",
-    "lucide-vue-next": "0.560.0",
+    "lucide-vue-next": "0.561.0",
     "marked": "16.4.2",
     "marked-emoji": "2.0.2",
     "moment": "2.30.1",
@@ -62,7 +62,7 @@
     "vue-i18n": "9.14.5",
     "vue-meta": "2.4.0",
     "vue-multiselect": "3.4.0",
-    "vue-router": "4.6.3",
+    "vue-router": "4.6.4",
     "vue-websocket-next": "0.2.7",
     "vue3-emoji-picker": "1.1.8",
     "vuedraggable": "4.1.0",
@@ -71,7 +71,7 @@
     "wavesurfer.js": "7.11.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "6.0.2",
+    "@vitejs/plugin-vue": "6.0.3",
     "@vue/compiler-sfc": "3.5.13",
     "@vue/test-utils": "2.4.6",
     "autoprefixer": "10.4.22",
