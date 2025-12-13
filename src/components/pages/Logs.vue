@@ -15,7 +15,7 @@
       </ul>
     </div>
     <events v-if="isActiveTab('events')" />
-    <preview-files v-if="isActiveTab('preview_files')" />
+    <preview-files v-else-if="isActiveTab('preview_files')" />
   </div>
 </template>
 

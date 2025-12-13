@@ -17,17 +17,16 @@
       <button-simple
         class="flexrow-item small"
         icon="refresh"
-        @click="loadDayEvents"
+        :is-loading="loading.events"
+        :title="$t('main.reload')"
+        @click="loadDayEvents()"
       />
-      <span class="flexrow-item nb-events">
-        {{ filteredEvents.length }} {{ $t('logs.events') }}
-      </span>
     </div>
 
-    <div class="mt2 empty" v-if="!isLoading && !filteredEvents.length">
+    <div class="mt2 empty" v-if="!loading.events && !filteredEvents.length">
       {{ $t('logs.empty_list') }}
     </div>
-    <div class="has-text-centered" v-if="isLoading">
+    <div class="has-text-centered" v-if="loading.events">
       <spinner />
     </div>
     <div class="log-list" v-else>
@@ -35,7 +34,7 @@
         class="event-line"
         :key="event.id"
         @click="selectLine(event)"
-        v-for="event in displayedEvents"
+        v-for="event in filteredEvents"
       >
         <span class="date tag mr1">{{ event.date }} </span>
         <span
@@ -77,8 +76,9 @@
       </div>
       <div class="has-text-centered mt1" v-if="hasMoreEvents">
         <button-simple
+          :is-loading="loading.moreEvents"
           :text="$t('main.load_more')"
-          @click="displayLimit += PAGE_SIZE"
+          @click="loadMoreEvents()"
         />
       </div>
     </div>
@@ -99,6 +99,8 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
+const PAGE_SIZE = 1000
+
 export default {
   name: 'events',
 
@@ -114,15 +116,16 @@ export default {
   },
 
   data() {
-    const PAGE_SIZE = 1000
     return {
-      PAGE_SIZE,
       currentDate: new Date(),
       events: [],
-      isLoading: true,
+      hasMoreEvents: false,
       selectedEvents: {},
       selectedPerson: null,
-      displayLimit: PAGE_SIZE
+      loading: {
+        events: false,
+        moreEvents: false
+      }
     }
   },
 
@@ -145,50 +148,69 @@ export default {
         )
       }
       return events
-    },
-
-    displayedEvents() {
-      return this.filteredEvents.slice(0, this.displayLimit)
-    },
-
-    hasMoreEvents() {
-      return this.filteredEvents.length > this.displayLimit
     }
   },
 
   methods: {
     ...mapActions(['loadEvents']),
 
-    loadDayEvents() {
+    async loadDayEvents() {
       const before = moment(this.currentDate).add(1, 'days')
       const after = moment(this.currentDate)
       this.selectedEvents = {}
-      this.displayLimit = this.PAGE_SIZE
-      this.isLoading = true
-      this.loadEvents({
-        after: formatFullDateWithRevertedTimezone(after, this.timezone),
-        before: formatFullDateWithRevertedTimezone(before, this.timezone)
+      this.events = []
+      this.loading.events = true
+      try {
+        const events = await this.loadEvents({
+          after: formatFullDateWithRevertedTimezone(after, this.timezone),
+          before: formatFullDateWithRevertedTimezone(before, this.timezone),
+          limit: PAGE_SIZE
+        })
+        this.events = this.formatEvents(events)
+        this.hasMoreEvents = events.length >= PAGE_SIZE
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loading.events = false
+      }
+    },
+
+    async loadMoreEvents() {
+      if (!this.events.length) return
+
+      this.loading.moreEvents = true
+      const lastEventId = this.events[this.events.length - 1].id
+      const before = moment(this.currentDate).add(1, 'days')
+      const after = moment(this.currentDate)
+      try {
+        const events = await this.loadEvents({
+          after: formatFullDateWithRevertedTimezone(after, this.timezone),
+          before: formatFullDateWithRevertedTimezone(before, this.timezone),
+          lastEventId,
+          limit: PAGE_SIZE
+        })
+        this.events = [...this.events, ...this.formatEvents(events)]
+        this.hasMoreEvents = events.length >= PAGE_SIZE
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loading.moreEvents = false
+      }
+    },
+
+    formatEvents(events) {
+      return events.map(event => {
+        const [name, type] = event.name.split(':')
+        return {
+          id: event.id,
+          date: this.formatDate(event.created_at),
+          data: event.data,
+          name,
+          shortType: type.substring(0, 3),
+          type,
+          user_id: event.user_id
+        }
       })
-        .then(events => {
-          this.events = events.map(event => {
-            const [name, type] = event.name.split(':')
-            return {
-              id: event.id,
-              date: this.formatDate(event.created_at),
-              data: event.data,
-              name,
-              shortType: type.substring(0, 3),
-              type,
-              user_id: event.user_id
-            }
-          })
-        })
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
     },
 
     selectLine(event) {
