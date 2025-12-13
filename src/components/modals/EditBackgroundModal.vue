@@ -144,7 +144,7 @@ export default {
         this.form.name = file.name.slice(0, -4)
       }
       this.$nextTick(() => {
-        this.$refs.nameField.focus()
+        this.$refs.nameField?.focus()
       })
     },
 
