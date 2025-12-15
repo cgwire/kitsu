@@ -32,6 +32,35 @@
           :options="modeOptions"
           @update:model-value="onModeChanged"
         />
+        <div class="flexrow-item ml1" v-if="availableEntityTypes.length > 1">
+          <label class="label">
+            {{ $t('schedule.entities') }}
+          </label>
+          <div class="entity-filter-dropdown">
+            <select
+              class="select-input"
+              @click.prevent="showEntityFilter = !showEntityFilter"
+              @mousedown.prevent
+            >
+              <option>{{ entityFilterLabel }}</option>
+            </select>
+            <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
+              <label
+                v-for="entityType in availableEntityTypes"
+                :key="entityType.value"
+                class="entity-filter-item"
+              >
+                <input
+                  type="checkbox"
+                  :value="entityType.value"
+                  :checked="isEntityTypeChecked(entityType.value)"
+                  @change="toggleEntityType(entityType.value)"
+                />
+                {{ entityType.label }}
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="flexrow-item ml1" v-if="mode === 'prev'">
           <label class="label">
             {{ $t('schedule.version') }}
@@ -65,35 +94,7 @@
             />
           </div>
         </div>
-        <div class="flexrow-item ml1" v-if="availableEntityTypes.length > 1">
-          <label class="label">
-            {{ $t('schedule.entities') }}
-          </label>
-          <div class="entity-filter-dropdown">
-            <button
-              class="button is-small"
-              @click="showEntityFilter = !showEntityFilter"
-            >
-              {{ entityFilterLabel }}
-              <chevron-down-icon :size="14" />
-            </button>
-            <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
-              <label
-                v-for="entityType in availableEntityTypes"
-                :key="entityType.value"
-                class="entity-filter-item"
-              >
-                <input
-                  type="checkbox"
-                  :value="entityType.value"
-                  v-model="entityTypeFilter"
-                  @change="onEntityFilterChanged"
-                />
-                {{ entityType.label }}
-              </label>
-            </div>
-          </div>
-        </div>
+
         <div class="filler"></div>
         <div class="flexrow" style="margin-top: 23px">
           <button-simple
@@ -1933,6 +1934,32 @@ export default {
       this.updateRoute({ entityTypes })
     },
 
+    isEntityTypeChecked(entityType) {
+      // If filter is empty, all are checked
+      if (this.entityTypeFilter.length === 0) {
+        return true
+      }
+      return this.entityTypeFilter.includes(entityType)
+    },
+
+    toggleEntityType(entityType) {
+      const index = this.entityTypeFilter.indexOf(entityType)
+      if (index > -1) {
+        // Remove from filter
+        this.entityTypeFilter.splice(index, 1)
+      } else {
+        // Add to filter
+        this.entityTypeFilter.push(entityType)
+      }
+      
+      // If all types are now selected, clear the filter (show all)
+      if (this.entityTypeFilter.length === this.availableEntityTypes.length) {
+        this.entityTypeFilter = []
+      }
+      
+      this.onEntityFilterChanged()
+    },
+
     refreshSchedule() {
       this.scheduleItems.forEach(item => {
         if (!item.expanded) {
@@ -2512,32 +2539,72 @@ export default {
 
   .entity-filter-dropdown {
     position: relative;
+    display: inline-block;
+    
+    .select-input {
+      appearance: none;
+      background-color: transparent;
+      border: 1px solid $green;
+      border-radius: 4px;
+      color: inherit;
+      cursor: pointer;
+      font-size: 1rem;
+      height: 3em;
+      padding: 0 2.5em 0 1em;
+      min-width: 120px;
+      
+      &:hover {
+        border-color: $light-green;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: $light-green;
+      }
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      right: 1em;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid $green;
+      pointer-events: none;
+    }
     
     .entity-filter-menu {
       position: absolute;
-      top: 100%;
+      top: calc(100% + 4px);
       left: 0;
       background: white;
-      border: 1px solid #ddd;
+      border: 1px solid $light-grey;
       border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 0.5em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      padding: 0.25em 0;
       z-index: 100;
-      min-width: 150px;
-      margin-top: 0.25em;
+      min-width: 100%;
       
       .entity-filter-item {
-        display: block;
-        padding: 0.25em 0.5em;
+        display: flex;
+        align-items: center;
+        padding: 0.4em 1em;
         cursor: pointer;
         user-select: none;
+        white-space: nowrap;
+        transition: background-color 0.1s ease;
         
         &:hover {
-          background: #f5f5f5;
+          background: $light-grey-light;
         }
         
-        input {
-          margin-right: 0.5em;
+        input[type="checkbox"] {
+          margin: 0 0.75em 0 0;
+          cursor: pointer;
         }
       }
     }
@@ -2545,12 +2612,27 @@ export default {
 }
 
 .dark {
-  .entity-filter-menu {
-    background: $dark-grey-light;
-    border-color: $dark-grey;
+  .entity-filter-dropdown {
+    .select-input {
+      border-color: $green;
+      
+      &:hover,
+      &:focus {
+        border-color: $light-green;
+      }
+    }
     
-    .entity-filter-item:hover {
-      background: $dark-grey;
+    &::after {
+      border-top-color: $green;
+    }
+    
+    .entity-filter-menu {
+      background: $dark-grey-light;
+      border-color: $dark-grey;
+      
+      .entity-filter-item:hover {
+        background: $dark-grey;
+      }
     }
   }
 }
