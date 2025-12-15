@@ -36,32 +36,41 @@
           <label class="label">
             {{ $t('schedule.entities') }}
           </label>
-          <p class="control">
-            <span class="select entity-filter-select">
-              <select
-                class="select-input"
-                @click.prevent="showEntityFilter = !showEntityFilter"
-                @mousedown.prevent
-              >
-                <option>{{ entityFilterLabel }}</option>
-              </select>
-            </span>
-          </p>
-          <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
+          <div
+            class="entity-filter-combo rounded"
+            :class="{ opened: showEntityFilter }"
+            :style="{ width: '180px' }"
+          >
+            <div class="flexrow" @click="showEntityFilter = !showEntityFilter">
+              <div class="selected-line flexrow-item">
+                <span class="entity-label">{{ entityFilterLabel }}</span>
+              </div>
+              <chevron-down-icon class="down-icon flexrow-item" />
+            </div>
             <div
-              v-for="entityType in availableEntityTypes"
-              :key="entityType.value"
-              class="entity-filter-item"
-              @click="toggleEntityType(entityType.value)"
+              class="select-input"
+              v-if="showEntityFilter"
+              :style="{ width: '180px', top: '31px', left: '0' }"
             >
-              <input
-                type="checkbox"
-                :checked="isEntityTypeChecked(entityType.value)"
-                @click.stop
-              />
-              <span>{{ entityType.label }}</span>
+              <div
+                v-for="entityType in availableEntityTypes"
+                :key="entityType.value"
+                class="entity-line"
+                @click="toggleEntityType(entityType.value)"
+              >
+                <input
+                  type="checkbox"
+                  :checked="isEntityTypeChecked(entityType.value)"
+                  @click.stop
+                />
+                <span class="entity-name">{{ entityType.label }}</span>
+              </div>
             </div>
           </div>
+          <combobox-mask
+            :displayed="showEntityFilter"
+            @click="showEntityFilter = false"
+          />
         </div>
         <div class="flexrow-item ml1" v-if="mode === 'prev'">
           <label class="label">
@@ -544,6 +553,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
