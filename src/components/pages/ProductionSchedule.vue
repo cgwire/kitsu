@@ -36,28 +36,30 @@
           <label class="label">
             {{ $t('schedule.entities') }}
           </label>
-          <div class="entity-filter-dropdown">
-            <select
-              class="select-input"
-              @click.prevent="showEntityFilter = !showEntityFilter"
-              @mousedown.prevent
-            >
-              <option>{{ entityFilterLabel }}</option>
-            </select>
-            <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
-              <label
-                v-for="entityType in availableEntityTypes"
-                :key="entityType.value"
-                class="entity-filter-item"
+          <p class="control">
+            <span class="select entity-filter-select">
+              <select
+                class="select-input"
+                @click.prevent="showEntityFilter = !showEntityFilter"
+                @mousedown.prevent
               >
-                <input
-                  type="checkbox"
-                  :value="entityType.value"
-                  :checked="isEntityTypeChecked(entityType.value)"
-                  @change="toggleEntityType(entityType.value)"
-                />
-                {{ entityType.label }}
-              </label>
+                <option>{{ entityFilterLabel }}</option>
+              </select>
+            </span>
+          </p>
+          <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
+            <div
+              v-for="entityType in availableEntityTypes"
+              :key="entityType.value"
+              class="entity-filter-item"
+              @click="toggleEntityType(entityType.value)"
+            >
+              <input
+                type="checkbox"
+                :checked="isEntityTypeChecked(entityType.value)"
+                @click.stop
+              />
+              <span>{{ entityType.label }}</span>
             </div>
           </div>
         </div>
@@ -2537,101 +2539,63 @@ export default {
     }
   }
 
-  .entity-filter-dropdown {
+  // Entity filter styling to match navigation menu
+  .entity-filter-select {
     position: relative;
-    display: inline-block;
+  }
+
+  .entity-filter-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: $dark-grey-light;
+    border: 1px solid $dark-grey;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 0.5em 0;
+    z-index: 200;
+    min-width: 180px;
     
-    .select-input {
-      appearance: none;
-      background-color: transparent;
-      border: 1px solid $green;
-      border-radius: 4px;
-      color: inherit;
+    .entity-filter-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75em;
+      padding: 0.75em 1.25em;
       cursor: pointer;
+      user-select: none;
+      color: white;
       font-size: 1rem;
-      height: 3em;
-      padding: 0 2.5em 0 1em;
-      min-width: 120px;
+      transition: background-color 0.15s ease;
       
       &:hover {
-        border-color: $light-green;
+        background: rgba(255, 255, 255, 0.1);
       }
       
-      &:focus {
-        outline: none;
-        border-color: $light-green;
-      }
-    }
-    
-    &::after {
-      content: '';
-      position: absolute;
-      right: 1em;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 5px solid $green;
-      pointer-events: none;
-    }
-    
-    .entity-filter-menu {
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      background: white;
-      border: 1px solid $light-grey;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-      padding: 0.25em 0;
-      z-index: 100;
-      min-width: 100%;
-      
-      .entity-filter-item {
-        display: flex;
-        align-items: center;
-        padding: 0.4em 1em;
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
         cursor: pointer;
-        user-select: none;
-        white-space: nowrap;
-        transition: background-color 0.1s ease;
-        
-        &:hover {
-          background: $light-grey-light;
-        }
-        
-        input[type="checkbox"] {
-          margin: 0 0.75em 0 0;
-          cursor: pointer;
-        }
+        flex-shrink: 0;
+      }
+      
+      span {
+        flex: 1;
       }
     }
   }
 }
 
+// Dark mode overrides
 .dark {
-  .entity-filter-dropdown {
-    .select-input {
-      border-color: $green;
-      
-      &:hover,
-      &:focus {
-        border-color: $light-green;
-      }
-    }
+  .entity-filter-menu {
+    background: $dark-grey-light;
+    border-color: $dark-grey;
     
-    &::after {
-      border-top-color: $green;
-    }
-    
-    .entity-filter-menu {
-      background: $dark-grey-light;
-      border-color: $dark-grey;
+    .entity-filter-item {
+      color: white;
       
-      .entity-filter-item:hover {
-        background: $dark-grey;
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
       }
     }
   }
