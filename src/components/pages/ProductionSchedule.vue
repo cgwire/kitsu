@@ -32,22 +32,7 @@
           :options="modeOptions"
           @update:model-value="onModeChanged"
         />
-        <div class="flexrow-item ml1" v-if="availableEntityTypes.length > 1">
-        </div>
-        <combobox-number
-          class="flexrow-item zoom-level nowrap"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-          @update:model-value="onZoomLevelChanged"
-        />
-        <combobox
-          class="flexrow-item ml1"
-          :label="$t('schedule.mode')"
-          v-model="mode"
-          :options="modeOptions"
-          @update:model-value="onModeChanged"
-        />
+
         <combobox
           class="flexrow-item ml1"
           v-if="availableEntityTypes.length > 1"
