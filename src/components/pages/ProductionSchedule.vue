@@ -2550,64 +2550,91 @@ export default {
   }
 
   // Entity filter styling to match navigation menu
-  .entity-filter-select {
+  // Entity filter styling to match ComboboxStatus/Department
+  .entity-filter-combo {
+    background: $white;
+    border: 1px solid $light-grey-light;
+    user-select: none;
+    cursor: pointer;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0.15em;
     position: relative;
+    vertical-align: middle;
+
+    &.opened {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:hover {
+      border: 1px solid $green;
+    }
   }
 
-  .entity-filter-menu {
+  .selected-line {
+    padding: 0.2em;
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .entity-label {
+    margin-left: 0.5em;
+  }
+
+  .down-icon {
+    width: 15px;
+    min-width: 15px;
+    margin-right: 0.4em;
+    color: $green;
+    cursor: pointer;
+  }
+
+  .select-input {
+    background: $white;
     position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    background: $dark-grey-light;
-    border: 1px solid $dark-grey;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    padding: 0.5em 0;
-    z-index: 200;
-    min-width: 180px;
-    
-    .entity-filter-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75em;
-      padding: 0.75em 1.25em;
-      cursor: pointer;
-      user-select: none;
+    border: 1px solid $light-grey-light;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    z-index: 300;
+    margin-left: -1px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .entity-line {
+    background: $white;
+    cursor: pointer;
+    padding: 0.5em 1em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background: $purple;
       color: white;
-      font-size: 1rem;
-      transition: background-color 0.15s ease;
-      
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      
-      input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        flex-shrink: 0;
-      }
-      
-      span {
-        flex: 1;
-      }
+    }
+
+    input[type="checkbox"] {
+      margin-right: 0.75em;
+      cursor: pointer;
     }
   }
 }
 
 // Dark mode overrides
 .dark {
-  .entity-filter-menu {
+  .entity-filter-combo,
+  .select-input,
+  .entity-line {
     background: $dark-grey-light;
     border-color: $dark-grey;
-    
-    .entity-filter-item {
-      color: white;
-      
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
-    }
+    color: $white;
+  }
+
+  .entity-line:hover {
+    background: $dark-purple;
   }
 }
 </style>
