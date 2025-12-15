@@ -2504,5 +2504,5 @@ export default {
   }
 
   // Entity filter styling to match navigation menu
-
+}
 </style>
