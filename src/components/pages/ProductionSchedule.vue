@@ -33,45 +33,29 @@
           @update:model-value="onModeChanged"
         />
         <div class="flexrow-item ml1" v-if="availableEntityTypes.length > 1">
-          <label class="label">
-            {{ $t('schedule.entities') }}
-          </label>
-          <div
-            class="entity-filter-combo rounded"
-            :class="{ opened: showEntityFilter }"
-            :style="{ width: '180px' }"
-          >
-            <div class="flexrow" @click="showEntityFilter = !showEntityFilter">
-              <div class="selected-line flexrow-item">
-                <span class="entity-label">{{ entityFilterLabel }}</span>
-              </div>
-              <chevron-down-icon class="down-icon flexrow-item" />
-            </div>
-            <div
-              class="select-input"
-              v-if="showEntityFilter"
-              :style="{ width: '180px', top: '31px', left: '0' }"
-            >
-              <div
-                v-for="entityType in availableEntityTypes"
-                :key="entityType.value"
-                class="entity-line"
-                @click="toggleEntityType(entityType.value)"
-              >
-                <input
-                  type="checkbox"
-                  :checked="isEntityTypeChecked(entityType.value)"
-                  @click.stop
-                />
-                <span class="entity-name">{{ entityType.label }}</span>
-              </div>
-            </div>
-          </div>
-          <combobox-mask
-            :displayed="showEntityFilter"
-            @click="showEntityFilter = false"
-          />
         </div>
+        <combobox-number
+          class="flexrow-item zoom-level nowrap"
+          :label="$t('schedule.zoom_level')"
+          :options="zoomOptions"
+          v-model="zoomLevel"
+          @update:model-value="onZoomLevelChanged"
+        />
+        <combobox
+          class="flexrow-item ml1"
+          :label="$t('schedule.mode')"
+          v-model="mode"
+          :options="modeOptions"
+          @update:model-value="onModeChanged"
+        />
+        <combobox
+          class="flexrow-item ml1"
+          v-if="availableEntityTypes.length > 1"
+          :label="$t('schedule.entities')"
+          v-model="entityTypeFilter"
+          :options="entityFilterOptions"
+          @update:model-value="onEntityFilterChanged"
+        />
         <div class="flexrow-item ml1" v-if="mode === 'prev'">
           <label class="label">
             {{ $t('schedule.version') }}
@@ -553,7 +537,6 @@ import { formatListMixin } from '@/components/mixins/format'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -622,10 +605,8 @@ export default {
       daysOffByPerson: {},
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
-      entityTypeFilter: [],
-      isSidePanelOpen: false,
+      entityTypeFilter: 'ALL',
       scheduleItems: [],
-      showEntityFilter: false,
       startDate: moment().startOf('day'),
       selectedStartDate: null,
       selectedEndDate: null,
@@ -787,36 +768,35 @@ export default {
     },
 
     availableEntityTypes() {
-      const entityTypes = new Set()
+      const types = new Set()
       this.scheduleItems.forEach(item => {
-        if (item.for_entity) {
-          entityTypes.add(item.for_entity)
+        const taskType = this.taskTypeMap.get(item.task_type_id)
+        if (taskType && taskType.for_entity) {
+          types.add(taskType.for_entity)
         }
       })
-      return Array.from(entityTypes).sort().map(type => ({
-        label: type,
-        value: type
-      }))
+      return Array.from(types).sort()
+    },
+
+    entityFilterOptions() {
+      const options = [
+        { label: this.$t('schedule.all_entities'), value: 'ALL' }
+      ]
+      this.availableEntityTypes.forEach(type => {
+        options.push({ label: type, value: type })
+      })
+      return options
     },
 
     filteredScheduleItems() {
-      if (this.entityTypeFilter.length === 0) {
+      if (this.entityTypeFilter === 'ALL') {
         return this.scheduleItems
       }
-      return this.scheduleItems.filter(item =>
-        this.entityTypeFilter.includes(item.for_entity)
-      )
+      return this.scheduleItems.filter(item => {
+        const taskType = this.taskTypeMap.get(item.task_type_id)
+        return taskType && taskType.for_entity === this.entityTypeFilter
+      })
     },
-
-    entityFilterLabel() {
-      if (this.entityTypeFilter.length === 0) {
-        return this.$t('schedule.all_entities')
-      }
-      if (this.entityTypeFilter.length === this.availableEntityTypes.length) {
-        return this.$t('schedule.all_entities')
-      }
-      return `${this.entityTypeFilter.length} ${this.$t('schedule.selected')}`
-    }
   },
 
   methods: {
@@ -968,11 +948,11 @@ export default {
         ? zoom
         : DEFAULT_ZOOM
       
-      const entityTypes = this.$route.query.entityTypes
-      if (entityTypes) {
-        this.entityTypeFilter = entityTypes.split(',').filter(type =>
-          this.availableEntityTypes.some(et => et.value === type)
-        )
+      const entityType = this.$route.query.entityType
+      if (entityType) {
+        this.entityTypeFilter = entityType
+      } else {
+        this.entityTypeFilter = 'ALL'
       }
     },
 
@@ -1940,36 +1920,10 @@ export default {
     },
 
     onEntityFilterChanged() {
-      const entityTypes = this.entityTypeFilter.length > 0
-        ? this.entityTypeFilter.join(',')
+      const entityType = this.entityTypeFilter !== 'ALL'
+        ? this.entityTypeFilter
         : undefined
-      this.updateRoute({ entityTypes })
-    },
-
-    isEntityTypeChecked(entityType) {
-      // If filter is empty, all are checked
-      if (this.entityTypeFilter.length === 0) {
-        return true
-      }
-      return this.entityTypeFilter.includes(entityType)
-    },
-
-    toggleEntityType(entityType) {
-      const index = this.entityTypeFilter.indexOf(entityType)
-      if (index > -1) {
-        // Remove from filter
-        this.entityTypeFilter.splice(index, 1)
-      } else {
-        // Add to filter
-        this.entityTypeFilter.push(entityType)
-      }
-      
-      // If all types are now selected, clear the filter (show all)
-      if (this.entityTypeFilter.length === this.availableEntityTypes.length) {
-        this.entityTypeFilter = []
-      }
-      
-      this.onEntityFilterChanged()
+      this.updateRoute({ entityType })
     },
 
     refreshSchedule() {
@@ -2550,91 +2504,5 @@ export default {
   }
 
   // Entity filter styling to match navigation menu
-  // Entity filter styling to match ComboboxStatus/Department
-  .entity-filter-combo {
-    background: $white;
-    border: 1px solid $light-grey-light;
-    user-select: none;
-    cursor: pointer;
-    border-radius: 10px;
-    margin: 0;
-    padding: 0.15em;
-    position: relative;
-    vertical-align: middle;
 
-    &.opened {
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-
-    &:hover {
-      border: 1px solid $green;
-    }
-  }
-
-  .selected-line {
-    padding: 0.2em;
-    flex: 1;
-    display: flex;
-    align-items: center;
-  }
-
-  .entity-label {
-    margin-left: 0.5em;
-  }
-
-  .down-icon {
-    width: 15px;
-    min-width: 15px;
-    margin-right: 0.4em;
-    color: $green;
-    cursor: pointer;
-  }
-
-  .select-input {
-    background: $white;
-    position: absolute;
-    border: 1px solid $light-grey-light;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    z-index: 300;
-    margin-left: -1px;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .entity-line {
-    background: $white;
-    cursor: pointer;
-    padding: 0.5em 1em;
-    margin: 0;
-    display: flex;
-    align-items: center;
-
-    &:hover {
-      background: $purple;
-      color: white;
-    }
-
-    input[type="checkbox"] {
-      margin-right: 0.75em;
-      cursor: pointer;
-    }
-  }
-}
-
-// Dark mode overrides
-.dark {
-  .entity-filter-combo,
-  .select-input,
-  .entity-line {
-    background: $dark-grey-light;
-    border-color: $dark-grey;
-    color: $white;
-  }
-
-  .entity-line:hover {
-    background: $dark-purple;
-  }
-}
 </style>
