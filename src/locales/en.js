@@ -1584,7 +1584,10 @@ export default {
       new: 'new schedule',
       name: 'version name',
       locked: 'locked version'
-    }
+    },
+    entities: 'Entities',
+    all_entities: 'All',
+    selected: 'selected'
   },
 
   team_schedule: {

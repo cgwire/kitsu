@@ -65,6 +65,35 @@
             />
           </div>
         </div>
+        <div class="flexrow-item ml1" v-if="availableEntityTypes.length > 1">
+          <label class="label">
+            {{ $t('schedule.entities') }}
+          </label>
+          <div class="entity-filter-dropdown">
+            <button
+              class="button is-small"
+              @click="showEntityFilter = !showEntityFilter"
+            >
+              {{ entityFilterLabel }}
+              <chevron-down-icon :size="14" />
+            </button>
+            <div v-if="showEntityFilter" v-click-outside="() => showEntityFilter = false" class="entity-filter-menu">
+              <label
+                v-for="entityType in availableEntityTypes"
+                :key="entityType.value"
+                class="entity-filter-item"
+              >
+                <input
+                  type="checkbox"
+                  :value="entityType.value"
+                  v-model="entityTypeFilter"
+                  @change="onEntityFilterChanged"
+                />
+                {{ entityType.label }}
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="filler"></div>
         <div class="flexrow" style="margin-top: 23px">
           <button-simple
@@ -105,7 +134,7 @@
         ref="schedule"
         :start-date="startDate"
         :end-date="endDate"
-        :hierarchy="scheduleItems"
+        :hierarchy="filteredScheduleItems"
         :zoom-level="zoomLevel"
         :is-loading="loading.schedule"
         :is-error="errors.schedule"
@@ -580,8 +609,10 @@ export default {
       daysOffByPerson: {},
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
+      entityTypeFilter: [],
       isSidePanelOpen: false,
       scheduleItems: [],
+      showEntityFilter: false,
       startDate: moment().startOf('day'),
       selectedStartDate: null,
       selectedEndDate: null,
@@ -740,6 +771,38 @@ export default {
       }
 
       return [referenceVersion, ...options]
+    },
+
+    availableEntityTypes() {
+      const entityTypes = new Set()
+      this.scheduleItems.forEach(item => {
+        if (item.for_entity) {
+          entityTypes.add(item.for_entity)
+        }
+      })
+      return Array.from(entityTypes).sort().map(type => ({
+        label: type,
+        value: type
+      }))
+    },
+
+    filteredScheduleItems() {
+      if (this.entityTypeFilter.length === 0) {
+        return this.scheduleItems
+      }
+      return this.scheduleItems.filter(item =>
+        this.entityTypeFilter.includes(item.for_entity)
+      )
+    },
+
+    entityFilterLabel() {
+      if (this.entityTypeFilter.length === 0) {
+        return this.$t('schedule.all_entities')
+      }
+      if (this.entityTypeFilter.length === this.availableEntityTypes.length) {
+        return this.$t('schedule.all_entities')
+      }
+      return `${this.entityTypeFilter.length} ${this.$t('schedule.selected')}`
     }
   },
 
@@ -769,7 +832,7 @@ export default {
       'updateTask'
     ]),
 
-    updateRoute({ mode, version, zoom }) {
+    updateRoute({ mode, version, zoom, entityTypes }) {
       const query = { ...this.$route.query }
 
       if (mode !== undefined) {
@@ -780,6 +843,9 @@ export default {
       }
       if (zoom !== undefined) {
         query.zoom = String(zoom)
+      }
+      if (entityTypes !== undefined) {
+        query.entityTypes = entityTypes || undefined
       }
 
       if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
@@ -888,6 +954,13 @@ export default {
       this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
         ? zoom
         : DEFAULT_ZOOM
+      
+      const entityTypes = this.$route.query.entityTypes
+      if (entityTypes) {
+        this.entityTypeFilter = entityTypes.split(',').filter(type =>
+          this.availableEntityTypes.some(et => et.value === type)
+        )
+      }
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
@@ -1853,6 +1926,13 @@ export default {
       this.refreshSchedule()
     },
 
+    onEntityFilterChanged() {
+      const entityTypes = this.entityTypeFilter.length > 0
+        ? this.entityTypeFilter.join(',')
+        : undefined
+      this.updateRoute({ entityTypes })
+    },
+
     refreshSchedule() {
       this.scheduleItems.forEach(item => {
         if (!item.expanded) {
@@ -2427,6 +2507,50 @@ export default {
       font-size: 1rem;
       padding: 0 1rem;
       width: 90px;
+    }
+  }
+
+  .entity-filter-dropdown {
+    position: relative;
+    
+    .entity-filter-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 0.5em;
+      z-index: 100;
+      min-width: 150px;
+      margin-top: 0.25em;
+      
+      .entity-filter-item {
+        display: block;
+        padding: 0.25em 0.5em;
+        cursor: pointer;
+        user-select: none;
+        
+        &:hover {
+          background: #f5f5f5;
+        }
+        
+        input {
+          margin-right: 0.5em;
+        }
+      }
+    }
+  }
+}
+
+.dark {
+  .entity-filter-menu {
+    background: $dark-grey-light;
+    border-color: $dark-grey;
+    
+    .entity-filter-item:hover {
+      background: $dark-grey;
     }
   }
 }
