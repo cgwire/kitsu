@@ -251,13 +251,13 @@ export default {
     getEntityTypeIdDefaultValue() {
       let entityTypeId = this.assetToEdit.asset_type_id
       if (!entityTypeId) {
-        entityTypeId = this.productionAssetTypeOptions[0].value
+        entityTypeId = this.productionAssetTypeOptions[0]?.value
       }
-      const isInOptions = this.productionAssetTypeOptions.find(
+      const isInOptions = this.productionAssetTypeOptions.some(
         option => option.value === entityTypeId
       )
       if (!isInOptions) {
-        entityTypeId = this.productionAssetTypeOptions[0].value
+        entityTypeId = this.productionAssetTypeOptions[0]?.value
       }
       return entityTypeId
     },

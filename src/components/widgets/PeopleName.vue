@@ -17,20 +17,17 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'people-name',
-  props: {
-    person: {
-      type: Object,
-      required: true
-    },
-    withLink: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+defineProps({
+  person: {
+    type: Object,
+    required: true
+  },
+  withLink: {
+    type: Boolean,
+    default: false
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

@@ -49,6 +49,7 @@
     <codepen-icon class="icon" v-else-if="icon === 'codepen'" />
     <link-icon class="icon" v-else-if="icon === 'link'" />
     <clock-icon class="icon" v-else-if="icon === 'clock'" />
+    <rotate-ccw-icon class="icon" v-else-if="icon === 'refresh'" />
     <file-down-icon
       class="icon"
       :stroke-width="1.5"
@@ -120,6 +121,7 @@ import {
   PaperclipIcon,
   PauseIcon,
   PlusIcon,
+  RotateCcwIcon,
   SaveIcon,
   SendIcon,
   SkipBackIcon,
@@ -168,6 +170,7 @@ export default {
     PaperclipIcon,
     PauseIcon,
     PlusIcon,
+    RotateCcwIcon,
     SaveIcon,
     SendIcon,
     SkipBackIcon,

@@ -645,7 +645,7 @@ export default {
         } else {
           data = {
             start_date: null,
-            due_date: dueDate
+            due_date: task.due_date
           }
         }
         if (task.difficulty) {
@@ -682,7 +682,7 @@ export default {
           )
         } else {
           data = {
-            start_date: startDate,
+            start_date: task.start_date,
             due_date: null
           }
         }

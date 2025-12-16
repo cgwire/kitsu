@@ -1,35 +1,31 @@
 <template>
-  <span class="department-name" :class="{ 'no-padding': noPadding }">
-    <span
-      class="dot"
-      :style="{ borderColor: department.color }"
-      :title="onlyDot ? department.name : undefined"
-    ></span>
+  <span
+    class="department-name"
+    :class="{ 'no-padding': noPadding }"
+    v-if="department"
+  >
+    <span class="dot" :title="onlyDot ? department.name : null"></span>
     <span class="name" v-if="!onlyDot">
       {{ department.name }}
     </span>
   </span>
 </template>
 
-<script>
-export default {
-  name: 'department-name',
-
-  props: {
-    department: {
-      type: Object,
-      required: true
-    },
-    noPadding: {
-      type: Boolean,
-      default: false
-    },
-    onlyDot: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+defineProps({
+  department: {
+    type: Object,
+    required: true
+  },
+  noPadding: {
+    type: Boolean,
+    default: false
+  },
+  onlyDot: {
+    type: Boolean,
+    default: false
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
@@ -46,7 +42,9 @@ export default {
 
 .dot {
   display: inline-block;
-  border: 5px solid;
+  width: 10px;
+  height: 10px;
+  background-color: v-bind('department?.color');
   border-radius: 50%;
 }
 

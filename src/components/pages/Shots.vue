@@ -454,7 +454,9 @@ export default {
     const finalize = () => {
       this.$nextTick(() => {
         // Needed to be sure the current production is set
-        this.loadShots()
+        this.loadShots(() => {
+          this.initialLoading = false
+        })
       })
     }
 

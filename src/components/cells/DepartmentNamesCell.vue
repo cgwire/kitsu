@@ -1,12 +1,10 @@
 <template>
-  <td class="departments">
-    <span
-      class="departments-element"
-      :key="'department-' + department.id"
-      v-for="department in sortDepartments(departments)"
-    >
-      <department-name :department="department" v-if="department" />
-    </span>
+  <td>
+    <department-name
+      :key="department.id"
+      :department="department"
+      v-for="department in sortedDepartments"
+    />
   </td>
 </template>
 
@@ -32,13 +30,13 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['departmentMap'])
-  },
+    ...mapGetters(['departmentMap']),
 
-  methods: {
-    sortDepartments(departmentIds = []) {
+    sortedDepartments() {
       return sortByName(
-        departmentIds.map(departmentId => this.departmentMap.get(departmentId))
+        this.departments
+          .map(departmentId => this.departmentMap.get(departmentId))
+          .filter(Boolean)
       )
     }
   }

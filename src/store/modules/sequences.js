@@ -380,6 +380,11 @@ const actions = {
     const taskMap = rootGetters.taskMap
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
+
+    if (!production) {
+      return []
+    }
+
     if (!episode && isTVShow) {
       if (rootGetters.episodes && rootGetters.episodes.length > 0) {
         episode = rootGetters.episodes[0]

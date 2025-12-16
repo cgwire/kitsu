@@ -88,12 +88,9 @@
     />
 
     <pdf-viewer
-      ref="pdf-viewer"
-      :preview-url="originalPath"
       :preview="preview"
       :default-height="defaultHeight"
-      :full-screen="isFullScreen"
-      v-show="isPdf"
+      v-if="isPdf"
     />
 
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">

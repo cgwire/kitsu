@@ -3,54 +3,68 @@
     <p class="flexrow">
       <em class="flexrow-item">{{ $t('logs.preview_files.explanation') }}</em>
       <span class="filler"></span>
-      <button-simple class="flexrow-item" icon="refresh" @click="reload" />
+      <button-simple
+        class="flexrow-item"
+        icon="refresh"
+        :is-loading="loading.previewFiles"
+        :title="$t('main.reload')"
+        @click="reload"
+      />
     </p>
-    <template v-if="previewFiles.length === 0 && !previewFilesLoading">
-      <p class="empty">{{ $t('logs.preview_files.empty_list') }}</p>
-    </template>
+    <div class="has-text-centered" v-if="loading.previewFiles">
+      <spinner />
+    </div>
+    <p class="empty" v-else-if="!previewFiles.length">
+      {{ $t('logs.preview_files.empty_list') }}
+    </p>
     <template v-else>
       <preview-file-list
         :preview-files="previewFiles"
-        :is-loading="previewFilesLoading"
+        :is-loading="loading.previewFiles"
         @mark-broken-clicked="markBrokenClicked"
       />
+      <div class="has-text-centered mt1" v-if="hasMorePreviewFiles">
+        <button-simple
+          :is-loading="loading.morePreviewFiles"
+          :text="$t('main.load_more')"
+          @click="loadMorePreviewFiles"
+        />
+      </div>
     </template>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
-
-import { timeMixin } from '@/components/mixins/time'
+import { mapActions } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PreviewFileList from '@/components/lists/PreviewFileList.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+
+const PAGE_SIZE = 100
 
 export default {
   name: 'preview-files',
 
-  mixins: [timeMixin],
-
   components: {
     ButtonSimple,
-    PreviewFileList
+    PreviewFileList,
+    Spinner
   },
 
   data() {
     return {
-      previewFilesLoading: true,
-      previewFiles: []
+      hasMorePreviewFiles: false,
+      previewFiles: [],
+      loading: {
+        previewFiles: false,
+        morePreviewFiles: false
+      }
     }
   },
 
-  computed: {
-    ...mapGetters(['personMap', 'taskTypeMap', 'user']),
-
-    displayedPreviewFiles() {
-      return this.previewFiles.filter(
-        previewFile => previewFile.status !== 'ready'
-      )
-    }
+  mounted() {
+    this.reload()
   },
 
   methods: {
@@ -58,9 +72,38 @@ export default {
 
     async reload() {
       this.previewFiles = []
-      this.previewFilesLoading = true
-      this.previewFiles = await this.getRunningPreviewFiles()
-      this.previewFilesLoading = false
+      this.loading.previewFiles = true
+      try {
+        const previewFiles = await this.getRunningPreviewFiles({
+          limit: PAGE_SIZE
+        })
+        this.previewFiles = previewFiles
+        this.hasMorePreviewFiles = previewFiles.length >= PAGE_SIZE
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loading.previewFiles = false
+      }
+    },
+
+    async loadMorePreviewFiles() {
+      if (!this.previewFiles.length) return
+
+      this.loading.morePreviewFiles = true
+      const lastPreviewFileId =
+        this.previewFiles[this.previewFiles.length - 1].id
+      try {
+        const previewFiles = await this.getRunningPreviewFiles({
+          limit: PAGE_SIZE,
+          lastPreviewFileId
+        })
+        this.previewFiles = [...this.previewFiles, ...previewFiles]
+        this.hasMorePreviewFiles = previewFiles.length >= PAGE_SIZE
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.loading.morePreviewFiles = false
+      }
     },
 
     async markBrokenClicked(previewFileId) {
@@ -68,10 +111,6 @@ export default {
       previewFile.status = 'broken'
       await this.markPreviewFileAsBroken(previewFileId)
     }
-  },
-
-  mounted() {
-    this.reload()
   }
 }
 </script>
@@ -101,12 +140,12 @@ em {
 }
 
 .status[data-status='broken'] {
-  color: white;
+  color: $white;
   background: $dark-red;
 }
 
 .status[data-status='processing'] {
-  color: white;
+  color: $white;
   background: $blue;
 }
 

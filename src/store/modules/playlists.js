@@ -236,8 +236,8 @@ const actions = {
     return playlistsApi.loadTempPlaylist(production, taskIds, sort)
   },
 
-  getRunningPreviewFiles() {
-    return playlistsApi.getRunningPreviewFiles()
+  getRunningPreviewFiles(_, { limit, lastPreviewFileId = null }) {
+    return playlistsApi.getRunningPreviewFiles(limit, lastPreviewFileId)
   },
 
   markPreviewFileAsBroken(utils, previewFileId) {

@@ -129,8 +129,11 @@ const client = {
     return client.pget(path)
   },
 
-  getEvents(after, before) {
-    const path = `/api/data/events/last?after=${after}&before=${before}&limit=100000`
+  getEvents(after, before, limit, lastEventId = null) {
+    let path = `/api/data/events/last?after=${after}&before=${before}&limit=${limit}`
+    if (lastEventId) {
+      path += `&cursor_event_id=${lastEventId}`
+    }
     return client.pget(path)
   },
 

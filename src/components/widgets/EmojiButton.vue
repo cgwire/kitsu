@@ -1,15 +1,13 @@
 <template>
   <div>
-    <div>
-      <button-simple
-        ref="buttonRef"
-        class="emoji-button"
-        icon="smile"
-        :title="$t('comments.add_emoji')"
-        :active="showEmojiPicker"
-        @click="toggleEmojiPicker"
-      />
-    </div>
+    <button-simple
+      ref="buttonRef"
+      class="emoji-button"
+      icon="smile"
+      :title="$t('comments.add_emoji')"
+      :active="showEmojiPicker"
+      @click="toggleEmojiPicker"
+    />
     <div class="emoji-picker-wrapper" v-if="showEmojiPicker">
       <emoji-picker
         class="emoji-picker"
@@ -52,9 +50,8 @@ const isPickerUp = ref(false)
 
 const emit = defineEmits(['select'])
 
-const isDarkTheme = computed(() => {
-  return useStore().getters.isDarkTheme
-})
+const store = useStore()
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
 
 const checkPosition = () => {
   if (!buttonRef.value) return
@@ -65,11 +62,8 @@ const checkPosition = () => {
   const spaceBelow = viewportHeight - buttonRect.bottom
   const spaceAbove = buttonRect.top
 
-  if (spaceBelow < pickerHeight + 20 && spaceAbove >= pickerHeight + 20) {
-    isPickerUp.value = true
-  } else {
-    isPickerUp.value = false
-  }
+  isPickerUp.value =
+    spaceBelow < pickerHeight + 20 && spaceAbove >= pickerHeight + 20
 }
 
 const onSelectEmoji = emoji => {
