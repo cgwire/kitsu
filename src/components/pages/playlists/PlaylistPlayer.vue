@@ -712,7 +712,7 @@
           :active="isZoomEnabled"
           icon="loupe"
           :title="$t('playlists.actions.annotation_zoom_pan')"
-          @click="isZoomEnabled = !isZoomEnabled"
+          @click="onPanZoomClicked()"
           v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
         />
         <transition name="slide">
@@ -2336,6 +2336,17 @@ export default {
     onEntityDragStart(event, entity) {
       event.dataTransfer.setData('entityId', entity.id)
       event.dataTransfer.setData('previewFileId', entity.preview_file_id)
+    },
+
+    onPanZoomClicked() {
+      if (!this.isZoomEnabled) {
+        this.isDrawing = false
+        this.isAnnotationsDisplayed = false
+        this.isZoomEnabled = true
+      } else {
+        this.isZoomEnabled = false
+        this.isAnnotationsDisplayed = true
+      }
     },
 
     resumePanZoom() {
