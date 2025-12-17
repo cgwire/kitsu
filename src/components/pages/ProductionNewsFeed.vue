@@ -471,8 +471,11 @@ export default {
     },
 
     team() {
-      const team = this.currentProduction?.team || []
-      return sortPeople(team.map(personId => this.personMap.get(personId)))
+      return sortPeople(
+        this.currentProduction?.team
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean) ?? []
+      )
     },
 
     renderedStats() {
