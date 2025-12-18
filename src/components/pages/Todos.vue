@@ -109,6 +109,7 @@
           :done-tasks="loggableDoneTasks"
           :is-loading="loading.timesheets || isTodosLoading"
           :is-error="isTodosLoadingError"
+          :days-off="daysOff"
           :day-off-error="dayOffError"
           :time-spent-map="timeSpentMap"
           :time-spent-total="timeSpentTotal"
@@ -514,7 +515,7 @@ export default {
       await this.loadData(true)
     },
 
-    async onUnsetDayOff(dayOff = null) {
+    async onUnsetDayOff(dayOff) {
       this.dayOffError = false
       try {
         await this.unsetDayOff(dayOff)
