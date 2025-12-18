@@ -966,6 +966,14 @@ export default {
           }
         }
       )
+    },
+
+    resetPanZoom() {
+      if (this.isCurrentPreviewMovie) {
+        this.rawPlayer.resetPanZoom()
+      } else if (this.isCurrentPreviewPicture) {
+        this.picturePlayer.resetPanZoom()
+      }
     }
   },
 
