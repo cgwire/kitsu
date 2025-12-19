@@ -37,7 +37,6 @@ import {
   USER_LOAD_DONE_TASKS_END,
   USER_LOAD_TIME_SPENTS_END,
   REGISTER_USER_TASKS,
-  PERSON_SET_DAY_OFF,
   SET_TODOS_SEARCH,
   LOAD_USER_FILTERS_END,
   LOAD_USER_FILTERS_ERROR,
@@ -281,11 +280,9 @@ const actions = {
       try {
         const tasks = await peopleApi.loadTodos()
         const timeSpents = await peopleApi.loadTimeSpents(date)
-        const dayOff = await peopleApi.getDayOff(state.user.id, date)
         commit(USER_LOAD_TODOS_END, { tasks, userFilters, taskTypeMap })
         commit(REGISTER_USER_TASKS, { tasks })
         commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
-        commit(PERSON_SET_DAY_OFF, dayOff)
         return tasks
       } catch (err) {
         console.error(err)

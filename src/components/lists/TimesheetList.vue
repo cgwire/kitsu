@@ -6,6 +6,7 @@
           :can-delete="false"
           :min-date="disabledDates.to"
           :max-date="disabledDates.from"
+          utc
           :with-margin="false"
           v-model="selectedDate"
         />
@@ -201,7 +202,7 @@
       "
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
-      @confirm="$emit('unset-day-off')"
+      @confirm="$emit('unset-day-off', personDayOff)"
       @cancel="closeUnsetDayOffModal"
     />
   </div>
@@ -258,6 +259,10 @@ export default {
     isError: {
       default: false,
       type: Boolean
+    },
+    daysOff: {
+      default: () => [],
+      type: Array
     },
     dayOffError: {
       default: false,
@@ -316,12 +321,23 @@ export default {
     ...mapGetters([
       'isCurrentUserArtist',
       'organisation',
-      'personDayOff',
-      'personIsDayOff',
       'productionMap',
       'taskTypeMap',
       'user'
     ]),
+
+    personDayOff() {
+      const selectedDate = moment(this.selectedDate).format('YYYY-MM-DD')
+      return this.daysOff.find(
+        dayOff =>
+          selectedDate >= dayOff.date &&
+          selectedDate <= (dayOff.end_date || dayOff.date)
+      )
+    },
+
+    personIsDayOff() {
+      return Boolean(this.personDayOff)
+    },
 
     displayedTasks() {
       return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))

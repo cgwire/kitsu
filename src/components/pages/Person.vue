@@ -109,6 +109,7 @@
             :done-tasks="loggableDoneTasks"
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
+            :days-off="daysOff"
             :day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
@@ -688,6 +689,11 @@ export default {
         this.isTasksLoadingError = true
       }
 
+      this.loadDaysOff()
+    },
+
+    async loadDaysOff() {
+      const personId = this.person.id
       try {
         this.daysOff = await this.loadAggregatedPersonDaysOff({ personId })
       } catch (error) {
@@ -784,16 +790,18 @@ export default {
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
+      await this.loadDaysOff()
     },
 
-    async onUnsetDayOff() {
+    async onUnsetDayOff(dayOff) {
       this.dayOffError = false
       try {
-        await this.unsetDayOff()
+        await this.unsetDayOff(dayOff)
         this.$refs['timesheet-list']?.closeUnsetDayOffModal()
       } catch (error) {
         this.dayOffError = error.body?.message || true
       }
+      await this.loadDaysOff()
     },
 
     saveTaskScheduleItem(item) {
