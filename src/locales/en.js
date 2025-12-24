@@ -701,6 +701,7 @@ export default {
     empty_comment: 'Empty comment',
     empty_schedule: 'There are no tasks or they don\'t have start dates.',
     end_date: 'End date',
+    entities: 'Entities',
     estimation: 'Estimation',
     estimation_short: 'Est.',
     expand_all: 'Expand all',

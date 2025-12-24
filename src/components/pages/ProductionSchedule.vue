@@ -26,6 +26,14 @@
           @update:model-value="onZoomLevelChanged"
         />
         <combobox
+          class="flexrow-item"
+          :label="$t('main.entities')"
+          v-model="entityType"
+          :options="entityTypeOptions"
+          @update:model-value="onEntityTypeChanged"
+          v-if="availableEntityTypes.length > 1"
+        />
+        <combobox
           class="flexrow-item ml1"
           :label="$t('schedule.mode')"
           v-model="mode"
@@ -105,7 +113,7 @@
         ref="schedule"
         :start-date="startDate"
         :end-date="endDate"
-        :hierarchy="scheduleItems"
+        :hierarchy="filteredScheduleItems"
         :zoom-level="zoomLevel"
         :is-loading="loading.schedule"
         :is-error="errors.schedule"
@@ -580,6 +588,7 @@ export default {
       daysOffByPerson: {},
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
+      entityType: null,
       isSidePanelOpen: false,
       scheduleItems: [],
       startDate: moment().startOf('day'),
@@ -740,6 +749,35 @@ export default {
       }
 
       return [referenceVersion, ...options]
+    },
+
+    availableEntityTypes() {
+      const types = new Set()
+      this.scheduleItems.forEach(item => {
+        const taskType = this.taskTypeMap.get(item.task_type_id)
+        if (taskType?.for_entity) {
+          types.add(taskType.for_entity)
+        }
+      })
+      return Array.from(types).sort()
+    },
+
+    entityTypeOptions() {
+      const options = [{ label: this.$t('main.all'), value: null }]
+      this.availableEntityTypes.forEach(type => {
+        options.push({ label: type, value: type })
+      })
+      return options
+    },
+
+    filteredScheduleItems() {
+      if (!this.entityType) {
+        return this.scheduleItems
+      }
+      return this.scheduleItems.filter(item => {
+        const taskType = this.taskTypeMap.get(item.task_type_id)
+        return taskType && taskType.for_entity === this.entityType
+      })
     }
   },
 
@@ -769,11 +807,14 @@ export default {
       'updateTask'
     ]),
 
-    updateRoute({ mode, version, zoom }) {
+    updateRoute({ mode, type, version, zoom }) {
       const query = { ...this.$route.query }
 
       if (mode !== undefined) {
         query.mode = mode || undefined
+      }
+      if (type !== undefined) {
+        query.type = type || undefined
       }
       if (version !== undefined) {
         query.version = version || undefined
@@ -876,12 +917,16 @@ export default {
       await this.loadData()
 
       const mode = this.$route.query.mode
+      const type = this.$route.query.type
       const version = this.$route.query.version
       const zoom = Number(this.$route.query.zoom)
 
       this.mode = this.modeOptions.map(o => o.value).includes(mode)
         ? mode
         : DEFAULT_MODE
+      this.entityType = this.entityTypeOptions.map(o => o.value).includes(type)
+        ? type
+        : null
       this.version = this.versionOptions.map(o => o.value).includes(version)
         ? version
         : DEFAULT_VERSION
@@ -965,7 +1010,9 @@ export default {
               : this.loadSequenceScheduleItems
             : taskTypeElement.for_entity === 'Shot'
               ? this.loadSequenceScheduleItems
-              : this.loadAssetTypeScheduleItems
+              : taskTypeElement.for_entity === 'Sequence'
+                ? this.loadSequenceScheduleItems
+                : this.loadAssetTypeScheduleItems
           const parameters = {
             production: this.currentProduction,
             taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
@@ -1837,6 +1884,10 @@ export default {
 
     onZoomLevelChanged(zoom) {
       this.updateRoute({ zoom })
+    },
+
+    onEntityTypeChanged(type) {
+      this.updateRoute({ type })
     },
 
     onModeChanged(mode) {
