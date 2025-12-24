@@ -26,20 +26,19 @@
           @update:model-value="onZoomLevelChanged"
         />
         <combobox
+          class="flexrow-item"
+          :label="$t('main.entities')"
+          v-model="entityType"
+          :options="entityTypeOptions"
+          @update:model-value="onEntityTypeChanged"
+          v-if="availableEntityTypes.length > 1"
+        />
+        <combobox
           class="flexrow-item ml1"
           :label="$t('schedule.mode')"
           v-model="mode"
           :options="modeOptions"
           @update:model-value="onModeChanged"
-        />
-
-        <combobox
-          class="flexrow-item ml1"
-          v-if="availableEntityTypes.length > 1"
-          :label="$t('schedule.entities')"
-          v-model="entityTypeFilter"
-          :options="entityFilterOptions"
-          @update:model-value="onEntityFilterChanged"
         />
         <div class="flexrow-item ml1" v-if="mode === 'prev'">
           <label class="label">
@@ -74,7 +73,6 @@
             />
           </div>
         </div>
-
         <div class="filler"></div>
         <div class="flexrow" style="margin-top: 23px">
           <button-simple
@@ -590,7 +588,8 @@ export default {
       daysOffByPerson: {},
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
-      entityTypeFilter: 'ALL',
+      entityType: null,
+      isSidePanelOpen: false,
       scheduleItems: [],
       startDate: moment().startOf('day'),
       selectedStartDate: null,
@@ -756,17 +755,15 @@ export default {
       const types = new Set()
       this.scheduleItems.forEach(item => {
         const taskType = this.taskTypeMap.get(item.task_type_id)
-        if (taskType && taskType.for_entity) {
+        if (taskType?.for_entity) {
           types.add(taskType.for_entity)
         }
       })
       return Array.from(types).sort()
     },
 
-    entityFilterOptions() {
-      const options = [
-        { label: this.$t('schedule.all_entities'), value: 'ALL' }
-      ]
+    entityTypeOptions() {
+      const options = [{ label: this.$t('main.all'), value: null }]
       this.availableEntityTypes.forEach(type => {
         options.push({ label: type, value: type })
       })
@@ -774,14 +771,14 @@ export default {
     },
 
     filteredScheduleItems() {
-      if (this.entityTypeFilter === 'ALL') {
+      if (!this.entityType) {
         return this.scheduleItems
       }
       return this.scheduleItems.filter(item => {
         const taskType = this.taskTypeMap.get(item.task_type_id)
-        return taskType && taskType.for_entity === this.entityTypeFilter
+        return taskType && taskType.for_entity === this.entityType
       })
-    },
+    }
   },
 
   methods: {
@@ -810,20 +807,20 @@ export default {
       'updateTask'
     ]),
 
-    updateRoute({ mode, version, zoom, entityTypes }) {
+    updateRoute({ mode, type, version, zoom }) {
       const query = { ...this.$route.query }
 
       if (mode !== undefined) {
         query.mode = mode || undefined
+      }
+      if (type !== undefined) {
+        query.type = type || undefined
       }
       if (version !== undefined) {
         query.version = version || undefined
       }
       if (zoom !== undefined) {
         query.zoom = String(zoom)
-      }
-      if (entityTypes !== undefined) {
-        query.entityTypes = entityTypes || undefined
       }
 
       if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
@@ -920,25 +917,22 @@ export default {
       await this.loadData()
 
       const mode = this.$route.query.mode
+      const type = this.$route.query.type
       const version = this.$route.query.version
       const zoom = Number(this.$route.query.zoom)
 
       this.mode = this.modeOptions.map(o => o.value).includes(mode)
         ? mode
         : DEFAULT_MODE
+      this.entityType = this.entityTypeOptions.map(o => o.value).includes(type)
+        ? type
+        : null
       this.version = this.versionOptions.map(o => o.value).includes(version)
         ? version
         : DEFAULT_VERSION
       this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
         ? zoom
         : DEFAULT_ZOOM
-      
-      const entityType = this.$route.query.entityType
-      if (entityType) {
-        this.entityTypeFilter = entityType
-      } else {
-        this.entityTypeFilter = 'ALL'
-      }
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
@@ -1892,6 +1886,10 @@ export default {
       this.updateRoute({ zoom })
     },
 
+    onEntityTypeChanged(type) {
+      this.updateRoute({ type })
+    },
+
     onModeChanged(mode) {
       this.updateRoute({ mode })
       this.closeSidePanel()
@@ -1902,13 +1900,6 @@ export default {
       this.updateRoute({ version })
       this.closeSidePanel()
       this.refreshSchedule()
-    },
-
-    onEntityFilterChanged() {
-      const entityType = this.entityTypeFilter !== 'ALL'
-        ? this.entityTypeFilter
-        : undefined
-      this.updateRoute({ entityType })
     },
 
     refreshSchedule() {
@@ -2487,7 +2478,5 @@ export default {
       width: 90px;
     }
   }
-
-  // Entity filter styling to match navigation menu
 }
 </style>
