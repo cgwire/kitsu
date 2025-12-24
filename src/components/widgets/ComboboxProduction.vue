@@ -4,7 +4,7 @@
       field: withMargin
     }"
   >
-    <label class="label" v-if="label.length > 0">
+    <label class="label" v-if="label">
       {{ label }}
     </label>
     <div class="production-combo">
@@ -19,7 +19,7 @@
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <div class="select-input" ref="select" v-if="showProductionList">
+      <div class="select-input" v-if="showProductionList">
         <div
           class="production-line"
           :key="production.id"
