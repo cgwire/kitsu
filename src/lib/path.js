@@ -129,11 +129,54 @@ export const getEntityPath = (
   return route
 }
 
-const getProductionRoute = (name, productionId) => {
+const SECTION_NAME_MAP = {
+  assetTypes: 'production-asset-types',
+  newsFeed: 'news-feed',
+  plugin: 'production-plugin'
+}
+
+const TVSHOW_NON_EPISODIC_SECTIONS = [
+  'news-feed',
+  'schedule',
+  'production-settings',
+  'quota',
+  'budget',
+  'team',
+  'episodes',
+  'episode-stats',
+  'concepts',
+  'brief'
+]
+
+const SECTIONS_WITH_SEARCH = [
+  'assets',
+  'shots',
+  'edits',
+  'sequences',
+  'episodes',
+  'breakdown'
+]
+
+/* Enforce section depending on the production type */
+const _getAdjustedRouteName = (productionType, section, pluginId = null) => {
+  if (pluginId) {
+    section = 'production-plugin'
+  }
+  if (productionType === 'shots' && section === 'assets') {
+    return 'shots'
+  }
+  if (productionType === 'assets' && ['shots', 'sequences'].includes(section)) {
+    return 'assets'
+  }
+  return section
+}
+
+const getProductionRoute = (name, productionId, pluginId = null) => {
   return {
     name,
     params: {
-      production_id: productionId
+      production_id: productionId,
+      plugin_id: pluginId
     }
   }
 }
@@ -141,44 +184,26 @@ const getProductionRoute = (name, productionId) => {
 export const getProductionPath = (
   production,
   section = production.homepage || 'assets',
-  episodeId
+  episodeId,
+  pluginId
 ) => {
-  if (section === 'assetTypes') section = 'production-asset-types'
-  if (section === 'newsFeed') section = 'news-feed'
-  let route = getProductionRoute(section, production.id)
+  const normalizedSection = SECTION_NAME_MAP[section] || section
+  const routeName = _getAdjustedRouteName(
+    production.production_type,
+    normalizedSection,
+    pluginId
+  )
+  let route = getProductionRoute(routeName, production.id, pluginId)
 
-  if (production.production_type === 'shots' && route.name === 'assets') {
-    route.name = 'shots'
-  } else if (
-    production.production_type === 'assets' &&
-    ['shots', 'sequences'].includes(route.name)
-  ) {
-    route.name = 'assets'
-  }
-
-  if (
+  const shouldEpisodify =
     production.production_type === 'tvshow' &&
-    ![
-      'news-feed',
-      'schedule',
-      'production-settings',
-      'quota',
-      'budget',
-      'team',
-      'episodes',
-      'episode-stats',
-      'concepts',
-      'brief'
-    ].includes(section)
-  ) {
+    !TVSHOW_NON_EPISODIC_SECTIONS.includes(normalizedSection)
+
+  if (shouldEpisodify) {
     route = episodifyRoute(route, episodeId || 'all')
   }
 
-  if (
-    ['assets', 'shots', 'edits', 'sequences', 'episodes', 'breakdown'].includes(
-      section
-    )
-  ) {
+  if (SECTIONS_WITH_SEARCH.includes(normalizedSection)) {
     route.query = { search: '' }
   }
 
