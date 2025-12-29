@@ -850,7 +850,6 @@ const mutations = {
 }
 
 export default {
-  namespaced: false,
   state,
   getters,
   actions,
