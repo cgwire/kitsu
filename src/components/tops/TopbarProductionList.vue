@@ -110,10 +110,12 @@ export default {
     },
 
     getProductionPath(production) {
+      const pluginId = this.$route.params.plugin_id
       return getProductionPath(
         production,
         this.section,
-        this.episodeId || 'all'
+        this.episodeId || 'all',
+        pluginId
       )
     }
   }

@@ -11,10 +11,15 @@
           class="selected-section-line flexrow-item flexrow"
           v-if="currentSection"
         >
+          <icon
+            class="section-icon"
+            :name="currentSection.icon"
+            v-if="currentSection.type === 'plugin'"
+          />
           <kitsu-icon
             class="section-icon"
             :name="currentSection.value"
-            v-if="currentSection.value !== 'budget'"
+            v-else-if="currentSection.value !== 'budget'"
           />
           <hand-coins-icon
             class="section-icon"
@@ -35,7 +40,19 @@
           <router-link
             class="flexrow"
             :to="getSectionPath(section)"
-            v-if="section.value !== 'separator'"
+            v-if="section.type === 'plugin'"
+          >
+            <icon
+              class="section-icon"
+              :name="section.icon"
+              v-if="section.type === 'plugin'"
+            />
+            <span class="flexrow-item">{{ section.label }}</span>
+          </router-link>
+          <router-link
+            class="flexrow"
+            :to="getSectionPath(section)"
+            v-else-if="section.value !== 'separator'"
           >
             <kitsu-icon
               class="section-icon"
@@ -67,6 +84,7 @@ import { getProductionPath } from '@/lib/path'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
+import Icon from '@/components/widgets/Icon.vue'
 
 export default {
   name: 'topbar-section-list',
@@ -74,8 +92,9 @@ export default {
   components: {
     ChevronDownIcon,
     ComboboxMask,
-    KitsuIcon,
-    HandCoinsIcon
+    HandCoinsIcon,
+    Icon,
+    KitsuIcon
   },
 
   emits: ['input'],
@@ -107,7 +126,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction']),
+    ...mapGetters(['currentProduction', 'projectPlugins']),
 
     currentSection() {
       return this.sectionList.find(
@@ -135,7 +154,8 @@ export default {
       const result = getProductionPath(
         this.currentProduction,
         section.value,
-        this.episodeId
+        this.episodeId,
+        section.plugin_id
       )
       return result
     }

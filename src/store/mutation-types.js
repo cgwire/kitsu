@@ -291,6 +291,10 @@ export const LOAD_STUDIOS_END = 'LOAD_STUDIOS_END'
 export const EDIT_STUDIOS_END = 'EDIT_STUDIOS_END'
 export const DELETE_STUDIOS_END = 'DELETE_STUDIOS_END'
 
+// Plugins
+
+export const LOAD_PLUGINS_END = 'LOAD_PLUGINS_END'
+
 // Assets
 
 export const CLEAR_ASSETS = 'CLEAR_ASSETS'

@@ -71,6 +71,7 @@ import {
   LOAD_CUSTOM_ACTIONS_END,
   LOAD_STATUS_AUTOMATIONS_END,
   LOAD_ASSET_TYPES_END,
+  LOAD_PLUGINS_END,
   SET_NOTIFICATION_COUNT,
   LOAD_OPEN_PRODUCTIONS_END,
   RESET_ALL,
@@ -119,7 +120,9 @@ const initialState = {
   todoListScrollPosition: 0,
 
   timeSpentMap: {},
-  timeSpentTotal: 0
+  timeSpentTotal: 0,
+
+  plugins: []
 }
 
 const state = {
@@ -158,7 +161,13 @@ const getters = {
   todoListScrollPosition: state => state.todoListScrollPosition,
 
   timeSpentMap: state => state.timeSpentMap,
-  timeSpentTotal: state => state.timeSpentTotal
+  timeSpentTotal: state => state.timeSpentTotal,
+
+  plugins: state => state.plugins,
+  studioPlugins: state =>
+    state.plugins.filter(plugin => plugin.frontend_studio_enabled),
+  projectPlugins: state =>
+    state.plugins.filter(plugin => plugin.frontend_project_enabled)
 }
 
 const actions = {
@@ -389,6 +398,7 @@ const actions = {
         commit(SET_CURRENT_PRODUCTION, rootGetters.currentProduction.id)
       }
       commit(LOAD_TASK_TYPES_END, context.task_types)
+      commit(LOAD_PLUGINS_END, context.plugins)
     })
   }
 }
@@ -821,6 +831,10 @@ const mutations = {
     }
   },
 
+  [LOAD_PLUGINS_END](state, plugins) {
+    state.plugins = plugins
+  },
+
   [CLEAR_AVATAR](state, userId) {
     if (state.user.id === userId) {
       state.user.has_avatar = false
@@ -836,7 +850,6 @@ const mutations = {
 }
 
 export default {
-  namespace: true,
   state,
   getters,
   actions,
