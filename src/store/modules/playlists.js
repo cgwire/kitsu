@@ -249,8 +249,8 @@ const actions = {
     return playlistsApi.updatePreviewFileValidationStatus(previewFile, status)
   },
 
-  notifyClients({ commit }, { playlist, studioId }) {
-    return playlistsApi.notifyClients(playlist, studioId)
+  notifyClients({ commit }, { playlist, studioId, departmentId }) {
+    return playlistsApi.notifyClients(playlist, studioId, departmentId)
   }
 }
 

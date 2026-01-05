@@ -109,6 +109,10 @@ export default {
     top: {
       default: false,
       type: Boolean
+    },
+    allDepartmentsLabel: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -159,7 +163,9 @@ export default {
           {
             color: '#AAA',
             id: null,
-            name: this.$t('departments.no_department')
+            name: this.allDepartmentsLabel
+              ? this.$t('departments.all_departments')
+              : this.$t('departments.no_department')
           },
           ...this.departmentsToTakeAccount
         ]
