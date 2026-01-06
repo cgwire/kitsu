@@ -172,12 +172,15 @@ const _getAdjustedRouteName = (productionType, section, pluginId = null) => {
 }
 
 const getProductionRoute = (name, productionId, pluginId = null) => {
+  const params = {
+    production_id: productionId
+  }
+  if (pluginId) {
+    params.plugin_id = pluginId
+  }
   return {
     name,
-    params: {
-      production_id: productionId,
-      plugin_id: pluginId
-    }
+    params
   }
 }
 
