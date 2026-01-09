@@ -51,6 +51,7 @@ const NotFound = () => import('@/components/pages/NotFound.vue')
 const People = () => import('@/components/pages/People.vue')
 const Person = () => import('@/components/pages/Person.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
+const Plugin = () => import('@/components/pages/Plugin.vue')
 const ProductionAssetTypes = () =>
   import('@/components/pages/ProductionAssetTypes.vue')
 const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
@@ -397,6 +398,12 @@ export const routes = [
       },
 
       {
+        path: '/plugins/:plugin_id',
+        component: Plugin,
+        name: 'plugin'
+      },
+
+      {
         path: 'settings',
         component: Settings,
         name: 'settings'
@@ -488,6 +495,18 @@ export const routes = [
         path: 'productions/:production_id/brief',
         component: Brief,
         name: 'brief'
+      },
+
+      {
+        path: 'productions/:production_id/plugins/:plugin_id',
+        component: Plugin,
+        name: 'production-plugin'
+      },
+
+      {
+        path: 'productions/:production_id/episodes/:episode_id/plugins/:plugin_id',
+        component: Plugin,
+        name: 'episode-production-plugin'
       },
 
       {

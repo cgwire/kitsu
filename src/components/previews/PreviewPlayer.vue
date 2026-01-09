@@ -560,7 +560,7 @@
 
 <script>
 import { fabric } from 'fabric'
-import { PSBrush } from '@arch-inc/fabricjs-psbrush'
+import { PSBrush } from 'fabricjs-psbrush'
 
 import {
   ArrowUpRightIcon,

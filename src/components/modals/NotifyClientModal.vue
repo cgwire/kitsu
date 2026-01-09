@@ -16,6 +16,14 @@
       v-model="form.studio_id"
     />
 
+    <combobox-department
+      class="mt1 mb1"
+      ref="departmentField"
+      :all-departments-label="true"
+      :label="$t('people.fields.departments')"
+      v-model="form.department_id"
+    />
+
     <p class="mb1 field-title" v-if="clients.length > 0">
       {{ $t('playlists.clients_to_notify') }}
     </p>
@@ -59,6 +67,7 @@ import { mapGetters } from 'vuex'
 import { modalMixin } from '@/components/modals/base_modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleAvatar from '../widgets/PeopleAvatar.vue'
@@ -71,6 +80,7 @@ export default {
 
   components: {
     BaseModal,
+    ComboboxDepartment,
     ComboboxStudio,
     ModalFooter,
     PeopleAvatar,
@@ -105,7 +115,8 @@ export default {
   data() {
     return {
       form: {
-        studio_id: ''
+        studio_id: '',
+        department_id: ''
       }
     }
   },
@@ -121,13 +132,20 @@ export default {
           person =>
             !this.form.studio_id || person.studio_id === this.form.studio_id
         )
+        .filter(
+          person =>
+            !this.form.department_id ||
+            (person.departments &&
+              person.departments.includes(this.form.department_id))
+        )
     }
   },
 
   methods: {
     runConfirmation() {
       this.$emit('confirm', {
-        studio_id: this.form.studio_id
+        studio_id: this.form.studio_id,
+        department_id: this.form.department_id
       })
     }
   }

@@ -4,7 +4,7 @@
  */
 import { fabric } from 'fabric'
 import moment from 'moment'
-import { PSStroke, PSBrush } from '@arch-inc/fabricjs-psbrush'
+import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 import { markRaw } from 'vue'
 

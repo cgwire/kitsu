@@ -107,8 +107,14 @@ export default {
     getEpisodePath() {
       const currentProduction = this.currentProduction
       const section = this.section
+      const pluginId = this.$route.params.plugin_id
       return episodeId => {
-        const path = getProductionPath(currentProduction, section, episodeId)
+        const path = getProductionPath(
+          currentProduction,
+          section,
+          episodeId,
+          pluginId
+        )
         return path
       }
     }

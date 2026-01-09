@@ -352,7 +352,7 @@ export default {
   },
 
   departments: {
-    all_asset_types: 'All departments',
+    all_departments: 'All departments',
     available_items: 'Available Items',
     create_error: 'An error occurred while saving this department. Are you sure there is no department with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',

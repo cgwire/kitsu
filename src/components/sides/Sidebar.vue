@@ -124,6 +124,19 @@
               </router-link>
             </p>
           </div>
+          <div v-for="plugin in studioPlugins" :key="plugin.id">
+            <p @click="toggleSidebar()">
+              <router-link
+                :to="{
+                  name: 'plugin',
+                  params: { plugin_id: plugin.plugin_id }
+                }"
+              >
+                <icon :name="plugin.icon" />
+                {{ plugin.name }}
+              </router-link>
+            </p>
+          </div>
 
           <div v-if="isCurrentUserAdmin">
             <h2>{{ $t('main.admin') }}</h2>
@@ -236,6 +249,7 @@ import {
   GlobeIcon,
   Rows4Icon
 } from 'lucide-vue-next'
+import Icon from '@/components/widgets/Icon.vue'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
@@ -248,7 +262,8 @@ export default {
     EggIcon,
     GlobeIcon,
     KitsuIcon,
-    Rows4Icon
+    Rows4Icon,
+    Icon
   },
 
   data() {
@@ -272,7 +287,8 @@ export default {
       'isCurrentUserVendor',
       'isSidebarHidden',
       'mainConfig',
-      'organisation'
+      'organisation',
+      'studioPlugins'
     ]),
 
     isLongLocale() {

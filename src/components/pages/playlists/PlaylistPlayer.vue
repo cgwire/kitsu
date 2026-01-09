@@ -1482,14 +1482,15 @@ export default {
       this.errors.notifyClients = false
     },
 
-    async confirmNotifyClients({ studioId }) {
+    async confirmNotifyClients({ studioId, departmentId }) {
       this.loading.notifyClients = true
       this.errors.notifyClients = false
       this.success.notifyClients = false
       try {
         await this.notifyClients({
           playlist: this.playlist,
-          studioId
+          studioId,
+          departmentId
         })
         this.success.notifyClients = true
       } catch (err) {
