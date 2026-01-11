@@ -22,9 +22,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src/'),
       vue: 'vue/dist/vue.esm-bundler.js',
-      '@arch-inc/fabricjs-psbrush': path.resolve(
+      'fabricjs-psbrush': path.resolve(
         __dirname,
-        'node_modules/@arch-inc/fabricjs-psbrush/dist/index.js'
+        'node_modules/fabricjs-psbrush/dist/index.mjs'
       )
     }
   },
