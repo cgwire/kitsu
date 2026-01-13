@@ -270,7 +270,6 @@ export default {
     return {
       currentMonth: moment().month() + 1,
       currentYear: moment().year(),
-      currentWeek: moment().week(),
       detailsMap: {},
       isLoading: true,
       isError: false,
@@ -321,7 +320,7 @@ export default {
     },
 
     weekRange() {
-      return getWeekRange(this.year, this.currentYear, this.currentWeek)
+      return getWeekRange(this.year, this.currentYear)
     },
 
     entryIds() {
