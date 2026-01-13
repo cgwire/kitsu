@@ -11,15 +11,15 @@
     <combobox-studio
       class="mt1 mb1"
       ref="studioField"
+      all-studios-label
       :label="$t('main.studio')"
-      :empty-choice-label="$t('playlists.all_studios')"
       v-model="form.studio_id"
     />
 
     <combobox-department
       class="mt1 mb1"
       ref="departmentField"
-      :all-departments-label="true"
+      all-departments-label
       :label="$t('people.fields.departments')"
       v-model="form.department_id"
     />

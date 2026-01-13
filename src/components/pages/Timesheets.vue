@@ -15,11 +15,12 @@
           />
           <combobox-studio
             class="flexrow-item field"
+            all-studios-label
             :label="$t('main.studio')"
             v-model="studioIdString"
           />
           <combobox
-            class="flexrow-item"
+            class="flexrow-item nowrap"
             :label="$t('timesheets.detail_level')"
             :options="detailOptions"
             v-model="detailLevelString"

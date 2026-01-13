@@ -21,6 +21,7 @@
       />
       <combobox-department
         class="flexrow-item"
+        all-departments-label
         :label="$t('main.department')"
         v-model="selectedDepartment"
       />

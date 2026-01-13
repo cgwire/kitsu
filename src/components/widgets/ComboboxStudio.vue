@@ -89,9 +89,9 @@ export default {
       default: true,
       type: Boolean
     },
-    emptyChoiceLabel: {
-      default: null,
-      type: String
+    allStudiosLabel: {
+      default: false,
+      type: Boolean
     }
   },
 
@@ -106,7 +106,9 @@ export default {
           {
             color: '#aaa',
             id: null,
-            name: this.emptyChoiceLabel || this.$t('studios.no_studio')
+            name: this.allStudiosLabel
+              ? this.$t('studios.all_studios')
+              : this.$t('studios.no_studio')
           },
           ...studios
         ]
