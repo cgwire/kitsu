@@ -961,7 +961,6 @@
 
     <notify-client-modal
       active
-      :playlist="playlist"
       :is-loading="loading.notifyClients"
       :is-error="errors.notifyClients"
       :is-success="success.notifyClients"

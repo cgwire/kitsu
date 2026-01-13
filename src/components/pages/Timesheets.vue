@@ -15,11 +15,12 @@
           />
           <combobox-studio
             class="flexrow-item field"
+            all-studios-label
             :label="$t('main.studio')"
             v-model="studioIdString"
           />
           <combobox
-            class="flexrow-item"
+            class="flexrow-item nowrap"
             :label="$t('timesheets.detail_level')"
             :options="detailOptions"
             v-model="detailLevelString"
@@ -504,7 +505,7 @@ export default {
     yearString() {
       if (this.silent) return
       const year = Number(this.yearString)
-      const currentMonth = moment().month()
+      const currentMonth = moment().month() + 1
       if (this.currentYear !== year) {
         if (this.detailLevel === 'month') {
           this.$router.push({

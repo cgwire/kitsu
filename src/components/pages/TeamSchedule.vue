@@ -49,11 +49,13 @@
       <div class="flexrow filters">
         <combobox-studio
           class="flexrow-item"
+          all-studios-label
           :label="$t('main.studio')"
           v-model="selectedStudio"
         />
         <combobox-department
           class="flexrow-item"
+          all-departments-label
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />

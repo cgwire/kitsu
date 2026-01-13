@@ -376,6 +376,7 @@ export default {
   },
 
   studios: {
+    all_studios: 'All studios',
     create_error: 'An error occurred while saving this studio. Are you sure there is no studio with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this studio.',
@@ -1041,7 +1042,6 @@ export default {
     add_sequence: 'Add entire sequence',
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',
-    all_studios: 'All studios',
     apply_task_type_change: 'This will set the last revision for the given task type on all entities.',
     available_build: 'Available builds',
     build_daily: 'Daily pending',

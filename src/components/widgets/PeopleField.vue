@@ -60,6 +60,7 @@ export default {
 
   data() {
     return {
+      index: null,
       item: null,
       items: [],
       search: ''

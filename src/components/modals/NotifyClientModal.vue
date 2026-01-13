@@ -11,42 +11,37 @@
     <combobox-studio
       class="mt1 mb1"
       ref="studioField"
+      all-studios-label
       :label="$t('main.studio')"
-      :empty-choice-label="$t('playlists.all_studios')"
       v-model="form.studio_id"
     />
 
     <combobox-department
       class="mt1 mb1"
       ref="departmentField"
-      :all-departments-label="true"
+      all-departments-label
       :label="$t('people.fields.departments')"
       v-model="form.department_id"
     />
 
-    <p class="mb1 field-title" v-if="clients.length > 0">
-      {{ $t('playlists.clients_to_notify') }}
-    </p>
-    <p class="empty" v-else>
-      {{ $t('playlists.no_clients_to_notify') }}
-    </p>
-
-    <div class="flexcolumn">
-      <div :key="client.id" class="flexrow mb1" v-for="client in clients">
-        <people-avatar
-          class="flexrow-item"
-          :person="client"
-          :size="30"
-          :is-link="false"
-          v-if="client"
-        />
-        <people-name
-          class="flexrow-item"
-          :person="client"
-          :is-link="false"
-          v-if="client"
-        />
-      </div>
+    <div class="mt2">
+      <em v-if="!clients.length">
+        {{ $t('playlists.no_clients_to_notify') }}
+      </em>
+      <template v-else>
+        <label class="label mb1">
+          {{ $t('playlists.clients_to_notify') }}
+        </label>
+        <div :key="client.id" class="flexrow mb05" v-for="client in clients">
+          <people-avatar
+            class="flexrow-item"
+            :person="client"
+            :size="30"
+            :is-link="false"
+          />
+          <people-name class="flexrow-item" :person="client" :is-link="false" />
+        </div>
+      </template>
     </div>
 
     <modal-footer
@@ -70,11 +65,11 @@ import BaseModal from '@/components/modals/BaseModal.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
-import PeopleAvatar from '../widgets/PeopleAvatar.vue'
-import PeopleName from '../widgets/PeopleName.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 
 export default {
-  name: 'edit-budget-modal',
+  name: 'notify-client-modal',
 
   mixins: [modalMixin],
 
@@ -91,10 +86,6 @@ export default {
     active: {
       type: Boolean,
       default: false
-    },
-    playlist: {
-      type: Object,
-      default: () => {}
     },
     isError: {
       type: Boolean,
@@ -127,7 +118,7 @@ export default {
     clients() {
       return this.currentProduction.team
         .map(personId => this.personMap.get(personId))
-        .filter(person => person.role === 'client')
+        .filter(person => person?.role === 'client')
         .filter(
           person =>
             !this.form.studio_id || person.studio_id === this.form.studio_id
@@ -151,17 +142,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.empty {
-  font-style: italic;
-}
-
-.field-title {
-  color: #eee;
-  font-size: 0.8rem;
-  font-weight: bold;
-  margin-top: 2em;
-  text-transform: uppercase;
-}
-</style>

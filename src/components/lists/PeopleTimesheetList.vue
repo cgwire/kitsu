@@ -203,8 +203,7 @@ export default {
   data() {
     return {
       currentMonth: moment().month() + 1,
-      currentYear: moment().year(),
-      currentWeek: moment().week()
+      currentYear: moment().year()
     }
   },
 
@@ -271,7 +270,7 @@ export default {
     },
 
     weekRange() {
-      return getWeekRange(this.year, this.currentYear, this.currentWeek)
+      return getWeekRange(this.year, this.currentYear)
     },
 
     isHours() {
@@ -443,8 +442,10 @@ export default {
 
   watch: {
     route() {
-      const els = document.getElementsByClassName('selected')
-      if (els.length === 0) {
+      if (
+        !document.getElementsByClassName('selected').length &&
+        this.$refs.body
+      ) {
         // selected element is not visible
         this.$refs.body.scrollLeft += 350
       }
@@ -509,11 +510,11 @@ a:hover {
 }
 
 .warning {
-  color: #ff3860;
-}
+  color: $red;
 
-.warning:hover {
-  color: red;
+  &:hover {
+    color: red;
+  }
 }
 
 .weekend {
@@ -542,6 +543,6 @@ a:hover {
 
 .selected .duration.warning {
   background: $red;
-  color: black;
+  color: $black;
 }
 </style>
