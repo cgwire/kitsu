@@ -442,8 +442,10 @@ export default {
 
   watch: {
     route() {
-      const els = document.getElementsByClassName('selected')
-      if (els.length === 0) {
+      if (
+        !document.getElementsByClassName('selected').length &&
+        this.$refs.body
+      ) {
         // selected element is not visible
         this.$refs.body.scrollLeft += 350
       }
