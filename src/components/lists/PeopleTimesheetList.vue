@@ -203,8 +203,7 @@ export default {
   data() {
     return {
       currentMonth: moment().month() + 1,
-      currentYear: moment().year(),
-      currentWeek: moment().week()
+      currentYear: moment().year()
     }
   },
 
@@ -271,7 +270,7 @@ export default {
     },
 
     weekRange() {
-      return getWeekRange(this.year, this.currentYear, this.currentWeek)
+      return getWeekRange(this.year, this.currentYear)
     },
 
     isHours() {
@@ -509,11 +508,11 @@ a:hover {
 }
 
 .warning {
-  color: #ff3860;
-}
+  color: $red;
 
-.warning:hover {
-  color: red;
+  &:hover {
+    color: red;
+  }
 }
 
 .weekend {
@@ -542,6 +541,6 @@ a:hover {
 
 .selected .duration.warning {
   background: $red;
-  color: black;
+  color: $black;
 }
 </style>
