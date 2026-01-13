@@ -504,7 +504,7 @@ export default {
     yearString() {
       if (this.silent) return
       const year = Number(this.yearString)
-      const currentMonth = moment().month()
+      const currentMonth = moment().month() + 1
       if (this.currentYear !== year) {
         if (this.detailLevel === 'month') {
           this.$router.push({
