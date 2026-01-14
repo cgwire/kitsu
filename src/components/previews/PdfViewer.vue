@@ -49,7 +49,7 @@ const hasError = ref(false)
 
 const pdfUrl = computed(() =>
   props.preview?.id
-    ? `/api/pictures/originals/preview-files/${props.preview.id}.pdf`
+    ? `/api/pictures/originals/preview-files/${props.preview.id}.pdf#view=Fit`
     : ''
 )
 
