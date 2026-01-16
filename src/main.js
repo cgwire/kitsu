@@ -23,10 +23,7 @@ import '@animxyz/core'
 import VueDatePicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 
-const app = createApp({
-  components: { App },
-  template: '<App/>'
-})
+const app = createApp(App)
 const head = createHead()
 
 app.use(i18n)
