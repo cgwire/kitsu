@@ -522,7 +522,7 @@ const actions = {
       )
       return func
         .runPromiseAsSeries(createTaskPromises)
-        .then(() => Promise.resolve(shot))
+        .then(() => shot)
         .catch(console.error)
     })
   },
@@ -552,14 +552,13 @@ const actions = {
       } else {
         commit(REMOVE_SHOT, shot)
       }
-      return Promise.resolve()
     })
   },
 
   restoreShot({ commit, state }, shot) {
     return shotsApi.restoreShot(shot).then(shot => {
       commit(RESTORE_SHOT_END, shot)
-      return Promise.resolve(shot)
+      return shot
     })
   },
 
@@ -569,18 +568,19 @@ const actions = {
       .postCsv(production, state.shotsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_SHOTS_END)
-        return Promise.resolve()
       })
   },
 
   uploadEdlFile({ rootGetters }, { edl_file, namingConvention, matchCase }) {
     const production = rootGetters.currentProduction
     const episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
-    return shotsApi
-      .postEdl(production, edl_file, namingConvention, matchCase, episode)
-      .then(() => {
-        return Promise.resolve()
-      })
+    return shotsApi.postEdl(
+      production,
+      edl_file,
+      namingConvention,
+      matchCase,
+      episode
+    )
   },
 
   displayMoreShots({ commit, rootGetters }) {

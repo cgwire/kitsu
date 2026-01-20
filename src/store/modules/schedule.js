@@ -56,7 +56,7 @@ const actions = {
           item.task_type_id === scheduleItem.taskTypeId &&
           item.project_id === scheduleItem.project_id
       )
-      if (previousItem) return Promise.resolve(scheduleItem)
+      if (previousItem) return scheduleItem
     }
     return scheduleApi
       .createScheduleItem(scheduleItem)
@@ -64,7 +64,7 @@ const actions = {
         const scheduleItems = state.currentScheduleItems.slice()
         scheduleItems.push(newScheduleItem)
         commit(SET_CURRENT_SCHEDULE_ITEMS, scheduleItems)
-        return Promise.resolve(newScheduleItem)
+        return newScheduleItem
       })
       .catch(console.error)
   },

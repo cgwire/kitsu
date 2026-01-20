@@ -1055,7 +1055,7 @@ export const annotationMixin = {
       return this.resetCanvasSize().then(() => {
         if (this.fabricCanvas) this.fabricCanvas.renderAll()
         this.resetCanvasVisibility()
-        return Promise.resolve(this.fabricCanvas)
+        return this.fabricCanvas
       })
     },
 

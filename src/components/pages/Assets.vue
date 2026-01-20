@@ -899,7 +899,6 @@ export default {
           })
           .then(() => {
             this.addThumbnailsModal.markUploaded(form.task.entity_id)
-            return Promise.resolve()
           })
       }
 

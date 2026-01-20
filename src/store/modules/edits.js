@@ -365,12 +365,12 @@ const actions = {
           taskMap,
           taskTypeMap
         })
-        return Promise.resolve(edits)
+        return edits
       })
       .catch(err => {
         console.error('an error occurred while loading edits', err)
         commit(LOAD_EDITS_ERROR)
-        return Promise.resolve([])
+        return []
       })
   },
 
@@ -428,7 +428,7 @@ const actions = {
       )
       return func
         .runPromiseAsSeries(createTaskPromises)
-        .then(() => Promise.resolve(edit))
+        .then(() => edit)
         .catch(console.error)
     })
   },
@@ -455,14 +455,13 @@ const actions = {
       } else {
         commit(REMOVE_EDIT, edit)
       }
-      return Promise.resolve()
     })
   },
 
   restoreEdit({ commit, state }, edit) {
     return editsApi.restoreEdit(edit).then(edit => {
       commit(RESTORE_EDIT_END, edit)
-      return Promise.resolve(edit)
+      return edit
     })
   },
 
@@ -472,7 +471,6 @@ const actions = {
       .postCsv(production, state.editsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_EDITS_END)
-        return Promise.resolve()
       })
   },
 

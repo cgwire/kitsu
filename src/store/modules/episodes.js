@@ -391,7 +391,7 @@ const actions = {
     const userFilters = rootGetters.userFilters
     return shotsApi.getEpisodes(currentProduction).then(episodes => {
       commit(LOAD_EPISODES_END, { episodes, routeEpisodeId, userFilters })
-      return Promise.resolve(episodes)
+      return episodes
     })
   },
 
@@ -414,7 +414,7 @@ const actions = {
         taskTypeMap,
         taskStatusMap
       })
-      return Promise.resolve(episodes)
+      return episodes
     })
   },
 
@@ -439,7 +439,7 @@ const actions = {
       )
       return func
         .runPromiseAsSeries(createTaskPromises)
-        .then(() => Promise.resolve(episode))
+        .then(() => episode)
         .catch(console.error)
     })
   },
@@ -457,7 +457,7 @@ const actions = {
   deleteEpisode({ commit, state }, episode) {
     return shotsApi.deleteEpisode(episode).then(() => {
       commit(REMOVE_EPISODE, episode)
-      return Promise.resolve(episode)
+      return episode
     })
   },
 
@@ -469,7 +469,7 @@ const actions = {
       .getEpisodeStats(productionId)
       .then(episodeStats => {
         commit(SET_EPISODE_STATS, { episodeStats, taskTypeMap, production })
-        return Promise.resolve(episodeStats)
+        return episodeStats
       })
       .catch(console.error)
   },
@@ -490,7 +490,7 @@ const actions = {
           production,
           taskTypeMap
         })
-        return Promise.resolve(episodeRetakeStats)
+        return episodeRetakeStats
       })
       .catch(console.error)
   },
