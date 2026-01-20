@@ -103,17 +103,5 @@ export default defineConfig([
         ...globals.node
       }
     }
-  },
-
-  // CommonJS config files
-  {
-    name: 'config-cjs',
-    files: ['.*.cjs'],
-    languageOptions: {
-      sourceType: 'commonjs',
-      globals: {
-        ...globals.node
-      }
-    }
   }
 ])
