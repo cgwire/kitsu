@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue({
@@ -20,12 +18,9 @@ export default defineConfig({
   resolve: {
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.vue'],
     alias: {
-      '@': path.resolve(__dirname, 'src/'),
+      '@': `${import.meta.dirname}/src/`,
       vue: 'vue/dist/vue.esm-bundler.js',
-      'fabricjs-psbrush': path.resolve(
-        __dirname,
-        'node_modules/fabricjs-psbrush/dist/index.mjs'
-      )
+      'fabricjs-psbrush': `${import.meta.dirname}/node_modules/fabricjs-psbrush/dist/index.mjs`
     }
   },
   css: {
@@ -58,16 +53,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['vitest-localstorage-mock', 'tests/unit.setup.js'],
     mockReset: false,
-    pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true
-      }
-    },
+    isolate: true,
     deps: {
       optimizer: {
-        web: {
+        client: {
           include: ['vue', 'vuex', 'vue-router', '@vue/test-utils']
         }
       }
