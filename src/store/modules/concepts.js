@@ -1,4 +1,3 @@
-import async from 'async'
 import { v4 as uuidv4 } from 'uuid'
 
 import conceptsApi from '@/store/api/concepts'
@@ -133,31 +132,19 @@ const actions = {
     commit(ADD_SELECTED_CONCEPTS, concept)
   },
 
-  deleteSelectedConcepts({ state, dispatch }) {
-    return new Promise((resolve, reject) => {
-      let selectedConceptIds = [...state.selectedConcepts.values()]
-        .filter(concept => !concept.canceled)
-        .map(concept => concept.id)
-      if (selectedConceptIds.length === 0) {
-        selectedConceptIds = [...state.selectedConcepts.keys()]
+  async deleteSelectedConcepts({ state, dispatch }) {
+    let selectedConceptIds = [...state.selectedConcepts.values()]
+      .filter(concept => !concept.canceled)
+      .map(concept => concept.id)
+    if (selectedConceptIds.length === 0) {
+      selectedConceptIds = [...state.selectedConcepts.keys()]
+    }
+    for (const conceptId of selectedConceptIds) {
+      const concept = state.conceptMap.get(conceptId)
+      if (concept) {
+        await dispatch('deleteConcept', concept)
       }
-      async.eachSeries(
-        selectedConceptIds,
-        (conceptId, next) => {
-          const concept = state.conceptMap.get(conceptId)
-          if (concept) {
-            dispatch('deleteConcept', concept)
-          }
-          next()
-        },
-        err => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        }
-      )
-    })
+    }
   },
 
   clearSelectedConcepts({ commit }) {

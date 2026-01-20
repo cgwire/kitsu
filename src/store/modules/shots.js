@@ -77,7 +77,6 @@ import {
   CLEAR_SELECTED_SHOTS,
   SET_SHOT_SELECTION
 } from '@/store/mutation-types'
-import async from 'async'
 
 const cache = {
   shots: [],
@@ -775,31 +774,19 @@ const actions = {
     commit(CLEAR_SELECTED_SHOTS)
   },
 
-  deleteSelectedShots({ state, dispatch }) {
-    return new Promise((resolve, reject) => {
-      let selectedShotIds = [...state.selectedShots.values()]
-        .filter(shot => !shot.canceled)
-        .map(shot => shot.id)
-      if (selectedShotIds.length === 0) {
-        selectedShotIds = [...state.selectedShots.keys()]
+  async deleteSelectedShots({ state, dispatch }) {
+    let selectedShotIds = [...state.selectedShots.values()]
+      .filter(shot => !shot.canceled)
+      .map(shot => shot.id)
+    if (selectedShotIds.length === 0) {
+      selectedShotIds = [...state.selectedShots.keys()]
+    }
+    for (const shotId of selectedShotIds) {
+      const shot = cache.shotMap.get(shotId)
+      if (shot) {
+        await dispatch('deleteShot', shot)
       }
-      async.eachSeries(
-        selectedShotIds,
-        (shotId, next) => {
-          const shot = cache.shotMap.get(shotId)
-          if (shot) {
-            dispatch('deleteShot', shot)
-          }
-          next()
-        },
-        err => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        }
-      )
-    })
+    }
   },
 
   async setNbFramesFromTaskTypePreviews(

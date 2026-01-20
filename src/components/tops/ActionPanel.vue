@@ -1352,14 +1352,12 @@ export default {
         .catch(console.error)
     },
 
-    confirmPriorityChange() {
+    async confirmPriorityChange() {
       this.loading.changePriority = true
-      this.changeSelectedPriorities({
-        priority: Number(this.priority),
-        callback: () => {
-          this.loading.changePriority = false
-        }
+      await this.changeSelectedPriorities({
+        priority: Number(this.priority)
       })
+      this.loading.changePriority = false
     },
 
     confirmTaskCreation() {

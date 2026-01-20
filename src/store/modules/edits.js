@@ -66,7 +66,6 @@ import {
   SET_EDIT_SELECTION,
   CHANGE_EDIT_SORT
 } from '@/store/mutation-types'
-import async from 'async'
 
 const cache = {
   edits: [],
@@ -652,31 +651,19 @@ const actions = {
     commit(CLEAR_SELECTED_EDITS)
   },
 
-  deleteSelectedEdits({ state, dispatch }) {
-    return new Promise((resolve, reject) => {
-      let selectedEditIds = [...state.selectedEdits.values()]
-        .filter(edit => !edit.canceled)
-        .map(edit => edit.id)
-      if (selectedEditIds.length === 0) {
-        selectedEditIds = [...state.selectedEdits.keys()]
+  async deleteSelectedEdits({ state, dispatch }) {
+    let selectedEditIds = [...state.selectedEdits.values()]
+      .filter(edit => !edit.canceled)
+      .map(edit => edit.id)
+    if (selectedEditIds.length === 0) {
+      selectedEditIds = [...state.selectedEdits.keys()]
+    }
+    for (const editId of selectedEditIds) {
+      const edit = cache.editMap.get(editId)
+      if (edit) {
+        await dispatch('deleteEdit', edit)
       }
-      async.eachSeries(
-        selectedEditIds,
-        (editId, next) => {
-          const edit = cache.editMap.get(editId)
-          if (edit) {
-            dispatch('deleteEdit', edit)
-          }
-          next()
-        },
-        err => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        }
-      )
-    })
+    }
   }
 }
 

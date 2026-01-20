@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "format": "prettier --write --list-different src/**/*.{js,vue}",
-    "lint": "eslint --ext .js,.vue src/",
+    "lint": "eslint src/",
     "lint:fix": "npm run lint -- --fix",
     "preview": "vite preview",
     "test": "npm run test:unit",
@@ -25,10 +25,9 @@
     "@fullcalendar/multimonth": "6.1.20",
     "@fullcalendar/vue3": "6.1.20",
     "@google/model-viewer": "4.1.0",
-    "@sentry/vue": "10.34.0",
+    "@sentry/vue": "10.35.0",
     "@unhead/vue": "2.1.2",
     "@vuepic/vue-datepicker": "11.0.3",
-    "async": "3.2.6",
     "bowser": "2.13.1",
     "bulma": "0.3.1",
     "chart.js": "4.5.1",
@@ -60,7 +59,6 @@
     "vue-at": "3.0.0-alpha.3",
     "vue-chartkick": "1.1.0",
     "vue-i18n": "9.14.5",
-    "vue-meta": "2.4.0",
     "vue-multiselect": "3.4.0",
     "vue-router": "4.6.4",
     "vue-websocket-next": "0.2.7",
@@ -71,15 +69,16 @@
     "wavesurfer.js": "7.11.1"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.2",
     "@vitejs/plugin-vue": "6.0.3",
     "@vue/compiler-sfc": "3.5.13",
     "@vue/test-utils": "2.4.6",
     "autoprefixer": "10.4.23",
-    "eslint": "8.57.1",
+    "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.5",
-    "eslint-plugin-vue": "9.33.0",
-    "esm": "3.2.25",
+    "eslint-plugin-vue": "10.7.0",
+    "globals": "17.0.0",
     "husky": "9.1.7",
     "jsdom": "27.4.0",
     "lint-staged": "16.2.7",
@@ -88,10 +87,12 @@
     "sass": "1.97.2",
     "vite": "7.3.1",
     "vitest": "4.0.17",
-    "vitest-localstorage-mock": "0.1.2"
+    "vitest-localstorage-mock": "0.1.2",
+    "vue-eslint-parser": "10.2.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=20.19",
+    "npm": ">=10"
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache"

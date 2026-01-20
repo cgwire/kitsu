@@ -83,7 +83,6 @@ import {
   LOAD_SHARED_ASSETS_END,
   LOAD_UNSHARED_ASSETS_END
 } from '@/store/mutation-types'
-import async from 'async'
 
 const helpers = {
   getCurrentProduction() {
@@ -812,31 +811,19 @@ const actions = {
     commit(CLEAR_SELECTED_ASSETS)
   },
 
-  deleteSelectedAssets({ state, dispatch }) {
-    return new Promise((resolve, reject) => {
-      let selectedAssetIds = [...state.selectedAssets.values()]
-        .filter(asset => !asset.canceled)
-        .map(asset => asset.id)
-      if (selectedAssetIds.length === 0) {
-        selectedAssetIds = [...state.selectedAssets.keys()]
+  async deleteSelectedAssets({ state, dispatch }) {
+    let selectedAssetIds = [...state.selectedAssets.values()]
+      .filter(asset => !asset.canceled)
+      .map(asset => asset.id)
+    if (selectedAssetIds.length === 0) {
+      selectedAssetIds = [...state.selectedAssets.keys()]
+    }
+    for (const assetId of selectedAssetIds) {
+      const asset = cache.assetMap.get(assetId)
+      if (asset) {
+        await dispatch('deleteAsset', asset)
       }
-      async.eachSeries(
-        selectedAssetIds,
-        (assetId, next) => {
-          const asset = cache.assetMap.get(assetId)
-          if (asset) {
-            dispatch('deleteAsset', asset)
-          }
-          next()
-        },
-        err => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        }
-      )
-    })
+    }
   },
 
   async loadSharedAssets({ commit, rootGetters }, { production }) {
