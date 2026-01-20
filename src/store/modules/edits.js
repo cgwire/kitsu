@@ -1,9 +1,11 @@
 import moment from 'moment'
+
 import peopleApi from '@/store/api/people'
 import editsApi from '@/store/api/edits'
-import tasksStore from '@/store/modules/tasks'
+
 import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
+import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
@@ -535,7 +537,9 @@ const actions = {
     }
     const lines = edits.map(edit => {
       let editLine = []
-      if (isTVShow) editLine.push(edit.episode_name)
+      if (isTVShow) {
+        editLine.push(edit.episode_name)
+      }
       editLine = editLine.concat([edit.name, edit.description || ''])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Edit')

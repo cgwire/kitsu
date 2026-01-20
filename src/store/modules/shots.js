@@ -1,4 +1,5 @@
 import moment from 'moment'
+
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 
@@ -669,8 +670,9 @@ const actions = {
     }
     const lines = shots.map(shot => {
       let shotLine = []
-      if (isTVShow)
-        shotLine.push(rootGetters.episodeMap.get(shot.episode_id).name)
+      if (isTVShow) {
+        shotLine.push(shot.episode_name)
+      }
       shotLine = shotLine.concat([
         shot.sequence_name,
         shot.name,

@@ -2,18 +2,18 @@ import moment from 'moment'
 
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
+
 import assetTypeStore from '@/store/modules/assettypes'
+import episodeStore from '@/store/modules/episodes'
+import peopleStore from '@/store/modules/people'
+import productionsStore from '@/store/modules/productions'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
-import productionsStore from '@/store/modules/productions'
-import peopleStore from '@/store/modules/people'
-
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import { minutesToDays } from '@/lib/time'
 
 import func from '@/lib/func'
-
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
+import { minutesToDays } from '@/lib/time'
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
   sortAssetResult,
@@ -717,7 +717,7 @@ const actions = {
 
   getAssetsCsvLines({ state, rootGetters }) {
     const production = rootGetters.currentProduction
-    const episodeMap = rootGetters.episodeMap
+    const episodeMap = episodeStore.cache.episodeMap
     const organisation = rootGetters.organisation
     const personMap = rootGetters.personMap
     const taskTypeMap = rootGetters.taskTypeMap
