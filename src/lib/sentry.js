@@ -7,7 +7,7 @@ export default {
     Sentry.init({
       Vue: app,
       dsn,
-      enabled: process.env.NODE_ENV === 'production',
+      enabled: import.meta.env.PROD,
       release: `${name}@${version}`,
       integrations: [
         Sentry.browserTracingIntegration({
