@@ -1,5 +1,3 @@
-import async from 'async'
-
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
 import playlistsApi from '@/store/api/playlists'
@@ -313,33 +311,15 @@ const actions = {
     )
   },
 
-  deleteSelectedTasks({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      const selectedTaskIds = Array.from(state.selectedTasks.keys())
-      async.eachSeries(
-        selectedTaskIds,
-        (taskId, next) => {
-          const task = state.taskMap.get(taskId)
-          if (task) {
-            tasksApi
-              .deleteTask(task)
-              .then(() => {
-                commit(DELETE_TASK_END, task)
-                next()
-              })
-              .catch(next)
-          } else {
-            next()
-          }
-        },
-        err => {
-          if (err) reject(err)
-          else {
-            resolve()
-          }
-        }
-      )
-    })
+  async deleteSelectedTasks({ commit, state }) {
+    const selectedTaskIds = Array.from(state.selectedTasks.keys())
+    for (const taskId of selectedTaskIds) {
+      const task = state.taskMap.get(taskId)
+      if (task) {
+        await tasksApi.deleteTask(task)
+        commit(DELETE_TASK_END, task)
+      }
+    }
   },
 
   deleteAllTasks({}, { projectId, taskTypeId, taskIds }) {
@@ -401,33 +381,17 @@ const actions = {
       })
   },
 
-  changeSelectedPriorities(
-    { commit, state, rootGetters },
-    { priority, callback }
-  ) {
+  async changeSelectedPriorities({ commit, state, rootGetters }, { priority }) {
     const selectedTaskIds = Array.from(state.selectedTasks.keys())
-    async.eachSeries(
-      selectedTaskIds,
-      (taskId, next) => {
-        const task = state.taskMap.get(taskId)
-        const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
+    for (const taskId of selectedTaskIds) {
+      const task = state.taskMap.get(taskId)
+      const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
 
-        if (task && task.priority !== priority) {
-          tasksApi
-            .updateTask(taskId, { priority })
-            .then(task => {
-              commit(EDIT_TASK_END, { task, taskType })
-              next()
-            })
-            .catch(next)
-        } else {
-          next()
-        }
-      },
-      err => {
-        callback(err)
+      if (task && task.priority !== priority) {
+        const updatedTask = await tasksApi.updateTask(taskId, { priority })
+        commit(EDIT_TASK_END, { task: updatedTask, taskType })
       }
-    )
+    }
   },
 
   updateTask({ commit }, { taskId, data }) {
