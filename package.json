@@ -92,7 +92,8 @@
     "vue-eslint-parser": "10.2.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=20.19",
+    "npm": ">=10"
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache"
