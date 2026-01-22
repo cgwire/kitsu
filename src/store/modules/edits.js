@@ -72,7 +72,8 @@ import {
 const cache = {
   edits: [],
   editIndex: [],
-  editMap: new Map()
+  editMap: new Map(),
+  result: []
 }
 
 const helpers = {
