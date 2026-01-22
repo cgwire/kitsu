@@ -131,10 +131,6 @@ export default {
     }
   },
 
-  mounted() {
-    this.selectedTaskStatus = this.taskStatus
-  },
-
   computed: {
     ...mapGetters(['isDarkTheme', 'productionMap', 'taskStatusMap']),
 
