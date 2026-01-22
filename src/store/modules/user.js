@@ -828,7 +828,7 @@ const mutations = {
     }
   },
 
-  [LOAD_PLUGINS_END](state, plugins) {
+  [LOAD_PLUGINS_END](state, plugins = []) {
     state.plugins = plugins
   },
 
