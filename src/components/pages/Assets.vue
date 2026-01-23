@@ -80,11 +80,7 @@
         />
         <asset-list
           ref="asset-list"
-          :displayed-assets="
-            displaySettings.showSharedAssets
-              ? displayedAssetsByType
-              : displayedAssetsByTypeWithoutShared
-          "
+          :displayed-assets="displayedAssetsByTypeFiltered"
           :display-settings="displaySettings"
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
@@ -332,7 +328,8 @@ export default {
         contactSheetMode: false,
         showAssignations: true,
         showInfos: true,
-        showSharedAssets: true
+        showSharedAssets: true,
+        showLinkedAssets: true
       },
       optionalColumns: ['Description', 'Ready for', 'Resolution'],
       pageName: 'Assets',
@@ -478,10 +475,30 @@ export default {
       return this.$refs['asset-search-field']
     },
 
-    displayedAssetsByTypeWithoutShared() {
-      return this.displayedAssetsByType.map(type =>
-        type.filter(asset => !asset.shared)
-      )
+    // Filter the displayed assets by the display settings
+    displayedAssetsByTypeFiltered() {
+      if (
+        this.displaySettings.showSharedAssets &&
+        this.displaySettings.showLinkedAssets
+      ) {
+        return this.displayedAssetsByType
+      }
+      const episodeId = this.currentEpisode?.id
+
+      return this.displayedAssetsByType.map(typeList => {
+        return typeList.filter(asset => {
+          if (!this.displaySettings.showSharedAssets && asset.shared) {
+            return false
+          }
+          if (
+            !this.displaySettings.showLinkedAssets &&
+            !['all', asset.episode_id || 'main'].includes(episodeId)
+          ) {
+            return false
+          }
+          return true
+        })
+      })
     },
 
     filteredAssets() {

@@ -50,6 +50,10 @@ const options = computed(() => {
       label: t('breakdown.show_library'),
       value: 'showSharedAssets'
     })
+    opts.push({
+      label: t('assets.show_linked'),
+      value: 'showLinkedAssets'
+    })
   }
   return opts
 })

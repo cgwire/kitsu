@@ -173,7 +173,7 @@ function onUpdateValue(key) {
   border-top-right-radius: 1em;
   left: 0;
   margin-left: -1px;
-  max-height: 240px;
+  max-height: 270px;
   overflow-x: hidden;
   overflow-y: auto;
   position: absolute;
