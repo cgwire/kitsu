@@ -883,7 +883,7 @@ export default {
 
     confirmAddThumbnails(forms) {
       const addPreview = form => {
-        this.addThumbnailsModal.markLoading(form.task.entity_id)
+        this.addThumbnailsModal?.markLoading(form.task.entity_id)
         return this.commentTaskWithPreview({
           taskId: form.task.id,
           commentText: '',
@@ -898,10 +898,9 @@ export default {
             })
           })
           .then(() => {
-            this.addThumbnailsModal.markUploaded(form.task.entity_id)
+            this.addThumbnailsModal?.markUploaded(form.task.entity_id)
           })
       }
-
       this.loading.addThumbnails = true
       func.runPromiseMapAsSeries(forms, addPreview).then(() => {
         this.loading.addThumbnails = false
