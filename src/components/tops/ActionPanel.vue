@@ -392,6 +392,14 @@
             </router-link>
           </div>
           <div
+            class="flexrow-item mb05 assignation-error"
+            v-if="errors.taskAssignation"
+          >
+            <p class="is-danger has-text-centered">
+              {{ $t('tasks.assignation_error') }}
+            </p>
+          </div>
+          <div
             class="flexrow-item is-wide flexrow"
             v-if="
               !loading.assignation &&
@@ -943,6 +951,7 @@ export default {
       },
       errors: {
         assetDeletion: false,
+        taskAssignation: false,
         taskDeletion: false,
         conceptDeletion: false,
         editDeletion: false,
@@ -1315,10 +1324,12 @@ export default {
             ? this.selectedPersonId
             : this.user.id
         this.loading.assignation = true
+        this.errors.taskAssignation = false
         try {
           await this.assignSelectedTasks({ personId })
           this.$refs['assignation-field']?.clear()
         } catch (err) {
+          this.errors.taskAssignation = true
           console.error(err)
         } finally {
           this.loading.assignation = false
@@ -1788,6 +1799,10 @@ export default {
   background: #fcfcff;
   overflow-x: auto;
   overflow-y: hidden;
+}
+.is-danger {
+  color: #ff3860;
+  font-style: italic;
 }
 
 .menu-item {
