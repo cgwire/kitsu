@@ -1,9 +1,11 @@
 import moment from 'moment'
+
 import peopleApi from '@/store/api/people'
 import editsApi from '@/store/api/edits'
-import tasksStore from '@/store/modules/tasks'
+
 import peopleStore from '@/store/modules/people'
 import productionsStore from '@/store/modules/productions'
+import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
@@ -70,7 +72,8 @@ import {
 const cache = {
   edits: [],
   editIndex: [],
-  editMap: new Map()
+  editMap: new Map(),
+  result: []
 }
 
 const helpers = {
@@ -363,12 +366,12 @@ const actions = {
           taskMap,
           taskTypeMap
         })
-        return Promise.resolve(edits)
+        return edits
       })
       .catch(err => {
         console.error('an error occurred while loading edits', err)
         commit(LOAD_EDITS_ERROR)
-        return Promise.resolve([])
+        return []
       })
   },
 
@@ -426,7 +429,7 @@ const actions = {
       )
       return func
         .runPromiseAsSeries(createTaskPromises)
-        .then(() => Promise.resolve(edit))
+        .then(() => edit)
         .catch(console.error)
     })
   },
@@ -453,14 +456,13 @@ const actions = {
       } else {
         commit(REMOVE_EDIT, edit)
       }
-      return Promise.resolve()
     })
   },
 
   restoreEdit({ commit, state }, edit) {
     return editsApi.restoreEdit(edit).then(edit => {
       commit(RESTORE_EDIT_END, edit)
-      return Promise.resolve(edit)
+      return edit
     })
   },
 
@@ -470,7 +472,6 @@ const actions = {
       .postCsv(production, state.editsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_EDITS_END)
-        return Promise.resolve()
       })
   },
 
@@ -535,7 +536,9 @@ const actions = {
     }
     const lines = edits.map(edit => {
       let editLine = []
-      if (isTVShow) editLine.push(edit.episode_name)
+      if (isTVShow) {
+        editLine.push(edit.episode_name)
+      }
       editLine = editLine.concat([edit.name, edit.description || ''])
       sortByName([...production.descriptors])
         .filter(d => d.entity_type === 'Edit')

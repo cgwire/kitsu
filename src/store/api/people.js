@@ -146,13 +146,13 @@ export default {
   },
 
   preEnableTOTP() {
-    return client.pput('/api/auth/totp', {}).then(body => Promise.resolve(body))
+    return client.pput('/api/auth/totp', {})
   },
 
   enableTOTP(totp) {
     return client
       .ppost('/api/auth/totp', { totp: totp })
-      .then(body => Promise.resolve(body.otp_recovery_codes))
+      .then(body => body.otp_recovery_codes)
   },
 
   disableTOTP(twoFactorPayload) {
@@ -164,15 +164,13 @@ export default {
   },
 
   preEnableEmailOTP() {
-    return client
-      .pput('/api/auth/email-otp', {})
-      .then(body => Promise.resolve(body))
+    return client.pput('/api/auth/email-otp', {})
   },
 
   enableEmailOTP(emailOTP) {
     return client
       .ppost('/api/auth/email-otp', { email_otp: emailOTP })
-      .then(body => Promise.resolve(body.otp_recovery_codes))
+      .then(body => body.otp_recovery_codes)
   },
 
   disableEmailOTP(twoFactorPayload) {
@@ -180,7 +178,7 @@ export default {
   },
 
   preRegisterFIDO() {
-    return client.pput('/api/auth/fido', {}).then(body => Promise.resolve(body))
+    return client.pput('/api/auth/fido', {})
   },
 
   registerFIDO(registrationResponse, deviceName) {
@@ -189,7 +187,7 @@ export default {
         registration_response: registrationResponse,
         device_name: deviceName
       })
-      .then(body => Promise.resolve(body.otp_recovery_codes))
+      .then(body => body.otp_recovery_codes)
   },
 
   getFIDOChallenge(email) {
@@ -204,7 +202,7 @@ export default {
   newRecoveryCodes(twoFactorPayload) {
     return client
       .pput('/api/auth/recovery-codes', twoFactorPayload)
-      .then(body => Promise.resolve(body.otp_recovery_codes))
+      .then(body => body.otp_recovery_codes)
   },
 
   loadTodos() {

@@ -821,11 +821,9 @@ export default {
       }
     },
 
-    loadAssetsData() {
+    async loadAssetsData() {
       if (this.isTVShow || this.displayedAssets.length === 0) {
         return this.loadAssets()
-      } else {
-        return Promise.resolve()
       }
     },
 
@@ -850,7 +848,7 @@ export default {
           .catch(err => {
             console.error(err)
             this.errors.loadPlaylists = true
-            return Promise.reject(err)
+            throw err
           })
       } else {
         return setFirstPlaylist()
@@ -889,7 +887,7 @@ export default {
           console.error(err)
           this.$options.silentMore = false
           this.errors.loadPlaylists = true
-          return Promise.reject(err)
+          throw err
         })
     },
 
