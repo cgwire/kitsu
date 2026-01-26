@@ -889,6 +889,9 @@ export const routes = [
         path: 'productions/:production_id/episodes/task-types/:task_type_id',
         component: TaskType,
         name: 'episodes-task-type',
+        meta: {
+          section: 'episodes'
+        },
         children: [
           {
             name: 'episodes-task-type-schedule',

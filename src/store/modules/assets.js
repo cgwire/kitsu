@@ -2,18 +2,18 @@ import moment from 'moment'
 
 import assetsApi from '@/store/api/assets'
 import peopleApi from '@/store/api/people'
+
 import assetTypeStore from '@/store/modules/assettypes'
+import episodeStore from '@/store/modules/episodes'
+import peopleStore from '@/store/modules/people'
+import productionsStore from '@/store/modules/productions'
 import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
-import productionsStore from '@/store/modules/productions'
-import peopleStore from '@/store/modules/people'
-
-import { getTaskTypePriorityOfProd } from '@/lib/productions'
-import { minutesToDays } from '@/lib/time'
 
 import func from '@/lib/func'
-
+import { getTaskTypePriorityOfProd } from '@/lib/productions'
+import { minutesToDays } from '@/lib/time'
 import { PAGE_SIZE } from '@/lib/pagination'
 import {
   sortAssetResult,
@@ -509,14 +509,14 @@ const actions = {
             production
           })
         }
-        return Promise.resolve(asset)
+        return asset
       })
       .catch(console.error)
   },
 
   newAsset({ commit, dispatch, state, rootGetters }, data) {
     if (cache.assets.find(asset => asset.name === data.name)) {
-      return Promise.reject(new Error('Asset already exists'))
+      throw new Error('Asset already exists')
     }
     return assetsApi.newAsset(data).then(asset => {
       const assetTypeMap = rootGetters.assetTypeMap
@@ -547,7 +547,7 @@ const actions = {
       })
       return func
         .runPromiseAsSeries(createTaskPromises)
-        .then(() => Promise.resolve(asset))
+        .then(() => asset)
         .catch(console.error)
     })
   },
@@ -583,14 +583,14 @@ const actions = {
       } else {
         commit(REMOVE_ASSET, asset)
       }
-      return Promise.resolve(asset)
+      return asset
     })
   },
 
   restoreAsset({ commit, state }, asset) {
     return assetsApi.restoreAsset(asset).then(() => {
       commit(RESTORE_ASSET_END, asset)
-      return Promise.resolve(asset)
+      return asset
     })
   },
 
@@ -609,7 +609,6 @@ const actions = {
       .postCsv(production, state.assetsCsvFormData, toUpdate)
       .then(() => {
         commit(IMPORT_ASSETS_END)
-        Promise.resolve()
       })
   },
 
@@ -697,7 +696,6 @@ const actions = {
     dispatch('setLastProductionScreen', 'production-asset-types')
     return dispatch('loadAssets').then(() => {
       dispatch('computeAssetTypeStats')
-      return Promise.resolve()
     })
   },
 
@@ -717,7 +715,7 @@ const actions = {
 
   getAssetsCsvLines({ state, rootGetters }) {
     const production = rootGetters.currentProduction
-    const episodeMap = rootGetters.episodeMap
+    const episodeMap = episodeStore.cache.episodeMap
     const organisation = rootGetters.organisation
     const personMap = rootGetters.personMap
     const taskTypeMap = rootGetters.taskTypeMap

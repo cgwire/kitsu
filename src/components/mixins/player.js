@@ -1280,7 +1280,7 @@ export const playerMixin = {
             const naturalHeight = naturalDimensions.height
             const ratio = naturalWidth / naturalHeight
 
-            if (!this.$refs['video-container']) return Promise.resolve()
+            if (!this.$refs['video-container']) return
 
             // Container size
             let fullWidth = this.$refs['video-container'].offsetWidth
@@ -1338,7 +1338,6 @@ export const playerMixin = {
             this.setAnnotationCanvasDimensions(width, height)
           }
         }
-        return Promise.resolve()
       })
     },
 
@@ -1490,15 +1489,14 @@ export const playerMixin = {
       this.maxDuration = '00:00.000'
     },
 
-    resetPictureCanvas() {
-      if (!this.currentPreview) return Promise.resolve()
+    async resetPictureCanvas() {
+      if (!this.currentPreview) return
       this.annotations = this.currentPreview.annotations || []
-      return this.resetCanvas().then(() => {
-        this.resetCanvasVisibility()
-        if (this.isCurrentPreviewPicture) {
-          if (!this.isPlaying) this.loadAnnotation(this.getAnnotation(0))
-        }
-      })
+      await this.resetCanvas()
+      this.resetCanvasVisibility()
+      if (this.isCurrentPreviewPicture) {
+        if (!this.isPlaying) this.loadAnnotation(this.getAnnotation(0))
+      }
     },
 
     // Scrubbing

@@ -206,7 +206,7 @@ const actions = {
   enableTOTP({ commit }, totp) {
     return peopleApi.enableTOTP(totp).then(OTPRecoveryCodes => {
       commit(USER_ENABLE_TOTP_SUCCESS)
-      return Promise.resolve(OTPRecoveryCodes)
+      return OTPRecoveryCodes
     })
   },
 
@@ -215,7 +215,6 @@ const actions = {
       .disableTOTP(coerceTwoFactorPayload(twoFactorPayload))
       .then(() => {
         commit(USER_DISABLE_TOTP_SUCCESS)
-        return Promise.resolve()
       })
   },
 
@@ -226,7 +225,7 @@ const actions = {
   enableEmailOTP({ commit, state }, otp) {
     return peopleApi.enableEmailOTP(otp).then(OTPRecoveryCodes => {
       commit(USER_ENABLE_EMAIL_OTP_SUCCESS)
-      return Promise.resolve(OTPRecoveryCodes)
+      return OTPRecoveryCodes
     })
   },
 
@@ -239,14 +238,13 @@ const actions = {
       .disableEmailOTP(coerceTwoFactorPayload(twoFactorPayload))
       .then(() => {
         commit(USER_DISABLE_EMAIL_OTP_SUCCESS)
-        return Promise.resolve()
       })
   },
 
   preRegisterFIDO({ commit, state }) {
     return peopleApi
       .preRegisterFIDO()
-      .then(body => Promise.resolve(coercePublicKeyFromJSON(body)))
+      .then(body => coercePublicKeyFromJSON(body))
   },
 
   registerFIDO({ commit, state }, { registrationResponse, deviceName }) {
@@ -257,14 +255,14 @@ const actions = {
       )
       .then(OTPRecoveryCodes => {
         commit(USER_REGISTER_FIDO_SUCCESS, deviceName)
-        return Promise.resolve(OTPRecoveryCodes)
+        return OTPRecoveryCodes
       })
   },
 
   getFIDOChallenge({ commit, state }, email) {
     return peopleApi
       .getFIDOChallenge(email)
-      .then(body => Promise.resolve(coercePublicKeyFromJSON(body)))
+      .then(body => coercePublicKeyFromJSON(body))
   },
 
   unregisterFIDO({ commit, state }, { twoFactorPayload, deviceName }) {
@@ -272,7 +270,6 @@ const actions = {
       .unregisterFIDO(coerceTwoFactorPayload(twoFactorPayload), deviceName)
       .then(() => {
         commit(USER_UNREGISTER_FIDO_SUCCESS, deviceName)
-        return Promise.resolve()
       })
   },
 
@@ -831,7 +828,7 @@ const mutations = {
     }
   },
 
-  [LOAD_PLUGINS_END](state, plugins) {
+  [LOAD_PLUGINS_END](state, plugins = []) {
     state.plugins = plugins
   },
 
