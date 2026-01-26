@@ -1,8 +1,9 @@
 import { defineConfig } from 'eslint/config'
 import js from '@eslint/js'
-import pluginVue from 'eslint-plugin-vue'
-import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
+import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import pluginPromise from 'eslint-plugin-promise'
+import pluginVue from 'eslint-plugin-vue'
 
 const isProduction = process.env.NODE_ENV === 'production'
 
@@ -26,6 +27,9 @@ export default defineConfig([
 
   // Vue 3 recommended rules
   ...pluginVue.configs['flat/recommended'],
+
+  // Promise recommended rules
+  pluginPromise.configs['flat/recommended'],
 
   // Prettier recommended rules
   pluginPrettierRecommended,
@@ -53,12 +57,20 @@ export default defineConfig([
       'no-debugger': isProduction ? 'error' : 'off',
 
       // Code quality
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-constant-binary-expression': 'off',
       'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
       'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }],
       'no-var': 'error',
-      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'prefer-const': ['error', { destructuring: 'all' }],
+
+      // Promise rules
+      'promise/always-return': 'off',
+      'promise/catch-or-return': 'off',
+      'promise/no-callback-in-promise': 'off',
+      'promise/no-nesting': 'off',
+      'promise/no-promise-in-callback': 'off',
+      'promise/no-return-wrap': 'error',
 
       // Additional rules for Vue
       'vue/component-definition-name-casing': ['error', 'kebab-case'],

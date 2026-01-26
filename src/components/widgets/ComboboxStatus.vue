@@ -17,6 +17,7 @@
               background: backgroundColor(currentStatus),
               color: color(currentStatus)
             }"
+            :title="currentStatus.name"
             v-if="currentStatus"
           >
             {{ currentStatus.short_name }}
@@ -51,6 +52,7 @@
               background: backgroundColor(status),
               color: color(status)
             }"
+            :title="status.name"
           >
             {{ status.short_name }}
           </span>
@@ -127,10 +129,6 @@ export default {
       default: '',
       type: String
     }
-  },
-
-  mounted() {
-    this.selectedTaskStatus = this.taskStatus
   },
 
   computed: {

@@ -741,6 +741,10 @@ export default {
       'user'
     ]),
 
+    isEpisodesSection() {
+      return this.$route.meta.section === 'episodes'
+    },
+
     taskStatusList() {
       return [
         {
@@ -1323,6 +1327,7 @@ export default {
           entity.canceled ||
           !entity.tasks?.length ||
           (this.isTVShow &&
+            !this.isEpisodesSection &&
             !['all', entity.episode_id || 'main'].includes(
               this.currentEpisode?.id
             ))
