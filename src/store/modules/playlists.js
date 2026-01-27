@@ -81,7 +81,7 @@ const actions = {
       .getPlaylists(production, episode, taskTypeId, sortBy, page)
       .then(playlists => {
         commit(LOAD_PLAYLISTS_END, playlists)
-        return Promise.resolve(playlists)
+        return playlists
       })
   },
 
@@ -100,7 +100,7 @@ const actions = {
       .getPlaylists(production, episode, taskTypeId, sortBy, page)
       .then(playlists => {
         commit(ADD_PLAYLISTS, playlists)
-        return Promise.resolve(playlists)
+        return playlists
       })
   },
 
@@ -111,11 +111,11 @@ const actions = {
       .getPlaylist(currentProduction, playlist)
       .then(playlist => {
         commit(LOAD_PLAYLIST_END, playlist)
-        return Promise.resolve(playlist)
+        return playlist
       })
       .catch(err => {
         console.error(err)
-        return Promise.resolve({})
+        return {}
       })
   },
 

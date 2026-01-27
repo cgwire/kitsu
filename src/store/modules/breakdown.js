@@ -209,7 +209,7 @@ const actions = {
     const episodeMap = rootGetters.episodeMap
     return breakdownApi.getEpisodeCasting(episode).then(casting => {
       commit(LOAD_EPISODE_CASTING_END, { episode, casting, episodeMap })
-      return Promise.resolve(casting)
+      return casting
     })
   },
 
@@ -218,7 +218,7 @@ const actions = {
     const assetMap = assetStore.cache.assetMap
     return breakdownApi.getAssetCasting(asset).then(casting => {
       commit(LOAD_ASSET_CASTING_END, { asset, casting, assetMap })
-      return Promise.resolve(casting)
+      return casting
     })
   },
 
@@ -226,7 +226,7 @@ const actions = {
     if (!shot) return Promise.resolve({})
     return breakdownApi.getShotCasting(shot).then(casting => {
       commit(LOAD_SHOT_CASTING_END, { shot, casting })
-      return Promise.resolve(casting)
+      return casting
     })
   },
 
@@ -237,7 +237,7 @@ const actions = {
       .getSequenceCasting(sequence.production_id, sequence.id)
       .then(casting => {
         commit(LOAD_SEQUENCE_CASTING_END, { sequence, casting, assetMap })
-        return Promise.resolve(casting)
+        return casting
       })
   },
 
@@ -246,7 +246,7 @@ const actions = {
     const shotMap = shotStore.cache.shotMap
     return breakdownApi.getAssetCastIn(asset).then(castIn => {
       commit(LOAD_ASSET_CAST_IN_END, { asset, castIn, shotMap })
-      return Promise.resolve(castIn)
+      return castIn
     })
   },
 
