@@ -25,7 +25,7 @@ export default {
     number: 'asset | assets',
     restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this asset.',
-    show_linked: 'Display Linked Assets',
+    show_linked: 'Display Breakdown Assets',
     tasks: 'Asset tasks',
     title: 'Assets',
     fields: {
