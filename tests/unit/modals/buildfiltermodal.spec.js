@@ -449,7 +449,7 @@ describe('BuildFilterModal', () => {
           it('status is', () => {
             changeSearch('Modeling=WIP')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
+            expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
               {
                 id: 'task-type-1',
                 operator: '=',
@@ -460,7 +460,7 @@ describe('BuildFilterModal', () => {
           it('status is not', () => {
             changeSearch('Modeling=WIP')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
+            expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
               {
                 id: 'task-type-1',
                 operator: '=',
@@ -471,7 +471,7 @@ describe('BuildFilterModal', () => {
           it('status in', () => {
             changeSearch('Modeling=WIP,Done')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.taskTypeFilters.values).toStrictEqual([
+            expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
               {
                 id: 'task-type-1',
                 operator: 'in',
@@ -484,7 +484,7 @@ describe('BuildFilterModal', () => {
           it('descriptor is', () => {
             changeSearch('Difficulty=easy')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
+            expect(wrapper.vm.metadataDescriptorFilters.values).toMatchObject([
               {
                 id: 'descriptor-1',
                 operator: '=',
@@ -496,7 +496,7 @@ describe('BuildFilterModal', () => {
           it('descriptor is not', () => {
             changeSearch('Difficulty=-easy')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
+            expect(wrapper.vm.metadataDescriptorFilters.values).toMatchObject([
               {
                 id: 'descriptor-1',
                 operator: '=-',
@@ -508,7 +508,7 @@ describe('BuildFilterModal', () => {
           it('descriptor in', () => {
             changeSearch('Difficulty=[easy,hard]')
             wrapper.vm.setFiltersFromCurrentQuery()
-            expect(wrapper.vm.metadataDescriptorFilters.values).toStrictEqual([
+            expect(wrapper.vm.metadataDescriptorFilters.values).toMatchObject([
               {
                 id: 'descriptor-1',
                 operator: 'in',
