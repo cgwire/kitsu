@@ -31,6 +31,7 @@
               <combobox-display-options
                 class="flexrow-item"
                 :type="type"
+                :has-linked-assets="isTVShow"
                 v-model="displaySettings"
               />
             </div>
@@ -491,6 +492,7 @@ export default {
             return false
           }
           if (
+            this.isTVShow &&
             !this.displaySettings.showLinkedAssets &&
             !['all', asset.episode_id || 'main'].includes(episodeId)
           ) {

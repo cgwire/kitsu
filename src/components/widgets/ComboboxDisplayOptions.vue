@@ -16,6 +16,10 @@ const props = defineProps({
   type: {
     type: String,
     required: true
+  },
+  hasLinkedAssets: {
+    type: Boolean,
+    required: false
   }
 })
 
@@ -50,10 +54,12 @@ const options = computed(() => {
       label: t('breakdown.show_library'),
       value: 'showSharedAssets'
     })
-    opts.push({
-      label: t('assets.show_linked'),
-      value: 'showLinkedAssets'
-    })
+    if (props.hasLinkedAssets) {
+      opts.push({
+        label: t('assets.show_linked'),
+        value: 'showLinkedAssets'
+      })
+    }
   }
   return opts
 })
