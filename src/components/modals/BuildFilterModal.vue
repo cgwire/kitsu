@@ -62,7 +62,7 @@
           <div class="flexrow-item flexrow value-column">
             <combobox-status
               class="flexrow-item"
-              :key="`task-type-value-${index}`"
+              :key="`task-type-value-${i}-${index}`"
               :task-status-list="taskStatuses"
               v-model="taskTypeFilter.values[index]"
               v-for="(statusId, index) in taskTypeFilter.values"
@@ -144,20 +144,20 @@
                   label=""
                   :descriptor="getDescriptor(descriptorFilter.id)"
                   :entity="{}"
-                  :key="`descriptor-value-${index}`"
+                  :key="`descriptor-value-field-${index}`"
                   v-model="descriptorFilter.values[index]"
                   v-if="getDescriptor(descriptorFilter.id).choices.length === 0"
                 />
                 <combobox
                   class="flexrow-item"
-                  :key="`descriptor-value-${index}`"
+                  :key="`descriptor-value-combobox-${index}`"
                   :options="
                     getDescriptorChoiceOptions(
                       descriptorFilter.id,
                       descriptorFilter.is_checklist
                     )
                   "
-                  v-model="descriptorFilter.values[index]"
+                  v-model="descriptorFilter.values[index].text"
                   v-else
                 />
               </template>
@@ -533,8 +533,6 @@ export default {
   },
 
   methods: {
-    // Build filter
-
     applyFilter() {
       const query = this.buildFilter()
       this.$emit('confirm', query)
@@ -727,7 +725,10 @@ export default {
         const checklistValues = this.getDescriptorChecklistValues(descriptor)
         if (checklistValues.length > 0) {
           isChecklist = true
-          values.push(checklistValues[0])
+          values.push({
+            ...checklistValues[0],
+            checked: true
+          })
         } else {
           values.push(descriptor.choices[0])
         }
@@ -759,13 +760,16 @@ export default {
     },
 
     getDescriptorChoiceOptions(descriptorId, isChecklist) {
-      const desc = this.getDescriptor(descriptorId)
+      const descriptor = this.getDescriptor(descriptorId)
       if (!isChecklist) {
-        return desc.choices.map(choice => ({ label: choice, value: choice }))
-      } else {
-        return this.getDescriptorChecklistValues(desc).map(choice => ({
-          label: choice.text,
+        return descriptor.choices.map(choice => ({
+          label: choice,
           value: choice
+        }))
+      } else {
+        return this.getDescriptorChecklistValues(descriptor).map(choice => ({
+          label: choice.text,
+          value: choice.text
         }))
       }
     },
@@ -830,6 +834,7 @@ export default {
         operator = '=-'
       }
       this.taskTypeFilters.values.push({
+        localId: uuidv4(),
         id: filter.taskType.id,
         operator,
         values: filter.taskStatuses
@@ -847,7 +852,7 @@ export default {
           isChecklist = true
           values = [
             {
-              text: filter.values[0].replace(new RegExp(':true$'), ''),
+              text: filter.values[0].replace(/:true$/, ''),
               checked: true
             }
           ]
@@ -855,7 +860,7 @@ export default {
           isChecklist = true
           values = [
             {
-              text: filter.values[0].replace(new RegExp(':false$'), ''),
+              text: filter.values[0].replace(/:false$/, ''),
               checked: false
             }
           ]
@@ -868,6 +873,7 @@ export default {
         }
       }
       this.metadataDescriptorFilters.values.push({
+        localId: uuidv4(),
         id: filter.descriptor.id,
         operator,
         values,
@@ -931,7 +937,7 @@ export default {
     reset() {
       this.assignation.value = 'nofilter'
       this.assignation.person = null
-      this.assignation.taskType = ''
+      this.assignation.taskTypeId = ''
       this.hasThumbnail.value = 'nofilter'
       this.metadataDescriptorFilters.values = []
       this.taskTypeFilters.values = []
