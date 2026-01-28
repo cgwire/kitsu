@@ -16,30 +16,43 @@ const props = defineProps({
   type: {
     type: String,
     required: true
+  },
+  hasLinkedAssets: {
+    type: Boolean,
+    required: false
   }
 })
 
 const { t } = useI18n()
 
 const options = computed(() => {
-  const opts = [
-    {
-      label: t('tasks.show_assignations'),
-      value: 'showAssignations'
-    },
-    {
-      label: t('tasks.show_infos'),
-      value: 'showInfos'
-    },
-    {
-      label: t('tasks.big_thumbnails'),
-      value: 'bigThumbnails'
-    },
-    {
+  let opts = []
+
+  if (props.type.indexOf('tasktype-') > -1) {
+    opts.push({
       label: t('tasks.show_contact_sheet'),
       value: 'contactSheetMode'
-    }
-  ]
+    })
+  } else {
+    opts = opts.concat([
+      {
+        label: t('tasks.show_assignations'),
+        value: 'showAssignations'
+      },
+      {
+        label: t('tasks.show_infos'),
+        value: 'showInfos'
+      },
+      {
+        label: t('tasks.big_thumbnails'),
+        value: 'bigThumbnails'
+      },
+      {
+        label: t('tasks.show_contact_sheet'),
+        value: 'contactSheetMode'
+      }
+    ])
+  }
   if (props.type === 'shot') {
     opts.push({
       label: t('shots.show_timecode'),
@@ -49,6 +62,17 @@ const options = computed(() => {
     opts.push({
       label: t('breakdown.show_library'),
       value: 'showSharedAssets'
+    })
+    if (props.hasLinkedAssets) {
+      opts.push({
+        label: t('assets.show_linked'),
+        value: 'showLinkedAssets'
+      })
+    }
+  } else if (props.type === 'tasktype-asset' && props.hasLinkedAssets) {
+    opts.push({
+      label: t('assets.show_linked'),
+      value: 'showLinkedAssets'
     })
   }
   return opts
