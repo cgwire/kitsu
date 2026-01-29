@@ -55,20 +55,22 @@ export const renderComment = (
   let html = renderMarkdown(input)
 
   if (mentions) {
-    mentions.forEach(personId => {
+    for (const personId of mentions) {
       const person = personMap.get(personId)
+      if (!person) continue
       html = html.replaceAll(
         `@${person.full_name}`,
         `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
       )
-    })
-    departmentMentions.forEach(departmentId => {
+    }
+    for (const departmentId of departmentMentions) {
       const department = departmentMap.get(departmentId)
+      if (!department) continue
       html = html.replaceAll(
         `@${department.name}`,
         `<span style="color: ${department.color}">@${department.name}</span>`
       )
-    })
+    }
   }
 
   if (taskTypes) {
