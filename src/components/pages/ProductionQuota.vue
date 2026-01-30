@@ -386,6 +386,7 @@ export default {
       const name = stringHelpers.slugify(nameData.join('_'))
       const people = Object.keys(quotas)
         .map(personId => personMap.get(personId))
+        .filter(Boolean)
         .sort((a, b) =>
           a.full_name.localeCompare(b.full_name, undefined, {
             numeric: true
