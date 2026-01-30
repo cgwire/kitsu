@@ -179,7 +179,7 @@
           <button-sound
             class="flexrow-item"
             @change-sound="onToggleSoundClicked"
-            v-model="isMuted"
+            v-model:muted="isMuted"
             v-model:volume="volume"
           />
 

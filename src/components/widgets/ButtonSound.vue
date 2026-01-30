@@ -1,20 +1,12 @@
 <template>
   <div class="sound-control-container">
     <button-simple
-      class="flexrow-item"
-      :title="$t('playlists.actions.unmute')"
-      icon="soundoff"
+      :title="
+        isMuted ? $t('playlists.actions.unmute') : $t('playlists.actions.mute')
+      "
+      :icon="isMuted ? 'soundoff' : 'soundon'"
       @click="onToggleSoundClicked"
-      v-if="isMuted"
     />
-    <button-simple
-      class="flexrow-item"
-      :title="$t('playlists.actions.mute')"
-      icon="soundon"
-      @click="onToggleSoundClicked"
-      v-else
-    />
-
     <div class="volume-bar">
       <input
         class="volume-slider"
@@ -23,57 +15,55 @@
         type="range"
         :title="$t('playlists.volume_level', { level: volume })"
         :value="volume"
-        @input="onVolumeChange"
+        @input.passive="onVolumeChange"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { watch } from 'vue'
+import { ref } from 'vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-const isMuted = defineModel()
-const volume = defineModel('volume', { default: 50 })
+defineOptions({
+  name: 'button-sound'
+})
+
+const DEFAULT_VOLUME = 50
+
+const isMuted = defineModel('muted', { default: false })
+const volume = defineModel('volume', { default: DEFAULT_VOLUME })
+const previousVolume = ref(DEFAULT_VOLUME)
 
 const onToggleSoundClicked = () => {
-  isMuted.value = !isMuted.value
+  if (isMuted.value) {
+    isMuted.value = false
+    volume.value = previousVolume.value || DEFAULT_VOLUME
+  } else {
+    previousVolume.value = volume.value
+    isMuted.value = true
+    volume.value = 0
+  }
 }
 
 const onVolumeChange = event => {
-  volume.value = parseInt(event.target.value)
-  if (volume.value === 0) {
-    isMuted.value = true
-  } else if (isMuted.value) {
-    isMuted.value = false
+  const newVolume = event.target.valueAsNumber
+  volume.value = newVolume
+  isMuted.value = newVolume === 0
+  if (newVolume > 0) {
+    previousVolume.value = newVolume
   }
 }
-
-watch(volume, newVolume => {
-  if (newVolume === 0) {
-    isMuted.value = true
-  }
-})
-
-watch(isMuted, muted => {
-  if (muted && volume.value > 0) {
-    volume.value = 0
-  } else if (!muted && volume.value === 0) {
-    volume.value = 50
-  }
-})
 </script>
 
 <style lang="scss" scoped>
 .sound-control-container {
-  display: inline-block;
   margin: 0;
   position: relative;
 
   .button {
     background: transparent;
-    border: 0;
-    margin: 0;
+    border: none;
   }
 
   &:hover .volume-bar {
@@ -82,7 +72,7 @@ watch(isMuted, muted => {
 }
 
 .volume-bar {
-  background: #36393f;
+  background: $dark-grey-2;
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -96,25 +86,6 @@ watch(isMuted, muted => {
   transform: translateX(-45%);
   white-space: nowrap;
   z-index: 1000;
-}
-
-.volume-track {
-  background: var(--background-alt);
-  border-radius: 3px;
-  height: 6px;
-  overflow: hidden;
-  position: relative;
-}
-
-.volume-fill {
-  background: #ccc;
-  border-radius: 3px;
-  height: 6px;
-  left: 12px;
-  position: absolute;
-  top: 14px;
-  transition: width 0.1s ease;
-  z-index: 0;
 }
 
 .volume-slider {
