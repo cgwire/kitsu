@@ -265,9 +265,10 @@ export default {
       if (this.isCurrentUserArtist) {
         return [personMap.get(this.user.id)]
       }
-      return sortPeople(
-        this.currentProduction.team.map(personId => personMap.get(personId))
-      )
+      const persons = this.currentProduction.team
+        .map(personId => personMap.get(personId))
+        .filter(Boolean)
+      return sortPeople(persons)
     },
 
     yearOptions() {
@@ -308,9 +309,9 @@ export default {
       const { month, year, week, day } = this.$route.params
       const { countMode, taskTypeId, computeMode } = this.$route.query
 
-      if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
-      if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
-      if (this.$route.path.indexOf('day') > 0) this.detailLevel = 'day'
+      if (this.$route.path.includes('week')) this.detailLevel = 'week'
+      if (this.$route.path.includes('month')) this.detailLevel = 'month'
+      if (this.$route.path.includes('day')) this.detailLevel = 'day'
 
       this.currentPerson = this.getCurrentPerson()
       this.detailLevelString = this.detailLevel
@@ -337,13 +338,12 @@ export default {
       }
       if (week) {
         this.currentWeek = Number(week)
-        this.weekString = `${week}`
       }
       if (day) {
         this.currentDay = Number(day)
       }
 
-      if (this.$route.path.indexOf('person') > 0) {
+      if (this.$route.path.includes('person')) {
         this.isPersonShotsLoading = true
         this.getPersonQuotaShots({
           personId: this.currentPerson.id,
@@ -386,11 +386,8 @@ export default {
       const name = stringHelpers.slugify(nameData.join('_'))
       const people = Object.keys(quotas)
         .map(personId => personMap.get(personId))
-        .sort((a, b) =>
-          a.full_name.localeCompare(b.full_name, undefined, {
-            numeric: true
-          })
-        )
+        .filter(Boolean)
+        .sort((a, b) => a.full_name.localeCompare(b.full_name))
       csv.generateQuotas(
         name,
         quotas,
@@ -438,14 +435,11 @@ export default {
     getQuery() {
       const taskTypeId =
         this.activeTab === 'tasktypes' ? this.params.taskTypeId : undefined
-      let personId = null
       const isPersonTab =
         this.activeTab === 'persons' || this.$route.query.tab === 'persons'
-      if (isPersonTab && this.params.person) {
-        personId = this.params.person.indexOf
-      } else if (isPersonTab) {
-        personId = this.teamPersons[0]?.id
-      }
+      const personId = isPersonTab
+        ? (this.params.person?.id ?? this.teamPersons[0]?.id)
+        : undefined
       const query = {
         countMode: this.params.countMode,
         computeMode: this.params.computeMode,

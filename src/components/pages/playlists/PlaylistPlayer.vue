@@ -552,7 +552,7 @@
         <button-sound
           class="flexrow-item playlist-button"
           @change-sound="onToggleSoundClicked"
-          v-model="isMuted"
+          v-model:muted="isMuted"
           v-model:volume="volume"
         />
         <button-simple

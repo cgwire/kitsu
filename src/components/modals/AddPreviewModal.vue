@@ -224,7 +224,7 @@ export default {
     },
 
     reset() {
-      this.previewField.reset()
+      this.previewField?.reset()
       this.forms = []
       this.isWrongDuration = false
     },
