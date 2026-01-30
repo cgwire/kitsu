@@ -1718,6 +1718,7 @@ export default {
     assignation_disclaimer: 'If people are missing from the list, it means they are not listed in the team.',
     assign_explaination: 'Select a person to assign...',
     assignation_warning: 'Warning: you won\'t see the result because you are hiding assignments',
+    assignation_error: 'There was a problem assigning this person to the selected tasks. Not all tasks were assigned.',
     back_to_list: 'back to list',
     bigger: 'Widen task panel',
     big_thumbnails: 'Show big thumbnails',
