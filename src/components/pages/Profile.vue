@@ -230,9 +230,11 @@
           {{ $t('profile.two_factor_authentication.title') }}
         </h2>
         <p v-if="twoFAButtonsDisabled" class="cancel-two-factor-action">
-          <a @click="cancelCurrentTwoFactorAuthAction">
-            <x-circle-icon :size="20" />
-          </a>
+          <x-circle-icon
+            class="action-icon"
+            :size="20"
+            @click="cancelCurrentTwoFactorAuthAction"
+          />
         </p>
 
         <div v-if="twoFA.TOTPPreEnabled" class="qrcode-informations">
@@ -536,13 +538,13 @@
           {{ $t('profile.two_factor_authentication.recovery_codes.error_new') }}
         </p>
 
-        <h3 v-if="user.fido_enabled">
+        <label class="label" v-if="user.fido_enabled">
           {{
             $t(
               'profile.two_factor_authentication.fido.registered_devices_title'
             )
           }}
-        </h3>
+        </label>
 
         <ul class="pa1">
           <li
@@ -551,7 +553,7 @@
           >
             {{ device }}
             <trash-icon
-              class="trash-icon-fido-device"
+              class="action-icon pull-right"
               :size="15"
               @click="unregisterFIDORequested(device)"
             />
@@ -659,10 +661,8 @@ export default {
         TOTPNeedTwoFA: false,
         emailOTPPreEnabled: false,
         emailOTPNeedTwoFA: false,
-        FIDONeedTwoFA: false,
         FIDONewDeviceName: '',
         FIDOPreRegistered: false,
-        preUnregisteredFIDODeviceName: '',
         newRecoveryCodesNeedTwoFA: false,
         validationOTP: '',
         error: {
@@ -728,7 +728,6 @@ export default {
       return (
         this.twoFA.TOTPNeedTwoFA ||
         this.twoFA.emailOTPNeedTwoFA ||
-        this.twoFA.FIDONeedTwoFA ||
         this.twoFA.newRecoveryCodesNeedTwoFA
       )
     },
@@ -739,7 +738,6 @@ export default {
         this.twoFA.TOTPNeedTwoFA ||
         this.twoFA.emailOTPPreEnabled ||
         this.twoFA.emailOTPNeedTwoFA ||
-        this.twoFA.FIDONeedTwoFA ||
         this.twoFA.FIDOPreRegistered ||
         this.twoFA.newRecoveryCodesNeedTwoFA
       )
@@ -768,19 +766,11 @@ export default {
         return this.$t(
           'profile.two_factor_authentication.recovery_codes.button_validate'
         )
-      } else if (this.twoFA.FIDONeedTwoFA) {
-        return this.$t(
-          'profile.two_factor_authentication.fido.button_unregister'
-        )
       } else return ''
     },
 
     validateTwoFAIsDisable() {
-      return (
-        this.twoFA.TOTPNeedTwoFA ||
-        this.twoFA.emailOTPNeedTwoFA ||
-        this.twoFA.FIDONeedTwoFA
-      )
+      return this.twoFA.TOTPNeedTwoFA || this.twoFA.emailOTPNeedTwoFA
     },
 
     placeholderInputEnableOTP() {
@@ -990,32 +980,26 @@ export default {
         })
     },
 
-    unregisterFIDORequested(deviceName, payload) {
+    unregisterFIDORequested(deviceName) {
       this.removeTwoFactorErrors()
-      if (!this.twoFA.FIDONeedTwoFA) {
-        this.twoFA.FIDONeedTwoFA = true
-        this.twoFA.preUnregisteredFIDODeviceName = deviceName
-      } else {
-        this.twoFA.isLoading = true
-        this.unregisterFIDO({
-          twoFactorPayload: payload,
-          deviceName: this.twoFA.preUnregisteredFIDODeviceName
+      this.twoFA.isLoading = true
+      this.unregisterFIDO({
+        deviceName
+      })
+        .then(() => {
+          this.twoFA.validationOTP = ''
+          this.twoFA.error.isWrongOTP = false
         })
-          .then(() => {
-            this.twoFA.FIDONeedTwoFA = false
-            this.twoFA.preUnregisteredFIDODeviceName = ''
-            this.twoFA.validationOTP = ''
-            this.twoFA.error.isWrongOTP = false
-          })
-          .catch(err => {
-            if (err.body && err.body.wrong_OTP)
-              this.twoFA.error.isWrongOTP = true
-            else this.twoFA.error.unregisterFIDO = true
-          })
-          .finally(() => {
-            this.twoFA.isLoading = false
-          })
-      }
+        .catch(err => {
+          if (err.body && err.body.wrong_OTP) {
+            this.twoFA.error.isWrongOTP = true
+          } else {
+            this.twoFA.error.unregisterFIDO = true
+          }
+        })
+        .finally(() => {
+          this.twoFA.isLoading = false
+        })
     },
 
     newRecoveryCodesRequested(payload) {
@@ -1048,16 +1032,12 @@ export default {
     },
 
     nextWithPayload(payload) {
-      if (this.twoFA.TOTPNeedTwoFA) this.disableTOTPRequested(payload)
-      else if (this.twoFA.emailOTPNeedTwoFA) {
+      if (this.twoFA.TOTPNeedTwoFA) {
+        this.disableTOTPRequested(payload)
+      } else if (this.twoFA.emailOTPNeedTwoFA) {
         this.disableEmailOTPRequested(payload)
       } else if (this.twoFA.newRecoveryCodesNeedTwoFA) {
         this.newRecoveryCodesRequested(payload)
-      } else if (this.twoFA.FIDONeedTwoFA) {
-        this.unregisterFIDORequested(
-          this.twoFA.preUnregisteredFIDODeviceName,
-          payload
-        )
       }
     },
 
@@ -1118,8 +1098,6 @@ export default {
       this.twoFA.newRecoveryCodesNeedTwoFA = false
       this.twoFA.FIDOPreRegistered = false
       this.twoFA.FIDONewDeviceName = ''
-      this.twoFA.FIDONeedTwoFA = false
-      this.twoFA.preUnregisteredFIDODeviceName = ''
       this.twoFA.isLoading = false
       this.twoFA.validationOTP = ''
       this.twoFA.error.isWrongOTP = false
@@ -1272,7 +1250,6 @@ h2:first-child {
 }
 
 .save-button {
-  border-radius: 2em;
   width: 100%;
   background: $green;
   border-color: $green;
@@ -1316,11 +1293,6 @@ select {
   margin-top: 1em;
 }
 
-.cancel-two-factor-action {
-  text-align: right;
-  margin-bottom: 0.2em;
-}
-
 .qrcode-informations {
   text-align: center;
 }
@@ -1345,6 +1317,20 @@ select {
   cursor: pointer;
   float: right;
   margin: 0 5px 5px;
+  color: $light-grey;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.cancel-two-factor-action {
+  text-align: right;
+  margin-bottom: 0.2em;
+
+  .action-icon {
+    float: none;
+  }
 }
 
 .label-recovery-codes {
@@ -1369,14 +1355,5 @@ select {
 
 .icon {
   padding: 0.25em;
-}
-
-.trash-icon-fido-device {
-  float: right;
-  cursor: pointer;
-}
-
-.button {
-  border-radius: 10px;
 }
 </style>

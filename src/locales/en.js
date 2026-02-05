@@ -1372,8 +1372,7 @@ export default {
         registered_devices_title: 'Registered FIDO devices:',
         button_register: 'Register new FIDO device',
         error_register: 'An error occurred while registering FIDO device.',
-        error_unregister: 'An error occurred while unregistering FIDO device.',
-        button_unregister: 'Validate and unregister FIDO device'
+        error_unregister: 'An error occurred while unregistering FIDO device.'
       },
       recovery_codes: {
         title: 'Recovery codes',
