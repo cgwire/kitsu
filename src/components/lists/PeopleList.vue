@@ -4,11 +4,8 @@
       <table class="datatable" v-if="!isLoading">
         <thead class="datatable-head">
           <tr>
-            <th scope="col" class="name datatable-row-header">
-              {{ $t('people.list.name') }}
-            </th>
-            <th scope="col" class="email" v-if="!isBots">
-              {{ $t('people.list.email') }}
+            <th scope="col" class="user datatable-row-header">
+              {{ isBots ? $t('bots.bots') : $t('people.persons') }}
             </th>
             <th scope="col" class="phone" v-if="!isBots">
               {{ $t('people.list.phone') }}
@@ -47,11 +44,10 @@
           v-if="entries.length > 0"
         >
           <tr :key="person.id" class="datatable-row" v-for="person in entries">
-            <people-name-cell
-              class="name datatable-row-header"
+            <people-user-cell
+              class="user datatable-row-header"
               :person="person"
             />
-            <td class="email" v-if="!isBots">{{ person.email }}</td>
             <td class="phone" v-if="!isBots">{{ person.phone }}</td>
             <td
               class="expiration"
@@ -120,13 +116,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { AlertTriangleIcon } from 'lucide-vue-next'
+import { mapGetters } from 'vuex'
+
 import { grabListMixin } from '@/components/mixins/grablist'
 import { domMixin } from '@/components/mixins/dom'
 
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
-import PeopleNameCell from '@/components/cells/PeopleNameCell.vue'
+import PeopleUserCell from '@/components/cells/PeopleUserCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import StudioName from '@/components/widgets/StudioName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -139,7 +136,7 @@ export default {
   components: {
     AlertTriangleIcon,
     DepartmentNamesCell,
-    PeopleNameCell,
+    PeopleUserCell,
     RowActionsCell,
     StudioName,
     TableInfo
@@ -231,15 +228,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.name {
-  width: 230px;
-  min-width: 230px;
-  user-select: text;
-}
-
-.email {
-  width: 300px;
-  min-width: 300px;
+.user {
+  width: 400px;
+  min-width: 400px;
   user-select: text;
 }
 
