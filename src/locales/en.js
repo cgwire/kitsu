@@ -1349,6 +1349,7 @@ export default {
     },
     two_factor_authentication: {
       title: 'Two-factor authentication',
+      enabled: 'Two-factor authentication enabled',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',
       otp_secret: 'OTP secret',
       totp: {
