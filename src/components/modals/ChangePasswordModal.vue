@@ -192,7 +192,7 @@ export default {
       if (this.active) {
         this.resetForm()
         setTimeout(() => {
-          this.$refs['first-password'].focus()
+          this.$refs['first-password']?.focus()
         }, 100)
       }
     }
