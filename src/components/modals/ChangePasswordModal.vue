@@ -53,7 +53,13 @@
               'is-loading': isLoading,
               'is-warning': true
             }"
-            :disabled="!(person.totp_enabled || person.email_otp_enabled)"
+            :disabled="
+              !(
+                person.totp_enabled ||
+                person.email_otp_enabled ||
+                person.fido_enabled
+              )
+            "
             @click="disableTwoFactorAuthenticationClicked"
           >
             {{ $t('people.disable_2FA') }}
