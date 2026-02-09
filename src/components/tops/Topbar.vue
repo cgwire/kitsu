@@ -733,7 +733,8 @@ export default {
         !isAssetSection &&
         !isEditSection &&
         !isBreakdownSection &&
-        ['all', 'main'].includes(episodeId)
+        ['all', 'main'].includes(episodeId) &&
+        this.episodes.length > 0
       ) {
         episodeId = this.episodes[0].id
         this.currentEpisodeId = episodeId
