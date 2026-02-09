@@ -1292,8 +1292,8 @@ export const playerMixin = {
             // Init canvas values
             let width = ratio ? fullHeight * ratio : fullWidth
             let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
-            let top = 0
-            let left = 0
+            let top
+            let left
             this.canvas.style.top = '0px'
             this.canvas.style.left = '0px'
 

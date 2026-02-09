@@ -53,8 +53,7 @@ const hashName = name => {
 
 const applyFiltersFunctions = {
   assettype(entry, filter, taskMap) {
-    let isOk = true
-    isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
+    let isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
     if (filter.excluding) isOk = !isOk
     return isOk
   },
@@ -152,8 +151,7 @@ const applyFiltersFunctions = {
 
   status(entry, filter, taskMap) {
     const task = taskMap.get(entry.validations.get(filter.taskType.id))
-    let isOk = true
-    isOk = task && filter.taskStatuses.includes(task.task_status_id)
+    let isOk = task && filter.taskStatuses.includes(task.task_status_id)
     isOk = isOk || false
     if (filter.excluding) isOk = !isOk
     return isOk
