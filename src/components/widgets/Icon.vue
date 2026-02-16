@@ -24,8 +24,8 @@ const props = defineProps({
   defaultClass: String
 })
 
-const iconName = stringHelpers.capitalize(
-  stringHelpers.snakeToCamel(props.name)
-)
-const icon = computed(() => icons[iconName])
+const icon = computed(() => {
+  const iconName = stringHelpers.snakeToPascal(props.name)
+  return icons[iconName]
+})
 </script>
