@@ -483,8 +483,6 @@
  * to set milestones too.
  */
 
-import ExcelJS from 'exceljs'
-import FileSaver from 'file-saver'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -2004,6 +2002,7 @@ export default {
 
         const data = this.$refs.schedule?.exportData()
 
+        const ExcelJS = (await import('exceljs')).default
         const workbook = new ExcelJS.Workbook()
         const sheet = workbook.addWorksheet(this.$t('schedule.title'))
 
@@ -2226,6 +2225,7 @@ export default {
           ({ value }) => value === this.version
         )?.label
         const release = this.isVersioned ? `${mode} - ${version}` : mode
+        const FileSaver = await import('file-saver')
         FileSaver.saveAs(new Blob([buffer]), `${filename} (${release}).xlsx`)
       } catch (err) {
         console.error(err)
