@@ -79,7 +79,7 @@ const Studios = () => import('@/components/pages/Studios.vue')
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
 const Team = () => import('@/components/pages/Team.vue')
-const TeamSchedule = () => import('@/components/pages/TeamSchedule')
+const TeamSchedule = () => import('@/components/pages/TeamSchedule.vue')
 const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 
