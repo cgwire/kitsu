@@ -373,7 +373,7 @@ export default {
     },
 
     getEntityWidth(entity) {
-      let ratio = 0
+      let ratio
       if (entity.preview_file_extension === 'mp4') {
         ratio = entity.preview_file_duration / this.playlistDuration
       } else if (entity.preview_nb_frames) {

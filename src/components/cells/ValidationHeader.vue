@@ -98,17 +98,17 @@ export default {
   },
   methods: {
     taskTypePath(taskTypeId) {
-      let route = {}
       if (this.currentTaskType.for_entity === 'Episode') {
-        route = {
+        const route = {
           name: 'episodes-task-type',
           params: {
             production_id: this.currentProduction.id,
             task_type_id: taskTypeId
           }
         }
+        return route
       } else {
-        route = {
+        const route = {
           name: 'task-type',
           params: {
             production_id: this.currentProduction.id,
@@ -121,9 +121,8 @@ export default {
           route.name = 'episode-task-type'
           route.params.episode_id = this.currentEpisode.id
         }
+        return route
       }
-
-      return route
     }
   }
 }

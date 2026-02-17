@@ -1208,12 +1208,9 @@ export default {
     },
 
     onNbFramesChanged(entry, value) {
-      let shotsToChange = []
-      if (this.selectedShots.has(entry.id)) {
-        shotsToChange = this.selectedShots
-      } else {
-        shotsToChange = [entry]
-      }
+      const shotsToChange = this.selectedShots.has(entry.id)
+        ? this.selectedShots
+        : [entry]
 
       const cleanValue = this.sanitizeIntegerLight(value)
 

@@ -198,12 +198,7 @@ const personTotalGap = computed(() => {
  * prioritized over the month costs.
  */
 const getMonthCost = (personEntry, month) => {
-  let monthKey = ''
-  if (typeof month === 'string') {
-    monthKey = month
-  } else {
-    monthKey = month.format('YYYY-MM')
-  }
+  const monthKey = typeof month === 'string' ? month : month.format('YYYY-MM')
   personEntry.exceptions = personEntry.exceptions || {}
   return (
     parseInt(personEntry.exceptions[monthKey]) ||

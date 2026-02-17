@@ -93,15 +93,6 @@ export default defineConfig([
     }
   },
 
-  // Disable no-useless-assignment for Vue files (false positives with template usage)
-  {
-    name: 'vue-no-useless-assignment',
-    files: ['src/**/*.vue'],
-    rules: {
-      'no-useless-assignment': 'off'
-    }
-  },
-
   // Test files configuration
   {
     name: 'test-files',

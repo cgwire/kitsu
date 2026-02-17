@@ -804,8 +804,7 @@ export default {
     },
 
     moviePath() {
-      let previewId = null
-      previewId = this.currentPreview.id
+      const previewId = this.currentPreview.id
       return `/api/movies/originals/preview-files/${previewId}.mp4`
     },
 

@@ -1696,9 +1696,8 @@ export default {
 
           let taskStartDate = nextStartDate
           let taskEndDate = null
-          let taskAssignee = null
           while (nextAssigneeIndex < this.availablePersons.length) {
-            taskAssignee = this.availablePersons[nextAssigneeIndex]
+            const taskAssignee = this.availablePersons[nextAssigneeIndex]
 
             taskStartDate = addBusinessDays(
               taskStartDate,
