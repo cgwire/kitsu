@@ -39,7 +39,7 @@
     "fabric": "cgwire/fabric.js",
     "fabricjs-psbrush": "cgwire/fabricjs-psbrush",
     "file-saver": "2.0.5",
-    "lucide-vue-next": "0.564.0",
+    "lucide-vue-next": "0.569.0",
     "marked": "17.0.2",
     "marked-emoji": "2.0.2",
     "moment": "2.30.1",
