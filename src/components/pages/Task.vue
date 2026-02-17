@@ -190,7 +190,10 @@
               </div>
             </div>
           </div>
-          <div class="flexrow-item block mt1 mr0 info-block">
+          <div
+            class="flexrow-item block mt1 mr0 info-block"
+            v-if="!isCurrentUserClient"
+          >
             <page-subtitle :text="$t('main.info')" />
             <div class="table-body mt1">
               <table class="datatable no-header" v-if="task">
