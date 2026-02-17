@@ -1213,4 +1213,8 @@ td.metadata-descriptor {
   max-width: 120px;
   padding: 0;
 }
+
+.metadata-value {
+  padding: 0.5rem 0.75rem;
+}
 </style>

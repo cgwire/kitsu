@@ -1360,9 +1360,9 @@ th.actions {
 }
 
 .fps {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
+  min-width: 70px;
+  max-width: 70px;
+  width: 70px;
 }
 
 .resolution {
@@ -1461,7 +1461,7 @@ td.metadata-descriptor {
   padding: 0;
 }
 
-.datatable .datatable-row td.number-cell {
-  padding-right: 0.75rem;
+.metadata-value {
+  padding: 0.5rem 0.75rem;
 }
 </style>
