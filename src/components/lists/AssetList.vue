@@ -290,7 +290,7 @@
                     class="asset-link asset-name flexrow-item"
                     :to="assetPath(asset.id)"
                     :title="asset.full_name"
-                    v-if="!asset.shared"
+                    v-if="!asset.shared && !isCurrentUserClient"
                   >
                     {{ asset.name }}
                   </router-link>

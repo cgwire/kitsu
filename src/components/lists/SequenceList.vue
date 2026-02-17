@@ -238,9 +238,13 @@
                     tabindex="-1"
                     :title="sequence.name"
                     :to="sequencePath(sequence.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ sequence.name }}
                   </router-link>
+                  <template v-else>
+                    {{ sequence.name }}
+                  </template>
                 </div>
               </th>
 
@@ -827,10 +831,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-}
-
-.datatable-row-header {
-  cursor: pointer;
 }
 
 th .input-editor,

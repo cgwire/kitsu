@@ -292,7 +292,7 @@
             <tr class="datatable-type-header">
               <th scope="rowgroup" :colspan="visibleColumns">
                 <div
-                  class="datatable-row-header"
+                  class="datatable-row-header pointer"
                   @click="$emit('sequence-clicked', group[0].sequence_name)"
                 >
                   {{ group[0] ? group[0].sequence_name : '' }}
@@ -333,9 +333,13 @@
                     tabindex="-1"
                     :title="shot.full_name"
                     :to="shotPath(shot.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ shot.name }}
                   </router-link>
+                  <template v-else>
+                    {{ shot.name }}
+                  </template>
                 </div>
               </th>
 
@@ -1437,10 +1441,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-}
-
-.datatable-row-header {
-  cursor: pointer;
 }
 
 input[type='number']::-webkit-outer-spin-button,

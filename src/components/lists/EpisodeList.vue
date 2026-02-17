@@ -251,9 +251,13 @@
                     tabindex="-1"
                     :title="episode.name"
                     :to="episodePath(episode.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ episode.name }}
                   </router-link>
+                  <template v-else>
+                    {{ episode.name }}
+                  </template>
                 </div>
               </th>
 
@@ -883,10 +887,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-}
-
-.datatable-row-header {
-  cursor: pointer;
 }
 
 th .input-editor,

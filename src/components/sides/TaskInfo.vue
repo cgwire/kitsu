@@ -83,9 +83,12 @@
               v-if="currentTaskType"
             />
             <div class="title flexrow-item filler">
-              <router-link :to="taskEntityPath">
+              <router-link :to="taskEntityPath" v-if="!isCurrentUserClient">
                 {{ title }}
               </router-link>
+              <template v-else>
+                {{ title }}
+              </template>
             </div>
           </div>
         </div>

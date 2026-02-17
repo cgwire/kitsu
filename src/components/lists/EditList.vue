@@ -257,9 +257,13 @@
                     tabindex="-1"
                     :title="edit.full_name"
                     :to="editPath(edit.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ edit.name }}
                   </router-link>
+                  <template v-else>
+                    {{ edit.name }}
+                  </template>
                 </div>
               </th>
 
@@ -958,10 +962,6 @@ span.thumbnail-empty {
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
-}
-
-.datatable-row-header {
-  cursor: pointer;
 }
 
 .dark {
