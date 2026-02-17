@@ -34,7 +34,10 @@
       "multiple_delete_error": "어셋을 삭제하는 동안 오류가 발생했습니다.  어셋에 연결된 일부 데이터가 있을 수 있습니다.  선택한 어셋에 연결된 작업이 없습니까?",
       "only_current_episode": "현재 에피소드만",
       "linked": "연결된",
-      "no_concept": "이 자산과 연결된 개념이 없습니다."
+      "no_concept": "이 자산과 연결된 개념이 없습니다.",
+      "casted_in_shots": "nbShots} 샷에 캐스팅됨",
+      "delete_for_selection_hard_text": "선택한 에셋을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
+      "delete_for_selection_hard_lock_text": "삭제"
     },
     "asset_types": {
       "all_asset_types": "모든 어셋 종류",
@@ -52,7 +55,9 @@
         "short_name": "짧은 이름",
         "description": "설명"
       },
-      "include_all": "모든 자산 유형 포함"
+      "include_all": "모든 자산 유형 포함",
+      "add_asset_type_to_library": "라이브러리에 에셋 유형 추가",
+      "library_title": "자산 유형 라이브러리"
     },
     "breakdown": {
       "all_assets": "사용 가능한 모든 어셋",
@@ -120,7 +125,11 @@
       "confirm_publish": "발행를 위한 미리보기 파일 세트가 없습니다. 정말 댓글을 게시하시겠습니까?",
       "confirm_publish_button": "파일 발행 없이 댓글 게시",
       "add_link": "URL 링크 추가",
-      "pinned_revision": "고정된 수정본"
+      "pinned_revision": "고정된 수정본",
+      "edited_by": "이름} 편집자",
+      "add_attachment_to_reply": "답장에 첨부파일 추가",
+      "add_frame_to_comment": "댓글에 현재 프레임 추가",
+      "add_emoji": "이모티콘 추가"
     },
     "custom_actions": {
       "create_error": "이 사용자 지정 행동을 저장하는 도중 오류가 발생했습니다. 같은 이름으로 다른 행동이 없는지 확인하셨습니까?",
@@ -140,7 +149,10 @@
       "entity_types": {
         "all": "전체",
         "shot": "샷",
-        "asset": "어셋"
+        "asset": "어셋",
+        "sequence": "시퀀스",
+        "edit": "편집",
+        "episode": "에피소드"
       }
     },
     "entities": {
@@ -185,7 +197,8 @@
         "edits_pattern": "\"수정 이름\" 예: 트레일러.",
         "edits_tvshow_pattern": "\"에피소드 이름 편집 이름\" 예: E01_Trailer.",
         "explanation": "미리보기 이미지를 추가하려면 새 미리보기를 설정해야 합니다. 여러 개의 미리보기 이미지를 동시에 설정하려면 먼저 새 미리 보기를 만들 작업 유형을 선택해야 합니다. 이 새 미리보기에서 미리보기 이미지가 설정됩니다.",
-        "explanation_two": "그런 다음 업로드할 파일을 선택해야 합니다. 올바른 엔티티를 찾으려면 파일 이름이 다음 패턴과 일치해야 합니다:"
+        "explanation_two": "그런 다음 업로드할 파일을 선택해야 합니다. 올바른 엔티티를 찾으려면 파일 이름이 다음 패턴과 일치해야 합니다:",
+        "invalid_files": "잘못된 파일(패턴과 일치하지 않음)"
       },
       "logs": {
         "no_logs": "이 개체에 대한 시간 기록이 없습니다."
@@ -199,7 +212,8 @@
         "size": "크기",
         "status": "상태",
         "task_type": "작업 유형",
-        "uploader": "업로드한 사람"
+        "uploader": "업로드한 사람",
+        "uploaded_at": "업로드 위치"
       },
       "nb_selected_assets": "{nbSelectedAssets} 자산 선택됨 | {nbSelectedAssets} 자산 선택됨",
       "nb_selected_shots": "{nbSelectedShots} 샷 선택됨 | {nbSelectedShots} 샷 선택됨",
@@ -214,7 +228,9 @@
         "status": "상태",
         "task_type": "작업 유형",
         "type": "유형"
-      }
+      },
+      "display_options": "디스플레이 설정",
+      "title": "엔티티"
     },
     "estimation": {
       "title": "예상"
@@ -268,7 +284,11 @@
       "plhome": "첫 번째 프레임으로 이동",
       "plend": "마지막 프레임으로 이동",
       "plaltright": "다음 샷의 첫 번째 프레임으로 이동",
-      "plaltleft": "이전 샷의 마지막 프레임으로 이동"
+      "plaltleft": "이전 샷의 마지막 프레임으로 이동",
+      "object_viewer": "개체 뷰어",
+      "rotate_hdr": "환경 맵 회전",
+      "change_fov": "초점 거리 변경",
+      "plalto": "비교 모드에서 0%와 100% 불투명도 사이를 전환합니다."
     },
     "login": {
       "back_to_login": "로그인 페이지로 돌아가기",
@@ -322,7 +342,10 @@
       "wrong_fido_challenge": "FIDO 도전 인증에 실패했습니다.",
       "login_server_failed": "로그인하는 동안 서버 오류가 발생했습니다.",
       "login_with_saml": "saml_idp_name}으로 SSO 로그인",
-      "login_saml": "SSO 로그인"
+      "login_saml": "SSO 로그인",
+      "reset_password_inactive": "비밀번호를 재설정하지 못했습니다. 이 이메일을 받은 사용자가 비활성 상태입니다.",
+      "set_password_title": "키츠에 오신 것을 환영합니다!",
+      "set_password": "비밀번호 설정"
     },
     "main": {
       "about": "정보",
@@ -493,7 +516,36 @@
       "no_results": "결과 없음",
       "link": "링크",
       "hours_spent": "소요 시간 | 소요 시간",
-      "hours_estimated": "예상 시간 | 예상 시간"
+      "hours_estimated": "예상 시간 | 예상 시간",
+      "created_by": "만든 사람",
+      "day": "일",
+      "hour": "시간",
+      "label": {
+        "casting": "캐스팅",
+        "chat": "채팅",
+        "concepts": "개념",
+        "info": "정보",
+        "output_files": "출력 파일",
+        "preview_files": "파일 미리보기",
+        "schedule": "일정",
+        "timelog": "타임로그"
+      },
+      "month": "월",
+      "nb_drawings": "그리기 | 도면",
+      "no_estimation": "추정치 없음",
+      "people": "사람",
+      "total": "합계",
+      "unassigned": "할당되지 않음",
+      "year": "연도",
+      "apply": "신청하기",
+      "back": "뒤로",
+      "edit_mode_on": "편집 모드 전환",
+      "entities": "엔티티",
+      "expand_all": "모두 확장",
+      "hours": "시간 | 시간",
+      "remove_search_query": "검색어 '{이름}'을 제거하시겠습니까?",
+      "remove_search_filter_group": "검색 필터 그룹 \"{이름}\"을 제거하시겠습니까?",
+      "shared_by": "이름}이 공유"
     },
     "menu": {
       "assign_tasks": "작업 할당",
@@ -563,7 +615,10 @@
       "publish": "게시",
       "published": "미리 보기를 게시했습니다.",
       "show_comments": "댓글 표시",
-      "watching": "시청 중"
+      "watching": "시청 중",
+      "only_playlists_ready": "준비된 재생 목록만",
+      "playlist_is_ready": "재생 목록이 준비되었습니다.",
+      "playlist_ready_text": "새 재생목록을 검토할 준비가 되었습니다:"
     },
     "people": {
       "active": "활성",
@@ -598,7 +653,10 @@
         "active": "활성",
         "departments": "부서",
         "contract": "계약",
-        "studio": "스튜디오"
+        "studio": "스튜디오",
+        "daily_salary": "일일 요금",
+        "position": "위치",
+        "seniority": "시니어"
       },
       "list": {
         "name": "이름",
@@ -609,7 +667,10 @@
         "departments": "부서",
         "contract": "계약",
         "expiration": "만료",
-        "studio": "스튜디오"
+        "studio": "스튜디오",
+        "position": "위치",
+        "salary": "급여",
+        "seniority": "시니어"
       },
       "role": {
         "admin": "스튜디오 관리자",
@@ -640,7 +701,18 @@
       },
       "import_from_production": "다른 프로덕션에서 팀 가져오기",
       "import_from_department": "전체 부서 가져오기",
-      "import_from_unlisted": "목록에 없는 사람으로부터 추가"
+      "import_from_unlisted": "목록에 없는 사람으로부터 추가",
+      "email_exist_error": "이 이메일은 다른 사용자가 이미 사용 중입니다.",
+      "position": {
+        "artist": "아티스트",
+        "supervisor": "감독자",
+        "lead": "Lead"
+      },
+      "seniority": {
+        "junior": "Junior",
+        "mid": "Mid",
+        "senior": "Senior"
+      }
     },
     "playlists": {
       "add_assets": "어셋 추가",
@@ -755,7 +827,16 @@
       "download_csv": ".csv 다운로드",
       "filter_task_type": "자산 유형으로 필터됨",
       "comparing_missing_plan": "현재 유형에서 누락된 장면",
-      "add_sequences": "시퀀스 추가"
+      "add_sequences": "시퀀스 추가",
+      "clients_to_notify": "알림 대상 클라이언트",
+      "mute": "음소거",
+      "notify_clients": "고객에게 알림",
+      "notify_clients_description": "선택한 스튜디오의 고객에게 재생 목록이 준비되었음을 알립니다. 이 작업을 수행하면 고객에게 알림이 생성됩니다.",
+      "notify_clients_error": "클라이언트에 알림을 보내는 동안 오류가 발생했습니다.",
+      "no_clients_to_notify": "알릴 클라이언트가 없습니다.",
+      "notify_clients_success": "알림이 성공적으로 전송되었습니다.",
+      "unmute": "음소거 해제",
+      "volume_level": "볼륨: 볼륨: {레벨}%"
     },
     "productions": {
       "current": "선택된 프로덕션",
@@ -828,7 +909,8 @@
       "edit_error": "프로덕션을 편집하는 도중 오류가 발생했습니다.\n지원팀에 문의하여 주십시오.",
       "brief": {
         "title": "요약",
-        "empty": "아직 요약이 없습니다. 만드시겠습니까?"
+        "empty": "아직 요약이 없습니다. 만드시겠습니까?",
+        "edit_error": "요약본을 편집하는 동안 오류가 발생했습니다."
       },
       "parameters": {
         "title": "변수",
@@ -895,7 +977,8 @@
         "vfx": "VFX",
         "video_game": "비디오 게임",
         "vr": "VR(가상 현실)",
-        "immersive": "몰입 경험"
+        "immersive": "몰입 경험",
+        "2dpaper": "2D 애니메이션(종이)"
       },
       "homepage": {
         "assets": "자산",
@@ -968,9 +1051,9 @@
           "registered_devices_title": "등록된 FIDO 기기:",
           "button_register": "새 FIDO 기기 등록",
           "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
-          "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다.",
-          "button_unregister": "FIDO 기기 유효성 검사 및 등록 취소"
-        }
+          "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다."
+        },
+        "enabled": "2단계 인증 사용"
       }
     },
     "settings": {
@@ -1025,14 +1108,17 @@
         "is_feedback_request": "피드백 요청입니다",
         "is_default": "기본값입니다",
         "for_concept": "컨셉용",
-        "description": "설명"
+        "description": "설명",
+        "is_wip": "WIP"
       },
       "name": "작업 상태",
       "title_entities": "법인 상태",
       "title_concepts": "개념에 대한 상태",
       "help": {
         "entities": "에셋, 샷, 시퀀스, ..."
-      }
+      },
+      "add_task_status_to_library": "라이브러리에 작업 상태 추가",
+      "library_title": "작업 상태 라이브러리"
     },
     "task_types": {
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",
@@ -1054,7 +1140,9 @@
       },
       "no_task_types": "이 엔티티 유형에 대한 작업 유형이 없습니다.",
       "add_task_type_placeholder": "+ 작업 유형",
-      "select_task_type": "작업 유형 선택..."
+      "select_task_type": "작업 유형 선택...",
+      "add_task_type_to_library": "라이브러리에 작업 유형 추가하기",
+      "library_title": "작업 유형 라이브러리"
     },
     "sequences": {
       "all_sequences": "모든 시퀀스",
@@ -1090,7 +1178,46 @@
         "error": "마일스톤을 추가하거나 편집하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
         "delete_milestone": "마일스톤 삭제"
       },
-      "today": "오늘"
+      "today": "오늘",
+      "mode": "보기 모드",
+      "mode_prev": "예측",
+      "mode_real": "실제",
+      "version": "버전",
+      "apply_to_prod": "프로덕션에 적용",
+      "apply_to_prod_confirm": "이 스케줄 버전을 현재 프로덕션에 적용하시겠습니까? 그러면 현재 작업 값을 재정의합니다.",
+      "apply_to_prod_error": "현재 프로덕션에 스케줄 버전을 적용하는 동안 오류가 발생했습니다.",
+      "assign": "할당 대상:",
+      "export": "내보내기 일정",
+      "export_error": "데이터를 내보내는 동안 오류가 발생했습니다.",
+      "reset_list": "목록 초기화",
+      "no_entity": "할당 가능한 엔티티 없음",
+      "no_assignee": "할당 가능한 사람 없음",
+      "select_task_type": "작업 유형 선택",
+      "show_assigned": "할당된 엔티티 표시",
+      "force_unassign": "이전 과제 재정의",
+      "forced_daily_quotas": "일일 강제 할당량:",
+      "estimated_daily_quotas": "자동 예상 일일 할당량:",
+      "edit_task": "작업 편집",
+      "new_version": "새 버전",
+      "create_version": "일정 버전 만들기",
+      "edit_version": "일정 버전 편집",
+      "edit_version_error": "일정 버전을 저장하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
+      "edit_version_exist": "비슷한 이름의 버전이 이미 존재합니다.",
+      "delete_version": "일정 버전 삭제",
+      "delete_version_error": "이 일정 버전을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
+      "delete_version_message": "일정 버전 {이름}을 삭제하시겠습니까? 아래에 일정 버전 이름을 입력하여 확인해 주세요.",
+      "versions": {
+        "reference": "참조 예측",
+        "from": "에서",
+        "locked": "잠김",
+        "canceled": "취소됨"
+      },
+      "fields": {
+        "create_from_version": "새 버전 또는 버전에서 만들기",
+        "new": "새 일정",
+        "name": "버전 이름",
+        "locked": "잠긴 버전"
+      }
     },
     "quota": {
       "average": "평균",
@@ -1125,7 +1252,8 @@
       "explanation_done": "마지막 승인 시 촬영이 완료된 것으로 간주됩니다. 해당 프레임 수는 해당 날짜의 할당량에 추가됩니다.",
       "explanation_weighted": "첫 번째 피드백 요청 시 촬영이 완료된 것으로 간주됩니다. 그런 다음 아티스트의 작업표에 기록된 대로 작업에 소요된 시간에 따라 할당량에 가중치가 부여됩니다.\n\n 시간이 기록되지 않으면 완료된 것으로 간주합니다:\n* 작업이 WIP로 처음 상태가 변경되었을 때 시작되었습니다.\n* 피드백 요청이 이루어진 날에 작업이 완료되었습니다.\n * 완료된 프레임은 시작 날짜와 종료 날짜 사이의 모든 영업일에 균등하게 분배됩니다.",
       "explanation_weighteddone": "샷은 마지막 승인 시 완료된 것으로 간주됩니다. 그런 다음 아티스트의 작업표에 기록된 대로 작업에 소요된 시간에 따라 할당량에 가중치가 부여됩니다.\n\n 시간이 기록되지 않으면 완료된 것으로 간주합니다:\n* 작업이 WIP로 처음 상태가 변경되었을 때 시작되었습니다.\n* 작업이 승인된 날에 완료되었습니다.\n * 완료된 프레임은 시작 날짜와 종료 날짜 사이의 모든 영업일에 균등하게 분배됩니다.",
-      "weighted_done": "가중치(승인)"
+      "weighted_done": "가중치(승인)",
+      "drawings": "도면"
     },
     "shots": {
       "casting": "샷 캐스팅",
@@ -1166,7 +1294,8 @@
         "person": "수식자",
         "max_retakes": "최대 재시도 횟수",
         "resolution": "해상도",
-        "placeholder": "SH01"
+        "placeholder": "SH01",
+        "nb_drawings": "도면"
       },
       "cancel_text": "정말 {name}을(를) 보관하시겠습니까?",
       "delete_for_selection": "{nbSelectedShots}개의 선택된 장면 삭제:",
@@ -1175,7 +1304,10 @@
       "get_frames_from_previews": "미리보기에서 프레임 번호 설정",
       "get_frames_from_previews_description": "작업 유형을 선택하여 최신 게시된 동영상 미리보기에서 프레임 번호를 추출합니다.",
       "get_frames_from_previews_error": "작업 유형 미리보기에서 프레임 번호를 추출하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
-      "wrong_file_duration": "업로드한 동영상 파일 길이 중 하나가 현재 샷의 예상 길이와 일치하지 않습니다."
+      "wrong_file_duration": "업로드한 동영상 파일 길이 중 하나가 현재 샷의 예상 길이와 일치하지 않습니다.",
+      "delete_for_selection_hard_text": "선택한 사진을 영구적으로 삭제하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
+      "delete_for_selection_hard_lock_text": "삭제",
+      "show_timecode": "타임코드로 체크인 및 체크아웃 표시"
     },
     "server_down": {
       "text": "문제에 대해 업체의 고객 지원팀이나 시스템 관리자, 또는 IT 부서에 문의해 주십시오.",
@@ -1193,7 +1325,8 @@
       "status": "상태",
       "all": "모두",
       "only_running": "진행 중만",
-      "episode_status": "에피소드 상태"
+      "episode_status": "에피소드 상태",
+      "drawings": "도면"
     },
     "tasks": {
       "add_preview": "미리 보기 추가",
@@ -1281,7 +1414,13 @@
         "parent": "부모",
         "difficulty": "난이도",
         "done_date": "승인 날짜",
-        "nb_frames": "프레임"
+        "nb_frames": "프레임",
+        "drawings": "도면",
+        "before_after_tasks": "작업 전/후",
+        "no_task_type": "작업 유형 없음",
+        "tasks_after": "이후 작업",
+        "tasks_before": "이전 작업",
+        "timesheets": "작업표"
       },
       "colors": {
         "title": "색상",
@@ -1365,7 +1504,14 @@
         "medium": "Medium",
         "hard": "하드",
         "very_hard": "매우 어려움"
-      }
+      },
+      "assignation_disclaimer": "목록에서 누락된 사람이 있으면 해당 사람이 팀에 등록되어 있지 않다는 뜻입니다.",
+      "create_tasks_disclaimer": "작업 유형이 누락된 경우 프로덕션 설정의 작업 유형 섹션에 해당 작업 유형이 나열되어 있는지 확인합니다.",
+      "data_display": "데이터 표시",
+      "delete_for_selection_error": "선택한 작업을 삭제하는 동안 오류가 발생했습니다.",
+      "delete_for_selection_hard_text": "선택한 작업을 영구적으로 제거하시겠습니까? 관련 댓글과 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
+      "delete_for_selection_hard_lock_text": "삭제",
+      "hookup_playlist": "훅업 재생목록 생성"
     },
     "timesheets": {
       "detail_level": "세부 사항 레벨",
@@ -1409,7 +1555,6 @@
       }
     },
     "departments": {
-      "all_asset_types": "모든 부서",
       "create_error": "이 부서를 저장하는 도중 오류가 발생했습니다. 유사한 이름의 부서가 없는지 확인하셨습니까?",
       "delete_text": "정말 {name}을(를) 데이터베이스에서 삭제하시겠습니까?",
       "delete_error": "이 부서를 저장하는 도중 오류가 발생했습니다.",
@@ -1421,7 +1566,16 @@
         "name": "이름",
         "color": "색상"
       },
-      "no_department": "부서 없음"
+      "no_department": "부서 없음",
+      "all_departments": "모든 부서",
+      "available_items": "사용 가능한 항목",
+      "hardware_used_by_artists": "아티스트가 사용하는 하드웨어",
+      "linked_hardware": "연결된 하드웨어",
+      "linked_items": "연결된 항목",
+      "linked_software": "연결된 소프트웨어",
+      "no_items_linked": "이 부서와 연결된 항목이 없습니다.",
+      "select_department": "항목을 연결할 부서를 선택합니다.",
+      "software_used_by_artists": "아티스트가 사용하는 소프트웨어"
     },
     "edits": {
       "all_edits": "모든 편집",
@@ -1446,7 +1600,12 @@
       "cancel_text": "정말 {name}을(를) 보관하시겠습니까?",
       "history": "값 기록 편집",
       "restore_error": "이 편집 내용을 복원하는 동안 오류가 발생했습니다.",
-      "edit_success": "수정 사항이 성공적으로 저장되었습니다."
+      "edit_success": "수정 사항이 성공적으로 저장되었습니다.",
+      "restore_text": "아카이브에서 {이름}을 복원하시겠습니까?",
+      "delete_for_selection_error": "선택한 편집 내용을 삭제하는 동안 오류가 발생했습니다.",
+      "delete_for_selection_hard_text": "선택한 편집 내용을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인하시기 바랍니다.",
+      "delete_for_selection_hard_lock_text": "삭제",
+      "multiple_delete_error": "편집 내용을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 편집에 연결된 작업이 없는 것이 확실합니까?"
     },
     "status_automations": {
       "change_ready_for": "\"준비 완료\" 상태를 다음으로 변경합니다",
@@ -1510,7 +1669,8 @@
         "is_default": "기본값입니다.",
         "name": "이름",
         "file": "HDRi 파일"
-      }
+      },
+      "library_title": "3D 배경 라이브러리"
     },
     "board": {
       "title": "보드",
@@ -1539,7 +1699,10 @@
         "expiration_date": "만료일",
         "token": "토큰"
       },
-      "no_bot": "봇이 없습니다. 봇을 만들고 싶으신가요?"
+      "no_bot": "봇이 없습니다. 봇을 만들고 싶으신가요?",
+      "confirm_edit": "봇 변경 사항 저장",
+      "create": "봇 만들기",
+      "departments_empty": "이 봇은 어떤 부서와도 연결되어 있지 않습니다."
     },
     "chats": {
       "join": "채팅 참여",
@@ -1571,7 +1734,10 @@
       "actions": {
         "title": "개념에 대한 링크",
         "empty": "링크 없음"
-      }
+      },
+      "delete_for_selection_hard_text": "선택한 컨셉을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
+      "delete_for_selection_hard_lock_text": "삭제",
+      "drop_new_concepts": "새로운 컨셉 파일을 여기에 드롭하세요."
     },
     "intro": {
       "main": "프로젝트가 성공하려면 여러분의 도움이 필요합니다. 다음은 여러분이 도울 수 있는 몇 가지 간단한 방법입니다:",
@@ -1604,7 +1770,8 @@
       "fields": {
         "name": "이름",
         "color": "색상"
-      }
+      },
+      "all_studios": "모든 스튜디오"
     },
     "days_off": {
       "title": "휴무일",
@@ -1642,6 +1809,120 @@
         "created_at": "생성 날짜",
         "updated_at": "업데이트 날짜"
       }
+    },
+    "budget": {
+      "add_entry": "항목 추가",
+      "analytics": "예산 분석",
+      "cash_evolution": "비용 진화",
+      "cash_repartition": "비용 재분배",
+      "cost": "비용",
+      "costs": "실제 비용",
+      "departments": "부서",
+      "expenses_error": "실제 비용을 로드하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
+      "budgets_error": "예산을 로드하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
+      "budget_entries_error": "예산 항목을 로드하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
+      "create_budget": "새 예산 만들기",
+      "create_budget_error": "이 예산을 저장하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
+      "delete_budget": "예산 삭제",
+      "delete_budget_entry": "항목 삭제",
+      "delete_budget_entry_error": "이 예산 항목을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
+      "delete_budget_entry_message": "이 예산 항목을 삭제하시겠습니까?",
+      "delete_budget_error": "이 예산을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
+      "delete_budget_message": "예산 {이름}을 삭제하시겠습니까? 아래에 예산 이름을 입력하여 확인해 주세요.",
+      "difference": "차이점",
+      "edit_budget": "현재 예산 버전 편집",
+      "edit_budget_entry": "항목 수정",
+      "edit_budget_entry_error": "이 예산 항목을 편집하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
+      "entries": "항목",
+      "gap": "Gap",
+      "hide_expenses": "실제 비용 숨기기",
+      "months": "개월",
+      "new_hiring": "신규 채용",
+      "new_version": "새 버전",
+      "no_budget_found": "이 프로덕션에는 예산이 없습니다. 만들고 싶으신가요?",
+      "no_budget_entries_found": "이 프로덕션에는 예산 항목이 없습니다. 만들고 싶으신가요?",
+      "no_analytics_to_show": "이 프로덕션에 대해 표시할 애널리틱스가 없습니다. 예산을 생성하고 항목을 추가하여 애널리틱스를 확인하세요.",
+      "remaining": "남아있음",
+      "previsional_costs": "예상",
+      "remaining_and_costs": "Rem. + 비용",
+      "salary_scale_title": "급여 규모",
+      "show_expenses": "실제 비용 표시",
+      "show_items": "하드웨어 및 소프트웨어 계산",
+      "title": "예산",
+      "fields": {
+        "base_salary": "급여",
+        "currency": "통화",
+        "daily_salary": "일급",
+        "duration": "기간",
+        "department": "부서",
+        "months_duration": "개월 기간",
+        "name": "이름",
+        "person": "사람",
+        "position": "위치",
+        "revision": "개정",
+        "start_date": "시작 날짜",
+        "end_date": "종료 날짜",
+        "monthly_salary": "월 급여",
+        "total_salary": "총 급여",
+        "seniority": "시니어"
+      },
+      "positions": {
+        "artist": "아티스트",
+        "lead": "Lead",
+        "supervisor": "감독자"
+      },
+      "seniorities": {
+        "junior": "Junior",
+        "mid": "Mid",
+        "senior": "Senior"
+      }
+    },
+    "hard_delete": {
+      "delete_for_selection_hard_text": "선택한 항목을 영구 삭제하시겠습니까? 아래에 '삭제'를 입력하여 확인해주세요.",
+      "delete_for_selection_hard_lock_text": "삭제"
+    },
+    "hardware_items": {
+      "create_error": "하드웨어 항목을 저장하는 동안 오류가 발생했습니다.",
+      "delete_error": "하드웨어 항목을 삭제하는 동안 오류가 발생했습니다.",
+      "delete_text": "이 하드웨어 항목을 삭제하시겠습니까?",
+      "edit_title": "하드웨어 항목 편집",
+      "new_hardware_item": "새로운 하드웨어 아이템",
+      "number": "하드웨어 항목 | 하드웨어 항목",
+      "title": "하드웨어 항목",
+      "fields": {
+        "inventory_amount": "재고 금액",
+        "monthly_cost": "월별 비용",
+        "name": "이름",
+        "remaining_amount": "남은 금액",
+        "short_name": "짧은 이름"
+      }
+    },
+    "software_licenses": {
+      "create_error": "소프트웨어 라이선스를 저장하는 동안 오류가 발생했습니다.",
+      "delete_error": "소프트웨어 라이선스를 삭제하는 동안 오류가 발생했습니다.",
+      "delete_text": "이 소프트웨어 라이선스를 삭제하시겠습니까?",
+      "edit_title": "소프트웨어 라이선스 편집",
+      "new_software_license": "새 소프트웨어 라이선스",
+      "number": "소프트웨어 라이선스 | 소프트웨어 라이선스",
+      "title": "소프트웨어 라이선스",
+      "fields": {
+        "extension": "확장",
+        "name": "이름",
+        "monthly_cost": "월별 비용",
+        "inventory_amount": "재고 금액",
+        "short_name": "짧은 이름",
+        "status": "상태",
+        "version": "버전"
+      }
+    },
+    "row_actions": {
+      "change_avatar": "아바타 변경",
+      "change_password": "비밀번호 변경",
+      "delete": "삭제",
+      "edit": "편집",
+      "history": "역사",
+      "refresh": "새로 고침",
+      "restore": "복원"
     }
   }
 }
