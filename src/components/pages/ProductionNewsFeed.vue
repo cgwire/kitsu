@@ -504,10 +504,10 @@ export default {
       if (this.newsList && this.newsList.length > 0 && event.altKey) {
         let index = this.lastSelection ? this.lastSelection : 0
         if ([37, 38].includes(event.keyCode)) {
-          index = index - 1 < 0 ? (index = this.newsList.length - 1) : index - 1
+          index = index - 1 < 0 ? this.newsList.length - 1 : index - 1
           this.onNewsSelected(this.newsList[index])
         } else if ([39, 40].includes(event.keyCode)) {
-          index = index + 1 >= this.newsList.length ? (index = 0) : index + 1
+          index = index + 1 >= this.newsList.length ? 0 : index + 1
           this.onNewsSelected(this.newsList[index])
         }
       }

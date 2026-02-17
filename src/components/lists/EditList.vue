@@ -257,9 +257,13 @@
                     tabindex="-1"
                     :title="edit.full_name"
                     :to="editPath(edit.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ edit.name }}
                   </router-link>
+                  <template v-else>
+                    {{ edit.name }}
+                  </template>
                 </div>
               </th>
 
@@ -960,10 +964,6 @@ span.thumbnail-empty {
   padding: 6px;
 }
 
-.datatable-row-header {
-  cursor: pointer;
-}
-
 .dark {
   th .input-editor,
   td .select select,
@@ -1073,7 +1073,7 @@ td .select {
 }
 
 .metadata-value {
-  padding: 0.8rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .resolution {

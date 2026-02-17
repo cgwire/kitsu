@@ -1001,7 +1001,7 @@ export default {
       deep: true,
       immediate: true,
       handler() {
-        let teamOptions = []
+        let teamOptions
         if (this.isCurrentUserClient) {
           teamOptions = this.team.filter(person =>
             ['admin', 'manager', 'client'].includes(person.role)

@@ -258,12 +258,10 @@ export const sortValidationColumns = (
 export const sortAssetResult = (result, sorting, taskTypeMap, taskMap) => {
   if (sorting && sorting.length > 0) {
     const sortInfo = sorting[0]
-    let sortEntities = []
-    if (sortInfo.type === 'metadata') {
-      sortEntities = sortByMetadata(sortInfo)
-    } else {
-      sortEntities = sortByTaskType(taskMap, sortInfo)
-    }
+    const sortEntities =
+      sortInfo.type === 'metadata'
+        ? sortByMetadata(sortInfo)
+        : sortByTaskType(taskMap, sortInfo)
     result = result.sort(
       firstBy('canceled')
         .thenBy(sortEntities)

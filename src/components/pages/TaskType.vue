@@ -1158,7 +1158,7 @@ export default {
           descFilters.length > 0 ||
           taskFilters.length > 0
         ) {
-          let tasks = []
+          let tasks
           const filters = taskFilters.concat(descFilters)
           if (keywords.length > 0) {
             tasks = indexSearch(this.$options.taskIndex, keywords)

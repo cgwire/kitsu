@@ -93,9 +93,9 @@
     v-else-if="descriptor.data_type === 'taglist'"
   />
   <!-- default -->
-  <span class="metadata-value selectable" v-else>
+  <div class="metadata-value selectable" v-else>
     {{ getMetadataFieldValue(descriptor, entity) }}
-  </span>
+  </div>
 </template>
 
 <script>
@@ -243,9 +243,8 @@ export default {
 }
 
 .metadata-value {
-  display: inline-block;
   max-width: 100%;
-  padding: 0.8rem;
+  padding: 0.5rem 0.75rem;
   overflow: auto;
   white-space: nowrap;
 }

@@ -251,9 +251,13 @@
                     tabindex="-1"
                     :title="episode.name"
                     :to="episodePath(episode.id)"
+                    v-if="!isCurrentUserClient"
                   >
                     {{ episode.name }}
                   </router-link>
+                  <template v-else>
+                    {{ episode.name }}
+                  </template>
                 </div>
               </th>
 
@@ -885,10 +889,6 @@ span.thumbnail-empty {
   padding: 6px;
 }
 
-.datatable-row-header {
-  cursor: pointer;
-}
-
 th .input-editor,
 td .input-editor {
   color: $grey-strong;
@@ -979,7 +979,7 @@ td .select {
 }
 
 .metadata-value {
-  padding: 0.8rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .resolution {

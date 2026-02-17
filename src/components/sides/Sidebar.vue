@@ -240,7 +240,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import {
   BotIcon,
   BuildingIcon,
@@ -249,21 +248,25 @@ import {
   GlobeIcon,
   Rows4Icon
 } from 'lucide-vue-next'
-import Icon from '@/components/widgets/Icon.vue'
+import { defineAsyncComponent } from 'vue'
+import { mapGetters, mapActions } from 'vuex'
+
+const Icon = defineAsyncComponent(() => import('@/components/widgets/Icon.vue'))
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 export default {
   name: 'sidebar',
+
   components: {
     BotIcon,
     BuildingIcon,
     ComputerIcon,
     EggIcon,
     GlobeIcon,
+    Icon,
     KitsuIcon,
-    Rows4Icon,
-    Icon
+    Rows4Icon
   },
 
   data() {

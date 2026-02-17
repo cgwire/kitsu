@@ -921,9 +921,10 @@ export default {
       const previousIndex = keys.findIndex(k => k === previousEntityId)
       const index = keys.findIndex(k => k === entityId)
 
-      let indexRange = []
-      if (previousIndex < index) indexRange = range(previousIndex, index)
-      else indexRange = range(index, previousIndex)
+      const indexRange =
+        previousIndex < index
+          ? range(previousIndex, index)
+          : range(index, previousIndex)
 
       indexRange.forEach(i => {
         if (i >= 0) this.selection[keys[i]] = true

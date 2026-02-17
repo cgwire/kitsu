@@ -12,21 +12,13 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import userStore from '@/store/modules/user'
 import store from '@/store'
 
-import Assets from '@/components/pages/Assets.vue'
 import Login from '@/components/pages/Login.vue'
 import Main from '@/components/Main.vue'
-import NewProduction from '@/components/pages/production/NewProduction.vue'
-import Notifications from '@/components/pages/Notifications.vue'
-import OpenProductions from '@/components/pages/OpenProductions.vue'
-import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed.vue'
-import Shots from '@/components/pages/Shots.vue'
-import TaskType from '@/components/pages/TaskType.vue'
-import Todos from '@/components/pages/Todos.vue'
-import Edits from '@/components/pages/Edits.vue'
 
-const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
 const AllTasks = () => import('@/components/pages/AllTasks.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
+const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
+const Assets = () => import('@/components/pages/Assets.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
 const Bots = () => import('@/components/pages/Bots.vue')
@@ -37,6 +29,7 @@ const Concepts = () => import('@/components/pages/Concepts.vue')
 const CustomActions = () => import('@/components/pages/CustomActions.vue')
 const Departments = () => import('@/components/pages/Departments.vue')
 const Edit = () => import('@/components/pages/Edit.vue')
+const Edits = () => import('@/components/pages/Edits.vue')
 const EntityChats = () => import('@/components/pages/EntityChats.vue')
 const EntitySearch = () => import('@/components/pages/EntitySearch.vue')
 const Episode = () => import('@/components/pages/Episode.vue')
@@ -47,13 +40,19 @@ const HardwareItems = () => import('@/components/pages/HardwareItems.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
+const NewProduction = () =>
+  import('@/components/pages/production/NewProduction.vue')
 const NotFound = () => import('@/components/pages/NotFound.vue')
+const Notifications = () => import('@/components/pages/Notifications.vue')
+const OpenProductions = () => import('@/components/pages/OpenProductions.vue')
 const People = () => import('@/components/pages/People.vue')
 const Person = () => import('@/components/pages/Person.vue')
 const Playlist = () => import('@/components/pages/Playlist.vue')
 const Plugin = () => import('@/components/pages/Plugin.vue')
 const ProductionAssetTypes = () =>
   import('@/components/pages/ProductionAssetTypes.vue')
+const ProductionNewsFeed = () =>
+  import('@/components/pages/ProductionNewsFeed.vue')
 const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
 const Productions = () => import('@/components/pages/Productions.vue')
 const ProductionSchedule = () =>
@@ -61,26 +60,29 @@ const ProductionSchedule = () =>
 const ProductionSettings = () =>
   import('@/components/pages/ProductionSettings.vue')
 const Profile = () => import('@/components/pages/Profile.vue')
-const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const ResetChangePassword = () =>
   import('@/components/pages/ResetChangePassword.vue')
+const ResetPassword = () => import('@/components/pages/ResetPassword.vue')
 const SalaryScale = () => import('@/components/pages/budget/SalaryScale.vue')
 const Sequence = () => import('@/components/pages/Sequence.vue')
 const Sequences = () => import('@/components/pages/Sequences.vue')
 const SequenceStats = () => import('@/components/pages/SequenceStats.vue')
 const ServerDown = () => import('@/components/pages/ServerDown.vue')
 const Settings = () => import('@/components/pages/Settings.vue')
-const SoftwareLicenses = () => import('@/components/pages/SoftwareLicenses.vue')
 const Shot = () => import('@/components/pages/Shot.vue')
+const Shots = () => import('@/components/pages/Shots.vue')
+const SoftwareLicenses = () => import('@/components/pages/SoftwareLicenses.vue')
 const StatusAutomations = () =>
   import('@/components/pages/StatusAutomations.vue')
-const Task = () => import('@/components/pages/Task.vue')
 const Studios = () => import('@/components/pages/Studios.vue')
+const Task = () => import('@/components/pages/Task.vue')
 const TaskStatus = () => import('@/components/pages/TaskStatus.vue')
+const TaskType = () => import('@/components/pages/TaskType.vue')
 const TaskTypes = () => import('@/components/pages/TaskTypes.vue')
 const Team = () => import('@/components/pages/Team.vue')
-const TeamSchedule = () => import('@/components/pages/TeamSchedule')
+const TeamSchedule = () => import('@/components/pages/TeamSchedule.vue')
 const Timesheets = () => import('@/components/pages/Timesheets.vue')
+const Todos = () => import('@/components/pages/Todos.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 
 const ADMIN_PAGES = [

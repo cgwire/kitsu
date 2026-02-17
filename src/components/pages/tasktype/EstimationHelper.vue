@@ -474,13 +474,11 @@ export default {
     },
 
     selectTaskRange(index) {
-      let taskIndices = []
       this.lastSelection = index
-      if (this.lastShiftSelection > index) {
-        taskIndices = range(index, this.lastShiftSelection)
-      } else {
-        taskIndices = range(this.lastShiftSelection, index)
-      }
+      const taskIndices =
+        this.lastShiftSelection > index
+          ? range(index, this.lastShiftSelection)
+          : range(this.lastShiftSelection, index)
       const selection = taskIndices.map(i => this.tasksByPerson[i].id)
       selection.forEach(taskId => {
         this.addToSelection(taskId)

@@ -464,7 +464,7 @@ const csv = {
       const line = [person.full_name]
       headers.forEach((h, index) => {
         if (index > 0) {
-          let key = year
+          let key
           if (detailLevel === 'day') {
             key = `${year}-${String(month).padStart(2, '0')}-${String(index).padStart(2, '0')}`
           } else if (detailLevel === 'week') {

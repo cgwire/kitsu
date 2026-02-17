@@ -445,7 +445,6 @@ export default {
       if (!personId) {
         return '-'
       }
-      let average = 0
       let total = 0
       let nbEntries
       if (this.detailLevel === 'day') {
@@ -461,7 +460,7 @@ export default {
         total = this.quotaMap[personId].year[this.countMode][yearKey]
         nbEntries = this.quotaMap[personId].month.entries[yearKey]
       }
-      average = total / nbEntries
+      const average = total / nbEntries
       return average ? average.toFixed(2) : '-'
     },
 

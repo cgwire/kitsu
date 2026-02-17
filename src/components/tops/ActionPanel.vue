@@ -293,7 +293,12 @@
           class="menu-item"
           :title="$t('main.csv.export_file')"
           @click="$emit('export-task')"
-          v-if="isTaskSelection && !isEntitySelection && nbSelectedTasks === 1"
+          v-if="
+            isTaskSelection &&
+            !isEntitySelection &&
+            nbSelectedTasks === 1 &&
+            !isCurrentUserClient
+          "
         >
           <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
         </div>
@@ -966,6 +971,7 @@ export default {
       'currentProduction',
       'getCustomActionsByType',
       'isCurrentUserArtist',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
       'isShowAssignations',

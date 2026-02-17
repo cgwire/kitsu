@@ -602,11 +602,11 @@ export default {
       if (this.tasks.length > 0 && event.altKey) {
         let index = this.lastSelection ? this.lastSelection : 0
         if ([37, 38].includes(event.keyCode)) {
-          index = index - 1 < 0 ? (index = this.tasks.length - 1) : index - 1
+          index = index - 1 < 0 ? this.tasks.length - 1 : index - 1
           this.selectTask({}, index, this.tasks[index])
           this.pauseEvent(event)
         } else if ([39, 40].includes(event.keyCode)) {
-          index = index + 1 >= this.tasks.length ? (index = 0) : index + 1
+          index = index + 1 >= this.tasks.length ? 0 : index + 1
           this.selectTask({}, index, this.tasks[index])
           this.pauseEvent(event)
         }
@@ -751,12 +751,9 @@ export default {
 
     updateStartDate(date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
-        let data = {
-          start_date: null,
-          due_date: null
-        }
         const task = this.taskMap.get(taskId)
         const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
+        let data
         if (date) {
           const startDate = moment(date)
           if (
@@ -784,14 +781,11 @@ export default {
 
     updateDueDate(date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
-        let data = {
-          start_date: null,
-          due_date: null
-        }
         const task = this.taskMap.get(taskId)
         const startDate = task.start_date
           ? parseSimpleDate(task.start_date)
           : null
+        let data
         if (date) {
           const dueDate = moment(date)
           if (
@@ -853,12 +847,10 @@ export default {
         }
       } else {
         this.selectionGrid = {}
-        let taskIndices = []
-        if (this.lastSelection > index) {
-          taskIndices = range(index, this.lastSelection)
-        } else {
-          taskIndices = range(this.lastSelection, index)
-        }
+        const taskIndices =
+          this.lastSelection > index
+            ? range(index, this.lastSelection)
+            : range(this.lastSelection, index)
         const selection = taskIndices.map(i => ({ task: this.tasks[i] }))
         selection.forEach(task => {
           this.selectionGrid[task.task.id] = true

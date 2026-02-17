@@ -46,9 +46,12 @@
           </span>
 
           <h1 class="title flexrow-item">
-            <router-link :to="taskEntityPath">
+            <router-link :to="taskEntityPath" v-if="!isCurrentUserClient">
               {{ title }}
             </router-link>
+            <template v-else>
+              {{ title }}
+            </template>
           </h1>
 
           <div class="flexrow-item flexrow block">
@@ -187,7 +190,10 @@
               </div>
             </div>
           </div>
-          <div class="flexrow-item block mt1 mr0 info-block">
+          <div
+            class="flexrow-item block mt1 mr0 info-block"
+            v-if="!isCurrentUserClient"
+          >
             <page-subtitle :text="$t('main.info')" />
             <div class="table-body mt1">
               <table class="datatable no-header" v-if="task">

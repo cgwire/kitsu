@@ -290,7 +290,7 @@
                     class="asset-link asset-name flexrow-item"
                     :to="assetPath(asset.id)"
                     :title="asset.full_name"
-                    v-if="!asset.shared"
+                    v-if="!asset.shared && !isCurrentUserClient"
                   >
                     {{ asset.name }}
                   </router-link>
@@ -1212,5 +1212,9 @@ td.metadata-descriptor {
   height: 3.1rem;
   max-width: 120px;
   padding: 0;
+}
+
+.metadata-value {
+  padding: 0.5rem 0.75rem;
 }
 </style>

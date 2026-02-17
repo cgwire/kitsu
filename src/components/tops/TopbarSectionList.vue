@@ -78,13 +78,15 @@
 
 <script>
 import { ChevronDownIcon, HandCoinsIcon } from 'lucide-vue-next'
+import { defineAsyncComponent } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
-import Icon from '@/components/widgets/Icon.vue'
+
+const Icon = defineAsyncComponent(() => import('@/components/widgets/Icon.vue'))
 
 export default {
   name: 'topbar-section-list',
