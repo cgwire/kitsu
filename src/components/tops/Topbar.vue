@@ -189,6 +189,11 @@
             Roadmap / Feedback
           </a>
         </li>
+        <li>
+          <a href="https://dev.kitsu.cloud" target="_blank">
+            Developer documentation
+          </a>
+        </li>
         <hr />
         <li>
           <a href="https://cg-wire.com/about" target="_blank">
