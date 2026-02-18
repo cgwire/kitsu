@@ -1,0 +1,2 @@
+import{_ as n,o as s,c as o,d as c,a8 as a,h as d}from"./index-C2m_IhNF.js";const r={name:"page-layout",props:{side:{type:Boolean,default:!0}}},i={ref:"page",class:"columns fixed-page"},l={class:"column main-column"},m={key:0,class:"column side-column"};function u(e,_,t,p,f,h){return s(),o("div",i,[c("div",l,[a(e.$slots,"main")]),t.side?(s(),o("div",m,[a(e.$slots,"side")])):d("",!0)],512)}const g=n(r,[["render",u]]);export{g as P};
+//# sourceMappingURL=PageLayout-B9XVVkU2.js.map
