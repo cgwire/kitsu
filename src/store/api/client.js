@@ -40,7 +40,7 @@ const client = {
     return superagent.get(path).then(res => {
       if (res?.statusCode === 401) {
         errors.backToLogin()
-        return Promise.reject(new Error('Unauthorized'))
+        throw new Error('Unauthorized')
       }
       return res?.body
     })
