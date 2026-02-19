@@ -759,7 +759,7 @@ body {
 } // End dark theme
 
 .loading-info {
-  background: white;
+  background: inherit;
 }
 
 .hidden {
