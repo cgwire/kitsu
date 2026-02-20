@@ -150,7 +150,7 @@
                 />
                 <combobox
                   class="flexrow-item"
-                  :key="`descriptor-value-combobox-${index}`"
+                  :key="`descriptor-value-combobox-checklist-${index}`"
                   :options="
                     getDescriptorChoiceOptions(
                       descriptorFilter.id,
@@ -158,6 +158,18 @@
                     )
                   "
                   v-model="descriptorFilter.values[index].text"
+                  v-else-if="descriptorFilter.is_checklist"
+                />
+                <combobox
+                  class="flexrow-item"
+                  :key="`descriptor-value-combobox-${index}`"
+                  :options="
+                    getDescriptorChoiceOptions(
+                      descriptorFilter.id,
+                      descriptorFilter.is_checklist
+                    )
+                  "
+                  v-model="descriptorFilter.values[index]"
                   v-else
                 />
               </template>
@@ -692,7 +704,9 @@ export default {
     },
 
     addInDescriptorFilter(descriptorFilter) {
-      descriptorFilter.values.push('')
+      const descriptor = this.getDescriptor(descriptorFilter.id)
+      const value = descriptor.choices.length ? descriptor.choices[0] : ''
+      descriptorFilter.values.push(value)
     },
 
     // Descriptors
