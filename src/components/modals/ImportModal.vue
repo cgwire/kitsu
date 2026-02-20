@@ -62,7 +62,7 @@
           <textarea
             class="paste-area"
             :placeholder="pasteAreaPlaceholder"
-            v-model="pastedCode"
+            v-model.trim="pastedCode"
           ></textarea>
         </div>
 
