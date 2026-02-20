@@ -168,7 +168,7 @@ export default {
     },
 
     reset() {
-      this.$refs.inputFile.reset()
+      this.$refs.inputFile?.reset()
       this.activeTab = 'file'
       this.formData = null
       this.pastedCode = ''
