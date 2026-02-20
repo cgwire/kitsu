@@ -158,6 +158,7 @@ export default {
   methods: {
     onFileSelected(formData) {
       this.formData = formData
+      this.onConfirmClicked()
     },
 
     onConfirmClicked() {
