@@ -62,7 +62,7 @@
           <textarea
             class="paste-area"
             :placeholder="pasteAreaPlaceholder"
-            v-model="pastedCode"
+            v-model.trim="pastedCode"
           ></textarea>
         </div>
 
@@ -158,6 +158,7 @@ export default {
   methods: {
     onFileSelected(formData) {
       this.formData = formData
+      this.onConfirmClicked()
     },
 
     onConfirmClicked() {
@@ -167,7 +168,7 @@ export default {
     },
 
     reset() {
-      this.$refs.inputFile.reset()
+      this.$refs.inputFile?.reset()
       this.activeTab = 'file'
       this.formData = null
       this.pastedCode = ''
