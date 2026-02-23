@@ -651,33 +651,6 @@ export default {
       )
     },
 
-    visibleColumns() {
-      let count = 2
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isSequenceDescription
-          ? 1
-          : 0
-      count += this.visibleMetadataDescriptors.length
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isSequenceTime &&
-        this.metadataDisplayHeaders.timeSpent
-          ? 1
-          : 0
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isSequenceEstimation &&
-        this.metadataDisplayHeaders.estimation
-          ? 1
-          : 0
-      count += this.displayedValidationColumns.length
-      return count
-    },
-
     displayedValidationColumns() {
       return this.validationColumns.filter(columnId => {
         return (

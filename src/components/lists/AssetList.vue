@@ -240,7 +240,7 @@
             v-for="(group, k) in displayedAssets"
           >
             <tr class="datatable-type-header" v-if="group[0]">
-              <th scope="rowgroup" :colspan="visibleColumns">
+              <th scope="rowgroup">
                 <span
                   class="datatable-row-header pointer"
                   @click="$emit('asset-type-clicked', group[0].asset_type_name)"
@@ -782,34 +782,6 @@ export default {
 
     isListVisible() {
       return !this.isLoading && !this.isError && this.displayedAssetsCount > 0
-    },
-
-    visibleColumns() {
-      let count = 1
-      count += this.isTVShow ? 1 : 0
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isAssetDescription
-          ? 1
-          : 0
-      count += this.visibleMetadataDescriptors.length
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isAssetTime &&
-        this.metadataDisplayHeaders.timeSpent
-          ? 1
-          : 0
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isAssetEstimation &&
-        this.metadataDisplayHeaders.estimation
-          ? 1
-          : 0
-      count += this.displayedValidationColumns.length
-      return count
     },
 
     displayedValidationColumns() {
