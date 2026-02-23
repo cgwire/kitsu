@@ -439,9 +439,21 @@
               </td>
 
               <td
+                class="drawings number-cell"
+                v-if="
+                  displaySettings.showInfos &&
+                  isPaperProduction &&
+                  metadataDisplayHeaders.drawings
+                "
+              >
+                {{ shot.nb_drawings }}
+              </td>
+
+              <td
                 class="frames number-cell"
                 v-if="
                   isFrames &&
+                  !isPaperProduction &&
                   displaySettings.showInfos &&
                   metadataDisplayHeaders.frames
                 "
@@ -463,17 +475,6 @@
                 <span class="metadata-value selectable" v-else>
                   {{ shot.nb_frames }}
                 </span>
-              </td>
-
-              <td
-                class="drawings number-cell"
-                v-if="
-                  displaySettings.showInfos &&
-                  isPaperProduction &&
-                  metadataDisplayHeaders.drawings
-                "
-              >
-                {{ shot.nb_drawings }}
               </td>
 
               <td
