@@ -681,6 +681,7 @@ export default {
     column_visibility: 'Visible columns',
     confirmation: 'Confirm',
     confirmation_and_stay: 'Confirm and stay',
+    continue: 'Continue',
     created_by: 'Created by',
     date: 'Date',
     dark_theme: 'Dark Theme',
@@ -1349,6 +1350,7 @@ export default {
     },
     two_factor_authentication: {
       title: 'Two-factor authentication',
+      mandatory: 'Your organization requires two-factor authentication. Please enable at least one method to continue.',
       enabled: 'Two-factor authentication enabled',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',
       otp_secret: 'OTP secret',
