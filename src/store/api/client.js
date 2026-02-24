@@ -4,7 +4,7 @@ import errors from '@/lib/errors'
 const client = {
   get(path, callback) {
     superagent.get(path).end((err, res) => {
-      // if (res?.statusCode === 401) return errors.backToLogin()
+      if (res?.statusCode === 401) return errors.backToLogin()
       callback(err, res?.body)
     })
   },
@@ -37,7 +37,13 @@ const client = {
   },
 
   pget(path) {
-    return superagent.get(path).then(res => res?.body)
+    return superagent.get(path).then(res => {
+      if (res?.statusCode === 401) {
+        errors.backToLogin()
+        throw new Error('Unauthorized')
+      }
+      return res?.body
+    })
   },
 
   ppost(path, data) {
