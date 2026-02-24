@@ -1,0 +1,2 @@
+import{_ as t,U as p,R as r,r as o,o as c,c as l,d as _,f as n}from"./index-DF-DoQlt.js";const m={name:"people-name-cell",components:{PeopleAvatar:r,PeopleName:p},props:{person:{type:Object,required:!0}}},d={scope:"row"},i={class:"flexrow"};function f(u,v,e,h,x,N){const s=o("people-avatar"),a=o("people-name");return c(),l("td",d,[_("div",i,[n(s,{person:e.person},null,8,["person"]),n(a,{"with-link":"",person:e.person},null,8,["person"])])])}const k=t(m,[["render",f],["__scopeId","data-v-7400e2ce"]]);export{k as P};
+//# sourceMappingURL=PeopleNameCell-BDbXJAyn.js.map
