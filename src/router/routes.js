@@ -37,6 +37,7 @@ const Episodes = () => import('@/components/pages/Episodes.vue')
 const EpisodeStats = () => import('@/components/pages/EpisodeStats.vue')
 const FirstConnection = () => import('@/components/pages/FirstConnection.vue')
 const HardwareItems = () => import('@/components/pages/HardwareItems.vue')
+const Login2FA = () => import('@/components/pages/Login2FA.vue')
 const Logs = () => import('@/components/pages/Logs.vue')
 const MainSchedule = () => import('@/components/pages/MainSchedule.vue')
 const MyChecks = () => import('@/components/pages/MyChecks.vue')
@@ -927,6 +928,14 @@ export const routes = [
     path: '/login',
     component: Login,
     name: 'login'
+  },
+  {
+    path: '/login/2fa',
+    component: Login2FA,
+    name: 'login-2fa',
+    beforeEnter: (to, from) => {
+      if (!store.getters.user) return { name: 'login' }
+    }
   },
   {
     path: '/logout',

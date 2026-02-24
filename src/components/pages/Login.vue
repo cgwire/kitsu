@@ -191,6 +191,10 @@ export default {
               this.isMissingOTP = true
               this.preferredTwoFA = err.preferred_two_factor_authentication
               this.TwoFAsEnabled = err.two_factor_authentication_enabled
+            } else if (err.two_factor_authentication_required) {
+              this.$router.push({
+                name: 'login-2fa'
+              })
             } else if (err.server_error) {
               this.isServerError = true
             } else {
