@@ -545,14 +545,28 @@ export const entityListMixin = {
             list = list.flat()
           }
           const x = list.findIndex(e => e.id === entity.id)
-          const y = this.displayedValidationColumns.indexOf(task.task_type_id)
-          this.$store.commit('ADD_SELECTED_TASK', {
-            task,
-            entity,
-            column: taskType,
-            x,
-            y
-          })
+          let y = this.stickedDisplayedValidationColumns.indexOf(
+            task.task_type_id
+          )
+          if (y === -1) {
+            const nonStickedIndex =
+              this.nonStickedDisplayedValidationColumns.indexOf(
+                task.task_type_id
+              )
+            if (nonStickedIndex > -1) {
+              y =
+                nonStickedIndex + this.stickedDisplayedValidationColumns.length
+            }
+          }
+          if (y > -1) {
+            this.$store.commit('ADD_SELECTED_TASK', {
+              task,
+              entity,
+              column: taskType,
+              x,
+              y
+            })
+          }
         }
       }
     },

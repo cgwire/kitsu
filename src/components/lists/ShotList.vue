@@ -290,7 +290,7 @@
             v-for="(group, k) in displayedShots"
           >
             <tr class="datatable-type-header">
-              <th scope="rowgroup" :colspan="visibleColumns">
+              <th scope="rowgroup">
                 <div
                   class="datatable-row-header pointer"
                   @click="$emit('sequence-clicked', group[0].sequence_name)"
@@ -1013,75 +1013,6 @@ export default {
 
     isListVisible() {
       return !this.isLoading && !this.isError && this.displayedShotsCount > 0
-    },
-
-    visibleColumns() {
-      let count = 2
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isShotDescription
-          ? 1
-          : 0
-      count += this.visibleMetadataDescriptors.length
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isShotTime &&
-        this.metadataDisplayHeaders.timeSpent
-          ? 1
-          : 0
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isShotEstimation &&
-        this.metadataDisplayHeaders.estimation
-          ? 1
-          : 0
-
-      if (this.isPaperProduction) {
-        count +=
-          this.displaySettings.showInfos && this.metadataDisplayHeaders.drawings
-            ? 1
-            : 0
-      } else {
-        count +=
-          this.displaySettings.showInfos && this.metadataDisplayHeaders.frames
-            ? 1
-            : 0
-      }
-      count +=
-        this.displaySettings.showInfos &&
-        this.isFrameIn &&
-        this.metadataDisplayHeaders.frameIn
-          ? 1
-          : 0
-      count +=
-        this.displaySettings.showInfos &&
-        this.isFrameOut &&
-        this.metadataDisplayHeaders.frameOut
-          ? 1
-          : 0
-      count +=
-        this.displaySettings.showInfos &&
-        this.isFps &&
-        this.metadataDisplayHeaders.fps
-          ? 1
-          : 0
-      count +=
-        this.displaySettings.showInfos &&
-        this.isResolution &&
-        this.metadataDisplayHeaders.resolution
-          ? 1
-          : 0
-      count +=
-        this.displaySettings.showInfos &&
-        this.isMaxRetakes &&
-        this.metadataDisplayHeaders.max_retakes
-          ? 1
-          : 0
-      count += this.displayedValidationColumns.length
-      return count
     },
 
     displayedValidationColumns() {

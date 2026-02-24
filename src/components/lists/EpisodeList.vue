@@ -691,33 +691,6 @@ export default {
       )
     },
 
-    visibleColumns() {
-      let count = 2
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isEpisodeDescription
-          ? 1
-          : 0
-      count += this.visibleMetadataDescriptors.length
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isEpisodeTime &&
-        this.metadataDisplayHeaders.timeSpent
-          ? 1
-          : 0
-      count +=
-        !this.isCurrentUserClient &&
-        this.displaySettings.showInfos &&
-        this.isEpisodeEstimation &&
-        this.metadataDisplayHeaders.estimation
-          ? 1
-          : 0
-      count += this.displayedValidationColumns.length
-      return count
-    },
-
     displayedValidationColumns() {
       return this.validationColumns.filter(columnId => {
         return (

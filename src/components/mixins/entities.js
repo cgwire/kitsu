@@ -134,6 +134,7 @@ export const entitiesMixin = {
       } else {
         this.departmentFilter = [departmentId]
       }
+      this.$store.commit('CLEAR_SELECTED_TASKS')
       preferences.setPreference(`${this.pageName}:department`, departmentId)
     },
 
