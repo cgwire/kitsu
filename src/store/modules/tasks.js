@@ -643,15 +643,34 @@ const actions = {
 
   assignSelectedTasks({ commit, state }, { personId, taskIds }) {
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.assignTasks(personId, selectedTaskIds).then(() => {
-      commit(ASSIGN_TASKS, { selectedTaskIds, personId })
+    return tasksApi.assignTasks(personId, selectedTaskIds).then(response => {
+      // Extract successfully assigned task IDs from the response
+      const taskIds = (response || []).map(task => task.id)
+
+      // Find task IDs that were sent but not returned (failed assignments)
+      const failedTaskIds = selectedTaskIds.filter(
+        taskId => !taskIds.includes(taskId)
+      )
+
+      // Only commit the assignment for the updated task ids returned by the API
+      commit(ASSIGN_TASKS, { taskIds, personId })
+
+      // // If any tasks failed to assign, throw an error
+      if (failedTaskIds.length > 0) {
+        const error = new Error(
+          `Failed to assign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
+        )
+        error.failedTaskIds = failedTaskIds
+        error.successfulTaskIds = taskIds
+        throw error
+      }
     })
   },
 
   unassignSelectedTasks({ commit, state }, { taskIds } = {}) {
-    const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.unassignTasks(selectedTaskIds).then(() => {
-      commit(UNASSIGN_TASKS, selectedTaskIds)
+    taskIds = taskIds || Array.from(state.selectedTasks.keys())
+    return tasksApi.unassignTasks(taskIds).then(() => {
+      commit(UNASSIGN_TASKS, taskIds)
     })
   },
 
@@ -1180,8 +1199,8 @@ const mutations = {
     }
   },
 
-  [ASSIGN_TASKS](state, { selectedTaskIds, personId }) {
-    selectedTaskIds.forEach(taskId => {
+  [ASSIGN_TASKS](state, { taskIds, personId }) {
+    taskIds.forEach(taskId => {
       const task = state.taskMap.get(taskId)
       if (task && !task.assignees.find(assigneeId => assigneeId === personId)) {
         task.assignees.push(personId)
@@ -1190,8 +1209,8 @@ const mutations = {
     })
   },
 
-  [UNASSIGN_TASKS](state, selectedTaskIds) {
-    selectedTaskIds.forEach(taskId => {
+  [UNASSIGN_TASKS](state, taskIds) {
+    taskIds.forEach(taskId => {
       const task = state.taskMap.get(taskId)
       if (task) {
         task.assignees = []
