@@ -550,38 +550,10 @@
       <table-info :is-loading="isLoading" :is-error="isError" />
     </div>
 
-    <p class="has-text-centered nb-assets" v-if="!isEmptyList && !isLoading">
-      {{ displayedAssetsLength }}
-      {{ $tc('assets.number', displayedAssetsLength) }}
-      <span
-        v-if="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
-      >
-        ({{ formatDuration(displayedAssetsTimeSpent) }}
-        {{
-          isDurationInHours
-            ? $tc(
-                'main.hours_spent',
-                formatDuration(displayedAssetsTimeSpent, false)
-              )
-            : $tc(
-                'main.days_spent',
-                formatDuration(displayedAssetsTimeSpent, false)
-              )
-        }},
-        {{ formatDuration(displayedAssetsEstimation) }}
-        {{
-          isDurationInHours
-            ? $tc(
-                'main.hours_estimated',
-                formatDuration(displayedAssetsEstimation, false)
-              )
-            : $tc(
-                'main.man_days',
-                formatDuration(displayedAssetsEstimation, false)
-              )
-        }})
-      </span>
-    </p>
+    <asset-list-numbers
+      :displayed-assets="displayedAssets"
+      v-if="!isEmptyList && !isLoading"
+    />
   </div>
 </template>
 
@@ -598,6 +570,7 @@ import preferences from '@/lib/preferences'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
 
+import AssetListNumbers from '@/components/widgets/AssetListNumbers.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
@@ -628,6 +601,7 @@ export default {
   ],
 
   components: {
+    AssetListNumbers,
     ButtonSimple,
     ComboboxTaskType,
     DescriptionCell,
@@ -728,9 +702,6 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedAssetsCount',
-      'displayedAssetsLength',
-      'displayedAssetsTimeSpent',
-      'displayedAssetsEstimation',
       'nbSelectedTasks',
       'organisation',
       'isAssetDescription',
