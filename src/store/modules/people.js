@@ -160,7 +160,8 @@ const initialState = {
   personTimeSpentTotal: 0,
   personDayOff: {},
   daysOff: [],
-  dayOffMap: {}
+  dayOffMap: {},
+  personMapVersion: 0
 }
 
 const state = {
@@ -177,7 +178,11 @@ const getters = {
     cache.people.filter(person => person.active && !person.is_bot),
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => cache.peopleIndex,
-  personMap: state => cache.personMap,
+  personMap: state => {
+    // Access personMapVersion to trigger reactivity when the map changes.
+    state.personMapVersion // eslint-disable-line no-unused-expressions
+    return cache.personMap
+  },
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
@@ -262,8 +267,8 @@ const actions = {
   },
 
   async newPersonAndInvite({ commit }, data) {
-    let person = await peopleApi.createPerson(data)
-    person = await peopleApi.invitePerson(person)
+    const person = await peopleApi.createPerson(data)
+    await peopleApi.invitePerson(person)
     commit(EDIT_PEOPLE_END, person)
     return person
   },
@@ -609,6 +614,7 @@ const mutations = {
     cache.people.forEach(person => {
       cache.personMap.set(person.id, person)
     })
+    state.personMapVersion++
     state.displayedPeople = cache.people
     cache.peopleIndex = buildPeopleIndex(cache.people)
 
@@ -625,6 +631,7 @@ const mutations = {
       }
       cache.personMap.delete(person.id)
     }
+    state.personMapVersion++
     cache.peopleIndex = buildPeopleIndex(cache.people)
     if (state.peopleSearchText) {
       const keywords = getKeyWords(state.peopleSearchText)
@@ -646,6 +653,7 @@ const mutations = {
         cache.people.push(person)
       }
       cache.personMap.set(person.id, person)
+      state.personMapVersion++
       cache.people = sortPeople(cache.people)
       cache.peopleIndex = buildPeopleIndex(cache.people)
       if (state.peopleSearchText) {
