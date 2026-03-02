@@ -1820,6 +1820,7 @@ tbody:last-child .empty-line:last-child {
 
   th {
     padding: 1.5rem 0 0.5rem;
+    left: 0;
 
     span,
     div {

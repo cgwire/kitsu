@@ -28,7 +28,7 @@
         </thead>
         <tbody class="datatable-body">
           <tr class="datatable-type-header">
-            <th scope="rowgroup" colspan="6">
+            <th scope="rowgroup" colspan="8">
               <span class="datatable-row-header">
                 {{ $t('productions.status.open') }}
               </span>
@@ -85,7 +85,7 @@
         </tbody>
         <tbody v-if="closedProductions.length > 0">
           <tr class="datatable-type-header">
-            <th scope="rowgroup" colspan="6">
+            <th scope="rowgroup" colspan="8">
               <span class="datatable-row-header">
                 {{ $t('productions.status.closed') }}
               </span>
