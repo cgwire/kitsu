@@ -5,7 +5,7 @@
       'field--narrow': narrow
     }"
   >
-    <label class="label" v-if="label.length > 0">
+    <label class="label" v-if="label">
       {{ label }}
     </label>
     <div class="status-combo" :style="comboStyles">
@@ -24,18 +24,15 @@
           </span>
         </div>
         <chevron-down-icon
+          class="down-icon flexrow-item"
           :class="{
-            'down-icon': true,
-            'flexrow-item': true,
             white: colorOnly
           }"
         />
       </div>
       <div
-        ref="select"
+        class="select-input"
         :class="{
-          big: big,
-          'select-input': true,
           'open-top': openTop
         }"
         v-if="showStatusList"
@@ -89,10 +86,6 @@ export default {
   },
 
   props: {
-    big: {
-      default: false,
-      type: Boolean
-    },
     colorOnly: {
       default: false,
       type: Boolean
@@ -148,7 +141,7 @@ export default {
         return this.taskStatusMap.get(this.modelValue)
       } else if (this.addPlaceholder) {
         return {
-          short_name: '+ add status',
+          short_name: this.$t('task_status.add_task_status_placeholder'),
           color: '#999'
         }
       } else {
@@ -158,7 +151,6 @@ export default {
 
     comboStyles() {
       return {
-        width: this.big ? '150px' : '120px',
         background: this.colorOnly
           ? this.backgroundColor(this.currentStatus)
           : this.isDarkTheme
@@ -232,9 +224,9 @@ export default {
 }
 
 .status-combo {
+  display: inline-block;
   background: var(--background);
-  min-width: 120px;
-  width: 120px;
+  min-width: 80px;
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
@@ -257,6 +249,7 @@ export default {
 .selected-status-line {
   text-transform: uppercase;
   flex: 1;
+  margin-right: 0;
 }
 
 .status-line {
@@ -280,7 +273,7 @@ export default {
 
 .select-input {
   background: $white;
-  width: 120px;
+  min-width: calc(100% + 2px);
   position: absolute;
   border: 1px solid $light-grey-light;
   border-bottom-left-radius: 10px;
@@ -291,10 +284,6 @@ export default {
   top: 38px;
   left: 0;
   overflow-y: auto;
-
-  &.big {
-    width: 150px;
-  }
 
   &.open-top {
     top: auto;

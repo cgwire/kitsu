@@ -20,7 +20,8 @@ export default defineConfig({
     alias: {
       '@': `${import.meta.dirname}/src/`,
       vue: 'vue/dist/vue.esm-bundler.js',
-      'fabricjs-psbrush': `${import.meta.dirname}/node_modules/fabricjs-psbrush/dist/index.mjs`
+      'fabricjs-psbrush': `${import.meta.dirname}/node_modules/fabricjs-psbrush/dist/index.mjs`,
+      moment: `${import.meta.dirname}/node_modules/moment/min/moment-with-locales.js`
     }
   },
   css: {

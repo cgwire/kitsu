@@ -57,7 +57,7 @@
             >
               {{ $t('tasks.fields.entity') }}
             </th>
-            <th scope="col" class="time-spent">
+            <th scope="col" class="time-spent datatable-row-header">
               {{ $t('timesheets.time_spents') }}
             </th>
           </tr>
@@ -427,8 +427,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.datatable-head th {
+.datatable-row-header {
   z-index: 6; // over the .vue-slider (z-index: 5)
+
+  &.time-spent {
+    position: relative;
+    z-index: 5; // <th> must be under <td> on vertical scroll
+  }
 }
 
 .datatable-body tr:first-child th,
@@ -473,10 +478,6 @@ export default {
 
 .time-spent {
   width: 100%;
-
-  :deep(.vue-slider:hover) {
-    z-index: 6; // hover the ".datatable-head th" (z-index: 6)
-  }
 }
 
 td.name {

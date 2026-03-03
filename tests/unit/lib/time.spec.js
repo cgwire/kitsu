@@ -1,4 +1,4 @@
-import moment from 'moment'
+import moment from 'moment-timezone'
 import {
   addBusinessDays,
   daysToMinutes,
@@ -81,9 +81,18 @@ describe('time', () => {
   })
 
   test('monthToString', () => {
+    const locale = moment.locale()
+
     expect(monthToString(1)).toEqual('Jan')
     expect(monthToString(8)).toEqual('Aug')
     expect(monthToString(12)).toEqual('Dec')
+
+    moment.locale('fr')
+    expect(monthToString(1)).toEqual('janv.')
+    expect(monthToString(8)).toEqual('août')
+    expect(monthToString(12)).toEqual('déc.')
+
+    moment.locale(locale) // restore locale after test
   })
 
   test('getMonthRange', () => {

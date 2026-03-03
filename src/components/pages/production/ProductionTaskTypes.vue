@@ -10,7 +10,10 @@
       <div class="columns">
         <div class="column">
           <template v-if="remainingTaskTypes.length > 0">
-            <div class="flexrow mt1 mb1 add-task-type">
+            <div
+              class="flexrow mt1 mb1 add-task-type"
+              v-if="remainingTaskTypesForEntity.length"
+            >
               <combobox-task-type
                 class="flexrow-item selector"
                 :task-type-list="remainingTaskTypesForEntity"
