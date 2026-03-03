@@ -399,8 +399,7 @@ export default {
       'runningEpisodes',
       'taskStatusMap',
       'taskTypeMap',
-      'taskStatusMap',
-      'user'
+      'taskStatusMap'
     ]),
 
     statMax() {
