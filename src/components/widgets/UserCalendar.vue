@@ -66,6 +66,7 @@ import { BriefcaseIcon } from 'lucide-vue-next'
 import { mapActions, mapGetters } from 'vuex'
 
 import FullCalendar from '@fullcalendar/vue3'
+import allLocales from '@fullcalendar/core/locales-all'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
@@ -110,7 +111,9 @@ export default {
           right: 'dayGridMonth,dayGridWeek,multiMonthYear'
         },
         initialView: 'dayGridMonth',
-        firstDay: 1
+        firstDay: 1,
+        locales: allLocales,
+        locale: this.$i18n.locale_code ?? 'en'
       }
     }
   },
