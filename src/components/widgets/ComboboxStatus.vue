@@ -148,7 +148,7 @@ export default {
         return this.taskStatusMap.get(this.modelValue)
       } else if (this.addPlaceholder) {
         return {
-          short_name: '+ add status',
+          short_name: this.$t('task_status.add_task_status_placeholder'),
           color: '#999'
         }
       } else {

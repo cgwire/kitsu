@@ -168,7 +168,7 @@ export default {
       )
       return [
         {
-          name: '+ Task Type',
+          name: this.$t('task_types.add_task_type_placeholder'),
           id: '-'
         },
         ...taskTypes

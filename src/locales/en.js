@@ -41,6 +41,7 @@ export default {
   },
 
   asset_types: {
+    add_asset_type_placeholder: '+ Add Asset Type',
     add_asset_type_to_library: 'Add an asset type to the library',
     all_asset_types: 'All asset types',
     create_error: 'An error occurred while saving this asset type. Are you sure there is no asset type with a similar name?',
@@ -317,6 +318,7 @@ export default {
   },
 
   status_automations: {
+    add_status_automation_placeholder: '+ Add Status Automation',
     change_ready_for: 'changes "ready for" to',
     change_status: 'changes task status to',
     create_error: 'An error occurred while saving this status automation. Are you sure that there is no other automation with the same name?',
@@ -339,7 +341,7 @@ export default {
       out_field_type: 'Trigger',
       out_task_type: 'Applied Task Type',
       out_task_status: 'Applied Task Status',
-      import_last_revision: "Import Last Revision",
+      import_last_revision: 'Import Last Revision'
     },
     entity_types: {
       asset: 'Asset',
@@ -696,6 +698,7 @@ export default {
     delete_text: 'Are you sure you want to remove {name} from your database?',
     department: 'Department',
     description: 'Description',
+    developer_documentation: 'Developer documentation',
     documentation: 'Documentation',
     drop_files_here: 'Drop files here',
     edit: 'Edit',
@@ -707,6 +710,7 @@ export default {
     estimation: 'Estimation',
     estimation_short: 'Est.',
     expand_all: 'Expand all',
+    feedback: 'Roadmap / Feedback',
     files_selected: 'files selected',
     filter_group: 'Filter Group',
     filter_group_add: 'Add A Filter Group',
@@ -1426,6 +1430,7 @@ export default {
   },
 
   task_status: {
+    add_task_status_placeholder: '+ Add Status',
     add_task_status_to_library: 'Add a task status to the library',
     create_error: 'An error occurred while saving this task status. Are you sure there is no task status with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
@@ -1993,7 +1998,7 @@ export default {
     change_avatar: 'Change avatar',
     change_password: 'Change password',
     delete: 'Delete',
-    edit: "Edit",
+    edit: 'Edit',
     history: 'History',
     refresh: 'Refresh',
     restore: 'Restore'

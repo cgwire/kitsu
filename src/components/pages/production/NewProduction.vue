@@ -789,7 +789,7 @@ export default {
       )
       return [
         {
-          name: '+ Add Asset Type',
+          name: this.$t('asset_types.add_asset_type_placeholder'),
           id: '-'
         },
         ...assetTypes

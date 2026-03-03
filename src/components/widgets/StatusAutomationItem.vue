@@ -1,7 +1,7 @@
 <template>
   <div class="status-automation flexrow">
     <span class="flexrow-item entity-type">
-      {{ statusAutomation.entity_type }}
+      {{ entityType }}
     </span>
     <span class="in-task-type flexrow-item">
       <task-type-name
@@ -16,11 +16,10 @@
       />
     </span>
     <span class="flexrow-item trigger-type">
-      changes
       {{
         statusAutomation.out_field_type === 'ready_for'
-          ? 'ready for to'
-          : 'task status for'
+          ? $t('status_automations.change_ready_for')
+          : $t('status_automations.change_status')
       }}
     </span>
     <span class="out-task-type flexrow-item">
@@ -32,7 +31,7 @@
       class="flexrow-item"
       v-if="statusAutomation.out_field_type === 'status'"
     >
-      to
+      {{ $t('main.to') }}
     </span>
     <span class="out-task-status flexrow-item">
       <task-status-cell
@@ -76,6 +75,13 @@ export default {
 
   computed: {
     ...mapGetters(['isCurrentUserClient', 'getTaskStatus', 'getTaskType']),
+
+    entityType() {
+      const entityType = this.statusAutomation.entity_type
+      return this.$t(
+        `status_automations.entity_types.${entityType.toLowerCase()}`
+      )
+    },
 
     statusAutomationPath() {
       const route = {
