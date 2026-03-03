@@ -234,7 +234,6 @@
               class="flexrow-item"
               :task-status-list="availableTaskStatuses"
               :with-margin="false"
-              big
               add-placeholder
               @update:model-value="
                 id =>

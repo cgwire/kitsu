@@ -1430,7 +1430,7 @@ export default {
   },
 
   task_status: {
-    add_task_status_placeholder: '+ Add Status',
+    add_task_status_placeholder: '+ Add Task Status',
     add_task_status_to_library: 'Add a task status to the library',
     create_error: 'An error occurred while saving this task status. Are you sure there is no task status with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
