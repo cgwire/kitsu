@@ -38,8 +38,7 @@
               </label>
               <people-field
                 class="person-field"
-                :people="team"
-                small
+                :people="isStudio ? displayedPeople : team"
                 v-model="person"
               />
             </div>
@@ -387,6 +386,7 @@ export default {
   computed: {
     ...mapGetters([
       'currentProduction',
+      'displayedPeople',
       'isTVShow',
       'newsList',
       'newsTotal',
