@@ -684,12 +684,13 @@ export default {
 
       'news:new'(eventData) {
         if (
-          eventData.project_id === this.currentProduction.id &&
+          (this.isStudio ||
+            eventData.project_id === this.currentProduction.id) &&
           (!this.taskTypeId || this.taskTypeId === eventData.task_type_id) &&
           (!this.taskStatusId || this.taskStatusId === eventData.task_status_id)
         ) {
           this.loadSingleNews({
-            productionId: this.currentProduction.id,
+            productionId: eventData.project_id,
             newsId: eventData.news_id
           })
         }
@@ -697,11 +698,13 @@ export default {
 
       'task:update'(eventData) {
         const relatedNews = this.newsList.find(
-          n => n.task_id === eventData.task_id
+          news =>
+            news.project_id === eventData.project_id &&
+            news.task_id === eventData.task_id
         )
         if (relatedNews) {
           this.loadSingleNews({
-            productionId: this.currentProduction.id,
+            productionId: relatedNews.project_id,
             newsId: relatedNews.id
           })
         }
