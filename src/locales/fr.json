@@ -57,7 +57,8 @@
       },
       "include_all": "Inclure tous les types d'asset",
       "add_asset_type_to_library": "Ajouter un type d'asset à la bibliothèque",
-      "library_title": "Bibliothèque des types d'assets"
+      "library_title": "Bibliothèque des types d'assets",
+      "add_asset_type_placeholder": "+ Ajouter un type d'asset"
     },
     "breakdown": {
       "all_assets": "Tous les assets disponibles",
@@ -159,13 +160,13 @@
       "build_filter": {
         "asset_type": "Type d'asset",
         "all_types": "Tous les types d'assets",
-        "assignation": "Affectation",
-        "assignation_exists_for": "Il existe des missions pour",
+        "assignation": "Assignations",
+        "assignation_exists_for": "Il existe des assignations pour",
         "assigned_to": "Assigné à",
         "descriptor": "Metadata",
         "equal": "Égal",
         "in": "Dans",
-        "no_assignation_for": "Il n'existe pas d'affectation pour",
+        "no_assignation_for": "Il n'existe pas d'assignation pour",
         "no_filter": "Pas de filtre",
         "not_equal": "Pas égal",
         "not_assigned_to": "Pas assigné à",
@@ -493,7 +494,7 @@
       "archived": "Archivé",
       "avatar": {
         "open_page": "Ouvrir la page de {personName}",
-        "unassign": "Désaffecter {personName}"
+        "unassign": "Désassigner {personName}"
       },
       "color": "Couleur",
       "copy": "Copie",
@@ -535,7 +536,7 @@
       "no_estimation": "Pas d'estimation",
       "people": "Les personnes",
       "total": "Total",
-      "unassigned": "Non attribué",
+      "unassigned": "Non assigné",
       "year": "Année",
       "apply": "Appliquer",
       "back": "Retour",
@@ -545,7 +546,10 @@
       "hours": "heure | heures",
       "remove_search_query": "Êtes-vous sûr de vouloir supprimer la requête de recherche \"{name}\" ?",
       "remove_search_filter_group": "Êtes-vous sûr de vouloir supprimer le groupe de filtres de recherche \"{name}\" ?",
-      "shared_by": "Partagé par {name}"
+      "shared_by": "Partagé par {name}",
+      "continue": "Continuer",
+      "developer_documentation": "Documentation pour développeurs",
+      "feedback": "Feuille de route / Suggestions"
     },
     "menu": {
       "assign_tasks": "Assigner des tâches",
@@ -585,7 +589,7 @@
     },
     "notifications": {
       "and_change_status": " et a modifié le statut de la tâche",
-      "assigned_you": "vous a confié cette tâche",
+      "assigned_you": "vous a assigné cette tâche",
       "commented_on": "commenté",
       "mention_you_on": "vous a mentionné dans un commentaire",
       "no_notifications": "Il n'y a actuellement aucune notification pour vos projets en cours.",
@@ -601,7 +605,7 @@
       "only_replies": "Seulement les réponses",
       "all_statuses": "Lus et non lus",
       "all_notifications": "Toutes les notifications",
-      "assignation": "Affectation",
+      "assignation": "Assignation",
       "comment": "Commentaire",
       "initial_comment": "Commentaire initial",
       "mark_all_as_read": "Marquer tous les textes comme lus",
@@ -626,7 +630,7 @@
       "add_member_to_team": "Ajouter un membre à l'équipe",
       "create_invite": "Créer et envoyer une invitation",
       "create_error": "Une erreur est survenue en créant ou modifiant l'utilisateur. Êtes-vous sûr qu'il n'y a pas un utilisateur avec un nom ou un email similaire ? Si le problème persiste, contactez notre support pour discuter de ce soucis.",
-      "delete_error": "Une erreur s'est produite lors de la suppression de cet utilisateur. Il se peut que des données existantes soient actuellement liées à cet utilisateur. Êtes-vous sûr que cet utilisateur n'a pas d'affectation ou n'a pas écrit de commentaire ?",
+      "delete_error": "Une erreur s'est produite lors de la suppression de cet utilisateur. Il se peut que des données existantes soient actuellement liées à cet utilisateur. Êtes-vous sûr que cet utilisateur n'a pas d'assignation ou n'a pas écrit de commentaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {personName} de votre base de données ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant le nom d'utilisateur complet ci-dessous.",
       "edit_title": "Modifier les informations de",
       "empty_team": "Personne n'a été affecté à cette production.",
@@ -851,7 +855,7 @@
       "home": {
         "create_new": "Créer une nouvelle production",
         "empty": "Vous n'avez pas de productions ouvertes. Pourquoi ne pas en créer une nouvelle ?",
-        "no_task": "Aucune tâche ne vous a été confiée. Consultez votre superviseur pour voir ce que vous pouvez faire !",
+        "no_task": "Aucune tâche ne vous a été assignée. Consultez votre superviseur pour voir ce que vous pouvez faire !",
         "no_prod_for_client": "Vous n'avez accès à aucune production. Contactez l'administrateur de votre site pour obtenir un accès.",
         "title": "Mes productions",
         "welcome": "Bienvenue sur Kitsu"
@@ -1053,7 +1057,8 @@
           "error_register": "Une erreur est survenue en enregistrant l'appareil FIDO.",
           "error_unregister": "Une erreur est survenue en retirant l'appareil FIDO."
         },
-        "enabled": "Authentification à deux facteurs activée"
+        "enabled": "Authentification à deux facteurs activée",
+        "mandatory": "Votre organisation requiert une authentification à deux facteurs. Veuillez activer au moins une méthode pour continuer."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "Assets, plans, séquences, ..."
       },
       "add_task_status_to_library": "Ajouter un statut de tâche à la bibliothèque",
-      "library_title": "Bibliothèque de statuts des tâches"
+      "library_title": "Bibliothèque de statuts des tâches",
+      "add_task_status_placeholder": "+ Ajouter un statut à la tâche"
     },
     "task_types": {
       "delete_text": "Êtes-vous sûr de vouloir retirer {name} de la base de données ?",
@@ -1186,7 +1192,7 @@
       "apply_to_prod": "Appliquer à la production",
       "apply_to_prod_confirm": "Êtes-vous sûr de vouloir appliquer cette version du planning à la production actuelle ? Cela annulera les valeurs de la tâche actuelle.",
       "apply_to_prod_error": "Une erreur s'est produite lors de l'application de la version du planning à la production en cours.",
-      "assign": "Affecter à :",
+      "assign": "Assigner à :",
       "export": "Exporter planning",
       "export_error": "Une erreur s'est produite lors de l'exportation des données.",
       "reset_list": "Réinitialiser la liste",
@@ -1434,7 +1440,7 @@
         "high": "Haute",
         "very_high": "Très haute"
       },
-      "assignation_warning": "Attention : vous ne verrez pas le résultat parce que vous cachez les affectations",
+      "assignation_warning": "Attention : vous ne verrez pas le résultat parce que vous cachez les assignations",
       "for_selection": "Pour la liste et les filtres courants",
       "for_project": "Pour le projet",
       "all_tasks": "Toutes les tâches",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "Statut",
         "ready_for": "Prêt pour"
-      }
+      },
+      "add_status_automation_placeholder": "+ Ajouter une automatisation de statuts"
     },
     "preview_room": {
       "join_room": "Rejoindre la conférence",
