@@ -132,7 +132,10 @@
       />
 
       <div class="buttons flexrow pull-bottom" ref="buttons">
-        <div class="left flexrow" v-if="isMovie || isSound || is3DAnimation">
+        <div
+          class="left flexrow"
+          v-if="isMovie || isSound || (is3DModel && is3DAnimation)"
+        >
           <button-simple
             class="flexrow-item"
             :title="$t('playlists.actions.play')"
@@ -154,7 +157,7 @@
             :is-dark="true"
             :thin="true"
             v-model="current3DAnimation"
-            v-if="is3DAnimation"
+            v-if="is3DModel && is3DAnimation"
           />
         </div>
 
