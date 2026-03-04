@@ -35,7 +35,7 @@
       "only_current_episode": "現在のエピソードのみ",
       "linked": "リンク済み",
       "no_concept": "このアセットにリンクされたコンセプトはありません",
-      "casted_in_shots": "nbショット}ショットでキャスティング",
+      "casted_in_shots": "{nbShots}ショットでキャスティング",
       "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「DELETE」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
     },
@@ -57,7 +57,8 @@
       },
       "include_all": "すべてのアセット用タスクタイプを含む",
       "add_asset_type_to_library": "ライブラリにアセットタイプを追加する",
-      "library_title": "アセット・タイプ・ライブラリー"
+      "library_title": "アセット・タイプ・ライブラリー",
+      "add_asset_type_placeholder": "+ 資産タイプの追加"
     },
     "breakdown": {
       "all_assets": "利用可能なすべてのアセット",
@@ -543,9 +544,12 @@
       "entities": "エンティティ",
       "expand_all": "すべてを拡大する",
       "hours": "時間",
-      "remove_search_query": "本当に\"{名前}\"という検索クエリを削除しますか？",
-      "remove_search_filter_group": "検索フィルターグループ\"{名前}\"を本当に削除しますか？",
-      "shared_by": "名前}によって共有される"
+      "remove_search_query": "本当に\"{name}\"という検索クエリを削除しますか？",
+      "remove_search_filter_group": "検索フィルターグループ\"{name}\"を本当に削除しますか？",
+      "shared_by": "{name} によって共有される",
+      "continue": "続ける",
+      "developer_documentation": "開発者向けドキュメント",
+      "feedback": "ロードマップ / フィードバック"
     },
     "menu": {
       "assign_tasks": "タスクにアサイン",
@@ -836,7 +840,7 @@
       "no_clients_to_notify": "通知する顧客はいない。",
       "notify_clients_success": "通知は正常に送信されました。",
       "unmute": "ミュート解除",
-      "volume_level": "ボリューム{レベル}%。"
+      "volume_level": "ボリューム{level}%。"
     },
     "productions": {
       "current": "選択されたプロダクション",
@@ -1053,7 +1057,8 @@
           "error_register": "FIDO デバイスの登録中にエラーが発生しました。",
           "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。"
         },
-        "enabled": "二要素認証が有効"
+        "enabled": "二要素認証が有効",
+        "mandatory": "お客様の組織では二要素認証が必要です。続行するには、少なくとも1つの方法を有効にしてください。"
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "アセット、ショット、シーケンス、…"
       },
       "add_task_status_to_library": "タスクのステータスをライブラリに追加する",
-      "library_title": "タスク・ステータス・ライブラリ"
+      "library_title": "タスク・ステータス・ライブラリ",
+      "add_task_status_placeholder": "+ タスクステータスの追加"
     },
     "task_types": {
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
@@ -1205,7 +1211,7 @@
       "edit_version_exist": "似た名前のバージョンはすでに存在する。",
       "delete_version": "スケジュールバージョンの削除",
       "delete_version_error": "このスケジュールバージョンの削除中にエラーが発生しました。サポートチームまでご連絡ください。",
-      "delete_version_message": "本当にスケジュールバージョン{名前}を削除しますか？以下にスケジュールバージョン名を入力して確認してください。",
+      "delete_version_message": "本当にスケジュールバージョン{name}を削除しますか？以下にスケジュールバージョン名を入力して確認してください。",
       "versions": {
         "reference": "参考予想",
         "from": "より",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "ステータス",
         "ready_for": "準備対象"
-      }
+      },
+      "add_status_automation_placeholder": "+ ステータス・オートメーションの追加"
     },
     "preview_room": {
       "join_room": "レビュールームに参加",
@@ -1828,7 +1835,7 @@
       "delete_budget_entry_error": "この予算エントリの削除中にエラーが発生しました。サポートチームまでご連絡ください。",
       "delete_budget_entry_message": "この予算項目を削除してもよろしいですか？",
       "delete_budget_error": "この予算の削除中にエラーが発生しました。サポートチームまでご連絡ください。",
-      "delete_budget_message": "予算{名前}を削除してもよろしいですか？下に予算名を入力して確認してください。",
+      "delete_budget_message": "予算{name}を削除してもよろしいですか？下に予算名を入力して確認してください。",
       "difference": "違い",
       "edit_budget": "現在の予算バージョンを編集する",
       "edit_budget_entry": "エントリーを編集する",
