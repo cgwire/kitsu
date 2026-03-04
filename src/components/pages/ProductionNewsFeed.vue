@@ -18,7 +18,7 @@
               :label="$t('shots.fields.episode')"
               :options="runningEpisodeOptions"
               v-model="episodeId"
-              v-if="isTVShow"
+              v-if="!isStudio && isTVShow"
             />
             <combobox-status
               class="flexrow-item selector"
@@ -90,8 +90,8 @@
                   }}
                 </div>
                 <div
-                  :key="'news-' + news.id"
-                  :ref="'news-' + news.id"
+                  :key="`news-${news.id}`"
+                  :ref="`news-${news.id}`"
                   v-for="(news, index) in dayList"
                 >
                   <div v-if="previewMode === 'comments'">
@@ -264,8 +264,9 @@
 
     <div id="side-column" class="column side-column">
       <task-info
-        :task="currentTask"
+        :entity-type="currentEntityType"
         :is-loading="loading.currentTask"
+        :task="currentTask"
         with-actions
       />
     </div>
@@ -401,6 +402,10 @@ export default {
       'taskTypeMap',
       'taskStatusMap'
     ]),
+
+    currentEntityType() {
+      return this.currentTask?.task_type?.for_entity
+    },
 
     statMax() {
       if (this.newsStats) {
@@ -611,7 +616,7 @@ export default {
           task_status_id: this.params.task_status_id,
           task_type_id: this.params.task_type_id
         }
-        if (this.$router) this.$router.push({ query })
+        this.$router.push({ query })
         this.loadNews(this.params)
           .then(() => {
             this.loading.news = false
@@ -706,6 +711,10 @@ export default {
 
   watch: {
     currentProduction() {
+      this.init()
+    },
+
+    isStudio() {
       this.init()
     },
 
