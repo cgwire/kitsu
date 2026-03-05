@@ -44,148 +44,145 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'entity-thumbnail',
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 
-  props: {
-    entity: {
-      default: () => {},
-      type: Object
-    },
-    square: {
-      default: false,
-      type: Boolean
-    },
-    width: {
-      default: null,
-      type: Number
-    },
-    height: {
-      default: null,
-      type: Number
-    },
-    maxWidth: {
-      default: null,
-      type: Number
-    },
-    maxHeight: {
-      default: null,
-      type: Number
-    },
-    noPreview: {
-      default: false,
-      type: Boolean
-    },
-    emptyHeight: {
-      default: 30,
-      type: Number
-    },
-    emptyWidth: {
-      default: 50,
-      type: Number
-    },
-    previewFileId: {
-      default: null,
-      type: String
-    },
-    withLink: {
-      default: true,
-      type: Boolean
-    }
+const store = useStore()
+
+const props = defineProps({
+  entity: {
+    default: () => {},
+    type: Object
   },
-
-  data() {
-    return {
-      timer: ''
-    }
+  square: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    originalPath() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return '/api/pictures/originals/preview-files/' + previewFileId + '.png'
-    },
-
-    isPreview() {
-      const previewFileId = this.previewFileId || this.entity?.preview_file_id
-      return previewFileId?.length > 0
-    },
-
-    imgStyle() {
-      const style = {}
-      if (this.emptyWidth) {
-        style['max-width'] = this.emptyWidth + 'px'
-        style['min-width'] = this.emptyWidth + 'px'
-      } else if (this.maxWidth) {
-        style['max-width'] = this.maxWidth + 'px'
-      } else if (this.width) {
-        style.width = this.width + 'px'
-        style['min-width'] = this.width + 'px'
-      }
-      if (this.emptyHeight) {
-        style['max-height'] = this.emptyHeight + 'px'
-        style['min-height'] = this.emptyHeight + 'px'
-      } else if (this.maxHeight) {
-        style['max-height'] = this.maxHeight + 'px'
-      } else if (this.height) {
-        style.height = this.height + 'px'
-      }
-      return style
-    },
-
-    thumbnailPath() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-
-      if (this.square) {
-        return (
-          '/api/pictures/thumbnails-square/preview-files/' +
-          previewFileId +
-          '.png'
-        )
-      } else {
-        if (this.width && this.width > 150) {
-          return (
-            '/api/pictures/previews/preview-files/' +
-            previewFileId +
-            '.png' +
-            this.timer
-          )
-        } else {
-          return (
-            '/api/pictures/thumbnails/preview-files/' +
-            previewFileId +
-            '.png' +
-            this.timer
-          )
-        }
-      }
-    },
-
-    thumbnailKey() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return `thumbnail-${previewFileId}`
-    }
+  width: {
+    default: null,
+    type: Number
   },
-
-  methods: {
-    onClicked() {
-      if (this.noPreview) return
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
-    }
+  height: {
+    default: null,
+    type: Number
   },
+  maxWidth: {
+    default: null,
+    type: Number
+  },
+  maxHeight: {
+    default: null,
+    type: Number
+  },
+  noPreview: {
+    default: false,
+    type: Boolean
+  },
+  emptyHeight: {
+    default: 30,
+    type: Number
+  },
+  emptyWidth: {
+    default: 50,
+    type: Number
+  },
+  previewFileId: {
+    default: null,
+    type: String
+  },
+  withLink: {
+    default: true,
+    type: Boolean
+  }
+})
 
-  watch: {
-    previewFileId() {
-      this.timer = '?t=' + new Date().valueOf()
-    },
+const timer = ref('')
 
-    'entity.preview_file_id'() {
-      this.timer = '?t=' + new Date().valueOf()
+const originalPath = computed(() => {
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  return '/api/pictures/originals/preview-files/' + previewFileId + '.png'
+})
+
+const isPreview = computed(() => {
+  const previewFileId = props.previewFileId || props.entity?.preview_file_id
+  return previewFileId?.length > 0
+})
+
+const imgStyle = computed(() => {
+  const style = {}
+  if (props.emptyWidth) {
+    style['max-width'] = props.emptyWidth + 'px'
+    style['min-width'] = props.emptyWidth + 'px'
+  } else if (props.maxWidth) {
+    style['max-width'] = props.maxWidth + 'px'
+  } else if (props.width) {
+    style.width = props.width + 'px'
+    style['min-width'] = props.width + 'px'
+  }
+  if (props.emptyHeight) {
+    style['max-height'] = props.emptyHeight + 'px'
+    style['min-height'] = props.emptyHeight + 'px'
+  } else if (props.maxHeight) {
+    style['max-height'] = props.maxHeight + 'px'
+  } else if (props.height) {
+    style.height = props.height + 'px'
+  }
+  return style
+})
+
+const thumbnailPath = computed(() => {
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+
+  if (props.square) {
+    return (
+      '/api/pictures/thumbnails-square/preview-files/' +
+      previewFileId +
+      '.png'
+    )
+  } else {
+    if (props.width && props.width > 150) {
+      return (
+        '/api/pictures/previews/preview-files/' +
+        previewFileId +
+        '.png' +
+        timer.value
+      )
+    } else {
+      return (
+        '/api/pictures/thumbnails/preview-files/' +
+        previewFileId +
+        '.png' +
+        timer.value
+      )
     }
   }
+})
+
+const thumbnailKey = computed(() => {
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  return `thumbnail-${previewFileId}`
+})
+
+function onClicked() {
+  if (props.noPreview) return
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  store.commit('SHOW_PREVIEW_FILE', previewFileId)
 }
+
+watch(
+  () => props.previewFileId,
+  () => {
+    timer.value = '?t=' + new Date().valueOf()
+  }
+)
+
+watch(
+  () => props.entity?.preview_file_id,
+  () => {
+    timer.value = '?t=' + new Date().valueOf()
+  }
+)
 </script>
 
 <style lang="scss" scoped>
