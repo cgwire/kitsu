@@ -42,8 +42,10 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
+
+import { useCombobox } from '@/composables/combobox'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -69,7 +71,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const showProductionList = ref(false)
+const { showList: showProductionList, toggle: toggleProductionList, select: selectProduction } = useCombobox(emit)
 
 const currentProduction = computed(() => {
   return (
@@ -78,14 +80,6 @@ const currentProduction = computed(() => {
   )
 })
 
-function selectProduction(production) {
-  emit('update:modelValue', production.id)
-  showProductionList.value = false
-}
-
-function toggleProductionList() {
-  showProductionList.value = !showProductionList.value
-}
 </script>
 
 <style lang="scss" scoped>
