@@ -16,26 +16,22 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'status-stats',
+<script setup>
+import { computed } from 'vue'
 
-  props: {
-    stats: Array
-  },
+const props = defineProps({
+  stats: Array
+})
 
-  computed: {
-    statMax() {
-      if (this.stats) {
-        return this.stats.reduce((max, stat) => {
-          return Math.max(stat.value, max)
-        }, 0)
-      } else {
-        return 0
-      }
-    }
+const statMax = computed(() => {
+  if (props.stats) {
+    return props.stats.reduce((max, stat) => {
+      return Math.max(stat.value, max)
+    }, 0)
+  } else {
+    return 0
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
