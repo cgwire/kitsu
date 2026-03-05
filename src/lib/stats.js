@@ -1,3 +1,19 @@
+const RETAKE_CHART_COLORS = {
+  done: '#22d160',
+  retake: '#ff3860',
+  other: '#6f727a'
+}
+
+const DEFAULT_STATUS_COLOR = '#6F727A'
+
+const createStatusEntry = taskStatus => ({
+  name: taskStatus.short_name,
+  color: taskStatus.color,
+  count: 0,
+  frames: 0,
+  drawings: 0
+})
+
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value], ...]
 // Set count data or frames data depending on data type.
@@ -13,7 +29,7 @@ export const getChartData = (
   return Object.keys(statusData)
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
-      const color = data.is_default ? '#6F727A' : data.color
+      const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
       return [data.name, data[valueField], color]
     })
     .sort(_sortData)
@@ -37,20 +53,15 @@ export const getRetakeChartData = (
   columnId,
   dataType = 'count'
 ) => {
-  const colorMap = {
-    done: '#22d160',
-    retake: '#ff3860',
-    other: '#6f727a'
-  }
   if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
   const statusData = { ...mainStats[entryId][columnId] }
   delete statusData.evolution
   delete statusData.max_retake_count
   const valueField = dataType
   return [
-    ['retake', statusData.retake[valueField] || 0, colorMap.retake],
-    ['other', statusData.other[valueField] || 0, colorMap.other],
-    ['done', statusData.done[valueField] || 0, colorMap.done]
+    ['retake', statusData.retake[valueField] || 0, RETAKE_CHART_COLORS.retake],
+    ['other', statusData.other[valueField] || 0, RETAKE_CHART_COLORS.other],
+    ['done', statusData.done[valueField] || 0, RETAKE_CHART_COLORS.done]
   ]
 }
 
@@ -133,51 +144,21 @@ const computeTaskResult = (
         results[sequenceId][taskTypeId] = {}
       }
 
-      // All / all intersections
       if (!results.all.all[taskStatusId]) {
-        results.all.all[taskStatusId] = {
-          name: taskStatus.short_name,
-          color: taskStatus.color,
-          count: 0,
-          frames: 0,
-          drawings: 0
-        }
+        results.all.all[taskStatusId] = createStatusEntry(taskStatus)
       }
-
-      // All line
       if (!results.all[taskTypeId]) {
         results.all[taskTypeId] = {}
       }
       if (!results.all[taskTypeId][taskStatusId]) {
-        results.all[taskTypeId][taskStatusId] = {
-          name: taskStatus.short_name,
-          color: taskStatus.color,
-          count: 0,
-          frames: 0,
-          drawings: 0
-        }
+        results.all[taskTypeId][taskStatusId] = createStatusEntry(taskStatus)
       }
-
-      // All column
       if (!results[sequenceId].all[taskStatusId]) {
-        results[sequenceId].all[taskStatusId] = {
-          name: taskStatus.short_name,
-          color: taskStatus.color,
-          count: 0,
-          frames: 0,
-          drawings: 0
-        }
+        results[sequenceId].all[taskStatusId] = createStatusEntry(taskStatus)
       }
-
-      // Columns
       if (!results[sequenceId][taskTypeId][taskStatusId]) {
-        results[sequenceId][taskTypeId][taskStatusId] = {
-          name: taskStatus.short_name,
-          color: taskStatus.color,
-          count: 0,
-          frames: 0,
-          drawings: 0
-        }
+        results[sequenceId][taskTypeId][taskStatusId] =
+          createStatusEntry(taskStatus)
       }
 
       // Slice count

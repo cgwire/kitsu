@@ -9,13 +9,15 @@
  */
 export const buildQueryString = (path, params) => {
   const result = `${path}?`
-  const couples = []
+  const pairs = []
   Object.keys(params).forEach(key => {
     if (
       params[key] ||
       (typeof params[key] === 'boolean' && params[key] === false)
     )
-      couples.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      pairs.push(
+        `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
+      )
   })
-  return result + couples.join('&')
+  return result + pairs.join('&')
 }
