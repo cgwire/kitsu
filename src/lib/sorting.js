@@ -261,109 +261,70 @@ export const sortValidationColumns = (
   })
 }
 
-export const sortAssetResult = (result, sorting, taskTypeMap, taskMap) => {
+const compareByName = (a, b) =>
+  a.name.localeCompare(b.name, undefined, { numeric: true })
+
+const sortEntityResult = (result, sorting, taskMap, thenBySteps, defaultSort) => {
   if (sorting && sorting.length > 0) {
     const sortInfo = sorting[0]
     const sortEntities =
       sortInfo.type === 'metadata'
         ? sortByMetadata(sortInfo)
         : sortByTaskType(taskMap, sortInfo)
-    result = result.sort(
-      firstBy('canceled')
-        .thenBy(sortEntities)
-        .thenBy((a, b) =>
-          a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
-            numeric: true
-          })
-        )
-        .thenBy((a, b) =>
-          a.name.localeCompare(b.name, undefined, { numeric: true })
-        )
-    )
+    let sorter = firstBy('canceled').thenBy(sortEntities)
+    for (const step of thenBySteps) {
+      sorter = sorter.thenBy(step)
+    }
+    result = result.sort(sorter)
   } else {
-    result = sortAssets(result)
+    result = defaultSort(result)
   }
   return result
+}
+
+export const sortAssetResult = (result, sorting, taskTypeMap, taskMap) => {
+  return sortEntityResult(result, sorting, taskMap, [
+    (a, b) =>
+      a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
+        numeric: true
+      }),
+    compareByName
+  ], sortAssets)
 }
 
 export const sortShotResult = (result, sorting, taskTypeMap, taskMap) => {
-  if (sorting && sorting.length > 0) {
-    const sortInfo = sorting[0]
-    let sortEntities = sortByTaskType(taskMap, sortInfo)
-    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
-    result = result.sort(
-      firstBy('canceled')
-        .thenBy(sortEntities)
-        .thenBy(sortByEpisode)
-        .thenBy((a, b) =>
-          a.sequence_name.localeCompare(b.sequence_name, undefined, {
-            numeric: true
-          })
-        )
-        .thenBy((a, b) =>
-          a.name.localeCompare(b.name, undefined, { numeric: true })
-        )
-    )
-  } else {
-    result = sortShots(result)
-  }
-  return result
+  return sortEntityResult(result, sorting, taskMap, [
+    sortByEpisode,
+    (a, b) =>
+      a.sequence_name.localeCompare(b.sequence_name, undefined, {
+        numeric: true
+      }),
+    compareByName
+  ], sortShots)
 }
 
 export const sortSequenceResult = (result, sorting, taskTypeMap, taskMap) => {
-  if (sorting && sorting.length > 0) {
-    const sortInfo = sorting[0]
-    let sortEntities = sortByTaskType(taskMap, sortInfo)
-    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
-    result = result.sort(
-      firstBy('canceled')
-        .thenBy(sortEntities)
-        .thenBy(sortByEpisode)
-        .thenBy((a, b) =>
-          a.name.localeCompare(b.name, undefined, { numeric: true })
-        )
-    )
-  } else {
-    result = sortByName(result)
-  }
-  return result
+  return sortEntityResult(
+    result, sorting, taskMap,
+    [sortByEpisode, compareByName],
+    sortByName
+  )
 }
 
 export const sortEpisodeResult = (result, sorting, taskTypeMap, taskMap) => {
-  if (sorting && sorting.length > 0) {
-    const sortInfo = sorting[0]
-    let sortEntities = sortByTaskType(taskMap, sortInfo)
-    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
-    result = result.sort(
-      firstBy('canceled')
-        .thenBy(sortEntities)
-        .thenBy((a, b) =>
-          a.name.localeCompare(b.name, undefined, { numeric: true })
-        )
-    )
-  } else {
-    result = sortByName(result)
-  }
-  return result
+  return sortEntityResult(
+    result, sorting, taskMap,
+    [compareByName],
+    sortByName
+  )
 }
 
 export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
-  if (sorting && sorting.length > 0) {
-    const sortInfo = sorting[0]
-    let sortEntities = sortByTaskType(taskMap, sortInfo)
-    if (sortInfo.type === 'metadata') sortEntities = sortByMetadata(sortInfo)
-    result = result.sort(
-      firstBy('canceled')
-        .thenBy(sortEntities)
-        .thenBy(sortByEpisode)
-        .thenBy((a, b) =>
-          a.name.localeCompare(b.name, undefined, { numeric: true })
-        )
-    )
-  } else {
-    result = sortEdits(result)
-  }
-  return result
+  return sortEntityResult(
+    result, sorting, taskMap,
+    [sortByEpisode, compareByName],
+    sortEdits
+  )
 }
 
 const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {

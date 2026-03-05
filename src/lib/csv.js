@@ -258,7 +258,8 @@ const csv = {
     taskStatusMap,
     entryMap,
     countMode = 'count',
-    production
+    production,
+    { excludeStatuses = [], sortEntries = true } = {}
   ) {
     let entries = []
     const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap, production)
@@ -266,6 +267,7 @@ const csv = {
 
     entryIds.forEach(entryId => {
       const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
+        .filter(s => !excludeStatuses.includes(s))
       const total = getStatsTotalCount(
         mainStats,
         taskStatusIds,
@@ -304,19 +306,21 @@ const csv = {
             )
           } else {
             Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
-              lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
+              if (!excludeStatuses.includes(taskStatusId)) {
+                lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
+              }
             })
           }
         }
       })
 
-      entries = entries.concat(
-        Object.values(lineMap).sort((a, b) => {
-          return a[1].localeCompare(b[1], undefined, {
-            numeric: true
-          })
-        })
-      )
+      const values = Object.values(lineMap)
+      if (sortEntries) {
+        values.sort((a, b) =>
+          a[1].localeCompare(b[1], undefined, { numeric: true })
+        )
+      }
+      entries = entries.concat(values)
       entries.push([''])
     })
     return entries
@@ -336,13 +340,18 @@ const csv = {
       taskTypeMap,
       production
     )
-    const entries = csv.getRetakeStatReportsEntries(
+    const retakeOptions = {
+      excludeStatuses: ['max_retake_count', 'evolution'],
+      sortEntries: false
+    }
+    const entries = csv.getStatReportsEntries(
       mainStats,
       taskTypeMap,
       taskStatusMap,
       entryMap,
       countMode,
-      production
+      production,
+      retakeOptions
     )
     const lines = [headers, ...entries]
     return csv.buildCsvFile(name, lines)
@@ -356,65 +365,18 @@ const csv = {
     countMode = 'count',
     production
   ) {
-    let entries = []
-    const taskTypeIds = getStatsTaskTypeIds(mainStats, taskTypeMap, production)
-    const entryIds = getStatsEntryIds(mainStats, entryMap)
-
-    entryIds.forEach(entryId => {
-      const taskStatusIds = getStatsTaskStatusIdsForEntry(
-        mainStats,
-        entryId
-      ).filter(s => !['max_retake_count', 'evolution'].includes(s))
-      const total = getStatsTotalCount(
-        mainStats,
-        taskStatusIds,
-        countMode,
-        entryId
-      )
-      const lineMap = buildTotalLines(
-        entryMap,
-        taskStatusMap,
-        countMode,
-        mainStats,
-        taskStatusIds,
-        entryId,
-        total
-      )
-
-      taskTypeIds.forEach(taskTypeId => {
-        if (taskTypeId !== 'all') {
-          const taskTypeStats = mainStats[entryId][taskTypeId]
-          if (taskTypeStats) {
-            const total = getStatsTotalEntryCount(
-              mainStats,
-              taskTypeStats,
-              countMode,
-              entryId,
-              taskTypeId
-            )
-            addEntryStatusStats(
-              mainStats,
-              countMode,
-              entryId,
-              taskTypeId,
-              taskStatusIds,
-              total,
-              lineMap
-            )
-          } else {
-            Object.keys(mainStats[entryId].all).forEach(taskStatusId => {
-              if (!['max_retake_count', 'evolution'].includes(taskStatusId)) {
-                lineMap[taskStatusId] = lineMap[taskStatusId].concat(['', ''])
-              }
-            })
-          }
-        }
-      })
-
-      entries = entries.concat(Object.values(lineMap))
-      entries.push([''])
-    })
-    return entries
+    return csv.getStatReportsEntries(
+      mainStats,
+      taskTypeMap,
+      taskStatusMap,
+      entryMap,
+      countMode,
+      production,
+      {
+        excludeStatuses: ['max_retake_count', 'evolution'],
+        sortEntries: false
+      }
+    )
   },
 
   generateQuotas(
