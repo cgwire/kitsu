@@ -1017,6 +1017,7 @@ import preferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
+import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 
@@ -1046,7 +1047,13 @@ import VideoProgress from '@/components/previews/VideoProgress.vue'
 export default {
   name: 'playlist-player',
 
-  mixins: [annotationMixin, domMixin, previewRoomMixin, playerMixin],
+  mixins: [
+    annotationMixin,
+    domMixin,
+    fullScreenMixin,
+    previewRoomMixin,
+    playerMixin
+  ],
 
   components: {
     ArrowUpRightIcon,
