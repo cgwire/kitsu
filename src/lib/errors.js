@@ -1,6 +1,6 @@
 const errors = {
   backToLogin() {
-    if (window.location !== '/login') {
+    if (window.location.pathname !== '/login') {
       window.location.replace('/login')
     }
   }
