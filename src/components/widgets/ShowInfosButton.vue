@@ -17,53 +17,46 @@
   </button>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, watch } from 'vue'
+import { useStore } from 'vuex'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
-export default {
-  name: 'show-infos-button',
+const store = useStore()
 
-  components: {
-    KitsuIcon
-  },
+const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
 
-  computed: {
-    ...mapGetters(['isShowInfosBreakdown']),
+const buttonIsOn = computed(() => isShowInfosBreakdown.value)
 
-    buttonIsOn() {
-      return this.isShowInfosBreakdown
-    }
-  },
+function hideInfosBreakdown() {
+  return store.dispatch('hideInfosBreakdown')
+}
 
-  methods: {
-    ...mapActions(['hideInfosBreakdown', 'showInfosBreakdown']),
+function showInfosBreakdown() {
+  return store.dispatch('showInfosBreakdown')
+}
 
-    toggleInfos() {
-      if (this.isShowInfosBreakdown) {
-        this.hideInfosBreakdown()
-      } else {
-        this.showInfosBreakdown()
-      }
-    }
-  },
-
-  mounted() {
-    if (localStorage.getItem('show-infos-breakdown') === 'false') {
-      this.hideInfosBreakdown()
-    } else {
-      this.showInfosBreakdown()
-    }
-  },
-
-  watch: {
-    isShowInfosBreakdown() {
-      const value = this.isShowInfosBreakdown.toString()
-      localStorage.setItem('show-infos-breakdown', value)
-    }
+function toggleInfos() {
+  if (isShowInfosBreakdown.value) {
+    hideInfosBreakdown()
+  } else {
+    showInfosBreakdown()
   }
 }
+
+onMounted(() => {
+  if (localStorage.getItem('show-infos-breakdown') === 'false') {
+    hideInfosBreakdown()
+  } else {
+    showInfosBreakdown()
+  }
+})
+
+watch(isShowInfosBreakdown, () => {
+  const value = isShowInfosBreakdown.value.toString()
+  localStorage.setItem('show-infos-breakdown', value)
+})
 </script>
 
 <style lang="scss" scoped>
