@@ -1,28 +1,27 @@
+const PRECISION_FACTOR = 10000
+
+const roundPrecision = value =>
+  Math.round(value * PRECISION_FACTOR) / PRECISION_FACTOR
+
 /*
  * Make sure that given time matches a frame in the video
  */
 export const roundToFrame = (time, fps) => {
-  const frameFactor = Math.round((1 / fps) * 10000) / 10000
+  const frameFactor = roundPrecision(1 / fps)
   const frameNumber = Math.round(time / frameFactor)
-  let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.round(roundedTime * 10000) / 10000
-  return roundedTime
+  return roundPrecision(frameNumber * frameFactor)
 }
 
 export const ceilToFrame = (time, fps) => {
-  const frameFactor = Math.round((1 / fps) * 10000) / 10000
+  const frameFactor = roundPrecision(1 / fps)
   const frameNumber = Math.ceil(time / frameFactor)
-  let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.ceil(roundedTime * 10000) / 10000
-  return roundedTime
+  return Math.ceil(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
 }
 
 export const floorToFrame = (time, fps) => {
-  const frameFactor = Math.round((1 / fps) * 10000) / 10000
+  const frameFactor = roundPrecision(1 / fps)
   const frameNumber = Math.floor(time / frameFactor)
-  let roundedTime = frameNumber * frameFactor
-  roundedTime = Math.floor(roundedTime * 10000) / 10000
-  return roundedTime
+  return Math.floor(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
 }
 
 /*
@@ -43,13 +42,13 @@ export const formatTime = (rawTime, fps) => {
 
   const time = new Date(1000 * rawTime).toISOString()
   const milliseconds = parseInt(time.substring(20, 23))
-  const frameDuration = Math.round((1 / fps) * 10000) / 10000
+  const frameDuration = roundPrecision(1 / fps)
   const frame = `${Math.round(milliseconds / (1000 * frameDuration))}`.padStart(
     2,
     '0'
   )
   try {
-    return `${time.substr(11, 8)}:${frame}`
+    return `${time.substring(11, 19)}:${frame}`
   } catch (err) {
     console.error(err)
     return '00:00:00:00'

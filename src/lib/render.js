@@ -54,11 +54,13 @@ export const renderComment = (
 ) => {
   let html = renderMarkdown(input)
 
+  const replacements = new Map()
+
   if (mentions) {
     for (const personId of mentions) {
       const person = personMap.get(personId)
       if (!person) continue
-      html = html.replaceAll(
+      replacements.set(
         `@${person.full_name}`,
         `<a class="mention" href="/people/${person.id}">@${person.full_name}</a>`
       )
@@ -66,7 +68,7 @@ export const renderComment = (
     for (const departmentId of departmentMentions) {
       const department = departmentMap.get(departmentId)
       if (!department) continue
-      html = html.replaceAll(
+      replacements.set(
         `@${department.name}`,
         `<span style="color: ${department.color}">@${department.name}</span>`
       )
@@ -74,19 +76,30 @@ export const renderComment = (
   }
 
   if (taskTypes) {
-    // replace #TaskType with a link to the task within the same entity
     taskTypes.forEach(taskType => {
       const task_name = encodeHtmlEntities(taskType.name)
-      if (taskType.url)
-        html = html.replaceAll(
+      if (taskType.url) {
+        replacements.set(
           `#${task_name}`,
           `<a class="mention mention-task" href="${taskType.url}">#${task_name}</a>`
         )
+      }
     })
-    // replace #All with a link to the shot
-    html = html.replaceAll(
+    replacements.set(
       '#All',
       `<a class="mention mention-task" href="#">#All</a>`
+    )
+  }
+
+  if (replacements.size > 0) {
+    const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const pattern = [...replacements.keys()]
+      .sort((a, b) => b.length - a.length)
+      .map(escapeRegex)
+      .join('|')
+    html = html.replace(
+      new RegExp(pattern, 'g'),
+      match => replacements.get(match)
     )
   }
 
