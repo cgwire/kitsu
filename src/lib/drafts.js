@@ -1,14 +1,29 @@
+const DRAFT_PREFIX = 'draft-'
+
 const drafts = {
   setTaskDraft(taskId, text) {
-    return localStorage.setItem('draft-' + taskId, text)
+    try {
+      return localStorage.setItem(DRAFT_PREFIX + taskId, text)
+    } catch (e) {
+      console.warn('Failed to save draft:', e)
+    }
   },
 
   getTaskDraft(taskId) {
-    return localStorage.getItem('draft-' + taskId)
+    try {
+      return localStorage.getItem(DRAFT_PREFIX + taskId)
+    } catch (e) {
+      console.warn('Failed to read draft:', e)
+      return null
+    }
   },
 
   clearTaskDraft(taskId) {
-    return localStorage.removeItem('draft-' + taskId)
+    try {
+      return localStorage.removeItem(DRAFT_PREFIX + taskId)
+    } catch (e) {
+      console.warn('Failed to clear draft:', e)
+    }
   }
 }
 
