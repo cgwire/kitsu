@@ -42,115 +42,97 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
 
 import colors from '@/lib/colors'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StatusAutomationItem from '@/components/widgets/StatusAutomationItem.vue'
 
-export default {
-  name: 'combobox-status-automation',
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    StatusAutomationItem
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['update:modelValue'],
-
-  data() {
-    return {
-      showStatusAutomationsList: false
-    }
+  statusAutomationsList: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    statusAutomationsList: {
-      default: () => [],
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    narrow: {
-      default: false,
-      type: Boolean
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    },
-    addPlaceholder: {
-      default: false,
-      type: Boolean
-    }
+  modelValue: {
+    default: '',
+    type: String
   },
-
-  mounted() {
-    this.selectedStatusAutomation = this.statusAutomation
+  narrow: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    ...mapGetters(['isDarkTheme', 'statusAutomationMap']),
-
-    currentStatusAutomation() {
-      if (this.modelValue) {
-        return this.statusAutomationMap.get(this.modelValue)
-      } else {
-        return this.statusAutomationsList[0]
-      }
-    }
+  withMargin: {
+    default: true,
+    type: Boolean
   },
-
-  methods: {
-    selectStatusAutomation(status) {
-      this.$emit('update:modelValue', status.id)
-      this.showStatusAutomationsList = false
-    },
-
-    backgroundColor(statusAutomation) {
-      if (
-        (!statusAutomation || statusAutomation.is_default) &&
-        !this.isDarkTheme
-      ) {
-        return '#ECECEC'
-      } else if (
-        (!statusAutomation || statusAutomation.is_default) &&
-        this.isDarkTheme
-      ) {
-        return '#5F626A'
-      } else if (this.isDarkTheme) {
-        return colors.darkenColor(statusAutomation.color)
-      } else {
-        return statusAutomation.color
-      }
-    },
-
-    color(statusAutomation) {
-      if (
-        !statusAutomation ||
-        !statusAutomation.is_default ||
-        this.isDarkTheme
-      ) {
-        return 'white'
-      } else {
-        return '#333'
-      }
-    },
-
-    toggleStatusAutomationsList() {
-      this.showStatusAutomationsList = !this.showStatusAutomationsList
-    }
+  addPlaceholder: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const showStatusAutomationsList = ref(false)
+
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const statusAutomationMap = computed(() => store.getters.statusAutomationMap)
+
+const currentStatusAutomation = computed(() => {
+  if (props.modelValue) {
+    return statusAutomationMap.value.get(props.modelValue)
+  } else {
+    return props.statusAutomationsList[0]
+  }
+})
+
+function selectStatusAutomation(status) {
+  emit('update:modelValue', status.id)
+  showStatusAutomationsList.value = false
+}
+
+function backgroundColor(statusAutomation) {
+  if (
+    (!statusAutomation || statusAutomation.is_default) &&
+    !isDarkTheme.value
+  ) {
+    return '#ECECEC'
+  } else if (
+    (!statusAutomation || statusAutomation.is_default) &&
+    isDarkTheme.value
+  ) {
+    return '#5F626A'
+  } else if (isDarkTheme.value) {
+    return colors.darkenColor(statusAutomation.color)
+  } else {
+    return statusAutomation.color
+  }
+}
+
+function color(statusAutomation) {
+  if (
+    !statusAutomation ||
+    !statusAutomation.is_default ||
+    isDarkTheme.value
+  ) {
+    return 'white'
+  } else {
+    return '#333'
+  }
+}
+
+function toggleStatusAutomationsList() {
+  showStatusAutomationsList.value = !showStatusAutomationsList.value
 }
 </script>
 
