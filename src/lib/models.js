@@ -101,7 +101,7 @@ export const addToIdList = (production, field, id) => {
 
 export const removeFromIdList = (production, field, id) => {
   const index = production[field].findIndex(mid => mid === id)
-  if (index !== null) production[field].splice(index, 1)
+  if (index !== -1) production[field].splice(index, 1)
 }
 
 export const arrayMove = (array, fromIndex, toIndex) => {
