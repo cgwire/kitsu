@@ -18,25 +18,21 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'route-tabs',
-
-  props: {
-    activeTab: {
-      type: String,
-      default: ''
-    },
-    tabs: {
-      type: Array,
-      default: () => []
-    },
-    routeKey: {
-      type: String,
-      default: 'tab'
-    }
+<script setup>
+defineProps({
+  activeTab: {
+    type: String,
+    default: ''
+  },
+  tabs: {
+    type: Array,
+    default: () => []
+  },
+  routeKey: {
+    type: String,
+    default: 'tab'
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
