@@ -8,31 +8,26 @@
   />
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-export default {
-  name: 'sorting-info',
+const { t } = useI18n()
 
-  components: {
-    ButtonSimple
-  },
-
-  props: {
-    sorting: {
-      type: Array,
-      required: true
-    }
-  },
-
-  emits: ['clear-sorting'],
-
-  computed: {
-    text() {
-      return `${this.$t('main.sorted_by')} ${this.sorting[0]?.name}`
-    }
+const props = defineProps({
+  sorting: {
+    type: Array,
+    required: true
   }
-}
+})
+
+defineEmits(['clear-sorting'])
+
+const text = computed(() => {
+  return `${t('main.sorted_by')} ${props.sorting[0]?.name}`
+})
 </script>
 
 <style lang="scss" scoped>
