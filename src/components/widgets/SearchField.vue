@@ -6,7 +6,7 @@
 
     <div class="flexrow-item search-field">
       <input
-        ref="input"
+        ref="inputRef"
         class="search-input"
         type="text"
         :placeholder="placeholder"
@@ -31,73 +31,62 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue'
 import { SaveIcon, SearchIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'search-field',
-
-  data() {
-    return {
-      search: '',
-      focused: false
-    }
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: ''
   },
-
-  props: {
-    placeholder: {
-      type: String,
-      default: ''
-    },
-    canSave: {
-      type: Boolean,
-      default: false
-    },
-    focusOptions: {
-      type: Object
-    }
+  canSave: {
+    type: Boolean,
+    default: false
   },
+  focusOptions: {
+    type: Object
+  }
+})
 
-  emits: ['change', 'enter', 'save'],
+const emit = defineEmits(['change', 'enter', 'save'])
 
-  components: {
-    SaveIcon,
-    SearchIcon
-  },
+const search = ref('')
+const focused = ref(false)
+const inputRef = ref(null)
 
-  methods: {
-    onSearchChange() {
-      this.$emit('change', this.search)
-    },
+function onSearchChange() {
+  emit('change', search.value)
+}
 
-    onEnterPressed() {
-      this.$emit('enter', this.search)
-    },
+function onEnterPressed() {
+  emit('enter', search.value)
+}
 
-    onSaveClicked() {
-      if (this.search && this.canSave) {
-        this.$emit('save', this.search)
-      }
-    },
-
-    getValue() {
-      return this.search
-    },
-
-    setValue(value) {
-      this.search = value
-    },
-
-    focus(options) {
-      this.$refs.input?.focus(options)
-    },
-
-    clearSearch() {
-      this.search = ''
-      this.onSearchChange()
-    }
+function onSaveClicked() {
+  if (search.value && props.canSave) {
+    emit('save', search.value)
   }
 }
+
+function getValue() {
+  return search.value
+}
+
+function setValue(value) {
+  search.value = value
+}
+
+function focus(options) {
+  inputRef.value?.focus(options)
+}
+
+function clearSearch() {
+  search.value = ''
+  onSearchChange()
+}
+
+defineExpose({ getValue, setValue, focus, clearSearch })
 </script>
 
 <style lang="scss" scoped>
