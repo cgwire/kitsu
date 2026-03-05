@@ -66,13 +66,14 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
-import colors from '@/lib/colors'
 import { sortTaskStatuses } from '@/lib/sorting'
+import { useTaskStatusStyle } from '@/composables/taskStatus'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 
 const { t } = useI18n()
 const store = useStore()
+const { backgroundColor, color, isDarkTheme } = useTaskStatusStyle()
 
 const props = defineProps({
   colorOnly: {
@@ -117,7 +118,6 @@ const emit = defineEmits(['update:modelValue'])
 
 const showStatusList = ref(false)
 
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
@@ -142,29 +142,6 @@ const currentStatus = computed(() => {
     return props.taskStatusList[0]
   }
 })
-
-function backgroundColor(taskStatus) {
-  if ((!taskStatus || taskStatus.name === 'Todo') && !isDarkTheme.value) {
-    return '#ECECEC'
-  } else if (
-    (!taskStatus || taskStatus.name === 'Todo') &&
-    isDarkTheme.value
-  ) {
-    return '#5F626A'
-  } else if (isDarkTheme.value) {
-    return colors.darkenColor(taskStatus.color)
-  } else {
-    return taskStatus.color
-  }
-}
-
-function color(taskStatus) {
-  if (!taskStatus || taskStatus.name !== 'Todo' || isDarkTheme.value) {
-    return 'white'
-  } else {
-    return '#333'
-  }
-}
 
 const comboStyles = computed(() => {
   return {
