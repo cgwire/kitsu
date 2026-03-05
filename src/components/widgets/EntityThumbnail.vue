@@ -136,9 +136,7 @@ const thumbnailPath = computed(() => {
 
   if (props.square) {
     return (
-      '/api/pictures/thumbnails-square/preview-files/' +
-      previewFileId +
-      '.png'
+      '/api/pictures/thumbnails-square/preview-files/' + previewFileId + '.png'
     )
   } else {
     if (props.width && props.width > 150) {

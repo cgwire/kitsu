@@ -52,12 +52,12 @@ const selectedOption = ref({
   value: ''
 })
 
-const selectOption = (option) => {
+const selectOption = option => {
   emit('update:modelValue', option.value)
   selectedOption.value = option
 }
 
-const getOptionLabel = (option) => {
+const getOptionLabel = option => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }

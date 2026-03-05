@@ -117,9 +117,7 @@ watch(selectedYear, newYear => {
   if (silent.value) return
   nextTick(() => {
     selectedMonth.value = availableMonths.value[0].value
-    const date = moment(
-      new Date(newYear, selectedMonth.value, 1, 0, 0, 0, 0)
-    )
+    const date = moment(new Date(newYear, selectedMonth.value, 1, 0, 0, 0, 0))
     emit('update:modelValue', date.startOf('month').toDate())
   })
 })

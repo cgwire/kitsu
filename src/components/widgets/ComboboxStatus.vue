@@ -117,7 +117,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { showList: showStatusList, toggle: toggleStatusList, select: selectStatus } = useCombobox(emit)
+const {
+  showList: showStatusList,
+  toggle: toggleStatusList,
+  select: selectStatus
+} = useCombobox(emit)
 
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -166,7 +170,6 @@ const comboStyles = computed(() => {
         : '10px'
   }
 })
-
 </script>
 
 <style lang="scss" scoped>

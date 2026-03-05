@@ -115,13 +115,13 @@ const tooltipStyle = computed(() => {
   }
 })
 
-const selectTaskType = (taskType) => {
+const selectTaskType = taskType => {
   emit('update:modelValue', taskType.id)
   emit('change', taskType.id)
   showTaskTypeList.value = false
 }
 
-const toggleTaskTypeList = (event) => {
+const toggleTaskTypeList = event => {
   if (props.disabled) {
     return
   }
@@ -135,8 +135,7 @@ const toggleTaskTypeList = (event) => {
   const curDiv = event.currentTarget
   const rect = curDiv.getBoundingClientRect()
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const scrollLeft =
-    window.pageXOffset || document.documentElement.scrollLeft
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
   tooltipPosition.value = {
     top: rect.top + scrollTop + 35,
     left: rect.left + scrollLeft

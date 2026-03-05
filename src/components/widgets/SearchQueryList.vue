@@ -330,7 +330,7 @@ const setQueryPaths = () => {
   })
 }
 
-const queryRoute = (searchQuery) => {
+const queryRoute = searchQuery => {
   return {
     ...route,
     query: {
@@ -340,7 +340,7 @@ const queryRoute = (searchQuery) => {
   }
 }
 
-const changeSearch = (searchQuery) => {
+const changeSearch = searchQuery => {
   emit('change-search', searchQuery)
 }
 
@@ -349,12 +349,12 @@ const editGroup = (group = {}) => {
   modals.group = true
 }
 
-const editSearch = (searchQuery) => {
+const editSearch = searchQuery => {
   searchQueryToEdit.value = searchQuery
   modals.edit = true
 }
 
-const confirmEditFilterGroup = async (filterGroup) => {
+const confirmEditFilterGroup = async filterGroup => {
   try {
     loading.group = true
     errors.group = false
@@ -378,7 +378,7 @@ const confirmEditFilterGroup = async (filterGroup) => {
   }
 }
 
-const confirmEditSearch = async (searchFilter) => {
+const confirmEditSearch = async searchFilter => {
   try {
     loading.edit = true
     errors.edit = false
@@ -399,7 +399,7 @@ const closeFilterGroupModal = () => {
   modals.group = false
 }
 
-const confirmRemoveSearch = (searchQuery) => {
+const confirmRemoveSearch = searchQuery => {
   searchQueryToRemove.value = searchQuery
   groupToRemove.value = {}
   modals.remove = true
@@ -416,7 +416,7 @@ const removeSearch = () => {
   groupToRemove.value = {}
 }
 
-const confirmRemoveGroup = (filterGroup) => {
+const confirmRemoveGroup = filterGroup => {
   groupToRemove.value = filterGroup
   searchQueryToRemove.value = {}
   modals.remove = true
@@ -437,11 +437,11 @@ const removeGroup = async () => {
   }
 }
 
-const toggleFilterGroup = (group) => {
+const toggleFilterGroup = group => {
   toggleGroupId.value = toggleGroupId.value !== group.id ? group.id : null
 }
 
-const getSearchQueryTitle = (searchQuery) => {
+const getSearchQueryTitle = searchQuery => {
   if (!searchQuery.is_shared) {
     return
   }
@@ -449,7 +449,7 @@ const getSearchQueryTitle = (searchQuery) => {
   return t('main.shared_by', { name: person?.full_name })
 }
 
-const getDepartment = (group) => {
+const getDepartment = group => {
   return departmentMap.value.get(group.department_id)
 }
 
@@ -459,11 +459,14 @@ onMounted(() => {
   })
 })
 
-watch(() => props.queries.length, () => {
-  nextTick(() => {
-    setQueryPaths()
-  })
-})
+watch(
+  () => props.queries.length,
+  () => {
+    nextTick(() => {
+      setQueryPaths()
+    })
+  }
+)
 
 watch(route, () => {
   setQueryPaths()

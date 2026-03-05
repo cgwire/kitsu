@@ -78,9 +78,7 @@ const getTaskType = computed(() => store.getters.getTaskType)
 
 const entityType = computed(() => {
   const et = props.statusAutomation.entity_type
-  return t(
-    `status_automations.entity_types.${et.toLowerCase()}`
-  )
+  return t(`status_automations.entity_types.${et.toLowerCase()}`)
 })
 
 const statusAutomationPath = computed(() => {

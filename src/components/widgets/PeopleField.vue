@@ -109,7 +109,7 @@ onMounted(() => {
   }, 10)
 })
 
-const onSearchChange = (s) => {
+const onSearchChange = s => {
   items.value = s?.length
     ? (indexSearch(index.value, [s]) ?? [])
     : props.people
@@ -130,17 +130,24 @@ const focus = () => {
   multiselect.value.$el.focus()
 }
 
-watch(() => props.people, () => {
-  item.value = item.value
-    ? props.people.find(person => person.id === item.value.id)
-    : null
-  items.value = props.people
-  index.value = buildNameIndex(props.people)
-}, { deep: true })
+watch(
+  () => props.people,
+  () => {
+    item.value = item.value
+      ? props.people.find(person => person.id === item.value.id)
+      : null
+    items.value = props.people
+    index.value = buildNameIndex(props.people)
+  },
+  { deep: true }
+)
 
-watch(() => props.modelValue, () => {
-  item.value = props.modelValue
-})
+watch(
+  () => props.modelValue,
+  () => {
+    item.value = props.modelValue
+  }
+)
 
 defineExpose({ focus })
 </script>

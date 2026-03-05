@@ -87,7 +87,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { showList: showStudioList, toggle: toggleStudioList, select: selectStudio } = useCombobox(emit)
+const {
+  showList: showStudioList,
+  toggle: toggleStudioList,
+  select: selectStudio
+} = useCombobox(emit)
 
 const studios = computed(() => store.getters.studios)
 const studioMap = computed(() => store.getters.studioMap)
@@ -119,7 +123,6 @@ const currentStudio = computed(() => {
     studioList.value.find(({ id }) => id === props.modelValue)
   )
 })
-
 </script>
 
 <style lang="scss" scoped>

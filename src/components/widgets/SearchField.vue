@@ -73,11 +73,11 @@ const getValue = () => {
   return search.value
 }
 
-const setValue = (value) => {
+const setValue = value => {
   search.value = value
 }
 
-const focus = (options) => {
+const focus = options => {
   inputRef.value?.focus(options)
 }
 

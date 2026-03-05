@@ -110,8 +110,12 @@ const props = defineProps({
 
 const emit = defineEmits(['enter', 'update:modelValue'])
 
-const { getDescriptorChecklistValues, getMetadataChecklistValues,
-  getDescriptorChoicesOptions, isSupervisorInDepartments } = descriptorMixin.methods
+const {
+  getDescriptorChecklistValues,
+  getMetadataChecklistValues,
+  getDescriptorChoicesOptions,
+  isSupervisorInDepartments
+} = descriptorMixin.methods
 
 const descriptorChecklistValues = computed(() => {
   return getDescriptorChecklistValues(props.descriptor)
@@ -156,7 +160,7 @@ const getMetadataFieldValue = (descriptor, entity) => {
   }
 }
 
-const updateValue = (value) => {
+const updateValue = value => {
   emit('update:modelValue', value)
 }
 

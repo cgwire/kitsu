@@ -32,7 +32,12 @@ defineProps({
   }
 })
 
-defineEmits(['delete-clicked', 'edit-clicked', 'sort-by-clicked', 'toggle-stick'])
+defineEmits([
+  'delete-clicked',
+  'edit-clicked',
+  'sort-by-clicked',
+  'toggle-stick'
+])
 </script>
 
 <style lang="scss" scoped>

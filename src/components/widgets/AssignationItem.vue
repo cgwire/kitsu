@@ -26,7 +26,7 @@ const props = defineProps({
   }
 })
 
-const regExpEscape = (string) => {
+const regExpEscape = string => {
   return string.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
 }
 
