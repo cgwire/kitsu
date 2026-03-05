@@ -23,77 +23,74 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-  name: 'date-field',
+const store = useStore()
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const user = computed(() => store.getters.user)
 
-  props: {
-    canDelete: {
-      default: true,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    format: {
-      default: 'yyyy-MM-dd',
-      type: String
-    },
-    label: {
-      default: '',
-      type: String
-    },
-    minDate: {
-      default: null,
-      type: [Date, String]
-    },
-    maxDate: {
-      default: null,
-      type: [Date, String]
-    },
-    modelValue: {
-      default: () => new Date(),
-      type: [Date, String]
-    },
-    placeholder: {
-      default: null,
-      type: String
-    },
-    utc: {
-      default: false,
-      type: Boolean
-    },
-    weekDaysDisabled: {
-      default: false,
-      type: Boolean
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    }
+const props = defineProps({
+  canDelete: {
+    default: true,
+    type: Boolean
   },
-
-  emits: ['update:modelValue'],
-
-  computed: {
-    ...mapGetters(['isDarkTheme', 'user']),
-
-    localValue: {
-      get() {
-        return this.modelValue
-      },
-      set(value) {
-        if (value?.setHours) {
-          value.setHours(0, 0, 0, 0)
-        }
-        this.$emit('update:modelValue', value)
-      }
-    }
+  disabled: {
+    default: false,
+    type: Boolean
+  },
+  format: {
+    default: 'yyyy-MM-dd',
+    type: String
+  },
+  label: {
+    default: '',
+    type: String
+  },
+  minDate: {
+    default: null,
+    type: [Date, String]
+  },
+  maxDate: {
+    default: null,
+    type: [Date, String]
+  },
+  modelValue: {
+    default: () => new Date(),
+    type: [Date, String]
+  },
+  placeholder: {
+    default: null,
+    type: String
+  },
+  utc: {
+    default: false,
+    type: Boolean
+  },
+  weekDaysDisabled: {
+    default: false,
+    type: Boolean
+  },
+  withMargin: {
+    default: true,
+    type: Boolean
   }
-}
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const localValue = computed({
+  get() {
+    return props.modelValue
+  },
+  set(value) {
+    if (value?.setHours) {
+      value.setHours(0, 0, 0, 0)
+    }
+    emit('update:modelValue', value)
+  }
+})
 </script>
 
 <style lang="scss" scoped>
