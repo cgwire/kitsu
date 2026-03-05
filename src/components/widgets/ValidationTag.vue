@@ -54,9 +54,12 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { pluralizeEntityType } from '@/lib/path'
+import { useTaskStatusStyle } from '@/composables/taskStatus'
 
 const { t } = useI18n()
 const store = useStore()
+const { backgroundColor: statusBgColor, color: statusColor, isDarkTheme } =
+  useTaskStatusStyle()
 
 const props = defineProps({
   task: {
@@ -90,7 +93,6 @@ defineEmits(['click'])
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -104,26 +106,9 @@ const taskStatus = computed(() => {
   return taskStatusMap.value?.get(taskStatusId) || {}
 })
 
-const backgroundColor = computed(() => {
-  if (taskStatus.value.short_name === 'todo' && !isDarkTheme.value) {
-    return '#ECECEC'
-  } else if (taskStatus.value.short_name === 'todo' && isDarkTheme.value) {
-    return '#5F626A'
-  } else if (isDarkTheme.value) {
-    return colors.darkenColor(taskStatus.value.color)
-  } else {
-    return taskStatus.value.color
-  }
-})
+const backgroundColor = computed(() => statusBgColor(taskStatus.value))
 
-const color = computed(() => {
-  const isTodo = taskStatus.value.name === 'Todo'
-  if (!isTodo || isDarkTheme.value) {
-    return 'white'
-  } else {
-    return '#333'
-  }
-})
+const color = computed(() => statusColor(taskStatus.value))
 
 const priority = computed(() => {
   if (props.task.priority && !taskStatus.value.is_done) {
