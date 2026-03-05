@@ -2,11 +2,11 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 
-export function useTaskStatusStyle() {
+export const useTaskStatusStyle = () => {
   const store = useStore()
   const isDarkTheme = computed(() => store.getters.isDarkTheme)
 
-  function backgroundColor(taskStatus) {
+  const backgroundColor = (taskStatus) => {
     if (
       (!taskStatus || taskStatus.name === 'Todo') &&
       !isDarkTheme.value
@@ -24,7 +24,7 @@ export function useTaskStatusStyle() {
     }
   }
 
-  function color(taskStatus) {
+  const color = (taskStatus) => {
     if (
       !taskStatus ||
       taskStatus.name !== 'Todo' ||
