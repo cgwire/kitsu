@@ -356,6 +356,8 @@ import { replaceTimeWithTimecode } from '@/lib/render'
 import preferences from '@/lib/preferences'
 import strings from '@/lib/string'
 
+import { useAtMentionsMembers } from '@/composables/atMentions'
+
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
@@ -441,8 +443,12 @@ const commentTextareaRef = ref(null)
 const inputLinkRef = ref(null)
 const addAttachmentModalRef = ref(null)
 
+const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
+  () => props.team,
+  () => props.taskTypes
+)
+
 const isFrameAddition = ref(false)
-const membersForAts = reactive({ '@': [], '#': [] })
 const isDragging = ref(false)
 const errors = reactive({
   addCommentAttachment: false
@@ -455,10 +461,8 @@ const modals = reactive({
   confirmFeedbackPublish: false
 })
 
-const departmentMap = computed(() => store.getters.departmentMap)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const productionDepartmentIds = computed(() => store.getters.productionDepartmentIds)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusForCurrentUser = computed(() => store.getters.taskStatusForCurrentUser)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -766,15 +770,6 @@ async function setValue(comment) {
   ).filter(Boolean)
 }
 
-function atOptionsFilter(name, chunk, at, v) {
-  // filter the list by the given at symbol
-  const option_at = v?.isTaskType ? '#' : '@'
-  // @ for team, # for task type
-  if (at !== option_at) return false
-  // match at lower-case
-  return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
-}
-
 function onAtTextChanged(input) {
   if (input.includes('@frame')) {
     text.value = replaceTimeWithTimecode(
@@ -883,54 +878,6 @@ watch(() => props.previewForms, () => {
     form => getRevision(form) > 0
   )
   nextRevision.value = getRevision(form)
-}, { deep: true, immediate: true })
-
-watch(() => props.taskTypes, (values) => {
-  const taskTypeOptions = values.map(taskType => {
-    return {
-      isTaskType: true,
-      full_name: taskType.name,
-      color: taskType.color,
-      id: taskType.id,
-      url: taskType.url
-    }
-  })
-  taskTypeOptions.push({
-    isTaskType: true,
-    color: '#000',
-    full_name: 'All'
-  })
-  membersForAts['#'] = taskTypeOptions
-}, { deep: true, immediate: true })
-
-watch(() => props.team, () => {
-  let teamOptions
-  if (isCurrentUserClient.value) {
-    teamOptions = props.team.filter(person =>
-      ['admin', 'manager', 'client'].includes(person.role)
-    )
-  } else {
-    teamOptions = [...props.team]
-  }
-  if (!isCurrentUserClient.value) {
-    teamOptions = teamOptions.concat(
-      productionDepartmentIds.value.map(departmentId => {
-        const department = departmentMap.value.get(departmentId)
-        return {
-          isDepartment: true,
-          full_name: department.name,
-          color: department.color,
-          id: departmentId
-        }
-      })
-    )
-  }
-  teamOptions.push({
-    isTime: true,
-    at: '@',
-    full_name: 'frame'
-  })
-  membersForAts['@'] = teamOptions
 }, { deep: true, immediate: true })
 
 defineExpose({
