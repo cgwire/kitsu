@@ -470,6 +470,7 @@ import { sortByName } from '@/lib/sorting'
 import { formatDate, parseDate } from '@/lib/time'
 import stringHelpers from '@/lib/string'
 
+import { useAtMentionsMembers } from '@/composables/atMentions'
 import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
@@ -551,7 +552,11 @@ const props = defineProps({
 const replyRef = ref(null)
 const addAttachmentModalRef = ref(null)
 
-const membersForAts = reactive({ '@': [], '#': [] })
+const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
+  () => props.team,
+  () => props.taskTypes
+)
+
 const checklist = ref([])
 const isReplyLoading = ref(false)
 const menuVisible = ref(false)
@@ -572,7 +577,6 @@ const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const personMap = computed(() => store.getters.personMap)
-const productionDepartmentIds = computed(() => store.getters.productionDepartmentIds)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
 
@@ -856,12 +860,6 @@ function onDeleteReplyClicked(reply) {
     .catch(console.error)
 }
 
-function atOptionsFilter(name, chunk, at, v) {
-  const option_at = v?.isTaskType ? '#' : '@'
-  if (at !== option_at) return false
-  return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
-}
-
 function onAtTextChanged(input) {
   if (input.includes('@frame')) {
     replyText.value = replaceTimeWithTimecode(
@@ -942,60 +940,6 @@ watch(checklist, () => {
   }
 })
 
-watch(
-  () => props.taskTypes,
-  (values) => {
-    const taskTypeOptions = values.map(taskType => {
-      return {
-        isTaskType: true,
-        full_name: taskType.name,
-        color: taskType.color,
-        id: taskType.id,
-        url: taskType.url
-      }
-    })
-    taskTypeOptions.push({
-      isTaskType: true,
-      color: '#000',
-      full_name: 'All'
-    })
-    membersForAts['#'] = taskTypeOptions
-  },
-  { deep: true, immediate: true }
-)
-
-watch(
-  () => props.team,
-  () => {
-    let teamOptions
-    if (isCurrentUserClient.value) {
-      teamOptions = props.team.filter(person =>
-        ['admin', 'manager', 'client'].includes(person.role)
-      )
-    } else {
-      teamOptions = [...props.team]
-    }
-    if (!isCurrentUserClient.value) {
-      teamOptions = teamOptions.concat(
-        productionDepartmentIds.value.map(departmentId => {
-          const department = departmentMap.value.get(departmentId)
-          return {
-            isDepartment: true,
-            full_name: department.name,
-            color: department.color,
-            id: departmentId
-          }
-        })
-      )
-    }
-    teamOptions.push({
-      isTime: true,
-      full_name: 'frame'
-    })
-    membersForAts['@'] = teamOptions
-  },
-  { deep: true, immediate: true }
-)
 </script>
 
 <style lang="scss" scoped>
