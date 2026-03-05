@@ -6,17 +6,13 @@
   ></div>
 </template>
 
-<script>
-export default {
-  name: 'combobox-mask',
+<script setup>
+defineProps({
+  displayed: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  props: {
-    displayed: {
-      type: Boolean,
-      default: false
-    }
-  },
-
-  emits: ['click']
-}
+defineEmits(['click'])
 </script>
