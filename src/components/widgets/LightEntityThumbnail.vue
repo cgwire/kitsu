@@ -25,54 +25,50 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'light-entity-thumbnail',
+<script setup>
+import { computed } from 'vue'
 
-  props: {
-    previewFileId: {
-      type: String
-    },
-    extension: {
-      type: String
-    },
-    width: {
-      default: '150px',
-      type: String
-    },
-    height: {
-      default: '50px',
-      type: String
-    },
-    maxHeight: {
-      default: 'auto',
-      type: String
-    },
-    maxWidth: {
-      default: 'auto',
-      type: String
-    },
-    emptyHeight: {
-      type: String
-    },
-    emptyWidth: {
-      type: String
-    },
-    type: {
-      default: 'thumbnails',
-      type: String
-    }
+const props = defineProps({
+  previewFileId: {
+    type: String
   },
-
-  computed: {
-    isPreviewWithThumbnail() {
-      return (
-        this.previewFileId &&
-        (!this.extension || ['mp4', 'png'].includes(this.extension))
-      )
-    }
+  extension: {
+    type: String
+  },
+  width: {
+    default: '150px',
+    type: String
+  },
+  height: {
+    default: '50px',
+    type: String
+  },
+  maxHeight: {
+    default: 'auto',
+    type: String
+  },
+  maxWidth: {
+    default: 'auto',
+    type: String
+  },
+  emptyHeight: {
+    type: String
+  },
+  emptyWidth: {
+    type: String
+  },
+  type: {
+    default: 'thumbnails',
+    type: String
   }
-}
+})
+
+const isPreviewWithThumbnail = computed(() => {
+  return (
+    props.previewFileId &&
+    (!props.extension || ['mp4', 'png'].includes(props.extension))
+  )
+})
 </script>
 
 <style lang="scss" scoped>
