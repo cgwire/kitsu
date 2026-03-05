@@ -53,16 +53,16 @@ const joinedRoom = computed(() => {
   return props.room.people.find(id => id === user.value.id)
 })
 
-function openRoom() {
+const openRoom = () => {
   if (!props.room.id) return
   emit('open-room', props.room.id)
 }
 
-function onJoinClicked() {
+const onJoinClicked = () => {
   emit('join-room', props.room.id)
 }
 
-function onLeaveClicked() {
+const onLeaveClicked = () => {
   emit('leave-room', props.room.id)
 }
 </script>

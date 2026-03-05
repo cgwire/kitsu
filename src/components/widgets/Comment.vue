@@ -697,21 +697,21 @@ const isAuthorClient = computed(() => {
   return personMap.value.get(props.comment.person_id)?.role === 'client'
 })
 
-function shortenText(text, length) {
+const shortenText = (text, length) => {
   return stringHelpers.shortenText(text, length)
 }
 
-function replyFullDate(date) {
+const replyFullDate = (date) => {
   return moment(parseDate(date))
     .tz(user.value.timezone)
     .format('YYYY-MM-DD HH:mm:ss')
 }
 
-function replyShortDate(date) {
+const replyShortDate = (date) => {
   return renderDate(parseDate(date))
 }
 
-function renderDate(date) {
+const renderDate = (date) => {
   date = moment(date)
   if (moment().isSame(date, 'd')) {
     return date.tz(user.value.timezone).format('HH:mm')
@@ -720,7 +720,7 @@ function renderDate(date) {
   }
 }
 
-function getPath(name) {
+const getPath = (name) => {
   const r = {
     name,
     params: {
@@ -735,11 +735,11 @@ function getPath(name) {
   return r
 }
 
-function toggleCommentMenu() {
+const toggleCommentMenu = () => {
   menuVisible.value = !menuVisible.value
 }
 
-function addChecklistEntry() {
+const addChecklistEntry = () => {
   silent = true
   checklist.value.push({
     text: '',
@@ -750,11 +750,11 @@ function addChecklistEntry() {
   })
 }
 
-function removeTask(entry) {
+const removeTask = (entry) => {
   checklist.value = remove(checklist.value, entry)
 }
 
-function onChecklistChanged() {
+const onChecklistChanged = () => {
   const now = new Date().getTime()
   if (now - lastCall > 1000) {
     lastCall = now
@@ -766,32 +766,32 @@ function onChecklistChanged() {
   }
 }
 
-function acknowledgeComment(comment) {
+const acknowledgeComment = (comment) => {
   emit('ack-comment', comment)
 }
 
-function timeCodeClicked(event) {
+const timeCodeClicked = (event) => {
   const data = { ...event.target.dataset }
   data.frame = data.frame - 1
   pauseEvent(event)
   emit('time-code-clicked', data)
 }
 
-function onChecklistTimecodeClicked(data) {
+const onChecklistTimecodeClicked = (data) => {
   emit('time-code-clicked', {
     versionRevision: data.revision,
     frame: data.frame - 1
   })
 }
 
-function setFrame(data) {
+const setFrame = (data) => {
   emit('time-code-clicked', {
     versionRevision: data.revision,
     frame: data.frame - 1
   })
 }
 
-function changePreviewValidationStatus(previewFiles) {
+const changePreviewValidationStatus = (previewFiles) => {
   if (!isCurrentUserManager.value) {
     return
   }
@@ -806,14 +806,14 @@ function changePreviewValidationStatus(previewFiles) {
   })
 }
 
-function showReplyWidget() {
+const showReplyWidget = () => {
   showReply.value = true
   nextTick(() => {
     replyRef.value?.focus()
   })
 }
 
-function onDrop(event) {
+const onDrop = (event) => {
   event.preventDefault()
   const droppedFiles = event.dataTransfer.files
   if (droppedFiles.length > 0) {
@@ -823,15 +823,15 @@ function onDrop(event) {
   }
 }
 
-function onDragover(event) {
+const onDragover = (event) => {
   event.preventDefault()
 }
 
-function onDragleave(event) {
+const onDragleave = (event) => {
   event.preventDefault()
 }
 
-function onReplyClicked() {
+const onReplyClicked = () => {
   isReplyLoading.value = true
   store.dispatch('replyToComment', {
     comment: props.comment,
@@ -850,7 +850,7 @@ function onReplyClicked() {
     })
 }
 
-function onDeleteReplyClicked(reply) {
+const onDeleteReplyClicked = (reply) => {
   store.dispatch('deleteReply', { comment: props.comment, reply })
     .then(() => {
       isReplyLoading.value = false
@@ -858,7 +858,7 @@ function onDeleteReplyClicked(reply) {
     .catch(console.error)
 }
 
-function onAtTextChanged(input) {
+const onAtTextChanged = (input) => {
   if (input.includes('@frame')) {
     replyText.value = replaceTimeWithTimecode(
       input,
@@ -869,23 +869,23 @@ function onAtTextChanged(input) {
   }
 }
 
-function onSelectEmoji(emoji) {
+const onSelectEmoji = (emoji) => {
   const textarea = replyRef.value
   replyText.value = stringHelpers.insertInTextArea(textarea, emoji.i)
 }
 
-function addAttachmentToReply(addedFiles) {
+const addAttachmentToReply = (addedFiles) => {
   modals.addAttachment = false
   replyAttachments.value = replyAttachments.value.concat(addedFiles)
 }
 
-function removeReplyAttachment(attachment) {
+const removeReplyAttachment = (attachment) => {
   replyAttachments.value = replyAttachments.value.filter(
     a => a !== attachment
   )
 }
 
-function onPaste(event) {
+const onPaste = (event) => {
   if (modals.addAttachment || !showReply.value) return
   if (replyRef.value !== document.activeElement) return
   const pastedFiles = event.clipboardData.files

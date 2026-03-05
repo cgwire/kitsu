@@ -42,19 +42,19 @@ const currentModelId = ref('')
 const modelMap = ref({})
 const modelOptions = ref([])
 
-function emitValue(value) {
+const emitValue = (value) => {
   currentModelId.value = value
   const model = modelMap.value[currentModelId.value]
   emit('update:modelValue', model)
 }
 
-function emitEnter(value) {
+const emitEnter = (value) => {
   currentModelId.value = value
   const model = modelMap.value[currentModelId.value]
   emit('enter', model)
 }
 
-function reset() {
+const reset = () => {
   if (props.models.length > 0) {
     currentModelId.value =
       props.models.find(model => model.id === props.modelValue.id) ??

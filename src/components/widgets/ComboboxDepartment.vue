@@ -198,16 +198,16 @@ const listStyle = computed(() => {
   return data
 })
 
-function selectDepartment(department) {
+const selectDepartment = (department) => {
   emit('update:modelValue', department.id)
   showDepartmentList.value = false
 }
 
-function toggleDepartmentList() {
+const toggleDepartmentList = () => {
   showDepartmentList.value = !showDepartmentList.value
 }
 
-function focus() {
+const focus = () => {
   combobox.value.focus()
 }
 

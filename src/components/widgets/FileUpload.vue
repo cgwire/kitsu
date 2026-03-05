@@ -85,7 +85,7 @@ const wrapperRef = ref(null)
 const uploadInputRef = ref(null)
 let isDragging = false
 
-function filesChange(name, files) {
+const filesChange = (name, files) => {
   uploadedFiles.value = []
   const forms = []
   for (let i = 0, numFiles = files.length; i < numFiles; i++) {
@@ -106,7 +106,7 @@ function filesChange(name, files) {
   }
 }
 
-function reset() {
+const reset = () => {
   isSaving.value = false
   isInitial.value = true
   uploadedFiles.value = []
@@ -115,15 +115,15 @@ function reset() {
   }
 }
 
-function onDragover() {
+const onDragover = () => {
   isDragging = true
 }
 
-function onDragleave() {
+const onDragleave = () => {
   isDragging = false
 }
 
-function onDrop(event) {
+const onDrop = (event) => {
   if (event.dataTransfer.files) {
     isDragging = false
     isSaving.value = false

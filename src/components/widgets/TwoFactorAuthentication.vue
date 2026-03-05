@@ -189,21 +189,21 @@ const othersTwoFA = computed(() => {
   return props.twoFasEnabled.filter((val, _) => val !== chosenTwoFA.value)
 })
 
-function updatePayload() {
+const updatePayload = () => {
   twoFactorPayload.value = {}
   twoFactorPayload.value[chosenTwoFA.value] = OTPValue.value
 }
 
-function validate() {
+const validate = () => {
   emit('validate', twoFactorPayload.value)
 }
 
-function removeErrors() {
+const removeErrors = () => {
   errorRequestingFIDOChallenge.value = false
   errorSendingEmail.value = false
 }
 
-function changeTwoFAText(twoFA) {
+const changeTwoFAText = (twoFA) => {
   switch (twoFA) {
     case 'totp':
       return t('login.choose_totp')
@@ -217,7 +217,7 @@ function changeTwoFAText(twoFA) {
   return ''
 }
 
-function changeTwoFA(twoFA, emitChanged = true) {
+const changeTwoFA = (twoFA, emitChanged = true) => {
   removeErrors()
   chosenTwoFA.value = twoFA
   if (chosenTwoFA.value === 'email_otp') {
@@ -228,14 +228,14 @@ function changeTwoFA(twoFA, emitChanged = true) {
   if (emitChanged) emit('changed-two-fa', chosenTwoFA.value)
 }
 
-function requestSendEmailOTP() {
+const requestSendEmailOTP = () => {
   removeErrors()
   store.dispatch('sendEmailOTP', props.email).catch(() => {
     errorSendingEmail.value = true
   })
 }
 
-function requestGetFIDOChallenge() {
+const requestGetFIDOChallenge = () => {
   removeErrors()
   store.dispatch('getFIDOChallenge', props.email)
     .then(FIDOChallenge => {

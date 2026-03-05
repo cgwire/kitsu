@@ -126,7 +126,7 @@ const emit = defineEmits(['enter', 'update:modelValue'])
 
 const inputRef = ref(null)
 
-function getInputValue() {
+const getInputValue = () => {
   const input = inputRef.value
   if (props.type === 'number') {
     return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
@@ -138,19 +138,19 @@ function getInputValue() {
   }
 }
 
-function emitEnter() {
+const emitEnter = () => {
   emit('enter', getInputValue())
 }
 
-function updateValue() {
+const updateValue = () => {
   emit('update:modelValue', getInputValue())
 }
 
-function focus() {
+const focus = () => {
   inputRef.value.focus()
 }
 
-function checkValidity() {
+const checkValidity = () => {
   return inputRef.value.checkValidity()
 }
 

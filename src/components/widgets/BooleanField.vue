@@ -62,11 +62,11 @@ const emit = defineEmits(['click', 'update:modelValue'])
 
 const localValue = ref(false)
 
-function emitValue() {
+const emitValue = () => {
   emit('update:modelValue', localValue.value ? 'true' : 'false')
 }
 
-function onClick() {
+const onClick = () => {
   localValue.value = !localValue.value
   emit('click', localValue.value ? 'true' : 'false')
   emitValue()

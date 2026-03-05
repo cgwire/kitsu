@@ -88,15 +88,15 @@ const emit = defineEmits(['enter', 'update:modelValue'])
 
 const selectRef = ref(null)
 
-function updateValue() {
+const updateValue = () => {
   emit('update:modelValue', parseInt(selectRef.value.value))
 }
 
-function emitEnter() {
+const emitEnter = () => {
   emit('enter', parseInt(selectRef.value.value))
 }
 
-function getOptionLabel(option) {
+const getOptionLabel = (option) => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }

@@ -45,7 +45,7 @@ onMounted(() => {
   id.value = getCurrentInstance().uid
 })
 
-function onChange(event) {
+const onChange = (event) => {
   emit('update:modelValue', event.target.checked)
   emit('change', event.target.checked)
 }

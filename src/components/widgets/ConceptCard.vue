@@ -84,7 +84,7 @@ const taskStatus = computed(() => {
   return taskStatusMap.value.get(props.concept.tasks[0].task_status_id)
 })
 
-function entityPath(entity, section) {
+const entityPath = (entity, section) => {
   const episodeId = isTVShow.value ? entity.episode_id || 'main' : null
   return getEntityPath(
     entity.id,

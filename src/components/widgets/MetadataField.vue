@@ -138,7 +138,7 @@ const isEditable = computed(() => {
   )
 })
 
-function getMetadataFieldValue(descriptor, entity) {
+const getMetadataFieldValue = (descriptor, entity) => {
   if (
     entity.data &&
     descriptor.field_name in entity.data &&
@@ -156,15 +156,15 @@ function getMetadataFieldValue(descriptor, entity) {
   }
 }
 
-function updateValue(value) {
+const updateValue = (value) => {
   emit('update:modelValue', value)
 }
 
-function onEnter() {
+const onEnter = () => {
   emit('enter')
 }
 
-function onMetadataCheckboxChanged(option, value) {
+const onMetadataCheckboxChanged = (option, value) => {
   const values = getMetadataChecklistValues.call(
     { getMetadataFieldValue, getDescriptorChecklistValues },
     props.descriptor,

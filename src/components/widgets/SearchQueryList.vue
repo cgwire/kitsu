@@ -324,13 +324,13 @@ const removeText = computed(() => {
   }
 })
 
-function setQueryPaths() {
+const setQueryPaths = () => {
   props.queries.forEach(query => {
     queryPaths.value[query.id] = queryRoute(query)
   })
 }
 
-function queryRoute(searchQuery) {
+const queryRoute = (searchQuery) => {
   return {
     ...route,
     query: {
@@ -340,21 +340,21 @@ function queryRoute(searchQuery) {
   }
 }
 
-function changeSearch(searchQuery) {
+const changeSearch = (searchQuery) => {
   emit('change-search', searchQuery)
 }
 
-function editGroup(group = {}) {
+const editGroup = (group = {}) => {
   groupToEdit.value = group
   modals.group = true
 }
 
-function editSearch(searchQuery) {
+const editSearch = (searchQuery) => {
   searchQueryToEdit.value = searchQuery
   modals.edit = true
 }
 
-async function confirmEditFilterGroup(filterGroup) {
+const confirmEditFilterGroup = async (filterGroup) => {
   try {
     loading.group = true
     errors.group = false
@@ -378,7 +378,7 @@ async function confirmEditFilterGroup(filterGroup) {
   }
 }
 
-async function confirmEditSearch(searchFilter) {
+const confirmEditSearch = async (searchFilter) => {
   try {
     loading.edit = true
     errors.edit = false
@@ -395,17 +395,17 @@ async function confirmEditSearch(searchFilter) {
   }
 }
 
-function closeFilterGroupModal() {
+const closeFilterGroupModal = () => {
   modals.group = false
 }
 
-function confirmRemoveSearch(searchQuery) {
+const confirmRemoveSearch = (searchQuery) => {
   searchQueryToRemove.value = searchQuery
   groupToRemove.value = {}
   modals.remove = true
 }
 
-function removeSearch() {
+const removeSearch = () => {
   if (searchQueryToRemove.value.id) {
     emit('remove-search', searchQueryToRemove.value)
   } else {
@@ -416,13 +416,13 @@ function removeSearch() {
   groupToRemove.value = {}
 }
 
-function confirmRemoveGroup(filterGroup) {
+const confirmRemoveGroup = (filterGroup) => {
   groupToRemove.value = filterGroup
   searchQueryToRemove.value = {}
   modals.remove = true
 }
 
-async function removeGroup() {
+const removeGroup = async () => {
   try {
     await store.dispatch(
       `remove${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
@@ -437,11 +437,11 @@ async function removeGroup() {
   }
 }
 
-function toggleFilterGroup(group) {
+const toggleFilterGroup = (group) => {
   toggleGroupId.value = toggleGroupId.value !== group.id ? group.id : null
 }
 
-function getSearchQueryTitle(searchQuery) {
+const getSearchQueryTitle = (searchQuery) => {
   if (!searchQuery.is_shared) {
     return
   }
@@ -449,7 +449,7 @@ function getSearchQueryTitle(searchQuery) {
   return t('main.shared_by', { name: person?.full_name })
 }
 
-function getDepartment(group) {
+const getDepartment = (group) => {
   return departmentMap.value.get(group.department_id)
 }
 
