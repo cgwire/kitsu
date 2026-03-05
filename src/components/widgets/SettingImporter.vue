@@ -45,61 +45,50 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useStore } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 
-export default {
-  name: 'setting-importer',
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    ComboboxProduction
+defineProps({
+  items: {
+    type: Array,
+    default: () => []
   },
-
-  emits: ['import-from-production', 'import-item'],
-
-  data() {
-    return {
-      importProductionId: null
-    }
-  },
-
-  props: {
-    items: {
-      type: Array,
-      default: () => []
-    },
-    loadingImport: {
-      type: Boolean,
-      default: true
-    }
-  },
-
-  mounted() {
-    if (this.availableProductions.length > 0) {
-      this.importProductionId = this.availableProductions[0].id
-    }
-  },
-
-  computed: {
-    ...mapGetters(['currentProduction', 'openProductions']),
-
-    availableProductions() {
-      return this.openProductions.filter(
-        production => production.id !== this.currentProduction.id
-      )
-    },
-
-    sizeStyle() {
-      return {
-        width: this.size ? this.size + 'px' : 'auto'
-      }
-    }
+  loadingImport: {
+    type: Boolean,
+    default: true
   }
-}
+})
+
+defineEmits(['import-from-production', 'import-item'])
+
+const importProductionId = ref(null)
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const openProductions = computed(() => store.getters.openProductions)
+
+const availableProductions = computed(() => {
+  return openProductions.value.filter(
+    production => production.id !== currentProduction.value.id
+  )
+})
+
+const sizeStyle = computed(() => {
+  return {
+    width: 'auto'
+  }
+})
+
+onMounted(() => {
+  if (availableProductions.value.length > 0) {
+    importProductionId.value = availableProductions.value[0].id
+  }
+})
 </script>
 
 <style lang="scss" scoped>
