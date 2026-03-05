@@ -46,19 +46,19 @@
               :is-editable="isEditable"
               @pin-clicked="
                 () => {
-                  $emit('pin-comment', comment)
+                  emit('pin-comment', comment)
                   toggleCommentMenu()
                 }
               "
               @edit-clicked="
                 () => {
-                  $emit('edit-comment', comment)
+                  emit('edit-comment', comment)
                   toggleCommentMenu()
                 }
               "
               @delete-clicked="
                 () => {
-                  $emit('delete-comment', comment)
+                  emit('delete-comment', comment)
                   toggleCommentMenu()
                 }
               "
@@ -76,7 +76,7 @@
               <copy-icon
                 class="copy-icon"
                 :size="12"
-                @click="$emit('duplicate-comment', comment)"
+                @click="emit('duplicate-comment', comment)"
               />
             </p>
             <p
@@ -271,7 +271,7 @@
                       </template>
                     </template>
                     <textarea
-                      ref="reply"
+                      ref="replyRef"
                       class="reply"
                       @keyup.ctrl.enter="onReplyClicked"
                       @dragover="onDragover"
@@ -414,19 +414,19 @@
             :is-empty="true"
             @pin-clicked="
               () => {
-                $emit('pin-comment', comment)
+                emit('pin-comment', comment)
                 toggleCommentMenu()
               }
             "
             @edit-clicked="
               () => {
-                $emit('edit-comment', comment)
+                emit('edit-comment', comment)
                 toggleCommentMenu()
               }
             "
             @delete-clicked="
               () => {
-                $emit('delete-comment', comment)
+                emit('delete-comment', comment)
                 toggleCommentMenu()
               }
             "
@@ -436,7 +436,7 @@
       </div>
     </div>
     <add-attachment-modal
-      ref="add-attachment-modal"
+      ref="addAttachmentModalRef"
       :active="modals.addAttachment"
       :title="$t('comments.add_attachment_to_reply')"
       @cancel="modals.addAttachment = false"
@@ -446,10 +446,12 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import AtTa from 'vue-at/dist/vue-at-textarea'
 import moment from 'moment'
-import { mapActions, mapGetters } from 'vuex'
 import {
   ChevronDownIcon,
   CopyIcon,
@@ -478,557 +480,520 @@ import PeopleName from '@/components/widgets/PeopleName.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
-export default {
-  name: 'comment',
+const { pauseEvent } = domMixin.methods
 
-  mixins: [domMixin],
+const store = useStore()
+const route = useRoute()
 
-  components: {
-    AtTa,
-    AddAttachmentModal,
-    ButtonSimple,
-    Checklist,
-    ChevronDownIcon,
-    CopyIcon,
-    CommentMenu,
-    EmojiButton,
-    LinkIcon,
-    PaperclipIcon,
-    PeopleAvatar,
-    PeopleName,
-    ThumbsUpIcon,
-    ValidationTag,
-    TaskTypeName
+const emit = defineEmits([
+  'ack-comment',
+  'checklist-updated',
+  'delete-comment',
+  'duplicate-comment',
+  'edit-comment',
+  'pin-comment',
+  'time-code-clicked'
+])
+
+const props = defineProps({
+  comment: {
+    type: Object,
+    default: () => {}
   },
+  frame: {
+    type: Number,
+    default: 0
+  },
+  fps: {
+    type: Number,
+    default: 25
+  },
+  isChange: {
+    type: Boolean,
+    default: false
+  },
+  isCheckable: {
+    type: Boolean,
+    default: false
+  },
+  isEditable: {
+    type: Boolean,
+    default: false
+  },
+  isPinnable: {
+    type: Boolean,
+    default: false
+  },
+  isReplyable: {
+    type: Boolean,
+    default: false
+  },
+  taskTypes: {
+    type: Array,
+    default: () => []
+  },
+  team: {
+    type: Array,
+    default: () => []
+  },
+  task: {
+    type: Object,
+    default: null
+  },
+  revision: {
+    type: Number,
+    default: 1
+  }
+})
 
-  data() {
-    return {
-      membersForAts: { '@': [], '#': [] },
-      checklist: [],
-      isReplyLoading: false,
-      menuVisible: false,
-      modals: {
-        addAttachment: false
-      },
-      replyAttachments: [],
-      replyText: '',
-      showReply: false,
-      uniqueClassName: (Math.random() + 1).toString(36).substring(2)
+const replyRef = ref(null)
+const addAttachmentModalRef = ref(null)
+
+const membersForAts = reactive({ '@': [], '#': [] })
+const checklist = ref([])
+const isReplyLoading = ref(false)
+const menuVisible = ref(false)
+const modals = reactive({
+  addAttachment: false
+})
+const replyAttachments = ref([])
+const replyText = ref('')
+const showReply = ref(false)
+const uniqueClassName = (Math.random() + 1).toString(36).substring(2)
+
+let silent = false
+let lastCall = 0
+
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const personMap = computed(() => store.getters.personMap)
+const productionDepartmentIds = computed(() => store.getters.productionDepartmentIds)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const user = computed(() => store.getters.user)
+
+const isConcept = computed(() => {
+  return route.path.includes('concept')
+})
+
+const isEmpty = computed(() => {
+  return (
+    props.comment.text.length === 0 &&
+    (!props.comment.checklist || props.comment.checklist.length === 0) &&
+    props.comment.attachment_files.length === 0 &&
+    props.comment.previews.length === 0
+  )
+})
+
+const previewRoute = computed(() => {
+  let r = {
+    name: 'task',
+    params: {
+      task_id: props.comment.object_id,
+      production_id: props.task.project_id
     }
-  },
-
-  emits: [
-    'ack-comment',
-    'checklist-updated',
-    'delete-comment',
-    'duplicate-comment',
-    'edit-comment',
-    'pin-comment',
-    'time-code-clicked'
-  ],
-
-  props: {
-    comment: {
-      type: Object,
-      default: () => {}
-    },
-    frame: {
-      type: Number,
-      default: 0
-    },
-    fps: {
-      type: Number,
-      default: 25
-    },
-    isChange: {
-      type: Boolean,
-      default: false
-    },
-    isCheckable: {
-      type: Boolean,
-      default: false
-    },
-    isEditable: {
-      type: Boolean,
-      default: false
-    },
-    isPinnable: {
-      type: Boolean,
-      default: false
-    },
-    isReplyable: {
-      type: Boolean,
-      default: false
-    },
-    taskTypes: {
-      type: Array,
-      default: () => []
-    },
-    team: {
-      type: Array,
-      default: () => []
-    },
-    task: {
-      type: Object,
-      default: null
-    },
-    revision: {
-      type: Number,
-      default: 1
-    }
-  },
-
-  mounted() {
-    if (this.comment.checklist) {
-      this.$options.silent = true
-      this.checklist = [...this.comment.checklist]
-      this.$nextTick().then(() => {
-        this.$options.silent = false
-      })
-    }
-    Array.from(document.getElementsByClassName(this.uniqueClassName)).forEach(
-      element => {
-        element.addEventListener('click', this.timeCodeClicked)
-      }
-    )
-    window.addEventListener('paste', this.onPaste, false)
-  },
-
-  beforeUnmount() {
-    Array.from(document.getElementsByClassName(this.uniqueClassName)).forEach(
-      element => {
-        element.removeEventListener('click', this.timeCodeClicked)
-      }
-    )
-    window.removeEventListener('paste', this.onPaste, false)
-  },
-
-  computed: {
-    ...mapGetters([
-      'departmentMap',
-      'isCurrentUserAdmin',
-      'isCurrentUserArtist',
-      'isCurrentUserClient',
-      'isCurrentUserManager',
-      'personMap',
-      'productionDepartmentIds',
-      'taskTypeMap',
-      'user'
-    ]),
-
-    isConcept() {
-      return this.$route.path.includes('concept')
-    },
-
-    isEmpty() {
-      return (
-        this.comment.text.length === 0 &&
-        (!this.comment.checklist || this.comment.checklist.length === 0) &&
-        this.comment.attachment_files.length === 0 &&
-        this.comment.previews.length === 0
-      )
-    },
-
-    previewRoute() {
-      let route = {
-        name: 'task',
-        params: {
-          task_id: this.comment.object_id,
-          production_id: this.task.project_id
-        }
-      }
-      if (this.comment.previews.length > 0) {
-        route = {
-          name: 'task-preview',
-          params: {
-            task_id: this.comment.object_id,
-            preview_id: this.comment.previews[0].id,
-            production_id: this.task.project_id
-          }
-        }
-      }
-      if (this.task.episode_id) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.task.episode_id
-      } else if (this.task.entity && this.task.entity.episode_id) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.task.entity.episode_id
-      }
-      const taskType = this.taskTypeMap.get(this.task.task_type_id)
-      route.params.type = pluralizeEntityType(taskType.for_entity)
-      return route
-    },
-
-    isLikedBy() {
-      const personList = this.comment.acknowledgements.map(personId =>
-        this.personMap.get(personId)
-      )
-      return sortByName(personList)
-        .map(p => p.name)
-        .join(', ')
-    },
-
-    commentAttachments() {
-      return this.comment.attachment_files.filter(
-        attachment => !attachment.reply_id
-      )
-    },
-
-    pictureAttachments() {
-      return this.commentAttachments
-        .filter(attachment =>
-          files.IMG_EXTENSIONS.includes(attachment.extension)
-        )
-        .sort((a, b) =>
-          a.name.localeCompare(b.name, undefined, {
-            numeric: true
-          })
-        )
-    },
-
-    fileAttachments() {
-      return this.commentAttachments.filter(
-        attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
-      )
-    },
-
-    replyAttachmentMap() {
-      const map = new Map()
-      this.comment.attachment_files.forEach(attachment => {
-        if (attachment.reply_id) {
-          if (!map.has(attachment.reply_id)) {
-            map.set(attachment.reply_id, {
-              pictures: [],
-              files: []
-            })
-          }
-          if (files.IMG_EXTENSIONS.includes(attachment.extension)) {
-            map.get(attachment.reply_id).pictures.push(attachment)
-          } else {
-            map.get(attachment.reply_id).files.push(attachment)
-          }
-        }
-      })
-      return map
-    },
-
-    commentDate() {
-      return parseDate(this.comment.created_at)
-    },
-
-    fullDate() {
-      return this.commentDate
-        .tz(this.user.timezone)
-        .format('YYYY-MM-DD HH:mm:ss')
-    },
-
-    shortDate() {
-      return this.renderDate(this.commentDate)
-    },
-
-    boxShadowStyle() {
-      const status = this.comment.task_status
-      return `0 0 3px 2px ${status.color}1F`
-    },
-
-    isAuthorClient() {
-      return this.personMap.get(this.comment.person_id)?.role === 'client'
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'deleteReply',
-      'replyToComment',
-      'updatePreviewFileValidationStatus'
-    ]),
-
-    shortenText: stringHelpers.shortenText,
-
-    formatDate(date) {
-      return formatDate(date)
-    },
-
-    replyFullDate(date) {
-      return moment(parseDate(date))
-        .tz(this.user.timezone)
-        .format('YYYY-MM-DD HH:mm:ss')
-    },
-
-    replyShortDate(date) {
-      return this.renderDate(parseDate(date))
-    },
-
-    renderDate(date) {
-      date = moment(date)
-      if (moment().isSame(date, 'd')) {
-        return date.tz(this.user.timezone).format('HH:mm')
-      } else {
-        return date.tz(this.user.timezone).format('MM/DD')
-      }
-    },
-
-    getPath(name) {
-      const route = {
-        name,
-        params: {
-          task_id: this.comment.object_id,
-          comment_id: this.comment.id
-        }
-      }
-      if (this.$route.params.episode_id) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.$route.params.episode_id
-      }
-      return route
-    },
-
-    getDownloadAttachmentPath,
-
-    toggleCommentMenu() {
-      this.menuVisible = !this.menuVisible
-    },
-
-    addChecklistEntry() {
-      this.$options.silent = true
-      this.checklist.push({
-        text: '',
-        checked: false
-      })
-      this.$nextTick().then(() => {
-        this.$options.silent = false
-      })
-    },
-
-    removeTask(entry) {
-      this.checklist = remove(this.checklist, entry)
-    },
-
-    onChecklistChanged() {
-      const now = new Date().getTime()
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 1000) {
-        this.lastCall = now
-        const comment = {
-          id: this.comment.id,
-          checklist: this.checklist.filter(item => item.text)
-        }
-        this.$emit('checklist-updated', comment)
-      }
-    },
-
-    acknowledgeComment(comment) {
-      this.$emit('ack-comment', comment)
-    },
-
-    timeCodeClicked(event) {
-      const data = { ...event.target.dataset }
-      data.frame = data.frame - 1
-      this.pauseEvent(event)
-      this.$emit('time-code-clicked', data)
-    },
-
-    onChecklistTimecodeClicked(data) {
-      this.$emit('time-code-clicked', {
-        versionRevision: data.revision,
-        frame: data.frame - 1
-      })
-    },
-
-    setFrame(data) {
-      this.$emit('time-code-clicked', {
-        versionRevision: data.revision,
-        frame: data.frame - 1
-      })
-    },
-
-    changePreviewValidationStatus(previewFiles) {
-      if (!this.isCurrentUserManager) {
-        return
-      }
-      const statusMap = {
-        validated: 'rejected',
-        rejected: 'neutral',
-        neutral: 'validated'
-      }
-      const status = statusMap[previewFiles[0].validation_status] || 'validated'
-      previewFiles.forEach(previewFile => {
-        this.updatePreviewFileValidationStatus({ previewFile, status })
-      })
-    },
-
-    renderComment,
-
-    showReplyWidget() {
-      this.showReply = true
-      this.$nextTick(() => {
-        this.$refs.reply?.focus()
-      })
-    },
-
-    onDrop(event) {
-      event.preventDefault()
-      const files = event.dataTransfer.files
-      if (files.length > 0) {
-        const form = new FormData()
-        form.append('file', files[0])
-        this.addAttachmentToReply([form])
-      }
-    },
-
-    onDragover(event) {
-      event.preventDefault()
-    },
-
-    onDragleave(event) {
-      event.preventDefault()
-    },
-
-    onReplyClicked() {
-      this.isReplyLoading = true
-      this.replyToComment({
-        comment: this.comment,
-        text: this.replyText,
-        attachments: this.replyAttachments
-      })
-        .then(() => {
-          this.isReplyLoading = false
-          this.replyText = ''
-          this.showReply = false
-          this.replyAttachments = []
-        })
-        .catch(error => {
-          console.error(error)
-          this.isReplyLoading = false
-        })
-    },
-
-    onDeleteReplyClicked(reply) {
-      this.deleteReply({ comment: this.comment, reply })
-        .then(() => {
-          this.isReplyLoading = false
-        })
-        .catch(console.error)
-    },
-
-    atOptionsFilter(name, chunk, at, v) {
-      // filter the list by the given at symbol
-      const option_at = v?.isTaskType ? '#' : '@'
-      // @ for team, # for task type
-      if (at !== option_at) return false
-      // match at lower-case
-      return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
-    },
-
-    onAtTextChanged(input) {
-      if (input.includes('@frame')) {
-        this.replyText = replaceTimeWithTimecode(
-          input,
-          this.revision,
-          this.frame + 1,
-          this.fps
-        )
-      }
-    },
-
-    onSelectEmoji(emoji) {
-      const textarea = this.$refs['reply']
-      this.replyText = stringHelpers.insertInTextArea(textarea, emoji.i)
-    },
-
-    addAttachmentToReply(files) {
-      this.modals.addAttachment = false
-      this.replyAttachments = this.replyAttachments.concat(files)
-    },
-
-    removeReplyAttachment(attachment) {
-      this.replyAttachments = this.replyAttachments.filter(
-        a => a !== attachment
-      )
-    },
-
-    onPaste(event) {
-      if (this.modals.addAttachment || !this.showReply) return
-      if (this.$refs['reply'] !== document.activeElement) return
-      const files = event.clipboardData.files
-      if (files.length > 0) {
-        const form = new FormData()
-        form.append('file', files[0])
-        this.addAttachmentToReply([form])
-      }
-    }
-  },
-
-  watch: {
-    'comment.checklist'() {
-      this.$options.silent = true
-      this.checklist = [...this.comment.checklist]
-      this.$nextTick().then(() => {
-        this.$options.silent = false
-      })
-    },
-
-    checklist() {
-      if (!this.$options.silent) {
-        this.onChecklistChanged()
-      }
-    },
-    taskTypes: {
-      deep: true,
-      immediate: true,
-      handler(values) {
-        const taskTypeOptions = values.map(taskType => {
-          return {
-            isTaskType: true,
-            full_name: taskType.name,
-            color: taskType.color,
-            id: taskType.id,
-            url: taskType.url
-          }
-        })
-        taskTypeOptions.push({
-          isTaskType: true,
-          color: '#000',
-          full_name: 'All'
-        })
-        this.membersForAts['#'] = taskTypeOptions
-      }
-    },
-
-    team: {
-      deep: true,
-      immediate: true,
-      handler() {
-        let teamOptions
-        if (this.isCurrentUserClient) {
-          teamOptions = this.team.filter(person =>
-            ['admin', 'manager', 'client'].includes(person.role)
-          )
-        } else {
-          teamOptions = [...this.team]
-        }
-        if (!this.isCurrentUserClient) {
-          teamOptions = teamOptions.concat(
-            this.productionDepartmentIds.map(departmentId => {
-              const department = this.departmentMap.get(departmentId)
-              return {
-                isDepartment: true,
-                full_name: department.name,
-                color: department.color,
-                id: departmentId
-              }
-            })
-          )
-        }
-        teamOptions.push({
-          isTime: true,
-          full_name: 'frame'
-        })
-        this.membersForAts['@'] = teamOptions
+  }
+  if (props.comment.previews.length > 0) {
+    r = {
+      name: 'task-preview',
+      params: {
+        task_id: props.comment.object_id,
+        preview_id: props.comment.previews[0].id,
+        production_id: props.task.project_id
       }
     }
   }
+  if (props.task.episode_id) {
+    r.name = `episode-${r.name}`
+    r.params.episode_id = props.task.episode_id
+  } else if (props.task.entity && props.task.entity.episode_id) {
+    r.name = `episode-${r.name}`
+    r.params.episode_id = props.task.entity.episode_id
+  }
+  const taskType = taskTypeMap.value.get(props.task.task_type_id)
+  r.params.type = pluralizeEntityType(taskType.for_entity)
+  return r
+})
+
+const isLikedBy = computed(() => {
+  const personList = props.comment.acknowledgements.map(personId =>
+    personMap.value.get(personId)
+  )
+  return sortByName(personList)
+    .map(p => p.name)
+    .join(', ')
+})
+
+const commentAttachments = computed(() => {
+  return props.comment.attachment_files.filter(
+    attachment => !attachment.reply_id
+  )
+})
+
+const pictureAttachments = computed(() => {
+  return commentAttachments.value
+    .filter(attachment =>
+      files.IMG_EXTENSIONS.includes(attachment.extension)
+    )
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, {
+        numeric: true
+      })
+    )
+})
+
+const fileAttachments = computed(() => {
+  return commentAttachments.value.filter(
+    attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
+  )
+})
+
+const replyAttachmentMap = computed(() => {
+  const map = new Map()
+  props.comment.attachment_files.forEach(attachment => {
+    if (attachment.reply_id) {
+      if (!map.has(attachment.reply_id)) {
+        map.set(attachment.reply_id, {
+          pictures: [],
+          files: []
+        })
+      }
+      if (files.IMG_EXTENSIONS.includes(attachment.extension)) {
+        map.get(attachment.reply_id).pictures.push(attachment)
+      } else {
+        map.get(attachment.reply_id).files.push(attachment)
+      }
+    }
+  })
+  return map
+})
+
+const commentDate = computed(() => {
+  return parseDate(props.comment.created_at)
+})
+
+const fullDate = computed(() => {
+  return commentDate.value
+    .tz(user.value.timezone)
+    .format('YYYY-MM-DD HH:mm:ss')
+})
+
+const shortDate = computed(() => {
+  return renderDate(commentDate.value)
+})
+
+const boxShadowStyle = computed(() => {
+  const status = props.comment.task_status
+  return `0 0 3px 2px ${status.color}1F`
+})
+
+const isAuthorClient = computed(() => {
+  return personMap.value.get(props.comment.person_id)?.role === 'client'
+})
+
+function shortenText(text, length) {
+  return stringHelpers.shortenText(text, length)
 }
+
+function replyFullDate(date) {
+  return moment(parseDate(date))
+    .tz(user.value.timezone)
+    .format('YYYY-MM-DD HH:mm:ss')
+}
+
+function replyShortDate(date) {
+  return renderDate(parseDate(date))
+}
+
+function renderDate(date) {
+  date = moment(date)
+  if (moment().isSame(date, 'd')) {
+    return date.tz(user.value.timezone).format('HH:mm')
+  } else {
+    return date.tz(user.value.timezone).format('MM/DD')
+  }
+}
+
+function getPath(name) {
+  const r = {
+    name,
+    params: {
+      task_id: props.comment.object_id,
+      comment_id: props.comment.id
+    }
+  }
+  if (route.params.episode_id) {
+    r.name = `episode-${r.name}`
+    r.params.episode_id = route.params.episode_id
+  }
+  return r
+}
+
+function toggleCommentMenu() {
+  menuVisible.value = !menuVisible.value
+}
+
+function addChecklistEntry() {
+  silent = true
+  checklist.value.push({
+    text: '',
+    checked: false
+  })
+  nextTick().then(() => {
+    silent = false
+  })
+}
+
+function removeTask(entry) {
+  checklist.value = remove(checklist.value, entry)
+}
+
+function onChecklistChanged() {
+  const now = new Date().getTime()
+  if (now - lastCall > 1000) {
+    lastCall = now
+    const comment = {
+      id: props.comment.id,
+      checklist: checklist.value.filter(item => item.text?.length)
+    }
+    emit('checklist-updated', comment)
+  }
+}
+
+function acknowledgeComment(comment) {
+  emit('ack-comment', comment)
+}
+
+function timeCodeClicked(event) {
+  const data = { ...event.target.dataset }
+  data.frame = data.frame - 1
+  pauseEvent(event)
+  emit('time-code-clicked', data)
+}
+
+function onChecklistTimecodeClicked(data) {
+  emit('time-code-clicked', {
+    versionRevision: data.revision,
+    frame: data.frame - 1
+  })
+}
+
+function setFrame(data) {
+  emit('time-code-clicked', {
+    versionRevision: data.revision,
+    frame: data.frame - 1
+  })
+}
+
+function changePreviewValidationStatus(previewFiles) {
+  if (!isCurrentUserManager.value) {
+    return
+  }
+  const statusMap = {
+    validated: 'rejected',
+    rejected: 'neutral',
+    neutral: 'validated'
+  }
+  const status = statusMap[previewFiles[0].validation_status] || 'validated'
+  previewFiles.forEach(previewFile => {
+    store.dispatch('updatePreviewFileValidationStatus', { previewFile, status })
+  })
+}
+
+function showReplyWidget() {
+  showReply.value = true
+  nextTick(() => {
+    replyRef.value?.focus()
+  })
+}
+
+function onDrop(event) {
+  event.preventDefault()
+  const droppedFiles = event.dataTransfer.files
+  if (droppedFiles.length > 0) {
+    const form = new FormData()
+    form.append('file', droppedFiles[0])
+    addAttachmentToReply([form])
+  }
+}
+
+function onDragover(event) {
+  event.preventDefault()
+}
+
+function onDragleave(event) {
+  event.preventDefault()
+}
+
+function onReplyClicked() {
+  isReplyLoading.value = true
+  store.dispatch('replyToComment', {
+    comment: props.comment,
+    text: replyText.value,
+    attachments: replyAttachments.value
+  })
+    .then(() => {
+      isReplyLoading.value = false
+      replyText.value = ''
+      showReply.value = false
+      replyAttachments.value = []
+    })
+    .catch(error => {
+      console.error(error)
+      isReplyLoading.value = false
+    })
+}
+
+function onDeleteReplyClicked(reply) {
+  store.dispatch('deleteReply', { comment: props.comment, reply })
+    .then(() => {
+      isReplyLoading.value = false
+    })
+    .catch(console.error)
+}
+
+function atOptionsFilter(name, chunk, at, v) {
+  const option_at = v?.isTaskType ? '#' : '@'
+  if (at !== option_at) return false
+  return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
+}
+
+function onAtTextChanged(input) {
+  if (input.includes('@frame')) {
+    replyText.value = replaceTimeWithTimecode(
+      input,
+      props.revision,
+      props.frame + 1,
+      props.fps
+    )
+  }
+}
+
+function onSelectEmoji(emoji) {
+  const textarea = replyRef.value
+  replyText.value = stringHelpers.insertInTextArea(textarea, emoji.i)
+}
+
+function addAttachmentToReply(addedFiles) {
+  modals.addAttachment = false
+  replyAttachments.value = replyAttachments.value.concat(addedFiles)
+}
+
+function removeReplyAttachment(attachment) {
+  replyAttachments.value = replyAttachments.value.filter(
+    a => a !== attachment
+  )
+}
+
+function onPaste(event) {
+  if (modals.addAttachment || !showReply.value) return
+  if (replyRef.value !== document.activeElement) return
+  const pastedFiles = event.clipboardData.files
+  if (pastedFiles.length > 0) {
+    const form = new FormData()
+    form.append('file', pastedFiles[0])
+    addAttachmentToReply([form])
+  }
+}
+
+onMounted(() => {
+  if (props.comment.checklist) {
+    silent = true
+    checklist.value = [...props.comment.checklist]
+    nextTick().then(() => {
+      silent = false
+    })
+  }
+  Array.from(document.getElementsByClassName(uniqueClassName)).forEach(
+    element => {
+      element.addEventListener('click', timeCodeClicked)
+    }
+  )
+  window.addEventListener('paste', onPaste, false)
+})
+
+onBeforeUnmount(() => {
+  Array.from(document.getElementsByClassName(uniqueClassName)).forEach(
+    element => {
+      element.removeEventListener('click', timeCodeClicked)
+    }
+  )
+  window.removeEventListener('paste', onPaste, false)
+})
+
+watch(
+  () => props.comment.checklist,
+  () => {
+    silent = true
+    checklist.value = [...props.comment.checklist]
+    nextTick().then(() => {
+      silent = false
+    })
+  }
+)
+
+watch(checklist, () => {
+  if (!silent) {
+    onChecklistChanged()
+  }
+})
+
+watch(
+  () => props.taskTypes,
+  (values) => {
+    const taskTypeOptions = values.map(taskType => {
+      return {
+        isTaskType: true,
+        full_name: taskType.name,
+        color: taskType.color,
+        id: taskType.id,
+        url: taskType.url
+      }
+    })
+    taskTypeOptions.push({
+      isTaskType: true,
+      color: '#000',
+      full_name: 'All'
+    })
+    membersForAts['#'] = taskTypeOptions
+  },
+  { deep: true, immediate: true }
+)
+
+watch(
+  () => props.team,
+  () => {
+    let teamOptions
+    if (isCurrentUserClient.value) {
+      teamOptions = props.team.filter(person =>
+        ['admin', 'manager', 'client'].includes(person.role)
+      )
+    } else {
+      teamOptions = [...props.team]
+    }
+    if (!isCurrentUserClient.value) {
+      teamOptions = teamOptions.concat(
+        productionDepartmentIds.value.map(departmentId => {
+          const department = departmentMap.value.get(departmentId)
+          return {
+            isDepartment: true,
+            full_name: department.name,
+            color: department.color,
+            id: departmentId
+          }
+        })
+      )
+    }
+    teamOptions.push({
+      isTime: true,
+      full_name: 'frame'
+    })
+    membersForAts['@'] = teamOptions
+  },
+  { deep: true, immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
