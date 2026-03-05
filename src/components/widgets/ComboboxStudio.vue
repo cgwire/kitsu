@@ -40,103 +40,91 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StudioName from '@/components/widgets/StudioName.vue'
 
-export default {
-  name: 'combobox-studio',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    StudioName
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['update:modelValue'],
-
-  data() {
-    return {
-      showStudioList: false
-    }
+  maxHeightSelectInput: {
+    default: 200,
+    type: Number
   },
-
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    maxHeightSelectInput: {
-      default: 200,
-      type: Number
-    },
-    rounded: {
-      default: false,
-      type: Boolean
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    width: {
-      default: 250,
-      type: Number
-    },
-    withEmptyChoice: {
-      default: true,
-      type: Boolean
-    },
-    allStudiosLabel: {
-      default: false,
-      type: Boolean
-    }
+  rounded: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    ...mapGetters(['studios', 'studioMap']),
-
-    studioList() {
-      const studios = [...this.studios]
-
-      if (this.withEmptyChoice) {
-        return [
-          {
-            color: '#aaa',
-            id: null,
-            name: this.allStudiosLabel
-              ? this.$t('studios.all_studios')
-              : this.$t('studios.no_studio')
-          },
-          ...studios
-        ]
-      }
-      return studios
-    },
-
-    currentStudio() {
-      if (!this.modelValue) {
-        return this.studioList[0]
-      }
-      return (
-        this.studioMap.get(this.modelValue) ??
-        this.studioList.find(({ id }) => id === this.modelValue)
-      )
-    }
+  modelValue: {
+    default: '',
+    type: String
   },
-
-  methods: {
-    selectStudio(studio) {
-      this.$emit('update:modelValue', studio.id)
-      this.showStudioList = false
-    },
-
-    toggleStudioList() {
-      this.showStudioList = !this.showStudioList
-    }
+  width: {
+    default: 250,
+    type: Number
+  },
+  withEmptyChoice: {
+    default: true,
+    type: Boolean
+  },
+  allStudiosLabel: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const showStudioList = ref(false)
+
+const studios = computed(() => store.getters.studios)
+const studioMap = computed(() => store.getters.studioMap)
+
+const studioList = computed(() => {
+  const studiosCopy = [...studios.value]
+
+  if (props.withEmptyChoice) {
+    return [
+      {
+        color: '#aaa',
+        id: null,
+        name: props.allStudiosLabel
+          ? t('studios.all_studios')
+          : t('studios.no_studio')
+      },
+      ...studiosCopy
+    ]
+  }
+  return studiosCopy
+})
+
+const currentStudio = computed(() => {
+  if (!props.modelValue) {
+    return studioList.value[0]
+  }
+  return (
+    studioMap.value.get(props.modelValue) ??
+    studioList.value.find(({ id }) => id === props.modelValue)
+  )
+})
+
+function selectStudio(studio) {
+  emit('update:modelValue', studio.id)
+  showStudioList.value = false
+}
+
+function toggleStudioList() {
+  showStudioList.value = !showStudioList.value
 }
 </script>
 
