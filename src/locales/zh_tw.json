@@ -36,7 +36,7 @@
       "linked": "連結",
       "no_concept": "沒有與此資產相關的概念",
       "casted_in_shots": "以 {nbShots} 鏡頭投射",
-      "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「DELETE」確認。",
+      "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除"
     },
     "asset_types": {
@@ -1742,7 +1742,7 @@
         "title": "概念連結",
         "empty": "無連結"
       },
-      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「DELETE」確認。",
+      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
       "drop_new_concepts": "在此丟入新的概念檔案"
     },
