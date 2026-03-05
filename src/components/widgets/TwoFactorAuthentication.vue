@@ -75,208 +75,192 @@
   </div>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { SmartphoneIcon, KeyIcon, MailIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-export default {
-  name: 'two-factor-authentication',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    KeyIcon,
-    MailIcon,
-    SmartphoneIcon
+const props = defineProps({
+  preferredTwoFa: {
+    required: true,
+    validator: prop => typeof prop === 'string' || prop === null
   },
-
-  emits: ['changed-two-fa', 'validate'],
-
-  data() {
-    return {
-      chosenTwoFA: '',
-      OTPValue: '',
-      twoFactorPayload: {},
-      errorSendingEmail: false,
-      errorRequestingFIDOChallenge: false,
-      textValidateButtonOrVerify: ''
-    }
+  twoFasEnabled: {
+    required: true,
+    type: Array
   },
-
-  props: {
-    preferredTwoFa: {
-      required: true,
-      validator: prop => typeof prop === 'string' || prop === null
-    },
-    twoFasEnabled: {
-      required: true,
-      type: Array
-    },
-    email: {
-      required: true,
-      type: String
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isWrongOtp: {
-      default: false,
-      type: Boolean
-    },
-    textValidateButton: {
-      default: '',
-      type: String
-    },
-    isDisableButton: {
-      default: false,
-      type: Boolean
-    },
-    isProfile: {
-      default: false,
-      type: Boolean
-    }
+  email: {
+    required: true,
+    type: String
   },
-
-  mounted() {
-    this.changeTwoFA(this.preferredTwoFa, false)
-    if (this.textValidateButton) {
-      this.textValidateButtonOrVerify = this.textValidateButton
-    } else {
-      this.textValidateButtonOrVerify = this.$t('login.verify')
-    }
+  isLoading: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    placeholderInputText() {
-      switch (this.chosenTwoFA) {
-        case 'totp':
-          return this.$t('login.fields.totp')
-        case 'email_otp':
-          return this.$t('login.fields.email_otp')
-        case 'recovery_code':
-          return this.$t('login.fields.recovery_code')
-      }
-      return ''
-    },
-
-    wrongOTPError() {
-      switch (this.chosenTwoFA) {
-        case 'totp':
-          return this.$t('login.wrong_totp')
-        case 'email_otp':
-          return this.$t('login.wrong_email_otp')
-        case 'recovery_code':
-          return this.$t('login.wrong_recovery_code')
-        case 'fido':
-          return this.$t('login.wrong_fido_challenge')
-      }
-      return ''
-    },
-
-    informationTwoFA() {
-      switch (this.chosenTwoFA) {
-        case 'totp':
-          return this.$t('login.information_totp')
-        case 'email_otp':
-          return this.$t('login.information_email_otp')
-        case 'recovery_code':
-          return this.$t('login.information_recovery_code')
-        case 'fido':
-          return this.$t('login.information_fido')
-      }
-      return ''
-    },
-
-    unableToVerify() {
-      switch (this.chosenTwoFA) {
-        case 'totp':
-          return this.$t('login.unable_to_verify_totp')
-        case 'email_otp':
-          return this.$t('login.unable_to_verify_email_otp')
-        case 'recovery_code':
-          return this.$t('login.unable_to_verify_recovery_code')
-        case 'fido':
-          return this.$t('login.unable_to_verify_fido')
-      }
-      return ''
-    },
-
-    othersTwoFA() {
-      return this.twoFasEnabled.filter((val, _) => val !== this.chosenTwoFA)
-    }
+  isWrongOtp: {
+    default: false,
+    type: Boolean
   },
-
-  methods: {
-    ...mapActions(['getFIDOChallenge', 'sendEmailOTP']),
-
-    updatePayload() {
-      this.twoFactorPayload = {}
-      this.twoFactorPayload[this.chosenTwoFA] = this.OTPValue
-    },
-
-    validate() {
-      this.$emit('validate', this.twoFactorPayload)
-    },
-
-    removeErrors() {
-      this.errorRequestingFIDOChallenge = false
-      this.errorSendingEmail = false
-    },
-
-    changeTwoFAText(twoFA) {
-      switch (twoFA) {
-        case 'totp':
-          return this.$t('login.choose_totp')
-        case 'email_otp':
-          return this.$t('login.choose_email_otp')
-        case 'recovery_code':
-          return this.$t('login.choose_recovery_code')
-        case 'fido':
-          return this.$t('login.choose_fido')
-      }
-      return ''
-    },
-
-    changeTwoFA(twoFA, emitChanged = true) {
-      this.removeErrors()
-      this.chosenTwoFA = twoFA
-      if (this.chosenTwoFA === 'email_otp') {
-        this.requestSendEmailOTP()
-      } else if (this.chosenTwoFA === 'fido') {
-        this.requestGetFIDOChallenge()
-      }
-      if (emitChanged) this.$emit('changed-two-fa', this.chosenTwoFA)
-    },
-
-    requestSendEmailOTP() {
-      this.removeErrors()
-      this.sendEmailOTP(this.email).catch(() => {
-        this.errorSendingEmail = true
-      })
-    },
-
-    requestGetFIDOChallenge() {
-      this.removeErrors()
-      this.getFIDOChallenge(this.email)
-        .then(FIDOChallenge => {
-          return navigator.credentials.get({ publicKey: FIDOChallenge })
-        })
-        .then(FIDOAuthenticationResponse => {
-          this.twoFactorPayload = {}
-          this.twoFactorPayload.fido_authentication_response =
-            FIDOAuthenticationResponse
-          this.validate()
-        })
-        .catch(err => {
-          if (err instanceof DOMException) console.error(err)
-          this.errorRequestingFIDOChallenge = true
-        })
-    }
+  textValidateButton: {
+    default: '',
+    type: String
+  },
+  isDisableButton: {
+    default: false,
+    type: Boolean
+  },
+  isProfile: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['changed-two-fa', 'validate'])
+
+const chosenTwoFA = ref('')
+const OTPValue = ref('')
+const twoFactorPayload = ref({})
+const errorSendingEmail = ref(false)
+const errorRequestingFIDOChallenge = ref(false)
+const textValidateButtonOrVerify = ref('')
+
+const placeholderInputText = computed(() => {
+  switch (chosenTwoFA.value) {
+    case 'totp':
+      return t('login.fields.totp')
+    case 'email_otp':
+      return t('login.fields.email_otp')
+    case 'recovery_code':
+      return t('login.fields.recovery_code')
+  }
+  return ''
+})
+
+const wrongOTPError = computed(() => {
+  switch (chosenTwoFA.value) {
+    case 'totp':
+      return t('login.wrong_totp')
+    case 'email_otp':
+      return t('login.wrong_email_otp')
+    case 'recovery_code':
+      return t('login.wrong_recovery_code')
+    case 'fido':
+      return t('login.wrong_fido_challenge')
+  }
+  return ''
+})
+
+const informationTwoFA = computed(() => {
+  switch (chosenTwoFA.value) {
+    case 'totp':
+      return t('login.information_totp')
+    case 'email_otp':
+      return t('login.information_email_otp')
+    case 'recovery_code':
+      return t('login.information_recovery_code')
+    case 'fido':
+      return t('login.information_fido')
+  }
+  return ''
+})
+
+const unableToVerify = computed(() => {
+  switch (chosenTwoFA.value) {
+    case 'totp':
+      return t('login.unable_to_verify_totp')
+    case 'email_otp':
+      return t('login.unable_to_verify_email_otp')
+    case 'recovery_code':
+      return t('login.unable_to_verify_recovery_code')
+    case 'fido':
+      return t('login.unable_to_verify_fido')
+  }
+  return ''
+})
+
+const othersTwoFA = computed(() => {
+  return props.twoFasEnabled.filter((val, _) => val !== chosenTwoFA.value)
+})
+
+function updatePayload() {
+  twoFactorPayload.value = {}
+  twoFactorPayload.value[chosenTwoFA.value] = OTPValue.value
 }
+
+function validate() {
+  emit('validate', twoFactorPayload.value)
+}
+
+function removeErrors() {
+  errorRequestingFIDOChallenge.value = false
+  errorSendingEmail.value = false
+}
+
+function changeTwoFAText(twoFA) {
+  switch (twoFA) {
+    case 'totp':
+      return t('login.choose_totp')
+    case 'email_otp':
+      return t('login.choose_email_otp')
+    case 'recovery_code':
+      return t('login.choose_recovery_code')
+    case 'fido':
+      return t('login.choose_fido')
+  }
+  return ''
+}
+
+function changeTwoFA(twoFA, emitChanged = true) {
+  removeErrors()
+  chosenTwoFA.value = twoFA
+  if (chosenTwoFA.value === 'email_otp') {
+    requestSendEmailOTP()
+  } else if (chosenTwoFA.value === 'fido') {
+    requestGetFIDOChallenge()
+  }
+  if (emitChanged) emit('changed-two-fa', chosenTwoFA.value)
+}
+
+function requestSendEmailOTP() {
+  removeErrors()
+  store.dispatch('sendEmailOTP', props.email).catch(() => {
+    errorSendingEmail.value = true
+  })
+}
+
+function requestGetFIDOChallenge() {
+  removeErrors()
+  store.dispatch('getFIDOChallenge', props.email)
+    .then(FIDOChallenge => {
+      return navigator.credentials.get({ publicKey: FIDOChallenge })
+    })
+    .then(FIDOAuthenticationResponse => {
+      twoFactorPayload.value = {}
+      twoFactorPayload.value.fido_authentication_response =
+        FIDOAuthenticationResponse
+      validate()
+    })
+    .catch(err => {
+      if (err instanceof DOMException) console.error(err)
+      errorRequestingFIDOChallenge.value = true
+    })
+}
+
+onMounted(() => {
+  changeTwoFA(props.preferredTwoFa, false)
+  if (props.textValidateButton) {
+    textValidateButtonOrVerify.value = props.textValidateButton
+  } else {
+    textValidateButtonOrVerify.value = t('login.verify')
+  }
+})
 </script>
 
 <style lang="scss" scoped>
