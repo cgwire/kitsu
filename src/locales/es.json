@@ -36,7 +36,7 @@
       "linked": "Enlace",
       "no_concept": "No hay conceptos vinculados a este activo",
       "casted_in_shots": "Lanzado en {nbShots} disparos",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los activos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los activos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR"
     },
     "asset_types": {
@@ -1311,7 +1311,7 @@
       "get_frames_from_previews_description": "Seleccione un tipo de tarea para extraer los números de fotograma de los últimos avances de película publicados.",
       "get_frames_from_previews_error": "Se ha producido un error al extraer los números de fotograma de las vistas previas del tipo de tarea. Póngase en contacto con nuestro equipo de asistencia.",
       "wrong_file_duration": "La duración de uno de los archivos de vídeo cargados no coincide con la duración prevista de la toma actual.",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tomas seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tomas seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
       "show_timecode": "Mostrar entrada y salida como códigos de tiempo"
     },
@@ -1515,7 +1515,7 @@
       "create_tasks_disclaimer": "Si falta el tipo de tarea, compruebe que aparece en la sección Tipos de tareas de los ajustes de producción.",
       "data_display": "Visualización de datos",
       "delete_for_selection_error": "Se ha producido un error al eliminar las tareas seleccionadas.",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tareas seleccionadas? También se eliminarán todos los comentarios y previsualizaciones relacionados. Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tareas seleccionadas? También se eliminarán todos los comentarios y previsualizaciones relacionados. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
       "hookup_playlist": "Generar una lista de reproducción para ligar"
     },
@@ -1609,7 +1609,7 @@
       "edit_success": "Las modificaciones se han guardado correctamente.",
       "restore_text": "¿Estás seguro de que quieres restaurar {name} de tu archivo?",
       "delete_for_selection_error": "Se ha producido un error al borrar las ediciones seleccionadas.",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente las ediciones seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente las ediciones seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
       "multiple_delete_error": "Se ha producido un error al borrar una edición. Es posible que existan datos vinculados a ella. ¿Está seguro de que no hay tareas vinculadas a la edición seleccionada?"
     },
@@ -1742,7 +1742,7 @@
         "title": "Enlaces a conceptos",
         "empty": "Sin enlaces"
       },
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente los conceptos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente los conceptos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
       "drop_new_concepts": "Suelte aquí los archivos de nuevos conceptos"
     },
@@ -1885,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los elementos seleccionados? Confírmelo escribiendo \"ELIMINAR\" a continuación.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los elementos seleccionados? Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR"
     },
     "hardware_items": {
