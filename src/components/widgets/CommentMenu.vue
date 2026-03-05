@@ -12,31 +12,27 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'comment-menu',
-
-  props: {
-    isEditable: {
-      type: Boolean,
-      default: true
-    },
-    isEmpty: {
-      type: Boolean,
-      default: false
-    },
-    isPinnable: {
-      type: Boolean,
-      default: true
-    },
-    isPinned: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+defineProps({
+  isEditable: {
+    type: Boolean,
+    default: true
   },
+  isEmpty: {
+    type: Boolean,
+    default: false
+  },
+  isPinnable: {
+    type: Boolean,
+    default: true
+  },
+  isPinned: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  emits: ['delete-clicked', 'edit-clicked', 'pin-clicked']
-}
+defineEmits(['delete-clicked', 'edit-clicked', 'pin-clicked'])
 </script>
 
 <style lang="scss" scoped>
