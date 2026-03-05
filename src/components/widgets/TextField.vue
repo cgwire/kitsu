@@ -10,7 +10,7 @@
       }"
     >
       <input
-        ref="input"
+        ref="inputRef"
         :class="
           errored
             ? 'input flexrow-item errored' + inputClass
@@ -47,114 +47,114 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'text-field',
+<script setup>
+import { ref } from 'vue'
 
-  props: {
-    autocomplete: {
-      type: String
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    label: {
-      type: String
-    },
-    modelModifiers: {
-      default: () => ({})
-    },
-    modelValue: {
-      type: [String, Number]
-    },
-    placeholder: {
-      type: [String, Number]
-    },
-    type: {
-      type: String
-    },
-    inputClass: {
-      default: '',
-      type: String
-    },
-    buttonLabel: {
-      type: String
-    },
-    min: {
-      default: 0,
-      type: Number
-    },
-    max: {
-      type: Number
-    },
-    maxlength: {
-      type: Number
-    },
-    step: {
-      type: Number
-    },
-    isInline: {
-      default: false,
-      type: Boolean
-    },
-    errored: {
-      default: false,
-      type: Boolean
-    },
-    errorText: {
-      default: '',
-      type: String
-    },
-    emptyLabel: {
-      default: false,
-      type: Boolean
-    },
-    readonly: {
-      default: false,
-      type: Boolean
-    },
-    required: {
-      default: false,
-      type: Boolean
-    },
-    unitLabel: {
-      type: String
-    }
+const props = defineProps({
+  autocomplete: {
+    type: String
   },
+  disabled: {
+    default: false,
+    type: Boolean
+  },
+  label: {
+    type: String
+  },
+  modelModifiers: {
+    default: () => ({})
+  },
+  modelValue: {
+    type: [String, Number]
+  },
+  placeholder: {
+    type: [String, Number]
+  },
+  type: {
+    type: String
+  },
+  inputClass: {
+    default: '',
+    type: String
+  },
+  buttonLabel: {
+    type: String
+  },
+  min: {
+    default: 0,
+    type: Number
+  },
+  max: {
+    type: Number
+  },
+  maxlength: {
+    type: Number
+  },
+  step: {
+    type: Number
+  },
+  isInline: {
+    default: false,
+    type: Boolean
+  },
+  errored: {
+    default: false,
+    type: Boolean
+  },
+  errorText: {
+    default: '',
+    type: String
+  },
+  emptyLabel: {
+    default: false,
+    type: Boolean
+  },
+  readonly: {
+    default: false,
+    type: Boolean
+  },
+  required: {
+    default: false,
+    type: Boolean
+  },
+  unitLabel: {
+    type: String
+  }
+})
 
-  emits: ['enter', 'update:modelValue'],
+const emit = defineEmits(['enter', 'update:modelValue'])
 
-  methods: {
-    getInputValue() {
-      const input = this.$refs.input
-      if (this.type === 'number') {
-        return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
-      } else {
-        if (this.modelModifiers.trim && typeof input.value === 'string') {
-          return input.value.trim()
-        }
-        return input.value
-      }
-    },
+const inputRef = ref(null)
 
-    emitEnter() {
-      this.$emit('enter', this.getInputValue())
-    },
-
-    updateValue() {
-      this.$emit('update:modelValue', this.getInputValue())
-    },
-
-    focus() {
-      this.$refs.input.focus()
-    },
-
-    checkValidity() {
-      return this.$refs.input.checkValidity()
+function getInputValue() {
+  const input = inputRef.value
+  if (props.type === 'number') {
+    return !isNaN(input.valueAsNumber) ? input.valueAsNumber : null
+  } else {
+    if (props.modelModifiers.trim && typeof input.value === 'string') {
+      return input.value.trim()
     }
+    return input.value
   }
 }
+
+function emitEnter() {
+  emit('enter', getInputValue())
+}
+
+function updateValue() {
+  emit('update:modelValue', getInputValue())
+}
+
+function focus() {
+  inputRef.value.focus()
+}
+
+function checkValidity() {
+  return inputRef.value.checkValidity()
+}
+
+defineExpose({ focus, checkValidity })
 </script>
 <style lang="scss" scoped>
 .input.is-size-2 {
