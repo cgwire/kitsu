@@ -112,7 +112,9 @@ const showDepartmentList = ref(false)
 const departmentMap = computed(() => store.getters.departmentMap)
 const departments = computed(() => store.getters.departments)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
-const isCurrentUserSupervisor = computed(() => store.getters.isCurrentUserSupervisor)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
 const user = computed(() => store.getters.user)
 
 const departmentsToTakeAccount = computed(() => {
@@ -198,7 +200,7 @@ const listStyle = computed(() => {
   return data
 })
 
-const selectDepartment = (department) => {
+const selectDepartment = department => {
   emit('update:modelValue', department.id)
   showDepartmentList.value = false
 }

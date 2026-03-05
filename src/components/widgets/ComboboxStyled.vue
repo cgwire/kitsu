@@ -145,7 +145,7 @@ const optionList = computed(() => {
   return props.options
 })
 
-const getOptionLabel = (option) => {
+const getOptionLabel = option => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
@@ -156,13 +156,13 @@ const selectedOptionLabel = computed(() => {
   return selectedOption.value ? getOptionLabel(selectedOption.value) : ''
 })
 
-const openRoute = (option) => {
+const openRoute = option => {
   const ahref = router.resolve(option.route).href
   const url = `${window.location.protocol}//${window.location.host}${ahref}`
   window.open(url, '_blank')
 }
 
-const selectOption = (option) => {
+const selectOption = option => {
   emit('update:modelValue', option.value)
   emit('change', option.value)
   selectedOption.value = option
@@ -180,14 +180,18 @@ const toggleList = () => {
   }
 }
 
-watch(() => props.options, () => {
-  if (props.options.length > 0) {
-    const option = props.options.find(
-      ({ value }) => value === props.modelValue
-    )
-    selectedOption.value = option || props.options[0]
-  }
-}, { deep: true, immediate: true })
+watch(
+  () => props.options,
+  () => {
+    if (props.options.length > 0) {
+      const option = props.options.find(
+        ({ value }) => value === props.modelValue
+      )
+      selectedOption.value = option || props.options[0]
+    }
+  },
+  { deep: true, immediate: true }
+)
 
 watch(showList, () => {
   if (showList.value && props.isReversed) {
@@ -204,9 +208,12 @@ watch(showList, () => {
   }
 })
 
-watch(() => props.modelValue, () => {
-  selectedOption.value = props.options.find(o => o.value === props.modelValue)
-})
+watch(
+  () => props.modelValue,
+  () => {
+    selectedOption.value = props.options.find(o => o.value === props.modelValue)
+  }
+)
 </script>
 
 <style lang="scss" scoped>

@@ -58,8 +58,11 @@ import { useTaskStatusStyle } from '@/composables/taskStatus'
 
 const { t } = useI18n()
 const store = useStore()
-const { backgroundColor: statusBgColor, color: statusColor, isDarkTheme } =
-  useTaskStatusStyle()
+const {
+  backgroundColor: statusBgColor,
+  color: statusColor,
+  isDarkTheme
+} = useTaskStatusStyle()
 
 const props = defineProps({
   task: {
@@ -135,9 +138,7 @@ const tagStyle = computed(() => {
         background: 'transparent',
         border:
           '1px solid ' +
-          (isTodo
-            ? 'grey'
-            : colors.lightenColor(backgroundColor.value, 0.5)),
+          (isTodo ? 'grey' : colors.lightenColor(backgroundColor.value, 0.5)),
         color: colors.lightenColor(backgroundColor.value, 0.5),
         cursor: isStaticVal ? 'pointer' : cursor.value
       }

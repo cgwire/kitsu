@@ -56,7 +56,7 @@ const togglePalette = () => {
   isOpen.value = !isOpen.value
 }
 
-const onColorPicked = (shade) => {
+const onColorPicked = shade => {
   emit('change', shade)
   isOpen.value = false
 }

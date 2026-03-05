@@ -131,7 +131,7 @@ const emitEnter = () => {
   emit('enter', value)
 }
 
-const getOptionLabel = (option) => {
+const getOptionLabel = option => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }

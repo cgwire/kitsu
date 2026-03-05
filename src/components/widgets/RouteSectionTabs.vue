@@ -32,7 +32,7 @@ const props = defineProps({
   }
 })
 
-const getRoute = (tab) => {
+const getRoute = tab => {
   return {
     ...props.route,
     query: {

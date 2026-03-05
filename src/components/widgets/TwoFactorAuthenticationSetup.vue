@@ -468,7 +468,7 @@ const preEnableTOTPRequested = () => {
     })
 }
 
-const disableTOTPRequested = (payload) => {
+const disableTOTPRequested = payload => {
   removeTwoFactorErrors()
   if (!twoFA.TOTPNeedTwoFA) {
     twoFA.TOTPNeedTwoFA = true
@@ -529,7 +529,7 @@ const preEnableEmailOTPRequested = () => {
     })
 }
 
-const disableEmailOTPRequested = (payload) => {
+const disableEmailOTPRequested = payload => {
   removeTwoFactorErrors()
   twoFA.OTPRecoveryCodes = null
   if (!twoFA.emailOTPNeedTwoFA) {
@@ -586,7 +586,7 @@ const registerFIDORequested = () => {
     })
 }
 
-const unregisterFIDORequested = (deviceName) => {
+const unregisterFIDORequested = deviceName => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   store
@@ -604,7 +604,7 @@ const unregisterFIDORequested = (deviceName) => {
     })
 }
 
-const newRecoveryCodesRequested = (payload) => {
+const newRecoveryCodesRequested = payload => {
   removeTwoFactorErrors()
   if (!twoFA.newRecoveryCodesNeedTwoFA) {
     twoFA.newRecoveryCodesNeedTwoFA = true
@@ -633,7 +633,7 @@ const nextEnable = () => {
   else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested()
 }
 
-const nextWithPayload = (payload) => {
+const nextWithPayload = payload => {
   if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
   else if (twoFA.emailOTPNeedTwoFA) disableEmailOTPRequested(payload)
   else if (twoFA.newRecoveryCodesNeedTwoFA) newRecoveryCodesRequested(payload)
@@ -679,7 +679,7 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.OTPRecoveryCodes = null
 }
 
-const onKeyDown = (event) => {
+const onKeyDown = event => {
   if (event.key === 'Escape') cancelCurrentTwoFactorAuthAction()
 }
 

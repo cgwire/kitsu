@@ -42,13 +42,13 @@ const currentModelId = ref('')
 const modelMap = ref({})
 const modelOptions = ref([])
 
-const emitValue = (value) => {
+const emitValue = value => {
   currentModelId.value = value
   const model = modelMap.value[currentModelId.value]
   emit('update:modelValue', model)
 }
 
-const emitEnter = (value) => {
+const emitEnter = value => {
   currentModelId.value = value
   const model = modelMap.value[currentModelId.value]
   emit('enter', model)

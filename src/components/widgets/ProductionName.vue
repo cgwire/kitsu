@@ -67,8 +67,7 @@ const avatarColor = computed(() => {
 })
 
 const thumbnailPath = computed(() => {
-  const lastUpdate =
-    props.production.updated_at || props.production.created_at
+  const lastUpdate = props.production.updated_at || props.production.created_at
   const timestamp = Date.parse(lastUpdate)
   return `/api/pictures/thumbnails/projects/${props.production.id}.png?t=${timestamp}`
 })

@@ -447,7 +447,15 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import AtTa from 'vue-at/dist/vue-at-textarea'
@@ -638,9 +646,7 @@ const commentAttachments = computed(() => {
 
 const pictureAttachments = computed(() => {
   return commentAttachments.value
-    .filter(attachment =>
-      files.IMG_EXTENSIONS.includes(attachment.extension)
-    )
+    .filter(attachment => files.IMG_EXTENSIONS.includes(attachment.extension))
     .sort((a, b) =>
       a.name.localeCompare(b.name, undefined, {
         numeric: true
@@ -679,9 +685,7 @@ const commentDate = computed(() => {
 })
 
 const fullDate = computed(() => {
-  return commentDate.value
-    .tz(user.value.timezone)
-    .format('YYYY-MM-DD HH:mm:ss')
+  return commentDate.value.tz(user.value.timezone).format('YYYY-MM-DD HH:mm:ss')
 })
 
 const shortDate = computed(() => {
@@ -701,17 +705,17 @@ const shortenText = (text, length) => {
   return stringHelpers.shortenText(text, length)
 }
 
-const replyFullDate = (date) => {
+const replyFullDate = date => {
   return moment(parseDate(date))
     .tz(user.value.timezone)
     .format('YYYY-MM-DD HH:mm:ss')
 }
 
-const replyShortDate = (date) => {
+const replyShortDate = date => {
   return renderDate(parseDate(date))
 }
 
-const renderDate = (date) => {
+const renderDate = date => {
   date = moment(date)
   if (moment().isSame(date, 'd')) {
     return date.tz(user.value.timezone).format('HH:mm')
@@ -720,7 +724,7 @@ const renderDate = (date) => {
   }
 }
 
-const getPath = (name) => {
+const getPath = name => {
   const r = {
     name,
     params: {
@@ -750,7 +754,7 @@ const addChecklistEntry = () => {
   })
 }
 
-const removeTask = (entry) => {
+const removeTask = entry => {
   checklist.value = remove(checklist.value, entry)
 }
 
@@ -766,32 +770,32 @@ const onChecklistChanged = () => {
   }
 }
 
-const acknowledgeComment = (comment) => {
+const acknowledgeComment = comment => {
   emit('ack-comment', comment)
 }
 
-const timeCodeClicked = (event) => {
+const timeCodeClicked = event => {
   const data = { ...event.target.dataset }
   data.frame = data.frame - 1
   pauseEvent(event)
   emit('time-code-clicked', data)
 }
 
-const onChecklistTimecodeClicked = (data) => {
+const onChecklistTimecodeClicked = data => {
   emit('time-code-clicked', {
     versionRevision: data.revision,
     frame: data.frame - 1
   })
 }
 
-const setFrame = (data) => {
+const setFrame = data => {
   emit('time-code-clicked', {
     versionRevision: data.revision,
     frame: data.frame - 1
   })
 }
 
-const changePreviewValidationStatus = (previewFiles) => {
+const changePreviewValidationStatus = previewFiles => {
   if (!isCurrentUserManager.value) {
     return
   }
@@ -813,7 +817,7 @@ const showReplyWidget = () => {
   })
 }
 
-const onDrop = (event) => {
+const onDrop = event => {
   event.preventDefault()
   const droppedFiles = event.dataTransfer.files
   if (droppedFiles.length > 0) {
@@ -823,21 +827,22 @@ const onDrop = (event) => {
   }
 }
 
-const onDragover = (event) => {
+const onDragover = event => {
   event.preventDefault()
 }
 
-const onDragleave = (event) => {
+const onDragleave = event => {
   event.preventDefault()
 }
 
 const onReplyClicked = () => {
   isReplyLoading.value = true
-  store.dispatch('replyToComment', {
-    comment: props.comment,
-    text: replyText.value,
-    attachments: replyAttachments.value
-  })
+  store
+    .dispatch('replyToComment', {
+      comment: props.comment,
+      text: replyText.value,
+      attachments: replyAttachments.value
+    })
     .then(() => {
       isReplyLoading.value = false
       replyText.value = ''
@@ -850,15 +855,16 @@ const onReplyClicked = () => {
     })
 }
 
-const onDeleteReplyClicked = (reply) => {
-  store.dispatch('deleteReply', { comment: props.comment, reply })
+const onDeleteReplyClicked = reply => {
+  store
+    .dispatch('deleteReply', { comment: props.comment, reply })
     .then(() => {
       isReplyLoading.value = false
     })
     .catch(console.error)
 }
 
-const onAtTextChanged = (input) => {
+const onAtTextChanged = input => {
   if (input.includes('@frame')) {
     replyText.value = replaceTimeWithTimecode(
       input,
@@ -869,23 +875,21 @@ const onAtTextChanged = (input) => {
   }
 }
 
-const onSelectEmoji = (emoji) => {
+const onSelectEmoji = emoji => {
   const textarea = replyRef.value
   replyText.value = stringHelpers.insertInTextArea(textarea, emoji.i)
 }
 
-const addAttachmentToReply = (addedFiles) => {
+const addAttachmentToReply = addedFiles => {
   modals.addAttachment = false
   replyAttachments.value = replyAttachments.value.concat(addedFiles)
 }
 
-const removeReplyAttachment = (attachment) => {
-  replyAttachments.value = replyAttachments.value.filter(
-    a => a !== attachment
-  )
+const removeReplyAttachment = attachment => {
+  replyAttachments.value = replyAttachments.value.filter(a => a !== attachment)
 }
 
-const onPaste = (event) => {
+const onPaste = event => {
   if (modals.addAttachment || !showReply.value) return
   if (replyRef.value !== document.activeElement) return
   const pastedFiles = event.clipboardData.files
@@ -937,7 +941,6 @@ watch(checklist, () => {
     onChecklistChanged()
   }
 })
-
 </script>
 
 <style lang="scss" scoped>

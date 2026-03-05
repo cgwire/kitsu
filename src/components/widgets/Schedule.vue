@@ -764,7 +764,15 @@
 /*
  * Component to facilitate the build of schedule pages.
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import {
@@ -959,19 +967,19 @@ const formatDuration = (minutes, toLocale = true) => {
 }
 
 // Dom mixin replacements
-const addEvents = (events) => {
+const addEvents = events => {
   events.forEach(([type, listener]) => {
     document.addEventListener(type, listener)
   })
 }
 
-const removeEvents = (events) => {
+const removeEvents = events => {
   events.forEach(([type, listener]) => {
     document.removeEventListener(type, listener)
   })
 }
 
-const getClientX = (event) => {
+const getClientX = event => {
   return (
     event.touches?.[0]?.clientX ??
     event.changedTouches?.[0]?.clientX ??
@@ -979,7 +987,7 @@ const getClientX = (event) => {
   )
 }
 
-const getClientY = (event) => {
+const getClientY = event => {
   return (
     event.touches?.[0]?.clientY ??
     event.changedTouches?.[0]?.clientY ??
@@ -988,15 +996,15 @@ const getClientY = (event) => {
 }
 
 // Store actions
-const deleteMilestone = (milestone) => {
+const deleteMilestone = milestone => {
   return store.dispatch('deleteMilestone', milestone)
 }
 
-const loadMilestones = (production) => {
+const loadMilestones = production => {
   return store.dispatch('loadMilestones', production)
 }
 
-const saveMilestone = (milestone) => {
+const saveMilestone = milestone => {
   return store.dispatch('saveMilestone', milestone)
 }
 
@@ -1065,9 +1073,7 @@ const daysAvailable = computed(() => {
   const days = []
   let day = props.startDate.clone().utc().startOf('day')
   const endDate = props.endDate.clone().utc().startOf('day')
-  const daysOff = getDayOffRange(props.daysOff).map(
-    dayOff => dayOff.date
-  )
+  const daysOff = getDayOffRange(props.daysOff).map(dayOff => dayOff.date)
 
   while (day.isSameOrBefore(endDate)) {
     day.off = daysOff.includes(day.toISOString().slice(0, 10))
@@ -1233,7 +1239,7 @@ const unitOfTime = computed(() => {
 
 // Methods
 
-const getNbSubChildren = (children) => {
+const getNbSubChildren = children => {
   if (!children) return 0
 
   return Object.values(children).reduce((acc, subChildren) => {
@@ -1254,7 +1260,7 @@ const refreshAllItemPositions = () => {
   })
 }
 
-const refreshItemPositions = (rootElement) => {
+const refreshItemPositions = rootElement => {
   if (!rootElement?.children) {
     return
   }
@@ -1276,7 +1282,7 @@ const refreshItemPositions = (rootElement) => {
   }
 }
 
-const refreshManDays = (rootElement) => {
+const refreshManDays = rootElement => {
   if (props.hideManDays || !rootElement?.children?.length) {
     return
   }
@@ -1287,11 +1293,9 @@ const refreshManDays = (rootElement) => {
   )
 }
 
-const isVisible = (timeElement) => {
+const isVisible = timeElement => {
   const isStartDateOk = timeElement.startDate.isSameOrAfter(props.startDate)
-  const isEndDateOk = timeElement.endDate.isSameOrBefore(
-    dayAfterEndDate.value
-  )
+  const isEndDateOk = timeElement.endDate.isSameOrBefore(dayAfterEndDate.value)
   return isStartDateOk && isEndDateOk
 }
 
@@ -1305,7 +1309,7 @@ const resetScheduleSize = () => {
   }
 }
 
-const onMouseMove = (event) => {
+const onMouseMove = event => {
   if (isChangeStartDate.value) {
     changeStartDate(event)
   } else if (isChangeEndDate.value) {
@@ -1343,7 +1347,7 @@ const onChildEstimationChanged = (event, childElement, rootElement) => {
   })
 }
 
-const updatePositionBarPosition = (event) => {
+const updatePositionBarPosition = event => {
   if (!timelineContentWrapperRef.value || !timelinePositionRef.value) return
 
   const cursorX =
@@ -1371,12 +1375,12 @@ const isValidItemDates = (startDate, endDate) => {
   )
 }
 
-const getDisplayedDaysIndex = (date) => {
+const getDisplayedDaysIndex = date => {
   const dateString = date.format('YYYY-MM-DD')
   return displayedDaysIndex.value[dateString]
 }
 
-const getDisplayedWeeksIndex = (date) => {
+const getDisplayedWeeksIndex = date => {
   const dateString = date.startOf('isoweek').format('YYYY-MM-DD')
   return displayedWeeksIndex.value[dateString]
 }
@@ -1387,14 +1391,13 @@ const resetDroppableTargets = () => {
   })
 }
 
-const changeDates = (event) => {
+const changeDates = event => {
   if (!isSelected(currentElement.value)) {
     // avoid side effect if item unselected
     return
   }
 
-  const change =
-    getClientX(event) - initialClientX - cellWidth.value / 2
+  const change = getClientX(event) - initialClientX - cellWidth.value / 2
   const dayChange = Math.ceil(change / cellWidth.value)
 
   if (props.reassignable) {
@@ -1523,9 +1526,8 @@ const changeDates = (event) => {
   }
 }
 
-const changeStartDate = (event) => {
-  const change =
-    getClientX(event) - initialClientX + cellWidth.value / 2
+const changeStartDate = event => {
+  const change = getClientX(event) - initialClientX + cellWidth.value / 2
   const dayChange = Math.floor(change / cellWidth.value)
 
   const startDate = lastStartDate
@@ -1557,9 +1559,8 @@ const changeStartDate = (event) => {
   }
 }
 
-const changeEndDate = (event) => {
-  const change =
-    getClientX(event) - initialClientX + cellWidth.value / 2
+const changeEndDate = event => {
+  const change = getClientX(event) - initialClientX + cellWidth.value / 2
   const dayChange = Math.ceil(change / cellWidth.value)
 
   if (currentElement.value.startDate.isBefore(props.startDate)) {
@@ -1612,7 +1613,7 @@ const changeEndDate = (event) => {
   }
 }
 
-const updateItemEstimation = (item) => {
+const updateItemEstimation = item => {
   if (props.isEstimationLinked) {
     const estimation = getBusinessDays(
       item.startDate,
@@ -1638,7 +1639,7 @@ const updateSelection = (item, event) => {
   }
 }
 
-const isOverlapping = (item) => {
+const isOverlapping = item => {
   return (
     props.withGhosts &&
     ((item.previousElement &&
@@ -1648,19 +1649,19 @@ const isOverlapping = (item) => {
   )
 }
 
-const isSelected = (item) => {
+const isSelected = item => {
   return selection.value.some(({ id }) => id === item.id)
 }
 
-const addToSelection = (itemToAdd) => {
+const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
 }
 
-const removeFromSelection = (itemToRemove) => {
+const removeFromSelection = itemToRemove => {
   selection.value = selection.value.filter(item => item !== itemToRemove)
 }
 
-const resetSelection = (value) => {
+const resetSelection = value => {
   selection.value = value || []
 }
 
@@ -1678,9 +1679,7 @@ const moveTimebar = (timeElement, event) => {
     lastStartDate = timeElement.startDate.clone()
     lastEndDate = timeElement.endDate.clone()
     initialClientX = getClientX(event)
-    document.body.style.cursor = props.reassignable
-      ? 'all-scroll'
-      : 'ew-resize'
+    document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
 
     updateSelection(timeElement, event)
   }
@@ -1688,11 +1687,7 @@ const moveTimebar = (timeElement, event) => {
 
 const moveTimebarLeftSide = (timeElement, event) => {
   event.preventDefault() // avoid scroll of schedule on touch
-  if (
-    !isChangeDates.value &&
-    !isChangeEndDate.value &&
-    timeElement.editable
-  ) {
+  if (!isChangeDates.value && !isChangeEndDate.value && timeElement.editable) {
     isChangeDates.value = false
     isChangeStartDate.value = true
     isChangeEndDate.value = false
@@ -1732,7 +1727,7 @@ const moveTimebarRightSide = (timeElement, event) => {
   }
 }
 
-const onTimelineScroll = (event) => {
+const onTimelineScroll = event => {
   if (!event?.target) return
   const position = event.target
   const newTop = position.scrollTop
@@ -1743,27 +1738,25 @@ const onTimelineScroll = (event) => {
   emit('scroll', { top: position.scrollTop })
 }
 
-const setScrollPosition = (top) => {
+const setScrollPosition = top => {
   timelineContentWrapperRef.value.scrollTop = top
   entityListRef.value.scrollTop = top
 }
 
-const scrollScheduleLeft = (event) => {
+const scrollScheduleLeft = event => {
   if (!timelineContentWrapperRef.value) return
   const previousLeft = timelineContentWrapperRef.value.scrollLeft
-  const movementX =
-    event.movementX || getClientX(event) - initialClientX
+  const movementX = event.movementX || getClientX(event) - initialClientX
   const newLeft = previousLeft - movementX
   initialClientX = getClientX(event)
   timelineContentWrapperRef.value.scrollLeft = newLeft
   timelineHeaderRef.value.scrollLeft = newLeft
 }
 
-const scrollScheduleTop = (event) => {
+const scrollScheduleTop = event => {
   if (!timelineContentWrapperRef.value) return
   const previousTop = timelineContentWrapperRef.value.scrollTop
-  const movementY =
-    event.movementY || getClientY(event) - initialClientY
+  const movementY = event.movementY || getClientY(event) - initialClientY
   const newTop = previousTop - movementY
   initialClientY = getClientY(event)
   setScrollPosition(newTop)
@@ -1774,7 +1767,7 @@ const scrollToToday = () => {
   scrollToDate(today)
 }
 
-const scrollToDate = (date) => {
+const scrollToDate = date => {
   setTimeout(() => {
     if (
       scheduleRef.value &&
@@ -1791,7 +1784,7 @@ const scrollToDate = (date) => {
   }, 10)
 }
 
-const startBrowsing = (event) => {
+const startBrowsing = event => {
   if (
     !isChangeStartDate.value &&
     !isChangeEndDate.value &&
@@ -1805,19 +1798,19 @@ const startBrowsing = (event) => {
   }
 }
 
-const startBrowsingX = (event) => {
+const startBrowsingX = event => {
   document.body.style.cursor = 'grabbing'
   isBrowsingX.value = true
   initialClientX = getClientX(event)
 }
 
-const startBrowsingY = (event) => {
+const startBrowsingY = event => {
   document.body.style.cursor = 'grabbing'
   isBrowsingY.value = true
   initialClientY = getClientY(event)
 }
 
-const stopBrowsing = (event) => {
+const stopBrowsing = event => {
   document.body.style.cursor = 'default'
   if (currentElement.value) {
     if (initialClientX !== getClientX(event)) {
@@ -1863,11 +1856,7 @@ const stopBrowsing = (event) => {
 // Helpers
 
 const dateDiff = (startDate, endDate, unit = 'days') => {
-  if (
-    startDate.isSame(endDate) ||
-    !startDate.isValid() ||
-    !endDate.isValid()
-  ) {
+  if (startDate.isSame(endDate) || !startDate.isValid() || !endDate.isValid()) {
     return 0
   }
   const first = startDate.clone().utc().startOf('day')
@@ -1888,26 +1877,22 @@ const dayClass = (day, index = 0) => {
   }
 }
 
-const dayOffStyle = (dayOff) => {
+const dayOffStyle = dayOff => {
   return {
     left: `${getLeftPosition(dayOff.date)}px`,
     width: `${cellWidth.value - 1}px`
   }
 }
 
-const dateStatusStyle = (date) => {
+const dateStatusStyle = date => {
   return {
     left: `${getLeftPosition(date) + cellWidth.value / 2 - 3}px`
   }
 }
 
-const getLeftPosition = (date) => {
+const getLeftPosition = date => {
   const startDate = moment.utc(date)
-  const startDiff = dateDiff(
-    props.startDate,
-    startDate,
-    unitOfTime.value
-  )
+  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
   return startDiff * cellWidth.value + 1
 }
 
@@ -1960,14 +1945,14 @@ const timebarStyle = (timeElement, root = false) => {
   return style
 }
 
-const timelineMultilineStyle = (timeElement) => {
+const timelineMultilineStyle = timeElement => {
   return {
     top: `${timeElement.line * 40 + 5}px`,
     left: `${getTimebarLeft(timeElement)}px`
   }
 }
 
-const timelineSubchildrenStyle = (timeElement) => {
+const timelineSubchildrenStyle = timeElement => {
   const children = Array.from(timeElement.children.values())
   const nbLines = children.reduce(
     (acc, subChildren) => acc + getNbLines(subChildren),
@@ -2002,7 +1987,12 @@ const timebarChildStyle = (
   }
 }
 
-const timesheetStyle = (timesheet, timeElement, rootElement, withEstimations) => {
+const timesheetStyle = (
+  timesheet,
+  timeElement,
+  rootElement,
+  withEstimations
+) => {
   return {
     top: withEstimations ? '7px' : '18px',
     left: `${getTimebarLeft(timesheet, true)}px`,
@@ -2028,7 +2018,7 @@ const timebarSubchildStyle = (timeElement, rootElement) => {
   }
 }
 
-const timebarSubchildTitle = (task) => {
+const timebarSubchildTitle = task => {
   const name = task.entity.name
   const startDate = task.startDate.format('YYYY-MM-DD')
   const endDate = task.endDate.format('YYYY-MM-DD')
@@ -2038,22 +2028,17 @@ const timebarSubchildTitle = (task) => {
   return `${name} (${startDate} - ${endDate}) ${duration} ${t('schedule.md')}`
 }
 
-const getTimebarLeft = (timeElement) => {
+const getTimebarLeft = timeElement => {
   const startDate = timeElement.startDate || props.startDate
-  const startDiff = dateDiff(
-    props.startDate,
-    startDate,
-    unitOfTime.value
-  )
+  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
   return startDiff * cellWidth.value + 3
 }
 
-const getTimebarWidth = (timeElement) => {
+const getTimebarWidth = timeElement => {
   const startDate = timeElement.startDate || props.startDate
   let endDate =
     timeElement.endDate ||
-    (timeElement.startDate &&
-      timeElement.startDate.clone().add(1, 'days')) ||
+    (timeElement.startDate && timeElement.startDate.clone().add(1, 'days')) ||
     props.startDate.clone().add(1, 'days')
 
   if (
@@ -2075,7 +2060,7 @@ const getTimebarWidth = (timeElement) => {
 
 // Children
 
-const expandRootElement = (rootElement) => {
+const expandRootElement = rootElement => {
   if (rootElement.expanded) {
     // clear selected items when collapsing the root element
     selection.value.forEach(item => {
@@ -2090,9 +2075,7 @@ const expandRootElement = (rootElement) => {
   emit(
     'root-element-expanded',
     rootElement,
-    props.multiline || props.subchildren
-      ? refreshItemPositions
-      : undefined
+    props.multiline || props.subchildren ? refreshItemPositions : undefined
   )
 }
 
@@ -2104,7 +2087,11 @@ const childNameStyle = (rootElement, index) => {
   }
 }
 
-const childrenStyle = (rootElement, isMultiline = false, setBackground = false) => {
+const childrenStyle = (
+  rootElement,
+  isMultiline = false,
+  setBackground = false
+) => {
   const style = {
     'border-bottom': `1px solid ${rootElement.color}`,
     'border-left': `1px solid ${rootElement.color}`
@@ -2131,7 +2118,11 @@ const showEditMilestoneModal = (day, milestone) => {
         date: parseDate(milestone.date)
       })
     } else {
-      Object.assign(milestoneToEdit, { date: day, name: undefined, id: undefined })
+      Object.assign(milestoneToEdit, {
+        date: day,
+        name: undefined,
+        id: undefined
+      })
     }
   }
 }
@@ -2140,7 +2131,7 @@ const hideEditMilestoneModal = () => {
   modals.edit = false
 }
 
-const confirmEditMilestone = (milestone) => {
+const confirmEditMilestone = milestone => {
   loading.edit = true
   saveMilestone(milestone)
     .then(() => {
@@ -2155,7 +2146,7 @@ const confirmEditMilestone = (milestone) => {
     })
 }
 
-const removeMilestone = (milestone) => {
+const removeMilestone = milestone => {
   loading.edit = true
   deleteMilestone(milestone)
     .then(() => {
@@ -2170,15 +2161,11 @@ const removeMilestone = (milestone) => {
     })
 }
 
-const milestoneLineStyle = (milestone) => {
+const milestoneLineStyle = milestone => {
   const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
   const milestoneDate = parseDate(milestone.date)
   if (startDate.isSameOrBefore(milestoneDate)) {
-    const lengthDiffVal = dateDiff(
-      startDate,
-      milestoneDate,
-      unitOfTime.value
-    )
+    const lengthDiffVal = dateDiff(startDate, milestoneDate, unitOfTime.value)
     return {
       left: `${(lengthDiffVal + 0.5) * cellWidth.value}px`
     }
@@ -2189,7 +2176,7 @@ const milestoneLineStyle = (milestone) => {
   }
 }
 
-const addMilestoneTitle = (day) => {
+const addMilestoneTitle = day => {
   return `${t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
 }
 
@@ -2223,11 +2210,11 @@ const onTaskDragEnter = (event, rootElement) => {
   event.currentTarget.classList.add('droppable')
 }
 
-const onTaskDragOver = (event) => {
+const onTaskDragOver = event => {
   event.preventDefault()
 }
 
-const onTaskDragLeave = (event) => {
+const onTaskDragLeave = event => {
   event.target.classList.remove('droppable')
 }
 
@@ -2285,27 +2272,42 @@ const exportData = () => {
 
 // Watchers
 
-watch(() => props.startDate, () => {
-  resetScheduleSize()
-})
+watch(
+  () => props.startDate,
+  () => {
+    resetScheduleSize()
+  }
+)
 
-watch(() => props.endDate, () => {
-  resetScheduleSize()
-})
+watch(
+  () => props.endDate,
+  () => {
+    resetScheduleSize()
+  }
+)
 
-watch(() => props.zoomLevel, () => {
-  resetScheduleSize()
-  refreshAllItemPositions()
-  onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
-})
+watch(
+  () => props.zoomLevel,
+  () => {
+    resetScheduleSize()
+    refreshAllItemPositions()
+    onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
+  }
+)
 
-watch(() => props.isLoading, () => {
-  nextTick(resetScheduleSize)
-})
+watch(
+  () => props.isLoading,
+  () => {
+    nextTick(resetScheduleSize)
+  }
+)
 
-watch(() => props.height, () => {
-  nextTick(resetScheduleSize)
-})
+watch(
+  () => props.height,
+  () => {
+    nextTick(resetScheduleSize)
+  }
+)
 
 watch(currentElement, () => {
   if (currentElement.value && currentElement.value.task_type_id) {
@@ -2319,11 +2321,15 @@ watch(currentElement, () => {
   }
 })
 
-watch(currentProduction, () => {
-  if (props.withMilestones) {
-    loadMilestones(currentProduction.value)
-  }
-}, { immediate: true })
+watch(
+  currentProduction,
+  () => {
+    if (props.withMilestones) {
+      loadMilestones(currentProduction.value)
+    }
+  },
+  { immediate: true }
+)
 
 // Lifecycle
 

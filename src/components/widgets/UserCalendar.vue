@@ -179,7 +179,7 @@ const resetEvents = () => {
   })
 }
 
-const onEventClicked = (event) => {
+const onEventClicked = event => {
   const task = taskMap.value.get(event.extendedProps.taskId)
   if (!task || task === currentTask.value) {
     currentTask.value = null
@@ -191,7 +191,7 @@ const onEventClicked = (event) => {
   }
 }
 
-const getStatusColor = (status) => {
+const getStatusColor = status => {
   if (status.name === 'Todo' && isDarkTheme.value) {
     return '#5F626A'
   } else {
@@ -199,7 +199,7 @@ const getStatusColor = (status) => {
   }
 }
 
-const getStatusTextColor = (status) => {
+const getStatusTextColor = status => {
   if (status.name === 'Todo' && !isDarkTheme.value) {
     return '#333'
   } else {
@@ -207,10 +207,9 @@ const getStatusTextColor = (status) => {
   }
 }
 
-const getDayOffInfo = (dayOff) => {
+const getDayOffInfo = dayOff => {
   const { description, date, end_date } = dayOff
-  const period =
-    end_date && date !== end_date ? `${date} - ${end_date}` : date
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
   return `${description || t('timesheets.day_off')} (${period})`
 }
 

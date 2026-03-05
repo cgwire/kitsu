@@ -123,7 +123,7 @@ const onDragleave = () => {
   isDragging = false
 }
 
-const onDrop = (event) => {
+const onDrop = event => {
   if (event.dataTransfer.files) {
     isDragging = false
     isSaving.value = false
