@@ -36,57 +36,49 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { UserIcon, UserMinusIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { useStore } from 'vuex'
 
-export default {
-  name: 'people-avatar-with-menu',
+const store = useStore()
 
-  components: {
-    UserIcon,
-    UserMinusIcon
+const props = defineProps({
+  person: {
+    type: Object,
+    default: () => ({
+      id: 'empty',
+      color: '#FFF'
+    })
   },
-
-  props: {
-    person: {
-      type: Object,
-      default: () => ({
-        id: 'empty',
-        color: '#FFF'
-      })
-    },
-    size: {
-      type: Number,
-      default: 40
-    },
-    fontSize: {
-      type: Number,
-      default: 18
-    },
-    isLazy: {
-      type: Boolean,
-      default: true
-    }
+  size: {
+    type: Number,
+    default: 40
   },
-
-  emits: ['unassign'],
-
-  computed: {
-    ...mapGetters(['isDarkTheme']),
-
-    style() {
-      return {
-        color: this.isDarkTheme ? '#333' : '#FFF',
-        'font-weight': this.isDarkTheme ? 'bold' : 'normal',
-        width: `${this.size}px`,
-        height: `${this.size}px`,
-        fontSize: `${this.fontSize}px`,
-        backgroundColor: this.person.color
-      }
-    }
+  fontSize: {
+    type: Number,
+    default: 18
+  },
+  isLazy: {
+    type: Boolean,
+    default: true
   }
-}
+})
+
+defineEmits(['unassign'])
+
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+
+const style = computed(() => {
+  return {
+    color: isDarkTheme.value ? '#333' : '#FFF',
+    'font-weight': isDarkTheme.value ? 'bold' : 'normal',
+    width: `${props.size}px`,
+    height: `${props.size}px`,
+    fontSize: `${props.fontSize}px`,
+    backgroundColor: props.person.color
+  }
+})
 </script>
 
 <style lang="scss" scoped>
