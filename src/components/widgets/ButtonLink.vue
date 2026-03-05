@@ -20,7 +20,7 @@
   </router-link>
 </template>
 
-<script>
+<script setup>
 import {
   DownloadIcon,
   EditIcon,
@@ -30,36 +30,23 @@ import {
   UploadIcon
 } from 'lucide-vue-next'
 
-export default {
-  name: 'button-link',
-
-  components: {
-    DownloadIcon,
-    EditIcon,
-    PlusIcon,
-    RotateCcwIcon,
-    TrashIcon,
-    UploadIcon
+defineProps({
+  text: {
+    type: String
   },
-
-  props: {
-    text: {
-      type: String
-    },
-    title: {
-      type: String
-    },
-    path: {
-      required: true,
-      type: [String, Object]
-    },
-    icon: {
-      type: String
-    },
-    isResponsive: {
-      default: false,
-      type: Boolean
-    }
+  title: {
+    type: String
+  },
+  path: {
+    required: true,
+    type: [String, Object]
+  },
+  icon: {
+    type: String
+  },
+  isResponsive: {
+    default: false,
+    type: Boolean
   }
-}
+})
 </script>
