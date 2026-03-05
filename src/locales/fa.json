@@ -1885,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید موارد انتخاب‌شده را به‌طور دائم حذف کنید؟ لطفاً با تایپ کردن «DELETE» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید موارد انتخاب‌شده را به‌طور دائم حذف کنید؟ لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف"
     },
     "hardware_items": {
