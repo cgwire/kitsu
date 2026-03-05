@@ -37,7 +37,7 @@
       "no_concept": "Keine mit diesem Vermögenswert verbundenen Konzepte",
       "casted_in_shots": "Gegossen in {nbShots} Schüsse",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Assets dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_lock_text": "LÖSCHEN"
     },
     "asset_types": {
       "all_asset_types": "Alle Assettypen",
@@ -1312,7 +1312,7 @@
       "get_frames_from_previews_error": "Es ist ein Fehler beim Extrahieren der Bildnummern aus der Aufgabenvorschau aufgetreten. Bitte kontaktieren Sie unser Support-Team.",
       "wrong_file_duration": "Die Dauer einer der hochgeladenen Videodateien stimmt nicht mit der erwarteten Dauer der aktuellen Aufnahme überein.",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Schüsse dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie dies, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
       "show_timecode": "Ein- und Ausgänge als Timecode anzeigen"
     },
     "server_down": {
@@ -1516,7 +1516,7 @@
       "data_display": "Anzeige der Daten",
       "delete_for_selection_error": "Beim Löschen der ausgewählten Aufgaben ist ein Fehler aufgetreten.",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Aufgaben dauerhaft entfernen möchten? Alle zugehörigen Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
       "hookup_playlist": "Erstellen Sie eine Wiedergabeliste"
     },
     "timesheets": {
@@ -1610,7 +1610,7 @@
       "restore_text": "Sind Sie sicher, dass Sie {name} aus Ihrem Archiv wiederherstellen möchten?",
       "delete_for_selection_error": "Beim Löschen der ausgewählten Bearbeitungen ist ein Fehler aufgetreten.",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Bearbeitungen dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
       "multiple_delete_error": "Beim Löschen einer Bearbeitung ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit diesem Vorgang verknüpft. Sind Sie sicher, dass keine Aufgaben mit der ausgewählten Bearbeitung verknüpft sind?"
     },
     "status_automations": {
@@ -1743,7 +1743,7 @@
         "empty": "Keine Links"
       },
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Konzepte dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
       "drop_new_concepts": "Neue Konzeptdateien hier ablegen"
     },
     "intro": {
@@ -1886,7 +1886,7 @@
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Elemente dauerhaft entfernen möchten? Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_lock_text": "LÖSCHEN"
     },
     "hardware_items": {
       "create_error": "Beim Speichern des Hardware-Elements ist ein Fehler aufgetreten.",
