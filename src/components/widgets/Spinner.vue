@@ -7,41 +7,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import Origami from '@/components/spinners/Origami.vue'
 import SquareGrid from '@/components/spinners/SquareGrid.vue'
 
-export default {
-  name: 'spinner',
-  components: {
-    SquareGrid,
-    Origami
+const props = defineProps({
+  isWhite: {
+    type: Boolean,
+    default: false
   },
-
-  props: {
-    isWhite: {
-      type: Boolean,
-      default: false
-    },
-    isProcessing: {
-      type: Boolean,
-      default: false
-    },
-    isStylish: {
-      type: Boolean,
-      default: false
-    },
-    size: {
-      type: Number
-    }
+  isProcessing: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    sizeStyle() {
-      return {
-        width: this.size ? `${this.size}px` : null
-      }
-    }
+  isStylish: {
+    type: Boolean,
+    default: false
+  },
+  size: {
+    type: Number
   }
-}
+})
+
+const sizeStyle = computed(() => {
+  return {
+    width: props.size ? `${props.size}px` : null
+  }
+})
 </script>
