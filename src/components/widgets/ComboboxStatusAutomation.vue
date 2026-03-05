@@ -97,7 +97,7 @@ const currentStatusAutomation = computed(() => {
   }
 })
 
-function backgroundColor(statusAutomation) {
+const backgroundColor = (statusAutomation) => {
   if (
     (!statusAutomation || statusAutomation.is_default) &&
     !isDarkTheme.value
@@ -115,7 +115,7 @@ function backgroundColor(statusAutomation) {
   }
 }
 
-function color(statusAutomation) {
+const color = (statusAutomation) => {
   if (
     !statusAutomation ||
     !statusAutomation.is_default ||

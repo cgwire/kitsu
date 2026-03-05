@@ -52,19 +52,19 @@ const selectedOption = ref({
   value: ''
 })
 
-function selectOption(option) {
+const selectOption = (option) => {
   emit('update:modelValue', option.value)
   selectedOption.value = option
 }
 
-function getOptionLabel(option) {
+const getOptionLabel = (option) => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
   return option.label
 }
 
-function resetOptions() {
+const resetOptions = () => {
   if (props.options.length > 0) {
     const option = props.options.find(o => o.value === props.modelValue)
     if (option) {

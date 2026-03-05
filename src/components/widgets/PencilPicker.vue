@@ -42,11 +42,11 @@ const emit = defineEmits(['change'])
 
 const isOpen = ref(false)
 
-function togglePalette() {
+const togglePalette = () => {
   isOpen.value = !isOpen.value
 }
 
-function onPencilPicked(width) {
+const onPencilPicked = (width) => {
   emit('change', width)
   isOpen.value = false
 }

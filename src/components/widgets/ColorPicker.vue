@@ -52,11 +52,11 @@ const emit = defineEmits(['change'])
 
 const isOpen = ref(false)
 
-function togglePalette() {
+const togglePalette = () => {
   isOpen.value = !isOpen.value
 }
 
-function onColorPicked(shade) {
+const onColorPicked = (shade) => {
   emit('change', shade)
   isOpen.value = false
 }

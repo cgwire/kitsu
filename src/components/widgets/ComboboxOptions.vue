@@ -79,7 +79,7 @@ const optionList = computed(() => {
   return props.isReversed ? props.options.slice().reverse() : props.options
 })
 
-function toggleList() {
+const toggleList = () => {
   if (showList.value) {
     lastScrollPosition.value = list.value?.scrollTop || 0
   }
@@ -95,7 +95,7 @@ function toggleList() {
   }
 }
 
-function onUpdateValue(key) {
+const onUpdateValue = (key) => {
   const value = !props.modelValue[key]
   emit('update:modelValue', {
     ...props.modelValue,

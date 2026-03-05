@@ -88,7 +88,7 @@ const emit = defineEmits([
 
 const checklistEntryRefs = {}
 
-function setChecklistEntryRef(el, index) {
+const setChecklistEntryRef = (el, index) => {
   if (el) {
     checklistEntryRefs[`checklist-entry-${index}`] = el
   }
@@ -98,7 +98,7 @@ const filteredChecklist = computed(() => {
   return props.checklist.filter(Boolean)
 })
 
-function addChecklistEntry(index) {
+const addChecklistEntry = (index) => {
   if (index === -1 || index === props.checklist.length - 1) {
     emit('add-item', {
       index,
@@ -122,7 +122,7 @@ function addChecklistEntry(index) {
   })
 }
 
-function removeChecklistEntry(index) {
+const removeChecklistEntry = (index) => {
   const entry = props.checklist[index]
   if (entry.text.length === 0) {
     emit('remove-task', entry)
@@ -130,7 +130,7 @@ function removeChecklistEntry(index) {
   }
 }
 
-function focusPrevious(index) {
+const focusPrevious = (index) => {
   if (props.checklist.length > 0) {
     if (index === 0) index = props.checklist.length
     index--
@@ -139,7 +139,7 @@ function focusPrevious(index) {
   }
 }
 
-function focusNext(index) {
+const focusNext = (index) => {
   if (props.checklist.length > 0) {
     if (index === props.checklist.length - 1) index = -1
     index++
@@ -148,7 +148,7 @@ function focusNext(index) {
   }
 }
 
-function setFrame(item) {
+const setFrame = (item) => {
   item.checked = !item.checked
   item.revision = props.revision
   item.frame = props.frame
@@ -156,7 +156,7 @@ function setFrame(item) {
   emit('emit-change')
 }
 
-function toggleEntryChecked(entry) {
+const toggleEntryChecked = (entry) => {
   if (props.isEditable) {
     entry.checked = !entry.checked
     emit('emit-change')

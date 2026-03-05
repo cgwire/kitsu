@@ -40,11 +40,11 @@ const booleanOptions = [
   { label: t('main.no'), value: 'false' }
 ]
 
-function emitValue(value) {
+const emitValue = (value) => {
   emit('update:modelValue', value)
 }
 
-function emitEnter(value) {
+const emitEnter = (value) => {
   emit('enter', value)
 }
 </script>

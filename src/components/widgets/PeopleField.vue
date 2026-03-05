@@ -109,24 +109,24 @@ onMounted(() => {
   }, 10)
 })
 
-function onSearchChange(s) {
+const onSearchChange = (s) => {
   items.value = s?.length
     ? indexSearch(index.value, [s])
     : props.people
   search.value = s
 }
 
-function onSelect() {
+const onSelect = () => {
   emit('update:modelValue', item.value)
   emit('select', item.value)
 }
 
-function clear() {
+const clear = () => {
   item.value = null
   onSelect()
 }
 
-function focus() {
+const focus = () => {
   multiselect.value.$el.focus()
 }
 

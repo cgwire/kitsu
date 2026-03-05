@@ -55,33 +55,33 @@ const search = ref('')
 const focused = ref(false)
 const inputRef = ref(null)
 
-function onSearchChange() {
+const onSearchChange = () => {
   emit('change', search.value)
 }
 
-function onEnterPressed() {
+const onEnterPressed = () => {
   emit('enter', search.value)
 }
 
-function onSaveClicked() {
+const onSaveClicked = () => {
   if (search.value && props.canSave) {
     emit('save', search.value)
   }
 }
 
-function getValue() {
+const getValue = () => {
   return search.value
 }
 
-function setValue(value) {
+const setValue = (value) => {
   search.value = value
 }
 
-function focus(options) {
+const focus = (options) => {
   inputRef.value?.focus(options)
 }
 
-function clearSearch() {
+const clearSearch = () => {
   search.value = ''
   onSearchChange()
 }

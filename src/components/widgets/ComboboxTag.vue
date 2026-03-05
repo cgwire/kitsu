@@ -112,7 +112,7 @@ const renderedValue = computed(() => {
   return props.modelValue.split(',').filter(Boolean).sort().join(', ')
 })
 
-function selectOption(option) {
+const selectOption = (option) => {
   let values = props.modelValue.split(',').filter(Boolean)
   if (values.includes(option.value)) {
     values.splice(values.indexOf(option.value), 1)
@@ -129,7 +129,7 @@ function selectOption(option) {
   emit('change', value)
 }
 
-function toggleList() {
+const toggleList = () => {
   if (showList.value) {
     lastScrollPosition = selectRef.value.scrollTop
   }
@@ -141,14 +141,14 @@ function toggleList() {
   }
 }
 
-function getOptionLabel(option) {
+const getOptionLabel = (option) => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
   return option.label
 }
 
-function isChecked(option) {
+const isChecked = (option) => {
   const values = props.modelValue.split(',')
   return values.includes(option.value)
 }
