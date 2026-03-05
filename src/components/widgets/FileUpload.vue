@@ -1,6 +1,6 @@
 <template>
   <div
-    ref="wrapper"
+    ref="wrapperRef"
     @drop="onDrop"
     @dragover="onDragover"
     @dragleave="onDragleave"
@@ -15,7 +15,7 @@
         >
           {{ label }}
           <input
-            ref="uploadInput"
+            ref="uploadInputRef"
             class="visuallyhidden"
             type="file"
             :accept="accept"
@@ -42,118 +42,115 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'file-upload',
+<script setup>
+import { ref, onMounted } from 'vue'
 
-  props: {
-    accept: {
-      default: '.csv',
-      type: String
-    },
-    isPrimary: {
-      default: true,
-      type: Boolean
-    },
-    label: {
-      type: String,
-      required: true
-    },
-    multiple: {
-      default: false,
-      type: Boolean
-    },
-    uploadFieldName: {
-      default: 'file',
-      type: String
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    hideFileNames: {
-      type: Boolean,
-      default: false
-    }
+const props = defineProps({
+  accept: {
+    default: '.csv',
+    type: String
   },
-
-  emits: ['fileselected'],
-
-  data() {
-    return {
-      isInitial: true,
-      isSaving: false,
-      uploadedFiles: []
-    }
+  isPrimary: {
+    default: true,
+    type: Boolean
   },
-
-  mounted() {
-    this.reset()
-    const events = [
-      'drag',
-      'dragstart',
-      'dragend',
-      'dragover',
-      'dragenter',
-      'dragleave',
-      'drop'
-    ]
-    events.forEach(evt => {
-      this.$refs.wrapper.addEventListener(evt, e => {
-        e.preventDefault()
-        e.stopPropagation()
-      })
-    })
+  label: {
+    type: String,
+    required: true
   },
+  multiple: {
+    default: false,
+    type: Boolean
+  },
+  uploadFieldName: {
+    default: 'file',
+    type: String
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  },
+  hideFileNames: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  methods: {
-    filesChange(name, files) {
-      this.uploadedFiles = []
-      const forms = []
-      for (let i = 0, numFiles = files.length; i < numFiles; i++) {
-        const file = files[i]
-        const formData = new FormData()
-        formData.append(this.uploadFieldName, file, file.name)
-        forms.push(formData)
-        if (this.multiple) {
-          this.uploadedFiles.push(file.name)
-        } else {
-          this.uploadedFiles = [file.name]
-        }
-      }
-      if (this.multiple) {
-        this.$emit('fileselected', forms)
-      } else {
-        this.$emit('fileselected', forms[0])
-      }
-    },
+const emit = defineEmits(['fileselected'])
 
-    reset() {
-      this.isSaving = false
-      this.isInitial = true
-      this.uploadedFiles = []
-      if (this.$refs.uploadInput) {
-        this.$refs.uploadInput.value = ''
-      }
-    },
+const isInitial = ref(true)
+const isSaving = ref(false)
+const uploadedFiles = ref([])
+const wrapperRef = ref(null)
+const uploadInputRef = ref(null)
+let isDragging = false
 
-    onDragover() {
-      this.isDragging = true
-    },
-
-    onDragleave() {
-      this.isDragging = false
-    },
-
-    onDrop(event) {
-      if (event.dataTransfer.files) {
-        this.isDragging = false
-        this.isSaving = false
-        this.filesChange('file', event.dataTransfer.files)
-      }
+function filesChange(name, files) {
+  uploadedFiles.value = []
+  const forms = []
+  for (let i = 0, numFiles = files.length; i < numFiles; i++) {
+    const file = files[i]
+    const formData = new FormData()
+    formData.append(props.uploadFieldName, file, file.name)
+    forms.push(formData)
+    if (props.multiple) {
+      uploadedFiles.value.push(file.name)
+    } else {
+      uploadedFiles.value = [file.name]
     }
   }
+  if (props.multiple) {
+    emit('fileselected', forms)
+  } else {
+    emit('fileselected', forms[0])
+  }
 }
+
+function reset() {
+  isSaving.value = false
+  isInitial.value = true
+  uploadedFiles.value = []
+  if (uploadInputRef.value) {
+    uploadInputRef.value.value = ''
+  }
+}
+
+function onDragover() {
+  isDragging = true
+}
+
+function onDragleave() {
+  isDragging = false
+}
+
+function onDrop(event) {
+  if (event.dataTransfer.files) {
+    isDragging = false
+    isSaving.value = false
+    filesChange('file', event.dataTransfer.files)
+  }
+}
+
+onMounted(() => {
+  reset()
+  const events = [
+    'drag',
+    'dragstart',
+    'dragend',
+    'dragover',
+    'dragenter',
+    'dragleave',
+    'drop'
+  ]
+  events.forEach(evt => {
+    wrapperRef.value.addEventListener(evt, e => {
+      e.preventDefault()
+      e.stopPropagation()
+    })
+  })
+})
+
+defineExpose({ reset })
 </script>
 
 <style lang="scss" scoped>
