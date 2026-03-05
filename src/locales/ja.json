@@ -36,7 +36,7 @@
       "linked": "リンク済み",
       "no_concept": "このアセットにリンクされたコンセプトはありません",
       "casted_in_shots": "{nbShots}ショットでキャスティング",
-      "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
     },
     "asset_types": {
@@ -1311,7 +1311,7 @@
       "get_frames_from_previews_description": "最新の公開された動画プレビューからフレーム番号を抽出するタスクタイプを選択してください。",
       "get_frames_from_previews_error": "タスクタイプのプレビューからフレーム番号を抽出中にエラーが発生しました。サポートにお問い合わせください。",
       "wrong_file_duration": "アップロードされた動画ファイルの1つの長さが現在のショットの予想される長さと一致しません。",
-      "delete_for_selection_hard_text": "選択したショットを永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したショットを永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "show_timecode": "インとアウトをタイムコードで表示"
     },
@@ -1515,7 +1515,7 @@
       "create_tasks_disclaimer": "タスク・タイプが見つからない場合は、本番設定のタスク・タイプ・セクションにリストされていることを確認してください。",
       "data_display": "データ表示",
       "delete_for_selection_error": "選択したタスクの削除中にエラーが発生しました。",
-      "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "hookup_playlist": "フックアップ・プレイリストを作成する"
     },
@@ -1609,7 +1609,7 @@
       "edit_success": "変更が正常に保存されました。",
       "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
       "delete_for_selection_error": "選択した編集の削除中にエラーが発生しました。",
-      "delete_for_selection_hard_text": "選択した編集を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択した編集を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "multiple_delete_error": "編集の削除中にエラーが発生しました。現在リンクされている既存のデータがある可能性があります。選択した編集にリンクされているタスクがないことを確認していますか？"
     },
@@ -1742,7 +1742,7 @@
         "title": "コンセプトへのリンク",
         "empty": "リンクなし"
       },
-      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "drop_new_concepts": "新しいコンセプトファイルをここにドロップする"
     },
@@ -1885,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "選択したアイテムを永久に削除してもよろしいですか？以下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したアイテムを永久に削除してもよろしいですか？以下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
     },
     "hardware_items": {
