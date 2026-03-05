@@ -43,11 +43,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import colors from '@/lib/colors'
+import { useCombobox } from '@/composables/combobox'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StatusAutomationItem from '@/components/widgets/StatusAutomationItem.vue'
@@ -83,7 +84,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const showStatusAutomationsList = ref(false)
+const { showList: showStatusAutomationsList, toggle: toggleStatusAutomationsList, select: selectStatusAutomation } = useCombobox(emit)
 
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const statusAutomationMap = computed(() => store.getters.statusAutomationMap)
@@ -95,11 +96,6 @@ const currentStatusAutomation = computed(() => {
     return props.statusAutomationsList[0]
   }
 })
-
-function selectStatusAutomation(status) {
-  emit('update:modelValue', status.id)
-  showStatusAutomationsList.value = false
-}
 
 function backgroundColor(statusAutomation) {
   if (
@@ -131,9 +127,6 @@ function color(statusAutomation) {
   }
 }
 
-function toggleStatusAutomationsList() {
-  showStatusAutomationsList.value = !showStatusAutomationsList.value
-}
 </script>
 
 <style lang="scss" scoped>

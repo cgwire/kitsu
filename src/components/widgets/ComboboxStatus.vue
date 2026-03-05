@@ -61,12 +61,13 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { sortTaskStatuses } from '@/lib/sorting'
+import { useCombobox } from '@/composables/combobox'
 import { useTaskStatusStyle } from '@/composables/taskStatus'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
@@ -116,7 +117,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const showStatusList = ref(false)
+const { showList: showStatusList, toggle: toggleStatusList, select: selectStatus } = useCombobox(emit)
 
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -166,14 +167,6 @@ const comboStyles = computed(() => {
   }
 })
 
-function selectStatus(status) {
-  emit('update:modelValue', status.id)
-  showStatusList.value = false
-}
-
-function toggleStatusList() {
-  showStatusList.value = !showStatusList.value
-}
 </script>
 
 <style lang="scss" scoped>

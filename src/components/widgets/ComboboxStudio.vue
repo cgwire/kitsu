@@ -41,10 +41,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
+
+import { useCombobox } from '@/composables/combobox'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import StudioName from '@/components/widgets/StudioName.vue'
@@ -85,7 +87,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const showStudioList = ref(false)
+const { showList: showStudioList, toggle: toggleStudioList, select: selectStudio } = useCombobox(emit)
 
 const studios = computed(() => store.getters.studios)
 const studioMap = computed(() => store.getters.studioMap)
@@ -118,14 +120,6 @@ const currentStudio = computed(() => {
   )
 })
 
-function selectStudio(studio) {
-  emit('update:modelValue', studio.id)
-  showStudioList.value = false
-}
-
-function toggleStudioList() {
-  showStudioList.value = !showStudioList.value
-}
 </script>
 
 <style lang="scss" scoped>
