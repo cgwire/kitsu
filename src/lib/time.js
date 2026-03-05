@@ -1,5 +1,8 @@
 import moment from 'moment-timezone'
 
+const SUNDAY = 0
+const SATURDAY = 6
+
 export const range = (start, end) => {
   let length = end - start + 1
   if (length < 0) length = 0
@@ -82,7 +85,7 @@ export const getWeekRange = (year, currentYear) => {
   if (currentYear === year) {
     return range(1, moment().week())
   } else {
-    return range(1, 52)
+    return range(1, moment(String(year), 'YYYY').isoWeeksInYear())
   }
 }
 
@@ -203,8 +206,6 @@ export const getDatesFromEndDate = (
 }
 
 export const getBusinessDays = (startDate, endDate, daysOff = []) => {
-  const Sunday = 0
-  const Saturday = 6
   const datesOff = daysOff
     ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
     : []
@@ -212,8 +213,8 @@ export const getBusinessDays = (startDate, endDate, daysOff = []) => {
   let nbDays = 0
   while (newDate.isSameOrBefore(endDate)) {
     if (
-      newDate.day() !== Sunday &&
-      newDate.day() !== Saturday &&
+      newDate.day() !== SUNDAY &&
+      newDate.day() !== SATURDAY &&
       !datesOff.includes(newDate.format('YYYY-MM-DD'))
     ) {
       nbDays++
@@ -225,8 +226,6 @@ export const getBusinessDays = (startDate, endDate, daysOff = []) => {
 
 const adjustBusinessDays = (originalDate, numDays, daysOff, method) => {
   if (!originalDate) return
-  const Sunday = 0
-  const Saturday = 6
   const datesOff = daysOff
     ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
     : []
@@ -234,8 +233,8 @@ const adjustBusinessDays = (originalDate, numDays, daysOff, method) => {
   let daysRemaining = numDays
   while (daysRemaining >= 0) {
     if (
-      newDate.day() !== Sunday &&
-      newDate.day() !== Saturday &&
+      newDate.day() !== SUNDAY &&
+      newDate.day() !== SATURDAY &&
       !datesOff.includes(newDate.format('YYYY-MM-DD'))
     ) {
       daysRemaining--
