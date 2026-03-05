@@ -38,49 +38,46 @@
   </span>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-  name: 'people-avatar',
+const store = useStore()
 
-  props: {
-    person: {
-      type: Object,
-      required: true
-    },
-    size: {
-      type: Number,
-      default: 40
-    },
-    fontSize: {
-      type: Number,
-      default: 18
-    },
-    isLink: {
-      type: Boolean,
-      default: true
-    },
-    isLazy: {
-      type: Boolean,
-      default: true
-    }
+const props = defineProps({
+  person: {
+    type: Object,
+    required: true
   },
-
-  computed: {
-    ...mapGetters(['isDarkTheme']),
-
-    style() {
-      return {
-        color: this.isDarkTheme ? '#333' : '#FFF',
-        width: `${this.size}px`,
-        height: `${this.size}px`,
-        fontSize: this.person.has_avatar ? 0 : `${this.fontSize}px`,
-        backgroundColor: this.person.color
-      }
-    }
+  size: {
+    type: Number,
+    default: 40
+  },
+  fontSize: {
+    type: Number,
+    default: 18
+  },
+  isLink: {
+    type: Boolean,
+    default: true
+  },
+  isLazy: {
+    type: Boolean,
+    default: true
   }
-}
+})
+
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+
+const style = computed(() => {
+  return {
+    color: isDarkTheme.value ? '#333' : '#FFF',
+    width: `${props.size}px`,
+    height: `${props.size}px`,
+    fontSize: props.person.has_avatar ? 0 : `${props.fontSize}px`,
+    backgroundColor: props.person.color
+  }
+})
 </script>
 
 <style lang="scss" scoped>
