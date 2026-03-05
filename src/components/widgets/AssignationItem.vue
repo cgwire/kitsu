@@ -11,40 +11,30 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'assignation-item',
-
-  components: {
-    PeopleAvatar
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true
   },
-
-  props: {
-    item: {
-      type: Object,
-      required: true
-    },
-    search: {
-      type: String
-    }
-  },
-
-  computed: {
-    label() {
-      const text = this.item.name.trim()
-      const search = this.search.trim()
-      return !search
-        ? text
-        : text.replace(RegExp(this.regExpEscape(search), 'gi'), '<b>$&</b>')
-    }
-  },
-
-  methods: {
-    regExpEscape(string) {
-      return string.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
-    }
+  search: {
+    type: String
   }
+})
+
+function regExpEscape(string) {
+  return string.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&')
 }
+
+const label = computed(() => {
+  const text = props.item.name.trim()
+  const search = props.search.trim()
+  return !search
+    ? text
+    : text.replace(RegExp(regExpEscape(search), 'gi'), '<b>$&</b>')
+})
 </script>
