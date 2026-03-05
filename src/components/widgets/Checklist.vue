@@ -30,7 +30,7 @@
       </span>
       <textarea
         class="checklist-text"
-        :ref="`checklist-entry-${index}`"
+        :ref="el => setChecklistEntryRef(el, index)"
         rows="1"
         :placeholder="$t('comments.task_placeholder')"
         @keydown.enter.prevent="addChecklistEntry(index)"
@@ -45,128 +45,121 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick } from 'vue'
 import { CheckSquareIcon, ClockIcon, SquareIcon } from 'lucide-vue-next'
 
 import { formatFrame } from '@/lib/video'
 
-export default {
-  name: 'checklist',
-
-  components: {
-    CheckSquareIcon,
-    ClockIcon,
-    SquareIcon
+const props = defineProps({
+  checklist: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    checklist: {
-      default: () => [],
-      type: Array
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    frame: {
-      default: -1,
-      type: Number
-    },
-    isEditable: {
-      type: Boolean,
-      default: true
-    },
-    isMoviePreview: {
-      default: false,
-      type: Boolean
-    },
-    revision: {
-      default: -1,
-      type: Number
-    }
+  disabled: {
+    default: false,
+    type: Boolean
   },
-
-  emits: [
-    'add-item',
-    'emit-change',
-    'insert-item',
-    'remove-task',
-    'time-code-clicked'
-  ],
-
-  computed: {
-    filteredChecklist() {
-      return this.checklist.filter(Boolean) // remove empty entries
-    }
+  frame: {
+    default: -1,
+    type: Number
   },
+  isEditable: {
+    type: Boolean,
+    default: true
+  },
+  isMoviePreview: {
+    default: false,
+    type: Boolean
+  },
+  revision: {
+    default: -1,
+    type: Number
+  }
+})
 
-  methods: {
-    addChecklistEntry(index) {
-      if (index === -1 || index === this.checklist.length - 1) {
-        this.$emit('add-item', {
-          index,
-          text: '',
-          frame: -1,
-          revision: -1,
-          checked: false
-        })
-      } else {
-        this.$emit('insert-item', {
-          index: index + 1,
-          text: '',
-          frame: -1,
-          revision: -1,
-          checked: false
-        })
-      }
+const emit = defineEmits([
+  'add-item',
+  'emit-change',
+  'insert-item',
+  'remove-task',
+  'time-code-clicked'
+])
 
-      this.$nextTick(() => {
-        this.focusNext(index)
-      })
-    },
+const checklistEntryRefs = {}
 
-    removeChecklistEntry(index) {
-      const entry = this.checklist[index]
-      if (entry.text.length === 0) {
-        this.$emit('remove-task', entry)
-        this.focusPrevious(index)
-      }
-    },
+function setChecklistEntryRef(el, index) {
+  if (el) {
+    checklistEntryRefs[`checklist-entry-${index}`] = el
+  }
+}
 
-    focusPrevious(index) {
-      if (this.checklist.length > 0) {
-        if (index === 0) index = this.checklist.length
-        index--
-        const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].focus()
-      }
-    },
+const filteredChecklist = computed(() => {
+  return props.checklist.filter(Boolean)
+})
 
-    formatFrame,
+function addChecklistEntry(index) {
+  if (index === -1 || index === props.checklist.length - 1) {
+    emit('add-item', {
+      index,
+      text: '',
+      frame: -1,
+      revision: -1,
+      checked: false
+    })
+  } else {
+    emit('insert-item', {
+      index: index + 1,
+      text: '',
+      frame: -1,
+      revision: -1,
+      checked: false
+    })
+  }
 
-    focusNext(index) {
-      if (this.checklist.length > 0) {
-        if (index === this.checklist.length - 1) index = -1
-        index++
-        const entryRef = `checklist-entry-${index}`
-        this.$refs[entryRef][0].focus()
-      }
-    },
+  nextTick(() => {
+    focusNext(index)
+  })
+}
 
-    setFrame(item) {
-      item.checked = !item.checked
-      item.revision = this.revision
-      item.frame = this.frame
-      item.checked = !item.checked
-      this.$emit('emit-change')
-    },
+function removeChecklistEntry(index) {
+  const entry = props.checklist[index]
+  if (entry.text.length === 0) {
+    emit('remove-task', entry)
+    focusPrevious(index)
+  }
+}
 
-    toggleEntryChecked(entry) {
-      if (this.isEditable) {
-        entry.checked = !entry.checked
-        this.$emit('emit-change')
-      }
-    }
+function focusPrevious(index) {
+  if (props.checklist.length > 0) {
+    if (index === 0) index = props.checklist.length
+    index--
+    const entryRef = `checklist-entry-${index}`
+    checklistEntryRefs[entryRef]?.focus()
+  }
+}
+
+function focusNext(index) {
+  if (props.checklist.length > 0) {
+    if (index === props.checklist.length - 1) index = -1
+    index++
+    const entryRef = `checklist-entry-${index}`
+    checklistEntryRefs[entryRef]?.focus()
+  }
+}
+
+function setFrame(item) {
+  item.checked = !item.checked
+  item.revision = props.revision
+  item.frame = props.frame
+  item.checked = !item.checked
+  emit('emit-change')
+}
+
+function toggleEntryChecked(entry) {
+  if (props.isEditable) {
+    entry.checked = !entry.checked
+    emit('emit-change')
   }
 }
 </script>
