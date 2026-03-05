@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import errors from '@/lib/errors'

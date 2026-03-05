@@ -1,18 +1,15 @@
 import func from '@/lib/func'
 
 describe('func', () => {
-  test('runPromiseMapAsSeries', () => new Promise((done) => {
+  test('runPromiseMapAsSeries', async () => {
     let counter = 0
     const mapFunc = (item) => {
       counter += item
       return Promise.resolve(item)
     }
-    func.runPromiseMapAsSeries([1, 5], mapFunc)
-      .then(() => {
-        expect(counter).toEqual(6)
-        done()
-      })
-  }))
+    await func.runPromiseMapAsSeries([1, 5], mapFunc)
+    expect(counter).toEqual(6)
+  })
 
   test('throttle', () => {
     let count = 0
@@ -23,16 +20,13 @@ describe('func', () => {
     expect(count).toBe(1) // throttled
   })
 
-  test('runPromiseAsSeries', () => new Promise((done) => {
+  test('runPromiseAsSeries', async () => {
     let counter = 0
     const promises = [
-      Promise.resolve().then(() => { counter += 1 }),
-      Promise.resolve().then(() => { counter += 5 })
+      Promise.resolve().then(() => { counter += 1; return undefined }),
+      Promise.resolve().then(() => { counter += 5; return undefined })
     ]
-    func.runPromiseAsSeries(promises)
-      .then(() => {
-        expect(counter).toEqual(6)
-        done()
-      })
-  }))
+    await func.runPromiseAsSeries(promises)
+    expect(counter).toEqual(6)
+  })
 })

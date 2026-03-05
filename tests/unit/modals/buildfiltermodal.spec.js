@@ -16,7 +16,6 @@ const router = createRouter({
 describe('BuildFilterModal', () => {
   let store, assetStore, peopleStore, shotStore, taskStore
   let wrapper
-  let getters
 
   beforeEach(() => {
     assetStore = {
@@ -54,7 +53,7 @@ describe('BuildFilterModal', () => {
         }
       },
       actions: {
-        changeSearch({ commit, state }, query) {
+        changeSearch({ commit }, query) {
           commit('CHANGE_SEARCH', query)
         }
       }
@@ -135,7 +134,6 @@ describe('BuildFilterModal', () => {
 
     wrapper = shallowMount(BuildFilterModal, {
       store,
-      getters,
       i18n,
       router,
       global: {
@@ -154,8 +152,7 @@ describe('BuildFilterModal', () => {
       wrapper.findComponent(BuildFilterModal)
     })
     describe('mount with query', () => {
-      it('task types', () =>
-        new Promise(done => {
+      it('task types', async () => {
           expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
           wrapper.setData({
             taskTypeFilters: {
@@ -168,13 +165,10 @@ describe('BuildFilterModal', () => {
               ]
             }
           })
-          wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
-            done()
-          })
-        }))
-      it('descriptors', () =>
-        new Promise(done => {
+          await wrapper.vm.$nextTick()
+          expect(wrapper.find('.task-type-filter').exists()).toBeTruthy()
+        })
+      it('descriptors', async () => {
           expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
           wrapper.setData({
             metadataDescriptorFilters: {
@@ -188,11 +182,9 @@ describe('BuildFilterModal', () => {
               ]
             }
           })
-          wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
-            done()
-          })
-        }))
+          await wrapper.vm.$nextTick()
+          expect(wrapper.find('.descriptor-filter').exists()).toBeTruthy()
+        })
     })
   })
 

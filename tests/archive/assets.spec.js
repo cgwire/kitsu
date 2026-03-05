@@ -450,7 +450,7 @@ describe('Actions', () => {
 
       let mockCommit = vi.fn()
       peopleApi.createFilter = vi.fn(
-        (listType, name, query, productionId, entityType) => {
+        (listType, name, query) => {
           return Promise.resolve(query)
         }
       )
@@ -479,7 +479,7 @@ describe('Actions', () => {
 
       const mockCommit = vi.fn()
       peopleApi.removeFilter = vi.fn(
-        (searchQuery) => {
+        () => {
           return Promise.resolve()
         }
       )
