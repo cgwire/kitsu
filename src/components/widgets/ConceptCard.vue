@@ -42,71 +42,57 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 import { getEntityPath } from '@/lib/path'
 
 import assetsStore from '@/store/modules/assets.js'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'concept-card',
+const store = useStore()
+const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
+const personMap = computed(() => store.getters.personMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-  components: {
-    EntityPreview,
-    PeopleAvatar
-  },
-
-  props: {
-    concept: {
-      type: Object,
-      required: true
-    }
-  },
-
-  emits: ['click'],
-
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'currentProduction',
-      'isTVShow',
-      'personMap',
-      'taskStatusMap'
-    ]),
-
-    assetMap() {
-      return assetsStore.cache.assetMap
-    },
-
-    linkedEntities() {
-      return this.concept.entity_concept_links
-        .map(id => this.assetMap.get(id))
-        .filter(Boolean)
-    },
-
-    hasTask() {
-      return this.concept.tasks?.length
-    },
-
-    taskStatus() {
-      return this.taskStatusMap.get(this.concept.tasks[0].task_status_id)
-    }
-  },
-
-  methods: {
-    entityPath(entity, section) {
-      const episodeId = this.isTVShow ? entity.episode_id || 'main' : null
-      return getEntityPath(
-        entity.id,
-        this.currentProduction.id,
-        section,
-        episodeId,
-        { section: 'concepts' }
-      )
-    }
+const props = defineProps({
+  concept: {
+    type: Object,
+    required: true
   }
+})
+
+defineEmits(['click'])
+
+const assetMap = computed(() => {
+  return assetsStore.cache.assetMap
+})
+
+const linkedEntities = computed(() => {
+  return props.concept.entity_concept_links
+    .map(id => assetMap.value.get(id))
+    .filter(Boolean)
+})
+
+const hasTask = computed(() => {
+  return props.concept.tasks?.length
+})
+
+const taskStatus = computed(() => {
+  return taskStatusMap.value.get(props.concept.tasks[0].task_status_id)
+})
+
+function entityPath(entity, section) {
+  const episodeId = isTVShow.value ? entity.episode_id || 'main' : null
+  return getEntityPath(
+    entity.id,
+    currentProduction.value.id,
+    section,
+    episodeId,
+    { section: 'concepts' }
+  )
 }
 </script>
 
