@@ -15,24 +15,15 @@
   />
 </template>
 
-<script>
+<script setup>
 import { CheckIcon, XIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'boolean-rep',
-
-  components: {
-    CheckIcon,
-    XIcon
-  },
-
-  props: {
-    value: {
-      default: false,
-      type: Boolean
-    }
+defineProps({
+  value: {
+    default: false,
+    type: Boolean
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
