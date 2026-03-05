@@ -48,173 +48,170 @@
   </span>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import colors from '@/lib/colors'
 import { pluralizeEntityType } from '@/lib/path'
 
-export default {
-  name: 'validation-tag',
+const { t } = useI18n()
+const store = useStore()
 
-  props: {
-    task: {
-      default: () => {},
-      type: Object
-    },
-    isStatic: {
-      default: false,
-      type: Boolean
-    },
-    isPriority: {
-      default: true,
-      type: Boolean
-    },
-    minimized: {
-      default: false,
-      type: Boolean
-    },
-    pointer: {
-      default: false,
-      type: Boolean
-    },
-    thin: {
-      default: false,
-      type: Boolean
-    }
+const props = defineProps({
+  task: {
+    default: () => {},
+    type: Object
   },
+  isStatic: {
+    default: false,
+    type: Boolean
+  },
+  isPriority: {
+    default: true,
+    type: Boolean
+  },
+  minimized: {
+    default: false,
+    type: Boolean
+  },
+  pointer: {
+    default: false,
+    type: Boolean
+  },
+  thin: {
+    default: false,
+    type: Boolean
+  }
+})
 
-  emits: ['click'],
+defineEmits(['click'])
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isCurrentUserClient',
-      'isDarkTheme',
-      'isTVShow',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    cursor() {
-      return this.pointer ? 'pointer' : 'default'
-    },
+const cursor = computed(() => {
+  return props.pointer ? 'pointer' : 'default'
+})
 
-    taskStatus() {
-      const taskStatusId = this.task?.task_status_id
-      return this.taskStatusMap?.get(taskStatusId) || {}
-    },
+const taskStatus = computed(() => {
+  const taskStatusId = props.task?.task_status_id
+  return taskStatusMap.value?.get(taskStatusId) || {}
+})
 
-    backgroundColor() {
-      if (this.taskStatus.short_name === 'todo' && !this.isDarkTheme) {
-        return '#ECECEC'
-      } else if (this.taskStatus.short_name === 'todo' && this.isDarkTheme) {
-        return '#5F626A'
-      } else if (this.isDarkTheme) {
-        return colors.darkenColor(this.taskStatus.color)
-      } else {
-        return this.taskStatus.color
+const backgroundColor = computed(() => {
+  if (taskStatus.value.short_name === 'todo' && !isDarkTheme.value) {
+    return '#ECECEC'
+  } else if (taskStatus.value.short_name === 'todo' && isDarkTheme.value) {
+    return '#5F626A'
+  } else if (isDarkTheme.value) {
+    return colors.darkenColor(taskStatus.value.color)
+  } else {
+    return taskStatus.value.color
+  }
+})
+
+const color = computed(() => {
+  const isTodo = taskStatus.value.name === 'Todo'
+  if (!isTodo || isDarkTheme.value) {
+    return 'white'
+  } else {
+    return '#333'
+  }
+})
+
+const priority = computed(() => {
+  if (props.task.priority && !taskStatus.value.is_done) {
+    if (props.task.priority === 3) {
+      return '!!!'
+    } else if (props.task.priority === 2) {
+      return '!!'
+    } else if (props.task.priority === 1) {
+      return '!'
+    } else {
+      return ''
+    }
+  } else {
+    return ''
+  }
+})
+
+const tagStyle = computed(() => {
+  const isStaticVal = !props.isStatic && !isCurrentUserClient.value
+  const isTodo = taskStatus.value.name === 'Todo'
+  if (props.thin && !isTodo) {
+    if (isDarkTheme.value) {
+      return {
+        background: 'transparent',
+        border:
+          '1px solid ' +
+          (isTodo
+            ? 'grey'
+            : colors.lightenColor(backgroundColor.value, 0.5)),
+        color: colors.lightenColor(backgroundColor.value, 0.5),
+        cursor: isStaticVal ? 'pointer' : cursor.value
       }
-    },
-
-    color() {
-      const isTodo = this.taskStatus.name === 'Todo'
-      if (!isTodo || this.isDarkTheme) {
-        return 'white'
-      } else {
-        return '#333'
+    } else {
+      return {
+        background: 'transparent',
+        border: '1px solid ' + (isTodo ? 'grey' : backgroundColor.value),
+        color: backgroundColor.value,
+        cursor: isStaticVal ? 'pointer' : cursor.value
       }
-    },
-
-    priority() {
-      if (this.task.priority && !this.taskStatus.is_done) {
-        if (this.task.priority === 3) {
-          return '!!!'
-        } else if (this.task.priority === 2) {
-          return '!!'
-        } else if (this.task.priority === 1) {
-          return '!'
-        } else {
-          return ''
-        }
-      } else {
-        return ''
-      }
-    },
-
-    tagStyle() {
-      const isStatic = !this.isStatic && !this.isCurrentUserClient
-      const isTodo = this.taskStatus.name === 'Todo'
-      if (this.thin && !isTodo) {
-        if (this.isDarkTheme) {
-          return {
-            background: 'transparent',
-            border:
-              '1px solid ' +
-              (isTodo
-                ? 'grey'
-                : colors.lightenColor(this.backgroundColor, 0.5)),
-            color: colors.lightenColor(this.backgroundColor, 0.5),
-            cursor: isStatic ? 'pointer' : this.cursor
-          }
-        } else {
-          return {
-            background: 'transparent',
-            border: '1px solid ' + (isTodo ? 'grey' : this.backgroundColor),
-            color: this.backgroundColor,
-            cursor: isStatic ? 'pointer' : this.cursor
-          }
-        }
-      } else {
-        return {
-          background: this.backgroundColor,
-          color: this.color,
-          cursor: isStatic ? 'pointer' : this.cursor
-        }
-      }
-    },
-
-    taskPath() {
-      if (!this.currentProduction?.id) return
-      const task = this.task
-      const productionId = this.task.project_id
-        ? this.task.project_id
-        : this.currentProduction.id
-      const route = {
-        name: 'task',
-        params: {
-          production_id: productionId,
-          task_id: task.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task'
-        route.params.episode_id = task.episode_id || this.currentEpisode.id
-      }
-
-      const taskType = this.taskTypeMap.get(task.task_type_id)
-      route.params.type = pluralizeEntityType(taskType.for_entity)
-
-      return route
-    },
-
-    formatPriority() {
-      const priority = this.task.priority
-      let label = priority + ''
-      if (priority === 0) {
-        label = 'normal'
-      } else if (priority === 1) {
-        label = this.$t('tasks.priority.high')
-      } else if (priority === 2) {
-        label = this.$t('tasks.priority.very_high')
-      } else if (priority === 3) {
-        label = this.$t('tasks.priority.emergency')
-      }
-      return label
+    }
+  } else {
+    return {
+      background: backgroundColor.value,
+      color: color.value,
+      cursor: isStaticVal ? 'pointer' : cursor.value
     }
   }
-}
+})
+
+const taskPath = computed(() => {
+  if (!currentProduction.value?.id) return
+  const task = props.task
+  const productionId = props.task.project_id
+    ? props.task.project_id
+    : currentProduction.value.id
+  const route = {
+    name: 'task',
+    params: {
+      production_id: productionId,
+      task_id: task.id
+    }
+  }
+
+  if (isTVShow.value && currentEpisode.value) {
+    route.name = 'episode-task'
+    route.params.episode_id = task.episode_id || currentEpisode.value.id
+  }
+
+  const taskType = taskTypeMap.value.get(task.task_type_id)
+  route.params.type = pluralizeEntityType(taskType.for_entity)
+
+  return route
+})
+
+const formatPriority = computed(() => {
+  const p = props.task.priority
+  let label = p + ''
+  if (p === 0) {
+    label = 'normal'
+  } else if (p === 1) {
+    label = t('tasks.priority.high')
+  } else if (p === 2) {
+    label = t('tasks.priority.very_high')
+  } else if (p === 3) {
+    label = t('tasks.priority.emergency')
+  }
+  return label
+})
 </script>
 
 <style lang="scss" scoped>
