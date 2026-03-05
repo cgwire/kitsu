@@ -15,7 +15,7 @@ export const buildQueryString = (path, params) => {
       params[key] ||
       (typeof params[key] === 'boolean' && params[key] === false)
     )
-      couples.push(`${key}=${params[key]}`)
+      couples.push(`${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
   })
   return result + couples.join('&')
 }
