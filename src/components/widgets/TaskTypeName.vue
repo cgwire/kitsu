@@ -37,118 +37,117 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { pluralizeEntityType } from '@/lib/path'
 
-export default {
-  name: 'task-type-name',
+const route = useRoute()
+const store = useStore()
 
-  props: {
-    isLink: {
-      type: Boolean,
-      default: true
-    },
-    deletable: {
-      type: Boolean,
-      default: false
-    },
-    disable: {
-      type: Boolean,
-      default: false
-    },
-    productionId: {
-      type: String,
-      default: null
-    },
-    rounded: {
-      type: Boolean,
-      default: false
-    },
-    taskId: {
-      type: String,
-      default: null
-    },
-    taskType: {
-      type: Object,
-      default: null
-    },
-    thin: {
-      type: Boolean,
-      default: false
-    },
-    transparent: {
-      type: Boolean,
-      default: false
-    }
+const props = defineProps({
+  isLink: {
+    type: Boolean,
+    default: true
   },
+  deletable: {
+    type: Boolean,
+    default: false
+  },
+  disable: {
+    type: Boolean,
+    default: false
+  },
+  productionId: {
+    type: String,
+    default: null
+  },
+  rounded: {
+    type: Boolean,
+    default: false
+  },
+  taskId: {
+    type: String,
+    default: null
+  },
+  taskType: {
+    type: Object,
+    default: null
+  },
+  thin: {
+    type: Boolean,
+    default: false
+  },
+  transparent: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  emits: ['delete'],
+defineEmits(['delete'])
 
-  computed: {
-    ...mapGetters(['isCurrentUserClient']),
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 
-    color() {
-      return this.taskType.color?.toUpperCase() === '#000000'
-        ? '#666'
-        : this.taskType.color
-    },
+const color = computed(() => {
+  return props.taskType.color?.toUpperCase() === '#000000'
+    ? '#666'
+    : props.taskType.color
+})
 
-    title() {
-      return `${this.taskType.for_entity} / ${this.taskType.name}`
-    },
+const title = computed(() => {
+  return `${props.taskType.for_entity} / ${props.taskType.name}`
+})
 
-    targetRoute() {
-      if (this.taskId) {
-        if (this.$route.params.episode_id) {
-          return {
-            name: 'episode-task',
-            params: {
-              production_id: this.productionId,
-              task_id: this.taskId,
-              episode_id: this.$route.params.episode_id,
-              type: pluralizeEntityType(this.taskType.for_entity)
-            }
-          }
-        } else {
-          return {
-            name: 'task',
-            params: {
-              production_id: this.productionId,
-              task_id: this.taskId,
-              type: pluralizeEntityType(this.taskType.for_entity)
-            }
-          }
+const targetRoute = computed(() => {
+  if (props.taskId) {
+    if (route.params.episode_id) {
+      return {
+        name: 'episode-task',
+        params: {
+          production_id: props.productionId,
+          task_id: props.taskId,
+          episode_id: route.params.episode_id,
+          type: pluralizeEntityType(props.taskType.for_entity)
         }
-      } else if (this.taskType.for_entity === 'Episode') {
-        return {
-          name: 'episodes-task-type',
-          params: {
-            production_id: this.productionId,
-            task_type_id: this.taskType.id
-          }
+      }
+    } else {
+      return {
+        name: 'task',
+        params: {
+          production_id: props.productionId,
+          task_id: props.taskId,
+          type: pluralizeEntityType(props.taskType.for_entity)
         }
-      } else {
-        const route = {
-          name: 'task-type',
-          params: {
-            production_id: this.productionId,
-            task_type_id: this.taskType.id,
-            type: pluralizeEntityType(this.taskType.for_entity)
-          }
-        }
-
-        if (this.taskType.episode_id || this.$route.params.episode_id) {
-          route.name = 'episode-task-type'
-          route.params.episode_id =
-            this.taskType.episode_id || this.$route.params.episode_id
-        }
-        return route
       }
     }
+  } else if (props.taskType.for_entity === 'Episode') {
+    return {
+      name: 'episodes-task-type',
+      params: {
+        production_id: props.productionId,
+        task_type_id: props.taskType.id
+      }
+    }
+  } else {
+    const r = {
+      name: 'task-type',
+      params: {
+        production_id: props.productionId,
+        task_type_id: props.taskType.id,
+        type: pluralizeEntityType(props.taskType.for_entity)
+      }
+    }
+
+    if (props.taskType.episode_id || route.params.episode_id) {
+      r.name = 'episode-task-type'
+      r.params.episode_id =
+        props.taskType.episode_id || route.params.episode_id
+    }
+    return r
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
