@@ -30,33 +30,29 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'table-header-menu',
-
-  props: {
-    isMinimized: {
-      type: Boolean,
-      default: false
-    },
-    isEditAllowed: {
-      type: Boolean,
-      default: false
-    },
-    isSticked: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+defineProps({
+  isMinimized: {
+    type: Boolean,
+    default: false
   },
+  isEditAllowed: {
+    type: Boolean,
+    default: false
+  },
+  isSticked: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  emits: [
-    'delete-all-clicked',
-    'minimize-clicked',
-    'select-column',
-    'sort-by-clicked',
-    'toggle-stick'
-  ]
-}
+defineEmits([
+  'delete-all-clicked',
+  'minimize-clicked',
+  'select-column',
+  'sort-by-clicked',
+  'toggle-stick'
+])
 </script>
 
 <style lang="scss" scoped>
