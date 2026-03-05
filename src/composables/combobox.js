@@ -1,13 +1,13 @@
 import { ref } from 'vue'
 
-export function useCombobox(emit) {
+export const useCombobox = (emit) => {
   const showList = ref(false)
 
-  function toggle() {
+  const toggle = () => {
     showList.value = !showList.value
   }
 
-  function select(item) {
+  const select = (item) => {
     emit('update:modelValue', item.id)
     showList.value = false
   }

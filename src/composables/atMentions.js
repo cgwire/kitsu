@@ -1,7 +1,7 @@
 import { computed, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 
-export function useAtMentionsMembers(teamGetter, taskTypesGetter) {
+export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
   const store = useStore()
   const departmentMap = computed(() => store.getters.departmentMap)
   const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -11,7 +11,7 @@ export function useAtMentionsMembers(teamGetter, taskTypesGetter) {
 
   const membersForAts = reactive({ '@': [], '#': [] })
 
-  function atOptionsFilter(name, chunk, at, v) {
+  const atOptionsFilter = (name, chunk, at, v) => {
     const option_at = v?.isTaskType ? '#' : '@'
     if (at !== option_at) return false
     return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
