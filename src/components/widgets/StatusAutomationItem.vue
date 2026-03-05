@@ -42,66 +42,64 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { pluralizeEntityType } from '@/lib/path'
 
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'status-automation-item',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    TaskStatusCell,
-    TaskTypeName
+const props = defineProps({
+  statusAutomation: {
+    type: Object,
+    default: null
   },
-
-  props: {
-    statusAutomation: {
-      type: Object,
-      default: null
-    },
-    productionId: {
-      type: String,
-      default: null
-    },
-    deletable: {
-      type: Boolean,
-      default: false
-    }
+  productionId: {
+    type: String,
+    default: null
   },
+  deletable: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  computed: {
-    ...mapGetters(['isCurrentUserClient', 'getTaskStatus', 'getTaskType']),
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const getTaskStatus = computed(() => store.getters.getTaskStatus)
+const getTaskType = computed(() => store.getters.getTaskType)
 
-    entityType() {
-      const entityType = this.statusAutomation.entity_type
-      return this.$t(
-        `status_automations.entity_types.${entityType.toLowerCase()}`
-      )
-    },
+const entityType = computed(() => {
+  const et = props.statusAutomation.entity_type
+  return t(
+    `status_automations.entity_types.${et.toLowerCase()}`
+  )
+})
 
-    statusAutomationPath() {
-      const route = {
-        name: 'status-automation',
-        params: {
-          production_id: this.productionId,
-          status_automation_id: this.statusAutomation.id,
-          type: pluralizeEntityType(this.statusAutomation.for_entity)
-        }
-      }
-
-      if (this.statusAutomation.episode_id || this.$route.params.episode_id) {
-        route.name = 'episode-status-automation'
-        route.params.episode_id =
-          this.statusAutomation.episode_id || this.$route.params.episode_id
-      }
-      return route
+const statusAutomationPath = computed(() => {
+  const r = {
+    name: 'status-automation',
+    params: {
+      production_id: props.productionId,
+      status_automation_id: props.statusAutomation.id,
+      type: pluralizeEntityType(props.statusAutomation.for_entity)
     }
   }
-}
+
+  if (props.statusAutomation.episode_id || route.params.episode_id) {
+    r.name = 'episode-status-automation'
+    r.params.episode_id =
+      props.statusAutomation.episode_id || route.params.episode_id
+  }
+  return r
+})
 </script>
 
 <style lang="scss" scoped>
