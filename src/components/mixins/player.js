@@ -220,11 +220,10 @@ export const playerMixin = {
           annotations: this.currentEntity.preview_file_annotations || [],
           duration: this.currentEntity.preview_file_duration || 0
         }
-      } else {
-        return this.currentEntity.preview_file_previews[
-          this.currentPreviewIndex - 1
-        ]
       }
+      return this.currentEntity.preview_file_previews?.[
+        this.currentPreviewIndex - 1
+      ]
     },
 
     currentEntityPreviewLength() {
