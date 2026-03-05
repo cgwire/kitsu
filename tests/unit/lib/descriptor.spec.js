@@ -13,4 +13,13 @@ describe('descriptors', () => {
       { label: 'difficult', value: 'difficult' }
     ])
   })
+
+  test('getChoiceOptions with missing choices', () => {
+    expect(descriptors.getChoicesOptions({})).toEqual([
+      { label: '', value: '' }
+    ])
+    expect(descriptors.getChoicesOptions(null)).toEqual([
+      { label: '', value: '' }
+    ])
+  })
 })
