@@ -9,86 +9,75 @@
   />
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onMounted } from 'vue'
+
 import Combobox from '@/components/widgets/Combobox.vue'
 
-export default {
-  name: 'combobox-model',
-
-  components: {
-    Combobox
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-
-    modelValue: {
-      default: () => {},
-      type: Object
-    },
-
-    models: {
-      default: () => [],
-      type: Array
-    },
-
-    disabled: {
-      default: false,
-      type: Boolean
-    }
+  modelValue: {
+    default: () => {},
+    type: Object
   },
 
-  emits: ['enter', 'update:modelValue'],
-
-  data() {
-    return {
-      currentModelId: '',
-      modelMap: {},
-      modelOptions: []
-    }
+  models: {
+    default: () => [],
+    type: Array
   },
 
-  mounted() {
-    this.reset()
-  },
+  disabled: {
+    default: false,
+    type: Boolean
+  }
+})
 
-  methods: {
-    emitValue(value) {
-      this.currentModelId = value
-      const model = this.modelMap[this.currentModelId]
-      this.$emit('update:modelValue', model)
-    },
+const emit = defineEmits(['enter', 'update:modelValue'])
 
-    emitEnter(value) {
-      this.currentModelId = value
-      const model = this.modelMap[this.currentModelId]
-      this.$emit('enter', model)
-    },
+const currentModelId = ref('')
+const modelMap = ref({})
+const modelOptions = ref([])
 
-    reset() {
-      if (this.models.length > 0) {
-        this.currentModelId =
-          this.models.find(model => model.id === this.modelValue.id) ??
-          this.models[0].id
-        this.modelMap = {}
-        this.modelOptions = this.models.map(model => ({
-          label: model.name,
-          value: model.id
-        }))
-        this.models.forEach(model => {
-          this.modelMap[model.id] = model
-        })
-      }
-    }
-  },
+function emitValue(value) {
+  currentModelId.value = value
+  const model = modelMap.value[currentModelId.value]
+  emit('update:modelValue', model)
+}
 
-  watch: {
-    models() {
-      this.reset()
-    }
+function emitEnter(value) {
+  currentModelId.value = value
+  const model = modelMap.value[currentModelId.value]
+  emit('enter', model)
+}
+
+function reset() {
+  if (props.models.length > 0) {
+    currentModelId.value =
+      props.models.find(model => model.id === props.modelValue.id) ??
+      props.models[0].id
+    modelMap.value = {}
+    modelOptions.value = props.models.map(model => ({
+      label: model.name,
+      value: model.id
+    }))
+    props.models.forEach(model => {
+      modelMap.value[model.id] = model
+    })
   }
 }
+
+onMounted(() => {
+  reset()
+})
+
+watch(
+  () => props.models,
+  () => {
+    reset()
+  }
+)
 </script>
