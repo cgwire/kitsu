@@ -1,4 +1,5 @@
 const PRECISION_FACTOR = 10000
+const DEFAULT_FPS = 25
 
 const roundPrecision = value =>
   Math.round(value * PRECISION_FACTOR) / PRECISION_FACTOR
@@ -28,7 +29,7 @@ export const floorToFrame = (time, fps) => {
  * Turn a frame number into seconds depending on context.
  */
 export const frameToSeconds = (nbFrames, production, shot) => {
-  let fps = 25
+  let fps = DEFAULT_FPS
   if (shot && shot.fps) fps = shot.fps
   if (production && production.fps) fps = production.fps
   return Math.round((nbFrames / fps) * 1000) / 1000
@@ -58,7 +59,7 @@ export const formatTime = (rawTime, fps) => {
 /**
  * Get timecode from frame number.
  */
-export const formatToTimecode = (frame, fps = 25) => {
+export const formatToTimecode = (frame, fps = DEFAULT_FPS) => {
   if (!frame || frame < 0) frame = 0
   const hours = Math.floor(frame / fps / 3600)
     .toString()
