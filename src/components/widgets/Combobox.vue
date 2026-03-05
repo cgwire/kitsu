@@ -14,7 +14,7 @@
           :style="{
             width: width ? `${width}px` : undefined
           }"
-          ref="select"
+          ref="selectRef"
           :disabled="disabled"
           @keyup.enter="emitEnter()"
           @change="updateValue"
@@ -38,91 +38,94 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'combobox',
+<script setup>
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    modelValue: {
-      default: '',
-      type: [Object, String, Boolean, Number]
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    },
-    isTop: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    error: {
-      default: false,
-      type: Boolean
-    },
-    thin: {
-      default: false,
-      type: Boolean
-    },
-    width: {
-      type: Number
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    },
-    isInline: {
-      default: false,
-      type: Boolean
-    }
+const { t } = useI18n()
+
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['enter', 'update:modelValue'],
-
-  methods: {
-    updateValue() {
-      let value = this.$refs.select.value
-      this.options.forEach(option => {
-        if (option.label === value) {
-          value = option.value
-        }
-      })
-      this.$emit('update:modelValue', value)
-    },
-
-    emitEnter() {
-      let value = this.$refs.select.value
-      this.options.forEach(option => {
-        if (option.label === value) {
-          value = option.value
-        }
-      })
-      this.$emit('enter', value)
-    },
-
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    },
-
-    focus() {
-      this.$refs.select?.focus()
-    }
+  modelValue: {
+    default: '',
+    type: [Object, String, Boolean, Number]
+  },
+  options: {
+    default: () => [],
+    type: Array
+  },
+  localeKeyPrefix: {
+    default: '',
+    type: String
+  },
+  isTop: {
+    default: false,
+    type: Boolean
+  },
+  disabled: {
+    default: false,
+    type: Boolean
+  },
+  error: {
+    default: false,
+    type: Boolean
+  },
+  thin: {
+    default: false,
+    type: Boolean
+  },
+  width: {
+    type: Number
+  },
+  withMargin: {
+    default: true,
+    type: Boolean
+  },
+  isInline: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['enter', 'update:modelValue'])
+
+const selectRef = ref(null)
+
+function updateValue() {
+  let value = selectRef.value.value
+  props.options.forEach(option => {
+    if (option.label === value) {
+      value = option.value
+    }
+  })
+  emit('update:modelValue', value)
 }
+
+function emitEnter() {
+  let value = selectRef.value.value
+  props.options.forEach(option => {
+    if (option.label === value) {
+      value = option.value
+    }
+  })
+  emit('enter', value)
+}
+
+function getOptionLabel(option) {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
+}
+
+function focus() {
+  selectRef.value?.focus()
+}
+
+defineExpose({ focus })
 </script>
 
 <style lang="scss" scoped>
