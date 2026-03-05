@@ -57,7 +57,8 @@
       },
       "include_all": "شامل تمام انواع وظایف منبع است",
       "add_asset_type_to_library": "",
-      "library_title": ""
+      "library_title": "",
+      "add_asset_type_placeholder": ""
     },
     "breakdown": {
       "all_assets": "همه منابع موجود",
@@ -545,7 +546,10 @@
       "hours": "",
       "remove_search_query": "",
       "remove_search_filter_group": "",
-      "shared_by": ""
+      "shared_by": "",
+      "continue": "",
+      "developer_documentation": "",
+      "feedback": ""
     },
     "menu": {
       "assign_tasks": "محول کردن وظایف",
@@ -1053,7 +1057,8 @@
           "error_register": "هنگام ثبت نام دستگاه FIDO خطایی روی داد.",
           "error_unregister": "هنگام لغو ثبت دستگاه FIDO خطایی روی داد."
         },
-        "enabled": ""
+        "enabled": "",
+        "mandatory": ""
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "منابع ، شات ها، سکانس ها، ..."
       },
       "add_task_status_to_library": "",
-      "library_title": ""
+      "library_title": "",
+      "add_task_status_placeholder": ""
     },
     "task_types": {
       "delete_text": "آیا مطمئنید که می خواهید {name} را حذف کنید؟",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "وضعیت",
         "ready_for": "آماده برای"
-      }
+      },
+      "add_status_automation_placeholder": ""
     },
     "preview_room": {
       "join_room": "به اتاق بررسی بپیوندید",
