@@ -10,20 +10,17 @@
   </h1>
 </template>
 
-<script>
-export default {
-  name: 'page-title',
-  props: {
-    text: {
-      default: '',
-      type: String
-    },
-    bold: {
-      default: false,
-      type: Boolean
-    }
+<script setup>
+defineProps({
+  text: {
+    default: '',
+    type: String
+  },
+  bold: {
+    default: false,
+    type: Boolean
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
