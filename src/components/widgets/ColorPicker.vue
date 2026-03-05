@@ -27,46 +27,38 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'color-picker',
+<script setup>
+import { ref } from 'vue'
 
-  props: {
-    color: {
-      type: String
-    },
-    palette: {
-      default: () => [
-        '#000000',
-        '#FFFFFF',
-        '#039BE5',
-        '#ff3860',
-        '#008732',
-        '#5E60BA',
-        '#f57f17'
-      ],
-      type: Array
-    }
+const props = defineProps({
+  color: {
+    type: String
   },
-
-  emits: ['change'],
-
-  data() {
-    return {
-      isOpen: false
-    }
-  },
-
-  methods: {
-    togglePalette() {
-      this.isOpen = !this.isOpen
-    },
-
-    onColorPicked(shade) {
-      this.$emit('change', shade)
-      this.isOpen = false
-    }
+  palette: {
+    default: () => [
+      '#000000',
+      '#FFFFFF',
+      '#039BE5',
+      '#ff3860',
+      '#008732',
+      '#5E60BA',
+      '#f57f17'
+    ],
+    type: Array
   }
+})
+
+const emit = defineEmits(['change'])
+
+const isOpen = ref(false)
+
+function togglePalette() {
+  isOpen.value = !isOpen.value
+}
+
+function onColorPicked(shade) {
+  emit('change', shade)
+  isOpen.value = false
 }
 </script>
 
