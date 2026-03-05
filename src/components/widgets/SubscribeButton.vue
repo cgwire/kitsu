@@ -5,34 +5,27 @@
   </button>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'subscribe-button',
+const { t } = useI18n()
 
-  components: {
-    EyeIcon,
-    EyeOffIcon
-  },
-
-  props: {
-    subscribed: {
-      default: false,
-      type: Boolean
-    }
-  },
-
-  emits: ['click'],
-
-  computed: {
-    buttonTitle() {
-      if (!this.subscribed) {
-        return this.$t('tasks.subscribe_notifications')
-      } else {
-        return this.$t('tasks.unsubscribe_notifications')
-      }
-    }
+const props = defineProps({
+  subscribed: {
+    default: false,
+    type: Boolean
   }
-}
+})
+
+defineEmits(['click'])
+
+const buttonTitle = computed(() => {
+  if (!props.subscribed) {
+    return t('tasks.subscribe_notifications')
+  } else {
+    return t('tasks.unsubscribe_notifications')
+  }
+})
 </script>
