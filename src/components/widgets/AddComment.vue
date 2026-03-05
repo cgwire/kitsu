@@ -517,7 +517,7 @@ const text = computed({
   }
 })
 
-function getAttachmentModal() {
+const getAttachmentModal = () => {
   return addAttachmentModalRef.value
 }
 
@@ -540,7 +540,7 @@ const isValidForm = computed(() => {
 
 const shortenText = strings.shortenText
 
-function toggleLinkField(reset = false) {
+const toggleLinkField = (reset = false) => {
   showLinkField.value = !showLinkField.value
   if (showLinkField.value) {
     nextTick(() => {
@@ -552,7 +552,7 @@ function toggleLinkField(reset = false) {
   }
 }
 
-function runAddComment(
+const runAddComment = (
   textVal,
   attachmentsVal,
   checklistVal,
@@ -560,7 +560,7 @@ function runAddComment(
   revisionVal,
   linkVal,
   force = false
-) {
+) => {
   if (!isValidForm.value) {
     return
   }
@@ -613,7 +613,7 @@ function runAddComment(
   )
 }
 
-function reset() {
+const reset = () => {
   text.value = ''
   link.value = null
   attachments.value = []
@@ -621,7 +621,7 @@ function reset() {
   nextRevision.value = undefined
 }
 
-function focus() {
+const focus = () => {
   const textarea = commentTextareaRef.value
   if (textarea) {
     textarea.focus()
@@ -630,7 +630,7 @@ function focus() {
   }
 }
 
-function getRevision(form) {
+const getRevision = (form) => {
   if (!form) {
     return undefined
   }
@@ -640,19 +640,19 @@ function getRevision(form) {
   return revision
 }
 
-function onAddChecklistItem(item) {
+const onAddChecklistItem = (item) => {
   delete item.index
   checklist.value.push(item)
 }
 
-function onInsertChecklistItem(item) {
+const onInsertChecklistItem = (item) => {
   checklist.value.splice(item.index, 0, item)
   for (let i = 0; i < checklist.value.length; i++) {
     checklist.value[i].index = i
   }
 }
 
-function resetStatus() {
+const resetStatus = () => {
   const taskStatus = taskStatusMap.value.get(props.task.task_status_id)
   if (
     (!isCurrentUserArtist.value || taskStatus.is_artist_allowed) &&
@@ -664,15 +664,15 @@ function resetStatus() {
   }
 }
 
-function onDragover() {
+const onDragover = () => {
   isDragging.value = true
 }
 
-function onDragleave() {
+const onDragleave = () => {
   isDragging.value = false
 }
 
-function onDrop(event) {
+const onDrop = (event) => {
   if (event.target.id === 'drop-mask') return
   if (
     event.target.parentElement?.className?.indexOf('add-attachment-box') >=
@@ -709,7 +709,7 @@ function onDrop(event) {
 /*
  * When a file is pasted in the comment area, it adds it to the attachments.
  */
-function onPaste(event) {
+const onPaste = (event) => {
   if (modals.addCommentAttachment) return
   if (commentTextareaRef.value !== document.activeElement) return
   const files = event.clipboardData.files
@@ -720,24 +720,24 @@ function onPaste(event) {
   }
 }
 
-function onAddCommentAttachmentClicked() {
+const onAddCommentAttachmentClicked = () => {
   modals.addCommentAttachment = true
 }
 
-function addCommentAttachment(forms) {
+const addCommentAttachment = (forms) => {
   onCloseCommentAttachment()
   attachments.value = attachments.value.concat(forms)
 }
 
-function onCloseCommentAttachment() {
+const onCloseCommentAttachment = () => {
   modals.addCommentAttachment = false
 }
 
-function removeAttachment(attach) {
+const removeAttachment = (attach) => {
   attachments.value = attachments.value.filter(a => a !== attach)
 }
 
-function addChecklistEntry(index) {
+const addChecklistEntry = (index) => {
   if (index === -1 || index === checklist.value.length - 1) {
     checklist.value.push({
       text: '',
@@ -746,11 +746,11 @@ function addChecklistEntry(index) {
   }
 }
 
-function removeTask(entry) {
+const removeTask = (entry) => {
   checklist.value = remove(checklist.value, entry)
 }
 
-async function setValue(comment) {
+const setValue = async (comment) => {
   checklist.value = JSON.parse(JSON.stringify(comment.checklist))
   text.value = comment.text
 
@@ -770,7 +770,7 @@ async function setValue(comment) {
   ).filter(Boolean)
 }
 
-function onAtTextChanged(input) {
+const onAtTextChanged = (input) => {
   if (input.includes('@frame')) {
     text.value = replaceTimeWithTimecode(
       input,
@@ -781,19 +781,19 @@ function onAtTextChanged(input) {
   }
 }
 
-function setAnnotationSnapshots(files) {
+const setAnnotationSnapshots = (files) => {
   getAttachmentModal().addFiles(files)
 }
 
-function showAnnotationLoading() {
+const showAnnotationLoading = () => {
   getAttachmentModal().showAnnotationLoading()
 }
 
-function hideAnnotationLoading() {
+const hideAnnotationLoading = () => {
   getAttachmentModal().hideAnnotationLoading()
 }
 
-function onSelectEmoji(emoji) {
+const onSelectEmoji = (emoji) => {
   const textarea = commentTextareaRef.value
   text.value = strings.insertInTextArea(textarea, emoji.i)
 }

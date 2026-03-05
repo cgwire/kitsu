@@ -211,7 +211,7 @@ watch(filteredMetadataDescriptors, (newValue) => {
   }
 }, { immediate: true })
 
-function setMetadataDisplayValue(metadataName, isSelected) {
+const setMetadataDisplayValue = (metadataName, isSelected) => {
   const headers = { ...props.modelValue }
   headers[metadataName] = isSelected
   localStorage.setItem(
@@ -221,7 +221,7 @@ function setMetadataDisplayValue(metadataName, isSelected) {
   emit('update:modelValue', headers)
 }
 
-function onDragEnd() {
+const onDragEnd = () => {
   const descriptorIds = sortedMetadataDescriptors.value
     .filter(d => d.id)
     .map(d => d.id)

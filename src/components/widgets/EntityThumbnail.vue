@@ -164,7 +164,7 @@ const thumbnailKey = computed(() => {
   return `thumbnail-${previewFileId}`
 })
 
-function onClicked() {
+const onClicked = () => {
   if (props.noPreview) return
   const previewFileId = props.previewFileId || props.entity.preview_file_id
   store.commit('SHOW_PREVIEW_FILE', previewFileId)

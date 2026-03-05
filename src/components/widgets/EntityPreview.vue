@@ -119,7 +119,7 @@ const thumbnailKey = computed(() => {
   return `preview-${previewFileId}`
 })
 
-function onPictureClicked() {
+const onPictureClicked = () => {
   if (props.noPreview) return
   const previewFileId = props.previewFileId || props.entity.preview_file_id
   if (previewFileId) {
@@ -127,7 +127,7 @@ function onPictureClicked() {
   }
 }
 
-function onVideoClicked() {
+const onVideoClicked = () => {
   if (isPlaying.value) {
     videoViewerRef.value.pause()
     buttonPlayRef.value.$el.style.display = 'initial'

@@ -111,7 +111,7 @@ const isValid = computed(() => {
   return !props.required || hasSelectedOption.value
 })
 
-function updateValue() {
+const updateValue = () => {
   let value = selectRef.value.value
   props.options.forEach(option => {
     if (option.label === value) {
@@ -121,7 +121,7 @@ function updateValue() {
   emit('update:modelValue', value)
 }
 
-function emitEnter() {
+const emitEnter = () => {
   let value = selectRef.value.value
   props.options.forEach(option => {
     if (option.label === value) {
@@ -131,14 +131,14 @@ function emitEnter() {
   emit('enter', value)
 }
 
-function getOptionLabel(option) {
+const getOptionLabel = (option) => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
   return option.label
 }
 
-function focus() {
+const focus = () => {
   touched.value = true
   selectRef.value?.focus()
 }

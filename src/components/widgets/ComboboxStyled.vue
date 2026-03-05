@@ -145,7 +145,7 @@ const optionList = computed(() => {
   return props.options
 })
 
-function getOptionLabel(option) {
+const getOptionLabel = (option) => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
@@ -156,19 +156,19 @@ const selectedOptionLabel = computed(() => {
   return selectedOption.value ? getOptionLabel(selectedOption.value) : ''
 })
 
-function openRoute(option) {
+const openRoute = (option) => {
   const ahref = router.resolve(option.route).href
   const url = `${window.location.protocol}//${window.location.host}${ahref}`
   window.open(url, '_blank')
 }
 
-function selectOption(option) {
+const selectOption = (option) => {
   emit('update:modelValue', option.value)
   emit('change', option.value)
   selectedOption.value = option
 }
 
-function toggleList() {
+const toggleList = () => {
   if (showList.value) {
     lastScrollPosition = select.value.scrollTop
   }

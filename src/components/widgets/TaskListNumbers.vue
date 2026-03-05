@@ -48,7 +48,7 @@ const isDurationInHours = computed(() => {
   return organisation.value.format_duration_in_hours
 })
 
-function formatDuration(minutes, toLocale = true) {
+const formatDuration = (minutes, toLocale = true) => {
   if (!minutes) {
     return 0
   }

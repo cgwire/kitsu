@@ -116,7 +116,7 @@ const calendarOptions = ref({
   locale: 'en'
 })
 
-function resetEvents() {
+const resetEvents = () => {
   if (!calendarRef.value) {
     return
   }
@@ -179,7 +179,7 @@ function resetEvents() {
   })
 }
 
-function onEventClicked(event) {
+const onEventClicked = (event) => {
   const task = taskMap.value.get(event.extendedProps.taskId)
   if (!task || task === currentTask.value) {
     currentTask.value = null
@@ -191,7 +191,7 @@ function onEventClicked(event) {
   }
 }
 
-function getStatusColor(status) {
+const getStatusColor = (status) => {
   if (status.name === 'Todo' && isDarkTheme.value) {
     return '#5F626A'
   } else {
@@ -199,7 +199,7 @@ function getStatusColor(status) {
   }
 }
 
-function getStatusTextColor(status) {
+const getStatusTextColor = (status) => {
   if (status.name === 'Todo' && !isDarkTheme.value) {
     return '#333'
   } else {
@@ -207,7 +207,7 @@ function getStatusTextColor(status) {
   }
 }
 
-function getDayOffInfo(dayOff) {
+const getDayOffInfo = (dayOff) => {
   const { description, date, end_date } = dayOff
   const period =
     end_date && date !== end_date ? `${date} - ${end_date}` : date

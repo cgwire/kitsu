@@ -47,19 +47,19 @@ const emit = defineEmits(['enter', 'keyup', 'update:modelValue'])
 
 const inputRef = ref(null)
 
-function emitEnter() {
+const emitEnter = () => {
   emit('enter', inputRef.value.value)
 }
 
-function updateValue() {
+const updateValue = () => {
   emit('update:modelValue', inputRef.value.value)
 }
 
-function emitKeyup(event) {
+const emitKeyup = (event) => {
   emit('keyup', event)
 }
 
-function focus() {
+const focus = () => {
   inputRef.value?.focus()
 }
 

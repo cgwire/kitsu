@@ -115,13 +115,13 @@ const tooltipStyle = computed(() => {
   }
 })
 
-function selectTaskType(taskType) {
+const selectTaskType = (taskType) => {
   emit('update:modelValue', taskType.id)
   emit('change', taskType.id)
   showTaskTypeList.value = false
 }
 
-function toggleTaskTypeList(event) {
+const toggleTaskTypeList = (event) => {
   if (props.disabled) {
     return
   }

@@ -416,7 +416,7 @@ const textWrongOTPError = computed(() => {
 
 // Methods
 
-function removeTwoFactorErrors() {
+const removeTwoFactorErrors = () => {
   twoFA.error.isWrongOTP = false
   twoFA.error.enableTOTP = false
   twoFA.error.disableTOTP = false
@@ -428,7 +428,7 @@ function removeTwoFactorErrors() {
   twoFA.OTPRecoveryCodes = null
 }
 
-function enableTOTPRequested() {
+const enableTOTPRequested = () => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   store
@@ -449,7 +449,7 @@ function enableTOTPRequested() {
     })
 }
 
-function preEnableTOTPRequested() {
+const preEnableTOTPRequested = () => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   twoFA.TOTPPreEnabled = false
@@ -468,7 +468,7 @@ function preEnableTOTPRequested() {
     })
 }
 
-function disableTOTPRequested(payload) {
+const disableTOTPRequested = (payload) => {
   removeTwoFactorErrors()
   if (!twoFA.TOTPNeedTwoFA) {
     twoFA.TOTPNeedTwoFA = true
@@ -491,7 +491,7 @@ function disableTOTPRequested(payload) {
   }
 }
 
-function enableEmailOTPRequested() {
+const enableEmailOTPRequested = () => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   store
@@ -511,7 +511,7 @@ function enableEmailOTPRequested() {
     })
 }
 
-function preEnableEmailOTPRequested() {
+const preEnableEmailOTPRequested = () => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   twoFA.emailOTPPreEnabled = false
@@ -529,7 +529,7 @@ function preEnableEmailOTPRequested() {
     })
 }
 
-function disableEmailOTPRequested(payload) {
+const disableEmailOTPRequested = (payload) => {
   removeTwoFactorErrors()
   twoFA.OTPRecoveryCodes = null
   if (!twoFA.emailOTPNeedTwoFA) {
@@ -553,12 +553,12 @@ function disableEmailOTPRequested(payload) {
   }
 }
 
-function preRegisterFIDORequested() {
+const preRegisterFIDORequested = () => {
   removeTwoFactorErrors()
   twoFA.FIDOPreRegistered = true
 }
 
-function registerFIDORequested() {
+const registerFIDORequested = () => {
   if (!twoFA.FIDONewDeviceName) return
 
   removeTwoFactorErrors()
@@ -586,7 +586,7 @@ function registerFIDORequested() {
     })
 }
 
-function unregisterFIDORequested(deviceName) {
+const unregisterFIDORequested = (deviceName) => {
   removeTwoFactorErrors()
   twoFA.isLoading = true
   store
@@ -604,7 +604,7 @@ function unregisterFIDORequested(deviceName) {
     })
 }
 
-function newRecoveryCodesRequested(payload) {
+const newRecoveryCodesRequested = (payload) => {
   removeTwoFactorErrors()
   if (!twoFA.newRecoveryCodesNeedTwoFA) {
     twoFA.newRecoveryCodesNeedTwoFA = true
@@ -628,22 +628,22 @@ function newRecoveryCodesRequested(payload) {
   }
 }
 
-function nextEnable() {
+const nextEnable = () => {
   if (twoFA.TOTPPreEnabled) enableTOTPRequested()
   else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested()
 }
 
-function nextWithPayload(payload) {
+const nextWithPayload = (payload) => {
   if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
   else if (twoFA.emailOTPNeedTwoFA) disableEmailOTPRequested(payload)
   else if (twoFA.newRecoveryCodesNeedTwoFA) newRecoveryCodesRequested(payload)
 }
 
-function copyRecoveryCodesToClipboard() {
+const copyRecoveryCodesToClipboard = () => {
   navigator.clipboard.writeText(twoFA.OTPRecoveryCodes.join('\n'))
 }
 
-function saveRecoveryCodesToFile() {
+const saveRecoveryCodesToFile = () => {
   const blob = new Blob([twoFA.OTPRecoveryCodes.join('\n')], {
     type: 'text/plain;charset=utf-8'
   })
@@ -654,11 +654,11 @@ function saveRecoveryCodesToFile() {
   link.click()
 }
 
-function changedTwoFA() {
+const changedTwoFA = () => {
   twoFA.error.isWrongOTP = false
 }
 
-function cancelCurrentTwoFactorAuthAction() {
+const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.TOTPPreEnabled = false
   twoFA.TOTPNeedTwoFA = false
   twoFA.emailOTPPreEnabled = false
@@ -679,7 +679,7 @@ function cancelCurrentTwoFactorAuthAction() {
   twoFA.OTPRecoveryCodes = null
 }
 
-function onKeyDown(event) {
+const onKeyDown = (event) => {
   if (event.key === 'Escape') cancelCurrentTwoFactorAuthAction()
 }
 

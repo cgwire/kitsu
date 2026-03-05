@@ -29,15 +29,15 @@ const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
 
 const buttonIsOn = computed(() => isShowInfosBreakdown.value)
 
-function hideInfosBreakdown() {
+const hideInfosBreakdown = () => {
   return store.dispatch('hideInfosBreakdown')
 }
 
-function showInfosBreakdown() {
+const showInfosBreakdown = () => {
   return store.dispatch('showInfosBreakdown')
 }
 
-function toggleInfos() {
+const toggleInfos = () => {
   if (isShowInfosBreakdown.value) {
     hideInfosBreakdown()
   } else {
