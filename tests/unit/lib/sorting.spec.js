@@ -549,10 +549,8 @@ describe('lib/sorting', () => {
     const taskMap = new Map()
     taskMap.set('task1', { task_status_short_name: 'status A' })
     taskMap.set('task2', { task_status_short_name: 'status B' })
-    const resultsMetadata =
-      sortAssetResult(entries, sortingMetadata, taskTypeMap, taskMap)
-    const resultsTaskTypes =
-      sortAssetResult(entries, sortingTaskType, taskTypeMap, taskMap)
+    sortAssetResult(entries, sortingMetadata, taskTypeMap, taskMap)
+    sortAssetResult(entries, sortingTaskType, taskTypeMap, taskMap)
     /*
     expect(resultsMetadata).toHaveLength(5)
     expect(resultsMetadata[0].id).toEqual(5)
@@ -637,8 +635,7 @@ describe('lib/sorting', () => {
       ['task1', { task_status_short_name: 'status A' }],
       ['task2', { task_status_short_name: 'status B' }]
     ])
-    const resultsMetadata =
-      sortShotResult(entries, sortingMetadata, taskTypeMap, taskMap)
+    sortShotResult(entries, sortingMetadata, taskTypeMap, taskMap)
     const resultsTaskTypes =
       sortShotResult(entries, sortingTaskType, taskTypeMap, taskMap)
     /*

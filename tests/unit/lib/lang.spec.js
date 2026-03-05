@@ -6,7 +6,7 @@ import i18n from '@/lib/i18n'
 import store from '@/store'
 
 class ColorHash {
-  constructor (colorData) {
+  constructor () {
   }
 
   hex (str) {
@@ -14,7 +14,7 @@ class ColorHash {
   }
 }
 
-global.ColorHash = ColorHash
+globalThis.ColorHash = ColorHash
 
 describe('lang', () => {
   store.commit('USER_LOGIN', {

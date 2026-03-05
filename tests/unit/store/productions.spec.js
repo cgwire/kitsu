@@ -310,14 +310,14 @@ describe('Productions store', () => {
         }))
       }
       let mockCommit = vi.fn()
-      productionApi.getProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
+      productionApi.getProduction = vi.fn(() => Promise.resolve({ id: '1' }))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, { id: '1' })
 
       mockCommit = vi.fn()
-      productionApi.getProduction = vi.fn(productionId => Promise.resolve({ id: '5' }))
+      productionApi.getProduction = vi.fn(() => Promise.resolve({ id: '5' }))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
@@ -325,7 +325,7 @@ describe('Productions store', () => {
 
       /*
       mockCommit = vi.fn()
-      productionApi.getProduction = vi.fn(productionId => Promise.reject(new Error('error')))
+      productionApi.getProduction = vi.fn(() => Promise.reject(new Error('error')))
       await store.actions.loadProduction({ commit: mockCommit, state }, 'production-id')
       expect(productionApi.getProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(0)
@@ -334,17 +334,17 @@ describe('Productions store', () => {
 
     test('newProduction', async () => {
       let mockCommit = vi.fn()
-      productionApi.newProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
+      productionApi.newProduction = vi.fn(() => Promise.resolve({ id: '1' }))
       await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.newProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_PRODUCTION, { id: '1' })
 
       mockCommit = vi.fn()
-      productionApi.newProduction = vi.fn(productionId => Promise.reject(new Error('error')))
+      productionApi.newProduction = vi.fn(() => Promise.reject(new Error('error')))
       try {
         await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
-      } catch (e) {
+      } catch {
         expect(productionApi.newProduction).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
       }
@@ -352,17 +352,17 @@ describe('Productions store', () => {
 
     test('editProduction', async () => {
       let mockCommit = vi.fn()
-      productionApi.updateProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
+      productionApi.updateProduction = vi.fn(() => Promise.resolve({ id: '1' }))
       await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.updateProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, { id: '1' })
 
       mockCommit = vi.fn()
-      productionApi.updateProduction = vi.fn(productionId => Promise.reject(new Error('error')))
+      productionApi.updateProduction = vi.fn(() => Promise.reject(new Error('error')))
       try {
         await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
-      } catch (e) {
+      } catch {
         expect(productionApi.updateProduction).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
       }
@@ -370,17 +370,17 @@ describe('Productions store', () => {
 
     test('deleteProduction', async () => {
       let mockCommit = vi.fn()
-      productionApi.deleteProduction = vi.fn(productionId => Promise.resolve({ id: '1' }))
+      productionApi.deleteProduction = vi.fn(() => Promise.resolve({ id: '1' }))
       await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
       expect(productionApi.deleteProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, REMOVE_PRODUCTION, 'production-id')
 
       mockCommit = vi.fn()
-      productionApi.deleteProduction = vi.fn(productionId => Promise.reject(new Error('error')))
+      productionApi.deleteProduction = vi.fn(() => Promise.reject(new Error('error')))
       try {
         await store.actions.deleteProduction({ commit: mockCommit, state: null }, 'production-id')
-      } catch (e) {
+      } catch {
         expect(productionApi.deleteProduction).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
       }
@@ -437,7 +437,7 @@ describe('Productions store', () => {
       productionApi.postAvatar = vi.fn(() => Promise.reject())
       try {
         await store.actions.uploadProductionAvatar({ commit: mockCommit, state }, 'production-id')
-      } catch (e) {
+      } catch {
         expect(productionApi.postAvatar).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
       }
@@ -578,7 +578,7 @@ describe('Productions store', () => {
       }
 
       const descriptor = { id: '456', field_name: 'descriptor name', project_id: '1' }
-      productionApi.getMetadataDescriptor = vi.fn((_, __) => Promise.resolve(descriptor))
+      productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(descriptor))
       await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
@@ -587,7 +587,7 @@ describe('Productions store', () => {
 
       descriptor.id = '789'
       mockCommit = vi.fn()
-      productionApi.getMetadataDescriptor = vi.fn((_, __) => Promise.resolve(descriptor))
+      productionApi.getMetadataDescriptor = vi.fn(() => Promise.resolve(descriptor))
       await store.actions.refreshMetadataDescriptor({ commit: mockCommit, state }, descriptor.id)
       expect(productionApi.getMetadataDescriptor).toBeCalledTimes(1)
       expect(productionApi.getMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', descriptor.id)
