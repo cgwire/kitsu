@@ -9,33 +9,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { HelpCircleIcon } from 'lucide-vue-next'
 
 import { renderMarkdown } from '@/lib/render'
 
-export default {
-  name: 'info-question-mark',
-
-  components: {
-    HelpCircleIcon
+defineProps({
+  text: {
+    type: String,
+    required: true
   },
-
-  props: {
-    text: {
-      type: String,
-      required: true
-    },
-    position: {
-      type: String,
-      validator: value => ['left', 'right'].includes(value)
-    }
-  },
-
-  methods: {
-    renderMarkdown
+  position: {
+    type: String,
+    validator: value => ['left', 'right'].includes(value)
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
