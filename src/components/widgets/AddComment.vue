@@ -355,7 +355,17 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onBeforeMount, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  inject,
+  nextTick,
+  onBeforeMount,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import AtTa from 'vue-at/dist/vue-at-textarea'
@@ -475,54 +485,72 @@ const modals = reactive({
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const productionMap = computed(() => store.getters.productionMap)
-const taskStatusForCurrentUser = computed(() => store.getters.taskStatusForCurrentUser)
+const taskStatusForCurrentUser = computed(
+  () => store.getters.taskStatusForCurrentUser
+)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const uploadProgress = computed(() => store.getters.uploadProgress)
 
 const attachments = computed({
   get: () => draftComment.attachments,
-  set: (value) => { draftComment.attachments = value }
+  set: value => {
+    draftComment.attachments = value
+  }
 })
 
 const checklist = computed({
   get: () => draftComment.checklist,
-  set: (value) => { draftComment.checklist = value }
+  set: value => {
+    draftComment.checklist = value
+  }
 })
 
 const link = computed({
   get: () => draftComment.link,
-  set: (value) => { draftComment.link = value }
+  set: value => {
+    draftComment.link = value
+  }
 })
 
 const mode = computed({
   get: () => draftComment.mode,
-  set: (value) => { draftComment.mode = value }
+  set: value => {
+    draftComment.mode = value
+  }
 })
 
 const nextRevision = computed({
   get: () => draftComment.nextRevision,
-  set: (value) => { draftComment.nextRevision = value }
+  set: value => {
+    draftComment.nextRevision = value
+  }
 })
 
 const showCommentArea = computed({
   get: () => draftComment.showCommentArea,
-  set: (value) => { draftComment.showCommentArea = value }
+  set: value => {
+    draftComment.showCommentArea = value
+  }
 })
 
 const showLinkField = computed({
   get: () => draftComment.showLinkField,
-  set: (value) => { draftComment.showLinkField = value }
+  set: value => {
+    draftComment.showLinkField = value
+  }
 })
 
 const task_status_id = computed({
   get: () => draftComment.task_status_id,
-  set: (value) => { draftComment.task_status_id = value }
+  set: value => {
+    draftComment.task_status_id = value
+  }
 })
 
 const text = computed({
   get: () => draftComment.text,
-  set: (value) => {
+  set: value => {
     draftComment.text = value
     drafts.setTaskDraft(props.task.id, text.value)
   }
@@ -641,7 +669,7 @@ const focus = () => {
   }
 }
 
-const getRevision = (form) => {
+const getRevision = form => {
   if (!form) {
     return undefined
   }
@@ -651,12 +679,12 @@ const getRevision = (form) => {
   return revision
 }
 
-const onAddChecklistItem = (item) => {
+const onAddChecklistItem = item => {
   delete item.index
   checklist.value.push(item)
 }
 
-const onInsertChecklistItem = (item) => {
+const onInsertChecklistItem = item => {
   checklist.value.splice(item.index, 0, item)
   for (let i = 0; i < checklist.value.length; i++) {
     checklist.value[i].index = i
@@ -683,23 +711,17 @@ const onDragleave = () => {
   isDragging.value = false
 }
 
-const onDrop = (event) => {
+const onDrop = event => {
   if (event.target.id === 'drop-mask') return
+  if (event.target.parentElement?.className?.indexOf('add-attachment-box') >= 0)
+    return
   if (
-    event.target.parentElement?.className?.indexOf('add-attachment-box') >=
+    event.target.parentElement?.className?.indexOf('add-attachment-buttons') >=
     0
   )
     return
   if (
-    event.target.parentElement?.className?.indexOf(
-      'add-attachment-buttons'
-    ) >= 0
-  )
-    return
-  if (
-    event.target.parentElement?.className?.indexOf(
-      'attachment-modal-box'
-    ) >= 0
+    event.target.parentElement?.className?.indexOf('attachment-modal-box') >= 0
   )
     return
 
@@ -720,7 +742,7 @@ const onDrop = (event) => {
 /*
  * When a file is pasted in the comment area, it adds it to the attachments.
  */
-const onPaste = (event) => {
+const onPaste = event => {
   if (modals.addCommentAttachment) return
   if (commentTextareaRef.value !== document.activeElement) return
   const files = event.clipboardData.files
@@ -735,7 +757,7 @@ const onAddCommentAttachmentClicked = () => {
   modals.addCommentAttachment = true
 }
 
-const addCommentAttachment = (forms) => {
+const addCommentAttachment = forms => {
   onCloseCommentAttachment()
   attachments.value = attachments.value.concat(forms)
 }
@@ -744,11 +766,11 @@ const onCloseCommentAttachment = () => {
   modals.addCommentAttachment = false
 }
 
-const removeAttachment = (attach) => {
+const removeAttachment = attach => {
   attachments.value = attachments.value.filter(a => a !== attach)
 }
 
-const addChecklistEntry = (index) => {
+const addChecklistEntry = index => {
   if (index === -1 || index === checklist.value.length - 1) {
     checklist.value.push({
       text: '',
@@ -757,11 +779,11 @@ const addChecklistEntry = (index) => {
   }
 }
 
-const removeTask = (entry) => {
+const removeTask = entry => {
   checklist.value = remove(checklist.value, entry)
 }
 
-const setValue = async (comment) => {
+const setValue = async comment => {
   checklist.value = JSON.parse(JSON.stringify(comment.checklist))
   text.value = comment.text
 
@@ -781,7 +803,7 @@ const setValue = async (comment) => {
   ).filter(Boolean)
 }
 
-const onAtTextChanged = (input) => {
+const onAtTextChanged = input => {
   if (input.includes('@frame')) {
     text.value = replaceTimeWithTimecode(
       input,
@@ -792,7 +814,7 @@ const onAtTextChanged = (input) => {
   }
 }
 
-const setAnnotationSnapshots = (files) => {
+const setAnnotationSnapshots = files => {
   getAttachmentModal().addFiles(files)
 }
 
@@ -804,7 +826,7 @@ const hideAnnotationLoading = () => {
   getAttachmentModal().hideAnnotationLoading()
 }
 
-const onSelectEmoji = (emoji) => {
+const onSelectEmoji = emoji => {
   const textarea = commentTextareaRef.value
   text.value = strings.insertInTextArea(textarea, emoji.i)
 }
@@ -858,13 +880,17 @@ onBeforeUnmount(() => {
   window.removeEventListener('paste', onPaste, false)
 })
 
-watch(() => props.task, () => {
-  resetStatus()
-  const draft = drafts.getTaskDraft(props.task.id)
-  if (draft) {
-    text.value = draft
-  }
-}, { immediate: true })
+watch(
+  () => props.task,
+  () => {
+    resetStatus()
+    const draft = drafts.getTaskDraft(props.task.id)
+    if (draft) {
+      text.value = draft
+    }
+  },
+  { immediate: true }
+)
 
 watch(mode, () => {
   if (mode.value === 'publish') {
@@ -878,18 +904,20 @@ watch(mode, () => {
   }
 })
 
-watch(isFrameAddition, (value) => {
+watch(isFrameAddition, value => {
   if (isCurrentUserClient.value) {
     preferences.setPreference('comments:add-frame-when-posting', value)
   }
 })
 
-watch(() => props.previewForms, () => {
-  const form = props.previewForms?.findLast(
-    form => getRevision(form) > 0
-  )
-  nextRevision.value = getRevision(form)
-}, { deep: true, immediate: true })
+watch(
+  () => props.previewForms,
+  () => {
+    const form = props.previewForms?.findLast(form => getRevision(form) > 0)
+    nextRevision.value = getRevision(form)
+  },
+  { deep: true, immediate: true }
+)
 
 defineExpose({
   reset,

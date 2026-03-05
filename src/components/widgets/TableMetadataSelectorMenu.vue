@@ -184,9 +184,7 @@ const entityType = computed(() => {
   return descriptorWithEntityType?.entity_type || null
 })
 
-const metadataDisplayHeadersString = localStorage.getItem(
-  localStorageKey.value
-)
+const metadataDisplayHeadersString = localStorage.getItem(localStorageKey.value)
 let localMetadataDisplayHeaders = { ...props.modelValue }
 if (metadataDisplayHeadersString) {
   localMetadataDisplayHeaders = {
@@ -202,22 +200,23 @@ for (const descriptor of props.descriptors) {
 emit('update:modelValue', localMetadataDisplayHeaders)
 sortedMetadataDescriptors.value = [...filteredMetadataDescriptors.value]
 
-watch(filteredMetadataDescriptors, (newValue) => {
-  if (
-    sortedMetadataDescriptors.value.length === 0 ||
-    sortedMetadataDescriptors.value.length !== newValue.length
-  ) {
-    sortedMetadataDescriptors.value = [...newValue]
-  }
-}, { immediate: true })
+watch(
+  filteredMetadataDescriptors,
+  newValue => {
+    if (
+      sortedMetadataDescriptors.value.length === 0 ||
+      sortedMetadataDescriptors.value.length !== newValue.length
+    ) {
+      sortedMetadataDescriptors.value = [...newValue]
+    }
+  },
+  { immediate: true }
+)
 
 const setMetadataDisplayValue = (metadataName, isSelected) => {
   const headers = { ...props.modelValue }
   headers[metadataName] = isSelected
-  localStorage.setItem(
-    localStorageKey.value,
-    JSON.stringify(headers)
-  )
+  localStorage.setItem(localStorageKey.value, JSON.stringify(headers))
   emit('update:modelValue', headers)
 }
 
@@ -231,12 +230,14 @@ const onDragEnd = () => {
     entityType.value &&
     descriptorIds.length > 0
   ) {
-    store.dispatch('reorderMetadataDescriptors', {
-      entityType: entityType.value,
-      descriptorIds
-    }).catch(err => {
-      console.error('Failed to reorder metadata descriptors:', err)
-    })
+    store
+      .dispatch('reorderMetadataDescriptors', {
+        entityType: entityType.value,
+        descriptorIds
+      })
+      .catch(err => {
+        console.error('Failed to reorder metadata descriptors:', err)
+      })
   }
 }
 </script>

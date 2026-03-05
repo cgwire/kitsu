@@ -203,7 +203,7 @@ const removeErrors = () => {
   errorSendingEmail.value = false
 }
 
-const changeTwoFAText = (twoFA) => {
+const changeTwoFAText = twoFA => {
   switch (twoFA) {
     case 'totp':
       return t('login.choose_totp')
@@ -237,7 +237,8 @@ const requestSendEmailOTP = () => {
 
 const requestGetFIDOChallenge = () => {
   removeErrors()
-  store.dispatch('getFIDOChallenge', props.email)
+  store
+    .dispatch('getFIDOChallenge', props.email)
     .then(FIDOChallenge => {
       return navigator.credentials.get({ publicKey: FIDOChallenge })
     })

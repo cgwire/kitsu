@@ -84,7 +84,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { showList: showStatusAutomationsList, toggle: toggleStatusAutomationsList, select: selectStatusAutomation } = useCombobox(emit)
+const {
+  showList: showStatusAutomationsList,
+  toggle: toggleStatusAutomationsList,
+  select: selectStatusAutomation
+} = useCombobox(emit)
 
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const statusAutomationMap = computed(() => store.getters.statusAutomationMap)
@@ -97,7 +101,7 @@ const currentStatusAutomation = computed(() => {
   }
 })
 
-const backgroundColor = (statusAutomation) => {
+const backgroundColor = statusAutomation => {
   if (
     (!statusAutomation || statusAutomation.is_default) &&
     !isDarkTheme.value
@@ -115,18 +119,13 @@ const backgroundColor = (statusAutomation) => {
   }
 }
 
-const color = (statusAutomation) => {
-  if (
-    !statusAutomation ||
-    !statusAutomation.is_default ||
-    isDarkTheme.value
-  ) {
+const color = statusAutomation => {
+  if (!statusAutomation || !statusAutomation.is_default || isDarkTheme.value) {
     return 'white'
   } else {
     return '#333'
   }
 }
-
 </script>
 
 <style lang="scss" scoped>

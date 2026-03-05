@@ -55,7 +55,7 @@ const updateValue = () => {
   emit('update:modelValue', inputRef.value.value)
 }
 
-const emitKeyup = (event) => {
+const emitKeyup = event => {
   emit('keyup', event)
 }
 

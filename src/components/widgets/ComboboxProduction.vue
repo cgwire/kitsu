@@ -71,7 +71,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { showList: showProductionList, toggle: toggleProductionList, select: selectProduction } = useCombobox(emit)
+const {
+  showList: showProductionList,
+  toggle: toggleProductionList,
+  select: selectProduction
+} = useCombobox(emit)
 
 const currentProduction = computed(() => {
   return (
@@ -79,7 +83,6 @@ const currentProduction = computed(() => {
     props.productionList[0]
   )
 })
-
 </script>
 
 <style lang="scss" scoped>

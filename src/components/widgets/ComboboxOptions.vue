@@ -95,7 +95,7 @@ const toggleList = () => {
   }
 }
 
-const onUpdateValue = (key) => {
+const onUpdateValue = key => {
   const value = !props.modelValue[key]
   emit('update:modelValue', {
     ...props.modelValue,

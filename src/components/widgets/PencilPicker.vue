@@ -46,7 +46,7 @@ const togglePalette = () => {
   isOpen.value = !isOpen.value
 }
 
-const onPencilPicked = (width) => {
+const onPencilPicked = width => {
   emit('change', width)
   isOpen.value = false
 }

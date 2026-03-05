@@ -112,15 +112,14 @@ const renderedValue = computed(() => {
   return props.modelValue.split(',').filter(Boolean).sort().join(', ')
 })
 
-const selectOption = (option) => {
+const selectOption = option => {
   let values = props.modelValue.split(',').filter(Boolean)
   if (values.includes(option.value)) {
     values.splice(values.indexOf(option.value), 1)
   } else {
     values = optionList.value
       .filter(
-        oldOption =>
-          isChecked(oldOption) || oldOption.value === option.value
+        oldOption => isChecked(oldOption) || oldOption.value === option.value
       )
       .map(oldOption => oldOption.value)
   }
@@ -141,14 +140,14 @@ const toggleList = () => {
   }
 }
 
-const getOptionLabel = (option) => {
+const getOptionLabel = option => {
   if (props.localeKeyPrefix && option.label) {
     return t(props.localeKeyPrefix + option.label.toLowerCase())
   }
   return option.label
 }
 
-const isChecked = (option) => {
+const isChecked = option => {
   const values = props.modelValue.split(',')
   return values.includes(option.value)
 }

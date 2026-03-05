@@ -138,8 +138,7 @@ const targetRoute = computed(() => {
 
     if (props.taskType.episode_id || route.params.episode_id) {
       r.name = 'episode-task-type'
-      r.params.episode_id =
-        props.taskType.episode_id || route.params.episode_id
+      r.params.episode_id = props.taskType.episode_id || route.params.episode_id
     }
     return r
   }
