@@ -1,9 +1,13 @@
+const createIndexPair = () => ({
+  index: Object.create(null),
+  entryIndex: Object.create(null)
+})
+
 /*
  * Build a simple index based on entry names.
  */
 export const buildNameIndex = (entries, split = true, withEmail = false) => {
-  const index = Object.create(null)
-  const entryIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   entries.forEach(entry => {
     if (entry) {
       let words
@@ -64,8 +68,7 @@ export const buildTaskStatusIndex = taskStatuses => {
  * The result is an array of tasks.
  */
 export const buildTaskIndex = tasks => {
-  const index = Object.create(null)
-  const taskIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   tasks.forEach(task => {
     const stringToIndex = task.full_entity_name
       .replace(/_/g, ' ')
@@ -78,7 +81,7 @@ export const buildTaskIndex = tasks => {
         task.task_status_short_name,
         task.project_name
       ])
-    indexWords(index, taskIndex, task, words)
+    indexWords(index, entryIndex, task, words)
   })
   return index
 }
@@ -89,8 +92,7 @@ export const buildTaskIndex = tasks => {
  * The result is an array of tasks.
  */
 export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
-  const index = Object.create(null)
-  const taskIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   tasks.forEach(task => {
     const stringToIndex = task.entity_name.replace(/_/g, ' ').replace(/-/g, ' ')
     const taskStatus = taskStatusMap.get(task.task_status_id)
@@ -102,7 +104,7 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
       const person = personMap.get(personId)
       if (person) words.push(person.first_name, person.last_name)
     })
-    indexWords(index, taskIndex, task, words)
+    indexWords(index, entryIndex, task, words)
   })
   return index
 }
@@ -113,8 +115,7 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
  * Results are arrays of assets.
  */
 export const buildAssetIndex = entries => {
-  const index = Object.create(null)
-  const assetIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   entries.forEach(asset => {
     const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
     let words = []
@@ -124,7 +125,7 @@ export const buildAssetIndex = entries => {
     const camelWords = stringToIndex.match(/[A-Z]+[a-z0-9]*/g)
     if (camelWords) words = words.concat(camelWords)
     words = [...new Set(words.map(word => word.toLowerCase()))]
-    indexWords(index, assetIndex, asset, words)
+    indexWords(index, entryIndex, asset, words)
   })
   return index
 }
@@ -135,11 +136,10 @@ export const buildAssetIndex = entries => {
  * Results are arrays of shots.
  */
 export const buildShotIndex = shots => {
-  const index = Object.create(null)
-  const shotIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   shots.forEach(shot => {
     const words = [shot.name, shot.sequence_name, shot.episode_name]
-    indexWords(index, shotIndex, shot, words)
+    indexWords(index, entryIndex, shot, words)
   })
   return index
 }
@@ -150,11 +150,10 @@ export const buildShotIndex = shots => {
  * Results are arrays of edits.
  */
 export const buildEditIndex = edits => {
-  const index = Object.create(null)
-  const editIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   edits.forEach(edit => {
     const words = [edit.name, edit.episode_name]
-    indexWords(index, editIndex, edit, words)
+    indexWords(index, entryIndex, edit, words)
   })
   return index
 }
@@ -165,11 +164,10 @@ export const buildEditIndex = edits => {
  * Results are arrays of sequences.
  */
 export const buildSequenceIndex = sequences => {
-  const index = Object.create(null)
-  const sequenceIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   sequences.forEach(sequence => {
     const words = [sequence.name, sequence.episode_name]
-    indexWords(index, sequenceIndex, sequence, words)
+    indexWords(index, entryIndex, sequence, words)
   })
   return index
 }
@@ -180,11 +178,10 @@ export const buildSequenceIndex = sequences => {
  * Results are arrays of episodes.
  */
 export const buildEpisodeIndex = episodes => {
-  const index = Object.create(null)
-  const episodeIndex = Object.create(null)
+  const { index, entryIndex } = createIndexPair()
   episodes.forEach(episode => {
     const words = [episode.name]
-    indexWords(index, episodeIndex, episode, words)
+    indexWords(index, entryIndex, episode, words)
   })
   return index
 }
