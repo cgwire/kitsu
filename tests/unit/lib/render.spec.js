@@ -61,11 +61,11 @@ describe('render', () => {
       'Text **bold** <img onerror="console.log(\'test\')" src="picture.png" />'
     let result = renderMarkdown(input)
     expect(result.trim()).toEqual(
-      '<p>Text <strong>bold</strong> <img src=\"picture.png\" /></p>')
+      '<p>Text <strong>bold</strong> <img src="picture.png" /></p>')
     input = 'Text **bold** <img src="picture.png" />'
     result = renderMarkdown(input)
     expect(result.trim()).toEqual(
-      '<p>Text <strong>bold</strong> <img src=\"picture.png\" /></p>')
+      '<p>Text <strong>bold</strong> <img src="picture.png" /></p>')
   })
 
   test('renderFileSize', () => {
