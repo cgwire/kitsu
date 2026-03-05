@@ -840,7 +840,7 @@
       "no_clients_to_notify": "هیچ مشتری برای اطلاع رسانی وجود ندارد.",
       "notify_clients_success": "اعلان با موفقیت ارسال شد.",
       "unmute": "بی‌صدا کردن",
-      "volume_level": "حجم: {سطح}%"
+      "volume_level": "حجم: {level}%"
     },
     "productions": {
       "current": "محصول انتخاب شده",
