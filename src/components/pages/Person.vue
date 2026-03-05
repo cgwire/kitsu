@@ -24,7 +24,7 @@
             :tabs="todoTabs"
           />
 
-          <div ref="search" class="flexrow" v-show="!isActiveTab('calendar')">
+          <div class="flexrow">
             <search-field
               ref="person-tasks-search-field"
               class="search-field flexrow-item"
@@ -244,18 +244,15 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
     this.productionId = this.$route.query.productionId || undefined
 
     this.updateActiveTab()
-    this.loadPerson(this.$route.params.person_id)
-    setTimeout(() => {
-      this.searchField?.focus()
-      this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
-    }, 300)
-
+    await this.loadPerson(this.$route.params.person_id)
     this.setSearchFromUrl()
     this.onSearchChange()
+
+    this.$refs['schedule-widget']?.scrollToDate(this.tasksStartDate)
 
     this.init = true
   },
@@ -748,21 +745,19 @@ export default {
         ? currentSection
         : 'todos'
 
-      if (this.activeTab === 'board') {
-        const currentProduction = this.userOpenProductions.find(
-          ({ id }) => id === this.$route.query.productionId
-        )
-        if (currentProduction) {
-          this.productionId = currentProduction.id
-        } else {
-          this.$router.push({
-            query: {
-              productionId: this.productionId,
-              section: this.activeTab,
-              search: this.$route.query.search
-            }
-          })
-        }
+      const currentProduction = this.userOpenProductions.find(
+        ({ id }) => id === this.$route.query.productionId
+      )
+      if (currentProduction) {
+        this.productionId = currentProduction.id
+      } else {
+        this.$router.push({
+          query: {
+            ...this.$route.query,
+            productionId: this.productionId,
+            section: this.activeTab
+          }
+        })
       }
 
       this.clearSelectedTasks()
