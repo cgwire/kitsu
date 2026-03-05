@@ -26,37 +26,29 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'pencil-picker',
+<script setup>
+import { ref } from 'vue'
 
-  props: {
-    pencil: {
-      type: String
-    },
-    sizes: {
-      type: Array
-    }
+const props = defineProps({
+  pencil: {
+    type: String
   },
-
-  emits: ['change'],
-
-  data() {
-    return {
-      isOpen: false
-    }
-  },
-
-  methods: {
-    togglePalette() {
-      this.isOpen = !this.isOpen
-    },
-
-    onPencilPicked(width) {
-      this.$emit('change', width)
-      this.isOpen = false
-    }
+  sizes: {
+    type: Array
   }
+})
+
+const emit = defineEmits(['change'])
+
+const isOpen = ref(false)
+
+function togglePalette() {
+  isOpen.value = !isOpen.value
+}
+
+function onPencilPicked(width) {
+  emit('change', width)
+  isOpen.value = false
 }
 </script>
 
