@@ -636,6 +636,7 @@ export default {
     productionId() {
       this.$router.push({
         query: {
+          ...this.$route.query,
           productionId: this.productionId,
           section: this.currentSection
         }
