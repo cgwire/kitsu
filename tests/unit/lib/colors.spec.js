@@ -47,4 +47,13 @@ describe('colors', () => {
     expect(colors.fromString('123456')).toEqual('#f0ee75')
     expect(colors.fromString('Jhon Doe')).toEqual('#9e75f0')
   })
+
+  test('validationTextColor with wtg status', () => {
+    const task = { task_status_short_name: 'wtg' }
+    expect(colors.validationTextColor(task)).toEqual('#333')
+  })
+
+  test('validationTextColor with null task', () => {
+    expect(colors.validationTextColor(null)).toEqual('#333')
+  })
 })

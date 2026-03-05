@@ -1,6 +1,9 @@
 import {
+  ceilToFrame,
+  floorToFrame,
   formatFrame,
   formatTime,
+  formatToTimecode,
   frameToSeconds,
   roundToFrame
 } from '@/lib/video'
@@ -52,5 +55,29 @@ describe('video', () => {
     expect(formatTime(2.016, 25)).toBe('00:00:02:00')
     expect(formatTime(60.018, 25)).toBe('00:01:00:00')
     expect(formatTime(362.018, 25)).toBe('00:06:02:00')
+  })
+
+  it('ceilToFrame', () => {
+    expect(ceilToFrame(1, 24)).toBeCloseTo(1.0008, 4)
+    expect(ceilToFrame(0.95, 24)).toBeCloseTo(0.9591, 4)
+    expect(ceilToFrame(49.12, 25)).toBeCloseTo(49.1201, 4)
+  })
+
+  it('floorToFrame', () => {
+    expect(floorToFrame(1, 24)).toBeCloseTo(0.9591, 4)
+    expect(floorToFrame(49.16, 25)).toBeCloseTo(49.16, 4)
+  })
+
+  it('formatToTimecode', () => {
+    expect(formatToTimecode(0, 25)).toBe('00:00:00:00')
+    expect(formatToTimecode(25, 25)).toBe('00:00:01:00')
+    expect(formatToTimecode(50, 25)).toBe('00:00:02:00')
+    expect(formatToTimecode(1525, 25)).toBe('00:01:01:00')
+    expect(formatToTimecode(null, 25)).toBe('00:00:00:00')
+    expect(formatToTimecode(-5, 25)).toBe('00:00:00:00')
+  })
+
+  it('formatTime with negative time', () => {
+    expect(formatTime(-1, 25)).toBe('00:00:00:00')
   })
 })
