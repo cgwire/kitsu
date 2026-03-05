@@ -49,181 +49,169 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
-export default {
-  name: 'combobox-department',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    DepartmentName
+const props = defineProps({
+  displayAllAndMyDepartments: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['update:modelValue'],
-
-  data() {
-    return {
-      showDepartmentList: false
-    }
+  label: {
+    default: '',
+    type: String
   },
-
-  props: {
-    displayAllAndMyDepartments: {
-      default: false,
-      type: Boolean
-    },
-    label: {
-      default: '',
-      type: String
-    },
-    maxHeightSelectInput: {
-      default: 200,
-      type: Number
-    },
-    rounded: {
-      default: false,
-      type: Boolean
-    },
-    selectableDepartments: {
-      type: Array,
-      required: false
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    width: {
-      default: 250,
-      type: Number
-    },
-    withEmptyChoice: {
-      default: true,
-      type: Boolean
-    },
-    top: {
-      default: false,
-      type: Boolean
-    },
-    allDepartmentsLabel: {
-      default: false,
-      type: Boolean
-    }
+  maxHeightSelectInput: {
+    default: 200,
+    type: Number
   },
-
-  computed: {
-    ...mapGetters([
-      'departmentMap',
-      'departments',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'user'
-    ]),
-
-    departmentsToTakeAccount() {
-      const departments = this.selectableDepartments
-        ? [...this.selectableDepartments]
-        : [...this.departments]
-      return departments.sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, {
-          numeric: true
-        })
-      )
-    },
-
-    departmentList() {
-      if (this.displayAllAndMyDepartments) {
-        const departmentFilter = [
-          {
-            name: this.$t('tasks.combobox_departments.all_departments'),
-            id: 'ALL',
-            color: '#CCC'
-          }
-        ]
-        if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-          departmentFilter.unshift({
-            name: this.$t('tasks.combobox_departments.my_departments'),
-            id: 'MY_DEPARTMENTS',
-            color: '#000000'
-          })
-        }
-        return [...departmentFilter, ...this.departmentsToTakeAccount]
-      } else if (
-        this.isCurrentUserSupervisor &&
-        this.user.departments.length > 0
-      ) {
-        return [...this.departmentsToTakeAccount]
-      } else if (this.withEmptyChoice) {
-        return [
-          {
-            color: '#AAA',
-            id: null,
-            name: this.allDepartmentsLabel
-              ? this.$t('departments.all_departments')
-              : this.$t('departments.no_department')
-          },
-          ...this.departmentsToTakeAccount
-        ]
-      } else {
-        return [...this.departmentsToTakeAccount]
-      }
-    },
-
-    currentDepartment() {
-      if (this.modelValue) {
-        const departmentMapped = this.departmentMap.get(this.modelValue)
-        if (departmentMapped) {
-          return departmentMapped
-        } else {
-          return this.departmentList.find(d => d.id === this.modelValue)
-        }
-      } else {
-        return this.departmentList[0]
-      }
-    },
-
-    listStyle() {
-      const data = {
-        'max-height': `${this.maxHeightSelectInput}px`,
-        width: `${this.width}px`,
-        top: this.rounded ? '31px' : '37px',
-        left: '0'
-      }
-      if (this.top) {
-        Object.assign(data, {
-          top: '-200px',
-          bottom: '-90px',
-          'border-top-left-radius': '10px',
-          'border-top-right-radius': '10px',
-          'border-bottom-left-radius': '0',
-          'border-bottom-right-radius': '0'
-        })
-      }
-
-      return data
-    }
+  rounded: {
+    default: false,
+    type: Boolean
   },
-
-  methods: {
-    selectDepartment(department) {
-      this.$emit('update:modelValue', department.id)
-      this.showDepartmentList = false
-    },
-
-    toggleDepartmentList() {
-      this.showDepartmentList = !this.showDepartmentList
-    },
-
-    focus() {
-      this.$refs.combobox.focus()
-    }
+  selectableDepartments: {
+    type: Array,
+    required: false
+  },
+  modelValue: {
+    default: '',
+    type: String
+  },
+  width: {
+    default: 250,
+    type: Number
+  },
+  withEmptyChoice: {
+    default: true,
+    type: Boolean
+  },
+  top: {
+    default: false,
+    type: Boolean
+  },
+  allDepartmentsLabel: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const combobox = ref(null)
+const showDepartmentList = ref(false)
+
+const departmentMap = computed(() => store.getters.departmentMap)
+const departments = computed(() => store.getters.departments)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(() => store.getters.isCurrentUserSupervisor)
+const user = computed(() => store.getters.user)
+
+const departmentsToTakeAccount = computed(() => {
+  const deps = props.selectableDepartments
+    ? [...props.selectableDepartments]
+    : [...departments.value]
+  return deps.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true
+    })
+  )
+})
+
+const departmentList = computed(() => {
+  if (props.displayAllAndMyDepartments) {
+    const departmentFilter = [
+      {
+        name: t('tasks.combobox_departments.all_departments'),
+        id: 'ALL',
+        color: '#CCC'
+      }
+    ]
+    if (!isCurrentUserManager.value && user.value.departments.length > 0) {
+      departmentFilter.unshift({
+        name: t('tasks.combobox_departments.my_departments'),
+        id: 'MY_DEPARTMENTS',
+        color: '#000000'
+      })
+    }
+    return [...departmentFilter, ...departmentsToTakeAccount.value]
+  } else if (
+    isCurrentUserSupervisor.value &&
+    user.value.departments.length > 0
+  ) {
+    return [...departmentsToTakeAccount.value]
+  } else if (props.withEmptyChoice) {
+    return [
+      {
+        color: '#AAA',
+        id: null,
+        name: props.allDepartmentsLabel
+          ? t('departments.all_departments')
+          : t('departments.no_department')
+      },
+      ...departmentsToTakeAccount.value
+    ]
+  } else {
+    return [...departmentsToTakeAccount.value]
+  }
+})
+
+const currentDepartment = computed(() => {
+  if (props.modelValue) {
+    const departmentMapped = departmentMap.value.get(props.modelValue)
+    if (departmentMapped) {
+      return departmentMapped
+    } else {
+      return departmentList.value.find(d => d.id === props.modelValue)
+    }
+  } else {
+    return departmentList.value[0]
+  }
+})
+
+const listStyle = computed(() => {
+  const data = {
+    'max-height': `${props.maxHeightSelectInput}px`,
+    width: `${props.width}px`,
+    top: props.rounded ? '31px' : '37px',
+    left: '0'
+  }
+  if (props.top) {
+    Object.assign(data, {
+      top: '-200px',
+      bottom: '-90px',
+      'border-top-left-radius': '10px',
+      'border-top-right-radius': '10px',
+      'border-bottom-left-radius': '0',
+      'border-bottom-right-radius': '0'
+    })
+  }
+
+  return data
+})
+
+function selectDepartment(department) {
+  emit('update:modelValue', department.id)
+  showDepartmentList.value = false
 }
+
+function toggleDepartmentList() {
+  showDepartmentList.value = !showDepartmentList.value
+}
+
+function focus() {
+  combobox.value.focus()
+}
+
+defineExpose({ focus })
 </script>
 
 <style lang="scss" scoped>
