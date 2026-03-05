@@ -9,6 +9,8 @@ const fadeColorIndex = {}
 let colorHashConstructor = ColorHash
 if (ColorHash.default) colorHashConstructor = ColorHash.default
 
+const DARK_STATUS_NAMES = ['todo', 'wtg']
+
 export default {
   /*
    * Turn hexadecimal color (#FFFFFF) to a darker and more saturated version.
@@ -26,19 +28,12 @@ export default {
    * Convert a string (it can be anything) into a HTML color hash.
    */
   fromString(str, darken = false) {
-    let colorHash = new colorHashConstructor({
-      lightness: 0.7,
+    const isDark =
+      darken || (localStorage && localStorage.getItem('dark-theme') === 'true')
+    const colorHash = new colorHashConstructor({
+      lightness: isDark ? 0.6 : 0.7,
       saturation: 0.8
     })
-    if (
-      darken ||
-      (localStorage && localStorage.getItem('dark-theme') === 'true')
-    ) {
-      colorHash = new colorHashConstructor({
-        lightness: 0.6,
-        saturation: 0.8
-      })
-    }
     return colorHash.hex(str)
   },
 
@@ -86,14 +81,9 @@ export default {
    * is too dark.
    */
   validationTextColor(task) {
-    if (
-      task &&
-      task.task_status_short_name !== 'todo' &&
-      task.task_status_short_name !== 'wtg'
-    ) {
+    if (task && !DARK_STATUS_NAMES.includes(task.task_status_short_name)) {
       return 'white'
-    } else {
-      return '#333'
     }
+    return '#333'
   }
 }

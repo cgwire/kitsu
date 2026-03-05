@@ -1,29 +1,27 @@
 export const populateTask = task => {
-  if (task.entity_type_name === 'Shot') {
-    if (task.episode_name) {
-      task.full_entity_name = `${task.episode_name} / ${task.sequence_name} / ${task.entity_name}`
-    } else {
-      task.full_entity_name = `${task.sequence_name} / ${task.entity_name}`
-    }
-  } else if (task.entity_type_name === 'Episode') {
-    task.full_entity_name = `${task.entity_name}`
-  } else if (['Sequence', 'Edit'].includes(task.entity_type_name)) {
-    if (task.episode_name) {
-      task.full_entity_name = `${task.episode_name} / ${task.entity_name}`
-    } else {
-      task.full_entity_name = `${task.entity_name}`
-    }
+  const type = task.entity_type_name
+  const parts = []
+
+  if (type === 'Shot') {
+    if (task.episode_name) parts.push(task.episode_name)
+    parts.push(task.sequence_name, task.entity_name)
+  } else if (['Sequence', 'Edit'].includes(type)) {
+    if (task.episode_name) parts.push(task.episode_name)
+    parts.push(task.entity_name)
+  } else if (type === 'Episode') {
+    parts.push(task.entity_name)
   } else {
-    task.full_entity_name = `${task.entity_type_name} / ${task.entity_name}`
+    parts.push(task.entity_type_name, task.entity_name)
   }
-  const type = task.entity_type_name.toLowerCase()
+
+  task.full_entity_name = parts.join(' / ')
   task.entity_path = {
-    name: type,
+    name: type.toLowerCase(),
     params: {
       production_id: task.project_id
     }
   }
-  task.entity_path.params[`${type}_id`] = task.entity_id
+  task.entity_path.params[`${type.toLowerCase()}_id`] = task.entity_id
   if (!task.entity && task.entity_id) {
     task.entity = {
       id: task.entity_id,
