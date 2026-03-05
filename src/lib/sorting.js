@@ -174,19 +174,22 @@ export const sortTaskTypeScheduleItems = (
   currentProduction,
   taskTypeMap
 ) => {
+  const priorityCache = new Map()
+  for (const item of items) {
+    if (!priorityCache.has(item.task_type_id)) {
+      const taskType = taskTypeMap.get(item.task_type_id)
+      priorityCache.set(
+        item.task_type_id,
+        getTaskTypePriorityOfProd(taskType, currentProduction)
+      )
+    }
+  }
   const sortFunc = firstBy('for_entity')
     .thenBy((itemA, itemB) => {
-      const taskTypeA = taskTypeMap.get(itemA.task_type_id)
-      const taskTypeB = taskTypeMap.get(itemB.task_type_id)
-      const taskTypeAPriority = getTaskTypePriorityOfProd(
-        taskTypeA,
-        currentProduction
+      return (
+        priorityCache.get(itemA.task_type_id) -
+        priorityCache.get(itemB.task_type_id)
       )
-      const taskTypeBPriority = getTaskTypePriorityOfProd(
-        taskTypeB,
-        currentProduction
-      )
-      return taskTypeAPriority - taskTypeBPriority
     })
     .thenBy('name')
   return items.sort(sortFunc)
@@ -233,18 +236,21 @@ export const sortValidationColumns = (
   taskTypeMap,
   currentProduction
 ) => {
+  const priorityCache = new Map()
+  for (const id of columns) {
+    if (!priorityCache.has(id)) {
+      priorityCache.set(
+        id,
+        getTaskTypePriorityOfProd(taskTypeMap.get(id), currentProduction)
+      )
+    }
+  }
   return columns.sort((a, b) => {
-    const taskTypeA = taskTypeMap.get(a)
-    const taskTypeB = taskTypeMap.get(b)
-    const taskTypeAPriority = getTaskTypePriorityOfProd(
-      taskTypeA,
-      currentProduction
-    )
-    const taskTypeBPriority = getTaskTypePriorityOfProd(
-      taskTypeB,
-      currentProduction
-    )
+    const taskTypeAPriority = priorityCache.get(a)
+    const taskTypeBPriority = priorityCache.get(b)
     if (taskTypeAPriority === taskTypeBPriority) {
+      const taskTypeA = taskTypeMap.get(a)
+      const taskTypeB = taskTypeMap.get(b)
       return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
         numeric: true
       })

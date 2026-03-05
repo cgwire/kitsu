@@ -238,18 +238,18 @@ const indexSearchWord = (index, word) => {
  */
 const indexWords = (index, entryIndex, entry, words) => {
   for (const word of words) {
-    let currentString = ''
     if (word) {
-      for (const character of word) {
-        currentString += character.toLowerCase()
-        if (index[currentString] === undefined) {
-          index[currentString] = []
-          entryIndex[currentString] = Object.create(null)
+      const lowerWord = word.toLowerCase()
+      for (let i = 1; i <= lowerWord.length; i++) {
+        const prefix = lowerWord.substring(0, i)
+        if (index[prefix] === undefined) {
+          index[prefix] = []
+          entryIndex[prefix] = Object.create(null)
         }
 
-        if (!entryIndex[currentString][entry.id]) {
-          index[currentString].push(entry)
-          entryIndex[currentString][entry.id] = true
+        if (!entryIndex[prefix][entry.id]) {
+          index[prefix].push(entry)
+          entryIndex[prefix][entry.id] = true
         }
       }
     }
