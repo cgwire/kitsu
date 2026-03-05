@@ -9,18 +9,14 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'group-button',
-
-  props: {
-    align: {
-      default: 'right',
-      type: String,
-      validator: prop => ['right', 'left', 'center'].includes(prop)
-    }
+<script setup>
+defineProps({
+  align: {
+    default: 'right',
+    type: String,
+    validator: prop => ['right', 'left', 'center'].includes(prop)
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
