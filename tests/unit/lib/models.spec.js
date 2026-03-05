@@ -1,5 +1,6 @@
 import {
   addToIdList,
+  arrayMove,
   removeFromIdList,
   getFilledColumns,
   groupEntitiesByParents,
@@ -152,5 +153,54 @@ describe('lib/helpers', () => {
     }
     removeFromIdList(production, 'asset_types', 'type-2')
     expect(production.asset_types).toEqual(['type-1', 'type-3'])
+  })
+
+  it('populateTask - Episode', () => {
+    const task = {
+      entity_name: 'E01',
+      entity_type_name: 'Episode',
+      project_id: 'prod-1',
+      entity_id: 'ep-1'
+    }
+    populateTask(task)
+    expect(task.full_entity_name).toEqual('E01')
+  })
+
+  it('populateTask - Sequence with episode', () => {
+    const task = {
+      entity_name: 'SQ01',
+      entity_type_name: 'Sequence',
+      episode_name: 'E01',
+      project_id: 'prod-1',
+      entity_id: 'seq-1'
+    }
+    populateTask(task)
+    expect(task.full_entity_name).toEqual('E01 / SQ01')
+  })
+
+  it('populateTask - Edit without episode', () => {
+    const task = {
+      entity_name: 'ED01',
+      entity_type_name: 'Edit',
+      project_id: 'prod-1',
+      entity_id: 'edit-1'
+    }
+    populateTask(task)
+    expect(task.full_entity_name).toEqual('ED01')
+  })
+
+  it('removeFromIdList - id not found', () => {
+    const production = {
+      id: '1',
+      asset_types: ['type-1', 'type-2']
+    }
+    removeFromIdList(production, 'asset_types', 'type-999')
+    expect(production.asset_types).toEqual(['type-1', 'type-2'])
+  })
+
+  it('arrayMove', () => {
+    const arr = ['a', 'b', 'c', 'd']
+    expect(arrayMove(arr, 0, 2)).toEqual(['b', 'c', 'a', 'd'])
+    expect(arr).toEqual(['a', 'b', 'c', 'd']) // original unchanged
   })
 })

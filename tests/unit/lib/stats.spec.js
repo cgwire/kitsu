@@ -1,7 +1,8 @@
 import {
   computeStats,
   getChartData,
-  getChartColors
+  getChartColors,
+  getPercentage
 } from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
@@ -174,5 +175,12 @@ describe('lib/stats', () => {
     expect(data).toEqual(['red', 'blue'])
     data = getChartColors(expectedStatResult, 'all', 'all')
     expect(data).toEqual(['red', 'blue'])
+  })
+
+  it('getPercentage', () => {
+    expect(getPercentage(50, 100)).toEqual('50.00')
+    expect(getPercentage(1, 3)).toEqual('33.33')
+    expect(getPercentage(0, 0)).toEqual('0.00')
+    expect(getPercentage(0, 100)).toEqual('0.00')
   })
 })
