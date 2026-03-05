@@ -57,7 +57,8 @@
       },
       "include_all": "Inclui todos os tipos de tarefas de ativos",
       "add_asset_type_to_library": "Adicionar um tipo de ativo à biblioteca",
-      "library_title": "Biblioteca de tipos de ativos"
+      "library_title": "Biblioteca de tipos de ativos",
+      "add_asset_type_placeholder": "+ Adicionar tipo de ativo"
     },
     "breakdown": {
       "all_assets": "Todos os assets disponíveis",
@@ -545,7 +546,10 @@
       "hours": "hora | horas",
       "remove_search_query": "Tem certeza de que deseja remover a consulta de pesquisa \"{name}\"?",
       "remove_search_filter_group": "Tem certeza de que deseja remover o grupo de filtros de pesquisa \"{name}\"?",
-      "shared_by": "Compartilhado por {name}"
+      "shared_by": "Compartilhado por {name}",
+      "continue": "Continuar",
+      "developer_documentation": "Documentação do desenvolvedor",
+      "feedback": "Roteiro / Feedback"
     },
     "menu": {
       "assign_tasks": "Atribuir tarefas",
@@ -1053,7 +1057,8 @@
           "error_register": "Ocorreu um erro ao registrar o dispositivo FIDO.",
           "error_unregister": "Ocorreu um erro ao cancelar o registro do dispositivo FIDO."
         },
-        "enabled": "Autenticação de dois fatores ativada"
+        "enabled": "Autenticação de dois fatores ativada",
+        "mandatory": "Sua organização exige autenticação de dois fatores. Ative pelo menos um método para continuar."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "Ativos, fotos, sequências, ..."
       },
       "add_task_status_to_library": "Adicionar um status de tarefa à biblioteca",
-      "library_title": "Biblioteca de status de tarefas"
+      "library_title": "Biblioteca de status de tarefas",
+      "add_task_status_placeholder": "+ Adicionar status da tarefa"
     },
     "task_types": {
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados?",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Pronto para"
-      }
+      },
+      "add_status_automation_placeholder": "+ Adicionar automação de status"
     },
     "preview_room": {
       "join_room": "Participe da Sala de Críticas",
