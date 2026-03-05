@@ -1720,18 +1720,24 @@ export default {
 
     onTimelineScroll(event) {
       if (!event?.target) return
-      const position = event.target
-      const newTop = position.scrollTop
-      this.entityList.scrollTop = newTop
-      const newLeft = position.scrollLeft
-      this.timelineHeader.scrollLeft = newLeft
+      const { scrollTop, scrollLeft } = event.target
+      if (this.entityList) {
+        this.entityList.scrollTop = scrollTop
+      }
+      if (this.timelineHeader) {
+        this.timelineHeader.scrollLeft = scrollLeft
+      }
 
-      this.$emit('scroll', { top: position.scrollTop })
+      this.$emit('scroll', { top: scrollTop })
     },
 
     setScrollPosition(top) {
-      this.timelineContentWrapper.scrollTop = top
-      this.entityList.scrollTop = top
+      if (this.timelineContentWrapper) {
+        this.timelineContentWrapper.scrollTop = top
+      }
+      if (this.entityList) {
+        this.entityList.scrollTop = top
+      }
     },
 
     scrollScheduleLeft(event) {
@@ -1742,7 +1748,9 @@ export default {
       const newLeft = previousLeft - movementX
       this.initialClientX = this.getClientX(event)
       this.timelineContentWrapper.scrollLeft = newLeft
-      this.timelineHeader.scrollLeft = newLeft
+      if (this.timelineHeader) {
+        this.timelineHeader.scrollLeft = newLeft
+      }
     },
 
     scrollScheduleTop(event) {
