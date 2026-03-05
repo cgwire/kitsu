@@ -37,7 +37,7 @@
       "no_concept": "Geen concepten gekoppeld aan dit actief",
       "casted_in_shots": "Gegoten in {nbShots} shots",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde onderdelen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en previews worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_lock_text": "WISSEN"
     },
     "asset_types": {
       "all_asset_types": "Alle assettypes",
@@ -1311,8 +1311,8 @@
       "get_frames_from_previews_description": "Selecteer een type taak om de framenummers uit de laatst gepubliceerde filmvoorvertoningen te halen.",
       "get_frames_from_previews_error": "Er is een fout opgetreden bij het extraheren van de framenummers uit de voorbeeldweergaven van de taaksoorten. Neem contact op met ons ondersteuningsteam.",
       "wrong_file_duration": "De duur van een van de geüploade videobestanden komt niet overeen met de verwachte duur van de huidige opname.",
-      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde opnamen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'DELETE' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde opnamen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "show_timecode": "Toon in en uit als tijdcodes"
     },
     "server_down": {
@@ -1516,7 +1516,7 @@
       "data_display": "Gegevensweergave",
       "delete_for_selection_error": "Er is een fout opgetreden bij het verwijderen van de geselecteerde taken.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde taken permanent wilt verwijderen? Alle gerelateerde opmerkingen en voorvertoningen worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "hookup_playlist": "Genereer een afspeellijst"
     },
     "timesheets": {
@@ -1610,7 +1610,7 @@
       "restore_text": "Weet je zeker dat je {name} uit je archief wilt herstellen?",
       "delete_for_selection_error": "Er is een fout opgetreden tijdens het verwijderen van de geselecteerde bewerkingen.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde bewerkingen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "multiple_delete_error": "Er is een fout opgetreden tijdens het verwijderen van een bewerking. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taken zijn gekoppeld aan een geselecteerde bewerking?"
     },
     "status_automations": {
@@ -1743,7 +1743,7 @@
         "empty": "Geen links"
       },
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde concepten definitief wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "drop_new_concepts": "Drop hier nieuwe conceptbestanden"
     },
     "intro": {
@@ -1885,8 +1885,8 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'DELETE' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'WISSEN' te typen.",
+      "delete_for_selection_hard_lock_text": "WISSEN"
     },
     "hardware_items": {
       "create_error": "Er is een fout opgetreden tijdens het opslaan van het hardware-item.",
