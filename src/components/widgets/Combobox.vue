@@ -15,7 +15,7 @@
           :style="{
             width: width ? `${width}px` : undefined
           }"
-          ref="select"
+          ref="selectRef"
           :disabled="disabled"
           :required="required && !hasSelectedOption"
           @keyup.enter="emitEnter()"
@@ -42,114 +42,108 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'combobox',
+<script setup>
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    modelValue: {
-      default: '',
-      type: [Object, String, Boolean, Number]
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    },
-    isTop: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    error: {
-      default: false,
-      type: Boolean
-    },
-    thin: {
-      default: false,
-      type: Boolean
-    },
-    width: {
-      type: Number
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    },
-    isInline: {
-      default: false,
-      type: Boolean
-    },
-    required: {
-      default: false,
-      type: Boolean
-    }
+const { t } = useI18n()
+
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  expose: ['isValid', 'focus'],
-
-  emits: ['enter', 'update:modelValue'],
-
-  data() {
-    return {
-      touched: false
-    }
+  modelValue: {
+    default: '',
+    type: [Object, String, Boolean, Number]
   },
-
-  computed: {
-    hasSelectedOption() {
-      return this.options.some(option => option.value === this.modelValue)
-    },
-
-    isValid() {
-      return !this.required || this.hasSelectedOption
-    }
+  options: {
+    default: () => [],
+    type: Array
   },
-
-  methods: {
-    updateValue() {
-      let value = this.$refs.select.value
-      this.options.forEach(option => {
-        if (option.label === value) {
-          value = option.value
-        }
-      })
-      this.$emit('update:modelValue', value)
-    },
-
-    emitEnter() {
-      let value = this.$refs.select.value
-      this.options.forEach(option => {
-        if (option.label === value) {
-          value = option.value
-        }
-      })
-      this.$emit('enter', value)
-    },
-
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    },
-
-    focus() {
-      this.touched = true
-      this.$refs.select?.focus()
-    }
+  localeKeyPrefix: {
+    default: '',
+    type: String
+  },
+  isTop: {
+    default: false,
+    type: Boolean
+  },
+  disabled: {
+    default: false,
+    type: Boolean
+  },
+  error: {
+    default: false,
+    type: Boolean
+  },
+  thin: {
+    default: false,
+    type: Boolean
+  },
+  width: {
+    type: Number
+  },
+  withMargin: {
+    default: true,
+    type: Boolean
+  },
+  isInline: {
+    default: false,
+    type: Boolean
+  },
+  required: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['enter', 'update:modelValue'])
+
+const selectRef = ref(null)
+const touched = ref(false)
+
+const hasSelectedOption = computed(() => {
+  return props.options.some(option => option.value === props.modelValue)
+})
+
+const isValid = computed(() => {
+  return !props.required || hasSelectedOption.value
+})
+
+function updateValue() {
+  let value = selectRef.value.value
+  props.options.forEach(option => {
+    if (option.label === value) {
+      value = option.value
+    }
+  })
+  emit('update:modelValue', value)
 }
+
+function emitEnter() {
+  let value = selectRef.value.value
+  props.options.forEach(option => {
+    if (option.label === value) {
+      value = option.value
+    }
+  })
+  emit('enter', value)
+}
+
+function getOptionLabel(option) {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
+}
+
+function focus() {
+  touched.value = true
+  selectRef.value?.focus()
+}
+
+defineExpose({ isValid, focus })
 </script>
 
 <style lang="scss" scoped>
