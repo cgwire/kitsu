@@ -13,25 +13,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'table-info',
-
-  components: {
-    Spinner
+defineProps({
+  isLoading: {
+    type: Boolean,
+    default: false
   },
-
-  props: {
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    }
+  isError: {
+    type: Boolean,
+    default: false
   }
-}
+})
 </script>
