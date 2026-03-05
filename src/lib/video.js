@@ -16,13 +16,17 @@ export const roundToFrame = (time, fps) => {
 export const ceilToFrame = (time, fps) => {
   const frameFactor = roundPrecision(1 / fps)
   const frameNumber = Math.ceil(time / frameFactor)
-  return Math.ceil(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
+  return (
+    Math.ceil(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
+  )
 }
 
 export const floorToFrame = (time, fps) => {
   const frameFactor = roundPrecision(1 / fps)
   const frameNumber = Math.floor(time / frameFactor)
-  return Math.floor(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
+  return (
+    Math.floor(frameNumber * frameFactor * PRECISION_FACTOR) / PRECISION_FACTOR
+  )
 }
 
 /*

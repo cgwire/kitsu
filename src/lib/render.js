@@ -97,9 +97,8 @@ export const renderComment = (
       .sort((a, b) => b.length - a.length)
       .map(escapeRegex)
       .join('|')
-    html = html.replace(
-      new RegExp(pattern, 'g'),
-      match => replacements.get(match)
+    html = html.replace(new RegExp(pattern, 'g'), match =>
+      replacements.get(match)
     )
   }
 

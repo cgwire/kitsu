@@ -266,8 +266,10 @@ const csv = {
     const entryIds = getStatsEntryIds(mainStats, entryMap)
 
     entryIds.forEach(entryId => {
-      const taskStatusIds = getStatsTaskStatusIdsForEntry(mainStats, entryId)
-        .filter(s => !excludeStatuses.includes(s))
+      const taskStatusIds = getStatsTaskStatusIdsForEntry(
+        mainStats,
+        entryId
+      ).filter(s => !excludeStatuses.includes(s))
       const total = getStatsTotalCount(
         mainStats,
         taskStatusIds,
