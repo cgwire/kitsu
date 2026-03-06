@@ -26,55 +26,47 @@ const props = defineProps({
 const { t } = useI18n()
 
 const options = computed(() => {
-  let opts = []
+  const isTaskType = props.type.includes('tasktype-')
 
-  if (props.type.indexOf('tasktype-') > -1) {
-    opts.push({
+  return [
+    {
+      label: t('tasks.show_assignations'),
+      value: 'showAssignations',
+      when: !isTaskType
+    },
+    {
+      label: t('tasks.show_infos'),
+      value: 'showInfos',
+      when: !isTaskType
+    },
+    {
+      label: t('tasks.big_thumbnails'),
+      value: 'bigThumbnails',
+      when: !isTaskType
+    },
+    {
       label: t('tasks.show_contact_sheet'),
       value: 'contactSheetMode'
-    })
-  } else {
-    opts = opts.concat([
-      {
-        label: t('tasks.show_assignations'),
-        value: 'showAssignations'
-      },
-      {
-        label: t('tasks.show_infos'),
-        value: 'showInfos'
-      },
-      {
-        label: t('tasks.big_thumbnails'),
-        value: 'bigThumbnails'
-      },
-      {
-        label: t('tasks.show_contact_sheet'),
-        value: 'contactSheetMode'
-      }
-    ])
-  }
-  if (props.type === 'shot') {
-    opts.push({
+    },
+    {
       label: t('shots.show_timecode'),
-      value: 'inOutTimecode'
-    })
-  } else if (props.type === 'asset') {
-    opts.push({
+      value: 'inOutTimecode',
+      when: props.type === 'shot'
+    },
+    {
       label: t('breakdown.show_library'),
-      value: 'showSharedAssets'
-    })
-    if (props.hasLinkedAssets) {
-      opts.push({
-        label: t('assets.show_linked'),
-        value: 'showLinkedAssets'
-      })
-    }
-  } else if (props.type === 'tasktype-asset' && props.hasLinkedAssets) {
-    opts.push({
+      value: 'showSharedAssets',
+      when: props.type === 'asset'
+    },
+    {
       label: t('assets.show_linked'),
-      value: 'showLinkedAssets'
-    })
-  }
-  return opts
+      value: 'showLinkedAssets',
+      when:
+        (props.type === 'asset' || props.type === 'tasktype-asset') &&
+        props.hasLinkedAssets
+    }
+  ]
+    .filter(opt => opt.when !== false)
+    .map(({ label, value }) => ({ label, value }))
 })
 </script>

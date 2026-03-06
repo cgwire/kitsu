@@ -551,7 +551,7 @@
     </div>
 
     <asset-list-numbers
-      :displayed-assets="displayedAssets"
+      :assets="displayedAssets"
       v-if="!isEmptyList && !isLoading"
     />
   </div>

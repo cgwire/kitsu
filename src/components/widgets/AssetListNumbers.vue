@@ -1,34 +1,22 @@
 <template>
-  <p class="has-text-centered nb-assets">
-    {{ displayedAssetsLength }}
-    {{ $tc('assets.number', displayedAssetsLength) }}
-    <span v-if="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0">
-      ({{ formatDuration(displayedAssetsTimeSpent) }}
+  <div class="has-text-centered pa05">
+    {{ activeAssets.length }}
+    {{ $tc('assets.number', activeAssets.length) }}
+    <template v-if="timeSpent > 0 || estimation > 0">
+      ({{ formatDuration(timeSpent) }}
       {{
         isDurationInHours
-          ? $tc(
-              'main.hours_spent',
-              formatDuration(displayedAssetsTimeSpent, false)
-            )
-          : $tc(
-              'main.days_spent',
-              formatDuration(displayedAssetsTimeSpent, false)
-            )
+          ? $tc('main.hours_spent', formatDuration(timeSpent, false))
+          : $tc('main.days_spent', formatDuration(timeSpent, false))
       }},
-      {{ formatDuration(displayedAssetsEstimation) }}
+      {{ formatDuration(estimation) }}
       {{
         isDurationInHours
-          ? $tc(
-              'main.hours_estimated',
-              formatDuration(displayedAssetsEstimation, false)
-            )
-          : $tc(
-              'main.man_days',
-              formatDuration(displayedAssetsEstimation, false)
-            )
+          ? $tc('main.hours_estimated', formatDuration(estimation, false))
+          : $tc('main.man_days', formatDuration(estimation, false))
       }})
-    </span>
-  </p>
+    </template>
+  </div>
 </template>
 
 <script>
@@ -40,42 +28,30 @@ export default {
   mixins: [formatListMixin],
 
   props: {
-    displayedAssets: {
+    assets: {
       type: Array,
       default: () => []
     }
   },
 
   computed: {
-    // Flatten the grouped assets array (array of arrays)
-    flattenedAssets() {
-      return this.displayedAssets.flat()
+    activeAssets() {
+      return this.assets.flat().filter(a => !a.canceled)
     },
 
-    // Count only non-canceled assets
-    displayedAssetsLength() {
-      return this.flattenedAssets.filter(a => !a.canceled).length
+    timeSpent() {
+      return this.activeAssets.reduce(
+        (acc, asset) => acc + (asset.timeSpent || 0),
+        0
+      )
     },
 
-    // Sum time spent from non-canceled assets
-    displayedAssetsTimeSpent() {
-      return this.flattenedAssets
-        .filter(a => !a.canceled)
-        .reduce((acc, asset) => acc + (asset.timeSpent || 0), 0)
-    },
-
-    // Sum estimation from non-canceled assets
-    displayedAssetsEstimation() {
-      return this.flattenedAssets
-        .filter(a => !a.canceled)
-        .reduce((acc, asset) => acc + (asset.estimation || 0), 0)
+    estimation() {
+      return this.activeAssets.reduce(
+        (acc, asset) => acc + (asset.estimation || 0),
+        0
+      )
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.nb-assets {
-  padding: 0.5em;
-}
-</style>
