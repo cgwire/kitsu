@@ -16,41 +16,57 @@ const props = defineProps({
   type: {
     type: String,
     required: true
+  },
+  hasLinkedAssets: {
+    type: Boolean,
+    required: false
   }
 })
 
 const { t } = useI18n()
 
 const options = computed(() => {
-  const opts = [
+  const isTaskType = props.type.includes('tasktype-')
+
+  return [
     {
       label: t('tasks.show_assignations'),
-      value: 'showAssignations'
+      value: 'showAssignations',
+      when: !isTaskType
     },
     {
       label: t('tasks.show_infos'),
-      value: 'showInfos'
+      value: 'showInfos',
+      when: !isTaskType
     },
     {
       label: t('tasks.big_thumbnails'),
-      value: 'bigThumbnails'
+      value: 'bigThumbnails',
+      when: !isTaskType
     },
     {
       label: t('tasks.show_contact_sheet'),
       value: 'contactSheetMode'
+    },
+    {
+      label: t('shots.show_timecode'),
+      value: 'inOutTimecode',
+      when: props.type === 'shot'
+    },
+    {
+      label: t('breakdown.show_library'),
+      value: 'showSharedAssets',
+      when: props.type === 'asset'
+    },
+    {
+      label: t('assets.show_linked'),
+      value: 'showLinkedAssets',
+      when:
+        (props.type === 'asset' || props.type === 'tasktype-asset') &&
+        props.hasLinkedAssets
     }
   ]
-  if (props.type === 'shot') {
-    opts.push({
-      label: t('shots.show_timecode'),
-      value: 'inOutTimecode'
-    })
-  } else if (props.type === 'asset') {
-    opts.push({
-      label: t('breakdown.show_library'),
-      value: 'showSharedAssets'
-    })
-  }
-  return opts
+    .filter(opt => opt.when !== false)
+    .map(({ label, value }) => ({ label, value }))
 })
 </script>

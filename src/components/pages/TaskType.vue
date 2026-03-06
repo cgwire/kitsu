@@ -14,13 +14,11 @@
               :task-type="currentTaskType"
             />
             <div class="filler"></div>
-            <button-simple
+            <combobox-display-options
               class="flexrow-item"
-              icon="grid"
-              :is-on="contactSheetMode"
-              :title="$t('tasks.show_contact_sheet')"
-              @click="toggleContactSheetMode()"
-              v-if="isActiveTab('tasks')"
+              :type="displayTaskType"
+              :has-linked-assets="isTVShow"
+              v-model="displaySettings"
             />
             <div
               class="flexrow-item"
@@ -170,7 +168,7 @@
               is-medium
               :text="$t('schedule.title')"
               @click="toggleSchedule()"
-              v-if="isActiveTab('tasks') && !contactSheetMode"
+              v-if="isActiveTab('tasks') && !displaySettings.contactSheetMode"
             />
             <div class="flexrow-item" v-if="isActiveTab('tasks')">
               <combobox-styled
@@ -254,7 +252,7 @@
           ref="task-list"
           :disabled-dates="disabledDates"
           :entity-type="entityType"
-          :is-contact-sheet="contactSheetMode"
+          :is-contact-sheet="displaySettings.contactSheetMode"
           :is-error="errors.entities"
           :is-grouped="currentSort === 'entity_name'"
           :is-loading="loading.entities"
@@ -286,7 +284,7 @@
             @root-element-expanded="expandPersonElement"
             @estimation-changed="updateEstimation"
             @scroll="onScheduleScroll"
-            v-if="isScheduleVisible && !contactSheetMode"
+            v-if="isScheduleVisible && !displaySettings.contactSheetMode"
           />
         </task-list>
 
@@ -410,6 +408,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -531,6 +530,7 @@ export default {
 
   components: {
     ButtonSimple,
+    ComboboxDisplayOptions,
     CornerLeftUpIcon,
     ComboboxNumber,
     ComboboxOptions,
@@ -558,7 +558,10 @@ export default {
       currentSort: 'entity_name',
       currentScheduleItem: null,
       currentTask: null,
-      contactSheetMode: false,
+      displaySettings: {
+        contactSheetMode: false,
+        showLinkedAssets: true
+      },
       dataDisplay: {
         estimations: true,
         statuses: true,
@@ -753,6 +756,10 @@ export default {
           short_name: this.$t('news.all')
         }
       ].concat(sortByName([...this.productionTaskStatuses]))
+    },
+
+    displayTaskType() {
+      return 'tasktype-' + this.entityType.toLowerCase()
     },
 
     taskTypeList() {
@@ -1264,11 +1271,6 @@ export default {
       this.$refs['task-list']?.setScrollPosition(top)
     },
 
-    toggleContactSheetMode() {
-      this.contactSheetMode = !this.contactSheetMode
-      this.isScheduleVisible = false
-    },
-
     toggleSchedule() {
       this.isScheduleVisible = !this.isScheduleVisible
       this.resetScheduleItems(true)
@@ -1327,6 +1329,7 @@ export default {
           entity.canceled ||
           !entity.tasks?.length ||
           (this.isTVShow &&
+            !this.displaySettings.showLinkedAssets &&
             !this.isEpisodesSection &&
             !['all', entity.episode_id || 'main'].includes(
               this.currentEpisode?.id
@@ -1982,6 +1985,14 @@ export default {
   watch: {
     $route() {
       this.updateActiveTab()
+    },
+
+    'displaySettings.contactSheetMode'() {
+      this.isScheduleVisible = false
+    },
+
+    'displaySettings.showLinkedAssets'() {
+      this.resetTasks()
     },
 
     '$route.query.search'() {
