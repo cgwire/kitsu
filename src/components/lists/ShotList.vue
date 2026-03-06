@@ -479,7 +479,6 @@
 
               <td
                 class="framein number-cell"
-                :class="{ 'timecode-cell': displaySettings.inOutTimecode }"
                 v-if="
                   isFrameIn &&
                   displaySettings.showInfos &&
@@ -1335,13 +1334,6 @@ th.actions {
   min-width: 70px;
   max-width: 70px;
   width: 70px;
-}
-
-.timecode-cell {
-  min-width: 95px;
-  max-width: 95px;
-  width: 95px;
-  padding: 10px;
 }
 
 td.name {
