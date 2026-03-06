@@ -27,6 +27,8 @@ const init = callback => {
         return
       }
       console.error('An init operation failed: ', err)
+      store.commit(DATA_LOADING_END)
+      callback(err)
     })
 }
 
