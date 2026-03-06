@@ -644,33 +644,26 @@ const actions = {
   assignSelectedTasks({ commit, state }, { personId, taskIds }) {
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
     return tasksApi.assignTasks(personId, selectedTaskIds).then(response => {
-      // Extract successfully assigned task IDs from the response
-      const taskIds = (response || []).map(task => task.id)
-
-      // Find task IDs that were sent but not returned (failed assignments)
+      const successfulTaskIds = response.map(task => task.id)
       const failedTaskIds = selectedTaskIds.filter(
-        taskId => !taskIds.includes(taskId)
+        taskId => !successfulTaskIds.includes(taskId)
       )
-
-      // Only commit the assignment for the updated task ids returned by the API
-      commit(ASSIGN_TASKS, { taskIds, personId })
-
-      // // If any tasks failed to assign, throw an error
-      if (failedTaskIds.length > 0) {
+      commit(ASSIGN_TASKS, { taskIds: successfulTaskIds, personId })
+      if (failedTaskIds.length) {
         const error = new Error(
           `Failed to assign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
         )
         error.failedTaskIds = failedTaskIds
-        error.successfulTaskIds = taskIds
+        error.successfulTaskIds = successfulTaskIds
         throw error
       }
     })
   },
 
   unassignSelectedTasks({ commit, state }, { taskIds } = {}) {
-    taskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.unassignTasks(taskIds).then(() => {
-      commit(UNASSIGN_TASKS, taskIds)
+    const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
+    return tasksApi.unassignTasks(selectedTaskIds).then(() => {
+      commit(UNASSIGN_TASKS, selectedTaskIds)
     })
   },
 
