@@ -606,6 +606,11 @@ import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 let lastIndex = 1
 
+const FRAME_DELAY = 20
+const RENDER_DELAY = 100
+const SYNC_DELAY = 200
+const RESIZE_DELAY = 500
+
 export default {
   name: 'preview-player',
 
@@ -732,7 +737,7 @@ export default {
       previewToCompare: null,
       previewToCompareId: null,
       speed: 3,
-      taskTypeId: this.entityPreviewFIles
+      taskTypeId: this.entityPreviewFiles
         ? Object.keys(this.entityPreviewFiles)[0]
         : null,
       textColor: '#ff3860',
@@ -1182,7 +1187,7 @@ export default {
       this.changeCurrentPreview(preview)
       setTimeout(() => {
         this.setCurrentFrame(frame)
-      }, 20)
+      }, FRAME_DELAY)
     },
 
     // Video
@@ -1487,7 +1492,7 @@ export default {
       setTimeout(() => {
         this.previewViewer?.resize()
         this.comparisonViewer?.resize()
-      }, 500)
+      }, RESIZE_DELAY)
     },
 
     // Comparison
@@ -1776,10 +1781,7 @@ export default {
             }
           })
         }
-        this.annotations =
-          annotations.sort((a, b) => {
-            return a.time < b.time
-          }) || []
+        this.annotations = annotations.sort((a, b) => a.time - b.time) || []
       } else {
         this.annotations = []
       }
@@ -1798,10 +1800,16 @@ export default {
       })
     },
 
-    async extractVideoFrame(canvas, frame) {
-      this.setCurrentFrame(frame)
-      await setTimeout(() => {}, 100)
-      await this.previewViewer.extractFrame(canvas, frame)
+    extractVideoFrame(canvas, frame) {
+      return new Promise(resolve => {
+        this.setCurrentFrame(frame)
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.previewViewer.extractFrame(canvas, frame)
+            resolve()
+          }, RESIZE_DELAY)
+        })
+      })
     },
 
     copyAnnotationCanvas(canvas, annotation) {
@@ -1816,7 +1824,7 @@ export default {
             width: canvas.width,
             height: canvas.height
           })
-          this.fabricCanvas.getObjects().find(obj => {
+          this.fabricCanvas.getObjects().forEach(obj => {
             if (obj._objects) {
               obj._objects.forEach(obj => {
                 tmpCanvas.add(obj)
@@ -1832,10 +1840,10 @@ export default {
             context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
             setTimeout(() => {
               tmpCanvas.dispose()
-            }, 100)
+            }, RENDER_DELAY)
             return resolve()
-          }, 100)
-        }, 100)
+          }, RENDER_DELAY)
+        }, RENDER_DELAY)
       })
     },
 
@@ -1899,16 +1907,13 @@ export default {
       const OKEY = 'o'
 
       if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if (event.keyCode === 46 || event.keyCode === 8) {
+        if (event.key === 'Delete' || event.key === 'Backspace') {
           this.deleteSelection()
-        } else if (event.keyCode === 37) {
-          // arrow left
+        } else if (event.key === 'ArrowLeft') {
           this.goPreviousFrame()
-        } else if (event.keyCode === 39) {
-          // arrow right
+        } else if (event.key === 'ArrowRight') {
           this.goNextFrame()
-        } else if (event.keyCode === 32) {
-          // space
+        } else if (event.key === ' ') {
           let styles
           const playlistModal = document.getElementById('temp-playlist-modal')
           if (playlistModal) styles = window.getComputedStyle(playlistModal)
@@ -1921,35 +1926,27 @@ export default {
           this.goNextDrawing()
         } else if (event.key === PREVANNKEY) {
           this.goPreviousDrawing()
-        } else if (event.keyCode === 68) {
-          // d
+        } else if (event.key === 'd') {
           this.container.focus()
           this.pauseEvent(event)
           this.onPencilAnnotateClicked()
-        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
-          // ctrl + z
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
           this.undoLastAction()
-        } else if (event.altKey && event.keyCode === 82) {
-          // alt + r
+        } else if (event.altKey && event.key === 'r') {
           this.redoLastAction()
-        } else if (event.altKey && event.keyCode === 74) {
-          // alt+j
+        } else if (event.altKey && event.key === 'j') {
           this.onPreviousClicked()
-        } else if (event.altKey && event.keyCode === 75) {
-          // alt+k
+        } else if (event.altKey && event.key === 'k') {
           this.onNextClicked()
-        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) {
-          // ctrl + c
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
           this.copyAnnotations()
-        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
-          // ctrl + v
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
           this.pasteAnnotations()
         } else if (event.altKey && event.key === OKEY) {
           event.preventDefault()
           event.stopPropagation()
           this.toggleFullOverlayComparison()
-        } else if (event.code === 'Escape') {
-          // Esc
+        } else if (event.key === 'Escape') {
           if (this.fullScreen) {
             this.onFullScreenChange()
           }
@@ -2189,7 +2186,7 @@ export default {
             this.previewViewer.resize()
             this.comparisonViewer.resize()
           }
-        }, 500)
+        }, RESIZE_DELAY)
       } else if (this.isPicture) {
         this.pause()
         this.isDrawing = false
@@ -2197,7 +2194,7 @@ export default {
         setTimeout(() => {
           this.previewViewer?.resize()
           this.comparisonViewer?.resize()
-        }, 500)
+        }, RESIZE_DELAY)
       } else if (this.is3DModel) {
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
         this.previewViewer?.resize()
@@ -2241,7 +2238,7 @@ export default {
           this.setCurrentFrame(this.currentFrame - 1)
           setTimeout(() => {
             this.syncComparisonViewer()
-          }, 200)
+          }, SYNC_DELAY)
           this.pause()
           if (this.isMovie) {
             this.loadComparisonAnnotation(this.currentTime)
