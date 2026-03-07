@@ -78,6 +78,11 @@ const helpers = {
       const timestamp = Date.parse(lastUpdate)
       person.avatarPath = `/api/pictures/thumbnails/persons/${person.id}.png?t=${timestamp}`
     }
+
+    if (!person.departments) {
+      person.departments = []
+    }
+
     return person
   },
 

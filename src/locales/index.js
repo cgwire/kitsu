@@ -2,7 +2,7 @@ import en from '@/locales/en'
 import en_nft from '@/locales/en_nft'
 import en_video_game from '@/locales/en_video-game'
 import da from '@/locales/da.json'
-import de from '@/locales/de.js'
+import de from '@/locales/de.json'
 import nl from '@/locales/nl.json'
 import es from '@/locales/es.json'
 import fa from '@/locales/fa.json'
@@ -17,7 +17,7 @@ import zhtw from '@/locales/zh_tw.json'
 
 export default {
   da: da.default,
-  de: de,
+  de: de.default,
   en: en,
   en_nft: en_nft,
   "en_video-game": en_video_game,

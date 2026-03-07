@@ -132,7 +132,10 @@
       />
 
       <div class="buttons flexrow pull-bottom" ref="buttons">
-        <div class="left flexrow" v-if="isMovie || isSound || is3DAnimation">
+        <div
+          class="left flexrow"
+          v-if="isMovie || isSound || (is3DModel && is3DAnimation)"
+        >
           <button-simple
             class="flexrow-item"
             :title="$t('playlists.actions.play')"
@@ -154,7 +157,7 @@
             :is-dark="true"
             :thin="true"
             v-model="current3DAnimation"
-            v-if="is3DAnimation"
+            v-if="is3DModel && is3DAnimation"
           />
         </div>
 
@@ -948,17 +951,6 @@ export default {
       return !this.isPicture && !this.isMovie // && !this.is3DModel && !this.isPdf
     },
 
-    isFullScreenEnabled() {
-      return !!(
-        document.fullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled ||
-        document.webkitSupportsFullscreen ||
-        document.webkitFullscreenEnabled ||
-        document.createElement('video').webkitRequestFullScreen
-      )
-    },
-
     originalPath() {
       if (this.currentPreview) {
         const previewId = this.currentPreview.id
@@ -1414,10 +1406,11 @@ export default {
 
     setFullScreen() {
       this.endAnnotationSaving()
-      const promise = this.documentSetFullScreen(this.container)
-      Promise.resolve(promise).finally(() => {
-        this.fullScreen = true
-      })
+      this.documentSetFullScreen(this.container)
+        .then(() => {
+          this.fullScreen = true
+        })
+        .catch(console.error)
       this.$nextTick(() => {
         // Needed to avoid fullscreen button to be called with space bar.
         this.clearFocus()
@@ -1426,14 +1419,15 @@ export default {
 
     exitFullScreen() {
       this.endAnnotationSaving()
-      const promise = this.documentExitFullScreen()
-      Promise.resolve(promise).finally(() => {
-        this.fullScreen = false
-        this.$nextTick(() => {
-          this.previewViewer?.resize()
-          this.comparisonViewer?.resize()
+      this.documentExitFullScreen()
+        .then(() => {
+          this.fullScreen = false
+          this.$nextTick(() => {
+            this.previewViewer?.resize()
+            this.comparisonViewer?.resize()
+          })
         })
-      })
+        .catch(console.error)
       this.isComparing = false
       this.isCommentsHidden = true
       this.$nextTick(() => {
@@ -2015,17 +2009,7 @@ export default {
         false
       )
       this.container.addEventListener(
-        'mozfullscreenchange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.addEventListener(
-        'MSFullscreenChange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.addEventListener(
-        'webkitfullscreenchange',
+        'webkitfullscreenchange', // Safari < 16.4
         this.onFullScreenChange,
         false
       )
@@ -2040,17 +2024,7 @@ export default {
         false
       )
       this.container.removeEventListener(
-        'mozfullscreenchange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.removeEventListener(
-        'MSFullscreenChange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.removeEventListener(
-        'webkitfullscreenchange',
+        'webkitfullscreenchange', // Safari < 16.4
         this.onFullScreenChange,
         false
       )

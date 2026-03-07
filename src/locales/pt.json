@@ -36,7 +36,7 @@
       "linked": "Vinculado",
       "no_concept": "Não há conceitos vinculados a esse ativo",
       "casted_in_shots": "Lançado em fotos {nbShots}",
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os ativos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os ativos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR"
     },
     "asset_types": {
@@ -57,7 +57,8 @@
       },
       "include_all": "Inclui todos os tipos de tarefas de ativos",
       "add_asset_type_to_library": "Adicionar um tipo de ativo à biblioteca",
-      "library_title": "Biblioteca de tipos de ativos"
+      "library_title": "Biblioteca de tipos de ativos",
+      "add_asset_type_placeholder": "+ Adicionar tipo de ativo"
     },
     "breakdown": {
       "all_assets": "Todos os assets disponíveis",
@@ -545,7 +546,10 @@
       "hours": "hora | horas",
       "remove_search_query": "Tem certeza de que deseja remover a consulta de pesquisa \"{name}\"?",
       "remove_search_filter_group": "Tem certeza de que deseja remover o grupo de filtros de pesquisa \"{name}\"?",
-      "shared_by": "Compartilhado por {name}"
+      "shared_by": "Compartilhado por {name}",
+      "continue": "Continuar",
+      "developer_documentation": "Documentação do desenvolvedor",
+      "feedback": "Roteiro / Feedback"
     },
     "menu": {
       "assign_tasks": "Atribuir tarefas",
@@ -1053,7 +1057,8 @@
           "error_register": "Ocorreu um erro ao registrar o dispositivo FIDO.",
           "error_unregister": "Ocorreu um erro ao cancelar o registro do dispositivo FIDO."
         },
-        "enabled": "Autenticação de dois fatores ativada"
+        "enabled": "Autenticação de dois fatores ativada",
+        "mandatory": "Sua organização exige autenticação de dois fatores. Ative pelo menos um método para continuar."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "Ativos, fotos, sequências, ..."
       },
       "add_task_status_to_library": "Adicionar um status de tarefa à biblioteca",
-      "library_title": "Biblioteca de status de tarefas"
+      "library_title": "Biblioteca de status de tarefas",
+      "add_task_status_placeholder": "+ Adicionar status da tarefa"
     },
     "task_types": {
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados?",
@@ -1305,7 +1311,7 @@
       "get_frames_from_previews_description": "Selecione um tipo de tarefa para extrair os números de quadros das últimas visualizações de filmes publicadas.",
       "get_frames_from_previews_error": "Ocorreu um erro ao extrair os números dos quadros das visualizações do tipo de tarefa. Entre em contato com nossa equipe de suporte.",
       "wrong_file_duration": "A duração de um dos arquivos de vídeo carregados não corresponde à duração esperada da captura atual.",
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as fotos selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as fotos selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
       "show_timecode": "Mostrar entrada e saída como códigos de tempo"
     },
@@ -1509,7 +1515,7 @@
       "create_tasks_disclaimer": "Se o seu tipo de tarefa estiver ausente, verifique se ele está listado na seção Tipos de tarefa das configurações de produção.",
       "data_display": "Exibição de dados",
       "delete_for_selection_error": "Ocorreu um erro ao excluir as tarefas selecionadas.",
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as tarefas selecionadas? Todos os comentários e visualizações relacionados também serão excluídos. Confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as tarefas selecionadas? Todos os comentários e visualizações relacionados também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
       "hookup_playlist": "Gerar uma lista de reprodução de conexão"
     },
@@ -1603,7 +1609,7 @@
       "edit_success": "As modificações foram salvas com sucesso.",
       "restore_text": "Tem certeza de que deseja restaurar {name} do seu arquivo?",
       "delete_for_selection_error": "Ocorreu um erro ao excluir as edições selecionadas.",
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as edições selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as edições selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
       "multiple_delete_error": "Ocorreu um erro ao excluir uma edição. Pode haver dados existentes atualmente vinculados a ela. Tem certeza de que não há tarefas vinculadas a uma edição selecionada?"
     },
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Pronto para"
-      }
+      },
+      "add_status_automation_placeholder": "+ Adicionar automação de status"
     },
     "preview_room": {
       "join_room": "Participe da Sala de Críticas",
@@ -1735,7 +1742,7 @@
         "title": "Links para conceitos",
         "empty": "Sem links"
       },
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os conceitos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os conceitos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "DELETE",
       "drop_new_concepts": "Envie novos arquivos de conceito aqui"
     },
@@ -1878,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os itens selecionados? Por favor, confirme digitando \"DELETE\" abaixo.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os itens selecionados? Por favor, confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR"
     },
     "hardware_items": {

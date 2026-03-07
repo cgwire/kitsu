@@ -124,13 +124,13 @@ export default {
       }
 
       const personId = eventData.person_id
-      const selectedTaskIds = [eventData.task_id]
+      const taskIds = [eventData.task_id]
 
       // for entity lists
       if (assign) {
-        this.$store.commit('ASSIGN_TASKS', { selectedTaskIds, personId })
+        this.$store.commit('ASSIGN_TASKS', { taskIds, personId })
       } else {
-        this.$store.commit('UNASSIGN_TASKS', selectedTaskIds)
+        this.$store.commit('UNASSIGN_TASKS', taskIds)
       }
     },
 
@@ -1820,6 +1820,7 @@ tbody:last-child .empty-line:last-child {
 
   th {
     padding: 1.5rem 0 0.5rem;
+    left: 0;
 
     span,
     div {

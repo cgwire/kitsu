@@ -134,7 +134,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['people', 'personMap', 'user']),
+    ...mapGetters(['people', 'personMap']),
 
     today() {
       return moment().toDate()

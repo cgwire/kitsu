@@ -36,7 +36,7 @@
       "linked": "Tilknyttet",
       "no_concept": "Ingen koncepter knyttet til denne asset",
       "casted_in_shots": "Støbt i {nbShots} skud",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte aktiver permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte aktiver permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET"
     },
     "asset_types": {
@@ -57,7 +57,8 @@
       },
       "include_all": "Inkluderer alle asset-opgavetyper",
       "add_asset_type_to_library": "Tilføj en aktivtype til biblioteket",
-      "library_title": "Bibliotek med aktivtyper"
+      "library_title": "Bibliotek med aktivtyper",
+      "add_asset_type_placeholder": "+ Tilføj aktivtype"
     },
     "breakdown": {
       "all_assets": "Alle tilgængelige assets",
@@ -126,7 +127,7 @@
       "confirm_publish_button": "Send kommentar uden at publicere filer",
       "add_link": "Tilføj et URL-link",
       "pinned_revision": "Fastgjort revision",
-      "edited_by": "Redigeret af {navn}",
+      "edited_by": "Redigeret af {name}",
       "add_attachment_to_reply": "Tilføj vedhæftet fil til svar",
       "add_frame_to_comment": "Føj den aktuelle ramme til kommentaren",
       "add_emoji": "Tilføj en emoji"
@@ -543,9 +544,12 @@
       "entities": "Enheder",
       "expand_all": "Udvid alle",
       "hours": "time | timer",
-      "remove_search_query": "Er du sikker på, at du vil fjerne søgeforespørgslen \"{navn}\"?",
-      "remove_search_filter_group": "Er du sikker på, at du vil fjerne søgefiltergruppen \"{navn}\"?",
-      "shared_by": "Delt af {navn}"
+      "remove_search_query": "Er du sikker på, at du vil fjerne søgeforespørgslen \"{name}\"?",
+      "remove_search_filter_group": "Er du sikker på, at du vil fjerne søgefiltergruppen \"{name}\"?",
+      "shared_by": "Delt af {name}",
+      "continue": "Fortsæt",
+      "developer_documentation": "Dokumentation til udviklere",
+      "feedback": "Køreplan / Feedback"
     },
     "menu": {
       "assign_tasks": "Tildel opgaver",
@@ -836,7 +840,7 @@
       "no_clients_to_notify": "Der er ingen kunder at underrette.",
       "notify_clients_success": "Meddelelsen er blevet sendt med succes.",
       "unmute": "Slå lyden fra",
-      "volume_level": "Volumen: {niveau}%."
+      "volume_level": "Volumen: {level}%."
     },
     "productions": {
       "current": "Valgt produktion",
@@ -1053,7 +1057,8 @@
           "error_register": "Der opstod en fejl under registrering af FIDO-enhed.",
           "error_unregister": "Der opstod en fejl under afregistrering af FIDO-enhed."
         },
-        "enabled": "To-faktor-autentificering aktiveret"
+        "enabled": "To-faktor-autentificering aktiveret",
+        "mandatory": "Din organisation kræver to-faktor-godkendelse. Aktivér venligst mindst én metode for at fortsætte."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "Assets, shots, sequences, ..."
       },
       "add_task_status_to_library": "Tilføj en opgavestatus til biblioteket",
-      "library_title": "Bibliotek for opgavestatus"
+      "library_title": "Bibliotek for opgavestatus",
+      "add_task_status_placeholder": "+ Tilføj opgavestatus"
     },
     "task_types": {
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
@@ -1205,7 +1211,7 @@
       "edit_version_exist": "Der findes allerede en version med et lignende navn.",
       "delete_version": "Slet version af tidsplan",
       "delete_version_error": "Der opstod en fejl under sletning af denne skemaversion. Kontakt venligst vores supportteam.",
-      "delete_version_message": "Er du sikker på, at du vil slette skemaversionen {navn}? Bekræft venligst ved at skrive navnet på skemaversionen nedenfor.",
+      "delete_version_message": "Er du sikker på, at du vil slette skemaversionen {name}? Bekræft venligst ved at skrive navnet på skemaversionen nedenfor.",
       "versions": {
         "reference": "Referenceprognose",
         "from": "fra",
@@ -1305,7 +1311,7 @@
       "get_frames_from_previews_description": "Vælg en opgavetype for at udtrække frame-numre fra de senest publicerede film-previews.",
       "get_frames_from_previews_error": "Der opstod en fejl under udtrækning af frame-numre fra opgavetypens previews. Kontakt venligst vores supportteam.",
       "wrong_file_duration": "Varigheden af en af de uploadede videofiler stemmer ikke overens med den forventede varighed af det aktuelle shot.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte billeder permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte billeder permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "show_timecode": "Vis ind og ud som tidskoder"
     },
@@ -1509,7 +1515,7 @@
       "create_tasks_disclaimer": "Hvis din opgavetype mangler, skal du kontrollere, at den er anført i afsnittet Opgavetyper i produktionsindstillingerne.",
       "data_display": "Visning af data",
       "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte opgaver.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte opgaver permanent? Alle relaterede kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte opgaver permanent? Alle relaterede kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "hookup_playlist": "Skab en playliste til opkobling"
     },
@@ -1601,9 +1607,9 @@
       "history": "Rediger værdiers historik",
       "restore_error": "Der opstod en fejl under gendannelse af denne redigering.",
       "edit_success": "Ændringerne blev gemt med succes.",
-      "restore_text": "Er du sikker på, at du vil gendanne {navn} fra dit arkiv?",
+      "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
       "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte redigeringer.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte redigeringer permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte redigeringer permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "multiple_delete_error": "Der opstod en fejl under sletning af en redigering. Der kan være eksisterende data knyttet til den. Er du sikker på, at der ikke er nogen opgaver knyttet til en valgt redigering?"
     },
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Klar til"
-      }
+      },
+      "add_status_automation_placeholder": "+ Tilføj statusautomatisering"
     },
     "preview_room": {
       "join_room": "Deltag i anmeldelsesrummet",
@@ -1735,7 +1742,7 @@
         "title": "Links til Koncepter",
         "empty": "Ingen links"
       },
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte koncepter permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte koncepter permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "drop_new_concepts": "Læg nye konceptfiler her"
     },
@@ -1828,7 +1835,7 @@
       "delete_budget_entry_error": "Der opstod en fejl under sletning af denne budgetpost. Kontakt venligst vores supportteam.",
       "delete_budget_entry_message": "Er du sikker på, at du vil slette denne budgetpost?",
       "delete_budget_error": "Der opstod en fejl under sletning af dette budget. Kontakt venligst vores supportteam.",
-      "delete_budget_message": "Er du sikker på, at du vil slette budgettet {navn}? Bekræft venligst ved at skrive budgetnavnet nedenfor.",
+      "delete_budget_message": "Er du sikker på, at du vil slette budgettet {name}? Bekræft venligst ved at skrive budgetnavnet nedenfor.",
       "difference": "Forskel",
       "edit_budget": "Rediger den aktuelle budgetversion",
       "edit_budget_entry": "Rediger post",
@@ -1878,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte elementer permanent? Bekræft venligst ved at skrive 'DELETE' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte elementer permanent? Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET"
     },
     "hardware_items": {

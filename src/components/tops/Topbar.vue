@@ -186,12 +186,12 @@
         </li>
         <li>
           <a href="https://cgwire.canny.io" target="_blank">
-            Roadmap / Feedback
+            {{ $t('main.feedback') }}
           </a>
         </li>
         <li>
           <a href="https://dev.kitsu.cloud" target="_blank">
-            Developer documentation
+            {{ $t('main.developer_documentation') }}
           </a>
         </li>
         <hr />

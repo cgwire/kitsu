@@ -334,7 +334,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['departments', 'departmentMap', 'people', 'user']),
+    ...mapGetters(['departments', 'departmentMap', 'people']),
 
     selectableDepartments() {
       return this.departments.filter(

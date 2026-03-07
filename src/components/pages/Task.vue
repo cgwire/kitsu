@@ -1688,7 +1688,7 @@ export default {
   },
 
   head() {
-    let title = 'Loading task... - Kitsu'
+    let title = `${this.$t('main.loading')} - Kitsu`
     if (this.task) {
       const taskTypeName = this.taskTypeMap.get(this.task.task_type_id).name
       title = `${this.title} / ${taskTypeName} - Kitsu`
