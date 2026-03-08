@@ -56,7 +56,7 @@
           width: Math.max(frameSize - 1, 5) + 'px'
         }"
         @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = false"
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
@@ -72,7 +72,7 @@
           width: Math.max(frameSize - 1, 5) + 'px'
         }"
         @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = true"
+        @mouseleave="isFrameNumberVisible = false"
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
@@ -417,28 +417,6 @@ export default {
           frameY * frameHeight
         }px`,
         width: `${frameWidth}px`
-      }
-    },
-
-    getFrameNumberStyle(frame) {
-      const frameHeight = 100
-      const height = frameHeight + 30
-      const ratio = this.movieDimensions.width
-        ? this.movieDimensions.width / this.movieDimensions.height
-        : 1
-      const frameWidth = Math.ceil(frameHeight * ratio)
-      const width = frameWidth + 10
-      const left = Math.min(
-        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
-        this.width - frameWidth - 10
-      )
-      const top = `-${height}px`
-
-      return {
-        height: `${height}px`,
-        width: `${width}px`,
-        top,
-        left: `${left}px`
       }
     }
   },

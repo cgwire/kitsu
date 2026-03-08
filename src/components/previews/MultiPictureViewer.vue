@@ -25,15 +25,10 @@
 </template>
 
 <script>
-import { fullScreenMixin } from '@/components/mixins/fullscreen'
-import { domMixin } from '@/components/mixins/dom'
-
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 
 export default {
   name: 'multi-picture-viewer',
-
-  mixins: [domMixin, fullScreenMixin],
 
   components: {
     PictureViewer
@@ -84,15 +79,9 @@ export default {
 
   emits: ['loaded', 'panzoom-changed', 'size-changed'],
 
-  data() {
-    return {}
-  },
-
   mounted() {
     this.container.style.height = this.defaultHeight + 'px'
   },
-
-  beforeUnmount() {},
 
   computed: {
     container() {
@@ -229,7 +218,6 @@ export default {
   height: 100%;
   background: black;
   display: flex;
-  background: black;
   align-items: center;
   justify-content: center;
 }

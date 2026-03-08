@@ -386,11 +386,11 @@ export default {
       })
       this.panzoomGif.on('zoom', () => {
         if (!this.isGif) return
-        this.emitPanZoom(this.panzoomBig)
+        this.emitPanZoom(this.panzoomGif)
       })
       this.panzoomGif.on('panend', () => {
         if (!this.isGif) return
-        this.emitPanZoom(this.panzoomBig)
+        this.emitPanZoom(this.panzoomGif)
       })
     },
 
@@ -496,7 +496,6 @@ export default {
   height: 100%;
   background: black;
   display: flex;
-  background: black;
   align-items: center;
   justify-content: center;
 }

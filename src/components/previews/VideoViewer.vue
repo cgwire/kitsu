@@ -162,13 +162,7 @@ export default {
           })
           this.$emit('video-loaded')
         }
-        this.video.addEventListener(
-          'focus',
-          function () {
-            this.blur()
-          },
-          false
-        )
+        this.video.addEventListener('focus', e => e.target.blur())
         this.video.addEventListener('resize', this.resetSize)
 
         this.video.addEventListener('loadedmetadata', () => {
@@ -227,7 +221,6 @@ export default {
 
   beforeUnmount() {
     this.pause()
-    window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('resize', this.onWindowResize)
     this.panzoomInstance?.dispose()
   },
@@ -372,7 +365,7 @@ export default {
 
     mountVideo() {
       if (!this.isMovie) return
-      this.video.mute = this.isMuted
+      this.video.muted = this.isMuted
       this.videoDuration = this.video.duration
       this.isLoading = false
       this.$emit('duration-changed', this.videoDuration)

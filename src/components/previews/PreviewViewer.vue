@@ -238,6 +238,17 @@ export default {
     'video-loaded'
   ],
 
+  data() {
+    return {
+      currentTime: '00:00.000',
+      currentTimeRaw: 0,
+      isDrawing: false,
+      isPlaying: false,
+      maxDuration: '00:00.000',
+      videoDuration: 0
+    }
+  },
+
   computed: {
     // Elements
 
@@ -451,7 +462,6 @@ export default {
     resize() {
       if (this.isPicture) this.pictureViewer?.resetPicture()
       else if (this.isMovie) this.videoViewer?.mountVideo()
-      else if (this.isSound) this.soundViewer?.redraw()
     },
 
     setCurrentFrame(frameNumber) {

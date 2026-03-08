@@ -76,12 +76,6 @@ export default {
     }
   },
 
-  computed: {
-    container() {
-      return this.$refs.container
-    }
-  },
-
   methods: {
     play() {
       this.wavesurfer.play()
@@ -89,9 +83,7 @@ export default {
 
     pause() {
       this.wavesurfer.pause()
-    },
-
-    redraw() {}
+    }
   },
 
   watch: {

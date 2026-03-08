@@ -183,14 +183,6 @@ export default {
   },
 
   computed: {
-    backgroundSize() {
-      if (this.videoDuration) {
-        return 200 / this.nbFrames + '% 100%'
-      } else {
-        return '300%'
-      }
-    },
-
     frameSize() {
       return this.width / this.nbFrames
     },
@@ -230,10 +222,6 @@ export default {
       return this.nbFrames * this.frameDuration
     },
 
-    handleInWidth() {
-      return Math.max(this.frameSize * this.handleIn, 0) + 'px'
-    },
-
     playlistProgressWidget() {
       return this.$refs['playlist-progress']
     }
@@ -255,8 +243,6 @@ export default {
       this.resetWidth()
     },
 
-    updatePlaylistProgressBar(time) {},
-
     startPlaylistProgressDrag(event) {
       this.playlistProgressDragging = true
       this.$emit('start-scrub')
@@ -273,7 +259,7 @@ export default {
         this.isFrameNumberVisible ||
         (!this.progressDragging &&
           event.target.classList &&
-          (event.target.classList.contains('playlilst-progress') ||
+          (event.target.classList.contains('playlist-progress') ||
             event.target.classList.contains('entity-status') ||
             event.target.classList.contains('playlist-progress-position')))
       ) {
@@ -348,28 +334,6 @@ export default {
       }
     },
 
-    getFrameNumberStyle(frame) {
-      const frameHeight = 100
-      const height = frameHeight + 30
-      const ratio = this.movieDimensions.width
-        ? this.movieDimensions.width / this.movieDimensions.height
-        : 1
-      const frameWidth = Math.ceil(frameHeight * ratio)
-      const width = frameWidth + 10
-      const left = Math.min(
-        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
-        this.width - frameWidth - 10
-      )
-      const top = this.isFullScreen ? `-${height + 32}px` : '42px'
-
-      return {
-        height: `${height}px`,
-        width: `${width}px`,
-        top,
-        left: `${left}px`
-      }
-    },
-
     getEntityPosition(entity) {
       const ratio =
         (entity.start_duration - this.frameDuration) / this.playlistDuration
@@ -421,10 +385,6 @@ export default {
 
     entityList() {
       this.resetWidth()
-    },
-
-    playlistProgress() {
-      this.updatePlaylistProgressBar(this.playlistProgress)
     }
   }
 }
