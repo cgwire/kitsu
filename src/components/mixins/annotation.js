@@ -65,12 +65,10 @@ if (PSStroke) {
 
   if (!PSStroke.prototype.getRelativeCenterPoint) {
     PSStroke.prototype.getRelativeCenterPoint = function () {
-      const center = new fabric.Point(
-        this.getCenterPoint
-          ? this.getCenterPoint()
-          : { x: this.left, y: this.top }
-      )
-      return center
+      if (this.getCenterPoint) {
+        return this.getCenterPoint()
+      }
+      return new fabric.Point(this.left, this.top)
     }
   }
 }
@@ -88,7 +86,7 @@ export const annotationMixin = {
       updates: [],
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      notSave: false,
+      notSaved: false,
       pencilColor: '#ff3860',
       pencilWidth: 'big',
       textColor: '#ff3860',
@@ -160,12 +158,13 @@ export const annotationMixin = {
         if (!object.id) object.set('id', uuidv4())
         object.set('canvasWidth', this.fabricCanvas.width)
         object.set('canvasHeight', this.fabricCanvas.height)
+        if (!object.createdBy) object.set('createdBy', this.userId)
       } else {
         if (!object.id) object.id = uuidv4()
         object.canvasWidth = this.fabricCanvas.width
         object.canvasHeight = this.fabricCanvas.height
+        if (!object.createdBy) object.createdBy = this.userId
       }
-      if (!object.createdBy) object.set('createdBy', this.userId)
       this.addSerialization(object)
       return object
     },
@@ -296,7 +295,7 @@ export const annotationMixin = {
       const obj = this.getObjectById(deletedObject.id)
       if (obj) {
         if (obj._objects) {
-          obj._objects.forEach(this.fabricCanvas.remove)
+          obj._objects.forEach(o => this.fabricCanvas.remove(o))
           this.fabricCanvas.remove(obj)
         } else {
           this.fabricCanvas.remove(obj)
@@ -322,18 +321,19 @@ export const annotationMixin = {
     addToAdditions(obj) {
       this.markLastAnnotationTime()
       const currentTime = this.getCurrentTime()
-      const currentFrame = this.getCurrentFrame() // this is different, depending if it is called in PreviewPlayer or player.js
+      const currentFrame = this.getCurrentFrame()
+      const serialized = obj.serialize()
       const additions = this.findAnnotation(this.additions, currentTime)
       if (additions) {
-        additions.drawing.objects.push(obj.serialize())
+        additions.drawing.objects.push(serialized)
       } else {
         this.additions.push({
           time: currentTime,
           frame: currentFrame,
-          drawing: { objects: [obj.serialize()] }
+          drawing: { objects: [serialized] }
         })
       }
-      this.postAnnotationAddition(currentTime, obj.serialize())
+      this.postAnnotationAddition(currentTime, serialized)
     },
 
     /*
@@ -646,9 +646,9 @@ export const annotationMixin = {
           tr: false,
           mtr: !this.isCurrentUserArtist
         })
-        this.$options.silentAnnnotation = true
+        this.$options.silentAnnotation = true
         canvas.add(path)
-        this.$options.silentAnnnotation = false
+        this.$options.silentAnnotation = false
       } else if (obj.type === 'i-text' || obj.type === 'text') {
         text = new fabric.IText(obj.text, {
           ...base,
@@ -675,9 +675,9 @@ export const annotationMixin = {
           tr: false,
           mtr: false
         })
-        this.$options.silentAnnnotation = true
+        this.$options.silentAnnotation = true
         canvas.add(text)
-        this.$options.silentAnnnotation = false
+        this.$options.silentAnnotation = false
       } else if (obj.type === 'PSStroke') {
         if (obj.canvasWidth) {
           let strokeMultiplier = canvasWidth / canvas.width
@@ -712,9 +712,9 @@ export const annotationMixin = {
             tr: false,
             mtr: !this.isCurrentUserArtist
           })
-          this.$options.silentAnnnotation = true
+          this.$options.silentAnnotation = true
           canvas.add(psstroke)
-          this.$options.silentAnnnotation = false
+          this.$options.silentAnnotation = false
         }
       } else if (
         obj.type === 'rect' ||
@@ -873,9 +873,6 @@ export const annotationMixin = {
           this.fabricCanvas.isDrawingMode = true
         }
 
-        this.fabricCanvas.freeDrawingBrush = new fabric.PencilBrush(
-          this.fabricCanvas
-        )
         const brush = new PSBrush(this.fabricCanvas)
         this.fabricCanvas.freeDrawingBrush = brush
         brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
@@ -943,7 +940,7 @@ export const annotationMixin = {
      * stacks.
      */
     onObjectAdded(obj) {
-      if (this.$options.silentAnnnotation) return
+      if (this.$options.silentAnnotation) return
       let o = obj.target ? obj.target : obj.targets[0]
       o = this.setObjectData(o)
       // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
@@ -1024,7 +1021,6 @@ export const annotationMixin = {
       if (action && action.obj) {
         if (action.type === 'add') {
           this.deleteObject(action.obj)
-          this.addToDeletions(action.obj)
           this.removeFromAdditions(action.obj)
         } else if (action.type === 'remove') {
           this.addObject(action.obj)
@@ -1139,7 +1135,7 @@ export const annotationMixin = {
         this.preview.annotations.forEach(a => annotations.push({ ...a }))
         this.annotations =
           annotations.sort((a, b) => {
-            return a.time < b.time
+            return a.time - b.time
           }) || []
       } else {
         this.annotations = []
@@ -1184,7 +1180,7 @@ export const annotationMixin = {
       this.fabricCanvas.off('object:added', this.onObjectAdded)
       this.fabricCanvas.off('mouse:down', this.onCanvasClicked)
       this.fabricCanvas.off('mouse:down', this.initalizeMouseDrawing)
-      this.fabricCanvas.off('mouse:move', this.onCanvaMouseMoved)
+      this.fabricCanvas.off('mouse:move', this.onCanvasMouseMoved)
       this.fabricCanvas.off('mouse:move', this.updateMousePressure)
       this.fabricCanvas.off('mouse:up', this.endDrawing)
       this.fabricCanvas.off('mouse:up', this.onCanvasReleased)
@@ -1344,10 +1340,9 @@ export const annotationMixin = {
      */
     isEmptyCanvas() {
       if (this.fabricCanvas) {
-        return this.fabricCanvas.getObjects().length > 0
-      } else {
-        return true
+        return this.fabricCanvas.getObjects().length === 0
       }
+      return true
     },
 
     /*
@@ -1549,7 +1544,7 @@ export const annotationMixin = {
             width: canvas.width,
             height: canvas.height
           })
-          this.fabricCanvas.getObjects().find(obj => {
+          this.fabricCanvas.getObjects().forEach(obj => {
             if (obj._objects) {
               obj._objects.forEach(obj => {
                 tmpCanvas.add(obj)
