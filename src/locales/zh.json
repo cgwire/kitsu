@@ -57,7 +57,8 @@
       },
       "include_all": "包括所有资产任务类型",
       "add_asset_type_to_library": "向库中添加资产类型",
-      "library_title": "资产类型库"
+      "library_title": "资产类型库",
+      "add_asset_type_placeholder": "+ 添加资产类型"
     },
     "breakdown": {
       "all_assets": "所有可用资产",
@@ -126,7 +127,7 @@
       "confirm_publish_button": "发表评论而不发布文件",
       "add_link": "添加 URL 链接",
       "pinned_revision": "被钉住的修订",
-      "edited_by": "编辑：{姓名｝",
+      "edited_by": "编辑：{name｝",
       "add_attachment_to_reply": "在回复中添加附件",
       "add_frame_to_comment": "将当前帧添加到注释中",
       "add_emoji": "添加表情符号"
@@ -545,7 +546,10 @@
       "hours": "小时",
       "remove_search_query": "您确定要删除搜索查询\"{name}\"吗？",
       "remove_search_filter_group": "您确定要删除搜索筛选器组\"{name}\"吗？",
-      "shared_by": "由 {name} 共享"
+      "shared_by": "由 {name} 共享",
+      "continue": "继续",
+      "developer_documentation": "开发人员文档",
+      "feedback": "路线图/反馈意见"
     },
     "menu": {
       "assign_tasks": "分配任务",
@@ -1053,7 +1057,8 @@
           "error_register": "注册 FIDO 设备时发生错误。",
           "error_unregister": "取消注册 FIDO 设备时发生错误。"
         },
-        "enabled": "启用双因素验证"
+        "enabled": "启用双因素验证",
+        "mandatory": "贵机构需要双因素身份验证。请启用至少一种方法以继续。"
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "资产、镜头、序列..."
       },
       "add_task_status_to_library": "在任务库中添加任务状态",
-      "library_title": "任务状态库"
+      "library_title": "任务状态库",
+      "add_task_status_placeholder": "+ 添加任务状态"
     },
     "task_types": {
       "delete_text": "您确定要从您的数据库移除{name}吗?",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "状态",
         "ready_for": "准备好为"
-      }
+      },
+      "add_status_automation_placeholder": "+ 添加状态自动化"
     },
     "preview_room": {
       "join_room": "加入审核室",

@@ -36,7 +36,7 @@
       "linked": "連結",
       "no_concept": "沒有與此資產相關的概念",
       "casted_in_shots": "以 {nbShots} 鏡頭投射",
-      "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「DELETE」確認。",
+      "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除"
     },
     "asset_types": {
@@ -57,7 +57,8 @@
       },
       "include_all": "包括所有資產任務類型",
       "add_asset_type_to_library": "新增資產類型到資料庫",
-      "library_title": "資產類型庫"
+      "library_title": "資產類型庫",
+      "add_asset_type_placeholder": "+ 新增資產類型"
     },
     "breakdown": {
       "all_assets": "所有可用Asset",
@@ -493,7 +494,7 @@
       "archived": "存檔",
       "avatar": {
         "open_page": "開啟 {personName} 頁面",
-        "unassign": "取消指定 { 人名｝"
+        "unassign": "取消指定 {personName｝"
       },
       "color": "顏色",
       "copy": "複製",
@@ -545,7 +546,10 @@
       "hours": "小時",
       "remove_search_query": "您確定要移除搜尋查詢「{name}」嗎？",
       "remove_search_filter_group": "您確定要移除搜尋篩選器群組「{name}」嗎？",
-      "shared_by": "由 {name} 分享"
+      "shared_by": "由 {name} 分享",
+      "continue": "繼續",
+      "developer_documentation": "開發人員文件",
+      "feedback": "路線圖 / 意見回饋"
     },
     "menu": {
       "assign_tasks": "分配任務",
@@ -1053,7 +1057,8 @@
           "error_register": "註冊 FIDO 裝置時發生錯誤。",
           "error_unregister": "取消註冊 FIDO 裝置時發生錯誤。"
         },
-        "enabled": "啟用雙重認證"
+        "enabled": "啟用雙重認證",
+        "mandatory": "您的組織需要雙因素驗證。請啟用至少一種方法以繼續。"
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "資產、鏡頭、序列..."
       },
       "add_task_status_to_library": "在資料庫中新增任務狀態",
-      "library_title": "任務狀態庫"
+      "library_title": "任務狀態庫",
+      "add_task_status_placeholder": "+ 新增任務狀態"
     },
     "task_types": {
       "delete_text": "您確定要從您的資料庫移除{name}嗎?",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "狀態",
         "ready_for": "準備就緒"
-      }
+      },
+      "add_status_automation_placeholder": "+ 新增狀態自動化"
     },
     "preview_room": {
       "join_room": "加入審閱室",
@@ -1735,7 +1742,7 @@
         "title": "概念連結",
         "empty": "無連結"
       },
-      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「DELETE」確認。",
+      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
       "drop_new_concepts": "在此丟入新的概念檔案"
     },

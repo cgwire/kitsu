@@ -35,7 +35,7 @@
       "only_current_episode": "현재 에피소드만",
       "linked": "연결된",
       "no_concept": "이 자산과 연결된 개념이 없습니다.",
-      "casted_in_shots": "nbShots} 샷에 캐스팅됨",
+      "casted_in_shots": "{nbShots} 샷에 캐스팅됨",
       "delete_for_selection_hard_text": "선택한 에셋을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
       "delete_for_selection_hard_lock_text": "삭제"
     },
@@ -57,7 +57,8 @@
       },
       "include_all": "모든 자산 유형 포함",
       "add_asset_type_to_library": "라이브러리에 에셋 유형 추가",
-      "library_title": "자산 유형 라이브러리"
+      "library_title": "자산 유형 라이브러리",
+      "add_asset_type_placeholder": "+ 자산 유형 추가"
     },
     "breakdown": {
       "all_assets": "사용 가능한 모든 어셋",
@@ -126,7 +127,7 @@
       "confirm_publish_button": "파일 발행 없이 댓글 게시",
       "add_link": "URL 링크 추가",
       "pinned_revision": "고정된 수정본",
-      "edited_by": "이름} 편집자",
+      "edited_by": "{name} 편집자",
       "add_attachment_to_reply": "답장에 첨부파일 추가",
       "add_frame_to_comment": "댓글에 현재 프레임 추가",
       "add_emoji": "이모티콘 추가"
@@ -341,7 +342,7 @@
       "unable_to_verify_fido": "FIDO 기기가 없으신가요?",
       "wrong_fido_challenge": "FIDO 도전 인증에 실패했습니다.",
       "login_server_failed": "로그인하는 동안 서버 오류가 발생했습니다.",
-      "login_with_saml": "saml_idp_name}으로 SSO 로그인",
+      "login_with_saml": "{saml_idp_name}으로 SSO 로그인",
       "login_saml": "SSO 로그인",
       "reset_password_inactive": "비밀번호를 재설정하지 못했습니다. 이 이메일을 받은 사용자가 비활성 상태입니다.",
       "set_password_title": "키츠에 오신 것을 환영합니다!",
@@ -492,8 +493,8 @@
       "activity": "활동",
       "archived": "아카이브",
       "avatar": {
-        "open_page": "사람 이름} 페이지 열기",
-        "unassign": "사람 이름} 할당 해제"
+        "open_page": "{personName} 페이지 열기",
+        "unassign": "{personName} 할당 해제"
       },
       "color": "색상",
       "copy": "복사",
@@ -543,9 +544,12 @@
       "entities": "엔티티",
       "expand_all": "모두 확장",
       "hours": "시간 | 시간",
-      "remove_search_query": "검색어 '{이름}'을 제거하시겠습니까?",
-      "remove_search_filter_group": "검색 필터 그룹 \"{이름}\"을 제거하시겠습니까?",
-      "shared_by": "이름}이 공유"
+      "remove_search_query": "검색어 '{name}'을 제거하시겠습니까?",
+      "remove_search_filter_group": "검색 필터 그룹 \"{name}\"을 제거하시겠습니까?",
+      "shared_by": "{name}이 공유",
+      "continue": "계속하기",
+      "developer_documentation": "개발자 문서",
+      "feedback": "로드맵 / 피드백"
     },
     "menu": {
       "assign_tasks": "작업 할당",
@@ -836,7 +840,7 @@
       "no_clients_to_notify": "알릴 클라이언트가 없습니다.",
       "notify_clients_success": "알림이 성공적으로 전송되었습니다.",
       "unmute": "음소거 해제",
-      "volume_level": "볼륨: 볼륨: {레벨}%"
+      "volume_level": "볼륨: 볼륨: {level}%"
     },
     "productions": {
       "current": "선택된 프로덕션",
@@ -1053,7 +1057,8 @@
           "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
           "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다."
         },
-        "enabled": "2단계 인증 사용"
+        "enabled": "2단계 인증 사용",
+        "mandatory": "조직에 2단계 인증이 필요합니다. 계속하려면 하나 이상의 방법을 사용하도록 설정하세요."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "에셋, 샷, 시퀀스, ..."
       },
       "add_task_status_to_library": "라이브러리에 작업 상태 추가",
-      "library_title": "작업 상태 라이브러리"
+      "library_title": "작업 상태 라이브러리",
+      "add_task_status_placeholder": "+ 작업 상태 추가"
     },
     "task_types": {
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",
@@ -1205,7 +1211,7 @@
       "edit_version_exist": "비슷한 이름의 버전이 이미 존재합니다.",
       "delete_version": "일정 버전 삭제",
       "delete_version_error": "이 일정 버전을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
-      "delete_version_message": "일정 버전 {이름}을 삭제하시겠습니까? 아래에 일정 버전 이름을 입력하여 확인해 주세요.",
+      "delete_version_message": "일정 버전 {name}을 삭제하시겠습니까? 아래에 일정 버전 이름을 입력하여 확인해 주세요.",
       "versions": {
         "reference": "참조 예측",
         "from": "에서",
@@ -1527,7 +1533,7 @@
       "export_timespents": "공개된 프로젝트에 소요된 시간을 목록으로 내보내기",
       "unit": "단위",
       "confirm_day_offs": "이 날짜를 휴무일로 설정하면 해당 날짜에 기록된 모든 시간이 지워집니다. 계속하시겠습니까?",
-      "confirm_unset_day_offs": "현재 {시작}부터 {종료}까지 휴무일이 적용됩니다. 이 기간을 제거하시겠습니까?",
+      "confirm_unset_day_offs": "현재 {start}부터 {end}까지 휴무일이 적용됩니다. 이 기간을 제거하시겠습니까?",
       "off": "꺼짐"
     },
     "wrong_browser": {
@@ -1601,7 +1607,7 @@
       "history": "값 기록 편집",
       "restore_error": "이 편집 내용을 복원하는 동안 오류가 발생했습니다.",
       "edit_success": "수정 사항이 성공적으로 저장되었습니다.",
-      "restore_text": "아카이브에서 {이름}을 복원하시겠습니까?",
+      "restore_text": "아카이브에서 {name}을 복원하시겠습니까?",
       "delete_for_selection_error": "선택한 편집 내용을 삭제하는 동안 오류가 발생했습니다.",
       "delete_for_selection_hard_text": "선택한 편집 내용을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인하시기 바랍니다.",
       "delete_for_selection_hard_lock_text": "삭제",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "상태",
         "ready_for": "준비 완료"
-      }
+      },
+      "add_status_automation_placeholder": "+ 상태 자동화 추가"
     },
     "preview_room": {
       "join_room": "검수실 참여",
@@ -1658,7 +1665,7 @@
     },
     "backgrounds": {
       "create_error": "이 배경을 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 배경이 없는 것이 확실합니까?",
-      "delete_text": "데이터베이스에서 {이름}을 제거하시겠습니까?",
+      "delete_text": "데이터베이스에서 {name}을 제거하시겠습니까?",
       "delete_error": "이 배경을 삭제하는 동안 오류가 발생했습니다. 현재 이 배경에 연결된 기존 데이터가 있을 수 있습니다. 이 배경에 연결된 작업이 없는 것이 확실합니까?",
       "name": "배경",
       "number": "배경 | 배경",
@@ -1689,7 +1696,7 @@
       "new_bot": "새 봇 추가하기",
       "edit_title": "봇 편집",
       "edit_avatar_error": "봇 아바타를 업데이트하는 동안 오류가 발생했습니다.",
-      "new_token_title": "이름}에 대한 새 API 토큰",
+      "new_token_title": "{name}에 대한 새 API 토큰",
       "new_token_warning": "새 토큰을 생성하면 이전 토큰은 비활성화됩니다.",
       "generate": "새 토큰 생성",
       "copy_token_warning": "아래 토큰을 복사하세요. 다시는 볼 수 없습니다.",
@@ -1760,7 +1767,7 @@
     },
     "studios": {
       "create_error": "이 스튜디오를 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 스튜디오가 없는 것이 확실합니까?",
-      "delete_text": "데이터베이스에서 {이름}을 제거하시겠습니까?",
+      "delete_text": "데이터베이스에서 {name}을 제거하시겠습니까?",
       "delete_error": "이 스튜디오를 삭제하는 동안 오류가 발생했습니다.",
       "edit_title": "편집 스튜디오",
       "new_studios": "스튜디오 추가",
@@ -1785,7 +1792,7 @@
       "edit": "휴무일 편집",
       "delete": "휴무일 삭제",
       "confirm_day_offs": "이 날짜를 쉬게 설정하면 해당 날짜에 채워진 모든 시간이 지워집니다. 계속하시겠습니까?",
-      "confirm_unset_day_offs": "현재 {시작}부터 {종료}까지 휴무일이 적용됩니다. 이 기간을 제거하시겠습니까?",
+      "confirm_unset_day_offs": "현재 {start}부터 {end}까지 휴무일이 적용됩니다. 이 기간을 제거하시겠습니까?",
       "error_days_off": "휴무일을 업데이트하는 동안 오류가 발생했습니다."
     },
     "library": {
@@ -1828,7 +1835,7 @@
       "delete_budget_entry_error": "이 예산 항목을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
       "delete_budget_entry_message": "이 예산 항목을 삭제하시겠습니까?",
       "delete_budget_error": "이 예산을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
-      "delete_budget_message": "예산 {이름}을 삭제하시겠습니까? 아래에 예산 이름을 입력하여 확인해 주세요.",
+      "delete_budget_message": "예산 {name}을 삭제하시겠습니까? 아래에 예산 이름을 입력하여 확인해 주세요.",
       "difference": "차이점",
       "edit_budget": "현재 예산 버전 편집",
       "edit_budget_entry": "항목 수정",

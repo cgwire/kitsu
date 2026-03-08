@@ -35,9 +35,9 @@
       "only_current_episode": "فقط قسمت فعلی",
       "linked": "پیوند داده شده است",
       "no_concept": "هیچ کانسپتی به این منبع مرتبط نیست",
-      "casted_in_shots": "",
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": ""
+      "casted_in_shots": "در نماهای {nbShots} اجرا شده است",
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید دارایی‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف"
     },
     "asset_types": {
       "all_asset_types": "انواع منابع",
@@ -56,8 +56,9 @@
         "description": "توضیحات"
       },
       "include_all": "شامل تمام انواع وظایف منبع است",
-      "add_asset_type_to_library": "",
-      "library_title": ""
+      "add_asset_type_to_library": "افزودن نوع دارایی به کتابخانه",
+      "library_title": "کتابخانه انواع دارایی‌ها",
+      "add_asset_type_placeholder": "+ افزودن نوع دارایی"
     },
     "breakdown": {
       "all_assets": "همه منابع موجود",
@@ -126,10 +127,10 @@
       "confirm_publish_button": "ارسال نظر بدون انتشار فایل",
       "add_link": "یک پیوند URL را اضافه کنید",
       "pinned_revision": "پین کردن ورژن",
-      "edited_by": "",
-      "add_attachment_to_reply": "",
-      "add_frame_to_comment": "",
-      "add_emoji": ""
+      "edited_by": "ویرایش شده توسط {name}",
+      "add_attachment_to_reply": "افزودن پیوست به پاسخ",
+      "add_frame_to_comment": "قاب فعلی را برای نظر اضافه کنید",
+      "add_emoji": "اضافه کردن ایموجی"
     },
     "custom_actions": {
       "create_error": "هنگام ذخیره این اقدام سفارشی خطایی روی داد. آیا مطمئن هستید که هیچ اقدام دیگری با همین نام وجود ندارد؟",
@@ -150,9 +151,9 @@
         "all": "همه",
         "shot": "شات",
         "asset": "منبع",
-        "sequence": "",
-        "edit": "",
-        "episode": ""
+        "sequence": "توالی",
+        "edit": "ویرایش",
+        "episode": "قسمت"
       }
     },
     "entities": {
@@ -198,7 +199,7 @@
         "edits_tvshow_pattern": "\"EpisodeName EditName\" به عنوان مثال. E01_تریلر.",
         "explanation": "افزودن یک تصویر کوچک مستلزم تنظیم یک پیش‌نمایش جدید است. برای تنظیم چندین تصویر کوچک به طور همزمان، ابتدا باید یک نوع کار را برای ایجاد پیش نمایش های جدید انتخاب کنید. ریز عکسها از این پیش نمایش های جدید تنظیم می شوند.",
         "explanation_two": "پس، باید فایل هایی را که می خواهید آپلود کنید انتخاب کنید. برای یافتن موارد مناسب، نام فایل ها باید با الگوی زیر مطابقت داشته باشد:",
-        "invalid_files": ""
+        "invalid_files": "فایل‌های نامعتبر (با الگو مطابقت ندارند)"
       },
       "logs": {
         "no_logs": "هیچ گزارش زمانی برای این مورد وجود ندارد."
@@ -213,7 +214,7 @@
         "status": "وضعیت",
         "task_type": "نوع وظیفه",
         "uploader": "آپلود شده توسط",
-        "uploaded_at": ""
+        "uploaded_at": "آپلود شده در"
       },
       "nb_selected_assets": "منبع {nbSelectedAssets} انتخاب شده | منابع {nbSelectedAssets} انتخاب شده",
       "nb_selected_shots": "شات {nbSelectedShots} انتخاب شده | {nbSelectedShots} شات های انتخاب شده",
@@ -229,8 +230,8 @@
         "task_type": "نوع وظیفه",
         "type": "طبقه بندی"
       },
-      "display_options": "",
-      "title": ""
+      "display_options": "تنظیمات نمایش",
+      "title": "اشخاص"
     },
     "estimation": {
       "title": "برآورد"
@@ -285,10 +286,10 @@
       "plend": "به آخرین فریم بروید",
       "plaltright": "به فریم اول شات بعدی بروید",
       "plaltleft": "به آخرین فریم شات قبلی بروید",
-      "object_viewer": "",
-      "rotate_hdr": "",
-      "change_fov": "",
-      "plalto": ""
+      "object_viewer": "نمایشگر شیء",
+      "rotate_hdr": "چرخاندن نقشه محیط",
+      "change_fov": "تغییر فاصله کانونی",
+      "plalto": "در حالت مقایسه، میزان شفافیت را بین ۰٪ و ۱۰۰٪ تغییر دهید"
     },
     "login": {
       "back_to_login": "به صفحه ورود برگردید",
@@ -343,9 +344,9 @@
       "login_server_failed": "هنگام ورود به سیستم یک خطای سرور رخ داد.",
       "login_with_saml": "ورود SSO با {saml_idp_name}",
       "login_saml": "ورود به سیستم SSO",
-      "reset_password_inactive": "",
-      "set_password_title": "",
-      "set_password": ""
+      "reset_password_inactive": "بازنشانی رمز عبور ناموفق بود. کاربری با این ایمیل غیرفعال است.",
+      "set_password_title": "به کیتسو خوش آمدید!",
+      "set_password": "رمز عبور خود را تنظیم کنید"
     },
     "main": {
       "about": "درباره",
@@ -517,35 +518,38 @@
       "link": "لینک",
       "hours_spent": "ساعت صرف شده | ساعت های صرف شده",
       "hours_estimated": "ساعت تخمینی | ساعت برآورد شده است",
-      "created_by": "",
+      "created_by": "ایجاد شده توسط",
       "day": "روز",
       "hour": "ساعت",
       "label": {
-        "casting": "",
+        "casting": "ریخته‌گری",
         "chat": "چت",
-        "concepts": "",
+        "concepts": "مفاهیم",
         "info": "اطلاعات",
-        "output_files": "",
-        "preview_files": "",
+        "output_files": "فایل‌های خروجی",
+        "preview_files": "پیش‌نمایش فایل‌ها",
         "schedule": "برنامه ریزی شده",
-        "timelog": ""
+        "timelog": "زمان‌نگار"
       },
       "month": "ماه",
-      "nb_drawings": "",
-      "no_estimation": "",
+      "nb_drawings": "نقاشی | نقاشی‌ها",
+      "no_estimation": "بدون تخمین",
       "people": "افراد",
-      "total": "",
-      "unassigned": "",
+      "total": "مجموع",
+      "unassigned": "اختصاص داده نشده",
       "year": "سال",
-      "apply": "",
-      "back": "",
-      "edit_mode_on": "",
-      "entities": "",
-      "expand_all": "",
-      "hours": "",
-      "remove_search_query": "",
-      "remove_search_filter_group": "",
-      "shared_by": ""
+      "apply": "اعمال کردن",
+      "back": "برگشت",
+      "edit_mode_on": "تغییر حالت ویرایش",
+      "entities": "اشخاص",
+      "expand_all": "همه را گسترش دهید",
+      "hours": "ساعت ‎| ‎ساعت",
+      "remove_search_query": "آیا مطمئن هستید که می‌خواهید عبارت جستجوی \"{name}\" را حذف کنید؟",
+      "remove_search_filter_group": "آیا مطمئن هستید که می‌خواهید گروه فیلتر جستجوی \"{name}\" را حذف کنید؟",
+      "shared_by": "به اشتراک گذاشته شده توسط {name}",
+      "continue": "ادامه",
+      "developer_documentation": "مستندات توسعه‌دهنده",
+      "feedback": "نقشه راه / بازخورد"
     },
     "menu": {
       "assign_tasks": "محول کردن وظایف",
@@ -616,9 +620,9 @@
       "published": "پیش نمایشی منتشر کرد",
       "show_comments": "نمایش نظرات",
       "watching": "تماشا کردن",
-      "only_playlists_ready": "",
-      "playlist_is_ready": "",
-      "playlist_ready_text": ""
+      "only_playlists_ready": "فقط لیست‌های پخش آماده",
+      "playlist_is_ready": "لیست پخش آماده است",
+      "playlist_ready_text": "یک لیست پخش جدید برای بررسی آماده است:"
     },
     "people": {
       "active": "فعال",
@@ -654,9 +658,9 @@
         "departments": "دپارتمان ها",
         "contract": "قرارداد",
         "studio": "استودیو",
-        "daily_salary": "",
-        "position": "",
-        "seniority": ""
+        "daily_salary": "نرخ روزانه",
+        "position": "موقعیت",
+        "seniority": "ارشدیت"
       },
       "list": {
         "name": "نام",
@@ -668,9 +672,9 @@
         "contract": "قرارداد",
         "expiration": "انقضا",
         "studio": "استودیو",
-        "position": "",
-        "salary": "",
-        "seniority": ""
+        "position": "موقعیت",
+        "salary": "حقوق",
+        "seniority": "ارشدیت"
       },
       "role": {
         "admin": "مدیر استودیو",
@@ -702,16 +706,16 @@
       "import_from_production": "یک تیم را از یک محصول دیگر وارد کنید",
       "import_from_department": "وارد کرد یک دپارتمان",
       "import_from_unlisted": "از افراد فهرست نشده اضافه کنید",
-      "email_exist_error": "",
+      "email_exist_error": "این ایمیل قبلاً توسط کاربر دیگری استفاده شده است.",
       "position": {
-        "artist": "",
-        "supervisor": "",
-        "lead": ""
+        "artist": "هنرمند",
+        "supervisor": "سرپرست",
+        "lead": "سرب"
       },
       "seniority": {
-        "junior": "",
-        "mid": "",
-        "senior": ""
+        "junior": "جونیور",
+        "mid": "میانه",
+        "senior": "ارشد"
       }
     },
     "playlists": {
@@ -828,15 +832,15 @@
       "filter_task_type": "بر اساس نوع وظیفه فیلتر شده است",
       "comparing_missing_plan": "شات برای نوع مورد نظر موجود نیست",
       "add_sequences": "افزودن یک سکانس",
-      "clients_to_notify": "",
-      "mute": "",
-      "notify_clients": "",
-      "notify_clients_description": "",
-      "notify_clients_error": "",
-      "no_clients_to_notify": "",
-      "notify_clients_success": "",
-      "unmute": "",
-      "volume_level": ""
+      "clients_to_notify": "مشتریانی که باید اطلاع دهند",
+      "mute": "بی‌صدا کردن",
+      "notify_clients": "به مشتریان اطلاع دهید",
+      "notify_clients_description": "به مشتریان استودیوی انتخاب شده اطلاع دهید که لیست پخش شما آماده است. این عملیات یک اعلان برای آنها ایجاد می‌کند.",
+      "notify_clients_error": "هنگام اطلاع رسانی به مشتریان خطایی رخ داد.",
+      "no_clients_to_notify": "هیچ مشتری برای اطلاع رسانی وجود ندارد.",
+      "notify_clients_success": "اعلان با موفقیت ارسال شد.",
+      "unmute": "بی‌صدا کردن",
+      "volume_level": "حجم: {level}%"
     },
     "productions": {
       "current": "محصول انتخاب شده",
@@ -874,7 +878,7 @@
         "is_set_preview_automated": "پیش نمایش جدید را به صورت خودکار به عنوان تصویر کوچک  برای این مورد تنظیم کنید",
         "homepage": "صفحه اصلی (صفحه اول نمایش داده می شود)",
         "code": "نام کوتاه",
-        "is_publish_default": ""
+        "is_publish_default": "ویجت نظر را برای هنرمندان به طور پیش‌فرض در حالت انتشار تنظیم کنید"
       },
       "metadata": {
         "add_explaination": "Add specific data required by this project.",
@@ -910,7 +914,7 @@
       "brief": {
         "title": "بریف",
         "empty": "هیچ بریفی موجود نیست.  چطور است یکی ایحاد کنیم؟",
-        "edit_error": ""
+        "edit_error": "هنگام ویرایش خلاصه، خطایی رخ داد."
       },
       "parameters": {
         "title": "پارامترها",
@@ -978,7 +982,7 @@
         "video_game": "بازی ویدیویی",
         "vr": "واقعیت مجازی(VR)",
         "immersive": "تجربه همه جانبه",
-        "2dpaper": ""
+        "2dpaper": "انیمیشن دوبعدی (کاغذی)"
       },
       "homepage": {
         "assets": "منابع",
@@ -1053,7 +1057,8 @@
           "error_register": "هنگام ثبت نام دستگاه FIDO خطایی روی داد.",
           "error_unregister": "هنگام لغو ثبت دستگاه FIDO خطایی روی داد."
         },
-        "enabled": ""
+        "enabled": "احراز هویت دو مرحله‌ای فعال شد",
+        "mandatory": "سازمان شما به احراز هویت دو مرحله‌ای نیاز دارد. لطفاً برای ادامه، حداقل یکی از روش‌ها را فعال کنید."
       }
     },
     "settings": {
@@ -1072,8 +1077,8 @@
         "mattermost_webhook": "Mattermost Webhook (اختیاری)",
         "discord_token": "توکن Discord (اختیاری)",
         "show_hd_default": "نمایش فیلم ها با کیفیت HD به صورت پیش فرض (آهسته تر)",
-        "format_duration_in_hours": "",
-        "dark_theme_by_default": ""
+        "format_duration_in_hours": "نمایش مدت زمان و تخمین‌ها بر حسب ساعت",
+        "dark_theme_by_default": "استفاده از تم تیره به صورت پیش‌فرض"
       },
       "production": {
         "empty_list": "لیست در حال حاضر خالی است. به این معنی که تمام داده های تنظیمات اصلی در دسترس کاربران است. برای محدود کردن انتخاب‌ها برای این محصول، چند ورودی اضافه کنید.",
@@ -1109,7 +1114,7 @@
         "is_default": "این پیش فرض است",
         "for_concept": "برای کانسپت ",
         "description": "توضیحات",
-        "is_wip": ""
+        "is_wip": "آیا در حال انجام است؟"
       },
       "name": "وضعیت وظیفه",
       "title_entities": "وضعیت برای انتیتی",
@@ -1117,8 +1122,9 @@
       "help": {
         "entities": "منابع ، شات ها، سکانس ها، ..."
       },
-      "add_task_status_to_library": "",
-      "library_title": ""
+      "add_task_status_to_library": "اضافه کردن وضعیت وظیفه به کتابخانه",
+      "library_title": "کتابخانه وضعیت وظایف",
+      "add_task_status_placeholder": "+ اضافه کردن وضعیت وظیفه"
     },
     "task_types": {
       "delete_text": "آیا مطمئنید که می خواهید {name} را حذف کنید؟",
@@ -1141,8 +1147,8 @@
       "no_task_types": "هیچ نوع طبقه بندی برای این نوع وظیقه وجود ندارد",
       "add_task_type_placeholder": "+ نوع وظیفه",
       "select_task_type": "انتخاب نوع وظیفه...",
-      "add_task_type_to_library": "",
-      "library_title": ""
+      "add_task_type_to_library": "افزودن نوع وظیفه به کتابخانه",
+      "library_title": "کتابخانه نوع وظیفه"
     },
     "sequences": {
       "all_sequences": "تمام سکانس ها",
@@ -1179,44 +1185,44 @@
         "delete_milestone": "حذف هدف گذاری"
       },
       "today": "امروز",
-      "mode": "",
-      "mode_prev": "",
-      "mode_real": "",
-      "version": "",
-      "apply_to_prod": "",
-      "apply_to_prod_confirm": "",
-      "apply_to_prod_error": "",
-      "assign": "",
-      "export": "",
-      "export_error": "",
-      "reset_list": "",
-      "no_entity": "",
-      "no_assignee": "",
-      "select_task_type": "",
-      "show_assigned": "",
-      "force_unassign": "",
-      "forced_daily_quotas": "",
-      "estimated_daily_quotas": "",
-      "edit_task": "",
-      "new_version": "",
-      "create_version": "",
-      "edit_version": "",
-      "edit_version_error": "",
-      "edit_version_exist": "",
-      "delete_version": "",
-      "delete_version_error": "",
-      "delete_version_message": "",
+      "mode": "حالت نمایش",
+      "mode_prev": "پیش‌بینی",
+      "mode_real": "واقعی",
+      "version": "نسخه",
+      "apply_to_prod": "اعمال به تولید",
+      "apply_to_prod_confirm": "آیا مطمئن هستید که می‌خواهید این نسخه از زمان‌بندی را روی محصول فعلی اعمال کنید؟ این کار مقادیر فعلی وظایف را لغو می‌کند.",
+      "apply_to_prod_error": "هنگام اعمال نسخه زمانبندی به محصول فعلی، خطایی روی داد.",
+      "assign": "اختصاص دادن به:",
+      "export": "برنامه صادرات",
+      "export_error": "هنگام صادر کردن داده‌ها خطایی روی داد.",
+      "reset_list": "تنظیم مجدد لیست",
+      "no_entity": "هیچ موجودیت قابل واگذاری وجود ندارد",
+      "no_assignee": "شخص قابل واگذاری وجود ندارد",
+      "select_task_type": "نوع وظیفه را انتخاب کنید",
+      "show_assigned": "نمایش موجودیت‌های اختصاص داده شده",
+      "force_unassign": "لغو تکالیف قبلی",
+      "forced_daily_quotas": "سهمیه‌های اجباری روزانه:",
+      "estimated_daily_quotas": "سهمیه روزانه تخمینی خودکار:",
+      "edit_task": "ویرایش وظیفه",
+      "new_version": "نسخه جدید",
+      "create_version": "ایجاد نسخه زمانبندی",
+      "edit_version": "ویرایش نسخه برنامه",
+      "edit_version_error": "هنگام ذخیره نسخه برنامه، خطایی روی داد. لطفاً دوباره امتحان کنید.",
+      "edit_version_exist": "نسخه‌ای با نام مشابه از قبل وجود دارد.",
+      "delete_version": "نسخه برنامه را حذف کنید",
+      "delete_version_error": "هنگام حذف این نسخه از برنامه، خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "delete_version_message": "آیا از حذف نسخهٔ زمان‌بندی {name} مطمئن هستید؟ لطفاً با تایپ نام نسخهٔ زمان‌بندی در زیر، آن را تأیید کنید.",
       "versions": {
-        "reference": "",
-        "from": "",
-        "locked": "",
-        "canceled": ""
+        "reference": "پیش‌بینی مرجع",
+        "from": "از",
+        "locked": "قفل شده",
+        "canceled": "لغو شد"
       },
       "fields": {
-        "create_from_version": "",
-        "new": "",
-        "name": "",
-        "locked": ""
+        "create_from_version": "ایجاد نسخه جدید یا از یک نسخه",
+        "new": "برنامه جدید",
+        "name": "نام نسخه",
+        "locked": "نسخه قفل شده"
       }
     },
     "quota": {
@@ -1249,10 +1255,10 @@
       "week": "هفته",
       "explanation_feedback": "ذر این شات اولین درخواست بازخورد کامل در نظر گرفته می شود. تعداد فریم های آن به سهمیه های آن روز اضافه می شود.",
       "done_date": "تاریخ تایید",
-      "explanation_done": "",
-      "explanation_weighted": "",
-      "explanation_weighteddone": "",
-      "weighted_done": "",
+      "explanation_done": "عکس با آخرین تأیید، کامل تلقی می‌شود. تعداد فریم‌های آن به سهمیه آن روز اضافه می‌شود.",
+      "explanation_weighted": "شات‌ها پس از اولین درخواست بازخورد، تکمیل‌شده در نظر گرفته می‌شوند. سپس، سهمیه‌ها بر اساس زمان صرف‌شده برای کار، همانطور که در برگه زمانی هنرمند ثبت شده است، وزن‌دهی می‌شوند.\n\nاگر زمانی ثبت نشده باشد، فرض بر این است که:\n\n* کار در اولین تغییر وضعیت به WIP آغاز شده است.\n\n* کار در روزی که درخواست بازخورد ارائه شده است، تکمیل شده است.\n\n* فریم‌های تکمیل‌شده به طور مساوی بین تمام روزهای کاری بین تاریخ شروع و پایان توزیع می‌شوند.",
+      "explanation_weighteddone": "شات‌ها پس از آخرین تأیید، تکمیل‌شده در نظر گرفته می‌شوند. سپس، سهمیه‌ها بر اساس زمان صرف‌شده برای کار، همانطور که در برگه زمانی هنرمند ثبت شده است، وزن‌دهی می‌شوند.\n\nاگر زمانی ثبت نشده باشد، فرض بر این است که:\n\n* کار در اولین تغییر وضعیت به WIP آغاز شده است.\n\n* کار در روزی که تأیید شد، تکمیل شده است.\n\n* فریم‌های تکمیل‌شده به طور مساوی بین تمام روزهای کاری بین تاریخ شروع و پایان توزیع می‌شوند.",
+      "weighted_done": "وزنی (تایید شده)",
       "drawings": "طراحی ها"
     },
     "shots": {
@@ -1305,9 +1311,9 @@
       "get_frames_from_previews_description": "برای استخراج شماره فریم ها از آخرین پیش نمایش های منتشر شده فیلم، یک نوع کار انتخاب کنید.",
       "get_frames_from_previews_error": "هنگام استخراج شماره فریم ها از پیش‌نمایش‌ نوع وظایف  خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
       "wrong_file_duration": "مدت زمان یکی از  فایل ویدیویی آپلود شده با مدت زمان مورد انتظار شات فعلی مطابقت ندارد.",
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": "",
-      "show_timecode": ""
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید عکس‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف",
+      "show_timecode": "نمایش ورود و خروج به صورت کدهای زمانی"
     },
     "server_down": {
       "text": "Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.",
@@ -1416,11 +1422,11 @@
         "done_date": "تاریخ تایید",
         "nb_frames": "فذیم ها",
         "drawings": "طراحی ها",
-        "before_after_tasks": "",
-        "no_task_type": "",
-        "tasks_after": "",
-        "tasks_before": "",
-        "timesheets": ""
+        "before_after_tasks": "وظایف قبل/بعد",
+        "no_task_type": "نوع وظیفه وجود ندارد",
+        "tasks_after": "وظایف بعد از",
+        "tasks_before": "وظایف قبل از",
+        "timesheets": "برگه‌های زمانی"
       },
       "colors": {
         "title": "رنگ بندی",
@@ -1505,13 +1511,13 @@
         "hard": "سخت",
         "very_hard": "خیلی سخت"
       },
-      "assignation_disclaimer": "",
-      "create_tasks_disclaimer": "",
-      "data_display": "",
-      "delete_for_selection_error": "",
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": "",
-      "hookup_playlist": ""
+      "assignation_disclaimer": "اگر افرادی در لیست نباشند، به این معنی است که در تیم ثبت نشده‌اند.",
+      "create_tasks_disclaimer": "اگر نوع وظیفه شما مشخص نیست، بررسی کنید که در بخش «انواع وظیفه» در تنظیمات تولید، فهرست شده باشد.",
+      "data_display": "نمایش داده",
+      "delete_for_selection_error": "هنگام حذف وظایف انتخاب شده خطایی روی داد.",
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید وظایف انتخاب شده را برای همیشه حذف کنید؟ تمام نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف",
+      "hookup_playlist": "یک لیست پخش برای آهنگ‌های عاشقانه ایجاد کنید"
     },
     "timesheets": {
       "detail_level": "سطح جزئیات",
@@ -1567,15 +1573,15 @@
         "color": "رنگ"
       },
       "no_department": "دپارتمانی وجود ندارد",
-      "all_departments": "",
-      "available_items": "",
-      "hardware_used_by_artists": "",
-      "linked_hardware": "",
-      "linked_items": "",
-      "linked_software": "",
-      "no_items_linked": "",
-      "select_department": "",
-      "software_used_by_artists": ""
+      "all_departments": "همه دپارتمان‌ها",
+      "available_items": "اقلام موجود",
+      "hardware_used_by_artists": "سخت‌افزار مورد استفاده هنرمندان",
+      "linked_hardware": "سخت‌افزار مرتبط",
+      "linked_items": "موارد مرتبط",
+      "linked_software": "نرم‌افزارهای مرتبط",
+      "no_items_linked": "هیچ موردی به این بخش مرتبط نیست.",
+      "select_department": "یک دپارتمان را برای پیوند دادن موارد انتخاب کنید.",
+      "software_used_by_artists": "نرم‌افزارهای مورد استفاده هنرمندان"
     },
     "edits": {
       "all_edits": "همه ویرایش ها",
@@ -1600,12 +1606,12 @@
       "cancel_text": "آیا مطمئن هستید که می خواهید {name} را بایگانی کنید؟",
       "history": "تاریخچه را ویرایش کنید",
       "restore_error": "هنگام بازیابی این ویرایش خطایی روی داد.",
-      "edit_success": "",
-      "restore_text": "",
-      "delete_for_selection_error": "",
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": "",
-      "multiple_delete_error": ""
+      "edit_success": "تغییرات با موفقیت ذخیره شدند.",
+      "restore_text": "آیا مطمئن هستید که می‌خواهید {name} را از بایگانی خود بازیابی کنید؟",
+      "delete_for_selection_error": "هنگام حذف ویرایش‌های انتخاب‌شده خطایی روی داد.",
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید ویرایش‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف",
+      "multiple_delete_error": "هنگام حذف ویرایش خطایی رخ داد. ممکن است داده‌های موجود در حال حاضر به آن پیوند داده شده باشند. آیا مطمئن هستید که هیچ وظیفه‌ای به ویرایش انتخاب شده پیوند داده نشده است؟"
     },
     "status_automations": {
       "change_ready_for": "تغییر دادن به \"آماده برای\"",
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "وضعیت",
         "ready_for": "آماده برای"
-      }
+      },
+      "add_status_automation_placeholder": "+ اضافه کردن اتوماسیون وضعیت"
     },
     "preview_room": {
       "join_room": "به اتاق بررسی بپیوندید",
@@ -1670,7 +1677,7 @@
         "name": "نام",
         "file": "فایل HDRi"
       },
-      "library_title": ""
+      "library_title": "کتابخانه پس‌زمینه‌های سه‌بعدی"
     },
     "board": {
       "title": "تخته برد",
@@ -1700,9 +1707,9 @@
         "token": "توکن"
       },
       "no_bot": "هیچ رباتی وجود ندارد. آیا می خواهید یکی را ایجاد کنید؟",
-      "confirm_edit": "",
-      "create": "",
-      "departments_empty": ""
+      "confirm_edit": "ذخیره تغییرات ربات",
+      "create": "ایجاد ربات",
+      "departments_empty": "این ربات به هیچ دپارتمانی متصل نیست."
     },
     "chats": {
       "join": "اضافه شدن به چت",
@@ -1735,9 +1742,9 @@
         "title": "لینک به کانسپت ها",
         "empty": "بدون لینک"
       },
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": "",
-      "drop_new_concepts": ""
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید مفاهیم انتخاب شده را برای همیشه حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف",
+      "drop_new_concepts": "فایل‌های مفهومی جدید را اینجا رها کنید"
     },
     "intro": {
       "main": "برای پیشرفت پروژه ما به حمایت شما نیاز داریم. در اینجا چند راه ساده وجود دارد که می توانید به آنها کمک کنید:",
@@ -1771,7 +1778,7 @@
         "name": "نام",
         "color": "رنگ"
       },
-      "all_studios": ""
+      "all_studios": "همه استودیوها"
     },
     "days_off": {
       "title": "روزهای تعطیل",
@@ -1792,9 +1799,9 @@
       "asset_library": "کتابخانه دارایی",
       "from_library": "از کتابخانه دارایی",
       "import_from_asset_type": "همه دارایی ها و محصولات را انتخاب شده را وارد کنید",
-      "import_from_assets": "",
-      "import_from_list": "",
-      "import_from_production": "",
+      "import_from_assets": "دارایی‌ها را از تولید و نوع دارایی انتخاب‌شده وارد کنید",
+      "import_from_list": "وارد کردن دارایی‌های انتخاب‌شده از لیست",
+      "import_from_production": "تمام دارایی‌ها را از تولید انتخاب‌شده وارد کنید",
       "manage": "دارایی ها را به کتابخانه خود اضافه کنید",
       "no_entities": "هیچ موردی در دسترس نیست",
       "no_open_productions": "محصولی باز نیست",
@@ -1811,118 +1818,118 @@
       }
     },
     "budget": {
-      "add_entry": "",
-      "analytics": "",
-      "cash_evolution": "",
-      "cash_repartition": "",
-      "cost": "",
-      "costs": "",
-      "departments": "",
-      "expenses_error": "",
-      "budgets_error": "",
-      "budget_entries_error": "",
-      "create_budget": "",
-      "create_budget_error": "",
-      "delete_budget": "",
-      "delete_budget_entry": "",
-      "delete_budget_entry_error": "",
-      "delete_budget_entry_message": "",
-      "delete_budget_error": "",
-      "delete_budget_message": "",
-      "difference": "",
-      "edit_budget": "",
-      "edit_budget_entry": "",
-      "edit_budget_entry_error": "",
-      "entries": "",
-      "gap": "",
-      "hide_expenses": "",
-      "months": "",
-      "new_hiring": "",
-      "new_version": "",
-      "no_budget_found": "",
-      "no_budget_entries_found": "",
-      "no_analytics_to_show": "",
-      "remaining": "",
-      "previsional_costs": "",
-      "remaining_and_costs": "",
-      "salary_scale_title": "",
-      "show_expenses": "",
-      "show_items": "",
-      "title": "",
+      "add_entry": "اضافه کردن ورودی",
+      "analytics": "تجزیه و تحلیل بودجه",
+      "cash_evolution": "تکامل هزینه",
+      "cash_repartition": "تقسیم مجدد هزینه‌ها",
+      "cost": "هزینه",
+      "costs": "هزینه‌های واقعی",
+      "departments": "بخش‌ها",
+      "expenses_error": "هنگام بارگذاری هزینه‌های واقعی خطایی رخ داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "budgets_error": "هنگام بارگذاری بودجه‌ها خطایی رخ داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "budget_entries_error": "هنگام بارگذاری ورودی‌های بودجه خطایی رخ داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "create_budget": "ایجاد بودجه جدید",
+      "create_budget_error": "هنگام ذخیره این بودجه خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "delete_budget": "حذف بودجه",
+      "delete_budget_entry": "حذف ورودی",
+      "delete_budget_entry_error": "هنگام حذف این ورودی بودجه خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "delete_budget_entry_message": "آیا مطمئن هستید که می‌خواهید این ورودی بودجه را حذف کنید؟",
+      "delete_budget_error": "هنگام حذف این بودجه خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "delete_budget_message": "آیا از حذف بودجه {name} مطمئن هستید؟ لطفاً با تایپ نام بودجه در زیر، آن را تأیید کنید.",
+      "difference": "تفاوت",
+      "edit_budget": "ویرایش نسخه بودجه فعلی",
+      "edit_budget_entry": "ویرایش ورودی",
+      "edit_budget_entry_error": "هنگام ویرایش این ورودی بودجه خطایی رخ داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
+      "entries": "نوشته‌ها",
+      "gap": "گپ",
+      "hide_expenses": "پنهان کردن هزینه‌های واقعی",
+      "months": "ماه‌ها",
+      "new_hiring": "استخدام جدید",
+      "new_version": "نسخه جدید",
+      "no_budget_found": "بودجه‌ای برای این محصول وجود ندارد. آیا می‌خواهید یکی بسازید؟",
+      "no_budget_entries_found": "هیچ بودجه‌ای برای این محصول در نظر گرفته نشده است. آیا می‌خواهید یکی بسازید؟",
+      "no_analytics_to_show": "هیچ تحلیلی برای نمایش این محصول وجود ندارد. بودجه‌ای ایجاد کنید و ورودی‌ها را برای مشاهده تحلیل‌ها اضافه کنید.",
+      "remaining": "باقی مانده",
+      "previsional_costs": "تخمین زده شده",
+      "remaining_and_costs": "هزینه‌ها + رم",
+      "salary_scale_title": "مقیاس حقوق و دستمزد",
+      "show_expenses": "نمایش هزینه‌های واقعی",
+      "show_items": "شمارش سخت‌افزار و نرم‌افزار",
+      "title": "بودجه",
       "fields": {
-        "base_salary": "",
-        "currency": "",
-        "daily_salary": "",
-        "duration": "",
-        "department": "",
-        "months_duration": "",
-        "name": "",
-        "person": "",
-        "position": "",
-        "revision": "",
-        "start_date": "",
-        "end_date": "",
-        "monthly_salary": "",
-        "total_salary": "",
-        "seniority": ""
+        "base_salary": "حقوق",
+        "currency": "ارز",
+        "daily_salary": "حقوق روزانه",
+        "duration": "مدت زمان",
+        "department": "دپارتمان",
+        "months_duration": "مدت زمان ماه",
+        "name": "نام",
+        "person": "شخص",
+        "position": "موقعیت",
+        "revision": "بازنگری",
+        "start_date": "تاریخ شروع",
+        "end_date": "تاریخ پایان",
+        "monthly_salary": "حقوق ماهانه",
+        "total_salary": "کل حقوق",
+        "seniority": "ارشدیت"
       },
       "positions": {
-        "artist": "",
-        "lead": "",
-        "supervisor": ""
+        "artist": "هنرمند",
+        "lead": "سرب",
+        "supervisor": "سرپرست"
       },
       "seniorities": {
-        "junior": "",
-        "mid": "",
-        "senior": ""
+        "junior": "جونیور",
+        "mid": "میانه",
+        "senior": "ارشد"
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "",
-      "delete_for_selection_hard_lock_text": ""
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید موارد انتخاب‌شده را به‌طور دائم حذف کنید؟ لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_lock_text": "حذف"
     },
     "hardware_items": {
-      "create_error": "",
-      "delete_error": "",
-      "delete_text": "",
-      "edit_title": "",
-      "new_hardware_item": "",
-      "number": "",
-      "title": "",
+      "create_error": "هنگام ذخیره مورد سخت‌افزاری خطایی روی داد.",
+      "delete_error": "هنگام حذف قطعه سخت‌افزاری خطایی روی داد.",
+      "delete_text": "آیا از حذف این قطعه سخت‌افزاری مطمئن هستید؟",
+      "edit_title": "ویرایش قطعه سخت‌افزاری",
+      "new_hardware_item": "مورد سخت‌افزاری جدید",
+      "number": "اقلام سخت‌افزاری | اقلام سخت‌افزاری",
+      "title": "اقلام سخت‌افزاری",
       "fields": {
-        "inventory_amount": "",
-        "monthly_cost": "",
-        "name": "",
-        "remaining_amount": "",
-        "short_name": ""
+        "inventory_amount": "مقدار موجودی",
+        "monthly_cost": "هزینه ماهانه",
+        "name": "نام",
+        "remaining_amount": "مبلغ باقیمانده",
+        "short_name": "نام کوتاه"
       }
     },
     "software_licenses": {
-      "create_error": "",
-      "delete_error": "",
-      "delete_text": "",
-      "edit_title": "",
-      "new_software_license": "",
-      "number": "",
-      "title": "",
+      "create_error": "هنگام ذخیره مجوز نرم‌افزار خطایی روی داد.",
+      "delete_error": "هنگام حذف مجوز نرم‌افزار خطایی رخ داد.",
+      "delete_text": "آیا از حذف مجوز این نرم‌افزار مطمئن هستید؟",
+      "edit_title": "ویرایش مجوز نرم‌افزار",
+      "new_software_license": "مجوز نرم‌افزار جدید",
+      "number": "مجوز نرم‌افزار | مجوزهای نرم‌افزاری",
+      "title": "مجوزهای نرم‌افزاری",
       "fields": {
-        "extension": "",
-        "name": "",
-        "monthly_cost": "",
-        "inventory_amount": "",
-        "short_name": "",
-        "status": "",
-        "version": ""
+        "extension": "پسوند",
+        "name": "نام",
+        "monthly_cost": "هزینه ماهانه",
+        "inventory_amount": "مقدار موجودی",
+        "short_name": "نام کوتاه",
+        "status": "وضعیت",
+        "version": "نسخه"
       }
     },
     "row_actions": {
-      "change_avatar": "",
-      "change_password": "",
-      "delete": "",
-      "edit": "",
-      "history": "",
-      "refresh": "",
-      "restore": ""
+      "change_avatar": "تغییر آواتار",
+      "change_password": "تغییر رمز عبور",
+      "delete": "حذف",
+      "edit": "ویرایش",
+      "history": "تاریخچه",
+      "refresh": "تازه کردن",
+      "restore": "بازیابی"
     }
   }
 }

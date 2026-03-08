@@ -35,8 +35,8 @@
       "only_current_episode": "現在のエピソードのみ",
       "linked": "リンク済み",
       "no_concept": "このアセットにリンクされたコンセプトはありません",
-      "casted_in_shots": "nbショット}ショットでキャスティング",
-      "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「DELETE」と入力して確認してください。",
+      "casted_in_shots": "{nbShots}ショットでキャスティング",
+      "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
     },
     "asset_types": {
@@ -57,7 +57,8 @@
       },
       "include_all": "すべてのアセット用タスクタイプを含む",
       "add_asset_type_to_library": "ライブラリにアセットタイプを追加する",
-      "library_title": "アセット・タイプ・ライブラリー"
+      "library_title": "アセット・タイプ・ライブラリー",
+      "add_asset_type_placeholder": "+ 資産タイプの追加"
     },
     "breakdown": {
       "all_assets": "利用可能なすべてのアセット",
@@ -263,28 +264,28 @@
       }
     },
     "keyboard": {
-      "altdown": "Move task selection down",
-      "altj": "Select the previous preview",
-      "altk": "Select the next preview",
-      "altleft": "Move task selection left",
-      "altright": "Move task selection right",
-      "altup": "Move task selection up",
-      "annotations": "Annotations",
-      "draw": "Set draw mode on",
-      "navigation": "Navigation",
-      "redo": "Redo",
-      "undo": "Undo",
-      "playlist_navigation": "Playlist navigation",
-      "remove_annotation": "Remove annotation",
-      "shortcuts": "Shortcuts",
-      "ctrldown": "Move metadata cell selection down",
-      "ctrlleft": "Move metadata cell selection left",
-      "ctrlright": "Move metadata cell selection right",
-      "ctrlup": "Move metadata cell selection up",
-      "plhome": "Go to the first frame",
-      "plend": "Go to the last frame",
-      "plaltright": "Go to the first frame of the next shot",
-      "plaltleft": "Go to the last frame of the previous shot",
+      "altdown": "タスクの選択を下に移動",
+      "altj": "前のプレビューを選択",
+      "altk": "次のプレビューを選択",
+      "altleft": "タスクの選択を左に移動",
+      "altright": "タスク選択を右に移動",
+      "altup": "タスク選択を上に移動",
+      "annotations": "注釈",
+      "draw": "描画モードをオンに設定",
+      "navigation": "ナビゲーション",
+      "redo": "やり直す",
+      "undo": "元に戻す",
+      "playlist_navigation": "プレイリストの操作",
+      "remove_annotation": "注釈を削除",
+      "shortcuts": "ショートカット",
+      "ctrldown": "メタデータセルの選択を下に移動",
+      "ctrlleft": "メタデータセルの選択を左に移動",
+      "ctrlright": "メタデータセルの選択範囲を右に移動",
+      "ctrlup": "メタデータセルの選択範囲を上に移動",
+      "plhome": "スタートフレームへ送る",
+      "plend": "エンドフレームへ送る",
+      "plaltright": "次のショットのスタートフレームへ送る",
+      "plaltleft": "前のショットのエンドフレームへ送る",
       "object_viewer": "オブジェクト・ビューワ",
       "rotate_hdr": "環境マップの回転",
       "change_fov": "焦点距離の変更",
@@ -543,9 +544,12 @@
       "entities": "エンティティ",
       "expand_all": "すべてを拡大する",
       "hours": "時間",
-      "remove_search_query": "本当に\"{名前}\"という検索クエリを削除しますか？",
-      "remove_search_filter_group": "検索フィルターグループ\"{名前}\"を本当に削除しますか？",
-      "shared_by": "名前}によって共有される"
+      "remove_search_query": "本当に\"{name}\"という検索クエリを削除しますか？",
+      "remove_search_filter_group": "検索フィルターグループ\"{name}\"を本当に削除しますか？",
+      "shared_by": "{name} によって共有される",
+      "continue": "続ける",
+      "developer_documentation": "開発者向けドキュメント",
+      "feedback": "ロードマップ / フィードバック"
     },
     "menu": {
       "assign_tasks": "タスクにアサイン",
@@ -836,7 +840,7 @@
       "no_clients_to_notify": "通知する顧客はいない。",
       "notify_clients_success": "通知は正常に送信されました。",
       "unmute": "ミュート解除",
-      "volume_level": "ボリューム{レベル}%。"
+      "volume_level": "ボリューム{level}%。"
     },
     "productions": {
       "current": "選択されたプロダクション",
@@ -1053,7 +1057,8 @@
           "error_register": "FIDO デバイスの登録中にエラーが発生しました。",
           "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。"
         },
-        "enabled": "二要素認証が有効"
+        "enabled": "二要素認証が有効",
+        "mandatory": "お客様の組織では二要素認証が必要です。続行するには、少なくとも1つの方法を有効にしてください。"
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "アセット、ショット、シーケンス、…"
       },
       "add_task_status_to_library": "タスクのステータスをライブラリに追加する",
-      "library_title": "タスク・ステータス・ライブラリ"
+      "library_title": "タスク・ステータス・ライブラリ",
+      "add_task_status_placeholder": "+ タスクステータスの追加"
     },
     "task_types": {
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
@@ -1205,7 +1211,7 @@
       "edit_version_exist": "似た名前のバージョンはすでに存在する。",
       "delete_version": "スケジュールバージョンの削除",
       "delete_version_error": "このスケジュールバージョンの削除中にエラーが発生しました。サポートチームまでご連絡ください。",
-      "delete_version_message": "本当にスケジュールバージョン{名前}を削除しますか？以下にスケジュールバージョン名を入力して確認してください。",
+      "delete_version_message": "本当にスケジュールバージョン{name}を削除しますか？以下にスケジュールバージョン名を入力して確認してください。",
       "versions": {
         "reference": "参考予想",
         "from": "より",
@@ -1305,7 +1311,7 @@
       "get_frames_from_previews_description": "最新の公開された動画プレビューからフレーム番号を抽出するタスクタイプを選択してください。",
       "get_frames_from_previews_error": "タスクタイプのプレビューからフレーム番号を抽出中にエラーが発生しました。サポートにお問い合わせください。",
       "wrong_file_duration": "アップロードされた動画ファイルの1つの長さが現在のショットの予想される長さと一致しません。",
-      "delete_for_selection_hard_text": "選択したショットを永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したショットを永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "show_timecode": "インとアウトをタイムコードで表示"
     },
@@ -1509,7 +1515,7 @@
       "create_tasks_disclaimer": "タスク・タイプが見つからない場合は、本番設定のタスク・タイプ・セクションにリストされていることを確認してください。",
       "data_display": "データ表示",
       "delete_for_selection_error": "選択したタスクの削除中にエラーが発生しました。",
-      "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "hookup_playlist": "フックアップ・プレイリストを作成する"
     },
@@ -1603,7 +1609,7 @@
       "edit_success": "変更が正常に保存されました。",
       "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
       "delete_for_selection_error": "選択した編集の削除中にエラーが発生しました。",
-      "delete_for_selection_hard_text": "選択した編集を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択した編集を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "multiple_delete_error": "編集の削除中にエラーが発生しました。現在リンクされている既存のデータがある可能性があります。選択した編集にリンクされているタスクがないことを確認していますか？"
     },
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "ステータス",
         "ready_for": "準備対象"
-      }
+      },
+      "add_status_automation_placeholder": "+ ステータス・オートメーションの追加"
     },
     "preview_room": {
       "join_room": "レビュールームに参加",
@@ -1657,13 +1664,13 @@
       "title": "エンティティ検索"
     },
     "backgrounds": {
-      "create_error": "An error occurred while saving this background. Are you sure there is no background with a similar name?",
-      "delete_text": "Are you sure you want to remove {name} from your database?",
-      "delete_error": "An error occurred while deleting this background. There may be existing data currently linked to it. Are you sure this background has no task linked to it?",
-      "name": "background",
-      "number": "background | backgrounds",
-      "edit_background": "Edit background",
-      "new_background": "Add a new background",
+      "create_error": "このBGを保存する際にエラーが発生しました。同様の名前のBGがありませんか？",
+      "delete_text": "{name}をデータベースから本当に削除してもよろしいですか？",
+      "delete_error": "このBGの削除中にエラーが発生しました。リンクされているデータが存在する可能性があります。 このBGにリンクされているタスクがありませんか？",
+      "name": "BG",
+      "number": "BG | 背景",
+      "edit_background": "BGを編集",
+      "new_background": "新しいBGを追加",
       "title": "3D背景",
       "fields": {
         "is_default": "デフォルト",
@@ -1735,7 +1742,7 @@
         "title": "コンセプトへのリンク",
         "empty": "リンクなし"
       },
-      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "drop_new_concepts": "新しいコンセプトファイルをここにドロップする"
     },
@@ -1828,7 +1835,7 @@
       "delete_budget_entry_error": "この予算エントリの削除中にエラーが発生しました。サポートチームまでご連絡ください。",
       "delete_budget_entry_message": "この予算項目を削除してもよろしいですか？",
       "delete_budget_error": "この予算の削除中にエラーが発生しました。サポートチームまでご連絡ください。",
-      "delete_budget_message": "予算{名前}を削除してもよろしいですか？下に予算名を入力して確認してください。",
+      "delete_budget_message": "予算{name}を削除してもよろしいですか？下に予算名を入力して確認してください。",
       "difference": "違い",
       "edit_budget": "現在の予算バージョンを編集する",
       "edit_budget_entry": "エントリーを編集する",
@@ -1878,7 +1885,7 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "選択したアイテムを永久に削除してもよろしいですか？以下に「DELETE」と入力して確認してください。",
+      "delete_for_selection_hard_text": "選択したアイテムを永久に削除してもよろしいですか？以下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
     },
     "hardware_items": {

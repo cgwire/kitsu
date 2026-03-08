@@ -55,7 +55,10 @@
       </div>
 
       <div class="tab" v-show="isActiveTab('assetTypes')">
-        <div class="flexrow mt1 mb1 add-asset-type">
+        <div
+          class="flexrow mt1 mb1 add-asset-type"
+          v-if="remainingAssetTypes.length"
+        >
           <combobox
             class="flexrow-item"
             :options="remainingAssetTypes"

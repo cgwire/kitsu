@@ -58,8 +58,7 @@ export const formatDate = date => {
 }
 
 export const monthToString = month => {
-  const currentYear = moment().year()
-  return moment(`${currentYear}-${month}`, 'YYYY-M').format('MMM')
+  return moment(`${month}`, 'M').format('MMM')
 }
 
 export const getMonthRange = (year, currentYear, currentMonth) => {

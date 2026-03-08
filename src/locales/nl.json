@@ -37,7 +37,7 @@
       "no_concept": "Geen concepten gekoppeld aan dit actief",
       "casted_in_shots": "Gegoten in {nbShots} shots",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde onderdelen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en previews worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_lock_text": "WISSEN"
     },
     "asset_types": {
       "all_asset_types": "Alle assettypes",
@@ -57,7 +57,8 @@
       },
       "include_all": "Omvat alle soorten elementtaken",
       "add_asset_type_to_library": "Een type bedrijfsmiddel toevoegen aan de bibliotheek",
-      "library_title": "Bibliotheek met activatypes"
+      "library_title": "Bibliotheek met activatypes",
+      "add_asset_type_placeholder": "+ Type bedrijfsmiddel toevoegen"
     },
     "breakdown": {
       "all_assets": "Alle beschikbare assets",
@@ -126,7 +127,7 @@
       "confirm_publish_button": "Reactie plaatsen zonder bestanden te publiceren",
       "add_link": "Een URL-link toevoegen",
       "pinned_revision": "Gepinde revisie",
-      "edited_by": "Bewerkt door {naam}",
+      "edited_by": "Bewerkt door {name}",
       "add_attachment_to_reply": "Bijlage toevoegen aan antwoord",
       "add_frame_to_comment": "Huidig frame toevoegen aan commentaar",
       "add_emoji": "Een emoji toevoegen"
@@ -543,9 +544,12 @@
       "entities": "Entiteiten",
       "expand_all": "Alles uitbreiden",
       "hours": "uur",
-      "remove_search_query": "Weet je zeker dat je de zoekopdracht \"{naam}\" wilt verwijderen?",
-      "remove_search_filter_group": "Weet je zeker dat je de zoekfiltergroep \"{naam}\" wilt verwijderen?",
-      "shared_by": "Gedeeld door {naam}"
+      "remove_search_query": "Weet je zeker dat je de zoekopdracht \"{name}\" wilt verwijderen?",
+      "remove_search_filter_group": "Weet je zeker dat je de zoekfiltergroep \"{name}\" wilt verwijderen?",
+      "shared_by": "Gedeeld door {name}",
+      "continue": "Ga verder",
+      "developer_documentation": "Documentatie voor ontwikkelaars",
+      "feedback": "Stappenplan / Feedback"
     },
     "menu": {
       "assign_tasks": "Taak toewijzen",
@@ -836,7 +840,7 @@
       "no_clients_to_notify": "Er zijn geen klanten te verwittigen.",
       "notify_clients_success": "De melding is succesvol verzonden.",
       "unmute": "Unmute",
-      "volume_level": "Volume: {niveau}%"
+      "volume_level": "Volume: {level}%"
     },
     "productions": {
       "current": "Geselecteerde productie",
@@ -1053,7 +1057,8 @@
           "error_register": "Er is een fout opgetreden tijdens het registreren van het FIDO-apparaat.",
           "error_unregister": "Er is een fout opgetreden bij het ongedaan maken van de registratie van het FIDO-apparaat."
         },
-        "enabled": "Authenticatie met twee factoren ingeschakeld"
+        "enabled": "Authenticatie met twee factoren ingeschakeld",
+        "mandatory": "Uw organisatie vereist twee-factor authenticatie. Schakel ten minste één methode in om door te gaan."
       }
     },
     "settings": {
@@ -1118,7 +1123,8 @@
         "entities": "Assets, shots, sequenties, ..."
       },
       "add_task_status_to_library": "Een taakstatus toevoegen aan de bibliotheek",
-      "library_title": "Taakstatusbibliotheek"
+      "library_title": "Taakstatusbibliotheek",
+      "add_task_status_placeholder": "+ Taakstatus toevoegen"
     },
     "task_types": {
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
@@ -1205,7 +1211,7 @@
       "edit_version_exist": "Er bestaat al een versie met een vergelijkbare naam.",
       "delete_version": "Versie schema verwijderen",
       "delete_version_error": "Er is een fout opgetreden tijdens het verwijderen van deze agendaversie. Neem contact op met ons ondersteuningsteam.",
-      "delete_version_message": "Weet u zeker dat u de agendaversie {naam} wilt verwijderen? Bevestig dit door de naam van de agendaversie hieronder in te voeren.",
+      "delete_version_message": "Weet u zeker dat u de agendaversie {name} wilt verwijderen? Bevestig dit door de naam van de agendaversie hieronder in te voeren.",
       "versions": {
         "reference": "Referentie voorspelling",
         "from": "van",
@@ -1305,8 +1311,8 @@
       "get_frames_from_previews_description": "Selecteer een type taak om de framenummers uit de laatst gepubliceerde filmvoorvertoningen te halen.",
       "get_frames_from_previews_error": "Er is een fout opgetreden bij het extraheren van de framenummers uit de voorbeeldweergaven van de taaksoorten. Neem contact op met ons ondersteuningsteam.",
       "wrong_file_duration": "De duur van een van de geüploade videobestanden komt niet overeen met de verwachte duur van de huidige opname.",
-      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde opnamen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'DELETE' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde opnamen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "show_timecode": "Toon in en uit als tijdcodes"
     },
     "server_down": {
@@ -1510,7 +1516,7 @@
       "data_display": "Gegevensweergave",
       "delete_for_selection_error": "Er is een fout opgetreden bij het verwijderen van de geselecteerde taken.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde taken permanent wilt verwijderen? Alle gerelateerde opmerkingen en voorvertoningen worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "hookup_playlist": "Genereer een afspeellijst"
     },
     "timesheets": {
@@ -1527,7 +1533,7 @@
       "export_timespents": "Tijdsbesteding voor open projecten exporteren als een lijst",
       "unit": "Eenheid",
       "confirm_day_offs": "Als je deze dagen als vrije dagen instelt, wordt alle gelogde tijd voor de betreffende dagen gewist. Weet je zeker dat je wilt doorgaan?",
-      "confirm_unset_day_offs": "Vrije dagen worden momenteel toegepast van {start} tot {einde}. Weet je zeker dat je deze periode wilt verwijderen?",
+      "confirm_unset_day_offs": "Vrije dagen worden momenteel toegepast van {start} tot {end}. Weet je zeker dat je deze periode wilt verwijderen?",
       "off": "Uit"
     },
     "wrong_browser": {
@@ -1601,10 +1607,10 @@
       "history": "Geschiedenis waarden bewerken",
       "restore_error": "Er is een fout opgetreden tijdens het herstellen van deze bewerking.",
       "edit_success": "Wijzigingen zijn succesvol opgeslagen.",
-      "restore_text": "Weet je zeker dat je {naam} uit je archief wilt herstellen?",
+      "restore_text": "Weet je zeker dat je {name} uit je archief wilt herstellen?",
       "delete_for_selection_error": "Er is een fout opgetreden tijdens het verwijderen van de geselecteerde bewerkingen.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde bewerkingen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "multiple_delete_error": "Er is een fout opgetreden tijdens het verwijderen van een bewerking. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taken zijn gekoppeld aan een geselecteerde bewerking?"
     },
     "status_automations": {
@@ -1639,7 +1645,8 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Klaar Voor"
-      }
+      },
+      "add_status_automation_placeholder": "+ Status automatisering toevoegen"
     },
     "preview_room": {
       "join_room": "Betreed Review Room",
@@ -1658,7 +1665,7 @@
     },
     "backgrounds": {
       "create_error": "Er is een fout opgetreden tijdens het opslaan van deze achtergrond. Weet je zeker dat er geen achtergrond is met een vergelijkbare naam?",
-      "delete_text": "Weet je zeker dat je {naam} uit je database wilt verwijderen?",
+      "delete_text": "Weet je zeker dat je {name} uit je database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze achtergrond. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taak aan deze achtergrond is gekoppeld?",
       "name": "achtergrond",
       "number": "achtergrond | achtergronden",
@@ -1689,7 +1696,7 @@
       "new_bot": "Een nieuwe bot toevoegen",
       "edit_title": "Bot bewerken",
       "edit_avatar_error": "Er is een fout opgetreden tijdens het bijwerken van de avatar van de bot.",
-      "new_token_title": "Nieuw API-token voor {naam}",
+      "new_token_title": "Nieuw API-token voor {name}",
       "new_token_warning": "Als u een nieuw token genereert, wordt het oude token uitgeschakeld.",
       "generate": "Een nieuw token genereren",
       "copy_token_warning": "Zorg ervoor dat je het onderstaande token kopieert. Je zult het niet meer kunnen zien.",
@@ -1736,7 +1743,7 @@
         "empty": "Geen links"
       },
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde concepten definitief wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "WISSEN",
       "drop_new_concepts": "Drop hier nieuwe conceptbestanden"
     },
     "intro": {
@@ -1760,7 +1767,7 @@
     },
     "studios": {
       "create_error": "Er is een fout opgetreden tijdens het opslaan van deze studio. Weet u zeker dat er geen studio is met een vergelijkbare naam?",
-      "delete_text": "Weet je zeker dat je {naam} uit je database wilt verwijderen?",
+      "delete_text": "Weet je zeker dat je {name} uit je database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van deze studio.",
       "edit_title": "Bewerk studio",
       "new_studios": "Een studio toevoegen",
@@ -1785,7 +1792,7 @@
       "edit": "Vrije dag bewerken",
       "delete": "Vrije dag verwijderen",
       "confirm_day_offs": "Door deze vrije dagen in te stellen, wordt alle tijd die is ingevuld voor de betreffende dagen gewist. Weet je zeker dat je wilt doorgaan?",
-      "confirm_unset_day_offs": "Vrije dagen worden momenteel toegepast van {start} tot {einde}. Weet je zeker dat je deze periode wilt verwijderen?",
+      "confirm_unset_day_offs": "Vrije dagen worden momenteel toegepast van {start} tot {end}. Weet je zeker dat je deze periode wilt verwijderen?",
       "error_days_off": "Er is een fout opgetreden tijdens het bijwerken van de vrije dagen."
     },
     "library": {
@@ -1828,7 +1835,7 @@
       "delete_budget_entry_error": "Er is een fout opgetreden tijdens het verwijderen van deze budgetvermelding. Neem contact op met ons ondersteuningsteam.",
       "delete_budget_entry_message": "Weet je zeker dat je deze budgetvermelding wilt verwijderen?",
       "delete_budget_error": "Er is een fout opgetreden tijdens het verwijderen van dit budget. Neem contact op met ons ondersteuningsteam.",
-      "delete_budget_message": "Weet je zeker dat je het budget {naam} wilt verwijderen? Bevestig dit door de budgetnaam hieronder te typen.",
+      "delete_budget_message": "Weet je zeker dat je het budget {name} wilt verwijderen? Bevestig dit door de budgetnaam hieronder te typen.",
       "difference": "Verschil",
       "edit_budget": "Huidige budgetversie bewerken",
       "edit_budget_entry": "Bericht bewerken",
@@ -1878,8 +1885,8 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'DELETE' te typen.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'WISSEN' te typen.",
+      "delete_for_selection_hard_lock_text": "WISSEN"
     },
     "hardware_items": {
       "create_error": "Er is een fout opgetreden tijdens het opslaan van het hardware-item.",

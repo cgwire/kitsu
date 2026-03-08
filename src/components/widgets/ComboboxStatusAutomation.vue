@@ -15,6 +15,9 @@
             :status-automation="currentStatusAutomation"
             v-if="currentStatusAutomation"
           />
+          <span class="tag ml05 mt05 mb05" v-else-if="addPlaceholder">
+            {{ $t('status_automations.add_status_automation_placeholder') }}
+          </span>
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
@@ -102,11 +105,6 @@ export default {
     currentStatusAutomation() {
       if (this.modelValue) {
         return this.statusAutomationMap.get(this.modelValue)
-      } else if (this.addPlaceholder) {
-        return {
-          short_name: '+ status',
-          color: '#999'
-        }
       } else {
         return this.statusAutomationsList[0]
       }
