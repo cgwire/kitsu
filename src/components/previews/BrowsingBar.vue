@@ -46,61 +46,53 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-export default {
-  name: 'browsing-bar',
-
-  components: {
-    ButtonSimple
+const props = defineProps({
+  currentIndex: {
+    type: Number,
+    default: 0
   },
-
-  props: {
-    currentIndex: {
-      type: Number,
-      default: 0
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
-    },
-    isAssigned: {
-      type: Boolean,
-      default: false
-    },
-    light: {
-      type: Boolean,
-      default: false
-    },
-    previews: {
-      type: Array,
-      default: () => []
-    },
-    readOnly: {
-      type: Boolean,
-      default: false
-    }
+  fullScreen: {
+    type: Boolean,
+    default: false
   },
-
-  emits: [
-    'add-preview-clicked',
-    'current-index-clicked',
-    'next-clicked',
-    'previous-clicked',
-    'remove-preview-clicked'
-  ],
-
-  computed: {
-    isBigDisplay() {
-      return (!this.light || this.fullScreen) && this.previews.length > 1
-    },
-
-    isMovie() {
-      return this.previews[this.currentIndex - 1]?.extension === 'mp4'
-    }
+  isAssigned: {
+    type: Boolean,
+    default: false
+  },
+  light: {
+    type: Boolean,
+    default: false
+  },
+  previews: {
+    type: Array,
+    default: () => []
+  },
+  readOnly: {
+    type: Boolean,
+    default: false
   }
-}
+})
+
+defineEmits([
+  'add-preview-clicked',
+  'current-index-clicked',
+  'next-clicked',
+  'previous-clicked',
+  'remove-preview-clicked'
+])
+
+const isBigDisplay = computed(
+  () => (!props.light || props.fullScreen) && props.previews.length > 1
+)
+
+const isMovie = computed(
+  () => props.previews[props.currentIndex - 1]?.extension === 'mp4'
+)
 </script>
 
 <style lang="scss" scoped>

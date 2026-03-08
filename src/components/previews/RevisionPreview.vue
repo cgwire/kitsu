@@ -17,7 +17,7 @@
       <span :title="originalName" v-else> .{{ previewFile.extension }} </span>
     </div>
     <div
-      ref="drop-area"
+      ref="dropArea"
       class="drop-area"
       @dragover="onDragover"
       @dragleave="onDragleave"
@@ -26,80 +26,68 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Widget to display a preview listed in a revision. It allows to select a
  * given file for current revision.
  * It fires events about drag'n'drop reordering too.
  */
+import { computed, ref } from 'vue'
+
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 
-export default {
-  name: 'revision-preview',
-
-  components: {
-    LightEntityThumbnail
+const props = defineProps({
+  index: {
+    required: true,
+    type: Number
   },
-
-  props: {
-    index: {
-      required: true,
-      type: Number
-    },
-    isSelected: {
-      default: false,
-      type: Boolean
-    },
-    previewFile: {
-      required: true,
-      type: Object
-    }
+  isSelected: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['preview-dropped', 'selected'],
-
-  computed: {
-    dropArea() {
-      return this.$refs['drop-area']
-    },
-
-    hasThumbnail() {
-      return ['mp4', 'png'].includes(this.previewFile.extension)
-    },
-
-    originalName() {
-      return `${this.previewFile.original_name}.${this.previewFile.extension}`
-    }
-  },
-
-  methods: {
-    onSelected() {
-      this.$emit('selected', this.index)
-    },
-
-    onPreviewDragStart(event, previewIndex) {
-      event.dataTransfer.setData('previewIndex', previewIndex)
-    },
-
-    onDragleave() {
-      this.dropArea.style.background = 'transparent'
-      this.dropArea.style.width = '15px'
-    },
-
-    onDragover(event) {
-      event.preventDefault()
-      this.dropArea.style.width = '60px'
-    },
-
-    onDropped(event) {
-      this.dropArea.style.background = 'transparent'
-      this.dropArea.style.width = '15px'
-      this.$emit('preview-dropped', {
-        previousIndex: event.dataTransfer.getData('previewIndex'),
-        newIndex: this.index
-      })
-    }
+  previewFile: {
+    required: true,
+    type: Object
   }
+})
+
+const emit = defineEmits(['preview-dropped', 'selected'])
+
+const dropArea = ref(null)
+
+const hasThumbnail = computed(() =>
+  ['mp4', 'png'].includes(props.previewFile.extension)
+)
+
+const originalName = computed(
+  () => `${props.previewFile.original_name}.${props.previewFile.extension}`
+)
+
+const onSelected = () => {
+  emit('selected', props.index)
+}
+
+const onPreviewDragStart = (event, previewIndex) => {
+  event.dataTransfer.setData('previewIndex', previewIndex)
+}
+
+const onDragleave = () => {
+  dropArea.value.style.background = 'transparent'
+  dropArea.value.style.width = '15px'
+}
+
+const onDragover = event => {
+  event.preventDefault()
+  dropArea.value.style.width = '60px'
+}
+
+const onDropped = event => {
+  dropArea.value.style.background = 'transparent'
+  dropArea.value.style.width = '15px'
+  emit('preview-dropped', {
+    previousIndex: event.dataTransfer.getData('previewIndex'),
+    newIndex: props.index
+  })
 }
 </script>
 

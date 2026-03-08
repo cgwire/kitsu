@@ -31,529 +31,508 @@
   </div>
 </template>
 
-<script>
-import panzoom from 'panzoom'
-import { mapGetters } from 'vuex'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import createPanzoom from 'panzoom'
+import { useStore } from 'vuex'
 
 import { formatFrame } from '@/lib/video'
 
-import { domMixin } from '@/components/mixins/dom'
-
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'video-viewer',
-
-  mixins: [domMixin],
-
-  components: {
-    Spinner
+const props = defineProps({
+  name: {
+    type: String,
+    default: ''
   },
-
-  props: {
-    name: {
-      type: String,
-      default: ''
-    },
-    big: {
-      type: Boolean,
-      default: false
-    },
-    isComparing: {
-      type: Boolean,
-      default: false
-    },
-    isComparisonOverlay: {
-      type: Boolean,
-      default: false
-    },
-    isHd: {
-      type: Boolean,
-      default: false
-    },
-    isDrawing: {
-      type: Boolean,
-      default: false
-    },
-    isTyping: {
-      type: Boolean,
-      default: false
-    },
-    isMuted: {
-      type: Boolean,
-      default: false
-    },
-    isRepeating: {
-      type: Boolean,
-      default: false
-    },
-    light: {
-      type: Boolean,
-      default: false
-    },
-    currentFrame: {
-      type: Number,
-      default: 0
-    },
-    nbFrames: {
-      type: Number,
-      default: 0
-    },
-    preview: {
-      type: Object,
-      default: () => {}
-    },
-    defaultHeight: {
-      type: Number,
-      default: 0
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
-    },
-    isRoundedTopBorder: {
-      type: Boolean,
-      default: false
-    },
-    panzoom: {
-      type: Boolean,
-      default: false
-    }
+  big: {
+    type: Boolean,
+    default: false
   },
-
-  emits: [
-    'click',
-    'duration-changed',
-    'frame-update',
-    'play-ended',
-    'size-changed',
-    'video-end',
-    'video-loaded'
-  ],
-
-  data() {
-    return {
-      annotations: [],
-      currentTimeRaw: 0,
-      isLoading: false,
-      maxDuration: '00:00.000',
-      videoDuration: 0
-    }
+  isComparing: {
+    type: Boolean,
+    default: false
   },
-
-  mounted() {
-    this.$options.currentTimeCalls = []
-
-    this.container.style.height = this.defaultHeight + 'px'
-    this.isLoading = true
-    if (this.isMuted) {
-      this.video.muted = this.isMuted
-    }
-    setTimeout(() => {
-      if (this.video) {
-        if (this.video.readyState === 4) {
-          this.configureVideo()
-          this.onWindowResize()
-          this.isLoading = false
-          this.setCurrentTime(0)
-          this.setCurrentTimeRaw(0)
-          this.$nextTick(() => {
-            this.video.currentTime = 0
-          })
-          this.$emit('video-loaded')
-        }
-        this.video.addEventListener('focus', e => e.target.blur())
-        this.video.addEventListener('resize', this.resetSize)
-
-        this.video.addEventListener('loadedmetadata', () => {
-          if (!this.video) return
-          this.configureVideo()
-          this.onWindowResize()
-          this.setCurrentTime(0)
-          this.setCurrentTimeRaw(0)
-          this.$emit('video-loaded')
-        })
-
-        this.video.addEventListener('canplay', () => {
-          this.isLoading = false
-        })
-
-        this.video.addEventListener('ended', () => {
-          this.isLoading = false
-        })
-
-        this.video.addEventListener('error', err => {
-          console.error('An error occurred while loading a video', err)
-          if (this.$refs.movie) {
-            this.$refs.movie.style.height = this.defaultHeight + 'px'
-          }
-          this.isLoading = false
-        })
-
-        this.video.addEventListener('loadstart', () => {
-          this.isLoading = true
-        })
-
-        this.video.addEventListener('stalled', () => {
-          this.isLoading = true
-        })
-
-        this.video.addEventListener('waiting', () => {
-          if (this.name.indexOf('comparison') < 0) {
-            this.isLoading = true
-          }
-        })
-
-        window.addEventListener('resize', this.onWindowResize)
-      }
-    }, 0)
-
-    if (this.panzoom) {
-      this.panzoomInstance = panzoom(this.container, {
-        bounds: true,
-        boundsPadding: 0.2,
-        maxZoom: 5,
-        minZoom: 1
-      })
-      this.pausePanZoom()
-    }
+  isComparisonOverlay: {
+    type: Boolean,
+    default: false
   },
-
-  beforeUnmount() {
-    this.pause()
-    window.removeEventListener('resize', this.onWindowResize)
-    this.panzoomInstance?.dispose()
+  isHd: {
+    type: Boolean,
+    default: false
   },
-
-  computed: {
-    ...mapGetters(['currentProduction']),
-
-    container() {
-      return this.$refs.container
-    },
-
-    extension() {
-      return this.preview ? this.preview.extension : ''
-    },
-
-    fps() {
-      return parseFloat(this.currentProduction?.fps) || 25
-    },
-
-    frameDuration() {
-      return Math.round((1 / this.fps) * 10000) / 10000
-    },
-
-    isAvailable() {
-      return !['broken', 'processing'].includes(this.status)
-    },
-
-    isMovie() {
-      return this.extension === 'mp4'
-    },
-
-    isVideo() {
-      return this.$refs.movie && this.videoDuration && this.videoDuration > 0
-    },
-
-    status() {
-      return this.preview && this.preview.status ? this.preview.status : 'ready'
-    },
-
-    video() {
-      return this.$refs.movie
-    },
-
-    moviePath() {
-      if (this.extension === 'mp4' && this.isAvailable && !this.isHd) {
-        return `/api/movies/low/preview-files/${this.preview.id}.mp4`
-      } else if (this.extension === 'mp4' && this.isAvailable) {
-        return `/api/movies/originals/preview-files/${this.preview.id}.mp4`
-      } else {
-        return null
-      }
-    },
-
-    movieDlPath() {
-      if (this.preview && this.isAvailable) {
-        return `/api/movies/originals/preview-files/${this.preview.id}/download`
-      } else {
-        return ''
-      }
-    },
-
-    posterPath() {
-      if (this.extension === 'mp4' && this.isAvailable) {
-        return `/api/pictures/previews/preview-files/${this.preview.id}.png`
-      } else {
-        return null
-      }
-    }
+  isDrawing: {
+    type: Boolean,
+    default: false
   },
-
-  methods: {
-    formatFrame,
-
-    getNaturalDimensions() {
-      return {
-        height: this.video ? this.video.videoHeight : 0,
-        width: this.video ? this.video.videoWidth : 0
-      }
-    },
-
-    getDimensions() {
-      const dimensions = this.getNaturalDimensions()
-      const ratio = dimensions.height / dimensions.width || 1
-      const fullWidth = this.container ? this.container.offsetWidth : 0
-      const fullHeight = this.container ? this.container.offsetHeight : 0
-      let width = fullWidth
-      let height = Math.floor(width * ratio)
-      if (height > fullHeight) {
-        height = fullHeight
-        width = height / ratio
-      }
-      return { width, height }
-    },
-
-    getLastPushedCurrentTime() {
-      const length = this.$options.currentTimeCalls.length
-      if (length > 0) {
-        return this.$options.currentTimeCalls[length - 1]
-      } else {
-        return this.currentTimeRaw
-      }
-    },
-
-    setCurrentFrame(frame) {
-      this.setCurrentTime(frame * this.frameDuration)
-    },
-
-    setCurrentTimeRaw(currentTime) {
-      if (currentTime < this.frameDuration) currentTime = 0
-      this.video.currentTime = currentTime
-    },
-
-    setCurrentTime(currentTime) {
-      if (!this.$options.currentTimeCalls) {
-        this.$options.currentTimeCalls = []
-      }
-      this.$options.currentTimeCalls.push(currentTime)
-      this.runSetCurrentTime()
-    },
-
-    runSetCurrentTime() {
-      if (this.$options.currentTimeCalls.length === 0) {
-        this.$options.running = false
-      } else {
-        this.$options.running = true
-        const currentTime = this.$options.currentTimeCalls.shift()
-        if (this.video.currentTime !== currentTime) {
-          this.video.currentTime = Number(currentTime.toPrecision(4)) + 0.001
-        }
-        setTimeout(() => {
-          this.runSetCurrentTime()
-        }, 10)
-      }
-    },
-
-    configureVideo() {
-      this.video.onended = this.onVideoEnd
-      if (this.video.currentTime === 0) {
-        this.mountVideo()
-      }
-    },
-
-    mountVideo() {
-      if (!this.isMovie) return
-      this.video.muted = this.isMuted
-      this.videoDuration = this.video.duration
-      this.isLoading = false
-      this.$emit('duration-changed', this.videoDuration)
-      this.resetSize()
-      setTimeout(() => {
-        this.resetSize()
-      }, 500)
-    },
-
-    resetSize() {
-      const { height: initialHeight } = this.getDimensions()
-      if (initialHeight > 0) {
-        this.container.style.height = this.defaultHeight + 'px'
-        this.video.style.height = initialHeight + 'px'
-        const videoPosition = this.video.getBoundingClientRect()
-        const containerPosition = this.container.getBoundingClientRect()
-        const top = videoPosition.top - containerPosition.top
-        const left = videoPosition.left - containerPosition.left
-        const width = videoPosition.width
-        const height = videoPosition.height
-
-        if (
-          !this.previousDimensions ||
-          this.previousDimensions.width !== width ||
-          this.previousDimensions.height !== height ||
-          this.previousDimensions.left !== left ||
-          this.previousDimensions.top !== top
-        ) {
-          this.$emit('size-changed', { width, height, top, left })
-        }
-        this.previousDimensions = { width, height, top, left }
-      } else {
-        this.$emit('size-changed', { width: 0, height: 0, top: 0, left: 0 })
-      }
-    },
-
-    getFrameFromPlayer() {
-      const currentTimeRaw = this.video ? this.video.currentTime : 0
-      if (currentTimeRaw === 0) {
-        return 0
-      }
-      let frame = Math.ceil(currentTimeRaw / this.frameDuration) + 1
-      frame = Number(frame.toPrecision(4))
-      frame = Math.min(frame, this.nbFrames)
-      return frame
-    },
-
-    play() {
-      if (!this.moviePath) return
-      if (
-        !this.isPlaying &&
-        this.videoDuration === this.video.currentTime &&
-        this.name.indexOf('comparison') < 0
-      ) {
-        this.setCurrentTime(0)
-      }
-      this.video.play()
-      if (this.name.indexOf('comparison') < 0) {
-        this.runEmitTimeUpdateLoop()
-      }
-    },
-
-    runEmitTimeUpdateLoop() {
-      clearInterval(this.$options.playLoop)
-      this.$options.playLoop = setInterval(
-        this.emitFrameChange,
-        this.frameDuration
-      )
-    },
-
-    emitFrameChange() {
-      const frame = this.getFrameFromPlayer()
-      this.$emit('frame-update', frame)
-    },
-
-    pause() {
-      this.video.pause()
-      clearInterval(this.$options.playLoop)
-      this.video.currentTime = this.currentFrame * this.frameDuration
-      this.$emit('frame-update', this.currentFrame)
-    },
-
-    toggleMute() {
-      this.video.muted = !this.video.muted
-    },
-
-    goPreviousFrame() {
-      const nextFrame = this.currentFrame - 1
-      if (nextFrame < 0) return
-      this.video.currentTime = nextFrame * this.frameDuration + 0.001
-      this.$emit('frame-update', nextFrame)
-      return nextFrame
-    },
-
-    goNextFrame() {
-      const nextFrame = this.currentFrame + 1
-      if (nextFrame >= this.nbFrames) return
-      this.video.currentTime = nextFrame * this.frameDuration + 0.001
-      this.$emit('frame-update', nextFrame)
-      return nextFrame
-    },
-
-    onVideoEnd() {
-      this.isPlaying = false
-      clearInterval(this.$options.playLoop)
-      if (this.isRepeating) {
-        this.$emit('video-end')
-        if (!this.video) return
-        this.video.currentTime = 0
-        this.play()
-      } else {
-        this.$emit('play-ended')
-      }
-    },
-
-    onWindowResize() {
-      this.mountVideo()
-    },
-
-    resetPanZoom() {
-      if (this.panzoomInstance) {
-        this.panzoomInstance.moveTo(0, 0)
-        this.panzoomInstance.zoomAbs(0, 0, 1)
-      }
-    },
-
-    pausePanZoom() {
-      if (this.panzoomInstance) {
-        this.panzoomInstance.pause()
-      }
-    },
-
-    resumePanZoom() {
-      if (this.panzoomInstance) {
-        this.panzoomInstance.resume()
-      }
-    },
-
-    setSpeed(rate) {
-      if (this.video) {
-        this.video.playbackRate = rate
-      }
-    },
-
-    setVolume(volume) {
-      if (this.video) {
-        this.video.volume = volume / 100
-      }
-    }
+  isTyping: {
+    type: Boolean,
+    default: false
   },
+  isMuted: {
+    type: Boolean,
+    default: false
+  },
+  isRepeating: {
+    type: Boolean,
+    default: false
+  },
+  light: {
+    type: Boolean,
+    default: false
+  },
+  currentFrame: {
+    type: Number,
+    default: 0
+  },
+  nbFrames: {
+    type: Number,
+    default: 0
+  },
+  preview: {
+    type: Object,
+    default: () => ({})
+  },
+  defaultHeight: {
+    type: Number,
+    default: 0
+  },
+  fullScreen: {
+    type: Boolean,
+    default: false
+  },
+  isRoundedTopBorder: {
+    type: Boolean,
+    default: false
+  },
+  panzoom: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  watch: {
-    preview() {
-      this.resetPanZoom()
-      this.maxDuration = '00:00.000'
-      this.pause()
-      this.$nextTick(() => {
-        this.resetPanZoom()
-        setTimeout(() => {
-          this.resetPanZoom()
-        }, 100)
-      })
-    },
+const emit = defineEmits([
+  'click',
+  'duration-changed',
+  'frame-update',
+  'play-ended',
+  'size-changed',
+  'video-end',
+  'video-loaded'
+])
 
-    light() {
-      this.resetPanZoom()
-      this.mountVideo()
-    },
+const store = useStore()
+const currentProduction = computed(() => store.getters.currentProduction)
 
-    isComparing() {
-      this.resetPanZoom()
-      this.mountVideo()
-    },
+const container = ref(null)
+const movie = ref(null)
+const isLoading = ref(false)
+const videoDuration = ref(0)
+const currentTimeRaw = ref(0)
 
-    isComparingOverlay() {
-      this.resetPanZoom()
-      this.mountVideo()
-    },
+let panzoomInstance = null
+let currentTimeCalls = []
+let playLoop = null
+let isPlaying = false
+let previousDimensions = null
 
-    isMuted() {
-      this.video.muted = this.isMuted
-    },
+const video = computed(() => movie.value)
 
-    fullScreen() {
-      this.resetPanZoom()
-    }
+const extension = computed(() => (props.preview ? props.preview.extension : ''))
+
+const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+
+const frameDuration = computed(
+  () => Math.round((1 / fps.value) * 10000) / 10000
+)
+
+const isAvailable = computed(() => {
+  const s =
+    props.preview && props.preview.status ? props.preview.status : 'ready'
+  return !['broken', 'processing'].includes(s)
+})
+
+const isMovie = computed(() => extension.value === 'mp4')
+
+const moviePath = computed(() => {
+  if (extension.value === 'mp4' && isAvailable.value && !props.isHd) {
+    return `/api/movies/low/preview-files/${props.preview.id}.mp4`
+  } else if (extension.value === 'mp4' && isAvailable.value) {
+    return `/api/movies/originals/preview-files/${props.preview.id}.mp4`
+  } else {
+    return null
+  }
+})
+
+const posterPath = computed(() => {
+  if (extension.value === 'mp4' && isAvailable.value) {
+    return `/api/pictures/previews/preview-files/${props.preview.id}.png`
+  } else {
+    return null
+  }
+})
+
+const getNaturalDimensions = () => ({
+  height: video.value ? video.value.videoHeight : 0,
+  width: video.value ? video.value.videoWidth : 0
+})
+
+const getDimensions = () => {
+  const dimensions = getNaturalDimensions()
+  const ratio = dimensions.height / dimensions.width || 1
+  const fullWidth = container.value ? container.value.offsetWidth : 0
+  const fullHeight = container.value ? container.value.offsetHeight : 0
+  let width = fullWidth
+  let height = Math.floor(width * ratio)
+  if (height > fullHeight) {
+    height = fullHeight
+    width = height / ratio
+  }
+  return { width, height }
+}
+
+const getLastPushedCurrentTime = () => {
+  const length = currentTimeCalls.length
+  if (length > 0) {
+    return currentTimeCalls[length - 1]
+  } else {
+    return currentTimeRaw.value
   }
 }
+
+const setCurrentFrame = frame => {
+  setCurrentTime(frame * frameDuration.value)
+}
+
+const setCurrentTimeRaw = currentTime => {
+  if (currentTime < frameDuration.value) currentTime = 0
+  video.value.currentTime = currentTime
+}
+
+const runSetCurrentTime = () => {
+  if (currentTimeCalls.length === 0) {
+    return
+  } else {
+    const currentTime = currentTimeCalls.shift()
+    if (video.value.currentTime !== currentTime) {
+      video.value.currentTime = Number(currentTime.toPrecision(4)) + 0.001
+    }
+    setTimeout(() => {
+      runSetCurrentTime()
+    }, 10)
+  }
+}
+
+const setCurrentTime = currentTime => {
+  currentTimeCalls.push(currentTime)
+  runSetCurrentTime()
+}
+
+const resetSize = () => {
+  const { height: initialHeight } = getDimensions()
+  if (initialHeight > 0) {
+    container.value.style.height = props.defaultHeight + 'px'
+    video.value.style.height = initialHeight + 'px'
+    const videoPosition = video.value.getBoundingClientRect()
+    const containerPosition = container.value.getBoundingClientRect()
+    const top = videoPosition.top - containerPosition.top
+    const left = videoPosition.left - containerPosition.left
+    const width = videoPosition.width
+    const height = videoPosition.height
+
+    if (
+      !previousDimensions ||
+      previousDimensions.width !== width ||
+      previousDimensions.height !== height ||
+      previousDimensions.left !== left ||
+      previousDimensions.top !== top
+    ) {
+      emit('size-changed', { width, height, top, left })
+    }
+    previousDimensions = { width, height, top, left }
+  } else {
+    emit('size-changed', { width: 0, height: 0, top: 0, left: 0 })
+  }
+}
+
+const mountVideo = () => {
+  if (!isMovie.value) return
+  video.value.muted = props.isMuted
+  videoDuration.value = video.value.duration
+  isLoading.value = false
+  emit('duration-changed', videoDuration.value)
+  resetSize()
+  setTimeout(() => {
+    resetSize()
+  }, 500)
+}
+
+const configureVideo = () => {
+  video.value.onended = onVideoEnd
+  if (video.value.currentTime === 0) {
+    mountVideo()
+  }
+}
+
+const getFrameFromPlayer = () => {
+  const raw = video.value ? video.value.currentTime : 0
+  if (raw === 0) return 0
+  let frame = Math.ceil(raw / frameDuration.value) + 1
+  frame = Number(frame.toPrecision(4))
+  frame = Math.min(frame, props.nbFrames)
+  return frame
+}
+
+const emitFrameChange = () => {
+  const frame = getFrameFromPlayer()
+  emit('frame-update', frame)
+}
+
+const runEmitTimeUpdateLoop = () => {
+  clearInterval(playLoop)
+  playLoop = setInterval(emitFrameChange, frameDuration.value)
+}
+
+const play = () => {
+  if (
+    !isPlaying &&
+    videoDuration.value === video.value.currentTime &&
+    props.name.indexOf('comparison') < 0
+  ) {
+    setCurrentTime(0)
+  }
+  video.value.play()
+  if (props.name.indexOf('comparison') < 0) {
+    runEmitTimeUpdateLoop()
+  }
+}
+
+const pause = () => {
+  video.value.pause()
+  clearInterval(playLoop)
+  video.value.currentTime = props.currentFrame * frameDuration.value
+  emit('frame-update', props.currentFrame)
+}
+
+const toggleMute = () => {
+  video.value.muted = !video.value.muted
+}
+
+const goPreviousFrame = () => {
+  const nextFrame = props.currentFrame - 1
+  if (nextFrame < 0) return
+  video.value.currentTime = nextFrame * frameDuration.value + 0.001
+  emit('frame-update', nextFrame)
+  return nextFrame
+}
+
+const goNextFrame = () => {
+  const nextFrame = props.currentFrame + 1
+  if (nextFrame >= props.nbFrames) return
+  video.value.currentTime = nextFrame * frameDuration.value + 0.001
+  emit('frame-update', nextFrame)
+  return nextFrame
+}
+
+const onVideoEnd = () => {
+  isPlaying = false
+  clearInterval(playLoop)
+  if (props.isRepeating) {
+    emit('video-end')
+    video.value.currentTime = 0
+    play()
+  } else {
+    emit('play-ended')
+  }
+}
+
+const onWindowResize = () => {
+  mountVideo()
+}
+
+const resetPanZoom = () => {
+  if (panzoomInstance) {
+    panzoomInstance.moveTo(0, 0)
+    panzoomInstance.zoomAbs(0, 0, 1)
+  }
+}
+
+const pausePanZoom = () => {
+  if (panzoomInstance) panzoomInstance.pause()
+}
+
+const resumePanZoom = () => {
+  if (panzoomInstance) panzoomInstance.resume()
+}
+
+const setSpeed = rate => {
+  if (video.value) video.value.playbackRate = rate
+}
+
+const setVolume = volume => {
+  if (video.value) video.value.volume = volume / 100
+}
+
+onMounted(() => {
+  currentTimeCalls = []
+  container.value.style.height = props.defaultHeight + 'px'
+  isLoading.value = true
+  if (props.isMuted) {
+    video.value.muted = props.isMuted
+  }
+  setTimeout(() => {
+    if (video.value) {
+      if (video.value.readyState === 4) {
+        configureVideo()
+        onWindowResize()
+        isLoading.value = false
+        setCurrentTime(0)
+        setCurrentTimeRaw(0)
+        nextTick(() => {
+          video.value.currentTime = 0
+        })
+        emit('video-loaded')
+      }
+      video.value.addEventListener('focus', e => e.target.blur())
+      video.value.addEventListener('resize', resetSize)
+
+      video.value.addEventListener('loadedmetadata', () => {
+        if (!video.value) return
+        configureVideo()
+        onWindowResize()
+        setCurrentTime(0)
+        setCurrentTimeRaw(0)
+        emit('video-loaded')
+      })
+
+      video.value.addEventListener('canplay', () => {
+        isLoading.value = false
+      })
+
+      video.value.addEventListener('ended', () => {
+        isLoading.value = false
+      })
+
+      video.value.addEventListener('error', err => {
+        console.error('An error occurred while loading a video', err)
+        if (movie.value) {
+          movie.value.style.height = props.defaultHeight + 'px'
+        }
+        isLoading.value = false
+      })
+
+      video.value.addEventListener('loadstart', () => {
+        isLoading.value = true
+      })
+
+      video.value.addEventListener('stalled', () => {
+        isLoading.value = true
+      })
+
+      video.value.addEventListener('waiting', () => {
+        if (props.name.indexOf('comparison') < 0) {
+          isLoading.value = true
+        }
+      })
+
+      window.addEventListener('resize', onWindowResize)
+    }
+  }, 0)
+
+  if (props.panzoom) {
+    panzoomInstance = createPanzoom(container.value, {
+      bounds: true,
+      boundsPadding: 0.2,
+      maxZoom: 5,
+      minZoom: 1
+    })
+    pausePanZoom()
+  }
+})
+
+onBeforeUnmount(() => {
+  pause()
+  window.removeEventListener('resize', onWindowResize)
+  panzoomInstance?.dispose()
+})
+
+watch(
+  () => props.preview,
+  () => {
+    resetPanZoom()
+    pause()
+    nextTick(() => {
+      resetPanZoom()
+      setTimeout(() => {
+        resetPanZoom()
+      }, 100)
+    })
+  }
+)
+
+watch(
+  () => props.light,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isComparing,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isComparisonOverlay,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isMuted,
+  () => {
+    video.value.muted = props.isMuted
+  }
+)
+
+watch(
+  () => props.fullScreen,
+  () => {
+    resetPanZoom()
+  }
+)
+
+defineExpose({
+  currentTimeRaw,
+  video,
+  formatFrame,
+  getNaturalDimensions,
+  getDimensions,
+  getLastPushedCurrentTime,
+  setCurrentFrame,
+  setCurrentTimeRaw,
+  setCurrentTime,
+  configureVideo,
+  mountVideo,
+  getFrameFromPlayer,
+  play,
+  pause,
+  toggleMute,
+  goPreviousFrame,
+  goNextFrame,
+  resetPanZoom,
+  pausePanZoom,
+  resumePanZoom,
+  setSpeed,
+  setVolume,
+  resetSize
+})
 </script>
 
 <style lang="scss" scoped>

@@ -1,7 +1,7 @@
 <template>
   <div class="flexrow">
     <combobox-styled
-      ref="task-type-combobox"
+      ref="taskTypeCombobox"
       class="flexrow-item"
       :options="taskTypeOptions"
       v-model="taskTypeId"
@@ -24,151 +24,128 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Widget displaying entity's revisions of previews per task type.
  * It allows to select a given revision for a given task type for current entity.
  */
+import { ref, computed, watch, onMounted } from 'vue'
 import { firstBy } from 'thenby'
-import { mapGetters } from 'vuex'
+import { useStore } from 'vuex'
 
 import editStore from '@/store/modules/edits'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
-export default {
-  name: 'previews-per-task-type',
+const props = defineProps({
+  entity: {
+    default: () => ({}),
+    type: Object
+  }
+})
 
-  components: {
-    ComboboxStyled,
-    ValidationTag
-  },
+const emit = defineEmits(['preview-changed'])
 
-  emits: ['preview-changed'],
+const store = useStore()
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-  data() {
-    return {
-      taskTypeId: null,
-      previewFileId: this.entity.preview_file_id
+const taskTypeId = ref(null)
+const previewFileId = ref(props.entity.preview_file_id)
+
+const taskTypeOptions = computed(() => {
+  const entity = editStore.cache.editMap.get(props.entity.id)
+  return entity.tasks
+    .map(taskId => taskMap.value.get(taskId))
+    .map(task => taskTypeMap.value.get(task.task_type_id))
+    .sort(firstBy('priority', 1).thenBy('name'))
+    .map(taskType => ({
+      label: taskType.name,
+      value: taskType.id
+    }))
+})
+
+const previewFileOptions = computed(() => {
+  const previewFiles = props.entity.preview_files[taskTypeId.value] || []
+  return previewFiles.map(previewFile => ({
+    label: `v${previewFile.revision}`,
+    value: previewFile.id
+  }))
+})
+
+const taskStatus = computed(() => {
+  if (!editStore.cache.editMap) return ''
+  const entity = editStore.cache.editMap.get(props.entity.id)
+  if (!entity) return ''
+  const taskId = entity.validations.get(taskTypeId.value)
+  if (taskId) {
+    const task = taskMap.value.get(taskId)
+    if (!task) return ''
+    return taskStatusMap.value.get(task.task_status_id)
+  } else {
+    return ''
+  }
+})
+
+const getTaskTypeIdForPreviewFile = (taskTypeIds, previewFileIdValue) => {
+  return taskTypeIds.find(ttId => {
+    const previewFiles = props.entity.preview_files[ttId]
+    return previewFiles.some(pf => pf.id === previewFileIdValue)
+  })
+}
+
+const setCurrentParameters = () => {
+  const taskTypeIds = Object.keys(props.entity.preview_files)
+  if (taskTypeIds.length) {
+    if (props.entity.preview_file_id) {
+      taskTypeId.value = getTaskTypeIdForPreviewFile(
+        taskTypeIds,
+        props.entity.preview_file_id
+      )
     }
-  },
-
-  props: {
-    entity: {
-      default: () => {},
-      type: Object
-    }
-  },
-
-  mounted() {
-    this.setCurrentParameters()
-  },
-
-  computed: {
-    ...mapGetters(['taskMap', 'taskTypeMap', 'taskStatusMap']),
-
-    taskTypeOptions() {
-      const entity = editStore.cache.editMap.get(this.entity.id)
-      return entity.tasks
-        .map(taskId => this.taskMap.get(taskId))
-        .map(task => this.taskTypeMap.get(task.task_type_id))
-        .sort(firstBy('priority', 1).thenBy('name'))
-        .map(taskType => ({
-          label: taskType.name,
-          value: taskType.id
-        }))
-    },
-
-    previewFileOptions() {
-      const previewFiles = this.entity.preview_files[this.taskTypeId] || []
-      return previewFiles.map(previewFile => ({
-        label: `v${previewFile.revision}`,
-        value: previewFile.id
-      }))
-    },
-
-    taskStatus() {
-      if (!editStore.cache.editMap) return ''
-
-      const entity = editStore.cache.editMap.get(this.entity.id)
-      if (!entity) return ''
-
-      const taskId = entity.validations.get(this.taskTypeId)
-      if (taskId) {
-        const task = this.taskMap.get(taskId)
-        if (!task) return ''
-        const taskStatus = this.taskStatusMap.get(task.task_status_id)
-        return taskStatus
-      } else {
-        return ''
-      }
-    }
-  },
-
-  methods: {
-    getTaskTypeIdForPreviewFile(taskTypeIds, previewFileId) {
-      return taskTypeIds.find(taskTypeId => {
-        const previewFiles = this.entity.preview_files[taskTypeId]
-        return previewFiles.some(
-          previewFile => previewFile.id === previewFileId
-        )
-      })
-    },
-
-    setCurrentParameters() {
-      // Find task type matching current preview.
-      const taskTypeIds = Object.keys(this.entity.preview_files)
-      if (taskTypeIds.length) {
-        if (this.entity.preview_file_id) {
-          this.taskTypeId = this.getTaskTypeIdForPreviewFile(
-            taskTypeIds,
-            this.entity.preview_file_id
-          )
-        }
-        if (!this.taskTypeId) {
-          this.taskTypeId = taskTypeIds[0]
-        }
-      }
-    }
-  },
-
-  watch: {
-    taskTypeId() {
-      // Set current preview was last preview selected. If there is no preview
-      // matching this task type, it selects the first preview available for
-      // this task type.
-      const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles?.length) {
-        const isPreviewFile = previewFiles.some(
-          previewFile => previewFile.id === this.entity.preview_file_id
-        )
-        if (isPreviewFile) {
-          this.previewFileId = this.entity.preview_file_id
-        } else {
-          this.previewFileId = previewFiles[0].id
-        }
-      } else {
-        this.previewFileId = null
-      }
-    },
-
-    previewFileId() {
-      let previewFile = null
-      const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles?.length) {
-        previewFile = previewFiles.find(
-          previewFile => previewFile.id === this.previewFileId
-        )
-      }
-      this.$emit('preview-changed', this.entity, previewFile)
-    },
-
-    'entity.preview_file_id'() {
-      if (this.previewFileId !== this.entity.preview_file_id) {
-        this.previewFileId = this.entity.preview_file_id
-      }
+    if (!taskTypeId.value) {
+      taskTypeId.value = taskTypeIds[0]
     }
   }
 }
+
+onMounted(() => {
+  setCurrentParameters()
+})
+
+watch(taskTypeId, () => {
+  const previewFiles = props.entity.preview_files[taskTypeId.value]
+  if (previewFiles?.length) {
+    const isPreviewFile = previewFiles.some(
+      pf => pf.id === props.entity.preview_file_id
+    )
+    if (isPreviewFile) {
+      previewFileId.value = props.entity.preview_file_id
+    } else {
+      previewFileId.value = previewFiles[0].id
+    }
+  } else {
+    previewFileId.value = null
+  }
+})
+
+watch(previewFileId, () => {
+  let previewFile = null
+  const previewFiles = props.entity.preview_files[taskTypeId.value]
+  if (previewFiles?.length) {
+    previewFile = previewFiles.find(pf => pf.id === previewFileId.value)
+  }
+  emit('preview-changed', props.entity, previewFile)
+})
+
+watch(
+  () => props.entity.preview_file_id,
+  () => {
+    if (previewFileId.value !== props.entity.preview_file_id) {
+      previewFileId.value = props.entity.preview_file_id
+    }
+  }
+)
 </script>

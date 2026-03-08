@@ -24,7 +24,7 @@
     </div>
 
     <video-viewer
-      ref="video-viewer"
+      ref="videoViewer"
       class="video-viewer"
       :name="name"
       :big="isBig"
@@ -50,7 +50,7 @@
     />
 
     <picture-viewer
-      ref="picture-viewer"
+      ref="pictureViewer"
       :big="isBig"
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
@@ -64,7 +64,7 @@
     />
 
     <object-viewer
-      ref="object-viewer"
+      ref="objectViewer"
       class="model-viewer"
       :background-url="backgroundUrl"
       :default-height="defaultHeight"
@@ -79,7 +79,7 @@
     />
 
     <sound-viewer
-      ref="sound-viewer"
+      ref="soundViewer"
       class="sound-viewer"
       :file-name="fileTitle"
       :preview-url="isSound ? originalPath : ''"
@@ -108,7 +108,7 @@
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
       <a
         class="button mt2"
-        ref="preview-file"
+        ref="previewFile"
         :href="originalDlPath"
         :title="fileTitle"
       >
@@ -121,12 +121,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
 import { DownloadIcon } from 'lucide-vue-next'
 
 import { formatFrame, formatTime } from '@/lib/video'
-import { domMixin } from '@/components/mixins/dom'
 
+/* eslint-disable no-unused-vars */
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import DiffViewer from '@/components/previews/DiffViewer.vue'
 import MarkdownViewer from '@/components/previews/MarkdownViewer.vue'
@@ -135,448 +136,351 @@ import PictureViewer from '@/components/previews/PictureViewer.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import VideoViewer from '@/components/previews/VideoViewer.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'preview-viewer',
-
-  mixins: [domMixin],
-
-  components: {
-    DiffViewer,
-    DownloadIcon,
-    MarkdownViewer,
-    ObjectViewer,
-    PdfViewer,
-    PictureViewer,
-    SoundViewer,
-    Spinner,
-    VideoViewer
+const props = defineProps({
+  name: {
+    type: String,
+    default: ''
   },
-
-  props: {
-    name: {
-      type: String,
-      default: ''
-    },
-    defaultHeight: {
-      type: Number,
-      default: 0
-    },
-    currentFrame: {
-      type: Number,
-      default: 0
-    },
-    marginBottom: {
-      type: Number,
-      default: 0
-    },
-    nbFrames: {
-      type: Number,
-      default: 0
-    },
-    isBig: {
-      type: Boolean,
-      default: false
-    },
-    isComparing: {
-      type: Boolean,
-      default: false
-    },
-    isEnvironmentSkybox: {
-      type: Boolean,
-      default: false
-    },
-    isFullScreen: {
-      type: Boolean,
-      default: false
-    },
-    isHd: {
-      type: Boolean,
-      default: false
-    },
-    isComparisonOverlay: {
-      type: Boolean,
-      default: false
-    },
-    isLight: {
-      type: Boolean,
-      default: false
-    },
-    isMuted: {
-      type: Boolean,
-      default: false
-    },
-    isObjectBackground: {
-      type: Boolean,
-      default: false
-    },
-    isRepeating: {
-      type: Boolean,
-      default: false
-    },
-    isWireframe: {
-      type: Boolean,
-      default: false
-    },
-    objectBackgroundUrl: {
-      type: String,
-      default: ''
-    },
-    preview: {
-      type: Object,
-      default: () => {}
-    }
+  defaultHeight: {
+    type: Number,
+    default: 0
   },
-
-  emits: [
-    'duration-changed',
-    'frame-update',
-    'model-loaded',
-    'play-ended',
-    'size-changed',
-    'video-end',
-    'video-loaded'
-  ],
-
-  data() {
-    return {
-      currentTime: '00:00.000',
-      currentTimeRaw: 0,
-      isDrawing: false,
-      isPlaying: false,
-      maxDuration: '00:00.000',
-      videoDuration: 0
-    }
+  currentFrame: {
+    type: Number,
+    default: 0
   },
-
-  computed: {
-    // Elements
-
-    container() {
-      return this.$refs.container
-    },
-
-    videoViewer() {
-      return this.$refs['video-viewer']
-    },
-
-    pictureViewer() {
-      return this.$refs['picture-viewer']
-    },
-
-    soundViewer() {
-      return this.$refs['sound-viewer']
-    },
-
-    objectViewer() {
-      return this.$refs['object-viewer']
-    },
-
-    //  Utils
-
-    backgroundUrl() {
-      return this.isObjectBackground ? this.objectBackgroundUrl : undefined
-    },
-
-    fileTitle() {
-      return this.preview
-        ? this.preview.original_name + '.' + this.preview.extension
-        : ''
-    },
-
-    extension() {
-      return this.preview ? this.preview.extension : ''
-    },
-
-    status() {
-      return this.preview && this.preview.status ? this.preview.status : 'ready'
-    },
-
-    isBroken() {
-      return this.status === 'broken'
-    },
-
-    isProcessing() {
-      return this.status === 'processing'
-    },
-
-    isReady() {
-      return this.status === 'ready'
-    },
-
-    isMovie() {
-      return this.isReady && this.extension === 'mp4'
-    },
-
-    isPdf() {
-      return this.isReady && this.extension === 'pdf'
-    },
-
-    isMarkdown() {
-      return this.isReady && this.extension === 'md'
-    },
-
-    isDiff() {
-      return this.isReady && this.extension === 'diff'
-    },
-
-    isPicture() {
-      return (
-        this.isReady && ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
-      )
-    },
-
-    is3DModel() {
-      return this.isReady && ['glb', 'gltf'].includes(this.extension)
-    },
-
-    isSound() {
-      return this.isReady && ['wav', 'mp3'].includes(this.extension)
-    },
-
-    isFile() {
-      return (
-        this.isReady &&
-        !this.isPicture &&
-        !this.isMovie &&
-        !this.is3DModel &&
-        !this.isSound &&
-        !this.isPdf &&
-        !this.isMarkdown &&
-        !this.isDiff
-      )
-    },
-
-    originalPath() {
-      if (this.preview) {
-        const previewId = this.preview.id
-        const extension = this.extension ? this.extension : 'png'
-        const type = this.isMovie ? 'movies' : 'pictures'
-        return `/api/${type}/originals/preview-files/${previewId}.${extension}`
-      } else {
-        return ''
-      }
-    },
-
-    originalDlPath() {
-      if (this.preview) {
-        const type = this.isMovie ? 'movies' : 'pictures'
-        return `/api/${type}/originals/preview-files/${this.preview.id}/download`
-      } else {
-        return ''
-      }
-    }
+  marginBottom: {
+    type: Number,
+    default: 0
   },
-
-  methods: {
-    formatFrame,
-    formatTime,
-
-    // Video
-
-    resetVideo() {
-      if (this.videoViewer) this.videoViewer.mountVideo()
-    },
-
-    updateTime(time) {
-      this.currentTimeRaw = time
-      this.currentTime = this.formatTime(this.currentTimeRaw)
-    },
-
-    changeMaxDuration(duration) {
-      if (duration) {
-        this.maxDuration = this.formatTime(duration)
-        this.videoDuration = duration
-      } else {
-        this.maxDuration = '00:00.000'
-        this.videoDuration = 0
-      }
-    },
-
-    play() {
-      this.isPlaying = true
-      this.isDrawing = false
-      if (this.videoViewer) {
-        this.videoViewer.play()
-      }
-      if (this.isSound) {
-        this.soundViewer.play()
-      }
-    },
-
-    pause() {
-      this.isPlaying = false
-      if (this.videoViewer) this.videoViewer.pause()
-      if (this.isSound) {
-        this.soundViewer.pause()
-      }
-    },
-
-    playModelAnimation(animationName) {
-      this.objectViewer.play(animationName)
-    },
-
-    pauseModelAnimation() {
-      this.objectViewer.pause()
-    },
-
-    goPreviousFrame() {
-      return this.videoViewer.goPreviousFrame()
-    },
-
-    goNextFrame() {
-      return this.videoViewer.goNextFrame()
-    },
-
-    onPlayPauseClicked() {
-      if (!this.isPlaying) {
-        this.play()
-      } else {
-        this.pause()
-      }
-    },
-
-    get3DAnimations() {
-      return this.$refs['object-viewer'].getAnimations()
-    },
-
-    // Sizing
-
-    getNaturalDimensions() {
-      if (this.isMovie) {
-        return this.videoViewer.getNaturalDimensions()
-      } else {
-        return this.pictureViewer.getNaturalDimensions()
-      }
-    },
-
-    getDimensions() {
-      const dimensions = { width: 0, height: 0 }
-      if (this.container) {
-        dimensions.width = this.container.offsetWidth
-        dimensions.height = this.container.offsetHeight
-      }
-      return dimensions
-    },
-
-    resize() {
-      if (this.isPicture) this.pictureViewer?.resetPicture()
-      else if (this.isMovie) this.videoViewer?.mountVideo()
-    },
-
-    setCurrentFrame(frameNumber) {
-      this.videoViewer.setCurrentFrame(frameNumber)
-    },
-
-    onPictureSizeChanged(dimensions) {
-      dimensions.source = 'picture'
-      this.$emit('size-changed', dimensions)
-    },
-
-    onVideoSizeChanged(dimensions) {
-      dimensions.source = 'movie'
-      this.$emit('size-changed', dimensions)
-    },
-
-    // To use when you don't want to handle back pressure and rounding
-    setCurrentTimeRaw(time) {
-      this.videoViewer.setCurrentTimeRaw(time)
-    },
-
-    getCurrentTimeRaw() {
-      return this.isMovie ? this.videoViewer.currentTimeRaw : 0
-    },
-
-    // Loupe
-
-    showLoupe() {
-      this.pictureViewer.showLoupe()
-    },
-
-    hideLoupe() {
-      this.pictureViewer.hideLoupe()
-    },
-
-    updateLoupePosition(event, canvasDimensions) {
-      this.pictureViewer.updateLoupePosition(event, canvasDimensions)
-    },
-
-    extractFrame(canvas, frame) {
-      return new Promise(resolve => {
-        const video = this.videoViewer.video
-        const draw = () => {
-          const context = canvas.getContext('2d')
-          const dimensions = this.videoViewer.getNaturalDimensions()
-          canvas.width = dimensions.width
-          canvas.height = dimensions.height
-          context.clearRect(0, 0, canvas.width, canvas.height)
-          context.drawImage(video, 0, 0, canvas.width, canvas.height)
-          resolve()
-        }
-        const targetTime = frame * this.videoViewer.frameDuration
-        if (Math.abs(video.currentTime - targetTime) < 0.01) {
-          draw()
-        } else {
-          video.addEventListener('seeked', draw, { once: true })
-          this.videoViewer.setCurrentFrame(frame)
-        }
-      })
-    },
-
-    resetZoom() {
-      if (this.pictureViewer) {
-        this.pictureViewer.resetPanZoom()
-      }
-      if (this.videoViewer) {
-        this.videoViewer.resetPanZoom()
-      }
-    },
-
-    pauseZoom() {
-      if (this.pictureViewer) {
-        this.pictureViewer.pausePanZoom()
-      }
-      if (this.videoViewer) {
-        this.videoViewer.pausePanZoom()
-      }
-    },
-
-    resumeZoom() {
-      if (this.pictureViewer) {
-        this.pictureViewer.resumePanZoom()
-      }
-      if (this.videoViewer) {
-        this.videoViewer.resumePanZoom()
-      }
-    },
-
-    setSpeed(rate) {
-      if (this.videoViewer) {
-        this.videoViewer.setSpeed(rate)
-      }
-    },
-
-    setVolume(volume) {
-      if (this.videoViewer) {
-        this.videoViewer.setVolume(volume)
-      }
-    }
+  nbFrames: {
+    type: Number,
+    default: 0
   },
+  isBig: {
+    type: Boolean,
+    default: false
+  },
+  isComparing: {
+    type: Boolean,
+    default: false
+  },
+  isEnvironmentSkybox: {
+    type: Boolean,
+    default: false
+  },
+  isFullScreen: {
+    type: Boolean,
+    default: false
+  },
+  isHd: {
+    type: Boolean,
+    default: false
+  },
+  isComparisonOverlay: {
+    type: Boolean,
+    default: false
+  },
+  isLight: {
+    type: Boolean,
+    default: false
+  },
+  isMuted: {
+    type: Boolean,
+    default: false
+  },
+  isObjectBackground: {
+    type: Boolean,
+    default: false
+  },
+  isRepeating: {
+    type: Boolean,
+    default: false
+  },
+  isWireframe: {
+    type: Boolean,
+    default: false
+  },
+  objectBackgroundUrl: {
+    type: String,
+    default: ''
+  },
+  preview: {
+    type: Object,
+    default: () => ({})
+  }
+})
 
-  watch: {
-    preview() {
-      if (this.isMovie) {
-        this.pause()
-        this.maxDuration = '00:00.000'
-      } else if (this.isPicture) {
-        this.pause()
-        setTimeout(() => {
-          if (this.pictureViewer) this.pictureViewer.resetPicture()
-        }, 10)
-      }
-    }
+const emit = defineEmits([
+  'duration-changed',
+  'frame-update',
+  'model-loaded',
+  'play-ended',
+  'size-changed',
+  'video-end',
+  'video-loaded'
+])
+
+const container = ref(null)
+const videoViewer = ref(null)
+const pictureViewer = ref(null)
+const soundViewer = ref(null)
+const objectViewer = ref(null)
+
+let isPlaying = false
+
+const backgroundUrl = computed(() =>
+  props.isObjectBackground ? props.objectBackgroundUrl : undefined
+)
+
+const fileTitle = computed(() =>
+  props.preview
+    ? props.preview.original_name + '.' + props.preview.extension
+    : ''
+)
+
+const extension = computed(() => (props.preview ? props.preview.extension : ''))
+
+const status = computed(() =>
+  props.preview && props.preview.status ? props.preview.status : 'ready'
+)
+
+const isBroken = computed(() => status.value === 'broken')
+const isProcessing = computed(() => status.value === 'processing')
+const isReady = computed(() => status.value === 'ready')
+const isMovie = computed(() => isReady.value && extension.value === 'mp4')
+const isPdf = computed(() => isReady.value && extension.value === 'pdf')
+
+const isPicture = computed(
+  () => isReady.value && ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
+)
+
+const is3DModel = computed(
+  () => isReady.value && ['glb', 'gltf'].includes(extension.value)
+)
+
+const isSound = computed(
+  () => isReady.value && ['wav', 'mp3'].includes(extension.value)
+)
+
+const isFile = computed(
+  () =>
+    isReady.value &&
+    !isPicture.value &&
+    !isMovie.value &&
+    !is3DModel.value &&
+    !isSound.value &&
+    !isPdf.value
+)
+
+const originalPath = computed(() => {
+  if (props.preview) {
+    const previewId = props.preview.id
+    const ext = extension.value ? extension.value : 'png'
+    const type = isMovie.value ? 'movies' : 'pictures'
+    return `/api/${type}/originals/preview-files/${previewId}.${ext}`
+  } else {
+    return ''
+  }
+})
+
+const originalDlPath = computed(() => {
+  if (props.preview) {
+    const type = isMovie.value ? 'movies' : 'pictures'
+    return `/api/${type}/originals/preview-files/${props.preview.id}/download`
+  } else {
+    return ''
+  }
+})
+
+const resetVideo = () => {
+  if (videoViewer.value) videoViewer.value.mountVideo()
+}
+
+const updateTime = () => {}
+
+const changeMaxDuration = () => {}
+
+const play = () => {
+  isPlaying = true
+  if (videoViewer.value) videoViewer.value.play()
+  if (isSound.value) soundViewer.value.play()
+}
+
+const pause = () => {
+  isPlaying = false
+  if (videoViewer.value) videoViewer.value.pause()
+  if (isSound.value) soundViewer.value.pause()
+}
+
+const playModelAnimation = animationName => {
+  objectViewer.value.play(animationName)
+}
+
+const pauseModelAnimation = () => {
+  objectViewer.value.pause()
+}
+
+const goPreviousFrame = () => {
+  return videoViewer.value.goPreviousFrame()
+}
+
+const goNextFrame = () => {
+  return videoViewer.value.goNextFrame()
+}
+
+const onPlayPauseClicked = () => {
+  if (!isPlaying) {
+    play()
+  } else {
+    pause()
   }
 }
+
+const get3DAnimations = () => {
+  return objectViewer.value.getAnimations()
+}
+
+const getNaturalDimensions = () => {
+  if (isMovie.value) {
+    return videoViewer.value.getNaturalDimensions()
+  } else {
+    return pictureViewer.value.getNaturalDimensions()
+  }
+}
+
+const getDimensions = () => {
+  const dimensions = { width: 0, height: 0 }
+  if (container.value) {
+    dimensions.width = container.value.offsetWidth
+    dimensions.height = container.value.offsetHeight
+  }
+  return dimensions
+}
+
+const resize = () => {
+  if (isPicture.value) pictureViewer.value?.resetPicture()
+  else if (isMovie.value) videoViewer.value?.mountVideo()
+}
+
+const setCurrentFrame = frameNumber => {
+  videoViewer.value.setCurrentFrame(frameNumber)
+}
+
+const onPictureSizeChanged = dimensions => {
+  dimensions.source = 'picture'
+  emit('size-changed', dimensions)
+}
+
+const onVideoSizeChanged = dimensions => {
+  dimensions.source = 'movie'
+  emit('size-changed', dimensions)
+}
+
+const setCurrentTimeRawValue = time => {
+  videoViewer.value.setCurrentTimeRaw(time)
+}
+
+const getCurrentTimeRaw = () => {
+  return isMovie.value ? videoViewer.value.currentTimeRaw : 0
+}
+
+const showLoupe = () => {
+  pictureViewer.value.showLoupe()
+}
+
+const hideLoupe = () => {
+  pictureViewer.value.hideLoupe()
+}
+
+const updateLoupePosition = (event, canvasDimensions) => {
+  pictureViewer.value.updateLoupePosition(event, canvasDimensions)
+}
+
+const extractFrame = (canvas, frame) => {
+  videoViewer.value.setCurrentFrame(frame)
+  const video = videoViewer.value.video
+  const context = canvas.getContext('2d')
+  const dimensions = videoViewer.value.getNaturalDimensions()
+  canvas.width = dimensions.width
+  canvas.height = dimensions.height
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(video, 0, 0, canvas.width, canvas.height)
+}
+
+const resetZoom = () => {
+  if (pictureViewer.value) pictureViewer.value.resetPanZoom()
+  if (videoViewer.value) videoViewer.value.resetPanZoom()
+}
+
+const pauseZoom = () => {
+  if (pictureViewer.value) pictureViewer.value.pausePanZoom()
+  if (videoViewer.value) videoViewer.value.pausePanZoom()
+}
+
+const resumeZoom = () => {
+  if (pictureViewer.value) pictureViewer.value.resumePanZoom()
+  if (videoViewer.value) videoViewer.value.resumePanZoom()
+}
+
+const setSpeed = rate => {
+  if (videoViewer.value) videoViewer.value.setSpeed(rate)
+}
+
+const setVolume = volume => {
+  if (videoViewer.value) videoViewer.value.setVolume(volume)
+}
+
+watch(
+  () => props.preview,
+  () => {
+    if (isMovie.value) {
+      pause()
+    } else if (isPicture.value) {
+      pause()
+      setTimeout(() => {
+        if (pictureViewer.value) pictureViewer.value.resetPicture()
+      }, 10)
+    }
+  }
+)
+
+defineExpose({
+  isBroken,
+  container,
+  videoViewer,
+  pictureViewer,
+  formatFrame,
+  formatTime,
+  resetVideo,
+  updateTime,
+  changeMaxDuration,
+  play,
+  pause,
+  playModelAnimation,
+  pauseModelAnimation,
+  goPreviousFrame,
+  goNextFrame,
+  onPlayPauseClicked,
+  get3DAnimations,
+  getNaturalDimensions,
+  getDimensions,
+  resize,
+  setCurrentFrame,
+  setCurrentTimeRaw: setCurrentTimeRawValue,
+  getCurrentTimeRaw,
+  showLoupe,
+  hideLoupe,
+  updateLoupePosition,
+  extractFrame,
+  resetZoom,
+  pauseZoom,
+  resumeZoom,
+  setSpeed,
+  setVolume
+})
 </script>
 
 <style lang="scss" scoped>
@@ -709,7 +613,6 @@ export default {
     position: relative;
     align-items: center;
     background: black;
-    // box-shadow: inset 4px 2px 20px 4px #000A;
     display: flex;
     flex: 1;
     justify-content: center;

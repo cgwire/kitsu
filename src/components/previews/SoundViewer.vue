@@ -16,85 +16,75 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onMounted } from 'vue'
 import WaveSurfer from 'wavesurfer.js'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'sound-viewer',
-
-  components: {
-    Spinner
+const props = defineProps({
+  previewUrl: {
+    default: '',
+    type: String
   },
-
-  emits: ['play-ended'],
-
-  data() {
-    return {
-      isLoading: false,
-      wavesurfer: null
-    }
+  fileName: {
+    default: '',
+    type: String
   },
-
-  props: {
-    previewUrl: {
-      default: '',
-      type: String
-    },
-    fileName: {
-      default: '',
-      type: String
-    },
-    defaultHeight: {
-      type: Number,
-      default: 200
-    },
-    fullScreen: {
-      default: false,
-      type: Boolean
-    }
+  defaultHeight: {
+    type: Number,
+    default: 200
   },
+  fullScreen: {
+    default: false,
+    type: Boolean
+  }
+})
 
-  mounted() {
-    this.isLoading = true
-    this.wavesurfer = WaveSurfer.create({
-      container: '#waveform',
-      waveColor: '#00B242', // green
-      progressColor: '#008732', // dark-green,
-      height: this.defaultHeight
-    })
-    this.wavesurfer.on('ready', () => {
-      this.isLoading = false
-    })
-    this.wavesurfer.on('finish', () => {
-      this.$emit('play-ended')
-    })
-    if (this.previewUrl) {
-      this.isLoading = true
-      this.wavesurfer.load(this.previewUrl)
-    }
-  },
+const emit = defineEmits(['play-ended'])
 
-  methods: {
-    play() {
-      this.wavesurfer.play()
-    },
+const isLoading = ref(false)
+let wavesurfer = null
 
-    pause() {
-      this.wavesurfer.pause()
-    }
-  },
+const play = () => {
+  wavesurfer.play()
+}
 
-  watch: {
-    previewUrl() {
-      if (this.previewUrl && this.previewUrl.length > 0) {
-        this.isLoading = true
-        this.wavesurfer.load(this.previewUrl)
-      }
+const pause = () => {
+  wavesurfer.pause()
+}
+
+onMounted(() => {
+  isLoading.value = true
+  wavesurfer = WaveSurfer.create({
+    container: '#waveform',
+    waveColor: '#00B242',
+    progressColor: '#008732',
+    height: props.defaultHeight
+  })
+  wavesurfer.on('ready', () => {
+    isLoading.value = false
+  })
+  wavesurfer.on('finish', () => {
+    emit('play-ended')
+  })
+  if (props.previewUrl) {
+    isLoading.value = true
+    wavesurfer.load(props.previewUrl)
+  }
+})
+
+watch(
+  () => props.previewUrl,
+  () => {
+    if (props.previewUrl && props.previewUrl.length > 0) {
+      isLoading.value = true
+      wavesurfer.load(props.previewUrl)
     }
   }
-}
+)
+
+defineExpose({ play, pause })
 </script>
 
 <style lang="scss" scoped>

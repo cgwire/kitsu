@@ -60,7 +60,7 @@
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
-        @click="_emitProgressEvent($event, annotation)"
+        @click="emitProgressEvent($event, annotation)"
         v-for="(annotation, index) in annotations"
       >
       </span>
@@ -76,7 +76,7 @@
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
-        @click="_emitProgressEvent($event, annotation)"
+        @click="emitProgressEvent($event, annotation)"
         v-for="(annotation, index) in comparisonAnnotations"
       >
       </span>
@@ -102,334 +102,303 @@
   </div>
 </template>
 
-<script>
-import { domMixin } from '@/components/mixins/dom'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'video-progress',
-
-  mixins: [domMixin],
-
-  components: {
-    Spinner
+const props = defineProps({
+  annotations: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    annotations: {
-      default: () => [],
-      type: Array
-    },
-    comparisonAnnotations: {
-      default: () => [],
-      type: Array
-    },
-    empty: {
-      default: false,
-      type: Boolean
-    },
-    frameDuration: {
-      default: 0,
-      type: Number
-    },
-    isFullMode: {
-      default: false,
-      type: Boolean
-    },
-    isFullScreen: {
-      default: false,
-      type: Boolean
-    },
-    movieDimensions: {
-      default: () => ({}),
-      type: Object
-    },
-    nbFrames: {
-      default: 0,
-      type: Number
-    },
-    handleIn: {
-      default: 3,
-      type: Number
-    },
-    handleOut: {
-      default: 3,
-      type: Number
-    },
-    previewId: {
-      default: '',
-      type: String
-    },
-    backgroundUrl: {
-      default: '',
-      type: String
-    },
-    urlPrefix: {
-      default: '/api',
-      type: String
-    }
+  comparisonAnnotations: {
+    default: () => [],
+    type: Array
   },
-
-  emits: [
-    'end-scrub',
-    'handle-in-changed',
-    'handle-out-changed',
-    'progress-changed',
-    'start-scrub'
-  ],
-
-  data() {
-    return {
-      currentMouseFrame: {},
-      frameNumberLeftPosition: 0,
-      isFrameNumberVisible: false,
-      isTileLoading: false,
-      handleInDragging: false,
-      handleOutDragging: false,
-      hoverFrame: 0,
-      progressDragging: false,
-      width: 0,
-      domEvents: [
-        ['mousemove', this.doProgressDrag],
-        ['touchmove', this.doProgressDrag],
-        ['mouseup', this.stopProgressDrag],
-        ['mouseleave', this.stopProgressDrag],
-        ['touchend', this.stopProgressDrag],
-        ['touchcancel', this.stopProgressDrag],
-        ['mouseup', this.stopHandleInDrag],
-        ['mouseleave', this.stopHandleInDrag],
-        ['touchend', this.stopHandleInDrag],
-        ['touchcancel', this.stopHandleInDrag],
-        ['mouseup', this.stopHandleOutDrag],
-        ['mouseleave', this.stopHandleOutDrag],
-        ['touchend', this.stopHandleOutDrag],
-        ['touchcancel', this.stopHandleOutDrag],
-        ['resize', this.resetScheduleSize]
-      ]
-    }
+  empty: {
+    default: false,
+    type: Boolean
   },
-
-  mounted() {
-    this.addEvents(this.domEvents)
-    new ResizeObserver(this.onWindowResize).observe(this.progress)
-    const progressCoordinates = this.progress.getBoundingClientRect()
-    this.width = progressCoordinates.width
-    setTimeout(() => {
-      this.width = progressCoordinates.width
-    })
-    this.progress.setAttribute('max', this.videoDuration)
+  frameDuration: {
+    default: 0,
+    type: Number
   },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
+  isFullMode: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    backgroundSize() {
-      if (this.videoDuration) {
-        return 200 / this.nbFrames + '% 100%'
-      } else {
-        return '300%'
-      }
-    },
-
-    frameSize() {
-      return this.width / this.nbFrames
-    },
-
-    frameNumberStyle() {
-      const frameHeight = 100
-      const height = frameHeight + 30
-      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
-      const width = frameWidth + 10
-      const left = Math.min(
-        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
-        this.width - frameWidth - 10
-      )
-      const top = `-${height + 30}px`
-
-      return {
-        height: `${height}px`,
-        width: `${width}px`,
-        top,
-        left: `${left}px`
-      }
-    },
-
-    progress() {
-      return this.$refs.progress
-    },
-
-    videoDuration() {
-      return this.nbFrames * this.frameDuration
-    },
-
-    videoRatio() {
-      return this.movieDimensions.width
-        ? this.movieDimensions.width / this.movieDimensions.height
-        : 1
-    },
-
-    handleInWidth() {
-      return Math.max(this.frameSize * this.handleIn, 0) + 'px'
-    }
+  isFullScreen: {
+    default: false,
+    type: Boolean
   },
-
-  methods: {
-    onWindowResize() {
-      if (this.progress) {
-        const progressCoordinates = this.progress.getBoundingClientRect()
-        this.width = progressCoordinates.width
-      }
-    },
-
-    getAnnotationPosition(annotation) {
-      if (this.nbFrames === 0) return 0
-      const frameNumber = Math.round(annotation.time / this.frameDuration)
-      return frameNumber * this.frameSize
-    },
-
-    updateProgressBar(frameNumber) {
-      this.progress.value = this.empty
-        ? frameNumber * this.frameDuration
-        : (frameNumber + 1) * this.frameDuration
-    },
-
-    startProgressDrag(event) {
-      this.progressDragging = true
-      this.$emit('start-scrub')
-    },
-
-    stopProgressDrag(event) {
-      this.progressDragging = false
-      this.$emit('end-scrub')
-    },
-
-    startHandleInDrag(event) {
-      this.handleInDragging = true
-    },
-
-    stopHandleInDrag(event) {
-      if (this.handleInDragging) {
-        this.handleInDragging = false
-        const { frameNumber } = this.currentMouseFrame
-        this.$emit('handle-in-changed', { frameNumber, save: true })
-      }
-    },
-
-    startHandleOutDrag(event) {
-      this.handleOutDragging = true
-    },
-
-    stopHandleOutDrag(event) {
-      if (this.handleOutDragging) {
-        this.handleOutDragging = false
-        let { frameNumber, position } = this.currentMouseFrame
-        if (this.width - position < 4) frameNumber += 1
-        this.$emit('handle-out-changed', { frameNumber, save: true })
-      }
-    },
-
-    doProgressDrag(event) {
-      if (
-        this.progressDragging ||
-        this.handleInDragging ||
-        this.handleOutDragging ||
-        this.isFrameNumberVisible
-      ) {
-        this.currentMouseFrame = this._getMouseFrame(event)
-        const { frameNumber } = this.currentMouseFrame
-        this.hoverFrame = frameNumber + 1
-        this.frameNumberLeftPosition =
-          (this.width / this.nbFrames) * frameNumber
-        if (this.progressDragging) {
-          this.$emit('progress-changed', frameNumber)
-        } else if (this.handleInDragging) {
-          this.$emit('handle-in-changed', { frameNumber, save: false })
-        } else if (this.handleOutDragging) {
-          let { frameNumber, position } = this.currentMouseFrame
-          if (this.width - position < 4) frameNumber += 1
-          this.$emit('handle-out-changed', { frameNumber, save: false })
-        }
-      }
-    },
-
-    onProgressClicked(event) {
-      this._emitProgressEvent(event)
-    },
-
-    _getMouseFrame(event, annotation) {
-      let left = this.progress.getBoundingClientRect().left
-      if (
-        left === 0 &&
-        !this.isFullScreen &&
-        this.progress.parentElement.offsetParent
-      ) {
-        left = this.progress.parentElement.offsetParent.offsetLeft
-      }
-      let position = this.getClientX(event) - left
-      if (position > this.width) position = this.width - 1
-      const ratio = position / this.width
-      let duration =
-        annotation && this.frameSize < 3
-          ? annotation.time
-          : this.videoDuration * ratio
-      if (duration < 0) duration = 0
-
-      const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
-      const videoDuration = this.nbFrames * this.frameDuration
-      if (duration > videoDuration) {
-        duration = videoDuration - change
-      }
-      const frameNumber = Math.floor(duration / this.frameDuration)
-      return { frameNumber, position }
-    },
-
-    _emitProgressEvent(event, annotation) {
-      const { frameNumber } = this._getMouseFrame(event, annotation)
-      if (frameNumber < 0) return
-      this.$emit('progress-changed', frameNumber)
-    },
-
-    /**
-     * Returns the background style for a given frame, calculating the
-     * background position depending on the frame number. The tile background is
-     * 8 frames wide.
-     * @param {number} frame
-     */
-    getFrameBackgroundStyle(frame) {
-      if (!frame) return {}
-      const previewId = this.previewId
-      frame = frame - 1
-      if (this.nbFrames >= 3840) {
-        frame = Math.ceil(frame / Math.ceil(this.nbFrames / 3840))
-      }
-      const frameX = frame % 8
-      const frameY = Math.floor(frame / 8)
-      const frameHeight = 100
-      const frameWidth = Math.ceil(frameHeight * this.videoRatio)
-      const tilePath = `${this.urlPrefix}/movies/tiles/preview-files/${previewId}.png`
-      return {
-        background: `url(${tilePath})`,
-        'background-position': `-${frameX * frameWidth}px -${
-          frameY * frameHeight
-        }px`,
-        width: `${frameWidth}px`
-      }
-    }
+  movieDimensions: {
+    default: () => ({}),
+    type: Object
   },
+  nbFrames: {
+    default: 0,
+    type: Number
+  },
+  handleIn: {
+    default: 3,
+    type: Number
+  },
+  handleOut: {
+    default: 3,
+    type: Number
+  },
+  previewId: {
+    default: '',
+    type: String
+  }
+})
 
-  watch: {
-    videoDuration() {
-      const progressCoordinates = this.progress.getBoundingClientRect()
-      this.width = progressCoordinates.width
-      this.progress.setAttribute('max', this.videoDuration)
-      this.updateProgressBar(0)
+const emit = defineEmits([
+  'end-scrub',
+  'handle-in-changed',
+  'handle-out-changed',
+  'progress-changed',
+  'start-scrub'
+])
+
+const progress = ref(null)
+const isFrameNumberVisible = ref(false)
+const isTileLoading = ref(false)
+const handleInDragging = ref(false)
+const handleOutDragging = ref(false)
+const hoverFrame = ref(0)
+const progressDragging = ref(false)
+const width = ref(0)
+const frameNumberLeftPosition = ref(0)
+
+let currentMouseFrame = {}
+
+const getClientX = event =>
+  event.touches?.[0]?.clientX ??
+  event.changedTouches?.[0]?.clientX ??
+  event.clientX
+
+const videoDuration = computed(() => props.nbFrames * props.frameDuration)
+
+const backgroundSize = computed(() => {
+  if (videoDuration.value) {
+    return 200 / props.nbFrames + '% 100%'
+  } else {
+    return '300%'
+  }
+})
+
+const frameSize = computed(() => width.value / props.nbFrames)
+
+const videoRatio = computed(() =>
+  props.movieDimensions.width
+    ? props.movieDimensions.width / props.movieDimensions.height
+    : 1
+)
+
+const handleInWidth = computed(
+  () => Math.max(frameSize.value * props.handleIn, 0) + 'px'
+)
+
+const frameNumberStyle = computed(() => {
+  const frameHeight = 100
+  const height = frameHeight + 30
+  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
+  const w = frameWidth + 10
+  const left = Math.min(
+    Math.max(frameNumberLeftPosition.value - frameWidth / 2, 0),
+    width.value - frameWidth - 10
+  )
+  const top = `-${height + 30}px`
+  return {
+    height: `${height}px`,
+    width: `${w}px`,
+    top,
+    left: `${left}px`
+  }
+})
+
+const onWindowResize = () => {
+  if (progress.value) {
+    const coords = progress.value.getBoundingClientRect()
+    width.value = coords.width
+  }
+}
+
+const getAnnotationPosition = annotation => {
+  if (props.nbFrames === 0) return 0
+  const frameNumber = Math.round(annotation.time / props.frameDuration)
+  return frameNumber * frameSize.value
+}
+
+const updateProgressBar = frameNumber => {
+  progress.value.value = props.empty
+    ? frameNumber * props.frameDuration
+    : (frameNumber + 1) * props.frameDuration
+}
+
+const startProgressDrag = () => {
+  progressDragging.value = true
+  emit('start-scrub')
+}
+
+const stopProgressDrag = () => {
+  progressDragging.value = false
+  emit('end-scrub')
+}
+
+const startHandleInDrag = () => {
+  handleInDragging.value = true
+}
+
+const stopHandleInDrag = () => {
+  if (handleInDragging.value) {
+    handleInDragging.value = false
+    const { frameNumber } = currentMouseFrame
+    emit('handle-in-changed', { frameNumber, save: true })
+  }
+}
+
+const startHandleOutDrag = () => {
+  handleOutDragging.value = true
+}
+
+const stopHandleOutDrag = () => {
+  if (handleOutDragging.value) {
+    handleOutDragging.value = false
+    let { frameNumber, position } = currentMouseFrame
+    if (width.value - position < 4) frameNumber += 1
+    emit('handle-out-changed', { frameNumber, save: true })
+  }
+}
+
+const getMouseFrame = (event, annotation) => {
+  let left = progress.value.getBoundingClientRect().left
+  if (
+    left === 0 &&
+    !props.isFullScreen &&
+    progress.value.parentElement.offsetParent
+  ) {
+    left = progress.value.parentElement.offsetParent.offsetLeft
+  }
+  let position = getClientX(event) - left
+  if (position > width.value) position = width.value - 1
+  const ratio = position / width.value
+  let duration =
+    annotation && frameSize.value < 3
+      ? annotation.time
+      : videoDuration.value * ratio
+  if (duration < 0) duration = 0
+
+  const isChromium = !!window.chrome
+  const change = isChromium ? props.frameDuration : 0
+  const vd = props.nbFrames * props.frameDuration
+  if (duration > vd) {
+    duration = vd - change
+  }
+  const frameNumber = Math.floor(duration / props.frameDuration)
+  return { frameNumber, position }
+}
+
+const doProgressDrag = event => {
+  if (
+    progressDragging.value ||
+    handleInDragging.value ||
+    handleOutDragging.value ||
+    isFrameNumberVisible.value
+  ) {
+    currentMouseFrame = getMouseFrame(event)
+    const { frameNumber } = currentMouseFrame
+    hoverFrame.value = frameNumber + 1
+    frameNumberLeftPosition.value = (width.value / props.nbFrames) * frameNumber
+    if (progressDragging.value) {
+      emit('progress-changed', frameNumber)
+    } else if (handleInDragging.value) {
+      emit('handle-in-changed', { frameNumber, save: false })
+    } else if (handleOutDragging.value) {
+      let { frameNumber, position } = currentMouseFrame
+      if (width.value - position < 4) frameNumber += 1
+      emit('handle-out-changed', { frameNumber, save: false })
     }
   }
 }
+
+const onProgressClicked = event => {
+  emitProgressEvent(event)
+}
+
+const emitProgressEvent = (event, annotation) => {
+  const { frameNumber } = getMouseFrame(event, annotation)
+  if (frameNumber < 0) return
+  emit('progress-changed', frameNumber)
+}
+
+const getFrameBackgroundStyle = frame => {
+  if (!frame) return {}
+  const previewId = props.previewId
+  frame = frame - 1
+  if (props.nbFrames >= 3840) {
+    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
+  }
+  const frameX = frame % 8
+  const frameY = Math.floor(frame / 8)
+  const frameHeight = 100
+  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
+  const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
+  return {
+    background: `url(${tilePath})`,
+    'background-position': `-${frameX * frameWidth}px -${
+      frameY * frameHeight
+    }px`,
+    width: `${frameWidth}px`
+  }
+}
+
+const domEvents = [
+  ['mousemove', doProgressDrag],
+  ['touchmove', doProgressDrag],
+  ['mouseup', stopProgressDrag],
+  ['mouseleave', stopProgressDrag],
+  ['touchend', stopProgressDrag],
+  ['touchcancel', stopProgressDrag],
+  ['mouseup', stopHandleInDrag],
+  ['mouseleave', stopHandleInDrag],
+  ['touchend', stopHandleInDrag],
+  ['touchcancel', stopHandleInDrag],
+  ['mouseup', stopHandleOutDrag],
+  ['mouseleave', stopHandleOutDrag],
+  ['touchend', stopHandleOutDrag],
+  ['touchcancel', stopHandleOutDrag]
+]
+
+onMounted(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.addEventListener(type, listener)
+  )
+  new ResizeObserver(onWindowResize).observe(progress.value)
+  const coords = progress.value.getBoundingClientRect()
+  width.value = coords.width
+  setTimeout(() => {
+    width.value = coords.width
+  })
+  progress.value.setAttribute('max', videoDuration.value)
+})
+
+onBeforeUnmount(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.removeEventListener(type, listener)
+  )
+})
+
+watch(videoDuration, () => {
+  const coords = progress.value.getBoundingClientRect()
+  width.value = coords.width
+  progress.value.setAttribute('max', videoDuration.value)
+  updateProgressBar(0)
+})
+
+defineExpose({ updateProgressBar })
 </script>
 
 <style lang="scss" scoped>

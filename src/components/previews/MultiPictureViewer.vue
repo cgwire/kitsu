@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="multi-picture-player">
     <picture-viewer
-      :ref="'picture-' + preview.id + '-' + preview.position"
+      :ref="el => setPictureRef(preview, el)"
       v-for="preview in previews"
       v-show="
         preview.id === currentPreview.id &&
@@ -24,192 +24,153 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 
-export default {
-  name: 'multi-picture-viewer',
-
-  components: {
-    PictureViewer
+const props = defineProps({
+  big: {
+    type: Boolean,
+    default: false
   },
-
-  props: {
-    big: {
-      type: Boolean,
-      default: false
-    },
-    defaultHeight: {
-      type: Number,
-      default: 0
-    },
-    marginBottom: {
-      type: Number,
-      default: 0
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
-    },
-    highQuality: {
-      type: Boolean,
-      default: false
-    },
-    isComparing: {
-      type: Boolean,
-      default: false
-    },
-    light: {
-      type: Boolean,
-      default: false
-    },
-    panzoom: {
-      type: Boolean,
-      default: false
-    },
-    currentPreview: {
-      type: Object,
-      default: () => null
-    },
-    previews: {
-      type: Array,
-      default: () => []
-    }
+  defaultHeight: {
+    type: Number,
+    default: 0
   },
-
-  emits: ['loaded', 'panzoom-changed', 'size-changed'],
-
-  mounted() {
-    this.container.style.height = this.defaultHeight + 'px'
+  marginBottom: {
+    type: Number,
+    default: 0
   },
-
-  computed: {
-    container() {
-      return this.$refs.container
-    }
+  fullScreen: {
+    type: Boolean,
+    default: false
   },
-
-  methods: {
-    getNaturalDimensions() {
-      if (!this.currentPreview) return { height: 0, width: 0 }
-      const previewPlayer =
-        this.$refs[
-          'picture-' +
-            this.currentPreview.id +
-            '-' +
-            this.currentPreview.position
-        ]
-      if (previewPlayer && previewPlayer[0]) {
-        return previewPlayer[0].getNaturalDimensions()
-      }
-    },
-
-    getDimensions() {
-      if (!this.currentPreview) return { height: 0, width: 0 }
-      const previewPlayer =
-        this.$refs[
-          'picture-' +
-            this.currentPreview.id +
-            '-' +
-            this.currentPreview.position
-        ]
-      if (previewPlayer && previewPlayer[0]) {
-        return previewPlayer[0].getDimensions()
-      }
-    },
-
-    onWindowResize() {
-      this.resetPicture()
-    },
-
-    // Configuration
-
-    resetPicture() {
-      this.container.style.height = this.defaultHeight + 'px'
-      if (this.currentPreview) {
-        const key =
-          'picture-' +
-          this.currentPreview.id +
-          '-' +
-          this.currentPreview.position
-        const previewPlayer = this.$refs[key]
-        if (previewPlayer && previewPlayer[0]) {
-          previewPlayer[0].resetPicture()
-        }
-      }
-    },
-
-    resetPanZoom() {
-      this.previews.forEach(preview => {
-        const key = 'picture-' + preview.id + '-' + preview.position
-        if (
-          preview.id === this.currentPreview.id &&
-          preview.position === this.currentPreview.position
-        ) {
-          const previewPlayer = this.$refs[key]
-          if (previewPlayer && previewPlayer[0]) {
-            previewPlayer[0].resetPanZoom()
-          }
-        }
-      })
-    },
-
-    pausePanZoom() {
-      this.previews.forEach(preview => {
-        const key = 'picture-' + preview.id + '-' + preview.position
-        const previewPlayer = this.$refs[key]
-        if (previewPlayer && previewPlayer[0]) {
-          previewPlayer[0].pausePanZoom()
-        }
-      })
-    },
-
-    resumePanZoom() {
-      this.previews.forEach(preview => {
-        const key = 'picture-' + preview.id + '-' + preview.position
-        const previewPlayer = this.$refs[key]
-        if (previewPlayer && previewPlayer[0]) {
-          previewPlayer[0].resumePanZoom()
-        }
-      })
-    },
-
-    setPanZoom(x, y, scale) {
-      this.previews.forEach(preview => {
-        const key = 'picture-' + preview.id + '-' + preview.position
-        const previewPlayer = this.$refs[key]
-        if (
-          preview.id === this.currentPreview.id &&
-          preview.position === this.currentPreview.position
-        ) {
-          if (previewPlayer && previewPlayer[0]) {
-            previewPlayer[0].setPanZoom(x, y, scale)
-          }
-        }
-      })
-    }
+  highQuality: {
+    type: Boolean,
+    default: false
   },
+  isComparing: {
+    type: Boolean,
+    default: false
+  },
+  light: {
+    type: Boolean,
+    default: false
+  },
+  panzoom: {
+    type: Boolean,
+    default: false
+  },
+  currentPreview: {
+    type: Object,
+    default: () => null
+  },
+  previews: {
+    type: Array,
+    default: () => []
+  }
+})
 
-  watch: {
-    fullScreen() {
-      this.resetPicture()
-    },
+defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 
-    isComparing() {
-      setTimeout(() => {
-        this.resetPicture()
-      }, 20)
-    },
+const container = ref(null)
+const pictureRefs = reactive({})
 
-    currentPreview() {
-      this.resetPicture()
-    },
-
-    previews() {
-      this.resetPicture()
-    }
+const setPictureRef = (preview, el) => {
+  const key = `${preview.id}-${preview.position}`
+  if (el) {
+    pictureRefs[key] = el
+  } else {
+    delete pictureRefs[key]
   }
 }
+
+const getCurrentRef = () => {
+  if (!props.currentPreview) return null
+  const key = `${props.currentPreview.id}-${props.currentPreview.position}`
+  return pictureRefs[key] || null
+}
+
+const getNaturalDimensions = () => {
+  const viewer = getCurrentRef()
+  if (viewer) return viewer.getNaturalDimensions()
+  return { height: 0, width: 0 }
+}
+
+const getDimensions = () => {
+  const viewer = getCurrentRef()
+  if (viewer) return viewer.getDimensions()
+  return { height: 0, width: 0 }
+}
+
+const resetPicture = () => {
+  container.value.style.height = props.defaultHeight + 'px'
+  const viewer = getCurrentRef()
+  if (viewer) viewer.resetPicture()
+}
+
+const resetPanZoom = () => {
+  const viewer = getCurrentRef()
+  if (viewer) viewer.resetPanZoom()
+}
+
+const pausePanZoom = () => {
+  for (const key in pictureRefs) {
+    pictureRefs[key]?.pausePanZoom()
+  }
+}
+
+const resumePanZoom = () => {
+  for (const key in pictureRefs) {
+    pictureRefs[key]?.resumePanZoom()
+  }
+}
+
+const setPanZoom = (x, y, scale) => {
+  const viewer = getCurrentRef()
+  if (viewer) viewer.setPanZoom(x, y, scale)
+}
+
+onMounted(() => {
+  container.value.style.height = props.defaultHeight + 'px'
+})
+
+watch(
+  () => props.fullScreen,
+  () => resetPicture()
+)
+
+watch(
+  () => props.isComparing,
+  () => {
+    setTimeout(() => {
+      resetPicture()
+    }, 20)
+  }
+)
+
+watch(
+  () => props.currentPreview,
+  () => {
+    nextTick(() => resetPicture())
+  }
+)
+
+watch(
+  () => props.previews,
+  () => resetPicture()
+)
+
+defineExpose({
+  getNaturalDimensions,
+  getDimensions,
+  resetPicture,
+  resetPanZoom,
+  pausePanZoom,
+  resumePanZoom,
+  setPanZoom
+})
 </script>
 
 <style lang="scss" scoped>

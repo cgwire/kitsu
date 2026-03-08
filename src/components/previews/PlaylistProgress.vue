@@ -21,7 +21,7 @@
       </span>
     </div>
     <div
-      ref="playlist-progress"
+      ref="playlistProgressWidget"
       class="playlist-progress"
       @click="onPlaylistProgressClicked"
       @mouseenter="isFrameNumberVisible = true"
@@ -79,315 +79,293 @@
   </div>
 </template>
 
-<script>
-import { domMixin } from '@/components/mixins/dom'
+<script setup>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'playlist-progress',
-
-  mixins: [domMixin],
-
-  components: {
-    Spinner
+const props = defineProps({
+  entityList: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    entityList: {
-      default: () => [],
-      type: Array
-    },
-    fps: {
-      default: 0,
-      type: Number
-    },
-    frameDuration: {
-      default: 0,
-      type: Number
-    },
-    isFullMode: {
-      default: false,
-      type: Boolean
-    },
-    isFullScreen: {
-      default: false,
-      type: Boolean
-    },
-    nbFrames: {
-      default: 0,
-      type: Number
-    },
-    movieDimensions: {
-      default: () => ({}),
-      type: Object
-    },
-    previewId: {
-      default: '',
-      type: String
-    },
-    playlistDuration: {
-      default: 0,
-      type: Number
-    },
-    playlistProgress: {
-      default: 0,
-      type: Number
-    },
-    playlistShotPosition: {
-      default: () => {},
-      type: Object
-    },
-    urlPrefix: {
-      default: '/api',
-      type: String
-    }
+  fps: {
+    default: 0,
+    type: Number
   },
-
-  emits: ['end-scrub', 'progress-playlist-changed', 'start-scrub'],
-
-  data() {
-    return {
-      currentMouseFrame: {},
-      frameNumberHeight: 0,
-      frameNumberLeftPosition: 0,
-      isFrameNumberVisible: false,
-      isTileLoading: false,
-      hoverFrame: 0,
-      progressDragging: false,
-      playlistProgressDragging: false,
-      width: 0,
-      domEvents: [
-        ['mousemove', this.doProgressDrag],
-        ['touchmove', this.doProgressDrag],
-        ['mouseup', this.stopProgressDrag],
-        ['mouseleave', this.stopProgressDrag],
-        ['touchend', this.stopProgressDrag],
-        ['touchcancel', this.stopProgressDrag],
-        ['mouseup', this.stopPlaylistProgressDrag],
-        ['mouseleave', this.stopPlaylistProgressDrag],
-        ['touchend', this.stopPlaylistProgressDrag],
-        ['touchcancel', this.stopPlaylistProgressDrag]
-      ]
-    }
+  frameDuration: {
+    default: 0,
+    type: Number
   },
-
-  mounted() {
-    this.addEvents(this.domEvents)
-    new ResizeObserver(this.onWindowResize).observe(this.playlistProgressWidget)
-    this.resetWidth()
+  isFullMode: {
+    default: false,
+    type: Boolean
   },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
+  isFullScreen: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    frameSize() {
-      return this.width / this.nbFrames
-    },
-
-    frameNumberStyle() {
-      const frameHeight = 100
-      const height = frameHeight + 30
-      let frameWidth = 150
-      const preview = this.playlistShotPosition[this.hoverFrame]
-      if (!preview) return {}
-      if (preview.extension === 'mp4') {
-        const ratio = preview.width / preview.height
-        frameWidth = Math.ceil(frameHeight * ratio)
-      } else if (preview.extension === 'png') {
-        frameWidth = 150
-      }
-      const width = frameWidth + 10
-      const left = Math.min(
-        Math.max(this.frameNumberLeftPosition - frameWidth / 2, 0),
-        this.width - frameWidth - 10
-      )
-      const top = this.isFullScreen ? `-${height + 2}px` : '16px'
-
-      return {
-        height: `${height}px`,
-        width: `${width}px`,
-        top,
-        left: `${left}px`
-      }
-    },
-
-    tilePath() {
-      return `${this.urlPrefix}/movies/tiles/preview-files/${this.previewId}.png`
-    },
-
-    videoDuration() {
-      return this.nbFrames * this.frameDuration
-    },
-
-    playlistProgressWidget() {
-      return this.$refs['playlist-progress']
-    }
+  nbFrames: {
+    default: 0,
+    type: Number
   },
-
-  methods: {
-    resetWidth() {
-      if (this.playlistProgressWidget) {
-        const progressCoordinates =
-          this.playlistProgressWidget.getBoundingClientRect()
-        this.width = progressCoordinates.width
-        setTimeout(() => {
-          this.width = progressCoordinates.width
-        })
-      }
-    },
-
-    onWindowResize() {
-      this.resetWidth()
-    },
-
-    startPlaylistProgressDrag(event) {
-      this.playlistProgressDragging = true
-      this.$emit('start-scrub')
-    },
-
-    stopPlaylistProgressDrag(event) {
-      this.playlistProgressDragging = false
-      this.$emit('end-scrub')
-    },
-
-    doProgressDrag(event) {
-      if (
-        this.playlistProgressDragging ||
-        this.isFrameNumberVisible ||
-        (!this.progressDragging &&
-          event.target.classList &&
-          (event.target.classList.contains('playlist-progress') ||
-            event.target.classList.contains('entity-status') ||
-            event.target.classList.contains('playlist-progress-position')))
-      ) {
-        this.currentMouseFrame = this._getPlaylistMouseFrame(event)
-        const { frameNumber } = this.currentMouseFrame
-        this.hoverFrame = frameNumber + 1
-        const allDuration = Math.round(this.playlistDuration * this.fps)
-        this.frameNumberLeftPosition = (this.width / allDuration) * frameNumber
-        if (this.playlistProgressDragging) {
-          this.$emit('progress-playlist-changed', frameNumber)
-        }
-      }
-    },
-
-    onPlaylistProgressClicked(event) {
-      const { frameNumber } = this._getPlaylistMouseFrame(event)
-      this.$emit('progress-playlist-changed', frameNumber)
-    },
-
-    _getPlaylistMouseFrame(event) {
-      if (this.width === 0) this.resetWidth()
-      const left = this.playlistProgressWidget.getBoundingClientRect().left
-      let position = this.getClientX(event) - left
-      if (position > this.width) position = this.width - 1
-      const ratio = position / this.width
-      let duration = this.playlistDuration * ratio
-      if (duration < 0) duration = 0
-      const frameNumber = Math.floor(duration / this.frameDuration)
-      return { frameNumber, position }
-    },
-
-    /**
-     * Returns the background style for a given frame, calculating the
-     * background position depending on the frame number. The tile background is
-     * 8 frames wide.
-     * @param {number} frame
-     */
-    getFrameBackgroundStyle(frame) {
-      if (!frame || !this.playlistShotPosition[frame]) return {}
-      const { id, extension, width, height } = this.playlistShotPosition[frame]
-
-      frame = frame - this.playlistShotPosition[frame].start * this.fps
-      if (this.nbFrames >= 3840) {
-        frame = Math.ceil(frame / Math.ceil(this.nbFrames / 3840))
-      }
-      const frameX = frame % 8
-      const frameY = Math.floor(frame / 8)
-      const frameHeight = 100
-
-      if (extension === 'png') {
-        const tilePath = `${this.urlPrefix}/pictures/thumbnails/preview-files/${id}.png`
-        return {
-          background: `url(${tilePath})`,
-          'background-position': '0 0',
-          width: '150px'
-        }
-      } else if (extension === 'mp4') {
-        const ratio = width / height
-        const frameWidth = Math.ceil(frameHeight * ratio)
-        const tilePath = `${this.urlPrefix}/movies/tiles/preview-files/${id}.png`
-        return {
-          background: `url(${tilePath})`,
-          'background-position': `-${frameX * frameWidth}px -${
-            frameY * frameHeight
-          }px`,
-          width: `${frameWidth}px`
-        }
-      } else {
-        return {
-          background: 'transparent'
-        }
-      }
-    },
-
-    getEntityPosition(entity) {
-      const ratio =
-        (entity.start_duration - this.frameDuration) / this.playlistDuration
-      return ratio * 100
-    },
-
-    getEntityWidth(entity) {
-      let ratio
-      if (entity.preview_file_extension === 'mp4') {
-        ratio = entity.preview_file_duration / this.playlistDuration
-      } else if (entity.preview_nb_frames) {
-        const duration = entity.preview_nb_frames * this.frameDuration
-        ratio = duration / this.playlistDuration
-      } else {
-        ratio = (2 * this.fps * this.frameDuration) / this.playlistDuration
-      }
-      return ratio * 100
-    },
-
-    getEntityColor(entity) {
-      return entity.task_status_color
-    },
-
-    getFullEntityName(entity) {
-      return `${entity.parent_name} / ${entity.name}`.replaceAll(' ', ' ')
-    }
+  movieDimensions: {
+    default: () => ({}),
+    type: Object
   },
+  previewId: {
+    default: '',
+    type: String
+  },
+  playlistDuration: {
+    default: 0,
+    type: Number
+  },
+  playlistProgress: {
+    default: 0,
+    type: Number
+  },
+  playlistShotPosition: {
+    default: () => ({}),
+    type: Object
+  }
+})
 
-  watch: {
-    previewId: {
-      immediate: true,
-      handler() {
-        if (this.previewId) {
-          const preview = this.playlistShotPosition[this.hoverFrame]
-          if (preview?.extension === 'mp4') {
-            this.isTileLoading = true
-            const img = new Image()
-            img.src = this.tilePath
-            img.onload = () => {
-              this.isTileLoading = false
-            }
-            img.onerror = () => {
-              this.isTileLoading = false
-            }
-          }
-        }
-      }
-    },
+const emit = defineEmits([
+  'end-scrub',
+  'progress-playlist-changed',
+  'start-scrub'
+])
 
-    entityList() {
-      this.resetWidth()
+const playlistProgressWidget = ref(null)
+const isFrameNumberVisible = ref(false)
+const isTileLoading = ref(false)
+const hoverFrame = ref(0)
+const progressDragging = ref(false)
+const playlistProgressDragging = ref(false)
+const width = ref(0)
+const frameNumberLeftPosition = ref(0)
+
+let currentMouseFrame = {}
+
+const getClientX = event =>
+  event.touches?.[0]?.clientX ??
+  event.changedTouches?.[0]?.clientX ??
+  event.clientX
+
+const tilePath = computed(
+  () => `/api/movies/tiles/preview-files/${props.previewId}.png`
+)
+
+const frameNumberStyle = computed(() => {
+  const frameHeight = 100
+  const height = frameHeight + 30
+  let frameWidth = 150
+  const preview = props.playlistShotPosition[hoverFrame.value]
+  if (!preview) return {}
+  if (preview.extension === 'mp4') {
+    const ratio = preview.width / preview.height
+    frameWidth = Math.ceil(frameHeight * ratio)
+  } else if (preview.extension === 'png') {
+    frameWidth = 150
+  }
+  const w = frameWidth + 10
+  const left = Math.min(
+    Math.max(frameNumberLeftPosition.value - frameWidth / 2, 0),
+    width.value - frameWidth - 10
+  )
+  const top = props.isFullScreen ? `-${height + 2}px` : '16px'
+  return {
+    height: `${height}px`,
+    width: `${w}px`,
+    top,
+    left: `${left}px`
+  }
+})
+
+const resetWidth = () => {
+  if (playlistProgressWidget.value) {
+    const coords = playlistProgressWidget.value.getBoundingClientRect()
+    width.value = coords.width
+    setTimeout(() => {
+      width.value = coords.width
+    })
+  }
+}
+
+const onWindowResize = () => {
+  resetWidth()
+}
+
+const startPlaylistProgressDrag = () => {
+  playlistProgressDragging.value = true
+  emit('start-scrub')
+}
+
+const stopPlaylistProgressDrag = () => {
+  playlistProgressDragging.value = false
+  emit('end-scrub')
+}
+
+const stopProgressDrag = () => {
+  progressDragging.value = false
+  emit('end-scrub')
+}
+
+const getPlaylistMouseFrame = event => {
+  if (width.value === 0) resetWidth()
+  const left = playlistProgressWidget.value.getBoundingClientRect().left
+  let position = getClientX(event) - left
+  if (position > width.value) position = width.value - 1
+  const ratio = position / width.value
+  let duration = props.playlistDuration * ratio
+  if (duration < 0) duration = 0
+  const frameNumber = Math.floor(duration / props.frameDuration)
+  return { frameNumber, position }
+}
+
+const doProgressDrag = event => {
+  if (
+    playlistProgressDragging.value ||
+    isFrameNumberVisible.value ||
+    (!progressDragging.value &&
+      event.target.classList &&
+      (event.target.classList.contains('playlist-progress') ||
+        event.target.classList.contains('entity-status') ||
+        event.target.classList.contains('playlist-progress-position')))
+  ) {
+    currentMouseFrame = getPlaylistMouseFrame(event)
+    const { frameNumber } = currentMouseFrame
+    hoverFrame.value = frameNumber + 1
+    const allDuration = Math.round(props.playlistDuration * props.fps)
+    frameNumberLeftPosition.value = (width.value / allDuration) * frameNumber
+    if (playlistProgressDragging.value) {
+      emit('progress-playlist-changed', frameNumber)
     }
   }
 }
+
+const onPlaylistProgressClicked = event => {
+  const { frameNumber } = getPlaylistMouseFrame(event)
+  emit('progress-playlist-changed', frameNumber)
+}
+
+const getFrameBackgroundStyle = frame => {
+  if (!frame || !props.playlistShotPosition[frame]) return {}
+  const {
+    id,
+    extension,
+    width: pw,
+    height: ph
+  } = props.playlistShotPosition[frame]
+
+  frame = frame - props.playlistShotPosition[frame].start * props.fps
+  if (props.nbFrames >= 3840) {
+    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
+  }
+  const frameX = frame % 8
+  const frameY = Math.floor(frame / 8)
+  const frameHeight = 100
+
+  if (extension === 'png') {
+    const tp = `/api/pictures/thumbnails/preview-files/${id}.png`
+    return {
+      background: `url(${tp})`,
+      'background-position': '0 0',
+      width: '150px'
+    }
+  } else if (extension === 'mp4') {
+    const ratio = pw / ph
+    const frameWidth = Math.ceil(frameHeight * ratio)
+    const tp = `/api/movies/tiles/preview-files/${id}.png`
+    return {
+      background: `url(${tp})`,
+      'background-position': `-${frameX * frameWidth}px -${
+        frameY * frameHeight
+      }px`,
+      width: `${frameWidth}px`
+    }
+  } else {
+    return { background: 'transparent' }
+  }
+}
+
+const getEntityPosition = entity => {
+  const ratio =
+    (entity.start_duration - props.frameDuration) / props.playlistDuration
+  return ratio * 100
+}
+
+const getEntityWidth = entity => {
+  let ratio
+  if (entity.preview_file_extension === 'mp4') {
+    ratio = entity.preview_file_duration / props.playlistDuration
+  } else if (entity.preview_nb_frames) {
+    const duration = entity.preview_nb_frames * props.frameDuration
+    ratio = duration / props.playlistDuration
+  } else {
+    ratio = (2 * props.fps * props.frameDuration) / props.playlistDuration
+  }
+  return ratio * 100
+}
+
+const getEntityColor = entity => {
+  return entity.task_status_color
+}
+
+const getFullEntityName = entity => {
+  return `${entity.parent_name} / ${entity.name}`.replaceAll(' ', ' ')
+}
+
+const domEvents = [
+  ['mousemove', doProgressDrag],
+  ['touchmove', doProgressDrag],
+  ['mouseup', stopProgressDrag],
+  ['mouseleave', stopProgressDrag],
+  ['touchend', stopProgressDrag],
+  ['touchcancel', stopProgressDrag],
+  ['mouseup', stopPlaylistProgressDrag],
+  ['mouseleave', stopPlaylistProgressDrag],
+  ['touchend', stopPlaylistProgressDrag],
+  ['touchcancel', stopPlaylistProgressDrag]
+]
+
+onMounted(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.addEventListener(type, listener)
+  )
+  new ResizeObserver(onWindowResize).observe(playlistProgressWidget.value)
+  resetWidth()
+})
+
+onBeforeUnmount(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.removeEventListener(type, listener)
+  )
+})
+
+watch(
+  () => props.previewId,
+  () => {
+    if (props.previewId) {
+      const preview = props.playlistShotPosition[hoverFrame.value]
+      if (preview.extension === 'mp4') {
+        isTileLoading.value = true
+        const img = new Image()
+        img.src = tilePath.value
+        img.onload = () => {
+          isTileLoading.value = false
+        }
+      }
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.entityList,
+  () => resetWidth()
+)
 </script>
 
 <style lang="scss" scoped>
@@ -419,7 +397,7 @@ export default {
   cursor: pointer;
   height: 18px;
   width: 100%;
-  position: relative; /* Relative positioning for pseudo-element placement */
+  position: relative;
   overflow: visible;
   transition: height 0.2s ease-in-out;
 
