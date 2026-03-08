@@ -94,9 +94,7 @@
         <span
           class="frame-tile"
           :style="getFrameBackgroundStyle(hoverFrame)"
-          v-if="!isTileLoading"
         ></span>
-        <spinner class="mt2" v-else />
       </span>
     </div>
   </div>
@@ -104,8 +102,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-
-import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
   annotations: {
@@ -164,7 +160,6 @@ const emit = defineEmits([
 
 const progress = ref(null)
 const isFrameNumberVisible = ref(false)
-const isTileLoading = ref(false)
 const handleInDragging = ref(false)
 const handleOutDragging = ref(false)
 const hoverFrame = ref(0)
@@ -417,14 +412,14 @@ defineExpose({ updateProgressBar })
 }
 
 .progress-wrapper {
-  background-repeat: repeat-x;
   background: $grey;
   background-image: url('../../assets/background/player-timeslider.png');
+  background-repeat: repeat-x;
   border: 0;
   cursor: pointer;
   flex-shrink: 0;
-  margin: 0;
   height: 28px;
+  margin: 0;
   padding: 0;
   position: relative;
   width: 100%;

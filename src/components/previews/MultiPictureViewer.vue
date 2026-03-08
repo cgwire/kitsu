@@ -174,67 +174,14 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.loading-background {
-  width: 100%;
-  height: 100%;
-  background: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .multi-picture-player {
   display: flex;
   flex-direction: column;
   align-content: flex-end;
   border-radius: 5px;
   height: 100%;
-}
-
-.spinner {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.picture-wrapper {
-  flex: 1;
-  border-radius: 5px;
-  display: flex;
-  background: black;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 100%;
-  z-index: 300;
-  margin: auto;
-  overflow: hidden;
-}
-
-.picture-subwrapper {
-  position: relative;
-}
-
-.multi-picture-player {
   width: 100%;
   text-align: center;
-  background: #36393f;
-}
-
-.loupe {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 300px;
-  width: 300px;
-  background: white;
-  z-index: 3000;
-  border-radius: 5px;
-  box-shadow: 0 0 8px 4px rgba(0, 0, 0, 0.2);
-
-  img {
-    position: relative;
-    width: 800px;
-  }
+  background: $dark-grey-2;
 }
 </style>

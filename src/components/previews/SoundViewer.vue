@@ -34,10 +34,6 @@ const props = defineProps({
   defaultHeight: {
     type: Number,
     default: 200
-  },
-  fullScreen: {
-    default: false,
-    type: Boolean
   }
 })
 

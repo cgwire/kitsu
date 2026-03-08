@@ -103,7 +103,6 @@ const onDropped = event => {
 }
 
 .revision-preview {
-  border-top: 3px solid transparent;
   border-radius: 5px;
   border: 3px solid transparent;
   box-shadow: 2px 2px 2px $dark-grey-strong;

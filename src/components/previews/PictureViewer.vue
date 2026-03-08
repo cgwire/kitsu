@@ -251,10 +251,6 @@ const endLoading = () => {
   nextTick(resetPicture)
 }
 
-const onWindowResize = () => {
-  resetPicture()
-}
-
 const showLoupe = () => {
   loupe.value.style.display = 'block'
 }
@@ -359,18 +355,18 @@ onMounted(() => {
   isLoading.value = true
   setPictureEmptyPath()
   if (picture.value.complete) {
-    onWindowResize()
+    resetPicture()
   }
   picture.value.addEventListener('load', endLoading)
   pictureBig.value.addEventListener('load', endLoading)
   pictureGif.value.addEventListener('load', endLoading)
-  window.addEventListener('resize', onWindowResize)
+  window.addEventListener('resize', resetPicture)
   setPicturePath()
   setupPanZoom()
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', onWindowResize)
+  window.removeEventListener('resize', resetPicture)
   panzoomInstances.value.forEach(pz => pz.dispose())
 })
 
@@ -398,7 +394,7 @@ watch(
   () => props.light,
   () => {
     resetPanZoom()
-    onWindowResize()
+    resetPicture()
   }
 )
 
@@ -423,7 +419,6 @@ watch(
       nextTick(() => {
         resetPicture()
         setPicturePath()
-        setPictureDlPath()
         if (props.fullScreen) {
           if (pictureBig.value.complete) {
             resetPicture()
@@ -451,21 +446,15 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.loading-background {
-  width: 100%;
-  height: 100%;
-  background: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .picture-player {
   display: flex;
   flex-direction: column;
   align-content: flex-end;
   border-radius: 5px;
   height: 100%;
+  width: 100%;
+  text-align: center;
+  background: $dark-grey-2;
 }
 
 .spinner {
@@ -491,12 +480,6 @@ defineExpose({
   position: relative;
   display: flex;
   align-items: center;
-}
-
-.picture-player {
-  width: 100%;
-  text-align: center;
-  background: #36393f;
 }
 
 .loupe {

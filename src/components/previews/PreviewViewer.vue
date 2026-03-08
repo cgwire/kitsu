@@ -106,12 +106,7 @@
     />
 
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
-      <a
-        class="button mt2"
-        ref="previewFile"
-        :href="originalDlPath"
-        :title="fileTitle"
-      >
+      <a class="button mt2" :href="originalDlPath" :title="fileTitle">
         <download-icon class="icon" />
         <span class="text" :title="fileTitle">
           {{ $t('tasks.download_pdf_file', { extension }) }}
@@ -124,8 +119,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { DownloadIcon } from 'lucide-vue-next'
-
-import { formatFrame, formatTime } from '@/lib/video'
 
 /* eslint-disable no-unused-vars */
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
@@ -299,10 +292,6 @@ const resetVideo = () => {
   if (videoViewer.value) videoViewer.value.mountVideo()
 }
 
-const updateTime = () => {}
-
-const changeMaxDuration = () => {}
-
 const play = () => {
   isPlaying = true
   if (videoViewer.value) videoViewer.value.play()
@@ -452,11 +441,7 @@ defineExpose({
   container,
   videoViewer,
   pictureViewer,
-  formatFrame,
-  formatTime,
   resetVideo,
-  updateTime,
-  changeMaxDuration,
   play,
   pause,
   playModelAnimation,
@@ -484,109 +469,9 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.annotation-movie {
-  margin: auto;
-  width: 100%;
-}
-
-.time-indicator {
-  color: $light-grey;
-  padding-left: 0.8em;
-  margin-right: 0;
-}
-
 .video-viewer {
   width: 100%;
   text-align: center;
-  background: #36393f;
-}
-
-.buttons {
-  background: #36393f;
-  height: 32px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-}
-
-.buttons .button:first-child {
-  border-bottom-left-radius: 5px;
-}
-.buttons .button:last-child {
-  border-bottom-right-radius: 5px;
-}
-
-.buttons .button {
-  background: transparent;
-  border-radius: 0;
-  color: #bbb;
-  border: 0;
-  margin: 0;
-  transition: all 0.3s ease;
-}
-
-.buttons .button.active,
-.buttons .button:hover {
-  color: #43b581;
-}
-
-.buttons .button:hover {
-  border-radius: 5px;
-  transform: scale(1.2);
-}
-
-.comparison-combobox {
-  margin-bottom: 0;
-}
-
-.buttons .comparison-button {
-  margin-left: 1em;
-}
-
-.previous-preview-file {
-  padding: 1px 8px;
-  margin-right: 0.4em;
-  border: 1px solid $grey;
-  border-radius: 50%;
-  cursor: pointer;
-  color: $grey;
-}
-
-.current-preview-file {
-  padding: 1px 8px;
-  margin-right: 0.4em;
-  border: 1px solid $grey;
-  border-radius: 50%;
-  cursor: pointer;
-  color: white;
-  background: $purple-strong;
-  transition: 0.3s background ease;
-}
-
-.annotation-tools {
-  align-items: stretch;
-  display: flex;
-  height: 33px;
-  background: $dark-grey;
-}
-
-.slide-enter-active {
-  transition: all 0.3s ease;
-}
-
-.slide-leave-active {
-  transition: all 0.3s ease;
-}
-
-.slide-enter,
-.slide-leave-to {
-  transform: translateX(100%);
-}
-
-.buttons .button.ml1 {
-  margin-left: 1em;
-}
-
-.video-viewer {
   background: $dark-grey-stronger;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -608,23 +493,5 @@ defineExpose({
   flex-direction: column;
   border-radius: 5px;
   min-height: 200px;
-
-  .preview {
-    position: relative;
-    align-items: center;
-    background: black;
-    display: flex;
-    flex: 1;
-    justify-content: center;
-
-    .button {
-      padding: 1.5em;
-      transition: background 0.3s ease;
-
-      &:hover {
-        background: $dark-grey-lightest;
-      }
-    }
-  }
 }
 </style>

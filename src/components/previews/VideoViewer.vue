@@ -560,7 +560,7 @@ defineExpose({
   height: 100%;
   width: 100%;
   text-align: center;
-  background: #36393f;
+  background: $dark-grey-2;
   overflow: hidden;
 }
 
@@ -579,10 +579,5 @@ defineExpose({
 
 video {
   object-fit: inherit;
-}
-
-.video-time {
-  position: absolute;
-  font-size: 2em;
 }
 </style>

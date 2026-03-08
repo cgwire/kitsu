@@ -146,8 +146,6 @@ const playlistProgressDragging = ref(false)
 const width = ref(0)
 const frameNumberLeftPosition = ref(0)
 
-let currentMouseFrame = {}
-
 const getClientX = event =>
   event.touches?.[0]?.clientX ??
   event.changedTouches?.[0]?.clientX ??
@@ -193,10 +191,6 @@ const resetWidth = () => {
   }
 }
 
-const onWindowResize = () => {
-  resetWidth()
-}
-
 const startPlaylistProgressDrag = () => {
   playlistProgressDragging.value = true
   emit('start-scrub')
@@ -234,8 +228,7 @@ const doProgressDrag = event => {
         event.target.classList.contains('entity-status') ||
         event.target.classList.contains('playlist-progress-position')))
   ) {
-    currentMouseFrame = getPlaylistMouseFrame(event)
-    const { frameNumber } = currentMouseFrame
+    const { frameNumber } = getPlaylistMouseFrame(event)
     hoverFrame.value = frameNumber + 1
     const allDuration = Math.round(props.playlistDuration * props.fps)
     frameNumberLeftPosition.value = (width.value / allDuration) * frameNumber
@@ -334,7 +327,7 @@ onMounted(() => {
   domEvents.forEach(([type, listener]) =>
     document.addEventListener(type, listener)
   )
-  new ResizeObserver(onWindowResize).observe(playlistProgressWidget.value)
+  new ResizeObserver(resetWidth).observe(playlistProgressWidget.value)
   resetWidth()
 })
 
@@ -400,10 +393,6 @@ watch(
   position: relative;
   overflow: visible;
   transition: height 0.2s ease-in-out;
-
-  &:hover {
-    height: 18px;
-  }
 }
 
 .playlist-progress-position {

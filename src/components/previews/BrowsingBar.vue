@@ -96,33 +96,6 @@ const isMovie = computed(
 </script>
 
 <style lang="scss" scoped>
-.error {
-  margin-top: 1em;
-}
-
-.buttons .button {
-  background: $dark-grey-2;
-  border-radius: 0;
-  color: $light-grey-2;
-  border: 0;
-  margin: 0;
-  transition: all 0.3s ease;
-
-  &:first-child {
-    border-bottom-left-radius: 5px;
-  }
-
-  &:hover {
-    border-radius: 5px;
-    transform: scale(1.2);
-  }
-}
-
-.buttons .button.active,
-.buttons .button:hover {
-  color: var(--background-selectable);
-}
-
 .bar-element {
   color: $light-grey;
   padding-left: 1em;

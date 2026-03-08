@@ -1,7 +1,6 @@
 <template>
   <div class="flexrow">
     <combobox-styled
-      ref="taskTypeCombobox"
       class="flexrow-item"
       :options="taskTypeOptions"
       v-model="taskTypeId"
