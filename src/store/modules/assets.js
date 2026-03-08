@@ -516,7 +516,7 @@ const actions = {
 
   newAsset({ commit, dispatch, state, rootGetters }, data) {
     if (cache.assets.find(asset => asset.name === data.name)) {
-      throw new Error('Asset already exists')
+      return Promise.reject(new Error('Asset already exists'))
     }
     return assetsApi.newAsset(data).then(asset => {
       const assetTypeMap = rootGetters.assetTypeMap
