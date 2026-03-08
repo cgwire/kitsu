@@ -631,18 +631,17 @@ export default {
         action = 'editAsset'
         form.id = this.assetToEdit.id
       }
-      ;(async () => {
-        try {
-          await this[action](form)
+      this[action](form)
+        .then(form => {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
           this.applySearchFromUrl(false)
-        } catch (err) {
+        })
+        .catch(err => {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
-        }
-      })()
+        })
     },
 
     confirmDeleteAsset() {
