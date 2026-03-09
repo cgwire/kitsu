@@ -758,10 +758,6 @@ body {
   }
 } // End dark theme
 
-.loading-info {
-  background: inherit;
-}
-
 .hidden {
   display: none !important;
 }
