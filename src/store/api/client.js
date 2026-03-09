@@ -37,13 +37,16 @@ const client = {
   },
 
   pget(path) {
-    return superagent.get(path).then(res => {
-      if (res?.statusCode === 401) {
-        errors.backToLogin()
-        throw new Error('Unauthorized')
-      }
-      return res?.body
-    })
+    return superagent
+      .get(path)
+      .then(res => res?.body)
+      .catch(err => {
+        if (err?.response?.status === 401) {
+          errors.backToLogin()
+          return
+        }
+        throw err
+      })
   },
 
   ppost(path, data) {
