@@ -4,7 +4,7 @@ import errors from '@/lib/errors'
 const client = {
   get(path, callback) {
     superagent.get(path).end((err, res) => {
-      // if (res?.statusCode === 401) return errors.backToLogin()
+      if (res?.statusCode === 401) return errors.backToLogin()
       callback(err, res?.body)
     })
   },
@@ -37,7 +37,16 @@ const client = {
   },
 
   pget(path) {
-    return superagent.get(path).then(res => res?.body)
+    return superagent
+      .get(path)
+      .then(res => res?.body)
+      .catch(err => {
+        if (err?.response?.status === 401) {
+          errors.backToLogin()
+          return
+        }
+        throw err
+      })
   },
 
   ppost(path, data) {
