@@ -21,13 +21,12 @@ const init = callback => {
       callback()
     })
     .catch(err => {
+      store.commit(DATA_LOADING_END)
       if (err.status === 403) {
-        store.commit(DATA_LOADING_END)
         router.push({ name: 'login-2fa' })
         return
       }
       console.error('An init operation failed: ', err)
-      store.commit(DATA_LOADING_END)
       callback(err)
     })
 }
