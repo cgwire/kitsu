@@ -263,7 +263,9 @@ export default {
       task_status: 'Task status',
       person: 'Person\'s name',
       checklist: 'Checklist',
-      acknowledgements: 'Acknowledgements'
+      acknowledgements: 'Acknowledgements',
+      revision: 'Revision',
+      attachments: 'Attachments'
     }
   },
 

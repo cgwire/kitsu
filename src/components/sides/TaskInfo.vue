@@ -356,15 +356,20 @@ import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
 import drafts from '@/lib/drafts'
-import { getTaskEntityPath, getTaskPath } from '@/lib/path'
+import {
+  getDownloadAttachmentPath,
+  getTaskEntityPath,
+  getTaskPath
+} from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { getTaskTypeStyle } from '@/lib/render'
 import { sortPeople, sortTaskNames } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
-import { formatDate } from '@/lib/time'
+import { formatFrame } from '@/lib/video'
 
-import { taskMixin } from '@/components/mixins/task'
 import { domMixin } from '@/components/mixins/dom'
+import { taskMixin } from '@/components/mixins/task'
+import { timeMixin } from '@/components/mixins/time'
 
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
@@ -384,7 +389,7 @@ const DEFAULT_PANEL_WIDTH = 400
 export default {
   name: 'task-info',
 
-  mixins: [domMixin, taskMixin],
+  mixins: [domMixin, taskMixin, timeMixin],
 
   components: {
     ActionPanel,
@@ -1337,38 +1342,60 @@ export default {
         this.$t('comments.fields.person'),
         this.$t('comments.fields.text'),
         this.$t('comments.fields.checklist'),
-        this.$t('comments.fields.acknowledgements')
+        this.$t('comments.fields.acknowledgements'),
+        this.$t('comments.fields.revision'),
+        this.$t('comments.fields.attachments')
       ]
       const commentLines = []
       this.getCurrentTaskComments().forEach(comment => {
         commentLines.push([
-          formatDate(comment.created_at),
+          this.formatDate(comment.created_at),
           comment.task_status.name,
           comment.person.name,
           comment.text,
           comment.checklist
             ? comment.checklist
-                .map(
-                  checkListElement =>
-                    `[${checkListElement.checked ? 'x' : ' '}] ${
-                      checkListElement.text
-                    }`
-                )
+                .map(item => {
+                  const checked = item.checked ? 'x' : ' '
+                  const revision =
+                    item.revision > -1
+                      ? `(v${item.revision} - ${formatFrame(item.frame)}) `
+                      : ''
+                  return `[${checked}] ${revision}${item.text}`
+                })
                 .join('\n')
             : '',
           comment.acknowledgements
             ? comment.acknowledgements
                 .map(personId => this.personMap.get(personId).name)
                 .join(',')
+            : '',
+          comment.previews[0]?.revision,
+          comment.attachment_files
+            ? comment.attachment_files
+                .filter(attachment => !attachment.reply_id)
+                .map(attachment => getDownloadAttachmentPath(attachment, true))
+                .join('\n')
             : ''
         ])
         if (comment.replies) {
           comment.replies.forEach(reply =>
             commentLines.push([
-              formatDate(reply.date),
-              'Reply',
+              this.formatDate(reply.date),
+              'Reply', // FIXME: i18n
               this.personMap.get(reply.person_id).name,
-              reply.text
+              reply.text,
+              null,
+              null,
+              null,
+              comment.attachment_files
+                ? comment.attachment_files
+                    .filter(attachment => attachment.reply_id === reply.id)
+                    .map(attachment =>
+                      getDownloadAttachmentPath(attachment, true)
+                    )
+                    .join('\n')
+                : ''
             ])
           )
         }
