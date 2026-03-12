@@ -4,20 +4,16 @@
     @drop="onDrop"
     @dragover="onDragover"
     @dragleave="onDragleave"
+    class="add-comment word-break media"
     :class="{
-      'add-comment': true,
-      'word-break': true,
-      media: true,
       'is-dragging': isDragging
     }"
   >
     <div class="media-content">
       <div class="flexrow tab-row">
         <span
+          class="filler has-text-centered"
           :class="{
-            'flexrow-item': true,
-            filler: true,
-            'has-text-centered': true,
             active: mode === 'status'
           }"
           @click="mode = 'status'"
@@ -25,10 +21,8 @@
           {{ $t('tasks.change_status') }}
         </span>
         <span
+          class="filler has-text-centered"
           :class="{
-            'flexrow-item': true,
-            filler: true,
-            'has-text-centered': true,
             active: mode === 'publish'
           }"
           @click="mode = 'publish'"
@@ -228,7 +222,6 @@
           <emoji-button @select="onSelectEmoji" v-if="mode === 'status'" />
           <button-simple
             :class="{
-              'flexrow-item': true,
               active: attachments.length !== 0
             }"
             icon="attach"
@@ -238,7 +231,6 @@
           />
           <button-simple
             :class="{
-              'flexrow-item': true,
               active: checklist.length !== 0
             }"
             icon="list"
@@ -248,7 +240,6 @@
           />
           <button-simple
             :class="{
-              'flexrow-item': true,
               active: showCommentArea
             }"
             icon="comment"
@@ -258,7 +249,6 @@
           />
           <button-simple
             :class="{
-              'flexrow-item': true,
               active: showLinkField
             }"
             icon="link"
@@ -268,7 +258,7 @@
           />
           <div class="filler"></div>
           <combobox-status
-            class="flexrow-item status-selector"
+            class="status-selector"
             :narrow="true"
             :color-only="true"
             :task-status-list="taskStatus"
@@ -276,9 +266,8 @@
             v-model="task_status_id"
           />
           <button-simple
+            class="post-button"
             :class="{
-              'post-button': true,
-              'flexrow-item': true,
               'is-loading': isLoading
             }"
             icon="send"
