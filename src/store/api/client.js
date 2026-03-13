@@ -1,37 +1,33 @@
 import superagent from 'superagent'
 import errors from '@/lib/errors'
 
+function handleResponse(res) {
+  return res?.body
+}
+
+function handleError(err) {
+  if (err?.response?.status === 401) {
+    errors.backToLogin()
+    return
+  }
+  err.body = err?.response?.body || ''
+  throw err
+}
+
 const client = {
+  request(method, path, data) {
+    return superagent(method, path)
+      .send(data)
+      .then(handleResponse)
+      .catch(handleError)
+  },
+
   pget(path) {
-    return superagent
-      .get(path)
-      .then(res => res?.body)
-      .catch(err => {
-        if (err?.response?.status === 401) {
-          errors.backToLogin()
-          return
-        }
-        throw err
-      })
+    return client.request('GET', path)
   },
 
   ppost(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            return reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('POST', path, data)
   },
 
   ppostFile(path, data) {
@@ -39,58 +35,16 @@ const client = {
       .post(path)
       .send(data)
       .on('progress', e => e)
-    return {
-      request,
-      promise: new Promise((resolve, reject) => {
-        request.end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            return reject(err)
-          } else {
-            if (err) return reject(err)
-            else return resolve(res?.body)
-          }
-        })
-      })
-    }
+    const promise = request.then(handleResponse).catch(handleError)
+    return { request, promise }
   },
 
   pput(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .put(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('PUT', path, data)
   },
 
   pdel(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .del(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('DELETE', path, data)
   },
 
   getConfig() {
