@@ -75,7 +75,7 @@
 
     <edit-person-modal
       active
-      :is-bot="true"
+      is-bot
       :is-error="errors.edit"
       :is-loading="loading.edit"
       :is-user-limit-error="errors.userLimit"

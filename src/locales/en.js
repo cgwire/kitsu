@@ -263,7 +263,9 @@ export default {
       task_status: 'Task status',
       person: 'Person\'s name',
       checklist: 'Checklist',
-      acknowledgements: 'Acknowledgements'
+      acknowledgements: 'Acknowledgements',
+      revision: 'Revision',
+      attachments: 'Attachments'
     }
   },
 
@@ -968,6 +970,7 @@ export default {
     team: 'Team',
     title: 'People',
     unactive: 'Inactive',
+    email_domain_error: 'This email domain is not allowed.',
     email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',

@@ -4,20 +4,20 @@
       {{ label }}
     </label>
     <div
+      class="combo"
       :class="{
-        combo: true,
-        thin: thin,
+        thin,
         reversed: isReversed,
         open: showList,
-        shy: shy
+        shy
       }"
       ref="select"
     >
       <div class="flexrow" @click="toggleList" :title="renderedValue">
-        <div class="selected-line flexrow-item ellipsis">
+        <div class="selected-line filler nowrap ellipsis">
           {{ renderedValue }}
         </div>
-        <chevron-down-icon class="down-icon flexrow-item" />
+        <chevron-down-icon class="down-icon" />
       </div>
       <div class="select-input" v-if="showList">
         <div
@@ -37,11 +37,11 @@
       </div>
     </div>
     <div
-      @click="toggleList"
+      class="c-mask"
       :class="{
-        'c-mask': true,
         'is-active': showList
       }"
+      @click="toggleList"
     ></div>
   </div>
 </template>
@@ -245,15 +245,9 @@ export default {
   border: 1px solid $green;
 }
 
-.selected-line {
-  flex: 1;
-  white-space: nowrap;
-}
-
 .option-line {
   background: $white;
   border-bottom: 1px solid $light-grey-light;
-  cursor: pointer;
   margin: 0;
   padding: 0.5em;
   min-width: 150px;
@@ -265,11 +259,10 @@ export default {
 }
 
 .down-icon {
-  width: 15px;
-  min-width: 15px;
-  margin-right: 0.4em;
+  width: 20px;
+  min-width: 20px;
+  padding: 0 2px;
   color: $green;
-  cursor: pointer;
 }
 
 .select-input {

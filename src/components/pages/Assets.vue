@@ -625,6 +625,7 @@ export default {
     confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
+      this.errors.edit = false
       this.newAsset(form)
         .then(() => {
           this.loading.stay = false
@@ -645,6 +646,7 @@ export default {
     confirmEditAsset(form) {
       let action = 'newAsset'
       this.loading.edit = true
+      this.success.edit = false
       this.errors.edit = false
       if (this.assetToEdit && this.assetToEdit.id) {
         action = 'editAsset'
@@ -655,6 +657,7 @@ export default {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
           this.applySearchFromUrl(false)
+          this.success.edit = true
         })
         .catch(err => {
           console.error(err)

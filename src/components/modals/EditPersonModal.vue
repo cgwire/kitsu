@@ -29,7 +29,7 @@
         <text-field
           type="email"
           :errored="form.email && !isValidEmail"
-          :error-text="isUniqEmail ? '' : $t('people.email_exist_error')"
+          :error-text="emailErrorText"
           :label="$t('people.fields.email')"
           :disabled="personToEdit.is_generated_from_ldap"
           v-model.trim="form.email"
@@ -266,6 +266,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isEmailDomainError: {
+      type: Boolean,
+      default: false
+    },
     isError: {
       type: Boolean,
       default: false
@@ -365,7 +369,7 @@ export default {
         return true
       }
 
-      return this.isUniqEmail
+      return this.isUniqEmail && !this.isEmailDomainError
     },
 
     isUniqEmail() {
@@ -379,6 +383,16 @@ export default {
 
     isValidForm() {
       return this.isValidName && this.isValidEmail
+    },
+
+    emailErrorText() {
+      if (this.isEmailDomainError) {
+        return this.$t('people.email_domain_error')
+      }
+      if (!this.isUniqEmail) {
+        return this.$t('people.email_exist_error')
+      }
+      return ''
     }
   },
 

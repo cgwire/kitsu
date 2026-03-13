@@ -264,8 +264,9 @@ export const getPersonPath = (personId, section = undefined) => {
   }
 }
 
-export const getDownloadAttachmentPath = attachment => {
-  return `/api/data/attachment-files/${attachment.id}/file/${attachment.name}`
+export const getDownloadAttachmentPath = (attachment, absolute = false) => {
+  const path = `/api/data/attachment-files/${attachment.id}/file/${attachment.name}`
+  return absolute ? `${window.location.origin}${path}` : path
 }
 
 export const getAttachmentThumbnailPath = attachment => {

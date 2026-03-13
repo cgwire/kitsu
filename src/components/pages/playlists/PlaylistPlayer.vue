@@ -434,7 +434,7 @@
           :thin="true"
           is-reversed
           v-model="objectModel.currentAnimation"
-          v-if="objectModel.isAnimation"
+          v-if="isCurrentPreviewModel && objectModel.isAnimation"
         />
       </div>
 
