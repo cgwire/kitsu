@@ -21,11 +21,8 @@ export const fullScreenMixin = {
      * Exit fullscreen mode
      * @returns {Promise<void>}
      */
-    documentExitFullScreen() {
-      return (
-        document.exitFullscreen?.() ||
-        Promise.resolve(document.webkitCancelFullScreen?.())
-      )
+    async documentExitFullScreen() {
+      return document.exitFullscreen?.() || document.webkitCancelFullScreen?.()
     },
 
     /**
@@ -33,10 +30,9 @@ export const fullScreenMixin = {
      * @param {HTMLElement} element - The HTML element to display in fullscreen
      * @returns {Promise<void>}
      */
-    documentSetFullScreen(element) {
+    async documentSetFullScreen(element) {
       return (
-        element.requestFullscreen?.() ||
-        Promise.resolve(element.webkitRequestFullScreen?.())
+        element.requestFullscreen?.() || element.webkitRequestFullScreen?.()
       )
     }
   }
