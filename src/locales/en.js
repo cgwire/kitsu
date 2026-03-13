@@ -1358,6 +1358,7 @@ export default {
     },
     two_factor_authentication: {
       title: 'Two-factor authentication',
+      description: 'Two-factor authentication (<abbr title="Two-Factor Authentication">2FA</abbr>) adds an extra layer of security to your account. When enabled, you will need to provide a second form of verification in addition to your password each time you log in. You can use an authenticator app (<abbr title="Time-based One-Time Password">TOTP</abbr>), email verification (<abbr title="One-Time Password">OTP</abbr>), or a hardware security key (<abbr title="Fast IDentity Online">FIDO</abbr>) as your second factor.',
       mandatory: 'Your organization requires two-factor authentication. Please enable at least one method to continue.',
       enabled: 'Two-factor authentication enabled',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',

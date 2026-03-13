@@ -1,6 +1,10 @@
 <template>
   <div class="two-factor-authentication-setup">
     <p
+      class="mb2 has-text-centered"
+      v-html="$t('profile.two_factor_authentication.description')"
+    />
+    <p
       v-if="showCancelButton && twoFAButtonsDisabled"
       class="cancel-two-factor-action"
     >
@@ -289,12 +293,12 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import QrcodeVue from 'qrcode.vue'
 import {
-  LockIcon,
   CopyIcon,
-  SaveIcon,
-  XCircleIcon,
   KeyIcon,
-  TrashIcon
+  LockIcon,
+  SaveIcon,
+  TrashIcon,
+  XCircleIcon
 } from 'lucide-vue-next'
 
 import TextField from '@/components/widgets/TextField.vue'

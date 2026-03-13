@@ -947,6 +947,16 @@ a:hover {
   color: #999;
 }
 
+abbr {
+  text-decoration: none;
+  border-bottom: 1px dotted $light-grey;
+  cursor: help;
+
+  &:hover {
+    border-bottom-color: $dark-grey;
+  }
+}
+
 .info {
   margin-top: 1em;
   font-size: 1.4em;
