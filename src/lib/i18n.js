@@ -7,7 +7,8 @@ const i18n = createI18n({
   legacy: true,
   locale: 'en',
   fallbackLocale: 'en',
-  messages: locales
+  messages: locales,
+  warnHtmlInMessage: 'off'
 })
 
 /*
