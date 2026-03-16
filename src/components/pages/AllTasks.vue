@@ -2,29 +2,29 @@
   <page-layout>
     <template #main>
       <div class="all-tasks">
-        <div class="filters flexrow mt1">
+        <div class="filters flexrow">
           <combobox-production
-            class="flexrow-item mb0"
+            class="combobox-production flexrow-item mb0"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
           />
           <combobox-status
-            class="flexrow-item selector mb0"
+            class="flexrow-item mb0"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
             v-model="filters.taskStatusId"
           />
           <combobox-task-type
-            class="flexrow-item selector mb0"
+            class="flexrow-item mb0"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
           />
         </div>
-        <div class="filters flexrow mt1 mb1">
+        <div class="filters flexrow">
           <combobox-studio
-            class="mr1"
+            class="flexrow-item"
             all-studios-label
             :label="$t('people.fields.studio')"
             v-model="filters.studioId"
@@ -35,19 +35,14 @@
             :label="$t('main.department')"
             v-model="filters.departmentId"
           />
-          <div class="flexrow-item selector">
-            <label class="label person-label">
-              {{ $t('main.person') }}
-            </label>
-            <people-field
-              class="person-field"
-              :multiple="true"
-              :people="personList"
-              v-model="filters.person"
-            />
-          </div>
+          <people-field
+            class="flexrow-item"
+            :label="$t('main.person')"
+            multiple
+            :people="personList"
+            v-model="filters.person"
+          />
         </div>
-
         <all-task-list
           :tasks="tasks"
           :stats="stats"
@@ -318,12 +313,17 @@ export default {
 .all-tasks {
   display: flex;
   flex-direction: column;
+  gap: 1em;
   max-height: 100%;
-  padding: 4em 1em 1em 1em;
+  padding: 5em 1em 1em 1em;
   color: var(--text);
 }
 
-.person-label {
-  margin-top: 0px;
+.filters {
+  align-items: flex-start;
+}
+
+.combobox-production {
+  padding-top: 7px;
 }
 </style>
