@@ -50,7 +50,6 @@
           :is-error="isLoadingError"
           :is-more="isMore"
           :is-more-loading="isMoreLoading"
-          @task-clicked="taskClicked"
           @more-clicked="loadMore"
         />
       </div>
@@ -274,10 +273,6 @@ export default {
           this.isMoreLoadingError = true
           console.error(error)
         })
-    },
-
-    taskClicked(task) {
-      this.$router.push({ name: 'Task', params: { id: task.id } })
     }
   },
 
