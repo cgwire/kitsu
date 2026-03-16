@@ -133,10 +133,18 @@ export default {
       this.filters.taskTypeId = routeQuery.task_type_id
     }
     if (routeQuery.person_id) {
-      this.filters.person = this.activePeopleWithoutBot.find(
-        person => person.id === routeQuery.person_id
+      const personIds = routeQuery.person_id.split(',')
+      this.filters.person = this.activePeopleWithoutBot.filter(person =>
+        personIds.includes(person.id)
       )
     }
+    if (routeQuery.department_id) {
+      this.filters.departmentId = routeQuery.department_id
+    }
+    if (routeQuery.studio_id) {
+      this.filters.studioId = routeQuery.studio_id
+    }
+
     this.reload()
   },
 
@@ -194,9 +202,8 @@ export default {
         project_id: this.filters.productionId,
         task_status_id: this.filters.taskStatusId,
         task_type_id: this.filters.taskTypeId,
-        person_id: this.filters.person
-          ? this.filters.person.map(person => person.id).join(',')
-          : null,
+        person_id:
+          this.filters.person?.map(person => person.id).join(',') || null,
         department_id: this.filters.departmentId,
         studio_id: this.filters.studioId
       }
@@ -281,12 +288,6 @@ export default {
 
   watch: {
     filters: {
-      handler() {
-        this.reload()
-      },
-      deep: true
-    },
-    'filters.person': {
       handler() {
         this.reload()
       },
