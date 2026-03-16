@@ -19,6 +19,7 @@
       <router-link
         :to="{ name: 'person', params: { person_id: person.id } }"
         class="menu-button flexrow"
+        @click.stop
       >
         <user-icon class="flexrow-item" :size="16" />
         <span class="flexrow-item">
