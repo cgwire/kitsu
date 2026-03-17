@@ -138,10 +138,11 @@
         >
           <button-simple
             class="flexrow-item"
+            :disabled="!isReady"
             :title="$t('playlists.actions.play')"
             icon="play"
             @click="onPlayPauseClicked"
-            v-if="!isPlaying"
+            v-if="!isPlaying || !isReady"
           />
           <button-simple
             class="flexrow-item"
@@ -497,6 +498,7 @@
 
           <a
             class="button flexrow-item"
+            :disabled="!isReady"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
             v-if="
@@ -949,6 +951,10 @@ export default {
 
     isFile() {
       return !this.isPicture && !this.isMovie // && !this.is3DModel && !this.isPdf
+    },
+
+    isReady() {
+      return this.currentPreview?.status === 'ready'
     },
 
     originalPath() {
