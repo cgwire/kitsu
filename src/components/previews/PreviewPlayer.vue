@@ -204,7 +204,7 @@
           </span>
 
           <div
-            class="flexrow-item time-indicator mr1"
+            class="flexrow-item time-indicator nowrap mr1"
             :title="$t('playlists.actions.frame_number')"
           >
             <span> ({{ currentFrameLabel }}</span
@@ -263,7 +263,7 @@
               icon="left"
               @click="onPreviousComparisonClicked"
             />
-            <span class="flexrow-item comparison-index">
+            <span class="flexrow-item comparison-index nowrap">
               {{ comparisonPreviewIndex + 1 }} /
               {{ comparisonPreviewLength }}
             </span>
@@ -2382,6 +2382,7 @@ export default {
   height: 32px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .buttons .button:first-child {

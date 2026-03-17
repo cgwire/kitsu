@@ -508,6 +508,7 @@ progress {
   z-index: 800;
   display: flex;
   flex-direction: column;
+  font-variant-numeric: tabular-nums;
 
   .frame-tile {
     display: inline-block;

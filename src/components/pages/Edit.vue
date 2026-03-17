@@ -312,7 +312,7 @@
               {{ maxDuration }}
             </span>
             <span
-              class="flexrow-item time-indicator mr1"
+              class="flexrow-item time-indicator nowrap mr1"
               :title="$t('playlists.actions.frame_number')"
             >
               ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
