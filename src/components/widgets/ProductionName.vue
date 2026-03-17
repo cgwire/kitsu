@@ -6,7 +6,7 @@
         background: avatarColor,
         width: `${size}px`,
         height: `${size}px`,
-        fontSize: `${size - 15}px`,
+        fontSize: `${Math.max(size - 15, 10)}px`,
         lineHeight: `${size}px`
       }"
       :title="production.name"
