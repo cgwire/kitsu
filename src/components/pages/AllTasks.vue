@@ -2,29 +2,29 @@
   <page-layout>
     <template #main>
       <div class="all-tasks">
-        <div class="filters flexrow mt1">
+        <div class="filters flexrow">
           <combobox-production
-            class="flexrow-item mb0"
+            class="combobox-production flexrow-item mb0"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
           />
           <combobox-status
-            class="flexrow-item selector mb0"
+            class="flexrow-item mb0"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
             v-model="filters.taskStatusId"
           />
           <combobox-task-type
-            class="flexrow-item selector mb0"
+            class="flexrow-item mb0"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
           />
         </div>
-        <div class="filters flexrow mt1 mb1">
+        <div class="filters flexrow">
           <combobox-studio
-            class="mr1"
+            class="flexrow-item"
             all-studios-label
             :label="$t('people.fields.studio')"
             v-model="filters.studioId"
@@ -35,19 +35,14 @@
             :label="$t('main.department')"
             v-model="filters.departmentId"
           />
-          <div class="flexrow-item selector">
-            <label class="label person-label">
-              {{ $t('main.person') }}
-            </label>
-            <people-field
-              class="person-field"
-              :multiple="true"
-              :people="personList"
-              v-model="filters.person"
-            />
-          </div>
+          <people-field
+            class="flexrow-item"
+            :label="$t('main.person')"
+            multiple
+            :people="personList"
+            v-model="filters.person"
+          />
         </div>
-
         <all-task-list
           :tasks="tasks"
           :stats="stats"
@@ -55,7 +50,6 @@
           :is-error="isLoadingError"
           :is-more="isMore"
           :is-more-loading="isMoreLoading"
-          @task-clicked="taskClicked"
           @more-clicked="loadMore"
         />
       </div>
@@ -133,10 +127,18 @@ export default {
       this.filters.taskTypeId = routeQuery.task_type_id
     }
     if (routeQuery.person_id) {
-      this.filters.person = this.activePeopleWithoutBot.find(
-        person => person.id === routeQuery.person_id
+      const personIds = routeQuery.person_id.split(',')
+      this.filters.person = this.activePeopleWithoutBot.filter(person =>
+        personIds.includes(person.id)
       )
     }
+    if (routeQuery.department_id) {
+      this.filters.departmentId = routeQuery.department_id
+    }
+    if (routeQuery.studio_id) {
+      this.filters.studioId = routeQuery.studio_id
+    }
+
     this.reload()
   },
 
@@ -194,9 +196,8 @@ export default {
         project_id: this.filters.productionId,
         task_status_id: this.filters.taskStatusId,
         task_type_id: this.filters.taskTypeId,
-        person_id: this.filters.person
-          ? this.filters.person.map(person => person.id).join(',')
-          : null,
+        person_id:
+          this.filters.person?.map(person => person.id).join(',') || null,
         department_id: this.filters.departmentId,
         studio_id: this.filters.studioId
       }
@@ -272,21 +273,11 @@ export default {
           this.isMoreLoadingError = true
           console.error(error)
         })
-    },
-
-    taskClicked(task) {
-      this.$router.push({ name: 'Task', params: { id: task.id } })
     }
   },
 
   watch: {
     filters: {
-      handler() {
-        this.reload()
-      },
-      deep: true
-    },
-    'filters.person': {
       handler() {
         this.reload()
       },
@@ -317,12 +308,17 @@ export default {
 .all-tasks {
   display: flex;
   flex-direction: column;
+  gap: 1em;
   max-height: 100%;
-  padding: 4em 1em 1em 1em;
+  padding: 5em 1em 1em 1em;
   color: var(--text);
 }
 
-.person-label {
-  margin-top: 0px;
+.filters {
+  align-items: flex-start;
+}
+
+.combobox-production {
+  padding-top: 7px;
 }
 </style>

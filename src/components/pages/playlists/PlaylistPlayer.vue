@@ -463,8 +463,8 @@
           class="flexrow-item time-indicator mr05 nowrap"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }}
-          <span class="is-hidden-touch is-hidden-desktop-only">
+          ({{ currentFrame
+          }}<span class="is-hidden-touch is-hidden-desktop-only">
             / {{ (nbFrames + '').padStart(3, '0') }} </span
           >)
         </span>
@@ -2778,6 +2778,7 @@ export default {
   width: 100%;
   height: 32px;
   padding-right: 5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .playlisted-entities {

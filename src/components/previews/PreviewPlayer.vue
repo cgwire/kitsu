@@ -138,10 +138,11 @@
         >
           <button-simple
             class="flexrow-item"
+            :disabled="!isReady"
             :title="$t('playlists.actions.play')"
             icon="play"
             @click="onPlayPauseClicked"
-            v-if="!isPlaying"
+            v-if="!isPlaying || !isReady"
           />
           <button-simple
             class="flexrow-item"
@@ -204,7 +205,7 @@
           </span>
 
           <div
-            class="flexrow-item time-indicator mr1"
+            class="flexrow-item time-indicator nowrap mr1"
             :title="$t('playlists.actions.frame_number')"
           >
             <span> ({{ currentFrameLabel }}</span
@@ -263,7 +264,7 @@
               icon="left"
               @click="onPreviousComparisonClicked"
             />
-            <span class="flexrow-item comparison-index">
+            <span class="flexrow-item comparison-index nowrap">
               {{ comparisonPreviewIndex + 1 }} /
               {{ comparisonPreviewLength }}
             </span>
@@ -497,6 +498,7 @@
 
           <a
             class="button flexrow-item"
+            :disabled="!isReady"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
             v-if="
@@ -949,6 +951,10 @@ export default {
 
     isFile() {
       return !this.isPicture && !this.isMovie // && !this.is3DModel && !this.isPdf
+    },
+
+    isReady() {
+      return this.currentPreview?.status === 'ready'
     },
 
     originalPath() {
@@ -2382,6 +2388,7 @@ export default {
   height: 32px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .buttons .button:first-child {
