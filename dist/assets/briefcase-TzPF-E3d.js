@@ -1,0 +1,2 @@
+import{ba as e}from"./index-CZS8Q7G0.js";const r=e("briefcase",[["path",{d:"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",key:"jecpp"}],["rect",{width:"20",height:"14",x:"2",y:"6",rx:"2",key:"i6l2r4"}]]);export{r as B};
+//# sourceMappingURL=briefcase-TzPF-E3d.js.map
