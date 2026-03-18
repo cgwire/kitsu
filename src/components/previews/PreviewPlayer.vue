@@ -498,7 +498,9 @@
 
           <a
             class="button flexrow-item"
-            :disabled="!isReady"
+            :class="{
+              'is-disabled': !isReady
+            }"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
             v-if="
