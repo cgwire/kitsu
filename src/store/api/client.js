@@ -8,7 +8,8 @@ function handleResponse(res) {
 function handleError(err) {
   if (err?.response?.status === 401) {
     errors.backToLogin()
-    return
+    // Return a pending promise to freeze the chain until the redirect happens.
+    return new Promise(() => {})
   }
   err.body = err?.response?.body || ''
   throw err
