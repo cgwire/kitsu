@@ -53,4 +53,5 @@ locales.forEach(locale => {
 */
 import fs from 'fs'
 import en from '../src/locales/en.js'
-fs.writeFileSync('en.json', JSON.stringify(en, null, 2))
+
+fs.writeFileSync('en.json', JSON.stringify({ default: en }, null, 2))
