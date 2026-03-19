@@ -76,7 +76,7 @@ export default {
     }
   },
 
-  emits: ['update:modelValue'],
+  emits: ['update:modelValue', 'change'],
 
   computed: {
     ...mapGetters(['isDarkTheme', 'user']),
@@ -90,6 +90,7 @@ export default {
           value.setHours(0, 0, 0, 0)
         }
         this.$emit('update:modelValue', value)
+        this.$emit('change', value)
       }
     }
   }
