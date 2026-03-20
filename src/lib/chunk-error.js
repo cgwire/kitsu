@@ -8,6 +8,10 @@ window.addEventListener('vite:preloadError', event => {
   chunkErrors.add(event.payload)
 })
 
+export function isChunkError(error) {
+  return chunkErrors.has(error)
+}
+
 /**
  * Sets up a global error handler for chunk loading errors in a Vue Router application.
  * When a chunk loading error is detected during navigation, the page will be reloaded

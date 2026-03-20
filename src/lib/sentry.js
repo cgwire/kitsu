@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/vue'
 
 import { name, version } from '@/../package.json'
+import { isChunkError } from '@/lib/chunk-error'
 
 export default {
   init(app, router, { dsn, sampleRate = 0.1 }) {
@@ -14,7 +15,13 @@ export default {
           router
         })
       ],
-      tracesSampleRate: sampleRate // capture Trace for % of transactions for performance monitoring
+      tracesSampleRate: sampleRate, // capture Trace for % of transactions for performance monitoring
+      beforeSend(event, hint) {
+        if (hint.originalException && isChunkError(hint.originalException)) {
+          return null
+        }
+        return event
+      }
     })
   },
 
