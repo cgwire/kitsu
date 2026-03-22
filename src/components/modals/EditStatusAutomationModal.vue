@@ -148,7 +148,9 @@ useModal(toRef(props, 'active'), emit)
 
 const entityTypeOptions = [
   { label: 'asset', value: 'asset' },
-  { label: 'shot', value: 'shot' }
+  { label: 'shot', value: 'shot' },
+  { label: 'sequence', value: 'sequence' },
+  { label: 'episode', value: 'episode' }
 ]
 const fieldTypeOptions = [
   { label: 'status', value: 'status' },
@@ -174,6 +176,8 @@ const form = reactive({
 
 const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
 const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
+const sequenceTaskTypes = computed(() => store.getters.sequenceTaskTypes)
+const episodeTaskTypes = computed(() => store.getters.episodeTaskTypes)
 const taskStatuses = computed(() => store.getters.taskStatuses)
 
 const taskStatusList = computed(() =>
@@ -195,6 +199,14 @@ const setTaskTypes = fieldType => {
     form.inEntityTaskTypes = shotTaskTypes.value
     form.outFieldType = 'status'
     form.outEntityTaskTypes = shotTaskTypes.value
+  } else if (fieldType === 'sequence') {
+    form.inEntityTaskTypes = sequenceTaskTypes.value
+    form.outFieldType = 'status'
+    form.outEntityTaskTypes = sequenceTaskTypes.value
+  } else if (fieldType === 'episode') {
+    form.inEntityTaskTypes = episodeTaskTypes.value
+    form.outFieldType = 'status'
+    form.outEntityTaskTypes = episodeTaskTypes.value
   }
 }
 
@@ -211,8 +223,14 @@ watch(
     const entityType = isEditing.value
       ? props.statusAutomationToEdit.entity_type
       : 'asset'
-    const entityTaskTypes =
-      entityType === 'shot' ? shotTaskTypes.value : assetTaskTypes.value
+    let entityTaskTypes = assetTaskTypes.value
+    if (entityType === 'shot') {
+      entityTaskTypes = shotTaskTypes.value
+    } else if (entityType === 'sequence') {
+      entityTaskTypes = sequenceTaskTypes.value
+    } else if (entityType === 'episode') {
+      entityTaskTypes = episodeTaskTypes.value
+    }
     Object.assign(form, {
       entityType,
       inEntityTaskTypes: entityTaskTypes,
