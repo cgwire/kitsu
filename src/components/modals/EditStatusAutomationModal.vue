@@ -175,6 +175,14 @@ export default {
         {
           label: 'shot',
           value: 'shot'
+        },
+        {
+          label: 'sequence',
+          value: 'sequence'
+        },
+        {
+          label: 'episode',
+          value: 'episode'
         }
       ],
       fieldTypeOptions: [
@@ -208,6 +216,8 @@ export default {
       'statusAutomationsStatusOptions',
       'assetTaskTypes',
       'shotTaskTypes',
+      'sequenceTaskTypes',
+      'episodeTaskTypes',
       'taskStatuses'
     ]),
 
@@ -237,6 +247,14 @@ export default {
         this.form.inEntityTaskTypes = this.shotTaskTypes
         this.form.outFieldType = 'status'
         this.form.outEntityTaskTypes = this.shotTaskTypes
+      } else if (fieldType === 'sequence') {
+        this.form.inEntityTaskTypes = this.sequenceTaskTypes
+        this.form.outFieldType = 'status'
+        this.form.outEntityTaskTypes = this.sequenceTaskTypes
+      } else if (fieldType === 'episode') {
+        this.form.inEntityTaskTypes = this.episodeTaskTypes
+        this.form.outFieldType = 'status'
+        this.form.outEntityTaskTypes = this.episodeTaskTypes
       }
     }
   },
@@ -249,6 +267,10 @@ export default {
           entityTaskTypes = this.assetTaskTypes
         } else if (this.form.entityType === 'shot') {
           entityTaskTypes = this.shotTaskTypes
+        } else if (this.form.entityType === 'sequence') {
+          entityTaskTypes = this.sequenceTaskTypes
+        } else if (this.form.entityType === 'episode') {
+          entityTaskTypes = this.episodeTaskTypes
         }
         this.form = {
           entityType: this.isEditing
