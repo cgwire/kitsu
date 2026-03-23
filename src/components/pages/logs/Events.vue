@@ -241,6 +241,9 @@ export default {
       const entityType = key.substring(0, key.length - 3)
       if (entityType === 'project') {
         return `/productions/${productionId}/news-feed`
+      } else if (entityType === 'task') {
+        const entityId = event.data[key]
+        return `/productions/${productionId}/entity/tasks/${entityId}`
       } else {
         const entityId = event.data[key]
         return `/productions/${productionId}/${entityType}s/${entityId}`
