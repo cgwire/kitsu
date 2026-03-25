@@ -237,7 +237,7 @@
             :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
-            v-for="(group, k) in displayedAssets"
+            v-for="(group, k) in filteredDisplayedAssets"
           >
             <tr class="datatable-type-header" v-if="group[0]">
               <th scope="rowgroup">
@@ -794,6 +794,33 @@ export default {
 
     formatDurationInHours() {
       return this.organisation.format_duration_in_hours
+    },
+
+    /** Filter the displayed assets by the display settings */
+    filteredDisplayedAssets() {
+      if (
+        this.displaySettings.showSharedAssets &&
+        this.displaySettings.showLinkedAssets
+      ) {
+        return this.displayedAssets
+      }
+      const episodeId = this.currentEpisode?.id
+
+      return this.displayedAssets.map(typeList =>
+        typeList.filter(asset => {
+          if (!this.displaySettings.showSharedAssets && asset.shared) {
+            return false
+          }
+          if (
+            this.isTVShow &&
+            !this.displaySettings.showLinkedAssets &&
+            !['all', asset.episode_id || 'main'].includes(episodeId)
+          ) {
+            return false
+          }
+          return true
+        })
+      )
     }
   },
 
