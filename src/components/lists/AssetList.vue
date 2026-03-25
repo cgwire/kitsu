@@ -551,7 +551,7 @@
     </div>
 
     <asset-list-numbers
-      :assets="displayedAssets"
+      :assets="assetCache.assets"
       v-if="!isEmptyList && !isLoading"
     />
   </div>
@@ -585,6 +585,7 @@ import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelecto
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 
+import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -720,6 +721,10 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    assetCache() {
+      return assetStore.cache
+    },
 
     assetTypeMap() {
       return assetTypeStore.cache.assetTypeMap
