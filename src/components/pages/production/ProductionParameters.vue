@@ -1,17 +1,20 @@
 <template>
   <div class="columns">
     <div class="column is-one-third box">
-      <form class="form" @submit.prevent>
+      <form class="form" @submit.prevent="editParameters">
         <text-field
           :label="$t('productions.fields.name')"
+          :maxlength="80"
           @enter="runConfirmation"
+          required
           v-focus
-          v-model="form.name"
+          v-model.trim="form.name"
         />
         <text-field
           :label="$t('productions.fields.code')"
+          :maxlength="80"
           @enter="runConfirmation"
-          v-model="form.code"
+          v-model.trim="form.code"
         />
         <div class="columns">
           <div class="mr1">
@@ -76,20 +79,24 @@
           :max="60"
           :step="0.001"
           :label="$t('productions.fields.fps')"
+          placeholder="25"
           @enter="runConfirmation"
           v-model="form.fps"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
           :label="$t('productions.fields.ratio')"
+          placeholder="16:9"
+          :maxlength="10"
           @enter="runConfirmation"
-          v-model="form.ratio"
+          v-model.trim="form.ratio"
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
           :label="$t('productions.fields.resolution')"
+          placeholder="1920x1080"
           @enter="runConfirmation"
-          v-model="form.resolution"
+          v-model.trim="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
@@ -143,7 +150,7 @@
             :class="{ 'is-loading': isLoading }"
             :disabled="isLoading"
             :text="$t('main.save')"
-            @click="editParameters"
+            type="submit"
           />
         </div>
       </form>

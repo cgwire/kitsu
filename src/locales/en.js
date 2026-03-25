@@ -602,6 +602,7 @@ export default {
     reset_change_password: 'Change password',
     reset_change_password_failed: 'Changing password failed. Please, restart the procedure.',
     reset_change_password_form_failed: 'There is a problem with the password you provided. Please verify that it is at least 8 characters long and that both passwords match.',
+    reset_change_password_token_failed: 'The password reset link is invalid or has expired. Please restart the procedure.',
     reset_change_password_succeed: 'Your password was changed successfully. Please return to the login page to use it.',
     reset_change_password_title: 'Enter a new password',
     reset_password: 'Reset Password',

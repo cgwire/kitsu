@@ -7,12 +7,14 @@
         :max-date="today"
         :label="$t('logs.current_date_label')"
         v-model="currentDate"
+        @change="onDateChange"
       />
       <people-field
         class="flexrow-item field"
         :label="$t('main.user')"
         :people="people"
         v-model="selectedPerson"
+        @select="onPersonSelect"
       />
       <button-simple
         class="flexrow-item small"
@@ -52,12 +54,12 @@
               class="flexrow-item"
               :size="20"
               :font-size="10"
-              :person="personMap.get(event.user_id)"
+              :person="event.person"
               v-if="event.user_id"
             />
             <people-name
               class="flexrow-item"
-              :person="personMap.get(event.user_id)"
+              :person="event.person"
               with-link
               v-if="event.user_id"
             />
@@ -89,7 +91,11 @@
 import { mapGetters, mapActions } from 'vuex'
 import moment from 'moment'
 
-import { formatFullDateWithRevertedTimezone } from '@/lib/time'
+import {
+  formatFullDateWithRevertedTimezone,
+  formatSimpleDate,
+  parseSimpleDate
+} from '@/lib/time'
 import { timeMixin } from '@/components/mixins/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -129,30 +135,37 @@ export default {
     }
   },
 
-  mounted() {
-    this.loadDayEvents()
-  },
-
   computed: {
     ...mapGetters(['people', 'personMap']),
 
-    today() {
-      return moment().toDate()
-    },
-
     filteredEvents() {
-      let events = this.events
-      if (this.selectedPerson) {
-        events = events.filter(
-          event => event.user_id === this.selectedPerson.id
-        )
-      }
-      return events
+      if (!this.selectedPerson) return this.events
+      return this.events.filter(
+        event => event.user_id === this.selectedPerson.id
+      )
     }
   },
 
   methods: {
     ...mapActions(['loadEvents']),
+
+    onDateChange(value) {
+      const currentDate = formatSimpleDate(value)
+      if (this.$route.query.date !== currentDate) {
+        this.$router.push({
+          query: { ...this.$route.query, date: currentDate }
+        })
+      }
+    },
+
+    onPersonSelect(person) {
+      const personId = person?.id
+      if (this.$route.query.person_id !== personId) {
+        this.$router.push({
+          query: { ...this.$route.query, person_id: personId }
+        })
+      }
+    },
 
     async loadDayEvents() {
       const before = moment(this.currentDate).add(1, 'days')
@@ -208,7 +221,8 @@ export default {
           name,
           shortType: type.substring(0, 3),
           type,
-          user_id: event.user_id
+          user_id: event.user_id,
+          person: this.personMap.get(event.user_id)
         }
       })
     },
@@ -227,6 +241,9 @@ export default {
       const entityType = key.substring(0, key.length - 3)
       if (entityType === 'project') {
         return `/productions/${productionId}/news-feed`
+      } else if (entityType === 'task') {
+        const entityId = event.data[key]
+        return `/productions/${productionId}/entity/tasks/${entityId}`
       } else {
         const entityId = event.data[key]
         return `/productions/${productionId}/${entityType}s/${entityId}`
@@ -235,8 +252,18 @@ export default {
   },
 
   watch: {
-    currentDate() {
-      this.loadDayEvents()
+    '$route.query.date': {
+      immediate: true,
+      handler(date) {
+        this.currentDate = parseSimpleDate(date).toDate()
+        this.loadDayEvents()
+      }
+    },
+    '$route.query.person_id': {
+      immediate: true,
+      handler(personId) {
+        this.selectedPerson = this.personMap.get(personId) || null
+      }
     }
   },
 

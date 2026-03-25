@@ -315,7 +315,8 @@
               v-if="
                 comment.text.length > 0 ||
                 comment.previews.length > 0 ||
-                comment.attachment_files.length > 0
+                comment.attachment_files.length > 0 ||
+                comment.checklist?.length > 0
               "
             >
               <button

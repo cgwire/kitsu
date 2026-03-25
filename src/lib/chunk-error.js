@@ -6,8 +6,11 @@ const PRELOAD_ERROR_FLAG = 'vite-preload-error-reload'
 // See: https://vite.dev/guide/build.html#load-error-handling
 window.addEventListener('vite:preloadError', event => {
   chunkErrors.add(event.payload)
-  event.preventDefault()
 })
+
+export function isChunkError(error) {
+  return chunkErrors.has(error)
+}
 
 /**
  * Sets up a global error handler for chunk loading errors in a Vue Router application.

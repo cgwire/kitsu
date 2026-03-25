@@ -59,19 +59,22 @@
             }}
           </a>
         </p>
-        <p class="error" v-show="isFormError">
+        <p class="error" v-if="isFormError">
           {{ $t('login.reset_change_password_form_failed') }}
         </p>
-        <p class="error" v-show="isError">
+        <p class="error" v-else-if="isTokenError">
+          {{ $t('login.reset_change_password_token_failed') }}
+        </p>
+        <p class="error" v-else-if="isError">
           {{ $t('login.reset_change_password_failed') }}
         </p>
-        <p class="success" v-show="isSuccess">
+        <p class="success" v-if="isSuccess">
           {{ $t('login.reset_change_password_succeed') }}
         </p>
-        <p class="has-text-centered mt2 mb2" v-show="isSuccess">
+        <p class="has-text-centered mt2" v-if="isSuccess">
           {{ $t('login.redirecting', { secondsLeft }) }}
         </p>
-        <p class="has-text-centered">
+        <p class="has-text-centered mt2">
           <router-link :to="{ name: 'login' }">
             <span v-if="isSuccess">
               {{ $t('login.back_to_login') }}
@@ -106,6 +109,7 @@ export default {
       isLoading: false,
       isError: false,
       isFormError: false,
+      isTokenError: false,
       isSuccess: false,
       secondsLeft: 5
     }
@@ -128,8 +132,9 @@ export default {
     ...mapActions(['resetChangePassword']),
 
     confirmResetChangePassword() {
-      this.isFormError = false
       this.isError = false
+      this.isFormError = false
+      this.isTokenError = false
       if (auth.isPasswordValid(this.password, this.password2)) {
         this.isLoading = true
         this.isSuccess = false
@@ -140,7 +145,6 @@ export default {
           password2: this.password2
         })
           .then(() => {
-            this.isLoading = false
             this.isSuccess = true
             const interval = setInterval(() => {
               this.secondsLeft--
@@ -150,10 +154,15 @@ export default {
               }
             }, 1000)
           })
-          .catch(() => {
+          .catch(error => {
+            if (error.body?.message?.includes('Wrong or expired token')) {
+              this.isTokenError = true
+            } else {
+              this.isError = true
+            }
+          })
+          .finally(() => {
             this.isLoading = false
-            this.isError = true
-            this.isSuccess = false
           })
       } else {
         this.isFormError = true

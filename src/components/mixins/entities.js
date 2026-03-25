@@ -41,9 +41,10 @@ export const entitiesMixin = {
     }
     this.onSelectedDepartmentChanged()
 
-    this.displaySettings =
-      preferences.getObjectPreference(`${this.type}s:display_settings`) ||
-      this.displaySettings
+    this.displaySettings = {
+      ...this.displaySettings,
+      ...preferences.getObjectPreference(`${this.type}s:display_settings`)
+    }
   },
 
   computed: {

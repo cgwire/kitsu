@@ -13,7 +13,7 @@
       :class="{
         rounded
       }"
-      :title="taskType.name"
+      :title="title"
     >
       {{ taskType.name }}
     </span>
@@ -28,7 +28,7 @@
     }"
     v-else
   >
-    <span :title="taskType.name">
+    <span :title="title">
       {{ taskType.name }}
     </span>
     <span class="delete-times" v-if="deletable" @click="$emit('delete')">
@@ -93,6 +93,10 @@ export default {
       return this.taskType.color?.toUpperCase() === '#000000'
         ? '#666'
         : this.taskType.color
+    },
+
+    title() {
+      return `${this.taskType.for_entity} / ${this.taskType.name}`
     },
 
     targetRoute() {

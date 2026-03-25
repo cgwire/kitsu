@@ -81,7 +81,7 @@
         />
         <asset-list
           ref="asset-list"
-          :displayed-assets="displayedAssetsByTypeFiltered"
+          :displayed-assets="displayedAssetsByType"
           :display-settings="displaySettings"
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
@@ -474,33 +474,6 @@ export default {
 
     searchField() {
       return this.$refs['asset-search-field']
-    },
-
-    // Filter the displayed assets by the display settings
-    displayedAssetsByTypeFiltered() {
-      if (
-        this.displaySettings.showSharedAssets &&
-        this.displaySettings.showLinkedAssets
-      ) {
-        return this.displayedAssetsByType
-      }
-      const episodeId = this.currentEpisode?.id
-
-      return this.displayedAssetsByType.map(typeList => {
-        return typeList.filter(asset => {
-          if (!this.displaySettings.showSharedAssets && asset.shared) {
-            return false
-          }
-          if (
-            this.isTVShow &&
-            !this.displaySettings.showLinkedAssets &&
-            !['all', asset.episode_id || 'main'].includes(episodeId)
-          ) {
-            return false
-          }
-          return true
-        })
-      })
     },
 
     filteredAssets() {
