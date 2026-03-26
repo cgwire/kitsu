@@ -37,7 +37,8 @@
       "no_concept": "이 자산과 연결된 개념이 없습니다.",
       "casted_in_shots": "{nbShots} 샷에 캐스팅됨",
       "delete_for_selection_hard_text": "선택한 에셋을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
-      "delete_for_selection_hard_lock_text": "삭제"
+      "delete_for_selection_hard_lock_text": "삭제",
+      "show_linked": "분석 자산 표시"
     },
     "asset_types": {
       "all_asset_types": "모든 어셋 종류",
@@ -114,7 +115,9 @@
         "task_status": "작업 상태",
         "person": "담당자 이름",
         "checklist": "체크리스트",
-        "acknowledgements": "승인"
+        "acknowledgements": "승인",
+        "revision": "개정",
+        "attachments": "첨부 파일"
       },
       "checklist": "체크리스트",
       "attachments": "첨부파일",
@@ -346,7 +349,8 @@
       "login_saml": "SSO 로그인",
       "reset_password_inactive": "비밀번호를 재설정하지 못했습니다. 이 이메일을 받은 사용자가 비활성 상태입니다.",
       "set_password_title": "키츠에 오신 것을 환영합니다!",
-      "set_password": "비밀번호 설정"
+      "set_password": "비밀번호 설정",
+      "reset_change_password_token_failed": "비밀번호 재설정 링크가 유효하지 않거나 만료되었습니다. 절차를 다시 시작하세요."
     },
     "main": {
       "about": "정보",
@@ -716,7 +720,8 @@
         "junior": "Junior",
         "mid": "Mid",
         "senior": "Senior"
-      }
+      },
+      "email_domain_error": "이 이메일 도메인은 허용되지 않습니다."
     },
     "playlists": {
       "add_assets": "어셋 추가",
@@ -1058,7 +1063,8 @@
           "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다."
         },
         "enabled": "2단계 인증 사용",
-        "mandatory": "조직에 2단계 인증이 필요합니다. 계속하려면 하나 이상의 방법을 사용하도록 설정하세요."
+        "mandatory": "조직에 2단계 인증이 필요합니다. 계속하려면 하나 이상의 방법을 사용하도록 설정하세요.",
+        "description": "2단계 인증(<abbr title=\"2단계 인증\">2FA</abbr>)은 계정에 보안을 한층 더 강화합니다. 이 기능을 활성화하면 로그인할 때마다 비밀번호 외에 두 번째 인증 수단을 제공해야 합니다. 두 번째 인증 수단으로 인증 앱(<abbr title=\"시간 기반 일회용 비밀번호\">TOTP</abbr>), 이메일 인증(<abbr title=\"일회용 비밀번호\">OTP</abbr>) 또는 하드웨어 보안 키(<abbr title=\"Fast IDentity Online\">FIDO</abbr>)를 사용할 수 있습니다."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "선택한 작업을 삭제하는 동안 오류가 발생했습니다.",
       "delete_for_selection_hard_text": "선택한 작업을 영구적으로 제거하시겠습니까? 관련 댓글과 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
       "delete_for_selection_hard_lock_text": "삭제",
-      "hookup_playlist": "훅업 재생목록 생성"
+      "hookup_playlist": "훅업 재생목록 생성",
+      "assignation_error": "이 사람을 선택한 작업에 할당하는 데 문제가 있습니다. 모든 작업이 할당되지 않았습니다."
     },
     "timesheets": {
       "detail_level": "세부 사항 레벨",
