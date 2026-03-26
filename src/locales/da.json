@@ -37,7 +37,8 @@
       "no_concept": "Ingen koncepter knyttet til denne asset",
       "casted_in_shots": "Støbt i {nbShots} skud",
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte aktiver permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
-      "delete_for_selection_hard_lock_text": "SLET"
+      "delete_for_selection_hard_lock_text": "SLET",
+      "show_linked": "Vis opdeling af aktiver"
     },
     "asset_types": {
       "all_asset_types": "Alle asset-typer",
@@ -114,7 +115,9 @@
         "task_status": "Opgavestatus",
         "person": "Persons navn",
         "checklist": "Tjekliste",
-        "acknowledgements": "Anerkendelser"
+        "acknowledgements": "Anerkendelser",
+        "revision": "Revision",
+        "attachments": "Vedhæftede filer"
       },
       "checklist": "Tjekliste",
       "attachments": "Vedhæftninger",
@@ -346,7 +349,8 @@
       "login_saml": "SSO-login",
       "reset_password_inactive": "Nulstilling af din adgangskode mislykkedes. Brugeren med denne e-mail er inaktiv.",
       "set_password_title": "Velkommen til Kitsu!",
-      "set_password": "Indstil din adgangskode"
+      "set_password": "Indstil din adgangskode",
+      "reset_change_password_token_failed": "Linket til nulstilling af adgangskode er ugyldigt eller udløbet. Genstart venligst proceduren."
     },
     "main": {
       "about": "Om",
@@ -716,7 +720,8 @@
         "junior": "Junior",
         "mid": "Midt",
         "senior": "Senior"
-      }
+      },
+      "email_domain_error": "Dette e-mail-domæne er ikke tilladt."
     },
     "playlists": {
       "add_assets": "Tilføj assets",
@@ -1058,7 +1063,8 @@
           "error_unregister": "Der opstod en fejl under afregistrering af FIDO-enhed."
         },
         "enabled": "To-faktor-autentificering aktiveret",
-        "mandatory": "Din organisation kræver to-faktor-godkendelse. Aktivér venligst mindst én metode for at fortsætte."
+        "mandatory": "Din organisation kræver to-faktor-godkendelse. Aktivér venligst mindst én metode for at fortsætte.",
+        "description": "To-faktor-autentificering (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) tilføjer et ekstra lag af sikkerhed til din konto. Når det er aktiveret, skal du angive en anden form for bekræftelse ud over din adgangskode, hver gang du logger ind. Du kan bruge en godkendelsesapp (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailbekræftelse (<abbr title=\"One-Time Password\">OTP</abbr>) eller en hardwaresikkerhedsnøgle (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) som din anden faktor."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte opgaver.",
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte opgaver permanent? Alle relaterede kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
-      "hookup_playlist": "Skab en playliste til opkobling"
+      "hookup_playlist": "Skab en playliste til opkobling",
+      "assignation_error": "Der var et problem med at tildele denne person de valgte opgaver. Ikke alle opgaver blev tildelt."
     },
     "timesheets": {
       "detail_level": "Detaljeniveau",
