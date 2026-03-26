@@ -37,7 +37,8 @@
       "no_concept": "Não há conceitos vinculados a esse ativo",
       "casted_in_shots": "Lançado em fotos {nbShots}",
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os ativos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
-      "delete_for_selection_hard_lock_text": "EXCLUIR"
+      "delete_for_selection_hard_lock_text": "EXCLUIR",
+      "show_linked": "Exibir ativos de decomposição"
     },
     "asset_types": {
       "all_asset_types": "Todos os tipos de assets",
@@ -114,7 +115,9 @@
         "task_status": "Status da tarefa",
         "person": "Nome da pessoa",
         "checklist": "Lista de verificação",
-        "acknowledgements": "Agradecimentos"
+        "acknowledgements": "Agradecimentos",
+        "revision": "Revisão",
+        "attachments": "Anexos"
       },
       "checklist": "Checklist",
       "attachments": "Anexos",
@@ -346,7 +349,8 @@
       "login_saml": "Login SSO",
       "reset_password_inactive": "A redefinição de sua senha falhou. O usuário com esse e-mail está inativo.",
       "set_password_title": "Bem-vindo à Kitsu!",
-      "set_password": "Defina sua senha"
+      "set_password": "Defina sua senha",
+      "reset_change_password_token_failed": "O link de redefinição de senha é inválido ou expirou. Reinicie o procedimento."
     },
     "main": {
       "about": "Sobre",
@@ -716,7 +720,8 @@
         "junior": "Júnior",
         "mid": "Médio",
         "senior": "Sênior"
-      }
+      },
+      "email_domain_error": "Esse domínio de e-mail não é permitido."
     },
     "playlists": {
       "add_assets": "Adicionar assets",
@@ -1058,7 +1063,8 @@
           "error_unregister": "Ocorreu um erro ao cancelar o registro do dispositivo FIDO."
         },
         "enabled": "Autenticação de dois fatores ativada",
-        "mandatory": "Sua organização exige autenticação de dois fatores. Ative pelo menos um método para continuar."
+        "mandatory": "Sua organização exige autenticação de dois fatores. Ative pelo menos um método para continuar.",
+        "description": "A autenticação de dois fatores (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) adiciona uma camada extra de segurança à sua conta. Quando ativada, você precisará fornecer uma segunda forma de verificação, além da sua senha, sempre que fizer login. Você pode usar um aplicativo autenticador (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), verificação por e-mail (<abbr title=\"One-Time Password\">OTP</abbr>) ou uma chave de segurança de hardware (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) como seu segundo fator."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "Ocorreu um erro ao excluir as tarefas selecionadas.",
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as tarefas selecionadas? Todos os comentários e visualizações relacionados também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
-      "hookup_playlist": "Gerar uma lista de reprodução de conexão"
+      "hookup_playlist": "Gerar uma lista de reprodução de conexão",
+      "assignation_error": "Houve um problema ao atribuir essa pessoa às tarefas selecionadas. Nem todas as tarefas foram atribuídas."
     },
     "timesheets": {
       "detail_level": "Nível de detalhe",
