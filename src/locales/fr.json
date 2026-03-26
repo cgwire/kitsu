@@ -37,7 +37,8 @@
       "no_concept": "Aucun concept n'est lié à cet asset",
       "casted_in_shots": "Casté dans {nbShots} plans",
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les assets sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_lock_text": "DELETE",
+      "show_linked": "Affichage les assets du casting"
     },
     "asset_types": {
       "all_asset_types": "Tous les types d'assets",
@@ -114,7 +115,9 @@
         "task_status": "Statut de tâches",
         "person": "Nom de la personne",
         "checklist": "Checklist",
-        "acknowledgements": "Remerciements"
+        "acknowledgements": "Remerciements",
+        "revision": "Révision",
+        "attachments": "Pièces jointes"
       },
       "checklist": "Checklist",
       "attachments": "Pièces jointes",
@@ -346,7 +349,8 @@
       "login_saml": "Connexion SSO",
       "reset_password_inactive": "La réinitialisation de votre mot de passe a échoué. L'utilisateur ayant cet email est inactif.",
       "set_password_title": "Bienvenue sur Kitsu !",
-      "set_password": "Définissez votre mot de passe"
+      "set_password": "Définissez votre mot de passe",
+      "reset_change_password_token_failed": "Le lien de réinitialisation du mot de passe n'est pas valide ou a expiré. Veuillez recommencer la procédure."
     },
     "main": {
       "about": "À propos",
@@ -716,7 +720,8 @@
         "junior": "Junior",
         "mid": "Moyen",
         "senior": "Senior"
-      }
+      },
+      "email_domain_error": "Ce domaine de messagerie n'est pas autorisé."
     },
     "playlists": {
       "add_assets": "Ajouter des assets",
@@ -1058,7 +1063,8 @@
           "error_unregister": "Une erreur est survenue en retirant l'appareil FIDO."
         },
         "enabled": "Authentification à deux facteurs activée",
-        "mandatory": "Votre organisation requiert une authentification à deux facteurs. Veuillez activer au moins une méthode pour continuer."
+        "mandatory": "Votre organisation requiert une authentification à deux facteurs. Veuillez activer au moins une méthode pour continuer.",
+        "description": "L'authentification à deux facteurs (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) ajoute un niveau de sécurité supplémentaire à votre compte. Lorsqu'elle est activée, vous devez fournir une deuxième forme de vérification en plus de votre mot de passe à chaque fois que vous vous connectez. Vous pouvez utiliser une application d'authentification (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), une vérification par courrier électronique (<abbr title=\"One-Time Password\">OTP</abbr>) ou une clé de sécurité matérielle (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) comme deuxième facteur."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des tâches sélectionnées.",
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les tâches sélectionnées ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
       "delete_for_selection_hard_lock_text": "DELETE",
-      "hookup_playlist": "Créer une liste de lecture pour les rencontres"
+      "hookup_playlist": "Créer une liste de lecture pour les rencontres",
+      "assignation_error": "Il y a eu un problème d'assignation de cette personne aux tâches sélectionnées. Toutes les tâches n'ont pas été assignées."
     },
     "timesheets": {
       "detail_level": "Niveau de détail",
