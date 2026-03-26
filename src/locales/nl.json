@@ -37,7 +37,8 @@
       "no_concept": "Geen concepten gekoppeld aan dit actief",
       "casted_in_shots": "Gegoten in {nbShots} shots",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde onderdelen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en previews worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "WISSEN"
+      "delete_for_selection_hard_lock_text": "WISSEN",
+      "show_linked": "Indeling Activa weergeven"
     },
     "asset_types": {
       "all_asset_types": "Alle assettypes",
@@ -114,7 +115,9 @@
         "task_status": "Taak status",
         "person": "Persoonsnaam",
         "checklist": "Checklist",
-        "acknowledgements": "Erkenningen"
+        "acknowledgements": "Erkenningen",
+        "revision": "Herziening",
+        "attachments": "Bijlagen"
       },
       "checklist": "Checklist",
       "attachments": "Bijlagen",
@@ -346,7 +349,8 @@
       "login_saml": "SSO aanmelding",
       "reset_password_inactive": "Uw wachtwoord opnieuw instellen is mislukt. De gebruiker met dit e-mailadres is inactief.",
       "set_password_title": "Welkom bij Kitsu!",
-      "set_password": "Wachtwoord instellen"
+      "set_password": "Wachtwoord instellen",
+      "reset_change_password_token_failed": "De link om het wachtwoord te resetten is ongeldig of verlopen. Start de procedure opnieuw."
     },
     "main": {
       "about": "Over",
@@ -716,7 +720,8 @@
         "junior": "Junior",
         "mid": "Midden",
         "senior": "Senior"
-      }
+      },
+      "email_domain_error": "Dit e-maildomein is niet toegestaan."
     },
     "playlists": {
       "add_assets": "Asset toevoegen",
@@ -1058,7 +1063,8 @@
           "error_unregister": "Er is een fout opgetreden bij het ongedaan maken van de registratie van het FIDO-apparaat."
         },
         "enabled": "Authenticatie met twee factoren ingeschakeld",
-        "mandatory": "Uw organisatie vereist twee-factor authenticatie. Schakel ten minste één methode in om door te gaan."
+        "mandatory": "Uw organisatie vereist twee-factor authenticatie. Schakel ten minste één methode in om door te gaan.",
+        "description": "Authenticatie met twee factoren (<abbr title=\"Authenticatie met twee factoren\">2FA</abbr>) voegt een extra beveiligingslaag toe aan je account. Als dit is ingeschakeld, moet je elke keer dat je inlogt een tweede vorm van verificatie opgeven naast je wachtwoord. Je kunt een authenticatie app (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailverificatie (<abbr title=\"One-Time Password\">OTP</abbr>) of een hardware beveiligingssleutel (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) gebruiken als je tweede factor."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "Er is een fout opgetreden bij het verwijderen van de geselecteerde taken.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde taken permanent wilt verwijderen? Alle gerelateerde opmerkingen en voorvertoningen worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
       "delete_for_selection_hard_lock_text": "WISSEN",
-      "hookup_playlist": "Genereer een afspeellijst"
+      "hookup_playlist": "Genereer een afspeellijst",
+      "assignation_error": "Er was een probleem met het toewijzen van deze persoon aan de geselecteerde taken. Niet alle taken werden toegewezen."
     },
     "timesheets": {
       "detail_level": "Detailniveau",
