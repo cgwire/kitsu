@@ -37,7 +37,8 @@
       "no_concept": "このアセットにリンクされたコンセプトはありません",
       "casted_in_shots": "{nbShots}ショットでキャスティング",
       "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「削除」と入力して確認してください。",
-      "delete_for_selection_hard_lock_text": "削除"
+      "delete_for_selection_hard_lock_text": "削除",
+      "show_linked": "ディスプレイの内訳 資産"
     },
     "asset_types": {
       "all_asset_types": "すべてのアセットタイプ",
@@ -114,7 +115,9 @@
         "task_status": "タスクのステータス",
         "person": "ユーザー名",
         "checklist": "チェックリスト",
-        "acknowledgements": "確認"
+        "acknowledgements": "確認",
+        "revision": "改訂",
+        "attachments": "アタッチメント"
       },
       "checklist": "チェックリスト",
       "attachments": "添付",
@@ -346,7 +349,8 @@
       "login_saml": "SSO ログイン",
       "reset_password_inactive": "パスワードのリセットに失敗しました。この電子メールを持つユーザーはアクティブではありません。",
       "set_password_title": "キツへようこそ！",
-      "set_password": "パスワードの設定"
+      "set_password": "パスワードの設定",
+      "reset_change_password_token_failed": "パスワードリセットリンクが無効か、有効期限が切れています。手続きをやり直してください。"
     },
     "main": {
       "about": "当社について",
@@ -716,7 +720,8 @@
         "junior": "ジュニア",
         "mid": "ミッド",
         "senior": "シニア"
-      }
+      },
+      "email_domain_error": "このメールドメインは許可されていません。"
     },
     "playlists": {
       "add_assets": "アセットを追加",
@@ -1058,7 +1063,8 @@
           "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。"
         },
         "enabled": "二要素認証が有効",
-        "mandatory": "お客様の組織では二要素認証が必要です。続行するには、少なくとも1つの方法を有効にしてください。"
+        "mandatory": "お客様の組織では二要素認証が必要です。続行するには、少なくとも1つの方法を有効にしてください。",
+        "description": "二要素認証（<abbr title=\"二要素認証\">2FA</abbr>）は、アカウントに追加のセキュリティ層を追加します。有効にすると、ログインのたびにパスワードに加えて2つ目の認証が必要になります。認証アプリ（<abbr title=\"Time-based One-Time Password\">TOTP</abbr>）、メール認証（<abbr title=\"One-Time Password\">OTP</abbr>）、ハードウェア・セキュリティ・キー（<abbr title=\"Fast IDentity Online\">FIDO</abbr>）を2つ目の認証要素として使用できます。"
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "選択したタスクの削除中にエラーが発生しました。",
       "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
-      "hookup_playlist": "フックアップ・プレイリストを作成する"
+      "hookup_playlist": "フックアップ・プレイリストを作成する",
+      "assignation_error": "選択したタスクにこの人物を割り当てるには問題がありました。すべてのタスクが割り当てられていません。"
     },
     "timesheets": {
       "detail_level": "詳細レベル",
