@@ -37,7 +37,8 @@
       "no_concept": "هیچ کانسپتی به این منبع مرتبط نیست",
       "casted_in_shots": "در نماهای {nbShots} اجرا شده است",
       "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید دارایی‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
-      "delete_for_selection_hard_lock_text": "حذف"
+      "delete_for_selection_hard_lock_text": "حذف",
+      "show_linked": ""
     },
     "asset_types": {
       "all_asset_types": "انواع منابع",
@@ -114,7 +115,9 @@
         "task_status": "وضعیت وظیفه",
         "person": "نام شخص",
         "checklist": "چک لیست",
-        "acknowledgements": "قدردانی"
+        "acknowledgements": "قدردانی",
+        "revision": "",
+        "attachments": ""
       },
       "checklist": "چک لیست",
       "attachments": "پیوست ها",
@@ -346,7 +349,8 @@
       "login_saml": "ورود به سیستم SSO",
       "reset_password_inactive": "بازنشانی رمز عبور ناموفق بود. کاربری با این ایمیل غیرفعال است.",
       "set_password_title": "به کیتسو خوش آمدید!",
-      "set_password": "رمز عبور خود را تنظیم کنید"
+      "set_password": "رمز عبور خود را تنظیم کنید",
+      "reset_change_password_token_failed": ""
     },
     "main": {
       "about": "درباره",
@@ -716,7 +720,8 @@
         "junior": "جونیور",
         "mid": "میانه",
         "senior": "ارشد"
-      }
+      },
+      "email_domain_error": ""
     },
     "playlists": {
       "add_assets": "اضافه کردن منابع",
@@ -1058,7 +1063,8 @@
           "error_unregister": "هنگام لغو ثبت دستگاه FIDO خطایی روی داد."
         },
         "enabled": "احراز هویت دو مرحله‌ای فعال شد",
-        "mandatory": "سازمان شما به احراز هویت دو مرحله‌ای نیاز دارد. لطفاً برای ادامه، حداقل یکی از روش‌ها را فعال کنید."
+        "mandatory": "سازمان شما به احراز هویت دو مرحله‌ای نیاز دارد. لطفاً برای ادامه، حداقل یکی از روش‌ها را فعال کنید.",
+        "description": ""
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "هنگام حذف وظایف انتخاب شده خطایی روی داد.",
       "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید وظایف انتخاب شده را برای همیشه حذف کنید؟ تمام نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف",
-      "hookup_playlist": "یک لیست پخش برای آهنگ‌های عاشقانه ایجاد کنید"
+      "hookup_playlist": "یک لیست پخش برای آهنگ‌های عاشقانه ایجاد کنید",
+      "assignation_error": ""
     },
     "timesheets": {
       "detail_level": "سطح جزئیات",
