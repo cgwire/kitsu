@@ -37,7 +37,8 @@
       "no_concept": "沒有與此資產相關的概念",
       "casted_in_shots": "以 {nbShots} 鏡頭投射",
       "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
-      "delete_for_selection_hard_lock_text": "刪除"
+      "delete_for_selection_hard_lock_text": "刪除",
+      "show_linked": "顯示細分資產"
     },
     "asset_types": {
       "all_asset_types": "所有Asset類型",
@@ -114,7 +115,9 @@
         "task_status": "任務狀態",
         "person": "人名",
         "checklist": "清單",
-        "acknowledgements": "鳴謝"
+        "acknowledgements": "鳴謝",
+        "revision": "修訂",
+        "attachments": "附件"
       },
       "checklist": "清單",
       "attachments": "附件",
@@ -346,7 +349,8 @@
       "login_saml": "SSO 登入",
       "reset_password_inactive": "重設密碼失敗。使用此電子郵件的使用者已停止活動。",
       "set_password_title": "歡迎來到 Kitsu！",
-      "set_password": "設定您的密碼"
+      "set_password": "設定您的密碼",
+      "reset_change_password_token_failed": "密碼重設連結無效或已過期。請重新啟動程序。"
     },
     "main": {
       "about": "關於",
@@ -716,7 +720,8 @@
         "junior": "初級",
         "mid": "中間",
         "senior": "資深"
-      }
+      },
+      "email_domain_error": "不允許使用此電子郵件網域。"
     },
     "playlists": {
       "add_assets": "新增Asset",
@@ -1058,7 +1063,8 @@
           "error_unregister": "取消註冊 FIDO 裝置時發生錯誤。"
         },
         "enabled": "啟用雙重認證",
-        "mandatory": "您的組織需要雙因素驗證。請啟用至少一種方法以繼續。"
+        "mandatory": "您的組織需要雙因素驗證。請啟用至少一種方法以繼續。",
+        "description": "雙因素驗證 (<abbr title=「雙因素驗證」>2FA</abbr>) 為您的帳戶增加了一層額外的安全性。啟用後，您每次登入時，除了密碼之外，還需要提供第二種驗證方式。您可以使用驗證器應用程式 (<abbr title=「基於時間的一次性密碼」>TOTP</abbr>)、電子郵件驗證 (<abbr title=「一次性密碼」>OTP</abbr>) 或硬件安全鑰匙 (<abbr title=「快速身份在線」>FIDO</abbr>) 作為您的第二個因素。"
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "刪除選取的任務時發生錯誤。",
       "delete_for_selection_hard_text": "您確定要永久移除選取的工作嗎？所有相關的註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
-      "hookup_playlist": "產生勾搭播放清單"
+      "hookup_playlist": "產生勾搭播放清單",
+      "assignation_error": "指派此人執行所選任務時出現問題。並未指派所有任務。"
     },
     "timesheets": {
       "detail_level": "細節層次",
