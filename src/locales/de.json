@@ -37,7 +37,8 @@
       "no_concept": "Keine mit diesem Vermögenswert verbundenen Konzepte",
       "casted_in_shots": "Gegossen in {nbShots} Schüsse",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Assets dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "LÖSCHEN"
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
+      "show_linked": "Aufschlüsselung der Vermögenswerte anzeigen"
     },
     "asset_types": {
       "all_asset_types": "Alle Assettypen",
@@ -114,7 +115,9 @@
         "task_status": "Aufgabenstatus",
         "person": "Name der Person",
         "checklist": "Checkliste",
-        "acknowledgements": "Danksagungen"
+        "acknowledgements": "Danksagungen",
+        "revision": "Revision",
+        "attachments": "Anhänge"
       },
       "checklist": "Checkliste",
       "attachments": "Anhänge",
@@ -346,7 +349,8 @@
       "login_saml": "SSO-Anmeldung",
       "reset_password_inactive": "Das Zurücksetzen Ihres Passworts ist fehlgeschlagen. Der Benutzer mit dieser E-Mail ist inaktiv.",
       "set_password_title": "Willkommen bei Kitsu!",
-      "set_password": "Ihr Passwort festlegen"
+      "set_password": "Ihr Passwort festlegen",
+      "reset_change_password_token_failed": "Der Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte starten Sie den Vorgang erneut."
     },
     "main": {
       "about": "Über",
@@ -716,7 +720,8 @@
         "junior": "Junior",
         "mid": "Mitte",
         "senior": "Senior"
-      }
+      },
+      "email_domain_error": "Diese E-Mail-Domäne ist nicht zulässig."
     },
     "playlists": {
       "add_assets": "Assets hinzufügen",
@@ -1058,7 +1063,8 @@
           "error_unregister": "Bei der Aufhebung der Registrierung des FIDO-Geräts ist ein Fehler aufgetreten."
         },
         "enabled": "Zwei-Faktor-Authentifizierung aktiviert",
-        "mandatory": "Ihre Organisation erfordert eine Zwei-Faktor-Authentifizierung. Bitte aktivieren Sie mindestens eine Methode, um fortzufahren."
+        "mandatory": "Ihre Organisation erfordert eine Zwei-Faktor-Authentifizierung. Bitte aktivieren Sie mindestens eine Methode, um fortzufahren.",
+        "description": "Die Zwei-Faktor-Authentifizierung (<abbr title=\"Zwei-Faktor-Authentifizierung\">2FA</abbr>) fügt eine zusätzliche Sicherheitsebene zu Ihrem Konto hinzu. Wenn sie aktiviert ist, müssen Sie bei jeder Anmeldung zusätzlich zu Ihrem Passwort eine zweite Form der Verifizierung angeben. Sie können eine Authentifizierungs-App (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), E-Mail-Verifizierung (<abbr title=\"One-Time Password\">OTP</abbr>) oder einen Hardware-Sicherheitsschlüssel (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) als zweiten Faktor verwenden."
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "Beim Löschen der ausgewählten Aufgaben ist ein Fehler aufgetreten.",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Aufgaben dauerhaft entfernen möchten? Alle zugehörigen Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
       "delete_for_selection_hard_lock_text": "LÖSCHEN",
-      "hookup_playlist": "Erstellen Sie eine Wiedergabeliste"
+      "hookup_playlist": "Erstellen Sie eine Wiedergabeliste",
+      "assignation_error": "Es gab ein Problem bei der Zuordnung dieser Person zu den ausgewählten Aufgaben. Es wurden nicht alle Aufgaben zugewiesen."
     },
     "timesheets": {
       "detail_level": "Detaillierungsgrad",
