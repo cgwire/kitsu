@@ -1714,9 +1714,9 @@
         "token": "jeton"
       },
       "no_bot": "Il n'y a pas de bot. Voulez-vous en créer un ?",
-      "confirm_edit": "Sauvegarder les modifications apportées au robot",
-      "create": "Créer un robot",
-      "departments_empty": "Ce robot n'est lié à aucun service."
+      "confirm_edit": "Sauvegarder les modifications apportées au bot",
+      "create": "Créer un bot",
+      "departments_empty": "Ce bot n'est lié à aucun service."
     },
     "chats": {
       "join": "Rejoindre le chat",
