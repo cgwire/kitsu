@@ -38,7 +38,7 @@
       "casted_in_shots": "Casté dans {nbShots} plans",
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les assets sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
       "delete_for_selection_hard_lock_text": "DELETE",
-      "show_linked": "Affichage les assets du casting"
+      "show_linked": "Afficher les assets du casting"
     },
     "asset_types": {
       "all_asset_types": "Tous les types d'assets",
