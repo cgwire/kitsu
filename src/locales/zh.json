@@ -37,7 +37,8 @@
       "no_concept": "没有与该资产相关的概念",
       "casted_in_shots": "以 {nbShots} 镜头投射",
       "delete_for_selection_hard_text": "您确定要永久删除所选资产吗？所有相关任务、注释和预览也将被删除。请在下面输入 \"删除 \"确认。",
-      "delete_for_selection_hard_lock_text": "删除"
+      "delete_for_selection_hard_lock_text": "删除",
+      "show_linked": "显示细分资产"
     },
     "asset_types": {
       "all_asset_types": "所有资产种类",
@@ -114,7 +115,9 @@
         "task_status": "任务状态",
         "person": "人名",
         "checklist": "清单",
-        "acknowledgements": "致谢"
+        "acknowledgements": "致谢",
+        "revision": "修订",
+        "attachments": "附件"
       },
       "checklist": "清单",
       "attachments": "附件",
@@ -346,7 +349,8 @@
       "login_saml": "SSO 登录",
       "reset_password_inactive": "重设密码失败。使用此电子邮件的用户处于非活动状态。",
       "set_password_title": "欢迎来到 Kitsu！",
-      "set_password": "设置密码"
+      "set_password": "设置密码",
+      "reset_change_password_token_failed": "密码重置链接无效或已过期。请重新启动程序。"
     },
     "main": {
       "about": "关于",
@@ -716,7 +720,8 @@
         "junior": "初级",
         "mid": "中层",
         "senior": "高级"
-      }
+      },
+      "email_domain_error": "不允许使用此电子邮件域。"
     },
     "playlists": {
       "add_assets": "添加资产",
@@ -1058,7 +1063,8 @@
           "error_unregister": "取消注册 FIDO 设备时发生错误。"
         },
         "enabled": "启用双因素验证",
-        "mandatory": "贵机构需要双因素身份验证。请启用至少一种方法以继续。"
+        "mandatory": "贵机构需要双因素身份验证。请启用至少一种方法以继续。",
+        "description": "双因素身份验证（<abbr title=\"双因素身份验证\">2FA</abbr>）为您的账户增加了一层额外的安全保护。启用后，每次登录时除了密码外，您还需要提供第二种验证方式。您可以使用验证器应用程序（<abbr title=\"基于时间的一次性密码\">TOTP</abbr>）、电子邮件验证（<abbr title=\"一次性密码\">OTP</abbr>）或硬件安全密钥（<abbr title=\"快速身份在线验证\">FIDO</abbr>）作为第二个因素。"
       }
     },
     "settings": {
@@ -1517,7 +1523,8 @@
       "delete_for_selection_error": "删除所选任务时发生错误。",
       "delete_for_selection_hard_text": "您确定要永久删除所选任务吗？所有相关评论和预览也将被删除。请在下面输入 \"删除 \"确认。",
       "delete_for_selection_hard_lock_text": "删除",
-      "hookup_playlist": "生成约会播放列表"
+      "hookup_playlist": "生成约会播放列表",
+      "assignation_error": "将此人分配到所选任务时出现问题。并非所有任务都已分配。"
     },
     "timesheets": {
       "detail_level": "细节层次",
