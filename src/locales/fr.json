@@ -1690,7 +1690,7 @@
       "title": "Kanban",
       "empty": "Votre tableau Kanban est actuellement vide. Cela signifie qu'aucun statut de tâche n'est configuré pour votre rôle d'utilisateur dans les paramètres de production.",
       "settings": {
-        "title": "Statut du kanban",
+        "title": "Statuts du kanban",
         "visible": "Affiché sur le kanban de...",
         "select_all": "Tout sélectionner",
         "unselect_all": "Désélectionner tout"
