@@ -280,7 +280,8 @@ export default {
     }
   },
 
-  emits: ['cancel'],
+  // eslint-disable-next-line vue/no-unused-emit-declarations
+  emits: ['cancel', 'confirm', 'confirm-invite', 'invite'],
 
   data() {
     return {
