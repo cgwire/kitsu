@@ -109,6 +109,7 @@ const ADMIN_PAGES = [
 export const routes = [
   {
     path: '',
+    name: 'home',
     component: Main,
 
     beforeEnter: (to, from, next) => {
@@ -202,11 +203,6 @@ export const routes = [
     },
 
     children: [
-      {
-        path: '',
-        name: 'home'
-      },
-
       {
         path: 'asset-library',
         component: AssetLibrary,
@@ -390,14 +386,7 @@ export const routes = [
       {
         path: 'profile',
         component: Profile,
-        name: 'profile',
-        children: [
-          {
-            path: 'change-avatar',
-            component: Profile,
-            name: 'change-avatar'
-          }
-        ]
+        name: 'profile'
       },
 
       {
@@ -438,24 +427,7 @@ export const routes = [
       {
         path: 'productions',
         component: Productions,
-        name: 'productions',
-        children: [
-          {
-            path: 'new',
-            component: Productions,
-            name: 'productions-new'
-          },
-          {
-            path: 'edit/:production_edit_id',
-            component: Productions,
-            name: 'edit-production'
-          },
-          {
-            path: 'delete/:production_delete_id',
-            component: Productions,
-            name: 'delete-production'
-          }
-        ]
+        name: 'productions'
       },
 
       {
@@ -597,16 +569,6 @@ export const routes = [
             name: 'playlist',
             path: ':playlist_id',
             component: Playlist
-          },
-          {
-            name: 'delete-playlist',
-            path: ':playlist_id/delete',
-            component: Playlist
-          },
-          {
-            name: 'edit-playlist',
-            path: ':playlist_id/edit',
-            component: Playlist
           }
         ]
       },
@@ -744,11 +706,6 @@ export const routes = [
         component: Task,
         children: [
           {
-            name: 'task-change-preview',
-            path: 'comments/:comment_id/change-preview',
-            component: Task
-          },
-          {
             name: 'task-preview',
             path: 'previews/:preview_id',
             component: Task
@@ -764,11 +721,6 @@ export const routes = [
       },
 
       {
-        path: 'productions/:production_id/episodes/:episode_id/schedule',
-        component: ProductionSchedule,
-        name: 'episode-schedule'
-      },
-      {
         path: 'productions/:production_id/episodes/:episode_id/playlists',
         component: Playlist,
         name: 'episode-playlists',
@@ -776,16 +728,6 @@ export const routes = [
           {
             name: 'episode-playlist',
             path: ':playlist_id',
-            component: Playlist
-          },
-          {
-            name: 'episode-delete-playlist',
-            path: ':playlist_id/delete',
-            component: Playlist
-          },
-          {
-            name: 'episode-edit-playlist',
-            path: ':playlist_id/edit',
             component: Playlist
           }
         ]

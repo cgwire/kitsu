@@ -31,6 +31,7 @@
             <th scope="rowgroup" colspan="8">
               <span class="datatable-row-header">
                 {{ $t('productions.status.open') }}
+                ({{ openProductions.length }})
               </span>
             </th>
           </tr>
@@ -77,7 +78,7 @@
               v-if="Object.keys(productionStats).length > 0"
             >
               <td :colspan="7" class="datatable-row-stats">
-                <production-stats :stats="productionStatsMap[entry.id] || {}" />
+                <production-stats :stats="productionStats[entry.id] || {}" />
               </td>
               <td class="actions"></td>
             </tr>
@@ -88,6 +89,7 @@
             <th scope="rowgroup" colspan="8">
               <span class="datatable-row-header">
                 {{ $t('productions.status.closed') }}
+                ({{ closedProductions.length }})
               </span>
             </th>
           </tr>
@@ -191,24 +193,10 @@ export default {
 
     closedProductions() {
       return this.entries.filter(p => p.project_status_name === 'Closed')
-    },
-
-    productionStatsMap() {
-      return this.productionStats
     }
   },
 
   methods: {
-    // Convert a database status to a locale key.
-    getStatusLocale(originalStatus) {
-      const statusMap = {
-        Active: 'productions.status.open', // Shotgun compatibility
-        Open: 'productions.status.open',
-        Closed: 'productions.status.closed'
-      }
-      return statusMap[originalStatus]
-    },
-
     getProductionStyleLabel(value) {
       return PRODUCTION_STYLE_OPTIONS.find(style => style.value === value)
         ?.label
@@ -231,11 +219,6 @@ export default {
 .style {
   min-width: 150px;
   width: 150px;
-}
-
-.status {
-  min-width: 100px;
-  width: 100px;
 }
 
 .actions {

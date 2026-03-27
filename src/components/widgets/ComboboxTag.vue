@@ -62,6 +62,7 @@ export default {
 
   data() {
     return {
+      lastScrollPosition: 0,
       showList: false
     }
   },
@@ -81,7 +82,7 @@ export default {
     },
     modelValue: {
       default: '',
-      type: String
+      type: [Number, String]
     },
     localeKeyPrefix: {
       default: '',
@@ -106,6 +107,13 @@ export default {
   },
 
   computed: {
+    selectedValues() {
+      const optionValues = this.options.map(option => option.value)
+      return String(this.modelValue ?? '')
+        .split(',')
+        .filter(value => value && optionValues.includes(value))
+    },
+
     optionList() {
       const sortedOptions = sortByValue([...this.options])
       if (this.isReversed) {
@@ -115,13 +123,13 @@ export default {
     },
 
     renderedValue() {
-      return this.modelValue.split(',').filter(Boolean).sort().join(', ')
+      return [...this.selectedValues].sort().join(', ')
     }
   },
 
   methods: {
     selectOption(option) {
-      let values = this.modelValue.split(',').filter(Boolean)
+      let values = [...this.selectedValues]
       if (values.includes(option.value)) {
         values.splice(values.indexOf(option.value), 1)
       } else {
@@ -157,8 +165,7 @@ export default {
     },
 
     isChecked(option) {
-      const values = this.modelValue.split(',')
-      return values.includes(option.value)
+      return this.selectedValues.includes(option.value)
     }
   },
 
