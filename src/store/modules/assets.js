@@ -724,6 +724,9 @@ const actions = {
       assets = cache.result
     }
     const lines = assets.map(asset => {
+      if (asset.shared) {
+        return [asset.asset_type_name, asset.name]
+      }
       let assetLine = []
       if (rootGetters.isTVShow) {
         assetLine.push(
