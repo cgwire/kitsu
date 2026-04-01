@@ -1,0 +1,2 @@
+import{W as e,b as t,q as n,t as r,v as i,x as a}from"./vue.esm-bundler-isl1nSAf.js";import{t as o}from"./_plugin-vue_export-helper-1r9tKl2A.js";r();var s={name:`page-layout`,props:{side:{type:Boolean,default:!0}}},c={ref:`page`,class:`columns fixed-page`},l={class:`column main-column`},u={key:0,class:`column side-column`};function d(r,o,s,d,f,p){return e(),a(`div`,c,[i(`div`,l,[n(r.$slots,`main`)]),s.side?(e(),a(`div`,u,[n(r.$slots,`side`)])):t(``,!0)],512)}var f=o(s,[[`render`,d]]);export{f as t};
+//# sourceMappingURL=PageLayout-9V5Pa4VR.js.map
