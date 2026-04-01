@@ -893,7 +893,7 @@ export default {
     },
 
     currentProduction() {
-      return this.productionMap.get(this.task.project_id)
+      return this.productionMap.get(this.task?.project_id)
     },
 
     marginBottom() {

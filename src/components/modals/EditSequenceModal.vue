@@ -35,7 +35,7 @@
           <text-field
             ref="resolutionField"
             :label="$t('shots.fields.resolution')"
-            :placeholder="currentProduction.resolution"
+            :placeholder="currentProduction?.resolution"
             v-model.trim="form.data.resolution"
             @enter="runConfirmation"
           />
