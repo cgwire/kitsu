@@ -21,13 +21,13 @@
               v-if="!isStudio && isTVShow"
             />
             <combobox-status
-              class="flexrow-item selector"
+              class="flexrow-item selector nowrap"
               :label="$t('news.task_status')"
               :task-status-list="taskStatusList"
               v-model="taskStatusId"
             />
             <combobox-task-type
-              class="flexrow-item selector"
+              class="flexrow-item selector nowrap"
               :label="$t('news.task_type')"
               :task-type-list="taskTypeList"
               v-model="taskTypeId"

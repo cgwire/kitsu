@@ -526,9 +526,9 @@ export default {
 
     team() {
       return sortPeople(
-        this.currentProduction.team
+        this.currentProduction?.team
           .map(personId => this.personMap.get(personId))
-          .filter(person => person && !person.is_bot)
+          .filter(person => person && !person.is_bot) ?? []
       )
     },
 

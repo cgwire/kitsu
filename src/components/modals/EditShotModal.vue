@@ -64,14 +64,14 @@
             type="number"
             :max="1000"
             :step="0.001"
-            :placeholder="currentProduction.fps"
+            :placeholder="currentProduction?.fps"
             v-model="form.fps"
             @enter="runConfirmation"
           />
           <text-field
             ref="resolutionField"
             :label="$t('shots.fields.resolution')"
-            :placeholder="currentProduction.resolution"
+            :placeholder="currentProduction?.resolution"
             v-model.trim="form.resolution"
             @enter="runConfirmation"
           />
@@ -79,7 +79,7 @@
             ref="maxRetakesField"
             type="number"
             :label="$t('shots.fields.max_retakes')"
-            :placeholder="currentProduction.max_retakes"
+            :placeholder="currentProduction?.max_retakes"
             v-model="form.max_retakes"
             @enter="runConfirmation"
           />

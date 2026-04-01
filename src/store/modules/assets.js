@@ -724,6 +724,9 @@ const actions = {
       assets = cache.result
     }
     const lines = assets.map(asset => {
+      if (asset.shared) {
+        return [asset.asset_type_name, asset.name]
+      }
       let assetLine = []
       if (rootGetters.isTVShow) {
         assetLine.push(
@@ -1087,9 +1090,14 @@ const mutations = {
   },
 
   [UPDATE_ASSET](state, asset) {
-    Object.assign(cache.assetMap.get(asset.id), asset)
-    const cachedAsset = state.displayedAssets.find(a => a.id === asset.id)
-    Object.assign(cachedAsset, asset)
+    const cachedAsset = cache.assetMap.get(asset.id)
+    if (cachedAsset) {
+      Object.assign(cachedAsset, asset)
+    }
+    const displayedAsset = state.displayedAssets.find(a => a.id === asset.id)
+    if (displayedAsset) {
+      Object.assign(displayedAsset, asset)
+    }
     state.displayedAssets = [...state.displayedAssets]
     cache.assetIndex = buildAssetIndex(cache.assets)
   },

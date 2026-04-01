@@ -19,7 +19,7 @@
             <th
               class="sequence"
               ref="th-type"
-              v-else-if="!isEpisodes && !isSequences"
+              v-else-if="!isEpisodes && !isSequences && !isEdits"
             >
               {{ $t('tasks.fields.sequence') }}
             </th>
@@ -110,7 +110,10 @@
             <td class="asset-type" v-if="isAssets">
               {{ getEntity(task.entity.id).asset_type_name }}
             </td>
-            <td class="sequence" v-else-if="!isEpisodes && !isSequences">
+            <td
+              class="sequence"
+              v-else-if="!isEpisodes && !isSequences && !isEdits"
+            >
               {{ getEntity(task.entity.id).sequence_name }}
             </td>
             <td class="name">
@@ -493,6 +496,10 @@ export default {
 
     isAssets() {
       return this.entityType === 'Asset'
+    },
+
+    isEdits() {
+      return this.entityType === 'Edit'
     },
 
     isEpisodes() {
