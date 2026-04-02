@@ -33,6 +33,7 @@
           :label="$t('people.fields.email')"
           :disabled="personToEdit.is_generated_from_ldap"
           v-model.trim="form.email"
+          @update:model-value="$emit('reset-error', 'email')"
           v-if="!isBot"
         />
         <text-field
@@ -280,7 +281,7 @@ export default {
     }
   },
 
-  emits: ['cancel'],
+  emits: ['cancel', 'reset-error'],
 
   data() {
     return {

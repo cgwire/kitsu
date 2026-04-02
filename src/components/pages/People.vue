@@ -134,6 +134,7 @@
       @confirm="confirmEditPeople"
       @confirm-invite="confirmCreateAndInvite"
       @invite="confirmInvite"
+      @reset-error="resetError"
       v-if="modals.edit"
     />
 
@@ -528,6 +529,12 @@ export default {
         .finally(() => {
           this.loading.del = false
         })
+    },
+
+    resetError(error) {
+      if (error === 'email') {
+        this.errors.invalidEmailDomain = false
+      }
     },
 
     onSearchChange() {

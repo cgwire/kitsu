@@ -1109,8 +1109,11 @@ input.input {
 .select select:active,
 .select select:focus,
 input.input:focus {
-  border-color: #00b242;
+  border-color: $green;
   outline: none;
+}
+.select select:required:invalid {
+  border-color: $red;
 }
 
 .button,
