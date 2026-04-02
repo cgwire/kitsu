@@ -1164,7 +1164,7 @@ export default {
     },
 
     focus() {
-      this.$refs.container.focus()
+      this.$refs.container?.focus()
     },
 
     timeCodeClicked({ versionRevision, frame }) {
