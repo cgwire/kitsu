@@ -685,7 +685,7 @@ export default {
         attachments = []
         checklist = []
       } else {
-        checklist = checklist.filter(item => item.text.length)
+        checklist = checklist.filter(item => item.text)
       }
 
       revision = Number(revision)

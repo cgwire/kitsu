@@ -287,8 +287,7 @@ export default {
         (['string', 'number', 'boolean'].includes(this.form.data_type) ||
           (['list', 'taglist'].includes(this.form.data_type) &&
             this.form.values.length) ||
-          (this.form.data_type === 'checklist' &&
-            this.checklist?.[0]?.text.length)) &&
+          (this.form.data_type === 'checklist' && this.checklist?.[0]?.text)) &&
         (!this.isCurrentUserSupervisor ||
           !this.user.departments.length ||
           this.form.departments.length)
