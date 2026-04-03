@@ -385,9 +385,8 @@ const actions = {
     const selectedTaskIds = Array.from(state.selectedTasks.keys())
     for (const taskId of selectedTaskIds) {
       const task = state.taskMap.get(taskId)
-      const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
-
       if (task && task.priority !== priority) {
+        const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
         const updatedTask = await tasksApi.updateTask(taskId, { priority })
         commit(EDIT_TASK_END, { task: updatedTask, taskType })
       }

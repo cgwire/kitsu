@@ -37,7 +37,7 @@
         @keyup.backspace="removeChecklistEntry(index)"
         @keyup.up="focusPrevious(index)"
         @keyup.down="focusNext(index)"
-        :disabled="entry.text.length !== 0 && disabled"
+        :disabled="entry.text?.length !== 0 && disabled"
         v-autosize
         v-model.trim="entry.text"
       ></textarea>
@@ -127,7 +127,7 @@ export default {
 
     removeChecklistEntry(index) {
       const entry = this.checklist[index]
-      if (entry.text.length === 0) {
+      if (!entry.text) {
         this.$emit('remove-task', entry)
         this.focusPrevious(index)
       }

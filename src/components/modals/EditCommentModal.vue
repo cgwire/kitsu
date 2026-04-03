@@ -297,7 +297,7 @@ export default {
           id: this.commentToEdit.id,
           text: this.form.text,
           task_status_id: this.form.task_status_id,
-          checklist: this.form.checklist.filter(item => item.text.length),
+          checklist: this.form.checklist.filter(item => item.text),
           newAttachmentFiles: this.attachmentFiles,
           attachmentFilesToDelete: this.attachmentFilesToDelete,
           links: this.form.link ? [this.form.link] : null

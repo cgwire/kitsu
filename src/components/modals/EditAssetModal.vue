@@ -25,6 +25,7 @@
           <combobox
             :label="$t('assets.fields.episode')"
             :options="episodeOptions"
+            required
             v-model="form.source_id"
             v-if="isTVShow"
           />
@@ -166,7 +167,7 @@ export default {
       form: {
         name: '',
         description: '',
-        source_id: null,
+        source_id: 'null',
         data: {
           resolution: ''
         },
@@ -276,9 +277,11 @@ export default {
         }
         this.form.name = ''
         this.form.description = ''
-        this.form.source_id = this.currentEpisode
-          ? this.currentEpisode.id
-          : null
+        this.form.source_id =
+          this.currentEpisode &&
+          !['all', 'main'].includes(this.currentEpisode.id)
+            ? this.currentEpisode.id
+            : 'null'
         this.form.data = {}
         this.form.is_shared = 'false'
       } else {
@@ -288,7 +291,8 @@ export default {
           project_id: this.assetToEdit.project_id,
           name: this.assetToEdit.name,
           description: this.assetToEdit.description,
-          source_id: this.assetToEdit.source_id || this.assetToEdit.episode_id,
+          source_id:
+            this.assetToEdit.source_id || this.assetToEdit.episode_id || 'null',
           data:
             {
               ...this.assetToEdit.data,

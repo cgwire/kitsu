@@ -16,6 +16,7 @@
           }"
           ref="select"
           :disabled="disabled"
+          :required="required && !hasSelectedOption"
           @keyup.enter="emitEnter()"
           @change="updateValue"
         >
@@ -83,6 +84,10 @@ export default {
       type: Boolean
     },
     isInline: {
+      default: false,
+      type: Boolean
+    },
+    required: {
       default: false,
       type: Boolean
     }
