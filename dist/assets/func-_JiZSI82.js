@@ -1,0 +1,2 @@
+var e={runPromiseMapAsSeries(e,t){return e.reduce((e,n)=>e.then(()=>t(n)),Promise.resolve())},runPromiseAsSeries(e){return e.reduce((e,t)=>e.then(()=>t),Promise.resolve())},throttle(e,t){let n=0;return function(...r){let i=new Date().getTime();if(!(i-n<t))return n=i,e(...r)}}};export{e as t};
+//# sourceMappingURL=func-_JiZSI82.js.map

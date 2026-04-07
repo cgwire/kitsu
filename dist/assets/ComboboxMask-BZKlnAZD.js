@@ -1,0 +1,2 @@
+import{W as e,t,x as n,yt as r}from"./vue.esm-bundler-BDxqJPKD.js";import{t as i}from"./_plugin-vue_export-helper-TcpyXLsZ.js";t();var a={name:`combobox-mask`,props:{displayed:{type:Boolean,default:!1}},emits:[`click`]};function o(t,i,a,o,s,c){return e(),n(`div`,{onClick:i[0]||(i[0]=e=>t.$emit(`click`)),class:r([`c-mask`,{"is-active":a.displayed}])},null,2)}var s=i(a,[[`render`,o]]);export{s as t};
+//# sourceMappingURL=ComboboxMask-BZKlnAZD.js.map

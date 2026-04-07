@@ -1,0 +1,2 @@
+import{St as e,W as t,t as n,x as r,yt as i}from"./vue.esm-bundler-BDxqJPKD.js";import{t as a}from"./_plugin-vue_export-helper-TcpyXLsZ.js";n();var o={name:`page-title`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}}};function s(n,a,o,s,c,l){return t(),r(`h1`,{class:i({title:!0,"hide-small-screen":!0,bold:o.bold})},e(o.text),3)}var c=a(o,[[`render`,s],[`__scopeId`,`data-v-2d7551ce`]]);export{c as t};
+//# sourceMappingURL=PageTitle-BsCSbf3g.js.map

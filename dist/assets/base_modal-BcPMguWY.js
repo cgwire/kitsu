@@ -1,0 +1,2 @@
+var e={beforeUnmount(){window.removeEventListener(`keydown`,this.onKeyDown)},methods:{onKeyDown(e){e.key===`Escape`&&this.$emit(`cancel`)}},watch:{active:{immediate:!0,handler(){this.active?window.addEventListener(`keydown`,this.onKeyDown,!1):window.removeEventListener(`keydown`,this.onKeyDown)}}}};export{e as t};
+//# sourceMappingURL=base_modal-BcPMguWY.js.map
