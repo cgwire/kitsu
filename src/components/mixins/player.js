@@ -1581,6 +1581,7 @@ export const playerMixin = {
       'preview-file:annotation-update'(eventData) {
         if (
           !this.tempMode &&
+          this.currentPreview &&
           this.previewFileMap.get(eventData.preview_file_id)
         ) {
           this.refreshPreview({
@@ -1589,14 +1590,13 @@ export const playerMixin = {
           }).then(preview => {
             if (
               !this.notSaved &&
-              this.currentPreview.id === eventData.preview_file_id &&
+              this.currentPreview?.id === eventData.preview_file_id &&
               !this.isWriting(eventData.updated_at)
             ) {
               const isAnnotationSizeChanged =
                 this.annotations.length !== preview.annotations.length
               this.annotations = preview.annotations
-              const isLiveRoom =
-                !this.room.people || this.room.people.length === 0
+              const isLiveRoom = !this.room?.people?.length
               if (isAnnotationSizeChanged) this.reloadAnnotations(isLiveRoom)
             }
             this.$emit('annotations-refreshed', preview)
