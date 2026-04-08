@@ -1112,9 +1112,6 @@ input.input:focus {
   border-color: $green;
   outline: none;
 }
-.select select:required:invalid {
-  border-color: $red;
-}
 
 .button,
 .button.is-small {
