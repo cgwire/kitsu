@@ -9,7 +9,7 @@
 
     <div class="modal-content">
       <div class="box">
-        <h1 class="title" v-if="assetToEdit && assetToEdit.id">
+        <h1 class="title" v-if="assetToEdit?.id">
           {{ $t('assets.edit_title') }} {{ assetToEdit.name }}
         </h1>
         <h1 class="title" v-else>
@@ -23,6 +23,7 @@
             v-model="form.entity_type_id"
           />
           <combobox
+            ref="episodeField"
             :label="$t('assets.fields.episode')"
             :options="episodeOptions"
             required
@@ -76,7 +77,7 @@
               'is-loading': isLoadingStay
             }"
             @click="confirmAndStayClicked"
-            v-if="!assetToEdit || !assetToEdit.id"
+            v-if="!assetToEdit?.id"
           >
             {{ $t('main.confirmation_and_stay') }}
           </a>
@@ -219,21 +220,36 @@ export default {
   },
 
   methods: {
+    validateForm() {
+      if (this.isTVShow && !this.$refs.episodeField?.isValid) {
+        this.focusEpisode()
+        return false
+      }
+      if (!this.form.name) {
+        this.focusName()
+        return false
+      }
+      return true
+    },
+
     runConfirmation() {
-      if (this.form.name.length > 0) {
-        if (this.isEditing()) {
-          this.confirmClicked()
-        } else {
-          this.confirmAndStayClicked()
-        }
+      if (this.isEditing()) {
+        this.confirmClicked()
+      } else {
+        this.confirmAndStayClicked()
       }
     },
 
+    focusEpisode() {
+      this.$refs.episodeField?.focus()
+    },
+
     focusName() {
-      this.$refs.nameField.focus()
+      this.$refs.nameField?.focus()
     },
 
     confirmAndStayClicked() {
+      if (!this.validateForm()) return
       this.$emit('confirm-and-stay', {
         ...this.form,
         is_shared: this.form.is_shared === 'true'
@@ -241,6 +257,7 @@ export default {
     },
 
     confirmClicked() {
+      if (!this.validateForm()) return
       this.$emit('confirm', {
         ...this.form,
         is_shared: this.form.is_shared === 'true'
@@ -248,7 +265,7 @@ export default {
     },
 
     isEditing() {
-      return this.assetToEdit && this.assetToEdit.id
+      return this.assetToEdit?.id
     },
 
     getEntityTypeIdDefaultValue() {
@@ -271,9 +288,7 @@ export default {
           this.form.entity_type_id = this.productionAssetTypeOptions[0].value
         }
         if (this.openProductions.length > 0) {
-          this.form.project_id = this.currentProduction
-            ? this.currentProduction.id
-            : ''
+          this.form.project_id = this.currentProduction?.id || ''
         }
         this.form.name = ''
         this.form.description = ''
@@ -293,11 +308,10 @@ export default {
           description: this.assetToEdit.description,
           source_id:
             this.assetToEdit.source_id || this.assetToEdit.episode_id || 'null',
-          data:
-            {
-              ...this.assetToEdit.data,
-              resolution: this.assetToEdit.data.resolution || ''
-            } || {},
+          data: {
+            ...this.assetToEdit.data,
+            resolution: this.assetToEdit.data?.resolution || ''
+          },
           is_shared: String(this.assetToEdit.is_shared === true)
         }
       }
@@ -326,7 +340,7 @@ export default {
       this.resetForm()
       if (this.active) {
         setTimeout(() => {
-          this.$refs.nameField.focus()
+          this.$refs.nameField?.focus()
         }, 100)
       }
     },
