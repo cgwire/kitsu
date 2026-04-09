@@ -72,6 +72,7 @@
       :entries="activeTab === 'active' ? activePeople : unactivePeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
+      :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
       @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
@@ -279,16 +280,24 @@ export default {
 
   computed: {
     ...mapGetters([
+      'activePeopleWithoutBot',
       'displayedPeople',
       'isCurrentUserAdmin',
-      'isPeopleLoading',
-      'isPeopleLoadingError',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
+      'isPeopleLoading',
+      'isPeopleLoadingError',
+      'mainConfig',
       'peopleSearchQueries',
       'personCsvFormData',
-      'studioMap'
+      'studioMap',
+      'userLimit'
     ]),
+
+    seatsRemaining() {
+      if (this.mainConfig.is_self_hosted) return null
+      return Math.max(0, this.userLimit - this.activePeopleWithoutBot.length)
+    },
 
     tabs() {
       return [

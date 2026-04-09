@@ -37,6 +37,7 @@ import {
   PERSON_LOAD_TIME_SPENTS_END,
   SET_ORGANISATION,
   SET_PERSON_TASKS_SCROLL_POSITION,
+  SET_USER_LIMIT,
   PEOPLE_SET_DAY_OFFS,
   PEOPLE_SET_DAYS_OFF,
   PEOPLE_SEARCH_CHANGE,
@@ -165,7 +166,9 @@ const initialState = {
   personTimeSpentTotal: 0,
   personDayOff: {},
   daysOff: [],
-  dayOffMap: {}
+  dayOffMap: {},
+
+  userLimit: 0
 }
 
 const state = {
@@ -214,7 +217,9 @@ const getters = {
   personTimeSpentMap: state => state.personTimeSpentMap,
   personTimeSpentTotal: state => state.personTimeSpentTotal,
   dayOffMap: state => state.dayOffMap,
-  daysOff: state => state.daysOff
+  daysOff: state => state.daysOff,
+
+  userLimit: state => state.userLimit
 }
 
 const actions = {
@@ -881,6 +886,10 @@ const mutations = {
 
   [SET_ORGANISATION](state, organisation) {
     state.organisation = { ...state.organisation, ...organisation }
+  },
+
+  [SET_USER_LIMIT](state, userLimit) {
+    state.userLimit = userLimit
   },
 
   [RESET_ALL](state) {

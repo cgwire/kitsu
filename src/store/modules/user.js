@@ -73,6 +73,7 @@ import {
   LOAD_ASSET_TYPES_END,
   LOAD_PLUGINS_END,
   SET_NOTIFICATION_COUNT,
+  SET_USER_LIMIT,
   LOAD_OPEN_PRODUCTIONS_END,
   RESET_ALL,
   SET_CURRENT_PRODUCTION
@@ -387,6 +388,7 @@ const actions = {
       commit(LOAD_STATUS_AUTOMATIONS_END, context.status_automations)
       commit(LOAD_ASSET_TYPES_END, context.asset_types)
       commit(SET_NOTIFICATION_COUNT, context.notification_count)
+      commit(SET_USER_LIMIT, context.user_limit)
       commit(LOAD_OPEN_PRODUCTIONS_END, context.projects)
       if (rootGetters.currentProduction) {
         commit(SET_CURRENT_PRODUCTION, rootGetters.currentProduction.id)

@@ -555,6 +555,8 @@ export const REMOVE_BUILD_JOB = 'REMOVE_BUILD_JOB'
 
 export const ADD_PLAYLISTS = 'ADD_PLAYLISTS'
 
+export const SET_USER_LIMIT = 'SET_USER_LIMIT'
+
 // Notifications
 
 export const CLEAR_NOTIFICATIONS = 'CLEAR_NOTIFICATIONS'
