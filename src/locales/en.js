@@ -966,6 +966,7 @@ export default {
     new_person: 'Add a new user',
     no_task_assigned: 'There are no running tasks assigned to you',
     persons: 'user | users',
+    seats_remaining: 'no seats remaining | {count} seat remaining | {count} seats remaining',
     running_tasks: 'Running tasks',
     select_person: 'Select a user...',
     team: 'Team',

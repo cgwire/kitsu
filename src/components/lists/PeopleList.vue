@@ -158,6 +158,10 @@ export default {
     isLoading: {
       type: Boolean,
       default: false
+    },
+    seatsRemaining: {
+      type: Number,
+      default: null
     }
   },
 
@@ -211,6 +215,14 @@ export default {
         this.isBots ? 'bots.bots' : 'people.persons',
         nbUsers
       )
+      if (!this.isBots && this.seatsRemaining !== null) {
+        const labelRemaining = this.$tc(
+          'people.seats_remaining',
+          this.seatsRemaining,
+          { count: this.seatsRemaining }
+        )
+        return `${nbUsers} ${labelUsers} (${labelRemaining})`
+      }
       return `${nbUsers} ${labelUsers}`
     }
   },
