@@ -122,7 +122,7 @@ export default {
   methods: {
     onSearchChange(search) {
       this.items = search?.length
-        ? indexSearch(this.index, [search])
+        ? (indexSearch(this.index, [search]) ?? [])
         : this.people
       this.search = search
     },
