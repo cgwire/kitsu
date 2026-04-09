@@ -199,7 +199,7 @@ export default {
       return sortPeople(
         this.task?.assignees
           .map(personId => this.personMap.get(personId))
-          .filter(Boolean) || []
+          .filter(Boolean) ?? []
       )
     },
 
