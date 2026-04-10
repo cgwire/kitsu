@@ -898,7 +898,7 @@ export default {
       return sortPeople(
         this.currentProduction?.team
           .map(personId => this.personMap.get(personId))
-          .filter(Boolean) || []
+          .filter(Boolean) ?? []
       )
     },
 

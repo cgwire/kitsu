@@ -102,7 +102,7 @@ export default {
       const taskTypes =
         taskTypeIds
           ?.map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-          .filter(Boolean) || []
+          .filter(Boolean) ?? []
       return sortTaskTypes(taskTypes)
     }
   }

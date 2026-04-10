@@ -153,16 +153,16 @@ export default {
 
     teamPersons() {
       return sortPeople(
-        this.currentProduction.team
+        this.currentProduction?.team
           .map(personId => this.personMap.get(personId))
-          .filter(Boolean)
+          .filter(Boolean) ?? []
       )
     },
 
     unlistedPeople() {
       return this.activePeople.filter(
         person =>
-          !this.currentProduction.team.includes(person.id) && person.active
+          !this.currentProduction?.team.includes(person.id) && person.active
       )
     }
   },

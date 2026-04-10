@@ -1,5 +1,5 @@
 <template>
-  <div class="login hero is-fullheight">
+  <div class="login hero is-fullheight" v-if="!isAuthenticated">
     <div class="container has-text-centered">
       <div
         class="box has-text-left"
@@ -142,6 +142,7 @@ export default {
   computed: {
     ...mapGetters([
       'isDarkTheme',
+      'isAuthenticated',
       'isLoginLoading',
       'isLoginError',
       'mainConfig'

@@ -265,9 +265,10 @@ export default {
       if (this.isCurrentUserArtist) {
         return [personMap.get(this.user.id)]
       }
-      const persons = this.currentProduction.team
-        .map(personId => personMap.get(personId))
-        .filter(Boolean)
+      const persons =
+        this.currentProduction?.team
+          .map(personId => personMap.get(personId))
+          .filter(Boolean) ?? []
       return sortPeople(persons)
     },
 
