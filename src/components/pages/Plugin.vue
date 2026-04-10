@@ -30,6 +30,10 @@ const episodeId = computed(() =>
     : ''
 )
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const userLocale = computed(() => {
+  const locale = store.state.user.user?.locale || 'en'
+  return locale.substring(0, 2)
+})
 
 const pluginUrl = computed(() => {
   const baseUrl = `/api/plugins/${route.params.plugin_id}/frontend/`
@@ -43,6 +47,9 @@ const pluginUrl = computed(() => {
   }
   if (isDarkTheme.value) {
     params.append('dark_theme', isDarkTheme.value)
+  }
+  if (userLocale.value) {
+    params.append('locale', userLocale.value)
   }
 
   return `${baseUrl}?${params.toString()}`
