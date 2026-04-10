@@ -869,7 +869,10 @@ export const routes = [
   {
     path: '/login',
     component: Login,
-    name: 'login'
+    name: 'login',
+    beforeEnter: (to, from) => {
+      if (store.getters.isAuthenticated) return { name: 'home' }
+    }
   },
   {
     path: '/login/2fa',
