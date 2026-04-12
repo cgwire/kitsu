@@ -113,6 +113,38 @@
           <option :value="4">Thick</option>
           <option :value="8">Extra</option>
         </select>
+        <select
+          class="stroke-width-select"
+          v-model="fontSize"
+          title="Font Size"
+        >
+          <option :value="12">12</option>
+          <option :value="14">14</option>
+          <option :value="18">18</option>
+          <option :value="24">24</option>
+          <option :value="32">32</option>
+          <option :value="48">48</option>
+          <option :value="72">72</option>
+        </select>
+      </div>
+
+      <div class="tool-separator" />
+
+      <div class="tool-group">
+        <button
+          class="tool-btn"
+          :class="{ active: activeTool === 'connector' }"
+          @click="setTool('connector')"
+          title="Connector (K)"
+        >
+          <git-branch-icon :size="18" />
+        </button>
+        <button class="tool-btn" @click="addYouTubeEmbed" title="YouTube Embed">
+          <youtube-icon :size="18" />
+        </button>
+        <button class="tool-btn" @click="addSticker" title="Sticker (S)">
+          <smile-icon :size="18" />
+        </button>
       </div>
 
       <div class="tool-separator" />
@@ -125,6 +157,21 @@
           class="tool-btn"
           @click="ungroupSelected"
           title="Ungroup (Ctrl+Shift+G)"
+        >
+          <grid-icon :size="18" />
+        </button>
+        <button
+          class="tool-btn"
+          @click="toggleLockSelected"
+          title="Lock/Unlock (Ctrl+L)"
+        >
+          <lock-icon :size="18" />
+        </button>
+        <button
+          class="tool-btn"
+          :class="{ active: snapToGrid }"
+          @click="snapToGrid = !snapToGrid"
+          title="Snap to Grid"
         >
           <grid-icon :size="18" />
         </button>
@@ -189,20 +236,24 @@ import {
   ArrowUpRightIcon,
   CircleIcon,
   Edit2Icon,
+  GitBranchIcon,
   GridIcon,
   ImageIcon,
   LayersIcon,
   LinkIcon,
+  LockIcon,
   MaximizeIcon,
   MinusIcon,
   MousePointerIcon,
   MoveIcon,
   Redo2Icon,
+  SmileIcon,
   SquareIcon,
   StickyNoteIcon,
   Trash2Icon,
   TypeIcon,
   Undo2Icon,
+  YoutubeIcon,
   ZoomInIcon,
   ZoomOutIcon
 } from 'lucide-vue-next'
@@ -214,20 +265,24 @@ export default {
     ArrowUpRightIcon,
     CircleIcon,
     Edit2Icon,
+    GitBranchIcon,
     GridIcon,
     ImageIcon,
     LayersIcon,
     LinkIcon,
+    LockIcon,
     MaximizeIcon,
     MinusIcon,
     MousePointerIcon,
     MoveIcon,
     Redo2Icon,
+    SmileIcon,
     SquareIcon,
     StickyNoteIcon,
     Trash2Icon,
     TypeIcon,
     Undo2Icon,
+    YoutubeIcon,
     ZoomInIcon,
     ZoomOutIcon
   },
@@ -254,7 +309,11 @@ export default {
       isDrawingShape: false,
       shapeStartPoint: null,
       currentShape: null,
-      isSaving: false
+      fontSize: 18,
+      isSaving: false,
+      snapToGrid: false,
+      gridSize: 20,
+      connectorStart: null
     }
   },
 
@@ -309,6 +368,15 @@ export default {
       this.canvas.on('object:modified', () => this.pushUndoState())
       this.canvas.on('object:added', () => {
         if (!this.isSaving) this.pushUndoState()
+      })
+      this.canvas.on('object:moving', e => {
+        if (this.snapToGrid) {
+          const obj = e.target
+          obj.set({
+            left: Math.round(obj.left / this.gridSize) * this.gridSize,
+            top: Math.round(obj.top / this.gridSize) * this.gridSize
+          })
+        }
       })
 
       this.canvas.on('mouse:down', this.onMouseDown)
@@ -383,7 +451,7 @@ export default {
         const text = new fabric.IText('Type here', {
           left: pointer.x,
           top: pointer.y,
-          fontSize: 18,
+          fontSize: this.fontSize,
           fill: this.strokeColor,
           fontFamily: 'Inter, Arial, sans-serif',
           id: uuidv4()
@@ -393,6 +461,26 @@ export default {
         text.enterEditing()
         this.setTool('select')
         this.emitChange()
+        return
+      }
+
+      if (this.activeTool === 'connector') {
+        if (!this.connectorStart) {
+          this.connectorStart = {
+            x: pointer.x,
+            y: pointer.y,
+            target: opt.target
+          }
+        } else {
+          this.drawConnector(
+            this.connectorStart.x,
+            this.connectorStart.y,
+            pointer.x,
+            pointer.y
+          )
+          this.connectorStart = null
+          this.emitChange()
+        }
         return
       }
 
@@ -987,13 +1075,210 @@ export default {
             e.preventDefault()
           }
           break
+        case 'k':
+          if (!ctrl) this.setTool('connector')
+          break
+        case 's':
+          if (!ctrl) this.addSticker()
+          else {
+            this.emitChange()
+            e.preventDefault()
+          }
+          break
       }
+    },
+
+    // --- Connectors ---
+
+    drawConnector(x1, y1, x2, y2) {
+      const line = new fabric.Line([x1, y1, x2, y2], {
+        stroke: this.strokeColor,
+        strokeWidth: 2,
+        strokeDashArray: [5, 3],
+        id: uuidv4()
+      })
+
+      // Add dots at endpoints
+      const dot1 = new fabric.Circle({
+        left: x1 - 4,
+        top: y1 - 4,
+        radius: 4,
+        fill: this.strokeColor
+      })
+      const dot2 = new fabric.Circle({
+        left: x2 - 4,
+        top: y2 - 4,
+        radius: 4,
+        fill: this.strokeColor
+      })
+
+      const group = new fabric.Group([line, dot1, dot2], {
+        id: uuidv4(),
+        isConnector: true
+      })
+      this.canvas.add(group)
+      this.canvas.renderAll()
+    },
+
+    // --- YouTube Embed ---
+
+    addYouTubeEmbed() {
+      const url = prompt('YouTube URL:')
+      if (!url) return
+
+      let videoId
+      try {
+        const parsed = new URL(url)
+        videoId =
+          parsed.searchParams.get('v') || parsed.pathname.split('/').pop() || ''
+      } catch {
+        videoId = url
+      }
+      if (!videoId) return
+
+      const center = this.canvas.getCenter()
+      const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+
+      // Create a card with the YouTube thumbnail
+      const rect = new fabric.Rect({
+        width: 320,
+        height: 200,
+        fill: '#000',
+        stroke: '#ff0000',
+        strokeWidth: 2,
+        rx: 8,
+        ry: 8
+      })
+
+      const playBtn = new fabric.Triangle({
+        left: 140,
+        top: 75,
+        width: 40,
+        height: 50,
+        fill: '#ff0000',
+        angle: 90,
+        originX: 'center',
+        originY: 'center'
+      })
+
+      const label = new fabric.Text('YouTube: ' + videoId, {
+        left: 10,
+        top: 175,
+        fontSize: 11,
+        fill: '#fff',
+        fontFamily: 'Inter, Arial, sans-serif'
+      })
+
+      const group = new fabric.Group([rect, playBtn, label], {
+        left: center.left - 160,
+        top: center.top - 100,
+        id: uuidv4(),
+        linkUrl: url,
+        isYouTube: true
+      })
+
+      this.canvas.add(group)
+      this.canvas.renderAll()
+      this.emitChange()
+
+      // Load actual thumbnail
+      fabric.Image.fromURL(
+        thumbUrl,
+        img => {
+          if (img) {
+            img.set({
+              scaleX: 320 / img.width,
+              scaleY: 180 / img.height
+            })
+            group.remove(rect)
+            group.addWithUpdate(img)
+            group.sendToBack(img)
+            this.canvas.renderAll()
+          }
+        },
+        { crossOrigin: 'anonymous' }
+      )
+
+      group.on('mousedblclick', () => {
+        window.open(url, '_blank')
+      })
+    },
+
+    // --- Lock ---
+
+    toggleLockSelected() {
+      const obj = this.canvas.getActiveObject()
+      if (!obj) return
+
+      const locked = !obj.lockMovementX
+      obj.set({
+        lockMovementX: locked,
+        lockMovementY: locked,
+        lockRotation: locked,
+        lockScalingX: locked,
+        lockScalingY: locked,
+        hasControls: !locked,
+        selectable: true,
+        opacity: locked ? 0.85 : 1
+      })
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
+    // --- Stickers ---
+
+    addSticker() {
+      const stickers = [
+        '\u{1F44D}',
+        '\u{1F44E}',
+        '\u{2705}',
+        '\u{274C}',
+        '\u{2757}',
+        '\u{2753}',
+        '\u{1F525}',
+        '\u{2B50}',
+        '\u{1F3AF}',
+        '\u{1F4A1}',
+        '\u{1F6A7}',
+        '\u{1F4AC}',
+        '\u{1F4CB}',
+        '\u{1F3A8}',
+        '\u{1F3AC}',
+        '\u{1F4F7}'
+      ]
+      const emoji = stickers[Math.floor(Math.random() * stickers.length)]
+      const center = this.canvas.getCenter()
+
+      const text = new fabric.Text(emoji, {
+        left: center.left - 20 + (Math.random() - 0.5) * 100,
+        top: center.top - 20 + (Math.random() - 0.5) * 100,
+        fontSize: 48,
+        id: uuidv4(),
+        isSticker: true
+      })
+      this.canvas.add(text)
+      this.canvas.setActiveObject(text)
+      this.canvas.renderAll()
+      this.emitChange()
     },
 
     // --- Serialization ---
 
     getCanvasData() {
-      return this.canvas.toJSON(['id', 'entityId', 'entityType', 'linkUrl'])
+      return this.canvas.toJSON([
+        'id',
+        'entityId',
+        'entityType',
+        'linkUrl',
+        'isConnector',
+        'isYouTube',
+        'isSticker',
+        'lockMovementX',
+        'lockMovementY',
+        'lockRotation',
+        'lockScalingX',
+        'lockScalingY'
+      ])
     },
 
     loadCanvasData(data) {
