@@ -316,6 +316,14 @@ export default {
       this.canvas.on('mouse:up', this.onMouseUp)
       this.canvas.on('mouse:wheel', this.onMouseWheel)
 
+      console.log(
+        '[Board] initCanvas — board:',
+        !!this.board,
+        'canvas_data:',
+        !!this.board?.canvas_data,
+        'objects:',
+        this.board?.canvas_data?.objects?.length
+      )
       if (this.board && this.board.canvas_data) {
         this.loadCanvasData(this.board.canvas_data)
       } else {
@@ -811,7 +819,7 @@ export default {
       this.redoStack.push(current)
       const prev = this.undoStack[this.undoStack.length - 1]
       this.isSaving = true
-      this.canvas.loadFromJSON(JSON.parse(prev), () => {
+      this.canvas.loadFromJSON(JSON.parse(prev)).then(() => {
         this.canvas.renderAll()
         this.isSaving = false
         this.emitChange()
@@ -823,7 +831,7 @@ export default {
       const next = this.redoStack.pop()
       this.undoStack.push(next)
       this.isSaving = true
-      this.canvas.loadFromJSON(JSON.parse(next), () => {
+      this.canvas.loadFromJSON(JSON.parse(next)).then(() => {
         this.canvas.renderAll()
         this.isSaving = false
         this.emitChange()
@@ -991,12 +999,37 @@ export default {
     loadCanvasData(data) {
       if (!data) return
       this.isSaving = true
-      this.canvas.loadFromJSON(data, () => {
-        this.canvas.renderAll()
+      const canvasData = typeof data === 'string' ? JSON.parse(data) : data
+
+      // Clear canvas first
+      this.canvas.clear()
+      if (canvasData.background) {
+        this.canvas.backgroundColor = canvasData.background
+      }
+
+      // Manually enliven and add objects
+      const objects = canvasData.objects || []
+      if (!objects.length) {
         this.isSaving = false
-        this.undoStack = [JSON.stringify(data)]
-        this.redoStack = []
-      })
+        this.pushUndoState()
+        return
+      }
+
+      fabric.util
+        .enlivenObjects(objects)
+        .then(enlivenedObjects => {
+          enlivenedObjects.forEach(obj => {
+            this.canvas.add(obj)
+          })
+          this.canvas.renderAll()
+          this.isSaving = false
+          this.undoStack = [JSON.stringify(canvasData)]
+          this.redoStack = []
+        })
+        .catch(err => {
+          console.error('[Board] Failed to load canvas objects:', err)
+          this.isSaving = false
+        })
     },
 
     emitChange() {
