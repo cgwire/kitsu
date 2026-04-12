@@ -420,6 +420,12 @@ export default {
         ])
       }
 
+      if (!this.isCurrentUserClient) {
+        options = options.concat([
+          { label: this.$t('boards.title'), value: 'boards' }
+        ])
+      }
+
       if (!this.isCurrentUserClient && isNotOnlyShots) {
         options = options.concat([
           { label: this.$t('breakdown.title'), value: 'breakdown' }

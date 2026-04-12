@@ -21,6 +21,7 @@ const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
 const Assets = () => import('@/components/pages/Assets.vue')
 const AssetTypes = () => import('@/components/pages/AssetTypes.vue')
 const Backgrounds = () => import('@/components/pages/Backgrounds.vue')
+const Board = () => import('@/components/pages/Board.vue')
 const Bots = () => import('@/components/pages/Bots.vue')
 const Breakdown = () => import('@/components/pages/Breakdown.vue')
 const Brief = () => import('@/components/pages/Brief.vue')
@@ -595,6 +596,19 @@ export const routes = [
         path: 'productions/:production_id/concepts',
         component: Concepts,
         name: 'concepts'
+      },
+
+      {
+        path: 'productions/:production_id/boards',
+        component: Board,
+        name: 'boards',
+        children: [
+          {
+            name: 'board',
+            path: ':board_id',
+            component: Board
+          }
+        ]
       },
 
       {

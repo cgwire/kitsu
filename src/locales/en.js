@@ -269,6 +269,17 @@ export default {
     }
   },
 
+  boards: {
+    title: 'Boards',
+    new_board: 'New Board',
+    empty: 'No boards yet. Create one to start collaborating visually.',
+    delete_confirm: 'Are you sure you want to delete this board?',
+    export: 'Export PNG',
+    entities: 'Entities',
+    search_placeholder: 'Search entities...',
+    no_entities: 'No entities found'
+  },
+
   concepts: {
     add_links: 'Add links to assets',
     add_new_concept: 'Add new concepts',

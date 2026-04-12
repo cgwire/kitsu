@@ -5,6 +5,7 @@ import * as getters from '@/store/getters'
 import assets from '@/store/modules/assets'
 import assetTypes from '@/store/modules/assettypes'
 import backgrounds from '@/store/modules/backgrounds'
+import boards from '@/store/modules/boards'
 import breakdown from '@/store/modules/breakdown'
 import budget from '@/store/modules/budget'
 import concepts from '@/store/modules/concepts'
@@ -37,6 +38,7 @@ const modules = {
   assets,
   assetTypes,
   backgrounds,
+  boards,
   breakdown,
   budget,
   concepts,
