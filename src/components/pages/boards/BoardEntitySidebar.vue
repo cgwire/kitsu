@@ -148,6 +148,8 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  z-index: 100;
 }
 
 .sidebar-header {
