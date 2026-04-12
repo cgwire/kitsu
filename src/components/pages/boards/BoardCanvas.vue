@@ -1007,7 +1007,12 @@ export default {
           this.setTool('pencil')
           break
         case 'l':
-          this.setTool('line')
+          if (ctrl) {
+            this.toggleLockSelected()
+            e.preventDefault()
+          } else {
+            this.setTool('line')
+          }
           break
         case 'a':
           if (!ctrl) this.setTool('arrow')
@@ -1118,6 +1123,7 @@ export default {
       })
       this.canvas.add(group)
       this.canvas.renderAll()
+      this.emitChange()
     },
 
     // --- YouTube Embed ---

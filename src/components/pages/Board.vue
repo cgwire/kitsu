@@ -137,6 +137,7 @@ export default {
 
   data() {
     return {
+      debounceSaveTimer: null,
       isEditingName: false,
       editingName: '',
       pendingCanvasData: null,
@@ -160,6 +161,9 @@ export default {
   beforeUnmount() {
     if (this.autoSaveTimer) {
       clearInterval(this.autoSaveTimer)
+    }
+    if (this.debounceSaveTimer) {
+      clearTimeout(this.debounceSaveTimer)
     }
     // Save before leaving
     if (this.currentBoard && this.pendingCanvasData) {
@@ -226,6 +230,11 @@ export default {
 
     onCanvasChanged(canvasData) {
       this.pendingCanvasData = canvasData
+      // Debounced auto-save on every change
+      if (this.debounceSaveTimer) clearTimeout(this.debounceSaveTimer)
+      this.debounceSaveTimer = setTimeout(() => {
+        this.saveCurrentBoard()
+      }, 2000)
     },
 
     startEditName() {
