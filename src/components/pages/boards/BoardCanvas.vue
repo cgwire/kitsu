@@ -280,8 +280,8 @@ export default {
 
   watch: {
     board: {
-      handler(newBoard) {
-        if (newBoard && this.canvas) {
+      handler(newBoard, oldBoard) {
+        if (newBoard && this.canvas && newBoard.id !== oldBoard?.id) {
           this.loadCanvasData(newBoard.canvas_data)
         }
       },
@@ -318,9 +318,9 @@ export default {
 
       if (this.board && this.board.canvas_data) {
         this.loadCanvasData(this.board.canvas_data)
+      } else {
+        this.pushUndoState()
       }
-
-      this.pushUndoState()
     },
 
     resizeCanvas() {

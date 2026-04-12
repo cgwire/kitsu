@@ -276,6 +276,8 @@ export default {
   padding: 8px 16px;
   border-bottom: 1px solid var(--border, #eee);
   flex-shrink: 0;
+  position: relative;
+  z-index: 100;
 }
 
 .header-left {
