@@ -143,7 +143,7 @@ export default {
 <style scoped>
 .board-entity-sidebar {
   width: 260px;
-  margin-top: 80px;
+  margin-top: 20px;
   border-left: 1px solid var(--border, #eee);
   background: var(--background, #fff);
   display: flex;
