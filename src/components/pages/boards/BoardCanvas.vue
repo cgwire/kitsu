@@ -84,9 +84,24 @@
         <button class="tool-btn" @click="addImage" title="Add Image (I)">
           <image-icon :size="18" />
         </button>
-        <button class="tool-btn" @click="addStickyNote" title="Sticky Note (N)">
-          <sticky-note-icon :size="18" />
-        </button>
+        <div class="sticker-picker-wrapper">
+          <button
+            class="tool-btn"
+            @click="showStickyColors = !showStickyColors"
+            title="Sticky Note (N)"
+          >
+            <sticky-note-icon :size="18" />
+          </button>
+          <div class="sticky-color-picker" v-if="showStickyColors">
+            <button
+              class="sticky-color-btn"
+              :key="c"
+              :style="{ background: c }"
+              @click="addStickyNote(c)"
+              v-for="c in stickyColors"
+            />
+          </div>
+        </div>
         <button class="tool-btn" @click="addLink" title="Add Link">
           <link-icon :size="18" />
         </button>
@@ -425,6 +440,21 @@ export default {
       isSpacePanning: false,
       showShortcuts: false,
       showStickerPicker: false,
+      showStickyColors: false,
+      stickyColors: [
+        '#fff9c4',
+        '#f8bbd0',
+        '#c8e6c9',
+        '#bbdefb',
+        '#d1c4e9',
+        '#ffe0b2',
+        '#b2dfdb',
+        '#f0f4c3',
+        '#ffccbc',
+        '#e1bee7',
+        '#b3e5fc',
+        '#dcedc8'
+      ],
       toolBeforeSpace: 'select',
       stickerList: [
         '\u{1F44D}',
@@ -631,6 +661,7 @@ export default {
         this.connectorStart = null
       }
       this.showStickerPicker = false
+      this.showStickyColors = false
 
       if (tool === 'pencil') {
         this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
@@ -1033,9 +1064,9 @@ export default {
       this.emitChange()
     },
 
-    addStickyNote() {
-      const colors = ['#fff9c4', '#f8bbd0', '#c8e6c9', '#bbdefb', '#d1c4e9']
-      const color = colors[Math.floor(Math.random() * colors.length)]
+    addStickyNote(chosenColor) {
+      this.showStickyColors = false
+      const color = chosenColor || '#fff9c4'
       const center = this.canvas.getCenter()
 
       const rect = new fabric.Rect({
@@ -1920,6 +1951,7 @@ export default {
   flex: 1;
   overflow: hidden;
   position: relative;
+  background: #ffffff;
 }
 
 .sticker-picker-wrapper {
@@ -2076,6 +2108,35 @@ export default {
   font-weight: 600;
   color: var(--text-secondary, #999);
   text-transform: uppercase;
+}
+
+.sticky-color-picker {
+  position: fixed;
+  top: auto;
+  left: auto;
+  background: var(--background, #fff);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  z-index: 200;
+}
+
+.sticky-color-btn {
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.sticky-color-btn:hover {
+  transform: scale(1.2);
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .hidden-file-input {
