@@ -76,8 +76,14 @@
                 <span class="board-card-name">{{ board.name }}</span>
                 <button
                   class="board-visibility-btn"
-                  :title="board.visibility || 'private'"
-                  @click.stop="cycleVisibility(board)"
+                  :title="
+                    (board.visibility || 'private') +
+                    (board.visibility === 'public' ||
+                    board.visibility === 'team'
+                      ? ' — click to copy link'
+                      : '')
+                  "
+                  @click.stop="handleVisibilityClick(board)"
                 >
                   <lock-icon
                     :size="14"
@@ -298,6 +304,20 @@ export default {
 
     exportBoard() {
       this.$refs.boardCanvas?.exportAsPNG()
+    },
+
+    async handleVisibilityClick(board) {
+      const cycle = { private: 'team', team: 'public', public: 'private' }
+      const current = board.visibility || 'private'
+      const next = cycle[current]
+
+      await this.cycleVisibility(board)
+
+      // Copy link when board becomes shared
+      if (next === 'team' || next === 'public') {
+        const url = `${window.location.origin}${this.$route.path}/${board.id}`
+        navigator.clipboard.writeText(url)
+      }
     },
 
     async cycleVisibility(board) {

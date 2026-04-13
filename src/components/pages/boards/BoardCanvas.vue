@@ -900,7 +900,9 @@ export default {
             ],
             {
               fill:
-                this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+                this.fillColor === '#ffffff'
+                  ? 'rgba(255,255,255,0.01)'
+                  : this.fillColor,
               stroke: this.strokeColor,
               strokeWidth: this.strokeWidth,
               strokeUniform: true,
@@ -920,7 +922,10 @@ export default {
             })
           }
           const star = new fabric.Polygon(points, {
-            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            fill:
+              this.fillColor === '#ffffff'
+                ? 'rgba(255,255,255,0.01)'
+                : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
@@ -950,7 +955,10 @@ export default {
             top: pointer.y,
             width: 0,
             height: 0,
-            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            fill:
+              this.fillColor === '#ffffff'
+                ? 'rgba(255,255,255,0.01)'
+                : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
@@ -962,7 +970,10 @@ export default {
             top: pointer.y,
             rx: 0,
             ry: 0,
-            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            fill:
+              this.fillColor === '#ffffff'
+                ? 'rgba(255,255,255,0.01)'
+                : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
@@ -974,7 +985,10 @@ export default {
             top: pointer.y,
             width: 0,
             height: 0,
-            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            fill:
+              this.fillColor === '#ffffff'
+                ? 'rgba(255,255,255,0.01)'
+                : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
