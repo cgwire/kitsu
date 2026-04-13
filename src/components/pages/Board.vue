@@ -80,10 +80,10 @@
                     (board.visibility || 'private') +
                     (board.visibility === 'public' ||
                     board.visibility === 'team'
-                      ? ' — click to copy link'
-                      : '')
+                      ? ' — click: copy link, shift+click: change'
+                      : ' — click to share')
                   "
-                  @click.stop="handleVisibilityClick(board)"
+                  @click.stop="handleVisibilityClick(board, $event)"
                 >
                   <lock-icon
                     :size="14"
@@ -94,6 +94,13 @@
                     v-else-if="board.visibility === 'team'"
                   />
                   <globe-icon :size="14" v-else />
+                </button>
+                <button
+                  class="board-delete-btn"
+                  title="Delete board"
+                  @click.stop="confirmDeleteBoardFromList(board)"
+                >
+                  <trash2-icon :size="14" />
                 </button>
               </div>
               <span class="board-card-date">
@@ -302,22 +309,28 @@ export default {
       await this.deleteBoard(boardId)
     },
 
+    async confirmDeleteBoardFromList(board) {
+      if (!confirm(`Delete "${board.name}"? This cannot be undone.`)) return
+      await this.deleteBoard(board.id)
+    },
+
     exportBoard() {
       this.$refs.boardCanvas?.exportAsPNG()
     },
 
-    async handleVisibilityClick(board) {
-      const cycle = { private: 'team', team: 'public', public: 'private' }
+    async handleVisibilityClick(board, event) {
       const current = board.visibility || 'private'
-      const next = cycle[current]
 
-      await this.cycleVisibility(board)
-
-      // Copy link when board becomes shared
-      if (next === 'team' || next === 'public') {
+      if ((current === 'team' || current === 'public') && !event.shiftKey) {
+        // Already shared — copy link
         const url = `${window.location.origin}${this.$route.path}/${board.id}`
         navigator.clipboard.writeText(url)
+        alert('Link copied!')
+        return
       }
+
+      // Private or Shift+click — cycle visibility
+      await this.cycleVisibility(board)
     },
 
     async cycleVisibility(board) {
@@ -525,6 +538,31 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.board-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.board-card:hover .board-delete-btn {
+  opacity: 1;
+}
+
+.board-delete-btn:hover {
+  background: rgba(255, 0, 0, 0.1);
+  color: #e53e3e;
 }
 
 .board-visibility-btn:hover {
