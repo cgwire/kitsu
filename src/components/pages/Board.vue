@@ -119,6 +119,25 @@
         </div>
       </div>
 
+      <!-- Delete confirmation -->
+      <div class="delete-overlay" v-if="deletingBoardId" @click="cancelDelete">
+        <div class="delete-modal" @click.stop>
+          <p>Delete this board? This cannot be undone.</p>
+          <div class="delete-actions">
+            <button class="delete-cancel" @click="cancelDelete">Cancel</button>
+            <button
+              class="delete-confirm"
+              @click="doDeleteBoard(deletingBoardId)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" v-if="toast">{{ toast }}</div>
+
       <!-- Board Canvas -->
       <board-canvas
         ref="boardCanvas"
@@ -180,6 +199,8 @@ export default {
     return {
       debounceSaveTimer: null,
       pendingThumbnail: null,
+      toast: null,
+      deletingBoardId: null,
       isEditingName: false,
       editingName: '',
       pendingCanvasData: null,
@@ -309,9 +330,25 @@ export default {
       await this.deleteBoard(boardId)
     },
 
-    async confirmDeleteBoardFromList(board) {
-      if (!confirm(`Delete "${board.name}"? This cannot be undone.`)) return
-      await this.deleteBoard(board.id)
+    confirmDeleteBoardFromList(board) {
+      this.deletingBoardId = board.id
+    },
+
+    async doDeleteBoard(boardId) {
+      await this.deleteBoard(boardId)
+      this.deletingBoardId = null
+      this.showToast('Board deleted')
+    },
+
+    cancelDelete() {
+      this.deletingBoardId = null
+    },
+
+    showToast(msg) {
+      this.toast = msg
+      setTimeout(() => {
+        this.toast = null
+      }, 2500)
     },
 
     exportBoard() {
@@ -324,8 +361,19 @@ export default {
       if ((current === 'team' || current === 'public') && !event.shiftKey) {
         // Already shared — copy link
         const url = `${window.location.origin}${this.$route.path}/${board.id}`
-        navigator.clipboard.writeText(url)
-        alert('Link copied!')
+        navigator.clipboard
+          .writeText(url)
+          .then(() => this.showToast('Link copied!'))
+          .catch(() => {
+            // Fallback for non-HTTPS
+            const input = document.createElement('input')
+            input.value = url
+            document.body.appendChild(input)
+            input.select()
+            document.execCommand('copy')
+            document.body.removeChild(input)
+            this.showToast('Link copied!')
+          })
         return
       }
 
@@ -538,6 +586,79 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.delete-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-modal {
+  background: var(--background, #2a2a2a);
+  border-radius: 10px;
+  padding: 24px;
+  min-width: 300px;
+  text-align: center;
+  color: #fff;
+}
+
+.delete-modal p {
+  margin: 0 0 16px;
+  font-size: 15px;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.delete-cancel {
+  padding: 8px 20px;
+  border: 1px solid #555;
+  border-radius: 6px;
+  background: transparent;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.delete-cancel:hover {
+  background: #333;
+}
+
+.delete-confirm {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #e53e3e;
+  color: #fff;
+  cursor: pointer;
+}
+
+.delete-confirm:hover {
+  background: #c53030;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 600;
+  pointer-events: none;
 }
 
 .board-delete-btn {
