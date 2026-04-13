@@ -717,13 +717,12 @@ export default {
           return
         }
 
-        // Regular shape — add centered text
-        if (target.type === 'i-text' || target.type === 'text') return
+        // Regular shape — add centered text (any non-text, non-group shape)
         if (
-          ['rect', 'ellipse', 'circle', 'polygon', 'triangle'].includes(
-            target.type
-          )
-        ) {
+          ['i-text', 'text', 'textbox', 'group', 'image'].includes(target.type)
+        )
+          return
+        {
           const bound = target.getBoundingRect()
           const itext = new fabric.IText('', {
             left: bound.left + bound.width / 2,
