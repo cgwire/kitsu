@@ -76,20 +76,10 @@
         >
           <triangle-icon :size="18" />
         </button>
-        <button
-          class="tool-btn"
-          :class="{ active: activeTool === 'diamond' }"
-          @click="setTool('diamond')"
-          title="Diamond"
-        >
+        <button class="tool-btn" @click="addDiamond" title="Diamond">
           <diamond-icon :size="18" />
         </button>
-        <button
-          class="tool-btn"
-          :class="{ active: activeTool === 'star' }"
-          @click="addStar"
-          title="Star"
-        >
+        <button class="tool-btn" @click="addStar" title="Star">
           <star-icon :size="18" />
         </button>
         <button
@@ -885,7 +875,7 @@ export default {
       }
 
       if (
-        ['rect', 'circle', 'triangle', 'diamond', 'line', 'arrow'].includes(
+        ['rect', 'circle', 'triangle', 'line', 'arrow'].includes(
           this.activeTool
         ) &&
         !opt.target
@@ -927,19 +917,6 @@ export default {
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
-            id: uuidv4()
-          })
-        } else if (this.activeTool === 'diamond') {
-          this.currentShape = new fabric.Rect({
-            left: pointer.x,
-            top: pointer.y,
-            width: 0,
-            height: 0,
-            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
-            stroke: this.strokeColor,
-            strokeWidth: this.strokeWidth,
-            strokeUniform: true,
-            angle: 45,
             id: uuidv4()
           })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
@@ -1002,10 +979,7 @@ export default {
           const left = Math.min(pointer.x, this.shapeStartPoint.x)
           const top = Math.min(pointer.y, this.shapeStartPoint.y)
           this.currentShape.set({ left, top, rx, ry })
-        } else if (
-          this.activeTool === 'triangle' ||
-          this.activeTool === 'diamond'
-        ) {
+        } else if (this.activeTool === 'triangle') {
           const left = Math.min(pointer.x, this.shapeStartPoint.x)
           const top = Math.min(pointer.y, this.shapeStartPoint.y)
           let width = Math.abs(pointer.x - this.shapeStartPoint.x)
@@ -1252,6 +1226,34 @@ export default {
       this.emitChange()
     },
 
+    addDiamond() {
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
+      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
+      const s = 60
+
+      const diamond = new fabric.Polygon(
+        [
+          { x: cx, y: cy - s },
+          { x: cx + s, y: cy },
+          { x: cx, y: cy + s },
+          { x: cx - s, y: cy }
+        ],
+        {
+          fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+          stroke: this.strokeColor,
+          strokeWidth: this.strokeWidth,
+          strokeUniform: true,
+          id: uuidv4()
+        }
+      )
+      this.canvas.add(diamond)
+      this.canvas.setActiveObject(diamond)
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
     addStar() {
       const vpt = this.canvas.viewportTransform
       const zoom = this.canvas.getZoom()
@@ -1268,7 +1270,7 @@ export default {
         })
       }
       const star = new fabric.Polygon(points, {
-        fill: this.fillColor === '#ffffff' ? '#ffeb3b' : this.fillColor,
+        fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
         stroke: this.strokeColor,
         strokeWidth: this.strokeWidth,
         strokeUniform: true,
@@ -1288,12 +1290,22 @@ export default {
       const cx = (this.canvas.width / 2 - vpt[4]) / zoom
       const cy = (this.canvas.height / 2 - vpt[5]) / zoom
 
-      const rect = new fabric.Rect({
+      // Sticky = Rect bg + IText, linked by stickyPairId
+      const pairId = uuidv4()
+
+      const bg = new fabric.Rect({
+        left: cx - 110,
+        top: cy - 90,
         width: 220,
         height: 180,
         fill: color,
         rx: 4,
         ry: 4,
+        selectable: false,
+        evented: false,
+        id: uuidv4(),
+        stickyPairId: pairId,
+        isStickyBg: true,
         shadow: new fabric.Shadow({
           color: 'rgba(0,0,0,0.15)',
           blur: 8,
@@ -1302,25 +1314,34 @@ export default {
         })
       })
 
-      const text = new fabric.IText('Note...', {
-        left: 12,
-        top: 12,
+      const note = new fabric.IText('Note...', {
+        left: cx - 98,
+        top: cy - 78,
         fontSize: 15,
         fill: '#333',
         fontFamily: this.fontFamily,
-        width: 196
-      })
-
-      const group = new fabric.Group([rect, text], {
-        left: cx - 110,
-        top: cy - 90,
         id: uuidv4(),
-        isSticky: true,
-        subTargetCheck: true
+        stickyPairId: pairId,
+        isSticky: true
       })
 
-      this.canvas.add(group)
-      this.canvas.setActiveObject(group)
+      // Move bg with text
+      note.on('moving', () => {
+        bg.set({
+          left: note.left - 12,
+          top: note.top - 12
+        })
+        bg.setCoords()
+      })
+
+      // Select all placeholder on first edit
+      note.on('editing:entered', () => {
+        if (note.text === 'Note...') note.selectAll()
+      })
+
+      this.canvas.add(bg)
+      this.canvas.add(note)
+      this.canvas.setActiveObject(note)
       this.canvas.renderAll()
       this.emitChange()
     },
