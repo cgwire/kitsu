@@ -92,11 +92,19 @@
                   </button>
                   <button
                     class="board-action-btn"
-                    title="Copy link"
-                    @click.stop="copyBoardLink(board)"
-                    v-if="
-                      board.visibility === 'team' ||
-                      board.visibility === 'public'
+                    :class="{
+                      'board-action-disabled':
+                        !board.visibility || board.visibility === 'private'
+                    }"
+                    :title="
+                      !board.visibility || board.visibility === 'private'
+                        ? 'Share board first'
+                        : 'Copy link'
+                    "
+                    @click.stop="
+                      board.visibility && board.visibility !== 'private'
+                        ? copyBoardLink(board)
+                        : null
                     "
                   >
                     <link-icon :size="12" />
@@ -595,6 +603,12 @@ export default {
 .board-action-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
+}
+
+.board-action-disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
 }
 
 .board-action-danger:hover {
