@@ -553,19 +553,47 @@ export default {
         const pointer = this.canvas.getPointer(e)
 
         if (this.activeTool === 'rect') {
-          const left = Math.min(pointer.x, this.shapeStartPoint.x)
-          const top = Math.min(pointer.y, this.shapeStartPoint.y)
-          const width = Math.abs(pointer.x - this.shapeStartPoint.x)
-          const height = Math.abs(pointer.y - this.shapeStartPoint.y)
+          let width = Math.abs(pointer.x - this.shapeStartPoint.x)
+          let height = Math.abs(pointer.y - this.shapeStartPoint.y)
+          if (e.shiftKey) {
+            const size = Math.max(width, height)
+            width = size
+            height = size
+          }
+          const left =
+            pointer.x < this.shapeStartPoint.x
+              ? this.shapeStartPoint.x - width
+              : this.shapeStartPoint.x
+          const top =
+            pointer.y < this.shapeStartPoint.y
+              ? this.shapeStartPoint.y - height
+              : this.shapeStartPoint.y
           this.currentShape.set({ left, top, width, height })
         } else if (this.activeTool === 'circle') {
-          const rx = Math.abs(pointer.x - this.shapeStartPoint.x) / 2
-          const ry = Math.abs(pointer.y - this.shapeStartPoint.y) / 2
+          let rx = Math.abs(pointer.x - this.shapeStartPoint.x) / 2
+          let ry = Math.abs(pointer.y - this.shapeStartPoint.y) / 2
+          if (e.shiftKey) {
+            const r = Math.max(rx, ry)
+            rx = r
+            ry = r
+          }
           const left = Math.min(pointer.x, this.shapeStartPoint.x)
           const top = Math.min(pointer.y, this.shapeStartPoint.y)
           this.currentShape.set({ left, top, rx, ry })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
-          this.currentShape.set({ x2: pointer.x, y2: pointer.y })
+          let x2 = pointer.x
+          let y2 = pointer.y
+          if (e.shiftKey) {
+            // Snap to 45-degree angles
+            const dx = x2 - this.shapeStartPoint.x
+            const dy = y2 - this.shapeStartPoint.y
+            const angle =
+              Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4)
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            x2 = this.shapeStartPoint.x + Math.cos(angle) * dist
+            y2 = this.shapeStartPoint.y + Math.sin(angle) * dist
+          }
+          this.currentShape.set({ x2, y2 })
         }
 
         this.canvas.renderAll()
