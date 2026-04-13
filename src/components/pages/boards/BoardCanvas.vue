@@ -297,6 +297,38 @@
       </button>
     </div>
 
+    <div class="shortcuts-panel" :class="{ collapsed: !showShortcuts }">
+      <button class="shortcuts-arrow" @click="showShortcuts = !showShortcuts">
+        <span class="arrow-icon">{{
+          showShortcuts ? '&#9660;' : '&#9650;'
+        }}</span>
+        <span class="arrow-label">Shortcuts</span>
+      </button>
+      <div class="shortcuts-grid" v-if="showShortcuts">
+        <span class="sc-key">V</span><span class="sc-label">Select</span>
+        <span class="sc-key">Space</span
+        ><span class="sc-label">Pan (hold)</span> <span class="sc-key">D</span
+        ><span class="sc-label">Draw</span> <span class="sc-key">L</span
+        ><span class="sc-label">Line</span> <span class="sc-key">A</span
+        ><span class="sc-label">Arrow</span> <span class="sc-key">R</span
+        ><span class="sc-label">Rectangle</span> <span class="sc-key">C</span
+        ><span class="sc-label">Circle</span> <span class="sc-key">T</span
+        ><span class="sc-label">Text</span> <span class="sc-key">I</span
+        ><span class="sc-label">Image</span> <span class="sc-key">N</span
+        ><span class="sc-label">Sticky Note</span> <span class="sc-key">S</span
+        ><span class="sc-label">Sticker</span> <span class="sc-key">X</span
+        ><span class="sc-label">Swap Colors</span>
+        <span class="sc-key">Del</span><span class="sc-label">Delete</span>
+        <span class="sc-key">Shift</span><span class="sc-label">Constrain</span>
+        <span class="sc-key">Ctrl Z</span><span class="sc-label">Undo</span>
+        <span class="sc-key">Ctrl Y</span><span class="sc-label">Redo</span>
+        <span class="sc-key">Ctrl G</span><span class="sc-label">Group</span>
+        <span class="sc-key">Ctrl L</span><span class="sc-label">Lock</span>
+        <span class="sc-key">Ctrl 0</span><span class="sc-label">Zoom Fit</span>
+        <span class="sc-key">Scroll</span><span class="sc-label">Zoom</span>
+      </div>
+    </div>
+
     <input
       type="file"
       ref="fileInput"
@@ -391,6 +423,7 @@ export default {
       fontSize: 18,
       isSaving: false,
       isSpacePanning: false,
+      showShortcuts: false,
       showStickerPicker: false,
       toolBeforeSpace: 'select',
       stickerList: [
@@ -486,30 +519,16 @@ export default {
       }
     },
     snapToGrid(enabled) {
-      if (!this.canvas) return
+      // Show/hide dot grid via CSS on canvas container
+      const container = this.$refs.canvasContainer
+      if (!container) return
       if (enabled) {
-        // Create dotted grid pattern
-        const dotCanvas = document.createElement('canvas')
         const size = this.gridSize
-        dotCanvas.width = size
-        dotCanvas.height = size
-        const ctx = dotCanvas.getContext('2d')
-        ctx.fillStyle = this.bgColor
-        ctx.fillRect(0, 0, size, size)
-        ctx.fillStyle = '#ccc'
-        ctx.beginPath()
-        ctx.arc(size / 2, size / 2, 1, 0, Math.PI * 2)
-        ctx.fill()
-        const patternUrl = dotCanvas.toDataURL()
-        this.canvas.backgroundColor = ''
-        this.canvas.setBackgroundColor(
-          { source: patternUrl, repeat: 'repeat' },
-          () => this.canvas.renderAll()
-        )
+        container.style.backgroundImage = `radial-gradient(circle, #ccc 1px, transparent 1px)`
+        container.style.backgroundSize = `${size}px ${size}px`
       } else {
-        this.canvas.setBackgroundColor(this.bgColor, () =>
-          this.canvas.renderAll()
-        )
+        container.style.backgroundImage = ''
+        container.style.backgroundSize = ''
       }
     }
   },
@@ -1811,9 +1830,10 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   flex: 1;
   position: relative;
+  overflow: hidden;
 }
 
 .board-toolbar {
@@ -1979,6 +1999,72 @@ export default {
   height: 1px;
   background: var(--border, #444);
   margin: 4px 0;
+}
+
+.shortcuts-panel {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 8px 12px;
+  z-index: 300;
+  color: #eee;
+  font-size: 11px;
+  min-width: 180px;
+  transition: all 0.2s;
+}
+
+.shortcuts-panel.collapsed {
+  padding: 4px 10px;
+  min-width: auto;
+}
+
+.shortcuts-arrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 0;
+  width: 100%;
+}
+
+.shortcuts-arrow:hover {
+  color: #fff;
+}
+
+.arrow-icon {
+  font-size: 8px;
+}
+
+.arrow-label {
+  font-weight: 500;
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 10px;
+  margin-top: 8px;
+}
+
+.sc-key {
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 10px;
+  color: #ddd;
+  text-align: center;
+}
+
+.sc-label {
+  color: #999;
 }
 
 .bg-color-group {
