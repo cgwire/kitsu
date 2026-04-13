@@ -640,6 +640,18 @@ export default {
       const tmp = this.strokeColor
       this.strokeColor = this.fillColor
       this.fillColor = tmp
+
+      // Apply to selected object
+      const obj = this.canvas?.getActiveObject()
+      if (obj) {
+        if (obj.type === 'i-text' || obj.type === 'text') {
+          obj.set('fill', this.strokeColor)
+        } else {
+          obj.set({ stroke: this.strokeColor, fill: this.fillColor })
+        }
+        this.canvas.renderAll()
+        this.emitChange()
+      }
     },
 
     snapPoint(p) {
