@@ -669,19 +669,22 @@ export default {
         // Sticky note group — enter text editing
         if (target.type === 'group' && target.isSticky) {
           const items = target._objects || []
-          const origText = items.find(o => o.type === 'i-text')
+          const origText = items.find(
+            o => o.type === 'i-text' || o.type === 'textbox'
+          )
           if (!origText) return
 
           const bound = target.getBoundingRect()
 
           // Create temporary editable overlay
-          const tmpText = new fabric.IText(origText.text, {
+          const tmpText = new fabric.Textbox(origText.text, {
             left: bound.left + 12,
             top: bound.top + 12,
             fontSize: origText.fontSize,
             fill: origText.fill,
             fontFamily: origText.fontFamily,
-            width: bound.width - 24
+            width: bound.width - 24,
+            splitByGrapheme: true
           })
 
           this.canvas.add(tmpText)
@@ -1301,13 +1304,14 @@ export default {
         })
       })
 
-      const text = new fabric.IText('Note...', {
+      const text = new fabric.Textbox('Note...', {
         left: 12,
         top: 12,
         fontSize: 15,
         fill: '#333',
         fontFamily: this.fontFamily,
-        width: 196
+        width: 196,
+        splitByGrapheme: true
       })
 
       const group = new fabric.Group([rect, text], {
