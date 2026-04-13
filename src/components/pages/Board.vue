@@ -345,6 +345,7 @@ export default {
 .board-name-display {
   font-size: 16px;
   font-weight: 500;
+  color: #fff;
   display: flex;
   align-items: center;
   gap: 6px;
