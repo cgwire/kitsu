@@ -107,13 +107,13 @@
           v-model="fillColor"
           title="Fill Color"
         />
-        <input
-          type="color"
-          class="color-picker"
-          v-model="bgColor"
-          title="Board Background"
-          @input="onBgColorChange"
-        />
+        <button
+          class="tool-btn swap-btn"
+          @click="swapColors"
+          title="Swap Stroke/Fill (X)"
+        >
+          <rotate-cw-icon :size="14" />
+        </button>
         <select class="stroke-width-select" v-model="strokeWidth">
           <option :value="1">Thin</option>
           <option :value="2">Normal</option>
@@ -133,11 +133,21 @@
           <option :value="48">48</option>
           <option :value="72">72</option>
         </select>
+        <select class="stroke-width-select" v-model="fontFamily" title="Font">
+          <option value="Inter, Arial, sans-serif">Inter</option>
+          <option value="Arial, sans-serif">Arial</option>
+          <option value="Georgia, serif">Georgia</option>
+          <option value="Courier New, monospace">Courier</option>
+          <option value="Comic Sans MS, cursive">Comic Sans</option>
+          <option value="Times New Roman, serif">Times</option>
+          <option value="Verdana, sans-serif">Verdana</option>
+        </select>
       </div>
 
       <div class="tool-separator" />
 
       <div class="tool-group">
+        <!-- Connector hidden until dynamic wiring is implemented
         <button
           class="tool-btn"
           :class="{ active: activeTool === 'connector' }"
@@ -146,6 +156,7 @@
         >
           <git-branch-icon :size="18" />
         </button>
+        -->
         <button class="tool-btn" @click="addYouTubeEmbed" title="YouTube Embed">
           <youtube-icon :size="18" />
         </button>
@@ -228,6 +239,19 @@
           <zoom-in-icon :size="18" />
         </button>
       </div>
+
+      <div class="tool-separator" />
+
+      <div class="tool-group bg-color-group">
+        <span class="bg-label">BG</span>
+        <input
+          type="color"
+          class="color-picker"
+          v-model="bgColor"
+          title="Board Background"
+          @input="onBgColorChange"
+        />
+      </div>
     </div>
 
     <div
@@ -259,7 +283,6 @@ import {
   ArrowUpRightIcon,
   CircleIcon,
   Edit2Icon,
-  GitBranchIcon,
   GridIcon,
   ImageIcon,
   LayersIcon,
@@ -270,6 +293,7 @@ import {
   MousePointerIcon,
   HandIcon,
   Redo2Icon,
+  RotateCwIcon,
   SmileIcon,
   SquareIcon,
   StickyNoteIcon,
@@ -288,7 +312,6 @@ export default {
     ArrowUpRightIcon,
     CircleIcon,
     Edit2Icon,
-    GitBranchIcon,
     GridIcon,
     ImageIcon,
     LayersIcon,
@@ -299,6 +322,7 @@ export default {
     MousePointerIcon,
     HandIcon,
     Redo2Icon,
+    RotateCwIcon,
     SmileIcon,
     SquareIcon,
     StickyNoteIcon,
@@ -322,6 +346,7 @@ export default {
       canvas: null,
       activeTool: 'select',
       bgColor: '#ffffff',
+      fontFamily: 'Inter, Arial, sans-serif',
       strokeColor: '#333333',
       fillColor: '#ffffff',
       strokeWidth: 2,
@@ -388,6 +413,41 @@ export default {
     }
   },
 
+  watch: {
+    board: {
+      handler(newBoard, oldBoard) {
+        if (newBoard && this.canvas && newBoard.id !== oldBoard?.id) {
+          this.loadCanvasData(newBoard.canvas_data)
+        }
+      },
+      immediate: false
+    },
+    fontFamily(val) {
+      const obj = this.canvas?.getActiveObject()
+      if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
+        obj.set('fontFamily', val)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
+    fontSize(val) {
+      const obj = this.canvas?.getActiveObject()
+      if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
+        obj.set('fontSize', val)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
+    strokeWidth(val) {
+      const obj = this.canvas?.getActiveObject()
+      if (obj && obj.type !== 'i-text' && obj.type !== 'text') {
+        obj.set('strokeWidth', val)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    }
+  },
+
   mounted() {
     this.initCanvas()
     this.setupKeyboardShortcuts()
@@ -400,17 +460,6 @@ export default {
     window.removeEventListener('keyup', this.onKeyUp)
     if (this.canvas) {
       this.canvas.dispose()
-    }
-  },
-
-  watch: {
-    board: {
-      handler(newBoard, oldBoard) {
-        if (newBoard && this.canvas && newBoard.id !== oldBoard?.id) {
-          this.loadCanvasData(newBoard.canvas_data)
-        }
-      },
-      immediate: false
     }
   },
 
@@ -464,6 +513,12 @@ export default {
       } else {
         this.pushUndoState()
       }
+    },
+
+    swapColors() {
+      const tmp = this.strokeColor
+      this.strokeColor = this.fillColor
+      this.fillColor = tmp
     },
 
     onBgColorChange() {
@@ -526,12 +581,12 @@ export default {
       }
 
       if (this.activeTool === 'text' && !opt.target) {
-        const text = new fabric.IText('Type here', {
+        const text = new fabric.IText('', {
           left: pointer.x,
           top: pointer.y,
           fontSize: this.fontSize,
           fill: this.strokeColor,
-          fontFamily: 'Inter, Arial, sans-serif',
+          fontFamily: this.fontFamily,
           id: uuidv4()
         })
         this.canvas.add(text)
@@ -1228,6 +1283,9 @@ export default {
         case 'k':
           if (!ctrl) this.setTool('connector')
           break
+        case 'x':
+          if (!ctrl) this.swapColors()
+          break
         case 's':
           if (!ctrl) this.addSticker()
           else {
@@ -1700,9 +1758,9 @@ export default {
 }
 
 .sticker-picker {
-  position: absolute;
-  top: 100%;
-  left: 0;
+  position: fixed;
+  top: auto;
+  left: auto;
   background: var(--background, #fff);
   border: 1px solid var(--border, #ddd);
   border-radius: 8px;
@@ -1731,6 +1789,17 @@ export default {
 
 .sticker-btn:hover {
   background: var(--background-hover, #f0f0f0);
+}
+
+.bg-color-group {
+  gap: 4px;
+}
+
+.bg-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary, #999);
+  text-transform: uppercase;
 }
 
 .hidden-file-input {
