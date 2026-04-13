@@ -549,16 +549,22 @@ export default {
       }
     },
     snapToGrid(enabled) {
-      // Show/hide dot grid via CSS on canvas container
       const container = this.$refs.canvasContainer
-      if (!container) return
+      if (!container || !this.canvas) return
       if (enabled) {
         const size = this.gridSize
         container.style.backgroundImage = `radial-gradient(circle, #ccc 1px, transparent 1px)`
         container.style.backgroundSize = `${size}px ${size}px`
+        container.style.backgroundColor = this.bgColor
+        // Make fabric canvas transparent so CSS dots show through
+        this.canvas.backgroundColor = 'transparent'
+        this.canvas.renderAll()
       } else {
         container.style.backgroundImage = ''
         container.style.backgroundSize = ''
+        container.style.backgroundColor = ''
+        this.canvas.backgroundColor = this.bgColor
+        this.canvas.renderAll()
       }
     }
   },
@@ -634,6 +640,14 @@ export default {
       const tmp = this.strokeColor
       this.strokeColor = this.fillColor
       this.fillColor = tmp
+    },
+
+    snapPoint(p) {
+      if (!this.snapToGrid) return p
+      return {
+        x: Math.round(p.x / this.gridSize) * this.gridSize,
+        y: Math.round(p.y / this.gridSize) * this.gridSize
+      }
     },
 
     onBgColorChange() {
@@ -744,7 +758,7 @@ export default {
         !opt.target
       ) {
         this.isDrawingShape = true
-        this.shapeStartPoint = pointer
+        this.shapeStartPoint = this.snapPoint(pointer)
 
         if (this.activeTool === 'rect') {
           this.currentShape = new fabric.Rect({
@@ -798,7 +812,7 @@ export default {
       }
 
       if (this.isDrawingShape && this.currentShape) {
-        const pointer = this.canvas.getPointer(e)
+        const pointer = this.snapPoint(this.canvas.getPointer(e))
 
         if (this.activeTool === 'rect') {
           let width = Math.abs(pointer.x - this.shapeStartPoint.x)
@@ -1069,40 +1083,34 @@ export default {
       const color = chosenColor || '#fff9c4'
       const center = this.canvas.getCenter()
 
-      const rect = new fabric.Rect({
+      const note = new fabric.IText('Note...', {
+        left: center.left - 100,
+        top: center.top - 75,
         width: 200,
-        height: 150,
-        fill: color,
-        stroke: '#ccc',
-        strokeWidth: 1,
-        rx: 4,
-        ry: 4,
+        fontSize: 14,
+        fill: '#333',
+        fontFamily: 'Inter, Arial, sans-serif',
+        backgroundColor: color,
+        padding: 16,
+        id: uuidv4(),
+        isSticky: true,
         shadow: new fabric.Shadow({
-          color: 'rgba(0,0,0,0.15)',
-          blur: 8,
+          color: 'rgba(0,0,0,0.12)',
+          blur: 6,
           offsetX: 2,
           offsetY: 2
         })
       })
 
-      const text = new fabric.IText('Note...', {
-        left: 10,
-        top: 10,
-        fontSize: 14,
-        fill: '#333',
-        fontFamily: 'Inter, Arial, sans-serif',
-        width: 180
+      // Clear placeholder on first edit
+      note.on('editing:entered', () => {
+        if (note.text === 'Note...') {
+          note.selectAll()
+        }
       })
 
-      const group = new fabric.Group([rect, text], {
-        left: center.left - 100,
-        top: center.top - 75,
-        id: uuidv4(),
-        subTargetCheck: true
-      })
-
-      this.canvas.add(group)
-      this.canvas.setActiveObject(group)
+      this.canvas.add(note)
+      this.canvas.setActiveObject(note)
       this.canvas.renderAll()
       this.emitChange()
     },
