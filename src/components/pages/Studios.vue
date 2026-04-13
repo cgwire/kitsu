@@ -12,7 +12,7 @@
 
     <studio-list
       class="studio-list"
-      :entries="studioList"
+      :entries="displayedStudios"
       :is-loading="loading.studios"
       :is-error="errors.studios"
       @edit-clicked="onEditClicked"
@@ -50,15 +50,10 @@ import { useStore } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-// eslint-disable-next-line no-unused-vars
 import DeleteModal from '@/components/modals/DeleteModal.vue'
-// eslint-disable-next-line no-unused-vars
 import EditStudiosModal from '@/components/modals/EditStudiosModal.vue'
-// eslint-disable-next-line no-unused-vars
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
-// eslint-disable-next-line no-unused-vars
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
-// eslint-disable-next-line no-unused-vars
 import StudioList from '@/components/lists/StudioList.vue'
 
 const { t } = useI18n()
@@ -82,7 +77,7 @@ const tabs = computed(() => [
 
 const isActiveTab = computed(() => activeTab.value === 'active')
 
-const studioList = computed(() =>
+const displayedStudios = computed(() =>
   isActiveTab.value ? studios.value : archivedStudios.value
 )
 
