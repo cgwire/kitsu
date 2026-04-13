@@ -232,15 +232,14 @@
       <canvas ref="boardCanvas" />
     </div>
 
-    <label class="hidden-file-input">
-      <input
-        type="file"
-        ref="fileInput"
-        accept="image/*"
-        @change="onFileSelected"
-        multiple
-      />
-    </label>
+    <input
+      type="file"
+      ref="fileInput"
+      accept="image/*"
+      class="hidden-file-input"
+      @change="onFileSelected"
+      multiple
+    />
   </div>
 </template>
 
@@ -473,6 +472,11 @@ export default {
       this.activeTool = tool
       this.canvas.isDrawingMode = tool === 'pencil'
       this.canvas.selection = tool === 'select'
+      // Reset connector state when switching tools
+      if (tool !== 'connector') {
+        this.connectorStart = null
+      }
+      this.showStickerPicker = false
 
       if (tool === 'pencil') {
         this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
@@ -526,12 +530,15 @@ export default {
 
       if (this.activeTool === 'connector') {
         if (!this.connectorStart) {
+          // First click — store start
           this.connectorStart = {
             x: pointer.x,
             y: pointer.y,
             target: opt.target || null
           }
+          this.canvas.defaultCursor = 'crosshair'
         } else {
+          // Second click — draw and reset
           this.drawConnector(
             this.connectorStart.target,
             opt.target || null,
@@ -541,6 +548,7 @@ export default {
             pointer.y
           )
           this.connectorStart = null
+          // Stay in connector mode but ready for next pair
           this.emitChange()
         }
         return
@@ -1712,15 +1720,9 @@ export default {
 
 .hidden-file-input {
   position: absolute;
-  width: 0;
-  height: 0;
-  overflow: hidden;
-}
-
-.hidden-file-input input {
-  position: absolute;
-  width: 0;
-  height: 0;
+  width: 1px;
+  height: 1px;
   opacity: 0;
+  pointer-events: none;
 }
 </style>
