@@ -1095,20 +1095,21 @@ export default {
       const color = chosenColor || '#fff9c4'
       const center = this.canvas.getCenter()
 
-      const note = new fabric.IText('Note...', {
+      // Use IText with large padding to create a card look
+      const note = new fabric.IText('Note...\n\n\n\n\n', {
         left: center.left - 100,
         top: center.top - 75,
-        width: 200,
-        fontSize: 14,
+        fontSize: 16,
         fill: '#333',
         fontFamily: 'Inter, Arial, sans-serif',
         backgroundColor: color,
-        padding: 16,
+        padding: 20,
+        width: 200,
         id: uuidv4(),
         isSticky: true,
         shadow: new fabric.Shadow({
           color: 'rgba(0,0,0,0.12)',
-          blur: 6,
+          blur: 8,
           offsetX: 2,
           offsetY: 2
         })
@@ -1116,8 +1117,10 @@ export default {
 
       // Clear placeholder on first edit
       note.on('editing:entered', () => {
-        if (note.text === 'Note...') {
-          note.selectAll()
+        if (note.text.startsWith('Note...')) {
+          note.text = ''
+          note.dirty = true
+          this.canvas.renderAll()
         }
       })
 
@@ -1768,11 +1771,14 @@ export default {
 
     placeSticker(emoji) {
       this.showStickerPicker = false
-      const center = this.canvas.getCenter()
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
+      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
 
       const text = new fabric.Text(emoji, {
-        left: center.left - 20,
-        top: center.top - 20,
+        left: cx - 20,
+        top: cy - 20,
         fontSize: 48,
         id: uuidv4(),
         isSticker: true
