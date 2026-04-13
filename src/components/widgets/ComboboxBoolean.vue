@@ -10,6 +10,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -35,10 +36,10 @@ defineProps({
 
 const emit = defineEmits(['enter', 'update:modelValue'])
 
-const booleanOptions = [
+const booleanOptions = computed(() => [
   { label: t('main.yes'), value: 'true' },
   { label: t('main.no'), value: 'false' }
-]
+])
 
 const emitValue = value => {
   emit('update:modelValue', value)

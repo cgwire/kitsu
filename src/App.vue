@@ -1508,6 +1508,7 @@ tbody:last-child .empty-line:last-child {
 
 .datatable-wrapper {
   overflow: auto;
+  border-radius: 10px;
   margin-bottom: 1rem;
 }
 

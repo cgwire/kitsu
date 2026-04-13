@@ -131,6 +131,7 @@ const currentStudio = computed(() => {
   .selected-studio-line,
   .studio-line,
   .studio-combo {
+    color: var(--text);
     background: $dark-grey-light;
     border-color: $dark-grey;
   }
@@ -141,28 +142,34 @@ const currentStudio = computed(() => {
 }
 
 .studio-combo {
-  background: $white;
+  background: var(--background);
   border: 1px solid $light-grey-light;
   user-select: none;
   cursor: pointer;
   border-radius: 10px;
   margin: 0;
+  max-width: 100%;
   padding: 0.15em;
   position: relative;
 
   &:hover {
     border: 1px solid $green;
   }
+
+  &.opened {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 .selected-studio-line {
-  background: $white;
+  background: transparent;
   padding: 0.2em;
   flex: 1;
 }
 
 .studio-line {
-  background: $white;
+  background: var(--background);
   cursor: pointer;
   padding: 0.2em;
   margin: 0;
@@ -181,14 +188,13 @@ const currentStudio = computed(() => {
 }
 
 .select-input {
-  background: $white;
+  background: var(--background);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   position: absolute;
   border: 1px solid $light-grey-light;
   z-index: 300;
   margin-left: -1px;
-  max-height: 200px;
   overflow-y: auto;
   left: 0;
 }
@@ -207,7 +213,6 @@ const currentStudio = computed(() => {
 
   .selected-studio-line {
     padding-top: 0;
-
     padding-bottom: 0;
     border-radius: 50px;
   }
