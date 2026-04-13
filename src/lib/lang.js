@@ -3,7 +3,7 @@ import i18n from '@/lib/i18n'
 
 const LOCALE_MAP = {
   zh_Hans_CN: { language: 'zh', localeCode: 'zh-cn' },
-  zh_Hant_TW: { language: 'zh', localeCode: 'zh-tw' }
+  zh_Hant_TW: { language: 'zw', localeCode: 'zh-tw' }
 }
 
 export default {
