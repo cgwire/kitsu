@@ -1508,7 +1508,6 @@ tbody:last-child .empty-line:last-child {
 
 .datatable-wrapper {
   overflow: auto;
-  border-radius: 10px;
   margin-bottom: 1rem;
 }
 
@@ -1704,6 +1703,32 @@ tbody:last-child .empty-line:last-child {
   &:last-child th,
   &:last-child td {
     border-bottom: 1px solid var(--border);
+  }
+
+  &:last-child {
+    background: transparent !important;
+
+    td {
+      background-color: var(--background);
+    }
+
+    td:first-child,
+    td:first-child.datatable-row-header {
+      border-bottom-left-radius: 10px;
+    }
+
+    td:last-child,
+    td:last-child.datatable-row-footer {
+      border-bottom-right-radius: 10px;
+    }
+  }
+
+  &:last-child:nth-child(even) td {
+    background-color: var(--background-alt);
+  }
+
+  &:last-child:hover td {
+    background-color: var(--background-hover);
   }
 
   &.datatable-row--selectable {
