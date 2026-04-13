@@ -669,38 +669,35 @@ export default {
         // Sticky note group — enter text editing
         if (target.type === 'group' && target.isSticky) {
           const items = target._objects || []
-          const itext = items.find(o => o.type === 'i-text')
-          if (!itext) return
+          const origText = items.find(o => o.type === 'i-text')
+          if (!origText) return
 
-          const groupLeft = target.left
-          const groupTop = target.top
+          const bound = target.getBoundingRect()
 
-          target.toActiveSelection()
-          this.canvas.discardActiveObject()
-          this.canvas.setActiveObject(itext)
-          itext.enterEditing()
-          if (itext.text === 'Note...') itext.selectAll()
+          // Create temporary editable overlay
+          const tmpText = new fabric.IText(origText.text, {
+            left: bound.left + 12,
+            top: bound.top + 12,
+            fontSize: origText.fontSize,
+            fill: origText.fill,
+            fontFamily: origText.fontFamily,
+            width: bound.width - 24
+          })
 
-          const regroup = () => {
-            itext.off('editing:exited', regroup)
-            this.canvas.discardActiveObject()
-            const rect = items.find(o => o.type === 'rect')
-            if (rect) {
-              const newGroup = new fabric.Group([rect, itext], {
-                left: groupLeft,
-                top: groupTop,
-                id: target.id,
-                isSticky: true,
-                subTargetCheck: true
-              })
-              this.canvas.remove(rect)
-              this.canvas.remove(itext)
-              this.canvas.add(newGroup)
-              this.canvas.renderAll()
-            }
+          this.canvas.add(tmpText)
+          this.canvas.setActiveObject(tmpText)
+          tmpText.enterEditing()
+          if (tmpText.text === 'Note...') tmpText.selectAll()
+
+          const finish = () => {
+            tmpText.off('editing:exited', finish)
+            // Copy text back into group
+            origText.set('text', tmpText.text)
+            this.canvas.remove(tmpText)
+            this.canvas.renderAll()
             this.emitChange()
           }
-          itext.on('editing:exited', regroup)
+          tmpText.on('editing:exited', finish)
           return
         }
 
@@ -1290,22 +1287,12 @@ export default {
       const cx = (this.canvas.width / 2 - vpt[4]) / zoom
       const cy = (this.canvas.height / 2 - vpt[5]) / zoom
 
-      // Sticky = Rect bg + IText, linked by stickyPairId
-      const pairId = uuidv4()
-
-      const bg = new fabric.Rect({
-        left: cx - 110,
-        top: cy - 90,
+      const rect = new fabric.Rect({
         width: 220,
         height: 180,
         fill: color,
         rx: 4,
         ry: 4,
-        selectable: false,
-        evented: false,
-        id: uuidv4(),
-        stickyPairId: pairId,
-        isStickyBg: true,
         shadow: new fabric.Shadow({
           color: 'rgba(0,0,0,0.15)',
           blur: 8,
@@ -1314,34 +1301,25 @@ export default {
         })
       })
 
-      const note = new fabric.IText('Note...', {
-        left: cx - 98,
-        top: cy - 78,
+      const text = new fabric.IText('Note...', {
+        left: 12,
+        top: 12,
         fontSize: 15,
         fill: '#333',
         fontFamily: this.fontFamily,
+        width: 196
+      })
+
+      const group = new fabric.Group([rect, text], {
+        left: cx - 110,
+        top: cy - 90,
         id: uuidv4(),
-        stickyPairId: pairId,
-        isSticky: true
+        isSticky: true,
+        subTargetCheck: true
       })
 
-      // Move bg with text
-      note.on('moving', () => {
-        bg.set({
-          left: note.left - 12,
-          top: note.top - 12
-        })
-        bg.setCoords()
-      })
-
-      // Select all placeholder on first edit
-      note.on('editing:entered', () => {
-        if (note.text === 'Note...') note.selectAll()
-      })
-
-      this.canvas.add(bg)
-      this.canvas.add(note)
-      this.canvas.setActiveObject(note)
+      this.canvas.add(group)
+      this.canvas.setActiveObject(group)
       this.canvas.renderAll()
       this.emitChange()
     },
