@@ -16,7 +16,7 @@
           @click="setTool('pan')"
           title="Pan (H)"
         >
-          <move-icon :size="18" />
+          <hand-icon :size="18" />
         </button>
       </div>
 
@@ -245,7 +245,7 @@ import {
   MaximizeIcon,
   MinusIcon,
   MousePointerIcon,
-  MoveIcon,
+  HandIcon,
   Redo2Icon,
   SmileIcon,
   SquareIcon,
@@ -274,7 +274,7 @@ export default {
     MaximizeIcon,
     MinusIcon,
     MousePointerIcon,
-    MoveIcon,
+    HandIcon,
     Redo2Icon,
     SmileIcon,
     SquareIcon,
@@ -640,7 +640,7 @@ export default {
     loadImageFile(file, offsetX = 0) {
       const reader = new FileReader()
       reader.onload = event => {
-        fabric.Image.fromURL(event.target.result, img => {
+        fabric.Image.fromURL(event.target.result).then(img => {
           const maxDim = 400
           const scale = Math.min(maxDim / img.width, maxDim / img.height, 1)
           img.set({
@@ -688,7 +688,7 @@ export default {
         : null
 
       if (previewUrl) {
-        fabric.Image.fromURL(previewUrl, img => {
+        fabric.Image.fromURL(previewUrl).then(img => {
           const maxDim = 300
           const scale = Math.min(maxDim / img.width, maxDim / img.height, 1)
           img.set({
@@ -1188,22 +1188,18 @@ export default {
       this.emitChange()
 
       // Load actual thumbnail
-      fabric.Image.fromURL(
-        thumbUrl,
-        img => {
-          if (img) {
-            img.set({
-              scaleX: 320 / img.width,
-              scaleY: 180 / img.height
-            })
-            group.remove(rect)
-            group.addWithUpdate(img)
-            group.sendToBack(img)
-            this.canvas.renderAll()
-          }
-        },
-        { crossOrigin: 'anonymous' }
-      )
+      fabric.Image.fromURL(thumbUrl, { crossOrigin: 'anonymous' }).then(img => {
+        if (img) {
+          img.set({
+            scaleX: 320 / img.width,
+            scaleY: 180 / img.height
+          })
+          group.remove(rect)
+          group.addWithUpdate(img)
+          group.sendToBack(img)
+          this.canvas.renderAll()
+        }
+      })
 
       group.on('mousedblclick', () => {
         window.open(url, '_blank')
@@ -1355,12 +1351,13 @@ export default {
 .board-toolbar {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
+  padding: 4px 8px;
   background: var(--background-alt, #fafafa);
   border-bottom: 1px solid var(--border, #eee);
-  gap: 4px;
+  gap: 2px;
   flex-shrink: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   z-index: 10;
 }
 
@@ -1381,8 +1378,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
