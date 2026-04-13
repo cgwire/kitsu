@@ -142,9 +142,25 @@
         <button class="tool-btn" @click="addYouTubeEmbed" title="YouTube Embed">
           <youtube-icon :size="18" />
         </button>
-        <button class="tool-btn" @click="addSticker" title="Sticker (S)">
-          <smile-icon :size="18" />
-        </button>
+        <div class="sticker-picker-wrapper">
+          <button
+            class="tool-btn"
+            @click="showStickerPicker = !showStickerPicker"
+            title="Sticker (S)"
+          >
+            <smile-icon :size="18" />
+          </button>
+          <div class="sticker-picker" v-if="showStickerPicker">
+            <button
+              class="sticker-btn"
+              :key="s"
+              @click="placeSticker(s)"
+              v-for="s in stickerList"
+            >
+              {{ s }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="tool-separator" />
@@ -313,7 +329,46 @@ export default {
       fontSize: 18,
       isSaving: false,
       isSpacePanning: false,
+      showStickerPicker: false,
       toolBeforeSpace: 'select',
+      stickerList: [
+        '\u{1F44D}',
+        '\u{1F44E}',
+        '\u{2705}',
+        '\u{274C}',
+        '\u{2757}',
+        '\u{2753}',
+        '\u{1F525}',
+        '\u{2B50}',
+        '\u{1F3AF}',
+        '\u{1F4A1}',
+        '\u{1F6A7}',
+        '\u{1F4AC}',
+        '\u{1F4CB}',
+        '\u{1F3A8}',
+        '\u{1F3AC}',
+        '\u{1F4F7}',
+        '\u{1F4CC}',
+        '\u{1F4CE}',
+        '\u{270F}\u{FE0F}',
+        '\u{1F50D}',
+        '\u{1F512}',
+        '\u{1F513}',
+        '\u{1F4A5}',
+        '\u{1F389}',
+        '\u{1F680}',
+        '\u{23F0}',
+        '\u{26A0}\u{FE0F}',
+        '\u{1F6D1}',
+        '\u{1F7E2}',
+        '\u{1F7E1}',
+        '\u{1F534}',
+        '\u{1F535}',
+        '\u{2764}\u{FE0F}',
+        '\u{1F499}',
+        '\u{1F49A}',
+        '\u{1F4AF}'
+      ],
       snapToGrid: false,
       gridSize: 20,
       connectorStart: null
@@ -1409,30 +1464,16 @@ export default {
     // --- Stickers ---
 
     addSticker() {
-      const stickers = [
-        '\u{1F44D}',
-        '\u{1F44E}',
-        '\u{2705}',
-        '\u{274C}',
-        '\u{2757}',
-        '\u{2753}',
-        '\u{1F525}',
-        '\u{2B50}',
-        '\u{1F3AF}',
-        '\u{1F4A1}',
-        '\u{1F6A7}',
-        '\u{1F4AC}',
-        '\u{1F4CB}',
-        '\u{1F3A8}',
-        '\u{1F3AC}',
-        '\u{1F4F7}'
-      ]
-      const emoji = stickers[Math.floor(Math.random() * stickers.length)]
+      this.showStickerPicker = !this.showStickerPicker
+    },
+
+    placeSticker(emoji) {
+      this.showStickerPicker = false
       const center = this.canvas.getCenter()
 
       const text = new fabric.Text(emoji, {
-        left: center.left - 20 + (Math.random() - 0.5) * 100,
-        top: center.top - 20 + (Math.random() - 0.5) * 100,
+        left: center.left - 20,
+        top: center.top - 20,
         fontSize: 48,
         id: uuidv4(),
         isSticker: true
@@ -1629,6 +1670,44 @@ export default {
   flex: 1;
   overflow: hidden;
   position: relative;
+}
+
+.sticker-picker-wrapper {
+  position: relative;
+}
+
+.sticker-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--background, #fff);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  z-index: 200;
+  width: 240px;
+}
+
+.sticker-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 22px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.sticker-btn:hover {
+  background: var(--background-hover, #f0f0f0);
 }
 
 .hidden-file-input {
