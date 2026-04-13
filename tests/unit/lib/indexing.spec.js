@@ -17,10 +17,12 @@ describe('lib/indexing', () => {
     ]
     const index = buildNameIndex(entries)
     expect(index.A).toBeUndefined()
-    expect(index.Ca).toBeUndefined()
-    expect(index.a).toHaveLength(2)
+    expect(index.agent).toHaveLength(1)
+    expect(index.arn).toHaveLength(1)
     expect(index.bunny).toHaveLength(1)
     expect(index.bunny[0].id).toEqual(3)
+    expect(index.nny).toHaveLength(1)
+    expect(index.nny[0].id).toEqual(3)
   })
 
   it('buildAssetIndex', () => {
@@ -34,12 +36,12 @@ describe('lib/indexing', () => {
     ]
     const index = buildAssetIndex(entries)
     expect(index.A).toBeUndefined()
-    expect(index.cs).toBeUndefined()
     expect(index.ch).toHaveLength(3)
-    expect(index.a).toHaveLength(2)
+    expect(index.agent).toHaveLength(1)
     expect(index.bunny).toHaveLength(1)
     expect(index.bunny[0].id).toEqual(3)
-    expect(index.o[0].id).toEqual(5)
+    expect(index.ject).toHaveLength(1)
+    expect(index.ject[0].id).toEqual(5)
   })
 
   it('buildShotIndex', () => {
