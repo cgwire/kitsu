@@ -70,6 +70,30 @@
         </button>
         <button
           class="tool-btn"
+          :class="{ active: activeTool === 'triangle' }"
+          @click="setTool('triangle')"
+          title="Triangle"
+        >
+          <triangle-icon :size="18" />
+        </button>
+        <button
+          class="tool-btn"
+          :class="{ active: activeTool === 'diamond' }"
+          @click="setTool('diamond')"
+          title="Diamond"
+        >
+          <diamond-icon :size="18" />
+        </button>
+        <button
+          class="tool-btn"
+          :class="{ active: activeTool === 'star' }"
+          @click="addStar"
+          title="Star"
+        >
+          <star-icon :size="18" />
+        </button>
+        <button
+          class="tool-btn"
           :class="{ active: activeTool === 'text' }"
           @click="setTool('text')"
           title="Text (T)"
@@ -363,6 +387,7 @@ import { markRaw } from 'vue'
 import {
   ArrowUpRightIcon,
   CircleIcon,
+  DiamondIcon,
   Edit2Icon,
   GridIcon,
   ImageIcon,
@@ -375,8 +400,10 @@ import {
   RotateCwIcon,
   SmileIcon,
   SquareIcon,
+  StarIcon,
   StickyNoteIcon,
   Trash2Icon,
+  TriangleIcon,
   TypeIcon,
   Undo2Icon,
   YoutubeIcon,
@@ -390,6 +417,7 @@ export default {
   components: {
     ArrowUpRightIcon,
     CircleIcon,
+    DiamondIcon,
     Edit2Icon,
     GridIcon,
     ImageIcon,
@@ -402,8 +430,10 @@ export default {
     RotateCwIcon,
     SmileIcon,
     SquareIcon,
+    StarIcon,
     StickyNoteIcon,
     Trash2Icon,
+    TriangleIcon,
     TypeIcon,
     Undo2Icon,
     YoutubeIcon,
@@ -640,6 +670,76 @@ export default {
       this.canvas.on('mouse:up', this.onMouseUp)
       this.canvas.on('mouse:wheel', this.onMouseWheel)
 
+      // Double-click on shape = add centered editable text
+      // Double-click on sticky note group = edit text inside
+      this.canvas.on('mouse:dblclick', opt => {
+        const target = opt.target
+        if (!target || target.isEditing) return
+
+        // Sticky note group — enter text editing
+        if (target.type === 'group' && target.isSticky) {
+          const items = target._objects || []
+          const itext = items.find(o => o.type === 'i-text')
+          if (!itext) return
+
+          const groupLeft = target.left
+          const groupTop = target.top
+
+          target.toActiveSelection()
+          this.canvas.discardActiveObject()
+          this.canvas.setActiveObject(itext)
+          itext.enterEditing()
+          if (itext.text === 'Note...') itext.selectAll()
+
+          const regroup = () => {
+            itext.off('editing:exited', regroup)
+            this.canvas.discardActiveObject()
+            const rect = items.find(o => o.type === 'rect')
+            if (rect) {
+              const newGroup = new fabric.Group([rect, itext], {
+                left: groupLeft,
+                top: groupTop,
+                id: target.id,
+                isSticky: true,
+                subTargetCheck: true
+              })
+              this.canvas.remove(rect)
+              this.canvas.remove(itext)
+              this.canvas.add(newGroup)
+              this.canvas.renderAll()
+            }
+            this.emitChange()
+          }
+          itext.on('editing:exited', regroup)
+          return
+        }
+
+        // Regular shape — add centered text
+        if (target.type === 'i-text' || target.type === 'text') return
+        if (
+          ['rect', 'ellipse', 'circle', 'polygon', 'triangle'].includes(
+            target.type
+          )
+        ) {
+          const bound = target.getBoundingRect()
+          const itext = new fabric.IText('', {
+            left: bound.left + bound.width / 2,
+            top: bound.top + bound.height / 2,
+            fontSize: this.fontSize,
+            fill: this.strokeColor,
+            fontFamily: this.fontFamily,
+            originX: 'center',
+            originY: 'center',
+            textAlign: 'center',
+            id: uuidv4()
+          })
+          this.canvas.add(itext)
+          this.canvas.setActiveObject(itext)
+          itext.enterEditing()
+          this.emitChange()
+        }
+      })
+
       console.log(
         '[Board] initCanvas — board:',
         !!this.board,
@@ -785,7 +885,9 @@ export default {
       }
 
       if (
-        ['rect', 'circle', 'line', 'arrow'].includes(this.activeTool) &&
+        ['rect', 'circle', 'triangle', 'diamond', 'line', 'arrow'].includes(
+          this.activeTool
+        ) &&
         !opt.target
       ) {
         this.isDrawingShape = true
@@ -800,6 +902,7 @@ export default {
             fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
+            strokeUniform: true,
             id: uuidv4()
           })
         } else if (this.activeTool === 'circle') {
@@ -811,6 +914,32 @@ export default {
             fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
             stroke: this.strokeColor,
             strokeWidth: this.strokeWidth,
+            strokeUniform: true,
+            id: uuidv4()
+          })
+        } else if (this.activeTool === 'triangle') {
+          this.currentShape = new fabric.Triangle({
+            left: pointer.x,
+            top: pointer.y,
+            width: 0,
+            height: 0,
+            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            stroke: this.strokeColor,
+            strokeWidth: this.strokeWidth,
+            strokeUniform: true,
+            id: uuidv4()
+          })
+        } else if (this.activeTool === 'diamond') {
+          this.currentShape = new fabric.Rect({
+            left: pointer.x,
+            top: pointer.y,
+            width: 0,
+            height: 0,
+            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            stroke: this.strokeColor,
+            strokeWidth: this.strokeWidth,
+            strokeUniform: true,
+            angle: 45,
             id: uuidv4()
           })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
@@ -873,6 +1002,20 @@ export default {
           const left = Math.min(pointer.x, this.shapeStartPoint.x)
           const top = Math.min(pointer.y, this.shapeStartPoint.y)
           this.currentShape.set({ left, top, rx, ry })
+        } else if (
+          this.activeTool === 'triangle' ||
+          this.activeTool === 'diamond'
+        ) {
+          const left = Math.min(pointer.x, this.shapeStartPoint.x)
+          const top = Math.min(pointer.y, this.shapeStartPoint.y)
+          let width = Math.abs(pointer.x - this.shapeStartPoint.x)
+          let height = Math.abs(pointer.y - this.shapeStartPoint.y)
+          if (e.shiftKey) {
+            const size = Math.max(width, height)
+            width = size
+            height = size
+          }
+          this.currentShape.set({ left, top, width, height })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
           let x2 = pointer.x
           let y2 = pointer.y
@@ -1109,6 +1252,34 @@ export default {
       this.emitChange()
     },
 
+    addStar() {
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
+      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
+      const size = 50
+      const points = []
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? size : size / 2
+        const angle = (Math.PI / 5) * i - Math.PI / 2
+        points.push({
+          x: cx + r * Math.cos(angle),
+          y: cy + r * Math.sin(angle)
+        })
+      }
+      const star = new fabric.Polygon(points, {
+        fill: this.fillColor === '#ffffff' ? '#ffeb3b' : this.fillColor,
+        stroke: this.strokeColor,
+        strokeWidth: this.strokeWidth,
+        strokeUniform: true,
+        id: uuidv4()
+      })
+      this.canvas.add(star)
+      this.canvas.setActiveObject(star)
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
     addStickyNote(chosenColor) {
       this.showStickyColors = false
       const color = chosenColor || '#fff9c4'
@@ -1146,41 +1317,6 @@ export default {
         id: uuidv4(),
         isSticky: true,
         subTargetCheck: true
-      })
-
-      // Double-click to edit text inside group
-      group.on('mousedblclick', () => {
-        const items = group._objects
-        const itext = items.find(o => o.type === 'i-text')
-        if (!itext) return
-
-        // Ungroup, make text editable, regroup after
-        group.toActiveSelection()
-        this.canvas.discardActiveObject()
-        this.canvas.setActiveObject(itext)
-        itext.enterEditing()
-        if (itext.text === 'Note...') {
-          itext.selectAll()
-        }
-
-        const regroup = () => {
-          itext.off('editing:exited', regroup)
-          this.canvas.discardActiveObject()
-          const newGroup = new fabric.Group([rect, itext], {
-            left: group.left,
-            top: group.top,
-            id: group.id,
-            isSticky: true,
-            subTargetCheck: true
-          })
-          this.canvas.remove(rect)
-          this.canvas.remove(itext)
-          this.canvas.add(newGroup)
-          newGroup.on('mousedblclick', group.__eventListeners.mousedblclick[0])
-          this.canvas.renderAll()
-          this.emitChange()
-        }
-        itext.on('editing:exited', regroup)
       })
 
       this.canvas.add(group)
