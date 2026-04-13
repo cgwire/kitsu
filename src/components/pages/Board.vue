@@ -285,7 +285,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 8px 16px;
-  margin-top: 80px;
+  margin-top: 110px;
   border-bottom: 1px solid var(--border, #eee);
   flex-shrink: 0;
   position: relative;
