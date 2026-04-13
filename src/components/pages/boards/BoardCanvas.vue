@@ -107,6 +107,13 @@
           v-model="fillColor"
           title="Fill Color"
         />
+        <input
+          type="color"
+          class="color-picker"
+          v-model="bgColor"
+          title="Board Background"
+          @input="onBgColorChange"
+        />
         <select class="stroke-width-select" v-model="strokeWidth">
           <option :value="1">Thin</option>
           <option :value="2">Normal</option>
@@ -314,6 +321,7 @@ export default {
     return {
       canvas: null,
       activeTool: 'select',
+      bgColor: '#ffffff',
       strokeColor: '#333333',
       fillColor: '#ffffff',
       strokeWidth: 2,
@@ -416,7 +424,7 @@ export default {
         new fabric.Canvas(this.$refs.boardCanvas, {
           width,
           height,
-          backgroundColor: '#f5f5f5',
+          backgroundColor: this.bgColor,
           selection: true,
           preserveObjectStacking: true,
           enableRetinaScaling: true
@@ -456,6 +464,12 @@ export default {
       } else {
         this.pushUndoState()
       }
+    },
+
+    onBgColorChange() {
+      this.canvas.backgroundColor = this.bgColor
+      this.canvas.renderAll()
+      this.emitChange()
     },
 
     resizeCanvas() {
@@ -1520,6 +1534,7 @@ export default {
       this.canvas.clear()
       if (canvasData.background) {
         this.canvas.backgroundColor = canvasData.background
+        this.bgColor = canvasData.background
       }
 
       // Manually enliven and add objects
