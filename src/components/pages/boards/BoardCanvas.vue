@@ -381,6 +381,7 @@ export default {
             top: Math.round(obj.top / this.gridSize) * this.gridSize
           })
         }
+        this.updateConnectors()
       })
 
       this.canvas.on('mouse:down', this.onMouseDown)
@@ -473,10 +474,12 @@ export default {
           this.connectorStart = {
             x: pointer.x,
             y: pointer.y,
-            target: opt.target
+            target: opt.target || null
           }
         } else {
           this.drawConnector(
+            this.connectorStart.target,
+            opt.target || null,
             this.connectorStart.x,
             this.connectorStart.y,
             pointer.x,
@@ -1112,35 +1115,106 @@ export default {
 
     // --- Connectors ---
 
-    drawConnector(x1, y1, x2, y2) {
-      const line = new fabric.Line([x1, y1, x2, y2], {
+    drawConnector(startObj, endObj, x1, y1, x2, y2) {
+      // Get center points of connected objects
+      const getCenter = obj => {
+        if (!obj) return null
+        const bound = obj.getBoundingRect()
+        return {
+          x: bound.left + bound.width / 2,
+          y: bound.top + bound.height / 2
+        }
+      }
+
+      const p1 = startObj ? getCenter(startObj) : { x: x1, y: y1 }
+      const p2 = endObj ? getCenter(endObj) : { x: x2, y: y2 }
+
+      const line = new fabric.Line([p1.x, p1.y, p2.x, p2.y], {
         stroke: this.strokeColor,
         strokeWidth: 2,
-        strokeDashArray: [5, 3],
-        id: uuidv4()
+        strokeDashArray: [6, 4],
+        selectable: true,
+        evented: true,
+        id: uuidv4(),
+        isConnector: true,
+        connectorStartId: startObj?.id || null,
+        connectorEndId: endObj?.id || null
       })
 
       // Add dots at endpoints
       const dot1 = new fabric.Circle({
-        left: x1 - 4,
-        top: y1 - 4,
-        radius: 4,
-        fill: this.strokeColor
+        left: p1.x - 5,
+        top: p1.y - 5,
+        radius: 5,
+        fill: this.strokeColor,
+        selectable: false,
+        evented: false
       })
       const dot2 = new fabric.Circle({
-        left: x2 - 4,
-        top: y2 - 4,
-        radius: 4,
-        fill: this.strokeColor
+        left: p2.x - 5,
+        top: p2.y - 5,
+        radius: 5,
+        fill: this.strokeColor,
+        selectable: false,
+        evented: false
       })
 
-      const group = new fabric.Group([line, dot1, dot2], {
-        id: uuidv4(),
-        isConnector: true
-      })
-      this.canvas.add(group)
+      this.canvas.add(line)
+      this.canvas.add(dot1)
+      this.canvas.add(dot2)
+
+      // Store reference for live updates
+      line._connectorDots = { dot1, dot2 }
+      line._connectorTargets = { start: startObj, end: endObj }
+
+      // Send line to back so it's behind objects
+      this.canvas.sendToBack(line)
+      this.canvas.sendToBack(dot1)
+      this.canvas.sendToBack(dot2)
       this.canvas.renderAll()
       this.emitChange()
+    },
+
+    updateConnectors() {
+      const objects = this.canvas.getObjects()
+      objects.forEach(obj => {
+        if (!obj.isConnector || !obj._connectorTargets) return
+
+        const { start, end } = obj._connectorTargets
+        const getCenter = target => {
+          if (!target) return null
+          // Check target still exists on canvas
+          if (!this.canvas.contains(target)) return null
+          const bound = target.getBoundingRect()
+          return {
+            x: bound.left + bound.width / 2,
+            y: bound.top + bound.height / 2
+          }
+        }
+
+        const p1 = getCenter(start)
+        const p2 = getCenter(end)
+
+        if (p1) {
+          obj.set({ x1: p1.x, y1: p1.y })
+          if (obj._connectorDots?.dot1) {
+            obj._connectorDots.dot1.set({
+              left: p1.x - 5,
+              top: p1.y - 5
+            })
+          }
+        }
+        if (p2) {
+          obj.set({ x2: p2.x, y2: p2.y })
+          if (obj._connectorDots?.dot2) {
+            obj._connectorDots.dot2.set({
+              left: p2.x - 5,
+              top: p2.y - 5
+            })
+          }
+        }
+      })
+      this.canvas.renderAll()
     },
 
     // --- YouTube Embed ---
