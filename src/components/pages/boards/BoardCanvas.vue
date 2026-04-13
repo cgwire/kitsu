@@ -645,14 +645,19 @@ export default {
     },
 
     loadImageFile(file, offsetX = 0) {
+      const center = this.canvas.getCenter()
+      this.loadImageFileAt(file, center.left + offsetX, center.top)
+    },
+
+    loadImageFileAt(file, x, y) {
       const reader = new FileReader()
       reader.onload = event => {
         fabric.Image.fromURL(event.target.result).then(img => {
           const maxDim = 400
           const scale = Math.min(maxDim / img.width, maxDim / img.height, 1)
           img.set({
-            left: 100 + offsetX,
-            top: 100,
+            left: x,
+            top: y,
             scaleX: scale,
             scaleY: scale,
             id: uuidv4()
@@ -667,11 +672,18 @@ export default {
     },
 
     onDrop(e) {
+      const canvasEl = this.$refs.canvasContainer
+      const rect = canvasEl.getBoundingClientRect()
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const dropX = (e.clientX - rect.left - vpt[4]) / zoom
+      const dropY = (e.clientY - rect.top - vpt[5]) / zoom
+
       const files = e.dataTransfer.files
       if (files.length) {
         Array.from(files).forEach((file, idx) => {
           if (file.type.startsWith('image/')) {
-            this.loadImageFile(file, idx * 220)
+            this.loadImageFileAt(file, dropX + idx * 220, dropY)
           }
         })
         return
@@ -689,7 +701,15 @@ export default {
     },
 
     addEntityToCanvas(entity, dropEvent) {
-      const pointer = this.canvas.getPointer(dropEvent)
+      // Convert drop coordinates to canvas coordinates
+      const canvasEl = this.$refs.canvasContainer
+      const rect = canvasEl.getBoundingClientRect()
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const pointer = {
+        x: (dropEvent.clientX - rect.left - vpt[4]) / zoom,
+        y: (dropEvent.clientY - rect.top - vpt[5]) / zoom
+      }
       const previewUrl = entity.preview_file_id
         ? `/api/pictures/originals/preview-files/${entity.preview_file_id}.png`
         : null
