@@ -1256,65 +1256,105 @@ export default {
       const center = this.canvas.getCenter()
       const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
 
-      // Create a card with the YouTube thumbnail
-      const rect = new fabric.Rect({
-        width: 320,
-        height: 200,
-        fill: '#000',
-        stroke: '#ff0000',
-        strokeWidth: 2,
-        rx: 8,
-        ry: 8
-      })
+      // Load thumbnail via HTML Image to bypass CORS, convert to dataURL
+      const htmlImg = new Image()
+      htmlImg.crossOrigin = 'anonymous'
+      htmlImg.onload = () => {
+        // Draw to temp canvas to get dataURL
+        const tmpCanvas = document.createElement('canvas')
+        tmpCanvas.width = htmlImg.width
+        tmpCanvas.height = htmlImg.height
+        const ctx = tmpCanvas.getContext('2d')
+        ctx.drawImage(htmlImg, 0, 0)
 
-      const playBtn = new fabric.Triangle({
-        left: 140,
-        top: 75,
-        width: 40,
-        height: 50,
-        fill: '#ff0000',
-        angle: 90,
-        originX: 'center',
-        originY: 'center'
-      })
+        // Dark overlay
+        ctx.fillStyle = 'rgba(0,0,0,0.3)'
+        ctx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height)
 
-      const label = new fabric.Text('YouTube: ' + videoId, {
-        left: 10,
-        top: 175,
-        fontSize: 11,
-        fill: '#fff',
-        fontFamily: 'Inter, Arial, sans-serif'
-      })
+        // Play button
+        ctx.fillStyle = '#ff0000'
+        ctx.beginPath()
+        const cx = tmpCanvas.width / 2
+        const cy = tmpCanvas.height / 2
+        ctx.moveTo(cx - 25, cy - 30)
+        ctx.lineTo(cx - 25, cy + 30)
+        ctx.lineTo(cx + 30, cy)
+        ctx.closePath()
+        ctx.fill()
 
-      const group = new fabric.Group([rect, playBtn, label], {
-        left: center.left - 160,
-        top: center.top - 100,
-        id: uuidv4(),
-        linkUrl: url,
-        isYouTube: true
-      })
+        // Label
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 14px Inter, Arial, sans-serif'
+        ctx.fillText('YouTube: ' + videoId, 10, tmpCanvas.height - 10)
 
-      this.canvas.add(group)
-      this.canvas.renderAll()
-      this.emitChange()
-
-      // Load actual thumbnail
-      fabric.Image.fromURL(thumbUrl, { crossOrigin: 'anonymous' }).then(img => {
-        if (img) {
+        const dataUrl = tmpCanvas.toDataURL('image/png')
+        fabric.Image.fromURL(dataUrl).then(img => {
+          const scale = Math.min(320 / img.width, 200 / img.height, 1)
           img.set({
-            scaleX: 320 / img.width,
-            scaleY: 180 / img.height
+            left: center.left - (img.width * scale) / 2,
+            top: center.top - (img.height * scale) / 2,
+            scaleX: scale,
+            scaleY: scale,
+            id: uuidv4(),
+            linkUrl: url,
+            isYouTube: true
           })
-          group.remove(rect)
-          group.addWithUpdate(img)
-          group.sendToBack(img)
+          this.canvas.add(img)
+          this.canvas.setActiveObject(img)
           this.canvas.renderAll()
-        }
-      })
+          this.emitChange()
 
-      group.on('mousedblclick', () => {
-        window.open(url, '_blank')
-      })
+          img.on('mousedblclick', () => {
+            window.open(url, '_blank')
+          })
+        })
+      }
+
+      htmlImg.onerror = () => {
+        // Fallback: create a placeholder card
+        const rect = new fabric.Rect({
+          width: 320,
+          height: 200,
+          fill: '#1a1a1a',
+          stroke: '#ff0000',
+          strokeWidth: 2,
+          rx: 8,
+          ry: 8
+        })
+        const playBtn = new fabric.Triangle({
+          left: 140,
+          top: 75,
+          width: 40,
+          height: 50,
+          fill: '#ff0000',
+          angle: 90,
+          originX: 'center',
+          originY: 'center'
+        })
+        const label = new fabric.Text('YouTube: ' + videoId, {
+          left: 10,
+          top: 175,
+          fontSize: 12,
+          fill: '#fff',
+          fontFamily: 'Inter, Arial, sans-serif'
+        })
+        const group = new fabric.Group([rect, playBtn, label], {
+          left: center.left - 160,
+          top: center.top - 100,
+          id: uuidv4(),
+          linkUrl: url,
+          isYouTube: true
+        })
+        this.canvas.add(group)
+        this.canvas.renderAll()
+        this.emitChange()
+
+        group.on('mousedblclick', () => {
+          window.open(url, '_blank')
+        })
+      }
+
+      htmlImg.src = thumbUrl
     },
 
     // --- Lock ---
