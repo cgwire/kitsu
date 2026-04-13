@@ -184,23 +184,6 @@
       <div class="tool-separator" />
 
       <div class="tool-group">
-        <button class="tool-btn" @click="groupSelected" title="Group (Ctrl+G)">
-          <layers-icon :size="18" />
-        </button>
-        <button
-          class="tool-btn"
-          @click="ungroupSelected"
-          title="Ungroup (Ctrl+Shift+G)"
-        >
-          <grid-icon :size="18" />
-        </button>
-        <button
-          class="tool-btn"
-          @click="toggleLockSelected"
-          title="Lock/Unlock (Ctrl+L)"
-        >
-          <lock-icon :size="18" />
-        </button>
         <button
           class="tool-btn"
           :class="{ active: snapToGrid }"
@@ -259,8 +242,59 @@
       ref="canvasContainer"
       @dragover.prevent
       @drop.prevent="onDrop"
+      @contextmenu.prevent="onContextMenu"
     >
       <canvas ref="boardCanvas" />
+    </div>
+
+    <div
+      class="context-menu"
+      ref="contextMenu"
+      v-if="contextMenu.visible"
+      :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }"
+    >
+      <button
+        class="ctx-item"
+        @click="ctxGroup"
+        v-if="contextMenu.hasSelection"
+      >
+        Group (Ctrl+G)
+      </button>
+      <button class="ctx-item" @click="ctxUngroup" v-if="contextMenu.isGroup">
+        Ungroup (Ctrl+Shift+G)
+      </button>
+      <button class="ctx-item" @click="ctxLock" v-if="contextMenu.hasTarget">
+        {{ contextMenu.isLocked ? 'Unlock' : 'Lock' }}
+      </button>
+      <button
+        class="ctx-item"
+        @click="ctxDuplicate"
+        v-if="contextMenu.hasTarget"
+      >
+        Duplicate
+      </button>
+      <button
+        class="ctx-item"
+        @click="ctxBringFront"
+        v-if="contextMenu.hasTarget"
+      >
+        Bring to Front
+      </button>
+      <button
+        class="ctx-item"
+        @click="ctxSendBack"
+        v-if="contextMenu.hasTarget"
+      >
+        Send to Back
+      </button>
+      <div class="ctx-separator" v-if="contextMenu.hasTarget" />
+      <button
+        class="ctx-item ctx-danger"
+        @click="ctxDelete"
+        v-if="contextMenu.hasTarget"
+      >
+        Delete
+      </button>
     </div>
 
     <input
@@ -285,9 +319,7 @@ import {
   Edit2Icon,
   GridIcon,
   ImageIcon,
-  LayersIcon,
   LinkIcon,
-  LockIcon,
   MaximizeIcon,
   MinusIcon,
   MousePointerIcon,
@@ -314,9 +346,7 @@ export default {
     Edit2Icon,
     GridIcon,
     ImageIcon,
-    LayersIcon,
     LinkIcon,
-    LockIcon,
     MaximizeIcon,
     MinusIcon,
     MousePointerIcon,
@@ -403,7 +433,16 @@ export default {
       ],
       snapToGrid: false,
       gridSize: 20,
-      connectorStart: null
+      connectorStart: null,
+      contextMenu: {
+        visible: false,
+        x: 0,
+        y: 0,
+        hasTarget: false,
+        hasSelection: false,
+        isGroup: false,
+        isLocked: false
+      }
     }
   },
 
@@ -1074,6 +1113,87 @@ export default {
       this.emitChange()
     },
 
+    // --- Context Menu ---
+
+    onContextMenu(e) {
+      const target = this.canvas.findTarget(e)
+      const active = this.canvas.getActiveObject()
+
+      this.contextMenu = {
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        hasTarget: !!target || !!active,
+        hasSelection: active?.type === 'activeSelection',
+        isGroup: active?.type === 'group',
+        isLocked: !!target?.lockMovementX
+      }
+
+      // Click anywhere closes menu
+      const close = () => {
+        this.contextMenu.visible = false
+        window.removeEventListener('click', close)
+      }
+      setTimeout(() => window.addEventListener('click', close), 50)
+    },
+
+    ctxGroup() {
+      this.contextMenu.visible = false
+      this.groupSelected()
+    },
+
+    ctxUngroup() {
+      this.contextMenu.visible = false
+      this.ungroupSelected()
+    },
+
+    ctxLock() {
+      this.contextMenu.visible = false
+      this.toggleLockSelected()
+    },
+
+    ctxDuplicate() {
+      this.contextMenu.visible = false
+      const active = this.canvas.getActiveObject()
+      if (!active) return
+      active.clone().then(cloned => {
+        cloned.set({
+          left: active.left + 20,
+          top: active.top + 20,
+          id: uuidv4()
+        })
+        this.canvas.add(cloned)
+        this.canvas.setActiveObject(cloned)
+        this.canvas.renderAll()
+        this.emitChange()
+      })
+    },
+
+    ctxBringFront() {
+      this.contextMenu.visible = false
+      const active = this.canvas.getActiveObject()
+      if (active) {
+        this.canvas.bringToFront(active)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
+
+    ctxSendBack() {
+      this.contextMenu.visible = false
+      const active = this.canvas.getActiveObject()
+      if (active) {
+        this.canvas.sendToBack(active)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
+
+    ctxDelete() {
+      this.contextMenu.visible = false
+      this.deleteSelected()
+    },
+
     // --- Undo / Redo ---
 
     pushUndoState() {
@@ -1535,7 +1655,9 @@ export default {
         lockScalingY: locked,
         hasControls: !locked,
         selectable: true,
-        opacity: locked ? 0.85 : 1
+        opacity: locked ? 0.7 : 1,
+        borderColor: locked ? '#999' : '#2196f3',
+        borderDashArray: locked ? [4, 4] : null
       })
       this.canvas.renderAll()
       this.emitChange()
@@ -1789,6 +1911,47 @@ export default {
 
 .sticker-btn:hover {
   background: var(--background-hover, #f0f0f0);
+}
+
+.context-menu {
+  position: fixed;
+  background: var(--background, #2a2a2a);
+  border: 1px solid var(--border, #444);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 4px 0;
+  z-index: 500;
+  min-width: 180px;
+}
+
+.ctx-item {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text, #eee);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ctx-item:hover {
+  background: var(--background-hover, #3a3a3a);
+}
+
+.ctx-danger {
+  color: #e53e3e;
+}
+
+.ctx-danger:hover {
+  background: #3a2020;
+}
+
+.ctx-separator {
+  height: 1px;
+  background: var(--border, #444);
+  margin: 4px 0;
 }
 
 .bg-color-group {

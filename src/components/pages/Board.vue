@@ -451,6 +451,7 @@ export default {
 .board-card-name {
   font-size: 14px;
   font-weight: 500;
+  color: #fff;
 }
 
 .board-card-date {
