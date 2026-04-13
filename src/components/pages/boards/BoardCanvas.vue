@@ -697,6 +697,8 @@ export default {
             splitByGrapheme: true
           })
 
+          // Hide group while editing
+          target.set('opacity', 0.3)
           this.canvas.add(tmpText)
           this.canvas.setActiveObject(tmpText)
           tmpText.enterEditing()
@@ -704,8 +706,9 @@ export default {
 
           const finish = () => {
             tmpText.off('editing:exited', finish)
-            // Copy text back into group
+            // Copy text back into group and restore
             origText.set('text', tmpText.text)
+            target.set('opacity', 1)
             this.canvas.remove(tmpText)
             this.canvas.renderAll()
             this.emitChange()
@@ -1531,9 +1534,12 @@ export default {
       if (!active) return
       active.clone().then(cloned => {
         cloned.set({
-          left: active.left + 20,
-          top: active.top + 20,
-          id: uuidv4()
+          left: active.left + 30,
+          top: active.top + 30,
+          id: uuidv4(),
+          isSticky: active.isSticky || false,
+          isYouTube: active.isYouTube || false,
+          linkUrl: active.linkUrl || null
         })
         this.canvas.add(cloned)
         this.canvas.setActiveObject(cloned)
