@@ -14,7 +14,7 @@ export default {
 
   getIntPreference(key, defaultValue = 0) {
     const item = this.getPreference(key)
-    const value = parseInt(item, 10)
+    const value = parseInt(item)
     return isNaN(value) ? defaultValue : value
   },
 
