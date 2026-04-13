@@ -844,9 +844,10 @@ export default {
       }
 
       if (this.activeTool === 'text' && !opt.target) {
-        const text = new fabric.IText('', {
+        const text = new fabric.Textbox('', {
           left: pointer.x,
           top: pointer.y,
+          width: 200,
           fontSize: this.fontSize,
           fill: this.strokeColor,
           fontFamily: this.fontFamily,
