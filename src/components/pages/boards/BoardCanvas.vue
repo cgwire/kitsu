@@ -484,6 +484,33 @@ export default {
         this.canvas.renderAll()
         this.emitChange()
       }
+    },
+    snapToGrid(enabled) {
+      if (!this.canvas) return
+      if (enabled) {
+        // Create dotted grid pattern
+        const dotCanvas = document.createElement('canvas')
+        const size = this.gridSize
+        dotCanvas.width = size
+        dotCanvas.height = size
+        const ctx = dotCanvas.getContext('2d')
+        ctx.fillStyle = this.bgColor
+        ctx.fillRect(0, 0, size, size)
+        ctx.fillStyle = '#ccc'
+        ctx.beginPath()
+        ctx.arc(size / 2, size / 2, 1, 0, Math.PI * 2)
+        ctx.fill()
+        const patternUrl = dotCanvas.toDataURL()
+        this.canvas.backgroundColor = ''
+        this.canvas.setBackgroundColor(
+          { source: patternUrl, repeat: 'repeat' },
+          () => this.canvas.renderAll()
+        )
+      } else {
+        this.canvas.setBackgroundColor(this.bgColor, () =>
+          this.canvas.renderAll()
+        )
+      }
     }
   },
 
