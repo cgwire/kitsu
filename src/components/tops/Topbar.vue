@@ -203,10 +203,10 @@
         <li class="version">Kitsu {{ kitsuVersion }}</li>
         <hr />
         <li>
-          <router-link :to="{ name: 'logout' }" class="flexrow">
+          <a @click="onLogout" class="flexrow">
             <log-out-icon class="flexrow-item icon-1x" />
             <span class="flexrow-item">{{ $t('main.logout') }}</span>
-          </router-link>
+          </a>
         </li>
       </ul>
     </nav>
@@ -543,6 +543,7 @@ export default {
   methods: {
     ...mapActions([
       'clearEpisodes',
+      'logout',
       'clearSelectedTasks',
       'decrementNotificationCounter',
       'loadEpisodes',
@@ -558,6 +559,15 @@ export default {
       'toggleSidebar',
       'toggleUserMenu'
     ]),
+
+    async onLogout() {
+      await this.$router.push({ name: 'login' })
+      try {
+        await this.logout()
+      } catch (error) {
+        console.error('An error occurred while logout', error)
+      }
+    },
 
     getCurrentSectionFromRoute() {
       if (this.$route.name.includes('production-plugin')) {

@@ -1,5 +1,4 @@
 import Bowser from 'bowser'
-import { nextTick } from 'vue'
 
 import auth from '@/lib/auth'
 import init from '@/lib/init'
@@ -869,10 +868,7 @@ export const routes = [
   {
     path: '/login',
     component: Login,
-    name: 'login',
-    beforeEnter: (to, from) => {
-      if (store.getters.isAuthenticated) return { name: 'home' }
-    }
+    name: 'login'
   },
   {
     path: '/login/2fa',
@@ -880,20 +876,6 @@ export const routes = [
     name: 'login-2fa',
     beforeEnter: (to, from) => {
       if (!store.getters.user) return { name: 'login' }
-    }
-  },
-  {
-    path: '/logout',
-    name: 'logout',
-    beforeEnter: (to, from, next) => {
-      next('/login')
-      nextTick(async () => {
-        try {
-          await store.dispatch('logout')
-        } catch (error) {
-          console.error('An error occurred while logout', error)
-        }
-      })
     }
   },
   {
