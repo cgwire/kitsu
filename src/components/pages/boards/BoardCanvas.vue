@@ -540,6 +540,25 @@ export default {
         this.emitChange()
       }
     },
+    strokeColor(val) {
+      if (this.canvas?.isDrawingMode && this.canvas.freeDrawingBrush) {
+        this.canvas.freeDrawingBrush.color = val
+      }
+      const obj = this.canvas?.getActiveObject()
+      if (obj && obj.type !== 'i-text' && obj.type !== 'text') {
+        obj.set('stroke', val)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
+    fillColor(val) {
+      const obj = this.canvas?.getActiveObject()
+      if (obj && obj.type !== 'i-text' && obj.type !== 'text') {
+        obj.set('fill', val)
+        this.canvas.renderAll()
+        this.emitChange()
+      }
+    },
     strokeWidth(val) {
       const obj = this.canvas?.getActiveObject()
       if (obj && obj.type !== 'i-text' && obj.type !== 'text') {
@@ -1093,39 +1112,79 @@ export default {
     addStickyNote(chosenColor) {
       this.showStickyColors = false
       const color = chosenColor || '#fff9c4'
-      const center = this.canvas.getCenter()
+      const vpt = this.canvas.viewportTransform
+      const zoom = this.canvas.getZoom()
+      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
+      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
 
-      // Use IText with large padding to create a card look
-      const note = new fabric.IText('Note...\n\n\n\n\n', {
-        left: center.left - 100,
-        top: center.top - 75,
-        fontSize: 16,
-        fill: '#333',
-        fontFamily: 'Inter, Arial, sans-serif',
-        backgroundColor: color,
-        padding: 20,
-        width: 200,
-        id: uuidv4(),
-        isSticky: true,
+      const rect = new fabric.Rect({
+        width: 220,
+        height: 180,
+        fill: color,
+        rx: 4,
+        ry: 4,
         shadow: new fabric.Shadow({
-          color: 'rgba(0,0,0,0.12)',
+          color: 'rgba(0,0,0,0.15)',
           blur: 8,
           offsetX: 2,
           offsetY: 2
         })
       })
 
-      // Clear placeholder on first edit
-      note.on('editing:entered', () => {
-        if (note.text.startsWith('Note...')) {
-          note.text = ''
-          note.dirty = true
-          this.canvas.renderAll()
-        }
+      const text = new fabric.IText('Note...', {
+        left: 12,
+        top: 12,
+        fontSize: 15,
+        fill: '#333',
+        fontFamily: this.fontFamily,
+        width: 196
       })
 
-      this.canvas.add(note)
-      this.canvas.setActiveObject(note)
+      const group = new fabric.Group([rect, text], {
+        left: cx - 110,
+        top: cy - 90,
+        id: uuidv4(),
+        isSticky: true,
+        subTargetCheck: true
+      })
+
+      // Double-click to edit text inside group
+      group.on('mousedblclick', () => {
+        const items = group._objects
+        const itext = items.find(o => o.type === 'i-text')
+        if (!itext) return
+
+        // Ungroup, make text editable, regroup after
+        group.toActiveSelection()
+        this.canvas.discardActiveObject()
+        this.canvas.setActiveObject(itext)
+        itext.enterEditing()
+        if (itext.text === 'Note...') {
+          itext.selectAll()
+        }
+
+        const regroup = () => {
+          itext.off('editing:exited', regroup)
+          this.canvas.discardActiveObject()
+          const newGroup = new fabric.Group([rect, itext], {
+            left: group.left,
+            top: group.top,
+            id: group.id,
+            isSticky: true,
+            subTargetCheck: true
+          })
+          this.canvas.remove(rect)
+          this.canvas.remove(itext)
+          this.canvas.add(newGroup)
+          newGroup.on('mousedblclick', group.__eventListeners.mousedblclick[0])
+          this.canvas.renderAll()
+          this.emitChange()
+        }
+        itext.on('editing:exited', regroup)
+      })
+
+      this.canvas.add(group)
+      this.canvas.setActiveObject(group)
       this.canvas.renderAll()
       this.emitChange()
     },
