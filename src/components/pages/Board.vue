@@ -72,7 +72,24 @@
               <layout-icon :size="32" v-else />
             </div>
             <div class="board-card-info">
-              <span class="board-card-name">{{ board.name }}</span>
+              <div class="board-card-top">
+                <span class="board-card-name">{{ board.name }}</span>
+                <button
+                  class="board-visibility-btn"
+                  :title="board.visibility || 'private'"
+                  @click.stop="cycleVisibility(board)"
+                >
+                  <lock-icon
+                    :size="14"
+                    v-if="!board.visibility || board.visibility === 'private'"
+                  />
+                  <users-icon
+                    :size="14"
+                    v-else-if="board.visibility === 'team'"
+                  />
+                  <globe-icon :size="14" v-else />
+                </button>
+              </div>
               <span class="board-card-date">
                 {{ formatDate(board.updated_at) }}
               </span>
@@ -116,9 +133,12 @@ import {
   DownloadIcon,
   Edit2Icon,
   LayoutIcon,
+  GlobeIcon,
+  LockIcon,
   PlusIcon,
   SaveIcon,
-  Trash2Icon
+  Trash2Icon,
+  UsersIcon
 } from 'lucide-vue-next'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
@@ -133,10 +153,13 @@ export default {
     BoardEntitySidebar,
     DownloadIcon,
     Edit2Icon,
+    GlobeIcon,
     LayoutIcon,
+    LockIcon,
     PlusIcon,
     SaveIcon,
     Trash2Icon,
+    UsersIcon,
     TableInfo
   },
 
@@ -275,6 +298,14 @@ export default {
 
     exportBoard() {
       this.$refs.boardCanvas?.exportAsPNG()
+    },
+
+    async cycleVisibility(board) {
+      const cycle = { private: 'team', team: 'public', public: 'private' }
+      const current = board.visibility || 'private'
+      const next = cycle[current]
+      const updated = { ...board, visibility: next }
+      await this.saveBoard(updated)
     }
   }
 }
@@ -449,9 +480,35 @@ export default {
   gap: 2px;
 }
 
+.board-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .board-card-name {
   font-size: 14px;
   font-weight: 500;
+  color: #fff;
+}
+
+.board-visibility-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #999;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.board-visibility-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
 
