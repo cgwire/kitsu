@@ -75,6 +75,7 @@ const icons = {
   bot,
   'big-thumbnail': bigThumbnail,
   box,
+  boards: annotations,
   breakdown,
   brief: infos,
   compare,

@@ -14,7 +14,7 @@
           class="tool-btn"
           :class="{ active: activeTool === 'pan' }"
           @click="setTool('pan')"
-          title="Pan (H)"
+          title="Pan (Space)"
         >
           <hand-icon :size="18" />
         </button>
@@ -216,14 +216,15 @@
       <canvas ref="boardCanvas" />
     </div>
 
-    <input
-      type="file"
-      ref="fileInput"
-      accept="image/*"
-      style="display: none"
-      @change="onFileSelected"
-      multiple
-    />
+    <label class="hidden-file-input">
+      <input
+        type="file"
+        ref="fileInput"
+        accept="image/*"
+        @change="onFileSelected"
+        multiple
+      />
+    </label>
   </div>
 </template>
 
@@ -311,6 +312,8 @@ export default {
       currentShape: null,
       fontSize: 18,
       isSaving: false,
+      isSpacePanning: false,
+      toolBeforeSpace: 'select',
       snapToGrid: false,
       gridSize: 20,
       connectorStart: null
@@ -332,6 +335,7 @@ export default {
   beforeUnmount() {
     window.removeEventListener('resize', this.resizeCanvas)
     window.removeEventListener('keydown', this.onKeyDown)
+    window.removeEventListener('keyup', this.onKeyUp)
     if (this.canvas) {
       this.canvas.dispose()
     }
@@ -986,6 +990,14 @@ export default {
 
     setupKeyboardShortcuts() {
       window.addEventListener('keydown', this.onKeyDown)
+      window.addEventListener('keyup', this.onKeyUp)
+    },
+
+    onKeyUp(e) {
+      if (e.key === ' ' && this.isSpacePanning) {
+        this.isSpacePanning = false
+        this.setTool(this.toolBeforeSpace)
+      }
     },
 
     onKeyDown(e) {
@@ -1000,8 +1012,13 @@ export default {
         case 'v':
           if (!ctrl) this.setTool('select')
           break
-        case 'h':
-          this.setTool('pan')
+        case ' ':
+          if (!this.isSpacePanning) {
+            this.toolBeforeSpace = this.activeTool
+            this.isSpacePanning = true
+            this.setTool('pan')
+            e.preventDefault()
+          }
           break
         case 'd':
           this.setTool('pencil')
@@ -1320,7 +1337,10 @@ export default {
     },
 
     emitChange() {
-      this.$emit('canvas-changed', this.getCanvasData())
+      this.$emit('canvas-changed', {
+        data: this.getCanvasData(),
+        thumbnail: this.getThumbnail()
+      })
     },
 
     exportAsPNG() {
@@ -1329,10 +1349,25 @@ export default {
         quality: 1,
         multiplier: 2
       })
-      const link = document.createElement('a')
-      link.download = `board-${Date.now()}.png`
-      link.href = dataUrl
-      link.click()
+      // Convert data URL to blob for proper .png download
+      fetch(dataUrl)
+        .then(res => res.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.download = `board-${Date.now()}.png`
+          link.href = url
+          link.click()
+          URL.revokeObjectURL(url)
+        })
+    },
+
+    getThumbnail() {
+      return this.canvas.toDataURL({
+        format: 'png',
+        quality: 0.5,
+        multiplier: 0.3
+      })
     }
   }
 }
@@ -1432,5 +1467,19 @@ export default {
   flex: 1;
   overflow: hidden;
   position: relative;
+}
+
+.hidden-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.hidden-file-input input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
 }
 </style>

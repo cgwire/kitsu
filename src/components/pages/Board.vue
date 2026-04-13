@@ -64,7 +64,12 @@
             v-for="board in boards"
           >
             <div class="board-card-preview">
-              <layout-icon :size="32" />
+              <img
+                :src="board.thumbnail"
+                class="board-thumb"
+                v-if="board.thumbnail"
+              />
+              <layout-icon :size="32" v-else />
             </div>
             <div class="board-card-info">
               <span class="board-card-name">{{ board.name }}</span>
@@ -138,6 +143,7 @@ export default {
   data() {
     return {
       debounceSaveTimer: null,
+      pendingThumbnail: null,
       isEditingName: false,
       editingName: '',
       pendingCanvasData: null,
@@ -222,14 +228,17 @@ export default {
       if (!this.currentBoard) return
       const board = {
         ...this.currentBoard,
-        canvas_data: this.pendingCanvasData || this.currentBoard.canvas_data
+        canvas_data: this.pendingCanvasData || this.currentBoard.canvas_data,
+        thumbnail: this.pendingThumbnail || this.currentBoard.thumbnail
       }
       await this.saveBoard(board)
       this.pendingCanvasData = null
+      this.pendingThumbnail = null
     },
 
-    onCanvasChanged(canvasData) {
-      this.pendingCanvasData = canvasData
+    onCanvasChanged({ data, thumbnail }) {
+      this.pendingCanvasData = data
+      this.pendingThumbnail = thumbnail
       // Debounced auto-save on every change
       if (this.debounceSaveTimer) clearTimeout(this.debounceSaveTimer)
       this.debounceSaveTimer = setTimeout(() => {
@@ -422,6 +431,13 @@ export default {
   align-items: center;
   justify-content: center;
   background: var(--background-alt, #f9f9f9);
+  overflow: hidden;
+}
+
+.board-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   color: var(--text-secondary, #ccc);
 }
 
