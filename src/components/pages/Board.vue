@@ -74,34 +74,41 @@
             <div class="board-card-info">
               <div class="board-card-top">
                 <span class="board-card-name">{{ board.name }}</span>
-                <button
-                  class="board-visibility-btn"
-                  :title="
-                    (board.visibility || 'private') +
-                    (board.visibility === 'public' ||
-                    board.visibility === 'team'
-                      ? ' — click: copy link, shift+click: change'
-                      : ' — click to share')
-                  "
-                  @click.stop="handleVisibilityClick(board, $event)"
-                >
-                  <lock-icon
-                    :size="14"
-                    v-if="!board.visibility || board.visibility === 'private'"
-                  />
-                  <users-icon
-                    :size="14"
-                    v-else-if="board.visibility === 'team'"
-                  />
-                  <globe-icon :size="14" v-else />
-                </button>
-                <button
-                  class="board-delete-btn"
-                  title="Delete board"
-                  @click.stop="confirmDeleteBoardFromList(board)"
-                >
-                  <trash2-icon :size="14" />
-                </button>
+                <div class="board-card-actions">
+                  <button
+                    class="board-action-btn"
+                    :title="board.visibility || 'private'"
+                    @click.stop="cycleVisibility(board)"
+                  >
+                    <lock-icon
+                      :size="12"
+                      v-if="!board.visibility || board.visibility === 'private'"
+                    />
+                    <users-icon
+                      :size="12"
+                      v-else-if="board.visibility === 'team'"
+                    />
+                    <globe-icon :size="12" v-else />
+                  </button>
+                  <button
+                    class="board-action-btn"
+                    title="Copy link"
+                    @click.stop="copyBoardLink(board)"
+                    v-if="
+                      board.visibility === 'team' ||
+                      board.visibility === 'public'
+                    "
+                  >
+                    <link-icon :size="12" />
+                  </button>
+                  <button
+                    class="board-action-btn board-action-danger"
+                    title="Delete"
+                    @click.stop="confirmDeleteBoardFromList(board)"
+                  >
+                    <trash2-icon :size="12" />
+                  </button>
+                </div>
               </div>
               <span class="board-card-date">
                 {{ formatDate(board.updated_at) }}
@@ -164,8 +171,9 @@ import {
   ArrowLeftIcon,
   DownloadIcon,
   Edit2Icon,
-  LayoutIcon,
   GlobeIcon,
+  LayoutIcon,
+  LinkIcon,
   LockIcon,
   PlusIcon,
   SaveIcon,
@@ -187,6 +195,7 @@ export default {
     Edit2Icon,
     GlobeIcon,
     LayoutIcon,
+    LinkIcon,
     LockIcon,
     PlusIcon,
     SaveIcon,
@@ -355,30 +364,20 @@ export default {
       this.$refs.boardCanvas?.exportAsPNG()
     },
 
-    async handleVisibilityClick(board, event) {
-      const current = board.visibility || 'private'
-
-      if ((current === 'team' || current === 'public') && !event.shiftKey) {
-        // Already shared — copy link
-        const url = `${window.location.origin}${this.$route.path}/${board.id}`
-        navigator.clipboard
-          .writeText(url)
-          .then(() => this.showToast('Link copied!'))
-          .catch(() => {
-            // Fallback for non-HTTPS
-            const input = document.createElement('input')
-            input.value = url
-            document.body.appendChild(input)
-            input.select()
-            document.execCommand('copy')
-            document.body.removeChild(input)
-            this.showToast('Link copied!')
-          })
-        return
-      }
-
-      // Private or Shift+click — cycle visibility
-      await this.cycleVisibility(board)
+    copyBoardLink(board) {
+      const url = `${window.location.origin}${this.$route.path}/${board.id}`
+      navigator.clipboard
+        .writeText(url)
+        .then(() => this.showToast('Link copied!'))
+        .catch(() => {
+          const input = document.createElement('input')
+          input.value = url
+          document.body.appendChild(input)
+          input.select()
+          document.execCommand('copy')
+          document.body.removeChild(input)
+          this.showToast('Link copied!')
+        })
     },
 
     async cycleVisibility(board) {
@@ -574,18 +573,33 @@ export default {
   color: #fff;
 }
 
-.board-visibility-btn {
+.board-card-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.board-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: transparent;
   color: #999;
-  border-radius: 4px;
+  border-radius: 3px;
   cursor: pointer;
-  flex-shrink: 0;
+}
+
+.board-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.board-action-danger:hover {
+  background: rgba(255, 0, 0, 0.15);
+  color: #e53e3e;
 }
 
 .delete-overlay {
@@ -659,36 +673,6 @@ export default {
   font-size: 13px;
   z-index: 600;
   pointer-events: none;
-}
-
-.board-delete-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  color: #666;
-  border-radius: 4px;
-  cursor: pointer;
-  flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.board-card:hover .board-delete-btn {
-  opacity: 1;
-}
-
-.board-delete-btn:hover {
-  background: rgba(255, 0, 0, 0.1);
-  color: #e53e3e;
-}
-
-.board-visibility-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
 }
 
 .board-card-date {
