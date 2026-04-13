@@ -1352,7 +1352,6 @@ export default {
   display: flex;
   align-items: center;
   padding: 4px 8px;
-  margin-top: 36px;
   background: var(--background-alt, #fafafa);
   border-bottom: 1px solid var(--border, #eee);
   gap: 2px;
