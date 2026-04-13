@@ -76,10 +76,20 @@
         >
           <triangle-icon :size="18" />
         </button>
-        <button class="tool-btn" @click="addDiamond" title="Diamond">
+        <button
+          class="tool-btn"
+          :class="{ active: activeTool === 'diamond' }"
+          @click="setTool('diamond')"
+          title="Diamond"
+        >
           <diamond-icon :size="18" />
         </button>
-        <button class="tool-btn" @click="addStar" title="Star">
+        <button
+          class="tool-btn"
+          :class="{ active: activeTool === 'star' }"
+          @click="setTool('star')"
+          title="Star"
+        >
           <star-icon :size="18" />
         </button>
         <button
@@ -875,9 +885,15 @@ export default {
       }
 
       if (
-        ['rect', 'circle', 'triangle', 'line', 'arrow'].includes(
-          this.activeTool
-        ) &&
+        [
+          'rect',
+          'circle',
+          'triangle',
+          'diamond',
+          'star',
+          'line',
+          'arrow'
+        ].includes(this.activeTool) &&
         !opt.target
       ) {
         this.isDrawingShape = true
@@ -918,6 +934,35 @@ export default {
             strokeWidth: this.strokeWidth,
             strokeUniform: true,
             id: uuidv4()
+          })
+        } else if (this.activeTool === 'diamond') {
+          this.currentShape = new fabric.Rect({
+            left: pointer.x,
+            top: pointer.y,
+            width: 0,
+            height: 0,
+            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            stroke: this.strokeColor,
+            strokeWidth: this.strokeWidth,
+            strokeUniform: true,
+            angle: 45,
+            originX: 'center',
+            originY: 'center',
+            id: uuidv4()
+          })
+        } else if (this.activeTool === 'star') {
+          // Star placeholder — will be replaced on mouseUp
+          this.currentShape = new fabric.Ellipse({
+            left: pointer.x,
+            top: pointer.y,
+            rx: 0,
+            ry: 0,
+            fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
+            stroke: this.strokeColor,
+            strokeWidth: this.strokeWidth,
+            strokeUniform: true,
+            id: uuidv4(),
+            _isStar: true
           })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
           this.currentShape = new fabric.Line(
@@ -990,6 +1035,34 @@ export default {
             height = size
           }
           this.currentShape.set({ left, top, width, height })
+        } else if (this.activeTool === 'diamond') {
+          const cx = (pointer.x + this.shapeStartPoint.x) / 2
+          const cy = (pointer.y + this.shapeStartPoint.y) / 2
+          let w = Math.abs(pointer.x - this.shapeStartPoint.x)
+          let h = Math.abs(pointer.y - this.shapeStartPoint.y)
+          if (e.shiftKey) {
+            const s = Math.max(w, h)
+            w = s
+            h = s
+          }
+          this.currentShape.set({
+            left: cx,
+            top: cy,
+            width: w,
+            height: h
+          })
+        } else if (this.activeTool === 'star') {
+          const rx = Math.abs(pointer.x - this.shapeStartPoint.x) / 2
+          const ry = Math.abs(pointer.y - this.shapeStartPoint.y) / 2
+          const r = e.shiftKey ? Math.max(rx, ry) : rx
+          const left = Math.min(pointer.x, this.shapeStartPoint.x)
+          const top = Math.min(pointer.y, this.shapeStartPoint.y)
+          this.currentShape.set({
+            left,
+            top,
+            rx: r,
+            ry: e.shiftKey ? r : ry
+          })
         } else if (this.activeTool === 'line' || this.activeTool === 'arrow') {
           let x2 = pointer.x
           let y2 = pointer.y
@@ -1020,6 +1093,33 @@ export default {
       if (this.isDrawingShape && this.currentShape) {
         if (this.activeTool === 'arrow') {
           this.addArrowHead(this.currentShape)
+        }
+        // Replace star placeholder ellipse with real star polygon
+        if (this.activeTool === 'star' && this.currentShape._isStar) {
+          const s = this.currentShape
+          const cx = s.left + s.rx
+          const cy = s.top + s.ry
+          const outerR = Math.max(s.rx, s.ry)
+          if (outerR > 5) {
+            const points = []
+            for (let i = 0; i < 10; i++) {
+              const r = i % 2 === 0 ? outerR : outerR / 2.2
+              const angle = (Math.PI / 5) * i - Math.PI / 2
+              points.push({
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+              })
+            }
+            const star = new fabric.Polygon(points, {
+              fill: s.fill,
+              stroke: s.stroke,
+              strokeWidth: s.strokeWidth,
+              strokeUniform: true,
+              id: s.id
+            })
+            this.canvas.remove(s)
+            this.canvas.add(star)
+          }
         }
         this.isDrawingShape = false
         this.currentShape = null
@@ -1226,62 +1326,6 @@ export default {
       this.emitChange()
     },
 
-    addDiamond() {
-      const vpt = this.canvas.viewportTransform
-      const zoom = this.canvas.getZoom()
-      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
-      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
-      const s = 60
-
-      const diamond = new fabric.Polygon(
-        [
-          { x: cx, y: cy - s },
-          { x: cx + s, y: cy },
-          { x: cx, y: cy + s },
-          { x: cx - s, y: cy }
-        ],
-        {
-          fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
-          stroke: this.strokeColor,
-          strokeWidth: this.strokeWidth,
-          strokeUniform: true,
-          id: uuidv4()
-        }
-      )
-      this.canvas.add(diamond)
-      this.canvas.setActiveObject(diamond)
-      this.canvas.renderAll()
-      this.emitChange()
-    },
-
-    addStar() {
-      const vpt = this.canvas.viewportTransform
-      const zoom = this.canvas.getZoom()
-      const cx = (this.canvas.width / 2 - vpt[4]) / zoom
-      const cy = (this.canvas.height / 2 - vpt[5]) / zoom
-      const size = 50
-      const points = []
-      for (let i = 0; i < 10; i++) {
-        const r = i % 2 === 0 ? size : size / 2
-        const angle = (Math.PI / 5) * i - Math.PI / 2
-        points.push({
-          x: cx + r * Math.cos(angle),
-          y: cy + r * Math.sin(angle)
-        })
-      }
-      const star = new fabric.Polygon(points, {
-        fill: this.fillColor === '#ffffff' ? 'transparent' : this.fillColor,
-        stroke: this.strokeColor,
-        strokeWidth: this.strokeWidth,
-        strokeUniform: true,
-        id: uuidv4()
-      })
-      this.canvas.add(star)
-      this.canvas.setActiveObject(star)
-      this.canvas.renderAll()
-      this.emitChange()
-    },
-
     addStickyNote(chosenColor) {
       this.showStickyColors = false
       const color = chosenColor || '#fff9c4'
@@ -1379,10 +1423,27 @@ export default {
 
     groupSelected() {
       const activeObj = this.canvas.getActiveObject()
-      if (!activeObj || activeObj.type !== 'activeSelection') return
+      if (!activeObj) return
 
-      activeObj.toGroup()
-      activeObj.set('id', uuidv4())
+      if (
+        activeObj.type !== 'activeSelection' &&
+        activeObj.type !== 'activeselection'
+      ) {
+        return
+      }
+      const objects = activeObj.getObjects()
+      if (!objects.length) {
+        return
+      }
+
+      // Remove objects from canvas
+      objects.forEach(obj => this.canvas.remove(obj))
+      this.canvas.discardActiveObject()
+
+      // Create group
+      const group = new fabric.Group(objects, { id: uuidv4() })
+      this.canvas.add(group)
+      this.canvas.setActiveObject(group)
       this.canvas.renderAll()
       this.emitChange()
     },
@@ -1391,7 +1452,21 @@ export default {
       const activeObj = this.canvas.getActiveObject()
       if (!activeObj || activeObj.type !== 'group') return
 
-      activeObj.toActiveSelection()
+      const items = activeObj._objects || []
+      const left = activeObj.left
+      const top = activeObj.top
+
+      // Remove group, add individual items back
+      this.canvas.remove(activeObj)
+      items.forEach(obj => {
+        obj.set({
+          left: left + obj.left + activeObj.width / 2,
+          top: top + obj.top + activeObj.height / 2
+        })
+        obj.setCoords()
+        this.canvas.add(obj)
+      })
+      this.canvas.discardActiveObject()
       this.canvas.renderAll()
       this.emitChange()
     },
