@@ -181,6 +181,40 @@
           <option value="Times New Roman, serif">Times</option>
           <option value="Verdana, sans-serif">Verdana</option>
         </select>
+        <button
+          class="tool-btn text-format-btn"
+          :class="{ active: isSelectionBold }"
+          @click="toggleBold"
+          title="Bold (Ctrl+B)"
+        >
+          <strong>B</strong>
+        </button>
+        <button
+          class="tool-btn text-format-btn"
+          :class="{ active: isSelectionItalic }"
+          @click="toggleItalic"
+          title="Italic (Ctrl+I)"
+        >
+          <em>I</em>
+        </button>
+        <button
+          class="tool-btn text-format-btn"
+          :class="{ active: isSelectionUnderline }"
+          @click="toggleUnderline"
+          title="Underline (Ctrl+U)"
+        >
+          <u>U</u>
+        </button>
+        <select
+          class="stroke-width-select"
+          v-model="textAlign"
+          title="Align"
+          @change="applyTextAlign"
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
       </div>
 
       <div class="tool-separator" />
@@ -454,6 +488,10 @@ export default {
       activeTool: 'select',
       bgColor: '#ffffff',
       fontFamily: 'Inter, Arial, sans-serif',
+      textAlign: 'left',
+      isSelectionBold: false,
+      isSelectionItalic: false,
+      isSelectionUnderline: false,
       strokeColor: '#333333',
       fillColor: '#ffffff',
       strokeWidth: 2,
@@ -665,6 +703,10 @@ export default {
         this.updateConnectors()
       })
 
+      // Update text format buttons when selecting objects
+      this.canvas.on('selection:created', () => this.updateTextFormatState())
+      this.canvas.on('selection:updated', () => this.updateTextFormatState())
+
       this.canvas.on('mouse:down', this.onMouseDown)
       this.canvas.on('mouse:move', this.onMouseMove)
       this.canvas.on('mouse:up', this.onMouseUp)
@@ -773,6 +815,54 @@ export default {
         this.canvas.renderAll()
         this.emitChange()
       }
+    },
+
+    updateTextFormatState() {
+      const obj = this.canvas?.getActiveObject()
+      if (obj && (obj.type === 'textbox' || obj.type === 'i-text')) {
+        this.isSelectionBold = obj.fontWeight === 'bold'
+        this.isSelectionItalic = obj.fontStyle === 'italic'
+        this.isSelectionUnderline = !!obj.underline
+        this.textAlign = obj.textAlign || 'left'
+      }
+    },
+
+    toggleBold() {
+      const obj = this.canvas?.getActiveObject()
+      if (!obj || (obj.type !== 'textbox' && obj.type !== 'i-text')) return
+      const isBold = obj.fontWeight === 'bold'
+      obj.set('fontWeight', isBold ? 'normal' : 'bold')
+      this.isSelectionBold = !isBold
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
+    toggleItalic() {
+      const obj = this.canvas?.getActiveObject()
+      if (!obj || (obj.type !== 'textbox' && obj.type !== 'i-text')) return
+      const isItalic = obj.fontStyle === 'italic'
+      obj.set('fontStyle', isItalic ? 'normal' : 'italic')
+      this.isSelectionItalic = !isItalic
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
+    toggleUnderline() {
+      const obj = this.canvas?.getActiveObject()
+      if (!obj || (obj.type !== 'textbox' && obj.type !== 'i-text')) return
+      const isUnder = obj.underline
+      obj.set('underline', !isUnder)
+      this.isSelectionUnderline = !isUnder
+      this.canvas.renderAll()
+      this.emitChange()
+    },
+
+    applyTextAlign() {
+      const obj = this.canvas?.getActiveObject()
+      if (!obj || (obj.type !== 'textbox' && obj.type !== 'i-text')) return
+      obj.set('textAlign', this.textAlign)
+      this.canvas.renderAll()
+      this.emitChange()
     },
 
     snapPoint(p) {
@@ -1524,7 +1614,7 @@ export default {
       this.contextMenu.visible = false
       const active = this.canvas.getActiveObject()
       if (active) {
-        this.canvas.bringToFront(active)
+        this.canvas.bringObjectToFront(active)
         this.canvas.renderAll()
         this.emitChange()
       }
@@ -1534,7 +1624,7 @@ export default {
       this.contextMenu.visible = false
       const active = this.canvas.getActiveObject()
       if (active) {
-        this.canvas.sendToBack(active)
+        this.canvas.sendObjectToBack(active)
         this.canvas.renderAll()
         this.emitChange()
       }
@@ -2374,6 +2464,13 @@ export default {
 
 .sc-label {
   color: #999;
+}
+
+.text-format-btn {
+  font-size: 13px;
+  font-family: serif;
+  width: 24px;
+  height: 24px;
 }
 
 .bg-color-group {
