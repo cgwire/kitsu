@@ -349,7 +349,10 @@
                 class="metadata-descriptor datatable-row-header"
                 :title="shot.data ? shot.data[descriptor.field_name] : ''"
                 :style="{
-                  'z-index': 1000 - i - k * 100, // Needed for combo to be above the next cell
+                  'z-index':
+                    descriptor.data_type === 'taglist'
+                      ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
+                      : undefined,
                   left: offsets['editor-' + j]
                     ? `${offsets['editor-' + j]}px`
                     : '0'
