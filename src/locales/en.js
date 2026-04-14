@@ -642,6 +642,12 @@ export default {
     empty_list: 'There are no logs for the selected date.',
     events: 'events listed for the current day',
     title: 'Logs',
+    audit: {
+      title: 'Activity logs'
+    },
+    logins: {
+      title: 'Login logs'
+    },
     preview_files: {
       date: 'Creation date',
       empty_list: 'There are no broken or ongoing previews.',

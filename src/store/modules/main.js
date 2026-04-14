@@ -76,6 +76,10 @@ const actions = {
     return client.getEvents(after, before, limit, lastEventId)
   },
 
+  loadLoginLogs(_, { after, before, limit, lastLoginLogId = null }) {
+    return client.getLoginLogs(after, before, limit, lastLoginLogId)
+  },
+
   async setMainConfig({ commit }) {
     let config = {}
     try {

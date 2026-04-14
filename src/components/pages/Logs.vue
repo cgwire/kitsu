@@ -4,7 +4,12 @@
       <ul>
         <li :class="{ 'is-active': isActiveTab('events') }">
           <a @click="activeTab = 'events'">
-            {{ $t('logs.title') }}
+            {{ $t('logs.audit.title') }}
+          </a>
+        </li>
+        <li :class="{ 'is-active': isActiveTab('logins') }">
+          <a @click="activeTab = 'logins'">
+            {{ $t('logs.logins.title') }}
           </a>
         </li>
         <li :class="{ 'is-active': isActiveTab('preview_files') }">
@@ -14,53 +19,34 @@
         </li>
       </ul>
     </div>
-    <events v-if="isActiveTab('events')" />
+    <event-logs v-if="isActiveTab('events')" />
+    <login-logs v-else-if="isActiveTab('logins')" />
     <preview-files v-else-if="isActiveTab('preview_files')" />
   </div>
 </template>
 
-<script>
-import Events from '@/components/pages/logs/Events.vue'
+<script setup>
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
+import EventLogs from '@/components/pages/logs/EventLogs.vue'
+import LoginLogs from '@/components/pages/logs/LoginLogs.vue'
 import PreviewFiles from '@/components/pages/logs/PreviewFiles.vue'
 
-export default {
-  name: 'logs',
+const route = useRoute()
+const router = useRouter()
 
-  components: {
-    Events,
-    PreviewFiles
-  },
+const activeTab = ref(route.query.tab || 'events')
 
-  data() {
-    return {
-      activeTab: 'events'
-    }
-  },
-
-  mounted() {
-    if (this.$route.query.tab) {
-      this.activeTab = this.$route.query.tab
-    }
-  },
-
-  methods: {
-    isActiveTab(tab) {
-      return this.activeTab === tab
-    }
-  },
-
-  watch: {
-    activeTab() {
-      if (this.$route.query.tab !== this.activeTab) {
-        this.$router.push({
-          query: {
-            tab: this.activeTab
-          }
-        })
-      }
-    }
-  }
+function isActiveTab(tab) {
+  return activeTab.value === tab
 }
+
+watch(activeTab, tab => {
+  if (route.query.tab !== tab) {
+    router.push({ query: { tab } })
+  }
+})
 </script>
 
 <style lang="scss" scoped>
