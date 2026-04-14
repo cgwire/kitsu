@@ -6,7 +6,7 @@ import {
   sortRevisionPreviewFiles,
   sortByName
 } from '@/lib/sorting'
-import { arrayMove, removeModelFromList } from '@/lib/models'
+import { arrayMove, populateTask, removeModelFromList } from '@/lib/models'
 import func from '@/lib/func'
 
 import assetStore from '@/store/modules/assets'
@@ -1240,6 +1240,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
+      populateTask(task)
       state.taskMap.set(task.id, task)
     })
   },
@@ -1250,6 +1251,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
+      populateTask(task)
       state.taskMap.set(task.id, task)
     })
   },

@@ -24,6 +24,12 @@ export const populateTask = task => {
     }
   }
   task.entity_path.params[`${type}_id`] = task.entity_id
+  if (!task.entity && task.entity_id) {
+    task.entity = {
+      id: task.entity_id,
+      preview_file_id: task.entity_preview_file_id
+    }
+  }
   return task
 }
 
