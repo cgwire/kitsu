@@ -67,6 +67,14 @@ const client = {
     return client.pget(path)
   },
 
+  getLoginLogs(after, before, limit, lastLoginLogId = null) {
+    let path = `/api/data/events/login-logs/last?limit=${limit}`
+    if (after) path += `&after=${after}`
+    if (before) path += `&before=${before}`
+    if (lastLoginLogId) path += `&cursor_login_log_id=${lastLoginLogId}`
+    return client.pget(path)
+  },
+
   searchData(query, limit, offset, index_names, productionId) {
     const path = '/api/data/search'
     const data = { query, limit, offset, index_names }
