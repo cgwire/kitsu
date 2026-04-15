@@ -396,6 +396,41 @@ export default {
     }
   },
 
+  project_templates: {
+    title: 'Project Templates',
+    new_project_template: 'Add a project template',
+    edit_title: 'Edit project template',
+    create_error: 'An error occurred while saving this project template. Are you sure there is no template with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this project template.',
+    number: 'project template | project templates',
+    select: 'Select a template',
+    apply: 'Apply template',
+    apply_to_project: 'Apply a template',
+    apply_to_project_description: "Add a template's configuration to this project. Existing settings are preserved.",
+    apply_confirm: "This will add the template's task types, statuses, asset types, automations, and metadata descriptors to this project. Existing settings are preserved. Continue?",
+    from_project: 'Create from project',
+    click_name_to_edit: 'Click on a template name to edit its configuration.',
+    name_required: 'A name is required.',
+    duplicate_name: 'A project template with this name already exists.',
+    fps_error: 'FPS must be an integer between 1 and 200.',
+    ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
+    resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
+    add_metadata: 'Add a metadata',
+    fields: {
+      name: 'Name',
+      description: 'Description',
+      entity_type: 'Entity type'
+    },
+    tabs: {
+      task_types: 'Task Types',
+      task_statuses: 'Task Statuses',
+      asset_types: 'Asset Types',
+      status_automations: 'Status Automations',
+      metadata_descriptors: 'Metadata'
+    }
+  },
+
   entities: {
     build_filter: {
       all_types: 'All asset types',
@@ -1435,6 +1470,9 @@ export default {
     production: {
       empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.',
       empty_automation_list: 'There is no automation set for this production.',
+      empty_board: 'Add task statuses first to configure their visibility on the board.',
+      empty_backgrounds: 'No background linked. Pick one from the list above to add it.',
+      empty_metadata: 'No metadata descriptor defined for this entity type yet.'
     },
     save: {
       button: 'Save settings',

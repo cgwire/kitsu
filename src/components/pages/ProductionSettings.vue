@@ -55,38 +55,12 @@
       </div>
 
       <div class="tab" v-show="isActiveTab('assetTypes')">
-        <div
-          class="flexrow mt1 mb1 add-asset-type"
-          v-if="remainingAssetTypes.length"
-        >
-          <combobox
-            class="flexrow-item"
-            :options="remainingAssetTypes"
-            v-model="assetTypeId"
-          />
-          <button class="button flexrow-item" @click="addAssetType">
-            {{ $t('main.add') }}
-          </button>
-        </div>
-        <div class="box" v-if="isEmpty(currentProduction.asset_types)">
-          {{ $t('settings.production.empty_list') }}
-        </div>
-        <table class="datatable list" v-else>
-          <tbody class="datatable-body">
-            <tr
-              class="datatable-row"
-              :key="assetType.id"
-              v-for="assetType in productionAssetTypes"
-            >
-              <td class="name">{{ assetType.name }}</td>
-              <td>
-                <button class="button" @click="removeAssetType(assetType.id)">
-                  {{ $t('main.remove') }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <asset-type-settings
+          :asset-types="productionAssetTypes"
+          :all-asset-types="assetTypes"
+          @add="addAssetType"
+          @remove="removeAssetType"
+        />
       </div>
 
       <div class="tab" v-show="isActiveTab('taskTypes')">
@@ -190,8 +164,8 @@ import { sortTaskStatuses } from '@/lib/sorting'
 
 import { GripVerticalIcon } from 'lucide-vue-next'
 
+import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
 import BooleanCell from '@/components/cells/BooleanCell.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds.vue'
 import ProductionBoard from '@/components/pages/production/ProductionBoard.vue'
@@ -205,8 +179,8 @@ export default {
   name: 'production-settings',
 
   components: {
+    AssetTypeSettings,
     BooleanCell,
-    Combobox,
     ComboboxStatus,
     draggable,
     GripVerticalIcon,
@@ -222,7 +196,6 @@ export default {
   data() {
     return {
       activeTab: 'parameters',
-      assetTypeId: '',
       taskStatusItems: [],
       taskStatusId: ''
     }
@@ -234,9 +207,6 @@ export default {
       return
     }
 
-    if (this.remainingAssetTypes.length > 0) {
-      this.assetTypeId = this.remainingAssetTypes[0].value
-    }
     if (this.remainingTaskStatuses.length > 0) {
       this.taskStatusId = this.remainingTaskStatuses[0].id
     }
@@ -254,12 +224,6 @@ export default {
       'productionTaskStatuses',
       'taskStatus'
     ]),
-
-    remainingAssetTypes() {
-      return this.assetTypes
-        .filter(t => !this.currentProduction.asset_types.includes(t.id))
-        .map(t => ({ label: t.name, value: t.id }))
-    },
 
     remainingTaskStatuses() {
       return this.taskStatus.filter(
@@ -295,11 +259,8 @@ export default {
       return this.activeTab === tab
     },
 
-    addAssetType() {
-      this.addAssetTypeToProduction(this.assetTypeId)
-      if (this.remainingAssetTypes.length > 0) {
-        this.assetTypeId = this.remainingAssetTypes[0].value
-      }
+    addAssetType(assetTypeId) {
+      this.addAssetTypeToProduction(assetTypeId)
     },
 
     removeAssetType(assetTypeId) {
