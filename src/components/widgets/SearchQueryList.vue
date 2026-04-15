@@ -233,7 +233,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change-search', 'remove-search'])
+const emit = defineEmits(['remove-search'])
 
 const groupToEdit = ref({})
 const groupToRemove = ref({})
@@ -340,10 +340,6 @@ const queryRoute = searchQuery => {
   }
 }
 
-const changeSearch = searchQuery => {
-  emit('change-search', searchQuery)
-}
-
 const editGroup = (group = {}) => {
   groupToEdit.value = group
   modals.group = true
@@ -393,10 +389,6 @@ const confirmEditSearch = async searchFilter => {
   } finally {
     loading.edit = false
   }
-}
-
-const closeFilterGroupModal = () => {
-  modals.group = false
 }
 
 const confirmRemoveSearch = searchQuery => {

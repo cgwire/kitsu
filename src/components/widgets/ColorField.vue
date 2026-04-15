@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   colors: {
     default: () => [
       '#CCCCCC',

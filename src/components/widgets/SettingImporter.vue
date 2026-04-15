@@ -38,7 +38,7 @@
           <slot name="item-line" :item="item" />
         </div>
       </div>
-      <p class="infos mt05">
+      <p class="infos mt05" v-else>
         {{ $t('settings.no_more_available_items') }}
       </p>
     </div>
@@ -73,15 +73,12 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const openProductions = computed(() => store.getters.openProductions)
 
 const availableProductions = computed(() => {
+  if (!currentProduction.value?.id) {
+    return openProductions.value
+  }
   return openProductions.value.filter(
     production => production.id !== currentProduction.value.id
   )
-})
-
-const sizeStyle = computed(() => {
-  return {
-    width: 'auto'
-  }
 })
 
 onMounted(() => {
@@ -100,6 +97,7 @@ onMounted(() => {
   margin-top: 0.5em;
   padding: 0.5em;
   overflow-y: auto;
+  color: var(--text);
 }
 
 .label {
@@ -116,5 +114,10 @@ onMounted(() => {
 
 .infos {
   font-style: italic;
+  color: var(--text-alt);
+
+  .dark & {
+    color: var(--text);
+  }
 }
 </style>

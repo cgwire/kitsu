@@ -45,16 +45,12 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
-
-import { pluralizeEntityType } from '@/lib/path'
 
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const { t } = useI18n()
-const route = useRoute()
 const store = useStore()
 
 const props = defineProps({
@@ -72,31 +68,12 @@ const props = defineProps({
   }
 })
 
-const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const getTaskStatus = computed(() => store.getters.getTaskStatus)
 const getTaskType = computed(() => store.getters.getTaskType)
 
 const entityType = computed(() => {
   const et = props.statusAutomation.entity_type
   return t(`status_automations.entity_types.${et.toLowerCase()}`)
-})
-
-const statusAutomationPath = computed(() => {
-  const r = {
-    name: 'status-automation',
-    params: {
-      production_id: props.productionId,
-      status_automation_id: props.statusAutomation.id,
-      type: pluralizeEntityType(props.statusAutomation.for_entity)
-    }
-  }
-
-  if (props.statusAutomation.episode_id || route.params.episode_id) {
-    r.name = 'episode-status-automation'
-    r.params.episode_id =
-      props.statusAutomation.episode_id || route.params.episode_id
-  }
-  return r
 })
 </script>
 

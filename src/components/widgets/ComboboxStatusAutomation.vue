@@ -47,7 +47,6 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
-import colors from '@/lib/colors'
 import { useCombobox } from '@/composables/combobox'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
@@ -90,7 +89,6 @@ const {
   select: selectStatusAutomation
 } = useCombobox(emit)
 
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const statusAutomationMap = computed(() => store.getters.statusAutomationMap)
 
 const currentStatusAutomation = computed(() => {
@@ -100,32 +98,6 @@ const currentStatusAutomation = computed(() => {
     return props.statusAutomationsList[0]
   }
 })
-
-const backgroundColor = statusAutomation => {
-  if (
-    (!statusAutomation || statusAutomation.is_default) &&
-    !isDarkTheme.value
-  ) {
-    return '#ECECEC'
-  } else if (
-    (!statusAutomation || statusAutomation.is_default) &&
-    isDarkTheme.value
-  ) {
-    return '#5F626A'
-  } else if (isDarkTheme.value) {
-    return colors.darkenColor(statusAutomation.color)
-  } else {
-    return statusAutomation.color
-  }
-}
-
-const color = statusAutomation => {
-  if (!statusAutomation || !statusAutomation.is_default || isDarkTheme.value) {
-    return 'white'
-  } else {
-    return '#333'
-  }
-}
 </script>
 
 <style lang="scss" scoped>

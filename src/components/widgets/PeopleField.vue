@@ -5,7 +5,7 @@
     </label>
     <div class="people-field" :class="{ small, wide }">
       <multiselect
-        ref="multiselect"
+        ref="multiselectRef"
         label="name"
         :allow-empty="clearable"
         :disabled="disabled"
@@ -40,7 +40,6 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
@@ -48,8 +47,6 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
 import AssignationItem from '@/components/widgets/AssignationItem.vue'
-
-const { t } = useI18n()
 
 const props = defineProps({
   clearable: {
@@ -92,7 +89,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'update:modelValue'])
 
-const multiselect = ref(null)
+const multiselectRef = ref(null)
 const index = ref(null)
 const item = ref(null)
 const items = ref([])
@@ -110,9 +107,7 @@ onMounted(() => {
 })
 
 const onSearchChange = s => {
-  items.value = s?.length
-    ? (indexSearch(index.value, [s]) ?? [])
-    : props.people
+  items.value = s?.length ? (indexSearch(index.value, [s]) ?? []) : props.people
   search.value = s
 }
 
@@ -127,7 +122,7 @@ const clear = () => {
 }
 
 const focus = () => {
-  multiselect.value.$el.focus()
+  multiselectRef.value.$el.focus()
 }
 
 watch(
