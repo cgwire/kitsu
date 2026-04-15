@@ -90,7 +90,7 @@ const toggleList = () => {
         lastScrollPosition.value ||
         (props.isReversed && list.value?.scrollHeight) ||
         0
-      list.value?.scrollTo({ top })
+      list.value?.scrollTo?.({ top })
     })
   }
 }

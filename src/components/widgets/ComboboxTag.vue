@@ -142,7 +142,7 @@ const toggleList = () => {
   showList.value = !showList.value
   if (showList.value) {
     nextTick(() => {
-      selectRef.value?.scrollTo({ top: lastScrollPosition, left: 0 })
+      selectRef.value?.scrollTo?.({ top: lastScrollPosition, left: 0 })
     })
   }
 }
@@ -168,7 +168,7 @@ watch(showList, () => {
           list = child
         }
       }
-      list?.scrollTo({ top: optionList.value.length * 60 })
+      list?.scrollTo?.({ top: optionList.value.length * 60 })
     })
   }
 })
