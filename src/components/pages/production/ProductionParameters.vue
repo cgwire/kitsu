@@ -168,8 +168,9 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useStore } from 'vuex'
 
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import {
@@ -185,183 +186,140 @@ import DateField from '@/components/widgets/DateField.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'production-parameters',
+const emit = defineEmits(['confirm'])
 
-  components: {
-    ComboboxBoolean,
-    ComboboxStyled,
-    DateField,
-    FileUpload,
-    TextField,
-    ButtonSimple
-  },
+const store = useStore()
 
-  emits: ['confirm'],
+const fileField = useTemplateRef('fileField')
 
-  data() {
-    return {
-      formData: null,
-      isLoading: false,
-      isError: false,
-      isLocalTVShow: false,
-      productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
-      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
-      homepageOptions: HOME_PAGE_OPTIONS,
-      form: {
-        name: '',
-        code: '',
-        start_date: new Date(),
-        end_date: new Date(),
-        nb_episodes: 0,
-        episode_span: 0,
-        fps: '',
-        max_retakes: 0,
-        is_clients_isolated: 'false',
-        is_preview_download_allowed: 'false',
-        is_set_preview_automated: 'false',
-        is_publish_default_for_artists: 'false',
-        ratio: '',
-        resolution: '',
-        production_type: 'short',
-        production_style: '2d3d'
-      }
-    }
-  },
+const isLoading = ref(false)
+const isError = ref(false)
+const isLocalTVShow = ref(false)
+const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
+const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
+const homepageOptions = HOME_PAGE_OPTIONS
 
-  computed: {
-    ...mapGetters(['currentProduction', 'productionAvatarFormData', 'isTVShow'])
-  },
+const emptyForm = () => ({
+  name: '',
+  code: '',
+  start_date: new Date(),
+  end_date: new Date(),
+  production_type: 'short',
+  production_style: '2d3d',
+  nb_episodes: 0,
+  episode_span: 0,
+  max_retakes: 0,
+  is_clients_isolated: 'false',
+  is_preview_download_allowed: 'false',
+  is_set_preview_automated: 'false',
+  is_publish_default_for_artists: 'false',
+  fps: '',
+  ratio: '',
+  resolution: '',
+  homepage: HOME_PAGE_OPTIONS[0].value
+})
 
-  mounted() {
-    this.resetForm()
-  },
+const form = ref(emptyForm())
 
-  watch: {
-    currentProduction: {
-      handler() {
-        this.resetForm()
-        this.updateTvShowRelatedDatas(this.isTVShow)
-      },
-      deep: true
-    },
-    'form.production_type'(newProductionType) {
-      this.updateTvShowRelatedDatas(newProductionType === 'tvshow')
-    }
-  },
+const currentProduction = computed(() => store.getters.currentProduction)
+const productionAvatarFormData = computed(
+  () => store.getters.productionAvatarFormData
+)
+const isTVShow = computed(() => store.getters.isTVShow)
 
-  methods: {
-    ...mapActions([
-      'editProduction',
-      'storeProductionPicture',
-      'uploadProductionAvatar'
-    ]),
+const onFileSelected = formData => {
+  store.dispatch('storeProductionPicture', formData)
+}
 
-    onFileSelected(formData) {
-      this.formData = formData
-      this.storeProductionPicture(formData)
-    },
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
 
-    isEmpty(str) {
-      return !str || str.length === 0
-    },
-
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    },
-
-    // Update the isLocalTVShow boolean and changes values linked to tvshow in form
-    updateTvShowRelatedDatas(isTVShow) {
-      this.isLocalTVShow = isTVShow
-      if (isTVShow && this.currentProduction) {
-        this.form.nb_episodes = this.currentProduction.nb_episodes
-        this.form.episode_span = this.currentProduction.episode_span
-      } else {
-        this.form.nb_episodes = 0
-        this.form.episode_span = 0
-      }
-    },
-
-    resetForm() {
-      this.$refs.fileField?.reset()
-      this.storeProductionPicture(null)
-
-      if (this.currentProduction) {
-        this.form = {
-          name: this.currentProduction.name,
-          code: this.currentProduction.code,
-          start_date: parseSimpleDate(
-            this.currentProduction.start_date
-          ).toDate(),
-          end_date: parseSimpleDate(this.currentProduction.end_date).toDate(),
-          production_type: this.currentProduction.production_type || 'short',
-          production_style: this.currentProduction.production_style || '2d3d',
-          episode_span: this.currentProduction.episode_span,
-          fps: this.currentProduction.fps,
-          max_retakes: this.currentProduction.max_retakes,
-          nb_episodes: this.currentProduction.nb_episodes,
-          is_clients_isolated: this.currentProduction.is_clients_isolated
-            ? 'true'
-            : 'false',
-          is_preview_download_allowed: this.currentProduction
-            .is_preview_download_allowed
-            ? 'true'
-            : 'false',
-          is_set_preview_automated: this.currentProduction
-            .is_set_preview_automated
-            ? 'true'
-            : 'false',
-          is_publish_default_for_artists: this.currentProduction
-            .is_publish_default_for_artists
-            ? 'true'
-            : 'false',
-          ratio: this.currentProduction.ratio,
-          resolution: this.currentProduction.resolution,
-          homepage: this.currentProduction.homepage
-        }
-      } else {
-        this.form = {
-          name: '',
-          code: '',
-          start_date: new Date(),
-          end_date: new Date(),
-          production_type: 'short',
-          production_style: '2d3d',
-          nb_episodes: 0,
-          episode_span: 0,
-          max_retakes: 0,
-          is_clients_isolated: 'false',
-          is_preview_download_allowed: 'false',
-          is_set_preview_automated: 'false',
-          is_publish_default_for_artists: 'false',
-          fps: '',
-          ratio: '',
-          resolution: '',
-          homepage: HOME_PAGE_OPTIONS[0].value
-        }
-      }
-    },
-
-    async editParameters() {
-      this.isLoading = true
-      this.isError = false
-      try {
-        if (this.productionAvatarFormData) {
-          await this.uploadProductionAvatar(this.currentProduction.id)
-        }
-        await this.editProduction({
-          ...this.form,
-          id: this.currentProduction.id,
-          start_date: formatSimpleDate(this.form.start_date),
-          end_date: formatSimpleDate(this.form.end_date)
-        })
-      } catch {
-        this.isError = true
-      }
-      this.isLoading = false
-    }
+const updateTvShowRelatedDatas = tvShow => {
+  isLocalTVShow.value = tvShow
+  if (tvShow && currentProduction.value) {
+    form.value.nb_episodes = currentProduction.value.nb_episodes
+    form.value.episode_span = currentProduction.value.episode_span
+  } else {
+    form.value.nb_episodes = 0
+    form.value.episode_span = 0
   }
 }
+
+const resetForm = () => {
+  fileField.value?.reset()
+  store.dispatch('storeProductionPicture', null)
+
+  const production = currentProduction.value
+  if (production) {
+    form.value = {
+      name: production.name,
+      code: production.code,
+      start_date: parseSimpleDate(production.start_date).toDate(),
+      end_date: parseSimpleDate(production.end_date).toDate(),
+      production_type: production.production_type || 'short',
+      production_style: production.production_style || '2d3d',
+      episode_span: production.episode_span,
+      fps: production.fps,
+      max_retakes: production.max_retakes,
+      nb_episodes: production.nb_episodes,
+      is_clients_isolated: production.is_clients_isolated ? 'true' : 'false',
+      is_preview_download_allowed: production.is_preview_download_allowed
+        ? 'true'
+        : 'false',
+      is_set_preview_automated: production.is_set_preview_automated
+        ? 'true'
+        : 'false',
+      is_publish_default_for_artists: production.is_publish_default_for_artists
+        ? 'true'
+        : 'false',
+      ratio: production.ratio,
+      resolution: production.resolution,
+      homepage: production.homepage
+    }
+  } else {
+    form.value = emptyForm()
+  }
+}
+
+const editParameters = async () => {
+  isLoading.value = true
+  isError.value = false
+  try {
+    if (productionAvatarFormData.value) {
+      await store.dispatch('uploadProductionAvatar', currentProduction.value.id)
+    }
+    await store.dispatch('editProduction', {
+      ...form.value,
+      id: currentProduction.value.id,
+      start_date: formatSimpleDate(form.value.start_date),
+      end_date: formatSimpleDate(form.value.end_date)
+    })
+  } catch {
+    isError.value = true
+  }
+  isLoading.value = false
+}
+
+onMounted(() => {
+  resetForm()
+})
+
+watch(
+  currentProduction,
+  () => {
+    resetForm()
+    updateTvShowRelatedDatas(isTVShow.value)
+  },
+  { deep: true }
+)
+
+watch(
+  () => form.value.production_type,
+  newType => {
+    updateTvShowRelatedDatas(newType === 'tvshow')
+  }
+)
 </script>
 
 <style lang="scss" scoped>

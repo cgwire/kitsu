@@ -96,10 +96,13 @@
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import draggable from 'vuedraggable'
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
@@ -112,363 +115,280 @@ import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'production-task-types',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    ComboboxTaskType,
-    draggable,
-    ProductionTaskType,
-    RouteSectionTabs,
-    SettingImporter,
-    TaskTypeName
-  },
+const activeTab = ref('assets')
+const assetTaskTypes = ref({ list: [] })
+const editTaskTypes = ref({ list: [] })
+const episodeTaskTypes = ref({ list: [] })
+const sequenceTaskTypes = ref({ list: [] })
+const shotTaskTypes = ref({ list: [] })
+const episode_span = ref(0)
+const taskTypeId = ref('')
+const loading = reactive({
+  import: false,
+  episode_span: false,
+  scheduleTimeUpdate: false,
+  scheduleTimeDelete: false
+})
+const errors = reactive({
+  episode_span: false,
+  scheduleTimeUpdate: false,
+  delete: false
+})
 
-  data() {
-    return {
-      activeTab: 'assets',
-      assetTaskTypes: { list: [] },
-      editTaskTypes: { list: [] },
-      episode_span: 0,
-      episodeTaskTypes: { list: [] },
-      sequenceTaskTypes: { list: [] },
-      shotTaskTypes: { list: [] },
-      taskTypeId: '',
-      loading: {
-        import: false,
-        episode_span: false,
-        scheduleTimeUpdate: false,
-        scheduleTimeDelete: false
-      },
-      errors: {
-        episode_span: false,
-        scheduleTimeUpdate: false,
-        delete: false
-      }
+let lastCall = 0
+let isSaving = false
+let newSaveCall = false
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const currentScheduleItems = computed(() => store.getters.currentScheduleItems)
+const getProductionTaskTypes = computed(
+  () => store.getters.getProductionTaskTypes
+)
+const productionAssetTaskTypes = computed(
+  () => store.getters.productionAssetTaskTypes
+)
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
+const productionEditTaskTypes = computed(
+  () => store.getters.productionEditTaskTypes
+)
+const productionSequenceTaskTypes = computed(
+  () => store.getters.productionSequenceTaskTypes
+)
+const productionEpisodeTaskTypes = computed(
+  () => store.getters.productionEpisodeTaskTypes
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const taskTypes = computed(() => store.getters.taskTypes)
+
+const groupByType = {
+  Asset: { ref: assetTaskTypes, getter: productionAssetTaskTypes },
+  Shot: { ref: shotTaskTypes, getter: productionShotTaskTypes },
+  Sequence: { ref: sequenceTaskTypes, getter: productionSequenceTaskTypes },
+  Episode: { ref: episodeTaskTypes, getter: productionEpisodeTaskTypes },
+  Edit: { ref: editTaskTypes, getter: productionEditTaskTypes }
+}
+
+const remainingTaskTypes = computed(() =>
+  sortByName(
+    taskTypes.value.filter(
+      tt => !currentProduction.value.task_types.includes(tt.id)
+    )
+  )
+)
+
+const remainingTaskTypesForEntity = computed(() =>
+  sortByName(
+    remainingTaskTypes.value.filter(
+      tt => `${tt.for_entity.toLowerCase()}s` === activeTab.value
+    )
+  )
+)
+
+const isAssetsOnly = computed(
+  () => currentProduction.value.production_type === 'assets'
+)
+
+const isShotsOnly = computed(
+  () => currentProduction.value.production_type === 'shots'
+)
+
+const taskTypeGroups = computed(() => {
+  let groups = []
+  if (!isShotsOnly.value) {
+    groups.push(assetTaskTypes.value)
+  }
+  if (!isAssetsOnly.value) {
+    groups = groups.concat([
+      shotTaskTypes.value,
+      editTaskTypes.value,
+      sequenceTaskTypes.value,
+      episodeTaskTypes.value
+    ])
+  }
+  return groups
+})
+
+const taskTypeTabs = computed(() => [
+  { label: t('assets.title'), name: 'assets' },
+  { label: t('shots.title'), name: 'shots' },
+  { label: t('sequences.title'), name: 'sequences' },
+  { label: t('episodes.title'), name: 'episodes' },
+  { label: t('edits.title'), name: 'edits' }
+])
+
+const isEmpty = list => !list || list.length === 0
+
+const getScheduleItemForTaskType = taskType =>
+  currentScheduleItems.value.find(
+    scheduleItem => scheduleItem.task_type_id === taskType.id
+  ) || {
+    start_date: formatFullDate(moment()),
+    end_date: formatFullDate(moment())
+  }
+
+const resetDisplayedTaskTypes = () => {
+  Object.entries(groupByType).forEach(([type, { ref: stateRef, getter }]) => {
+    let list = sortTaskTypes([...getter.value], currentProduction.value)
+    list = list.map(taskType => ({
+      taskType,
+      scheduleItem: getScheduleItemForTaskType(taskType)
+    }))
+    stateRef.value = {
+      entity: `${type.toLowerCase()}s`,
+      title: t(`${type.toLowerCase()}s.title`),
+      list
     }
-  },
+  })
+}
 
-  mounted() {
-    if (this.remainingTaskTypesForEntity.length > 0) {
-      this.taskTypeId = this.remainingTaskTypesForEntity[0].id
-    } else {
-      this.taskTypeId = null
+const updateTaskTypeIdFromRemaining = () => {
+  taskTypeId.value = remainingTaskTypesForEntity.value[0]?.id || null
+}
+
+const addTaskType = async taskType => {
+  const id = taskType && taskType.id ? taskType.id : taskTypeId.value
+  await store.dispatch('addTaskTypeToProduction', {
+    taskTypeId: id,
+    priority: assetTaskTypes.value.length
+  })
+  try {
+    await store.dispatch('createScheduleItem', {
+      startDate: moment(),
+      endDate: moment(),
+      project_id: currentProduction.value.id,
+      task_type_id: id
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  updateTaskTypeIdFromRemaining()
+  resetDisplayedTaskTypes()
+}
+
+const removeTaskType = async ({ taskType, scheduleItem }) => {
+  errors.delete = false
+  try {
+    await store.dispatch('removeTaskTypeFromProduction', taskType.id)
+    if (scheduleItem !== null) {
+      loading.scheduleTimeDelete = true
+      await store.dispatch('deleteScheduleItem', scheduleItem)
+      loading.scheduleTimeDelete = false
     }
+  } catch {
+    errors.delete = true
+    loading.scheduleTimeDelete = false
+    return
+  }
+  await nextTick()
+  updateTaskTypeIdFromRemaining()
+  resetDisplayedTaskTypes()
+}
 
-    if (this.$route.query.section) {
-      this.activeTab = this.$route.query.section
-    } else {
-      if (this.isShotsOnly) {
-        this.activeTab = 'shots'
-      } else {
-        this.activeTab = 'assets'
-      }
-    }
-
-    this.resetDisplayedTaskTypes()
-    if (this.currentProduction) {
-      this.episode_span = this.currentProduction.episode_span
-      this.loadAllScheduleItems(this.currentProduction).then(() => {
-        this.resetDisplayedTaskTypes()
-      })
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'currentScheduleItems',
-      'getProductionTaskTypes',
-      'productionTaskTypes',
-      'productionAssetTaskTypes',
-      'productionShotTaskTypes',
-      'productionEditTaskTypes',
-      'productionSequenceTaskTypes',
-      'productionEpisodeTaskTypes',
-      'taskStatusMap',
-      'taskTypeMap',
-      'taskTypes',
-      'isTVShow'
-    ]),
-
-    remainingTaskTypes() {
-      return sortByName(
-        this.taskTypes.filter(
-          t => !this.currentProduction.task_types.includes(t.id)
-        )
-      )
-    },
-
-    remainingTaskTypesForEntity() {
-      return sortByName(
-        this.remainingTaskTypes.filter(
-          t => `${t.for_entity.toLowerCase()}s` === this.activeTab
-        )
-      )
-    },
-
-    isAssetsOnly() {
-      return this.currentProduction.production_type === 'assets'
-    },
-
-    isShotsOnly() {
-      return this.currentProduction.production_type === 'shots'
-    },
-
-    taskTypeGroups() {
-      let groups = []
-      if (!this.isShotsOnly) {
-        groups.push(this.assetTaskTypes)
-      }
-      if (!this.isAssetsOnly) {
-        groups = groups.concat([
-          this.shotTaskTypes,
-          this.editTaskTypes,
-          this.sequenceTaskTypes,
-          this.episodeTaskTypes
-        ])
-      }
-      return groups
-    },
-
-    taskTypeTabs() {
-      return [
-        {
-          label: this.$t('assets.title'),
-          name: 'assets'
-        },
-        {
-          label: this.$t('shots.title'),
-          name: 'shots'
-        },
-        {
-          label: this.$t('sequences.title'),
-          name: 'sequences'
-        },
-        {
-          label: this.$t('episodes.title'),
-          name: 'episodes'
-        },
-        {
-          label: this.$t('edits.title'),
-          name: 'edits'
-        }
-      ]
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addTaskTypeToProduction',
-      'createScheduleItem',
-      'deleteScheduleItem',
-      'editProduction',
-      'editTaskTypeLink',
-      'loadAllScheduleItems',
-      'loadContext',
-      'removeTaskTypeFromProduction',
-      'saveScheduleItem'
-    ]),
-
-    isEmpty(list) {
-      return !list || list.length === 0
-    },
-
-    resetDisplayedTaskTypes() {
-      /*
-        Return an object with the following structure:
-        {
-          title: 'title of the first column of the tab (Assets or short)',
-          list:  [{taskTypes, scheduleItem}]
-          // A list of objects that represents a couple of taskType and their
-          linked scheduleItem.
-        }
-      */
-      ;['Asset', 'Shot', 'Sequence', 'Episode', 'Edit'].forEach(type => {
-        const arr = this[`production${type}TaskTypes`]
-        let list = sortTaskTypes([...arr], this.currentProduction)
-        list = list.map(taskType => {
-          return {
-            taskType,
-            scheduleItem: this.getScheduleItemForTaskType(taskType)
-          }
-        })
-        this[`${type.toLowerCase()}TaskTypes`] = {
-          entity: `${type.toLowerCase()}s`,
-          title: this.$t(`${type.toLowerCase()}s.title`),
-          list
-        }
-      })
-    },
-
-    getScheduleItemForTaskType(taskType) {
-      const item = this.currentScheduleItems.find(
-        scheduleItem => scheduleItem.task_type_id === taskType.id
-      ) || {
-        start_date: formatFullDate(moment()),
-        end_date: formatFullDate(moment())
-      }
-      return item
-    },
-
-    async addTaskType(taskType) {
-      const taskTypeId = taskType && taskType.id ? taskType.id : this.taskTypeId
-      await this.addTaskTypeToProduction({
-        taskTypeId,
-        priority: this.assetTaskTypes.length
-      })
-      try {
-        await this.createScheduleItem({
-          startDate: moment(),
-          endDate: moment(),
-          project_id: this.currentProduction.id,
-          task_type_id: taskTypeId
-        })
-      } catch (err) {
-        console.error(err)
-      }
-
-      if (this.remainingTaskTypesForEntity.length > 0) {
-        this.taskTypeId = this.remainingTaskTypesForEntity[0].id
-      } else {
-        this.taskTypeId = null
-      }
-
-      this.resetDisplayedTaskTypes()
-    },
-
-    async removeTaskType({ taskType, scheduleItem }) {
-      this.errors.delete = false
-      try {
-        await this.removeTaskTypeFromProduction(taskType.id)
-        if (scheduleItem !== null) {
-          this.loading.scheduleTimeDelete = true
-          await this.deleteScheduleItem(scheduleItem)
-          this.loading.scheduleTimeDelete = false
-        }
-      } catch {
-        this.errors.delete = true
-        this.loading.scheduleTimeDelete = false
-        return
-      }
-      await this.$nextTick()
-      if (this.remainingTaskTypesForEntity.length > 0) {
-        this.taskTypeId = this.remainingTaskTypesForEntity[0].id
-      } else {
-        this.taskTypeId = null
-      }
-      this.resetDisplayedTaskTypes()
-    },
-
-    async editEpisodeSpan() {
-      this.loading.episode_span = true
-      this.errors.episode_span = false
-      try {
-        await this.editProduction({
-          id: this.currentProduction.id,
-          episode_span: this.episode_span
-        })
-      } catch (err) {
-        this.errors.episode_span = true
-        console.error(err)
-      }
-      this.loading.episode_span = false
-    },
-
-    async onDateChanged(scheduleItem) {
-      this.errors.scheduleTimeUpdate = false
-      try {
-        await this.saveScheduleItem(scheduleItem)
-      } catch (err) {
-        console.error(err)
-        this.errors.scheduleTimeUpdate = true
-      }
-    },
-
-    async savePriorities(forms) {
-      const now = new Date().getTime()
-      this.lastCall = this.lastCall || 0
-      if (now - this.lastCall > 1000 && !this.isSaving) {
-        this.lastCall = now
-        this.isSaving = true
-        await func.runPromiseAsSeries(
-          forms.map(async form => {
-            return await this.editTaskTypeLink(form)
-          })
-        )
-        this.isSaving = false
-        if (this.newSaveCall) {
-          await this.savePriorities(forms)
-        }
-        setTimeout(() => {
-          this.$store.commit('SORT_VALIDATION_COLUMNS', this.taskTypeMap)
-        }, 100)
-      } else {
-        this.newSaveCall = true
-      }
-    },
-
-    async updatePriorities(taskTypes) {
-      const forms = []
-      taskTypes.forEach((item, index) => {
-        index += 1
-        const form = {
-          projectId: this.currentProduction.id,
-          taskTypeId: item.taskType.id,
-          priority: index
-        }
-        forms.push(form)
-      })
-      await this.savePriorities(forms)
-      await this.loadContext()
-    },
-
-    async importTaskTypesFromProduction(productionId) {
-      this.loading.import = true
-      const taskTypes = this.getProductionTaskTypes(productionId).filter(
-        t => `${t.for_entity.toLowerCase()}s` === this.activeTab
-      )
-      const entityName = stringHelper.capitalize(this.activeTab).slice(0, -1)
-      await this[`production${entityName}TaskTypes`].forEach(async taskType => {
-        const scheduleItem = this.getScheduleItemForTaskType(taskTypes[0])
-        await this.removeTaskType({
-          taskType,
-          scheduleItem
-        })
-      })
-      setTimeout(async () => {
-        await taskTypes.forEach(async taskType => {
-          await this.addTaskType(taskType)
-        })
-        this.loading.import = false
-      }, 500)
-    }
-  },
-
-  watch: {
-    currentProduction: {
-      handler() {
-        this.episode_span = this.currentProduction.episode_span
-        this.loadAllScheduleItems(this.currentProduction)
-        this.resetDisplayedTaskTypes()
-      },
-      deep: true
-    },
-
-    $route() {
-      if (this.$route.query.section) {
-        this.activeTab = this.$route.query.section
-        this.$nextTick(() => {
-          if (this.remainingTaskTypesForEntity.length > 0) {
-            this.taskTypeId = this.remainingTaskTypesForEntity[0].id
-          } else {
-            this.taskTypeId = null
-          }
-        })
-      }
-    }
+const onDateChanged = async scheduleItem => {
+  errors.scheduleTimeUpdate = false
+  try {
+    await store.dispatch('saveScheduleItem', scheduleItem)
+  } catch (err) {
+    console.error(err)
+    errors.scheduleTimeUpdate = true
   }
 }
+
+const savePriorities = async forms => {
+  const now = new Date().getTime()
+  if (now - lastCall > 1000 && !isSaving) {
+    lastCall = now
+    isSaving = true
+    await func.runPromiseAsSeries(
+      forms.map(async form => store.dispatch('editTaskTypeLink', form))
+    )
+    isSaving = false
+    if (newSaveCall) {
+      await savePriorities(forms)
+    }
+    setTimeout(() => {
+      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
+    }, 100)
+  } else {
+    newSaveCall = true
+  }
+}
+
+const updatePriorities = async items => {
+  const forms = items.map((item, index) => ({
+    projectId: currentProduction.value.id,
+    taskTypeId: item.taskType.id,
+    priority: index + 1
+  }))
+  await savePriorities(forms)
+  await store.dispatch('loadContext')
+}
+
+const importTaskTypesFromProduction = async productionId => {
+  loading.import = true
+  const imported = getProductionTaskTypes
+    .value(productionId)
+    .filter(tt => `${tt.for_entity.toLowerCase()}s` === activeTab.value)
+  const entityName = stringHelper.capitalize(activeTab.value).slice(0, -1)
+  const group = groupByType[entityName]?.ref.value?.list || []
+  for (const item of group) {
+    await removeTaskType({
+      taskType: item.taskType,
+      scheduleItem: imported[0] ? getScheduleItemForTaskType(imported[0]) : null
+    })
+  }
+  setTimeout(async () => {
+    for (const taskType of imported) {
+      await addTaskType(taskType)
+    }
+    loading.import = false
+  }, 500)
+}
+
+onMounted(() => {
+  updateTaskTypeIdFromRemaining()
+
+  if (route.query.section) {
+    activeTab.value = route.query.section
+  } else {
+    activeTab.value = isShotsOnly.value ? 'shots' : 'assets'
+  }
+
+  resetDisplayedTaskTypes()
+  if (currentProduction.value) {
+    episode_span.value = currentProduction.value.episode_span
+    store.dispatch('loadAllScheduleItems', currentProduction.value).then(() => {
+      resetDisplayedTaskTypes()
+    })
+  }
+})
+
+watch(
+  currentProduction,
+  () => {
+    episode_span.value = currentProduction.value.episode_span
+    store.dispatch('loadAllScheduleItems', currentProduction.value)
+    resetDisplayedTaskTypes()
+  },
+  { deep: true }
+)
+
+watch(
+  () => route.query.section,
+  section => {
+    if (!section) return
+    activeTab.value = section
+    nextTick(() => {
+      updateTaskTypeIdFromRemaining()
+    })
+  }
+)
 </script>
 
 <style lang="scss" scoped>

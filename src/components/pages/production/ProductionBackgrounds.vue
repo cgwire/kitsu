@@ -11,40 +11,29 @@
   />
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import BackgroundSettings from '@/components/pages/production/BackgroundSettings.vue'
 
-export default {
-  name: 'production-backgrounds',
+const store = useStore()
 
-  components: {
-    BackgroundSettings
-  },
+const backgrounds = computed(() => store.getters.backgrounds)
+const currentProduction = computed(() => store.getters.currentProduction)
+const productionBackgrounds = computed(
+  () => store.getters.productionBackgrounds
+)
 
-  computed: {
-    ...mapGetters(['backgrounds', 'currentProduction', 'productionBackgrounds'])
-  },
+const onAdd = backgroundId => {
+  store.dispatch('addBackgroundToProduction', backgroundId)
+}
 
-  methods: {
-    ...mapActions([
-      'addBackgroundToProduction',
-      'removeBackgroundFromProduction',
-      'setDefaultBackgroundToProduction'
-    ]),
+const onRemove = backgroundId => {
+  store.dispatch('removeBackgroundFromProduction', backgroundId)
+}
 
-    onAdd(backgroundId) {
-      this.addBackgroundToProduction(backgroundId)
-    },
-
-    onRemove(backgroundId) {
-      this.removeBackgroundFromProduction(backgroundId)
-    },
-
-    onSetDefault(backgroundId) {
-      this.setDefaultBackgroundToProduction(backgroundId)
-    }
-  }
+const onSetDefault = backgroundId => {
+  store.dispatch('setDefaultBackgroundToProduction', backgroundId)
 }
 </script>

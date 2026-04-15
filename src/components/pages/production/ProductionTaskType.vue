@@ -18,119 +18,94 @@
   </tr>
 </template>
 
-<script>
+<script setup>
 import moment from 'moment'
-import { mapGetters } from 'vuex'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
 import { parseDate } from '@/lib/time'
 import { GripVerticalIcon } from 'lucide-vue-next'
 
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
-export default {
-  name: 'production-task-type',
+const props = defineProps({
+  taskType: { required: true, type: Object },
+  scheduleItem: { required: true, type: Object }
+})
 
-  components: {
-    GripVerticalIcon,
-    TaskTypeCell
-  },
+const emit = defineEmits(['date-changed', 'remove'])
 
-  props: {
-    taskType: {
-      required: true,
-      type: Object
-    },
-    scheduleItem: {
-      required: true,
-      type: Object
-    }
-  },
+const store = useStore()
 
-  emits: ['date-changed', 'remove'],
+const startDate = ref(null)
+const endDate = ref(null)
+const silent = ref(true)
 
-  data() {
-    return {
-      startDate: null,
-      endDate: null,
-      silent: true
-    }
-  },
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  computed: {
-    ...mapGetters(['currentProduction', 'getTaskTypePriority']),
+// eslint-disable-next-line no-unused-vars
+const productionTimeRange = computed(() => ({
+  to: parseDate(currentProduction.value.start_date).toDate(),
+  from: parseDate(currentProduction.value.end_date).toDate()
+}))
 
-    productionTimeRange() {
-      const dates = {
-        to: parseDate(this.currentProduction.start_date).toDate(),
-        from: parseDate(this.currentProduction.end_date).toDate()
-      }
-      return dates
-    },
+// eslint-disable-next-line no-unused-vars
+const endDateTimeRange = computed(() => ({
+  to: startDate.value,
+  from: parseDate(currentProduction.value.end_date).toDate()
+}))
 
-    endDateTimeRange() {
-      const dates = {
-        to: this.startDate,
-        from: parseDate(this.currentProduction.end_date).toDate()
-      }
-      return dates
-    }
-  },
+onMounted(() => {
+  startDate.value = parseDate(props.scheduleItem.start_date).toDate()
+  endDate.value = parseDate(props.scheduleItem.end_date).toDate()
+  nextTick(() => {
+    silent.value = false
+  })
+})
 
-  mounted() {
-    this.startDate = parseDate(this.scheduleItem.start_date).toDate()
-    this.endDate = parseDate(this.scheduleItem.end_date).toDate()
-    this.$nextTick(() => {
-      this.silent = false
-    })
-  },
-
-  watch: {
-    startDate() {
-      if (this.silent) return
-      const startDate = moment(this.startDate)
-      let endDate = moment(this.endDate)
-      this.silent = true
-      if (endDate.isBefore(startDate)) {
-        endDate = startDate.clone().add(1, 'days')
-        this.endDate = endDate.toDate()
-      }
-      const data = { ...this.scheduleItem }
-      data.startDate = startDate
-      data.endDate = endDate
-      this.$emit('date-changed', data)
-      this.$nextTick(() => {
-        this.silent = false
-      })
-    },
-
-    endDate() {
-      if (this.silent) return
-      let startDate = moment(this.startDate)
-      const endDate = moment(this.endDate)
-      this.silent = true
-      if (endDate.isBefore(startDate)) {
-        startDate = endDate.clone().add(-1, 'days')
-        this.startDate = startDate.toDate()
-      }
-      const data = { ...this.scheduleItem }
-      data.startDate = startDate
-      data.endDate = endDate
-      this.$emit('date-changed', data)
-      this.$nextTick(() => {
-        this.silent = false
-      })
-    },
-
-    scheduleItem() {
-      this.silent = true
-      this.startDate = parseDate(this.scheduleItem.start_date).toDate()
-      this.endDate = parseDate(this.scheduleItem.end_date).toDate()
-      this.$nextTick(() => {
-        this.silent = false
-      })
-    }
+watch(startDate, () => {
+  if (silent.value) return
+  const start = moment(startDate.value)
+  let end = moment(endDate.value)
+  silent.value = true
+  if (end.isBefore(start)) {
+    end = start.clone().add(1, 'days')
+    endDate.value = end.toDate()
   }
-}
+  const data = { ...props.scheduleItem, startDate: start, endDate: end }
+  emit('date-changed', data)
+  nextTick(() => {
+    silent.value = false
+  })
+})
+
+watch(endDate, () => {
+  if (silent.value) return
+  let start = moment(startDate.value)
+  const end = moment(endDate.value)
+  silent.value = true
+  if (end.isBefore(start)) {
+    start = end.clone().add(-1, 'days')
+    startDate.value = start.toDate()
+  }
+  const data = { ...props.scheduleItem, startDate: start, endDate: end }
+  emit('date-changed', data)
+  nextTick(() => {
+    silent.value = false
+  })
+})
+
+watch(
+  () => props.scheduleItem,
+  () => {
+    silent.value = true
+    startDate.value = parseDate(props.scheduleItem.start_date).toDate()
+    endDate.value = parseDate(props.scheduleItem.end_date).toDate()
+    nextTick(() => {
+      silent.value = false
+    })
+  }
+)
 </script>
 
 <style lang="scss" scoped>
