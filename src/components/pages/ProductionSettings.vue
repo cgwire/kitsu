@@ -422,4 +422,150 @@ th {
   width: 40px;
   color: $grey;
 }
+
+.tabs {
+  overflow-x: auto;
+}
+
+.tabs ul {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 1000px) {
+  .wrapper {
+    padding: 1.5em 1em;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .wrapper {
+    padding: 1em 0.75em;
+  }
+
+  .column {
+    padding: 0.5em 0;
+  }
+
+  .columns {
+    margin-bottom: 1em;
+  }
+
+  .box {
+    padding: 1.5em;
+  }
+
+  /* Read-only mobile: hide add buttons / mutation widgets */
+  .tab .has-text-right {
+    display: none;
+  }
+
+  .tab > .flexrow.mt1.mb1 {
+    display: none;
+  }
+
+  :deep(.tab .columns .column + .column) {
+    display: none;
+  }
+
+  :deep(.tab .remove),
+  :deep(.tab .grab),
+  :deep(.tab td.remove),
+  :deep(.tab td.grab),
+  :deep(.tab .name-full) {
+    display: none !important;
+  }
+
+  :deep(.background-settings .flexrow.mt1.mb1),
+  :deep(.task-status-settings .add-task-status),
+  :deep(.status-automation-settings .add-status-automation) {
+    display: none;
+  }
+
+  :deep(.background-settings .datatable th:last-child),
+  :deep(.background-settings .datatable td:last-child),
+  :deep(.background-settings .is-default) {
+    display: none !important;
+  }
+
+  :deep(.tab .datatable-row .button) {
+    display: none !important;
+  }
+
+  :deep(.board-settings .roles .button) {
+    display: none;
+  }
+
+  :deep(.board-settings .roles .bool-field) {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  :deep(.board-settings .datatable-row .roles .bool-field) {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    margin-bottom: 0.35em;
+  }
+
+  /* Card mode for every list/table inside a tab */
+  :deep(.tab .datatable),
+  :deep(.tab .datatable.list),
+  :deep(.tab table.list) {
+    display: block;
+    background: transparent;
+    overflow-x: visible;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    white-space: normal;
+  }
+
+  :deep(.tab .columns),
+  :deep(.tab .columns .column) {
+    max-width: 100%;
+    min-width: 0;
+    width: auto;
+  }
+
+  :deep(.tab .datatable .datatable-head),
+  :deep(.tab .datatable thead) {
+    display: none;
+  }
+
+  :deep(.tab .datatable .datatable-body),
+  :deep(.tab .datatable tbody) {
+    display: block;
+  }
+
+  :deep(.tab .datatable .datatable-row),
+  :deep(.tab .datatable .datatable-row:nth-child(even)),
+  :deep(.tab .datatable .datatable-row:hover),
+  :deep(.tab .datatable .datatable-row:last-child) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.6em 0.75em;
+    margin-bottom: 0.5em;
+    background-color: var(--background) !important;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  :deep(.tab .datatable .datatable-row td),
+  :deep(.tab .datatable .datatable-row:last-child td),
+  :deep(.tab .datatable .datatable-row:last-child:nth-child(even) td),
+  :deep(.tab .datatable .datatable-row:last-child:hover td) {
+    display: block;
+    padding: 0;
+    border: 0;
+    background-color: transparent !important;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+  }
+}
 </style>
