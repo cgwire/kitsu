@@ -122,14 +122,15 @@ export default {
     font-weight: 600;
     line-height: 1.125;
     padding-top: 0.2em;
-
-    &.optional {
-      color: var(--text);
-    }
   }
 
   h3.title.is-completed {
     color: $green;
+  }
+
+  h3.title.optional,
+  h3.title.optional.is-completed {
+    color: var(--text) !important;
   }
 
   p.subtitle {

@@ -26,282 +26,314 @@
           />
         </timeline-item>
         <timeline-item
-          :title="$t('productions.creation.production_settings')"
-          :subtitle="$t('productions.creation.production_settings_description')"
+          :title="$t('productions.creation.choose_template')"
+          :subtitle="$t('productions.creation.choose_template_description')"
           :step="2"
-          :is-completed="hasValidSettings"
+          :is-completed="!!productionToCreate.project_template_id"
+          :optional="true"
         >
-          <div class="flexrow">
-            <combobox-styled
-              class="flexrow-item"
-              :options="productionTypeOptions"
-              :label="$t('productions.fields.type')"
-              locale-key-prefix="productions.type."
-              v-model="productionToCreate.settings.type"
-              thin
-              is-inline
-            />
-            <combobox-styled
-              class="flexrow-item"
-              :options="productionStyleOptions"
-              :label="$t('productions.fields.style')"
-              locale-key-prefix="productions.style."
-              v-model="productionToCreate.settings.style"
-              thin
-              is-inline
-            />
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_type') }}
-          </div>
-          <div class="flexrow">
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-4"
-              :label="$t('productions.fields.fps')"
-              type="number"
-              :max="60"
-              :step="0.001"
-              :placeholder="$t('productions.creation.placeholder_fps')"
-              :errored="!hasValidFPS"
-              v-model="productionToCreate.settings.fps"
-              thin
-            />
-            <span class="input-separator flexrow-item mr1"></span>
-            <text-field
-              class="flexrow-item mr0"
-              input-class=" is-small is-size-3"
-              :label="$t('productions.fields.ratio')"
-              type="number"
-              :step="0.01"
-              :placeholder="$t('productions.creation.placeholder_ratio1')"
-              v-model="productionToCreate.settings.ratio[0]"
-              thin
-            />
-            <span class="input-separator flexrow-item mt15 mr0">:</span>
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-2"
-              type="number"
-              :step="1"
-              :placeholder="$t('productions.creation.placeholder_ratio2')"
-              :empty-label="true"
-              v-model="productionToCreate.settings.ratio[1]"
-              thin
-            />
-            <span class="input-separator flexrow-item mr1"></span>
-            <text-field
-              class="flexrow-item mr0 ml2"
-              input-class=" is-small is-size-4"
-              :label="$t('productions.fields.resolution')"
-              type="number"
-              :step="1"
-              :placeholder="$t('productions.creation.placeholder_resolution1')"
-              v-model="productionToCreate.settings.resolution[0]"
-              thin
-            />
-            <span class="input-separator flexrow-item mt15 mr05">x</span>
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-4"
-              type="number"
-              :placeholder="$t('productions.creation.placeholder_resolution2')"
-              :step="1"
-              :empty-label="true"
-              v-model="productionToCreate.settings.resolution[1]"
-              thin
-            />
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_video') }}
-          </div>
-          <div>
-            <label class="label">
-              {{ $t('productions.creation.start_and_end_dates') }}
-            </label>
-            <div class="date-picker-wrapper">
-              <date-field
-                :can-delete="false"
-                :label="$t('main.start_date')"
-                :max-date="productionToCreate.settings.dateEnd"
-                :placeholder="startDatePlaceholder"
-                v-model="productionToCreate.settings.dateStart"
+          <combobox-styled
+            :options="projectTemplateOptions"
+            :label="$t('project_templates.title')"
+            v-model="productionToCreate.project_template_id"
+            thin
+            is-inline
+          />
+        </timeline-item>
+        <template v-if="!productionToCreate.project_template_id">
+          <timeline-item
+            :title="$t('productions.creation.production_settings')"
+            :subtitle="
+              $t('productions.creation.production_settings_description')
+            "
+            :step="3"
+            :is-completed="hasValidSettings"
+          >
+            <div class="flexrow">
+              <combobox-styled
+                class="flexrow-item"
+                :options="productionTypeOptions"
+                :label="$t('productions.fields.type')"
+                locale-key-prefix="productions.type."
+                v-model="productionToCreate.settings.type"
+                thin
+                is-inline
               />
-              <span class="input-separator">-</span>
-              <date-field
-                :can-delete="false"
-                :label="$t('main.end_date')"
-                :min-date="productionToCreate.settings.dateStart"
-                :placeholder="endDatePlaceholder"
-                v-model="productionToCreate.settings.dateEnd"
+              <combobox-styled
+                class="flexrow-item"
+                :options="productionStyleOptions"
+                :label="$t('productions.fields.style')"
+                locale-key-prefix="productions.style."
+                v-model="productionToCreate.settings.style"
+                thin
+                is-inline
               />
             </div>
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_date') }}
-          </div>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_asset_task_type')"
-          :subtitle="
-            $t('productions.creation.select_asset_task_type_description')
-          "
-          :step="3"
-          :is-completed="hasValidAssetTaskTypes"
-          v-if="!isShotsOnly"
-        >
-          <draggable item-key="id" v-model="productionToCreate.assetTaskTypes">
-            <template #item="{ element: taskType }">
-              <task-type-name
-                class="task-type"
-                deletable
-                :task-type="taskType"
-                @delete="deleteFromList(taskType, 'assetTaskTypes')"
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_type') }}
+            </div>
+            <div class="flexrow">
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-4"
+                :label="$t('productions.fields.fps')"
+                type="number"
+                :max="60"
+                :step="0.001"
+                :placeholder="$t('productions.creation.placeholder_fps')"
+                :errored="!hasValidFPS"
+                v-model="productionToCreate.settings.fps"
+                thin
               />
-            </template>
-            <template #header>
-              <div class="flexrow mb1">
-                <combobox-task-type
-                  class="is-inline inline-task-type-combo flexrow-item mb0"
-                  :task-type-list="availableAssetTaskTypes"
-                  add-placeholder
-                  @update:model-value="
-                    id =>
-                      productionToCreate.assetTaskTypes.push(
-                        taskTypeMap.get(id)
-                      )
-                  "
-                  v-if="availableAssetTaskTypes.length"
-                />
-                <button
-                  class="button is-link flexrow-item"
-                  @click="onAddLibraryAssetTaskTypeClicked"
-                >
-                  {{ $t('task_types.add_task_type_to_library') }}
-                </button>
-              </div>
-            </template>
-          </draggable>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_shot_task_type')"
-          :subtitle="
-            $t('productions.creation.select_shot_task_type_description')
-          "
-          :step="isShotsOnly ? 3 : 4"
-          :is-completed="hasValidShotTaskTypes"
-          v-if="!isAssetsOnly"
-        >
-          <draggable item-key="id" v-model="productionToCreate.shotTaskTypes">
-            <template #item="{ element: taskType }">
-              <task-type-name
-                class="task-type"
-                deletable
-                :task-type="taskType"
-                @delete="deleteFromList(taskType, 'shotTaskTypes')"
+              <span class="input-separator flexrow-item mr1"></span>
+              <text-field
+                class="flexrow-item mr0"
+                input-class=" is-small is-size-3"
+                :label="$t('productions.fields.ratio')"
+                type="number"
+                :step="0.01"
+                :placeholder="$t('productions.creation.placeholder_ratio1')"
+                v-model="productionToCreate.settings.ratio[0]"
+                thin
               />
-            </template>
-            <template #header>
-              <div class="flexrow mb1">
-                <combobox-task-type
-                  class="is-inline inline-task-type-combo flexrow-item mb0"
-                  :task-type-list="availableShotTaskTypes"
-                  add-placeholder
-                  @update:model-value="
-                    id =>
-                      productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
-                  "
-                  v-if="availableShotTaskTypes.length"
+              <span class="input-separator flexrow-item mt15 mr0">:</span>
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-2"
+                type="number"
+                :step="1"
+                :placeholder="$t('productions.creation.placeholder_ratio2')"
+                :empty-label="true"
+                v-model="productionToCreate.settings.ratio[1]"
+                thin
+              />
+              <span class="input-separator flexrow-item mr1"></span>
+              <text-field
+                class="flexrow-item mr0 ml2"
+                input-class=" is-small is-size-4"
+                :label="$t('productions.fields.resolution')"
+                type="number"
+                :step="1"
+                :placeholder="
+                  $t('productions.creation.placeholder_resolution1')
+                "
+                v-model="productionToCreate.settings.resolution[0]"
+                thin
+              />
+              <span class="input-separator flexrow-item mt15 mr05">x</span>
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-4"
+                type="number"
+                :placeholder="
+                  $t('productions.creation.placeholder_resolution2')
+                "
+                :step="1"
+                :empty-label="true"
+                v-model="productionToCreate.settings.resolution[1]"
+                thin
+              />
+            </div>
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_video') }}
+            </div>
+            <div>
+              <label class="label">
+                {{ $t('productions.creation.start_and_end_dates') }}
+              </label>
+              <div class="date-picker-wrapper">
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.start_date')"
+                  :max-date="productionToCreate.settings.dateEnd"
+                  :placeholder="startDatePlaceholder"
+                  v-model="productionToCreate.settings.dateStart"
                 />
-                <button
-                  class="button is-link flexrow-item"
-                  @click="onAddLibraryShotTaskTypeClicked"
-                >
-                  {{ $t('task_types.add_task_type_to_library') }}
-                </button>
+                <span class="input-separator">-</span>
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.end_date')"
+                  :min-date="productionToCreate.settings.dateStart"
+                  :placeholder="endDatePlaceholder"
+                  v-model="productionToCreate.settings.dateEnd"
+                />
               </div>
-            </template>
-          </draggable>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_task_status')"
-          :subtitle="$t('productions.creation.select_task_status_description')"
-          :step="isShotsOnly || isAssetsOnly ? 4 : 5"
-          :is-completed="hasValidTaskStatuses"
-        >
-          <div class="flexrow">
-            <combobox-status
-              class="flexrow-item"
-              :task-status-list="availableTaskStatuses"
-              :with-margin="false"
-              add-placeholder
-              @update:model-value="
-                id =>
-                  productionToCreate.taskStatuses.push(taskStatusMap.get(id))
-              "
-              v-if="availableTaskStatuses.length > 0"
-            />
-            <button
-              class="button is-link flexrow-item"
-              @click="modals.isAddTaskStatusDisplayed = true"
+            </div>
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_date') }}
+            </div>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_asset_task_type')"
+            :subtitle="
+              $t('productions.creation.select_asset_task_type_description')
+            "
+            :step="4"
+            :is-completed="hasValidAssetTaskTypes"
+            v-if="!isShotsOnly"
+          >
+            <draggable
+              item-key="id"
+              v-model="productionToCreate.assetTaskTypes"
             >
-              {{ $t('task_status.add_task_status_to_library') }}
-            </button>
-          </div>
-          <div class="flexrow mt1">
-            <validation-tag
-              class="task-status flexrow-item"
-              :task="{ task_status_id: taskStatus.id }"
-              :key="taskStatus.id"
-              pointer
-              is-static
-              @click="deleteFromList(taskStatus, 'taskStatuses')"
-              v-for="taskStatus in productionToCreate.taskStatuses"
-            />
-          </div>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.add_asset_types')"
-          :subtitle="$t('productions.creation.add_asset_types_description')"
-          :step="isAssetsOnly ? 5 : 6"
-          :is-completed="hasValidAssetTypes"
-          v-if="!isShotsOnly"
-        >
-          <div class="flexrow asset-types mb1">
-            <combobox
-              class="flexrow-item"
-              :options="availableAssetTypes"
-              :with-margin="false"
-              @update:model-value="
-                id => {
-                  assetTypeMap.get(id) &&
-                    productionToCreate.assetTypes.push(assetTypeMap.get(id))
-                }
-              "
-              v-if="availableAssetTypes.length > 1"
-            />
-            <button
-              class="button is-link flexrow-item"
-              @click="modals.isAddAssetTypeDisplayed = true"
-            >
-              {{ $t('asset_types.add_asset_type_to_library') }}
-            </button>
-          </div>
-          <div class="flexrow mt1">
-            <span
-              :key="assetType.id"
-              class="asset-type-name flexrow-item"
-              @click="deleteFromList(assetType, 'assetTypes')"
-              v-for="assetType in productionToCreate.assetTypes"
-            >
-              {{ assetType.name }}
-            </span>
-          </div>
-        </timeline-item>
+              <template #item="{ element: taskType }">
+                <task-type-name
+                  class="task-type"
+                  deletable
+                  :task-type="taskType"
+                  @delete="deleteFromList(taskType, 'assetTaskTypes')"
+                />
+              </template>
+              <template #header>
+                <div class="flexrow mb1">
+                  <combobox-task-type
+                    class="is-inline inline-task-type-combo flexrow-item mb0"
+                    :task-type-list="availableAssetTaskTypes"
+                    add-placeholder
+                    @update:model-value="
+                      id =>
+                        productionToCreate.assetTaskTypes.push(
+                          taskTypeMap.get(id)
+                        )
+                    "
+                    v-if="availableAssetTaskTypes.length"
+                  />
+                  <button
+                    class="button is-link flexrow-item"
+                    @click="onAddLibraryAssetTaskTypeClicked"
+                  >
+                    {{ $t('task_types.add_task_type_to_library') }}
+                  </button>
+                </div>
+              </template>
+            </draggable>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_shot_task_type')"
+            :subtitle="
+              $t('productions.creation.select_shot_task_type_description')
+            "
+            :step="isShotsOnly ? 4 : 5"
+            :is-completed="hasValidShotTaskTypes"
+            v-if="!isAssetsOnly"
+          >
+            <draggable item-key="id" v-model="productionToCreate.shotTaskTypes">
+              <template #item="{ element: taskType }">
+                <task-type-name
+                  class="task-type"
+                  deletable
+                  :task-type="taskType"
+                  @delete="deleteFromList(taskType, 'shotTaskTypes')"
+                />
+              </template>
+              <template #header>
+                <div class="flexrow mb1">
+                  <combobox-task-type
+                    class="is-inline inline-task-type-combo flexrow-item mb0"
+                    :task-type-list="availableShotTaskTypes"
+                    add-placeholder
+                    @update:model-value="
+                      id =>
+                        productionToCreate.shotTaskTypes.push(
+                          taskTypeMap.get(id)
+                        )
+                    "
+                    v-if="availableShotTaskTypes.length"
+                  />
+                  <button
+                    class="button is-link flexrow-item"
+                    @click="onAddLibraryShotTaskTypeClicked"
+                  >
+                    {{ $t('task_types.add_task_type_to_library') }}
+                  </button>
+                </div>
+              </template>
+            </draggable>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_task_status')"
+            :subtitle="
+              $t('productions.creation.select_task_status_description')
+            "
+            :step="isShotsOnly || isAssetsOnly ? 5 : 6"
+            :is-completed="hasValidTaskStatuses"
+          >
+            <div class="flexrow">
+              <combobox-status
+                class="flexrow-item"
+                :task-status-list="availableTaskStatuses"
+                :with-margin="false"
+                add-placeholder
+                @update:model-value="
+                  id =>
+                    productionToCreate.taskStatuses.push(taskStatusMap.get(id))
+                "
+                v-if="availableTaskStatuses.length > 0"
+              />
+              <button
+                class="button is-link flexrow-item"
+                @click="modals.isAddTaskStatusDisplayed = true"
+              >
+                {{ $t('task_status.add_task_status_to_library') }}
+              </button>
+            </div>
+            <div class="flexrow mt1">
+              <validation-tag
+                class="task-status flexrow-item"
+                :task="{ task_status_id: taskStatus.id }"
+                :key="taskStatus.id"
+                pointer
+                is-static
+                @click="deleteFromList(taskStatus, 'taskStatuses')"
+                v-for="taskStatus in productionToCreate.taskStatuses"
+              />
+            </div>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.add_asset_types')"
+            :subtitle="$t('productions.creation.add_asset_types_description')"
+            :step="isAssetsOnly ? 6 : 7"
+            :is-completed="hasValidAssetTypes"
+            v-if="!isShotsOnly"
+          >
+            <div class="flexrow asset-types mb1">
+              <combobox
+                class="flexrow-item"
+                :options="availableAssetTypes"
+                :with-margin="false"
+                @update:model-value="
+                  id => {
+                    assetTypeMap.get(id) &&
+                      productionToCreate.assetTypes.push(assetTypeMap.get(id))
+                  }
+                "
+                v-if="availableAssetTypes.length > 1"
+              />
+              <button
+                class="button is-link flexrow-item"
+                @click="modals.isAddAssetTypeDisplayed = true"
+              >
+                {{ $t('asset_types.add_asset_type_to_library') }}
+              </button>
+            </div>
+            <div class="flexrow mt1">
+              <span
+                :key="assetType.id"
+                class="asset-type-name flexrow-item"
+                @click="deleteFromList(assetType, 'assetTypes')"
+                v-for="assetType in productionToCreate.assetTypes"
+              >
+                {{ assetType.name }}
+              </span>
+            </div>
+          </timeline-item>
+        </template>
         <timeline-item
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
-          :step="isAssetsOnly ? 6 : 7"
+          :step="
+            productionToCreate.project_template_id ? 3 : isAssetsOnly ? 7 : 8
+          "
           :is-completed="hasValidAssets"
           :optional="true"
           :is-last="isAssetsOnly"
@@ -323,7 +355,9 @@
         <timeline-item
           :title="$t('productions.creation.add_shots')"
           :subtitle="$t('productions.creation.add_shots_description')"
-          :step="isShotsOnly ? 5 : 8"
+          :step="
+            productionToCreate.project_template_id ? 4 : isShotsOnly ? 6 : 9
+          "
           :is-completed="hasValidShots"
           :optional="true"
           is-last
@@ -565,6 +599,7 @@ export default {
         assetTaskTypes: [],
         episodesToCreate: [],
         name: null,
+        project_template_id: null,
         sequencesToCreate: [],
         settings: {
           dateStart: null,
@@ -602,6 +637,7 @@ export default {
 
   mounted() {
     this.$refs.nameField.focus()
+    this.$store.dispatch('loadProjectTemplates')
   },
 
   computed: {
@@ -610,10 +646,24 @@ export default {
       'assetTaskTypes',
       'assetTypes',
       'productionStatus',
+      'projectTemplates',
       'shotsCsvFormData',
       'shotTaskTypes',
       'taskStatus'
     ]),
+
+    projectTemplateOptions() {
+      return [
+        {
+          label: this.$t('productions.creation.no_template'),
+          value: null
+        },
+        ...this.projectTemplates.map(template => ({
+          label: template.name,
+          value: template.id
+        }))
+      ]
+    },
 
     assetTypeMap() {
       return assetTypeStore.cache.assetTypeMap
@@ -762,6 +812,9 @@ export default {
     },
 
     hasAllDataCorrect() {
+      if (this.productionToCreate.project_template_id) {
+        return this.hasValidName
+      }
       return (
         this.hasValidName &&
         this.hasValidSettings &&
@@ -1017,20 +1070,31 @@ export default {
       this.errors.creatingProduction = false
       this.errors.creatingProductionError = ''
       try {
-        const createdProduction = await this.newProduction({
+        const hasTemplate = !!this.productionToCreate.project_template_id
+        const payload = {
           name: this.productionToCreate.name,
-          project_status_id: this.productionStatus[0].id,
-          fps: this.productionToCreate.settings.fps,
-          ratio: this.productionToCreate.settings.ratio.join(':'),
-          resolution: this.productionToCreate.settings.resolution.join('x'),
-          production_type: this.productionToCreate.settings.type,
-          production_style: this.productionToCreate.settings.style,
-          start_date: this.productionToCreate.settings.dateStart,
-          end_date: this.productionToCreate.settings.dateEnd
-        })
+          project_status_id: this.productionStatus[0].id
+        }
+        if (hasTemplate) {
+          payload.project_template_id =
+            this.productionToCreate.project_template_id
+        } else {
+          Object.assign(payload, {
+            fps: this.productionToCreate.settings.fps,
+            ratio: this.productionToCreate.settings.ratio.join(':'),
+            resolution: this.productionToCreate.settings.resolution.join('x'),
+            production_type: this.productionToCreate.settings.type,
+            production_style: this.productionToCreate.settings.style,
+            start_date: this.productionToCreate.settings.dateStart,
+            end_date: this.productionToCreate.settings.dateEnd
+          })
+        }
+        const createdProduction = await this.newProduction(payload)
         await this.setProduction(createdProduction.id)
-        await this.createTaskTypesAndStatuses()
-        await this.createAssetTypes()
+        if (!hasTemplate) {
+          await this.createTaskTypesAndStatuses()
+          await this.createAssetTypes()
+        }
         await this.createAssets()
         if (this.productionToCreate.production_type !== 'assets') {
           await this.createShots()
@@ -1262,6 +1326,8 @@ span.input-separator {
 
 .big-button {
   max-width: 100%;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
 
   &:active,
   &:focus {
