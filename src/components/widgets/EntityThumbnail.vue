@@ -99,11 +99,6 @@ const props = defineProps({
 
 const timer = ref('')
 
-const originalPath = computed(() => {
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  return '/api/pictures/originals/preview-files/' + previewFileId + '.png'
-})
-
 const isPreview = computed(() => {
   const previewFileId = props.previewFileId || props.entity?.preview_file_id
   return previewFileId?.length > 0

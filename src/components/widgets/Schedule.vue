@@ -1034,15 +1034,7 @@ let initialClientY = null
 let lastStartDate = null
 let lastEndDate = null
 
-const domEvents = [
-  ['mousemove', onMouseMove],
-  ['touchmove', onMouseMove],
-  ['mouseup', stopBrowsing],
-  ['mouseleave', stopBrowsing],
-  ['touchend', stopBrowsing],
-  ['touchcancel', stopBrowsing],
-  ['resize', resetScheduleSize]
-]
+let domEvents = []
 
 // Computed
 
@@ -2334,6 +2326,15 @@ watch(
 // Lifecycle
 
 onMounted(() => {
+  domEvents = [
+    ['mousemove', onMouseMove],
+    ['touchmove', onMouseMove],
+    ['mouseup', stopBrowsing],
+    ['mouseleave', stopBrowsing],
+    ['touchend', stopBrowsing],
+    ['touchcancel', stopBrowsing],
+    ['resize', resetScheduleSize]
+  ]
   resetScheduleSize()
   addEvents(domEvents)
 })

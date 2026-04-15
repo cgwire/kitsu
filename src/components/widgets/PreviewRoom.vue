@@ -42,7 +42,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['join-room', 'leave-room', 'open-room'])
+const emit = defineEmits(['join-room', 'leave-room'])
 
 const peopleInRoom = computed(() => {
   return props.room.people.map(id => personMap.value.get(id))
@@ -52,11 +52,6 @@ const joinedRoom = computed(() => {
   if (!props.room.id) return
   return props.room.people.find(id => id === user.value.id)
 })
-
-const openRoom = () => {
-  if (!props.room.id) return
-  emit('open-room', props.room.id)
-}
 
 const onJoinClicked = () => {
   emit('join-room', props.room.id)

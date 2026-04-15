@@ -1,10 +1,5 @@
 <template>
-  <div
-    ref="wrapperRef"
-    @drop="onDrop"
-    @dragover="onDragover"
-    @dragleave="onDragleave"
-  >
+  <div ref="wrapperRef" @drop="onDrop">
     <form enctype="multipart/form-data" novalidate>
       <div class="dropbox">
         <label
@@ -83,7 +78,6 @@ const isSaving = ref(false)
 const uploadedFiles = ref([])
 const wrapperRef = ref(null)
 const uploadInputRef = ref(null)
-let isDragging = false
 
 const filesChange = (name, files) => {
   uploadedFiles.value = []
@@ -115,17 +109,8 @@ const reset = () => {
   }
 }
 
-const onDragover = () => {
-  isDragging = true
-}
-
-const onDragleave = () => {
-  isDragging = false
-}
-
 const onDrop = event => {
   if (event.dataTransfer.files) {
-    isDragging = false
     isSaving.value = false
     filesChange('file', event.dataTransfer.files)
   }

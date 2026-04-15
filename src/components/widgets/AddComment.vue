@@ -138,14 +138,14 @@
       </div>
       <div class="post-area">
         <checklist
-          :checklist="checklist"
+          :checklist="checklistItems"
           :frame="frame + 1"
           :revision="revision"
           :is-movie-preview="isMovie"
           @add-item="onAddChecklistItem"
           @insert-item="onInsertChecklistItem"
           @remove-task="removeTask"
-          v-if="checklist.length > 0"
+          v-if="checklistItems.length > 0"
         />
 
         <div v-if="mode === 'publish'" class="post-area mt1">
@@ -231,7 +231,7 @@
           />
           <button-simple
             :class="{
-              active: checklist.length !== 0
+              active: checklistItems.length !== 0
             }"
             icon="list"
             :title="$t('comments.add_checklist')"
@@ -488,7 +488,7 @@ const attachments = computed({
   }
 })
 
-const checklist = computed({
+const checklistItems = computed({
   get: () => draftComment.checklist,
   set: value => {
     draftComment.checklist = value
@@ -645,7 +645,7 @@ const reset = () => {
   text.value = ''
   link.value = null
   attachments.value = []
-  checklist.value = []
+  checklistItems.value = []
   nextRevision.value = undefined
 }
 
@@ -670,13 +670,13 @@ const getRevision = form => {
 
 const onAddChecklistItem = item => {
   delete item.index
-  checklist.value.push(item)
+  checklistItems.value.push(item)
 }
 
 const onInsertChecklistItem = item => {
-  checklist.value.splice(item.index, 0, item)
-  for (let i = 0; i < checklist.value.length; i++) {
-    checklist.value[i].index = i
+  checklistItems.value.splice(item.index, 0, item)
+  for (let i = 0; i < checklistItems.value.length; i++) {
+    checklistItems.value[i].index = i
   }
 }
 
@@ -760,8 +760,8 @@ const removeAttachment = attach => {
 }
 
 const addChecklistEntry = index => {
-  if (index === -1 || index === checklist.value.length - 1) {
-    checklist.value.push({
+  if (index === -1 || index === checklistItems.value.length - 1) {
+    checklistItems.value.push({
       text: '',
       checked: false
     })
@@ -769,11 +769,11 @@ const addChecklistEntry = index => {
 }
 
 const removeTask = entry => {
-  checklist.value = remove(checklist.value, entry)
+  checklistItems.value = remove(checklistItems.value, entry)
 }
 
 const setValue = async comment => {
-  checklist.value = JSON.parse(JSON.stringify(comment.checklist))
+  checklistItems.value = JSON.parse(JSON.stringify(comment.checklist))
   text.value = comment.text
 
   // duplicate attachment files
@@ -824,8 +824,8 @@ onBeforeMount(() => {
   if (!attachments.value) {
     attachments.value = []
   }
-  if (!checklist.value) {
-    checklist.value = []
+  if (!checklistItems.value) {
+    checklistItems.value = []
   }
 })
 
@@ -883,7 +883,7 @@ watch(
 
 watch(mode, () => {
   if (mode.value === 'publish') {
-    checklist.value = []
+    checklistItems.value = []
     attachments.value = []
     if (text.value && text.value.length > 0) {
       showCommentArea.value = true

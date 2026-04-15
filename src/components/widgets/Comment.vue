@@ -96,13 +96,13 @@
             ></p>
             <checklist
               class="checklist"
-              :checklist="checklist"
+              :checklist="checklistItems"
               :disabled="true"
               :is-editable="isCheckable"
               @remove-task="removeTask"
               @emit-change="onChecklistChanged"
               @time-code-clicked="onChecklistTimecodeClicked"
-              v-if="checklist.length > 0"
+              v-if="checklistItems.length > 0"
             />
             <p v-if="comment.attachment_files.length > 0">
               <a
@@ -473,7 +473,7 @@ import { remove } from '@/lib/models'
 import { getDownloadAttachmentPath, pluralizeEntityType } from '@/lib/path'
 import { renderComment, replaceTimeWithTimecode } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
-import { formatDate, parseDate } from '@/lib/time'
+import { parseDate } from '@/lib/time'
 import stringHelpers from '@/lib/string'
 
 import { useAtMentionsMembers } from '@/composables/atMentions'
@@ -563,7 +563,7 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.taskTypes
 )
 
-const checklist = ref([])
+const checklistItems = ref([])
 const isReplyLoading = ref(false)
 const menuVisible = ref(false)
 const modals = reactive({
@@ -724,38 +724,12 @@ const renderDate = date => {
   }
 }
 
-const getPath = name => {
-  const r = {
-    name,
-    params: {
-      task_id: props.comment.object_id,
-      comment_id: props.comment.id
-    }
-  }
-  if (route.params.episode_id) {
-    r.name = `episode-${r.name}`
-    r.params.episode_id = route.params.episode_id
-  }
-  return r
-}
-
 const toggleCommentMenu = () => {
   menuVisible.value = !menuVisible.value
 }
 
-const addChecklistEntry = () => {
-  silent = true
-  checklist.value.push({
-    text: '',
-    checked: false
-  })
-  nextTick().then(() => {
-    silent = false
-  })
-}
-
 const removeTask = entry => {
-  checklist.value = remove(checklist.value, entry)
+  checklistItems.value = remove(checklistItems.value, entry)
 }
 
 const onChecklistChanged = () => {
@@ -764,7 +738,7 @@ const onChecklistChanged = () => {
     lastCall = now
     const comment = {
       id: props.comment.id,
-      checklist: checklist.value.filter(item => item.text?.length)
+      checklist: checklistItems.value.filter(item => item.text?.length)
     }
     emit('checklist-updated', comment)
   }
@@ -782,13 +756,6 @@ const timeCodeClicked = event => {
 }
 
 const onChecklistTimecodeClicked = data => {
-  emit('time-code-clicked', {
-    versionRevision: data.revision,
-    frame: data.frame - 1
-  })
-}
-
-const setFrame = data => {
   emit('time-code-clicked', {
     versionRevision: data.revision,
     frame: data.frame - 1
@@ -903,7 +870,7 @@ const onPaste = event => {
 onMounted(() => {
   if (props.comment.checklist) {
     silent = true
-    checklist.value = [...props.comment.checklist]
+    checklistItems.value = [...props.comment.checklist]
     nextTick().then(() => {
       silent = false
     })
@@ -929,14 +896,14 @@ watch(
   () => props.comment.checklist,
   () => {
     silent = true
-    checklist.value = [...props.comment.checklist]
+    checklistItems.value = [...props.comment.checklist]
     nextTick().then(() => {
       silent = false
     })
   }
 )
 
-watch(checklist, () => {
+watch(checklistItems, () => {
   if (!silent) {
     onChecklistChanged()
   }
