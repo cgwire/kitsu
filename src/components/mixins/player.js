@@ -734,13 +734,15 @@ export const playerMixin = {
 
     _saveHandles() {
       const shot = this.shotMap.get(this.currentEntity.id)
-      const editedShot = {
+      if (!shot) return
+      this.editShot({
         id: shot.id,
-        data: { ...shot.data }
-      }
-      editedShot.data.handle_in = this.handleIn
-      editedShot.data.handle_out = this.handleOut
-      this.editShot(editedShot)
+        data: {
+          ...shot.data,
+          handle_in: this.handleIn,
+          handle_out: this.handleOut
+        }
+      })
     },
 
     onPreviousFrameClicked() {
