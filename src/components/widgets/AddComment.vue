@@ -93,7 +93,7 @@
             runAddComment(
               text,
               attachments,
-              checklist,
+              checklistItems,
               task_status_id,
               nextRevision,
               link
@@ -103,7 +103,7 @@
             runAddComment(
               text,
               attachments,
-              checklist,
+              checklistItems,
               task_status_id,
               nextRevision,
               link
@@ -282,7 +282,7 @@
               runAddComment(
                 text,
                 attachments,
-                checklist,
+                checklistItems,
                 task_status_id,
                 nextRevision,
                 link
@@ -331,7 +331,7 @@
           runAddComment(
             text,
             attachments,
-            checklist,
+            checklistItems,
             task_status_id,
             nextRevision,
             link,
