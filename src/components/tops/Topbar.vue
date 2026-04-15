@@ -63,7 +63,9 @@
         >
           <router-link :to="lastProductionRoute" class="flexrow">
             <chevron-left-icon />
-            {{ $t('main.go_productions') }}
+            <span class="go-productions-label">
+              {{ $t('main.go_productions') }}
+            </span>
           </router-link>
         </div>
       </div>
@@ -990,6 +992,30 @@ export default {
 
 .help-button {
   margin-top: 3px;
+}
+
+@media screen and (max-width: 768px) {
+  .nav-item:has(.changelog-button),
+  .nav-item:has(.help-button) {
+    display: none;
+  }
+
+  .go-productions-label {
+    display: none;
+  }
+
+  .nav-right .nav-item {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .studio-logo-wrapper {
+    margin-right: 0;
+  }
+
+  .nav-left .nav-item:has(.go-productions-label) {
+    padding-left: 0;
+  }
 }
 
 .studio-logo-wrapper {
