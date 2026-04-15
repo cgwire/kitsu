@@ -84,7 +84,7 @@
             <td v-else>
               <button
                 class="button"
-                @click="removeStatusAutomation(statusAutomation.id)"
+                @click="$emit('remove-clicked', statusAutomation.id)"
               >
                 {{ $t('main.remove') }}
               </button>
@@ -105,7 +105,7 @@
 
 <script>
 import { AlertTriangleIcon } from 'lucide-vue-next'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 
 import { formatListMixin } from '@/components/mixins/format'
 
@@ -146,14 +146,13 @@ export default {
     }
   },
 
-  emits: ['delete-clicked', 'edit-clicked'],
+  emits: ['delete-clicked', 'edit-clicked', 'remove-clicked'],
 
   computed: {
     ...mapGetters([
       'taskStatusMap',
       'getTaskType',
-      'isStatusAutomationDisabled',
-      'remainingStatusAutomations'
+      'isStatusAutomationDisabled'
     ]),
 
     statusAutomations() {
@@ -163,18 +162,6 @@ export default {
           `status_automations.entity_types.${statusAutomation.entity_type.toLowerCase()}`
         )
       }))
-    }
-  },
-  methods: {
-    ...mapActions(['removeStatusAutomationFromProduction']),
-
-    async removeStatusAutomation(statusAutomationId) {
-      await this.removeStatusAutomationFromProduction(statusAutomationId)
-      await this.$nextTick()
-      // Reselect the remainingStatusAutomations to avoid empty statusAutomationId
-      if (this.remainingStatusAutomations.length > 0) {
-        this.statusAutomationId = this.remainingStatusAutomations[0].id
-      }
     }
   }
 }

@@ -56,6 +56,9 @@ const ProductionNewsFeed = () =>
   import('@/components/pages/ProductionNewsFeed.vue')
 const ProductionQuota = () => import('@/components/pages/ProductionQuota.vue')
 const Productions = () => import('@/components/pages/Productions.vue')
+const ProjectTemplates = () => import('@/components/pages/ProjectTemplates.vue')
+const ProjectTemplateSettings = () =>
+  import('@/components/pages/ProjectTemplateSettings.vue')
 const ProductionSchedule = () =>
   import('@/components/pages/ProductionSchedule.vue')
 const ProductionSettings = () =>
@@ -103,7 +106,9 @@ const ADMIN_PAGES = [
   'team-schedule',
   'settings',
   'status-automations',
-  'studios'
+  'studios',
+  'project-templates',
+  'project-template-settings'
 ]
 
 export const routes = [
@@ -237,6 +242,17 @@ export const routes = [
         path: 'studios',
         name: 'studios',
         component: Studios
+      },
+
+      {
+        path: 'project-templates',
+        name: 'project-templates',
+        component: ProjectTemplates
+      },
+      {
+        path: 'project-templates/:template_id',
+        name: 'project-template-settings',
+        component: ProjectTemplateSettings
       },
 
       {

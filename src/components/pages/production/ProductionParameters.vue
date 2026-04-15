@@ -50,6 +50,16 @@
 
         <combobox-styled
           class="mb2"
+          locale-key-prefix="productions.style."
+          :label="$t('productions.fields.style')"
+          :options="productionStyleOptions"
+          @enter="runConfirmation"
+          v-model="form.production_style"
+          v-if="currentProduction && currentProduction.id"
+        />
+
+        <combobox-styled
+          class="mb2"
           locale-key-prefix="productions.homepage."
           :label="$t('productions.fields.homepage')"
           :options="homepageOptions"
@@ -162,7 +172,11 @@
 import { mapGetters, mapActions } from 'vuex'
 
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
-import { PRODUCTION_TYPE_OPTIONS, HOME_PAGE_OPTIONS } from '@/lib/productions'
+import {
+  PRODUCTION_TYPE_OPTIONS,
+  PRODUCTION_STYLE_OPTIONS,
+  HOME_PAGE_OPTIONS
+} from '@/lib/productions'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
@@ -192,6 +206,7 @@ export default {
       isError: false,
       isLocalTVShow: false,
       productionTypeOptions: PRODUCTION_TYPE_OPTIONS,
+      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
       homepageOptions: HOME_PAGE_OPTIONS,
       form: {
         name: '',
@@ -208,7 +223,8 @@ export default {
         is_publish_default_for_artists: 'false',
         ratio: '',
         resolution: '',
-        production_type: 'short'
+        production_type: 'short',
+        production_style: '2d3d'
       }
     }
   },
@@ -279,6 +295,7 @@ export default {
           ).toDate(),
           end_date: parseSimpleDate(this.currentProduction.end_date).toDate(),
           production_type: this.currentProduction.production_type || 'short',
+          production_style: this.currentProduction.production_style || '2d3d',
           episode_span: this.currentProduction.episode_span,
           fps: this.currentProduction.fps,
           max_retakes: this.currentProduction.max_retakes,
@@ -309,6 +326,7 @@ export default {
           start_date: new Date(),
           end_date: new Date(),
           production_type: 'short',
+          production_style: '2d3d',
           nb_episodes: 0,
           episode_span: 0,
           max_retakes: 0,

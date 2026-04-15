@@ -27,6 +27,7 @@ import sequences from '@/store/modules/sequences'
 import shots from '@/store/modules/shots'
 import software from '@/store/modules/software'
 import statusAutomations from '@/store/modules/statusautomation'
+import projectTemplates from '@/store/modules/projecttemplates'
 import studios from '@/store/modules/studios'
 import taskStatus from '@/store/modules/taskstatus'
 import taskTypes from '@/store/modules/tasktypes'
@@ -52,6 +53,7 @@ const modules = {
   people,
   playlists,
   productions,
+  projectTemplates,
   news,
   notifications,
   schedule,
