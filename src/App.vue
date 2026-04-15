@@ -1708,8 +1708,38 @@ tbody:last-child .empty-line:last-child {
   &:last-child {
     background: transparent !important;
 
-    td {
+    td,
+    .datatable-row-header,
+    .validation-cell,
+    .hidden-validation-cell {
       background-color: var(--background);
+    }
+
+    &:nth-child(even) td,
+    &:nth-child(even) .datatable-row-header,
+    &:nth-child(even) .validation-cell,
+    &:nth-child(even) .hidden-validation-cell {
+      background-color: var(--background-alt);
+    }
+
+    &:hover td,
+    &:hover .datatable-row-header,
+    &:hover .datatable-row-footer {
+      background-color: var(--background-hover);
+    }
+
+    &.datatable-row--selectable:hover td,
+    &.datatable-row--selectable:hover .datatable-row-header,
+    &.datatable-row--selectable:hover .datatable-row-footer {
+      background-color: var(--background-selectable);
+    }
+
+    &.selected td,
+    &.selected .datatable-row-header,
+    &.selected:hover td,
+    &.selected:hover .datatable-row-header,
+    &.selected:hover .datatable-row-footer {
+      background-color: var(--background-selected);
     }
 
     td:first-child,
@@ -1721,14 +1751,6 @@ tbody:last-child .empty-line:last-child {
     td:last-child.datatable-row-footer {
       border-bottom-right-radius: 10px;
     }
-  }
-
-  &:last-child:nth-child(even) td {
-    background-color: var(--background-alt);
-  }
-
-  &:last-child:hover td {
-    background-color: var(--background-hover);
   }
 
   &.datatable-row--selectable {
@@ -1805,6 +1827,16 @@ tbody:last-child .empty-line:last-child {
   &:hover,
   &:hover .datatable-row-header {
     background: var(--background-hover);
+  }
+
+  &:last-child:nth-child(odd) td,
+  &:last-child:nth-child(odd) .datatable-row-header {
+    background-color: var(--background-alt);
+  }
+
+  &:last-child:nth-child(even) td,
+  &:last-child:nth-child(even) .datatable-row-header {
+    background-color: var(--background);
   }
 }
 
