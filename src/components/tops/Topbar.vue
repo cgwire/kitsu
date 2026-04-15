@@ -104,6 +104,7 @@
         </router-link>
         <global-search-field
           class="flexrow-item mr0"
+          :class="{ 'hide-in-production': isProductionContext }"
           v-if="mainConfig.indexer_configured"
         />
         <div class="nav-item">
@@ -1015,6 +1016,19 @@ export default {
 
   .nav-left .nav-item:has(.go-productions-label) {
     padding-left: 0;
+  }
+
+  .hide-in-production {
+    display: none;
+  }
+
+  .nav-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .nav-right {
+    flex: 0 0 auto;
   }
 }
 
