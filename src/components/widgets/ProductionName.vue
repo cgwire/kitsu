@@ -85,4 +85,10 @@ const thumbnailPath = computed(() => {
     color: $white;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .avatar-name {
+    display: none;
+  }
+}
 </style>
