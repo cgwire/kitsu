@@ -96,7 +96,7 @@
           <div
             class="flexrow descriptor-filter"
             :key="`descriptor-${i}`"
-            v-for="(descriptorFilter, i) in metadataDescriptorFilters.values"
+            v-for="(descriptorFilter, i) in validDescriptorFilters"
           >
             <combobox
               class="flexrow-item"
@@ -541,6 +541,12 @@ export default {
 
     metadataDescriptors() {
       return this[`${this.entityType}MetadataDescriptors`]
+    },
+
+    validDescriptorFilters() {
+      return this.metadataDescriptorFilters.values.filter(descriptor =>
+        this.getDescriptor(descriptor.id)
+      )
     }
   },
 
@@ -591,7 +597,7 @@ export default {
     },
 
     applyDescriptorChoice(query) {
-      this.metadataDescriptorFilters.values.forEach(descriptorFilter => {
+      this.validDescriptorFilters.forEach(descriptorFilter => {
         let operator = '=['
         let value
         if (descriptorFilter.is_checklist) {
