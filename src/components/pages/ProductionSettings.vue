@@ -13,6 +13,16 @@
               {{ $t('productions.brief.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
+            <a @click="activeTab = 'assetTypes'">
+              {{ $t('asset_types.title') }}
+            </a>
+          </li>
+          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
+            <a @click="activeTab = 'taskTypes'">
+              {{ $t('task_types.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('taskStatus') }">
             <a @click="activeTab = 'taskStatus'">
               {{ $t('task_status.title') }}
@@ -21,16 +31,6 @@
           <li :class="{ 'is-active': isActiveTab('board') }">
             <a @click="activeTab = 'board'">
               {{ $t('board.settings.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
-            <a @click="activeTab = 'taskTypes'">
-              {{ $t('task_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
-            <a @click="activeTab = 'assetTypes'">
-              {{ $t('asset_types.title') }}
             </a>
           </li>
           <li :class="{ 'is-active': isActiveTab('statusAutomations') }">
@@ -156,9 +156,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import draggable from 'vuedraggable'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { sortTaskStatuses } from '@/lib/sorting'
 
@@ -175,157 +179,109 @@ import ProductionStatusAutomations from '@/components/pages/production/Productio
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
-export default {
-  name: 'production-settings',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    AssetTypeSettings,
-    BooleanCell,
-    ComboboxStatus,
-    draggable,
-    GripVerticalIcon,
-    ProductionBackgrounds,
-    ProductionBoard,
-    ProductionBrief,
-    ProductionParameters,
-    ProductionStatusAutomations,
-    ProductionTaskTypes,
-    ValidationTag
-  },
+const activeTab = ref('parameters')
+const taskStatusItems = ref([])
+const taskStatusId = ref('')
 
-  data() {
-    return {
-      activeTab: 'parameters',
-      taskStatusItems: [],
-      taskStatusId: ''
-    }
-  },
+const assetTypes = computed(() => store.getters.assetTypes)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
+const productionTaskStatuses = computed(
+  () => store.getters.productionTaskStatuses
+)
+const taskStatus = computed(() => store.getters.taskStatus)
 
-  mounted() {
-    if (!this.isCurrentUserManager) {
-      this.$router.push({ name: 'not-found' })
-      return
-    }
+const remainingTaskStatuses = computed(() =>
+  taskStatus.value.filter(
+    status =>
+      !currentProduction.value.task_statuses.includes(status.id) &&
+      !status.for_concept
+  )
+)
 
-    if (this.remainingTaskStatuses.length > 0) {
-      this.taskStatusId = this.remainingTaskStatuses[0].id
-    }
-    if (this.$route.query.tab) {
-      this.activeTab = this.$route.query.tab
-    }
-  },
+const sortedProductionTaskStatuses = computed(() =>
+  sortTaskStatuses(productionTaskStatuses.value, currentProduction.value)
+)
 
-  computed: {
-    ...mapGetters([
-      'assetTypes',
-      'currentProduction',
-      'isCurrentUserManager',
-      'productionAssetTypes',
-      'productionTaskStatuses',
-      'taskStatus'
-    ]),
+const isEmpty = list => !list || list.length === 0
+const isActiveTab = tab => activeTab.value === tab
 
-    remainingTaskStatuses() {
-      return this.taskStatus.filter(
-        status =>
-          !this.currentProduction.task_statuses.includes(status.id) &&
-          !status.for_concept
-      )
-    },
-
-    sortedProductionTaskStatuses() {
-      return sortTaskStatuses(
-        this.productionTaskStatuses,
-        this.currentProduction
-      )
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addAssetTypeToProduction',
-      'addTaskStatusToProduction',
-      'editTaskStatusLink',
-      'loadContext',
-      'removeAssetTypeFromProduction',
-      'removeTaskStatusFromProduction'
-    ]),
-
-    isEmpty(list) {
-      return !list || list.length === 0
-    },
-
-    isActiveTab(tab) {
-      return this.activeTab === tab
-    },
-
-    addAssetType(assetTypeId) {
-      this.addAssetTypeToProduction(assetTypeId)
-    },
-
-    removeAssetType(assetTypeId) {
-      this.removeAssetTypeFromProduction(assetTypeId)
-    },
-
-    async addTaskStatus() {
-      await this.addTaskStatusToProduction(this.taskStatusId)
-      await this.loadContext()
-      this.taskStatusId = this.remainingTaskStatuses[0]?.id
-    },
-
-    async removeTaskStatus(taskStatusId) {
-      await this.removeTaskStatusFromProduction(taskStatusId)
-      await this.loadContext()
-      this.taskStatusId = this.remainingTaskStatuses[0]?.id
-    },
-
-    async updateTaskStatusPriority() {
-      await this.updateTaskStatusPriorities(this.taskStatusItems)
-    },
-
-    async updateTaskStatusPriorities(taskStatuses) {
-      const taskStatusLinks = taskStatuses.map((taskStatus, index) => ({
-        ...this.currentProduction.task_statuses_link[taskStatus.id],
-        priority: index + 1,
-        project_id: this.currentProduction.id,
-        task_status_id: taskStatus.id
-      }))
-      for (const taskStatusLink of taskStatusLinks) {
-        await this.editTaskStatusLink(taskStatusLink)
-      }
-      await this.loadContext()
-    }
-  },
-
-  watch: {
-    activeTab() {
-      if (this.$route.query.tab !== this.activeTab) {
-        this.$router.push({
-          query: {
-            tab: this.activeTab
-          }
-        })
-      }
-    },
-
-    sortedProductionTaskStatuses: {
-      immediate: true,
-      handler() {
-        this.taskStatusItems = JSON.parse(
-          JSON.stringify(this.sortedProductionTaskStatuses)
-        )
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} | ${this.$t(
-        'settings.title'
-      )} - Kitsu`
-    }
-  }
+const addAssetType = assetTypeId => {
+  store.dispatch('addAssetTypeToProduction', assetTypeId)
 }
+
+const removeAssetType = assetTypeId => {
+  store.dispatch('removeAssetTypeFromProduction', assetTypeId)
+}
+
+const addTaskStatus = async () => {
+  await store.dispatch('addTaskStatusToProduction', taskStatusId.value)
+  await store.dispatch('loadContext')
+  taskStatusId.value = remainingTaskStatuses.value[0]?.id
+}
+
+const removeTaskStatus = async id => {
+  await store.dispatch('removeTaskStatusFromProduction', id)
+  await store.dispatch('loadContext')
+  taskStatusId.value = remainingTaskStatuses.value[0]?.id
+}
+
+const updateTaskStatusPriorities = async taskStatuses => {
+  const taskStatusLinks = taskStatuses.map((status, index) => ({
+    ...currentProduction.value.task_statuses_link[status.id],
+    priority: index + 1,
+    project_id: currentProduction.value.id,
+    task_status_id: status.id
+  }))
+  for (const taskStatusLink of taskStatusLinks) {
+    await store.dispatch('editTaskStatusLink', taskStatusLink)
+  }
+  await store.dispatch('loadContext')
+}
+
+const updateTaskStatusPriority = async () => {
+  await updateTaskStatusPriorities(taskStatusItems.value)
+}
+
+watch(activeTab, tab => {
+  if (route.query.tab !== tab) {
+    router.push({ query: { tab } })
+  }
+})
+
+watch(
+  sortedProductionTaskStatuses,
+  list => {
+    taskStatusItems.value = JSON.parse(JSON.stringify(list))
+  },
+  { immediate: true }
+)
+
+useHead({
+  title: computed(
+    () => `${currentProduction.value?.name} | ${t('settings.title')} - Kitsu`
+  )
+})
+
+onMounted(() => {
+  if (!isCurrentUserManager.value) {
+    router.push({ name: 'not-found' })
+    return
+  }
+
+  if (remainingTaskStatuses.value.length > 0) {
+    taskStatusId.value = remainingTaskStatuses.value[0].id
+  }
+  if (route.query.tab) {
+    activeTab.value = route.query.tab
+  }
+})
 </script>
 
 <style lang="scss" scoped>

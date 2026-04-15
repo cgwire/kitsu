@@ -7,39 +7,24 @@
   />
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
 
-export default {
-  name: 'production-status-automations',
+const store = useStore()
 
-  components: {
-    StatusAutomationSettings
-  },
+const productionStatusAutomations = computed(
+  () => store.getters.productionStatusAutomations
+)
+const allStatusAutomations = computed(() => store.getters.statusAutomations)
 
-  computed: {
-    ...mapGetters(['productionStatusAutomations', 'statusAutomations']),
+const onAdd = statusAutomationId => {
+  store.dispatch('addStatusAutomationToProduction', statusAutomationId)
+}
 
-    allStatusAutomations() {
-      return this.statusAutomations
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addStatusAutomationToProduction',
-      'removeStatusAutomationFromProduction'
-    ]),
-
-    onAdd(statusAutomationId) {
-      this.addStatusAutomationToProduction(statusAutomationId)
-    },
-
-    onRemove(statusAutomationId) {
-      this.removeStatusAutomationFromProduction(statusAutomationId)
-    }
-  }
+const onRemove = statusAutomationId => {
+  store.dispatch('removeStatusAutomationFromProduction', statusAutomationId)
 }
 </script>
