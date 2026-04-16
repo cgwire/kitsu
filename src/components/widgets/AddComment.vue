@@ -510,6 +510,7 @@ const checklistItems = computed({
   get: () => draftComment.checklist,
   set: value => {
     draftComment.checklist = value
+    saveDraft()
   }
 })
 
@@ -559,9 +560,20 @@ const text = computed({
   get: () => draftComment.text,
   set: value => {
     draftComment.text = value
-    drafts.setTaskDraft(props.task.id, text.value)
+    saveDraft()
   }
 })
+
+const saveDraft = () => {
+  drafts.setTaskDraft(props.task.id, {
+    text: draftComment.text,
+    checklist: draftComment.checklist
+  })
+}
+
+// Checklist items are mutated in place (push/splice), so the computed
+// setter doesn't fire; watch the array deeply to persist those edits.
+watch(() => draftComment.checklist, saveDraft, { deep: true })
 
 const getAttachmentModal = () => {
   return addAttachmentModalRef.value
@@ -894,9 +906,8 @@ watch(
   () => {
     resetStatus()
     const draft = drafts.getTaskDraft(props.task.id)
-    if (draft) {
-      text.value = draft
-    }
+    text.value = draft?.text || ''
+    checklistItems.value = draft?.checklist || []
   },
   { immediate: true }
 )
