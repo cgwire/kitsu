@@ -47,11 +47,8 @@ export const taskMixin = {
       const task = this.getTask()
       if (task && this.$refs['add-comment']) {
         const draft = drafts.getTaskDraft(task.id)
-        if (draft) {
-          this.$refs['add-comment'].text = draft
-        } else {
-          this.$refs['add-comment'].text = ''
-        }
+        this.$refs['add-comment'].text = draft?.text || ''
+        this.$refs['add-comment'].checklistItems = draft?.checklist || []
       }
     },
 
