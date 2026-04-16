@@ -6,7 +6,7 @@ import {
   sortRevisionPreviewFiles,
   sortByName
 } from '@/lib/sorting'
-import { arrayMove, removeModelFromList } from '@/lib/models'
+import { arrayMove, populateTask, removeModelFromList } from '@/lib/models'
 import func from '@/lib/func'
 
 import assetStore from '@/store/modules/assets'
@@ -385,9 +385,8 @@ const actions = {
     const selectedTaskIds = Array.from(state.selectedTasks.keys())
     for (const taskId of selectedTaskIds) {
       const task = state.taskMap.get(taskId)
-      const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
-
       if (task && task.priority !== priority) {
+        const taskType = rootGetters.taskTypeMap.get(task.task_type_id)
         const updatedTask = await tasksApi.updateTask(taskId, { priority })
         commit(EDIT_TASK_END, { task: updatedTask, taskType })
       }
@@ -643,8 +642,20 @@ const actions = {
 
   assignSelectedTasks({ commit, state }, { personId, taskIds }) {
     const selectedTaskIds = taskIds || Array.from(state.selectedTasks.keys())
-    return tasksApi.assignTasks(personId, selectedTaskIds).then(() => {
-      commit(ASSIGN_TASKS, { selectedTaskIds, personId })
+    return tasksApi.assignTasks(personId, selectedTaskIds).then(response => {
+      const successfulTaskIds = response.map(task => task.id)
+      const failedTaskIds = selectedTaskIds.filter(
+        taskId => !successfulTaskIds.includes(taskId)
+      )
+      commit(ASSIGN_TASKS, { taskIds: successfulTaskIds, personId })
+      if (failedTaskIds.length) {
+        const error = new Error(
+          `Failed to assign ${failedTaskIds.length} task(s). Task IDs: ${failedTaskIds.join(', ')}`
+        )
+        error.failedTaskIds = failedTaskIds
+        error.successfulTaskIds = successfulTaskIds
+        throw error
+      }
     })
   },
 
@@ -1180,8 +1191,8 @@ const mutations = {
     }
   },
 
-  [ASSIGN_TASKS](state, { selectedTaskIds, personId }) {
-    selectedTaskIds.forEach(taskId => {
+  [ASSIGN_TASKS](state, { taskIds, personId }) {
+    taskIds.forEach(taskId => {
       const task = state.taskMap.get(taskId)
       if (task && !task.assignees.find(assigneeId => assigneeId === personId)) {
         task.assignees.push(personId)
@@ -1190,8 +1201,8 @@ const mutations = {
     })
   },
 
-  [UNASSIGN_TASKS](state, selectedTaskIds) {
-    selectedTaskIds.forEach(taskId => {
+  [UNASSIGN_TASKS](state, taskIds) {
+    taskIds.forEach(taskId => {
       const task = state.taskMap.get(taskId)
       if (task) {
         task.assignees = []
@@ -1229,6 +1240,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
+      populateTask(task)
       state.taskMap.set(task.id, task)
     })
   },
@@ -1239,6 +1251,7 @@ const mutations = {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
+      populateTask(task)
       state.taskMap.set(task.id, task)
     })
   },

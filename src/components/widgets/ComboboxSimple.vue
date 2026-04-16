@@ -20,79 +20,78 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'combobox-simple',
+<script setup>
+import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-  emits: ['update:modelValue'],
+const { t } = useI18n()
 
-  data() {
-    return {
-      selectedOption: {
-        label: '',
-        value: ''
-      }
-    }
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    }
+  options: {
+    default: () => [],
+    type: Array
   },
-
-  mounted() {
-    this.resetOptions()
+  modelValue: {
+    default: '',
+    type: String
   },
+  localeKeyPrefix: {
+    default: '',
+    type: String
+  }
+})
 
-  methods: {
-    selectOption(option) {
-      this.$emit('update:modelValue', option.value)
-      this.selectedOption = option
-    },
+const emit = defineEmits(['update:modelValue'])
 
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    },
+const selectedOption = ref({
+  label: '',
+  value: ''
+})
 
-    resetOptions() {
-      if (this.options.length > 0) {
-        const option = this.options.find(o => o.value === this.modelValue)
-        if (option) {
-          this.selectedOption = option
-        } else {
-          this.selectedOption = this.options[0]
-        }
-      }
-    }
-  },
+const selectOption = option => {
+  emit('update:modelValue', option.value)
+  selectedOption.value = option
+}
 
-  watch: {
-    options() {
-      this.resetOptions()
-    },
+const getOptionLabel = option => {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
+}
 
-    modelValue() {
-      this.selectedOption = this.options.find(o => o.value === this.modelValue)
+const resetOptions = () => {
+  if (props.options.length > 0) {
+    const option = props.options.find(o => o.value === props.modelValue)
+    if (option) {
+      selectedOption.value = option
+    } else {
+      selectedOption.value = props.options[0]
     }
   }
 }
+
+onMounted(() => {
+  resetOptions()
+})
+
+watch(
+  () => props.options,
+  () => {
+    resetOptions()
+  }
+)
+
+watch(
+  () => props.modelValue,
+  () => {
+    selectedOption.value = props.options.find(o => o.value === props.modelValue)
+  }
+)
 </script>
 
 <style lang="scss" scoped>

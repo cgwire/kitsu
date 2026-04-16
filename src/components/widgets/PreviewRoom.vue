@@ -24,60 +24,41 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'preview-room',
+const store = useStore()
+const personMap = computed(() => store.getters.personMap)
+const user = computed(() => store.getters.user)
 
-  components: {
-    ButtonSimple,
-    PeopleAvatar
-  },
-
-  props: {
-    room: {
-      type: Object,
-      default: () => {}
-    }
-  },
-
-  emits: ['join-room', 'leave-room', 'open-room'],
-
-  data() {
-    return {}
-  },
-
-  computed: {
-    ...mapGetters(['personMap', 'user']),
-
-    peopleInRoom() {
-      return this.room.people.map(id => this.personMap.get(id)) // .filter(Boolean)
-    },
-
-    joinedRoom() {
-      if (!this.room.id) return
-      return this.room.people.find(id => id === this.user.id)
-    }
-  },
-
-  methods: {
-    openRoom() {
-      if (!this.room.id) return
-      this.$emit('open-room', this.room.id)
-    },
-
-    onJoinClicked() {
-      this.$emit('join-room', this.room.id)
-    },
-
-    onLeaveClicked() {
-      this.$emit('leave-room', this.room.id)
-    }
+const props = defineProps({
+  room: {
+    type: Object,
+    default: () => {}
   }
+})
+
+const emit = defineEmits(['join-room', 'leave-room'])
+
+const peopleInRoom = computed(() => {
+  return props.room.people.map(id => personMap.value.get(id))
+})
+
+const joinedRoom = computed(() => {
+  if (!props.room.id) return
+  return props.room.people.find(id => id === user.value.id)
+})
+
+const onJoinClicked = () => {
+  emit('join-room', props.room.id)
+}
+
+const onLeaveClicked = () => {
+  emit('leave-room', props.room.id)
 }
 </script>
 

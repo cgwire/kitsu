@@ -364,6 +364,12 @@ export default {
   }
 }
 
+@media screen and (max-width: 768px) {
+  .global-search-field {
+    width: 120px;
+  }
+}
+
 .search-loader {
   opacity: 0.5;
   padding-top: 0.8em;

@@ -32,126 +32,113 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'combobox-task-type',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    TaskTypeName
+const props = defineProps({
+  disabled: {
+    default: false,
+    type: Boolean
   },
+  label: {
+    default: '',
+    type: String
+  },
+  taskTypeList: {
+    default: () => [],
+    type: Array
+  },
+  modelValue: {
+    default: '',
+    type: String
+  },
+  shy: {
+    default: false,
+    type: Boolean
+  },
+  addPlaceholder: {
+    default: false,
+    type: Boolean
+  },
+  placeholder: {
+    type: String
+  },
+  openTop: {
+    default: false,
+    type: Boolean
+  },
+  withMargin: {
+    default: true,
+    type: Boolean
+  }
+})
 
-  emits: ['change', 'update:modelValue'],
+const emit = defineEmits(['change', 'update:modelValue'])
 
-  data() {
+const showTaskTypeList = ref(false)
+const tooltipPosition = ref({ top: 0, left: 0 })
+
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+
+const defaultPlaceholder = computed(() => {
+  return t('task_types.add_task_type_placeholder')
+})
+
+const currentTaskType = computed(() => {
+  if (props.modelValue) {
+    return taskTypeMap.value.get(props.modelValue)
+  } else if (props.addPlaceholder) {
     return {
-      showTaskTypeList: false,
-      tooltipPosition: { top: 0, left: 0 }
+      name: props.placeholder ?? defaultPlaceholder.value,
+      color: '#E5E5E5',
+      id: ''
     }
-  },
+  } else {
+    return props.taskTypeList[0]
+  }
+})
 
-  props: {
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    label: {
-      default: '',
-      type: String
-    },
-    taskTypeList: {
-      default: () => [],
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    shy: {
-      default: false,
-      type: Boolean
-    },
-    addPlaceholder: {
-      default: false,
-      type: Boolean
-    },
-    placeholder: {
-      type: String
-    },
-    openTop: {
-      default: false,
-      type: Boolean
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    }
-  },
+const tooltipStyle = computed(() => {
+  return {
+    top: tooltipPosition.value.top + 'px',
+    left: tooltipPosition.value.left + 'px'
+  }
+})
 
-  computed: {
-    ...mapGetters(['taskTypeMap', 'isDarkTheme']),
+const selectTaskType = taskType => {
+  emit('update:modelValue', taskType.id)
+  emit('change', taskType.id)
+  showTaskTypeList.value = false
+}
 
-    currentTaskType() {
-      if (this.modelValue) {
-        return this.taskTypeMap.get(this.modelValue)
-      } else if (this.addPlaceholder) {
-        return {
-          name: this.placeholder ?? this.defaultPlaceholder,
-          color: '#E5E5E5',
-          id: ''
-        }
-      } else {
-        return this.taskTypeList[0]
-      }
-    },
+const toggleTaskTypeList = event => {
+  if (props.disabled) {
+    return
+  }
 
-    defaultPlaceholder() {
-      return this.$t('task_types.add_task_type_placeholder')
-    },
+  showTaskTypeList.value = !showTaskTypeList.value
 
-    tooltipStyle() {
-      return {
-        top: this.tooltipPosition.top + 'px',
-        left: this.tooltipPosition.left + 'px'
-      }
-    }
-  },
+  if (!showTaskTypeList.value) {
+    return
+  }
 
-  methods: {
-    selectTaskType(taskType) {
-      this.$emit('update:modelValue', taskType.id)
-      this.$emit('change', taskType.id)
-      this.showTaskTypeList = false
-    },
-
-    toggleTaskTypeList(event) {
-      if (this.disabled) {
-        return
-      }
-
-      this.showTaskTypeList = !this.showTaskTypeList
-
-      if (!this.showTaskTypeList) {
-        return
-      }
-
-      const curDiv = event.currentTarget
-      const rect = curDiv.getBoundingClientRect()
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const scrollLeft =
-        window.pageXOffset || document.documentElement.scrollLeft
-      this.tooltipPosition = {
-        top: rect.top + scrollTop + 35,
-        left: rect.left + scrollLeft
-      }
-    }
+  const curDiv = event.currentTarget
+  const rect = curDiv.getBoundingClientRect()
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+  const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft
+  tooltipPosition.value = {
+    top: rect.top + scrollTop + 35,
+    left: rect.left + scrollLeft
   }
 }
 </script>

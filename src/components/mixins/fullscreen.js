@@ -1,53 +1,39 @@
-/*
+/**
  * Utilities to deal with full screen state.
+ *
+ * Warning: Webkit prefix is needed for Safari < 16.4.
  */
 export const fullScreenMixin = {
   computed: {
     isFullScreenEnabled() {
-      return !!(
-        document.fullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled ||
-        document.webkitSupportsFullscreen ||
-        document.webkitFullscreenEnabled ||
-        document.createElement('picture').webkitRequestFullScreen
+      return Boolean(
+        document.fullscreenEnabled || document.webkitFullscreenEnabled
       )
     }
   },
 
   methods: {
     isFullScreen() {
-      return !!(
-        document.fullscreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
+      return Boolean(document.fullscreenElement || document.webkitIsFullScreen)
+    },
+
+    /**
+     * Exit fullscreen mode
+     * @returns {Promise<void>}
+     */
+    async documentExitFullScreen() {
+      return document.exitFullscreen?.() || document.webkitCancelFullScreen?.()
+    },
+
+    /**
+     * Request fullscreen mode for the given HTML element
+     * @param {HTMLElement} element - The HTML element to display in fullscreen
+     * @returns {Promise<void>}
+     */
+    async documentSetFullScreen(element) {
+      return (
+        element.requestFullscreen?.() || element.webkitRequestFullScreen?.()
       )
-    },
-
-    documentExitFullScreen() {
-      if (document.exitFullscreen) {
-        return document.exitFullscreen()
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen()
-      } else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen()
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen()
-      }
-    },
-
-    documentSetFullScreen(element) {
-      if (element.requestFullscreen) {
-        return element.requestFullscreen()
-      } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen()
-      } else if (element.webkitRequestFullScreen) {
-        element.webkitRequestFullScreen()
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen()
-      }
     }
   }
 }

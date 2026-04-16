@@ -20,6 +20,7 @@
           <text-field
             ref="nameField"
             :label="$t('episodes.fields.name')"
+            :maxlength="160"
             v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
@@ -32,19 +33,20 @@
             v-model="form.status"
           />
 
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            v-model="form.data.resolution"
-            @enter="runConfirmation"
-          />
-
           <textarea-field
             ref="descriptionField"
             :label="$t('episodes.fields.description')"
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
             v-model="form.description"
+          />
+
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            :placeholder="currentProduction?.resolution"
+            v-model.trim="form.data.resolution"
+            @enter="runConfirmation"
           />
 
           <template v-if="episodeToEdit">
@@ -152,7 +154,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['episodeMetadataDescriptors'])
+    ...mapGetters(['currentProduction', 'episodeMetadataDescriptors'])
   },
 
   methods: {

@@ -28,7 +28,7 @@
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { domMixin } from '@/components/mixins/dom'
 
-import PictureViewer from '@/components/previews/PictureViewer'
+import PictureViewer from '@/components/previews/PictureViewer.vue'
 
 export default {
   name: 'multi-picture-viewer',

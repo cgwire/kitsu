@@ -15,43 +15,31 @@
   </a>
 </template>
 
-<script>
+<script setup>
 import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
-export default {
-  name: 'button-href-link',
-
-  components: {
-    DownloadIcon,
-    KitsuIcon,
-    ListIcon,
-    PlusIcon,
-    UploadIcon
+defineProps({
+  text: {
+    type: String
   },
-
-  props: {
-    text: {
-      type: String
-    },
-    path: {
-      required: true,
-      type: String
-    },
-    icon: {
-      default: '',
-      type: String
-    },
-    title: {
-      type: String
-    },
-    target: {
-      default: '_self',
-      type: String
-    }
+  path: {
+    required: true,
+    type: String
+  },
+  icon: {
+    default: '',
+    type: String
+  },
+  title: {
+    type: String
+  },
+  target: {
+    default: '_self',
+    type: String
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>

@@ -10,22 +10,19 @@
   </p>
 </template>
 
-<script>
-export default {
-  name: 'error-text',
-  props: {
-    text: {
-      default: '',
-      type: String
-    },
-    hidden: {
-      default: false,
-      type: Boolean
-    },
-    alignRight: {
-      default: false,
-      type: Boolean
-    }
+<script setup>
+defineProps({
+  text: {
+    default: '',
+    type: String
+  },
+  hidden: {
+    default: false,
+    type: Boolean
+  },
+  alignRight: {
+    default: false,
+    type: Boolean
   }
-}
+})
 </script>

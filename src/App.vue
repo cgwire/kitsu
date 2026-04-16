@@ -124,13 +124,13 @@ export default {
       }
 
       const personId = eventData.person_id
-      const selectedTaskIds = [eventData.task_id]
+      const taskIds = [eventData.task_id]
 
       // for entity lists
       if (assign) {
-        this.$store.commit('ASSIGN_TASKS', { selectedTaskIds, personId })
+        this.$store.commit('ASSIGN_TASKS', { taskIds, personId })
       } else {
-        this.$store.commit('UNASSIGN_TASKS', selectedTaskIds)
+        this.$store.commit('UNASSIGN_TASKS', taskIds)
       }
     },
 
@@ -758,10 +758,6 @@ body {
   }
 } // End dark theme
 
-.loading-info {
-  background: white;
-}
-
 .hidden {
   display: none !important;
 }
@@ -951,6 +947,16 @@ a:hover {
   color: #999;
 }
 
+abbr {
+  text-decoration: none;
+  border-bottom: 1px dotted $light-grey;
+  cursor: help;
+
+  &:hover {
+    border-bottom-color: $dark-grey;
+  }
+}
+
 .info {
   margin-top: 1em;
   font-size: 1.4em;
@@ -1103,7 +1109,7 @@ input.input {
 .select select:active,
 .select select:focus,
 input.input:focus {
-  border-color: #00b242;
+  border-color: $green;
   outline: none;
 }
 
@@ -1699,6 +1705,54 @@ tbody:last-child .empty-line:last-child {
     border-bottom: 1px solid var(--border);
   }
 
+  &:last-child {
+    background: transparent !important;
+
+    td,
+    .datatable-row-header,
+    .validation-cell,
+    .hidden-validation-cell {
+      background-color: var(--background);
+    }
+
+    &:nth-child(even) td,
+    &:nth-child(even) .datatable-row-header,
+    &:nth-child(even) .validation-cell,
+    &:nth-child(even) .hidden-validation-cell {
+      background-color: var(--background-alt);
+    }
+
+    &:hover td,
+    &:hover .datatable-row-header,
+    &:hover .datatable-row-footer {
+      background-color: var(--background-hover);
+    }
+
+    &.datatable-row--selectable:hover td,
+    &.datatable-row--selectable:hover .datatable-row-header,
+    &.datatable-row--selectable:hover .datatable-row-footer {
+      background-color: var(--background-selectable);
+    }
+
+    &.selected td,
+    &.selected .datatable-row-header,
+    &.selected:hover td,
+    &.selected:hover .datatable-row-header,
+    &.selected:hover .datatable-row-footer {
+      background-color: var(--background-selected);
+    }
+
+    td:first-child,
+    td:first-child.datatable-row-header {
+      border-bottom-left-radius: 10px;
+    }
+
+    td:last-child,
+    td:last-child.datatable-row-footer {
+      border-bottom-right-radius: 10px;
+    }
+  }
+
   &.datatable-row--selectable {
     cursor: pointer;
 
@@ -1773,6 +1827,16 @@ tbody:last-child .empty-line:last-child {
   &:hover,
   &:hover .datatable-row-header {
     background: var(--background-hover);
+  }
+
+  &:last-child:nth-child(odd) td,
+  &:last-child:nth-child(odd) .datatable-row-header {
+    background-color: var(--background-alt);
+  }
+
+  &:last-child:nth-child(even) td,
+  &:last-child:nth-child(even) .datatable-row-header {
+    background-color: var(--background);
   }
 }
 

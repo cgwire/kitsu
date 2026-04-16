@@ -63,7 +63,9 @@
         >
           <router-link :to="lastProductionRoute" class="flexrow">
             <chevron-left-icon />
-            {{ $t('main.go_productions') }}
+            <span class="go-productions-label">
+              {{ $t('main.go_productions') }}
+            </span>
           </router-link>
         </div>
       </div>
@@ -102,6 +104,7 @@
         </router-link>
         <global-search-field
           class="flexrow-item mr0"
+          :class="{ 'hide-in-production': isProductionContext }"
           v-if="mainConfig.indexer_configured"
         />
         <div class="nav-item">
@@ -203,10 +206,10 @@
         <li class="version">Kitsu {{ kitsuVersion }}</li>
         <hr />
         <li>
-          <router-link :to="{ name: 'logout' }" class="flexrow">
+          <a @click="onLogout" class="flexrow">
             <log-out-icon class="flexrow-item icon-1x" />
             <span class="flexrow-item">{{ $t('main.logout') }}</span>
-          </router-link>
+          </a>
         </li>
       </ul>
     </nav>
@@ -543,6 +546,7 @@ export default {
   methods: {
     ...mapActions([
       'clearEpisodes',
+      'logout',
       'clearSelectedTasks',
       'decrementNotificationCounter',
       'loadEpisodes',
@@ -558,6 +562,15 @@ export default {
       'toggleSidebar',
       'toggleUserMenu'
     ]),
+
+    async onLogout() {
+      await this.$router.push({ name: 'login' })
+      try {
+        await this.logout()
+      } catch (error) {
+        console.error('An error occurred while logout', error)
+      }
+    },
 
     getCurrentSectionFromRoute() {
       if (this.$route.name.includes('production-plugin')) {
@@ -990,6 +1003,43 @@ export default {
 
 .help-button {
   margin-top: 3px;
+}
+
+@media screen and (max-width: 768px) {
+  .nav-item:has(.changelog-button),
+  .nav-item:has(.help-button) {
+    display: none;
+  }
+
+  .go-productions-label {
+    display: none;
+  }
+
+  .nav-right .nav-item {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .studio-logo-wrapper {
+    margin-right: 0;
+  }
+
+  .nav-left .nav-item:has(.go-productions-label) {
+    padding-left: 0;
+  }
+
+  .hide-in-production {
+    display: none;
+  }
+
+  .nav-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .nav-right {
+    flex: 0 0 auto;
+  }
 }
 
 .studio-logo-wrapper {

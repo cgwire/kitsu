@@ -79,7 +79,7 @@ const optionList = computed(() => {
   return props.isReversed ? props.options.slice().reverse() : props.options
 })
 
-function toggleList() {
+const toggleList = () => {
   if (showList.value) {
     lastScrollPosition.value = list.value?.scrollTop || 0
   }
@@ -90,12 +90,12 @@ function toggleList() {
         lastScrollPosition.value ||
         (props.isReversed && list.value?.scrollHeight) ||
         0
-      list.value?.scrollTo({ top })
+      list.value?.scrollTo?.({ top })
     })
   }
 }
 
-function onUpdateValue(key) {
+const onUpdateValue = key => {
   const value = !props.modelValue[key]
   emit('update:modelValue', {
     ...props.modelValue,
@@ -173,7 +173,7 @@ function onUpdateValue(key) {
   border-top-right-radius: 1em;
   left: 0;
   margin-left: -1px;
-  max-height: 240px;
+  max-height: 270px;
   overflow-x: hidden;
   overflow-y: auto;
   position: absolute;

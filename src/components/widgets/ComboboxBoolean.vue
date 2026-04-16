@@ -9,52 +9,43 @@
   />
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 import Combobox from '@/components/widgets/Combobox.vue'
 
-export default {
-  name: 'combobox-boolean',
+const { t } = useI18n()
 
-  components: {
-    Combobox
+defineProps({
+  label: {
+    default: '',
+    type: String
   },
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-
-    modelValue: {
-      default: 'false',
-      type: String
-    },
-
-    disabled: {
-      default: false,
-      type: Boolean
-    }
+  modelValue: {
+    default: 'false',
+    type: String
   },
 
-  emits: ['enter', 'update:modelValue'],
-
-  data() {
-    return {
-      booleanOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
-      ]
-    }
-  },
-
-  methods: {
-    emitValue(value) {
-      this.$emit('update:modelValue', value)
-    },
-
-    emitEnter(value) {
-      this.$emit('enter', value)
-    }
+  disabled: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['enter', 'update:modelValue'])
+
+const booleanOptions = computed(() => [
+  { label: t('main.yes'), value: 'true' },
+  { label: t('main.no'), value: 'false' }
+])
+
+const emitValue = value => {
+  emit('update:modelValue', value)
+}
+
+const emitEnter = value => {
+  emit('enter', value)
 }
 </script>

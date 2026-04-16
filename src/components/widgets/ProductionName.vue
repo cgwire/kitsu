@@ -6,7 +6,7 @@
         background: avatarColor,
         width: `${size}px`,
         height: `${size}px`,
-        fontSize: `${size - 15}px`,
+        fontSize: `${Math.max(size - 15, 10)}px`,
         lineHeight: `${size}px`
       }"
       :title="production.name"
@@ -34,49 +34,43 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import colors from '@/lib/colors.js'
 
-export default {
-  name: 'production-name',
-
-  props: {
-    onlyAvatar: {
-      default: false,
-      type: Boolean
-    },
-    production: {
-      default: () => {},
-      type: Object
-    },
-    size: {
-      default: 40,
-      type: Number
-    },
-    withAvatar: {
-      default: true,
-      type: Boolean
-    }
+const props = defineProps({
+  onlyAvatar: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    avatar() {
-      const firstLetter = this.production.name[0] || 'P'
-      return firstLetter.toUpperCase()
-    },
-
-    avatarColor() {
-      return colors.fromString(this.production.name)
-    },
-
-    thumbnailPath() {
-      const lastUpdate =
-        this.production.updated_at || this.production.created_at
-      const timestamp = Date.parse(lastUpdate)
-      return `/api/pictures/thumbnails/projects/${this.production.id}.png?t=${timestamp}`
-    }
+  production: {
+    default: () => {},
+    type: Object
+  },
+  size: {
+    default: 40,
+    type: Number
+  },
+  withAvatar: {
+    default: true,
+    type: Boolean
   }
-}
+})
+
+const avatar = computed(() => {
+  const firstLetter = props.production.name[0] || 'P'
+  return firstLetter.toUpperCase()
+})
+
+const avatarColor = computed(() => {
+  return colors.fromString(props.production.name)
+})
+
+const thumbnailPath = computed(() => {
+  const lastUpdate = props.production.updated_at || props.production.created_at
+  const timestamp = Date.parse(lastUpdate)
+  return `/api/pictures/thumbnails/projects/${props.production.id}.png?t=${timestamp}`
+})
 </script>
 
 <style lang="scss" scoped>
@@ -89,6 +83,12 @@ export default {
 
   .dark & {
     color: $white;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .avatar-name {
+    display: none;
   }
 }
 </style>

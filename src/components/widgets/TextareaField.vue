@@ -3,7 +3,7 @@
     <label class="label" v-if="label">{{ label }}</label>
     <p class="control">
       <textarea
-        ref="input"
+        ref="inputRef"
         class="input"
         :class="`input ${inputClass}`"
         :placeholder="placeholder"
@@ -17,50 +17,53 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'textarea-field',
+<script setup>
+import { ref } from 'vue'
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    placeholder: {
-      default: '',
-      type: String
-    },
-    type: {
-      default: 'text',
-      type: String
-    },
-    inputClass: {
-      default: '',
-      type: String
-    }
+defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['enter', 'keyup', 'update:modelValue'],
-
-  methods: {
-    emitEnter() {
-      this.$emit('enter', this.$refs.input.value)
-    },
-    updateValue() {
-      this.$emit('update:modelValue', this.$refs.input.value)
-    },
-    emitKeyup(event) {
-      this.$emit('keyup', event)
-    },
-    focus() {
-      this.$refs.input?.focus()
-    }
+  modelValue: {
+    default: '',
+    type: String
+  },
+  placeholder: {
+    default: '',
+    type: String
+  },
+  type: {
+    default: 'text',
+    type: String
+  },
+  inputClass: {
+    default: '',
+    type: String
   }
+})
+
+const emit = defineEmits(['enter', 'keyup', 'update:modelValue'])
+
+const inputRef = ref(null)
+
+const emitEnter = () => {
+  emit('enter', inputRef.value.value)
 }
+
+const updateValue = () => {
+  emit('update:modelValue', inputRef.value.value)
+}
+
+const emitKeyup = event => {
+  emit('keyup', event)
+}
+
+const focus = () => {
+  inputRef.value?.focus()
+}
+
+defineExpose({ focus })
 </script>
 
 <style lang="scss" scoped>

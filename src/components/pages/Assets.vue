@@ -31,6 +31,7 @@
               <combobox-display-options
                 class="flexrow-item"
                 :type="type"
+                :has-linked-assets="isTVShow"
                 v-model="displaySettings"
               />
             </div>
@@ -80,11 +81,7 @@
         />
         <asset-list
           ref="asset-list"
-          :displayed-assets="
-            displaySettings.showSharedAssets
-              ? displayedAssetsByType
-              : displayedAssetsByTypeWithoutShared
-          "
+          :displayed-assets="displayedAssetsByType"
           :display-settings="displaySettings"
           :is-loading="isAssetsLoading || initialLoading"
           :is-error="isAssetsLoadingError"
@@ -332,7 +329,8 @@ export default {
         contactSheetMode: false,
         showAssignations: true,
         showInfos: true,
-        showSharedAssets: true
+        showSharedAssets: true,
+        showLinkedAssets: true
       },
       optionalColumns: ['Description', 'Ready for', 'Resolution'],
       pageName: 'Assets',
@@ -478,12 +476,6 @@ export default {
       return this.$refs['asset-search-field']
     },
 
-    displayedAssetsByTypeWithoutShared() {
-      return this.displayedAssetsByType.map(type =>
-        type.filter(asset => !asset.shared)
-      )
-    },
-
     filteredAssets() {
       const assets = {}
       this.displayedAssetsByType.forEach(type => {
@@ -606,6 +598,7 @@ export default {
     confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
+      this.errors.edit = false
       this.newAsset(form)
         .then(() => {
           this.loading.stay = false
@@ -626,6 +619,7 @@ export default {
     confirmEditAsset(form) {
       let action = 'newAsset'
       this.loading.edit = true
+      this.success.edit = false
       this.errors.edit = false
       if (this.assetToEdit && this.assetToEdit.id) {
         action = 'editAsset'
@@ -636,6 +630,7 @@ export default {
           this.loading.edit = false
           this.modals.isNewDisplayed = false
           this.applySearchFromUrl(false)
+          this.success.edit = true
         })
         .catch(err => {
           console.error(err)

@@ -220,11 +220,10 @@ export const playerMixin = {
           annotations: this.currentEntity.preview_file_annotations || [],
           duration: this.currentEntity.preview_file_duration || 0
         }
-      } else {
-        return this.currentEntity.preview_file_previews[
-          this.currentPreviewIndex - 1
-        ]
       }
+      return this.currentEntity.preview_file_previews?.[
+        this.currentPreviewIndex - 1
+      ]
     },
 
     currentEntityPreviewLength() {
@@ -232,17 +231,6 @@ export const playerMixin = {
         return 0
       }
       return this.currentEntity.preview_file_previews.length + 1
-    },
-
-    isFullScreenEnabled() {
-      return !!(
-        document.fullscreenEnabled ||
-        document.mozFullScreenEnabled ||
-        document.msFullscreenEnabled ||
-        document.webkitSupportsFullscreen ||
-        document.webkitFullscreenEnabled ||
-        document.createElement('video').webkitRequestFullScreen
-      )
     },
 
     // Frames
@@ -328,17 +316,7 @@ export const playerMixin = {
           false
         )
         this.container.addEventListener(
-          'mozfullscreenchange',
-          this.onFullScreenChange,
-          false
-        )
-        this.container.addEventListener(
-          'MSFullscreenChange',
-          this.onFullScreenChange,
-          false
-        )
-        this.container.addEventListener(
-          'webkitfullscreenchange',
+          'webkitfullscreenchange', // Safari < 16.4
           this.onFullScreenChange,
           false
         )
@@ -358,17 +336,7 @@ export const playerMixin = {
           false
         )
         this.container.removeEventListener(
-          'mozfullscreenchange',
-          this.onFullScreenChange,
-          false
-        )
-        this.container.removeEventListener(
-          'MSFullscreenChange',
-          this.onFullScreenChange,
-          false
-        )
-        this.container.removeEventListener(
-          'webkitfullscreenchange',
+          'webkitfullscreenchange', // Safari < 16.4
           this.onFullScreenChange,
           false
         )
@@ -690,49 +658,29 @@ export const playerMixin = {
     },
 
     setFullScreen() {
-      if (this.container.requestFullscreen) {
-        this.container.requestFullscreen()
-      } else if (this.container.mozRequestFullScreen) {
-        this.container.mozRequestFullScreen()
-      } else if (this.container.webkitRequestFullScreen) {
-        this.container.webkitRequestFullScreen()
-      } else if (this.container.msRequestFullscreen) {
-        this.container.msRequestFullscreen()
-      }
-      this.container.setAttribute('data-fullscreen', !!true)
-      document.activeElement.blur()
-      this.fullScreen = true
+      this.documentSetFullScreen(this.container)
+        .then(() => {
+          this.container.setAttribute('data-fullscreen', true)
+          document.activeElement.blur()
+          this.fullScreen = true
+        })
+        .catch(console.error)
     },
 
     exitFullScreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen()
-      } else if (document.mozCancelFullScreen) {
-        document.mozCancelFullScreen()
-      } else if (document.webkitCancelFullScreen) {
-        document.webkitCancelFullScreen()
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen()
-      }
-      this.container.setAttribute('data-fullscreen', !!false)
-      document.activeElement.blur()
-      this.fullScreen = false
+      this.documentExitFullScreen()
+        .then(() => {
+          this.container.setAttribute('data-fullscreen', false)
+          document.activeElement.blur()
+          this.fullScreen = false
+        })
+        .catch(console.error)
       setTimeout(() => {
         this.triggerResize()
       }, 200)
       setTimeout(() => {
         this.triggerResize()
       }, 500)
-    },
-
-    isFullScreen() {
-      return !!(
-        document.fullscreen ||
-        document.webkitIsFullScreen ||
-        document.mozFullScreen ||
-        document.msFullscreenElement ||
-        document.fullscreenElement
-      )
     },
 
     onScrubStart() {
@@ -786,13 +734,15 @@ export const playerMixin = {
 
     _saveHandles() {
       const shot = this.shotMap.get(this.currentEntity.id)
-      const editedShot = {
+      if (!shot) return
+      this.editShot({
         id: shot.id,
-        data: { ...shot.data }
-      }
-      editedShot.data.handle_in = this.handleIn
-      editedShot.data.handle_out = this.handleOut
-      this.editShot(editedShot)
+        data: {
+          ...shot.data,
+          handle_in: this.handleIn,
+          handle_out: this.handleOut
+        }
+      })
     },
 
     onPreviousFrameClicked() {
@@ -1633,6 +1583,7 @@ export const playerMixin = {
       'preview-file:annotation-update'(eventData) {
         if (
           !this.tempMode &&
+          this.currentPreview &&
           this.previewFileMap.get(eventData.preview_file_id)
         ) {
           this.refreshPreview({
@@ -1641,14 +1592,13 @@ export const playerMixin = {
           }).then(preview => {
             if (
               !this.notSaved &&
-              this.currentPreview.id === eventData.preview_file_id &&
+              this.currentPreview?.id === eventData.preview_file_id &&
               !this.isWriting(eventData.updated_at)
             ) {
               const isAnnotationSizeChanged =
                 this.annotations.length !== preview.annotations.length
               this.annotations = preview.annotations
-              const isLiveRoom =
-                !this.room.people || this.room.people.length === 0
+              const isLiveRoom = !this.room?.people?.length
               if (isAnnotationSizeChanged) this.reloadAnnotations(isLiveRoom)
             }
             this.$emit('annotations-refreshed', preview)

@@ -5,7 +5,7 @@
     </label>
     <div class="people-field" :class="{ small, wide }">
       <multiselect
-        ref="multiselect"
+        ref="multiselectRef"
         label="name"
         :allow-empty="clearable"
         :disabled="disabled"
@@ -38,7 +38,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onMounted } from 'vue'
 import { XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
@@ -47,118 +48,103 @@ import { buildNameIndex, indexSearch } from '@/lib/indexing'
 
 import AssignationItem from '@/components/widgets/AssignationItem.vue'
 
-export default {
-  name: 'people-field',
-
-  components: {
-    AssignationItem,
-    Multiselect,
-    XIcon
+const props = defineProps({
+  clearable: {
+    type: Boolean,
+    default: true
   },
-
-  emits: ['select', 'update:modelValue'],
-
-  data() {
-    return {
-      index: null,
-      item: null,
-      items: [],
-      search: ''
-    }
+  disabled: {
+    type: Boolean,
+    default: false
   },
-
-  created() {
-    this.items = this.people
-    this.index = buildNameIndex(this.people)
+  label: {
+    type: String,
+    default: null
   },
-
-  mounted() {
-    this.items = this.people
-    this.item = this.modelValue
-    setTimeout(() => {
-      this.item = this.modelValue
-    }, 10)
+  modelValue: {
+    type: Object,
+    default: () => {}
   },
-
-  props: {
-    clearable: {
-      type: Boolean,
-      default: true
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    label: {
-      type: String,
-      default: null
-    },
-    modelValue: {
-      type: Object,
-      default: () => {}
-    },
-    multiple: {
-      type: Boolean,
-      default: false
-    },
-    people: {
-      type: Array,
-      default: () => []
-    },
-    placeholder: {
-      type: String,
-      default: ''
-    },
-    small: {
-      type: Boolean,
-      default: false
-    },
-    wide: {
-      type: Boolean,
-      default: false
-    }
+  multiple: {
+    type: Boolean,
+    default: false
   },
-
-  methods: {
-    onSearchChange(search) {
-      this.items = search?.length
-        ? indexSearch(this.index, [search])
-        : this.people
-      this.search = search
-    },
-
-    onSelect() {
-      this.$emit('update:modelValue', this.item)
-      this.$emit('select', this.item)
-    },
-
-    clear() {
-      this.item = null
-      this.onSelect()
-    },
-
-    focus() {
-      this.$refs.multiselect.$el.focus()
-    }
+  people: {
+    type: Array,
+    default: () => []
   },
-
-  watch: {
-    people: {
-      deep: true,
-      handler() {
-        this.item = this.item
-          ? this.people.find(person => person.id === this.item.id)
-          : null
-        this.items = this.people
-        this.index = buildNameIndex(this.people)
-      }
-    },
-
-    modelValue() {
-      this.item = this.modelValue
-    }
+  placeholder: {
+    type: String,
+    default: ''
+  },
+  small: {
+    type: Boolean,
+    default: false
+  },
+  wide: {
+    type: Boolean,
+    default: false
   }
+})
+
+const emit = defineEmits(['select', 'update:modelValue'])
+
+const multiselectRef = ref(null)
+const index = ref(null)
+const item = ref(null)
+const items = ref([])
+const search = ref('')
+
+items.value = props.people
+index.value = buildNameIndex(props.people)
+
+onMounted(() => {
+  items.value = props.people
+  item.value = props.modelValue
+  setTimeout(() => {
+    item.value = props.modelValue
+  }, 10)
+})
+
+const onSearchChange = s => {
+  items.value = s?.length ? (indexSearch(index.value, [s]) ?? []) : props.people
+  search.value = s
 }
+
+const onSelect = () => {
+  emit('update:modelValue', item.value)
+  emit('select', item.value)
+}
+
+const clear = () => {
+  item.value = null
+  onSelect()
+}
+
+const focus = () => {
+  multiselectRef.value.$el.focus()
+}
+
+watch(
+  () => props.people,
+  () => {
+    item.value = item.value
+      ? props.people.find(person => person.id === item.value.id)
+      : null
+    items.value = props.people
+    index.value = buildNameIndex(props.people)
+  },
+  { deep: true }
+)
+
+watch(
+  () => props.modelValue,
+  () => {
+    item.value = props.modelValue
+  }
+)
+
+defineExpose({ focus })
 </script>
 
 <style lang="scss" scoped>

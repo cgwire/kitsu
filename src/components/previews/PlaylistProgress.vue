@@ -436,6 +436,7 @@ export default {
   z-index: 800;
   display: flex;
   flex-direction: column;
+  font-variant-numeric: tabular-nums;
 
   .frame-tile {
     display: inline-block;
@@ -471,6 +472,7 @@ export default {
 
 .frame-number-rail {
   position: relative;
+  font-variant-numeric: tabular-nums;
 }
 
 .entity-status {

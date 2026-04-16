@@ -11,7 +11,7 @@
       >
         <select
           class="select-input"
-          ref="select"
+          ref="selectRef"
           :disabled="disabled"
           @keyup.enter="emitEnter()"
           @change="updateValue"
@@ -35,7 +35,7 @@
   <span class="select" v-else>
     <select
       class="select-input"
-      ref="select"
+      ref="selectRef"
       @keyup.enter="emitEnter()"
       @change="updateValue"
     >
@@ -51,55 +51,56 @@
   </span>
 </template>
 
-<script>
-export default {
-  name: 'combobox-number',
+<script setup>
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    modelValue: {
-      default: 0,
-      type: Number
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    },
-    isSimple: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    }
+const { t } = useI18n()
+
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['enter', 'update:modelValue'],
-
-  methods: {
-    updateValue() {
-      this.$emit('update:modelValue', parseInt(this.$refs.select.value))
-    },
-
-    emitEnter() {
-      this.$emit('enter', parseInt(this.$refs.select.value))
-    },
-
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    }
+  modelValue: {
+    default: 0,
+    type: Number
+  },
+  options: {
+    default: () => [],
+    type: Array
+  },
+  localeKeyPrefix: {
+    default: '',
+    type: String
+  },
+  isSimple: {
+    default: false,
+    type: Boolean
+  },
+  disabled: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['enter', 'update:modelValue'])
+
+const selectRef = ref(null)
+
+const updateValue = () => {
+  emit('update:modelValue', parseInt(selectRef.value.value))
+}
+
+const emitEnter = () => {
+  emit('enter', parseInt(selectRef.value.value))
+}
+
+const getOptionLabel = option => {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
 }
 </script>
 

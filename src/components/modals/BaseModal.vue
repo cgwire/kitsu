@@ -18,42 +18,28 @@
   </div>
 </template>
 
-<script>
-/*
- */
-import { modalMixin } from './base_modal'
+<script setup>
+import { toRef } from 'vue'
 
-export default {
-  name: 'base-modal',
+import { useModal } from '@/composables/modal'
 
-  mixins: [modalMixin],
-
-  emits: ['cancel'],
-
-  components: {},
-
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    title: {
-      type: String,
-      default: ''
-    }
+const props = defineProps({
+  active: {
+    type: Boolean,
+    default: false
   },
+  title: {
+    type: String,
+    default: ''
+  }
+})
 
-  data() {
-    return {}
-  },
+const emit = defineEmits(['cancel'])
 
-  methods: {
-    onBackgroundClicked() {
-      this.$emit('cancel')
-    }
-  },
+useModal(toRef(props, 'active'), emit)
 
-  watch: {}
+const onBackgroundClicked = () => {
+  emit('cancel')
 }
 </script>
 
@@ -63,6 +49,21 @@ export default {
 
   &.is-active {
     display: flex;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modal-content {
+    margin: 0 0.5em;
+    max-height: calc(100vh - 40px);
+  }
+
+  .box {
+    padding: 1.5em;
+  }
+
+  .title {
+    font-size: 1.5em;
   }
 }
 </style>

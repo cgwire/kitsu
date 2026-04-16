@@ -34,76 +34,58 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import {
+  computed,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef
+} from 'vue'
+import { useStore } from 'vuex'
 
 import { renderMarkdown } from '@/lib/render'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
 
-export default {
-  name: 'production-brief',
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    TextareaField
-  },
+const brief = ref('')
+const isEditing = ref(false)
+const isLoading = ref(false)
+const errors = reactive({ editBrief: false })
+const textarea = useTemplateRef('textarea')
 
-  data() {
-    return {
-      brief: '',
-      isEditing: false,
-      isLoading: false,
-      errors: {
-        editBrief: false
-      }
-    }
-  },
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 
-  computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+onMounted(() => {
+  brief.value = currentProduction.value?.description
+})
 
-    textarea() {
-      return this.$refs.textarea
-    }
-  },
+const openEditing = () => {
+  if (!isCurrentUserManager.value) return
+  isEditing.value = true
+  nextTick(() => {
+    textarea.value?.focus()
+  })
+}
 
-  mounted() {
-    this.brief = this.currentProduction?.description
-  },
-
-  methods: {
-    ...mapActions(['editProduction']),
-
-    openEditing() {
-      if (!this.isCurrentUserManager) {
-        return
-      }
-      this.isEditing = true
-      this.$nextTick(() => {
-        // Needed because of the v-if
-        this.textarea.focus()
-      })
-    },
-
-    async editBrief() {
-      this.isLoading = true
-      this.errors.editBrief = false
-      try {
-        await this.editProduction({
-          id: this.currentProduction.id,
-          description: this.brief
-        })
-        this.isEditing = false
-      } catch {
-        this.errors.editBrief = true
-      }
-      this.isLoading = false
-    },
-
-    renderMarkdown
+const editBrief = async () => {
+  isLoading.value = true
+  errors.editBrief = false
+  try {
+    await store.dispatch('editProduction', {
+      id: currentProduction.value.id,
+      description: brief.value
+    })
+    isEditing.value = false
+  } catch {
+    errors.editBrief = true
   }
+  isLoading.value = false
 }
 </script>
 

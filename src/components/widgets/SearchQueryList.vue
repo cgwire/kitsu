@@ -189,11 +189,11 @@
   </div>
 </template>
 
-<script>
-/*
- * This component displays a list of queries available to users to filter list
- * results. It allows to modify each query too.
- */
+<script setup>
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -202,7 +202,6 @@ import {
   PencilIcon,
   Trash2Icon
 } from 'lucide-vue-next'
-import { mapActions, mapGetters } from 'vuex'
 
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -211,298 +210,259 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditSearchFilterModal from '@/components/modals/EditSearchFilterModal.vue'
 import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGroupModal.vue'
 
-export default {
-  name: 'search-query-list',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ChevronUpIcon,
-    ConfirmModal,
-    Edit2Icon,
-    EditSearchFilterModal,
-    EditSearchFilterGroupModal,
-    FolderPlusIcon,
-    PencilIcon,
-    Trash2Icon
+const props = defineProps({
+  queries: {
+    type: Array,
+    default: () => []
   },
-
-  props: {
-    queries: {
-      type: Array,
-      default: () => []
-    },
-    groups: {
-      type: Array,
-      default: () => []
-    },
-    isGroupEnabled: {
-      type: Boolean,
-      default: false
-    },
-    type: {
-      type: String,
-      required: true
-    }
+  groups: {
+    type: Array,
+    default: () => []
   },
-
-  emits: ['change-search', 'remove-search'],
-
-  data() {
-    return {
-      groupToEdit: {},
-      groupToRemove: {},
-      isEditing: false,
-      queryPaths: {},
-      searchQueryToEdit: {},
-      searchQueryToRemove: {},
-      errors: {
-        edit: false,
-        group: false,
-        remove: false
-      },
-      loading: {
-        edit: false,
-        group: false,
-        remove: false
-      },
-      modals: {
-        edit: false,
-        group: false,
-        remove: false
-      },
-      toggleGroupId: null
-    }
+  isGroupEnabled: {
+    type: Boolean,
+    default: false
   },
+  type: {
+    type: String,
+    required: true
+  }
+})
 
-  mounted() {
-    this.$nextTick(() => {
-      this.setQueryPaths()
+const emit = defineEmits(['remove-search'])
+
+const groupToEdit = ref({})
+const groupToRemove = ref({})
+const isEditing = ref(false)
+const queryPaths = ref({})
+const searchQueryToEdit = ref({})
+const searchQueryToRemove = ref({})
+const errors = reactive({
+  edit: false,
+  group: false,
+  remove: false
+})
+const loading = reactive({
+  edit: false,
+  group: false,
+  remove: false
+})
+const modals = reactive({
+  edit: false,
+  group: false,
+  remove: false
+})
+const toggleGroupId = ref(null)
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const personMap = computed(() => store.getters.personMap)
+
+const sortedFilters = computed(() => {
+  const queries = props.queries.filter(
+    query =>
+      !isCurrentUserClient.value ||
+      (isCurrentUserClient.value && !query.is_shared)
+  )
+  return sortByName(queries)
+})
+
+const userFilters = computed(() => {
+  return sortedFilters.value
+    .filter(query => !query.search_filter_group_id)
+    .sort((a, b) => {
+      if (a.is_shared && !b.is_shared) {
+        return -1
+      } else if (!a.is_shared && b.is_shared) {
+        return 1
+      } else {
+        return 0
+      }
     })
-  },
+})
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departmentMap',
-      'isCurrentUserClient',
-      'isCurrentUserManager',
-      'personMap'
-    ]),
+const userFilterGroups = computed(() => {
+  const groups = props.groups.filter(
+    group =>
+      !isCurrentUserClient.value ||
+      (isCurrentUserClient.value && !group.is_shared)
+  )
+  return sortByName(groups).map(group => ({
+    ...group,
+    queries: sortedFilters.value.filter(
+      query => query.search_filter_group_id === group.id
+    )
+  }))
+})
 
-    sortedFilters() {
-      const queries = this.queries.filter(
-        query =>
-          !this.isCurrentUserClient ||
-          (this.isCurrentUserClient && !query.is_shared)
-      )
-      return sortByName(queries)
-    },
+const groupOptions = computed(() => {
+  return [
+    { label: '', value: null },
+    ...userFilterGroups.value.map(group => ({
+      label: group.name,
+      value: group.id,
+      is_shared: group.is_shared
+    }))
+  ]
+})
 
-    userFilters() {
-      return this.sortedFilters
-        .filter(query => !query.search_filter_group_id)
-        .sort((a, b) => {
-          if (a.is_shared && !b.is_shared) {
-            return -1
-          } else if (!a.is_shared && b.is_shared) {
-            return 1
-          } else {
-            return 0
-          }
-        })
-    },
+const removeText = computed(() => {
+  if (searchQueryToRemove.value.id) {
+    return t('main.remove_search_query', {
+      name: searchQueryToRemove.value.name
+    })
+  } else {
+    return t('main.remove_search_filter_group', {
+      name: groupToRemove.value.name
+    })
+  }
+})
 
-    userFilterGroups() {
-      const groups = this.groups.filter(
-        group =>
-          !this.isCurrentUserClient ||
-          (this.isCurrentUserClient && !group.is_shared)
-      )
-      return sortByName(groups).map(group => ({
-        ...group,
-        queries: this.sortedFilters.filter(
-          query => query.search_filter_group_id === group.id
-        )
-      }))
-    },
+const setQueryPaths = () => {
+  props.queries.forEach(query => {
+    queryPaths.value[query.id] = queryRoute(query)
+  })
+}
 
-    groupOptions() {
-      return [
-        { label: '', value: null },
-        ...this.userFilterGroups.map(group => ({
-          label: group.name,
-          value: group.id,
-          is_shared: group.is_shared
-        }))
-      ]
-    },
-
-    removeText() {
-      if (this.searchQueryToRemove.id) {
-        return this.$t('main.remove_search_query', {
-          name: this.searchQueryToRemove.name
-        })
-      } else {
-        return this.$t('main.remove_search_filter_group', {
-          name: this.groupToRemove.name
-        })
-      }
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'removeAssetSearchFilterGroup',
-      'removeBreakdownSearchFilterGroup',
-      'removeShotSearchFilterGroup',
-      'saveAssetSearchFilterGroup',
-      'saveBreakdownSearchFilterGroup',
-      'saveShotSearchFilterGroup',
-      'updateSearchFilter',
-      'updateSearchFilterGroup'
-    ]),
-
-    setQueryPaths() {
-      this.queries.forEach(query => {
-        this.queryPaths[query.id] = this.queryRoute(query)
-      })
-    },
-
-    queryRoute(searchQuery) {
-      const route = this.$route
-      return {
-        ...route,
-        query: {
-          ...route.query,
-          search: searchQuery.search_query
-        }
-      }
-    },
-
-    changeSearch(searchQuery) {
-      this.$emit('change-search', searchQuery)
-    },
-
-    editGroup(group = {}) {
-      this.groupToEdit = group
-      this.modals.group = true
-    },
-
-    editSearch(searchQuery) {
-      this.searchQueryToEdit = searchQuery
-      this.modals.edit = true
-    },
-
-    async confirmEditFilterGroup(filterGroup) {
-      try {
-        this.loading.group = true
-        this.errors.group = false
-        filterGroup.project_id = this.currentProduction
-          ? this.currentProduction.id
-          : null
-        if (!filterGroup.id) {
-          await this[
-            `save${stringHelpers.capitalize(this.type)}SearchFilterGroup`
-          ](filterGroup)
-        } else {
-          await this.updateSearchFilterGroup(filterGroup)
-        }
-        this.modals.group = false
-      } catch (err) {
-        console.error(err)
-        this.errors.group = true
-      } finally {
-        this.loading.group = false
-      }
-    },
-
-    async confirmEditSearch(searchFilter) {
-      try {
-        this.loading.edit = true
-        this.errors.edit = false
-        searchFilter.project_id = this.currentProduction
-          ? this.currentProduction.id
-          : null
-        await this.updateSearchFilter(searchFilter)
-        this.modals.edit = false
-      } catch (err) {
-        console.error(err)
-        this.errors.edit = true
-      } finally {
-        this.loading.edit = false
-      }
-    },
-
-    closeFilterGroupModal() {
-      this.modals.group = false
-    },
-
-    confirmRemoveSearch(searchQuery) {
-      this.searchQueryToRemove = searchQuery
-      this.groupToRemove = {}
-      this.modals.remove = true
-    },
-
-    removeSearch() {
-      if (this.searchQueryToRemove.id) {
-        this.$emit('remove-search', this.searchQueryToRemove)
-      } else {
-        this.removeGroup()
-      }
-      this.modals.remove = false
-      this.searchQueryToRemove = {}
-      this.groupToRemove = {}
-    },
-
-    confirmRemoveGroup(filterGroup) {
-      this.groupToRemove = filterGroup
-      this.searchQueryToRemove = {}
-      this.modals.remove = true
-    },
-
-    async removeGroup() {
-      try {
-        await this[
-          `remove${stringHelpers.capitalize(this.type)}SearchFilterGroup`
-        ](this.groupToRemove)
-        this.modals.remove = false
-      } catch (err) {
-        console.error(err)
-        this.errors.remove = true
-      } finally {
-        this.loading.remove = false
-      }
-    },
-
-    toggleFilterGroup(group) {
-      this.toggleGroupId = this.toggleGroupId !== group.id ? group.id : null
-    },
-
-    getSearchQueryTitle(searchQuery) {
-      if (!searchQuery.is_shared) {
-        return
-      }
-      const person = this.personMap.get(searchQuery.person_id)
-      return this.$t('main.shared_by', { name: person?.full_name })
-    },
-
-    getDepartment(group) {
-      return this.departmentMap.get(group.department_id)
-    }
-  },
-
-  watch: {
-    'queries.length'() {
-      this.$nextTick(() => {
-        this.setQueryPaths()
-      })
-    },
-
-    $route() {
-      this.setQueryPaths()
+const queryRoute = searchQuery => {
+  return {
+    ...route,
+    query: {
+      ...route.query,
+      search: searchQuery.search_query
     }
   }
 }
+
+const editGroup = (group = {}) => {
+  groupToEdit.value = group
+  modals.group = true
+}
+
+const editSearch = searchQuery => {
+  searchQueryToEdit.value = searchQuery
+  modals.edit = true
+}
+
+const confirmEditFilterGroup = async filterGroup => {
+  try {
+    loading.group = true
+    errors.group = false
+    filterGroup.project_id = currentProduction.value
+      ? currentProduction.value.id
+      : null
+    if (!filterGroup.id) {
+      await store.dispatch(
+        `save${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
+        filterGroup
+      )
+    } else {
+      await store.dispatch('updateSearchFilterGroup', filterGroup)
+    }
+    modals.group = false
+  } catch (err) {
+    console.error(err)
+    errors.group = true
+  } finally {
+    loading.group = false
+  }
+}
+
+const confirmEditSearch = async searchFilter => {
+  try {
+    loading.edit = true
+    errors.edit = false
+    searchFilter.project_id = currentProduction.value
+      ? currentProduction.value.id
+      : null
+    await store.dispatch('updateSearchFilter', searchFilter)
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
+  }
+}
+
+const confirmRemoveSearch = searchQuery => {
+  searchQueryToRemove.value = searchQuery
+  groupToRemove.value = {}
+  modals.remove = true
+}
+
+const removeSearch = () => {
+  if (searchQueryToRemove.value.id) {
+    emit('remove-search', searchQueryToRemove.value)
+  } else {
+    removeGroup()
+  }
+  modals.remove = false
+  searchQueryToRemove.value = {}
+  groupToRemove.value = {}
+}
+
+const confirmRemoveGroup = filterGroup => {
+  groupToRemove.value = filterGroup
+  searchQueryToRemove.value = {}
+  modals.remove = true
+}
+
+const removeGroup = async () => {
+  try {
+    await store.dispatch(
+      `remove${stringHelpers.capitalize(props.type)}SearchFilterGroup`,
+      groupToRemove.value
+    )
+    modals.remove = false
+  } catch (err) {
+    console.error(err)
+    errors.remove = true
+  } finally {
+    loading.remove = false
+  }
+}
+
+const toggleFilterGroup = group => {
+  toggleGroupId.value = toggleGroupId.value !== group.id ? group.id : null
+}
+
+const getSearchQueryTitle = searchQuery => {
+  if (!searchQuery.is_shared) {
+    return
+  }
+  const person = personMap.value.get(searchQuery.person_id)
+  return t('main.shared_by', { name: person?.full_name })
+}
+
+const getDepartment = group => {
+  return departmentMap.value.get(group.department_id)
+}
+
+onMounted(() => {
+  nextTick(() => {
+    setQueryPaths()
+  })
+})
+
+watch(
+  () => props.queries.length,
+  () => {
+    nextTick(() => {
+      setQueryPaths()
+    })
+  }
+)
+
+watch(route, () => {
+  setQueryPaths()
+})
 </script>
 
 <style lang="scss" scoped>

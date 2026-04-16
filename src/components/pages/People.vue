@@ -72,6 +72,7 @@
       :entries="activeTab === 'active' ? activePeople : unactivePeople"
       :is-loading="isPeopleLoading"
       :is-error="isPeopleLoadingError"
+      :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
       @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
@@ -120,9 +121,10 @@
     />
 
     <edit-person-modal
-      :active="modals.edit"
+      active
       :is-create-invite-loading="loading.createAndInvite"
       :is-error="errors.edit"
+      :is-email-domain-error="errors.invalidEmailDomain"
       :is-invite-loading="loading.invite"
       :is-invitation-success="success.invite"
       :is-invitation-error="errors.invite"
@@ -133,6 +135,8 @@
       @confirm="confirmEditPeople"
       @confirm-invite="confirmCreateAndInvite"
       @invite="confirmInvite"
+      @reset-error="resetError"
+      v-if="modals.edit"
     />
 
     <change-password-modal
@@ -232,6 +236,7 @@ export default {
         del: false,
         edit: false,
         invite: false,
+        invalidEmailDomain: false,
         userLimit: false
       },
       loading: {
@@ -259,17 +264,7 @@ export default {
       selectedStudio: '',
       success: {
         invite: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'unactive',
-          label: this.$t('people.unactive')
-        }
-      ]
+      }
     }
   },
 
@@ -285,16 +280,37 @@ export default {
 
   computed: {
     ...mapGetters([
+      'activePeopleWithoutBot',
       'displayedPeople',
       'isCurrentUserAdmin',
-      'isPeopleLoading',
-      'isPeopleLoadingError',
       'isImportPeopleLoading',
       'isImportPeopleLoadingError',
+      'isPeopleLoading',
+      'isPeopleLoadingError',
+      'mainConfig',
       'peopleSearchQueries',
       'personCsvFormData',
-      'studioMap'
+      'studioMap',
+      'userLimit'
     ]),
+
+    seatsRemaining() {
+      if (this.mainConfig.is_self_hosted) return null
+      return Math.max(0, this.userLimit - this.activePeopleWithoutBot.length)
+    },
+
+    tabs() {
+      return [
+        {
+          name: 'active',
+          label: `${this.$t('main.active')} (${this.activePeople.length})`
+        },
+        {
+          name: 'unactive',
+          label: `${this.$t('people.unactive')} (${this.unactivePeople.length})`
+        }
+      ]
+    },
 
     currentPeople() {
       let people = this.displayedPeople.filter(person => !person.is_bot)
@@ -438,21 +454,25 @@ export default {
       else form.id = this.personToEdit.id
       this.loading.edit = true
       this.errors.edit = false
+      this.errors.invalidEmailDomain = false
       this.errors.userLimit = false
       this[action](form)
         .then(() => {
-          this.loading.edit = false
           this.modals.edit = false
           this.onSearchChange()
         })
         .catch(err => {
-          const isUserLimitReached =
-            err.body?.message?.includes('limit') ?? false
-          if (isUserLimitReached) {
+          console.error(err)
+          const message = err.body?.message ?? ''
+          if (message.includes('domain name')) {
+            this.errors.invalidEmailDomain = true
+          } else if (message.includes('limit reached')) {
             this.errors.userLimit = true
           } else {
             this.errors.edit = true
           }
+        })
+        .finally(() => {
           this.loading.edit = false
         })
     },
@@ -460,22 +480,25 @@ export default {
     confirmCreateAndInvite(form) {
       this.loading.createAndInvite = true
       this.errors.edit = false
+      this.errors.invalidEmailDomain = false
       this.errors.userLimit = false
       this.newPersonAndInvite(form)
         .then(() => {
-          this.loading.createAndInvite = false
           this.modals.edit = false
           this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
-          const isUserLimitReached =
-            err.body?.message?.includes('limit') ?? false
-          if (isUserLimitReached) {
+          const message = err.body?.message ?? ''
+          if (message.includes('domain name')) {
+            this.errors.invalidEmailDomain = true
+          } else if (message.includes('limit reached')) {
             this.errors.userLimit = true
           } else {
             this.errors.edit = true
           }
+        })
+        .finally(() => {
           this.loading.createAndInvite = false
         })
     },
@@ -483,18 +506,20 @@ export default {
     confirmInvite(form) {
       form.id = this.personToEdit.id
       this.loading.invite = true
+      this.success.invite = false
       this.errors.invite = false
       this.invitePerson(form)
         .then(() => {
-          this.loading.invite = false
           this.success.invite = true
           this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
-          this.loading.invite = false
           this.success.invite = false
           this.errors.invite = true
+        })
+        .finally(() => {
+          this.loading.invite = false
         })
     },
 
@@ -503,15 +528,22 @@ export default {
       this.errors.del = false
       this.deletePeople(this.personToDelete)
         .then(() => {
-          this.loading.del = false
           this.modals.del = false
           this.onSearchChange()
         })
         .catch(err => {
           console.error(err)
-          this.loading.del = false
           this.errors.del = true
         })
+        .finally(() => {
+          this.loading.del = false
+        })
+    },
+
+    resetError(error) {
+      if (error === 'email') {
+        this.errors.invalidEmailDomain = false
+      }
     },
 
     onSearchChange() {
@@ -522,9 +554,6 @@ export default {
         }
         this.setSearchInUrl()
       }
-      // refresh tabs
-      this.tabs[0].label = `${this.$t('main.active')} (${this.activePeople.length})`
-      this.tabs[1].label = `${this.$t('people.unactive')} (${this.unactivePeople.length})`
     },
 
     onAvatarClicked(person) {
@@ -604,6 +633,7 @@ export default {
         this.loading.createAndInvite = false
         this.errors.edit = false
         this.errors.invite = false
+        this.errors.invalidEmailDomain = false
         this.errors.userLimit = false
         this.loading.edit = false
         this.loading.invite = false

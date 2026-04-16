@@ -1,62 +1,34 @@
 import superagent from 'superagent'
 import errors from '@/lib/errors'
 
+function handleResponse(res) {
+  return res?.body
+}
+
+function handleError(err) {
+  if (err?.response?.status === 401) {
+    errors.backToLogin()
+    // Return a pending promise to freeze the chain until the redirect happens.
+    return new Promise(() => {})
+  }
+  err.body = err?.response?.body || ''
+  throw err
+}
+
 const client = {
-  get(path, callback) {
-    superagent.get(path).end((err, res) => {
-      // if (res?.statusCode === 401) return errors.backToLogin()
-      callback(err, res?.body)
-    })
-  },
-
-  post(path, data, callback) {
-    superagent
-      .post(path)
+  request(method, path, data) {
+    return superagent(method, path)
       .send(data)
-      .end((err, res) => {
-        if (res?.statusCode === 401) return errors.backToLogin()
-        callback(err, res?.body)
-      })
-  },
-
-  put(path, data, callback) {
-    superagent
-      .put(path)
-      .send(data)
-      .end((err, res) => {
-        if (res?.statusCode === 401) return errors.backToLogin()
-        callback(err, res?.body)
-      })
-  },
-
-  del(path, callback) {
-    superagent.del(path).end((err, res) => {
-      if (res?.statusCode === 401) return errors.backToLogin()
-      callback(err, res?.body)
-    })
+      .then(handleResponse)
+      .catch(handleError)
   },
 
   pget(path) {
-    return superagent.get(path).then(res => res?.body)
+    return client.request('GET', path)
   },
 
   ppost(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .post(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            return reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('POST', path, data)
   },
 
   ppostFile(path, data) {
@@ -64,58 +36,16 @@ const client = {
       .post(path)
       .send(data)
       .on('progress', e => e)
-    return {
-      request,
-      promise: new Promise((resolve, reject) => {
-        request.end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            return reject(err)
-          } else {
-            if (err) return reject(err)
-            else return resolve(res?.body)
-          }
-        })
-      })
-    }
+    const promise = request.then(handleResponse).catch(handleError)
+    return { request, promise }
   },
 
   pput(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .put(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('PUT', path, data)
   },
 
   pdel(path, data) {
-    return new Promise((resolve, reject) => {
-      superagent
-        .del(path)
-        .send(data)
-        .end((err, res) => {
-          if (res?.statusCode === 401) {
-            errors.backToLogin()
-            reject(err)
-          } else {
-            if (err) {
-              err.body = res ? res.body : ''
-              return reject(err)
-            } else return resolve(res?.body)
-          }
-        })
-    })
+    return client.request('DELETE', path, data)
   },
 
   getConfig() {
@@ -134,6 +64,14 @@ const client = {
     if (lastEventId) {
       path += `&cursor_event_id=${lastEventId}`
     }
+    return client.pget(path)
+  },
+
+  getLoginLogs(after, before, limit, lastLoginLogId = null) {
+    let path = `/api/data/events/login-logs/last?limit=${limit}`
+    if (after) path += `&after=${after}`
+    if (before) path += `&before=${before}`
+    if (lastLoginLogId) path += `&cursor_login_log_id=${lastLoginLogId}`
     return client.pget(path)
   },
 

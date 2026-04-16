@@ -434,7 +434,7 @@
           :thin="true"
           is-reversed
           v-model="objectModel.currentAnimation"
-          v-if="objectModel.isAnimation"
+          v-if="isCurrentPreviewModel && objectModel.isAnimation"
         />
       </div>
 
@@ -463,8 +463,8 @@
           class="flexrow-item time-indicator mr05 nowrap"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrame }}
-          <span class="is-hidden-touch is-hidden-desktop-only">
+          ({{ currentFrame
+          }}<span class="is-hidden-touch is-hidden-desktop-only">
             / {{ (nbFrames + '').padStart(3, '0') }} </span
           >)
         </span>
@@ -1017,6 +1017,7 @@ import preferences from '@/lib/preferences'
 
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
+import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 
@@ -1046,7 +1047,13 @@ import VideoProgress from '@/components/previews/VideoProgress.vue'
 export default {
   name: 'playlist-player',
 
-  mixins: [annotationMixin, domMixin, previewRoomMixin, playerMixin],
+  mixins: [
+    annotationMixin,
+    domMixin,
+    fullScreenMixin,
+    previewRoomMixin,
+    playerMixin
+  ],
 
   components: {
     ArrowUpRightIcon,
@@ -2771,6 +2778,7 @@ export default {
   width: 100%;
   height: 32px;
   padding-right: 5px;
+  font-variant-numeric: tabular-nums;
 }
 
 .playlisted-entities {

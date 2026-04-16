@@ -19,6 +19,7 @@
         <form @submit.prevent>
           <text-field
             ref="nameField"
+            :errored="errors.name"
             :label="$t('custom_actions.fields.name')"
             v-model.trim="form.name"
             v-focus
@@ -26,6 +27,8 @@
           />
 
           <text-field
+            ref="urlField"
+            :errored="errors.url"
             :label="$t('custom_actions.fields.url')"
             placeholder="https://..."
             type="url"
@@ -109,6 +112,10 @@ export default {
         entityType: 'all',
         isAjax: 'false'
       },
+      errors: {
+        name: false,
+        url: false
+      },
       entityTypeOptions: [
         {
           label: 'all',
@@ -140,6 +147,18 @@ export default {
 
   methods: {
     confirmClicked() {
+      this.errors.name = false
+      this.errors.url = false
+      if (!this.form.name) {
+        this.errors.name = true
+        this.$refs.nameField.focus()
+        return
+      }
+      if (!this.form.url) {
+        this.errors.url = true
+        this.$refs.urlField.focus()
+        return
+      }
       this.$emit('confirm', this.form)
     },
 

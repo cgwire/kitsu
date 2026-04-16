@@ -31,73 +31,58 @@
   </span>
 </template>
 
-<script>
+<script setup>
+import { ref, watch } from 'vue'
 import { CheckIcon, XIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'boolean-field',
-
-  components: {
-    CheckIcon,
-    XIcon
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    modelValue: {
-      default: 'false',
-      type: String
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    isField: {
-      default: false,
-      type: Boolean
-    },
-    isSmall: {
-      default: false,
-      type: Boolean
-    }
+  modelValue: {
+    default: 'false',
+    type: String
   },
-
-  emits: ['click', 'update:modelValue'],
-
-  data() {
-    return {
-      localValue: false
-    }
+  disabled: {
+    default: false,
+    type: Boolean
   },
-
-  methods: {
-    emitValue() {
-      this.$emit('update:modelValue', this.localValue ? 'true' : 'false')
-    },
-
-    onClick() {
-      this.localValue = !this.localValue
-      this.$emit('click', this.localValue ? 'true' : 'false')
-      this.emitValue()
-    }
+  isField: {
+    default: false,
+    type: Boolean
   },
-
-  watch: {
-    modelValue: {
-      immediate: true,
-      handler() {
-        this.localValue = this.modelValue === 'true'
-      }
-    },
-
-    localValue() {
-      // this.emitValue()
-    }
+  isSmall: {
+    default: false,
+    type: Boolean
   }
+})
+
+const emit = defineEmits(['click', 'update:modelValue'])
+
+const localValue = ref(false)
+
+const emitValue = () => {
+  emit('update:modelValue', localValue.value ? 'true' : 'false')
 }
+
+const onClick = () => {
+  localValue.value = !localValue.value
+  emit('click', localValue.value ? 'true' : 'false')
+  emitValue()
+}
+
+watch(
+  () => props.modelValue,
+  () => {
+    localValue.value = props.modelValue === 'true'
+  },
+  { immediate: true }
+)
+
+watch(localValue, () => {
+  // this.emitValue()
+})
 </script>
 
 <style lang="scss" scoped>

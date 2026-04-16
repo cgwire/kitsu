@@ -26,15 +26,10 @@
           <text-field
             ref="nameField"
             :label="$t('edits.fields.name')"
+            :maxlength="160"
             v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
-          />
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            @enter="runConfirmation"
-            v-model="form.data.resolution"
           />
           <textarea-field
             ref="descriptionField"
@@ -42,6 +37,13 @@
             v-model="form.description"
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
+          />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            :placeholder="currentProduction?.resolution"
+            @enter="runConfirmation"
+            v-model.trim="form.data.resolution"
           />
           <template v-if="editToEdit">
             <metadata-field

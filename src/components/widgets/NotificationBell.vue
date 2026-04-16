@@ -18,31 +18,21 @@
   </div>
 </template>
 
-<script>
-/*
- * Widget use to show if there is notification. The count is extracted directly
- * from the Vuex store.
- * If there is no value, it doesn't show a counter. If there are some, it adds
- * a badge giving the number of unread notifications.
- */
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import { BellIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'notification-bell',
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    BellIcon
-  },
+const isNewNotification = computed(() => store.getters.isNewNotification)
+const notificationCount = computed(() => store.getters.notificationCount)
 
-  computed: {
-    ...mapGetters(['isNewNotification', 'notificationCount']),
-
-    isNotificationPage() {
-      return this.$route.name === 'notifications'
-    }
-  }
-}
+const isNotificationPage = computed(() => {
+  return route.name === 'notifications'
+})
 </script>
 
 <style lang="scss" scoped>

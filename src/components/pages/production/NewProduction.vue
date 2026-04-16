@@ -26,282 +26,314 @@
           />
         </timeline-item>
         <timeline-item
-          :title="$t('productions.creation.production_settings')"
-          :subtitle="$t('productions.creation.production_settings_description')"
+          :title="$t('productions.creation.choose_template')"
+          :subtitle="$t('productions.creation.choose_template_description')"
           :step="2"
-          :is-completed="hasValidSettings"
+          :is-completed="!!productionToCreate.project_template_id"
+          :optional="true"
         >
-          <div class="flexrow">
-            <combobox-styled
-              class="flexrow-item"
-              :options="productionTypeOptions"
-              :label="$t('productions.fields.type')"
-              locale-key-prefix="productions.type."
-              v-model="productionToCreate.settings.type"
-              thin
-              is-inline
-            />
-            <combobox-styled
-              class="flexrow-item"
-              :options="productionStyleOptions"
-              :label="$t('productions.fields.style')"
-              locale-key-prefix="productions.style."
-              v-model="productionToCreate.settings.style"
-              thin
-              is-inline
-            />
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_type') }}
-          </div>
-          <div class="flexrow">
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-4"
-              :label="$t('productions.fields.fps')"
-              type="number"
-              :max="60"
-              :step="0.001"
-              :placeholder="$t('productions.creation.placeholder_fps')"
-              :errored="!hasValidFPS"
-              v-model="productionToCreate.settings.fps"
-              thin
-            />
-            <span class="input-separator flexrow-item mr1"></span>
-            <text-field
-              class="flexrow-item mr0"
-              input-class=" is-small is-size-3"
-              :label="$t('productions.fields.ratio')"
-              type="number"
-              :step="0.01"
-              :placeholder="$t('productions.creation.placeholder_ratio1')"
-              v-model="productionToCreate.settings.ratio[0]"
-              thin
-            />
-            <span class="input-separator flexrow-item mt15 mr0">:</span>
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-2"
-              type="number"
-              :step="1"
-              :placeholder="$t('productions.creation.placeholder_ratio2')"
-              :empty-label="true"
-              v-model="productionToCreate.settings.ratio[1]"
-              thin
-            />
-            <span class="input-separator flexrow-item mr1"></span>
-            <text-field
-              class="flexrow-item mr0 ml2"
-              input-class=" is-small is-size-4"
-              :label="$t('productions.fields.resolution')"
-              type="number"
-              :step="1"
-              :placeholder="$t('productions.creation.placeholder_resolution1')"
-              v-model="productionToCreate.settings.resolution[0]"
-              thin
-            />
-            <span class="input-separator flexrow-item mt15 mr05">x</span>
-            <text-field
-              class="flexrow-item"
-              input-class=" is-small is-size-4"
-              type="number"
-              :placeholder="$t('productions.creation.placeholder_resolution2')"
-              :step="1"
-              :empty-label="true"
-              v-model="productionToCreate.settings.resolution[1]"
-              thin
-            />
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_video') }}
-          </div>
-          <div>
-            <label class="label">
-              {{ $t('productions.creation.start_and_end_dates') }}
-            </label>
-            <div class="date-picker-wrapper">
-              <date-field
-                :can-delete="false"
-                :label="$t('main.start_date')"
-                :max-date="productionToCreate.settings.dateEnd"
-                :placeholder="startDatePlaceholder"
-                v-model="productionToCreate.settings.dateStart"
+          <combobox-styled
+            :options="projectTemplateOptions"
+            :label="$t('project_templates.title')"
+            v-model="productionToCreate.project_template_id"
+            thin
+            is-inline
+          />
+        </timeline-item>
+        <template v-if="!productionToCreate.project_template_id">
+          <timeline-item
+            :title="$t('productions.creation.production_settings')"
+            :subtitle="
+              $t('productions.creation.production_settings_description')
+            "
+            :step="3"
+            :is-completed="hasValidSettings"
+          >
+            <div class="flexrow">
+              <combobox-styled
+                class="flexrow-item"
+                :options="productionTypeOptions"
+                :label="$t('productions.fields.type')"
+                locale-key-prefix="productions.type."
+                v-model="productionToCreate.settings.type"
+                thin
+                is-inline
               />
-              <span class="input-separator">-</span>
-              <date-field
-                :can-delete="false"
-                :label="$t('main.end_date')"
-                :min-date="productionToCreate.settings.dateStart"
-                :placeholder="endDatePlaceholder"
-                v-model="productionToCreate.settings.dateEnd"
+              <combobox-styled
+                class="flexrow-item"
+                :options="productionStyleOptions"
+                :label="$t('productions.fields.style')"
+                locale-key-prefix="productions.style."
+                v-model="productionToCreate.settings.style"
+                thin
+                is-inline
               />
             </div>
-          </div>
-          <div class="mb1 explaination">
-            {{ $t('productions.creation.explaination_date') }}
-          </div>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_asset_task_type')"
-          :subtitle="
-            $t('productions.creation.select_asset_task_type_description')
-          "
-          :step="3"
-          :is-completed="hasValidAssetTaskTypes"
-          v-if="!isShotsOnly"
-        >
-          <draggable item-key="id" v-model="productionToCreate.assetTaskTypes">
-            <template #item="{ element: taskType }">
-              <task-type-name
-                class="task-type"
-                deletable
-                :task-type="taskType"
-                @delete="deleteFromList(taskType, 'assetTaskTypes')"
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_type') }}
+            </div>
+            <div class="flexrow">
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-4"
+                :label="$t('productions.fields.fps')"
+                type="number"
+                :max="60"
+                :step="0.001"
+                :placeholder="$t('productions.creation.placeholder_fps')"
+                :errored="!hasValidFPS"
+                v-model="productionToCreate.settings.fps"
+                thin
               />
-            </template>
-            <template #header>
-              <div class="flexrow mb1">
-                <combobox-task-type
-                  class="is-inline inline-task-type-combo flexrow-item mb0"
-                  :task-type-list="availableAssetTaskTypes"
-                  add-placeholder
-                  @update:model-value="
-                    id =>
-                      productionToCreate.assetTaskTypes.push(
-                        taskTypeMap.get(id)
-                      )
-                  "
-                  v-if="availableAssetTaskTypes.length"
-                />
-                <button
-                  class="button is-link flexrow-item"
-                  @click="onAddLibraryAssetTaskTypeClicked"
-                >
-                  {{ $t('task_types.add_task_type_to_library') }}
-                </button>
-              </div>
-            </template>
-          </draggable>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_shot_task_type')"
-          :subtitle="
-            $t('productions.creation.select_shot_task_type_description')
-          "
-          :step="isShotsOnly ? 3 : 4"
-          :is-completed="hasValidShotTaskTypes"
-          v-if="!isAssetsOnly"
-        >
-          <draggable item-key="id" v-model="productionToCreate.shotTaskTypes">
-            <template #item="{ element: taskType }">
-              <task-type-name
-                class="task-type"
-                deletable
-                :task-type="taskType"
-                @delete="deleteFromList(taskType, 'shotTaskTypes')"
+              <span class="input-separator flexrow-item mr1"></span>
+              <text-field
+                class="flexrow-item mr0"
+                input-class=" is-small is-size-3"
+                :label="$t('productions.fields.ratio')"
+                type="number"
+                :step="0.01"
+                :placeholder="$t('productions.creation.placeholder_ratio1')"
+                v-model="productionToCreate.settings.ratio[0]"
+                thin
               />
-            </template>
-            <template #header>
-              <div class="flexrow mb1">
-                <combobox-task-type
-                  class="is-inline inline-task-type-combo flexrow-item mb0"
-                  :task-type-list="availableShotTaskTypes"
-                  add-placeholder
-                  @update:model-value="
-                    id =>
-                      productionToCreate.shotTaskTypes.push(taskTypeMap.get(id))
-                  "
-                  v-if="availableShotTaskTypes.length"
+              <span class="input-separator flexrow-item mt15 mr0">:</span>
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-2"
+                type="number"
+                :step="1"
+                :placeholder="$t('productions.creation.placeholder_ratio2')"
+                :empty-label="true"
+                v-model="productionToCreate.settings.ratio[1]"
+                thin
+              />
+              <span class="input-separator flexrow-item mr1"></span>
+              <text-field
+                class="flexrow-item mr0 ml2"
+                input-class=" is-small is-size-4"
+                :label="$t('productions.fields.resolution')"
+                type="number"
+                :step="1"
+                :placeholder="
+                  $t('productions.creation.placeholder_resolution1')
+                "
+                v-model="productionToCreate.settings.resolution[0]"
+                thin
+              />
+              <span class="input-separator flexrow-item mt15 mr05">x</span>
+              <text-field
+                class="flexrow-item"
+                input-class=" is-small is-size-4"
+                type="number"
+                :placeholder="
+                  $t('productions.creation.placeholder_resolution2')
+                "
+                :step="1"
+                :empty-label="true"
+                v-model="productionToCreate.settings.resolution[1]"
+                thin
+              />
+            </div>
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_video') }}
+            </div>
+            <div>
+              <label class="label">
+                {{ $t('productions.creation.start_and_end_dates') }}
+              </label>
+              <div class="date-picker-wrapper">
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.start_date')"
+                  :max-date="productionToCreate.settings.dateEnd"
+                  :placeholder="startDatePlaceholder"
+                  v-model="productionToCreate.settings.dateStart"
                 />
-                <button
-                  class="button is-link flexrow-item"
-                  @click="onAddLibraryShotTaskTypeClicked"
-                >
-                  {{ $t('task_types.add_task_type_to_library') }}
-                </button>
+                <span class="input-separator">-</span>
+                <date-field
+                  :can-delete="false"
+                  :label="$t('main.end_date')"
+                  :min-date="productionToCreate.settings.dateStart"
+                  :placeholder="endDatePlaceholder"
+                  v-model="productionToCreate.settings.dateEnd"
+                />
               </div>
-            </template>
-          </draggable>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.select_task_status')"
-          :subtitle="$t('productions.creation.select_task_status_description')"
-          :step="isShotsOnly || isAssetsOnly ? 4 : 5"
-          :is-completed="hasValidTaskStatuses"
-        >
-          <div class="flexrow">
-            <combobox-status
-              class="flexrow-item"
-              :task-status-list="availableTaskStatuses"
-              :with-margin="false"
-              add-placeholder
-              @update:model-value="
-                id =>
-                  productionToCreate.taskStatuses.push(taskStatusMap.get(id))
-              "
-              v-if="availableTaskStatuses.length > 0"
-            />
-            <button
-              class="button is-link flexrow-item"
-              @click="modals.isAddTaskStatusDisplayed = true"
+            </div>
+            <div class="mb1 explaination">
+              {{ $t('productions.creation.explaination_date') }}
+            </div>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_asset_task_type')"
+            :subtitle="
+              $t('productions.creation.select_asset_task_type_description')
+            "
+            :step="4"
+            :is-completed="hasValidAssetTaskTypes"
+            v-if="!isShotsOnly"
+          >
+            <draggable
+              item-key="id"
+              v-model="productionToCreate.assetTaskTypes"
             >
-              {{ $t('task_status.add_task_status_to_library') }}
-            </button>
-          </div>
-          <div class="flexrow mt1">
-            <validation-tag
-              class="task-status flexrow-item"
-              :task="{ task_status_id: taskStatus.id }"
-              :key="taskStatus.id"
-              pointer
-              is-static
-              @click="deleteFromList(taskStatus, 'taskStatuses')"
-              v-for="taskStatus in productionToCreate.taskStatuses"
-            />
-          </div>
-        </timeline-item>
-        <timeline-item
-          :title="$t('productions.creation.add_asset_types')"
-          :subtitle="$t('productions.creation.add_asset_types_description')"
-          :step="isAssetsOnly ? 5 : 6"
-          :is-completed="hasValidAssetTypes"
-          v-if="!isShotsOnly"
-        >
-          <div class="flexrow asset-types mb1">
-            <combobox
-              class="flexrow-item"
-              :options="availableAssetTypes"
-              :with-margin="false"
-              @update:model-value="
-                id => {
-                  assetTypeMap.get(id) &&
-                    productionToCreate.assetTypes.push(assetTypeMap.get(id))
-                }
-              "
-              v-if="availableAssetTypes.length > 1"
-            />
-            <button
-              class="button is-link flexrow-item"
-              @click="modals.isAddAssetTypeDisplayed = true"
-            >
-              {{ $t('asset_types.add_asset_type_to_library') }}
-            </button>
-          </div>
-          <div class="flexrow mt1">
-            <span
-              :key="assetType.id"
-              class="asset-type-name flexrow-item"
-              @click="deleteFromList(assetType, 'assetTypes')"
-              v-for="assetType in productionToCreate.assetTypes"
-            >
-              {{ assetType.name }}
-            </span>
-          </div>
-        </timeline-item>
+              <template #item="{ element: taskType }">
+                <task-type-name
+                  class="task-type"
+                  deletable
+                  :task-type="taskType"
+                  @delete="deleteFromList(taskType, 'assetTaskTypes')"
+                />
+              </template>
+              <template #header>
+                <div class="flexrow mb1">
+                  <combobox-task-type
+                    class="is-inline inline-task-type-combo flexrow-item mb0"
+                    :task-type-list="availableAssetTaskTypes"
+                    add-placeholder
+                    @update:model-value="
+                      id =>
+                        productionToCreate.assetTaskTypes.push(
+                          taskTypeMap.get(id)
+                        )
+                    "
+                    v-if="availableAssetTaskTypes.length"
+                  />
+                  <button
+                    class="button is-link flexrow-item"
+                    @click="onAddLibraryAssetTaskTypeClicked"
+                  >
+                    {{ $t('task_types.add_task_type_to_library') }}
+                  </button>
+                </div>
+              </template>
+            </draggable>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_shot_task_type')"
+            :subtitle="
+              $t('productions.creation.select_shot_task_type_description')
+            "
+            :step="isShotsOnly ? 4 : 5"
+            :is-completed="hasValidShotTaskTypes"
+            v-if="!isAssetsOnly"
+          >
+            <draggable item-key="id" v-model="productionToCreate.shotTaskTypes">
+              <template #item="{ element: taskType }">
+                <task-type-name
+                  class="task-type"
+                  deletable
+                  :task-type="taskType"
+                  @delete="deleteFromList(taskType, 'shotTaskTypes')"
+                />
+              </template>
+              <template #header>
+                <div class="flexrow mb1">
+                  <combobox-task-type
+                    class="is-inline inline-task-type-combo flexrow-item mb0"
+                    :task-type-list="availableShotTaskTypes"
+                    add-placeholder
+                    @update:model-value="
+                      id =>
+                        productionToCreate.shotTaskTypes.push(
+                          taskTypeMap.get(id)
+                        )
+                    "
+                    v-if="availableShotTaskTypes.length"
+                  />
+                  <button
+                    class="button is-link flexrow-item"
+                    @click="onAddLibraryShotTaskTypeClicked"
+                  >
+                    {{ $t('task_types.add_task_type_to_library') }}
+                  </button>
+                </div>
+              </template>
+            </draggable>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.select_task_status')"
+            :subtitle="
+              $t('productions.creation.select_task_status_description')
+            "
+            :step="isShotsOnly || isAssetsOnly ? 5 : 6"
+            :is-completed="hasValidTaskStatuses"
+          >
+            <div class="flexrow">
+              <combobox-status
+                class="flexrow-item"
+                :task-status-list="availableTaskStatuses"
+                :with-margin="false"
+                add-placeholder
+                @update:model-value="
+                  id =>
+                    productionToCreate.taskStatuses.push(taskStatusMap.get(id))
+                "
+                v-if="availableTaskStatuses.length > 0"
+              />
+              <button
+                class="button is-link flexrow-item"
+                @click="modals.isAddTaskStatusDisplayed = true"
+              >
+                {{ $t('task_status.add_task_status_to_library') }}
+              </button>
+            </div>
+            <div class="flexrow mt1">
+              <validation-tag
+                class="task-status flexrow-item"
+                :task="{ task_status_id: taskStatus.id }"
+                :key="taskStatus.id"
+                pointer
+                is-static
+                @click="deleteFromList(taskStatus, 'taskStatuses')"
+                v-for="taskStatus in productionToCreate.taskStatuses"
+              />
+            </div>
+          </timeline-item>
+          <timeline-item
+            :title="$t('productions.creation.add_asset_types')"
+            :subtitle="$t('productions.creation.add_asset_types_description')"
+            :step="isAssetsOnly ? 6 : 7"
+            :is-completed="hasValidAssetTypes"
+            v-if="!isShotsOnly"
+          >
+            <div class="flexrow asset-types mb1">
+              <combobox
+                class="flexrow-item"
+                :options="availableAssetTypes"
+                :with-margin="false"
+                @update:model-value="
+                  id => {
+                    assetTypeMap.get(id) &&
+                      productionToCreate.assetTypes.push(assetTypeMap.get(id))
+                  }
+                "
+                v-if="availableAssetTypes.length > 1"
+              />
+              <button
+                class="button is-link flexrow-item"
+                @click="modals.isAddAssetTypeDisplayed = true"
+              >
+                {{ $t('asset_types.add_asset_type_to_library') }}
+              </button>
+            </div>
+            <div class="flexrow mt1">
+              <span
+                :key="assetType.id"
+                class="asset-type-name flexrow-item"
+                @click="deleteFromList(assetType, 'assetTypes')"
+                v-for="assetType in productionToCreate.assetTypes"
+              >
+                {{ assetType.name }}
+              </span>
+            </div>
+          </timeline-item>
+        </template>
         <timeline-item
           :title="$t('productions.creation.add_assets')"
           :subtitle="$t('productions.creation.add_assets_description')"
-          :step="isAssetsOnly ? 6 : 7"
+          :step="
+            productionToCreate.project_template_id ? 3 : isAssetsOnly ? 7 : 8
+          "
           :is-completed="hasValidAssets"
           :optional="true"
           :is-last="isAssetsOnly"
@@ -323,7 +355,9 @@
         <timeline-item
           :title="$t('productions.creation.add_shots')"
           :subtitle="$t('productions.creation.add_shots_description')"
-          :step="isShotsOnly ? 5 : 8"
+          :step="
+            productionToCreate.project_template_id ? 4 : isShotsOnly ? 6 : 9
+          "
           :is-completed="hasValidShots"
           :optional="true"
           is-last
@@ -470,10 +504,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import draggable from 'vuedraggable'
 import moment from 'moment'
-import { mapActions, mapGetters } from 'vuex'
+import { computed, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import func from '@/lib/func'
@@ -506,651 +543,553 @@ import assetTypeStore from '@/store/modules/assettypes'
 import taskStatusStore from '@/store/modules/taskstatus.js'
 import taskTypeStore from '@/store/modules/tasktypes'
 
-export default {
-  name: 'new-production',
+const { t } = useI18n()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    draggable,
-    Combobox,
-    ComboboxStyled,
-    ComboboxTaskType,
-    ComboboxStatus,
-    DateField,
-    EditAssetTypeModal,
-    EditTaskStatusModal,
-    EditTaskTypeModal,
-    ImportModal,
-    ImportRenderModal,
-    ManageShotsModal,
-    Spinner,
-    TaskTypeName,
-    TextField,
-    TimelineItem,
-    ValidationTag
+const nameField = useTemplateRef('nameField')
+const importAssetsModal = useTemplateRef('import-assets-modal')
+const importShotsModal = useTemplateRef('import-shots-modal')
+
+const errors = reactive({
+  creatingProduction: false,
+  creatingProductionError: '',
+  creatingTaskType: false,
+  creatingTaskStatus: false,
+  creatingAssetType: false,
+  importingAssets: false,
+  importingAssetsError: null,
+  importingShots: false,
+  importingShotsError: null
+})
+const loading = reactive({
+  createProduction: false,
+  importingAssets: false,
+  importingShots: false,
+  creatingTaskType: false,
+  creatingTaskStatus: false,
+  creatingAssetType: false
+})
+const modals = reactive({
+  isAddAssetsDisplayed: false,
+  isAddAssetTypeDisplayed: false,
+  isAddShotsDisplayed: false,
+  isAddTaskStatusDisplayed: false,
+  isAddTaskTypeDisplayed: false,
+  isAssetsImportDisplayed: false,
+  isAssetsImportRenderDisplayed: false,
+  isShotsImportDisplayed: false,
+  isShotsImportRenderDisplayed: false
+})
+const parsedAssetsCSV = ref([])
+const parsedShotsCSV = ref([])
+const productionToCreate = reactive({
+  assetsToAdd: null,
+  assetTypes: [],
+  assetTaskTypes: [],
+  episodesToCreate: [],
+  name: null,
+  project_template_id: null,
+  sequencesToCreate: [],
+  settings: {
+    dateStart: null,
+    dateEnd: null,
+    fps: 25,
+    ratio: [16, 9],
+    resolution: [1920, 1080],
+    style: PRODUCTION_STYLE_OPTIONS[0].value,
+    type: PRODUCTION_TYPE_OPTIONS[0].value
   },
+  shotsToAdd: null,
+  shotTaskTypes: [],
+  shotsToCreate: [],
+  taskStatuses: []
+})
+const assetsOptionalColumns = ['Description', 'Ready for', 'Resolution']
+const shotsOptionalColumns = [
+  'Description',
+  'Nb Frames',
+  'Frame In',
+  'Frame Out',
+  'FPS',
+  'Resolution'
+]
+const taskTypeForEntity = ref('Asset')
+const genericColumns = [
+  'metadata_column_name => text value',
+  'task_type_name => task_status_name',
+  'task_type_name comment => comment text'
+]
+const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
+const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
 
-  data() {
-    return {
-      errors: {
-        creatingProduction: false,
-        creatingProductionError: '',
-        creatingTaskType: false,
-        importingAssets: false,
-        importingAssetsError: null,
-        importingShots: false,
-        importingShotsError: null
-      },
-      loading: {
-        createProduction: false,
-        importingAssets: false,
-        importingShots: false,
-        creatingTaskType: false
-      },
-      modals: {
-        isAddAssetsDisplayed: false,
-        isAddAssetTypeDisplayed: false,
-        isAddShotsDisplayed: false,
-        isAddTaskStatusDisplayed: false,
-        isAddTaskTypeDisplayed: false,
-        isAssetsImportDisplayed: false,
-        isAssetsImportRenderDisplayed: false,
-        isShotsImportDisplayed: false,
-        isShotsImportRenderDisplayed: false
-      },
-      parsedAssetsCSV: [],
-      parsedShotsCSV: [],
-      productionToCreate: {
-        assetsToAdd: null,
-        assetTypes: [],
-        assetTaskTypes: [],
-        episodesToCreate: [],
-        name: null,
-        sequencesToCreate: [],
-        settings: {
-          dateStart: null,
-          dateEnd: null,
-          fps: 25,
-          ratio: [16, 9],
-          resolution: [1920, 1080],
-          style: PRODUCTION_STYLE_OPTIONS[0].value,
-          type: PRODUCTION_TYPE_OPTIONS[0].value
-        },
-        shotsToAdd: null,
-        shotTaskTypes: [],
-        shotsToCreate: [],
-        taskStatuses: []
-      },
-      assetsOptionalColumns: ['Description', 'Ready for', 'Resolution'],
-      shotsOptionalColumns: [
-        'Description',
-        'Nb Frames',
-        'Frame In',
-        'Frame Out',
-        'FPS',
-        'Resolution'
-      ],
-      taskTypeForEntity: 'Asset',
-      genericColumns: [
-        'metadata_column_name => text value',
-        'task_type_name => task_status_name',
-        'task_type_name comment => comment text'
-      ],
-      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
-      productionTypeOptions: PRODUCTION_TYPE_OPTIONS
-    }
-  },
+const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
+const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
+const assetTypes = computed(() => store.getters.assetTypes)
+const productionStatus = computed(() => store.getters.productionStatus)
+const projectTemplates = computed(() => store.getters.projectTemplates)
+const shotsCsvFormData = computed(() => store.getters.shotsCsvFormData)
+const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
+const taskStatus = computed(() => store.getters.taskStatus)
 
-  mounted() {
-    this.$refs.nameField.focus()
-  },
+const projectTemplateOptions = computed(() => [
+  { label: t('productions.creation.no_template'), value: null },
+  ...projectTemplates.value.map(template => ({
+    label: template.name,
+    value: template.id
+  }))
+])
 
-  computed: {
-    ...mapGetters([
-      'assetsCsvFormData',
-      'assetTaskTypes',
-      'assetTypes',
-      'productionStatus',
-      'shotsCsvFormData',
-      'shotTaskTypes',
-      'taskStatus'
-    ]),
+const assetTypeMap = computed(() => assetTypeStore.cache.assetTypeMap)
+const taskStatusMap = computed(() => taskStatusStore.cache.taskStatusMap)
+const taskTypeMap = computed(() => taskTypeStore.cache.taskTypeMap)
 
-    assetTypeMap() {
-      return assetTypeStore.cache.assetTypeMap
-    },
+const isTVShow = computed(() => productionToCreate.settings.type === 'tvshow')
+const isAssetsOnly = computed(
+  () => productionToCreate.settings.type === 'assets'
+)
+const isShotsOnly = computed(() => productionToCreate.settings.type === 'shots')
 
-    taskStatusMap() {
-      return taskStatusStore.cache.taskStatusMap
-    },
+const assetsDataMatchers = computed(() =>
+  isTVShow.value ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
+)
 
-    taskTypeMap() {
-      return taskTypeStore.cache.taskTypeMap
-    },
+const shotsDataMatchers = computed(() =>
+  isTVShow.value ? ['Episode', 'Sequence', 'Name'] : ['Sequence', 'Name']
+)
 
-    isTVShow() {
-      return this.productionToCreate.settings.type === 'tvshow'
-    },
+const assetsRenderColumns = computed(() => {
+  const collection = [...assetsDataMatchers.value, ...assetsOptionalColumns]
+  productionToCreate.assetTaskTypes.forEach(item => {
+    collection.push(item.name)
+    collection.push(item.name + ' comment')
+  })
+  return collection
+})
 
-    isAssetsOnly() {
-      return this.productionToCreate.settings.type === 'assets'
-    },
+const shotsRenderColumns = computed(() => {
+  const collection = [...shotsDataMatchers.value, ...shotsOptionalColumns]
+  productionToCreate.shotTaskTypes.forEach(item => {
+    collection.push(item.name)
+    collection.push(item.name + ' comment')
+  })
+  return collection
+})
 
-    isShotsOnly() {
-      return this.productionToCreate.settings.type === 'shots'
-    },
+const allowedProductionTypes = computed(() =>
+  PRODUCTION_TYPE_OPTIONS.map(option => option.value)
+)
 
-    assetsDataMatchers() {
-      return this.isTVShow ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
-    },
+const isEmpty = value =>
+  value === null ||
+  value === undefined ||
+  value === '' ||
+  value === [] ||
+  value === {}
 
-    assetsRenderColumns() {
-      const collection = [
-        ...this.assetsDataMatchers,
-        ...this.assetsOptionalColumns
-      ]
+const isFloat = value => !isEmpty(value) && /^[(\d)*,(\d)+]|(\d)+$/.test(value)
 
-      this.productionToCreate.assetTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(item.name + ' comment')
+const isInteger = value => !isEmpty(value) && /^\d+$/.test(value)
+
+const hasValidName = computed(() => !isEmpty(productionToCreate.name))
+const hasValidStartDate = computed(
+  () => !isEmpty(productionToCreate.settings.dateStart)
+)
+const hasValidEndDate = computed(
+  () => !isEmpty(productionToCreate.settings.dateEnd)
+)
+const hasValidAssets = computed(() => nbAssetsToImport.value > 0)
+const hasValidAssetTypes = computed(
+  () => productionToCreate.assetTypes.length > 0
+)
+const hasValidShots = computed(() => nbShotsToImport.value > 0)
+
+const hasValidFPS = computed(() => {
+  const fps = parseInt(productionToCreate.settings.fps)
+  return fps > 0 && fps <= 60
+})
+
+const hasValidRatio = computed(() => {
+  if (isEmpty(productionToCreate.settings.ratio)) return false
+  return (
+    productionToCreate.settings.ratio.length === 2 &&
+    isFloat(productionToCreate.settings.ratio[0]) &&
+    isInteger(productionToCreate.settings.ratio[1])
+  )
+})
+
+const hasValidResolution = computed(() => {
+  if (isEmpty(productionToCreate.settings.resolution)) return false
+  return (
+    productionToCreate.settings.resolution.length === 2 &&
+    isInteger(productionToCreate.settings.resolution[0]) &&
+    isInteger(productionToCreate.settings.resolution[1])
+  )
+})
+
+const hasValidType = computed(() =>
+  allowedProductionTypes.value.includes(productionToCreate.settings.type)
+)
+
+const hasValidSettings = computed(
+  () =>
+    hasValidType.value &&
+    hasValidFPS.value &&
+    hasValidRatio.value &&
+    hasValidResolution.value &&
+    hasValidStartDate.value &&
+    hasValidEndDate.value
+)
+
+const hasValidAssetTaskTypes = computed(
+  () => productionToCreate.assetTaskTypes.length > 0
+)
+const hasValidShotTaskTypes = computed(
+  () => productionToCreate.shotTaskTypes.length > 0
+)
+const hasValidTaskStatuses = computed(
+  () => productionToCreate.taskStatuses.length > 0
+)
+
+const hasAllDataCorrect = computed(() => {
+  if (productionToCreate.project_template_id) return hasValidName.value
+  return (
+    hasValidName.value &&
+    hasValidSettings.value &&
+    (hasValidAssetTaskTypes.value || isShotsOnly.value) &&
+    (hasValidShotTaskTypes.value || isAssetsOnly.value) &&
+    hasValidTaskStatuses.value &&
+    (hasValidAssetTypes.value || isShotsOnly.value)
+  )
+})
+
+const availableAssetTaskTypes = computed(() =>
+  assetTaskTypes.value.filter(
+    att => !productionToCreate.assetTaskTypes.includes(att) && !att.archived
+  )
+)
+
+const availableAssetTypes = computed(() => {
+  const sorted = sortByName(
+    assetTypes.value.filter(at => !productionToCreate.assetTypes.includes(at))
+  )
+  return [
+    { name: t('asset_types.add_asset_type_placeholder'), id: '-' },
+    ...sorted
+  ].map(at => ({ label: at.name, value: at.id }))
+})
+
+const availableShotTaskTypes = computed(() =>
+  shotTaskTypes.value.filter(
+    stt => !productionToCreate.shotTaskTypes.includes(stt) && !stt.archived
+  )
+)
+
+const availableTaskStatuses = computed(() =>
+  taskStatus.value.filter(
+    status =>
+      !productionToCreate.taskStatuses.includes(status) &&
+      !status.is_default &&
+      !status.for_concept
+  )
+)
+
+const nbAssetsToImport = computed(() => {
+  if (productionToCreate.assetsToAdd) {
+    const lines = productionToCreate.assetsToAdd.filter(l => l.length > 1)
+    return lines.length - 1
+  }
+  return 0
+})
+
+const nbShotsToImport = computed(() => {
+  let nb = productionToCreate.shotsToCreate.length
+  if (productionToCreate.shotsToAdd) {
+    const lines = productionToCreate.shotsToAdd.filter(l => l.length > 1)
+    nb += lines.length - 1
+  }
+  return nb
+})
+
+const startDatePlaceholder = computed(() => formatSimpleDate(moment()))
+const endDatePlaceholder = computed(() =>
+  formatSimpleDate(moment().add(3, 'month'))
+)
+
+const deleteFromList = (object, listName) => {
+  productionToCreate[listName] = removeModelFromList(
+    productionToCreate[listName],
+    object
+  )
+}
+
+const createTaskTypesAndStatuses = async () => {
+  await func.runPromiseAsSeries(
+    productionToCreate.assetTaskTypes
+      .concat(productionToCreate.shotTaskTypes)
+      .map(async (taskType, index) => {
+        const finalIndex =
+          taskType.for_entity === 'Shot'
+            ? index - productionToCreate.assetTaskTypes.length
+            : index
+        return await store.dispatch('addTaskTypeToProduction', {
+          taskTypeId: taskType.id,
+          priority: finalIndex + 1
+        })
       })
-
-      return collection
-    },
-
-    shotsRenderColumns() {
-      const collection = [
-        ...this.shotsDataMatchers,
-        ...this.shotsOptionalColumns
-      ]
-
-      this.productionToCreate.shotTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(item.name + ' comment')
-      })
-
-      return collection
-    },
-
-    shotsDataMatchers() {
-      return this.isTVShow
-        ? ['Episode', 'Sequence', 'Name']
-        : ['Sequence', 'Name']
-    },
-
-    allowedProductionTypes() {
-      return PRODUCTION_TYPE_OPTIONS.map(option => option.value)
-    },
-
-    hasValidName() {
-      return !this.isEmpty(this.productionToCreate.name)
-    },
-
-    hasValidStartDate() {
-      return !this.isEmpty(this.productionToCreate.settings.dateStart)
-    },
-
-    hasValidEndDate() {
-      return !this.isEmpty(this.productionToCreate.settings.dateEnd)
-    },
-
-    hasValidAssets() {
-      return this.nbAssetsToImport > 0
-    },
-
-    hasValidAssetTypes() {
-      return this.productionToCreate.assetTypes.length > 0
-    },
-
-    hasValidShots() {
-      return this.nbShotsToImport > 0
-    },
-
-    hasValidSettings() {
-      return (
-        this.hasValidType &&
-        this.hasValidFPS &&
-        this.hasValidRatio &&
-        this.hasValidResolution &&
-        this.hasValidStartDate &&
-        this.hasValidEndDate
-      )
-    },
-
-    hasValidFPS() {
-      const fps = parseInt(this.productionToCreate.settings.fps)
-      return fps > 0 && fps <= 60
-    },
-
-    hasValidRatio() {
-      if (this.isEmpty(this.productionToCreate.settings.ratio)) {
-        return false
-      }
-      return (
-        this.productionToCreate.settings.ratio.length === 2 &&
-        this.isFloat(this.productionToCreate.settings.ratio[0]) &&
-        this.isInteger(this.productionToCreate.settings.ratio[1])
-      )
-    },
-
-    hasValidResolution() {
-      if (this.isEmpty(this.productionToCreate.settings.resolution)) {
-        return false
-      }
-      return (
-        this.productionToCreate.settings.resolution.length === 2 &&
-        this.isInteger(this.productionToCreate.settings.resolution[0]) &&
-        this.isInteger(this.productionToCreate.settings.resolution[1])
-      )
-    },
-
-    hasValidType() {
-      return this.allowedProductionTypes.includes(
-        this.productionToCreate.settings.type
-      )
-    },
-
-    hasValidAssetTaskTypes() {
-      return this.productionToCreate.assetTaskTypes.length > 0
-    },
-
-    hasValidShotTaskTypes() {
-      return this.productionToCreate.shotTaskTypes.length > 0
-    },
-
-    hasValidTaskStatuses() {
-      return this.productionToCreate.taskStatuses.length > 0
-    },
-
-    hasAllDataCorrect() {
-      return (
-        this.hasValidName &&
-        this.hasValidSettings &&
-        (this.hasValidAssetTaskTypes || this.isShotsOnly) &&
-        (this.hasValidShotTaskTypes || this.isAssetsOnly) &&
-        this.hasValidTaskStatuses &&
-        (this.hasValidAssetTypes || this.isShotsOnly)
-      )
-    },
-
-    availableAssetTaskTypes() {
-      return this.assetTaskTypes.filter(
-        assetTaskType =>
-          !this.productionToCreate.assetTaskTypes.includes(assetTaskType) &&
-          !assetTaskType.archived
-      )
-    },
-
-    availableAssetTypes() {
-      const assetTypes = sortByName(
-        this.assetTypes.filter(
-          assetType => !this.productionToCreate.assetTypes.includes(assetType)
-        )
-      )
-      return [
-        {
-          name: this.$t('asset_types.add_asset_type_placeholder'),
-          id: '-'
-        },
-        ...assetTypes
-      ].map(assetType => {
-        return {
-          label: assetType.name,
-          value: assetType.id
-        }
-      })
-    },
-
-    availableShotTaskTypes() {
-      return this.shotTaskTypes.filter(
-        shotTaskType =>
-          !this.productionToCreate.shotTaskTypes.includes(shotTaskType) &&
-          !shotTaskType.archived
-      )
-    },
-
-    availableTaskStatuses() {
-      return this.taskStatus.filter(
-        status =>
-          !this.productionToCreate.taskStatuses.includes(status) &&
-          !status.is_default &&
-          !status.for_concept
-      )
-    },
-
-    nbAssetsToImport() {
-      if (this.productionToCreate.assetsToAdd) {
-        const assetsLines = this.productionToCreate.assetsToAdd.filter(
-          assetLine => assetLine.length > 1
-        )
-        return assetsLines.length - 1
-      }
-      return 0
-    },
-
-    nbShotsToImport() {
-      let nbShots = this.productionToCreate.shotsToCreate.length
-      if (this.productionToCreate.shotsToAdd) {
-        const shotsLines = this.productionToCreate.shotsToAdd.filter(
-          shotLine => shotLine.length > 1
-        )
-        nbShots += shotsLines.length - 1
-      }
-      return nbShots
-    },
-
-    startDatePlaceholder() {
-      return formatSimpleDate(moment())
-    },
-
-    endDatePlaceholder() {
-      return formatSimpleDate(moment().add(3, 'month'))
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addAssetTypeToProduction',
-      'addTaskStatusToProduction',
-      'addTaskTypeToProduction',
-      'loadContext',
-      'newAssetType',
-      'newProduction',
-      'newTaskStatus',
-      'newTaskType',
-      'setProduction',
-      'uploadAssetFile',
-      'uploadShotFile'
-    ]),
-
-    removeModelFromList,
-
-    deleteFromList(object, listName) {
-      this.productionToCreate[listName] = removeModelFromList(
-        this.productionToCreate[listName],
-        object
-      )
-    },
-
-    isEmpty(value) {
-      return (
-        value === null ||
-        value === undefined ||
-        value === '' ||
-        value === [] ||
-        value === {}
-      )
-    },
-
-    isFloat(value) {
-      return !this.isEmpty(value) && /^[(\d)*,(\d)+]|(\d)+$/.test(value)
-    },
-
-    isInteger(value) {
-      return !this.isEmpty(value) && /^\d+$/.test(value)
-    },
-
-    async createTaskTypesAndStatuses() {
-      await func.runPromiseAsSeries(
-        this.productionToCreate.assetTaskTypes
-          .concat(this.productionToCreate.shotTaskTypes)
-          .map(async (taskType, index) => {
-            const finalIndex =
-              taskType.for_entity === 'Shot'
-                ? index - this.productionToCreate.assetTaskTypes.length
-                : index
-            return await this.addTaskTypeToProduction({
-              taskTypeId: taskType.id,
-              priority: finalIndex + 1
-            })
-          })
-          .concat(
-            this.productionToCreate.taskStatuses.map(async taskStatus => {
-              return await this.addTaskStatusToProduction(taskStatus.id)
-            })
+      .concat(
+        productionToCreate.taskStatuses.map(async taskStatus => {
+          return await store.dispatch(
+            'addTaskStatusToProduction',
+            taskStatus.id
           )
+        })
       )
-    },
+  )
+}
 
-    async createAssets() {
-      if (this.productionToCreate.assetsToAdd !== null) {
-        this.loading.importingAssets = true
-        this.errors.importingAssets = false
-        await this.uploadAssetFile(false)
-          .then(() => {
-            this.loading.importingAssets = false
-          })
-          .catch(err => {
-            this.loading.importingAssets = false
-            this.errors.importingAssets = true
-            this.errors.importingAssetsError = err
-          })
-      }
-    },
-
-    createAssetTypes() {
-      this.productionToCreate.assetTypes.map(async assetType => {
-        return await this.addAssetTypeToProduction(assetType.id)
-      })
-    },
-
-    async createShots() {
-      if (this.productionToCreate.shotsToAdd !== null) {
-        this.loading.importingShots = true
-        this.errors.importingShots = false
-        await this.uploadShotFile(false)
-          .then(() => {
-            this.loading.importingShots = false
-          })
-          .catch(err => {
-            this.loading.importingShots = false
-            this.errors.importingShots = true
-            this.errors.importingShotsError = err
-          })
-      }
-    },
-
-    createTaskType(taskType) {
-      this.loading.creatingTaskType = true
-      this.errors.creatingTaskType = false
-      this.newTaskType(taskType)
-        .then(() => {
-          this.loading.creatingTaskType = false
-          this.modals.isAddTaskTypeDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.creatingTaskType = false
-          this.errors.creatingTaskType = true
-        })
-    },
-
-    createTaskStatus(taskStatus) {
-      this.loading.creatingTaskStatus = true
-      this.errors.creatingTaskStatus = false
-      this.newTaskStatus(taskStatus)
-        .then(() => {
-          this.loading.creatingTaskStatus = false
-          this.modals.isAddTaskStatusDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.creatingTaskStatus = false
-          this.errors.creatingTaskStatus = true
-        })
-    },
-
-    createAssetType(assetType) {
-      this.loading.creatingAssetType = true
-      this.errors.creatingAssetType = false
-      this.newAssetType(assetType)
-        .then(() => {
-          this.loading.creatingAssetType = false
-          this.modals.isAddAssetTypeDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.creatingAssetType = false
-          this.errors.creatingAssetType = true
-        })
-    },
-
-    createProductionRoute(createdProduction) {
-      const params = {
-        production_id: createdProduction.id
-      }
-      let routeName = 'assets'
-      if (this.isTVShow) {
-        params.episode_id = 'all'
-        routeName = 'episode-assets'
-      } else if (this.isShotsOnly) {
-        routeName = 'shots'
-      }
-      return {
-        name: routeName,
-        params
-      }
-    },
-
-    async createProduction() {
-      if (this.loading.createProduction) return
-      this.loading.createProduction = true
-      this.errors.creatingProduction = false
-      this.errors.creatingProductionError = ''
-      try {
-        const createdProduction = await this.newProduction({
-          name: this.productionToCreate.name,
-          project_status_id: this.productionStatus[0].id,
-          fps: this.productionToCreate.settings.fps,
-          ratio: this.productionToCreate.settings.ratio.join(':'),
-          resolution: this.productionToCreate.settings.resolution.join('x'),
-          production_type: this.productionToCreate.settings.type,
-          production_style: this.productionToCreate.settings.style,
-          start_date: this.productionToCreate.settings.dateStart,
-          end_date: this.productionToCreate.settings.dateEnd
-        })
-        await this.setProduction(createdProduction.id)
-        await this.createTaskTypesAndStatuses()
-        await this.createAssetTypes()
-        await this.createAssets()
-        if (this.productionToCreate.production_type !== 'assets') {
-          await this.createShots()
-        }
-        await this.loadContext()
-        await this.$router.push(this.createProductionRoute(createdProduction))
-      } catch (err) {
-        console.error(err)
-        this.errors.creatingProduction = true
-        this.errors.creatingProductionError =
-          err.body?.message?.substring(0, 165) ?? ''
-      }
-      this.loading.createProduction = false
-    },
-
-    toggleModal(modalName) {
-      this.modals[modalName] = !this.modals[modalName]
-    },
-
-    renderAssetsImport(data, mode) {
-      this.loading.importingAssets = true
-      this.errors.importingAssets = false
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedAssetsCSV = results
-        this.toggleModal('isAssetsImportDisplayed')
-        this.loading.importingAssets = false
-        this.toggleModal('isAssetsImportRenderDisplayed')
-      })
-    },
-
-    resetAssetsImport() {
-      this.errors.importingAssets = false
-      this.toggleModal('isAssetsImportRenderDisplayed')
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
-      this.productionToCreate.assetsToAdd = null
-      this.$refs['import-assets-modal'].reset()
-      this.toggleModal('isAssetsImportDisplayed')
-    },
-
-    uploadAssetsImportFile(data, toUpdate) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
-      this.productionToCreate.assetsToAdd = data
-      this.toggleModal('isAssetsImportRenderDisplayed')
-    },
-
-    renderShotsImport(data, mode) {
-      this.loading.importingShots = true
-      this.errors.importingShots = false
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedShotsCSV = results
-        this.toggleModal('isShotsImportDisplayed')
-        this.loading.importingShots = false
-        this.toggleModal('isShotsImportRenderDisplayed')
-      })
-    },
-
-    resetShotsImport() {
-      this.errors.importingShots = false
-      this.toggleModal('isShotsImportRenderDisplayed')
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
-      this.productionToCreate.shotsToAdd = null
-      this.$refs['import-shots-modal'].reset()
-      this.toggleModal('isShotsImportDisplayed')
-    },
-
-    uploadShotsImportFile(data, toUpdate) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
-      this.productionToCreate.shotsToAdd = data
-      this.toggleModal('isShotsImportRenderDisplayed')
-    },
-
-    addEpisode(episode, callback) {
-      this.productionToCreate.episodesToCreate.push(episode)
-      episode.id = this.productionToCreate.episodesToCreate.length - 1
-      callback(episode)
-    },
-
-    addSequence(sequence, callback) {
-      this.productionToCreate.sequencesToCreate.push(sequence)
-      sequence.id = this.productionToCreate.sequencesToCreate.length - 1
-      callback(sequence)
-    },
-
-    addShot(shot, callback) {
-      this.productionToCreate.shotsToCreate.push(shot)
-      shot.id = this.productionToCreate.shotsToCreate.length - 1
-      callback(shot)
-    },
-
-    onAddLibraryAssetTaskTypeClicked() {
-      this.taskTypeForEntity = 'Asset'
-      this.modals.isAddTaskTypeDisplayed = true
-    },
-
-    onAddLibraryShotTaskTypeClicked() {
-      this.taskTypeForEntity = 'Shot'
-      this.modals.isAddTaskTypeDisplayed = true
+const createAssets = async () => {
+  if (productionToCreate.assetsToAdd !== null) {
+    loading.importingAssets = true
+    errors.importingAssets = false
+    try {
+      await store.dispatch('uploadAssetFile', false)
+    } catch (err) {
+      errors.importingAssets = true
+      errors.importingAssetsError = err
     }
+    loading.importingAssets = false
   }
 }
+
+const createAssetTypes = () => {
+  productionToCreate.assetTypes.map(async at =>
+    store.dispatch('addAssetTypeToProduction', at.id)
+  )
+}
+
+const createShots = async () => {
+  if (productionToCreate.shotsToAdd !== null) {
+    loading.importingShots = true
+    errors.importingShots = false
+    try {
+      await store.dispatch('uploadShotFile', false)
+    } catch (err) {
+      errors.importingShots = true
+      errors.importingShotsError = err
+    }
+    loading.importingShots = false
+  }
+}
+
+const createTaskType = taskType => {
+  loading.creatingTaskType = true
+  errors.creatingTaskType = false
+  store
+    .dispatch('newTaskType', taskType)
+    .then(() => {
+      loading.creatingTaskType = false
+      modals.isAddTaskTypeDisplayed = false
+    })
+    .catch(err => {
+      console.error(err)
+      loading.creatingTaskType = false
+      errors.creatingTaskType = true
+    })
+}
+
+const createTaskStatus = taskStatus => {
+  loading.creatingTaskStatus = true
+  errors.creatingTaskStatus = false
+  store
+    .dispatch('newTaskStatus', taskStatus)
+    .then(() => {
+      loading.creatingTaskStatus = false
+      modals.isAddTaskStatusDisplayed = false
+    })
+    .catch(err => {
+      console.error(err)
+      loading.creatingTaskStatus = false
+      errors.creatingTaskStatus = true
+    })
+}
+
+const createAssetType = assetType => {
+  loading.creatingAssetType = true
+  errors.creatingAssetType = false
+  store
+    .dispatch('newAssetType', assetType)
+    .then(() => {
+      loading.creatingAssetType = false
+      modals.isAddAssetTypeDisplayed = false
+    })
+    .catch(err => {
+      console.error(err)
+      loading.creatingAssetType = false
+      errors.creatingAssetType = true
+    })
+}
+
+const createProductionRoute = createdProduction => {
+  const params = { production_id: createdProduction.id }
+  let routeName = 'assets'
+  if (isTVShow.value) {
+    params.episode_id = 'all'
+    routeName = 'episode-assets'
+  } else if (isShotsOnly.value) {
+    routeName = 'shots'
+  }
+  return { name: routeName, params }
+}
+
+const createProduction = async () => {
+  if (loading.createProduction) return
+  loading.createProduction = true
+  errors.creatingProduction = false
+  errors.creatingProductionError = ''
+  try {
+    const hasTemplate = !!productionToCreate.project_template_id
+    const payload = {
+      name: productionToCreate.name,
+      project_status_id: productionStatus.value[0].id
+    }
+    if (hasTemplate) {
+      payload.project_template_id = productionToCreate.project_template_id
+    } else {
+      Object.assign(payload, {
+        fps: productionToCreate.settings.fps,
+        ratio: productionToCreate.settings.ratio.join(':'),
+        resolution: productionToCreate.settings.resolution.join('x'),
+        production_type: productionToCreate.settings.type,
+        production_style: productionToCreate.settings.style,
+        start_date: productionToCreate.settings.dateStart,
+        end_date: productionToCreate.settings.dateEnd
+      })
+    }
+    const createdProduction = await store.dispatch('newProduction', payload)
+    await store.dispatch('setProduction', createdProduction.id)
+    if (!hasTemplate) {
+      await createTaskTypesAndStatuses()
+      await createAssetTypes()
+    }
+    await createAssets()
+    if (productionToCreate.production_type !== 'assets') {
+      await createShots()
+    }
+    await store.dispatch('loadContext')
+    await router.push(createProductionRoute(createdProduction))
+  } catch (err) {
+    console.error(err)
+    errors.creatingProduction = true
+    errors.creatingProductionError = err.body?.message?.substring(0, 165) ?? ''
+  }
+  loading.createProduction = false
+}
+
+const toggleModal = modalName => {
+  modals[modalName] = !modals[modalName]
+}
+
+const renderAssetsImport = (data, mode) => {
+  loading.importingAssets = true
+  errors.importingAssets = false
+  if (mode === 'file') {
+    data = data.get('file')
+  }
+  csv.processCSV(data).then(results => {
+    parsedAssetsCSV.value = results
+    toggleModal('isAssetsImportDisplayed')
+    loading.importingAssets = false
+    toggleModal('isAssetsImportRenderDisplayed')
+  })
+}
+
+const resetAssetsImport = () => {
+  errors.importingAssets = false
+  toggleModal('isAssetsImportRenderDisplayed')
+  store.commit('ASSET_CSV_FILE_SELECTED', null)
+  productionToCreate.assetsToAdd = null
+  importAssetsModal.value?.reset()
+  toggleModal('isAssetsImportDisplayed')
+}
+
+const uploadAssetsImportFile = data => {
+  const formData = new FormData()
+  const file = new File([csv.turnEntriesToCsvString(data)], 'import.csv', {
+    type: 'text/csv'
+  })
+  formData.append('file', file)
+  store.commit('ASSET_CSV_FILE_SELECTED', formData)
+  productionToCreate.assetsToAdd = data
+  toggleModal('isAssetsImportRenderDisplayed')
+}
+
+const renderShotsImport = (data, mode) => {
+  loading.importingShots = true
+  errors.importingShots = false
+  if (mode === 'file') {
+    data = data.get('file')
+  }
+  csv.processCSV(data).then(results => {
+    parsedShotsCSV.value = results
+    toggleModal('isShotsImportDisplayed')
+    loading.importingShots = false
+    toggleModal('isShotsImportRenderDisplayed')
+  })
+}
+
+const resetShotsImport = () => {
+  errors.importingShots = false
+  toggleModal('isShotsImportRenderDisplayed')
+  store.commit('SHOT_CSV_FILE_SELECTED', null)
+  productionToCreate.shotsToAdd = null
+  importShotsModal.value?.reset()
+  toggleModal('isShotsImportDisplayed')
+}
+
+const uploadShotsImportFile = data => {
+  const formData = new FormData()
+  const file = new File([csv.turnEntriesToCsvString(data)], 'import.csv', {
+    type: 'text/csv'
+  })
+  formData.append('file', file)
+  store.commit('SHOT_CSV_FILE_SELECTED', formData)
+  productionToCreate.shotsToAdd = data
+  toggleModal('isShotsImportRenderDisplayed')
+}
+
+const addEpisode = (episode, callback) => {
+  productionToCreate.episodesToCreate.push(episode)
+  episode.id = productionToCreate.episodesToCreate.length - 1
+  callback(episode)
+}
+
+const addSequence = (sequence, callback) => {
+  productionToCreate.sequencesToCreate.push(sequence)
+  sequence.id = productionToCreate.sequencesToCreate.length - 1
+  callback(sequence)
+}
+
+const addShot = (shot, callback) => {
+  productionToCreate.shotsToCreate.push(shot)
+  shot.id = productionToCreate.shotsToCreate.length - 1
+  callback(shot)
+}
+
+const onAddLibraryAssetTaskTypeClicked = () => {
+  taskTypeForEntity.value = 'Asset'
+  modals.isAddTaskTypeDisplayed = true
+}
+
+const onAddLibraryShotTaskTypeClicked = () => {
+  taskTypeForEntity.value = 'Shot'
+  modals.isAddTaskTypeDisplayed = true
+}
+
+onMounted(() => {
+  nameField.value?.focus()
+  store.dispatch('loadProjectTemplates')
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1262,10 +1201,95 @@ span.input-separator {
 
 .big-button {
   max-width: 100%;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
 
   &:active,
   &:focus {
     color: white;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .new-production.page {
+    padding: 0.5em 1.5em;
+    padding-top: 60px;
+  }
+
+  .column.is-offset-one-quarter.is-half {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  h1.title {
+    font-size: 36px;
+    line-height: 40px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .new-production.page {
+    padding: 0.5em 1em;
+    padding-top: 50px;
+  }
+
+  .hero .hero-body {
+    padding: 1em 0;
+  }
+
+  h2 {
+    font-size: 16px;
+    letter-spacing: 3px;
+    line-height: 20px;
+    padding-bottom: 0.4em;
+  }
+
+  h1.title {
+    font-size: 28px;
+    line-height: 32px;
+  }
+
+  .flexrow {
+    flex-wrap: wrap;
+  }
+
+  .flexrow-item {
+    margin-right: 0.5em;
+  }
+
+  .date-picker-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5em;
+
+    .input-separator {
+      display: none;
+    }
+  }
+
+  .import-content {
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  /* Deep: shrink the timeline bubble gap on mobile */
+  :deep(.wrapper .timeline) {
+    margin-right: 1rem;
+  }
+
+  :deep(.wrapper .step),
+  :deep(.wrapper .check) {
+    height: 28px;
+    width: 28px;
+    font-size: 14px;
+    padding: 7px;
+    padding-top: 0.1rem;
+  }
+
+  :deep(.wrapper h3.title) {
+    font-size: 18px;
   }
 }
 </style>

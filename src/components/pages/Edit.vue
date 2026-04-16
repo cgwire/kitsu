@@ -312,7 +312,7 @@
               {{ maxDuration }}
             </span>
             <span
-              class="flexrow-item time-indicator mr1"
+              class="flexrow-item time-indicator nowrap mr1"
               :title="$t('playlists.actions.frame_number')"
             >
               ({{ currentFrame }} / {{ (nbFrames + '').padStart(3, '0') }})
@@ -594,6 +594,7 @@ import editStore from '@/store/modules/edits'
 import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
 import { entityMixin } from '@/components/mixins/entity'
+import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { getEntitiesPath } from '@/lib/path'
 import { formatListMixin } from '@/components/mixins/format'
 import { previewRoomMixin } from '@/components/mixins/previewRoom'
@@ -632,6 +633,7 @@ export default {
     domMixin,
     entityMixin,
     formatListMixin,
+    fullScreenMixin,
     previewRoomMixin,
     playerMixin
   ],

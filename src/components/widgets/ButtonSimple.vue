@@ -89,7 +89,7 @@
   </button>
 </template>
 
-<script>
+<script setup>
 import {
   BellIcon,
   CalendarIcon,
@@ -135,108 +135,60 @@ import {
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
-export default {
-  name: 'button-simple',
-
-  components: {
-    BellIcon,
-    CalendarIcon,
-    CalendarPlusIcon,
-    ChevronDownIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    ClockIcon,
-    CodepenIcon,
-    CornerLeftDownIcon,
-    CornerRightDownIcon,
-    DownloadIcon,
-    EditIcon,
-    Edit2Icon,
-    FileDigitIcon,
-    FileDownIcon,
-    FilmIcon,
-    GlobeIcon,
-    GridIcon,
-    ImageIcon,
-    KeyIcon,
-    KitsuIcon,
-    LayersIcon,
-    LinkIcon,
-    ListIcon,
-    MaximizeIcon,
-    MessageSquareIcon,
-    MinusIcon,
-    MusicIcon,
-    PaperclipIcon,
-    PauseIcon,
-    PlusIcon,
-    RotateCcwIcon,
-    SaveIcon,
-    SendIcon,
-    SkipBackIcon,
-    SkipForwardIcon,
-    SmileIcon,
-    SquareIcon,
-    TriangleIcon,
-    XIcon,
-    ZoomInIcon
+defineProps({
+  active: {
+    default: false,
+    type: Boolean
   },
-
-  props: {
-    active: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    icon: {
-      default: '',
-      type: String
-    },
-    isBig: {
-      default: false,
-      type: Boolean
-    },
-    isMedium: {
-      default: false,
-      type: Boolean
-    },
-    isOn: {
-      default: false,
-      type: Boolean
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isPrimary: {
-      default: false,
-      type: Boolean
-    },
-    isResponsive: {
-      default: false,
-      type: Boolean
-    },
-    isThin: {
-      default: false,
-      type: Boolean
-    },
-    text: {
-      type: String
-    },
-    title: {
-      type: String
-    },
-    type: {
-      type: String,
-      validator: value => ['submit', 'button', 'reset'].includes(value)
-    }
+  disabled: {
+    default: false,
+    type: Boolean
   },
+  icon: {
+    default: '',
+    type: String
+  },
+  isBig: {
+    default: false,
+    type: Boolean
+  },
+  isMedium: {
+    default: false,
+    type: Boolean
+  },
+  isOn: {
+    default: false,
+    type: Boolean
+  },
+  isLoading: {
+    default: false,
+    type: Boolean
+  },
+  isPrimary: {
+    default: false,
+    type: Boolean
+  },
+  isResponsive: {
+    default: false,
+    type: Boolean
+  },
+  isThin: {
+    default: false,
+    type: Boolean
+  },
+  text: {
+    type: String
+  },
+  title: {
+    type: String
+  },
+  type: {
+    type: String,
+    validator: value => ['submit', 'button', 'reset'].includes(value)
+  }
+})
 
-  emits: ['click']
-}
+defineEmits(['click'])
 </script>
 
 <style lang="scss" scoped>

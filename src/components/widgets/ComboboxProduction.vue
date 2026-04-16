@@ -41,68 +41,48 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
 import { ChevronDownIcon } from 'lucide-vue-next'
+
+import { useCombobox } from '@/composables/combobox'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 
-export default {
-  name: 'combobox-production',
-
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    ProductionName
+const props = defineProps({
+  label: {
+    default: '',
+    type: String
   },
-
-  emits: ['update:modelValue'],
-
-  data() {
-    return {
-      showProductionList: false
-    }
+  withMargin: {
+    default: true,
+    type: Boolean
   },
-
-  props: {
-    label: {
-      default: '',
-      type: String
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    },
-    productionList: {
-      required: true,
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: String
-    }
+  productionList: {
+    required: true,
+    type: Array
   },
-
-  computed: {
-    currentProduction() {
-      return (
-        this.productionList.find(({ id }) => id === this.modelValue) ||
-        this.productionList[0]
-      )
-    }
-  },
-
-  methods: {
-    selectProduction(production) {
-      this.$emit('update:modelValue', production.id)
-      this.showProductionList = false
-    },
-
-    toggleProductionList() {
-      this.showProductionList = !this.showProductionList
-    }
+  modelValue: {
+    default: '',
+    type: String
   }
-}
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const {
+  showList: showProductionList,
+  toggle: toggleProductionList,
+  select: selectProduction
+} = useCombobox(emit)
+
+const currentProduction = computed(() => {
+  return (
+    props.productionList.find(({ id }) => id === props.modelValue) ||
+    props.productionList[0]
+  )
+})
 </script>
 
 <style lang="scss" scoped>

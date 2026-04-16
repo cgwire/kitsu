@@ -1,0 +1,88 @@
+.data-list {
+  .datatable-wrapper {
+    overflow-x: auto;
+  }
+
+  .datatable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .datatable-head th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    text-align: left;
+    padding: 1em;
+    border-bottom: 2px solid #ddd;
+
+    &:first-child {
+      border-top-left-radius: 10px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 10px;
+    }
+  }
+
+  .datatable-body td {
+    padding: 1em;
+    border-bottom: 1px solid #eee;
+  }
+
+  .datatable-body tr:last-child td {
+    border-bottom: 0;
+
+    &:first-child {
+      border-bottom-left-radius: 10px;
+    }
+
+    &:last-child {
+      border-bottom-right-radius: 10px;
+    }
+  }
+
+  .datatable-body tr:hover {
+    background-color: #f9f9f9;
+  }
+}
+
+.name {
+  width: 300px;
+  padding: 1em;
+}
+
+.short-name {
+  width: 100px;
+  padding: 1em;
+}
+
+.monthly-cost,
+.inventory-amount,
+.remaining-amount {
+  width: 100px;
+  padding: 1em;
+}
+
+.negative-amount {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+@mixin number-cell {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+.number-cell {
+  @include number-cell;
+}
+
+@mixin actions-cell {
+  width: 80px;
+  text-align: center;
+}
+
+.actions {
+  @include actions-cell;
+}

@@ -20,23 +20,24 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'table-metadata-header-menu',
-
-  props: {
-    isEditAllowed: {
-      type: Boolean,
-      default: false
-    },
-    isSticked: {
-      type: Boolean,
-      default: false
-    }
+<script setup>
+defineProps({
+  isEditAllowed: {
+    type: Boolean,
+    default: false
   },
+  isSticked: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  emits: ['delete-clicked', 'edit-clicked', 'sort-by-clicked', 'toggle-stick']
-}
+defineEmits([
+  'delete-clicked',
+  'edit-clicked',
+  'sort-by-clicked',
+  'toggle-stick'
+])
 </script>
 
 <style lang="scss" scoped>

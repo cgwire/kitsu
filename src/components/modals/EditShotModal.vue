@@ -25,6 +25,7 @@
           <text-field
             ref="nameField"
             :label="$t('shots.fields.name')"
+            :maxlength="160"
             v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
@@ -63,19 +64,22 @@
             type="number"
             :max="1000"
             :step="0.001"
+            :placeholder="currentProduction?.fps"
             v-model="form.fps"
             @enter="runConfirmation"
           />
           <text-field
             ref="resolutionField"
             :label="$t('shots.fields.resolution')"
-            v-model="form.resolution"
+            :placeholder="currentProduction?.resolution"
+            v-model.trim="form.resolution"
             @enter="runConfirmation"
           />
           <text-field
             ref="maxRetakesField"
             type="number"
             :label="$t('shots.fields.max_retakes')"
+            :placeholder="currentProduction?.max_retakes"
             v-model="form.max_retakes"
             @enter="runConfirmation"
           />

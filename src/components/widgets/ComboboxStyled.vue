@@ -70,158 +70,150 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 
-export default {
-  name: 'combobox-styled',
+const { t } = useI18n()
+const router = useRouter()
 
-  components: {
-    ChevronDownIcon,
-    EntityThumbnail
+const props = defineProps({
+  active: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['change', 'update:modelValue'],
-
-  data() {
-    return {
-      selectedOption: {
-        label: '',
-        value: ''
-      },
-      showList: false
-    }
+  disabled: {
+    default: false,
+    type: Boolean
   },
-
-  props: {
-    active: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    label: {
-      default: '',
-      type: String
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: [String, Object]
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    },
-    isCompact: {
-      default: false,
-      type: Boolean
-    },
-    isPreview: {
-      default: false,
-      type: Boolean
-    },
-    isReversed: {
-      default: false,
-      type: Boolean
-    },
-    keepOrder: {
-      default: false,
-      type: Boolean
-    },
-    thin: {
-      default: false,
-      type: Boolean
-    }
+  label: {
+    default: '',
+    type: String
   },
-
-  computed: {
-    optionList() {
-      if (this.isReversed && !this.keepOrder) {
-        return [...this.options].reverse()
-      }
-      return this.options
-    },
-
-    selectedOptionLabel() {
-      return this.selectedOption ? this.getOptionLabel(this.selectedOption) : ''
-    }
+  options: {
+    default: () => [],
+    type: Array
   },
-
-  methods: {
-    openRoute(option) {
-      const ahref = this.$router.resolve(option.route).href
-      const url = `${window.location.protocol}//${window.location.host}${ahref}`
-      window.open(url, '_blank')
-    },
-
-    selectOption(option) {
-      this.$emit('update:modelValue', option.value)
-      this.$emit('change', option.value)
-      this.selectedOption = option
-    },
-
-    toggleList() {
-      if (this.showList) {
-        this.lastScrollPosition = this.$refs.select.scrollTop
-      }
-      this.showList = !this.showList
-      if (this.showList) {
-        this.$nextTick(() => {
-          this.$refs.select?.scrollTo({ top: this.lastScrollPosition, left: 0 })
-        })
-      }
-    },
-
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    }
+  modelValue: {
+    default: '',
+    type: [String, Object]
   },
+  localeKeyPrefix: {
+    default: '',
+    type: String
+  },
+  isCompact: {
+    default: false,
+    type: Boolean
+  },
+  isPreview: {
+    default: false,
+    type: Boolean
+  },
+  isReversed: {
+    default: false,
+    type: Boolean
+  },
+  keepOrder: {
+    default: false,
+    type: Boolean
+  },
+  thin: {
+    default: false,
+    type: Boolean
+  }
+})
 
-  watch: {
-    options: {
-      deep: true,
-      immediate: true,
-      handler() {
-        if (this.options.length > 0) {
-          const option = this.options.find(
-            ({ value }) => value === this.modelValue
-          )
-          this.selectedOption = option || this.options[0]
-        }
-      }
-    },
+const emit = defineEmits(['change', 'update:modelValue'])
 
-    showList() {
-      if (this.showList && this.isReversed) {
-        this.$nextTick(() => {
-          if (!this.$refs.select?.children) return
-          let list = null
-          for (const child of this.$refs.select.children) {
-            if (child.className !== 'flexrow') {
-              list = child
-            }
-          }
-          list?.scrollTo({ top: this.optionList.length * 60 })
-        })
-      }
-    },
+const select = ref(null)
+const selectedOption = ref({
+  label: '',
+  value: ''
+})
+const showList = ref(false)
+let lastScrollPosition = 0
 
-    modelValue() {
-      this.selectedOption = this.options.find(o => o.value === this.modelValue)
-    }
+const optionList = computed(() => {
+  if (props.isReversed && !props.keepOrder) {
+    return [...props.options].reverse()
+  }
+  return props.options
+})
+
+const getOptionLabel = option => {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
+}
+
+const selectedOptionLabel = computed(() => {
+  return selectedOption.value ? getOptionLabel(selectedOption.value) : ''
+})
+
+const openRoute = option => {
+  const ahref = router.resolve(option.route).href
+  const url = `${window.location.protocol}//${window.location.host}${ahref}`
+  window.open(url, '_blank')
+}
+
+const selectOption = option => {
+  emit('update:modelValue', option.value)
+  emit('change', option.value)
+  selectedOption.value = option
+}
+
+const toggleList = () => {
+  if (showList.value) {
+    lastScrollPosition = select.value.scrollTop
+  }
+  showList.value = !showList.value
+  if (showList.value) {
+    nextTick(() => {
+      select.value?.scrollTo?.({ top: lastScrollPosition, left: 0 })
+    })
   }
 }
+
+watch(
+  () => props.options,
+  () => {
+    if (props.options.length > 0) {
+      const option = props.options.find(
+        ({ value }) => value === props.modelValue
+      )
+      selectedOption.value = option || props.options[0]
+    }
+  },
+  { deep: true, immediate: true }
+)
+
+watch(showList, () => {
+  if (showList.value && props.isReversed) {
+    nextTick(() => {
+      if (!select.value?.children) return
+      let list = null
+      for (const child of select.value.children) {
+        if (child.className !== 'flexrow') {
+          list = child
+        }
+      }
+      list?.scrollTo?.({ top: optionList.value.length * 60 })
+    })
+  }
+})
+
+watch(
+  () => props.modelValue,
+  () => {
+    selectedOption.value = props.options.find(o => o.value === props.modelValue)
+  }
+)
 </script>
 
 <style lang="scss" scoped>

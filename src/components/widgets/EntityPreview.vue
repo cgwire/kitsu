@@ -1,7 +1,7 @@
 <template>
   <div class="preview-wrapper preview-video" v-if="isMovie && showMovie">
     <video-viewer
-      ref="video-viewer"
+      ref="videoViewerRef"
       :is-repeating="true"
       :default-height="height"
       :preview="{
@@ -14,7 +14,7 @@
     <button-simple
       class="button-play"
       icon="play"
-      ref="button-play"
+      ref="buttonPlayRef"
       :title="$t('playlists.actions.play')"
       @click="onVideoClicked()"
     />
@@ -52,101 +52,90 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from 'vue'
+import { useStore } from 'vuex'
 import { EyeIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import VideoViewer from '@/components/previews/VideoViewer.vue'
 
-export default {
-  name: 'entity-preview',
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    EyeIcon,
-    VideoViewer
+const props = defineProps({
+  entity: {
+    default: () => {},
+    type: Object
   },
-
-  data() {
-    return {
-      isPlaying: false
-    }
+  cover: {
+    default: false,
+    type: Boolean
   },
-
-  props: {
-    entity: {
-      default: () => {},
-      type: Object
-    },
-    cover: {
-      default: false,
-      type: Boolean
-    },
-    width: {
-      default: null,
-      type: Number
-    },
-    height: {
-      default: null,
-      type: Number
-    },
-    emptyHeight: {
-      default: null,
-      type: Number
-    },
-    emptyWidth: {
-      default: null,
-      type: Number
-    },
-    previewFileId: {
-      default: null,
-      type: String
-    },
-    isRoundedTopBorder: {
-      default: false,
-      type: Boolean
-    },
-    showMovie: {
-      default: true,
-      type: Boolean
-    }
+  width: {
+    default: null,
+    type: Number
   },
-
-  computed: {
-    isMovie() {
-      return this.entity.preview_file_extension === 'mp4'
-    },
-
-    thumbnailPath() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return `/api/pictures/previews/preview-files/${previewFileId}.png`
-    },
-
-    thumbnailKey() {
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      return `preview-${previewFileId}`
-    }
+  height: {
+    default: null,
+    type: Number
   },
-
-  methods: {
-    onPictureClicked() {
-      if (this.noPreview) return
-      const previewFileId = this.previewFileId || this.entity.preview_file_id
-      if (previewFileId) {
-        this.$store.commit('SHOW_PREVIEW_FILE', previewFileId)
-      }
-    },
-    onVideoClicked() {
-      if (this.isPlaying) {
-        this.$refs['video-viewer'].pause()
-        this.$refs['button-play'].$el.style.display = 'initial'
-      } else {
-        this.$refs['video-viewer'].play()
-        this.$refs['button-play'].$el.style.display = 'none'
-      }
-      this.isPlaying = !this.isPlaying
-    }
+  emptyHeight: {
+    default: null,
+    type: Number
+  },
+  emptyWidth: {
+    default: null,
+    type: Number
+  },
+  previewFileId: {
+    default: null,
+    type: String
+  },
+  isRoundedTopBorder: {
+    default: false,
+    type: Boolean
+  },
+  showMovie: {
+    default: true,
+    type: Boolean
   }
+})
+
+const isPlaying = ref(false)
+const videoViewerRef = ref(null)
+const buttonPlayRef = ref(null)
+
+const isMovie = computed(() => {
+  return props.entity.preview_file_extension === 'mp4'
+})
+
+const thumbnailPath = computed(() => {
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  return `/api/pictures/previews/preview-files/${previewFileId}.png`
+})
+
+const thumbnailKey = computed(() => {
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  return `preview-${previewFileId}`
+})
+
+const onPictureClicked = () => {
+  if (props.noPreview) return
+  const previewFileId = props.previewFileId || props.entity.preview_file_id
+  if (previewFileId) {
+    store.commit('SHOW_PREVIEW_FILE', previewFileId)
+  }
+}
+
+const onVideoClicked = () => {
+  if (isPlaying.value) {
+    videoViewerRef.value.pause()
+    buttonPlayRef.value.$el.style.display = 'initial'
+  } else {
+    videoViewerRef.value.play()
+    buttonPlayRef.value.$el.style.display = 'none'
+  }
+  isPlaying.value = !isPlaying.value
 }
 </script>
 

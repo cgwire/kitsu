@@ -1,6 +1,6 @@
 export default {
-  install(Vue) {
-    Vue.directive('columns-resizable', {
+  install(app) {
+    app.directive('columns-resizable', {
       updated(el) {
         if (!el.id) {
           console.error('Resizable headers must be in a thead with an id')

@@ -91,171 +91,153 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
-import { mapGetters, mapActions } from 'vuex'
 
-export default {
-  name: 'table-metadata-selector-menu',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    draggable,
-    GripVerticalIcon
+const props = defineProps({
+  descriptors: {
+    type: Array,
+    required: true
   },
-
-  props: {
-    descriptors: {
-      type: Array,
-      required: true
-    },
-    exclude: {
-      type: Object,
-      default: () => {}
-    },
-    modelValue: {
-      type: Object,
-      required: true
-    },
-    namespace: {
-      type: String,
-      required: true
-    }
+  exclude: {
+    type: Object,
+    default: () => {}
   },
-
-  emits: ['update:modelValue'],
-
-  data() {
-    return {
-      fieldToName: {
-        estimation: this.$t('main.estimation'),
-        fps: this.$t('main.fps'),
-        frameIn: this.$t('main.frame_in'),
-        frameOut: this.$t('main.frame_out'),
-        frames: this.$t('main.frames'),
-        readyFor: this.$t('assets.fields.ready_for'),
-        timeSpent: this.$t('main.timeSpent'),
-        resolution: this.$t('shots.fields.resolution'),
-        stdby: this.$t('breakdown.fields.standby'),
-        maxRetakes: this.$t('shots.fields.max_retakes')
-      },
-      sortedMetadataDescriptors: []
-    }
+  modelValue: {
+    type: Object,
+    required: true
   },
+  namespace: {
+    type: String,
+    required: true
+  }
+})
 
-  created() {
-    const metadataDisplayHeadersString = localStorage.getItem(
-      this.localStorageKey
-    )
-    let localMetadataDisplayHeaders = { ...this.modelValue }
-    if (metadataDisplayHeadersString) {
-      localMetadataDisplayHeaders = {
-        ...localMetadataDisplayHeaders,
-        ...JSON.parse(metadataDisplayHeadersString)
-      }
-    }
-    for (const descriptor of this.descriptors) {
-      if (localMetadataDisplayHeaders[descriptor.field_name] === undefined) {
-        localMetadataDisplayHeaders[descriptor.field_name] = true
-      }
-    }
-    this.$emit('update:modelValue', localMetadataDisplayHeaders)
-    this.sortedMetadataDescriptors = [...this.filteredMetadataDescriptors]
-  },
+const emit = defineEmits(['update:modelValue'])
 
-  watch: {
-    filteredMetadataDescriptors: {
-      handler(newValue) {
-        if (
-          this.sortedMetadataDescriptors.length === 0 ||
-          this.sortedMetadataDescriptors.length !== newValue.length
-        ) {
-          this.sortedMetadataDescriptors = [...newValue]
-        }
-      },
-      immediate: true
-    }
-  },
+const fieldToName = {
+  estimation: t('main.estimation'),
+  fps: t('main.fps'),
+  frameIn: t('main.frame_in'),
+  frameOut: t('main.frame_out'),
+  frames: t('main.frames'),
+  readyFor: t('assets.fields.ready_for'),
+  timeSpent: t('main.timeSpent'),
+  resolution: t('shots.fields.resolution'),
+  stdby: t('breakdown.fields.standby'),
+  maxRetakes: t('shots.fields.max_retakes')
+}
+const sortedMetadataDescriptors = ref([])
 
-  computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserManager']),
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 
-    localStorageKey() {
-      return `metadataDisplayHeaders:${this.namespace}`
-    },
+const localStorageKey = computed(() => {
+  return `metadataDisplayHeaders:${props.namespace}`
+})
 
-    fixedColumns() {
-      const fixed = []
-      for (const headerName in this.modelValue) {
-        if (this.fieldToName[headerName]) {
-          fixed.push({
-            field_name: headerName,
-            name: this.fieldToName[headerName],
-            isFixed: true
-          })
-        }
-      }
-      return fixed
-    },
-
-    filteredFixedColumns() {
-      return this.fixedColumns.filter(descriptor => {
-        return !this.exclude[descriptor.field_name]
+const fixedColumns = computed(() => {
+  const fixed = []
+  for (const headerName in props.modelValue) {
+    if (fieldToName[headerName]) {
+      fixed.push({
+        field_name: headerName,
+        name: fieldToName[headerName],
+        isFixed: true
       })
-    },
+    }
+  }
+  return fixed
+})
 
-    filteredMetadataDescriptors() {
-      const filtered = this.descriptors.filter(descriptor => {
-        return !this.exclude[descriptor.field_name]
-      })
-      return filtered.sort((a, b) => {
-        const positionA = a.position ?? 1000
-        const positionB = b.position ?? 1000
-        if (positionA !== positionB) {
-          return positionA - positionB
-        }
-        const nameA = a.name || ''
-        const nameB = b.name || ''
-        return nameA.localeCompare(nameB)
-      })
-    },
+const filteredFixedColumns = computed(() => {
+  return fixedColumns.value.filter(descriptor => {
+    return !props.exclude[descriptor.field_name]
+  })
+})
 
-    entityType() {
-      const descriptorWithEntityType = this.descriptors.find(d => d.entity_type)
-      return descriptorWithEntityType?.entity_type || null
+const filteredMetadataDescriptors = computed(() => {
+  const filtered = props.descriptors.filter(descriptor => {
+    return !props.exclude[descriptor.field_name]
+  })
+  return filtered.sort((a, b) => {
+    const positionA = a.position ?? 1000
+    const positionB = b.position ?? 1000
+    if (positionA !== positionB) {
+      return positionA - positionB
+    }
+    const nameA = a.name || ''
+    const nameB = b.name || ''
+    return nameA.localeCompare(nameB)
+  })
+})
+
+const entityType = computed(() => {
+  const descriptorWithEntityType = props.descriptors.find(d => d.entity_type)
+  return descriptorWithEntityType?.entity_type || null
+})
+
+const metadataDisplayHeadersString = localStorage.getItem(localStorageKey.value)
+let localMetadataDisplayHeaders = { ...props.modelValue }
+if (metadataDisplayHeadersString) {
+  localMetadataDisplayHeaders = {
+    ...localMetadataDisplayHeaders,
+    ...JSON.parse(metadataDisplayHeadersString)
+  }
+}
+for (const descriptor of props.descriptors) {
+  if (localMetadataDisplayHeaders[descriptor.field_name] === undefined) {
+    localMetadataDisplayHeaders[descriptor.field_name] = true
+  }
+}
+emit('update:modelValue', localMetadataDisplayHeaders)
+sortedMetadataDescriptors.value = [...filteredMetadataDescriptors.value]
+
+watch(
+  filteredMetadataDescriptors,
+  newValue => {
+    if (
+      sortedMetadataDescriptors.value.length === 0 ||
+      sortedMetadataDescriptors.value.length !== newValue.length
+    ) {
+      sortedMetadataDescriptors.value = [...newValue]
     }
   },
+  { immediate: true }
+)
 
-  methods: {
-    ...mapActions(['reorderMetadataDescriptors']),
-    setMetadataDisplayValue(metadataName, isSelected) {
-      const localMetadataDisplayHeaders = { ...this.modelValue }
-      localMetadataDisplayHeaders[metadataName] = isSelected
-      localStorage.setItem(
-        this.localStorageKey,
-        JSON.stringify(localMetadataDisplayHeaders)
-      )
-      this.$emit('update:modelValue', localMetadataDisplayHeaders)
-    },
+const setMetadataDisplayValue = (metadataName, isSelected) => {
+  const headers = { ...props.modelValue }
+  headers[metadataName] = isSelected
+  localStorage.setItem(localStorageKey.value, JSON.stringify(headers))
+  emit('update:modelValue', headers)
+}
 
-    onDragEnd() {
-      const descriptorIds = this.sortedMetadataDescriptors
-        .filter(d => d.id)
-        .map(d => d.id)
+const onDragEnd = () => {
+  const descriptorIds = sortedMetadataDescriptors.value
+    .filter(d => d.id)
+    .map(d => d.id)
 
-      if (
-        this.currentProduction?.id &&
-        this.entityType &&
-        descriptorIds.length > 0
-      ) {
-        this.reorderMetadataDescriptors({
-          entityType: this.entityType,
-          descriptorIds
-        }).catch(err => {
-          console.error('Failed to reorder metadata descriptors:', err)
-        })
-      }
-    }
+  if (
+    currentProduction.value?.id &&
+    entityType.value &&
+    descriptorIds.length > 0
+  ) {
+    store
+      .dispatch('reorderMetadataDescriptors', {
+        entityType: entityType.value,
+        descriptorIds
+      })
+      .catch(err => {
+        console.error('Failed to reorder metadata descriptors:', err)
+      })
   }
 }
 </script>

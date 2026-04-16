@@ -421,6 +421,7 @@ export default {
     },
 
     play() {
+      if (!this.moviePath) return
       if (
         !this.isPlaying &&
         this.videoDuration === this.video.currentTime &&

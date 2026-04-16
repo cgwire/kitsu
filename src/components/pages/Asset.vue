@@ -142,20 +142,14 @@
         />
 
         <div class="asset-casted-in" v-show="currentSection === 'casting'">
-          <div v-if="currentAsset">
-            <div
-              v-if="
-                currentAsset.castInShotsBySequence &&
-                currentAsset.castInShotsBySequence[0].length > 0
-              "
-            >
+          <template v-if="currentAsset">
+            <div v-if="currentAsset.castInShotsBySequence?.[0]?.length > 0">
               <em>{{
                 $t('assets.casted_in_shots', { nbShots: nbShotsCastedIn })
               }}</em>
               <template
                 v-if="
-                  currentAsset.castInShotsBySequence.length > 0 &&
-                  currentAsset.castInShotsBySequence[0][0].sequence_name
+                  currentAsset.castInShotsBySequence?.[0]?.[0]?.sequence_name
                 "
               >
                 <div
@@ -203,15 +197,11 @@
             </div>
             <div
               class="mt1"
-              v-if="
-                currentAsset &&
-                currentAsset.castingAssetsByType &&
-                currentAsset.castingAssetsByType[0]?.length === 0
-              "
+              v-else-if="currentAsset.castingAssetsByType?.[0]?.length === 0"
             >
               {{ $t('assets.no_cast_in') }}
             </div>
-          </div>
+          </template>
           <table-info
             :is-loading="castIn.isLoading"
             :is-error="castIn.isError"
@@ -220,18 +210,11 @@
 
           <div
             v-if="
-              currentAsset &&
-              currentAsset.castingAssetsByType &&
-              currentAsset.castingAssetsByType[0].length > 0
+              currentAsset && currentAsset.castingAssetsByType?.[0]?.length > 0
             "
           >
             <page-subtitle :text="$t('assets.linked')" />
-            <div
-              v-if="
-                currentAsset.castingAssetsByType &&
-                currentAsset.castingAssetsByType[0].length > 0
-              "
-            >
+            <template v-if="currentAsset.castingAssetsByType?.[0]?.length > 0">
               <div
                 class="type-assets"
                 :key="
@@ -275,7 +258,7 @@
                   </router-link>
                 </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
 

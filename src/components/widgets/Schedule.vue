@@ -1,12 +1,12 @@
 <template>
   <div class="schedule-wrapper">
     <div
-      ref="schedule"
+      ref="scheduleRef"
       class="schedule unselectable"
       :class="`zoom-level-${zoomLevel}`"
     >
       <div
-        ref="entity-list"
+        ref="entityListRef"
         class="entities"
         @mousedown="startBrowsingY"
         @touchstart="startBrowsingY"
@@ -243,9 +243,9 @@
         </div>
       </div>
 
-      <div class="timeline" ref="timeline">
+      <div class="timeline" ref="timelineRef">
         <div
-          ref="timeline-header"
+          ref="timelineHeaderRef"
           class="timeline-header"
           :class="{
             'without-milestones': !withMilestones
@@ -320,7 +320,7 @@
         </div>
 
         <div
-          ref="timeline-header"
+          ref="timelineHeaderRef"
           class="timeline-header"
           :class="{
             'without-milestones': !withMilestones
@@ -359,38 +359,38 @@
         </div>
 
         <div
-          ref="timeline-content-wrapper"
+          ref="timelineContentWrapperRef"
           class="timeline-content-wrapper"
           @scroll.passive="onTimelineScroll"
         >
           <div
-            ref="timeline-content"
+            ref="timelineContentRef"
             class="timeline-content"
             :style="timelineStyle"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
           >
             <div
-              ref="timeline-sub-start"
+              ref="timelineSubStartRef"
               class="sub-zone"
               :style="timelineSubStartStyle"
               v-if="subStartDate"
             ></div>
 
             <div
-              ref="timeline-sub-end"
+              ref="timelineSubEndRef"
               class="sub-zone"
               :style="timelineSubEndStyle"
               v-if="subEndDate"
             ></div>
 
             <div
-              ref="timeline-today-position"
+              ref="timelineTodayPositionRef"
               class="timeline-position today"
               :style="timelineTodayPositionStyle"
             ></div>
             <div
-              ref="timeline-position"
+              ref="timelinePositionRef"
               class="timeline-position"
               :style="timelinePositionStyle"
               v-show="!isChangeDates"
@@ -760,10 +760,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Component to facilitate the build of schedule pages.
  */
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import {
   BriefcaseIcon,
   ChevronDownIcon,
@@ -774,10 +785,6 @@ import {
   PlusIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
-import { mapGetters, mapActions } from 'vuex'
-
-import { domMixin } from '@/components/mixins/dom'
-import { formatListMixin } from '@/components/mixins/format'
 
 import colors from '@/lib/colors'
 import {
@@ -796,1519 +803,1558 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'schedule',
+const store = useStore()
+const { t } = useI18n()
 
-  mixins: [domMixin, formatListMixin],
-
-  components: {
-    BriefcaseIcon,
-    ChevronDownIcon,
-    ChevronRightIcon,
-    DepartmentName,
-    EditIcon,
-    EditMilestoneModal,
-    LinkIcon,
-    ListChevronsUpDownIcon,
-    PeopleAvatar,
-    PlusIcon,
-    ProductionName,
-    Spinner
+const props = defineProps({
+  daysOff: {
+    type: Array,
+    default: () => []
   },
+  draggedItems: {
+    type: Array,
+    default: () => []
+  },
+  endDate: {
+    type: Object,
+    required: true
+  },
+  isError: {
+    type: Boolean,
+    default: false
+  },
+  isLoading: {
+    type: Boolean,
+    default: true
+  },
+  hideEntities: {
+    type: Boolean,
+    default: false
+  },
+  hideManDays: {
+    type: Boolean,
+    default: false
+  },
+  hierarchy: {
+    default: () => [],
+    type: Array
+  },
+  invertLinesColor: {
+    type: Boolean,
+    default: false
+  },
+  showExpandAll: {
+    type: Boolean,
+    default: false
+  },
+  subEndDate: {
+    type: Object,
+    default: null
+  },
+  subStartDate: {
+    type: Object,
+    default: null
+  },
+  startDate: {
+    type: Object,
+    required: true
+  },
+  isEstimationLinked: {
+    type: Boolean,
+    default: false
+  },
+  withMilestones: {
+    type: Boolean,
+    default: true
+  },
+  withEstimations: {
+    type: Boolean,
+    default: true
+  },
+  withGhosts: {
+    type: Boolean,
+    default: false
+  },
+  withStatuses: {
+    type: Boolean,
+    default: false
+  },
+  withTimesheets: {
+    type: Boolean,
+    default: false
+  },
+  hideRoot: {
+    type: Boolean,
+    default: false
+  },
+  zoomLevel: {
+    type: Number,
+    default: 2
+  },
+  multiline: {
+    type: Boolean,
+    default: false
+  },
+  subchildren: {
+    type: Boolean,
+    default: false
+  },
+  reassignable: {
+    type: Boolean,
+    default: false
+  },
+  type: {
+    type: String,
+    validator: value => ['prev', 'real'].includes(value)
+  }
+})
 
-  data() {
-    return {
-      currentElement: null,
-      selection: [],
-      isBrowsingX: false,
-      isBrowsingY: false,
-      isChangeDates: false,
-      isChangeStartDate: false,
-      isChangeEndDate: false,
-      milestoneToEdit: {
-        date: moment()
-      },
-      errors: {
-        edit: false
-      },
-      modals: {
-        edit: false
-      },
-      loading: {
-        edit: false
-      },
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['resize', this.resetScheduleSize]
-      ]
+const emit = defineEmits([
+  'estimation-changed',
+  'expand-all',
+  'item-assign',
+  'item-changed',
+  'item-drop',
+  'item-selected',
+  'item-unassign',
+  'root-element-expanded',
+  'root-element-selected',
+  'scroll',
+  'task-selected',
+  'task-unselected'
+])
+
+// Template refs
+const scheduleRef = ref(null)
+const entityListRef = ref(null)
+const timelineRef = ref(null)
+const timelineContentRef = ref(null)
+const timelineContentWrapperRef = ref(null)
+const timelineHeaderRef = ref(null)
+const timelinePositionRef = ref(null)
+
+// Store getters
+const currentProduction = computed(() => store.getters.currentProduction)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const milestones = computed(() => store.getters.milestones)
+const openProductions = computed(() => store.getters.openProductions)
+const organisation = computed(() => store.getters.organisation)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatuses = computed(() => store.getters.taskStatuses)
+
+// Format mixin replacements
+const isDurationInHours = computed(() => {
+  return organisation.value.format_duration_in_hours
+})
+
+const formatDuration = (minutes, toLocale = true) => {
+  if (!minutes) {
+    return 0
+  }
+
+  const duration = organisation.value.format_duration_in_hours
+    ? minutes / 60
+    : minutesToDays(organisation.value, minutes)
+
+  if (toLocale) {
+    return duration.toLocaleString('fullwide', {
+      maximumFractionDigits: 2
+    })
+  }
+  return Math.round(duration * 100) / 100
+}
+
+// Dom mixin replacements
+const addEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.addEventListener(type, listener)
+  })
+}
+
+const removeEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.removeEventListener(type, listener)
+  })
+}
+
+const getClientX = event => {
+  return (
+    event.touches?.[0]?.clientX ??
+    event.changedTouches?.[0]?.clientX ??
+    event.clientX
+  )
+}
+
+const getClientY = event => {
+  return (
+    event.touches?.[0]?.clientY ??
+    event.changedTouches?.[0]?.clientY ??
+    event.clientY
+  )
+}
+
+// Store actions
+const deleteMilestone = milestone => {
+  return store.dispatch('deleteMilestone', milestone)
+}
+
+const loadMilestones = production => {
+  return store.dispatch('loadMilestones', production)
+}
+
+const saveMilestone = milestone => {
+  return store.dispatch('saveMilestone', milestone)
+}
+
+// Data
+const currentElement = ref(null)
+const selection = ref([])
+const isBrowsingX = ref(false)
+const isBrowsingY = ref(false)
+const isChangeDates = ref(false)
+const isChangeStartDate = ref(false)
+const isChangeEndDate = ref(false)
+const milestoneToEdit = reactive({
+  date: moment()
+})
+const errors = reactive({
+  edit: false
+})
+const modals = reactive({
+  edit: false
+})
+const loading = reactive({
+  edit: false
+})
+
+let initialClientX = null
+let initialClientY = null
+let lastStartDate = null
+let lastEndDate = null
+
+let domEvents = []
+
+// Computed
+
+const statuses = computed(() => {
+  return {
+    wip: taskStatuses.value.find(status => status.is_wip) ?? {},
+    wfa: taskStatuses.value.find(status => status.is_feedback_request) ?? {},
+    done: taskStatuses.value.find(status => status.is_done) ?? {}
+  }
+})
+
+const currentMilestones = computed(() => {
+  const localMilestones = {}
+  Object.keys(milestones.value).forEach(key => {
+    if (displayedDaysIndex.value[key]) {
+      localMilestones[key] = milestones.value[key]
     }
-  },
+  })
+  return localMilestones
+})
 
-  props: {
-    daysOff: {
-      type: Array,
-      default: () => []
-    },
-    draggedItems: {
-      type: Array,
-      default: () => []
-    },
-    endDate: {
-      type: Object,
-      required: true
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: true
-    },
-    hideEntities: {
-      type: Boolean,
-      default: false
-    },
-    hideManDays: {
-      type: Boolean,
-      default: false
-    },
-    hierarchy: {
-      default: () => [],
-      type: Array
-    },
-    invertLinesColor: {
-      type: Boolean,
-      default: false
-    },
-    showExpandAll: {
-      type: Boolean,
-      default: false
-    },
-    subEndDate: {
-      type: Object,
-      default: null
-    },
-    subStartDate: {
-      type: Object,
-      default: null
-    },
-    startDate: {
-      type: Object,
-      required: true
-    },
-    isEstimationLinked: {
-      type: Boolean,
-      default: false
-    },
-    withMilestones: {
-      type: Boolean,
-      default: true
-    },
-    withEstimations: {
-      type: Boolean,
-      default: true
-    },
-    withGhosts: {
-      type: Boolean,
-      default: false
-    },
-    withStatuses: {
-      type: Boolean,
-      default: false
-    },
-    withTimesheets: {
-      type: Boolean,
-      default: false
-    },
-    hideRoot: {
-      type: Boolean,
-      default: false
-    },
-    zoomLevel: {
-      type: Number,
-      default: 2
-    },
-    multiline: {
-      type: Boolean,
-      default: false
-    },
-    subchildren: {
-      type: Boolean,
-      default: false
-    },
-    reassignable: {
-      type: Boolean,
-      default: false
-    },
-    type: {
-      type: String,
-      validator: value => ['prev', 'real'].includes(value)
+const cellWidth = computed(() => {
+  const cellWidthByLevel = [20, 20, 40, 60, 120]
+  return cellWidthByLevel[props.zoomLevel] || 20
+})
+
+const daysAvailable = computed(() => {
+  const days = []
+  let day = props.startDate.clone().utc().startOf('day')
+  const endDate = props.endDate.clone().utc().startOf('day')
+  const daysOff = getDayOffRange(props.daysOff).map(dayOff => dayOff.date)
+
+  while (day.isSameOrBefore(endDate)) {
+    day.off = daysOff.includes(day.toISOString().slice(0, 10))
+    day.newWeek = day.isoWeekday() === 1
+    day.newMonth = day.date() === 1
+    day.weekend = [6, 7].includes(day.isoWeekday())
+    day.weekNumber = day.week()
+    day.text = day.format('YYYY-MM-DD')
+    day.monthText = day.format('MMMM YY')
+    day.dayNumber = day.format('DD')
+    day.dayText = day.format('ddd')[0]
+    days.push(day)
+    day = day.clone().add(1, 'days')
+  }
+
+  // always show month and week number at start of schedule
+  if (days.length) {
+    const indexNextMonth = days.findIndex(day => day.newMonth)
+    if (indexNextMonth >= 5 || indexNextMonth === -1) {
+      days[0].newMonth = true
     }
-  },
-
-  emits: [
-    'estimation-changed',
-    'expand-all',
-    'item-assign',
-    'item-changed',
-    'item-drop',
-    'item-selected',
-    'item-unassign',
-    'root-element-expanded',
-    'root-element-selected',
-    'scroll',
-    'task-selected',
-    'task-unselected'
-  ],
-
-  mounted() {
-    this.resetScheduleSize()
-    this.addEvents(this.domEvents)
-  },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
-    document.body.style.cursor = 'default'
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departmentMap',
-      'isCurrentUserManager',
-      'isDarkTheme',
-      'milestones',
-      'openProductions',
-      'organisation',
-      'taskMap',
-      'taskStatuses'
-    ]),
-
-    statuses() {
-      return {
-        wip: this.taskStatuses.find(status => status.is_wip) ?? {},
-        wfa: this.taskStatuses.find(status => status.is_feedback_request) ?? {},
-        done: this.taskStatuses.find(status => status.is_done) ?? {}
-      }
-    },
-
-    currentMilestones() {
-      const localMilestones = {}
-      Object.keys(this.milestones).forEach(key => {
-        if (this.displayedDaysIndex[key]) {
-          localMilestones[key] = this.milestones[key]
-        }
-      })
-      return localMilestones
-    },
-
-    cellWidth() {
-      const cellWidthByLevel = [20, 20, 40, 60, 120]
-      return cellWidthByLevel[this.zoomLevel] || 20
-    },
-
-    daysAvailable() {
-      const days = []
-      let day = this.startDate.clone().utc().startOf('day')
-      const endDate = this.endDate.clone().utc().startOf('day')
-      const daysOff = this.getDayOffRange(this.daysOff).map(
-        dayOff => dayOff.date
-      )
-
-      while (day.isSameOrBefore(endDate)) {
-        day.off = daysOff.includes(day.toISOString().slice(0, 10))
-        day.newWeek = day.isoWeekday() === 1
-        day.newMonth = day.date() === 1
-        day.weekend = [6, 7].includes(day.isoWeekday())
-        day.weekNumber = day.week()
-        day.text = day.format('YYYY-MM-DD')
-        day.monthText = day.format('MMMM YY')
-        day.dayNumber = day.format('DD')
-        day.dayText = day.format('ddd')[0]
-        days.push(day)
-        day = day.clone().add(1, 'days')
-      }
-
-      // always show month and week number at start of schedule
-      if (days.length) {
-        const indexNextMonth = days.findIndex(day => day.newMonth)
-        if (indexNextMonth >= 5 || indexNextMonth === -1) {
-          days[0].newMonth = true
-        }
-        const indexNextWeek = days.findIndex(day => day.newWeek)
-        if (indexNextWeek === -1) {
-          days[0].newWeek = true
-        }
-      }
-      return days
-    },
-
-    weeksAvailable() {
-      const weeks = []
-      if (this.daysAvailable.length < 1) return []
-      const startDate = this.daysAvailable[0]
-      const endDate = this.daysAvailable[this.daysAvailable.length - 1]
-      const day = startDate.clone().add(-1, 'days')
-      let dayDate = day.toDate()
-      const endDayDate = endDate.clone().add(7, 'days').toDate()
-      dayDate.weekday = day.isoWeekday()
-      dayDate.monthday = day.month()
-      dayDate.week = day.week()
-
-      while (dayDate < endDayDate) {
-        const nextDay = new Date(Number(dayDate))
-        nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
-        if (nextDay.isoweekday > 7) {
-          nextDay.isoweekday = 1
-          nextDay.newWeek = true
-        }
-        nextDay.monthday = dayDate.monthday + 1
-        if (nextDay.getMonth() !== dayDate.getMonth()) {
-          nextDay.newMonth = true
-          nextDay.monthday = 1
-        }
-        const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
-        if (momentDay.isoWeekday() === 1) {
-          momentDay.weekText = momentDay.format('YYYY-MM-DD')
-          momentDay.label = `${momentDay.weekText} to ${momentDay
-            .clone()
-            .add(6, 'days')
-            .format('YYYY-MM-DD')}`
-          momentDay.weekNumber = momentDay.week()
-          momentDay.newMonth =
-            weeks.length === 0 ||
-            momentDay.month() !== weeks[weeks.length - 1].month()
-          momentDay.monthText = momentDay.format('MMMM YY')
-          weeks.push(momentDay)
-        }
-        dayDate = nextDay
-      }
-      return weeks
-    },
-
-    displayedDays() {
-      return this.daysAvailable
-    },
-
-    displayedDaysIndex() {
-      let index = 0
-      const dayIndex = {}
-      this.displayedDays.forEach(d => {
-        dayIndex[d.text] = index
-        index++
-      })
-      return dayIndex
-    },
-
-    displayedWeeksIndex() {
-      let index = 0
-      const weekIndex = {}
-      this.weeksAvailable.forEach(w => {
-        weekIndex[w.weekText] = index
-        index++
-      })
-      return weekIndex
-    },
-
-    isRealSchedule() {
-      return this.type === 'real'
-    },
-
-    totalManDays() {
-      return this.hierarchy.reduce(
-        (acc, timeElement) => acc + (timeElement.man_days || 0),
-        0
-      )
-    },
-
-    // References
-
-    entityList() {
-      return this.$refs['entity-list']
-    },
-
-    schedule() {
-      return this.$refs.schedule
-    },
-
-    timeline() {
-      return this.$refs.timeline
-    },
-
-    timelineContent() {
-      return this.$refs['timeline-content']
-    },
-
-    timelineContentWrapper() {
-      return this.$refs['timeline-content-wrapper']
-    },
-
-    timelineHeader() {
-      return this.$refs['timeline-header']
-    },
-
-    timelinePosition() {
-      return this.$refs['timeline-position']
-    },
-
-    // Styles
-
-    timelineStyle() {
-      const firstDay = this.daysAvailable[0]
-      const multiplier = firstDay ? -1 * (firstDay.isoWeekday() - 1) : 0
-      return {
-        'background-position-x': `${multiplier * this.cellWidth}px`
-      }
-    },
-
-    timelinePositionStyle() {
-      return { width: `${this.cellWidth}px` }
-    },
-
-    timelineTodayPositionStyle() {
-      const today = moment().utc(true)
-      const isVisible =
-        today.isAfter(this.startDate) && today.isBefore(this.endDate)
-      return {
-        width: `${this.cellWidth}px`,
-        left: `${this.getTimebarLeft({ startDate: today }) - 3}px`,
-        display: isVisible ? 'block' : 'none'
-      }
-    },
-
-    timelineSubStartStyle() {
-      const diff = Math.max(this.dateDiff(this.startDate, this.subStartDate), 0)
-      return {
-        left: 0,
-        width: `${this.cellWidth * diff}px`
-      }
-    },
-
-    timelineSubEndStyle() {
-      const diff = Math.max(
-        this.dateDiff(this.subEndDate, this.endDate) - 1, // end date must available
-        0
-      )
-      return {
-        right: 0,
-        width: `${this.cellWidth * diff}px`
-      }
-    },
-
-    dayAfterEndDate() {
-      return this.endDate.clone().add(1, 'days')
-    },
-
-    isWeekMode() {
-      return this.zoomLevel === 0
-    },
-
-    unitOfTime() {
-      return this.zoomLevel > 0 ? 'days' : 'weeks'
+    const indexNextWeek = days.findIndex(day => day.newWeek)
+    if (indexNextWeek === -1) {
+      days[0].newWeek = true
     }
-  },
+  }
+  return days
+})
 
-  methods: {
-    ...mapActions(['deleteMilestone', 'loadMilestones', 'saveMilestone']),
+const weeksAvailable = computed(() => {
+  const weeks = []
+  if (daysAvailable.value.length < 1) return []
+  const startDate = daysAvailable.value[0]
+  const endDate = daysAvailable.value[daysAvailable.value.length - 1]
+  const day = startDate.clone().add(-1, 'days')
+  let dayDate = day.toDate()
+  const endDayDate = endDate.clone().add(7, 'days').toDate()
+  dayDate.weekday = day.isoWeekday()
+  dayDate.monthday = day.month()
+  dayDate.week = day.week()
 
-    getDayOffRange,
+  while (dayDate < endDayDate) {
+    const nextDay = new Date(Number(dayDate))
+    nextDay.setDate(dayDate.getDate() + 1) // Add 1 day
+    if (nextDay.isoweekday > 7) {
+      nextDay.isoweekday = 1
+      nextDay.newWeek = true
+    }
+    nextDay.monthday = dayDate.monthday + 1
+    if (nextDay.getMonth() !== dayDate.getMonth()) {
+      nextDay.newMonth = true
+      nextDay.monthday = 1
+    }
+    const momentDay = parseDate(moment(nextDay).format('YYYY-MM-DD'))
+    if (momentDay.isoWeekday() === 1) {
+      momentDay.weekText = momentDay.format('YYYY-MM-DD')
+      momentDay.label = `${momentDay.weekText} to ${momentDay
+        .clone()
+        .add(6, 'days')
+        .format('YYYY-MM-DD')}`
+      momentDay.weekNumber = momentDay.week()
+      momentDay.newMonth =
+        weeks.length === 0 ||
+        momentDay.month() !== weeks[weeks.length - 1].month()
+      momentDay.monthText = momentDay.format('MMMM YY')
+      weeks.push(momentDay)
+    }
+    dayDate = nextDay
+  }
+  return weeks
+})
 
-    getNbSubChildren(children) {
-      if (!children) return 0
+const displayedDays = computed(() => {
+  return daysAvailable.value
+})
 
-      return Object.values(children).reduce((acc, subChildren) => {
-        return acc + subChildren.length
-      }, 0)
-    },
+const displayedDaysIndex = computed(() => {
+  let index = 0
+  const dayIndex = {}
+  displayedDays.value.forEach(d => {
+    dayIndex[d.text] = index
+    index++
+  })
+  return dayIndex
+})
 
-    getNbLines(items = []) {
-      const values = items.map(item => item.line || 0)
-      return values.length ? Math.max(...values) + 1 : 1
-    },
+const displayedWeeksIndex = computed(() => {
+  let index = 0
+  const weekIndex = {}
+  weeksAvailable.value.forEach(w => {
+    weekIndex[w.weekText] = index
+    index++
+  })
+  return weekIndex
+})
 
-    refreshAllItemPositions() {
-      this.hierarchy.forEach(rootElement => {
-        if (rootElement.expanded) {
-          this.refreshItemPositions(rootElement)
-        }
-      })
-    },
+const isRealSchedule = computed(() => {
+  return props.type === 'real'
+})
 
-    refreshItemPositions(rootElement) {
-      if (!rootElement?.children) {
-        return
-      }
+const totalManDays = computed(() => {
+  return props.hierarchy.reduce(
+    (acc, timeElement) => acc + (timeElement.man_days || 0),
+    0
+  )
+})
 
-      if (this.multiline) {
-        setItemPositions(rootElement.children, this.unitOfTime)
-      }
+// Styles
 
-      if (this.subchildren) {
-        rootElement.children.forEach(childElement => {
-          if (childElement.children) {
-            childElement.children.forEach(subchildElement => {
-              setItemPositions(subchildElement, this.unitOfTime)
-            })
-          } else {
-            setItemPositions(childElement, this.unitOfTime)
-          }
+const timelineStyle = computed(() => {
+  const firstDay = daysAvailable.value[0]
+  const multiplier = firstDay ? -1 * (firstDay.isoWeekday() - 1) : 0
+  return {
+    'background-position-x': `${multiplier * cellWidth.value}px`
+  }
+})
+
+const timelinePositionStyle = computed(() => {
+  return { width: `${cellWidth.value}px` }
+})
+
+const timelineTodayPositionStyle = computed(() => {
+  const today = moment().utc(true)
+  const isVisible =
+    today.isAfter(props.startDate) && today.isBefore(props.endDate)
+  return {
+    width: `${cellWidth.value}px`,
+    left: `${getTimebarLeft({ startDate: today }) - 3}px`,
+    display: isVisible ? 'block' : 'none'
+  }
+})
+
+const timelineSubStartStyle = computed(() => {
+  const diff = Math.max(dateDiff(props.startDate, props.subStartDate), 0)
+  return {
+    left: 0,
+    width: `${cellWidth.value * diff}px`
+  }
+})
+
+const timelineSubEndStyle = computed(() => {
+  const diff = Math.max(
+    dateDiff(props.subEndDate, props.endDate) - 1, // end date must available
+    0
+  )
+  return {
+    right: 0,
+    width: `${cellWidth.value * diff}px`
+  }
+})
+
+const dayAfterEndDate = computed(() => {
+  return props.endDate.clone().add(1, 'days')
+})
+
+const isWeekMode = computed(() => {
+  return props.zoomLevel === 0
+})
+
+const unitOfTime = computed(() => {
+  return props.zoomLevel > 0 ? 'days' : 'weeks'
+})
+
+// Methods
+
+const getNbSubChildren = children => {
+  if (!children) return 0
+
+  return Object.values(children).reduce((acc, subChildren) => {
+    return acc + subChildren.length
+  }, 0)
+}
+
+const getNbLines = (items = []) => {
+  const values = items.map(item => item.line || 0)
+  return values.length ? Math.max(...values) + 1 : 1
+}
+
+const refreshAllItemPositions = () => {
+  props.hierarchy.forEach(rootElement => {
+    if (rootElement.expanded) {
+      refreshItemPositions(rootElement)
+    }
+  })
+}
+
+const refreshItemPositions = rootElement => {
+  if (!rootElement?.children) {
+    return
+  }
+
+  if (props.multiline) {
+    setItemPositions(rootElement.children, unitOfTime.value)
+  }
+
+  if (props.subchildren) {
+    rootElement.children.forEach(childElement => {
+      if (childElement.children) {
+        childElement.children.forEach(subchildElement => {
+          setItemPositions(subchildElement, unitOfTime.value)
         })
+      } else {
+        setItemPositions(childElement, unitOfTime.value)
       }
-    },
+    })
+  }
+}
 
-    refreshManDays(rootElement) {
-      if (this.hideManDays || !rootElement?.children?.length) {
-        return
-      }
+const refreshManDays = rootElement => {
+  if (props.hideManDays || !rootElement?.children?.length) {
+    return
+  }
 
-      rootElement.man_days = rootElement.children.reduce(
-        (acc, child) => acc + (child.man_days || 0),
-        0
+  rootElement.man_days = rootElement.children.reduce(
+    (acc, child) => acc + (child.man_days || 0),
+    0
+  )
+}
+
+const isVisible = timeElement => {
+  const isStartDateOk = timeElement.startDate.isSameOrAfter(props.startDate)
+  const isEndDateOk = timeElement.endDate.isSameOrBefore(dayAfterEndDate.value)
+  return isStartDateOk && isEndDateOk
+}
+
+const resetScheduleSize = () => {
+  if (timelineContentRef.value) {
+    if (props.zoomLevel > 0) {
+      timelineContentRef.value.style.width = `${displayedDays.value.length * cellWidth.value}px`
+    } else {
+      timelineContentRef.value.style.width = `${weeksAvailable.value.length * cellWidth.value}px`
+    }
+  }
+}
+
+const onMouseMove = event => {
+  if (isChangeStartDate.value) {
+    changeStartDate(event)
+  } else if (isChangeEndDate.value) {
+    changeEndDate(event)
+  } else if (isChangeDates.value) {
+    changeDates(event)
+  } else {
+    if (isBrowsingX.value) scrollScheduleLeft(event)
+    if (isBrowsingY.value) scrollScheduleTop(event)
+  }
+
+  updatePositionBarPosition(event)
+}
+
+const onChildEstimationChanged = (event, childElement, rootElement) => {
+  const estimation = event.target.valueAsNumber || 0
+  if (props.isEstimationLinked) {
+    childElement.man_days = daysToMinutes(organisation.value, estimation)
+    childElement.estimation = childElement.man_days
+    refreshManDays(rootElement)
+
+    if (estimation > 0) {
+      childElement.endDate = addBusinessDays(
+        childElement.startDate,
+        estimation - 1,
+        rootElement.daysOff
       )
-    },
-
-    isVisible(timeElement) {
-      const isStartDateOk = timeElement.startDate.isSameOrAfter(this.startDate)
-      const isEndDateOk = timeElement.endDate.isSameOrBefore(
-        this.dayAfterEndDate
-      )
-      return isStartDateOk && isEndDateOk
-    },
-
-    resetScheduleSize() {
-      if (this.timelineContent) {
-        if (this.zoomLevel > 0) {
-          this.timelineContent.style.width = `${this.displayedDays.length * this.cellWidth}px`
-        } else {
-          this.timelineContent.style.width = `${this.weeksAvailable.length * this.cellWidth}px`
-        }
-      }
-    },
-
-    onMouseMove(event) {
-      if (this.isChangeStartDate) {
-        this.changeStartDate(event)
-      } else if (this.isChangeEndDate) {
-        this.changeEndDate(event)
-      } else if (this.isChangeDates) {
-        this.changeDates(event)
-      } else {
-        if (this.isBrowsingX) this.scrollScheduleLeft(event)
-        if (this.isBrowsingY) this.scrollScheduleTop(event)
-      }
-
-      this.updatePositionBarPosition(event)
-    },
-
-    onChildEstimationChanged(event, childElement, rootElement) {
-      const estimation = event.target.valueAsNumber || 0
-      if (this.isEstimationLinked) {
-        childElement.man_days = daysToMinutes(this.organisation, estimation)
-        childElement.estimation = childElement.man_days
-        this.refreshManDays(rootElement)
-
-        if (estimation > 0) {
-          childElement.endDate = addBusinessDays(
-            childElement.startDate,
-            estimation - 1,
-            rootElement.daysOff
-          )
-        }
-      }
-      this.$emit('estimation-changed', {
-        taskId: childElement.id,
-        days: estimation,
-        item: childElement,
-        daysOff: rootElement.daysOff
-      })
-    },
-
-    updatePositionBarPosition(event) {
-      if (!this.timelineContentWrapper || !this.timelinePosition) return
-
-      const cursorX =
-        this.getClientX(event) -
-        this.timelineContentWrapper.getBoundingClientRect().left
-
-      if (cursorX <= 0 || cursorX >= this.timelineContentWrapper.offsetWidth)
-        return
-
-      const left =
-        Math.floor(
-          (this.timelineContentWrapper.scrollLeft + cursorX) / this.cellWidth
-        ) * this.cellWidth
-      this.timelinePosition.style.left = `${left}px`
-    },
-
-    isValidItemDates(startDate, endDate) {
-      return (
-        startDate &&
-        endDate &&
-        startDate.isSameOrAfter(this.startDate.clone().add(-1, 'hour')) &&
-        endDate.isSameOrBefore(this.endDate.clone().add(1, 'day')) &&
-        startDate.isSameOrBefore(endDate) &&
-        endDate.isSameOrAfter(startDate)
-      )
-    },
-
-    getDisplayedDaysIndex(date) {
-      const dateString = date.format('YYYY-MM-DD')
-      return this.displayedDaysIndex[dateString]
-    },
-
-    getDisplayedWeeksIndex(date) {
-      const dateString = date.startOf('isoweek').format('YYYY-MM-DD')
-      return this.displayedWeeksIndex[dateString]
-    },
-
-    resetDroppableTargets() {
-      this.schedule?.querySelectorAll('.droppable').forEach(element => {
-        element.classList.remove('droppable')
-      })
-    },
-
-    changeDates(event) {
-      if (!this.isSelected(this.currentElement)) {
-        // avoid side effect if item unselected
-        return
-      }
-
-      const change =
-        this.getClientX(event) - this.initialClientX - this.cellWidth / 2
-      const dayChange = Math.ceil(change / this.cellWidth)
-
-      if (this.reassignable) {
-        let target = event.target
-        while (target && !target.classList?.contains('drop-item-target')) {
-          target = target.parentNode
-        }
-        if (!target) {
-          this.resetDroppableTargets()
-        }
-        const currentRootElement = this.currentElement.parentElement
-        if (
-          this.subchildren &&
-          target &&
-          target.dataset.personId &&
-          target.dataset.entityTypeId &&
-          !this.currentElement.assignees?.includes(target.dataset.personId)
-        ) {
-          // check rights
-          if (
-            target.dataset.personId === 'unassigned' ||
-            target.dataset.entityTypeId !== this.currentElement.entity_type_id
-          ) {
-            return
-          }
-
-          target.classList.add('droppable')
-
-          this.selection.forEach(item => {
-            // update item assignation in element hierarchy
-            const previousAssigneeId = item.assignees[0]
-            const newAssigneeId = target.dataset.personId
-            item.assignees = item.assignees.filter(
-              assigneeId => assigneeId !== previousAssigneeId
-            )
-            item.assignees.push(newAssigneeId)
-
-            this.$emit('item-unassign', item, previousAssigneeId)
-            this.$emit('item-assign', item, newAssigneeId)
-            this.refreshItemPositions(currentRootElement)
-          })
-        } else if (
-          !this.subchildren &&
-          target &&
-          target.dataset.rootElementId &&
-          currentRootElement.id !== target.dataset.rootElementId
-        ) {
-          const newRootElement = this.hierarchy.find(
-            rootElement => rootElement.id === target.dataset.rootElementId
-          )
-          this.selection.forEach(item => {
-            if (!this.checkUserIsAllowed(item, newRootElement)) {
-              return
-            }
-            target.classList.add('droppable')
-            // update assignation in element hierarchy
-            const previousRootElement = item.parentElement
-            item.parentElement = newRootElement
-            previousRootElement.children = previousRootElement.children.filter(
-              ({ id }) => id !== item.id
-            )
-            newRootElement.children = newRootElement.children.filter(
-              ({ id }) => id !== item.id
-            )
-            newRootElement.children.push(item)
-            this.$emit('item-unassign', item, previousRootElement)
-            this.$emit('item-assign', item, newRootElement)
-            this.refreshItemPositions(previousRootElement)
-          })
-          this.refreshItemPositions(newRootElement)
-        }
-      }
-
-      if (this.lastStartDate.isBefore(this.startDate)) {
-        this.lastStartDate = this.startDate.clone()
-      }
-
-      if (this.lastEndDate.isBefore(this.startDate)) {
-        this.lastEndDate = this.startDate.clone().add(1, 'days')
-      }
-
-      const startDate = this.lastStartDate
-      const endDate = this.lastEndDate
-      if (!this.isWeekMode) {
-        const startDateIndex = this.getDisplayedDaysIndex(startDate)
-        const endDateIndex = this.getDisplayedDaysIndex(endDate)
-        const length = endDateIndex - startDateIndex
-        let currentIndex = this.getDisplayedDaysIndex(startDate)
-
-        currentIndex += dayChange
-        if (currentIndex < 0) currentIndex = 0
-
-        const newStartDate = this.displayedDays[currentIndex]
-        if (newStartDate) {
-          const newEndDate = this.displayedDays[currentIndex + length]
-          const dateDiff = newStartDate.diff(this.currentElement.startDate)
-          if (dateDiff && this.isValidItemDates(newStartDate, newEndDate)) {
-            // update all selected items
-            this.selection.forEach(item => {
-              item.startDate = item.startDate.clone().add(dateDiff)
-              item.endDate = item.endDate.clone().add(dateDiff)
-            })
-            if (this.multiline || this.subchildren) {
-              const parentElements = [
-                ...new Set(this.selection.map(item => item.parentElement))
-              ]
-              parentElements.forEach(this.refreshItemPositions)
-            }
-          }
-        }
-      } else {
-        const startDateIndex = this.getDisplayedWeeksIndex(startDate)
-        const endDateIndex = this.getDisplayedWeeksIndex(endDate)
-        const length = endDateIndex - startDateIndex
-        let currentIndex = this.getDisplayedWeeksIndex(startDate)
-        currentIndex += dayChange
-        if (currentIndex < 0) currentIndex = 0
-        const newStartDate = this.weeksAvailable[currentIndex]
-        if (newStartDate) {
-          const newEndDate = this.weeksAvailable[currentIndex + length]
-          if (this.isValidItemDates(newStartDate, newEndDate)) {
-            this.currentElement.startDate = newStartDate
-            this.currentElement.endDate = newEndDate
-          }
-        }
-      }
-    },
-
-    changeStartDate(event) {
-      const change =
-        this.getClientX(event) - this.initialClientX + this.cellWidth / 2
-      const dayChange = Math.floor(change / this.cellWidth)
-
-      const startDate = this.lastStartDate
-      const endDate = this.currentElement.endDate
-      let currentIndex, endDateIndex
-      if (this.isWeekMode) {
-        currentIndex = this.getDisplayedWeeksIndex(startDate)
-        endDateIndex = this.getDisplayedWeeksIndex(endDate)
-      } else {
-        currentIndex = this.getDisplayedDaysIndex(startDate)
-        endDateIndex = this.getDisplayedDaysIndex(endDate)
-      }
-      currentIndex += dayChange
-      if (currentIndex > endDateIndex) currentIndex = endDateIndex
-      if (currentIndex < 0) currentIndex = 0
-
-      const newStartDate = this.isWeekMode
-        ? this.weeksAvailable[currentIndex]
-        : this.displayedDays[currentIndex]
-
-      if (
-        !newStartDate.isSame(this.currentElement.startDate) &&
-        this.isValidItemDates(newStartDate, this.currentElement.endDate)
-      ) {
-        this.currentElement.startDate = newStartDate.clone()
-        this.updateItemEstimation(this.currentElement)
-        this.refreshItemPositions(this.currentElement.parentElement)
-        this.resetSelection([this.currentElement])
-      }
-    },
-
-    changeEndDate(event) {
-      const change =
-        this.getClientX(event) - this.initialClientX + this.cellWidth / 2
-      const dayChange = Math.ceil(change / this.cellWidth)
-
-      if (this.currentElement.startDate.isBefore(this.startDate)) {
-        this.currentElement.startDate = this.startDate.clone()
-      }
-
-      if (this.currentElement.endDate.isBefore(this.startDate)) {
-        this.currentElement.endDate = this.startDate.clone().add(1, 'days')
-      }
-
-      if (this.lastEndDate.isBefore(this.startDate)) {
-        this.lastEndDate = this.startDate.clone().add(1, 'days')
-      }
-
-      const startDate = this.currentElement.startDate
-      const endDate = this.lastEndDate
-      let startDateIndex, currentIndex
-      if (this.isWeekMode) {
-        startDateIndex = this.getDisplayedWeeksIndex(startDate)
-        currentIndex = this.getDisplayedWeeksIndex(endDate)
-      } else {
-        startDateIndex = this.getDisplayedDaysIndex(startDate)
-        currentIndex = this.getDisplayedDaysIndex(endDate)
-      }
-
-      currentIndex += dayChange - 1
-      if (currentIndex < startDateIndex) currentIndex = startDateIndex
-      if (this.isWeekMode) {
-        if (currentIndex > this.displayedWeeksIndex.length) {
-          currentIndex = this.displayedWeeksIndex.length - 1
-        }
-      } else {
-        if (currentIndex > this.displayedDaysIndex.length) {
-          currentIndex = this.displayedDaysIndex.length - 1
-        }
-      }
-
-      const newEndDate = this.isWeekMode
-        ? this.weeksAvailable[currentIndex]
-        : this.displayedDays[currentIndex]
-      if (
-        newEndDate &&
-        !newEndDate.isSame(this.currentElement.endDate) &&
-        this.isValidItemDates(this.currentElement.startDate, newEndDate)
-      ) {
-        this.currentElement.endDate = newEndDate.clone()
-        this.updateItemEstimation(this.currentElement)
-        this.refreshItemPositions(this.currentElement.parentElement)
-        this.resetSelection([this.currentElement])
-      }
-    },
-
-    updateItemEstimation(item) {
-      if (this.isEstimationLinked) {
-        const estimation = getBusinessDays(
-          item.startDate,
-          item.endDate,
-          item.parentElement?.daysOff
-        )
-        item.estimation = daysToMinutes(this.organisation, estimation)
-      }
-    },
-
-    updateSelection(item, event) {
-      const isCtrlKey = event.ctrlKey || event.metaKey
-
-      if (this.isSelected(item)) {
-        if (isCtrlKey) {
-          this.removeFromSelection(item)
-        }
-      } else {
-        if (!isCtrlKey) {
-          this.resetSelection()
-        }
-        this.addToSelection(item)
-      }
-    },
-
-    isOverlapping(item) {
-      return (
-        this.withGhosts &&
-        ((item.previousElement &&
-          item.startDate.isSameOrBefore(item.previousElement.endDate)) ||
-          (item.nextElement &&
-            item.endDate.isSameOrAfter(item.nextElement.startDate)))
-      )
-    },
-
-    isSelected(item) {
-      return this.selection.some(({ id }) => id === item.id)
-    },
-
-    addToSelection(itemToAdd) {
-      this.selection.push(itemToAdd)
-    },
-
-    removeFromSelection(itemToRemove) {
-      this.selection = this.selection.filter(item => item !== itemToRemove)
-    },
-
-    resetSelection(value) {
-      this.selection = value || []
-    },
-
-    moveTimebar(timeElement, event) {
-      event.preventDefault() // avoid scroll of schedule on touch
-      if (
-        !this.isChangeStartDate &&
-        !this.isChangeEndDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = true
-        this.isChangeStartDate = false
-        this.isChangeEndDate = false
-        this.currentElement = timeElement
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = this.getClientX(event)
-        document.body.style.cursor = this.reassignable
-          ? 'all-scroll'
-          : 'ew-resize'
-
-        this.updateSelection(timeElement, event)
-      }
-    },
-
-    moveTimebarLeftSide(timeElement, event) {
-      event.preventDefault() // avoid scroll of schedule on touch
-      if (
-        !this.isChangeDates &&
-        !this.isChangeEndDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = false
-        this.isChangeStartDate = true
-        this.isChangeEndDate = false
-        this.currentElement = timeElement
-        if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
-        }
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = this.getClientX(event)
-        document.body.style.cursor = 'w-resize'
-
-        this.updateSelection(timeElement, event)
-      }
-    },
-
-    moveTimebarRightSide(timeElement, event) {
-      event.preventDefault() // avoid scroll of schedule on touch
-      if (
-        !this.isChangeDates &&
-        !this.isChangeStartDate &&
-        timeElement.editable
-      ) {
-        this.isChangeDates = false
-        this.isChangeStartDate = false
-        this.isChangeEndDate = true
-        this.currentElement = timeElement
-        if (!timeElement.endDate) {
-          timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
-        }
-        this.lastStartDate = timeElement.startDate.clone()
-        this.lastEndDate = timeElement.endDate.clone()
-        this.initialClientX = this.getClientX(event)
-        document.body.style.cursor = 'e-resize'
-
-        this.updateSelection(timeElement, event)
-      }
-    },
-
-    onTimelineScroll(event) {
-      if (!event?.target) return
-      const position = event.target
-      const newTop = position.scrollTop
-      this.entityList.scrollTop = newTop
-      const newLeft = position.scrollLeft
-      this.timelineHeader.scrollLeft = newLeft
-
-      this.$emit('scroll', { top: position.scrollTop })
-    },
-
-    setScrollPosition(top) {
-      this.timelineContentWrapper.scrollTop = top
-      this.entityList.scrollTop = top
-    },
-
-    scrollScheduleLeft(event) {
-      if (!this.timelineContentWrapper) return
-      const previousLeft = this.timelineContentWrapper.scrollLeft
-      const movementX =
-        event.movementX || this.getClientX(event) - this.initialClientX
-      const newLeft = previousLeft - movementX
-      this.initialClientX = this.getClientX(event)
-      this.timelineContentWrapper.scrollLeft = newLeft
-      this.timelineHeader.scrollLeft = newLeft
-    },
-
-    scrollScheduleTop(event) {
-      if (!this.timelineContentWrapper) return
-      const previousTop = this.timelineContentWrapper.scrollTop
-      const movementY =
-        event.movementY || this.getClientY(event) - this.initialClientY
-      const newTop = previousTop - movementY
-      this.initialClientY = this.getClientY(event)
-      this.setScrollPosition(newTop)
-    },
-
-    scrollToToday() {
-      const today = moment()
-      this.scrollToDate(today)
-    },
-
-    scrollToDate(date) {
-      setTimeout(() => {
-        if (
-          this.schedule &&
-          date.isAfter(this.startDate) &&
-          date.isBefore(this.endDate)
-        ) {
-          const datePosition = this.getTimebarLeft({ startDate: date }) - 5
-          const newLeft = datePosition - (this.schedule.offsetWidth / 2 - 300)
-          this.timelineContentWrapper.scrollLeft = newLeft
-          if (this.timelineHeader) {
-            this.timelineHeader.scrollLeft = newLeft
-          }
-        }
-      }, 10)
-    },
-
-    startBrowsing(event) {
-      if (
-        !this.isChangeStartDate &&
-        !this.isChangeEndDate &&
-        !this.isChangeDates
-      ) {
-        document.body.style.cursor = 'grabbing'
-        this.isBrowsingX = true
-        this.isBrowsingY = true
-        this.initialClientX = this.getClientX(event)
-        this.initialClientY = this.getClientY(event)
-      }
-    },
-
-    startBrowsingX(event) {
-      document.body.style.cursor = 'grabbing'
-      this.isBrowsingX = true
-      this.initialClientX = this.getClientX(event)
-    },
-
-    startBrowsingY(event) {
-      document.body.style.cursor = 'grabbing'
-      this.isBrowsingY = true
-      this.initialClientY = this.getClientY(event)
-    },
-
-    stopBrowsing(event) {
-      document.body.style.cursor = 'default'
-      if (this.currentElement) {
-        if (this.initialClientX !== this.getClientX(event)) {
-          // on moving or resizing selected items
-          this.selection.forEach(item => {
-            this.$emit('item-changed', item)
-            this.refreshItemPositions(item.parentElement)
-            this.refreshManDays(item.parentElement)
-          })
-          // clear selection after moving a single item
-          if (this.isChangeDates && this.selection.length === 1) {
-            this.resetSelection()
-          }
-        } else {
-          // reset multi-selection when clicking on a single item
-          const isCtrlKey = event.ctrlKey || event.metaKey
-          if (this.isChangeDates && this.selection.length > 1 && !isCtrlKey) {
-            this.resetSelection([this.currentElement])
-          }
-        }
-      } else {
-        // clear the selection when clicking outside an item
-        let target = event.target
-        while (target && target !== this.timeline) {
-          target = target.parentNode
-        }
-        if (target) {
-          this.resetSelection()
-          this.$emit('task-unselected')
-        }
-      }
-      this.resetDroppableTargets()
-      this.isChangeStartDate = false
-      this.isChangeEndDate = false
-      this.isChangeDates = false
-      this.isBrowsingX = false
-      this.isBrowsingY = false
-      this.initialClientX = null
-      this.initialClientY = null
-      this.currentElement = null
-    },
-
-    // Helpers
-
-    dateDiff(startDate, endDate, unitOfTime = 'days') {
-      if (
-        startDate.isSame(endDate) ||
-        !startDate.isValid() ||
-        !endDate.isValid()
-      ) {
-        return 0
-      }
-      const first = startDate.clone().utc().startOf('day')
-      const last = endDate.clone().utc().endOf('day')
-      const diff = last.diff(first, unitOfTime)
-      return diff
-    },
-
-    // Styles
-
-    dayClass(day, index = 0) {
-      return {
-        'day-name': true,
-        'new-week': day.newWeek || false,
-        'new-month': day.newMonth || index === 0 || false,
-        weekend: day.weekend || false,
-        'day-name-off': day.off || false
-      }
-    },
-
-    dayOffStyle(dayOff) {
-      return {
-        left: `${this.getLeftPosition(dayOff.date)}px`,
-        width: `${this.cellWidth - 1}px`
-      }
-    },
-
-    dateStatusStyle(date) {
-      return {
-        left: `${this.getLeftPosition(date) + this.cellWidth / 2 - 3}px`
-      }
-    },
-
-    getLeftPosition(date) {
-      const startDate = moment.utc(date)
-      const startDiff = this.dateDiff(
-        this.startDate,
-        startDate,
-        this.unitOfTime
-      )
-      return startDiff * this.cellWidth + 1
-    },
-
-    entityLineStyle(
-      timeElement,
-      root = false,
-      header = false,
-      expanded = false
+    }
+  }
+  emit('estimation-changed', {
+    taskId: childElement.id,
+    days: estimation,
+    item: childElement,
+    daysOff: rootElement.daysOff
+  })
+}
+
+const updatePositionBarPosition = event => {
+  if (!timelineContentWrapperRef.value || !timelinePositionRef.value) return
+
+  const cursorX =
+    getClientX(event) -
+    timelineContentWrapperRef.value.getBoundingClientRect().left
+
+  if (cursorX <= 0 || cursorX >= timelineContentWrapperRef.value.offsetWidth)
+    return
+
+  const left =
+    Math.floor(
+      (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
+    ) * cellWidth.value
+  timelinePositionRef.value.style.left = `${left}px`
+}
+
+const isValidItemDates = (startDate, endDate) => {
+  return (
+    startDate &&
+    endDate &&
+    startDate.isSameOrAfter(props.startDate.clone().add(-1, 'hour')) &&
+    endDate.isSameOrBefore(props.endDate.clone().add(1, 'day')) &&
+    startDate.isSameOrBefore(endDate) &&
+    endDate.isSameOrAfter(startDate)
+  )
+}
+
+const getDisplayedDaysIndex = date => {
+  const dateString = date.format('YYYY-MM-DD')
+  return displayedDaysIndex.value[dateString]
+}
+
+const getDisplayedWeeksIndex = date => {
+  const dateString = date.startOf('isoweek').format('YYYY-MM-DD')
+  return displayedWeeksIndex.value[dateString]
+}
+
+const resetDroppableTargets = () => {
+  scheduleRef.value?.querySelectorAll('.droppable').forEach(element => {
+    element.classList.remove('droppable')
+  })
+}
+
+const changeDates = event => {
+  if (!isSelected(currentElement.value)) {
+    // avoid side effect if item unselected
+    return
+  }
+
+  const change = getClientX(event) - initialClientX - cellWidth.value / 2
+  const dayChange = Math.ceil(change / cellWidth.value)
+
+  if (props.reassignable) {
+    let target = event.target
+    while (target && !target.classList?.contains('drop-item-target')) {
+      target = target.parentNode
+    }
+    if (!target) {
+      resetDroppableTargets()
+    }
+    const currentRootElement = currentElement.value.parentElement
+    if (
+      props.subchildren &&
+      target &&
+      target.dataset.personId &&
+      target.dataset.entityTypeId &&
+      !currentElement.value.assignees?.includes(target.dataset.personId)
     ) {
-      const style = {}
-      let color = timeElement.color
-      if (root) {
-        // is a person
-        color = this.isDarkTheme ? '#222' : '#EEF'
-      }
-      if (root) {
-        style['border-left'] = `1px solid ${color}`
-        style['border-top'] = `1px solid ${color}`
-        if (!expanded) {
-          style['border-bottom'] = `1px solid ${color}`
-        }
-        if (header) {
-          style.background = color
-        }
-      }
-      if (timeElement.expanded) {
-        style['margin-bottom'] = '0'
-      }
-      style['border-left'] = `1px solid ${color}`
-      style.color = this.isDarkTheme ? '#EEE' : '#111'
-      if (!this.isDarkTheme) {
-        style['border-color'] = '#BBE'
-      }
-      return style
-    },
-
-    timebarStyle(timeElement, root = false) {
-      const style = {
-        left: `${this.getTimebarLeft(timeElement)}px`,
-        width: `${this.getTimebarWidth(timeElement)}px`,
-        cursor: timeElement.editable
-          ? !root && this.reassignable
-            ? 'all-scroll'
-            : 'ew-resize'
-          : 'default'
-      }
-      if (root) {
-        style['background-color'] = timeElement.color
-      }
-      return style
-    },
-
-    timelineMultilineStyle(timeElement) {
-      return {
-        top: `${timeElement.line * 40 + 5}px`,
-        left: `${this.getTimebarLeft(timeElement)}px`
-      }
-    },
-
-    timelineSubchildrenStyle(timeElement) {
-      const children = Array.from(timeElement.children.values())
-      const nbLines = children.reduce(
-        (acc, subChildren) => acc + this.getNbLines(subChildren),
-        0
-      )
-      const marginBottom = children.length * 10
-      return {
-        height: `${40 + 40 * nbLines + marginBottom + 2}px`,
-        'padding-top': '13px'
-      }
-    },
-
-    timebarChildStyle(
-      timeElement,
-      rootElement,
-      multiline = false,
-      opacityPercentage = 0,
-      opacityColor = 'transparent'
-    ) {
-      const elementColor = timeElement.color || rootElement.color
-      return {
-        left: !multiline && `${this.getTimebarLeft(timeElement)}px`,
-        width: `${this.getTimebarWidth(timeElement)}px`,
-        cursor: timeElement.editable
-          ? this.reassignable
-            ? 'all-scroll'
-            : 'ew-resize'
-          : 'default',
-        background: opacityPercentage
-          ? `color-mix(in srgb, ${elementColor}, ${opacityColor} ${opacityPercentage}%)` // lighter color
-          : elementColor
-      }
-    },
-
-    timesheetStyle(timesheet, timeElement, rootElement, withEstimations) {
-      return {
-        top: withEstimations ? '7px' : '18px',
-        left: `${this.getTimebarLeft(timesheet, true)}px`,
-        width: `${this.getTimebarWidth(timesheet)}px`,
-        background: timesheet.color || timeElement.color || rootElement.color
-      }
-    },
-
-    timebarSubchildStyle(timeElement, rootElement) {
-      const color = timeElement.color || rootElement.color
-      const isSelected = this.isSelected(timeElement)
-      return {
-        left: `${this.getTimebarLeft(timeElement)}px`,
-        width: `${this.getTimebarWidth(timeElement)}px`,
-        cursor: timeElement.editable
-          ? this.reassignable
-            ? 'all-scroll'
-            : 'ew-resize'
-          : 'default',
-        top: `${5 + 38 * timeElement.line}px`,
-        background: `color-mix(in srgb, ${color} ${isSelected ? 80 : 40}%, transparent)`,
-        'box-shadow': `inset 0 0 1px 2px ${isSelected ? 'var(--background-selected)' : color}`
-      }
-    },
-
-    timebarSubchildTitle(task) {
-      const name = task.entity.name
-      const startDate = task.startDate.format('YYYY-MM-DD')
-      const endDate = task.endDate.format('YYYY-MM-DD')
-      const duration = this.isRealSchedule
-        ? this.formatDuration(task.duration)
-        : this.formatDuration(task.estimation)
-      return `${name} (${startDate} - ${endDate}) ${duration} ${this.$t('schedule.md')}`
-    },
-
-    getTimebarLeft(timeElement) {
-      const startDate = timeElement.startDate || this.startDate
-      const startDiff = this.dateDiff(
-        this.startDate,
-        startDate,
-        this.unitOfTime
-      )
-      return startDiff * this.cellWidth + 3
-    },
-
-    getTimebarWidth(timeElement) {
-      const startDate = timeElement.startDate || this.startDate
-      let endDate =
-        timeElement.endDate ||
-        (timeElement.startDate &&
-          timeElement.startDate.clone().add(1, 'days')) ||
-        this.startDate.clone().add(1, 'days')
-
+      // check rights
       if (
-        timeElement.man_days > 0 &&
-        !timeElement.end_date &&
-        !timeElement.endDate
+        target.dataset.personId === 'unassigned' ||
+        target.dataset.entityTypeId !== currentElement.value.entity_type_id
       ) {
-        const days = Math.ceil(timeElement.man_days)
-        endDate = addBusinessDays(startDate, days - 1)
+        return
       }
 
-      const lengthDiff = this.dateDiff(startDate, endDate, this.unitOfTime)
-      if (lengthDiff > 0) {
-        return (lengthDiff + 1) * this.cellWidth - 6
-      } else {
-        return this.cellWidth - 4
-      }
-    },
+      target.classList.add('droppable')
 
-    // Children
-
-    expandRootElement(rootElement) {
-      if (rootElement.expanded) {
-        // clear selected items when collapsing the root element
-        this.selection.forEach(item => {
-          const taskRootElementId =
-            item.parentElement?.parentElement?.id || item.parentElement?.id
-          if (taskRootElementId === rootElement.id) {
-            this.removeFromSelection(item)
-          }
-        })
-      }
-
-      this.$emit(
-        'root-element-expanded',
-        rootElement,
-        this.multiline || this.subchildren
-          ? this.refreshItemPositions
-          : undefined
-      )
-    },
-
-    childNameStyle(rootElement, index) {
-      const isOdd = index % 2 === 0
-      const level = isOdd ? 0.7 : 0.9
-      return {
-        background: colors.fadeColor(rootElement.color, level)
-      }
-    },
-
-    childrenStyle(rootElement, isMultiline = false, setBackground = false) {
-      const style = {
-        'border-bottom': `1px solid ${rootElement.color}`,
-        'border-left': `1px solid ${rootElement.color}`
-      }
-      if (isMultiline) {
-        const nbLines = this.getNbLines(rootElement.children)
-        style.height = `${40 * nbLines + 10}px`
-
-        if (setBackground) {
-          style.background = colors.fadeColor(rootElement.color, 0.7)
-        }
-      }
-      return style
-    },
-
-    // Milestones
-
-    showEditMilestoneModal(day, milestone) {
-      if (this.isCurrentUserManager) {
-        this.modals.edit = true
-        if (milestone) {
-          this.milestoneToEdit = {
-            ...milestone,
-            date: parseDate(milestone.date)
-          }
-        } else {
-          this.milestoneToEdit = { date: day }
-        }
-      }
-    },
-
-    hideEditMilestoneModal() {
-      this.modals.edit = false
-    },
-
-    confirmEditMilestone(milestone) {
-      this.loading.edit = true
-      this.saveMilestone(milestone)
-        .then(() => {
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.edit = true
-        })
-        .finally(() => {
-          this.loading.edit = false
-        })
-    },
-
-    removeMilestone(milestone) {
-      this.loading.edit = true
-      this.deleteMilestone(milestone)
-        .then(() => {
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.edit = true
-        })
-        .finally(() => {
-          this.loading.edit = false
-        })
-    },
-
-    milestoneLineStyle(milestone) {
-      const startDate = parseDate(this.startDate.format('YYYY-MM-DD'))
-      const milestoneDate = parseDate(milestone.date)
-      if (startDate.isSameOrBefore(milestoneDate)) {
-        const lengthDiff = this.dateDiff(
-          startDate,
-          milestoneDate,
-          this.unitOfTime
+      selection.value.forEach(item => {
+        // update item assignation in element hierarchy
+        const previousAssigneeId = item.assignees[0]
+        const newAssigneeId = target.dataset.personId
+        item.assignees = item.assignees.filter(
+          assigneeId => assigneeId !== previousAssigneeId
         )
-        return {
-          left: `${(lengthDiff + 0.5) * this.cellWidth}px`
-        }
-      } else {
-        return {
-          display: 'none'
-        }
-      }
-    },
+        item.assignees.push(newAssigneeId)
 
-    addMilestoneTitle(day) {
-      return `${this.$t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
-    },
-
-    checkUserIsAllowed(item, person) {
-      if (!item) {
-        return false
-      }
-      const production = this.openProductions.find(
-        ({ id }) => id === item.project_id
+        emit('item-unassign', item, previousAssigneeId)
+        emit('item-assign', item, newAssigneeId)
+        refreshItemPositions(currentRootElement)
+      })
+    } else if (
+      !props.subchildren &&
+      target &&
+      target.dataset.rootElementId &&
+      currentRootElement.id !== target.dataset.rootElementId
+    ) {
+      const newRootElement = props.hierarchy.find(
+        rootElement => rootElement.id === target.dataset.rootElementId
       )
-      const isTeamMember = production.team.includes(person.id)
-      const isDepartmentMember =
-        !person.departments.length ||
-        !item.department ||
-        person.departments.includes(item.department.id)
-      return isTeamMember && isDepartmentMember
-    },
-
-    onTaskDragEnter(event, rootElement) {
-      // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
-      const draggedItemTaskType = event.dataTransfer.types.find(
-        dataKey => dataKey === `task-type-${rootElement.task_type_id}`
-      )
-      if (!draggedItemTaskType) {
-        const item = this.draggedItems?.[0]
-        const isAllowed = this.checkUserIsAllowed(item, rootElement)
-        if (!isAllowed) {
+      selection.value.forEach(item => {
+        if (!checkUserIsAllowed(item, newRootElement)) {
           return
         }
-      }
-      event.currentTarget.classList.add('droppable')
-    },
+        target.classList.add('droppable')
+        // update assignation in element hierarchy
+        const previousRootElement = item.parentElement
+        item.parentElement = newRootElement
+        previousRootElement.children = previousRootElement.children.filter(
+          ({ id }) => id !== item.id
+        )
+        newRootElement.children = newRootElement.children.filter(
+          ({ id }) => id !== item.id
+        )
+        newRootElement.children.push(item)
+        emit('item-unassign', item, previousRootElement)
+        emit('item-assign', item, newRootElement)
+        refreshItemPositions(previousRootElement)
+      })
+      refreshItemPositions(newRootElement)
+    }
+  }
 
-    onTaskDragOver(event) {
-      event.preventDefault()
-    },
+  if (lastStartDate.isBefore(props.startDate)) {
+    lastStartDate = props.startDate.clone()
+  }
 
-    onTaskDragLeave(event) {
-      event.target.classList.remove('droppable')
-    },
+  if (lastEndDate.isBefore(props.startDate)) {
+    lastEndDate = props.startDate.clone().add(1, 'days')
+  }
 
-    onTaskDrop(event, rootElement) {
-      event.target.classList.remove('droppable')
+  const startDate = lastStartDate
+  const endDate = lastEndDate
+  if (!isWeekMode.value) {
+    const startDateIndex = getDisplayedDaysIndex(startDate)
+    const endDateIndex = getDisplayedDaysIndex(endDate)
+    const length = endDateIndex - startDateIndex
+    let currentIndex = getDisplayedDaysIndex(startDate)
 
-      let item = this.draggedItems?.[0]
-      if (!item) {
-        const entityId = event.dataTransfer.getData('entityId')
-        const taskTypeId = event.dataTransfer.getData('taskTypeId')
-        if (!entityId || taskTypeId !== rootElement.task_type_id) {
-          return // invalid task type
+    currentIndex += dayChange
+    if (currentIndex < 0) currentIndex = 0
+
+    const newStartDate = displayedDays.value[currentIndex]
+    if (newStartDate) {
+      const newEndDate = displayedDays.value[currentIndex + length]
+      const dateDiffVal = newStartDate.diff(currentElement.value.startDate)
+      if (dateDiffVal && isValidItemDates(newStartDate, newEndDate)) {
+        // update all selected items
+        selection.value.forEach(item => {
+          item.startDate = item.startDate.clone().add(dateDiffVal)
+          item.endDate = item.endDate.clone().add(dateDiffVal)
+        })
+        if (props.multiline || props.subchildren) {
+          const parentElements = [
+            ...new Set(selection.value.map(item => item.parentElement))
+          ]
+          parentElements.forEach(refreshItemPositions)
         }
-        item = { entity_id: entityId }
-      } else if (!this.checkUserIsAllowed(item, rootElement)) {
-        return // invalid user rights
-      }
-
-      const position =
-        this.timelineContentWrapper.scrollLeft +
-        this.getClientX(event) -
-        300 -
-        this.cellWidth * 1.5
-      const dayPosition = Math.floor(position / this.cellWidth)
-      const dropDate = this.startDate.clone().add(dayPosition, 'days')
-      const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
-      const endDate = item.estimation
-        ? addBusinessDays(
-            startDate,
-            minutesToDays(this.organisation, item.estimation) - 1,
-            rootElement.daysOff
-          )
-        : startDate
-
-      // convert to schedule item
-      item.full_entity_name = `${item.entity_type_name} / ${item.entity_name}`
-      item.start_date = startDate.format('YYYY-MM-DD')
-      item.due_date = endDate.format('YYYY-MM-DD')
-      item.parentElement = rootElement
-
-      this.$emit(
-        'item-drop',
-        item,
-        rootElement,
-        this.multiline ? this.refreshItemPositions : undefined
-      )
-    },
-
-    exportData() {
-      return {
-        header: this.daysAvailable,
-        hierarchy: this.hierarchy
       }
     }
-  },
-
-  watch: {
-    startDate() {
-      this.resetScheduleSize()
-    },
-    endDate() {
-      this.resetScheduleSize()
-    },
-    zoomLevel() {
-      this.resetScheduleSize()
-      this.refreshAllItemPositions()
-      this.onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
-    },
-    isLoading() {
-      this.$nextTick(this.resetScheduleSize)
-    },
-    height() {
-      this.$nextTick(this.resetScheduleSize)
-    },
-    currentElement() {
-      if (this.currentElement && this.currentElement.task_type_id) {
-        const task = this.taskMap.get(this.currentElement.id)
-        if (task) {
-          this.$store.commit('UPDATE_TASK', {
-            task,
-            updatedAt: formatFullDate(moment())
-          })
-        }
-      }
-    },
-    currentProduction: {
-      immediate: true,
-      handler() {
-        if (this.withMilestones) {
-          this.loadMilestones(this.currentProduction)
-        }
+  } else {
+    const startDateIndex = getDisplayedWeeksIndex(startDate)
+    const endDateIndex = getDisplayedWeeksIndex(endDate)
+    const length = endDateIndex - startDateIndex
+    let currentIndex = getDisplayedWeeksIndex(startDate)
+    currentIndex += dayChange
+    if (currentIndex < 0) currentIndex = 0
+    const newStartDate = weeksAvailable.value[currentIndex]
+    if (newStartDate) {
+      const newEndDate = weeksAvailable.value[currentIndex + length]
+      if (isValidItemDates(newStartDate, newEndDate)) {
+        currentElement.value.startDate = newStartDate
+        currentElement.value.endDate = newEndDate
       }
     }
   }
 }
+
+const changeStartDate = event => {
+  const change = getClientX(event) - initialClientX + cellWidth.value / 2
+  const dayChange = Math.floor(change / cellWidth.value)
+
+  const startDate = lastStartDate
+  const endDate = currentElement.value.endDate
+  let currentIndex, endDateIndex
+  if (isWeekMode.value) {
+    currentIndex = getDisplayedWeeksIndex(startDate)
+    endDateIndex = getDisplayedWeeksIndex(endDate)
+  } else {
+    currentIndex = getDisplayedDaysIndex(startDate)
+    endDateIndex = getDisplayedDaysIndex(endDate)
+  }
+  currentIndex += dayChange
+  if (currentIndex > endDateIndex) currentIndex = endDateIndex
+  if (currentIndex < 0) currentIndex = 0
+
+  const newStartDate = isWeekMode.value
+    ? weeksAvailable.value[currentIndex]
+    : displayedDays.value[currentIndex]
+
+  if (
+    !newStartDate.isSame(currentElement.value.startDate) &&
+    isValidItemDates(newStartDate, currentElement.value.endDate)
+  ) {
+    currentElement.value.startDate = newStartDate.clone()
+    updateItemEstimation(currentElement.value)
+    refreshItemPositions(currentElement.value.parentElement)
+    resetSelection([currentElement.value])
+  }
+}
+
+const changeEndDate = event => {
+  const change = getClientX(event) - initialClientX + cellWidth.value / 2
+  const dayChange = Math.ceil(change / cellWidth.value)
+
+  if (currentElement.value.startDate.isBefore(props.startDate)) {
+    currentElement.value.startDate = props.startDate.clone()
+  }
+
+  if (currentElement.value.endDate.isBefore(props.startDate)) {
+    currentElement.value.endDate = props.startDate.clone().add(1, 'days')
+  }
+
+  if (lastEndDate.isBefore(props.startDate)) {
+    lastEndDate = props.startDate.clone().add(1, 'days')
+  }
+
+  const startDate = currentElement.value.startDate
+  const endDate = lastEndDate
+  let startDateIndex, currentIndex
+  if (isWeekMode.value) {
+    startDateIndex = getDisplayedWeeksIndex(startDate)
+    currentIndex = getDisplayedWeeksIndex(endDate)
+  } else {
+    startDateIndex = getDisplayedDaysIndex(startDate)
+    currentIndex = getDisplayedDaysIndex(endDate)
+  }
+
+  currentIndex += dayChange - 1
+  if (currentIndex < startDateIndex) currentIndex = startDateIndex
+  if (isWeekMode.value) {
+    if (currentIndex > displayedWeeksIndex.value.length) {
+      currentIndex = displayedWeeksIndex.value.length - 1
+    }
+  } else {
+    if (currentIndex > displayedDaysIndex.value.length) {
+      currentIndex = displayedDaysIndex.value.length - 1
+    }
+  }
+
+  const newEndDate = isWeekMode.value
+    ? weeksAvailable.value[currentIndex]
+    : displayedDays.value[currentIndex]
+  if (
+    newEndDate &&
+    !newEndDate.isSame(currentElement.value.endDate) &&
+    isValidItemDates(currentElement.value.startDate, newEndDate)
+  ) {
+    currentElement.value.endDate = newEndDate.clone()
+    updateItemEstimation(currentElement.value)
+    refreshItemPositions(currentElement.value.parentElement)
+    resetSelection([currentElement.value])
+  }
+}
+
+const updateItemEstimation = item => {
+  if (props.isEstimationLinked) {
+    const estimation = getBusinessDays(
+      item.startDate,
+      item.endDate,
+      item.parentElement?.daysOff
+    )
+    item.estimation = daysToMinutes(organisation.value, estimation)
+  }
+}
+
+const updateSelection = (item, event) => {
+  const isCtrlKey = event.ctrlKey || event.metaKey
+
+  if (isSelected(item)) {
+    if (isCtrlKey) {
+      removeFromSelection(item)
+    }
+  } else {
+    if (!isCtrlKey) {
+      resetSelection()
+    }
+    addToSelection(item)
+  }
+}
+
+const isOverlapping = item => {
+  return (
+    props.withGhosts &&
+    ((item.previousElement &&
+      item.startDate.isSameOrBefore(item.previousElement.endDate)) ||
+      (item.nextElement &&
+        item.endDate.isSameOrAfter(item.nextElement.startDate)))
+  )
+}
+
+const isSelected = item => {
+  return selection.value.some(({ id }) => id === item.id)
+}
+
+const addToSelection = itemToAdd => {
+  selection.value.push(itemToAdd)
+}
+
+const removeFromSelection = itemToRemove => {
+  selection.value = selection.value.filter(item => item !== itemToRemove)
+}
+
+const resetSelection = value => {
+  selection.value = value || []
+}
+
+const moveTimebar = (timeElement, event) => {
+  event.preventDefault() // avoid scroll of schedule on touch
+  if (
+    !isChangeStartDate.value &&
+    !isChangeEndDate.value &&
+    timeElement.editable
+  ) {
+    isChangeDates.value = true
+    isChangeStartDate.value = false
+    isChangeEndDate.value = false
+    currentElement.value = timeElement
+    lastStartDate = timeElement.startDate.clone()
+    lastEndDate = timeElement.endDate.clone()
+    initialClientX = getClientX(event)
+    document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
+
+    updateSelection(timeElement, event)
+  }
+}
+
+const moveTimebarLeftSide = (timeElement, event) => {
+  event.preventDefault() // avoid scroll of schedule on touch
+  if (!isChangeDates.value && !isChangeEndDate.value && timeElement.editable) {
+    isChangeDates.value = false
+    isChangeStartDate.value = true
+    isChangeEndDate.value = false
+    currentElement.value = timeElement
+    if (!timeElement.endDate) {
+      timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
+    }
+    lastStartDate = timeElement.startDate.clone()
+    lastEndDate = timeElement.endDate.clone()
+    initialClientX = getClientX(event)
+    document.body.style.cursor = 'w-resize'
+
+    updateSelection(timeElement, event)
+  }
+}
+
+const moveTimebarRightSide = (timeElement, event) => {
+  event.preventDefault() // avoid scroll of schedule on touch
+  if (
+    !isChangeDates.value &&
+    !isChangeStartDate.value &&
+    timeElement.editable
+  ) {
+    isChangeDates.value = false
+    isChangeStartDate.value = false
+    isChangeEndDate.value = true
+    currentElement.value = timeElement
+    if (!timeElement.endDate) {
+      timeElement.endDate = timeElement.startDate.clone().add(1, 'days')
+    }
+    lastStartDate = timeElement.startDate.clone()
+    lastEndDate = timeElement.endDate.clone()
+    initialClientX = getClientX(event)
+    document.body.style.cursor = 'e-resize'
+
+    updateSelection(timeElement, event)
+  }
+}
+
+const onTimelineScroll = event => {
+  if (!event?.target) return
+  const position = event.target
+  const newTop = position.scrollTop
+  entityListRef.value.scrollTop = newTop
+  const newLeft = position.scrollLeft
+  timelineHeaderRef.value.scrollLeft = newLeft
+
+  emit('scroll', { top: position.scrollTop })
+}
+
+const setScrollPosition = top => {
+  timelineContentWrapperRef.value.scrollTop = top
+  entityListRef.value.scrollTop = top
+}
+
+const scrollScheduleLeft = event => {
+  if (!timelineContentWrapperRef.value) return
+  const previousLeft = timelineContentWrapperRef.value.scrollLeft
+  const movementX = event.movementX || getClientX(event) - initialClientX
+  const newLeft = previousLeft - movementX
+  initialClientX = getClientX(event)
+  timelineContentWrapperRef.value.scrollLeft = newLeft
+  timelineHeaderRef.value.scrollLeft = newLeft
+}
+
+const scrollScheduleTop = event => {
+  if (!timelineContentWrapperRef.value) return
+  const previousTop = timelineContentWrapperRef.value.scrollTop
+  const movementY = event.movementY || getClientY(event) - initialClientY
+  const newTop = previousTop - movementY
+  initialClientY = getClientY(event)
+  setScrollPosition(newTop)
+}
+
+const scrollToToday = () => {
+  const today = moment()
+  scrollToDate(today)
+}
+
+const scrollToDate = date => {
+  setTimeout(() => {
+    if (
+      scheduleRef.value &&
+      date.isAfter(props.startDate) &&
+      date.isBefore(props.endDate)
+    ) {
+      const datePosition = getTimebarLeft({ startDate: date }) - 5
+      const newLeft = datePosition - (scheduleRef.value.offsetWidth / 2 - 300)
+      timelineContentWrapperRef.value.scrollLeft = newLeft
+      if (timelineHeaderRef.value) {
+        timelineHeaderRef.value.scrollLeft = newLeft
+      }
+    }
+  }, 10)
+}
+
+const startBrowsing = event => {
+  if (
+    !isChangeStartDate.value &&
+    !isChangeEndDate.value &&
+    !isChangeDates.value
+  ) {
+    document.body.style.cursor = 'grabbing'
+    isBrowsingX.value = true
+    isBrowsingY.value = true
+    initialClientX = getClientX(event)
+    initialClientY = getClientY(event)
+  }
+}
+
+const startBrowsingX = event => {
+  document.body.style.cursor = 'grabbing'
+  isBrowsingX.value = true
+  initialClientX = getClientX(event)
+}
+
+const startBrowsingY = event => {
+  document.body.style.cursor = 'grabbing'
+  isBrowsingY.value = true
+  initialClientY = getClientY(event)
+}
+
+const stopBrowsing = event => {
+  document.body.style.cursor = 'default'
+  if (currentElement.value) {
+    if (initialClientX !== getClientX(event)) {
+      // on moving or resizing selected items
+      selection.value.forEach(item => {
+        emit('item-changed', item)
+        refreshItemPositions(item.parentElement)
+        refreshManDays(item.parentElement)
+      })
+      // clear selection after moving a single item
+      if (isChangeDates.value && selection.value.length === 1) {
+        resetSelection()
+      }
+    } else {
+      // reset multi-selection when clicking on a single item
+      const isCtrlKey = event.ctrlKey || event.metaKey
+      if (isChangeDates.value && selection.value.length > 1 && !isCtrlKey) {
+        resetSelection([currentElement.value])
+      }
+    }
+  } else {
+    // clear the selection when clicking outside an item
+    let target = event.target
+    while (target && target !== timelineRef.value) {
+      target = target.parentNode
+    }
+    if (target) {
+      resetSelection()
+      emit('task-unselected')
+    }
+  }
+  resetDroppableTargets()
+  isChangeStartDate.value = false
+  isChangeEndDate.value = false
+  isChangeDates.value = false
+  isBrowsingX.value = false
+  isBrowsingY.value = false
+  initialClientX = null
+  initialClientY = null
+  currentElement.value = null
+}
+
+// Helpers
+
+const dateDiff = (startDate, endDate, unit = 'days') => {
+  if (startDate.isSame(endDate) || !startDate.isValid() || !endDate.isValid()) {
+    return 0
+  }
+  const first = startDate.clone().utc().startOf('day')
+  const last = endDate.clone().utc().endOf('day')
+  const diff = last.diff(first, unit)
+  return diff
+}
+
+// Styles
+
+const dayClass = (day, index = 0) => {
+  return {
+    'day-name': true,
+    'new-week': day.newWeek || false,
+    'new-month': day.newMonth || index === 0 || false,
+    weekend: day.weekend || false,
+    'day-name-off': day.off || false
+  }
+}
+
+const dayOffStyle = dayOff => {
+  return {
+    left: `${getLeftPosition(dayOff.date)}px`,
+    width: `${cellWidth.value - 1}px`
+  }
+}
+
+const dateStatusStyle = date => {
+  return {
+    left: `${getLeftPosition(date) + cellWidth.value / 2 - 3}px`
+  }
+}
+
+const getLeftPosition = date => {
+  const startDate = moment.utc(date)
+  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
+  return startDiff * cellWidth.value + 1
+}
+
+const entityLineStyle = (
+  timeElement,
+  root = false,
+  header = false,
+  expanded = false
+) => {
+  const style = {}
+  let color = timeElement.color
+  if (root) {
+    // is a person
+    color = isDarkTheme.value ? '#222' : '#EEF'
+  }
+  if (root) {
+    style['border-left'] = `1px solid ${color}`
+    style['border-top'] = `1px solid ${color}`
+    if (!expanded) {
+      style['border-bottom'] = `1px solid ${color}`
+    }
+    if (header) {
+      style.background = color
+    }
+  }
+  if (timeElement.expanded) {
+    style['margin-bottom'] = '0'
+  }
+  style['border-left'] = `1px solid ${color}`
+  style.color = isDarkTheme.value ? '#EEE' : '#111'
+  if (!isDarkTheme.value) {
+    style['border-color'] = '#BBE'
+  }
+  return style
+}
+
+const timebarStyle = (timeElement, root = false) => {
+  const style = {
+    left: `${getTimebarLeft(timeElement)}px`,
+    width: `${getTimebarWidth(timeElement)}px`,
+    cursor: timeElement.editable
+      ? !root && props.reassignable
+        ? 'all-scroll'
+        : 'ew-resize'
+      : 'default'
+  }
+  if (root) {
+    style['background-color'] = timeElement.color
+  }
+  return style
+}
+
+const timelineMultilineStyle = timeElement => {
+  return {
+    top: `${timeElement.line * 40 + 5}px`,
+    left: `${getTimebarLeft(timeElement)}px`
+  }
+}
+
+const timelineSubchildrenStyle = timeElement => {
+  const children = Array.from(timeElement.children.values())
+  const nbLines = children.reduce(
+    (acc, subChildren) => acc + getNbLines(subChildren),
+    0
+  )
+  const marginBottom = children.length * 10
+  return {
+    height: `${40 + 40 * nbLines + marginBottom + 2}px`,
+    'padding-top': '13px'
+  }
+}
+
+const timebarChildStyle = (
+  timeElement,
+  rootElement,
+  multiline = false,
+  opacityPercentage = 0,
+  opacityColor = 'transparent'
+) => {
+  const elementColor = timeElement.color || rootElement.color
+  return {
+    left: !multiline && `${getTimebarLeft(timeElement)}px`,
+    width: `${getTimebarWidth(timeElement)}px`,
+    cursor: timeElement.editable
+      ? props.reassignable
+        ? 'all-scroll'
+        : 'ew-resize'
+      : 'default',
+    background: opacityPercentage
+      ? `color-mix(in srgb, ${elementColor}, ${opacityColor} ${opacityPercentage}%)` // lighter color
+      : elementColor
+  }
+}
+
+const timesheetStyle = (
+  timesheet,
+  timeElement,
+  rootElement,
+  withEstimations
+) => {
+  return {
+    top: withEstimations ? '7px' : '18px',
+    left: `${getTimebarLeft(timesheet, true)}px`,
+    width: `${getTimebarWidth(timesheet)}px`,
+    background: timesheet.color || timeElement.color || rootElement.color
+  }
+}
+
+const timebarSubchildStyle = (timeElement, rootElement) => {
+  const color = timeElement.color || rootElement.color
+  const selected = isSelected(timeElement)
+  return {
+    left: `${getTimebarLeft(timeElement)}px`,
+    width: `${getTimebarWidth(timeElement)}px`,
+    cursor: timeElement.editable
+      ? props.reassignable
+        ? 'all-scroll'
+        : 'ew-resize'
+      : 'default',
+    top: `${5 + 38 * timeElement.line}px`,
+    background: `color-mix(in srgb, ${color} ${selected ? 80 : 40}%, transparent)`,
+    'box-shadow': `inset 0 0 1px 2px ${selected ? 'var(--background-selected)' : color}`
+  }
+}
+
+const timebarSubchildTitle = task => {
+  const name = task.entity.name
+  const startDate = task.startDate.format('YYYY-MM-DD')
+  const endDate = task.endDate.format('YYYY-MM-DD')
+  const duration = isRealSchedule.value
+    ? formatDuration(task.duration)
+    : formatDuration(task.estimation)
+  return `${name} (${startDate} - ${endDate}) ${duration} ${t('schedule.md')}`
+}
+
+const getTimebarLeft = timeElement => {
+  const startDate = timeElement.startDate || props.startDate
+  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
+  return startDiff * cellWidth.value + 3
+}
+
+const getTimebarWidth = timeElement => {
+  const startDate = timeElement.startDate || props.startDate
+  let endDate =
+    timeElement.endDate ||
+    (timeElement.startDate && timeElement.startDate.clone().add(1, 'days')) ||
+    props.startDate.clone().add(1, 'days')
+
+  if (
+    timeElement.man_days > 0 &&
+    !timeElement.end_date &&
+    !timeElement.endDate
+  ) {
+    const days = Math.ceil(timeElement.man_days)
+    endDate = addBusinessDays(startDate, days - 1)
+  }
+
+  const lengthDiff = dateDiff(startDate, endDate, unitOfTime.value)
+  if (lengthDiff > 0) {
+    return (lengthDiff + 1) * cellWidth.value - 6
+  } else {
+    return cellWidth.value - 4
+  }
+}
+
+// Children
+
+const expandRootElement = rootElement => {
+  if (rootElement.expanded) {
+    // clear selected items when collapsing the root element
+    selection.value.forEach(item => {
+      const taskRootElementId =
+        item.parentElement?.parentElement?.id || item.parentElement?.id
+      if (taskRootElementId === rootElement.id) {
+        removeFromSelection(item)
+      }
+    })
+  }
+
+  emit(
+    'root-element-expanded',
+    rootElement,
+    props.multiline || props.subchildren ? refreshItemPositions : undefined
+  )
+}
+
+const childNameStyle = (rootElement, index) => {
+  const isOdd = index % 2 === 0
+  const level = isOdd ? 0.7 : 0.9
+  return {
+    background: colors.fadeColor(rootElement.color, level)
+  }
+}
+
+const childrenStyle = (
+  rootElement,
+  isMultiline = false,
+  setBackground = false
+) => {
+  const style = {
+    'border-bottom': `1px solid ${rootElement.color}`,
+    'border-left': `1px solid ${rootElement.color}`
+  }
+  if (isMultiline) {
+    const nbLines = getNbLines(rootElement.children)
+    style.height = `${40 * nbLines + 10}px`
+
+    if (setBackground) {
+      style.background = colors.fadeColor(rootElement.color, 0.7)
+    }
+  }
+  return style
+}
+
+// Milestones
+
+const showEditMilestoneModal = (day, milestone) => {
+  if (isCurrentUserManager.value) {
+    modals.edit = true
+    if (milestone) {
+      Object.assign(milestoneToEdit, {
+        ...milestone,
+        date: parseDate(milestone.date)
+      })
+    } else {
+      Object.assign(milestoneToEdit, {
+        date: day,
+        name: undefined,
+        id: undefined
+      })
+    }
+  }
+}
+
+const hideEditMilestoneModal = () => {
+  modals.edit = false
+}
+
+const confirmEditMilestone = milestone => {
+  loading.edit = true
+  saveMilestone(milestone)
+    .then(() => {
+      modals.edit = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.edit = true
+    })
+    .finally(() => {
+      loading.edit = false
+    })
+}
+
+const removeMilestone = milestone => {
+  loading.edit = true
+  deleteMilestone(milestone)
+    .then(() => {
+      modals.edit = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.edit = true
+    })
+    .finally(() => {
+      loading.edit = false
+    })
+}
+
+const milestoneLineStyle = milestone => {
+  const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
+  const milestoneDate = parseDate(milestone.date)
+  if (startDate.isSameOrBefore(milestoneDate)) {
+    const lengthDiffVal = dateDiff(startDate, milestoneDate, unitOfTime.value)
+    return {
+      left: `${(lengthDiffVal + 0.5) * cellWidth.value}px`
+    }
+  } else {
+    return {
+      display: 'none'
+    }
+  }
+}
+
+const addMilestoneTitle = day => {
+  return `${t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
+}
+
+const checkUserIsAllowed = (item, person) => {
+  if (!item) {
+    return false
+  }
+  const production = openProductions.value.find(
+    ({ id }) => id === item.project_id
+  )
+  const isTeamMember = production.team.includes(person.id)
+  const isDepartmentMember =
+    !person.departments.length ||
+    !item.department ||
+    person.departments.includes(item.department.id)
+  return isTeamMember && isDepartmentMember
+}
+
+const onTaskDragEnter = (event, rootElement) => {
+  // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
+  const draggedItemTaskType = event.dataTransfer.types.find(
+    dataKey => dataKey === `task-type-${rootElement.task_type_id}`
+  )
+  if (!draggedItemTaskType) {
+    const item = props.draggedItems?.[0]
+    const isAllowed = checkUserIsAllowed(item, rootElement)
+    if (!isAllowed) {
+      return
+    }
+  }
+  event.currentTarget.classList.add('droppable')
+}
+
+const onTaskDragOver = event => {
+  event.preventDefault()
+}
+
+const onTaskDragLeave = event => {
+  event.target.classList.remove('droppable')
+}
+
+const onTaskDrop = (event, rootElement) => {
+  event.target.classList.remove('droppable')
+
+  let item = props.draggedItems?.[0]
+  if (!item) {
+    const entityId = event.dataTransfer.getData('entityId')
+    const taskTypeId = event.dataTransfer.getData('taskTypeId')
+    if (!entityId || taskTypeId !== rootElement.task_type_id) {
+      return // invalid task type
+    }
+    item = { entity_id: entityId }
+  } else if (!checkUserIsAllowed(item, rootElement)) {
+    return // invalid user rights
+  }
+
+  const position =
+    timelineContentWrapperRef.value.scrollLeft +
+    getClientX(event) -
+    300 -
+    cellWidth.value * 1.5
+  const dayPosition = Math.floor(position / cellWidth.value)
+  const dropDate = props.startDate.clone().add(dayPosition, 'days')
+  const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
+  const endDate = item.estimation
+    ? addBusinessDays(
+        startDate,
+        minutesToDays(organisation.value, item.estimation) - 1,
+        rootElement.daysOff
+      )
+    : startDate
+
+  // convert to schedule item
+  item.full_entity_name = `${item.entity_type_name} / ${item.entity_name}`
+  item.start_date = startDate.format('YYYY-MM-DD')
+  item.due_date = endDate.format('YYYY-MM-DD')
+  item.parentElement = rootElement
+
+  emit(
+    'item-drop',
+    item,
+    rootElement,
+    props.multiline ? refreshItemPositions : undefined
+  )
+}
+
+const exportData = () => {
+  return {
+    header: daysAvailable.value,
+    hierarchy: props.hierarchy
+  }
+}
+
+// Watchers
+
+watch(
+  () => props.startDate,
+  () => {
+    resetScheduleSize()
+  }
+)
+
+watch(
+  () => props.endDate,
+  () => {
+    resetScheduleSize()
+  }
+)
+
+watch(
+  () => props.zoomLevel,
+  () => {
+    resetScheduleSize()
+    refreshAllItemPositions()
+    onTimelineScroll(null, { scrollTop: 0, scrollLeft: 0 })
+  }
+)
+
+watch(
+  () => props.isLoading,
+  () => {
+    nextTick(resetScheduleSize)
+  }
+)
+
+watch(
+  () => props.height,
+  () => {
+    nextTick(resetScheduleSize)
+  }
+)
+
+watch(currentElement, () => {
+  if (currentElement.value && currentElement.value.task_type_id) {
+    const task = taskMap.value.get(currentElement.value.id)
+    if (task) {
+      store.commit('UPDATE_TASK', {
+        task,
+        updatedAt: formatFullDate(moment())
+      })
+    }
+  }
+})
+
+watch(
+  currentProduction,
+  () => {
+    if (props.withMilestones) {
+      loadMilestones(currentProduction.value)
+    }
+  },
+  { immediate: true }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  domEvents = [
+    ['mousemove', onMouseMove],
+    ['touchmove', onMouseMove],
+    ['mouseup', stopBrowsing],
+    ['mouseleave', stopBrowsing],
+    ['touchend', stopBrowsing],
+    ['touchcancel', stopBrowsing],
+    ['resize', resetScheduleSize]
+  ]
+  resetScheduleSize()
+  addEvents(domEvents)
+})
+
+onBeforeUnmount(() => {
+  removeEvents(domEvents)
+  document.body.style.cursor = 'default'
+})
+
+defineExpose({
+  exportData,
+  getNbSubChildren,
+  refreshAllItemPositions,
+  refreshItemPositions,
+  refreshManDays,
+  resetScheduleSize,
+  scrollToDate,
+  scrollToToday,
+  setScrollPosition
+})
 
 /**
  * Set the position of items in the schedule, avoiding collisions.

@@ -25,6 +25,7 @@ export default {
     number: 'asset | assets',
     restore_text: 'Are you sure you want to restore {name} from your archive?',
     restore_error: 'An error occurred while restoring this asset.',
+    show_linked: 'Display Breakdown Assets',
     tasks: 'Asset tasks',
     title: 'Assets',
     fields: {
@@ -262,7 +263,9 @@ export default {
       task_status: 'Task status',
       person: 'Person\'s name',
       checklist: 'Checklist',
-      acknowledgements: 'Acknowledgements'
+      acknowledgements: 'Acknowledgements',
+      revision: 'Revision',
+      attachments: 'Attachments'
     }
   },
 
@@ -390,6 +393,41 @@ export default {
     fields: {
       name: 'Name',
       color: 'Color'
+    }
+  },
+
+  project_templates: {
+    title: 'Project Templates',
+    new_project_template: 'Add a project template',
+    edit_title: 'Edit project template',
+    create_error: 'An error occurred while saving this project template. Are you sure there is no template with a similar name?',
+    delete_text: 'Are you sure you want to remove {name} from your database?',
+    delete_error: 'An error occurred while deleting this project template.',
+    number: 'project template | project templates',
+    select: 'Select a template',
+    apply: 'Apply template',
+    apply_to_project: 'Apply a template',
+    apply_to_project_description: "Add a template's configuration to this project. Existing settings are preserved.",
+    apply_confirm: "This will add the template's task types, statuses, asset types, automations, and metadata descriptors to this project. Existing settings are preserved. Continue?",
+    from_project: 'Create from project',
+    click_name_to_edit: 'Click on a template name to edit its configuration.',
+    name_required: 'A name is required.',
+    duplicate_name: 'A project template with this name already exists.',
+    fps_error: 'FPS must be an integer between 1 and 200.',
+    ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
+    resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
+    add_metadata: 'Add a metadata',
+    fields: {
+      name: 'Name',
+      description: 'Description',
+      entity_type: 'Entity type'
+    },
+    tabs: {
+      task_types: 'Task Types',
+      task_statuses: 'Task Statuses',
+      asset_types: 'Asset Types',
+      status_automations: 'Status Automations',
+      metadata_descriptors: 'Metadata'
     }
   },
 
@@ -599,6 +637,7 @@ export default {
     reset_change_password: 'Change password',
     reset_change_password_failed: 'Changing password failed. Please, restart the procedure.',
     reset_change_password_form_failed: 'There is a problem with the password you provided. Please verify that it is at least 8 characters long and that both passwords match.',
+    reset_change_password_token_failed: 'The password reset link is invalid or has expired. Please restart the procedure.',
     reset_change_password_succeed: 'Your password was changed successfully. Please return to the login page to use it.',
     reset_change_password_title: 'Enter a new password',
     reset_password: 'Reset Password',
@@ -638,6 +677,12 @@ export default {
     empty_list: 'There are no logs for the selected date.',
     events: 'events listed for the current day',
     title: 'Logs',
+    audit: {
+      title: 'Activity logs'
+    },
+    logins: {
+      title: 'Login logs'
+    },
     preview_files: {
       date: 'Creation date',
       empty_list: 'There are no broken or ongoing previews.',
@@ -962,11 +1007,13 @@ export default {
     new_person: 'Add a new user',
     no_task_assigned: 'There are no running tasks assigned to you',
     persons: 'user | users',
+    seats_remaining: 'no seats remaining | {count} seat remaining | {count} seats remaining',
     running_tasks: 'Running tasks',
     select_person: 'Select a user...',
     team: 'Team',
     title: 'People',
     unactive: 'Inactive',
+    email_domain_error: 'This email domain is not allowed.',
     email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
     change_password_for: 'Change password for',
@@ -1198,6 +1245,9 @@ export default {
       explaination_video: 'These settings are used to normalize the uploaded videos.',
       give_a_name: 'Give your production a name',
       give_a_name_description: 'Start by giving your production a meaningful name.',
+      choose_template: 'Apply a project template (optional)',
+      choose_template_description: 'Pick a template to pre-fill task types, task statuses, asset types, metadata and settings. Leave empty to configure the project from scratch.',
+      no_template: 'No template',
       import_assets_button: 'Import assets',
       import_shots_button: 'Import shots',
       new_project: 'New Project',
@@ -1354,6 +1404,7 @@ export default {
     },
     two_factor_authentication: {
       title: 'Two-factor authentication',
+      description: 'Two-factor authentication (<abbr title="Two-Factor Authentication">2FA</abbr>) adds an extra layer of security to your account. When enabled, you will need to provide a second form of verification in addition to your password each time you log in. You can use an authenticator app (<abbr title="Time-based One-Time Password">TOTP</abbr>), email verification (<abbr title="One-Time Password">OTP</abbr>), or a hardware security key (<abbr title="Fast IDentity Online">FIDO</abbr>) as your second factor.',
       mandatory: 'Your organization requires two-factor authentication. Please enable at least one method to continue.',
       enabled: 'Two-factor authentication enabled',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',
@@ -1422,6 +1473,9 @@ export default {
     production: {
       empty_list: 'The list is currently empty. It means that all data from the main settings are available to users. Add some entries to limit choices for this production.',
       empty_automation_list: 'There is no automation set for this production.',
+      empty_board: 'Add task statuses first to configure their visibility on the board.',
+      empty_backgrounds: 'No background linked. Pick one from the list above to add it.',
+      empty_metadata: 'No metadata descriptor defined for this entity type yet.'
     },
     save: {
       button: 'Save settings',
@@ -1725,6 +1779,7 @@ export default {
     assignation_disclaimer: 'If people are missing from the list, it means they are not listed in the team.',
     assign_explaination: 'Select a person to assign...',
     assignation_warning: 'Warning: you won\'t see the result because you are hiding assignments',
+    assignation_error: 'There was a problem assigning this person to the selected tasks. Not all tasks were assigned.',
     back_to_list: 'back to list',
     bigger: 'Widen task panel',
     big_thumbnails: 'Show big thumbnails',

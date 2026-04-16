@@ -21,33 +21,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
-export default {
-  name: 'list-page-header',
-
-  components: {
-    ButtonSimple,
-    PageTitle
+defineProps({
+  isExportable: {
+    type: Boolean,
+    default: true
   },
-
-  props: {
-    isExportable: {
-      type: Boolean,
-      default: true
-    },
-    newEntryLabel: {
-      type: String,
-      default: ''
-    },
-    title: {
-      type: String,
-      default: ''
-    }
+  newEntryLabel: {
+    type: String,
+    default: ''
   },
+  title: {
+    type: String,
+    default: ''
+  }
+})
 
-  emits: ['export-clicked', 'new-clicked']
-}
+defineEmits(['export-clicked', 'new-clicked'])
 </script>

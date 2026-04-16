@@ -11,36 +11,30 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import ButtonLink from '@/components/widgets/ButtonLink.vue'
 
-export default {
-  name: 'preview-row',
-  components: {
-    ButtonLink
+const props = defineProps({
+  preview: {
+    type: Object,
+    default: () => {}
   },
-  props: {
-    preview: {
-      type: Object,
-      default: () => {}
-    },
-    selected: {
-      type: Boolean,
-      default: false
-    },
-    previewPath: {
-      type: Object,
-      default: () => {}
-    }
+  selected: {
+    type: Boolean,
+    default: false
   },
-  computed: {
-    label() {
-      const label = `v${this.preview.revision}`
-      return label
-    }
-  },
-  methods: {}
-}
+  previewPath: {
+    type: Object,
+    default: () => {}
+  }
+})
+
+const label = computed(() => {
+  const label = `v${props.preview.revision}`
+  return label
+})
 </script>
 
 <style lang="scss" scoped>

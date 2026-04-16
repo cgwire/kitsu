@@ -237,7 +237,7 @@
             :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
             @mousedown="startBrowsing"
             @touchstart="startBrowsing"
-            v-for="(group, k) in displayedAssets"
+            v-for="(group, k) in filteredDisplayedAssets"
           >
             <tr class="datatable-type-header" v-if="group[0]">
               <th scope="rowgroup">
@@ -311,7 +311,10 @@
                 class="metadata-descriptor datatable-row-header"
                 :title="asset.data ? asset.data[descriptor.field_name] : ''"
                 :style="{
-                  'z-index': 1000 - i - k * 100, // Needed for combo to be above the next cell
+                  'z-index':
+                    descriptor.data_type === 'taglist'
+                      ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
+                      : undefined,
                   left: offsets['editor-' + j]
                     ? `${offsets['editor-' + j]}px`
                     : '0'
@@ -550,38 +553,10 @@
       <table-info :is-loading="isLoading" :is-error="isError" />
     </div>
 
-    <p class="has-text-centered nb-assets" v-if="!isEmptyList && !isLoading">
-      {{ displayedAssetsLength }}
-      {{ $tc('assets.number', displayedAssetsLength) }}
-      <span
-        v-if="displayedAssetsTimeSpent > 0 || displayedAssetsEstimation > 0"
-      >
-        ({{ formatDuration(displayedAssetsTimeSpent) }}
-        {{
-          isDurationInHours
-            ? $tc(
-                'main.hours_spent',
-                formatDuration(displayedAssetsTimeSpent, false)
-              )
-            : $tc(
-                'main.days_spent',
-                formatDuration(displayedAssetsTimeSpent, false)
-              )
-        }},
-        {{ formatDuration(displayedAssetsEstimation) }}
-        {{
-          isDurationInHours
-            ? $tc(
-                'main.hours_estimated',
-                formatDuration(displayedAssetsEstimation, false)
-              )
-            : $tc(
-                'main.man_days',
-                formatDuration(displayedAssetsEstimation, false)
-              )
-        }})
-      </span>
-    </p>
+    <asset-list-numbers
+      :assets="assetCache.assets"
+      v-if="!isEmptyList && !isLoading"
+    />
   </div>
 </template>
 
@@ -598,6 +573,7 @@ import preferences from '@/lib/preferences'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
 
+import AssetListNumbers from '@/components/widgets/AssetListNumbers.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
@@ -612,6 +588,7 @@ import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelecto
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 
+import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -628,6 +605,7 @@ export default {
   ],
 
   components: {
+    AssetListNumbers,
     ButtonSimple,
     ComboboxTaskType,
     DescriptionCell,
@@ -728,9 +706,6 @@ export default {
       'currentEpisode',
       'currentProduction',
       'displayedAssetsCount',
-      'displayedAssetsLength',
-      'displayedAssetsTimeSpent',
-      'displayedAssetsEstimation',
       'nbSelectedTasks',
       'organisation',
       'isAssetDescription',
@@ -749,6 +724,10 @@ export default {
       'taskMap',
       'user'
     ]),
+
+    assetCache() {
+      return assetStore.cache
+    },
 
     assetTypeMap() {
       return assetTypeStore.cache.assetTypeMap
@@ -818,6 +797,33 @@ export default {
 
     formatDurationInHours() {
       return this.organisation.format_duration_in_hours
+    },
+
+    /** Filter the displayed assets by the display settings */
+    filteredDisplayedAssets() {
+      if (
+        this.displaySettings.showSharedAssets &&
+        this.displaySettings.showLinkedAssets
+      ) {
+        return this.displayedAssets
+      }
+      const episodeId = this.currentEpisode?.id
+
+      return this.displayedAssets.map(typeList =>
+        typeList.filter(asset => {
+          if (!this.displaySettings.showSharedAssets && asset.shared) {
+            return false
+          }
+          if (
+            this.isTVShow &&
+            !this.displaySettings.showLinkedAssets &&
+            !['all', asset.episode_id || 'main'].includes(episodeId)
+          ) {
+            return false
+          }
+          return true
+        })
+      )
     }
   },
 

@@ -20,15 +20,10 @@
           <text-field
             ref="nameField"
             :label="$t('sequences.fields.name')"
+            :maxlength="160"
             v-model.trim="form.name"
             @enter="runConfirmation"
             v-focus
-          />
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            v-model="form.data.resolution"
-            @enter="runConfirmation"
           />
           <textarea-field
             ref="descriptionField"
@@ -36,6 +31,13 @@
             @keyup.ctrl.enter="runConfirmation"
             @keyup.meta.enter="runConfirmation"
             v-model="form.description"
+          />
+          <text-field
+            ref="resolutionField"
+            :label="$t('shots.fields.resolution')"
+            :placeholder="currentProduction?.resolution"
+            v-model.trim="form.data.resolution"
+            @enter="runConfirmation"
           />
           <template v-if="sequenceToEdit">
             <metadata-field
@@ -136,7 +138,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['sequenceMetadataDescriptors'])
+    ...mapGetters(['currentProduction', 'sequenceMetadataDescriptors'])
   },
 
   methods: {

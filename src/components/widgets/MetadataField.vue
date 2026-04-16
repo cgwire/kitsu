@@ -72,8 +72,9 @@
   />
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
@@ -82,72 +83,99 @@ import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'metadata-field',
+const store = useStore()
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const user = computed(() => store.getters.user)
 
-  mixins: [descriptorMixin],
-
-  components: {
-    Combobox,
-    ComboboxBoolean,
-    ComboboxTag,
-    TextField
+const props = defineProps({
+  descriptor: {
+    type: Object,
+    required: true
   },
-
-  props: {
-    descriptor: {
-      type: Object,
-      required: true
-    },
-    entity: {
-      type: Object,
-      required: true
-    },
-    label: {
-      type: String
-    },
-    modelValue: {
-      type: [Number, String, Object],
-      default: ''
-    }
+  entity: {
+    type: Object,
+    required: true
   },
-
-  emits: ['enter', 'update:modelValue'],
-
-  computed: {
-    ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
-
-    descriptorChecklistValues() {
-      return this.getDescriptorChecklistValues(this.descriptor)
-    },
-
-    metadataChecklistValues() {
-      return this.getMetadataChecklistValues(this.descriptor, this.entity)
-    },
-
-    isEditable() {
-      return Boolean(
-        this.isCurrentUserManager ||
-        this.isSupervisorInDepartments(this.descriptor.departments)
-      )
-    }
+  label: {
+    type: String
   },
-
-  methods: {
-    updateValue(value) {
-      this.$emit('update:modelValue', value)
-    },
-
-    onEnter() {
-      this.$emit('enter')
-    },
-
-    onMetadataCheckboxChanged(option, value) {
-      const values = this.metadataChecklistValues
-      values[option] = value
-      this.updateValue(JSON.stringify(values))
-    }
+  modelValue: {
+    type: [Number, String, Object],
+    default: ''
   }
+})
+
+const emit = defineEmits(['enter', 'update:modelValue'])
+
+const {
+  getDescriptorChecklistValues,
+  getMetadataChecklistValues,
+  getDescriptorChoicesOptions,
+  isSupervisorInDepartments
+} = descriptorMixin.methods
+
+const descriptorChecklistValues = computed(() => {
+  return getDescriptorChecklistValues(props.descriptor)
+})
+
+const metadataChecklistValues = computed(() => {
+  return getMetadataChecklistValues.call(
+    { getMetadataFieldValue, getDescriptorChecklistValues },
+    props.descriptor,
+    props.entity
+  )
+})
+
+const isEditable = computed(() => {
+  return Boolean(
+    isCurrentUserManager.value ||
+    isSupervisorInDepartments.call(
+      {
+        isCurrentUserSupervisor: isCurrentUserSupervisor.value,
+        user: user.value
+      },
+      props.descriptor.departments
+    )
+  )
+})
+
+const getMetadataFieldValue = (descriptor, entity) => {
+  if (
+    entity.data &&
+    descriptor.field_name in entity.data &&
+    entity.data[descriptor.field_name] != null
+  ) {
+    return entity.data[descriptor.field_name]
+  } else if (
+    entity.entity_data &&
+    descriptor.field_name in entity.entity_data &&
+    entity.entity_data[descriptor.field_name] != null
+  ) {
+    return entity.entity_data[descriptor.field_name]
+  } else {
+    return ''
+  }
+}
+
+const updateValue = value => {
+  emit('update:modelValue', value)
+}
+
+const onEnter = () => {
+  emit('enter')
+}
+
+const onMetadataCheckboxChanged = (option, value) => {
+  const values = getMetadataChecklistValues.call(
+    { getMetadataFieldValue, getDescriptorChecklistValues },
+    props.descriptor,
+    props.entity
+  )
+  values[option] = value
+  updateValue(JSON.stringify(values))
 }
 </script>
 

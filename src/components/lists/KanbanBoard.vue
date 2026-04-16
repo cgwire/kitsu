@@ -253,7 +253,7 @@ export default {
     },
 
     getSortedPeople(personIds) {
-      const people = personIds.map(id => this.personMap.get(id))
+      const people = personIds.map(id => this.personMap.get(id)).filter(Boolean)
       return sortPeople(people)
     },
 

@@ -4,7 +4,7 @@
   </div>
   <div class="user-calendar mt1" v-else>
     <full-calendar
-      ref="calendar"
+      ref="calendarRef"
       class="app-calendar"
       :options="calendarOptions"
     >
@@ -61,9 +61,11 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 import { BriefcaseIcon } from 'lucide-vue-next'
-import { mapActions, mapGetters } from 'vuex'
 
 import FullCalendar from '@fullcalendar/vue3'
 import allLocales from '@fullcalendar/core/locales-all'
@@ -74,180 +76,161 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'user-calendar',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    BriefcaseIcon,
-    EntityThumbnail,
-    FullCalendar,
-    ProductionName,
-    Spinner
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const productionMap = computed(() => store.getters.productionMap)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const props = defineProps({
+  tasks: {
+    type: Array,
+    default: () => []
   },
+  daysOff: {
+    type: Array,
+    default: () => []
+  },
+  isLoading: {
+    type: Boolean,
+    default: true
+  }
+})
 
-  props: {
-    tasks: {
-      type: Array,
-      default: () => []
-    },
-    daysOff: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: true
+const currentTask = ref(null)
+const calendarRef = ref(null)
+
+const calendarOptions = ref({
+  plugins: [dayGridPlugin, multiMonthPlugin],
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,dayGridWeek,multiMonthYear'
+  },
+  initialView: 'dayGridMonth',
+  firstDay: 1,
+  locales: allLocales,
+  locale: 'en'
+})
+
+const resetEvents = () => {
+  if (!calendarRef.value) {
+    return
+  }
+  const calendarApi = calendarRef.value.getApi()
+  calendarApi.removeAllEvents()
+
+  calendarApi.addEvent({
+    display: 'background',
+    daysOfWeek: [0, 6],
+    backgroundColor: '#ddd',
+    extendedProps: {
+      isOff: true
     }
-  },
+  })
 
-  data() {
-    return {
-      currentTask: null,
-      calendarOptions: {
-        plugins: [dayGridPlugin, multiMonthPlugin],
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,dayGridWeek,multiMonthYear'
-        },
-        initialView: 'dayGridMonth',
-        firstDay: 1,
-        locales: allLocales,
-        locale: this.$i18n.locale_code ?? 'en'
-      }
-    }
-  },
-
-  mounted() {
-    this.resetEvents()
-  },
-
-  computed: {
-    ...mapGetters([
-      'isDarkTheme',
-      'productionMap',
-      'taskMap',
-      'taskStatusMap',
-      'taskTypeMap'
-    ])
-  },
-
-  methods: {
-    ...mapActions(['addSelectedTasks', 'clearSelectedTasks']),
-
-    resetEvents() {
-      if (!this.$refs.calendar) {
-        return
-      }
-      const calendarApi = this.$refs.calendar.getApi()
-      calendarApi.removeAllEvents()
-
-      calendarApi.addEvent({
-        display: 'background',
-        daysOfWeek: [0, 6], // Sunday + Saturday
-        backgroundColor: '#ddd',
+  props.tasks
+    .filter(task => task.start_date && task.due_date)
+    .forEach(task => {
+      const production = productionMap.value.get(task.project_id)
+      const taskType = taskTypeMap.value.get(task.task_type_id)
+      const taskStatus = taskStatusMap.value.get(task.task_status_id)
+      const start = task.start_date
+      const end = new Date(task.due_date)
+      end.setDate(end.getDate() + 1)
+      const event = {
+        title: task.full_entity_name,
+        allDay: true,
+        start,
+        end,
+        borderColor: '#666',
+        backgroundColor: taskType.color,
         extendedProps: {
-          isOff: true
+          previewFileId: task.entity_preview_file_id,
+          taskStatus,
+          taskId: task.id,
+          title: task.full_entity_name.split(' / '),
+          production
+        }
+      }
+      calendarApi.addEvent(event)
+    })
+
+  props.daysOff.forEach(dayOff => {
+    const description = getDayOffInfo(dayOff)
+    const startDate = new Date(dayOff.date)
+    const endDate = new Date(dayOff.end_date)
+    while (startDate <= endDate) {
+      calendarApi.addEvent({
+        title: t('timesheets.day_off'),
+        display: 'background',
+        start: startDate.toISOString().slice(0, 10),
+        backgroundColor: '#ffffe0',
+        extendedProps: {
+          isOff: true,
+          description
         }
       })
-
-      this.tasks
-        .filter(task => task.start_date && task.due_date)
-        .forEach(task => {
-          const production = this.productionMap.get(task.project_id)
-          const taskType = this.taskTypeMap.get(task.task_type_id)
-          const taskStatus = this.taskStatusMap.get(task.task_status_id)
-          const start = task.start_date
-          const end = new Date(task.due_date)
-          end.setDate(end.getDate() + 1) // end date is exclusive
-          const event = {
-            title: task.full_entity_name,
-            allDay: true,
-            start,
-            end,
-            borderColor: '#666',
-            backgroundColor: taskType.color,
-            extendedProps: {
-              previewFileId: task.entity_preview_file_id,
-              taskStatus,
-              taskId: task.id,
-              title: task.full_entity_name.split(' / '),
-              production
-            }
-          }
-          calendarApi.addEvent(event)
-        })
-
-      this.daysOff.forEach(dayOff => {
-        const description = this.getDayOffInfo(dayOff)
-        const startDate = new Date(dayOff.date)
-        const endDate = new Date(dayOff.end_date)
-        while (startDate <= endDate) {
-          calendarApi.addEvent({
-            title: this.$t('timesheets.day_off'),
-            display: 'background',
-            start: startDate.toISOString().slice(0, 10),
-            backgroundColor: '#ffffe0',
-            extendedProps: {
-              isOff: true,
-              description
-            }
-          })
-          startDate.setDate(startDate.getDate() + 1)
-        }
-      })
-    },
-
-    onEventClicked(event) {
-      const task = this.taskMap.get(event.extendedProps.taskId)
-      if (!task || task === this.currentTask) {
-        this.currentTask = null
-        this.clearSelectedTasks()
-      } else {
-        this.currentTask = task
-        this.clearSelectedTasks()
-        this.addSelectedTasks([{ task }])
-      }
-    },
-
-    getStatusColor(status) {
-      if (status.name === 'Todo' && this.isDarkTheme) {
-        return '#5F626A'
-      } else {
-        return status.color
-      }
-    },
-
-    getStatusTextColor(status) {
-      if (status.name === 'Todo' && !this.isDarkTheme) {
-        return '#333'
-      } else {
-        return 'white'
-      }
-    },
-
-    getDayOffInfo(dayOff) {
-      const { description, date, end_date } = dayOff
-      const period =
-        end_date && date !== end_date ? `${date} - ${end_date}` : date
-      return `${description || this.$t('timesheets.day_off')} (${period})`
+      startDate.setDate(startDate.getDate() + 1)
     }
-  },
+  })
+}
 
-  watch: {
-    tasks: {
-      deep: true,
-      handler() {
-        this.resetEvents()
-      }
-    },
-    daysOff: {
-      handler() {
-        this.resetEvents()
-      }
-    }
+const onEventClicked = event => {
+  const task = taskMap.value.get(event.extendedProps.taskId)
+  if (!task || task === currentTask.value) {
+    currentTask.value = null
+    store.dispatch('clearSelectedTasks')
+  } else {
+    currentTask.value = task
+    store.dispatch('clearSelectedTasks')
+    store.dispatch('addSelectedTasks', [{ task }])
   }
 }
+
+const getStatusColor = status => {
+  if (status.name === 'Todo' && isDarkTheme.value) {
+    return '#5F626A'
+  } else {
+    return status.color
+  }
+}
+
+const getStatusTextColor = status => {
+  if (status.name === 'Todo' && !isDarkTheme.value) {
+    return '#333'
+  } else {
+    return 'white'
+  }
+}
+
+const getDayOffInfo = dayOff => {
+  const { description, date, end_date } = dayOff
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
+  return `${description || t('timesheets.day_off')} (${period})`
+}
+
+onMounted(() => {
+  resetEvents()
+})
+
+watch(
+  () => props.tasks,
+  () => {
+    resetEvents()
+  },
+  { deep: true }
+)
+
+watch(
+  () => props.daysOff,
+  () => {
+    resetEvents()
+  }
+)
 </script>
 
 <style lang="scss" scoped>

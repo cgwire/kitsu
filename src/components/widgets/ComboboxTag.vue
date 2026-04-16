@@ -4,20 +4,20 @@
       {{ label }}
     </label>
     <div
+      class="combo"
       :class="{
-        combo: true,
-        thin: thin,
+        thin,
         reversed: isReversed,
         open: showList,
-        shy: shy
+        shy
       }"
-      ref="select"
+      ref="selectRef"
     >
       <div class="flexrow" @click="toggleList" :title="renderedValue">
-        <div class="selected-line flexrow-item ellipsis">
+        <div class="selected-line filler nowrap ellipsis">
           {{ renderedValue }}
         </div>
-        <chevron-down-icon class="down-icon flexrow-item" />
+        <chevron-down-icon class="down-icon" />
       </div>
       <div class="select-input" v-if="showList">
         <div
@@ -37,148 +37,141 @@
       </div>
     </div>
     <div
-      @click="toggleList"
+      class="c-mask"
       :class="{
-        'c-mask': true,
         'is-active': showList
       }"
+      @click="toggleList"
     ></div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ChevronDownIcon } from 'lucide-vue-next'
 
 import { sortByValue } from '@/lib/sorting'
 
-export default {
-  name: 'combobox-tag',
+const { t } = useI18n()
 
-  components: {
-    ChevronDownIcon
+const props = defineProps({
+  disabled: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['change', 'update:modelValue'],
-
-  data() {
-    return {
-      showList: false
-    }
+  label: {
+    default: '',
+    type: String
   },
-
-  props: {
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    label: {
-      default: '',
-      type: String
-    },
-    options: {
-      default: () => [],
-      type: Array
-    },
-    modelValue: {
-      default: '',
-      type: String
-    },
-    localeKeyPrefix: {
-      default: '',
-      type: String
-    },
-    isReversed: {
-      default: false,
-      type: Boolean
-    },
-    shy: {
-      default: false,
-      type: Boolean
-    },
-    thin: {
-      default: false,
-      type: Boolean
-    },
-    withMargin: {
-      default: true,
-      type: Boolean
-    }
+  options: {
+    default: () => [],
+    type: Array
   },
-
-  computed: {
-    optionList() {
-      const sortedOptions = sortByValue([...this.options])
-      if (this.isReversed) {
-        sortedOptions.reverse()
-      }
-      return sortedOptions
-    },
-
-    renderedValue() {
-      return this.modelValue.split(',').filter(Boolean).sort().join(', ')
-    }
+  modelValue: {
+    default: '',
+    type: [Number, String]
   },
-
-  methods: {
-    selectOption(option) {
-      let values = this.modelValue.split(',').filter(Boolean)
-      if (values.includes(option.value)) {
-        values.splice(values.indexOf(option.value), 1)
-      } else {
-        values = this.optionList
-          .filter(
-            oldOption =>
-              this.isChecked(oldOption) || oldOption.value === option.value
-          )
-          .map(oldOption => oldOption.value)
-      }
-      const value = values.join(',')
-      this.$emit('update:modelValue', value)
-      this.$emit('change', value)
-    },
-
-    toggleList() {
-      if (this.showList) {
-        this.lastScrollPosition = this.$refs.select.scrollTop
-      }
-      this.showList = !this.showList
-      if (this.showList) {
-        this.$nextTick(() => {
-          this.$refs.select?.scrollTo({ top: this.lastScrollPosition, left: 0 })
-        })
-      }
-    },
-
-    getOptionLabel(option) {
-      if (this.localeKeyPrefix && option.label) {
-        return this.$t(this.localeKeyPrefix + option.label.toLowerCase())
-      }
-      return option.label
-    },
-
-    isChecked(option) {
-      const values = this.modelValue.split(',')
-      return values.includes(option.value)
-    }
+  localeKeyPrefix: {
+    default: '',
+    type: String
   },
+  isReversed: {
+    default: false,
+    type: Boolean
+  },
+  shy: {
+    default: false,
+    type: Boolean
+  },
+  thin: {
+    default: false,
+    type: Boolean
+  },
+  withMargin: {
+    default: true,
+    type: Boolean
+  }
+})
 
-  watch: {
-    showList() {
-      if (this.showList) {
-        this.$nextTick(() => {
-          if (!this.$refs.select?.children) return
-          let list = null
-          for (const child of this.$refs.select.children) {
-            if (child.className !== 'flexrow') {
-              list = child
-            }
-          }
-          list?.scrollTo({ top: this.optionList.length * 60 })
-        })
-      }
-    }
+const emit = defineEmits(['change', 'update:modelValue'])
+
+const showList = ref(false)
+const selectRef = ref(null)
+let lastScrollPosition = 0
+
+const selectedValues = computed(() => {
+  const optionValues = props.options.map(option => option.value)
+  return String(props.modelValue ?? '')
+    .split(',')
+    .filter(value => value && optionValues.includes(value))
+})
+
+const optionList = computed(() => {
+  const sortedOptions = sortByValue([...props.options])
+  if (props.isReversed) {
+    sortedOptions.reverse()
+  }
+  return sortedOptions
+})
+
+const renderedValue = computed(() => {
+  return [...selectedValues.value].sort().join(', ')
+})
+
+const selectOption = option => {
+  let values = [...selectedValues.value]
+  if (values.includes(option.value)) {
+    values.splice(values.indexOf(option.value), 1)
+  } else {
+    values = optionList.value
+      .filter(
+        oldOption => isChecked(oldOption) || oldOption.value === option.value
+      )
+      .map(oldOption => oldOption.value)
+  }
+  const value = values.join(',')
+  emit('update:modelValue', value)
+  emit('change', value)
+}
+
+const toggleList = () => {
+  if (showList.value) {
+    lastScrollPosition = selectRef.value.scrollTop
+  }
+  showList.value = !showList.value
+  if (showList.value) {
+    nextTick(() => {
+      selectRef.value?.scrollTo?.({ top: lastScrollPosition, left: 0 })
+    })
   }
 }
+
+const getOptionLabel = option => {
+  if (props.localeKeyPrefix && option.label) {
+    return t(props.localeKeyPrefix + option.label.toLowerCase())
+  }
+  return option.label
+}
+
+const isChecked = option => {
+  return selectedValues.value.includes(option.value)
+}
+
+watch(showList, () => {
+  if (showList.value) {
+    nextTick(() => {
+      if (!selectRef.value?.children) return
+      let list = null
+      for (const child of selectRef.value.children) {
+        if (child.className !== 'flexrow') {
+          list = child
+        }
+      }
+      list?.scrollTo?.({ top: optionList.value.length * 60 })
+    })
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -245,15 +238,9 @@ export default {
   border: 1px solid $green;
 }
 
-.selected-line {
-  flex: 1;
-  white-space: nowrap;
-}
-
 .option-line {
   background: $white;
   border-bottom: 1px solid $light-grey-light;
-  cursor: pointer;
   margin: 0;
   padding: 0.5em;
   min-width: 150px;
@@ -265,11 +252,10 @@ export default {
 }
 
 .down-icon {
-  width: 15px;
-  min-width: 15px;
-  margin-right: 0.4em;
+  width: 20px;
+  min-width: 20px;
+  padding: 0 2px;
   color: $green;
-  cursor: pointer;
 }
 
 .select-input {

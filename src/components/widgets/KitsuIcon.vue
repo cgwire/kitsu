@@ -2,7 +2,9 @@
   <img :class="{ active }" :src="imgUrl" :title="title" :alt="alt" />
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import assets from '@/assets/icons/fi-assets.svg'
 import assetTypeStats from '@/assets/icons/fi-asset-stats.svg'
 import addThumbnail from '@/assets/icons/fi-add-thumbnail.svg'
@@ -131,32 +133,26 @@ const icons = {
   waveform
 }
 
-export default {
-  name: 'kitsu-icon',
-
-  props: {
-    name: {
-      required: true,
-      type: String
-    },
-    title: {
-      type: String
-    },
-    alt: {
-      type: String
-    },
-    active: {
-      default: false,
-      type: Boolean
-    }
+const props = defineProps({
+  name: {
+    required: true,
+    type: String
   },
-
-  computed: {
-    imgUrl() {
-      return icons[this.name]
-    }
+  title: {
+    type: String
+  },
+  alt: {
+    type: String
+  },
+  active: {
+    default: false,
+    type: Boolean
   }
-}
+})
+
+const imgUrl = computed(() => {
+  return icons[props.name]
+})
 </script>
 
 <style lang="scss" scoped>
