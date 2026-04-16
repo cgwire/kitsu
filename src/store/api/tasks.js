@@ -46,7 +46,8 @@ export default {
       task_status_id: data.taskStatusId,
       comment: data.comment,
       checklist: data.checklist || [],
-      links: data.links
+      links: data.links,
+      for_client: data.forClient || false
     }
     if (data.attachment?.length) {
       commentData = new FormData()
@@ -56,11 +57,18 @@ export default {
       commentData.set('task_status_id', data.taskStatusId)
       commentData.set('comment', data.comment)
       commentData.set('checklist', JSON.stringify(data.checklist || []))
+      commentData.set('for_client', data.forClient ? 'true' : 'false')
     }
     return client.ppost(
       `/api/actions/tasks/${data.taskId}/comment`,
       commentData
     )
+  },
+
+  updateCommentForClient(commentId, forClient) {
+    return client.pput(`/api/data/comments/${commentId}`, {
+      for_client: forClient
+    })
   },
 
   addAttachmentToComment(comment, files, replyId) {

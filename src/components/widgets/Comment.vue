@@ -37,13 +37,15 @@
           </span>
           <div
             class="flexrow-item menu-wrapper"
-            v-if="isPinnable || isEditable"
+            v-if="isPinnable || isEditable || canToggleForClient"
           >
             <chevron-down-icon class="menu-icon" @click="toggleCommentMenu" />
             <comment-menu
               :is-pinnable="isPinnable"
               :is-pinned="comment.pinned"
               :is-editable="isEditable"
+              :can-toggle-for-client="canToggleForClient"
+              :is-for-client="Boolean(comment.for_client)"
               @pin-clicked="
                 () => {
                   emit('pin-comment', comment)
@@ -59,6 +61,12 @@
               @delete-clicked="
                 () => {
                   emit('delete-comment', comment)
+                  toggleCommentMenu()
+                }
+              "
+              @toggle-for-client-clicked="
+                () => {
+                  emit('toggle-for-client', comment)
                   toggleCommentMenu()
                 }
               "
@@ -78,6 +86,12 @@
                 :size="12"
                 @click="emit('duplicate-comment', comment)"
               />
+            </p>
+            <p
+              class="for-client-tag"
+              v-if="comment.for_client && !isCurrentUserClient"
+            >
+              {{ $t('comments.for_client_badge') }}
             </p>
             <p
               v-html="
@@ -501,7 +515,8 @@ const emit = defineEmits([
   'duplicate-comment',
   'edit-comment',
   'pin-comment',
-  'time-code-clicked'
+  'time-code-clicked',
+  'toggle-for-client'
 ])
 
 const props = defineProps({
@@ -589,6 +604,8 @@ const user = computed(() => store.getters.user)
 const isConcept = computed(() => {
   return route.path.includes('concept')
 })
+
+const canToggleForClient = computed(() => isCurrentUserManager.value)
 
 const isEmpty = computed(() => {
   return (
@@ -1022,6 +1039,23 @@ article.comment {
   padding: 0.5em 0.2em;
   text-align: center;
   text-transform: uppercase;
+}
+
+.content .for-client-tag {
+  border-radius: 4px;
+  background: color.adjust($green, $lightness: 65%);
+  color: color.adjust($green, $lightness: -15%, $saturation: -10%);
+  font-size: 0.8em;
+  margin-top: 0.4em;
+  margin-bottom: 0;
+  padding: 0.5em 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.dark .content .for-client-tag {
+  background: color.adjust($green, $lightness: 20%, $saturation: -40%);
+  color: $white;
 }
 
 .round-name {

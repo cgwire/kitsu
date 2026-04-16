@@ -3,6 +3,9 @@
     <div @click="$emit('pin-clicked')" v-if="isPinnable && !isEmpty">
       {{ isPinned ? $t('comments.unpin') : $t('comments.pin') }}
     </div>
+    <div @click="$emit('toggle-for-client-clicked')" v-if="canToggleForClient">
+      {{ $t('comments.toggle_for_client') }}
+    </div>
     <div @click="$emit('edit-clicked')" v-if="isEditable">
       {{ $t('main.edit') }}
     </div>
@@ -29,10 +32,23 @@ defineProps({
   isPinned: {
     type: Boolean,
     default: false
+  },
+  canToggleForClient: {
+    type: Boolean,
+    default: false
+  },
+  isForClient: {
+    type: Boolean,
+    default: false
   }
 })
 
-defineEmits(['delete-clicked', 'edit-clicked', 'pin-clicked'])
+defineEmits([
+  'delete-clicked',
+  'edit-clicked',
+  'pin-clicked',
+  'toggle-for-client-clicked'
+])
 </script>
 
 <style lang="scss" scoped>

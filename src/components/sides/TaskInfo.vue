@@ -240,6 +240,7 @@
                       @pin-comment="onPinComment"
                       @edit-comment="onEditComment"
                       @delete-comment="onDeleteComment"
+                      @toggle-for-client="onToggleForClient"
                       @checklist-updated="saveComment"
                       @time-code-clicked="timeCodeClicked"
                       v-for="(comment, index) in taskComments"
@@ -909,7 +910,8 @@ export default {
       checklist,
       taskStatusId,
       revision = undefined,
-      link = undefined
+      link = undefined,
+      forClient = false
     ) {
       this.animOn = true
       this.$nextTick(() => {
@@ -925,7 +927,8 @@ export default {
           checklist,
           comment,
           links: link ? [link] : null,
-          revision
+          revision,
+          forClient
         }
         const action =
           this.previewForms.length > 0
@@ -1165,6 +1168,10 @@ export default {
 
     onPinComment(comment) {
       this.pinComment(comment)
+    },
+
+    onToggleForClient(comment) {
+      this.$store.dispatch('toggleCommentForClient', comment)
     },
 
     onEditComment(comment) {

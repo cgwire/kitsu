@@ -256,6 +256,21 @@
             @click="toggleLinkField"
             v-if="mode === 'publish'"
           />
+          <button
+            type="button"
+            class="button for-client-toggle"
+            :class="{ active: forClient }"
+            :title="
+              forClient
+                ? $t('comments.for_client_on')
+                : $t('comments.for_client_off')
+            "
+            @click="forClient = !forClient"
+            v-if="isCurrentUserManager"
+          >
+            <eye-icon class="icon" v-if="forClient" />
+            <eye-off-icon class="icon" v-else />
+          </button>
           <div class="filler"></div>
           <combobox-status
             class="status-selector"
@@ -358,6 +373,7 @@ import {
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import AtTa from 'vue-at/dist/vue-at-textarea'
+import { EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 
 import drafts from '@/lib/drafts'
 import { remove } from '@/lib/models'
@@ -473,6 +489,8 @@ const modals = reactive({
 
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const forClient = ref(false)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusForCurrentUser = computed(
   () => store.getters.taskStatusForCurrentUser
@@ -637,7 +655,8 @@ const runAddComment = (
     checklistVal,
     taskStatusId,
     revisionVal,
-    linkVal
+    linkVal,
+    forClient.value
   )
 }
 
@@ -647,6 +666,7 @@ const reset = () => {
   attachments.value = []
   checklistItems.value = []
   nextRevision.value = undefined
+  forClient.value = false
 }
 
 const focus = () => {

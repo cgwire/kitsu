@@ -482,6 +482,26 @@ export default {
         }
       },
 
+      'comment:update'(eventData) {
+        const commentId = eventData.comment_id
+        const taskId = eventData.task_id
+        const task = taskId ? this.taskMap.get(taskId) : null
+        if (!task && !this.taskComments[taskId]) return
+        this.loadComment({ commentId }).catch(err => {
+          // A manager may have just flipped for_client off — the client
+          // loses access and gets a 403. Keep the row but blank its
+          // content locally.
+          if (err?.status === 403 || err?.body?.status === 403) {
+            this.$store.commit('BLANK_COMMENT_CONTENT', {
+              taskId,
+              commentId
+            })
+          } else {
+            console.error(err)
+          }
+        })
+      },
+
       'task:update'(eventData) {
         if (this.taskMap.get(eventData.task_id)) {
           this.$nextTick(() => {
