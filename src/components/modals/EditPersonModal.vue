@@ -281,7 +281,8 @@ export default {
     }
   },
 
-  emits: ['cancel', 'reset-error'],
+  // eslint-disable-next-line vue/no-unused-emit-declarations
+  emits: ['cancel', 'confirm', 'confirm-invite', 'invite', 'reset-error'],
 
   data() {
     return {
