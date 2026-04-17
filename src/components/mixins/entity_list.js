@@ -369,22 +369,24 @@ export const entityListMixin = {
 
     // i = line number in entity group and k is the index of the entity group
     getEntityLineNumber(entities, i, k) {
-      this.$options.lineIndex = {}
+      if (!this.$options.lineIndex || this.$options.lineIndexRef !== entities) {
+        this.$options.lineIndex = {}
+        this.$options.lineIndexRef = entities
+      }
       const key = `${i}-${k}`
       const cached = this.$options.lineIndex[key]
-      if (!cached) {
-        let j = 0
-        let index = 0
-        while (j < k) {
-          index += entities[j].length
-          j++
-        }
-        const val = i + index
-        this.$options.lineIndex[key] = val
-        return val
-      } else {
+      if (cached !== undefined) {
         return cached
       }
+      let j = 0
+      let index = 0
+      while (j < k) {
+        index += entities[j].length
+        j++
+      }
+      const val = i + index
+      this.$options.lineIndex[key] = val
+      return val
     },
 
     getGroupKey(group, i, fieldName) {

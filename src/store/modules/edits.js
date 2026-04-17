@@ -937,7 +937,7 @@ const mutations = {
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (
-      !validationInfo.x &&
+      validationInfo.x === undefined &&
       validationInfo.task?.column &&
       cache.editMap.get(validationInfo.task.entity.id)
     ) {
@@ -956,7 +956,12 @@ const mutations = {
   },
 
   [CLEAR_SELECTED_TASKS](state) {
-    clearSelectionGrid(state.editSelectionGrid)
+    if (
+      tasksStore.state.nbSelectedValidations > 0 ||
+      tasksStore.state.nbSelectedTasks > 0
+    ) {
+      clearSelectionGrid(state.editSelectionGrid)
+    }
   },
 
   [NEW_TASK_END](state, { task }) {
