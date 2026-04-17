@@ -554,7 +554,7 @@
     </div>
 
     <asset-list-numbers
-      :assets="assetCache.assets"
+      :assets="assetCache.result"
       v-if="!isEmptyList && !isLoading"
     />
   </div>
