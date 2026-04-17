@@ -85,11 +85,10 @@
                   >
                     <td class="field-label">{{ descriptor.name }}</td>
                     <td>
-                      {{
-                        currentSequence.data
-                          ? currentSequence.data[descriptor.field_name]
-                          : ''
-                      }}
+                      <metadata-value
+                        :descriptor="descriptor"
+                        :entity="currentSequence"
+                      />
                     </td>
                   </tr>
                 </tbody>
@@ -289,6 +288,7 @@ import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.v
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -316,6 +316,7 @@ export default {
     EntityTaskList,
     EntityTimeLogs,
     EntityThumbnail,
+    MetadataValue,
     PageSubtitle,
     PageTitle,
     Schedule,

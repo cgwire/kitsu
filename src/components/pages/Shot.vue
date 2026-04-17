@@ -197,11 +197,11 @@
                 >
                   <td class="field-label">{{ descriptor.name }}</td>
                   <td>
-                    {{
-                      currentShot && currentShot.data
-                        ? currentShot.data[descriptor.field_name]
-                        : ''
-                    }}
+                    <metadata-value
+                      :descriptor="descriptor"
+                      :entity="currentShot"
+                      v-if="currentShot"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -363,6 +363,7 @@ import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.v
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
@@ -389,6 +390,7 @@ export default {
     EntityTaskList,
     EntityTimeLogs,
     EntityThumbnail,
+    MetadataValue,
     PageSubtitle,
     RouteSectionTabs,
     Schedule,

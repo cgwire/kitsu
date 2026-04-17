@@ -509,11 +509,10 @@
                       >
                         <td class="field-label">{{ descriptor.name }}</td>
                         <td>
-                          {{
-                            currentEdit.data
-                              ? currentEdit.data[descriptor.field_name]
-                              : ''
-                          }}
+                          <metadata-value
+                            :descriptor="descriptor"
+                            :entity="currentEdit"
+                          />
                         </td>
                       </tr>
                     </tbody>
@@ -610,6 +609,7 @@ import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.v
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
@@ -655,6 +655,7 @@ export default {
     EntityTaskList,
     EntityTimeLogs,
     EntityThumbnail,
+    MetadataValue,
     ObjectViewer,
     PageSubtitle,
     PencilPicker,
