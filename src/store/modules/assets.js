@@ -893,6 +893,8 @@ const mutations = {
     state.assetSearchFilterGroups = []
 
     state.selectedAssets = new Map()
+    state.isAssetsLoading = false
+    state.isAssetsLoadingError = false
   },
 
   [LOAD_ASSETS_START](state) {

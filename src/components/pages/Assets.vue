@@ -380,6 +380,7 @@ export default {
         isImportRenderDisplayed: false,
         isNewDisplayed: false
       },
+      resetTimeout: null,
       success: {
         edit: false
       }
@@ -431,6 +432,7 @@ export default {
 
   beforeUnmount() {
     this.clearSelectedAssets()
+    if (this.resetTimeout) clearTimeout(this.resetTimeout)
   },
 
   computed: {
@@ -996,11 +998,17 @@ export default {
     },
 
     reset() {
-      this.initialLoading = true
-      this.loadAssets().then(() => {
-        this.initialLoading = false
-        this.applySearchFromUrl()
-      })
+      // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
+      if (this.resetTimeout) clearTimeout(this.resetTimeout)
+      this.resetTimeout = setTimeout(() => {
+        this.resetTimeout = null
+        if (this.isAssetsLoading) return
+        this.initialLoading = true
+        this.loadAssets().then(() => {
+          this.initialLoading = false
+          this.applySearchFromUrl()
+        })
+      }, 50)
     }
   },
 
