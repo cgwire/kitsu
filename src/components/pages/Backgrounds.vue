@@ -10,6 +10,7 @@
     <route-tabs class="mt2" :active-tab="activeTab" :tabs="tabs" />
 
     <background-list
+      class="background-list"
       :entries="backgroundsList"
       :is-loading="loading.list"
       :is-error="errors.list"
@@ -30,7 +31,7 @@
       :active="modals.del"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('backgrounds.delete_error')"
       @cancel="modals.del = false"
       @confirm="confirmDeleteBackground"
@@ -38,8 +39,12 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import BackgroundList from '@/components/lists/BackgroundList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -47,139 +52,119 @@ import EditBackgroundModal from '@/components/modals/EditBackgroundModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
-export default {
-  name: 'backgrounds',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    BackgroundList,
-    DeleteModal,
-    EditBackgroundModal,
-    ListPageHeader,
-    RouteTabs
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      backgroundToEdit: {},
-      backgroundToDelete: {},
-      modals: {
-        edit: false,
-        del: false
-      },
-      loading: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      errors: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        }
-      ]
-    }
-  },
+const activeTab = ref('active')
+const backgroundToEdit = ref({})
+const backgroundToDelete = ref({})
+const modals = reactive({ edit: false, del: false })
+const loading = reactive({ edit: false, del: false, list: false })
+const errors = reactive({ edit: false, del: false, list: false })
 
-  mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-  },
+// Computed
 
-  computed: {
-    ...mapGetters(['archivedBackgrounds', 'backgrounds']),
+const backgrounds = computed(() => store.getters.backgrounds)
+const archivedBackgrounds = computed(() => store.getters.archivedBackgrounds)
 
-    backgroundsList() {
-      return this.activeTab === 'active'
-        ? this.backgrounds
-        : this.archivedBackgrounds
-    }
-  },
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') }
+])
 
-  methods: {
-    ...mapActions(['deleteBackground']),
+const backgroundsList = computed(() =>
+  activeTab.value === 'active' ? backgrounds.value : archivedBackgrounds.value
+)
 
-    confirmEditBackground(form) {
-      const isNew = !this.backgroundToEdit?.id
-      let action = 'newBackground'
-      if (!isNew) {
-        action = 'saveBackground'
-        form.id = this.backgroundToEdit.id
-      }
+const deleteText = computed(() =>
+  backgroundToDelete.value
+    ? t('backgrounds.delete_text', { name: backgroundToDelete.value.name })
+    : ''
+)
 
-      this.loading.edit = true
-      this.errors.edit = false
-      this.$store
-        .dispatch(action, form)
-        .then(() => {
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.edit = true
-        })
-        .finally(() => {
-          this.loading.edit = false
-        })
-    },
+// Functions
 
-    confirmDeleteBackground() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteBackground(this.backgroundToDelete)
-        .then(() => {
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-        })
-        .finally(() => {
-          this.loading.del = false
-        })
-    },
-
-    deleteText() {
-      const background = this.backgroundToDelete
-      return background
-        ? this.$t('backgrounds.delete_text', { name: background.name })
-        : ''
-    },
-
-    onNewClicked() {
-      this.backgroundToEdit = {}
-      this.modals.edit = true
-    },
-
-    onEditClicked(background) {
-      this.backgroundToEdit = background
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(background) {
-      this.backgroundToDelete = background
-      this.modals.del = true
-    }
-  },
-
-  watch: {
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('backgrounds.title')} - Kitsu`
-    }
+const confirmEditBackground = form => {
+  const isNew = !backgroundToEdit.value?.id
+  let action = 'newBackground'
+  if (!isNew) {
+    action = 'saveBackground'
+    form.id = backgroundToEdit.value.id
   }
+
+  loading.edit = true
+  errors.edit = false
+  store
+    .dispatch(action, form)
+    .then(() => {
+      modals.edit = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.edit = true
+    })
+    .finally(() => {
+      loading.edit = false
+    })
 }
+
+const confirmDeleteBackground = () => {
+  loading.del = true
+  errors.del = false
+  store
+    .dispatch('deleteBackground', backgroundToDelete.value)
+    .then(() => {
+      modals.del = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.del = true
+    })
+    .finally(() => {
+      loading.del = false
+    })
+}
+
+const onNewClicked = () => {
+  backgroundToEdit.value = {}
+  modals.edit = true
+}
+
+const onEditClicked = background => {
+  backgroundToEdit.value = background
+  modals.edit = true
+}
+
+const onDeleteClicked = background => {
+  backgroundToDelete.value = background
+  modals.del = true
+}
+
+// Watchers
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  activeTab.value = route.query.tab || 'active'
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('backgrounds.title')} - Kitsu`) })
 </script>
+
+<style lang="scss" scoped>
+.background-list {
+  margin-top: 0;
+}
+</style>

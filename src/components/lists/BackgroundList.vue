@@ -46,42 +46,33 @@
     <table-info :is-loading="isLoading" :is-error="isError" />
 
     <p class="has-text-centered">
-      {{ entries.length }} {{ $tc('backgrounds.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('backgrounds.number', entries.length, { n: entries.length }) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'background-list',
-
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    }
+defineProps({
+  entries: {
+    type: Array,
+    default: () => []
   },
-
-  components: {
-    BooleanCell,
-    RowActionsCell,
-    TableInfo
+  isError: {
+    type: Boolean,
+    default: false
   },
+  isLoading: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  emits: ['delete-clicked', 'edit-clicked']
-}
+defineEmits(['delete-clicked', 'edit-clicked'])
 </script>
 
 <style lang="scss" scoped>
@@ -113,5 +104,80 @@ export default {
   text-align: center;
   width: 140px;
   min-width: 140px;
+}
+
+@media screen and (max-width: 768px) {
+  .datatable-wrapper {
+    overflow-x: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  table.datatable {
+    display: block;
+    background: transparent;
+  }
+
+  .datatable-head {
+    display: none;
+  }
+
+  .datatable-body {
+    display: block;
+  }
+
+  .data-list .datatable .datatable-row,
+  .data-list .datatable .datatable-row:nth-child(even),
+  .data-list .datatable .datatable-row:hover,
+  .data-list .datatable .datatable-row:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    background-color: var(--background) !important;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .data-list .datatable .datatable-row td,
+  .data-list .datatable .datatable-row :deep(td),
+  .data-list .datatable .datatable-row:last-child td,
+  .data-list .datatable .datatable-row:last-child:nth-child(even) td,
+  .data-list .datatable .datatable-row:last-child:hover td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background-color: transparent !important;
+  }
+
+  .name {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    font-weight: 600;
+
+    :deep(.flexrow) {
+      align-items: center;
+      gap: 0.75em;
+    }
+
+    .entity-thumbnail {
+      flex-shrink: 0;
+
+      img {
+        width: 80px;
+        height: 53px;
+        min-width: 80px;
+      }
+    }
+  }
+
+  .is-default {
+    display: none;
+  }
 }
 </style>
