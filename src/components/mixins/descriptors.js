@@ -4,6 +4,10 @@
  */
 import { mapGetters } from 'vuex'
 
+// Descriptor choices are static per descriptor — no need to reparse them
+// for every row. Cache keyed by descriptor.id, cleared when it grows too large.
+const _checklistValuesCache = new Map()
+
 export const descriptorMixin = {
   emits: [
     'add-metadata',
@@ -170,6 +174,8 @@ export const descriptorMixin = {
     },
 
     getDescriptorChecklistValues(descriptor) {
+      const cached = _checklistValuesCache.get(descriptor.id)
+      if (cached) return cached
       const values = descriptor.choices.reduce((result, choice) => {
         if (choice && typeof choice === 'string' && choice.startsWith('[x] ')) {
           result.push({ text: choice.slice(4), checked: true })
@@ -182,7 +188,9 @@ export const descriptorMixin = {
         }
         return result
       }, [])
-      return values.length === descriptor.choices.length ? values : []
+      const result = values.length === descriptor.choices.length ? values : []
+      _checklistValuesCache.set(descriptor.id, result)
+      return result
     },
 
     getMetadataChecklistValues(descriptor, entity) {
