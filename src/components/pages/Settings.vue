@@ -35,7 +35,7 @@
           </p>
         </div>
       </form>
-      <form ref="form" @submit.prevent="saveSettings">
+      <form ref="formRef" @submit.prevent="saveSettings">
         <h2>
           {{ $t('settings.title') }}
         </h2>
@@ -101,7 +101,7 @@
           :class="{
             'is-loading': loading.save
           }"
-          :disabled="loading.save || !$refs.form?.checkValidity()"
+          :disabled="loading.save || !formRef?.checkValidity()"
         >
           {{ $t('settings.save.button') }}
         </button>
@@ -122,183 +122,174 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useStore } from 'vuex'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'settings',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ChangeAvatarModal,
-    ComboboxBoolean,
-    TextField
-  },
+// State
 
-  data() {
-    return {
-      organisationLogoPath: '',
-      form: {
-        chat_token_discord: '',
-        chat_token_slack: '',
-        chat_webhook_mattermost: '',
-        has_avatar: false,
-        hd_by_default: 'false',
-        hours_by_day: 0,
-        name: '',
-        timesheets_locked: 'false',
-        use_original_file_name: 'false',
-        format_duration_in_hours: 'false',
-        dark_theme_by_default: 'false'
-      },
-      errors: {
-        save: false,
-        saveAvatar: false,
-        webhook_error: false
-      },
-      loading: {
-        save: false,
-        saveAvatar: false
-      },
-      modals: {
-        avatar: false
-      }
-    }
-  },
+const form = reactive({
+  chat_token_discord: '',
+  chat_token_slack: '',
+  chat_webhook_mattermost: '',
+  has_avatar: false,
+  hd_by_default: 'false',
+  hours_by_day: 0,
+  name: '',
+  timesheets_locked: 'false',
+  use_original_file_name: 'false',
+  format_duration_in_hours: 'false',
+  dark_theme_by_default: 'false'
+})
+const errors = reactive({
+  save: false,
+  saveAvatar: false,
+  webhook_error: false
+})
+const loading = reactive({
+  save: false,
+  saveAvatar: false
+})
+const modals = reactive({
+  avatar: false
+})
 
-  mounted() {
-    this.organisationLogoPath = `/api/pictures/thumbnails/organisations/${this.organisation.id}.png`
-  },
+const formRef = ref(null)
+const organisationLogoPath = ref('')
 
-  computed: {
-    ...mapGetters(['organisation'])
-  },
+// Computed
 
-  methods: {
-    ...mapActions([
-      'changeAvatar',
-      'deleteOrganisationLogo',
-      'saveOrganisation',
-      'uploadOrganisationLogo'
-    ]),
+const organisation = computed(() => store.getters.organisation)
 
-    checkWebhook() {
-      if (
-        !this.form.chat_webhook_mattermost ||
-        this.form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')
-      ) {
-        this.errors.webhook_error = false
-        return true
-      } else {
-        this.errors.webhook_error = true
-        return false
-      }
-    },
+// Functions
 
-    hideAvatarModal() {
-      this.modals.avatar = false
-    },
-
-    showAvatarModal() {
-      this.modals.avatar = true
-    },
-
-    saveSettings() {
-      if (this.checkWebhook()) {
-        this.loading.save = true
-        this.errors.save = false
-        const organisation = {
-          ...this.form,
-          hd_by_default: this.form.hd_by_default === 'true',
-          timesheets_locked: this.form.timesheets_locked === 'true',
-          use_original_file_name: this.form.use_original_file_name === 'true',
-          format_duration_in_hours:
-            this.form.format_duration_in_hours === 'true',
-          dark_theme_by_default: this.form.dark_theme_by_default === 'true'
-        }
-        this.saveOrganisation(organisation)
-          .catch(err => {
-            console.error(err)
-            this.errors.save = true
-          })
-          .finally(() => {
-            this.loading.save = false
-          })
-      }
-    },
-
-    uploadAvatarFile(formData) {
-      this.loading.saveAvatar = true
-      this.errors.saveAvatar = false
-      this.uploadOrganisationLogo(formData)
-        .then(() => {
-          setTimeout(() => {
-            this.modals.avatar = false
-            const timestamp = Date.now()
-            this.organisationLogoPath = `/api/pictures/thumbnails/organisations/${this.organisation.id}.png?t=${timestamp}`
-          }, 500)
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.saveAvatar = true
-        })
-        .finally(() => {
-          this.loading.saveAvatar = false
-        })
-    },
-
-    removeAvatar() {
-      this.loading.save = true
-      this.errors.save = false
-      this.deleteOrganisationLogo()
-        .catch(err => {
-          console.error(err)
-          this.errors.save = true
-        })
-        .finally(() => {
-          this.loading.save = false
-        })
-    }
-  },
-
-  watch: {
-    organisation: {
-      immediate: true,
-      handler() {
-        this.form = {
-          chat_token_discord: this.organisation.chat_token_discord,
-          chat_token_slack: this.organisation.chat_token_slack,
-          chat_webhook_mattermost: this.organisation.chat_webhook_mattermost,
-          has_avatar: this.organisation.has_avatar,
-          hd_by_default: this.organisation.hd_by_default ? 'true' : 'false',
-          hours_by_day: this.organisation.hours_by_day,
-          name: this.organisation.name,
-          timesheets_locked: this.organisation.timesheets_locked
-            ? 'true'
-            : 'false',
-          use_original_file_name: this.organisation.use_original_file_name
-            ? 'true'
-            : 'false',
-          format_duration_in_hours: this.organisation.format_duration_in_hours
-            ? 'true'
-            : 'false',
-          dark_theme_by_default: this.organisation.dark_theme_by_default
-            ? 'true'
-            : 'false'
-        }
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('settings.title')} - Kitsu`
-    }
+const checkWebhook = () => {
+  if (
+    !form.chat_webhook_mattermost ||
+    form.chat_webhook_mattermost.match('/hooks/[a-zA-Z0-9]+$')
+  ) {
+    errors.webhook_error = false
+    return true
+  } else {
+    errors.webhook_error = true
+    return false
   }
 }
+
+const hideAvatarModal = () => {
+  modals.avatar = false
+}
+
+const showAvatarModal = () => {
+  modals.avatar = true
+}
+
+const saveSettings = () => {
+  if (!checkWebhook()) return
+  loading.save = true
+  errors.save = false
+  const data = {
+    ...form,
+    hd_by_default: form.hd_by_default === 'true',
+    timesheets_locked: form.timesheets_locked === 'true',
+    use_original_file_name: form.use_original_file_name === 'true',
+    format_duration_in_hours: form.format_duration_in_hours === 'true',
+    dark_theme_by_default: form.dark_theme_by_default === 'true'
+  }
+  store
+    .dispatch('saveOrganisation', data)
+    .catch(err => {
+      console.error(err)
+      errors.save = true
+    })
+    .finally(() => {
+      loading.save = false
+    })
+}
+
+const uploadAvatarFile = formData => {
+  loading.saveAvatar = true
+  errors.saveAvatar = false
+  store
+    .dispatch('uploadOrganisationLogo', formData)
+    .then(() => {
+      setTimeout(() => {
+        modals.avatar = false
+        const timestamp = Date.now()
+        organisationLogoPath.value = `/api/pictures/thumbnails/organisations/${organisation.value.id}.png?t=${timestamp}`
+      }, 500)
+    })
+    .catch(err => {
+      console.error(err)
+      errors.saveAvatar = true
+    })
+    .finally(() => {
+      loading.saveAvatar = false
+    })
+}
+
+const removeAvatar = () => {
+  loading.save = true
+  errors.save = false
+  store
+    .dispatch('deleteOrganisationLogo')
+    .catch(err => {
+      console.error(err)
+      errors.save = true
+    })
+    .finally(() => {
+      loading.save = false
+    })
+}
+
+// Watchers
+
+watch(
+  organisation,
+  () => {
+    Object.assign(form, {
+      chat_token_discord: organisation.value.chat_token_discord,
+      chat_token_slack: organisation.value.chat_token_slack,
+      chat_webhook_mattermost: organisation.value.chat_webhook_mattermost,
+      has_avatar: organisation.value.has_avatar,
+      hd_by_default: organisation.value.hd_by_default ? 'true' : 'false',
+      hours_by_day: organisation.value.hours_by_day,
+      name: organisation.value.name,
+      timesheets_locked: organisation.value.timesheets_locked
+        ? 'true'
+        : 'false',
+      use_original_file_name: organisation.value.use_original_file_name
+        ? 'true'
+        : 'false',
+      format_duration_in_hours: organisation.value.format_duration_in_hours
+        ? 'true'
+        : 'false',
+      dark_theme_by_default: organisation.value.dark_theme_by_default
+        ? 'true'
+        : 'false'
+    })
+  },
+  { immediate: true }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  organisationLogoPath.value = `/api/pictures/thumbnails/organisations/${organisation.value.id}.png`
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('settings.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
@@ -340,6 +331,13 @@ export default {
   padding: 2em;
   box-shadow: rgba(0, 0, 0, 0.15) 0 1px 4px 2px;
   border-radius: 1em;
+}
+
+@media screen and (max-width: 768px) {
+  .settings-form {
+    margin: 1em 0.5em;
+    padding: 1em;
+  }
 }
 
 input,
