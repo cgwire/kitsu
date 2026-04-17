@@ -1077,7 +1077,7 @@ export default {
   position: sticky;
 }
 
-.name {
+thead .name {
   min-width: 200px;
   width: 200px;
 }

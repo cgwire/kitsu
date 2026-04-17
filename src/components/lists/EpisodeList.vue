@@ -805,7 +805,7 @@ th.actions {
   color: inherit;
 }
 
-.name.episode-name {
+thead .name.episode-name {
   min-width: 110px;
   width: 110px;
 }

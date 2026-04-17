@@ -880,7 +880,7 @@ th.actions {
   color: inherit;
 }
 
-.name.edit-name {
+thead .name.edit-name {
   min-width: 110px;
   width: 110px;
 }

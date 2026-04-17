@@ -1264,7 +1264,7 @@ th.actions {
   color: inherit;
 }
 
-.name.shot-name {
+thead .name.shot-name {
   min-width: 110px;
   width: 110px;
 }

@@ -749,7 +749,7 @@ th.actions {
   color: inherit;
 }
 
-.name.sequence-name {
+thead .name.sequence-name {
   min-width: 110px;
   width: 110px;
 }
