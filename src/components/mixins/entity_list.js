@@ -233,19 +233,16 @@ export const entityListMixin = {
             }
           }
           this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-          this.updateTaskInQuery()
         }
       } else if (!validationInfo.isCtrlKey) {
         this.$store.commit('CLEAR_SELECTED_TASKS')
-        this.updateTaskInQuery()
       }
       if (selection.length === 0) {
         this.$store.commit('ADD_SELECTED_TASK', validationInfo)
-        this.updateTaskInQuery()
       } else {
         this.$store.commit('ADD_SELECTED_TASKS', selection)
-        this.updateTaskInQuery()
       }
+      this.updateTaskInQuery()
 
       if (!validationInfo.isShiftKey && validationInfo.isUserClick) {
         const x = validationInfo.x

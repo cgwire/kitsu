@@ -10,6 +10,13 @@ import {
   minutesToDays
 } from '@/lib/time'
 
+// Module-level cache for formatDuration results. toLocaleString is expensive
+// (~0.05ms per call) and formatDuration is called per-row per-render (3000+
+// times). The cache key includes every parameter that affects the output:
+// minutes, format_duration_in_hours, toLocale, and hours_by_day (used by
+// minutesToDays). The cache is capped at 10k entries and cleared when full.
+const _durationCache = new Map()
+
 export const formatListMixin = {
   computed: {
     ...mapGetters(['organisation']),
@@ -33,16 +40,27 @@ export const formatListMixin = {
         return 0
       }
 
-      const duration = this.organisation.format_duration_in_hours
+      const inHours = this.organisation.format_duration_in_hours
+      const hpd = this.organisation.hours_by_day || 8
+      const cacheKey = `${minutes}-${inHours ? 1 : 0}-${toLocale ? 1 : 0}-${hpd}`
+      const cached = _durationCache.get(cacheKey)
+      if (cached !== undefined) return cached
+
+      const duration = inHours
         ? minutes / 60
         : minutesToDays(this.organisation, minutes)
 
+      let result
       if (toLocale) {
-        return duration.toLocaleString('fullwide', {
+        result = duration.toLocaleString('fullwide', {
           maximumFractionDigits: 2
         })
+      } else {
+        result = Math.round(duration * 100) / 100
       }
-      return Math.round(duration * 100) / 100 // Round to 2 decimal places
+      if (_durationCache.size > 10000) _durationCache.clear()
+      _durationCache.set(cacheKey, result)
+      return result
     },
 
     formatPriority(priority) {

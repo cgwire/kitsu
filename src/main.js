@@ -13,7 +13,7 @@ import router from '@/router'
 import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
 
-import Autosize from 'v-autosize/src/plugin.js'
+import vAutosize from '@/directives/autosize'
 import VueChartkick from 'vue-chartkick'
 import 'chartkick/chart.js'
 import VueWebsocket from 'vue-websocket-next'
@@ -34,7 +34,7 @@ app.use(router)
 app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket.default || VueWebsocket, IO, '/events')
-app.use(Autosize)
+app.directive('autosize', vAutosize)
 app.use(VueChartkick)
 app.use(VueAnimXYZ)
 
