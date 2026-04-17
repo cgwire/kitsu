@@ -698,7 +698,7 @@ export default {
     ...mapActions(['displayMoreEdits', 'setEditSelection']),
 
     isSelected(lineIndex, columnIndex) {
-      return this.editSelectionGrid[lineIndex][columnIndex]
+      return this.editSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
     toggleLine(edit, event) {

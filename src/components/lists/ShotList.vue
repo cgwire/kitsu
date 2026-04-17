@@ -1042,7 +1042,7 @@ export default {
 
     isSelected(indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
-      return this.shotSelectionGrid[lineIndex][columnIndex]
+      return this.shotSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
     isCastingReady(shot, columnId) {

@@ -6,7 +6,6 @@ import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
 import { populateTask } from '@/lib/models'
-import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 
 import {
   coercePublicKeyFromJSON,
@@ -113,8 +112,8 @@ const initialState = {
   displayedTodos: [],
   displayedDoneTasks: [],
   todosSearchText: '',
-  doneSelectionGrid: {},
-  todoSelectionGrid: {},
+  doneSelectionGrid: new Set(),
+  todoSelectionGrid: new Set(),
   todoSearchQueries: [],
   userFilters: {},
   userFilterGroups: {},
@@ -559,7 +558,7 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
-    state.todoSelectionGrid = buildSelectionGrid(tasks.length, 1)
+    state.todoSelectionGrid = new Set()
     state.todos = sortTasks(tasks, taskTypeMap)
     state.todoMap = new Map(tasks.map(task => [task.id, task]))
     cache.todosIndex = buildTaskIndex(tasks)
@@ -581,7 +580,7 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
-    state.doneSelectionGrid = buildSelectionGrid(tasks.length, 1)
+    state.doneSelectionGrid = new Set()
     cache.doneIndex = buildTaskIndex(tasks)
     cache.doneTasks = tasks
     state.displayedDoneTasks = tasks
@@ -647,39 +646,29 @@ const mutations = {
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (
-      validationInfo.done &&
-      state.doneSelectionGrid &&
-      state.doneSelectionGrid[validationInfo.x]
-    ) {
-      state.doneSelectionGrid[validationInfo.x][validationInfo.y] = true
-    } else if (
-      state.todoSelectionGrid &&
-      state.todoSelectionGrid[validationInfo.x]
-    ) {
-      state.todoSelectionGrid[validationInfo.x][validationInfo.y] = true
+    const key = `${validationInfo.x}-${validationInfo.y}`
+    if (validationInfo.done) {
+      state.doneSelectionGrid.add(key)
+    } else {
+      state.todoSelectionGrid.add(key)
     }
   },
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
-    if (
-      validationInfo.done &&
-      state.doneSelectionGrid &&
-      state.doneSelectionGrid[validationInfo.x]
-    ) {
-      state.doneSelectionGrid[validationInfo.x][validationInfo.y] = false
-    } else if (
-      state.todoSelectionGrid &&
-      state.todoSelectionGrid[validationInfo.x]
-    ) {
-      state.todoSelectionGrid[validationInfo.x][validationInfo.y] = false
+    const key = `${validationInfo.x}-${validationInfo.y}`
+    if (validationInfo.done) {
+      state.doneSelectionGrid.delete(key)
+    } else {
+      state.todoSelectionGrid.delete(key)
     }
   },
 
   [CLEAR_SELECTED_TASKS](state) {
-    if (Object.keys(state.todoSelectionGrid).length > 0) {
-      state.todoSelectionGrid = clearSelectionGrid(state.todoSelectionGrid)
-      state.doneSelectionGrid = clearSelectionGrid(state.doneSelectionGrid)
+    for (const key of state.todoSelectionGrid) {
+      state.todoSelectionGrid.delete(key)
+    }
+    for (const key of state.doneSelectionGrid) {
+      state.doneSelectionGrid.delete(key)
     }
   },
 

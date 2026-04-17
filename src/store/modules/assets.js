@@ -22,11 +22,7 @@ import {
   sortTasks,
   sortValidationColumns
 } from '@/lib/sorting'
-import {
-  appendSelectionGrid,
-  buildSelectionGrid,
-  clearSelectionGrid
-} from '@/lib/selection'
+import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import {
   getFilledColumns,
   groupEntitiesByParents,
@@ -250,14 +246,11 @@ const helpers = {
         ? state.displayedAssets.length
         : PAGE_SIZE
     const displayedAssets = result.slice(0, limit)
-    const maxX = displayedAssets.length
-    const maxY = state.nbValidationColumns
-
     state.displayedAssets = displayedAssets
     state.assetFilledColumns = getFilledColumns(displayedAssets)
     helpers.setListStats(state, result)
     state.assetSearchText = query
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+    state.assetSelectionGrid = buildSelectionGrid()
   },
 
   buildResultForSharedAssets(state, { assetSearch }) {
@@ -291,7 +284,7 @@ const initialState = {
   displayedAssetsEstimation: 0,
   assetFilledColumns: {},
   assetSearchText: '',
-  assetSelectionGrid: {},
+  assetSelectionGrid: new Set(),
   assetSearchQueries: [],
   assetSearchFilterGroups: [],
   assetSorting: [],
@@ -989,9 +982,7 @@ const mutations = {
     state.displayedAssetTypes = assetTypes
     state.displayedAssetTypesLength = assetTypes.length
 
-    const maxX = state.displayedAssets.length
-    const maxY = state.nbValidationColumns
-    state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+    state.assetSelectionGrid = buildSelectionGrid()
 
     state.assetSearchQueries = userFilters.asset?.[production.id] || []
 
@@ -1085,9 +1076,7 @@ const mutations = {
       helpers.setListStats(state, cache.assets)
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
 
-      const maxX = state.displayedAssets.length
-      const maxY = state.nbValidationColumns
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.assetSelectionGrid = buildSelectionGrid()
     }
   },
 
@@ -1166,9 +1155,7 @@ const mutations = {
       state.displayedAssetsLength = cache.assets.filter(a => !a.canceled).length
       state.displayedAssetsCount = cache.assets.length
 
-      const maxX = state.displayedAssets.length
-      const maxY = state.nbValidationColumns
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.assetSelectionGrid = buildSelectionGrid()
       cache.assetMap.set(newAsset.id, newAsset)
     }
     if (newAsset.description && !state.isAssetDescription) {
@@ -1257,17 +1244,6 @@ const mutations = {
         state.displayedAssets.length + PAGE_SIZE
       )
       state.assetFilledColumns = getFilledColumns(state.displayedAssets)
-      const previousX = Object.keys(state.assetSelectionGrid).length
-      const maxX = state.displayedAssets.length
-      const maxY = state.nbValidationColumns
-      if (previousX >= 0) {
-        state.assetSelectionGrid = appendSelectionGrid(
-          state.assetSelectionGrid,
-          previousX,
-          maxX,
-          maxY
-        )
-      }
     }
   },
 
@@ -1304,50 +1280,27 @@ const mutations = {
       validationInfo.x = list.findIndex(e => e.id === entity.id)
       validationInfo.y = state.assetValidationColumns.indexOf(taskType.id)
     }
-    if (
-      state.assetSelectionGrid[0] &&
-      state.assetSelectionGrid[validationInfo.x]
-    ) {
-      state.assetSelectionGrid[validationInfo.x][validationInfo.y] = false
-    }
+    state.assetSelectionGrid.delete(`${validationInfo.x}-${validationInfo.y}`)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (
-      state.assetSelectionGrid[0] &&
-      state.assetSelectionGrid[validationInfo.x]
-    ) {
-      state.assetSelectionGrid[validationInfo.x][validationInfo.y] = true
-      state.selectedAssets = new Map() // unselect all previously selected lines
-    }
+    state.assetSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
+    state.selectedAssets = new Map()
   },
 
   [ADD_SELECTED_TASKS](state, selection) {
-    let tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
     selection.forEach(validationInfo => {
-      if (!tmpGrid[validationInfo.x]) {
-        tmpGrid = appendSelectionGrid(
-          tmpGrid,
-          Object.keys(tmpGrid).length,
-          validationInfo.x + 1,
-          state.nbValidationColumns
-        )
-      }
-      if (tmpGrid[validationInfo.x]) {
-        tmpGrid[validationInfo.x][validationInfo.y] = true
-      }
+      state.assetSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedAssets = new Map() // unselect all previously selected lines
-    state.assetSelectionGrid = tmpGrid
+    state.selectedAssets = new Map()
   },
 
-  [CLEAR_SELECTED_TASKS](state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state) {
     if (
       tasksStore.state.nbSelectedValidations > 0 ||
       tasksStore.state.nbSelectedTasks > 0
     ) {
-      const tmpGrid = JSON.parse(JSON.stringify(state.assetSelectionGrid))
-      state.assetSelectionGrid = clearSelectionGrid(tmpGrid)
+      clearSelectionGrid(state.assetSelectionGrid)
     }
   },
 
@@ -1475,10 +1428,7 @@ const mutations = {
     }
     if (selected) {
       state.selectedAssets.set(asset.id, asset)
-      const maxX = state.displayedAssets.length
-      const maxY = state.nbValidationColumns
-      // unselect previously selected tasks
-      state.assetSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.assetSelectionGrid = buildSelectionGrid()
     }
   },
 

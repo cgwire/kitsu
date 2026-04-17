@@ -713,10 +713,7 @@ export default {
     ...mapActions(['setEpisodeSelection']),
 
     isSelected(lineIndex, columnIndex) {
-      return (
-        this.episodeSelectionGrid[lineIndex] &&
-        this.episodeSelectionGrid[lineIndex][columnIndex]
-      )
+      return this.episodeSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
     episodePath(episodeId) {

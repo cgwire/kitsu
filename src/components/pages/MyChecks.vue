@@ -143,7 +143,7 @@ export default {
       person: {},
       productionId: '',
       productionList: [],
-      selectionGrid: {},
+      selectionGrid: new Set(),
       sortOptions: [
         'entity_name',
         'priority',
@@ -319,7 +319,7 @@ export default {
     ...mapActions(['clearSelectedTasks', 'loadTasksToCheck']),
 
     buildSelectionGrid(tasks) {
-      this.selectionGrid = buildSelectionGrid(tasks.length, 1)
+      this.selectionGrid = buildSelectionGrid()
     },
 
     resetProductionList(tasks = []) {

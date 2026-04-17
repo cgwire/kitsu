@@ -1,7 +1,6 @@
 import peopleApi from '@/store/api/people'
 import shotsApi from '@/store/api/shots'
 import shotStore from '@/store/modules/shots'
-import taskStore from '@/store/modules/tasks'
 
 import func from '@/lib/func'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -11,11 +10,7 @@ import {
   sortEpisodeResult,
   sortValidationColumns
 } from '@/lib/sorting'
-import {
-  appendSelectionGrid,
-  buildSelectionGrid,
-  clearSelectionGrid
-} from '@/lib/selection'
+import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
 import { getFilledColumns, removeModelFromList } from '@/lib/models'
 import { computeStats } from '@/lib/stats'
@@ -93,15 +88,13 @@ const helpers = {
     cache.result = result
 
     const displayedEpisodes = result
-    const maxX = displayedEpisodes.length
-    const maxY = state.nbValidationColumns
 
     helpers.setListStats(state, result)
     Object.assign(state, {
       displayedEpisodes: displayedEpisodes,
       episodeFilledColumns: getFilledColumns(displayedEpisodes),
       episodeSearchText: episodeSearch,
-      episodeSelectionGrid: buildSelectionGrid(maxX, maxY)
+      episodeSelectionGrid: buildSelectionGrid()
     })
   },
 
@@ -186,7 +179,7 @@ const initialState = {
   displayedEpisodesTimeSpent: 0,
   displayedEpisodesEstimation: 0,
   episodeFilledColumns: [],
-  episodeSelectionGrid: {},
+  episodeSelectionGrid: new Set(),
   episodeValidationColumns: [],
   isEpisodeDescription: false,
   isEpisodeEstimation: false,
@@ -552,10 +545,8 @@ const mutations = {
     }
     if (selected) {
       state.selectedEpisodes.set(episode.id, episode)
-      const maxX = displayedEpisodes.length
-      const maxY = state.nbValidationColumns
       // unselect previously selected tasks
-      state.episodeSelectionGrid = buildSelectionGrid(maxX, maxY)
+      state.episodeSelectionGrid = buildSelectionGrid()
     }
   },
 
@@ -674,9 +665,7 @@ const mutations = {
     state.displayedEpisodesLength = displayedEpisodes.length
     state.episodeFilledColumns = filledColumns
 
-    const maxX = state.displayedEpisodes.length
-    const maxY = state.nbValidationColumns
-    state.episodeSelectionGrid = buildSelectionGrid(maxX, maxY)
+    state.episodeSelectionGrid = buildSelectionGrid()
     helpers.setListStats(state, episodes)
 
     if (userFilters.episode && userFilters.episode[production.id]) {
@@ -730,9 +719,7 @@ const mutations = {
     episode.validations = new Map()
     episode.data = {}
 
-    const maxX = state.displayedEpisodes.length + 1
-    const maxY = state.nbValidationColumns
-    state.episodeSelectionGrid = buildSelectionGrid(maxX, maxY)
+    state.episodeSelectionGrid = buildSelectionGrid()
 
     cache.episodes = state.displayedEpisodes
     cache.episodes.push(episode)
@@ -898,51 +885,23 @@ const mutations = {
       validationInfo.x = list.findIndex(e => e.id === entity.id)
       validationInfo.y = state.episodeValidationColumns.indexOf(taskType.id)
     }
-    if (
-      state.episodeSelectionGrid[0] &&
-      state.episodeSelectionGrid[validationInfo.x]
-    ) {
-      state.episodeSelectionGrid[validationInfo.x][validationInfo.y] = false
-    }
+    state.episodeSelectionGrid.delete(`${validationInfo.x}-${validationInfo.y}`)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (
-      state.episodeSelectionGrid[0] &&
-      state.episodeSelectionGrid[validationInfo.x]
-    ) {
-      state.episodeSelectionGrid[validationInfo.x][validationInfo.y] = true
-      state.selectedEpisodes = new Map() // unselect all previously selected lines
-    }
+    state.episodeSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
+    state.selectedEpisodes = new Map() // unselect all previously selected lines
   },
 
   [ADD_SELECTED_TASKS](state, selection) {
-    let tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
     selection.forEach(validationInfo => {
-      if (!tmpGrid[validationInfo.x]) {
-        tmpGrid = appendSelectionGrid(
-          tmpGrid,
-          Object.keys(tmpGrid).length,
-          validationInfo.x + 1,
-          state.nbValidationColumns
-        )
-      }
-      if (tmpGrid[validationInfo.x]) {
-        tmpGrid[validationInfo.x][validationInfo.y] = true
-      }
+      state.episodeSelectionGrid.add(`${validationInfo.x}-${validationInfo.y}`)
     })
-    state.selectedEpisodes = new Map() // unselect all previously selected lines
-    state.episodeSelectionGrid = tmpGrid
+    state.selectedEpisodes = new Map()
   },
 
-  [CLEAR_SELECTED_TASKS](state, validationInfo) {
-    if (
-      taskStore.state.nbSelectedValidations > 0 ||
-      taskStore.state.nbSelectedTasks > 0
-    ) {
-      const tmpGrid = JSON.parse(JSON.stringify(state.episodeSelectionGrid))
-      state.episodeSelectionGrid = clearSelectionGrid(tmpGrid)
-    }
+  [CLEAR_SELECTED_TASKS](state) {
+    clearSelectionGrid(state.episodeSelectionGrid)
   },
 
   [NEW_TASK_END](state, { task, taskTypeMap, taskStatusMap, production }) {

@@ -217,7 +217,7 @@ export const entityListMixin = {
           for (let i = startX; i <= endX; i++) {
             for (let j = startY; j <= endY; j++) {
               const validationCell = this.$refs[`validation-${i}-${j}`]?.[0]
-              const isSelectedCell = grid?.[i]?.[j]
+              const isSelectedCell = grid?.has(`${i}-${j}`)
               if (validationCell?.selectable && !isSelectedCell) {
                 let y = validationCell.columnY
                 if (!sticked) y += columnOffset

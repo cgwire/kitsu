@@ -873,7 +873,7 @@ export default {
 
     isSelected(indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
-      return this.assetSelectionGrid[lineIndex][columnIndex]
+      return this.assetSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
     toggleLine(asset, event) {

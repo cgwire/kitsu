@@ -1,6 +1,5 @@
 import peopleApi from '@/store/api/people'
 import colors from '@/lib/colors'
-import { clearSelectionGrid } from '@/lib/selection'
 import { populateTask } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
@@ -157,7 +156,7 @@ const initialState = {
   displayedPersonTasks: [],
   displayedPersonDoneTasks: [],
   personTasksSearchText: '',
-  personTaskSelectionGrid: {},
+  personTaskSelectionGrid: new Set(),
   personTaskSearchQueries: [],
   personTasksScrollPosition: 0,
 
@@ -729,11 +728,7 @@ const mutations = {
       const taskStatus = helpers.getTaskStatus(task.task_status_id)
       task.taskStatus = taskStatus
     })
-    const personTaskSelectionGrid = {}
-    for (let i = 0; i < tasks.length; i++) {
-      personTaskSelectionGrid[i] = { 0: false }
-    }
-    state.personTaskSelectionGrid = personTaskSelectionGrid
+    state.personTaskSelectionGrid = new Set()
     state.personTasks = sortTasks(tasks, taskTypeMap)
 
     cache.personTasksIndex = buildTaskIndex(tasks)
@@ -799,25 +794,21 @@ const mutations = {
   },
 
   [REMOVE_SELECTED_TASK](state, validationInfo) {
-    if (state.personTaskSelectionGrid[validationInfo.x]) {
-      state.personTaskSelectionGrid[validationInfo.x][0] = false
-    }
+    state.personTaskSelectionGrid.delete(`${validationInfo.x}-0`)
   },
 
   [ADD_SELECTED_TASK](state, validationInfo) {
-    if (state.personTaskSelectionGrid[validationInfo.x]) {
-      state.personTaskSelectionGrid[validationInfo.x][0] = true
-    }
+    state.personTaskSelectionGrid.add(`${validationInfo.x}-0`)
   },
 
-  [CLEAR_SELECTED_TASKS](state, validationInfo) {
+  [CLEAR_SELECTED_TASKS](state) {
     if (
       taskStore.state.nbSelectedValidations > 0 ||
       taskStore.state.nbSelectedTasks > 0
     ) {
-      state.personTaskSelectionGrid = clearSelectionGrid(
-        state.personTaskSelectionGrid
-      )
+      for (const key of state.personTaskSelectionGrid) {
+        state.personTaskSelectionGrid.delete(key)
+      }
     }
   },
 

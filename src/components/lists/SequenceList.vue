@@ -673,10 +673,7 @@ export default {
     ...mapActions(['setSequenceSelection']),
 
     isSelected(lineIndex, columnIndex) {
-      return (
-        this.sequenceSelectionGrid[lineIndex] &&
-        this.sequenceSelectionGrid[lineIndex][columnIndex]
-      )
+      return this.sequenceSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
     sequencePath(sequenceId) {
