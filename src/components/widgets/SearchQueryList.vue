@@ -89,6 +89,7 @@
               :key="searchQuery.id"
               :style="{ backgroundColor: `${group.color}23` }"
               :title="getSearchQueryTitle(searchQuery)"
+              @click="navigateToSearchQuery(searchQuery)"
               v-for="searchQuery in group.queries"
             >
               <router-link
@@ -128,6 +129,7 @@
       }"
       :key="searchQuery.id"
       :title="getSearchQueryTitle(searchQuery)"
+      @click="navigateToSearchQuery(searchQuery)"
       v-for="searchQuery in userFilters"
     >
       <router-link
@@ -192,7 +194,7 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import {
   ChevronDownIcon,
@@ -212,6 +214,7 @@ import EditSearchFilterGroupModal from '@/components/modals/EditSearchFilterGrou
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const store = useStore()
 
 const props = defineProps({
@@ -348,6 +351,10 @@ const editGroup = (group = {}) => {
 const editSearch = searchQuery => {
   searchQueryToEdit.value = searchQuery
   modals.edit = true
+}
+
+const navigateToSearchQuery = searchQuery => {
+  router.push(queryPaths.value[searchQuery.id] || { name: 'open-productions' })
 }
 
 const confirmEditFilterGroup = async filterGroup => {
