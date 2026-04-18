@@ -796,10 +796,44 @@ export default {
       return !this.isLoading && !this.isError && this.displayedAssetsCount > 0
     },
 
+    /**
+     * Map of task type id → true for columns considered "filled" for the
+     * displayed assets. A column counts as filled only when at least one
+     * displayed asset has a task whose type is part of the asset type's
+     * workflow.
+     *
+     * Tasks lingering on assets whose type no longer accepts that task
+     * type (workflow-change leftovers, asset type reassignments, etc.) are
+     * deliberately treated as if they did not exist, so the column hides
+     * instead of being kept visible by orphaned tasks the artist cannot
+     * actually edit.
+     */
+    inWorkflowFilledColumns() {
+      const filled = {}
+      const productionTaskTypeIds = this.productionAssetTaskTypes.map(t => t.id)
+      for (const typeGroup of this.displayedAssets) {
+        if (!typeGroup.length) continue
+        const assetType = this.assetTypeMap.get(typeGroup[0].asset_type_id)
+        const allowedTaskTypes = assetType?.task_types?.length
+          ? assetType.task_types
+          : productionTaskTypeIds
+        const allowedSet = new Set(allowedTaskTypes)
+        for (const asset of typeGroup) {
+          if (!asset.validations) continue
+          for (const columnId of asset.validations.keys()) {
+            if (!filled[columnId] && allowedSet.has(columnId)) {
+              filled[columnId] = true
+            }
+          }
+        }
+      }
+      return filled
+    },
+
     displayedValidationColumns() {
       return this.validationColumns.filter(columnId => {
         return (
-          this.assetFilledColumns[columnId] &&
+          this.inWorkflowFilledColumns[columnId] &&
           (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
         )
       })
