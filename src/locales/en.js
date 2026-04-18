@@ -1066,7 +1066,7 @@ export default {
       senior: 'Senior'
     },
     role: {
-      all: 'All',
+      all: 'All Roles',
       admin: 'Studio Manager',
       client: 'Client',
       manager: 'Production Manager',

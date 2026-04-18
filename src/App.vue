@@ -803,6 +803,13 @@ body {
   height: 100vh;
 }
 
+@media screen and (max-width: 768px) {
+  .page {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+}
+
 th.actions {
   min-width: 160px;
 }
@@ -1296,6 +1303,22 @@ textarea.input:focus {
 
     .button {
       border-radius: 10px;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modal-content {
+    margin: 0 0.5em;
+    max-height: calc(100vh - 40px);
+
+    .box {
+      padding: 1.5em;
+
+      h1.title {
+        font-size: 1.8em;
+        margin-bottom: 0.5em;
+      }
     }
   }
 }

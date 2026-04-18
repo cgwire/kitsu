@@ -32,5 +32,13 @@ defineProps({
   font-weight: 500;
   letter-spacing: 1px;
   text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .title {
+    font-size: 1.5em;
+    letter-spacing: 0;
+  }
 }
 </style>
