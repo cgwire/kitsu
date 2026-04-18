@@ -100,6 +100,7 @@ export default defineConfig([
     languageOptions: {
       globals: {
         ...globals.vitest,
+        ...globals.browser,
         cy: 'readonly'
       }
     }

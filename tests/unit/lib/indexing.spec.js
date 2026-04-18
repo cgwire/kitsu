@@ -131,4 +131,31 @@ describe('lib/indexing', () => {
     expect(indexSearch(index, ['bunny'])).toHaveLength(1)
     expect(indexSearch(index, ['bunny'])[0].id).toEqual(3)
   })
+
+  it('indexSearch finds substrings (not just prefixes)', () => {
+    const entries = [
+      { name: 'Caminandes', id: 1 },
+      { name: 'Agent327', id: 2 },
+      { name: 'Spring', id: 3 }
+    ]
+    const index = buildNameIndex(entries)
+    expect(indexSearch(index, ['andes'])).toHaveLength(1)
+    expect(indexSearch(index, ['andes'])[0].id).toEqual(1)
+    expect(indexSearch(index, ['327'])).toHaveLength(1)
+    expect(indexSearch(index, ['327'])[0].id).toEqual(2)
+    expect(indexSearch(index, ['rin'])).toHaveLength(1)
+    expect(indexSearch(index, ['rin'])[0].id).toEqual(3)
+    expect(indexSearch(index, ['xyz'])).toHaveLength(0)
+  })
+
+  it('indexSearch with multiple terms intersects results', () => {
+    const entries = [
+      { name: 'Big Buck', id: 1 },
+      { name: 'Big Hero', id: 2 },
+      { name: 'Small Buck', id: 3 }
+    ]
+    const index = buildNameIndex(entries)
+    expect(indexSearch(index, ['big', 'buck'])).toHaveLength(1)
+    expect(indexSearch(index, ['big', 'buck'])[0].id).toEqual(1)
+  })
 })

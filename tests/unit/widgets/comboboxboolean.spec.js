@@ -32,6 +32,15 @@ describe('ComboboxBoolean', () => {
     expect(options[1].value).toBe('false')
   })
 
+  it('has non-empty labels on options', () => {
+    const combobox = wrapper.findComponent({ name: 'Combobox' })
+    const options = combobox.props('options')
+    expect(options[0].label).toBeTruthy()
+    expect(options[1].label).toBeTruthy()
+    expect(options[0].label.length).toBeGreaterThan(0)
+    expect(options[1].label.length).toBeGreaterThan(0)
+  })
+
   it('forwards modelValue to inner combobox', () => {
     const combobox = wrapper.findComponent({ name: 'Combobox' })
     expect(combobox.props('modelValue')).toBe('true')
