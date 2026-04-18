@@ -401,7 +401,7 @@ export default {
   },
 
   project_templates: {
-    title: 'Production Templates',
+    title: 'Templates',
     new_project_template: 'Add a production template',
     edit_title: 'Edit template',
     create_error: 'An error occurred while saving this template. Are you sure there is no template with a similar name?',
