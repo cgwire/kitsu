@@ -28,7 +28,15 @@
       <table class="datatable multi-section">
         <thead class="datatable-head" v-columns-resizable id="datatable-asset">
           <tr>
-            <th ref="th-name" class="name datatable-row-header" scope="col">
+            <th
+              ref="th-name"
+              :class="{
+                name: true,
+                'datatable-row-header': true,
+                'datatable-row-header--nobd': hasStickyEpisode
+              }"
+              scope="col"
+            >
               <div class="flexrow">
                 <span class="flexrow-item">
                   {{ $t('assets.fields.name') }}
@@ -48,9 +56,10 @@
 
             <th
               scope="col"
-              class="episode"
+              class="episode datatable-row-header"
               ref="th-episode"
-              v-if="isTVShow && displaySettings.showInfos"
+              :style="{ left: `${nameWidth}px` }"
+              v-if="hasStickyEpisode"
             >
               {{ $t('assets.fields.episode') }}
             </th>
@@ -264,6 +273,7 @@
               <th
                 :class="{
                   'datatable-row-header': true,
+                  'datatable-row-header--nobd': hasStickyEpisode,
                   name: true,
                   bold: !asset.canceled
                 }"
@@ -300,7 +310,11 @@
                 </div>
               </th>
 
-              <td class="episode" v-if="isTVShow && displaySettings.showInfos">
+              <td
+                class="episode datatable-row-header"
+                :style="{ left: `${nameWidth}px` }"
+                v-if="hasStickyEpisode"
+              >
                 <div class="flexrow" :title="assetEpisodes(asset, true)">
                   {{ assetEpisodes(asset, false) }}
                 </div>
@@ -691,8 +705,27 @@ export default {
         ['keyup', this.stopBrowsing]
       ],
       offsets: {},
+      nameWidth: 200,
+      nameResizeObserver: null,
       lastSelectedAsset: null
     }
+  },
+
+  mounted() {
+    this.$nextTick(() => {
+      const thName = this.$refs['th-name']
+      if (thName && typeof ResizeObserver !== 'undefined') {
+        this.nameResizeObserver = new ResizeObserver(() => {
+          this.nameWidth = thName.clientWidth
+          this.updateOffsets()
+        })
+        this.nameResizeObserver.observe(thName)
+      }
+    })
+  },
+
+  beforeUnmount() {
+    this.nameResizeObserver?.disconnect()
   },
 
   computed: {
@@ -797,6 +830,10 @@ export default {
 
     formatDurationInHours() {
       return this.organisation.format_duration_in_hours
+    },
+
+    hasStickyEpisode() {
+      return this.isTVShow && this.displaySettings.showInfos
     },
 
     /** Filter the displayed assets by the display settings */
@@ -992,7 +1029,11 @@ export default {
         return
       }
       this.$nextTick(function () {
-        let offset = this.$refs['th-name'].clientWidth
+        this.nameWidth = this.$refs['th-name'].clientWidth
+        let offset = this.nameWidth
+        if (this.$refs['th-episode']) {
+          offset += this.$refs['th-episode'].clientWidth
+        }
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {
@@ -1104,8 +1145,8 @@ td.ready-for {
 }
 
 .episode {
-  min-width: 130px;
-  width: 130px;
+  min-width: 80px;
+  width: 80px;
 }
 
 .bold {
