@@ -269,6 +269,7 @@ export default {
       currentProjectSection: this.isCurrentUserClient ? 'playlists' : 'assets',
       kitsuVersion: version,
       silent: true,
+      hasConfiguredProduction: false,
       display: {
         shortcutModal: false
       }
@@ -637,6 +638,10 @@ export default {
     },
 
     configureProduction(routeProductionId, routeEpisodeId = undefined) {
+      // Initial app load (e.g. F5 / direct link) has no previous production:
+      // honor the URL episode. Production switch defaults to 'all' for assets.
+      const isInitialLoad = !this.hasConfiguredProduction
+      this.hasConfiguredProduction = true
       this.setProduction(routeProductionId)
       this.currentProductionId = routeProductionId
       this.currentEpisodeId = null
@@ -647,7 +652,13 @@ export default {
             const query = this.$route.query
             this.currentProjectSection = this.getCurrentSectionFromRoute()
             if (this.currentProjectSection === 'assets') {
-              this.currentEpisodeId = 'all'
+              const isValidEpisode =
+                ['all', 'main'].includes(routeEpisodeId) ||
+                this.episodes.some(({ id }) => id === routeEpisodeId)
+              this.currentEpisodeId =
+                isInitialLoad && routeEpisodeId && isValidEpisode
+                  ? routeEpisodeId
+                  : 'all'
             } else if (
               this.currentProjectSection === 'playlists' &&
               routeEpisodeId === 'all'
