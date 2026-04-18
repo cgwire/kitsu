@@ -3,7 +3,7 @@
     <div class="flexrow page-header">
       <page-title class="flexrow-item filler" :text="$t('bots.title')" />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item mr0"
         :text="$t('bots.new_bot')"
         :is-responsive="true"
         icon="plus"
@@ -14,29 +14,29 @@
 
     <div class="flexrow search-options">
       <search-field
-        ref="search-field"
+        ref="searchFieldRef"
         class="search flexrow-item"
         @change="onSearchChange"
         placeholder="ex: gazu bot"
       />
-      <combobox-department
-        class="flexrow-item"
-        all-departments-label
-        :label="$t('main.department')"
-        v-model="selectedDepartment"
-      />
-      <combobox-styled
-        class="flexrow-item"
-        :label="$t('people.fields.role')"
-        locale-key-prefix="people.role."
-        :options="roleOptions"
-        v-model="role"
-      />
+      <div class="flexrow filters">
+        <combobox-department
+          class="flexrow-item"
+          all-departments-label
+          :label="$t('main.department')"
+          v-model="selectedDepartment"
+        />
+        <combobox-styled
+          class="flexrow-item"
+          :label="$t('people.fields.role')"
+          locale-key-prefix="people.role."
+          :options="roleOptions"
+          v-model="role"
+        />
+      </div>
     </div>
 
-    <div class="query-list"></div>
-
-    <route-tabs class="mb0" :active-tab="activeTab" :tabs="tabs" />
+    <route-tabs class="mb0 mt1" :active-tab="activeTab" :tabs="tabs" />
 
     <people-list
       :entries="activeTab === 'active' ? activePeople : unactivePeople"
@@ -47,7 +47,7 @@
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
       @refresh-clicked="onRefreshClicked"
-      v-if="isPeopleLoading || currentPeople.length > 0"
+      v-if="isPeopleLoading || hasBots"
     />
     <div class="has-text-centered strong" v-else>
       <p>{{ $t('bots.no_bot') }}</p>
@@ -108,10 +108,12 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
-
-import { searchMixin } from '@/components/mixins/search'
+<script setup>
+import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -125,308 +127,320 @@ import PeopleList from '@/components/lists/PeopleList.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
-export default {
-  name: 'bots',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
 
-  components: {
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxStyled,
-    EditAvatarModal,
-    EditPersonModal,
-    HardDeleteModal,
-    NewTokenModal,
-    PageTitle,
-    PeopleList,
-    RouteTabs,
-    SearchField
+const activeTab = ref('active')
+const role = ref('all')
+const selectedDepartment = ref('')
+const personToDelete = ref({})
+const personToEdit = ref({ role: 'user' })
+
+const roleOptions = [
+  { label: 'all', value: 'all' },
+  { label: 'admin', value: 'admin' },
+  { label: 'client', value: 'client' },
+  { label: 'manager', value: 'manager' },
+  { label: 'supervisor', value: 'supervisor' },
+  { label: 'user', value: 'user' },
+  { label: 'vendor', value: 'vendor' }
+]
+
+const errors = reactive({
+  avatar: false,
+  del: false,
+  edit: false,
+  userLimit: false
+})
+const loading = reactive({
+  del: false,
+  deletingAvatar: false,
+  edit: false,
+  updatingAvatar: false
+})
+const modals = reactive({
+  avatar: false,
+  del: false,
+  edit: false,
+  newToken: false
+})
+
+const searchFieldRef = ref(null)
+
+// Computed
+
+const people = computed(() => store.getters.people)
+const displayedPeople = computed(() => store.getters.displayedPeople)
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
+const isPeopleLoading = computed(() => store.getters.isPeopleLoading)
+const isPeopleLoadingError = computed(() => store.getters.isPeopleLoadingError)
+
+const hasBots = computed(() => people.value.some(person => person.is_bot))
+
+const currentPeople = computed(() => {
+  let people = displayedPeople.value.filter(person => person.is_bot)
+  if (role.value !== 'all') {
+    people = people.filter(person => person.role === role.value)
+  }
+  if (selectedDepartment.value) {
+    people = people.filter(person =>
+      person.departments.includes(selectedDepartment.value)
+    )
+  }
+  return people
+})
+
+const activePeople = computed(() =>
+  currentPeople.value.filter(person => person.active)
+)
+
+const unactivePeople = computed(() =>
+  currentPeople.value.filter(person => !person.active)
+)
+
+const tabs = computed(() => [
+  {
+    name: 'active',
+    label: `${t('main.active')} (${activePeople.value.length})`
   },
+  {
+    name: 'unactive',
+    label: `${t('people.unactive')} (${unactivePeople.value.length})`
+  }
+])
 
-  data() {
-    return {
-      activeTab: 'active',
-      role: 'all',
-      roleOptions: [
-        { label: 'all', value: 'all' },
-        { label: 'admin', value: 'admin' },
-        { label: 'client', value: 'client' },
-        { label: 'manager', value: 'manager' },
-        { label: 'supervisor', value: 'supervisor' },
-        { label: 'user', value: 'user' },
-        { label: 'vendor', value: 'vendor' }
-      ],
-      errors: {
-        avatar: false,
-        del: false,
-        edit: false,
-        userLimit: false
-      },
-      loading: {
-        del: false,
-        deletingAvatar: false,
-        edit: false,
-        updatingAvatar: false
-      },
-      modals: {
-        avatar: false,
-        del: false,
-        edit: false,
-        newToken: false
-      },
-      personToDelete: {},
-      personToEdit: { role: 'user' },
-      selectedDepartment: ''
-    }
-  },
+const deleteText = computed(() => {
+  const personName = personToDelete.value?.full_name
+  return personName ? t('people.delete_text', { personName }) : ''
+})
 
-  async mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-    this.role = this.$route.query.role || 'all'
-    this.selectedDepartment = this.$route.query.department || ''
-    this.setSearchFromUrl()
-    await this.loadPeople()
-    this.onSearchChange()
-  },
+// Functions
 
-  watch: {
-    'modals.edit'() {
-      if (this.modals.edit) {
-        this.errors.edit = false
-        this.errors.userLimit = false
-        this.loading.edit = false
-      }
-    },
-
-    selectedDepartment() {
-      this.updateRoute()
-    },
-
-    role() {
-      this.updateRoute()
-    },
-
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'displayedPeople',
-      'isCurrentUserAdmin',
-      'isPeopleLoading',
-      'isPeopleLoadingError'
-    ]),
-
-    tabs() {
-      return [
-        {
-          name: 'active',
-          label: `${this.$t('main.active')} (${this.activePeople.length})`
-        },
-        {
-          name: 'unactive',
-          label: `${this.$t('people.unactive')} (${this.unactivePeople.length})`
-        }
-      ]
-    },
-
-    currentPeople() {
-      let people = this.displayedPeople.filter(person => person.is_bot)
-      if (this.role !== 'all') {
-        people = people.filter(person => person.role === this.role)
-      }
-      if (this.selectedDepartment) {
-        people = people.filter(person =>
-          person.departments.includes(this.selectedDepartment)
-        )
-      }
-      return people
-    },
-
-    deleteText() {
-      const personName = this.personToDelete?.full_name
-      return personName ? this.$t('people.delete_text', { personName }) : ''
-    },
-
-    searchField() {
-      return this.$refs['search-field']
-    },
-
-    activePeople() {
-      return this.currentPeople.filter(person => person.active)
-    },
-
-    unactivePeople() {
-      return this.currentPeople.filter(person => !person.active)
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'clearPersonAvatar',
-      'deletePeople',
-      'editPerson',
-      'generateToken',
-      'loadPeople',
-      'newPerson',
-      'setPeopleSearch',
-      'uploadPersonAvatar'
-    ]),
-
-    async deleteAvatar() {
-      this.loading.deletingAvatar = true
-      try {
-        await this.clearPersonAvatar(this.personToEdit)
-        this.modals.avatar = false
-        this.onSearchChange()
-      } catch (err) {
-        this.errors.avatar = true
-      }
-      this.loading.deletingAvatar = false
-    },
-
-    async updateAvatar(formData) {
-      this.loading.updatingAvatar = true
-      try {
-        await this.uploadPersonAvatar({ person: this.personToEdit, formData })
-        this.modals.avatar = false
-        this.onSearchChange()
-      } catch (err) {
-        this.errors.avatar = true
-      }
-      this.loading.updatingAvatar = false
-    },
-
-    confirmGenerateToken(form) {
-      this.generateToken(form)
-        .then(person => {
-          this.updatePersonToEdit(person)
-        })
-        .catch(console.error)
-    },
-
-    confirmEditPeople(form) {
-      let action = 'editPerson'
-      if (this.personToEdit.id === undefined) action = 'newPerson'
-      else form.id = this.personToEdit.id
-      this.loading.edit = true
-      this.errors.edit = false
-      this.errors.userLimit = false
-      this[action](form)
-        .then(person => {
-          this.loading.edit = false
-          this.modals.edit = false
-          const access_token = person.access_token
-          if (access_token?.length) {
-            this.updatePersonToEdit(person)
-            this.modals.newToken = true
-          }
-          this.onSearchChange()
-        })
-        .catch(err => {
-          console.error(err)
-          const isUserLimitReached =
-            err.body?.message?.includes('limit') ?? false
-          if (isUserLimitReached) {
-            this.errors.userLimit = true
-          } else {
-            this.errors.edit = true
-          }
-          this.loading.edit = false
-        })
-    },
-
-    confirmDeletePeople() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deletePeople(this.personToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-          this.onSearchChange()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
-
-    onSearchChange() {
-      if (this.searchField) {
-        const searchQuery = this.searchField.getValue()
-        if (searchQuery?.length !== 1) {
-          this.setPeopleSearch(searchQuery)
-        }
-        this.setSearchInUrl()
-      }
-    },
-
-    onAvatarClicked(person) {
-      this.updatePersonToEdit(person)
-      this.errors.avatar = false
-      this.modals.avatar = true
-    },
-
-    onDeleteClicked(person) {
-      this.personToDelete = person
-      this.modals.del = true
-    },
-
-    onEditClicked(person) {
-      this.updatePersonToEdit(person)
-      this.modals.edit = true
-    },
-
-    onRefreshClicked(person) {
-      this.updatePersonToEdit(person)
-      this.modals.newToken = true
-    },
-
-    onNewClicked() {
-      this.updatePersonToEdit({ role: 'user' })
-      this.modals.edit = true
-    },
-
-    updatePersonToEdit(person) {
-      this.personToEdit = {
-        ...person,
-        expiration_date: person.expiration_date
-          ? new Date(person.expiration_date)
-          : null
-      }
-    },
-
-    updateRoute() {
-      const search = this.searchField.getValue()
-      const department = this.selectedDepartment
-      const role = this.role
-      this.$router.push({ query: { search, department, role } })
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('bots.title')} - Kitsu`
-    }
+const setSearchFromUrl = () => {
+  const searchQuery = searchFieldRef.value?.getValue()
+  const searchFromUrl = route.query.search
+  if (!searchQuery && searchFromUrl) {
+    searchFieldRef.value?.setValue(searchFromUrl)
   }
 }
+
+const setSearchInUrl = query => {
+  const searchQuery = query || searchFieldRef.value?.getValue()
+  router.push({
+    query: {
+      ...route.query,
+      search: searchQuery || undefined
+    }
+  })
+}
+
+const onSearchChange = () => {
+  if (!searchFieldRef.value) return
+  const searchQuery = searchFieldRef.value.getValue()
+  if (searchQuery?.length !== 1) {
+    store.dispatch('setPeopleSearch', searchQuery)
+  }
+  setSearchInUrl()
+}
+
+const updatePersonToEdit = person => {
+  personToEdit.value = {
+    ...person,
+    expiration_date: person.expiration_date
+      ? new Date(person.expiration_date)
+      : null
+  }
+}
+
+const deleteAvatar = async () => {
+  loading.deletingAvatar = true
+  try {
+    await store.dispatch('clearPersonAvatar', personToEdit.value)
+    modals.avatar = false
+    onSearchChange()
+  } catch (err) {
+    errors.avatar = true
+  }
+  loading.deletingAvatar = false
+}
+
+const updateAvatar = async formData => {
+  loading.updatingAvatar = true
+  try {
+    await store.dispatch('uploadPersonAvatar', {
+      person: personToEdit.value,
+      formData
+    })
+    modals.avatar = false
+    onSearchChange()
+  } catch (err) {
+    errors.avatar = true
+  }
+  loading.updatingAvatar = false
+}
+
+const confirmGenerateToken = form => {
+  store
+    .dispatch('generateToken', form)
+    .then(person => {
+      updatePersonToEdit(person)
+    })
+    .catch(console.error)
+}
+
+const confirmEditPeople = form => {
+  const action =
+    personToEdit.value.id === undefined ? 'newPerson' : 'editPerson'
+  if (action === 'editPerson') form.id = personToEdit.value.id
+  loading.edit = true
+  errors.edit = false
+  errors.userLimit = false
+  store
+    .dispatch(action, form)
+    .then(person => {
+      loading.edit = false
+      modals.edit = false
+      if (person.access_token?.length) {
+        updatePersonToEdit(person)
+        modals.newToken = true
+      }
+      onSearchChange()
+    })
+    .catch(err => {
+      console.error(err)
+      const isUserLimitReached = err.body?.message?.includes('limit') ?? false
+      if (isUserLimitReached) {
+        errors.userLimit = true
+      } else {
+        errors.edit = true
+      }
+      loading.edit = false
+    })
+}
+
+const confirmDeletePeople = () => {
+  loading.del = true
+  errors.del = false
+  store
+    .dispatch('deletePeople', personToDelete.value)
+    .then(() => {
+      loading.del = false
+      modals.del = false
+      onSearchChange()
+    })
+    .catch(err => {
+      console.error(err)
+      loading.del = false
+      errors.del = true
+    })
+}
+
+const onAvatarClicked = person => {
+  updatePersonToEdit(person)
+  errors.avatar = false
+  modals.avatar = true
+}
+
+const onDeleteClicked = person => {
+  personToDelete.value = person
+  modals.del = true
+}
+
+const onEditClicked = person => {
+  updatePersonToEdit(person)
+  modals.edit = true
+}
+
+const onRefreshClicked = person => {
+  updatePersonToEdit(person)
+  modals.newToken = true
+}
+
+const onNewClicked = () => {
+  updatePersonToEdit({ role: 'user' })
+  modals.edit = true
+}
+
+const updateRoute = () => {
+  const search = searchFieldRef.value?.getValue()
+  router.push({
+    query: { search, department: selectedDepartment.value, role: role.value }
+  })
+}
+
+// Watchers
+
+watch(
+  () => modals.edit,
+  isOpen => {
+    if (isOpen) {
+      errors.edit = false
+      errors.userLimit = false
+      loading.edit = false
+    }
+  }
+)
+
+watch(selectedDepartment, updateRoute)
+watch(role, updateRoute)
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(async () => {
+  activeTab.value = route.query.tab || 'active'
+  role.value = route.query.role || 'all'
+  selectedDepartment.value = route.query.department || ''
+  setSearchFromUrl()
+  await store.dispatch('loadPeople')
+  onSearchChange()
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('bots.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
+.page-header {
+  align-items: center;
+  margin-bottom: 1em;
+}
+
 .search {
   margin-top: 2em;
-}
-.query-list {
-  margin-top: 1.5rem;
 }
 .search-options {
   align-items: flex-end;
 }
 .filter-button {
   margin-top: 0.3em;
+}
+
+@media screen and (max-width: 768px) {
+  .search-options {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5em;
+  }
+
+  .search {
+    margin-top: 0;
+    order: 0;
+  }
+
+  .search-options :deep(.label) {
+    display: none;
+  }
 }
 </style>

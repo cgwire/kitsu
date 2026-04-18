@@ -315,4 +315,118 @@ export default {
 .actions {
   min-width: 150px;
 }
+
+.data-list {
+  margin-top: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .datatable-wrapper {
+    overflow-x: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  table.datatable {
+    display: block;
+    background: transparent;
+  }
+
+  .datatable-head {
+    display: none;
+  }
+
+  .datatable-body {
+    display: block;
+  }
+
+  .data-list .datatable .datatable-row,
+  .data-list .datatable .datatable-row:nth-child(even),
+  .data-list .datatable .datatable-row:hover,
+  .data-list .datatable .datatable-row:last-child {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'user role'
+      'departments departments'
+      'expiration expiration';
+    align-items: center;
+    column-gap: 0.5em;
+    row-gap: 0.25em;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    background-color: var(--background) !important;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .data-list .datatable .datatable-row td,
+  .data-list .datatable .datatable-row :deep(td),
+  .data-list .datatable .datatable-row:last-child td,
+  .data-list .datatable .datatable-row:last-child:nth-child(even) td,
+  .data-list .datatable .datatable-row:last-child:hover td {
+    display: block;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background-color: transparent !important;
+  }
+
+  .user {
+    grid-area: user;
+    width: auto;
+    min-width: 0;
+  }
+
+  .role {
+    grid-area: role;
+    width: auto;
+    min-width: 0;
+    color: var(--text-alt);
+    font-size: 0.9em;
+  }
+
+  .departments {
+    grid-area: departments;
+    width: auto;
+    min-width: 0;
+  }
+
+  .expiration {
+    grid-area: expiration;
+    width: auto;
+    min-width: 0;
+    font-size: 0.9em;
+  }
+
+  :deep(.actions) {
+    display: none !important;
+  }
+
+  :deep(.entity-thumbnail) {
+    box-shadow: none;
+  }
+
+  :deep(.datatable-row-header) {
+    border-right: 0;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  .phone,
+  .studio,
+  .contract,
+  .position,
+  .seniority,
+  .salary {
+    display: none;
+  }
+
+  .footer-info {
+    display: none;
+  }
+}
 </style>

@@ -216,4 +216,10 @@ defineEmits(['click'])
 .active {
   box-shadow: inset 0 0 2px 2px var(--box-shadow);
 }
+
+@media screen and (max-width: 768px) {
+  .button .icon:first-child:not(:last-child) {
+    margin-right: 0;
+  }
+}
 </style>
