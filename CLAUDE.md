@@ -69,6 +69,35 @@ useHead({ title: computed(() => `${t('studios.title')} - Kitsu`) })
 </script>
 ```
 
+### Script setup organization
+
+Group code by role with section comments, in this order:
+
+```vue
+<script setup>
+// Imports
+import { ref, computed, ... } from 'vue'
+...
+
+// Composables (useI18n, useStore, useRoute, ...)
+const { t } = useI18n()
+const store = useStore()
+
+// Props / Emits
+const props = defineProps({ ... })
+const emit = defineEmits([...])
+
+// State            (refs and reactive)
+// Computed         (computed values, including Vuex getters)
+// Functions        (event handlers and helpers)
+// Watchers         (watch / watchEffect)
+// Lifecycle        (onMounted, onBeforeUnmount, ...)
+// Head             (useHead)
+</script>
+```
+
+Skip sections that are not relevant. Order within each section is by usage proximity (related items together) rather than alphabetical.
+
 ### Arrow functions
 
 Arrow functions are preferred over classic function declarations:
