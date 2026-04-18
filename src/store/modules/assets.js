@@ -384,8 +384,8 @@ const getters = {
 }
 
 const actions = {
-  loadAssets(
-    { commit, state, rootGetters },
+  async loadAssets(
+    { commit, dispatch, state, rootGetters },
     { all = false, withShared = true, withTasks = true } = {}
   ) {
     const assetTypeMap = rootGetters.assetTypeMap
@@ -398,9 +398,12 @@ const actions = {
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
 
-    if (isTVShow && !episode) {
-      // If it's tv show and if we don't have any episode set,
-      // we use the first one.
+    if (isTVShow && !episode && !all) {
+      // If it's a TV show and no episode is set, try to load episodes
+      // first, then pick the first one.
+      if (rootGetters.episodes.length === 0) {
+        await dispatch('loadEpisodes')
+      }
       episode = rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
       if (!episode) {
         return []
@@ -408,12 +411,8 @@ const actions = {
       commit(SET_CURRENT_EPISODE, episode.id)
     }
 
-    if (isTVShow && !episode && !all) {
-      return []
-    }
-
     if (state.isAssetsLoading) {
-      return []
+      return cache.assets
     }
 
     if (all) {
