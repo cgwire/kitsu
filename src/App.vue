@@ -946,24 +946,6 @@ tr:hover .actions a {
 tr:hover .actions.datatable-row-footer {
   position: sticky;
   right: 0;
-  border-left: 1px solid rgba(var(--border-rgb), 0.5);
-
-  &::before {
-    content: '';
-    display: block;
-    position: absolute;
-    right: calc(100% + 1px);
-    top: 0;
-    bottom: 0;
-    width: 0.75rem;
-    background: linear-gradient(
-      270deg,
-      rgba(var(--border-rgb), 0.4) 0%,
-      rgba(var(--border-rgb), 0.3) 20%,
-      rgba(var(--border-rgb), 0.2) 50%,
-      rgba(var(--border-rgb), 0) 100%
-    );
-  }
 }
 
 a {
