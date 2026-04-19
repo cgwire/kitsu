@@ -408,6 +408,14 @@ export default {
     box-shadow: none;
   }
 
+  :deep(.datatable-row-footer) {
+    border-left: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
   :deep(.datatable-row-header) {
     border-right: 0;
 
