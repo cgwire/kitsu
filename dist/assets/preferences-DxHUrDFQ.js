@@ -1,2 +1,0 @@
-var e={setPreference(e,t){return localStorage.setItem(e,t)},getPreference(e){return localStorage.getItem(e)},getBoolPreference(e,t=!1){let n=this.getPreference(e);return n===null?t:n===`true`},getIntPreference(e,t=0){let n=this.getPreference(e),r=parseInt(n);return isNaN(r)?t:r},setObjectPreference(e,t){return localStorage.setItem(e,JSON.stringify(t))},getObjectPreference(e){let t=this.getPreference(e);try{return JSON.parse(t)}catch{return null}}};export{e as t};
-//# sourceMappingURL=preferences-DxHUrDFQ.js.map

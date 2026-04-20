@@ -1,2 +1,0 @@
-import{o as e}from"./chunk-zsgVPwQN.js";import{r as t}from"./vuex.esm-bundler-BRKxNkYq.js";import{t as n}from"./moment-timezone-BLXiXGed.js";import{o as r}from"./time-B-0jb6nC.js";var i=e(n(),1),a={computed:{...t([`user`]),timezone(){return this.user.timezone||i.default.tz.guess()},today(){return(0,i.default)().toDate()}},methods:{formatDate(e){return r(e,this.timezone)}}};export{a as t};
-//# sourceMappingURL=time-C_8D3_Ge.js.map
