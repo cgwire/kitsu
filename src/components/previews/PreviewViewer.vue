@@ -93,6 +93,18 @@
       v-if="isPdf"
     />
 
+    <markdown-viewer
+      :preview="preview"
+      :default-height="defaultHeight"
+      v-if="isMarkdown"
+    />
+
+    <diff-viewer
+      :preview="preview"
+      :default-height="defaultHeight"
+      v-if="isDiff"
+    />
+
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
       <a
         class="button mt2"
@@ -116,6 +128,8 @@ import { formatFrame, formatTime } from '@/lib/video'
 import { domMixin } from '@/components/mixins/dom'
 
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
+import DiffViewer from '@/components/previews/DiffViewer.vue'
+import MarkdownViewer from '@/components/previews/MarkdownViewer.vue'
 import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
@@ -128,7 +142,9 @@ export default {
   mixins: [domMixin],
 
   components: {
+    DiffViewer,
     DownloadIcon,
+    MarkdownViewer,
     ObjectViewer,
     PdfViewer,
     PictureViewer,
@@ -285,6 +301,14 @@ export default {
       return this.isReady && this.extension === 'pdf'
     },
 
+    isMarkdown() {
+      return this.isReady && this.extension === 'md'
+    },
+
+    isDiff() {
+      return this.isReady && this.extension === 'diff'
+    },
+
     isPicture() {
       return (
         this.isReady && ['gif', 'png', 'jpg', 'jpeg'].includes(this.extension)
@@ -306,7 +330,9 @@ export default {
         !this.isMovie &&
         !this.is3DModel &&
         !this.isSound &&
-        !this.isPdf
+        !this.isPdf &&
+        !this.isMarkdown &&
+        !this.isDiff
       )
     },
 

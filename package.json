@@ -37,6 +37,7 @@
     "color-hash": "2.0.2",
     "color-string": "1.9.1",
     "core-js": "3.49.0",
+    "diff2html": "^3.4.56",
     "exceljs": "4.4.0",
     "fabric": "cgwire/fabric.js",
     "fabricjs-psbrush": "cgwire/fabricjs-psbrush",
