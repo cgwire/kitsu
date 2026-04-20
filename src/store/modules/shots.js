@@ -72,7 +72,8 @@ import {
   UNLOCK_SHOT,
   RESET_ALL,
   CLEAR_SELECTED_SHOTS,
-  SET_SHOT_SELECTION
+  SET_SHOT_SELECTION,
+  LOAD_TASK_END
 } from '@/store/mutation-types'
 
 const cache = {
@@ -1223,6 +1224,23 @@ const mutations = {
         shotTaskId => shotTaskId === task.id
       )
       shot.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [LOAD_TASK_END](state, task) {
+    const shot = cache.shotMap.get(task.entity_id)
+    if (shot) {
+      let timeSpent = 0
+      let estimation = 0
+      shot.tasks.forEach(taskId => {
+        const t = tasksStore.state.taskMap.get(taskId)
+        if (t) {
+          timeSpent += t.duration || 0
+          estimation += t.estimation || 0
+        }
+      })
+      shot.timeSpent = timeSpent
+      shot.estimation = estimation
     }
   },
 

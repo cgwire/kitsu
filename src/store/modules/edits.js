@@ -62,7 +62,8 @@ import {
   RESET_ALL,
   CLEAR_SELECTED_EDITS,
   SET_EDIT_SELECTION,
-  CHANGE_EDIT_SORT
+  CHANGE_EDIT_SORT,
+  LOAD_TASK_END
 } from '@/store/mutation-types'
 
 const cache = {
@@ -998,6 +999,23 @@ const mutations = {
         editTaskId => editTaskId === task.id
       )
       edit.tasks.splice(taskIndex, 1)
+    }
+  },
+
+  [LOAD_TASK_END](state, task) {
+    const edit = cache.editMap.get(task.entity_id)
+    if (edit) {
+      let timeSpent = 0
+      let estimation = 0
+      edit.tasks.forEach(taskId => {
+        const t = tasksStore.state.taskMap.get(taskId)
+        if (t) {
+          timeSpent += t.duration || 0
+          estimation += t.estimation || 0
+        }
+      })
+      edit.timeSpent = timeSpent
+      edit.estimation = estimation
     }
   },
 
