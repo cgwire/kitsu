@@ -24,6 +24,7 @@ export default {
   },
 
   getUsedSharedAssets(production, episode = undefined) {
+    if (!production) return Promise.resolve([])
     let path = `/api/data/projects/${production.id}`
     if (episode) {
       path += `/episodes/${episode.id}`

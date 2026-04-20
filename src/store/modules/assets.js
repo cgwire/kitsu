@@ -77,7 +77,8 @@ import {
   CLEAR_SELECTED_ASSETS,
   SET_ASSET_SELECTION,
   LOAD_SHARED_ASSETS_END,
-  LOAD_UNSHARED_ASSETS_END
+  LOAD_UNSHARED_ASSETS_END,
+  LOAD_TASK_END
 } from '@/store/mutation-types'
 
 const helpers = {
@@ -390,6 +391,7 @@ const actions = {
   ) {
     const assetTypeMap = rootGetters.assetTypeMap
     const production = rootGetters.currentProduction
+    if (!production) return []
     let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
     const userFilters = rootGetters.userFilters
@@ -1192,6 +1194,23 @@ const mutations = {
   },
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {},
+
+  [LOAD_TASK_END](state, task) {
+    const asset = cache.assetMap.get(task.entity_id)
+    if (asset) {
+      let timeSpent = 0
+      let estimation = 0
+      asset.tasks.forEach(taskId => {
+        const t = tasksStore.state.taskMap.get(taskId)
+        if (t) {
+          timeSpent += t.duration || 0
+          estimation += t.estimation || 0
+        }
+      })
+      asset.timeSpent = timeSpent
+      asset.estimation = estimation
+    }
+  },
 
   [SET_ASSET_SEARCH](state, payload) {
     payload.sorting = state.assetSorting
