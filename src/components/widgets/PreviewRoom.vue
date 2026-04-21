@@ -1,5 +1,5 @@
 <template v-if="room.id">
-  <div class="preview-room mr05">
+  <div class="preview-room" :class="{ mr05: peopleInRoom.length > 0 }">
     <button-simple
       :text="$t('preview_room.leave_room')"
       class="preview-room-button"

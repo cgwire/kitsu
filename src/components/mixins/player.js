@@ -1098,18 +1098,21 @@ export const playerMixin = {
           this.clearCanvas()
         }
       }
-      if (
-        this.playlist &&
-        this.playlist.for_entity === 'shot' &&
-        this.handleOut < this.nbFrames &&
-        this.frameNumber >= this.handleOut &&
-        this.isPlaying
-      ) {
-        if (this.isRepeating) {
-          this.rawPlayer.setCurrentFrame(this.handleIn)
-          this.rawPlayerComparison.setCurrentFrame(this.handleIn)
-        } else {
-          this.onPlayNext()
+      if (this.playlist && this.isPlaying) {
+        const hasHandles =
+          this.playlist.for_entity === 'shot' && this.handleOut < this.nbFrames
+        const reachedEnd = hasHandles
+          ? this.frameNumber >= this.handleOut
+          : this.frameNumber >= this.nbFrames - 1
+
+        if (reachedEnd) {
+          if (this.isRepeating) {
+            const startFrame = hasHandles ? this.handleIn : 0
+            this.rawPlayer.setCurrentFrame(startFrame)
+            this.rawPlayerComparison.setCurrentFrame(startFrame)
+          } else {
+            this.onPlayNext()
+          }
         }
       }
 

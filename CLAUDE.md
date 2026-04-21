@@ -111,6 +111,27 @@ const onSearchChange = s => { ... }
 function onSelect() { ... }
 ```
 
+### Functional style
+
+Prefer functional array methods (`map`, `filter`, `some`, `reduce`, `forEach`) over imperative loops (`for`, `for...of`, `while`) when possible.
+
+```js
+// Good
+const hasMatch = items.some(item => item.id === targetId)
+const names = people.map(p => p.name)
+
+// Avoid
+let hasMatch = false
+for (const item of items) {
+  if (item.id === targetId) {
+    hasMatch = true
+    break
+  }
+}
+```
+
+Use imperative loops only when functional doesn't fit (side effects across iterations, performance-critical hot paths, or complex control flow).
+
 ### Props
 
 Always type props with defaults:
