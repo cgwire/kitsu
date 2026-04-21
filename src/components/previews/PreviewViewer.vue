@@ -492,14 +492,25 @@ export default {
     },
 
     extractFrame(canvas, frame) {
-      this.videoViewer.setCurrentFrame(frame)
-      const video = this.videoViewer.video
-      const context = canvas.getContext('2d')
-      const dimensions = this.videoViewer.getNaturalDimensions()
-      canvas.width = dimensions.width
-      canvas.height = dimensions.height
-      context.clearRect(0, 0, canvas.width, canvas.height)
-      context.drawImage(video, 0, 0, canvas.width, canvas.height)
+      return new Promise(resolve => {
+        const video = this.videoViewer.video
+        const draw = () => {
+          const context = canvas.getContext('2d')
+          const dimensions = this.videoViewer.getNaturalDimensions()
+          canvas.width = dimensions.width
+          canvas.height = dimensions.height
+          context.clearRect(0, 0, canvas.width, canvas.height)
+          context.drawImage(video, 0, 0, canvas.width, canvas.height)
+          resolve()
+        }
+        const targetTime = frame * this.videoViewer.frameDuration
+        if (Math.abs(video.currentTime - targetTime) < 0.01) {
+          draw()
+        } else {
+          video.addEventListener('seeked', draw, { once: true })
+          this.videoViewer.setCurrentFrame(frame)
+        }
+      })
     },
 
     resetZoom() {
