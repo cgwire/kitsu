@@ -129,6 +129,7 @@ export default {
             (person.departments &&
               person.departments.includes(this.form.department_id))
         )
+        .sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
     }
   },
 
