@@ -414,6 +414,7 @@ export default {
     apply_to_description: "Add a template's configuration to this production. Existing settings are preserved.",
     apply_confirm: "This will add the template's task types, statuses, asset types, automations, and metadata descriptors to this production. Existing settings are preserved. Continue?",
     from_production: 'Create from production',
+    empty: 'No production template yet. Create one to quickly configure new productions.',
     click_name_to_edit: 'Click on a template name to edit its configuration.',
     name_required: 'A name is required.',
     duplicate_name: 'A production template with this name already exists.',

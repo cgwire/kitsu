@@ -8,7 +8,7 @@
       @new-clicked="onNewClicked"
     />
 
-    <p class="info">
+    <p class="info" v-if="projectTemplates.length > 0">
       <info-icon class="info-icon" />
       {{ $t('project_templates.click_name_to_edit') }}
     </p>
@@ -20,7 +20,21 @@
       :is-error="errors.list"
       @edit-clicked="onEditClicked"
       @delete-clicked="onDeleteClicked"
+      v-if="loading.list || projectTemplates.length > 0"
     />
+
+    <div
+      class="empty-state has-text-centered"
+      v-else-if="!loading.list && projectTemplates.length === 0"
+    >
+      <p class="empty-text">{{ $t('project_templates.empty') }}</p>
+      <button-simple
+        class="mt1"
+        :text="$t('project_templates.new_project_template')"
+        icon="plus"
+        @click="onNewClicked"
+      />
+    </div>
 
     <edit-project-template-modal
       :active="modals.edit"
@@ -55,6 +69,7 @@ import { InfoIcon } from 'lucide-vue-next'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditProjectTemplateModal from '@/components/modals/EditProjectTemplateModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
@@ -193,6 +208,15 @@ onMounted(async () => {
 .info-icon {
   width: 16px;
   height: 16px;
+}
+
+.empty-state {
+  margin-top: 3em;
+}
+
+.empty-text {
+  color: var(--text-alt);
+  font-size: 1.1em;
 }
 
 @media screen and (max-width: 768px) {

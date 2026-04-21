@@ -1154,7 +1154,7 @@ export default {
 
 thead .name {
   min-width: 200px;
-  width: 200px;
+  width: 300px;
 }
 
 th.time-spent,

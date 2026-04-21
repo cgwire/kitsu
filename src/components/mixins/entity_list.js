@@ -346,15 +346,17 @@ export const entityListMixin = {
           throw new Error(`Invalid entity type: ${type}`)
       }
 
-      entities.forEach((entity, i) => {
-        selection.push({
-          entity,
-          column: this.taskTypeMap.get(taskTypeId),
-          task: this.taskMap.get(entity.validations.get(taskTypeId)),
-          x: i,
-          y: this.lastHeaderMenuDisplayedIndexInGrid
+      entities
+        .filter(entity => !entity.canceled)
+        .forEach((entity, i) => {
+          selection.push({
+            entity,
+            column: this.taskTypeMap.get(taskTypeId),
+            task: this.taskMap.get(entity.validations.get(taskTypeId)),
+            x: i,
+            y: this.lastHeaderMenuDisplayedIndexInGrid
+          })
         })
-      })
 
       this.$store.commit('CLEAR_SELECTED_TASKS')
       this.$nextTick(() => {

@@ -1787,16 +1787,10 @@ export default {
       })
     },
 
-    extractVideoFrame(canvas, frame) {
-      return new Promise(resolve => {
-        this.setCurrentFrame(frame)
-        this.$nextTick(() => {
-          setTimeout(() => {
-            this.previewViewer.extractFrame(canvas, frame)
-            resolve()
-          }, 500)
-        })
-      })
+    async extractVideoFrame(canvas, frame) {
+      this.setCurrentFrame(frame)
+      await setTimeout(() => {}, 100)
+      await this.previewViewer.extractFrame(canvas, frame)
     },
 
     copyAnnotationCanvas(canvas, annotation) {
