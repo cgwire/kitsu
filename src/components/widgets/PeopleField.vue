@@ -144,7 +144,7 @@ watch(
   }
 )
 
-defineExpose({ focus })
+defineExpose({ clear, focus })
 </script>
 
 <style lang="scss" scoped>
@@ -230,6 +230,7 @@ defineExpose({ focus })
     background: var(--background-selectable);
     color: inherit;
   }
+
   .multiselect__option--selected {
     background: var(--background-selected);
     color: inherit;
