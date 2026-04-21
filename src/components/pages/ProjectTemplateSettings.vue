@@ -417,7 +417,11 @@ const params = ref({
   max_retakes: 0
 })
 
-const allTaskTypes = computed(() => store.getters.taskTypes || [])
+const allTaskTypes = computed(() => {
+  const taskTypes = store.getters.taskTypes || []
+  if (params.value.production_type === 'tvshow') return taskTypes
+  return taskTypes.filter(tt => tt.for_entity !== 'Episode')
+})
 const allTaskStatuses = computed(() => store.getters.taskStatus || [])
 const allAssetTypes = computed(() => store.getters.assetTypes || [])
 const allAutomations = computed(() => store.getters.statusAutomations || [])
@@ -510,6 +514,8 @@ const saveParameters = async () => {
   try {
     await projectTemplatesApi.editProjectTemplate({
       id: templateId.value,
+      name: template.value.name,
+      description: template.value.description,
       ...params.value,
       is_clients_isolated: params.value.is_clients_isolated === 'true',
       is_preview_download_allowed:
