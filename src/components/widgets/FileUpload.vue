@@ -135,7 +135,7 @@ onMounted(() => {
   })
 })
 
-defineExpose({ reset })
+defineExpose({ filesChange, onDrop, reset })
 </script>
 
 <style lang="scss" scoped>
