@@ -100,5 +100,17 @@ export default {
       `/api/data/playlists/${playlist.id}/notify-clients`,
       data
     )
+  },
+
+  getShareLinks(playlistId) {
+    return client.pget(`/api/data/playlists/${playlistId}/share`)
+  },
+
+  createShareLink(playlistId, data) {
+    return client.ppost(`/api/data/playlists/${playlistId}/share`, data)
+  },
+
+  revokeShareLink(playlistId, token) {
+    return client.pdel(`/api/data/playlists/${playlistId}/share/${token}`)
   }
 }

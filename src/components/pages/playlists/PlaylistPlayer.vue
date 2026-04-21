@@ -69,6 +69,14 @@
         @click="onNotifyClientsClicked"
         v-if="!isLoading && isCurrentUserManager && playlist.for_client"
       />
+      <button-simple
+        class="playlist-button topbar-button flexrow-item full-button"
+        :class="{ 'has-active-links': hasActiveShareLinks }"
+        icon="link"
+        :text="$t('playlists.share')"
+        @click="modals.share = true"
+        v-if="!isLoading && isCurrentUserManager"
+      />
 
       <template v-if="isAllowToEdit">
         <button-simple
@@ -986,6 +994,14 @@
       @cancel="hideTaskTypeModal"
     />
 
+    <share-playlist-modal
+      :active="modals.share"
+      :playlist="playlist"
+      @cancel="modals.share = false"
+      @links-updated="onShareLinksUpdated"
+      v-if="modals.share"
+    />
+
     <!-- used only for picture saving purpose, it is not displayed -->
     <canvas id="annotation-snapshot" ref="annotation-snapshot"> </canvas>
     <canvas id="resize-annotation-canvas" ref="resize-annotation-canvas">
@@ -1037,6 +1053,7 @@ import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
+import SharePlaylistModal from '@/components/modals/SharePlaylistModal.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import SpeedButton from '@/components/widgets/SpeedButton.vue'
@@ -1077,6 +1094,7 @@ export default {
     PreviewRoom,
     RawVideoPlayer,
     SelectTaskTypeModal,
+    SharePlaylistModal,
     SoundViewer,
     Spinner,
     SpeedButton,
@@ -1100,6 +1118,10 @@ export default {
     isAddingEntity: {
       type: Boolean,
       default: false
+    },
+    initialShareLinksCount: {
+      type: Number,
+      default: 0
     },
     currentEntityType: {
       type: String,
@@ -1167,9 +1189,11 @@ export default {
         people: [],
         newComer: true
       },
+      hasActiveShareLinks: false,
       modals: {
         delete: false,
         notifyClients: false,
+        share: false,
         taskType: false
       },
       loading: {
@@ -1486,6 +1510,10 @@ export default {
       this.modals.notifyClients = true
       this.success.notifyClients = false
       this.errors.notifyClients = false
+    },
+
+    onShareLinksUpdated(count) {
+      this.hasActiveShareLinks = count > 0
     },
 
     async confirmNotifyClients({ studioId, departmentId }) {
@@ -2659,6 +2687,13 @@ export default {
       })
     },
 
+    initialShareLinksCount: {
+      immediate: true,
+      handler(count) {
+        this.hasActiveShareLinks = count > 0
+      }
+    },
+
     isEntitiesHidden() {
       this.$nextTick(() => {
         setTimeout(() => {
@@ -2740,6 +2775,11 @@ export default {
   .playlist-button.delete-button {
     margin-right: 10px;
   }
+}
+
+.has-active-links {
+  color: $purple-strong;
+  border-color: $purple-strong;
 }
 
 .playlist-player {

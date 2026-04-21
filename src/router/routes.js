@@ -15,6 +15,7 @@ import Login from '@/components/pages/Login.vue'
 import Main from '@/components/Main.vue'
 
 const AllTasks = () => import('@/components/pages/AllTasks.vue')
+const SharedPlaylist = () => import('@/components/pages/SharedPlaylist.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
 const Assets = () => import('@/components/pages/Assets.vue')
@@ -918,6 +919,12 @@ export const routes = [
     path: '/wrong-browser',
     component: WrongBrowser,
     name: 'wrong-browser'
+  },
+
+  {
+    path: '/playlists/shared/:token',
+    component: SharedPlaylist,
+    name: 'shared-playlist'
   },
 
   {

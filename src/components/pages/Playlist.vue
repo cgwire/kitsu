@@ -210,6 +210,7 @@
           :entities="currentEntitiesList"
           :is-loading="loading.playlist"
           :is-adding-entity="isAddingEntity"
+          :initial-share-links-count="currentShareLinksCount"
           :current-entity-type="currentEntityType"
           @edit-clicked="showEditModal"
           @show-add-entities="toggleAddEntities"
@@ -502,6 +503,7 @@ import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'lucide-vue-next'
 
+import playlistsApi from '@/store/api/playlists'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
 import { getPlaylistPath } from '@/lib/path'
@@ -548,6 +550,7 @@ export default {
   data() {
     return {
       currentPlaylist: { name: '' },
+      currentShareLinksCount: 0,
       currentSort: 'updated_at',
       currentEntitiesMap: {},
       currentEntitiesList: [],
@@ -835,6 +838,16 @@ export default {
       }
     },
 
+    async loadShareLinksCount(playlistId) {
+      if (!this.isCurrentUserManager || !playlistId) return
+      try {
+        const links = await playlistsApi.getShareLinks(playlistId)
+        this.currentShareLinksCount = links.length
+      } catch {
+        this.currentShareLinksCount = 0
+      }
+    },
+
     loadPlaylistsData(force = false) {
       const setFirstPlaylist = () => {
         this.setCurrentPlaylist(() => {
@@ -1015,6 +1028,7 @@ export default {
         this.currentPlaylist = ref(loadedPlaylist)
         this.rebuildCurrentEntities()
         this.loading.playlist = false
+        this.loadShareLinksCount(loadedPlaylist.id)
       } else {
         this.currentPlaylist = {
           name: ''
