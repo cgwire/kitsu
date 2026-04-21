@@ -17,7 +17,9 @@
         </h1>
 
         <form @submit.prevent>
-          <h3 class="subtitle">{{ $t('status_automations.entity_title') }}</h3>
+          <h3 class="subtitle">
+            {{ $t('status_automations.entity_title') }}
+          </h3>
           <combobox
             :label="$t('status_automations.fields.entity_type')"
             :options="entityTypeOptions"
@@ -108,6 +110,7 @@
         <modal-footer
           :error-text="$t('status_automations.create_error')"
           :is-error="isError"
+          :is-loading="isLoading"
           @confirm="confirmClicked"
           @cancel="$emit('cancel')"
         />
@@ -116,10 +119,11 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, reactive, toRef, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
+import { useModal } from '@/composables/modal'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
@@ -127,185 +131,141 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 
-export default {
-  name: 'edit-status-automation-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  statusAutomationToEdit: { type: Object, default: () => ({}) }
+})
 
-  mixins: [modalMixin],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  components: {
-    Combobox,
-    ComboboxBoolean,
-    ComboboxStatus,
-    ComboboxTaskType,
-    ModalFooter
-  },
+const store = useStore()
+useModal(toRef(props, 'active'), emit)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    statusAutomationToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    taskStatus: {
-      type: Object,
-      default: () => {}
-    }
-  },
+// Constants
 
-  emits: ['cancel', 'confirm'],
+const entityTypeOptions = [
+  { label: 'asset', value: 'asset' },
+  { label: 'shot', value: 'shot' }
+]
+const fieldTypeOptions = [
+  { label: 'status', value: 'status' },
+  { label: 'ready_for', value: 'ready_for' }
+]
 
-  data() {
-    return {
-      entityTypeOptions: [
-        {
-          label: 'asset',
-          value: 'asset'
-        },
-        {
-          label: 'shot',
-          value: 'shot'
-        }
-      ],
-      fieldTypeOptions: [
-        {
-          label: 'status',
-          value: 'status'
-        },
-        {
-          label: 'ready_for',
-          value: 'ready_for'
-        }
-      ],
-      form: {
-        entityType: 'asset',
-        outFieldType: 'status',
-        inEntityTaskTypes: [],
-        outEntityTaskTypes: [],
-        inTaskTypeId: '',
-        outTaskTypeId: '',
-        inTaskStatusId: '',
-        outTaskStatusId: '',
-        importLastRevision: 'false',
-        archived: 'false'
-      }
-    }
-  },
+// State
 
-  computed: {
-    ...mapGetters([
-      'statusAutomations',
-      'statusAutomationsStatusOptions',
-      'assetTaskTypes',
-      'shotTaskTypes',
-      'taskStatuses'
-    ]),
+const form = reactive({
+  entityType: 'asset',
+  outFieldType: 'status',
+  inEntityTaskTypes: [],
+  outEntityTaskTypes: [],
+  inTaskTypeId: '',
+  outTaskTypeId: '',
+  inTaskStatusId: '',
+  outTaskStatusId: '',
+  importLastRevision: 'false',
+  archived: 'false'
+})
 
-    taskStatusList() {
-      return this.taskStatuses.filter(status => !status.for_concept)
-    },
+// Computed
 
-    isEditing() {
-      return this.statusAutomationToEdit?.id
-    }
-  },
+const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
+const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
+const taskStatuses = computed(() => store.getters.taskStatuses)
 
-  methods: {
-    confirmClicked() {
-      this.$emit('confirm', this.form)
-    },
+const taskStatusList = computed(() =>
+  taskStatuses.value.filter(status => !status.for_concept)
+)
 
-    setTaskTypes(fieldType) {
-      if (fieldType === 'asset') {
-        this.form.inEntityTaskTypes = this.assetTaskTypes
-        if (this.form.outFieldType === 'status') {
-          this.form.outEntityTaskTypes = this.assetTaskTypes
-        } else {
-          this.form.outEntityTaskTypes = this.shotTaskTypes
-        }
-      } else if (fieldType === 'shot') {
-        this.form.inEntityTaskTypes = this.shotTaskTypes
-        this.form.outFieldType = 'status'
-        this.form.outEntityTaskTypes = this.shotTaskTypes
-      }
-    }
-  },
+const isEditing = computed(() => props.statusAutomationToEdit?.id)
 
-  watch: {
-    statusAutomationToEdit() {
-      if (this.statusAutomationToEdit) {
-        let entityTaskTypes = []
-        if (this.form.entityType === 'asset') {
-          entityTaskTypes = this.assetTaskTypes
-        } else if (this.form.entityType === 'shot') {
-          entityTaskTypes = this.shotTaskTypes
-        }
-        this.form = {
-          entityType: this.isEditing
-            ? this.statusAutomationToEdit.entity_type
-            : 'asset',
-          inEntityTaskTypes: entityTaskTypes,
-          outEntityTaskTypes: entityTaskTypes,
-          inTaskTypeId: this.isEditing
-            ? this.statusAutomationToEdit.in_task_type_id
-            : entityTaskTypes[0].id,
-          inTaskStatusId: this.isEditing
-            ? this.statusAutomationToEdit.in_task_status_id
-            : this.taskStatusList[0].id,
-          outFieldType: this.isEditing
-            ? this.statusAutomationToEdit.out_field_type
-            : 'status',
-          outTaskTypeId: this.isEditing
-            ? this.statusAutomationToEdit.out_task_type_id
-            : entityTaskTypes[1].id,
-          outTaskStatusId: this.isEditing
-            ? this.statusAutomationToEdit.out_task_status_id
-            : this.taskStatusList[1].id,
-          importLastRevision: this.isEditing
-            ? String(this.statusAutomationToEdit.import_last_revision === true)
-            : 'false',
-          archived: this.isEditing
-            ? String(this.statusAutomationToEdit.archived === true)
-            : 'false'
-        }
-      }
-    },
+// Functions
 
-    // Adapt available values to the entity type
-    'form.entityType': function (entityType) {
-      this.setTaskTypes(entityType)
-      if (!this.isEditing) {
-        this.form.inTaskTypeId = this.form.inEntityTaskTypes[0].id
-        this.form.inTaskStatusId = this.taskStatusList[0].id
-        this.form.outTaskTypeId = this.form.outEntityTaskTypes[1].id
-        this.form.outTaskStatusId = this.taskStatusList[1].id
-      }
-    },
-
-    // Adapt available values to the automation type
-    // * Ready for apply to assets
-    // * Status apply to the same entity.
-    'form.outFieldType': function (outFieldType) {
-      if (outFieldType === 'ready_for') {
-        this.form.outEntityTaskTypes = this.shotTaskTypes
-        this.form.outTaskTypeId = this.shotTaskTypes[1].id
-      } else if (outFieldType === 'status') {
-        this.setTaskTypes(this.form.entityType)
-        this.form.outTaskTypeId = this.form.outEntityTaskTypes[1].id
-      }
-    }
+const setTaskTypes = fieldType => {
+  if (fieldType === 'asset') {
+    form.inEntityTaskTypes = assetTaskTypes.value
+    form.outEntityTaskTypes =
+      form.outFieldType === 'status'
+        ? assetTaskTypes.value
+        : shotTaskTypes.value
+  } else if (fieldType === 'shot') {
+    form.inEntityTaskTypes = shotTaskTypes.value
+    form.outFieldType = 'status'
+    form.outEntityTaskTypes = shotTaskTypes.value
   }
 }
+
+const confirmClicked = () => {
+  emit('confirm', { ...form })
+}
+
+// Watchers
+
+watch(
+  () => props.statusAutomationToEdit,
+  () => {
+    if (!props.statusAutomationToEdit) return
+    const entityType = isEditing.value
+      ? props.statusAutomationToEdit.entity_type
+      : 'asset'
+    const entityTaskTypes =
+      entityType === 'shot' ? shotTaskTypes.value : assetTaskTypes.value
+    Object.assign(form, {
+      entityType,
+      inEntityTaskTypes: entityTaskTypes,
+      outEntityTaskTypes: entityTaskTypes,
+      inTaskTypeId: isEditing.value
+        ? props.statusAutomationToEdit.in_task_type_id
+        : entityTaskTypes[0]?.id,
+      inTaskStatusId: isEditing.value
+        ? props.statusAutomationToEdit.in_task_status_id
+        : taskStatusList.value[0]?.id,
+      outFieldType: isEditing.value
+        ? props.statusAutomationToEdit.out_field_type
+        : 'status',
+      outTaskTypeId: isEditing.value
+        ? props.statusAutomationToEdit.out_task_type_id
+        : entityTaskTypes[1]?.id,
+      outTaskStatusId: isEditing.value
+        ? props.statusAutomationToEdit.out_task_status_id
+        : taskStatusList.value[1]?.id,
+      importLastRevision: isEditing.value
+        ? String(props.statusAutomationToEdit.import_last_revision === true)
+        : 'false',
+      archived: isEditing.value
+        ? String(props.statusAutomationToEdit.archived === true)
+        : 'false'
+    })
+  }
+)
+
+watch(
+  () => form.entityType,
+  entityType => {
+    setTaskTypes(entityType)
+    if (!isEditing.value) {
+      form.inTaskTypeId = form.inEntityTaskTypes[0]?.id
+      form.inTaskStatusId = taskStatusList.value[0]?.id
+      form.outTaskTypeId = form.outEntityTaskTypes[1]?.id
+      form.outTaskStatusId = taskStatusList.value[1]?.id
+    }
+  }
+)
+
+watch(
+  () => form.outFieldType,
+  outFieldType => {
+    if (outFieldType === 'ready_for') {
+      form.outEntityTaskTypes = shotTaskTypes.value
+      form.outTaskTypeId = shotTaskTypes.value[1]?.id
+    } else if (outFieldType === 'status') {
+      setTaskTypes(form.entityType)
+      form.outTaskTypeId = form.outEntityTaskTypes[1]?.id
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>

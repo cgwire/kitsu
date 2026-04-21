@@ -97,74 +97,57 @@
     <table-info :is-loading="isLoading" :is-error="isError" />
 
     <p class="has-text-centered nb-status-automations">
-      {{ statusAutomations.length }}
-      {{ $tc('status_automations.number', statusAutomations.length) }}
+      {{ entries.length }}
+      {{ $t('status_automations.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import { AlertTriangleIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
-
-import { formatListMixin } from '@/components/mixins/format'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
-export default {
-  name: 'status-automation-list',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [formatListMixin],
+// Props / Emits
 
-  components: {
-    AlertTriangleIcon,
-    RowActionsCell,
-    TableInfo,
-    TaskStatusCell,
-    TaskTypeCell
-  },
+const props = defineProps({
+  entries: { type: Array, default: () => [] },
+  isEditable: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isEditable: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    }
-  },
+defineEmits(['delete-clicked', 'edit-clicked', 'remove-clicked'])
 
-  emits: ['delete-clicked', 'edit-clicked', 'remove-clicked'],
+// Computed
 
-  computed: {
-    ...mapGetters([
-      'taskStatusMap',
-      'getTaskType',
-      'isStatusAutomationDisabled'
-    ]),
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const getTaskType = computed(() => store.getters.getTaskType)
+const isStatusAutomationDisabled = computed(
+  () => store.getters.isStatusAutomationDisabled
+)
 
-    statusAutomations() {
-      return this.entries.map(statusAutomation => ({
-        ...statusAutomation,
-        entityType: this.$t(
-          `status_automations.entity_types.${statusAutomation.entity_type.toLowerCase()}`
-        )
-      }))
-    }
-  }
-}
+const statusAutomations = computed(() =>
+  props.entries.map(statusAutomation => ({
+    ...statusAutomation,
+    entityType: t(
+      `status_automations.entity_types.${statusAutomation.entity_type.toLowerCase()}`
+    )
+  }))
+)
+
+// Functions
+
+const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
 </script>
 
 <style lang="scss" scoped>

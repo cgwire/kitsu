@@ -31,43 +31,23 @@
   </div>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { toRef } from 'vue'
 
-export default {
-  name: 'delete-modal',
+import { useModal } from '@/composables/modal'
 
-  mixins: [modalMixin],
+const props = defineProps({
+  text: { required: true, type: String },
+  active: { default: false, type: Boolean },
+  isLoading: { default: false, type: Boolean },
+  isError: { default: false, type: Boolean },
+  errorText: { default: '', type: String },
+  deleteButtonText: { default: '', type: String }
+})
 
-  props: {
-    text: {
-      required: true,
-      type: String
-    },
-    active: {
-      default: false,
-      type: Boolean
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isError: {
-      default: false,
-      type: Boolean
-    },
-    errorText: {
-      default: '',
-      type: String
-    },
-    deleteButtonText: {
-      default: '',
-      type: String
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm']
-}
+useModal(toRef(props, 'active'), emit)
 </script>
 
 <style lang="scss" scoped>
