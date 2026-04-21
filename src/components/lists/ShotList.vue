@@ -1266,7 +1266,7 @@ th.actions {
 
 thead .name.shot-name {
   min-width: 110px;
-  width: 110px;
+  width: 300px;
 }
 
 .episode {

@@ -1705,7 +1705,8 @@ tbody:last-child .empty-line:last-child {
 
 // width: 0 + flex: 1 forces the link to size from flex space (not content), so the column can be resized smaller than the longest name.
 // :not(.thumbnail-wrapper) excludes the EntityThumbnail anchor which is also a direct child of .flexrow.
-.datatable th.name .flexrow > a:not(.thumbnail-wrapper) {
+.datatable th.name .flexrow > a:not(.thumbnail-wrapper),
+.datatable td.name .flexrow > a:not(.thumbnail-wrapper) {
   flex: 1;
   width: 0;
   min-width: 0;
