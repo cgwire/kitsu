@@ -61,7 +61,7 @@
       <div class="tab" v-show="isActiveTab('parameters')">
         <div class="columns">
           <div class="column is-one-third box">
-            <form class="form" @submit.prevent="saveParameters">
+            <div class="form">
               <combobox-styled
                 class="mb2"
                 locale-key-prefix="productions.type."
@@ -133,16 +133,7 @@
               <p v-if="errors.parameters" class="error mt1">
                 {{ $t('productions.edit_error') }}
               </p>
-              <div class="has-text-right mt2">
-                <button-simple
-                  :is-primary="true"
-                  :class="{ 'is-loading': loading.parameters }"
-                  :disabled="loading.parameters"
-                  :text="$t('main.save')"
-                  type="submit"
-                />
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -324,7 +315,6 @@ import BackgroundSettings from '@/components/pages/production/BackgroundSettings
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import BoardSettings from '@/components/pages/production/BoardSettings.vue'
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -530,6 +520,17 @@ const saveParameters = async () => {
   }
   loading.parameters = false
 }
+
+let saveTimeout = null
+watch(
+  () => ({ ...params.value }),
+  () => {
+    if (!template.value?.id) return
+    clearTimeout(saveTimeout)
+    saveTimeout = setTimeout(saveParameters, 800)
+  },
+  { deep: true }
+)
 
 const onUpdateBoardRoles = async ({ taskStatusId, roles }) => {
   boardRoles.value = { ...boardRoles.value, [taskStatusId]: roles }
