@@ -149,6 +149,39 @@ describe('lib/filtering', () => {
       expect(filter.type).toEqual('status')
     })
 
+    it('status filter across all task types', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'status=wip'
+      })
+      expect(filters).toHaveLength(1)
+      const filter = filters[0]
+      expect(filter.type).toEqual('statusAny')
+      expect(filter.taskStatuses).toEqual(['task-status-1'])
+      expect(filter.taskType).toBeUndefined()
+      expect(filter.excluding).toBe(false)
+    })
+
+    it('status filter with multiple statuses', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'status=wip,done'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].type).toEqual('statusAny')
+      expect(filters[0].taskStatuses).toEqual(['task-status-1', 'task-status-3'])
+    })
+
     it('shortcut case', () => {
       const filters = getFilters({
         entryIndex,

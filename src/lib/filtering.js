@@ -157,6 +157,15 @@ const applyFiltersFunctions = {
     return isOk
   },
 
+  statusAny(entry, filter, taskMap) {
+    let isOk = Array.from(entry.validations?.values() || []).some(taskId => {
+      const task = taskMap.get(taskId)
+      return task && filter.taskStatuses.includes(task.task_status_id)
+    })
+    if (filter.excluding) isOk = !isOk
+    return isOk
+  },
+
   thumbnail(entry, filter, taskMap) {
     const hasAvatar =
       entry.preview_file_id !== '' &&
@@ -433,6 +442,25 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
       const excluding = value.startsWith('-')
       if (excluding) value = value.substring(1)
       const taskTypeName = cleanParenthesis(pattern[0])
+
+      // Cross-task-type status filter: status=WIP matches entries where ANY
+      // task is in one of the given statuses, regardless of the task type.
+      if (taskTypeName.toLowerCase() === 'status' && value) {
+        const values = value
+          .split(',')
+          .map(shortName => shortName.toLowerCase())
+          .filter(shortName => taskStatusShortNameIndex[shortName])
+          .map(shortName => taskStatusShortNameIndex[shortName].id)
+        if (values.length > 0) {
+          results.push({
+            taskStatuses: values,
+            type: 'statusAny',
+            excluding
+          })
+        }
+        return
+      }
+
       const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
       if (taskTypes) {
         if (value === 'unassigned') {
