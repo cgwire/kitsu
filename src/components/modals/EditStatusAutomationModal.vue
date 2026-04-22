@@ -94,6 +94,7 @@
           </div>
 
           <combobox-boolean
+            class="mt1"
             :label="$t('status_automations.fields.import_last_revision')"
             @enter="confirmClicked"
             v-model="form.importLastRevision"
@@ -281,5 +282,36 @@ watch(
 .entity-type-name {
   font-size: 1.2em;
   text-transform: capitalize;
+}
+
+@media screen and (max-width: 768px) {
+  .subtitle {
+    font-size: 1.15em;
+    margin-top: 1.25em;
+  }
+
+  .flexrow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .flexrow > .flexrow-item {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .flexrow :deep(.field) {
+    margin-bottom: 0.4em;
+  }
+
+  .margin-fix {
+    margin-top: 0;
+  }
+
+  :deep(.select),
+  :deep(.select select) {
+    width: 100%;
+  }
 }
 </style>
