@@ -34,8 +34,8 @@ const tabs = computed(() => [
 <style lang="scss" scoped>
 .fixed-page {
   margin-top: 60px;
-  padding: 2em;
   overflow: scroll;
+  padding: 2em;
 }
 
 :deep(.tabs) {

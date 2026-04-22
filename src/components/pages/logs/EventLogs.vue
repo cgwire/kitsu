@@ -88,19 +88,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useStore } from 'vuex'
-import { useRoute, useRouter } from 'vue-router'
-import { useHead } from '@unhead/vue'
-import { useI18n } from 'vue-i18n'
 import moment from 'moment'
+import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useTime } from '@/composables/time'
 import {
   formatFullDateWithRevertedTimezone,
   formatSimpleDate,
   parseSimpleDate
 } from '@/lib/time'
-import { useTime } from '@/composables/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -110,43 +110,50 @@ import PeopleName from '@/components/widgets/PeopleName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const PAGE_SIZE = 1000
+const LINK_KEYS = ['project_id', 'task_id']
 
-const store = useStore()
-const route = useRoute()
-const router = useRouter()
 const { t } = useI18n()
 const { today, timezone, formatDate } = useTime()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-const people = computed(() => store.getters.people)
-const personMap = computed(() => store.getters.personMap)
+// State
 
 const currentDate = ref(new Date())
 const events = ref([])
 const hasMoreEvents = ref(false)
 const selectedEvents = ref({})
 const selectedPerson = ref(null)
-const loading = ref({ events: false, moreEvents: false })
+const loading = reactive({ events: false, moreEvents: false })
+
+// Computed
+
+const people = computed(() => store.getters.people)
+const personMap = computed(() => store.getters.personMap)
 
 const filteredEvents = computed(() => {
   if (!selectedPerson.value) return events.value
   return events.value.filter(event => event.user_id === selectedPerson.value.id)
 })
 
-function onDateChange(value) {
+// Functions
+
+const onDateChange = value => {
   const date = formatSimpleDate(value)
   if (route.query.date !== date) {
     router.push({ query: { ...route.query, date } })
   }
 }
 
-function onPersonSelect(person) {
+const onPersonSelect = person => {
   const personId = person?.id
   if (route.query.person_id !== personId) {
     router.push({ query: { ...route.query, person_id: personId } })
   }
 }
 
-function getDateParams(date) {
+const getDateParams = date => {
   if (!date) return {}
   const after = moment(date)
   const before = moment(date).add(1, 'days')
@@ -156,7 +163,7 @@ function getDateParams(date) {
   }
 }
 
-function formatEvents(rawEvents) {
+const formatEvents = rawEvents => {
   return rawEvents.map(event => {
     const [name, type] = event.name.split(':')
     return {
@@ -172,10 +179,10 @@ function formatEvents(rawEvents) {
   })
 }
 
-async function loadDayEvents(date) {
+const loadDayEvents = async date => {
   selectedEvents.value = {}
   events.value = []
-  loading.value.events = true
+  loading.events = true
   try {
     const result = await store.dispatch('loadEvents', {
       limit: PAGE_SIZE,
@@ -186,14 +193,14 @@ async function loadDayEvents(date) {
   } catch (err) {
     console.error(err)
   } finally {
-    loading.value.events = false
+    loading.events = false
   }
 }
 
-async function loadMoreEvents(date) {
+const loadMoreEvents = async date => {
   if (!events.value.length) return
 
-  loading.value.moreEvents = true
+  loading.moreEvents = true
   const lastEventId = events.value[events.value.length - 1].id
   try {
     const result = await store.dispatch('loadEvents', {
@@ -206,32 +213,30 @@ async function loadMoreEvents(date) {
   } catch (err) {
     console.error(err)
   } finally {
-    loading.value.moreEvents = false
+    loading.moreEvents = false
   }
 }
 
-function selectLine(event) {
+const selectLine = event => {
   selectedEvents.value[event.id] = !selectedEvents.value[event.id]
 }
 
-function isLink(key) {
-  const linkKeys = ['project_id', 'task_id']
-  return linkKeys.includes(key)
-}
+const isLink = key => LINK_KEYS.includes(key)
 
-function getLink(event, key) {
+const getLink = (event, key) => {
   const productionId = event.data.project_id
   const entityType = key.substring(0, key.length - 3)
   if (entityType === 'project') {
     return `/productions/${productionId}/news-feed`
-  } else if (entityType === 'task') {
-    const entityId = event.data[key]
-    return `/productions/${productionId}/entity/tasks/${entityId}`
-  } else {
-    const entityId = event.data[key]
-    return `/productions/${productionId}/${entityType}s/${entityId}`
   }
+  const entityId = event.data[key]
+  if (entityType === 'task') {
+    return `/productions/${productionId}/entity/tasks/${entityId}`
+  }
+  return `/productions/${productionId}/${entityType}s/${entityId}`
 }
+
+// Watchers
 
 watch(
   () => route.query.date,
@@ -251,19 +256,15 @@ watch(
   { immediate: true }
 )
 
+// Head
+
 useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .tag {
-    color: $white;
-    background: $dark-grey;
-  }
-
-  .nb-events {
-    color: $white;
-  }
+.dark .tag {
+  background: $dark-grey;
+  color: $white;
 }
 
 .empty {
@@ -271,16 +272,10 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
   font-style: italic;
 }
 
-.log-list {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 2em;
-}
-
 .event-line {
+  border-radius: 4px;
   cursor: pointer;
   padding: 0.25em;
-  border-radius: 4px;
   transition: background 0.2s ease;
 
   &:hover {
@@ -294,52 +289,46 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
   }
 
   .type {
-    text-transform: uppercase;
     min-width: 50px;
-  }
-
-  .type[data-status='new'] {
-    color: white;
-    background: $green;
-  }
-
-  .type[data-status='upd'] {
-    color: white;
-    background: $blue;
+    text-transform: uppercase;
   }
 
   .type[data-status='add'] {
-    color: white;
     background: $dark-purple;
+    color: white;
   }
 
   .type[data-status='del'] {
-    color: white;
     background: $red;
+    color: white;
   }
 
-  .type[data-status='sta'] {
+  .type[data-status='new'] {
+    background: $green;
     color: white;
-    background: $pink;
   }
 
   .type[data-status='set'] {
     background: $purple;
   }
 
+  .type[data-status='sta'] {
+    background: $pink;
+    color: white;
+  }
+
+  .type[data-status='upd'] {
+    background: $blue;
+    color: white;
+  }
+
   ul {
-    cursor: default;
-    color: var(--text);
     border-left: 3px solid $light-grey;
+    color: var(--text);
+    cursor: default;
     list-style-type: none;
     margin: 1em 1em 2em 0.2em;
     padding-left: 1em;
-
-    .key {
-      font-weight: 500;
-      width: 170px;
-      display: inline-block;
-    }
 
     a {
       color: var(--text);
@@ -348,6 +337,18 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
         text-decoration: underline;
       }
     }
+
+    .key {
+      display: inline-block;
+      font-weight: 500;
+      width: 170px;
+    }
   }
+}
+
+.log-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2em;
 }
 </style>

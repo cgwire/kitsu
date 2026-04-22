@@ -104,44 +104,15 @@ onMounted(reload)
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .tag {
-    color: $white;
-    background: $dark-grey;
-  }
-}
-.tag {
-  border-radius: 4px;
-}
-
-em {
-  color: var(--text);
-}
-
-.date {
-  font-weight: 500;
-}
-
-.status {
-  text-transform: uppercase;
-  min-width: 50px;
-}
-
-.status[data-status='broken'] {
-  color: $white;
-  background: $dark-red;
-}
-
-.status[data-status='processing'] {
-  color: $white;
-  background: $blue;
-}
-
 .empty {
   color: var(--text);
   font-size: 1.2em;
   font-weight: 500;
-  text-align: center;
   margin-top: 1em;
+  text-align: center;
+}
+
+em {
+  color: var(--text);
 }
 </style>
