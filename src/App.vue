@@ -1290,9 +1290,13 @@ textarea.input:focus {
 }
 
 @media screen and (max-width: 768px) {
+  .modal {
+    align-items: flex-start;
+  }
+
   .modal-content {
-    margin: 0 0.5em;
-    max-height: calc(100vh - 40px);
+    margin: 70px 0.5em 10px;
+    max-height: calc(100vh - 80px);
 
     .box {
       padding: 1.5em;
