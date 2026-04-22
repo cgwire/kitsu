@@ -1,23 +1,20 @@
 <template>
-  <div class="level page-header">
-    <div class="level-left">
-      <page-title :text="title" />
-    </div>
-    <div class="level-right">
-      <button-simple
-        class="flexrow-item"
-        icon="export"
-        :title="$t('main.csv.export_file')"
-        @click="$emit('export-clicked')"
-        v-if="isExportable"
-      />
-      <button-simple
-        class="level-item"
-        icon="plus"
-        :text="newEntryLabel"
-        @click="$emit('new-clicked')"
-      />
-    </div>
+  <div class="flexrow page-header">
+    <page-title class="flexrow-item filler" :text="title" />
+    <button-simple
+      class="flexrow-item export-button"
+      icon="export"
+      :title="$t('main.csv.export_file')"
+      @click="$emit('export-clicked')"
+      v-if="isExportable"
+    />
+    <button-simple
+      class="flexrow-item mr0"
+      icon="plus"
+      :text="newEntryLabel"
+      :is-responsive="true"
+      @click="$emit('new-clicked')"
+    />
   </div>
 </template>
 
@@ -42,3 +39,11 @@ defineProps({
 
 defineEmits(['export-clicked', 'new-clicked'])
 </script>
+
+<style lang="scss" scoped>
+@media screen and (max-width: 768px) {
+  .export-button {
+    display: none;
+  }
+}
+</style>
