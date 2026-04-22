@@ -1,52 +1,34 @@
 <template>
   <div class="logs fixed-page">
-    <div class="tabs logs-tabs">
-      <ul>
-        <li :class="{ 'is-active': isActiveTab('events') }">
-          <a @click="activeTab = 'events'">
-            {{ $t('logs.audit.title') }}
-          </a>
-        </li>
-        <li :class="{ 'is-active': isActiveTab('logins') }">
-          <a @click="activeTab = 'logins'">
-            {{ $t('logs.logins.title') }}
-          </a>
-        </li>
-        <li :class="{ 'is-active': isActiveTab('preview_files') }">
-          <a @click="activeTab = 'preview_files'">
-            {{ $t('logs.preview_files.title') }}
-          </a>
-        </li>
-      </ul>
-    </div>
-    <event-logs v-if="isActiveTab('events')" />
-    <login-logs v-else-if="isActiveTab('logins')" />
-    <preview-files v-else-if="isActiveTab('preview_files')" />
+    <route-tabs :active-tab="activeTab" :tabs="tabs" />
+    <event-logs v-if="activeTab === 'events'" />
+    <login-logs v-else-if="activeTab === 'logins'" />
+    <preview-files v-else-if="activeTab === 'preview_files'" />
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
 import EventLogs from '@/components/pages/logs/EventLogs.vue'
 import LoginLogs from '@/components/pages/logs/LoginLogs.vue'
 import PreviewFiles from '@/components/pages/logs/PreviewFiles.vue'
+import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
+const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 
-const activeTab = ref(route.query.tab || 'events')
+// Computed
 
-function isActiveTab(tab) {
-  return activeTab.value === tab
-}
+const activeTab = computed(() => route.query.tab || 'events')
 
-watch(activeTab, tab => {
-  if (route.query.tab !== tab) {
-    router.push({ query: { tab } })
-  }
-})
+const tabs = computed(() => [
+  { name: 'events', label: t('logs.audit.title') },
+  { name: 'logins', label: t('logs.logins.title') },
+  { name: 'preview_files', label: t('logs.preview_files.title') }
+])
 </script>
 
 <style lang="scss" scoped>
@@ -56,10 +38,7 @@ watch(activeTab, tab => {
   overflow: scroll;
 }
 
-.tabs.logs-tabs {
+:deep(.tabs) {
   overflow: visible;
-  ul {
-    margin-left: 0;
-  }
 }
 </style>

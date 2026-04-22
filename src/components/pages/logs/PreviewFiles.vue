@@ -34,8 +34,9 @@
   </div>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
+<script setup>
+import { onMounted, reactive, ref } from 'vue'
+import { useStore } from 'vuex'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PreviewFileList from '@/components/lists/PreviewFileList.vue'
@@ -43,76 +44,63 @@ import Spinner from '@/components/widgets/Spinner.vue'
 
 const PAGE_SIZE = 100
 
-export default {
-  name: 'preview-files',
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    PreviewFileList,
-    Spinner
-  },
+// State
 
-  data() {
-    return {
-      hasMorePreviewFiles: false,
-      previewFiles: [],
-      loading: {
-        previewFiles: false,
-        morePreviewFiles: false
-      }
-    }
-  },
+const hasMorePreviewFiles = ref(false)
+const previewFiles = ref([])
+const loading = reactive({
+  previewFiles: false,
+  morePreviewFiles: false
+})
 
-  mounted() {
-    this.reload()
-  },
+// Functions
 
-  methods: {
-    ...mapActions(['getRunningPreviewFiles', 'markPreviewFileAsBroken']),
-
-    async reload() {
-      this.previewFiles = []
-      this.loading.previewFiles = true
-      try {
-        const previewFiles = await this.getRunningPreviewFiles({
-          limit: PAGE_SIZE
-        })
-        this.previewFiles = previewFiles
-        this.hasMorePreviewFiles = previewFiles.length >= PAGE_SIZE
-      } catch (err) {
-        console.error(err)
-      } finally {
-        this.loading.previewFiles = false
-      }
-    },
-
-    async loadMorePreviewFiles() {
-      if (!this.previewFiles.length) return
-
-      this.loading.morePreviewFiles = true
-      const lastPreviewFileId =
-        this.previewFiles[this.previewFiles.length - 1].id
-      try {
-        const previewFiles = await this.getRunningPreviewFiles({
-          limit: PAGE_SIZE,
-          lastPreviewFileId
-        })
-        this.previewFiles = [...this.previewFiles, ...previewFiles]
-        this.hasMorePreviewFiles = previewFiles.length >= PAGE_SIZE
-      } catch (err) {
-        console.error(err)
-      } finally {
-        this.loading.morePreviewFiles = false
-      }
-    },
-
-    async markBrokenClicked(previewFileId) {
-      const previewFile = this.previewFiles.find(p => p.id === previewFileId)
-      previewFile.status = 'broken'
-      await this.markPreviewFileAsBroken(previewFileId)
-    }
+const reload = async () => {
+  previewFiles.value = []
+  loading.previewFiles = true
+  try {
+    const result = await store.dispatch('getRunningPreviewFiles', {
+      limit: PAGE_SIZE
+    })
+    previewFiles.value = result
+    hasMorePreviewFiles.value = result.length >= PAGE_SIZE
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.previewFiles = false
   }
 }
+
+const loadMorePreviewFiles = async () => {
+  if (!previewFiles.value.length) return
+
+  loading.morePreviewFiles = true
+  const lastPreviewFileId = previewFiles.value[previewFiles.value.length - 1].id
+  try {
+    const result = await store.dispatch('getRunningPreviewFiles', {
+      limit: PAGE_SIZE,
+      lastPreviewFileId
+    })
+    previewFiles.value = [...previewFiles.value, ...result]
+    hasMorePreviewFiles.value = result.length >= PAGE_SIZE
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.morePreviewFiles = false
+  }
+}
+
+const markBrokenClicked = async previewFileId => {
+  const previewFile = previewFiles.value.find(p => p.id === previewFileId)
+  previewFile.status = 'broken'
+  await store.dispatch('markPreviewFileAsBroken', previewFileId)
+}
+
+// Lifecycle
+
+onMounted(reload)
 </script>
 
 <style lang="scss" scoped>
