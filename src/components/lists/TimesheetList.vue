@@ -110,7 +110,9 @@
               @change="onSliderChange"
               v-if="!personIsDayOff"
             />
-            <td v-else></td>
+            <td class="time-spent day-off-cell" v-else>
+              {{ $t('timesheets.day_off_no_logging') }}
+            </td>
           </tr>
         </tbody>
         <tbody class="datatable-body" v-if="!isLoading && !hideDone">
@@ -166,6 +168,9 @@
               @change="onSliderChange"
               v-if="!personIsDayOff"
             />
+            <td class="time-spent day-off-cell" v-else>
+              {{ $t('timesheets.day_off_no_logging') }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -478,6 +483,11 @@ export default {
 
 .time-spent {
   width: 100%;
+}
+
+.day-off-cell {
+  color: var(--text-alt);
+  font-style: italic;
 }
 
 td.name {

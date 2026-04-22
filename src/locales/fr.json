@@ -1537,6 +1537,7 @@
       "year": "Année",
       "confirm_day_off": "Le fait de définir ce jour comme un jour de congé effacera tout le temps enregistré pour le jour en cours. Êtes-vous sûr de vouloir continuer ?",
       "day_off": "Jour Off",
+      "day_off_no_logging": "Pas de saisie de temps sur un jour off",
       "export_timespents": "Exporter les temps passés pour les projets ouverts",
       "unit": "Unité",
       "confirm_day_offs": "Le fait de définir ces jours comme des jours de congé effacera toutes les heures enregistrées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",

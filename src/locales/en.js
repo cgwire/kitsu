@@ -1997,6 +1997,7 @@ export default {
     confirm_day_offs: 'Setting these days as days off will erase all time logged for the affected days. Are you sure you want to continue?',
     confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
     day_off: 'Day Off',
+    day_off_no_logging: 'No time logging on a day off',
     detail_level: 'Detail level',
     done_tasks: 'Done tasks',
     export_timesheet: 'Export Timesheet',

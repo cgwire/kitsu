@@ -344,13 +344,13 @@ export default {
 
     loggableTodos() {
       return this.sortedTasks.filter(task => {
-        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+        return this.taskTypeMap.get(task.task_type_id)?.allow_timelog
       })
     },
 
     loggableDoneTasks() {
       return this.sortedDoneTasks.filter(task => {
-        return this.taskTypeMap.get(task.task_type_id).allow_timelog
+        return this.taskTypeMap.get(task.task_type_id)?.allow_timelog
       })
     },
 
