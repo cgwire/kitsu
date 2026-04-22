@@ -42,9 +42,12 @@
     </div>
 
     <div class="player-container" v-else>
-      <p class="has-text-centered mt2">
-        {{ $t('share.player_placeholder') }}
-      </p>
+      <shared-playlist-player
+        :playlist="playlist"
+        :entities="playlistEntities"
+        :loading="loadingPlayer"
+        :token="token"
+      />
     </div>
   </div>
 </template>
@@ -54,6 +57,7 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
+import SharedPlaylistPlayer from '@/components/previews/SharedPlaylistPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -65,9 +69,11 @@ const route = useRoute()
 const nameField = useTemplateRef('nameField')
 
 const loading = ref(true)
+const loadingPlayer = ref(false)
 const error = ref(false)
 const shareLink = ref(null)
 const playlist = ref(null)
+const playlistEntities = ref([])
 const guestId = ref(null)
 const guestName = ref('')
 
@@ -89,6 +95,7 @@ const loadSharedPlaylist = async () => {
     if (!response.ok) throw new Error('Invalid token')
     const data = await response.json()
     playlist.value = data
+    playlistEntities.value = data.shots || []
 
     // Fetch share link metadata
     shareLink.value = { can_comment: true }

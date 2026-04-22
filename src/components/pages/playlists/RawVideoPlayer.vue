@@ -86,6 +86,10 @@ export default {
     panzoom: {
       type: Boolean,
       default: false
+    },
+    movieUrlPrefix: {
+      type: String,
+      default: null
     }
   },
 
@@ -247,7 +251,9 @@ export default {
           previewId =
             entity.preview_file_previews[this.currentPreviewIndex - 1].id
         }
-        if (this.isHd) {
+        if (this.movieUrlPrefix) {
+          return `${this.movieUrlPrefix}/movies/originals/preview-files/${previewId}.mp4`
+        } else if (this.isHd) {
           return `/api/movies/originals/preview-files/${previewId}.mp4`
         } else {
           return `/api/movies/low/preview-files/${previewId}.mp4`

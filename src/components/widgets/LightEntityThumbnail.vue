@@ -5,7 +5,7 @@
     loading="lazy"
     alt=""
     :key="previewFileId"
-    :src="`/api/pictures/${type}/preview-files/${previewFileId}.png`"
+    :src="thumbnailUrl"
     :style="{
       width,
       height,
@@ -60,6 +60,10 @@ const props = defineProps({
   type: {
     default: 'thumbnails',
     type: String
+  },
+  urlPrefix: {
+    default: '',
+    type: String
   }
 })
 
@@ -68,6 +72,11 @@ const isPreviewWithThumbnail = computed(() => {
     props.previewFileId &&
     (!props.extension || ['mp4', 'png'].includes(props.extension))
   )
+})
+
+const thumbnailUrl = computed(() => {
+  const base = props.urlPrefix || '/api'
+  return `${base}/pictures/${props.type}/preview-files/${props.previewFileId}.png`
 })
 </script>
 

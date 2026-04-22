@@ -11,7 +11,7 @@
           class="remove-button flexrow-item"
           :title="$t('playlists.remove')"
           @click.prevent="onRemoveClick"
-          v-if="isCurrentUserManager || isCurrentUserSupervisor"
+          v-if="!readOnly && (isCurrentUserManager || isCurrentUserSupervisor)"
         >
           <x-icon />
         </span>
@@ -20,14 +20,17 @@
           height="103px"
           :extension="entity.preview_file_extension"
           :preview-file-id="previewFileId"
+          :url-prefix="thumbnailUrlPrefix"
         />
       </div>
 
       <div
         class="entity-title"
-        :title="taskStatus.name"
+        :title="taskStatus ? taskStatus.name : ''"
         :style="{
-          'border-bottom': '2px solid ' + taskStatus.color,
+          'border-bottom': taskStatus
+            ? '2px solid ' + taskStatus.color
+            : 'none',
           'padding-bottom': '5px'
         }"
         @click.prevent="onPlayClick"
@@ -35,24 +38,32 @@
         {{ entity.parent_name }} / {{ entity.name }}
       </div>
 
-      <div class="preview-choice" v-if="taskTypeOptions.length > 0">
-        <combobox
-          ref="task-type-combobox"
-          :thin="true"
-          :width="150"
-          :options="taskTypeOptions"
-          v-model="taskTypeId"
-        />
-        <combobox
-          class="version-combo"
-          :thin="true"
-          :width="150"
-          :options="previewFileOptions"
-          v-model="previewFileId"
-        />
-      </div>
-      <div v-else>
-        {{ $t('playlists.no_preview') }}
+      <template v-if="!readOnly">
+        <div class="preview-choice" v-if="taskTypeOptions.length > 0">
+          <combobox
+            ref="task-type-combobox"
+            :thin="true"
+            :width="150"
+            :options="taskTypeOptions"
+            v-model="taskTypeId"
+          />
+          <combobox
+            class="version-combo"
+            :thin="true"
+            :width="150"
+            :options="previewFileOptions"
+            v-model="previewFileId"
+          />
+        </div>
+        <div v-else>
+          {{ $t('playlists.no_preview') }}
+        </div>
+      </template>
+      <div class="preview-meta" v-else-if="readOnlyTaskTypeName">
+        <span class="task-type-name">{{ readOnlyTaskTypeName }}</span>
+        <span class="revision" v-if="entity.preview_file_revision">
+          v{{ entity.preview_file_revision }}
+        </span>
       </div>
     </div>
 
@@ -63,6 +74,7 @@
       @dragleave="onDragleave"
       @drop="onDropped"
       ref="drop-area"
+      v-if="!readOnly"
     ></div>
   </div>
 </template>
@@ -110,6 +122,14 @@ export default {
     entity: {
       default: () => {},
       type: Object
+    },
+    readOnly: {
+      default: false,
+      type: Boolean
+    },
+    thumbnailUrlPrefix: {
+      default: '',
+      type: String
     }
   },
 
@@ -133,12 +153,13 @@ export default {
     },
 
     previewFiles() {
+      if (this.readOnly) return {}
       const previewFiles = { ...this.entity.preview_files }
       Object.keys(previewFiles).forEach(taskTypeId => {
         previewFiles[taskTypeId] = previewFiles[taskTypeId].filter(
           previewFile => {
             return (
-              !this.playlistEntryMap.has(
+              !this.playlistEntryMap?.has(
                 `${this.entity.id}-${previewFile.id}`
               ) || previewFile.id === this.entity.preview_file_id
             )
@@ -149,21 +170,22 @@ export default {
     },
 
     taskTypeOptions() {
+      if (this.readOnly) return []
       return this.previewFiles
         ? Object.keys(this.previewFiles)
             .filter(id => this.previewFiles[id].length > 0)
-            .map(id => this.taskTypeMap.get(id))
+            .map(id => this.taskTypeMap?.get(id))
+            .filter(Boolean)
             .sort(firstBy('priority', 1).thenBy('name'))
-            .map(taskType => {
-              return {
-                label: taskType.name,
-                value: taskType.id
-              }
-            })
+            .map(taskType => ({
+              label: taskType.name,
+              value: taskType.id
+            }))
         : []
     },
 
     previewFileOptions() {
+      if (this.readOnly) return []
       const previewFiles = this.previewFiles[this.taskTypeId] || []
       return previewFiles.map(previewFile => ({
         label: `v${previewFile.revision}`,
@@ -172,15 +194,25 @@ export default {
     },
 
     taskStatus() {
+      if (this.readOnly) return null
       const taskId = this.entity.preview_file_task_id
       if (taskId) {
-        const task = this.taskMap.get(taskId)
-        if (!task) return ''
-        const taskStatus = this.taskStatusMap.get(task.task_status_id)
-        return taskStatus
-      } else {
-        return ''
+        const task = this.taskMap?.get(taskId)
+        if (!task) return null
+        return this.taskStatusMap?.get(task.task_status_id) || null
       }
+      return null
+    },
+
+    readOnlyTaskTypeName() {
+      if (!this.readOnly) return ''
+      if (this.entity.preview_file_task_type_name) {
+        return this.entity.preview_file_task_type_name
+      }
+      const taskId = this.entity.preview_file_task_id
+      const task = this.taskMap?.get(taskId)
+      const taskType = task && this.taskTypeMap?.get(task.task_type_id)
+      return taskType?.name || ''
     }
   },
 
@@ -367,6 +399,26 @@ export default {
 
 .version-combo {
   margin-top: 0.1em;
+}
+
+.preview-meta {
+  color: $white-grey;
+  font-size: 0.8em;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5em;
+  max-width: 150px;
+
+  .task-type-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .revision {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 .remove-button {
