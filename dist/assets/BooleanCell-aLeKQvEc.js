@@ -1,0 +1,2 @@
+import{J as e,T as t,W as n,t as r,x as i}from"./vue.esm-bundler-BDxqJPKD.js";import{t as a}from"./_plugin-vue_export-helper-TcpyXLsZ.js";import{t as o}from"./BooleanRep-wkqEg8cW.js";r();var s={name:`boolean-cell`,components:{BooleanRep:o},props:{value:{default:!1,type:Boolean}}},c={class:`has-text-centered`};function l(r,a,o,s,l,u){let d=e(`boolean-rep`);return n(),i(`td`,c,[t(d,{value:o.value},null,8,[`value`])])}var u=a(s,[[`render`,l],[`__scopeId`,`data-v-4f199334`]]);export{u as t};
+//# sourceMappingURL=BooleanCell-aLeKQvEc.js.map
