@@ -1,54 +1,60 @@
 <template>
   <aside class="shared-comments-panel flexcolumn">
     <form class="post-form" @submit.prevent="submitComment" v-if="canPost">
-      <div class="status-picker flexrow">
-        <button
-          type="button"
-          class="status-chip"
-          :class="{ selected: selectedStatusId === status.id }"
-          :style="statusChipStyle(status)"
-          :key="status.id"
-          :title="status.name"
-          @click="selectedStatusId = status.id"
-          v-for="status in availableStatuses"
-        >
-          {{ status.short_name }}
-        </button>
-      </div>
       <textarea
         ref="textareaRef"
         class="comment-input"
+        rows="4"
         :placeholder="$t('share.comment_placeholder')"
         :disabled="submitting"
+        v-autosize
         v-model="commentText"
+      ></textarea>
+      <checklist
+        class="draft-checklist"
+        :checklist="checklistItems"
+        :frame="(currentFrame || 0) + 1"
+        :revision="entity?.preview_file_revision || 1"
+        :is-movie-preview="currentFrame != null"
+        @add-item="onAddChecklistItem"
+        @insert-item="onInsertChecklistItem"
+        @remove-task="removeChecklistEntry"
+        @time-code-clicked="onChecklistTimeCodeClicked"
+        v-if="checklistItems.length > 0"
       />
-      <ul class="draft-checklist" v-if="checklistItems.length">
+      <ul class="draft-attachments" v-if="pendingAttachments.length">
         <li
-          class="draft-checklist-item flexrow"
-          :key="`draft-${index}`"
-          v-for="(item, index) in checklistItems"
+          class="draft-attachment flexrow"
+          :key="`attachment-${index}`"
+          v-for="(form, index) in pendingAttachments"
         >
-          <input
-            type="checkbox"
-            :checked="item.checked"
-            @change="item.checked = !item.checked"
-          />
-          <input
-            type="text"
-            class="draft-checklist-text filler"
-            v-model="item.text"
-          />
+          <paperclip-icon class="draft-attachment-icon" :size="14" />
+          <span class="draft-attachment-name filler">
+            {{ form.get('file').name }}
+          </span>
           <button
             type="button"
-            class="draft-checklist-remove"
-            @click="removeChecklistItem(index)"
+            class="chip-remove"
+            :title="$t('main.delete')"
+            @click="removePendingAttachment(index)"
           >
-            ×
+            <x-icon :size="14" />
           </button>
         </li>
       </ul>
       <div class="form-tools flexrow">
-        <emoji-button @select="insertEmoji" />
+        <span class="tool-button-slot">
+          <emoji-button @select="insertEmoji" />
+        </span>
+        <button
+          type="button"
+          class="tool-button"
+          :class="{ active: pendingAttachments.length > 0 }"
+          :title="$t('comments.add_attachment')"
+          @click="openAttachmentPicker"
+        >
+          <paperclip-icon :size="16" />
+        </button>
         <button
           type="button"
           class="tool-button"
@@ -56,20 +62,37 @@
           @click="insertFrameMention"
           v-if="currentFrame != null"
         >
-          #F
+          <film-icon :size="16" />
         </button>
         <button
           type="button"
           class="tool-button"
+          :class="{ active: checklistItems.length > 0 }"
           :title="$t('comments.add_checklist')"
           @click="addChecklistItem"
         >
-          ☑
+          <list-icon :size="16" />
         </button>
         <div class="filler"></div>
-        <button type="submit" class="button is-primary" :disabled="!canSubmit">
-          {{ submitting ? $t('main.loading') : $t('comments.publish') }}
-        </button>
+        <div class="post-compound flexrow">
+          <combobox-status
+            class="status-selector"
+            :narrow="true"
+            :color-only="true"
+            :task-status-list="availableStatuses"
+            :production-id="currentProduction?.id || ''"
+            v-model="selectedStatusId"
+          />
+          <button-simple
+            class="post-button"
+            :class="{ 'is-loading': submitting }"
+            type="submit"
+            icon="send"
+            :disabled="!canSubmit"
+            :text="$t('tasks.post')"
+            :title="$t('comments.post_status')"
+          />
+        </div>
       </div>
     </form>
     <p class="post-disabled" v-else-if="!canComment">
@@ -107,33 +130,48 @@
           :revision="comment.revision || 1"
           @edit-comment="onEditComment"
           @delete-comment="onDeleteComment"
+          @time-code-clicked="onCommentTimeCodeClicked"
           v-for="comment in taskComments"
         />
       </template>
     </div>
 
-    <edit-comment-modal
-      :active="modals.edit"
-      :comment-to-edit="commentToEdit || {}"
-      :task-types="[]"
-      :team="[]"
-      :fps="fps"
-      :frame="currentFrame || 0"
-      :is-loading="isEditing"
-      :is-error="editError"
-      @confirm="confirmEditComment"
-      @cancel="modals.edit = false"
-    />
+    <teleport to="body">
+      <div class="shared-modals">
+        <add-attachment-modal
+          :active="modals.attachment"
+          :is-loading="false"
+          :is-error="false"
+          :is-movie="false"
+          :title="entity?.name || ''"
+          @cancel="modals.attachment = false"
+          @confirm="onAttachmentsConfirmed"
+        />
 
-    <delete-modal
-      :active="modals.delete"
-      :text="$t('tasks.delete_comment')"
-      :error-text="$t('tasks.delete_comment_error')"
-      :is-loading="isDeleting"
-      :is-error="deleteError"
-      @confirm="confirmDeleteComment"
-      @cancel="modals.delete = false"
-    />
+        <edit-comment-modal
+          :active="modals.edit"
+          :comment-to-edit="commentToEdit || {}"
+          :task-types="[]"
+          :team="[]"
+          :fps="fps"
+          :frame="currentFrame || 0"
+          :is-loading="isEditing"
+          :is-error="editError"
+          @confirm="confirmEditComment"
+          @cancel="modals.edit = false"
+        />
+
+        <delete-modal
+          :active="modals.delete"
+          :text="$t('tasks.delete_comment')"
+          :error-text="$t('tasks.delete_comment_error')"
+          :is-loading="isDeleting"
+          :is-error="deleteError"
+          @confirm="confirmDeleteComment"
+          @cancel="modals.delete = false"
+        />
+      </div>
+    </teleport>
   </aside>
 </template>
 
@@ -141,14 +179,22 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import { FilmIcon, ListIcon, PaperclipIcon, XIcon } from 'lucide-vue-next'
+
+import { replaceTimeWithTimecode } from '@/lib/render'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 
 // eslint-disable-next-line no-unused-vars
 import TaskComment from '@/components/widgets/Comment.vue'
 // eslint-disable-next-line no-unused-vars
+import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
+// eslint-disable-next-line no-unused-vars
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 // eslint-disable-next-line no-unused-vars
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checklist from '@/components/widgets/Checklist.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -161,6 +207,8 @@ const props = defineProps({
   entity: { type: Object, default: () => ({}) }
 })
 
+const emit = defineEmits(['time-code-clicked'])
+
 const store = useStore()
 
 const comments = ref([])
@@ -170,8 +218,9 @@ const submitting = ref(false)
 const commentText = ref('')
 const selectedStatusId = ref('')
 const checklistItems = ref([])
+const pendingAttachments = ref([])
 const textareaRef = ref(null)
-const modals = reactive({ edit: false, delete: false })
+const modals = reactive({ edit: false, delete: false, attachment: false })
 const commentToEdit = ref(null)
 const isEditing = ref(false)
 const editError = ref(false)
@@ -200,15 +249,9 @@ const taskComments = computed(() =>
     .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''))
 )
 
-const availableStatuses = computed(() => {
-  const clientAllowed = taskStatuses.value.filter(
-    status => status.is_client_allowed
-  )
-  if (clientAllowed.length > 0) return clientAllowed
-  // Fallback: no explicit client-allowed status → offer them all so a guest
-  // can still post. Backend will still enforce via project permissions.
-  return taskStatuses.value
-})
+const availableStatuses = computed(() =>
+  taskStatuses.value.filter(status => status.is_client_allowed)
+)
 
 const canPost = computed(
   () =>
@@ -222,10 +265,6 @@ const canSubmit = computed(
     selectedStatusId.value &&
     (commentText.value.trim() || selectedStatusId.value)
 )
-
-const statusChipStyle = status => ({
-  borderLeft: `4px solid ${status.color}`
-})
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
@@ -348,15 +387,58 @@ const insertEmoji = emoji => {
 
 const insertFrameMention = () => {
   if (props.currentFrame == null) return
-  insertAtCursor(`[[frame ${props.currentFrame}]]`)
+  const revision = props.entity?.preview_file_revision || 1
+  const frame = props.currentFrame + 1
+  const rendered = replaceTimeWithTimecode('@frame', revision, frame, fps.value)
+  insertAtCursor(rendered + ' ')
 }
 
 const addChecklistItem = () => {
-  checklistItems.value.push({ text: '', checked: false })
+  checklistItems.value.push({
+    text: '',
+    checked: false,
+    frame: -1,
+    revision: -1
+  })
 }
 
-const removeChecklistItem = index => {
-  checklistItems.value.splice(index, 1)
+const onAddChecklistItem = item => {
+  delete item.index
+  checklistItems.value.push(item)
+}
+
+const onInsertChecklistItem = item => {
+  checklistItems.value.splice(item.index, 0, item)
+}
+
+const removeChecklistEntry = entry => {
+  checklistItems.value = checklistItems.value.filter(e => e !== entry)
+}
+
+const onCommentTimeCodeClicked = data => {
+  emit('time-code-clicked', data)
+}
+
+const onChecklistTimeCodeClicked = ({ frame, revision }) => {
+  emit('time-code-clicked', {
+    versionRevision: revision,
+    frame: (frame || 0) - 1
+  })
+}
+
+const openAttachmentPicker = () => {
+  modals.attachment = true
+}
+
+const onAttachmentsConfirmed = forms => {
+  modals.attachment = false
+  if (forms?.length) {
+    pendingAttachments.value = [...pendingAttachments.value, ...forms]
+  }
+}
+
+const removePendingAttachment = index => {
+  pendingAttachments.value.splice(index, 1)
 }
 
 const loadContext = async () => {
@@ -364,8 +446,8 @@ const loadContext = async () => {
   if (!response.ok) throw new Error('Failed to load context')
   const data = await response.json()
   taskStatuses.value = data.task_statuses || []
-  if (taskStatuses.value.length > 0 && !selectedStatusId.value) {
-    selectedStatusId.value = taskStatuses.value[0].id
+  if (availableStatuses.value.length > 0 && !selectedStatusId.value) {
+    selectedStatusId.value = availableStatuses.value[0].id
   }
 }
 
@@ -404,6 +486,36 @@ const refresh = async () => {
   loading.value = false
 }
 
+const uploadAttachments = async commentId => {
+  if (pendingAttachments.value.length === 0) return null
+  const formData = new FormData()
+  formData.append('guest_id', props.guestId)
+  pendingAttachments.value.forEach((form, index) => {
+    const file = form.get('file')
+    console.log('[shared-panel] attaching', index, file?.name, file?.size)
+    formData.append(`file-${index}`, file)
+  })
+  console.log(
+    '[shared-panel] POST attachments to',
+    `${apiBase.value}/comments/${commentId}/attachments`
+  )
+  const response = await fetch(
+    `${apiBase.value}/comments/${commentId}/attachments`,
+    { method: 'POST', body: formData }
+  )
+  console.log(
+    '[shared-panel] attachment response',
+    response.status,
+    response.ok
+  )
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '')
+    console.warn('[shared-panel] attachment upload failed:', errorText)
+    return null
+  }
+  return response.json()
+}
+
 const submitComment = async () => {
   if (!canSubmit.value) return
   submitting.value = true
@@ -420,10 +532,13 @@ const submitComment = async () => {
       })
     })
     if (response.ok) {
-      const comment = await response.json()
+      let comment = await response.json()
+      const withAttachments = await uploadAttachments(comment.id)
+      if (withAttachments) comment = withAttachments
       comments.value = [comment, ...comments.value]
       commentText.value = ''
       checklistItems.value = []
+      pendingAttachments.value = []
     }
   } catch {
     // No-op
@@ -639,38 +754,6 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.status-picker {
-  flex-wrap: wrap;
-  gap: 0.35em;
-  margin-bottom: 0.6em;
-}
-
-.status-chip {
-  background: var(--surface-inset);
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.72em;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  padding: 0.3em 0.7em;
-  text-transform: uppercase;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-strong);
-    color: var(--text);
-  }
-
-  &.selected {
-    background: var(--accent-soft);
-    border-color: rgba(124, 92, 255, 0.4);
-    color: var(--text);
-  }
-}
-
 .comment-input {
   background: var(--surface-inset);
   border: 1px solid var(--border-soft);
@@ -678,9 +761,11 @@ onMounted(() => {
   color: var(--text);
   font-family: inherit;
   font-size: 0.9em;
-  min-height: 80px;
+  line-height: 1.5;
+  min-height: 7em;
+  max-height: 14em;
   padding: 0.7em 0.8em;
-  resize: vertical;
+  resize: none;
   width: 100%;
   transition:
     border-color 0.2s ease,
@@ -699,84 +784,278 @@ onMounted(() => {
 
 .form-tools {
   align-items: center;
-  gap: 0.4em;
+  gap: 0.3em;
   margin-top: 0.6em;
+}
 
-  :deep(.button.is-primary) {
-    background: var(--accent);
-    border: 0;
-    border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(124, 92, 255, 0.35);
-    color: white;
-    font-weight: 600;
-    padding: 0.55em 1.2em;
-    transition: all 0.2s ease;
+.post-compound {
+  align-items: stretch;
+  height: 32px;
+
+  :deep(.status-combo) {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-strong);
+    border-right: 0;
+    border-top-left-radius: 2em;
+    border-bottom-left-radius: 2em;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    height: 32px;
+    margin: 0;
+    min-width: 64px;
+    padding: 0 0.2em 0 0.55em;
+
+    &:hover {
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-right: 0;
+    }
+
+    .flexrow {
+      align-items: center;
+      height: 100%;
+    }
+
+    .tag {
+      border-radius: 999px;
+      font-size: 0.75em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 0.2em 0.55em;
+    }
+
+    .down-icon {
+      color: var(--text-muted);
+      margin-right: 0.25em;
+    }
+  }
+
+  :deep(.select-input) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    bottom: auto;
+    left: -1px;
+    margin-left: 0;
+    min-width: 140px;
+    padding: 0.25em 0;
+    top: calc(100% + 4px);
+  }
+
+  :deep(.status-line) {
+    background: transparent;
+    color: var(--text);
+    padding: 0.3em 0.5em;
+
+    &:hover {
+      background: var(--accent-soft);
+    }
+
+    .tag {
+      border-radius: 999px;
+      font-size: 0.75em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 0.2em 0.55em;
+    }
+  }
+
+  .post-button {
+    align-items: center;
+    background: var(--surface-inset);
+    border: 1px solid var(--border-strong);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 2em;
+    border-bottom-right-radius: 2em;
+    color: var(--text);
+    display: inline-flex;
+    font-weight: 500;
+    gap: 0.4em;
+    height: 32px;
+    padding: 0 1em 0 0.9em;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
 
     &:hover:not(:disabled) {
-      box-shadow: 0 6px 20px rgba(124, 92, 255, 0.5);
-      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.24);
     }
 
     &:disabled {
-      box-shadow: none;
+      cursor: not-allowed;
       opacity: 0.5;
+    }
+
+    :deep(.icon) {
+      height: 14px;
+      width: 14px;
     }
   }
 }
 
-.tool-button {
-  background: var(--surface-inset);
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
+.tool-button,
+.tool-button-slot :deep(.emoji-button) {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.8em;
-  padding: 0.35em 0.65em;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+  width: 32px;
 
   &:hover {
     background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-strong);
+    border-color: var(--border-soft);
+    color: var(--text);
+  }
+
+  &.active {
+    background: var(--accent-soft);
+    border-color: rgba(124, 92, 255, 0.35);
     color: var(--text);
   }
 }
 
-.draft-checklist {
+.tool-button-slot {
+  display: inline-flex;
+
+  :deep(.emoji-button .icon) {
+    height: 16px;
+    margin: 0;
+    width: 16px;
+  }
+}
+
+.post-form :deep(.v3-emoji-picker) {
+  --v3-picker-bg: #1d1d26;
+  --v3-picker-fg: #f4f5fa;
+  --v3-picker-border: rgba(255, 255, 255, 0.08);
+  --v3-picker-input-bg: #0e0e13;
+  --v3-picker-input-border: rgba(255, 255, 255, 0.12);
+  --v3-picker-input-focus-border: rgba(124, 92, 255, 0.55);
+  --v3-group-image-filter: invert(1) brightness(1.2);
+  --v3-picker-emoji-hover: rgba(124, 92, 255, 0.22);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.chip-remove {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 22px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  width: 22px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+  }
+}
+
+.draft-attachments {
   list-style: none;
   margin: 0.6em 0 0;
   padding: 0;
 
-  .draft-checklist-item {
+  .draft-attachment {
     align-items: center;
-    gap: 0.45em;
-    margin-bottom: 0.3em;
-  }
-
-  .draft-checklist-text {
     background: var(--surface-inset);
     border: 1px solid var(--border-soft);
     border-radius: 8px;
-    color: var(--text);
-    font-size: 0.85em;
-    padding: 0.35em 0.55em;
-
-    &:focus {
-      border-color: rgba(124, 92, 255, 0.5);
-      box-shadow: 0 0 0 2px var(--accent-soft);
-      outline: none;
-    }
+    color: var(--text-muted);
+    font-size: 0.8em;
+    gap: 0.45em;
+    margin-bottom: 0.3em;
+    padding: 0.3em 0.55em;
   }
 
-  .draft-checklist-remove {
-    background: transparent;
-    border: 0;
+  .draft-attachment-icon {
     color: var(--text-muted);
-    cursor: pointer;
-    font-size: 1.1em;
-    padding: 0 0.3em;
+    flex-shrink: 0;
+  }
 
-    &:hover {
+  .draft-attachment-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.draft-checklist {
+  margin-top: 0.6em;
+
+  :deep(.checklist-entry) {
+    color: var(--text);
+
+    .checklist-checkbox {
+      color: var(--text-muted);
+
+      .icon {
+        width: 16px;
+      }
+
+      &:hover {
+        color: var(--text);
+      }
+    }
+
+    .checklist-text {
+      background: var(--surface-inset);
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
       color: var(--text);
+      font-size: 0.85em;
+      padding: 0.35em 0.55em;
+      margin-top: 0;
+
+      &:hover,
+      &:focus,
+      &:active {
+        background: var(--surface-inset);
+        border-color: rgba(124, 92, 255, 0.5);
+        box-shadow: 0 0 0 2px var(--accent-soft);
+      }
+    }
+
+    &.checked .checklist-text {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .frame {
+      background: var(--surface-inset);
+      border-color: var(--border-soft);
+      color: var(--accent);
+    }
+
+    .clock {
+      color: var(--text-muted);
+
+      &:hover {
+        color: var(--text);
+      }
     }
   }
 }
@@ -788,5 +1067,134 @@ onMounted(() => {
   margin: 0;
   padding: 0.9em;
   text-align: center;
+}
+
+.shared-modals {
+  --accent: #7c5cff;
+  --accent-soft: rgba(124, 92, 255, 0.16);
+  --surface: #14141a;
+  --surface-raised: #1d1d26;
+  --surface-inset: #0e0e13;
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --text: #f4f5fa;
+  --text-muted: rgba(244, 245, 250, 0.65);
+
+  :deep(.modal-background) {
+    background: rgba(6, 6, 10, 0.75);
+    backdrop-filter: blur(4px);
+  }
+
+  :deep(.modal-content .box) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    color: var(--text);
+  }
+
+  :deep(.modal-content .title),
+  :deep(.modal-content .subtitle),
+  :deep(.modal-content .label),
+  :deep(.modal-content p.text),
+  :deep(.modal-content h1),
+  :deep(.modal-content h2),
+  :deep(.modal-content h3) {
+    color: var(--text);
+  }
+
+  :deep(.modal-content .subtitle),
+  :deep(.modal-content .label) {
+    color: var(--text-muted);
+  }
+
+  :deep(.modal-content .input),
+  :deep(.modal-content textarea),
+  :deep(.modal-content input[type='text']),
+  :deep(.modal-content input[type='number']),
+  :deep(.modal-content select) {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    color: var(--text);
+
+    &::placeholder {
+      color: rgba(244, 245, 250, 0.35);
+    }
+
+    &:focus {
+      border-color: rgba(124, 92, 255, 0.5);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+      outline: none;
+    }
+  }
+
+  :deep(.modal-content .attachment-file),
+  :deep(.modal-content .upload-attachments .attachment-name) {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    color: var(--text-muted);
+    padding: 0.4em 0.6em;
+  }
+
+  :deep(.modal-content .button) {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    color: var(--text);
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-strong);
+    }
+  }
+
+  :deep(.modal-content .button.is-primary) {
+    background: var(--accent);
+    border: 0;
+    border-radius: 2em;
+    color: white;
+    font-weight: 600;
+    padding: 0.5em 1.3em;
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 88%, white 12%);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  :deep(.modal-content .button.is-link) {
+    background: transparent;
+    border: 1px solid var(--border-soft);
+    color: var(--text-muted);
+
+    &:hover {
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+  }
+
+  :deep(.modal-content .button.is-danger) {
+    background: #ff4d6d;
+    border: 0;
+    color: white;
+
+    &:hover {
+      background: #ff3358;
+    }
+  }
+
+  :deep(.modal-content .drop-mask) {
+    background: rgba(124, 92, 255, 0.18);
+    border: 2px dashed rgba(124, 92, 255, 0.55);
+    color: var(--text);
+  }
 }
 </style>

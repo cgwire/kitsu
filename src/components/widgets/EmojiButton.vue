@@ -4,6 +4,7 @@
       ref="buttonRef"
       class="emoji-button"
       icon="smile"
+      type="button"
       :title="$t('comments.add_emoji')"
       :active="showEmojiPicker"
       @click="toggleEmojiPicker"

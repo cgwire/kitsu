@@ -125,6 +125,7 @@
         :can-comment="canComment"
         :current-frame="currentFrameNumber"
         :entity="currentEntity || {}"
+        @time-code-clicked="onTimeCodeClicked"
         v-if="!isCommentsHidden && token"
       />
     </div>
@@ -133,6 +134,7 @@
       ref="videoProgress"
       class="video-progress pull-bottom"
       :annotations="currentAnnotations"
+      :background-url="videoProgressBackgroundUrl"
       :empty="!isMovie"
       :frame-duration="frameDuration"
       :is-full-mode="false"
@@ -144,23 +146,6 @@
       :preview-id="currentPreview ? currentPreview.id : ''"
       @progress-changed="onProgressChanged"
       v-show="!!currentPreview"
-    />
-
-    <playlist-progress
-      :entity-list="entityListForProgress"
-      :fps="fps"
-      :frame-duration="frameDuration"
-      :is-full-mode="false"
-      :is-full-screen="false"
-      :movie-dimensions="movieDimensions"
-      :nb-frames="nbFrames"
-      :preview-id="currentPreview ? currentPreview.id : ''"
-      :playlist-duration="playlistDuration"
-      :playlist-progress="playlistProgress"
-      :playlist-shot-position="playlistShotPosition"
-      :url-prefix="sharedApiPrefix || '/api'"
-      @progress-playlist-changed="onProgressPlaylistChanged"
-      v-if="entityList.length > 1 && playlistDuration > 0"
     />
 
     <div class="playlist-footer flexrow">
@@ -259,6 +244,23 @@
       />
     </div>
 
+    <playlist-progress
+      :entity-list="entityListForProgress"
+      :fps="fps"
+      :frame-duration="frameDuration"
+      :is-full-mode="false"
+      :is-full-screen="false"
+      :movie-dimensions="movieDimensions"
+      :nb-frames="nbFrames"
+      :preview-id="currentPreview ? currentPreview.id : ''"
+      :playlist-duration="playlistDuration"
+      :playlist-progress="playlistProgress"
+      :playlist-shot-position="playlistShotPosition"
+      :url-prefix="sharedApiPrefix || '/api'"
+      @progress-playlist-changed="onProgressPlaylistChanged"
+      v-if="entityList.length > 1 && playlistDuration > 0"
+    />
+
     <div
       :class="{
         'playlisted-entities': true,
@@ -301,6 +303,8 @@ import { LogOutIcon } from 'lucide-vue-next'
 import { useStore } from 'vuex'
 
 import { floorToFrame, formatTime } from '@/lib/video'
+
+import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ButtonSound from '@/components/widgets/ButtonSound.vue'
@@ -376,6 +380,8 @@ const sharedApiPrefix = computed(() =>
 )
 
 const movieUrlPrefix = computed(() => sharedApiPrefix.value)
+
+const videoProgressBackgroundUrl = darkTimesliderUrl
 
 const currentEntity = computed(() => entityList.value[playingEntityIndex.value])
 
@@ -617,6 +623,13 @@ const onProgressChanged = frameNumber => {
     rawPlayer.value?.setCurrentFrame(frameNumber)
     onFrameUpdate(frameNumber)
   }
+}
+
+const onTimeCodeClicked = ({ frame }) => {
+  if (!isMovie.value) return
+  const frameNumber = Math.max(parseInt(frame, 10) || 0, 0)
+  rawPlayer.value?.setCurrentFrame(frameNumber)
+  onFrameUpdate(frameNumber)
 }
 
 const goPreviousFrame = () => {
@@ -963,7 +976,7 @@ watch(isCommentsHidden, triggerPlayerResize)
 }
 
 .shared-player :deep(.playlist-progress) {
-  background: rgba(10, 10, 15, 0.25) !important;
+  background: #08080c !important;
   border-top: 1px solid var(--border-soft) !important;
   border-bottom: 1px solid var(--border-soft) !important;
   height: 14px;

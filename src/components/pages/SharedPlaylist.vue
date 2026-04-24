@@ -44,6 +44,7 @@ import {
   LOAD_TASK_STATUSES_END,
   LOAD_TASK_TYPES_END,
   SET_CURRENT_PRODUCTION,
+  TOGGLE_DARK_THEME,
   USER_LOGIN,
   USER_LOGOUT
 } from '@/store/mutation-types'
@@ -87,15 +88,7 @@ const populateStoreFromContext = async () => {
     store.commit(SET_CURRENT_PRODUCTION, project.id)
   }
   store.commit(LOAD_TASK_TYPES_END, data.task_types || [])
-  // If no status is explicitly client-allowed, mark them all as such so the
-  // guest can still change a comment status via EditCommentModal (which
-  // filters via `is_client_allowed` when user role is client).
-  const statuses = data.task_statuses || []
-  const anyClientAllowed = statuses.some(s => s.is_client_allowed)
-  const normalizedStatuses = anyClientAllowed
-    ? statuses
-    : statuses.map(s => ({ ...s, is_client_allowed: true }))
-  store.commit(LOAD_TASK_STATUSES_END, normalizedStatuses)
+  store.commit(LOAD_TASK_STATUSES_END, data.task_statuses || [])
 }
 
 const loginAsGuest = guest => {
@@ -186,6 +179,7 @@ const logoutGuest = () => {
 }
 
 onMounted(() => {
+  store.commit(TOGGLE_DARK_THEME, true)
   loadSharedPlaylist()
 })
 </script>
