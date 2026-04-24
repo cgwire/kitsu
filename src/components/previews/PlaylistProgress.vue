@@ -137,6 +137,10 @@ export default {
     playlistShotPosition: {
       default: () => {},
       type: Object
+    },
+    urlPrefix: {
+      default: '/api',
+      type: String
     }
   },
 
@@ -219,7 +223,7 @@ export default {
     },
 
     tilePath() {
-      return `/api/movies/tiles/preview-files/${this.previewId}.png`
+      return `${this.urlPrefix}/movies/tiles/preview-files/${this.previewId}.png`
     },
 
     videoDuration() {
@@ -320,7 +324,7 @@ export default {
       const frameHeight = 100
 
       if (extension === 'png') {
-        const tilePath = `/api/pictures/thumbnails/preview-files/${id}.png`
+        const tilePath = `${this.urlPrefix}/pictures/thumbnails/preview-files/${id}.png`
         return {
           background: `url(${tilePath})`,
           'background-position': '0 0',
@@ -329,7 +333,7 @@ export default {
       } else if (extension === 'mp4') {
         const ratio = width / height
         const frameWidth = Math.ceil(frameHeight * ratio)
-        const tilePath = `/api/movies/tiles/preview-files/${id}.png`
+        const tilePath = `${this.urlPrefix}/movies/tiles/preview-files/${id}.png`
         return {
           background: `url(${tilePath})`,
           'background-position': `-${frameX * frameWidth}px -${
@@ -400,11 +404,14 @@ export default {
       handler() {
         if (this.previewId) {
           const preview = this.playlistShotPosition[this.hoverFrame]
-          if (preview.extension === 'mp4') {
+          if (preview?.extension === 'mp4') {
             this.isTileLoading = true
             const img = new Image()
             img.src = this.tilePath
             img.onload = () => {
+              this.isTileLoading = false
+            }
+            img.onerror = () => {
               this.isTileLoading = false
             }
           }

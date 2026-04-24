@@ -59,8 +59,12 @@
           {{ $t('playlists.no_preview') }}
         </div>
       </template>
-      <div class="preview-meta" v-else-if="readOnlyTaskTypeName">
-        <span class="task-type-name">{{ readOnlyTaskTypeName }}</span>
+      <div class="preview-meta" v-else-if="readOnlyTaskType">
+        <task-type-name
+          :task-type="readOnlyTaskType"
+          :is-link="false"
+          :thin="true"
+        />
         <span class="revision" v-if="entity.preview_file_revision">
           v{{ entity.preview_file_revision }}
         </span>
@@ -91,6 +95,7 @@ import { mapGetters } from 'vuex'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 export default {
   name: 'playlisted-entity',
@@ -98,6 +103,7 @@ export default {
   components: {
     Combobox,
     LightEntityThumbnail,
+    TaskTypeName,
     XIcon
   },
 
@@ -204,15 +210,14 @@ export default {
       return null
     },
 
-    readOnlyTaskTypeName() {
-      if (!this.readOnly) return ''
-      if (this.entity.preview_file_task_type_name) {
-        return this.entity.preview_file_task_type_name
+    readOnlyTaskType() {
+      if (!this.readOnly) return null
+      if (this.entity.preview_file_task_type) {
+        return this.entity.preview_file_task_type
       }
       const taskId = this.entity.preview_file_task_id
       const task = this.taskMap?.get(taskId)
-      const taskType = task && this.taskTypeMap?.get(task.task_type_id)
-      return taskType?.name || ''
+      return (task && this.taskTypeMap?.get(task.task_type_id)) || null
     }
   },
 
@@ -402,18 +407,13 @@ export default {
 }
 
 .preview-meta {
+  align-items: center;
   color: $white-grey;
-  font-size: 0.8em;
   display: flex;
+  font-size: 0.85em;
+  gap: 0.4em;
   justify-content: space-between;
-  gap: 0.5em;
   max-width: 150px;
-
-  .task-type-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 
   .revision {
     flex-shrink: 0;

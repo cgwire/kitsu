@@ -138,6 +138,7 @@ export default {
   },
 
   beforeUnmount() {
+    clearInterval(this.$options.playLoop)
     window.removeEventListener('resize', this.resetHeight)
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
 
