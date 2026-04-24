@@ -12,33 +12,11 @@
     </div>
 
     <div class="shared-content" v-else-if="needsIdentity">
-      <div class="identity-card">
-        <div class="identity-header">
-          <img class="kitsu-logo" src="@/assets/kitsu.png" alt="Kitsu" />
-          <h1 class="title">{{ playlistName }}</h1>
-          <p class="description">
-            {{ $t('share.identity_description') }}
-          </p>
-        </div>
-        <form class="identity-form" @submit.prevent="submitIdentity">
-          <text-field
-            ref="nameField"
-            :label="$t('share.your_name')"
-            :placeholder="$t('share.name_placeholder')"
-            v-model.trim="guestName"
-            required
-          />
-          <div class="has-text-centered mt2">
-            <button
-              class="button is-primary"
-              type="submit"
-              :disabled="!guestName"
-            >
-              {{ $t('share.enter_review') }}
-            </button>
-          </div>
-        </form>
-      </div>
+      <shared-playlist-identity-card
+        v-model:guest-name="guestName"
+        :playlist-name="playlistName"
+        @submit="submitIdentity"
+      />
     </div>
 
     <div class="player-container" v-else>
@@ -47,26 +25,38 @@
         :entities="playlistEntities"
         :loading="loadingPlayer"
         :token="token"
+        :guest-id="guestId || ''"
+        :can-comment="shareLink?.can_comment || false"
+        @logout="logoutGuest"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
+import {
+  LOAD_PRODUCTIONS_END,
+  LOAD_TASK_STATUSES_END,
+  LOAD_TASK_TYPES_END,
+  SET_CURRENT_PRODUCTION,
+  USER_LOGIN,
+  USER_LOGOUT
+} from '@/store/mutation-types'
+
+import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
 import SharedPlaylistPlayer from '@/components/previews/SharedPlaylistPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import TextField from '@/components/widgets/TextField.vue'
 
 const GUEST_STORAGE_PREFIX = 'shared-playlist-guest-'
 
 const { t } = useI18n()
 const route = useRoute()
-
-const nameField = useTemplateRef('nameField')
+const store = useStore()
 
 const loading = ref(true)
 const loadingPlayer = ref(false)
@@ -87,6 +77,41 @@ const needsIdentity = computed(
   () => shareLink.value?.can_comment && !guestId.value
 )
 
+const populateStoreFromContext = async () => {
+  const response = await fetch(`/api/shared/playlists/${token.value}/context`)
+  if (!response.ok) return
+  const data = await response.json()
+  const project = data.project
+  if (project) {
+    store.commit(LOAD_PRODUCTIONS_END, [project])
+    store.commit(SET_CURRENT_PRODUCTION, project.id)
+  }
+  store.commit(LOAD_TASK_TYPES_END, data.task_types || [])
+  // If no status is explicitly client-allowed, mark them all as such so the
+  // guest can still change a comment status via EditCommentModal (which
+  // filters via `is_client_allowed` when user role is client).
+  const statuses = data.task_statuses || []
+  const anyClientAllowed = statuses.some(s => s.is_client_allowed)
+  const normalizedStatuses = anyClientAllowed
+    ? statuses
+    : statuses.map(s => ({ ...s, is_client_allowed: true }))
+  store.commit(LOAD_TASK_STATUSES_END, normalizedStatuses)
+}
+
+const loginAsGuest = guest => {
+  if (!guest) return
+  store.commit(USER_LOGIN, {
+    id: guest.id,
+    first_name: guest.first_name || 'Guest',
+    last_name: guest.last_name || '',
+    email: guest.email || '',
+    role: 'client',
+    is_guest: true,
+    has_avatar: false,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  })
+}
+
 const loadSharedPlaylist = async () => {
   loading.value = true
   error.value = false
@@ -96,6 +121,8 @@ const loadSharedPlaylist = async () => {
     const data = await response.json()
     playlist.value = data
     playlistEntities.value = data.shots || []
+
+    await populateStoreFromContext()
 
     // Fetch share link metadata
     shareLink.value = { can_comment: true }
@@ -117,6 +144,7 @@ const loadSharedPlaylist = async () => {
         if (guestResponse.ok) {
           const guest = await guestResponse.json()
           guestId.value = guest.id
+          loginAsGuest(guest)
         }
       } catch {
         // Guest not found, will ask for identity
@@ -143,10 +171,18 @@ const submitIdentity = async () => {
     const guest = await response.json()
     guestId.value = guest.id
     localStorage.setItem(GUEST_STORAGE_PREFIX + token.value, guest.id)
+    loginAsGuest(guest)
   } catch {
     error.value = true
   }
   loading.value = false
+}
+
+const logoutGuest = () => {
+  localStorage.removeItem(GUEST_STORAGE_PREFIX + token.value)
+  guestId.value = null
+  guestName.value = ''
+  store.commit(USER_LOGOUT)
 }
 
 onMounted(() => {
@@ -160,8 +196,19 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: var(--background);
-  color: var(--text);
+  background:
+    radial-gradient(
+      80% 80% at 15% 0%,
+      rgba(124, 92, 255, 0.18) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      70% 70% at 85% 100%,
+      rgba(255, 120, 180, 0.12) 0%,
+      transparent 55%
+    ),
+    #14141a;
+  color: #f4f5fa;
 }
 
 .shared-content {
@@ -172,57 +219,23 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-.identity-card {
-  background: var(--background-alt);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 2.5em;
-  max-width: 420px;
-  width: 100%;
-  text-align: center;
-}
-
-.identity-header {
-  margin-bottom: 2em;
-}
-
-.kitsu-logo {
-  width: 60px;
-  margin-bottom: 1em;
-}
-
-.title {
-  color: var(--text);
-  font-size: 1.4em;
-  font-weight: 700;
-  margin-bottom: 0.5em;
-}
-
-.description {
-  color: var(--text-alt);
-  font-size: 0.95em;
-  line-height: 1.5;
-}
-
-.identity-form {
-  text-align: left;
-
-  .button.is-primary {
-    border-radius: 10px;
-  }
-}
-
 .error-card {
-  background: var(--background-alt);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: rgba(29, 29, 38, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   padding: 2.5em;
   max-width: 420px;
   width: 100%;
   text-align: center;
+
+  .title {
+    color: #f4f5fa;
+  }
 
   p {
-    color: var(--text-alt);
+    color: rgba(244, 245, 250, 0.6);
     margin-top: 0.5em;
   }
 }

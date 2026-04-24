@@ -15,7 +15,8 @@ export default {
     comments_disabled: 'Comments are disabled for this link.',
     identity_required: 'You need to enter your name before posting.',
     no_status_available: 'No task statuses are configured for this project.',
-    logout: 'Leave review session'
+    logout: 'Leave review session',
+    kitsu_homepage: 'About Kitsu'
   },
 
   assets: {

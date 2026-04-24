@@ -1,21 +1,23 @@
 <template>
   <div class="shared-player playlist-player" ref="container">
     <header class="shared-header flexrow">
-      <img class="kitsu-logo" src="@/assets/kitsu.png" alt="Kitsu" />
+      <a
+        class="kitsu-logo-link"
+        href="https://www.cg-wire.com/kitsu"
+        target="_blank"
+        rel="noopener"
+        :title="$t('share.kitsu_homepage')"
+      >
+        <img class="kitsu-logo" src="@/assets/kitsu.png" alt="Kitsu" />
+      </a>
       <span class="project-name uppercase" v-if="projectName">
         {{ projectName }}
       </span>
       <span v-if="projectName">|</span>
       <span class="playlist-name">{{ playlistName }}</span>
-
-      <div class="filler"></div>
+      <span v-if="playlistName">|</span>
 
       <div class="flexrow flexrow-item entity-nav">
-        <span class="flexrow-item entity-counter">
-          {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
-          /
-          {{ entityList.length }}
-        </span>
         <button-simple
           class="playlist-button flexrow-item"
           icon="back"
@@ -28,60 +30,103 @@
           :title="$t('playlists.actions.next_shot')"
           @click="nextEntity"
         />
+        <span class="flexrow-item entity-counter">
+          {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
+          /
+          {{ entityList.length }}
+        </span>
       </div>
+
+      <span
+        class="flexrow-item current-entity-name"
+        :title="currentEntityDisplayName"
+        v-if="currentEntityDisplayName"
+      >
+        {{ currentEntityDisplayName }}
+      </span>
+
+      <div class="filler"></div>
+
+      <span
+        class="flexrow-item guest-name"
+        :title="guestDisplayName"
+        v-if="guestDisplayName"
+      >
+        {{ guestDisplayName }}
+      </span>
+      <button
+        class="logout-button flexrow-item"
+        :title="$t('share.logout')"
+        @click="emit('logout')"
+        v-if="guestId"
+      >
+        <log-out-icon class="icon" :size="16" />
+      </button>
     </header>
 
-    <div class="player-area">
-      <div class="video-container" ref="videoContainer">
-        <raw-video-player
-          ref="rawPlayer"
-          class="raw-player"
-          :entities="entityList"
-          :current-preview-index="currentPreviewIndex"
-          :is-hd="isHd"
-          :is-repeating="isRepeating"
-          :muted="isMuted"
-          :movie-url-prefix="movieUrlPrefix"
-          :panzoom="true"
-          @entity-change="onEntityChange"
-          @frame-update="onFrameUpdate"
-          @max-duration-update="onMaxDurationUpdate"
-          @play-next="onPlayNext"
-          @video-loaded="onVideoLoaded"
-          v-show="isMovie && !loading"
-        />
+    <div class="player-row">
+      <div class="player-area">
+        <div class="video-container" ref="videoContainer">
+          <raw-video-player
+            ref="rawPlayer"
+            class="raw-player"
+            :entities="entityList"
+            :current-preview-index="currentPreviewIndex"
+            :is-hd="isHd"
+            :is-repeating="isRepeating"
+            :muted="isMuted"
+            :movie-url-prefix="movieUrlPrefix"
+            :panzoom="true"
+            @entity-change="onEntityChange"
+            @frame-update="onFrameUpdate"
+            @max-duration-update="onMaxDurationUpdate"
+            @play-next="onPlayNext"
+            @video-loaded="onVideoLoaded"
+            v-show="isMovie && !loading"
+          />
 
-        <picture-viewer
-          ref="picturePlayer"
-          :big="true"
-          :default-height="600"
-          :full-screen="false"
-          :light="false"
-          :margin-bottom="0"
-          :panzoom="true"
-          :preview="currentPreview"
-          high-quality
-          v-show="isPicture && !loading"
-        />
+          <picture-viewer
+            ref="picturePlayer"
+            :big="true"
+            :default-height="600"
+            :full-screen="false"
+            :light="false"
+            :margin-bottom="0"
+            :panzoom="true"
+            :preview="currentPreview"
+            high-quality
+            v-show="isPicture && !loading"
+          />
 
-        <sound-viewer
-          ref="soundPlayer"
-          :preview-url="currentPreviewUrl"
-          @play-ended="pause"
-          v-if="isSound && !loading"
-        />
+          <sound-viewer
+            ref="soundPlayer"
+            :preview-url="currentPreviewUrl"
+            @play-ended="pause"
+            v-if="isSound && !loading"
+          />
 
-        <div class="loading-background" v-if="loading">
-          <spinner />
+          <div class="loading-background" v-if="loading">
+            <spinner />
+          </div>
+
+          <p
+            class="has-text-centered mt2 no-preview"
+            v-if="!loading && !currentPreview"
+          >
+            {{ $t('share.no_preview') }}
+          </p>
         </div>
-
-        <p
-          class="has-text-centered mt2 no-preview"
-          v-if="!loading && !currentPreview"
-        >
-          {{ $t('share.no_preview') }}
-        </p>
       </div>
+
+      <shared-comments-panel
+        :token="token"
+        :guest-id="guestId"
+        :current-task-id="currentTaskId"
+        :can-comment="canComment"
+        :current-frame="currentFrameNumber"
+        :entity="currentEntity || {}"
+        v-if="!isCommentsHidden && token"
+      />
     </div>
 
     <video-progress
@@ -182,12 +227,14 @@
 
       <div class="filler"></div>
 
-      <div class="flexrow flexrow-item" v-if="currentEntity">
-        <span class="entity-name">
-          {{ currentEntity.entity_name || currentEntity.name }}
-        </span>
-      </div>
-
+      <button-simple
+        class="playlist-button flexrow-item"
+        :active="!isCommentsHidden"
+        icon="comment"
+        :title="$t('playlists.actions.comments')"
+        @click="isCommentsHidden = !isCommentsHidden"
+        v-if="token"
+      />
       <button-simple
         class="playlist-button flexrow-item"
         :active="isZoomEnabled"
@@ -250,6 +297,9 @@ import {
   watchEffect
 } from 'vue'
 
+import { LogOutIcon } from 'lucide-vue-next'
+import { useStore } from 'vuex'
+
 import { floorToFrame, formatTime } from '@/lib/video'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -259,6 +309,8 @@ import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 // eslint-disable-next-line no-unused-vars
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+// eslint-disable-next-line no-unused-vars
+import SharedCommentsPanel from '@/components/previews/SharedCommentsPanel.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 // eslint-disable-next-line no-unused-vars
@@ -268,7 +320,28 @@ const props = defineProps({
   playlist: { type: Object, default: () => ({}) },
   entities: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
-  token: { type: String, default: '' }
+  token: { type: String, default: '' },
+  guestId: { type: String, default: '' },
+  canComment: { type: Boolean, default: false }
+})
+
+const emit = defineEmits(['logout'])
+
+const store = useStore()
+const guestDisplayName = computed(() => {
+  const user = store.getters.user
+  if (!user?.is_guest) return ''
+  const name = `${user.first_name || ''} ${user.last_name || ''}`.trim()
+  return name
+})
+
+const currentEntityDisplayName = computed(() => {
+  const entity = props.entities[playingEntityIndex.value]
+  if (!entity) return ''
+  const parent = entity.parent_name || ''
+  const name = entity.name || ''
+  if (parent && name) return `${parent} / ${name}`
+  return parent || name
 })
 
 const container = ref(null)
@@ -286,6 +359,7 @@ const isMuted = ref(false)
 const isHd = ref(true)
 const isZoomEnabled = ref(false)
 const isEntitiesHidden = ref(false)
+const isCommentsHidden = ref(false)
 const volume = ref(100)
 const currentFrameNumber = ref(0)
 const maxDuration = ref(0)
@@ -304,6 +378,10 @@ const sharedApiPrefix = computed(() =>
 const movieUrlPrefix = computed(() => sharedApiPrefix.value)
 
 const currentEntity = computed(() => entityList.value[playingEntityIndex.value])
+
+const currentTaskId = computed(
+  () => currentEntity.value?.preview_file_task_id || ''
+)
 
 const currentPreview = computed(() => {
   const entity = currentEntity.value
@@ -655,7 +733,7 @@ watch(isZoomEnabled, enabled => {
   }
 })
 
-watch(isEntitiesHidden, () => {
+const triggerPlayerResize = () => {
   // Dispatch synchronously so flex layout recomputes; then let the DOM
   // paint before asking the raw player to re-measure its container.
   window.dispatchEvent(new Event('resize'))
@@ -663,39 +741,78 @@ watch(isEntitiesHidden, () => {
     rawPlayer.value?.resetHeight?.()
     window.dispatchEvent(new Event('resize'))
   }, 50)
-})
+}
+
+watch(isEntitiesHidden, triggerPlayerResize)
+watch(isCommentsHidden, triggerPlayerResize)
 </script>
 
 <style lang="scss" scoped>
 .shared-player {
+  --accent: #7c5cff;
+  --accent-soft: rgba(124, 92, 255, 0.16);
+  --surface: #14141a;
+  --surface-raised: #1d1d26;
+  --surface-inset: #0e0e13;
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text: #f4f5fa;
+  --text-muted: rgba(244, 245, 250, 0.6);
+
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: $dark-grey;
+  background:
+    radial-gradient(
+      120% 120% at 10% -10%,
+      rgba(124, 92, 255, 0.12) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      100% 100% at 90% 110%,
+      rgba(255, 120, 180, 0.08) 0%,
+      transparent 50%
+    ),
+    var(--surface);
+  color: var(--text);
 }
 
 .shared-header {
   align-items: center;
-  background: $dark-grey-light;
-  border-bottom: 1px solid $dark-grey-strong;
-  color: $white-grey;
-  gap: 0.6em;
-  height: 44px;
-  padding: 0 1em;
+  background: rgba(20, 20, 26, 0.7);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  gap: 0.8em;
+  height: 52px;
+  padding: 0 1.4em;
   flex-shrink: 0;
 
+  .kitsu-logo-link {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+
   .kitsu-logo {
-    height: 24px;
+    height: 26px;
     width: auto;
   }
 
   .project-name {
     text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78em;
+    color: var(--text-muted);
   }
 
-  .project-name,
   .playlist-name {
-    color: $white;
+    color: var(--text);
     font-size: 0.95em;
     font-weight: 600;
     margin: 0;
@@ -707,18 +824,71 @@ watch(isEntitiesHidden, () => {
 
   .entity-nav {
     align-items: center;
-    gap: 0.3em;
+    background: var(--surface-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    gap: 0.25em;
+    padding: 0.15em 0.5em;
   }
 
   .entity-counter {
-    color: $white-grey;
-    font-size: 0.9em;
+    color: var(--text-muted);
+    font-size: 0.82em;
     font-variant-numeric: tabular-nums;
+    margin: 0 0.4em;
+  }
+
+  .current-entity-name {
+    color: var(--text);
+    font-size: 0.9em;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 320px;
+  }
+
+  .guest-name {
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-left: 0.8em;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .logout-button {
+    align-items: center;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    padding: 0.45em 0.55em;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
   }
 }
 
-.player-area {
+.player-row {
   flex: 1;
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.player-area {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -750,42 +920,143 @@ watch(isEntitiesHidden, () => {
 }
 
 .no-preview {
-  color: $white-grey;
+  color: var(--text-muted);
 }
 
 .video-progress {
   width: 100%;
 }
 
+.shared-player :deep(progress),
+.shared-player :deep(progress[value]::-webkit-progress-bar) {
+  background-color: transparent;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.shared-player :deep(progress::-moz-progress-bar) {
+  background-color: rgba(124, 92, 255, 0.75);
+  opacity: 1;
+}
+
+.shared-player :deep(progress::-webkit-progress-value) {
+  background-color: rgba(124, 92, 255, 0.75);
+  opacity: 1;
+}
+
+.shared-player :deep(.handle-in),
+.shared-player :deep(.handle-out) {
+  background: rgba(14, 14, 19, 0.85);
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.shared-player :deep(.handle-in::after),
+.shared-player :deep(.handle-out::before) {
+  background: var(--accent);
+}
+
+.shared-player :deep(.annotation-mark) {
+  background: #ff578c;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px rgba(255, 87, 140, 0.25);
+}
+
+.shared-player :deep(.playlist-progress) {
+  background: rgba(10, 10, 15, 0.25) !important;
+  border-top: 1px solid var(--border-soft) !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  height: 14px;
+  transition: height 0.2s ease-in-out;
+
+  &:hover {
+    height: 14px;
+  }
+}
+
+.shared-player :deep(.playlist-progress-position) {
+  border-left: 3px solid var(--accent);
+  box-shadow: 0 0 10px rgba(124, 92, 255, 0.6);
+  height: 14px;
+  top: 0;
+  border-radius: 0;
+}
+
+.shared-player :deep(.entity-status) {
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  height: 14px;
+  opacity: 0.55;
+  transition:
+    opacity 0.2s ease,
+    height 0.2s ease;
+
+  &:hover {
+    opacity: 0.95;
+  }
+
+  span {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    color: var(--text);
+    font-size: 0.8em;
+    padding: 0.25em 0.6em;
+  }
+}
+
+.shared-player :deep(.frame-number) {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  color: var(--text);
+}
+
 .playlist-footer {
-  background: $dark-grey-light;
-  color: $white-grey;
+  background: rgba(20, 20, 26, 0.7);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
   width: 100%;
-  height: 32px;
-  padding: 0 0.5em;
+  height: 44px;
+  padding: 0 0.8em;
   align-items: center;
+  gap: 0.3em;
 }
 
 .playlist-button {
-  margin: 0;
-  background: none;
-  border: 0;
-  border-radius: 0;
-  color: $white-grey;
+  margin: 0 0.1em;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--text-muted);
+  padding: 0.35em 0.6em;
+  transition: all 0.18s ease;
 
   &:hover {
-    background: var(--background-tag-button);
-    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  &.active {
+    background: var(--accent-soft);
+    border-color: rgba(124, 92, 255, 0.4);
+    box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.15);
+    color: var(--accent);
   }
 }
 
 .time-indicator {
-  color: $white-grey;
-  font-size: 0.9em;
+  color: var(--text-muted);
+  font-size: 0.82em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 
 .entity-name {
-  color: $white-grey;
+  color: var(--text-muted);
   font-size: 0.9em;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -793,16 +1064,79 @@ watch(isEntitiesHidden, () => {
 }
 
 .playlisted-entities {
-  background: $dark-grey-light;
-  border-top: 1px solid $dark-grey-strong;
-  padding: 0.4em 0 0 0.4em;
+  background: var(--surface-inset);
+  border-top: 1px solid var(--border-soft);
+  padding: 0.6em 0.4em 0.3em 0.6em;
   overflow-x: auto;
   align-items: flex-start;
-  height: 240px;
-  min-height: 240px;
+  height: 200px;
+  min-height: 200px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 
   &.hidden {
     display: none;
+  }
+
+  :deep(.playlisted-entity) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    padding: 0.4em;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+
+    &:hover {
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      transform: translateY(-1px);
+    }
+
+    &.playing {
+      border: 1px solid rgba(124, 92, 255, 0.55);
+      box-shadow:
+        0 0 0 2px rgba(124, 92, 255, 0.18),
+        0 6px 22px rgba(124, 92, 255, 0.25);
+    }
+  }
+
+  :deep(.thumbnail-wrapper) {
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+      border-radius: 8px;
+    }
+  }
+
+  :deep(.thumbnail-picture) {
+    background-color: #000 !important;
+    border-color: transparent !important;
+  }
+
+  :deep(span.thumbnail-empty) {
+    background: #000;
+  }
+
+  :deep(.entity-title) {
+    color: var(--text);
+    font-size: 0.85em;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  :deep(.preview-meta) {
+    color: var(--text-muted);
+    font-size: 0.78em;
+
+    .revision {
+      color: var(--text);
+      font-weight: 600;
+    }
   }
 }
 

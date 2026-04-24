@@ -393,6 +393,10 @@ export default {
   position: relative;
   cursor: pointer;
 
+  :deep(.thumbnail-picture) {
+    background-color: #000;
+  }
+
   img {
     border-radius: 5px;
   }

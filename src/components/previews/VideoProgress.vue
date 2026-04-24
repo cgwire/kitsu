@@ -461,7 +461,7 @@ export default {
 .progress-wrapper {
   background-repeat: repeat-x;
   background: $grey;
-  background-image: url('../../assets/background/player-timeslider.png');
+  background-image: url('../../assets/background/video-timeslider-dark.png');
   border: 0;
   cursor: pointer;
   flex-shrink: 0;
