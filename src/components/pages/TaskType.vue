@@ -114,6 +114,13 @@
                 locale-key-prefix="tasks."
                 v-model="priorityFilter"
               />
+              <combobox-styled
+                class="flexrow-item"
+                :label="$t('tasks.fields.retake_count')"
+                :options="retakeCountOptions"
+                locale-key-prefix="tasks."
+                v-model="retakeCountFilter"
+              />
             </div>
 
             <div
@@ -596,6 +603,12 @@ export default {
       optionalColumns: ['Estimation', 'Start date', 'Due date', 'Difficulty'],
       parsedCSV: [],
       priorityFilter: '-1',
+      retakeCountFilter: 'all',
+      retakeCountOptions: [
+        { label: 'all_tasks', value: 'all' },
+        { label: 'retake_filter_none', value: 'none' },
+        { label: 'retake_filter_with_retakes', value: 'with_retakes' }
+      ],
       selection: {},
       tasks: [],
       taskStatusIdFilter: null,
@@ -1054,6 +1067,7 @@ export default {
             this.estimationFilter = this.$route.query.late || 'all'
             this.priorityFilter = this.$route.query.priority || '-1'
             this.difficultyFilter = this.$route.query.difficulty || '-1'
+            this.retakeCountFilter = this.$route.query.retake_count || 'all'
             this.taskStatusIdFilter = this.$route.query.task_status_id || ''
 
             const taskId = this.$route.query.task_id
@@ -1205,6 +1219,11 @@ export default {
           t => t.difficulty === parseInt(this.difficultyFilter)
         )
       }
+      if (this.retakeCountFilter === 'none') {
+        this.tasks = this.tasks.filter(t => !(t.retake_count > 0))
+      } else if (this.retakeCountFilter === 'with_retakes') {
+        this.tasks = this.tasks.filter(t => t.retake_count > 0)
+      }
       if (this.taskStatusIdFilter !== null && this.taskStatusIdFilter !== '') {
         this.tasks = this.tasks.filter(
           t => t.task_status_id === this.taskStatusIdFilter
@@ -1235,6 +1254,7 @@ export default {
       const late = this.estimationFilter
       const priority = this.priorityFilter
       const difficulty = this.difficultyFilter
+      const retakeCount = this.retakeCountFilter
       const taskStatusId = this.taskStatusIdFilter || null
       this.$router.push({
         query: {
@@ -1243,6 +1263,7 @@ export default {
           late,
           priority,
           difficulty,
+          retake_count: retakeCount === 'all' ? undefined : retakeCount,
           task_status_id: taskStatusId
         }
       })
@@ -2041,6 +2062,10 @@ export default {
     },
 
     taskStatusIdFilter() {
+      this.applyTaskFilters()
+    },
+
+    retakeCountFilter() {
       this.applyTaskFilters()
     },
 

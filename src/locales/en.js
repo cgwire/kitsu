@@ -1,5 +1,23 @@
 export default {
 
+  share: {
+    error_title: 'Link not available',
+    error_text: 'This shared link is invalid, expired or has been revoked.',
+    identity_description: 'Enter your name to join the review session. You will be able to view the playlist and leave comments.',
+    your_name: 'Your name',
+    name_placeholder: 'John Doe',
+    enter_review: 'Enter review',
+    review_session: 'Review session',
+    player_placeholder: 'Player will be displayed here.',
+    no_preview: 'No preview',
+    no_comments_yet: 'No comments yet.',
+    comment_placeholder: 'Leave a comment...',
+    comments_disabled: 'Comments are disabled for this link.',
+    identity_required: 'You need to enter your name before posting.',
+    no_status_available: 'No task statuses are configured for this project.',
+    logout: 'Leave review session'
+  },
+
   assets: {
     cast_in: 'Cast in',
     casted_in_shots: 'Casted in {nbShots} shots',
@@ -220,6 +238,7 @@ export default {
   },
 
   comments: {
+    title: 'Comments',
     add_attachment: 'Add attachment',
     add_attachment_to_reply: 'Add attachment to reply',
     add_checklist: 'Add checklist',
@@ -1874,6 +1893,8 @@ export default {
     preview: 'Previews',
     previous: 'previous task',
     revision_preview_file: 'If one of your selected files contains a revision number in its name (eg. "preview-v3.png"), then it will be suggested as a new revision name (eg. "revision 3") at the next step.',
+    retake_filter_none: 'No retakes',
+    retake_filter_with_retakes: 'With retakes',
     select_preview_file: 'Please select files (pictures, movies, etc) from your hard drive to be used as a new preview revision for the current task:',
     selected_entities: 'Selected entities',
     selected_tasks: 'Selected tasks',
