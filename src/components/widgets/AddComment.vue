@@ -1085,6 +1085,11 @@ article.add-comment {
   }
 }
 
+// tag for vue-at
+.tag.thin {
+  line-height: 1.2em;
+}
+
 .attachment-title {
   margin-left: 3px;
   margin-top: 6px;
