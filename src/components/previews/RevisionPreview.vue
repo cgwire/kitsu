@@ -11,6 +11,7 @@
         width="150px"
         height="103px"
         :preview-file-id="previewFile.id"
+        :title="originalName"
         v-if="hasThumbnail"
       />
       <span :title="originalName" v-else> .{{ previewFile.extension }} </span>
