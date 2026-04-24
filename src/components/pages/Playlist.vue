@@ -755,6 +755,14 @@ export default {
       return formatDate(dateString)
     },
 
+    isCurrentProjectEvent(eventData) {
+      return (
+        this.currentProduction?.id != null &&
+        eventData?.project_id != null &&
+        eventData.project_id === this.currentProduction.id
+      )
+    },
+
     getPlaylistPath(playlistId, section) {
       return getPlaylistPath(
         this.currentProduction.id,
@@ -1514,27 +1522,38 @@ export default {
   socket: {
     events: {
       'playlist:new'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (!this.playlistMap.get(eventData.playlist_id)) {
           this.refreshPlaylist(eventData.playlist_id)
         }
       },
 
       'playlist:update'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (
           this.playlistMap.get(eventData.playlist_id) &&
           !this.lockSystem.isSilent &&
           !this.isAddingEntity
         ) {
           this.refreshPlaylist(eventData.playlist_id).then(playlist => {
-            this.currentPlaylist = ref(playlist)
-            this.$nextTick(() => {
-              this.rebuildCurrentEntities()
-            })
+            if (eventData.playlist_id === this.currentPlaylist.id) {
+              this.currentPlaylist = ref(playlist)
+              this.$nextTick(() => {
+                this.rebuildCurrentEntities()
+              })
+            }
           })
         }
       },
 
       'playlist:delete'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (this.playlistMap.get(eventData.playlist_id)) {
           this.$store.commit('DELETE_PLAYLIST_END', {
             id: eventData.playlist_id
@@ -1543,6 +1562,9 @@ export default {
       },
 
       'build-job:new'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           this.currentPlaylist.build_jobs = [
             {
@@ -1556,6 +1578,9 @@ export default {
       },
 
       'build-job:update'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           updateModelFromList(this.currentPlaylist.build_jobs, {
             id: eventData.build_job_id,
@@ -1565,6 +1590,9 @@ export default {
       },
 
       'build-job:delete'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           this.currentPlaylist.build_jobs = removeModelFromList(
             this.currentPlaylist.build_jobs,
