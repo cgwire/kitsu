@@ -66,7 +66,7 @@
 
     <div class="player-row">
       <div class="player-area">
-        <div class="video-container" ref="videoContainer">
+        <div class="video-container" ref="videoContainer" @contextmenu.prevent>
           <raw-video-player
             ref="rawPlayer"
             class="raw-player"
@@ -103,6 +103,16 @@
             :preview-url="currentPreviewUrl"
             @play-ended="pause"
             v-if="isSound && !loading"
+          />
+
+          <shared-annotation-overlay
+            :annotations="currentAnnotations"
+            :current-frame="currentFrameNumber"
+            :frame-duration="frameDuration"
+            :is-picture="isPicture"
+            :is-playing="isPlaying"
+            :movie-dimensions="overlayDimensions"
+            v-if="(isMovie || isPicture) && !loading && currentPreview"
           />
 
           <div class="loading-background" v-if="loading">
@@ -313,6 +323,8 @@ import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 // eslint-disable-next-line no-unused-vars
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+// eslint-disable-next-line no-unused-vars
+import SharedAnnotationOverlay from '@/components/previews/SharedAnnotationOverlay.vue'
 // eslint-disable-next-line no-unused-vars
 import SharedCommentsPanel from '@/components/previews/SharedCommentsPanel.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
@@ -616,6 +628,16 @@ const onVideoLoaded = () => {
     height: dimensions.height || 0
   }
 }
+
+const overlayDimensions = computed(() => {
+  if (isPicture.value) {
+    return {
+      width: currentPreview.value?.width || 0,
+      height: currentPreview.value?.height || 0
+    }
+  }
+  return movieDimensions.value
+})
 
 const onMaxDurationUpdate = duration => {
   maxDuration.value = duration ? floorToFrame(duration, fps.value) : 0
