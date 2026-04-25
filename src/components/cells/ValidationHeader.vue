@@ -131,7 +131,7 @@ export default {
 <style lang="scss" scoped>
 th.metadata-descriptor {
   min-width: 120px;
-  max-width: 120px;
+  max-width: none;
   width: 120px;
   overflow-wrap: break-word;
   hyphens: auto;

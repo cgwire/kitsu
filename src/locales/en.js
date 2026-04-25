@@ -1328,6 +1328,8 @@ export default {
     },
 
     metadata: {
+      applies_to_all_projects:
+        'This column is added to every project in the list. Each project can have its own value in the list view.',
       add_explaination: 'Add specific data required by this production.',
       add_failed: 'An error occurred while adding metadata to your production.',
       add_new_values: 'There are currently no available values.',
@@ -1335,6 +1337,8 @@ export default {
       boolean: 'Checkbox',
       checklist: 'Checklist',
       choices: 'List of values',
+      delete_list_column_text:
+        'This will remove the column “{name}” from all projects, including stored values. Continue?',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
@@ -1342,6 +1346,7 @@ export default {
       number: 'Number',
       string: 'Text',
       tags: 'List of tags',
+      target_project: 'Project',
       title: 'Add metadata column'
     },
 

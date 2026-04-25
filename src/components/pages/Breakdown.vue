@@ -87,7 +87,7 @@
               timeSpent: true
             }"
             v-model="metadataDisplayHeaders"
-            v-show="columnSelectorDisplayed"
+            v-model:is-open="columnSelectorDisplayed"
             v-if="isShowInfosBreakdown"
           />
           <span class="filler"></span>

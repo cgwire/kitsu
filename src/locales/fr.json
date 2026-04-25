@@ -892,6 +892,7 @@
         "available_values": "Valeurs disponibles",
         "choices": "Liste de valeurs",
         "delete_text": "Êtes-vous sûr de vouloir supprimer cette colonne et toutes les données liées ?",
+        "delete_list_column_text": "Cela retirera la colonne « {name} » de tous les projets, y compris les valeurs enregistrées. Continuer ?",
         "delete_error": "Une erreur est survenue en supprimant une colone de métadonnées.",
         "error": "Une erreur est survenue en ajoutant la colone de métadonnées. Assurez-vous qu'aucune colonne ne porte le même nom et que les champs sont bien renseignés. Si le problème persiste, contactez notre support.",
         "title": "Ajouter une colonne de métadonnées",

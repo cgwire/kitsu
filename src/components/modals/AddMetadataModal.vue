@@ -17,6 +17,13 @@
           }}
         </h1>
 
+        <p
+          class="explanation mb1"
+          v-if="!isEditing && entityType === 'Project'"
+        >
+          {{ $t('productions.metadata.applies_to_all_projects') }}
+        </p>
+
         <text-field
           ref="nameField"
           :label="$t('assets.fields.name')"
@@ -252,7 +259,7 @@ export default {
     ]),
 
     isEditing() {
-      return Boolean(this.descriptorToEdit.id)
+      return Boolean(this.descriptorToEdit?.id)
     },
 
     selectableDepartments() {
@@ -282,16 +289,18 @@ export default {
     },
 
     isFormFilled() {
-      return (
-        this.form.name.length &&
-        (['string', 'number', 'boolean'].includes(this.form.data_type) ||
-          (['list', 'taglist'].includes(this.form.data_type) &&
-            this.form.values.length) ||
-          (this.form.data_type === 'checklist' && this.checklist?.[0]?.text)) &&
-        (!this.isCurrentUserSupervisor ||
-          !this.user.departments.length ||
-          this.form.departments.length)
-      )
+      const dataTypeOk =
+        ['string', 'number', 'boolean'].includes(this.form.data_type) ||
+        (['list', 'taglist'].includes(this.form.data_type) &&
+          this.form.values.length) ||
+        (this.form.data_type === 'checklist' && this.checklist?.[0]?.text)
+      const supervisorDeptOk =
+        !this.isCurrentUserSupervisor ||
+        !this.user.departments.length ||
+        this.form.departments.length ||
+        (this.entityType === 'Project' &&
+          this.selectableDepartments.length === 0)
+      return this.form.name.length && dataTypeOk && supervisorDeptOk
     },
 
     valueList() {

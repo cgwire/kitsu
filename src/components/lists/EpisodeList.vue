@@ -206,7 +206,7 @@
                 }"
                 namespace="episodes"
                 v-model="metadataDisplayHeaders"
-                v-show="columnSelectorDisplayed"
+                v-model:is-open="columnSelectorDisplayed"
                 v-if="displaySettings.showInfos"
               />
 
@@ -904,7 +904,6 @@ input[type='number'] {
 
 td.metadata-descriptor {
   height: 3.1rem;
-  max-width: 120px;
   padding: 0;
 }
 
