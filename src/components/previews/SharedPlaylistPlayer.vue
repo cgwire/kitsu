@@ -1265,19 +1265,35 @@ watch(isCommentsHidden, triggerPlayerResize)
   }
 
   .playlist-footer {
-    gap: 0.1em;
-    padding: 0 0.4em;
+    gap: 0;
+    padding: 0 0.2em;
 
-    .time-info .time-indicator {
-      display: none;
+    .flexrow-item {
+      margin-right: 0;
+    }
+
+    .time-info {
+      .time-indicator {
+        display: none;
+        font-size: 0.75em;
+      }
+
+      .frame-counter {
+        margin-right: 0.2em;
+      }
     }
 
     .playlist-button {
       box-sizing: border-box;
-      margin: 0 0.05em;
-      min-width: 36px;
-      padding: 0.35em 0.4em;
       justify-content: center;
+      margin: 0;
+      min-width: 30px;
+      padding: 0.3em 0.25em;
+
+      :deep(.icon) {
+        height: 14px;
+        width: 14px;
+      }
     }
   }
 }
