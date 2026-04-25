@@ -1,50 +1,63 @@
 <template>
   <div class="annotation-overlay" ref="wrapper" :style="overlayStyle">
     <canvas :id="canvasId" />
+    <div class="annotation-toolbar" v-if="isEditable">
+      <button
+        type="button"
+        class="annotation-tool"
+        :title="$t('playlists.actions.annotation_undo')"
+        :disabled="!annotation.hasChanges()"
+        @click="annotation.undo"
+      >
+        <corner-left-down-icon :size="14" />
+      </button>
+      <button
+        type="button"
+        class="annotation-tool"
+        :title="$t('playlists.actions.annotation_delete')"
+        :disabled="!annotation.hasChanges()"
+        @click="annotation.clearLocal"
+      >
+        <trash-2-icon :size="14" />
+      </button>
+      <button
+        type="button"
+        class="annotation-tool primary"
+        :title="$t('main.save')"
+        :disabled="!annotation.hasChanges() || isSaving"
+        @click="save"
+      >
+        <save-icon :size="14" />
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-import { fabric } from 'fabric'
-import { PSStroke } from 'fabricjs-psbrush'
+import { CornerLeftDownIcon, SaveIcon, Trash2Icon } from 'lucide-vue-next'
 
-// Mirror the monkey patches applied by annotation.js so PSStrokes
-// deserialised here render correctly even when the main player code
-// has not been loaded yet.
-if (PSStroke) {
-  if (!PSStroke.prototype.getAncestors) {
-    PSStroke.prototype.getAncestors = function () {
-      return []
-    }
-  }
-  if (!PSStroke.prototype.contextTop) {
-    PSStroke.prototype.contextTop = function () {
-      return null
-    }
-  }
-  if (!PSStroke.prototype.dispose) {
-    PSStroke.prototype.dispose = function () {}
-  }
-  if (!PSStroke.prototype.getRelativeCenterPoint) {
-    PSStroke.prototype.getRelativeCenterPoint = function () {
-      return new fabric.Point(0, 0)
-    }
-  }
-}
+import { buildReadOnlyShape, findAnnotationAtTime } from '@/lib/annotation'
+import { useSharedAnnotationCanvas } from '@/composables/sharedAnnotation'
 
 const props = defineProps({
   annotations: { type: Array, default: () => [] },
   currentFrame: { type: Number, default: 0 },
   frameDuration: { type: Number, default: 1 / 25 },
+  guestId: { type: String, default: '' },
+  isEditable: { type: Boolean, default: false },
   isPicture: { type: Boolean, default: false },
   isPlaying: { type: Boolean, default: false },
   movieDimensions: {
     type: Object,
     default: () => ({ width: 0, height: 0 })
-  }
+  },
+  previewFileId: { type: String, default: '' },
+  token: { type: String, default: '' }
 })
+
+const emit = defineEmits(['saved'])
 
 const canvasId = `shared-annotation-canvas-${Math.random()
   .toString(36)
@@ -52,8 +65,10 @@ const canvasId = `shared-annotation-canvas-${Math.random()
 
 const wrapper = ref(null)
 const containerSize = ref({ width: 0, height: 0 })
+const isSaving = ref(false)
 
-let fabricCanvas = null
+const annotation = useSharedAnnotationCanvas()
+
 let resizeObserver = null
 
 const videoBounds = computed(() => {
@@ -92,6 +107,7 @@ const overlayStyle = computed(() => {
   return {
     height: `${bounds.height}px`,
     left: `${bounds.left}px`,
+    pointerEvents: props.isEditable ? 'auto' : 'none',
     top: `${bounds.top}px`,
     width: `${bounds.width}px`
   }
@@ -102,114 +118,31 @@ const currentTime = computed(() => {
   return Math.round(props.currentFrame * props.frameDuration * 10000) / 10000
 })
 
-const findAnnotation = () => {
-  if (!props.annotations?.length) return null
-  if (props.isPicture) {
-    return props.annotations.find(a => a.time === 0) || null
-  }
-  const t = currentTime.value
-  const halfFrame = props.frameDuration / 2
-  return (
-    props.annotations.find(a => Math.abs((a.time || 0) - t) < halfFrame) || null
-  )
-}
-
-const deserializePSStroke = obj =>
-  new Promise(resolve => {
-    PSStroke.fromObject(obj, stroke => resolve(stroke || null))
-  })
-
-const buildShape = async (obj, scaleX, scaleY) => {
-  if (!obj || !obj.type) return null
-  const base = {
-    angle: obj.angle || 0,
-    evented: false,
-    fill: obj.fill || 'transparent',
-    height: obj.height,
-    hoverCursor: 'default',
-    left: (obj.left || 0) * scaleX,
-    radius: obj.radius,
-    scaleX: (obj.scaleX || 1) * scaleX,
-    scaleY: (obj.scaleY || 1) * scaleY,
-    selectable: false,
-    stroke: obj.stroke,
-    strokeWidth: obj.strokeWidth || 1,
-    top: (obj.top || 0) * scaleY,
-    width: obj.width
-  }
-
-  switch (obj.type) {
-    case 'path':
-      return new fabric.Path(obj.path, base)
-    case 'PSStroke': {
-      const stroke = await deserializePSStroke(obj)
-      if (!stroke) return null
-      stroke.set({
-        angle: base.angle,
-        evented: false,
-        fill: base.fill,
-        hoverCursor: 'default',
-        left: base.left,
-        scaleX: base.scaleX,
-        scaleY: base.scaleY,
-        selectable: false,
-        stroke: base.stroke,
-        strokeWidth: base.strokeWidth,
-        top: base.top
-      })
-      return stroke
-    }
-    case 'i-text':
-    case 'text':
-    case 'textbox':
-      return new fabric.Text(obj.text || '', {
-        ...base,
-        fontFamily: obj.fontFamily || 'Arial',
-        fontSize: obj.fontSize || 16,
-        fontWeight: obj.fontWeight,
-        textAlign: obj.textAlign
-      })
-    case 'circle':
-      return new fabric.Circle(base)
-    case 'rect':
-      return new fabric.Rect(base)
-    case 'ellipse':
-      return new fabric.Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
-    case 'line':
-      return new fabric.Line(
-        [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
-        base
-      )
-    case 'group': {
-      if (!Array.isArray(obj.objects)) return null
-      const children = (
-        await Promise.all(obj.objects.map(child => buildShape(child, 1, 1)))
-      ).filter(Boolean)
-      return new fabric.Group(children, base)
-    }
-    default:
-      return null
-  }
-}
-
 let renderToken = 0
 
 const render = async () => {
+  const fabricCanvas = annotation.getCanvas()
   if (!fabricCanvas) return
   const token = ++renderToken
   fabricCanvas.clear()
+  annotation.reset()
   if (props.isPlaying) return
-  const annotation = findAnnotation()
-  if (!annotation) return
-  const objects = annotation.drawing?.objects || []
-  const scaleX = annotation.width ? fabricCanvas.width / annotation.width : 1
-  const scaleY = annotation.height
-    ? fabricCanvas.height / annotation.height
-    : scaleX
-  const shapes = await Promise.all(
-    objects.map(obj => buildShape(obj, scaleX, scaleY))
+  const current = findAnnotationAtTime(
+    props.annotations,
+    currentTime.value,
+    props.frameDuration,
+    props.isPicture
   )
-  if (token !== renderToken || !fabricCanvas) return
+  annotation.setAnnotationDimensions(
+    current?.width || props.movieDimensions?.width || fabricCanvas.width,
+    current?.height || props.movieDimensions?.height || fabricCanvas.height
+  )
+  if (!current) return
+  const objects = current.drawing?.objects || []
+  const shapes = await Promise.all(
+    objects.map(obj => buildReadOnlyShape(current, obj, fabricCanvas))
+  )
+  if (token !== renderToken) return
   shapes.forEach(shape => {
     if (shape) fabricCanvas.add(shape)
   })
@@ -224,23 +157,68 @@ const measureContainer = () => {
 }
 
 const fitCanvasToBounds = () => {
-  if (!fabricCanvas) return
   const bounds = videoBounds.value
   if (bounds.width <= 0 || bounds.height <= 0) return
-  fabricCanvas.setDimensions({
-    width: bounds.width,
-    height: bounds.height
-  })
+  annotation.setCanvasSize(bounds.width, bounds.height)
   render()
 }
 
+const save = async () => {
+  if (
+    isSaving.value ||
+    !annotation.hasChanges() ||
+    !props.token ||
+    !props.guestId ||
+    !props.previewFileId
+  ) {
+    return
+  }
+  isSaving.value = true
+  try {
+    const diff = annotation.getDiff()
+    const response = await fetch(
+      `/api/shared/playlists/${props.token}/annotations`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guest_id: props.guestId,
+          preview_file_id: props.previewFileId,
+          additions: diff.additions,
+          updates: diff.updates,
+          deletions: diff.deletions
+        })
+      }
+    )
+    if (!response.ok) throw new Error('Failed to save annotations')
+    const updated = await response.json()
+    emit('saved', updated.annotations || [])
+  } catch {
+    // Silent failure for now; toolbar stays so the user can retry.
+  }
+  isSaving.value = false
+}
+
+watch(
+  () => [props.currentFrame, currentTime.value],
+  () => {
+    annotation.setTime(currentTime.value, props.currentFrame)
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.guestId,
+  id => annotation.setUserId(id),
+  { immediate: true }
+)
+
 onMounted(() => {
-  fabricCanvas = markRaw(
-    new fabric.StaticCanvas(canvasId, {
-      selection: false,
-      skipTargetFind: true
-    })
-  )
+  const canvasEl = document.getElementById(canvasId)
+  annotation.setup(canvasEl, { width: 1, height: 1 })
+  annotation.setUserId(props.guestId)
+  annotation.setTime(currentTime.value, props.currentFrame)
+  annotation.setDrawingMode(!!props.isEditable)
   measureContainer()
   fitCanvasToBounds()
   const target = wrapper.value?.parentElement
@@ -256,8 +234,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   resizeObserver = null
-  fabricCanvas?.dispose()
-  fabricCanvas = null
+  annotation.dispose()
 })
 
 watch(() => props.annotations, render, { deep: true })
@@ -266,11 +243,24 @@ watch(() => props.frameDuration, render)
 watch(() => props.isPicture, render)
 watch(() => props.isPlaying, render)
 watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
+watch(
+  () => props.isEditable,
+  enabled => {
+    annotation.setDrawingMode(!!enabled)
+  },
+  { immediate: true }
+)
+
+defineExpose({
+  hasChanges: () => annotation.hasChanges(),
+  getDiff: () => annotation.getDiff(),
+  reset: () => annotation.reset(),
+  setDrawingMode: enabled => annotation.setDrawingMode(enabled)
+})
 </script>
 
 <style lang="scss" scoped>
 .annotation-overlay {
-  pointer-events: none;
   position: absolute;
   z-index: 5;
 
@@ -278,6 +268,66 @@ watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
     display: block;
     height: 100%;
     width: 100%;
+  }
+}
+
+.annotation-toolbar {
+  align-items: center;
+  background: rgba(20, 20, 26, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  display: flex;
+  gap: 0.25em;
+  left: 50%;
+  padding: 0.35em 0.5em;
+  position: absolute;
+  pointer-events: auto;
+  top: 0.6em;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.annotation-tool {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: rgba(244, 245, 250, 0.7);
+  cursor: pointer;
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+  width: 28px;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06);
+    color: #f4f5fa;
+  }
+
+  &.active {
+    background: rgba(124, 92, 255, 0.18);
+    border-color: rgba(124, 92, 255, 0.55);
+    color: #b8a4ff;
+  }
+
+  &.primary:not(:disabled) {
+    background: rgba(124, 92, 255, 0.55);
+    color: white;
+
+    &:hover {
+      background: rgba(124, 92, 255, 0.7);
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
   }
 }
 </style>

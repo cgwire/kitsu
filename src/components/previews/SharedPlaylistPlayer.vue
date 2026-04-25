@@ -109,9 +109,14 @@
             :annotations="currentAnnotations"
             :current-frame="currentFrameNumber"
             :frame-duration="frameDuration"
+            :guest-id="guestId"
+            :is-editable="canComment && !!guestId && isAnnotating"
             :is-picture="isPicture"
             :is-playing="isPlaying"
             :movie-dimensions="overlayDimensions"
+            :preview-file-id="currentPreview?.id || ''"
+            :token="token"
+            @saved="onAnnotationsSaved"
             v-if="(isMovie || isPicture) && !loading && currentPreview"
           />
 
@@ -229,6 +234,14 @@
         :title="$t('playlists.actions.comments')"
         @click="isCommentsHidden = !isCommentsHidden"
         v-if="token"
+      />
+      <button-simple
+        class="playlist-button flexrow-item"
+        :active="isAnnotating"
+        icon="pencil"
+        :title="$t('playlists.actions.annotation_draw')"
+        @click="isAnnotating = !isAnnotating"
+        v-if="canComment && guestId"
       />
       <button-simple
         class="playlist-button flexrow-item"
@@ -379,6 +392,7 @@ const isCommentsHidden = ref(
   typeof window !== 'undefined' &&
     window.matchMedia?.('(max-width: 768px)').matches
 )
+const isAnnotating = ref(false)
 const volume = ref(100)
 const currentFrameNumber = ref(0)
 const maxDuration = ref(0)
@@ -655,6 +669,13 @@ const onTimeCodeClicked = ({ frame }) => {
   const frameNumber = Math.max(parseInt(frame, 10) || 0, 0)
   rawPlayer.value?.setCurrentFrame(frameNumber)
   onFrameUpdate(frameNumber)
+}
+
+const onAnnotationsSaved = annotations => {
+  const entity = currentEntity.value
+  if (entity) {
+    entity.preview_file_annotations = annotations
+  }
 }
 
 const goPreviousFrame = () => {
