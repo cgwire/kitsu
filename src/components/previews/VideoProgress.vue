@@ -3,7 +3,10 @@
     <div
       class="progress-wrapper"
       :style="{
-        'background-size': backgroundSize
+        'background-size': backgroundSize,
+        ...(backgroundUrl
+          ? { 'background-image': `url(${backgroundUrl})` }
+          : {})
       }"
       @mouseenter="isFrameNumberVisible = true"
       @mouseleave="isFrameNumberVisible = false"
@@ -155,6 +158,10 @@ export default {
       type: Number
     },
     previewId: {
+      default: '',
+      type: String
+    },
+    backgroundUrl: {
       default: '',
       type: String
     }
@@ -461,7 +468,7 @@ export default {
 .progress-wrapper {
   background-repeat: repeat-x;
   background: $grey;
-  background-image: url('../../assets/background/video-timeslider-dark.png');
+  background-image: url('../../assets/background/player-timeslider.png');
   border: 0;
   cursor: pointer;
   flex-shrink: 0;
