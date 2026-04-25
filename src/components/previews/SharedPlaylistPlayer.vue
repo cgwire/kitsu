@@ -80,6 +80,7 @@
             @entity-change="onEntityChange"
             @frame-update="onFrameUpdate"
             @max-duration-update="onMaxDurationUpdate"
+            @panzoom-changed="onPanzoomChanged"
             @play-next="onPlayNext"
             @video-loaded="onVideoLoaded"
             v-show="isMovie && !loading"
@@ -114,6 +115,7 @@
             :is-picture="isPicture"
             :is-playing="isPlaying"
             :movie-dimensions="overlayDimensions"
+            :panzoom-transform="panzoomTransform"
             :preview-file-id="currentPreview?.id || ''"
             :token="token"
             @saved="onAnnotationsSaved"
@@ -395,6 +397,7 @@ const isCommentsHidden = ref(
     window.matchMedia?.('(max-width: 768px)').matches
 )
 const isAnnotating = ref(false)
+const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
 const volume = ref(100)
 const currentFrameNumber = ref(0)
 const maxDuration = ref(0)
@@ -687,6 +690,10 @@ const onStatusChanged = ({ taskStatusId, color }) => {
   if (taskStatusId) entity.task_status_id = taskStatusId
 }
 
+const onPanzoomChanged = ({ x, y, scale }) => {
+  panzoomTransform.value = { x, y, scale }
+}
+
 const goPreviousFrame = () => {
   if (!rawPlayer.value) return
   const previousFrame = currentFrameNumber.value - 1
@@ -815,6 +822,7 @@ watch(isZoomEnabled, enabled => {
   else {
     target?.pausePanZoom?.()
     target?.resetPanZoom?.()
+    panzoomTransform.value = { x: 0, y: 0, scale: 1 }
   }
 })
 

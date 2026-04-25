@@ -98,6 +98,10 @@ const props = defineProps({
     type: Object,
     default: () => ({ width: 0, height: 0 })
   },
+  panzoomTransform: {
+    type: Object,
+    default: () => ({ x: 0, y: 0, scale: 1 })
+  },
   previewFileId: { type: String, default: '' },
   token: { type: String, default: '' }
 })
@@ -208,6 +212,14 @@ const fitCanvasToBounds = () => {
   render()
 }
 
+const applyPanzoomTransform = () => {
+  const fabricCanvas = annotation.getCanvas()
+  if (!fabricCanvas) return
+  const { x = 0, y = 0, scale = 1 } = props.panzoomTransform || {}
+  fabricCanvas.setViewportTransform([scale, 0, 0, scale, x, y])
+  fabricCanvas.requestRenderAll()
+}
+
 const save = async () => {
   if (
     isSaving.value ||
@@ -266,6 +278,7 @@ onMounted(() => {
   annotation.setDrawingMode(!!props.isEditable)
   measureContainer()
   fitCanvasToBounds()
+  applyPanzoomTransform()
   const target = wrapper.value?.parentElement
   if (typeof ResizeObserver !== 'undefined' && target) {
     resizeObserver = new ResizeObserver(() => {
@@ -288,6 +301,7 @@ watch(() => props.frameDuration, render)
 watch(() => props.isPicture, render)
 watch(() => props.isPlaying, render)
 watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
+watch(() => props.panzoomTransform, applyPanzoomTransform, { deep: true })
 watch(
   () => props.isEditable,
   enabled => {
