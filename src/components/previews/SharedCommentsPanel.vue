@@ -209,7 +209,7 @@ const props = defineProps({
   entity: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['time-code-clicked'])
+const emit = defineEmits(['status-changed', 'time-code-clicked'])
 
 const store = useStore()
 
@@ -388,6 +388,14 @@ const confirmEditComment = async updatedComment => {
     comments.value = comments.value.map(c =>
       c.id === saved.id ? { ...c, ...saved } : c
     )
+    const status =
+      saved.task_status || store.getters.taskStatusMap.get(saved.task_status_id)
+    if (status?.color) {
+      emit('status-changed', {
+        taskStatusId: status.id || saved.task_status_id,
+        color: status.color
+      })
+    }
     modals.edit = false
   } catch {
     editError.value = true
@@ -577,6 +585,17 @@ const submitComment = async () => {
       const withAttachments = await uploadAttachments(comment.id)
       if (withAttachments) comment = withAttachments
       comments.value = [comment, ...comments.value]
+      // Reflect the new status colour on the surrounding entity so the
+      // playlist progress bar repaints without waiting for a refetch.
+      const status =
+        comment.task_status ||
+        store.getters.taskStatusMap.get(selectedStatusId.value)
+      if (status?.color) {
+        emit('status-changed', {
+          taskStatusId: status.id || selectedStatusId.value,
+          color: status.color
+        })
+      }
       commentText.value = ''
       checklistItems.value = []
       pendingAttachments.value = []

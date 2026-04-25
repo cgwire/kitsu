@@ -140,6 +140,7 @@
         :can-comment="canComment"
         :current-frame="currentFrameNumber"
         :entity="currentEntity || {}"
+        @status-changed="onStatusChanged"
         @time-code-clicked="onTimeCodeClicked"
         v-if="!isCommentsHidden && token"
       />
@@ -295,6 +296,7 @@
     >
       <div
         class="flexrow-item has-text-centered playlisted-wrapper"
+        :data-entity-index="index"
         :key="entity.id || index"
         v-for="(entity, index) in entityList"
       >
@@ -678,6 +680,13 @@ const onAnnotationsSaved = annotations => {
   }
 }
 
+const onStatusChanged = ({ taskStatusId, color }) => {
+  const entity = currentEntity.value
+  if (!entity) return
+  if (color) entity.task_status_color = color
+  if (taskStatusId) entity.task_status_id = taskStatusId
+}
+
 const goPreviousFrame = () => {
   if (!rawPlayer.value) return
   const previousFrame = currentFrameNumber.value - 1
@@ -698,6 +707,23 @@ const onEntitiesWheel = event => {
   if (playlistedEntities.value) {
     playlistedEntities.value.scrollLeft += event.deltaY
   }
+}
+
+const scrollPlayingEntityIntoView = () => {
+  const container = playlistedEntities.value
+  if (!container || container.classList.contains('hidden')) return
+  const target = container.querySelector(
+    `[data-entity-index="${playingEntityIndex.value}"]`
+  )
+  if (!target) return
+  const containerRect = container.getBoundingClientRect()
+  const targetRect = target.getBoundingClientRect()
+  const targetCenter = targetRect.left + targetRect.width / 2
+  const containerCenter = containerRect.left + containerRect.width / 2
+  container.scrollTo({
+    left: container.scrollLeft + (targetCenter - containerCenter),
+    behavior: 'smooth'
+  })
 }
 
 let firstEntityLoaded = false
@@ -804,6 +830,12 @@ const triggerPlayerResize = () => {
 
 watch(isEntitiesHidden, triggerPlayerResize)
 watch(isCommentsHidden, triggerPlayerResize)
+watch(playingEntityIndex, () => {
+  nextTick(scrollPlayingEntityIntoView)
+})
+watch(isEntitiesHidden, hidden => {
+  if (!hidden) nextTick(scrollPlayingEntityIntoView)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -969,6 +1001,7 @@ watch(isCommentsHidden, triggerPlayerResize)
 }
 
 .raw-player {
+  margin-right: 0;
   max-width: 100%;
   max-height: 100%;
 }
