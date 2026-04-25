@@ -5,6 +5,43 @@
       <button
         type="button"
         class="annotation-tool"
+        :class="{ active: annotation.currentTool.value === 'pen' }"
+        :title="$t('playlists.actions.annotation_draw')"
+        @click="annotation.setTool('pen')"
+      >
+        <pen-tool-icon :size="14" />
+      </button>
+      <button
+        type="button"
+        class="annotation-tool"
+        :class="{ active: annotation.currentTool.value === 'rectangle' }"
+        title="Rectangle"
+        @click="annotation.setTool('rectangle')"
+      >
+        <rectangle-horizontal-icon :size="14" />
+      </button>
+      <button
+        type="button"
+        class="annotation-tool"
+        :class="{ active: annotation.currentTool.value === 'circle' }"
+        title="Circle"
+        @click="annotation.setTool('circle')"
+      >
+        <circle-icon :size="14" />
+      </button>
+      <button
+        type="button"
+        class="annotation-tool"
+        :class="{ active: annotation.currentTool.value === 'arrow' }"
+        title="Arrow"
+        @click="annotation.setTool('arrow')"
+      >
+        <arrow-up-right-icon :size="14" />
+      </button>
+      <div class="annotation-divider" />
+      <button
+        type="button"
+        class="annotation-tool"
         :title="$t('playlists.actions.annotation_undo')"
         :disabled="!annotation.hasChanges()"
         @click="annotation.undo"
@@ -36,7 +73,15 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-import { CornerLeftDownIcon, SaveIcon, Trash2Icon } from 'lucide-vue-next'
+import {
+  ArrowUpRightIcon,
+  CircleIcon,
+  CornerLeftDownIcon,
+  PenToolIcon,
+  RectangleHorizontalIcon,
+  SaveIcon,
+  Trash2Icon
+} from 'lucide-vue-next'
 
 import { buildReadOnlyShape, findAnnotationAtTime } from '@/lib/annotation'
 import { useSharedAnnotationCanvas } from '@/composables/sharedAnnotation'
@@ -286,6 +331,13 @@ defineExpose({
   top: 0.6em;
   transform: translateX(-50%);
   z-index: 10;
+}
+
+.annotation-divider {
+  background: rgba(255, 255, 255, 0.1);
+  height: 18px;
+  margin: 0 0.15em;
+  width: 1px;
 }
 
 .annotation-tool {

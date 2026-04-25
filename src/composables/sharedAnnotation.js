@@ -4,9 +4,11 @@ import {
   DEFAULT_PENCIL_COLOR,
   DEFAULT_PENCIL_WIDTH,
   PENCIL_WIDTHS,
+  SHAPE_STROKE_WIDTH,
   applyPencilColor,
   applyPencilWidth,
   attachMousePressureSimulation,
+  attachShapeDrawing,
   createAnnotationCanvas,
   pushAddition,
   removeAddition,
@@ -21,6 +23,7 @@ import {
  */
 export const useSharedAnnotationCanvas = () => {
   const isDrawing = ref(false)
+  const currentTool = ref('pen')
   const pencilColor = ref(DEFAULT_PENCIL_COLOR)
   const pencilWidth = ref(DEFAULT_PENCIL_WIDTH)
   const localStack = shallowRef([])
@@ -29,6 +32,7 @@ export const useSharedAnnotationCanvas = () => {
   let fabricCanvas = null
   let onPathCreated = null
   let detachMousePressure = null
+  let detachShapeDrawing = null
   let currentTime = 0
   let currentFrame = 0
   let lastAnnotationW = 0
@@ -60,14 +64,43 @@ export const useSharedAnnotationCanvas = () => {
     }
     fabricCanvas.on('path:created', onPathCreated)
     detachMousePressure = attachMousePressureSimulation(fabricCanvas)
+    detachShapeDrawing = attachShapeDrawing(fabricCanvas, {
+      getTool: () => (isDrawing.value ? currentTool.value : null),
+      getColor: () => pencilColor.value,
+      getWidth: () => SHAPE_STROKE_WIDTH,
+      onShapeAdded: shape => {
+        setObjectData(shape, fabricCanvas, userId)
+        shape.set('selectable', false)
+        shape.set('evented', false)
+        pushAddition(additionsRef.value, {
+          time: currentTime,
+          frame: currentFrame,
+          canvasWidth: lastAnnotationW || fabricCanvas.width,
+          canvasHeight: lastAnnotationH || fabricCanvas.height,
+          object: shape
+        })
+        additionsRef.value = [...additionsRef.value]
+        localStack.value = [...localStack.value, shape]
+      }
+    })
     return fabricCanvas
   }
 
-  const setDrawingMode = enabled => {
+  const applyToolToCanvas = () => {
     if (!fabricCanvas) return
+    const penActive = isDrawing.value && currentTool.value === 'pen'
+    fabricCanvas.isDrawingMode = penActive
+    fabricCanvas.skipTargetFind = !isDrawing.value
+  }
+
+  const setDrawingMode = enabled => {
     isDrawing.value = !!enabled
-    fabricCanvas.isDrawingMode = !!enabled
-    fabricCanvas.skipTargetFind = !enabled
+    applyToolToCanvas()
+  }
+
+  const setTool = tool => {
+    currentTool.value = tool
+    applyToolToCanvas()
   }
 
   const setColor = color => {
@@ -137,6 +170,8 @@ export const useSharedAnnotationCanvas = () => {
     }
     detachMousePressure?.()
     detachMousePressure = null
+    detachShapeDrawing?.()
+    detachShapeDrawing = null
     fabricCanvas?.dispose()
     fabricCanvas = null
     onPathCreated = null
@@ -147,12 +182,14 @@ export const useSharedAnnotationCanvas = () => {
   return {
     PENCIL_WIDTHS,
     isDrawing,
+    currentTool,
     pencilColor,
     pencilWidth,
     localStack,
     additions: additionsRef,
     setup,
     setDrawingMode,
+    setTool,
     setColor,
     setWidth,
     setUserId,

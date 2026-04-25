@@ -11,6 +11,9 @@ import { markRaw } from 'vue'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
+// Importing the arrow shape registers `fabric.Arrow` on the global fabric
+// namespace so deserialised arrows can render here as well.
+import { Arrow } from '@/lib/arrowshape'
 
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
@@ -713,6 +716,46 @@ export const annotationMixin = {
           canvas.add(psstroke)
           this.$options.silentAnnnotation = false
         }
+      } else if (
+        obj.type === 'rect' ||
+        obj.type === 'circle' ||
+        obj.type === 'arrow'
+      ) {
+        let shape
+        if (obj.type === 'rect') {
+          shape = new fabric.Rect({ ...base, fill: 'transparent' })
+        } else if (obj.type === 'circle') {
+          shape = new fabric.Circle({ ...base, fill: 'transparent' })
+        } else {
+          shape = new Arrow(
+            [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
+            {
+              ...base,
+              fill: 'transparent',
+              arrowHeadSize: obj.arrowHeadSize || 15,
+              arrowHeadWidth: obj.arrowHeadWidth || 12
+            }
+          )
+        }
+        shape.set('id', obj.id)
+        shape.set('canvasWidth', canvasWidth)
+        shape.set('canvasHeight', canvasHeight)
+        this.addSerialization(shape)
+        shape.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: !this.isCurrentUserArtist,
+          tl: false,
+          tr: false,
+          mtr: !this.isCurrentUserArtist
+        })
+        this.$options.silentAnnnotation = true
+        canvas.add(shape)
+        this.$options.silentAnnnotation = false
+        return shape
       }
       return path || text || psstroke
     },

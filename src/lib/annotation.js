@@ -10,6 +10,12 @@ import { fabric } from 'fabric'
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Arrow, registerArrowFabricShape } from './arrowshape'
+
+// Make sure fabric.Arrow is reachable from the global fabric namespace
+// (the deserialiser branches on `obj.type === 'arrow'`).
+registerArrowFabricShape()
+
 /* -------------------------------------------------------------------------
  * PSBrush prototype patches (idempotent — safe to import from many places)
  * -----------------------------------------------------------------------*/
@@ -47,6 +53,11 @@ export const PENCIL_WIDTHS = {
 
 export const DEFAULT_PENCIL_WIDTH = 'big'
 export const DEFAULT_PENCIL_COLOR = '#ff3860'
+
+// Shapes don't get pressure modulation so the same px value as the pen
+// (10) looks heavy. 4 lines up nicely with what the studio uses for
+// other UI strokes.
+export const SHAPE_STROKE_WIDTH = 4
 
 /* -------------------------------------------------------------------------
  * Object helpers
@@ -141,6 +152,130 @@ export const applyPencilWidth = (canvas, width) => {
 export const applyPencilColor = (canvas, color) => {
   if (!canvas?.freeDrawingBrush) return
   canvas.freeDrawingBrush.color = color
+}
+
+/* -------------------------------------------------------------------------
+ * Shape drawing (drag-to-create rectangle / circle / arrow)
+ *
+ * Adapted from cgwire/kitsu#1830. Uses fabric mouse events instead of raw
+ * DOM listeners so the canvas's pointer offset / panzoom transforms are
+ * resolved correctly. The caller passes:
+ *   - getTool(): one of 'rectangle' | 'circle' | 'arrow' | null
+ *   - getColor(): current stroke color
+ *   - getWidth(): current stroke width (px)
+ *   - onShapeAdded(shape): callback fired when the user releases mouse,
+ *     with the finalised fabric object so the consumer can register it
+ *     in its additions list.
+ *
+ * Returns a detach function.
+ * -----------------------------------------------------------------------*/
+
+const PREVIEW_FILL = 'rgba(128, 128, 128, 0.25)'
+
+const buildShape = (tool, startX, startY, color, width) => {
+  const base = {
+    left: startX,
+    top: startY,
+    stroke: color,
+    fill: PREVIEW_FILL,
+    strokeWidth: width
+  }
+  if (tool === 'rectangle') {
+    return new fabric.Rect({ ...base, width: 1, height: 1 })
+  }
+  if (tool === 'circle') {
+    return new fabric.Circle({ ...base, radius: 1 })
+  }
+  if (tool === 'arrow') {
+    return new Arrow([startX, startY, startX, startY], {
+      stroke: color,
+      strokeWidth: width,
+      fill: 'transparent',
+      arrowHeadSize: 15,
+      arrowHeadWidth: 12
+    })
+  }
+  return null
+}
+
+const updateShape = (shape, tool, startX, startY, currentX, currentY) => {
+  const dx = currentX - startX
+  const dy = currentY - startY
+  if (tool === 'rectangle') {
+    const width = Math.abs(dx)
+    const height = Math.abs(dy)
+    shape.set({
+      left: dx < 0 ? startX - width : startX,
+      top: dy < 0 ? startY - height : startY,
+      width,
+      height
+    })
+    return
+  }
+  if (tool === 'circle') {
+    const delta = Math.abs(dx) > Math.abs(dy) ? dy : dx
+    const radius = Math.abs(delta)
+    shape.set({
+      left: dx < 0 ? startX - radius : startX,
+      top: dy < 0 ? startY - radius : startY,
+      radius: radius * 0.5
+    })
+    return
+  }
+  if (tool === 'arrow') {
+    shape.set({ x1: startX, y1: startY, x2: currentX, y2: currentY })
+  }
+}
+
+export const attachShapeDrawing = (
+  canvas,
+  { getTool, getColor, getWidth, onShapeAdded }
+) => {
+  let drawing = null
+  let startX = 0
+  let startY = 0
+
+  const onMouseDown = e => {
+    const tool = getTool?.()
+    if (!tool || tool === 'pen') return
+    const pointer = canvas.getPointer(e.e)
+    startX = pointer.x
+    startY = pointer.y
+    drawing = buildShape(tool, startX, startY, getColor(), getWidth())
+    if (!drawing) return
+    drawing.set({ selectable: false, evented: false })
+    canvas.add(drawing)
+    canvas.requestRenderAll()
+  }
+
+  const onMouseMove = e => {
+    if (!drawing) return
+    const tool = getTool?.()
+    if (!tool || tool === 'pen') return
+    const pointer = canvas.getPointer(e.e)
+    updateShape(drawing, tool, startX, startY, pointer.x, pointer.y)
+    drawing.setCoords()
+    canvas.requestRenderAll()
+  }
+
+  const onMouseUp = () => {
+    if (!drawing) return
+    drawing.set({ fill: 'transparent' })
+    drawing.setCoords()
+    canvas.requestRenderAll()
+    onShapeAdded?.(drawing)
+    drawing = null
+  }
+
+  canvas.on('mouse:down', onMouseDown)
+  canvas.on('mouse:move', onMouseMove)
+  canvas.on('mouse:up', onMouseUp)
+
+  return () => {
+    canvas.off('mouse:down', onMouseDown)
+    canvas.off('mouse:move', onMouseMove)
+    canvas.off('mouse:up', onMouseUp)
+  }
 }
 
 /* -------------------------------------------------------------------------
@@ -433,6 +568,19 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
       [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
       base
     )
+  }
+
+  if (obj.type === 'arrow') {
+    const arrow = new Arrow(
+      [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
+      {
+        ...base,
+        arrowHeadSize: obj.arrowHeadSize || 15,
+        arrowHeadWidth: obj.arrowHeadWidth || 12
+      }
+    )
+    addSerialization(arrow)
+    return arrow
   }
 
   if (obj.type === 'group' && Array.isArray(obj.objects)) {
