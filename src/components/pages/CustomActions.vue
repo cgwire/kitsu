@@ -38,8 +38,11 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useHead } from '@unhead/vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
@@ -49,155 +52,122 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCustomActionModal from '@/components/modals/EditCustomActionModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 
-export default {
-  name: 'custom-actions',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    CustomActionList,
-    DeleteModal,
-    EditCustomActionModal,
-    ListPageHeader
-  },
+// State
 
-  data() {
-    return {
-      modals: {
-        edit: false,
-        del: false
-      },
-      loading: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      errors: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      customActionToDelete: null,
-      customActionToEdit: null
-    }
-  },
+const customActionToDelete = ref(null)
+const customActionToEdit = ref(null)
+const modals = reactive({ edit: false, del: false })
+const loading = reactive({ edit: false, del: false, list: false })
+const errors = reactive({ edit: false, del: false, list: false })
 
-  computed: {
-    ...mapGetters(['customActions']),
+// Computed
 
-    deleteText() {
-      const customAction = this.customActionToDelete
-      if (customAction) {
-        return this.$t('custom_actions.delete_text', {
-          name: customAction.name
-        })
-      } else {
-        return ''
-      }
-    }
-  },
+const customActions = computed(() => store.getters.customActions)
 
-  async created() {
-    this.loading.list = true
-    this.errors.list = false
-    try {
-      await this.loadCustomActions()
-    } catch {
-      this.errors.list = true
-    } finally {
-      this.loading.list = false
-    }
-  },
+const deleteText = computed(() => {
+  const customAction = customActionToDelete.value
+  return customAction
+    ? t('custom_actions.delete_text', { name: customAction.name })
+    : ''
+})
 
-  methods: {
-    ...mapActions([
-      'deleteCustomAction',
-      'editCustomAction',
-      'loadCustomActions',
-      'newCustomAction'
-    ]),
+// Functions
 
-    confirmEditCustomAction(form) {
-      let action = 'newCustomAction'
-      if (this.customActionToEdit && this.customActionToEdit.id) {
-        action = 'editCustomAction'
-        form.id = this.customActionToEdit.id
-      }
+const confirmEditCustomAction = form => {
+  const isEdit = !!customActionToEdit.value?.id
+  if (isEdit) form.id = customActionToEdit.value.id
 
-      this.loading.edit = true
-      this.errors.edit = false
-      this[action](form)
-        .then(() => {
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.edit = true
-          this.modals.isNewDisplayed = false
-        })
-        .finally(() => {
-          this.loading.edit = false
-        })
-    },
-
-    confirmDeleteCustomAction() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteCustomAction(this.customActionToDelete)
-        .then(() => {
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-        })
-        .finally(() => {
-          this.loading.del = false
-        })
-    },
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('custom_actions.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('custom_actions.fields.name'),
-        this.$t('custom_actions.fields.url'),
-        this.$t('custom_actions.fields.entity_type'),
-        this.$t('custom_actions.fields.is_ajax')
-      ]
-      const entries = [headers].concat(
-        this.customActions.map(customAction => [
-          customAction.type,
-          customAction.name,
-          customAction.url,
-          customAction.entity_type,
-          customAction.is_ajax
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.customActionToEdit = {}
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onEditClicked(customAction) {
-      this.customActionToEdit = customAction
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(customAction) {
-      this.customActionToDelete = customAction
-      this.errors.del = false
-      this.modals.del = true
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('custom_actions.title')} - Kitsu`
-    }
-  }
+  loading.edit = true
+  errors.edit = false
+  store
+    .dispatch(isEdit ? 'editCustomAction' : 'newCustomAction', form)
+    .then(() => {
+      modals.edit = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.edit = true
+    })
+    .finally(() => {
+      loading.edit = false
+    })
 }
+
+const confirmDeleteCustomAction = () => {
+  loading.del = true
+  errors.del = false
+  store
+    .dispatch('deleteCustomAction', customActionToDelete.value)
+    .then(() => {
+      modals.del = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.del = true
+    })
+    .finally(() => {
+      loading.del = false
+    })
+}
+
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('custom_actions.title'))
+  const headers = [
+    t('main.type'),
+    t('custom_actions.fields.name'),
+    t('custom_actions.fields.url'),
+    t('custom_actions.fields.entity_type'),
+    t('custom_actions.fields.is_ajax')
+  ]
+  const entries = [
+    headers,
+    ...customActions.value.map(customAction => [
+      customAction.type,
+      customAction.name,
+      customAction.url,
+      customAction.entity_type,
+      customAction.is_ajax
+    ])
+  ]
+  csv.buildCsvFile(name, entries)
+}
+
+const onNewClicked = () => {
+  customActionToEdit.value = {}
+  errors.edit = false
+  modals.edit = true
+}
+
+const onEditClicked = customAction => {
+  customActionToEdit.value = customAction
+  errors.edit = false
+  modals.edit = true
+}
+
+const onDeleteClicked = customAction => {
+  customActionToDelete.value = customAction
+  errors.del = false
+  modals.del = true
+}
+
+// Lifecycle
+
+onMounted(async () => {
+  loading.list = true
+  errors.list = false
+  try {
+    await store.dispatch('loadCustomActions')
+  } catch {
+    errors.list = true
+  } finally {
+    loading.list = false
+  }
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('custom_actions.title')} - Kitsu`) })
 </script>
