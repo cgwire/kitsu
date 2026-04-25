@@ -192,13 +192,43 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.shared-playlist {
+.error-card {
+  backdrop-filter: blur(20px);
+  background: rgba(29, 29, 38, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  max-width: 420px;
+  padding: 2.5em;
+  text-align: center;
+  width: 100%;
+
+  p {
+    color: rgba(244, 245, 250, 0.6);
+    margin-top: 0.5em;
+  }
+
+  .title {
+    color: #f4f5fa;
+  }
+}
+
+.player-container {
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.shared-content {
+  align-items: center;
   display: flex;
+  height: 100%;
   justify-content: center;
+  width: 100%;
+}
+
+.shared-playlist {
   align-items: stretch;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
   background:
     radial-gradient(
       80% 80% at 15% 0%,
@@ -212,40 +242,10 @@ onBeforeUnmount(() => {
     ),
     #14141a;
   color: #f4f5fa;
-}
-
-.shared-content {
   display: flex;
+  height: 100vh;
+  height: 100dvh;
   justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.error-card {
-  background: rgba(29, 29, 38, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  padding: 2.5em;
-  max-width: 420px;
-  width: 100%;
-  text-align: center;
-
-  .title {
-    color: #f4f5fa;
-  }
-
-  p {
-    color: rgba(244, 245, 250, 0.6);
-    margin-top: 0.5em;
-  }
-}
-
-.player-container {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
+  overflow: hidden;
 }
 </style>

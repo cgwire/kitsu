@@ -149,10 +149,10 @@
     </div>
 
     <video-progress
-      ref="videoProgress"
+      ref="videoProgressRef"
       class="video-progress pull-bottom"
       :annotations="currentAnnotations"
-      :background-url="videoProgressBackgroundUrl"
+      :background-url="darkTimesliderUrl"
       :empty="!isMovie"
       :frame-duration="frameDuration"
       :is-full-mode="false"
@@ -280,7 +280,7 @@
       :nb-frames="nbFrames"
       :preview-id="currentPreview ? currentPreview.id : ''"
       :playlist-duration="playlistDuration"
-      :playlist-progress="playlistProgress"
+      :playlist-progress="currentPlaylistProgress"
       :playlist-shot-position="playlistShotPosition"
       :url-prefix="sharedApiPrefix || '/api'"
       @progress-playlist-changed="onProgressPlaylistChanged"
@@ -316,6 +316,7 @@
 </template>
 
 <script setup>
+import { LogOutIcon } from 'lucide-vue-next'
 import {
   computed,
   nextTick,
@@ -325,29 +326,24 @@ import {
   watch,
   watchEffect
 } from 'vue'
-
-import { LogOutIcon } from 'lucide-vue-next'
 import { useStore } from 'vuex'
 
+import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { floorToFrame, formatTime } from '@/lib/video'
 
-import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
-// eslint-disable-next-line no-unused-vars
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
-// eslint-disable-next-line no-unused-vars
 import SharedAnnotationOverlay from '@/components/previews/SharedAnnotationOverlay.vue'
-// eslint-disable-next-line no-unused-vars
 import SharedCommentsPanel from '@/components/previews/SharedCommentsPanel.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-// eslint-disable-next-line no-unused-vars
 import VideoProgress from '@/components/previews/VideoProgress.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ButtonSound from '@/components/widgets/ButtonSound.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+
+// Props / Emits
 
 const props = defineProps({
   playlist: { type: Object, default: () => ({}) },
@@ -361,48 +357,42 @@ const props = defineProps({
 const emit = defineEmits(['logout'])
 
 const store = useStore()
-const guestDisplayName = computed(() => {
-  const user = store.getters.user
-  if (!user?.is_guest) return ''
-  const name = `${user.first_name || ''} ${user.last_name || ''}`.trim()
-  return name
-})
 
-const currentEntityDisplayName = computed(() => {
-  const entity = props.entities[playingEntityIndex.value]
-  if (!entity) return ''
-  const parent = entity.parent_name || ''
-  const name = entity.name || ''
-  if (parent && name) return `${parent} / ${name}`
-  return parent || name
-})
+// State
 
 const container = ref(null)
 const rawPlayer = ref(null)
 const picturePlayer = ref(null)
 const playlistedEntities = ref(null)
-const videoProgress = ref(null)
-const isFullScreen = ref(false)
+const videoProgressRef = ref(null)
 
 const playingEntityIndex = ref(0)
 const currentPreviewIndex = ref(0)
+const currentFrameNumber = ref(0)
+const currentPlaylistProgress = ref(0)
+const maxDuration = ref(0)
+const movieDimensions = ref({ width: 0, height: 0 })
+const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
+const volume = ref(100)
+
 const isPlaying = ref(false)
 const isRepeating = ref(false)
 const isMuted = ref(false)
 const isHd = ref(true)
 const isZoomEnabled = ref(false)
+const isAnnotating = ref(false)
+const isFullScreen = ref(false)
 const isEntitiesHidden = ref(false)
 const isCommentsHidden = ref(
   typeof window !== 'undefined' &&
     window.matchMedia?.('(max-width: 768px)').matches
 )
-const isAnnotating = ref(false)
-const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
-const volume = ref(100)
-const currentFrameNumber = ref(0)
-const maxDuration = ref(0)
-const movieDimensions = ref({ width: 0, height: 0 })
-const playlistProgress = ref(0)
+
+// Tracks whether the very first entity has been auto-loaded after mount.
+// Plain `let` (not ref) — only used by the watchers below.
+let firstEntityLoaded = false
+
+// Computed
 
 const entityList = computed(() => props.entities || [])
 
@@ -412,16 +402,32 @@ const playlistName = computed(() => props.playlist?.name || '')
 const sharedApiPrefix = computed(() =>
   props.token ? `/api/shared/playlists/${props.token}` : ''
 )
-
 const movieUrlPrefix = computed(() => sharedApiPrefix.value)
 
-const videoProgressBackgroundUrl = darkTimesliderUrl
+const fps = computed(() => parseFloat(props.playlist?.project_fps) || 25)
+const frameDuration = computed(
+  () => Math.round((1 / fps.value) * 10000) / 10000
+)
 
 const currentEntity = computed(() => entityList.value[playingEntityIndex.value])
-
 const currentTaskId = computed(
   () => currentEntity.value?.preview_file_task_id || ''
 )
+
+const currentEntityDisplayName = computed(() => {
+  const entity = currentEntity.value
+  if (!entity) return ''
+  const parent = entity.parent_name || ''
+  const name = entity.name || ''
+  if (parent && name) return `${parent} / ${name}`
+  return parent || name
+})
+
+const guestDisplayName = computed(() => {
+  const user = store.getters.user
+  if (!user?.is_guest) return ''
+  return `${user.first_name || ''} ${user.last_name || ''}`.trim()
+})
 
 const currentPreview = computed(() => {
   const entity = currentEntity.value
@@ -441,16 +447,6 @@ const currentPreview = computed(() => {
   return entity.preview_file_previews?.[currentPreviewIndex.value - 1]
 })
 
-const extension = computed(() => currentPreview.value?.extension || '')
-
-const isMovie = computed(() => extension.value === 'mp4')
-const isPicture = computed(() =>
-  ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension.value)
-)
-const isSound = computed(() =>
-  ['mp3', 'wav', 'ogg', 'flac', 'aiff'].includes(extension.value)
-)
-
 const currentPreviewUrl = computed(() => {
   if (!currentPreview.value) return ''
   if (props.token) {
@@ -459,11 +455,28 @@ const currentPreviewUrl = computed(() => {
   return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
 })
 
-const fps = computed(() => parseFloat(props.playlist?.project_fps) || 25)
-
-const frameDuration = computed(
-  () => Math.round((1 / fps.value) * 10000) / 10000
+const currentAnnotations = computed(
+  () => currentPreview.value?.annotations || []
 )
+
+const extension = computed(() => currentPreview.value?.extension || '')
+const isMovie = computed(() => extension.value === 'mp4')
+const isPicture = computed(() =>
+  ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension.value)
+)
+const isSound = computed(() =>
+  ['mp3', 'wav', 'ogg', 'flac', 'aiff'].includes(extension.value)
+)
+
+const overlayDimensions = computed(() => {
+  if (isPicture.value) {
+    return {
+      width: currentPreview.value?.width || 0,
+      height: currentPreview.value?.height || 0
+    }
+  }
+  return movieDimensions.value
+})
 
 const nbFrames = computed(() => {
   const isChromium = !!window.chrome
@@ -477,22 +490,15 @@ const nbFrames = computed(() => {
   return 0
 })
 
-const currentAnnotations = computed(
-  () => currentPreview.value?.annotations || []
-)
-
 const currentFrameDisplay = computed(() =>
   String(Math.max(currentFrameNumber.value, 0) + 1).padStart(3, '0')
 )
-
 const nbFramesDisplay = computed(() =>
   String(nbFrames.value || 0).padStart(3, '0')
 )
-
 const currentTimeFormatted = computed(() =>
   formatTime(currentFrameNumber.value * frameDuration.value, fps.value)
 )
-
 const maxDurationFormatted = computed(() =>
   formatTime(maxDuration.value, fps.value)
 )
@@ -539,31 +545,14 @@ const playlistFrameData = computed(() => {
 const playlistShotPosition = computed(
   () => playlistFrameData.value.playlistShotPosition
 )
-
 const playlistDuration = computed(
   () => playlistFrameData.value.playlistDuration
 )
-
 const entityListForProgress = computed(
   () => playlistFrameData.value.entitiesWithStart
 )
 
-const selectEntity = index => {
-  if (index < 0 || index >= entityList.value.length) return
-  const wasPlaying = isPlaying.value
-  pause()
-  playingEntityIndex.value = index
-  currentPreviewIndex.value = 0
-  currentFrameNumber.value = 0
-  rawPlayer.value?.loadEntity(index)
-  if (wasPlaying) {
-    nextTick(() => play())
-  }
-}
-
-const previousEntity = () => selectEntity(playingEntityIndex.value - 1)
-
-const nextEntity = () => selectEntity(playingEntityIndex.value + 1)
+// Functions — playback
 
 const play = () => {
   isPlaying.value = true
@@ -576,6 +565,46 @@ const pause = () => {
 }
 
 const togglePlay = () => (isPlaying.value ? pause() : play())
+
+const selectEntity = index => {
+  if (index < 0 || index >= entityList.value.length) return
+  const wasPlaying = isPlaying.value
+  pause()
+  playingEntityIndex.value = index
+  currentPreviewIndex.value = 0
+  currentFrameNumber.value = 0
+  rawPlayer.value?.loadEntity(index)
+  if (wasPlaying) nextTick(play)
+}
+
+const previousEntity = () => selectEntity(playingEntityIndex.value - 1)
+const nextEntity = () => selectEntity(playingEntityIndex.value + 1)
+
+const goPreviousFrame = () => {
+  if (!rawPlayer.value) return
+  const previousFrame = currentFrameNumber.value - 1
+  if (previousFrame < 0) return
+  rawPlayer.value.goPreviousFrame()
+  onFrameUpdate(previousFrame)
+}
+
+const goNextFrame = () => {
+  if (!rawPlayer.value) return
+  const nextFrame = currentFrameNumber.value + 1
+  if (nbFrames.value > 0 && nextFrame >= nbFrames.value) return
+  rawPlayer.value.goNextFrame()
+  onFrameUpdate(nextFrame)
+}
+
+const loadFirstEntity = () => {
+  if (firstEntityLoaded) return
+  if (entityList.value.length > 0 && rawPlayer.value?.player1) {
+    firstEntityLoaded = true
+    rawPlayer.value.loadEntity(0)
+  }
+}
+
+// Functions — fullscreen / sound
 
 const isDocumentFullScreen = () =>
   Boolean(document.fullscreenElement || document.webkitIsFullScreen)
@@ -597,6 +626,8 @@ const onToggleSoundClicked = () => {
   isMuted.value = !isMuted.value
 }
 
+// Functions — player events
+
 const onEntityChange = index => {
   playingEntityIndex.value = index
 }
@@ -604,15 +635,19 @@ const onEntityChange = index => {
 const onFrameUpdate = rawFrameNumber => {
   const frameNumber = Math.round(Number(rawFrameNumber) || 0)
   currentFrameNumber.value = frameNumber
-  if (videoProgress.value) {
-    videoProgress.value.updateProgressBar(frameNumber)
-  }
+  videoProgressRef.value?.updateProgressBar(frameNumber)
   const startDuration =
     playlistFrameData.value.startDurationByIndex[playingEntityIndex.value]
   if (typeof startDuration === 'number' && playlistDuration.value > 0) {
-    const fpsValue = fps.value || 25
-    playlistProgress.value = startDuration + frameNumber / fpsValue
+    currentPlaylistProgress.value =
+      startDuration + frameNumber / (fps.value || 25)
   }
+}
+
+const onProgressChanged = frameNumber => {
+  if (!isMovie.value) return
+  rawPlayer.value?.setCurrentFrame(frameNumber)
+  onFrameUpdate(frameNumber)
 }
 
 const onProgressPlaylistChanged = frameNumber => {
@@ -622,9 +657,7 @@ const onProgressPlaylistChanged = frameNumber => {
   const localFrame = Math.round(frameNumber - start * fps.value)
   if (index !== playingEntityIndex.value) {
     selectEntity(index)
-    nextTick(() => {
-      rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0))
-    })
+    nextTick(() => rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0)))
   } else {
     rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0))
   }
@@ -633,11 +666,8 @@ const onProgressPlaylistChanged = frameNumber => {
 const onPlayNext = () => {
   if (!isPlaying.value) return
   const isLast = playingEntityIndex.value >= entityList.value.length - 1
-  if (isLast) {
-    isPlaying.value = false
-  } else {
-    rawPlayer.value?.playNext()
-  }
+  if (isLast) isPlaying.value = false
+  else rawPlayer.value?.playNext()
 }
 
 const onVideoLoaded = () => {
@@ -648,25 +678,12 @@ const onVideoLoaded = () => {
   }
 }
 
-const overlayDimensions = computed(() => {
-  if (isPicture.value) {
-    return {
-      width: currentPreview.value?.width || 0,
-      height: currentPreview.value?.height || 0
-    }
-  }
-  return movieDimensions.value
-})
-
 const onMaxDurationUpdate = duration => {
   maxDuration.value = duration ? floorToFrame(duration, fps.value) : 0
 }
 
-const onProgressChanged = frameNumber => {
-  if (isMovie.value) {
-    rawPlayer.value?.setCurrentFrame(frameNumber)
-    onFrameUpdate(frameNumber)
-  }
+const onPanzoomChanged = ({ x, y, scale }) => {
+  panzoomTransform.value = { x, y, scale }
 }
 
 const onTimeCodeClicked = ({ frame }) => {
@@ -678,9 +695,7 @@ const onTimeCodeClicked = ({ frame }) => {
 
 const onAnnotationsSaved = annotations => {
   const entity = currentEntity.value
-  if (entity) {
-    entity.preview_file_annotations = annotations
-  }
+  if (entity) entity.preview_file_annotations = annotations
 }
 
 const onStatusChanged = ({ taskStatusId, color }) => {
@@ -690,25 +705,7 @@ const onStatusChanged = ({ taskStatusId, color }) => {
   if (taskStatusId) entity.task_status_id = taskStatusId
 }
 
-const onPanzoomChanged = ({ x, y, scale }) => {
-  panzoomTransform.value = { x, y, scale }
-}
-
-const goPreviousFrame = () => {
-  if (!rawPlayer.value) return
-  const previousFrame = currentFrameNumber.value - 1
-  if (previousFrame < 0) return
-  rawPlayer.value.goPreviousFrame()
-  onFrameUpdate(previousFrame)
-}
-
-const goNextFrame = () => {
-  if (!rawPlayer.value) return
-  const nextFrame = currentFrameNumber.value + 1
-  if (nbFrames.value > 0 && nextFrame >= nbFrames.value) return
-  rawPlayer.value.goNextFrame()
-  onFrameUpdate(nextFrame)
-}
+// Functions — entity strip
 
 const onEntitiesWheel = event => {
   if (playlistedEntities.value) {
@@ -717,92 +714,90 @@ const onEntitiesWheel = event => {
 }
 
 const scrollPlayingEntityIntoView = () => {
-  const container = playlistedEntities.value
-  if (!container || container.classList.contains('hidden')) return
-  const target = container.querySelector(
+  const stripContainer = playlistedEntities.value
+  if (!stripContainer || stripContainer.classList.contains('hidden')) return
+  const target = stripContainer.querySelector(
     `[data-entity-index="${playingEntityIndex.value}"]`
   )
   if (!target) return
-  const containerRect = container.getBoundingClientRect()
+  const containerRect = stripContainer.getBoundingClientRect()
   const targetRect = target.getBoundingClientRect()
   const targetCenter = targetRect.left + targetRect.width / 2
   const containerCenter = containerRect.left + containerRect.width / 2
-  container.scrollTo({
-    left: container.scrollLeft + (targetCenter - containerCenter),
+  stripContainer.scrollTo({
+    left: stripContainer.scrollLeft + (targetCenter - containerCenter),
     behavior: 'smooth'
   })
 }
 
-let firstEntityLoaded = false
-const loadFirstEntity = () => {
-  if (firstEntityLoaded) return
-  if (entityList.value.length > 0 && rawPlayer.value?.player1) {
-    firstEntityLoaded = true
-    rawPlayer.value.loadEntity(0)
-  }
+// Tell the embedded video player its container size has changed: dispatch
+// a resize synchronously so flex layout recomputes, then let the DOM paint
+// before asking the raw player to re-measure.
+const triggerPlayerResize = () => {
+  window.dispatchEvent(new Event('resize'))
+  setTimeout(() => {
+    rawPlayer.value?.resetHeight?.()
+    window.dispatchEvent(new Event('resize'))
+  }, 50)
 }
+
+// Functions — keyboard
 
 const onKeyDown = event => {
   if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return
 
-  const HOMEKEY = 36
-  const ENDKEY = 35
-  const LEFTKEY = 37
-  const RIGHTKEY = 39
-  const SPACEKEY = 32
-  const JKEY = 74
-  const KKEY = 75
+  const stop = () => {
+    event.preventDefault()
+    event.stopPropagation()
+  }
 
-  if (event.keyCode === SPACEKEY) {
-    event.preventDefault()
-    event.stopPropagation()
-    togglePlay()
-  } else if (event.keyCode === LEFTKEY) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (event.altKey) previousEntity()
-    else goPreviousFrame()
-  } else if (event.keyCode === RIGHTKEY) {
-    event.preventDefault()
-    event.stopPropagation()
-    if (event.altKey) nextEntity()
-    else goNextFrame()
-  } else if (event.altKey && event.keyCode === JKEY) {
-    event.preventDefault()
-    event.stopPropagation()
-    previousEntity()
-  } else if (event.altKey && event.keyCode === KKEY) {
-    event.preventDefault()
-    event.stopPropagation()
-    nextEntity()
-  } else if (event.keyCode === HOMEKEY) {
-    rawPlayer.value?.setCurrentFrame(0)
-    onFrameUpdate(0)
-  } else if (event.keyCode === ENDKEY) {
-    if (nbFrames.value > 0) {
-      const lastFrame = nbFrames.value - 1
-      rawPlayer.value?.setCurrentFrame(lastFrame)
-      onFrameUpdate(lastFrame)
-    }
+  switch (event.code) {
+    case 'Space':
+      stop()
+      togglePlay()
+      break
+    case 'ArrowLeft':
+      stop()
+      if (event.altKey) previousEntity()
+      else goPreviousFrame()
+      break
+    case 'ArrowRight':
+      stop()
+      if (event.altKey) nextEntity()
+      else goNextFrame()
+      break
+    case 'KeyJ':
+      if (event.altKey) {
+        stop()
+        previousEntity()
+      }
+      break
+    case 'KeyK':
+      if (event.altKey) {
+        stop()
+        nextEntity()
+      }
+      break
+    case 'Home':
+      rawPlayer.value?.setCurrentFrame(0)
+      onFrameUpdate(0)
+      break
+    case 'End':
+      if (nbFrames.value > 0) {
+        const lastFrame = nbFrames.value - 1
+        rawPlayer.value?.setCurrentFrame(lastFrame)
+        onFrameUpdate(lastFrame)
+      }
+      break
   }
 }
 
-onMounted(() => {
-  window.addEventListener('keydown', onKeyDown, false)
-  document.addEventListener('fullscreenchange', onFullScreenChange)
-  document.addEventListener('webkitfullscreenchange', onFullScreenChange)
-})
+// Watchers
 
 watchEffect(() => {
   if (!firstEntityLoaded && entityList.value.length > 0 && rawPlayer.value) {
     nextTick(loadFirstEntity)
   }
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
-  document.removeEventListener('fullscreenchange', onFullScreenChange)
-  document.removeEventListener('webkitfullscreenchange', onFullScreenChange)
 })
 
 watch(
@@ -818,51 +813,53 @@ watch(volume, newVolume => {
 
 watch(isZoomEnabled, enabled => {
   const target = isMovie.value ? rawPlayer.value : picturePlayer.value
-  if (enabled) target?.resumePanZoom?.()
-  else {
+  if (enabled) {
+    target?.resumePanZoom?.()
+  } else {
     target?.pausePanZoom?.()
     target?.resetPanZoom?.()
     panzoomTransform.value = { x: 0, y: 0, scale: 1 }
   }
 })
 
-const triggerPlayerResize = () => {
-  // Dispatch synchronously so flex layout recomputes; then let the DOM
-  // paint before asking the raw player to re-measure its container.
-  window.dispatchEvent(new Event('resize'))
-  setTimeout(() => {
-    rawPlayer.value?.resetHeight?.()
-    window.dispatchEvent(new Event('resize'))
-  }, 50)
-}
-
-watch(isEntitiesHidden, triggerPlayerResize)
 watch(isCommentsHidden, triggerPlayerResize)
-watch(playingEntityIndex, () => {
-  nextTick(scrollPlayingEntityIntoView)
-})
+
 watch(isEntitiesHidden, hidden => {
+  triggerPlayerResize()
   if (!hidden) nextTick(scrollPlayingEntityIntoView)
+})
+
+watch(playingEntityIndex, () => nextTick(scrollPlayingEntityIntoView))
+
+// Lifecycle
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown, false)
+  document.addEventListener('fullscreenchange', onFullScreenChange)
+  document.addEventListener('webkitfullscreenchange', onFullScreenChange)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('fullscreenchange', onFullScreenChange)
+  document.removeEventListener('webkitfullscreenchange', onFullScreenChange)
 })
 </script>
 
 <style lang="scss" scoped>
+// Theme
+
 .shared-player {
   --accent: #7c5cff;
   --accent-soft: rgba(124, 92, 255, 0.16);
-  --surface: #14141a;
-  --surface-raised: #1d1d26;
-  --surface-inset: #0e0e13;
   --border-soft: rgba(255, 255, 255, 0.06);
   --border-strong: rgba(255, 255, 255, 0.12);
+  --surface: #14141a;
+  --surface-inset: #0e0e13;
+  --surface-raised: #1d1d26;
   --text: #f4f5fa;
   --text-muted: rgba(244, 245, 250, 0.6);
 
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
   background:
     radial-gradient(
       120% 120% at 10% -10%,
@@ -876,60 +873,235 @@ watch(isEntitiesHidden, hidden => {
     ),
     var(--surface);
   color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// Layout & containers
+
+.entity-name {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.loading-background {
+  align-items: center;
+  background: black;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
+.mr1 {
+  margin-right: 1em;
+}
+
+.no-preview {
+  color: var(--text-muted);
+}
+
+.player-area {
+  align-items: center;
+  background: black;
+  display: flex;
+  flex: 1 1 0;
+  justify-content: center;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.player-row {
+  align-items: stretch;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.playlist-button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-muted);
+  margin: 0 0.1em;
+  padding: 0.35em 0.6em;
+  transition: all 0.18s ease;
+
+  &.active {
+    background: var(--accent-soft);
+    border-color: rgba(124, 92, 255, 0.4);
+    box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.15);
+    color: var(--accent);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+}
+
+.playlist-footer {
+  align-items: center;
+  backdrop-filter: blur(14px);
+  background: rgba(20, 20, 26, 0.7);
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-muted);
+  flex-shrink: 0;
+  gap: 0.3em;
+  height: 44px;
+  padding: 0 0.8em;
+  width: 100%;
+}
+
+.playlisted-entities {
+  align-items: flex-start;
+  background: var(--surface-inset);
+  border-top: 1px solid var(--border-soft);
+  flex-shrink: 0;
+  height: 200px;
+  min-height: 200px;
+  overflow-x: auto;
+  padding: 0.6em 0.4em 0.3em 0.6em;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-width: thin;
+
+  &.hidden {
+    display: none;
+  }
+
+  :deep(.entity-title) {
+    color: var(--text);
+    font-size: 0.85em;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  :deep(.playlisted-entity) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    padding: 0.4em;
+    position: relative;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    &::after {
+      background: linear-gradient(
+        135deg,
+        rgba(124, 92, 255, 0.35) 0%,
+        rgba(255, 120, 180, 0.2) 100%
+      );
+      border-radius: 12px;
+      content: '';
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      transition: opacity 0.25s ease;
+      z-index: 0;
+    }
+
+    &.playing {
+      border: 1px solid rgba(124, 92, 255, 0.55);
+      box-shadow:
+        0 0 0 2px rgba(124, 92, 255, 0.18),
+        0 6px 22px rgba(124, 92, 255, 0.25);
+    }
+
+    &:hover {
+      background: #22222e;
+      border-color: rgba(124, 92, 255, 0.45);
+      box-shadow:
+        0 0 0 1px rgba(124, 92, 255, 0.25),
+        0 14px 32px rgba(124, 92, 255, 0.28),
+        0 6px 18px rgba(0, 0, 0, 0.45);
+      transform: translateY(-2px) scale(1.015);
+
+      &::after {
+        opacity: 0.1;
+      }
+    }
+  }
+
+  :deep(.playlisted-entity:hover .thumbnail-wrapper img) {
+    transform: scale(1.03);
+  }
+
+  :deep(.preview-meta) {
+    color: var(--text-muted);
+    font-size: 0.78em;
+
+    .revision {
+      color: var(--text);
+      font-weight: 600;
+    }
+  }
+
+  :deep(.thumbnail-picture) {
+    background-color: #000 !important;
+    border-color: transparent !important;
+  }
+
+  :deep(.thumbnail-wrapper) {
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+
+    img {
+      border-radius: 8px;
+      transition: transform 0.35s ease;
+    }
+  }
+
+  :deep(span.thumbnail-empty) {
+    background: #000;
+  }
+}
+
+.raw-player {
+  margin-right: 0;
+  max-height: 100%;
+  max-width: 100%;
 }
 
 .shared-header {
   align-items: center;
-  background: rgba(20, 20, 26, 0.7);
   backdrop-filter: blur(14px);
+  background: rgba(20, 20, 26, 0.7);
   border-bottom: 1px solid var(--border-soft);
   color: var(--text-muted);
+  flex-shrink: 0;
   gap: 0.8em;
   height: 52px;
   padding: 0 1.4em;
-  flex-shrink: 0;
 
-  .kitsu-logo-link {
-    display: inline-flex;
-    align-items: center;
-    line-height: 0;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-      opacity: 0.75;
-    }
-  }
-
-  .kitsu-logo {
-    height: 26px;
-    width: auto;
-  }
-
-  .project-name {
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78em;
-    color: var(--text-muted);
-  }
-
-  .playlist-name {
+  .current-entity-name {
     color: var(--text);
-    font-size: 0.95em;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .filler {
-    flex: 1;
-  }
-
-  .entity-nav {
-    align-items: center;
-    background: var(--surface-inset);
-    border: 1px solid var(--border-soft);
-    border-radius: 999px;
-    gap: 0.25em;
-    padding: 0.15em 0.5em;
+    font-size: 0.9em;
+    font-weight: 500;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .entity-counter {
@@ -939,14 +1111,17 @@ watch(isEntitiesHidden, hidden => {
     margin: 0 0.4em;
   }
 
-  .current-entity-name {
-    color: var(--text);
-    font-size: 0.9em;
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 320px;
+  .entity-nav {
+    align-items: center;
+    background: var(--surface-inset);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    gap: 0.25em;
+    padding: 0.15em 0.5em;
+  }
+
+  .filler {
+    flex: 1;
   }
 
   .guest-name {
@@ -959,11 +1134,27 @@ watch(isEntitiesHidden, hidden => {
     white-space: nowrap;
   }
 
+  .kitsu-logo {
+    height: 26px;
+    width: auto;
+  }
+
+  .kitsu-logo-link {
+    align-items: center;
+    display: inline-flex;
+    line-height: 0;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
+  }
+
   .logout-button {
     align-items: center;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: 10px;
     color: var(--text-muted);
     cursor: pointer;
     display: flex;
@@ -977,60 +1168,43 @@ watch(isEntitiesHidden, hidden => {
       color: var(--text);
     }
   }
+
+  .playlist-name {
+    color: var(--text);
+    font-size: 0.95em;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .project-name {
+    color: var(--text-muted);
+    font-size: 0.78em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 }
 
-.player-row {
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-  min-height: 0;
-  overflow: hidden;
-  position: relative;
-}
-
-.player-area {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: black;
+.time-indicator {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
 }
 
 .video-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
   align-items: center;
+  display: flex;
+  height: 100%;
   justify-content: center;
   position: relative;
-}
-
-.raw-player {
-  margin-right: 0;
-  max-width: 100%;
-  max-height: 100%;
-}
-
-.loading-background {
   width: 100%;
-  height: 100%;
-  background: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.no-preview {
-  color: var(--text-muted);
 }
 
 .video-progress {
-  width: 100%;
   flex-shrink: 0;
+  width: 100%;
 }
+
+// :deep overrides on the shared player
 
 .shared-player :deep(progress),
 .shared-player :deep(progress[value]::-webkit-progress-bar) {
@@ -1048,43 +1222,10 @@ watch(isEntitiesHidden, hidden => {
   opacity: 1;
 }
 
-.shared-player :deep(.handle-in),
-.shared-player :deep(.handle-out) {
-  background: rgba(14, 14, 19, 0.85);
-  color: var(--text-muted);
-  opacity: 1;
-}
-
-.shared-player :deep(.handle-in::after),
-.shared-player :deep(.handle-out::before) {
-  background: var(--accent);
-}
-
 .shared-player :deep(.annotation-mark) {
   background: #ff578c;
   border-radius: 3px;
   box-shadow: 0 0 0 2px rgba(255, 87, 140, 0.25);
-}
-
-.shared-player :deep(.playlist-progress) {
-  background: #08080c !important;
-  border-top: 1px solid var(--border-soft) !important;
-  border-bottom: 1px solid var(--border-soft) !important;
-  flex-shrink: 0;
-  height: 14px;
-  transition: height 0.2s ease-in-out;
-
-  &:hover {
-    height: 14px;
-  }
-}
-
-.shared-player :deep(.playlist-progress-position) {
-  border-left: 3px solid var(--accent);
-  box-shadow: 0 0 10px rgba(124, 92, 255, 0.6);
-  height: 14px;
-  top: 0;
-  border-radius: 0;
 }
 
 .shared-player :deep(.entity-status) {
@@ -1118,210 +1259,48 @@ watch(isEntitiesHidden, hidden => {
   color: var(--text);
 }
 
-.playlist-footer {
-  background: rgba(20, 20, 26, 0.7);
-  backdrop-filter: blur(14px);
-  border-top: 1px solid var(--border-soft);
+.shared-player :deep(.handle-in),
+.shared-player :deep(.handle-out) {
+  background: rgba(14, 14, 19, 0.85);
   color: var(--text-muted);
-  width: 100%;
-  height: 44px;
-  flex-shrink: 0;
-  padding: 0 0.8em;
-  align-items: center;
-  gap: 0.3em;
+  opacity: 1;
 }
 
-.playlist-button {
-  margin: 0 0.1em;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  color: var(--text-muted);
-  padding: 0.35em 0.6em;
-  transition: all 0.18s ease;
+.shared-player :deep(.handle-in::after),
+.shared-player :deep(.handle-out::before) {
+  background: var(--accent);
+}
+
+.shared-player :deep(.playlist-progress) {
+  background: #08080c !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  border-top: 1px solid var(--border-soft) !important;
+  flex-shrink: 0;
+  height: 14px;
+  transition: height 0.2s ease-in-out;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-strong);
-    color: var(--text);
-  }
-
-  &.active {
-    background: var(--accent-soft);
-    border-color: rgba(124, 92, 255, 0.4);
-    box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.15);
-    color: var(--accent);
+    height: 14px;
   }
 }
 
-.time-indicator {
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
+.shared-player :deep(.playlist-progress-position) {
+  border-left: 3px solid var(--accent);
+  border-radius: 0;
+  box-shadow: 0 0 10px rgba(124, 92, 255, 0.6);
+  height: 14px;
+  top: 0;
 }
 
-.entity-name {
-  color: var(--text-muted);
-  font-size: 0.9em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.playlisted-entities {
-  background: var(--surface-inset);
-  border-top: 1px solid var(--border-soft);
-  padding: 0.6em 0.4em 0.3em 0.6em;
-  overflow-x: auto;
-  align-items: flex-start;
-  flex-shrink: 0;
-  height: 200px;
-  min-height: 200px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-
-  &.hidden {
-    display: none;
-  }
-
-  :deep(.playlisted-entity) {
-    background: var(--surface-raised);
-    border: 1px solid var(--border-soft);
-    border-radius: 12px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    padding: 0.4em;
-    position: relative;
-    transition:
-      background 0.25s ease,
-      border-color 0.25s ease,
-      box-shadow 0.25s ease,
-      transform 0.25s ease;
-
-    &::after {
-      background: linear-gradient(
-        135deg,
-        rgba(124, 92, 255, 0.35) 0%,
-        rgba(255, 120, 180, 0.2) 100%
-      );
-      border-radius: 12px;
-      content: '';
-      inset: 0;
-      opacity: 0;
-      pointer-events: none;
-      position: absolute;
-      transition: opacity 0.25s ease;
-      z-index: 0;
-    }
-
-    > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    &:hover {
-      background: #22222e;
-      border-color: rgba(124, 92, 255, 0.45);
-      box-shadow:
-        0 0 0 1px rgba(124, 92, 255, 0.25),
-        0 14px 32px rgba(124, 92, 255, 0.28),
-        0 6px 18px rgba(0, 0, 0, 0.45);
-      transform: translateY(-2px) scale(1.015);
-
-      &::after {
-        opacity: 0.1;
-      }
-    }
-
-    &.playing {
-      border: 1px solid rgba(124, 92, 255, 0.55);
-      box-shadow:
-        0 0 0 2px rgba(124, 92, 255, 0.18),
-        0 6px 22px rgba(124, 92, 255, 0.25);
-    }
-  }
-
-  :deep(.thumbnail-wrapper) {
-    background: #000;
-    border-radius: 8px;
-    overflow: hidden;
-
-    img {
-      border-radius: 8px;
-      transition: transform 0.35s ease;
-    }
-  }
-
-  :deep(.playlisted-entity:hover .thumbnail-wrapper img) {
-    transform: scale(1.03);
-  }
-
-  :deep(.thumbnail-picture) {
-    background-color: #000 !important;
-    border-color: transparent !important;
-  }
-
-  :deep(span.thumbnail-empty) {
-    background: #000;
-  }
-
-  :deep(.entity-title) {
-    color: var(--text);
-    font-size: 0.85em;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-  }
-
-  :deep(.preview-meta) {
-    color: var(--text-muted);
-    font-size: 0.78em;
-
-    .revision {
-      color: var(--text);
-      font-weight: 600;
-    }
-  }
-}
-
-.mr1 {
-  margin-right: 1em;
-}
+// Responsive
 
 @media screen and (max-width: 768px) {
-  .shared-header {
-    .project-name,
-    .header-separator,
-    .entity-nav,
-    .current-entity-name,
-    .guest-name {
-      display: none;
-    }
-
-    .playlist-name {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-
   .playlist-footer {
     gap: 0;
     padding: 0 0.2em;
 
     .flexrow-item {
       margin-right: 0;
-    }
-
-    .time-info {
-      .time-indicator {
-        display: none;
-        font-size: 0.75em;
-      }
-
-      .frame-counter {
-        margin-right: 0.2em;
-      }
     }
 
     .playlist-button {
@@ -1335,6 +1314,35 @@ watch(isEntitiesHidden, hidden => {
         height: 14px;
         width: 14px;
       }
+    }
+
+    .time-info {
+      .frame-counter {
+        margin-right: 0.2em;
+      }
+
+      .time-indicator {
+        display: none;
+        font-size: 0.75em;
+      }
+    }
+  }
+
+  .shared-header {
+    .current-entity-name,
+    .entity-nav,
+    .guest-name,
+    .header-separator,
+    .project-name {
+      display: none;
+    }
+
+    .playlist-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 }

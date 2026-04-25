@@ -256,19 +256,38 @@ const save = async () => {
   isSaving.value = false
 }
 
+// Watchers
+
 watch(
   () => [props.currentFrame, currentTime.value],
-  () => {
-    annotation.setTime(currentTime.value, props.currentFrame)
-  },
+  () => annotation.setTime(currentTime.value, props.currentFrame),
+  { immediate: true }
+)
+
+watch(() => props.guestId, annotation.setUserId, { immediate: true })
+
+watch(
+  () => props.isEditable,
+  enabled => annotation.setDrawingMode(!!enabled),
   { immediate: true }
 )
 
 watch(
-  () => props.guestId,
-  id => annotation.setUserId(id),
-  { immediate: true }
+  [
+    () => props.annotations,
+    () => props.currentFrame,
+    () => props.frameDuration,
+    () => props.isPicture,
+    () => props.isPlaying
+  ],
+  render,
+  { deep: true }
 )
+
+watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
+watch(() => props.panzoomTransform, applyPanzoomTransform, { deep: true })
+
+// Lifecycle
 
 onMounted(() => {
   const canvasEl = document.getElementById(canvasId)
@@ -294,21 +313,6 @@ onBeforeUnmount(() => {
   resizeObserver = null
   annotation.dispose()
 })
-
-watch(() => props.annotations, render, { deep: true })
-watch(() => props.currentFrame, render)
-watch(() => props.frameDuration, render)
-watch(() => props.isPicture, render)
-watch(() => props.isPlaying, render)
-watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
-watch(() => props.panzoomTransform, applyPanzoomTransform, { deep: true })
-watch(
-  () => props.isEditable,
-  enabled => {
-    annotation.setDrawingMode(!!enabled)
-  },
-  { immediate: true }
-)
 
 defineExpose({
   hasChanges: () => annotation.hasChanges(),
