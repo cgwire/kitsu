@@ -13,9 +13,9 @@
       <span class="project-name uppercase" v-if="projectName">
         {{ projectName }}
       </span>
-      <span v-if="projectName">|</span>
+      <span class="header-separator" v-if="projectName">|</span>
       <span class="playlist-name">{{ playlistName }}</span>
-      <span v-if="playlistName">|</span>
+      <span class="header-separator" v-if="playlistName">|</span>
 
       <div class="flexrow flexrow-item entity-nav">
         <button-simple
@@ -166,7 +166,7 @@
         />
       </div>
 
-      <div class="flexrow flexrow-item" v-if="isMovie">
+      <div class="flexrow flexrow-item time-info" v-if="isMovie">
         <span
           class="flexrow-item time-indicator"
           :title="$t('playlists.actions.current_time')"
@@ -181,10 +181,10 @@
           {{ maxDurationFormatted }}
         </span>
         <span
-          class="flexrow-item time-indicator mr05 nowrap"
+          class="flexrow-item frame-counter mr05 nowrap"
           :title="$t('playlists.actions.frame_number')"
         >
-          ({{ currentFrameDisplay }} / {{ nbFramesDisplay }})
+          {{ currentFrameDisplay }} / {{ nbFramesDisplay }}
         </span>
       </div>
 
@@ -363,7 +363,10 @@ const isMuted = ref(false)
 const isHd = ref(true)
 const isZoomEnabled = ref(false)
 const isEntitiesHidden = ref(false)
-const isCommentsHidden = ref(false)
+const isCommentsHidden = ref(
+  typeof window !== 'undefined' &&
+    window.matchMedia?.('(max-width: 768px)').matches
+)
 const volume = ref(100)
 const currentFrameNumber = ref(0)
 const maxDuration = ref(0)
@@ -774,7 +777,9 @@ watch(isCommentsHidden, triggerPlayerResize)
 
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   background:
     radial-gradient(
       120% 120% at 10% -10%,
@@ -879,6 +884,7 @@ watch(isCommentsHidden, triggerPlayerResize)
     color: var(--text-muted);
     cursor: pointer;
     display: flex;
+    margin-right: -0.6em;
     padding: 0.45em 0.55em;
     transition: all 0.2s ease;
 
@@ -896,6 +902,7 @@ watch(isCommentsHidden, triggerPlayerResize)
   align-items: stretch;
   min-height: 0;
   overflow: hidden;
+  position: relative;
 }
 
 .player-area {
@@ -938,13 +945,13 @@ watch(isCommentsHidden, triggerPlayerResize)
 
 .video-progress {
   width: 100%;
+  flex-shrink: 0;
 }
 
 .shared-player :deep(progress),
 .shared-player :deep(progress[value]::-webkit-progress-bar) {
   background-color: transparent;
-  border-top: 1px solid var(--border-soft);
-  border-bottom: 1px solid var(--border-soft);
+  border: 0;
 }
 
 .shared-player :deep(progress::-moz-progress-bar) {
@@ -979,6 +986,7 @@ watch(isCommentsHidden, triggerPlayerResize)
   background: #08080c !important;
   border-top: 1px solid var(--border-soft) !important;
   border-bottom: 1px solid var(--border-soft) !important;
+  flex-shrink: 0;
   height: 14px;
   transition: height 0.2s ease-in-out;
 
@@ -1033,6 +1041,7 @@ watch(isCommentsHidden, triggerPlayerResize)
   color: var(--text-muted);
   width: 100%;
   height: 44px;
+  flex-shrink: 0;
   padding: 0 0.8em;
   align-items: center;
   gap: 0.3em;
@@ -1063,7 +1072,6 @@ watch(isCommentsHidden, triggerPlayerResize)
 
 .time-indicator {
   color: var(--text-muted);
-  font-size: 0.82em;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
@@ -1082,6 +1090,7 @@ watch(isCommentsHidden, triggerPlayerResize)
   padding: 0.6em 0.4em 0.3em 0.6em;
   overflow-x: auto;
   align-items: flex-start;
+  flex-shrink: 0;
   height: 200px;
   min-height: 200px;
   scrollbar-width: thin;
@@ -1097,15 +1106,46 @@ watch(isCommentsHidden, triggerPlayerResize)
     border-radius: 12px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     padding: 0.4em;
+    position: relative;
     transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
+      background 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+
+    &::after {
+      background: linear-gradient(
+        135deg,
+        rgba(124, 92, 255, 0.35) 0%,
+        rgba(255, 120, 180, 0.2) 100%
+      );
+      border-radius: 12px;
+      content: '';
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      transition: opacity 0.25s ease;
+      z-index: 0;
+    }
+
+    > * {
+      position: relative;
+      z-index: 1;
+    }
 
     &:hover {
-      border: 1px solid var(--border-strong);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-      transform: translateY(-1px);
+      background: #22222e;
+      border-color: rgba(124, 92, 255, 0.45);
+      box-shadow:
+        0 0 0 1px rgba(124, 92, 255, 0.25),
+        0 14px 32px rgba(124, 92, 255, 0.28),
+        0 6px 18px rgba(0, 0, 0, 0.45);
+      transform: translateY(-2px) scale(1.015);
+
+      &::after {
+        opacity: 0.1;
+      }
     }
 
     &.playing {
@@ -1123,7 +1163,12 @@ watch(isCommentsHidden, triggerPlayerResize)
 
     img {
       border-radius: 8px;
+      transition: transform 0.35s ease;
     }
+  }
+
+  :deep(.playlisted-entity:hover .thumbnail-wrapper img) {
+    transform: scale(1.03);
   }
 
   :deep(.thumbnail-picture) {
@@ -1155,5 +1200,53 @@ watch(isCommentsHidden, triggerPlayerResize)
 
 .mr1 {
   margin-right: 1em;
+}
+
+@media screen and (max-width: 768px) {
+  .shared-header {
+    .project-name,
+    .header-separator,
+    .entity-nav,
+    .current-entity-name,
+    .guest-name {
+      display: none;
+    }
+
+    .playlist-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .playlist-footer {
+    gap: 0.1em;
+    padding: 0 0.4em;
+
+    .time-info .time-indicator {
+      display: none;
+    }
+
+    .playlist-button {
+      box-sizing: border-box;
+      margin: 0 0.05em;
+      min-width: 36px;
+      padding: 0.35em 0.4em;
+      justify-content: center;
+    }
+  }
+}
+
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  .shared-header,
+  .video-progress {
+    display: none;
+  }
+
+  .shared-player :deep(.playlist-progress) {
+    display: none !important;
+  }
 }
 </style>

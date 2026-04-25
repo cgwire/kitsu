@@ -111,7 +111,8 @@ export default {
       isPlaying: false,
       nextPlayer: undefined,
       panzoomInstances: [],
-      playingIndex: 0
+      playingIndex: 0,
+      showLoadingTimer: null
     }
   },
 
@@ -121,6 +122,12 @@ export default {
     this.resetHeight()
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
+    if (typeof ResizeObserver !== 'undefined' && this.container) {
+      this.containerResizeObserver = new ResizeObserver(() => {
+        this.resetHeight()
+      })
+      this.containerResizeObserver.observe(this.container)
+    }
     this.$options.currentTimeCalls = []
 
     this.player1.addEventListener('canplay', this.hideLoading)
@@ -140,6 +147,7 @@ export default {
   beforeUnmount() {
     clearInterval(this.$options.playLoop)
     window.removeEventListener('resize', this.resetHeight)
+    this.containerResizeObserver?.disconnect()
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
 
     this.player1.removeEventListener('canplay', this.hideLoading)
@@ -223,12 +231,20 @@ export default {
     },
 
     hideLoading() {
+      if (this.showLoadingTimer) {
+        clearTimeout(this.showLoadingTimer)
+        this.showLoadingTimer = null
+      }
       this.isLoading = false
     },
 
     showLoading() {
-      setTimeout(() => {
-        if (this.currentPlayer.readyState !== 4) {
+      if (this.showLoadingTimer) {
+        clearTimeout(this.showLoadingTimer)
+      }
+      this.showLoadingTimer = setTimeout(() => {
+        this.showLoadingTimer = null
+        if (this.currentPlayer && this.currentPlayer.readyState < 3) {
           this.isLoading = true
         }
       }, 150) // Hack to avoid blinking effect
@@ -709,6 +725,18 @@ export default {
 
   video {
     margin: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .video-wrapper {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+    video {
+      margin: 0 auto;
+    }
   }
 }
 

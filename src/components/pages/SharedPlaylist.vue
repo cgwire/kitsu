@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
@@ -48,6 +48,8 @@ import {
   USER_LOGIN,
   USER_LOGOUT
 } from '@/store/mutation-types'
+
+import crisp from '@/lib/crisp'
 
 import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
 import SharedPlaylistPlayer from '@/components/previews/SharedPlaylistPlayer.vue'
@@ -180,7 +182,12 @@ const logoutGuest = () => {
 
 onMounted(() => {
   store.commit(TOGGLE_DARK_THEME, true)
+  crisp.setChatVisibility(false)
   loadSharedPlaylist()
+})
+
+onBeforeUnmount(() => {
+  crisp.setChatVisibility(true)
 })
 </script>
 
@@ -188,8 +195,10 @@ onMounted(() => {
 .shared-playlist {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  align-items: stretch;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background:
     radial-gradient(
       80% 80% at 15% 0%,
@@ -210,7 +219,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
 }
 
 .error-card {
@@ -236,6 +245,7 @@ onMounted(() => {
 
 .player-container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  min-height: 0;
 }
 </style>

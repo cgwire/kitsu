@@ -121,17 +121,19 @@
           :fps="fps"
           :frame="currentFrame || 0"
           :is-change="false"
-          :is-checkable="false"
+          :is-checkable="isOwnedByGuest(comment)"
           :is-editable="isOwnedByGuest(comment)"
           :is-pinnable="false"
           :is-replyable="false"
           :task-types="[]"
           :team="[]"
           :revision="comment.revision || 1"
+          :style="{ animationDelay: Math.min(index, 8) * 60 + 'ms' }"
           @edit-comment="onEditComment"
           @delete-comment="onDeleteComment"
+          @checklist-updated="onChecklistUpdated"
           @time-code-clicked="onCommentTimeCodeClicked"
-          v-for="comment in taskComments"
+          v-for="(comment, index) in taskComments"
         />
       </template>
     </div>
@@ -229,18 +231,22 @@ const deleteError = ref(false)
 
 const apiBase = computed(() => `/api/shared/playlists/${props.token}`)
 
-const normalizeComment = comment => ({
-  ...comment,
-  text: comment.text || '',
-  checklist: comment.checklist || [],
-  attachment_files: comment.attachment_files || [],
-  previews: comment.previews || [],
-  acknowledgements: comment.acknowledgements || [],
-  mentions: comment.mentions || [],
-  department_mentions: comment.department_mentions || [],
-  replies: comment.replies || [],
-  task_status: comment.task_status || {}
-})
+const normalizeComment = comment => {
+  const enrichedPerson = store.getters.personMap.get(comment.person_id)
+  return {
+    ...comment,
+    person: enrichedPerson || comment.person || {},
+    text: comment.text || '',
+    checklist: comment.checklist || [],
+    attachment_files: comment.attachment_files || [],
+    previews: comment.previews || [],
+    acknowledgements: comment.acknowledgements || [],
+    mentions: comment.mentions || [],
+    department_mentions: comment.department_mentions || [],
+    replies: comment.replies || [],
+    task_status: comment.task_status || {}
+  }
+}
 
 const taskComments = computed(() =>
   comments.value
@@ -295,6 +301,32 @@ const onEditComment = comment => {
   commentToEdit.value = comment
   editError.value = false
   modals.edit = true
+}
+
+const onChecklistUpdated = async updated => {
+  const existing = comments.value.find(c => c.id === updated.id)
+  if (!existing) return
+  const previous = existing.checklist
+  existing.checklist = updated.checklist
+  try {
+    const res = await fetch(`${apiBase.value}/comments/${updated.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guest_id: props.guestId,
+        text: existing.text,
+        checklist: updated.checklist,
+        task_status_id: existing.task_status_id
+      })
+    })
+    if (!res.ok) throw new Error('checklist update failed')
+    const saved = await res.json()
+    comments.value = comments.value.map(c =>
+      c.id === saved.id ? { ...c, ...saved } : c
+    )
+  } catch {
+    existing.checklist = previous
+  }
 }
 
 const confirmDeleteComment = async () => {
@@ -458,12 +490,21 @@ const loadComments = async () => {
   populatePersonMap()
 }
 
+const buildFullName = person => {
+  const fromNames = [person.first_name, person.last_name]
+    .filter(Boolean)
+    .join(' ')
+    .trim()
+  return fromNames || person.email || person.name || 'Guest'
+}
+
 const populatePersonMap = () => {
   const byId = new Map()
   comments.value.forEach(comment => {
     if (comment.person && comment.person.id) {
       byId.set(comment.person.id, {
         ...comment.person,
+        full_name: comment.person.full_name || buildFullName(comment.person),
         role: comment.person.role || 'client'
       })
     }
@@ -582,6 +623,73 @@ onMounted(() => {
   overflow: hidden;
 }
 
+@media screen and (max-width: 768px) {
+  .shared-comments-panel {
+    border-left: 0;
+    flex: 0 0 auto;
+    inset: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+  }
+
+  .post-form {
+    padding: 0.6em;
+  }
+
+  .comments-list {
+    padding: 0.4em 0.6em 1em;
+
+    :deep(article.comment) {
+      margin: 0.4em 0;
+    }
+
+    :deep(.content-wrapper) {
+      padding: 0.45em 0.6em;
+    }
+
+    :deep(.content-wrapper > .flexrow) {
+      align-items: center;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 0.4em;
+      min-width: 0;
+    }
+
+    :deep(.content-wrapper > .flexrow > .flexrow-item) {
+      margin-right: 0;
+    }
+
+    :deep(strong) {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    :deep(.comment-text) {
+      font-size: 0.88em;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    :deep(.checklist) {
+      margin-top: 0.4em;
+    }
+
+    :deep(.preview-info) {
+      padding: 0.4em 0.6em;
+    }
+
+    :deep(.attachment-file),
+    :deep(.attachment) {
+      padding: 0.3em 0.5em;
+    }
+  }
+}
+
 .comments-list {
   flex: 1;
   overflow-y: auto;
@@ -602,7 +710,25 @@ onMounted(() => {
 }
 
 .comment-wrapper {
+  animation: commentFadeIn 0.45s ease both;
   margin-bottom: 0;
+}
+
+@keyframes commentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-wrapper {
+    animation: none;
+  }
 }
 
 .comments-list :deep(article.comment) {
@@ -663,6 +789,32 @@ onMounted(() => {
 
     &:hover {
       color: var(--text);
+    }
+  }
+
+  :deep(.comment-menu) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color: var(--text);
+    overflow: hidden;
+
+    div {
+      color: var(--text);
+      transition: background 0.15s ease;
+
+      &:hover {
+        background: var(--accent-soft);
+      }
+
+      &.error {
+        color: #ff578c;
+
+        &:hover {
+          background: rgba(255, 87, 140, 0.15);
+        }
+      }
     }
   }
 
@@ -868,6 +1020,7 @@ onMounted(() => {
     border-bottom-left-radius: 0;
     border-top-right-radius: 2em;
     border-bottom-right-radius: 2em;
+    box-shadow: 0 0 0 0 rgba(124, 92, 255, 0);
     color: var(--text);
     display: inline-flex;
     font-weight: 500;
@@ -877,11 +1030,14 @@ onMounted(() => {
     transition:
       background 0.2s ease,
       border-color 0.2s ease,
+      box-shadow 0.25s ease,
       color 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(124, 92, 255, 0.12);
+      border-color: rgba(124, 92, 255, 0.55);
+      box-shadow: 0 8px 22px rgba(124, 92, 255, 0.32);
+      color: var(--text);
     }
 
     &:disabled {
@@ -1195,6 +1351,63 @@ onMounted(() => {
     background: rgba(124, 92, 255, 0.18);
     border: 2px dashed rgba(124, 92, 255, 0.55);
     color: var(--text);
+  }
+
+  :deep(.modal-content .status-combo) {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    color: var(--text);
+    margin: 0;
+    padding: 0 0.4em 0 0.6em;
+
+    &:hover {
+      border: 1px solid rgba(124, 92, 255, 0.55);
+    }
+
+    .selected-status-line {
+      color: var(--text);
+      padding: 0.4em 0;
+    }
+
+    .down-icon {
+      color: var(--text-muted);
+    }
+
+    .tag {
+      border-radius: 999px;
+      font-size: 0.78em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 0.25em 0.6em;
+    }
+  }
+
+  :deep(.modal-content .select-input) {
+    background: var(--surface-raised);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    margin-left: 0;
+    padding: 0.25em 0;
+  }
+
+  :deep(.modal-content .status-line) {
+    background: transparent;
+    color: var(--text);
+    padding: 0.35em 0.5em;
+
+    &:hover {
+      background: var(--accent-soft);
+    }
+
+    .tag {
+      border-radius: 999px;
+      font-size: 0.78em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 0.25em 0.6em;
+    }
   }
 }
 </style>
