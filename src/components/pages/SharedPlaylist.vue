@@ -14,6 +14,7 @@
     <div class="shared-content" v-else-if="needsIdentity">
       <shared-playlist-identity-card
         v-model:guest-name="guestName"
+        :error-message="identityError"
         :playlist-name="playlistName"
         @submit="submitIdentity"
       />
@@ -34,16 +35,12 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import {
-  LOAD_PRODUCTIONS_END,
-  LOAD_TASK_STATUSES_END,
-  LOAD_TASK_TYPES_END,
-  SET_CURRENT_PRODUCTION,
   TOGGLE_DARK_THEME,
   USER_LOGIN,
   USER_LOGOUT
@@ -69,6 +66,7 @@ const playlist = ref(null)
 const playlistEntities = ref([])
 const guestId = ref(null)
 const guestName = ref('')
+const identityError = ref('')
 
 const token = computed(() => route.params.token)
 
@@ -80,18 +78,9 @@ const needsIdentity = computed(
   () => shareLink.value?.can_comment && !guestId.value
 )
 
-const populateStoreFromContext = async () => {
-  const response = await fetch(`/api/shared/playlists/${token.value}/context`)
-  if (!response.ok) return
-  const data = await response.json()
-  const project = data.project
-  if (project) {
-    store.commit(LOAD_PRODUCTIONS_END, [project])
-    store.commit(SET_CURRENT_PRODUCTION, project.id)
-  }
-  store.commit(LOAD_TASK_TYPES_END, data.task_types || [])
-  store.commit(LOAD_TASK_STATUSES_END, data.task_statuses || [])
-}
+watch(guestName, () => {
+  identityError.value = ''
+})
 
 const loginAsGuest = guest => {
   if (!guest) return
@@ -107,44 +96,31 @@ const loginAsGuest = guest => {
   })
 }
 
+const restoreStoredGuest = async () => {
+  const storedGuestId = localStorage.getItem(GUEST_STORAGE_PREFIX + token.value)
+  if (!storedGuestId) return
+  try {
+    const guest = await store.dispatch('postSharedPlaylistGuest', {
+      shareToken: token.value,
+      data: { guest_id: storedGuestId }
+    })
+    guestId.value = guest.id
+    loginAsGuest(guest)
+  } catch {
+    // Guest not found, will ask for identity
+  }
+}
+
 const loadSharedPlaylist = async () => {
   loading.value = true
   error.value = false
   try {
-    const response = await fetch(`/api/shared/playlists/${token.value}`)
-    if (!response.ok) throw new Error('Invalid token')
-    const data = await response.json()
+    const data = await store.dispatch('loadSharedPlaylist', token.value)
     playlist.value = data
     playlistEntities.value = data.shots || []
-
-    await populateStoreFromContext()
-
-    // Fetch share link metadata
+    await store.dispatch('loadSharedPlaylistContext', token.value)
     shareLink.value = { can_comment: true }
-
-    // Check localStorage for existing guest
-    const storedGuestId = localStorage.getItem(
-      GUEST_STORAGE_PREFIX + token.value
-    )
-    if (storedGuestId) {
-      try {
-        const guestResponse = await fetch(
-          `/api/shared/playlists/${token.value}/guest`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ guest_id: storedGuestId })
-          }
-        )
-        if (guestResponse.ok) {
-          const guest = await guestResponse.json()
-          guestId.value = guest.id
-          loginAsGuest(guest)
-        }
-      } catch {
-        // Guest not found, will ask for identity
-      }
-    }
+    await restoreStoredGuest()
   } catch {
     error.value = true
   }
@@ -153,22 +129,18 @@ const loadSharedPlaylist = async () => {
 
 const submitIdentity = async () => {
   if (!guestName.value) return
+  identityError.value = ''
   loading.value = true
   try {
-    const response = await fetch(`/api/shared/playlists/${token.value}/guest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        first_name: guestName.value
-      })
+    const guest = await store.dispatch('postSharedPlaylistGuest', {
+      shareToken: token.value,
+      data: { first_name: guestName.value }
     })
-    if (!response.ok) throw new Error('Failed to create guest')
-    const guest = await response.json()
     guestId.value = guest.id
     localStorage.setItem(GUEST_STORAGE_PREFIX + token.value, guest.id)
     loginAsGuest(guest)
-  } catch {
-    error.value = true
+  } catch (err) {
+    identityError.value = err?.message || t('share.guest_error')
   }
   loading.value = false
 }

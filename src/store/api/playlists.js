@@ -112,5 +112,21 @@ export default {
 
   revokeShareLink(playlistId, token) {
     return client.pdel(`/api/data/playlists/${playlistId}/share/${token}`)
+  },
+
+  postSharedPlaylistGuest(shareToken, data) {
+    return client.ppost(`/api/shared/playlists/${shareToken}/guest`, data)
+  },
+
+  loadSharedPlaylist(shareToken) {
+    return client.pget(`/api/shared/playlists/${shareToken}`)
+  },
+
+  loadSharedPlaylistContext(shareToken) {
+    return client.pget(`/api/shared/playlists/${shareToken}/context`)
+  },
+
+  saveSharedPlaylistAnnotations(shareToken, data) {
+    return client.pput(`/api/shared/playlists/${shareToken}/annotations`, data)
   }
 }

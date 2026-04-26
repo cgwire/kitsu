@@ -71,8 +71,6 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-
 import {
   ArrowUpRightIcon,
   CircleIcon,
@@ -82,9 +80,13 @@ import {
   SaveIcon,
   Trash2Icon
 } from 'lucide-vue-next'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { buildReadOnlyShape, findAnnotationAtTime } from '@/lib/annotation'
 import { useSharedAnnotationCanvas } from '@/composables/sharedAnnotation'
+import { buildReadOnlyShape, findAnnotationAtTime } from '@/lib/annotation'
+
+const store = useStore()
 
 const props = defineProps({
   annotations: { type: Array, default: () => [] },
@@ -233,22 +235,16 @@ const save = async () => {
   isSaving.value = true
   try {
     const diff = annotation.getDiff()
-    const response = await fetch(
-      `/api/shared/playlists/${props.token}/annotations`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          guest_id: props.guestId,
-          preview_file_id: props.previewFileId,
-          additions: diff.additions,
-          updates: diff.updates,
-          deletions: diff.deletions
-        })
+    const updated = await store.dispatch('saveSharedPlaylistAnnotations', {
+      shareToken: props.token,
+      data: {
+        guest_id: props.guestId,
+        preview_file_id: props.previewFileId,
+        additions: diff.additions,
+        updates: diff.updates,
+        deletions: diff.deletions
       }
-    )
-    if (!response.ok) throw new Error('Failed to save annotations')
-    const updated = await response.json()
+    })
     emit('saved', updated.annotations || [])
   } catch {
     // Silent failure for now; toolbar stays so the user can retry.

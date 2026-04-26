@@ -1,24 +1,5 @@
 export default {
 
-  share: {
-    error_title: 'Link not available',
-    error_text: 'This shared link is invalid, expired or has been revoked.',
-    identity_description: 'Enter your name to join the review session. You will be able to view the playlist and leave comments.',
-    your_name: 'Your name',
-    name_placeholder: 'John Doe',
-    enter_review: 'Enter review',
-    review_session: 'Review session',
-    player_placeholder: 'Player will be displayed here.',
-    no_preview: 'No preview',
-    no_comments_yet: 'No comments yet.',
-    comment_placeholder: 'Leave a comment...',
-    comments_disabled: 'Comments are disabled for this link.',
-    identity_required: 'You need to enter your name before posting.',
-    no_status_available: 'No task statuses are configured for this project.',
-    logout: 'Leave review session',
-    kitsu_homepage: 'About Kitsu'
-  },
-
   assets: {
     cast_in: 'Cast in',
     casted_in_shots: 'Casted in {nbShots} shots',
@@ -1528,6 +1509,27 @@ export default {
       button: 'Save settings',
       error: 'A server error occurred while saving settings'
     }
+  },
+
+  share: {
+    error_title: 'Link not available',
+    error_text: 'This shared link is invalid, expired or has been revoked.',
+    guest_error:
+      'We could not sign you in. Check your connection and try again. If the problem persists, please contact the support team.',
+    identity_description: 'Enter your name to join the review session. You will be able to view the playlist and leave comments.',
+    your_name: 'Your name',
+    name_placeholder: 'John Doe',
+    enter_review: 'Enter review',
+    review_session: 'Review session',
+    player_placeholder: 'Player will be displayed here.',
+    no_preview: 'No preview',
+    no_comments_yet: 'No comments yet.',
+    comment_placeholder: 'Leave a comment...',
+    comments_disabled: 'Comments are disabled for this link.',
+    identity_required: 'You need to enter your name before posting.',
+    no_status_available: 'No task statuses are configured for this project.',
+    logout: 'Leave review session',
+    kitsu_homepage: 'About Kitsu'
   },
 
   task_status: {

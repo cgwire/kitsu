@@ -14,6 +14,9 @@
         v-model.trim="guestName"
         required
       />
+      <p v-if="errorMessage" class="identity-error" role="alert">
+        {{ errorMessage }}
+      </p>
       <div class="has-text-centered mt2">
         <button class="button is-primary" type="submit" :disabled="!guestName">
           {{ $t('share.enter_review') }}
@@ -27,6 +30,7 @@
 import TextField from '@/components/widgets/TextField.vue'
 
 defineProps({
+  errorMessage: { type: String, default: '' },
   playlistName: { type: String, required: true }
 })
 
@@ -60,6 +64,13 @@ const onSubmit = () => {
   padding: 2.8em 2.5em;
   text-align: center;
   width: 100%;
+}
+
+.identity-error {
+  color: #f56565;
+  font-size: 0.9em;
+  line-height: 1.4;
+  margin: 0.75em 0 0;
 }
 
 .identity-form {
