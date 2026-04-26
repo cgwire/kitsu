@@ -1526,6 +1526,7 @@ export default {
     no_comments_yet: 'No comments yet.',
     comment_placeholder: 'Leave a comment...',
     comments_disabled: 'Comments are disabled for this link.',
+    download_preview: 'Download preview',
     identity_required: 'You need to enter your name before posting.',
     no_status_available: 'No task statuses are configured for this project.',
     logout: 'Leave review session',

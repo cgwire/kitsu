@@ -1,68 +1,17 @@
 <template>
   <div class="shared-player playlist-player" ref="container">
-    <header class="shared-header flexrow">
-      <a
-        class="kitsu-logo-link"
-        href="https://www.cg-wire.com/kitsu"
-        target="_blank"
-        rel="noopener"
-        :title="$t('share.kitsu_homepage')"
-      >
-        <img class="kitsu-logo" src="@/assets/kitsu.png" alt="Kitsu" />
-      </a>
-      <span class="project-name uppercase" v-if="projectName">
-        {{ projectName }}
-      </span>
-      <span class="header-separator" v-if="projectName">|</span>
-      <span class="playlist-name">{{ playlistName }}</span>
-      <span class="header-separator" v-if="playlistName">|</span>
-
-      <div class="flexrow flexrow-item entity-nav">
-        <button-simple
-          class="playlist-button flexrow-item"
-          icon="back"
-          :title="$t('playlists.actions.previous_shot')"
-          @click="previousEntity"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          icon="forward"
-          :title="$t('playlists.actions.next_shot')"
-          @click="nextEntity"
-        />
-        <span class="flexrow-item entity-counter">
-          {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
-          /
-          {{ entityList.length }}
-        </span>
-      </div>
-
-      <span
-        class="flexrow-item current-entity-name"
-        :title="currentEntityDisplayName"
-        v-if="currentEntityDisplayName"
-      >
-        {{ currentEntityDisplayName }}
-      </span>
-
-      <div class="filler"></div>
-
-      <span
-        class="flexrow-item guest-name"
-        :title="guestDisplayName"
-        v-if="guestDisplayName"
-      >
-        {{ guestDisplayName }}
-      </span>
-      <button
-        class="logout-button flexrow-item"
-        :title="$t('share.logout')"
-        @click="emit('logout')"
-        v-if="guestId"
-      >
-        <log-out-icon class="icon" :size="16" />
-      </button>
-    </header>
+    <shared-playlist-header
+      :current-entity-display-name="currentEntityDisplayName"
+      :entity-count="entityList.length"
+      :guest-display-name="guestDisplayName"
+      :guest-id="guestId"
+      :playing-entity-index="playingEntityIndex"
+      :playlist-name="playlistName"
+      :project-name="projectName"
+      @logout="emit('logout')"
+      @next-entity="nextEntity"
+      @previous-entity="previousEntity"
+    />
 
     <div class="player-row">
       <div class="player-area">
@@ -105,6 +54,23 @@
             @play-ended="pause"
             v-if="isSound && !loading"
           />
+
+          <div
+            class="other-file"
+            v-if="isOtherFile && !loading && currentPreview"
+          >
+            <a
+              class="other-file-link"
+              :href="downloadUrl"
+              :download="downloadFileName"
+              target="_blank"
+              rel="noopener"
+            >
+              <download-icon class="icon" :size="20" />
+              <span>{{ $t('share.download_preview') }}</span>
+              <span class="other-file-extension">.{{ extension }}</span>
+            </a>
+          </div>
 
           <shared-annotation-overlay
             :annotations="currentAnnotations"
@@ -166,109 +132,32 @@
       v-show="!!currentPreview"
     />
 
-    <div class="playlist-footer flexrow">
-      <div class="flexrow flexrow-item" v-if="isMovie || isSound">
-        <button-simple
-          class="playlist-button flexrow-item"
-          icon="play"
-          :title="$t('playlists.actions.play')"
-          @click="play"
-          v-if="!isPlaying"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          icon="pause"
-          :title="$t('playlists.actions.pause')"
-          @click="pause"
-          v-else
-        />
-      </div>
-
-      <div class="flexrow flexrow-item time-info" v-if="isMovie">
-        <span
-          class="flexrow-item time-indicator"
-          :title="$t('playlists.actions.current_time')"
-        >
-          {{ currentTimeFormatted }}
-        </span>
-        <span class="flexrow-item time-indicator">/</span>
-        <span
-          class="flexrow-item time-indicator"
-          :title="$t('playlists.actions.max_duration')"
-        >
-          {{ maxDurationFormatted }}
-        </span>
-        <span
-          class="flexrow-item frame-counter mr05 nowrap"
-          :title="$t('playlists.actions.frame_number')"
-        >
-          {{ currentFrameDisplay }} / {{ nbFramesDisplay }}
-        </span>
-      </div>
-
-      <div class="flexrow flexrow-item" v-if="isMovie">
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isRepeating"
-          :title="$t('playlists.actions.looping')"
-          icon="repeat"
-          @click="isRepeating = !isRepeating"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-          :text="isHd ? 'HD' : 'LD'"
-          @click="isHd = !isHd"
-        />
-        <button-sound
-          class="flexrow-item playlist-button"
-          @change-sound="onToggleSoundClicked"
-          v-model:muted="isMuted"
-          v-model:volume="volume"
-        />
-      </div>
-
-      <div class="filler"></div>
-
-      <button-simple
-        class="playlist-button flexrow-item"
-        :active="!isCommentsHidden"
-        icon="comment"
-        :title="$t('playlists.actions.comments')"
-        @click="isCommentsHidden = !isCommentsHidden"
-        v-if="token"
-      />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :active="isAnnotating"
-        icon="pencil"
-        :title="$t('playlists.actions.annotation_draw')"
-        @click="isAnnotating = !isAnnotating"
-        v-if="canComment && guestId"
-      />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :active="isZoomEnabled"
-        icon="loupe"
-        :title="$t('playlists.actions.annotation_zoom_pan')"
-        @click="isZoomEnabled = !isZoomEnabled"
-        v-if="isMovie || isPicture"
-      />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :active="!isEntitiesHidden"
-        icon="film"
-        :title="$t('playlists.actions.entity_list')"
-        @click="isEntitiesHidden = !isEntitiesHidden"
-      />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :active="isFullScreen"
-        :title="$t('playlists.actions.fullscreen')"
-        icon="maximize"
-        @click="toggleFullScreen"
-      />
-    </div>
+    <shared-playlist-button-bar
+      :can-comment="canComment"
+      :current-frame-display="currentFrameDisplay"
+      :current-time-formatted="currentTimeFormatted"
+      :guest-id="guestId"
+      :is-full-screen="isFullScreen"
+      :is-movie="isMovie"
+      :is-picture="isPicture"
+      :is-playing="isPlaying"
+      :is-sound="isSound"
+      :max-duration-formatted="maxDurationFormatted"
+      :nb-frames-display="nbFramesDisplay"
+      :token="token"
+      v-model:is-annotating="isAnnotating"
+      v-model:is-comments-hidden="isCommentsHidden"
+      v-model:is-entities-hidden="isEntitiesHidden"
+      v-model:is-hd="isHd"
+      v-model:is-muted="isMuted"
+      v-model:is-repeating="isRepeating"
+      v-model:is-zoom-enabled="isZoomEnabled"
+      v-model:volume="volume"
+      @pause="pause"
+      @play="play"
+      @toggle-full-screen="toggleFullScreen"
+      @toggle-sound="onToggleSoundClicked"
+    />
 
     <playlist-progress
       :entity-list="entityListForProgress"
@@ -316,7 +205,7 @@
 </template>
 
 <script setup>
-import { LogOutIcon } from 'lucide-vue-next'
+import { DownloadIcon } from 'lucide-vue-next'
 import {
   computed,
   nextTick,
@@ -337,10 +226,10 @@ import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
 import SharedAnnotationOverlay from '@/components/previews/SharedAnnotationOverlay.vue'
 import SharedCommentsPanel from '@/components/previews/SharedCommentsPanel.vue'
+import SharedPlaylistButtonBar from '@/components/previews/SharedPlaylistButtonBar.vue'
+import SharedPlaylistHeader from '@/components/previews/SharedPlaylistHeader.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 // Props / Emits
@@ -467,6 +356,26 @@ const isPicture = computed(() =>
 const isSound = computed(() =>
   ['mp3', 'wav', 'ogg', 'flac', 'aiff'].includes(extension.value)
 )
+const isOtherFile = computed(
+  () =>
+    !!currentPreview.value &&
+    !isMovie.value &&
+    !isPicture.value &&
+    !isSound.value
+)
+
+const downloadUrl = computed(() => {
+  if (!currentPreview.value) return ''
+  if (props.token) {
+    return `/api/shared/playlists/${props.token}/movies/originals/preview-files/${currentPreview.value.id}.${extension.value}`
+  }
+  return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
+})
+
+const downloadFileName = computed(() => {
+  const entityName = currentEntity.value?.name || 'preview'
+  return extension.value ? `${entityName}.${extension.value}` : entityName
+})
 
 const overlayDimensions = computed(() => {
   if (isPicture.value) {
@@ -907,6 +816,45 @@ onBeforeUnmount(() => {
   color: var(--text-muted);
 }
 
+.other-file {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: 2em;
+  width: 100%;
+}
+
+.other-file-link {
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  color: var(--text);
+  display: inline-flex;
+  font-size: 0.95em;
+  font-weight: 500;
+  gap: 0.6em;
+  padding: 0.8em 1.4em;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    background: var(--accent-soft);
+    border-color: rgba(124, 92, 255, 0.55);
+    box-shadow: 0 8px 22px rgba(124, 92, 255, 0.32);
+    color: var(--text);
+  }
+}
+
+.other-file-extension {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  text-transform: uppercase;
+}
+
 .player-area {
   align-items: center;
   background: black;
@@ -925,42 +873,6 @@ onBeforeUnmount(() => {
   min-height: 0;
   overflow: hidden;
   position: relative;
-}
-
-.playlist-button {
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  color: var(--text-muted);
-  margin: 0 0.1em;
-  padding: 0.35em 0.6em;
-  transition: all 0.18s ease;
-
-  &.active {
-    background: var(--accent-soft);
-    border-color: rgba(124, 92, 255, 0.4);
-    box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.15);
-    color: var(--accent);
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--border-strong);
-    color: var(--text);
-  }
-}
-
-.playlist-footer {
-  align-items: center;
-  backdrop-filter: blur(14px);
-  background: rgba(20, 20, 26, 0.7);
-  border-top: 1px solid var(--border-soft);
-  color: var(--text-muted);
-  flex-shrink: 0;
-  gap: 0.3em;
-  height: 44px;
-  padding: 0 0.8em;
-  width: 100%;
 }
 
 .playlisted-entities {
@@ -1083,113 +995,6 @@ onBeforeUnmount(() => {
   max-width: 100%;
 }
 
-.shared-header {
-  align-items: center;
-  backdrop-filter: blur(14px);
-  background: rgba(20, 20, 26, 0.7);
-  border-bottom: 1px solid var(--border-soft);
-  color: var(--text-muted);
-  flex-shrink: 0;
-  gap: 0.8em;
-  height: 52px;
-  padding: 0 1.4em;
-
-  .current-entity-name {
-    color: var(--text);
-    font-size: 0.9em;
-    font-weight: 500;
-    max-width: 320px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .entity-counter {
-    color: var(--text-muted);
-    font-size: 0.82em;
-    font-variant-numeric: tabular-nums;
-    margin: 0 0.4em;
-  }
-
-  .entity-nav {
-    align-items: center;
-    background: var(--surface-inset);
-    border: 1px solid var(--border-soft);
-    border-radius: 10px;
-    gap: 0.25em;
-    padding: 0.15em 0.5em;
-  }
-
-  .filler {
-    flex: 1;
-  }
-
-  .guest-name {
-    color: var(--text-muted);
-    font-size: 0.85em;
-    margin-left: 0.8em;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .kitsu-logo {
-    height: 26px;
-    width: auto;
-  }
-
-  .kitsu-logo-link {
-    align-items: center;
-    display: inline-flex;
-    line-height: 0;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-      opacity: 0.75;
-    }
-  }
-
-  .logout-button {
-    align-items: center;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    color: var(--text-muted);
-    cursor: pointer;
-    display: flex;
-    margin-right: -0.6em;
-    padding: 0.45em 0.55em;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.04);
-      border-color: var(--border-strong);
-      color: var(--text);
-    }
-  }
-
-  .playlist-name {
-    color: var(--text);
-    font-size: 0.95em;
-    font-weight: 600;
-    margin: 0;
-  }
-
-  .project-name {
-    color: var(--text-muted);
-    font-size: 0.78em;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-}
-
-.time-indicator {
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-
 .video-container {
   align-items: center;
   display: flex;
@@ -1294,61 +1099,7 @@ onBeforeUnmount(() => {
 
 // Responsive
 
-@media screen and (max-width: 768px) {
-  .playlist-footer {
-    gap: 0;
-    padding: 0 0.2em;
-
-    .flexrow-item {
-      margin-right: 0;
-    }
-
-    .playlist-button {
-      box-sizing: border-box;
-      justify-content: center;
-      margin: 0;
-      min-width: 30px;
-      padding: 0.3em 0.25em;
-
-      :deep(.icon) {
-        height: 14px;
-        width: 14px;
-      }
-    }
-
-    .time-info {
-      .frame-counter {
-        margin-right: 0.2em;
-      }
-
-      .time-indicator {
-        display: none;
-        font-size: 0.75em;
-      }
-    }
-  }
-
-  .shared-header {
-    .current-entity-name,
-    .entity-nav,
-    .guest-name,
-    .header-separator,
-    .project-name {
-      display: none;
-    }
-
-    .playlist-name {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-}
-
 @media screen and (max-width: 900px) and (orientation: landscape) {
-  .shared-header,
   .video-progress {
     display: none;
   }
