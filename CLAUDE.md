@@ -96,6 +96,20 @@ const emit = defineEmits([...])
 </script>
 ```
 
+#### Import order
+
+Within `<script setup>`, sort imports **alphabetically by source path** within
+each of these blocks (separate blocks with a blank line):
+
+1. Third-party packages (`vue`, `vue-i18n`, `vuex`, `vue-router`,
+   `lucide-vue-next`, `moment`, …) — alphabetical by package name.
+2. Project libs and composables (`@/lib/...`, `@/composables/...`,
+   `@/store/...`).
+3. Vue components (`@/components/...`) — alphabetical by path; named imports
+   alphabetical too.
+
+The same rule applies in `.js` files.
+
 Skip sections that are not relevant. Order within each section is by usage proximity (related items together) rather than alphabetical.
 
 ### Arrow functions
@@ -255,6 +269,20 @@ Pattern:
 - Use `sortByName()` from `@/lib/sorting` after loading collections
 
 When editing/adding items, re-sort the list to maintain order (some mutations miss this).
+
+### No direct `fetch` from components
+
+Components must never call `fetch()` (or any HTTP client) directly. All
+network calls go through:
+
+1. an API method in `src/store/api/<entity>.js` using the shared `client.*`
+   helpers (`pget`, `ppost`, `pput`, `pdel`),
+2. a Vuex action in `src/store/modules/<entity>.js` that wraps it and commits
+   the resulting mutations.
+
+This keeps auth/error handling, retries and store updates centralised. If you
+find yourself reaching for `fetch` in a `.vue` file, add the missing API
+method and action instead.
 
 ## Testing
 
