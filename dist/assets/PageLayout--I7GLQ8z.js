@@ -1,0 +1,2 @@
+import{G as e,J as t,b as n,t as r,v as i,x as a}from"./vue.esm-bundler-CAnh283u.js";import{t as o}from"./_plugin-vue_export-helper-TcpyXLsZ.js";r();var s={name:`page-layout`,props:{side:{type:Boolean,default:!0}}},c={ref:`page`,class:`columns fixed-page`},l={class:`column main-column`},u={key:0,class:`column side-column`};function d(r,o,s,d,f,p){return e(),a(`div`,c,[i(`div`,l,[t(r.$slots,`main`)]),s.side?(e(),a(`div`,u,[t(r.$slots,`side`)])):n(``,!0)],512)}var f=o(s,[[`render`,d]]);export{f as t};
+//# sourceMappingURL=PageLayout--I7GLQ8z.js.map

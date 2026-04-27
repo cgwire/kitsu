@@ -1,0 +1,2 @@
+import{pt as e,t}from"./vue.esm-bundler-CAnh283u.js";t();var n=t=>{let n=e(!1);return{showList:n,toggle:()=>{n.value=!n.value},select:e=>{t(`update:modelValue`,e.id),n.value=!1}}};export{n as t};
+//# sourceMappingURL=combobox-BzY8HL4D.js.map

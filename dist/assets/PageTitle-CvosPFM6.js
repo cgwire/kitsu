@@ -1,0 +1,2 @@
+import{Ct as e,G as t,bt as n,t as r,x as i}from"./vue.esm-bundler-CAnh283u.js";import{t as a}from"./_plugin-vue_export-helper-TcpyXLsZ.js";r();var o=a({__name:`PageTitle`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}},setup(r){return(a,o)=>(t(),i(`h1`,{class:n({title:!0,"hide-small-screen":!0,bold:r.bold})},e(r.text),3))}},[[`__scopeId`,`data-v-e097dae2`]]);export{o as t};
+//# sourceMappingURL=PageTitle-CvosPFM6.js.map

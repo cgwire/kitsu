@@ -1,0 +1,2 @@
+import{G as e,bt as t,t as n,x as r}from"./vue.esm-bundler-CAnh283u.js";n();var i={__name:`ComboboxMask`,props:{displayed:{type:Boolean,default:!1}},emits:[`click`],setup(n){return(i,a)=>(e(),r(`div`,{onClick:a[0]||(a[0]=e=>i.$emit(`click`)),class:t([`c-mask`,{"is-active":n.displayed}])},null,2))}};export{i as t};
+//# sourceMappingURL=ComboboxMask-C7wctow5.js.map

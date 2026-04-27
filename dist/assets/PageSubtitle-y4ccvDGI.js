@@ -1,0 +1,2 @@
+import{Ct as e,G as t,t as n,x as r}from"./vue.esm-bundler-CAnh283u.js";import{t as i}from"./_plugin-vue_export-helper-TcpyXLsZ.js";n();var a={class:`subtitle`},o=i({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(n){return(i,o)=>(t(),r(`h2`,a,e(n.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
+//# sourceMappingURL=PageSubtitle-y4ccvDGI.js.map
