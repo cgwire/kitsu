@@ -546,14 +546,33 @@ describe('Productions store', () => {
 
     test('addMetadataDescriptor', async () => {
       let mockCommit = vi.fn()
+      const productionForMap = { id: '123', descriptors: [] }
       const state = {
-        currentProduction: { id: '123', descriptors: [{ field_name: 'descriptor', id: 1 }] }
+        currentProduction: { id: '123', descriptors: [{ field_name: 'descriptor', id: 1 }] },
+        productionMap: new Map([['123', productionForMap]]),
+        openProductions: [],
+        productions: []
       }
 
-      productionApi.addMetadataDescriptor = vi.fn()
-      store.actions.addMetadataDescriptor({ commit: mockCommit, state }, { field_name: 'new descriptor' })
+      const created = {
+        id: 'new-desc',
+        project_id: '123',
+        field_name: 'new descriptor'
+      }
+      productionApi.addMetadataDescriptor = vi.fn(() => Promise.resolve(created))
+      await store.actions.addMetadataDescriptor(
+        { commit: mockCommit, state },
+        { field_name: 'new descriptor' }
+      )
       expect(productionApi.addMetadataDescriptor).toBeCalledTimes(1)
-      expect(productionApi.addMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', { field_name: 'new descriptor' })
+      expect(productionApi.addMetadataDescriptor).toHaveBeenNthCalledWith(1, '123', {
+        field_name: 'new descriptor'
+      })
+      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_METADATA_DESCRIPTOR_END, {
+        production: productionForMap,
+        descriptor: created
+      })
 
       const existingDescriptor = { field_name: 'new descriptor name', id: 1 }
       mockCommit = vi.fn()

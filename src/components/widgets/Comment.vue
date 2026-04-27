@@ -1275,11 +1275,4 @@ textarea.reply {
     float: right;
   }
 }
-
-@media screen and (max-width: 768px) {
-  .flexrow {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
 </style>

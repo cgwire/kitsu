@@ -210,6 +210,7 @@
           :entities="currentEntitiesList"
           :is-loading="loading.playlist"
           :is-adding-entity="isAddingEntity"
+          :initial-share-links-count="currentShareLinksCount"
           :current-entity-type="currentEntityType"
           @edit-clicked="showEditModal"
           @show-add-entities="toggleAddEntities"
@@ -502,6 +503,7 @@ import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'lucide-vue-next'
 
+import playlistsApi from '@/store/api/playlists'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 import { formatDate } from '@/lib/time'
 import { getPlaylistPath } from '@/lib/path'
@@ -548,6 +550,7 @@ export default {
   data() {
     return {
       currentPlaylist: { name: '' },
+      currentShareLinksCount: 0,
       currentSort: 'updated_at',
       currentEntitiesMap: {},
       currentEntitiesList: [],
@@ -755,6 +758,14 @@ export default {
       return formatDate(dateString)
     },
 
+    isCurrentProjectEvent(eventData) {
+      return (
+        this.currentProduction?.id != null &&
+        eventData?.project_id != null &&
+        eventData.project_id === this.currentProduction.id
+      )
+    },
+
     getPlaylistPath(playlistId, section) {
       return getPlaylistPath(
         this.currentProduction.id,
@@ -824,6 +835,16 @@ export default {
     async loadAssetsData() {
       if (this.isTVShow || this.displayedAssets.length === 0) {
         return this.loadAssets()
+      }
+    },
+
+    async loadShareLinksCount(playlistId) {
+      if (!this.isCurrentUserManager || !playlistId) return
+      try {
+        const links = await playlistsApi.getShareLinks(playlistId)
+        this.currentShareLinksCount = links.length
+      } catch {
+        this.currentShareLinksCount = 0
       }
     },
 
@@ -1007,6 +1028,7 @@ export default {
         this.currentPlaylist = ref(loadedPlaylist)
         this.rebuildCurrentEntities()
         this.loading.playlist = false
+        this.loadShareLinksCount(loadedPlaylist.id)
       } else {
         this.currentPlaylist = {
           name: ''
@@ -1514,27 +1536,38 @@ export default {
   socket: {
     events: {
       'playlist:new'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (!this.playlistMap.get(eventData.playlist_id)) {
           this.refreshPlaylist(eventData.playlist_id)
         }
       },
 
       'playlist:update'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (
           this.playlistMap.get(eventData.playlist_id) &&
           !this.lockSystem.isSilent &&
           !this.isAddingEntity
         ) {
           this.refreshPlaylist(eventData.playlist_id).then(playlist => {
-            this.currentPlaylist = ref(playlist)
-            this.$nextTick(() => {
-              this.rebuildCurrentEntities()
-            })
+            if (eventData.playlist_id === this.currentPlaylist.id) {
+              this.currentPlaylist = ref(playlist)
+              this.$nextTick(() => {
+                this.rebuildCurrentEntities()
+              })
+            }
           })
         }
       },
 
       'playlist:delete'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (this.playlistMap.get(eventData.playlist_id)) {
           this.$store.commit('DELETE_PLAYLIST_END', {
             id: eventData.playlist_id
@@ -1543,6 +1576,9 @@ export default {
       },
 
       'build-job:new'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           this.currentPlaylist.build_jobs = [
             {
@@ -1556,6 +1592,9 @@ export default {
       },
 
       'build-job:update'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           updateModelFromList(this.currentPlaylist.build_jobs, {
             id: eventData.build_job_id,
@@ -1565,6 +1604,9 @@ export default {
       },
 
       'build-job:delete'(eventData) {
+        if (!this.isCurrentProjectEvent(eventData)) {
+          return
+        }
         if (eventData.playlist_id === this.currentPlaylist.id) {
           this.currentPlaylist.build_jobs = removeModelFromList(
             this.currentPlaylist.build_jobs,

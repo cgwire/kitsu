@@ -20,9 +20,13 @@ import {
   ADD_ENTITY_TO_PLAYLIST,
   REMOVE_ENTITY_FROM_PLAYLIST,
   LOAD_ENTITY_PREVIEW_FILES_END,
+  LOAD_PRODUCTIONS_END,
+  LOAD_TASK_STATUSES_END,
+  LOAD_TASK_TYPES_END,
   ADD_NEW_JOB,
   MARK_JOB_AS_DONE,
   REMOVE_BUILD_JOB,
+  SET_CURRENT_PRODUCTION,
   SET_PLAYLIST_ENTRY_MAP,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
@@ -44,6 +48,16 @@ const helpers = {
     }
 
     return previewFile || null
+  },
+
+  getSharedPlaylistGuestErrorMessage(err) {
+    const body = err?.body
+    if (body && typeof body === 'object') {
+      if (body.message) return String(body.message)
+      if (body.error) return String(body.error)
+    }
+    if (typeof body === 'string' && body.trim()) return body
+    return ''
   }
 }
 
@@ -251,6 +265,35 @@ const actions = {
 
   notifyClients({ commit }, { playlist, studioId, departmentId }) {
     return playlistsApi.notifyClients(playlist, studioId, departmentId)
+  },
+
+  async postSharedPlaylistGuest(_, { shareToken, data }) {
+    try {
+      return await playlistsApi.postSharedPlaylistGuest(shareToken, data)
+    } catch (err) {
+      throw new Error(helpers.getSharedPlaylistGuestErrorMessage(err), {
+        cause: err
+      })
+    }
+  },
+
+  loadSharedPlaylist(_, shareToken) {
+    return playlistsApi.loadSharedPlaylist(shareToken)
+  },
+
+  async loadSharedPlaylistContext({ commit }, shareToken) {
+    const data = await playlistsApi.loadSharedPlaylistContext(shareToken)
+    if (data.project) {
+      commit(LOAD_PRODUCTIONS_END, [data.project])
+      commit(SET_CURRENT_PRODUCTION, data.project.id)
+    }
+    commit(LOAD_TASK_TYPES_END, data.task_types || [])
+    commit(LOAD_TASK_STATUSES_END, data.task_statuses || [])
+    return data
+  },
+
+  saveSharedPlaylistAnnotations(_, { shareToken, data }) {
+    return playlistsApi.saveSharedPlaylistAnnotations(shareToken, data)
   }
 }
 

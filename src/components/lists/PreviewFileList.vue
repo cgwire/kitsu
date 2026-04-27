@@ -75,83 +75,69 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { formatListMixin } from '@/components/mixins/format'
 import { getTaskPath } from '@/lib/path'
+import { formatDate } from '@/lib/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'preview-file-list',
+const router = useRouter()
+const store = useStore()
 
-  mixins: [formatListMixin],
+// Props / Emits
 
-  components: {
-    ButtonSimple,
-    ProductionNameCell,
-    TableInfo,
-    TaskTypeCell
-  },
+defineProps({
+  previewFiles: { type: Array, default: () => [] },
+  isLoading: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false }
+})
 
-  props: {
-    previewFiles: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    }
-  },
+defineEmits(['mark-broken-clicked'])
 
-  emits: ['mark-broken-clicked'],
+// State
 
-  computed: {
-    ...mapGetters(['productionMap', 'taskTypeMap'])
-  },
+const headerWrapper = ref(null)
 
-  methods: {
-    ...mapActions(['loadTask']),
+// Computed
 
-    onBodyScroll(event) {
-      const position = event.target
-      this.$refs.headerWrapper.style.left = `-${position.scrollLeft}px`
-    },
+const productionMap = computed(() => store.getters.productionMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    async redirectToTask(previewFile) {
-      const task = await this.loadTask({ taskId: previewFile.task_id })
-      return this.$router.push(
-        getTaskPath(
-          task,
-          task.project,
-          task.project.production_type === 'tvshow',
-          task.episode,
-          this.taskTypeMap
-        )
-      )
-    }
-  }
+// Functions
+
+const onBodyScroll = event => {
+  headerWrapper.value.style.left = `-${event.target.scrollLeft}px`
+}
+
+const redirectToTask = async previewFile => {
+  const task = await store.dispatch('loadTask', { taskId: previewFile.task_id })
+  return router.push(
+    getTaskPath(
+      task,
+      task.project,
+      task.project.production_type === 'tvshow',
+      task.episode,
+      taskTypeMap.value
+    )
+  )
 }
 </script>
 
 <style lang="scss" scoped>
+.datatable-head th {
+  border: 0;
+}
+
 .date {
   max-width: 150px;
   width: 150px;
-}
-
-.production {
-  max-width: 300px;
-  width: 300px;
 }
 
 .entity-name {
@@ -160,10 +146,9 @@ export default {
   word-break: break-word;
 }
 
-.task-type {
-  max-width: 200px;
-  width: 200px;
-  overflow: auto hidden;
+.production {
+  max-width: 300px;
+  width: 300px;
 }
 
 .revision {
@@ -171,19 +156,30 @@ export default {
   width: 80px;
 }
 
-.status {
+.task-type {
+  max-width: 200px;
+  overflow: auto hidden;
+  width: 200px;
 }
 
-.datatable-head {
-  th {
-    border: 0;
+td.status {
+  font-weight: 500;
+  text-transform: uppercase;
+
+  &[data-status='broken'] {
+    color: red;
   }
+}
+
+tr {
+  cursor: pointer;
 }
 
 tr:first-child {
   td:first-child {
     border-top-left-radius: 10px;
   }
+
   td:last-child {
     border-top-right-radius: 10px;
   }
@@ -193,24 +189,9 @@ tr:last-child {
   td:first-child {
     border-bottom-left-radius: 10px;
   }
+
   td:last-child {
     border-bottom-right-radius: 10px;
   }
-}
-
-tr {
-  cursor: pointer;
-}
-
-td.status {
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
-td.status[data-status='broken'] {
-  color: red;
-}
-
-td.status[data-status='processing'] {
 }
 </style>

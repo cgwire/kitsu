@@ -3,10 +3,10 @@
     <div @click="$emit('edit-clicked')" v-if="isEditAllowed">
       {{ $t('main.edit') }}
     </div>
-    <div @click="$emit('sort-by-clicked')">
+    <div @click="$emit('sort-by-clicked')" v-if="showSort">
       {{ $t('main.sort_by') }}
     </div>
-    <div @click="$emit('toggle-stick')">
+    <div @click="$emit('toggle-stick')" v-if="showStick">
       <template v-if="isSticked">
         {{ $t('main.unstick') }}
       </template>
@@ -29,6 +29,14 @@ defineProps({
   isSticked: {
     type: Boolean,
     default: false
+  },
+  showSort: {
+    type: Boolean,
+    default: true
+  },
+  showStick: {
+    type: Boolean,
+    default: true
   }
 })
 

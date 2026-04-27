@@ -86,6 +86,10 @@ export default {
     panzoom: {
       type: Boolean,
       default: false
+    },
+    movieUrlPrefix: {
+      type: String,
+      default: null
     }
   },
 
@@ -107,7 +111,8 @@ export default {
       isPlaying: false,
       nextPlayer: undefined,
       panzoomInstances: [],
-      playingIndex: 0
+      playingIndex: 0,
+      showLoadingTimer: null
     }
   },
 
@@ -117,6 +122,12 @@ export default {
     this.resetHeight()
     this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
     window.addEventListener('resize', this.resetHeight)
+    if (typeof ResizeObserver !== 'undefined' && this.container) {
+      this.containerResizeObserver = new ResizeObserver(() => {
+        this.resetHeight()
+      })
+      this.containerResizeObserver.observe(this.container)
+    }
     this.$options.currentTimeCalls = []
 
     this.player1.addEventListener('canplay', this.hideLoading)
@@ -134,7 +145,9 @@ export default {
   },
 
   beforeUnmount() {
+    clearInterval(this.$options.playLoop)
     window.removeEventListener('resize', this.resetHeight)
+    this.containerResizeObserver?.disconnect()
     this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
 
     this.player1.removeEventListener('canplay', this.hideLoading)
@@ -191,21 +204,16 @@ export default {
           minZoom: 0.5
         })
         this.panzoomInstances = [this.firstPanZoom, this.secondPanZoom]
-        this.firstPanZoom.on('zoom', () => {
-          if (this.currentPlayer !== this.player1) return
-          this.emitPanZoomChanged(this.firstPanZoom)
-        })
-        this.firstPanZoom.on('panend', () => {
-          if (this.currentPlayer !== this.player1) return
-          this.emitPanZoomChanged(this.firstPanZoom)
-        })
-        this.secondPanZoom.on('zoom', () => {
-          if (this.currentPlayer !== this.player2) return
-          this.emitPanZoomChanged(this.secondPanZoom)
-        })
-        this.secondPanZoom.on('panend', () => {
-          if (this.currentPlayer !== this.player2) return
-          this.emitPanZoomChanged(this.secondPanZoom)
+        const events = ['zoom', 'pan', 'panend', 'transform']
+        events.forEach(name => {
+          this.firstPanZoom.on(name, () => {
+            if (this.currentPlayer !== this.player1) return
+            this.emitPanZoomChanged(this.firstPanZoom)
+          })
+          this.secondPanZoom.on(name, () => {
+            if (this.currentPlayer !== this.player2) return
+            this.emitPanZoomChanged(this.secondPanZoom)
+          })
         })
         this.pausePanZoom()
       }
@@ -218,12 +226,20 @@ export default {
     },
 
     hideLoading() {
+      if (this.showLoadingTimer) {
+        clearTimeout(this.showLoadingTimer)
+        this.showLoadingTimer = null
+      }
       this.isLoading = false
     },
 
     showLoading() {
-      setTimeout(() => {
-        if (this.currentPlayer.readyState !== 4) {
+      if (this.showLoadingTimer) {
+        clearTimeout(this.showLoadingTimer)
+      }
+      this.showLoadingTimer = setTimeout(() => {
+        this.showLoadingTimer = null
+        if (this.currentPlayer && this.currentPlayer.readyState < 3) {
           this.isLoading = true
         }
       }, 150) // Hack to avoid blinking effect
@@ -247,7 +263,9 @@ export default {
           previewId =
             entity.preview_file_previews[this.currentPreviewIndex - 1].id
         }
-        if (this.isHd) {
+        if (this.movieUrlPrefix) {
+          return `${this.movieUrlPrefix}/movies/originals/preview-files/${previewId}.mp4`
+        } else if (this.isHd) {
           return `/api/movies/originals/preview-files/${previewId}.mp4`
         } else {
           return `/api/movies/low/preview-files/${previewId}.mp4`
@@ -702,6 +720,18 @@ export default {
 
   video {
     margin: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .video-wrapper {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+    video {
+      margin: 0 auto;
+    }
   }
 }
 

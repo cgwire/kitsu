@@ -3,7 +3,10 @@
     <div
       class="progress-wrapper"
       :style="{
-        'background-size': backgroundSize
+        'background-size': backgroundSize,
+        ...(backgroundUrl
+          ? { 'background-image': `url(${backgroundUrl})` }
+          : {})
       }"
       @mouseenter="isFrameNumberVisible = true"
       @mouseleave="isFrameNumberVisible = false"
@@ -155,6 +158,10 @@ export default {
       type: Number
     },
     previewId: {
+      default: '',
+      type: String
+    },
+    backgroundUrl: {
       default: '',
       type: String
     }

@@ -150,6 +150,52 @@ const entityMetadataDescriptors = entityType => (state, getters) => {
   }
 }
 
+/**
+ * The same project often exists as multiple object references (e.g. open list
+ * vs all productions). Metadata must be updated on every copy.
+ */
+const forEachProductionAlias = (state, productionId, fn, primary = null) => {
+  if (!productionId) {
+    return
+  }
+  const seen = new Set()
+  const run = p => {
+    if (!p || p.id !== productionId || seen.has(p)) {
+      return
+    }
+    seen.add(p)
+    fn(p)
+  }
+  run(primary)
+  run(state.productionMap?.get(productionId))
+  state.productions?.forEach(p => run(p))
+  state.openProductions?.forEach(p => run(p))
+}
+
+const forEachProductionObjectInState = (state, fn) => {
+  const seen = new Set()
+  const run = p => {
+    if (!p || seen.has(p)) {
+      return
+    }
+    seen.add(p)
+    fn(p)
+  }
+  state.productions?.forEach(run)
+  state.openProductions?.forEach(run)
+  state.productionMap?.forEach(run)
+}
+
+const findProductionInState = (state, id) => {
+  if (!id) return null
+  return (
+    state.productionMap?.get(id) ||
+    state.productions?.find(p => p.id === id) ||
+    state.openProductions?.find(p => p.id === id) ||
+    null
+  )
+}
+
 const getters = {
   productions: state => state.productions,
   productionMap: state => state.productionMap,
@@ -287,6 +333,34 @@ const getters = {
   episodeMetadataDescriptors: entityMetadataDescriptors('Episode'),
   editMetadataDescriptors: entityMetadataDescriptors('Edit'),
 
+  /**
+   * Union of all Project-entity metadata descriptors (field definitions) that
+   * appear in any project on the all-projects list. Used for the productions
+   * table columns.
+   */
+  mergedProjectMetadataDescriptors: state => {
+    const byField = new Map()
+    forEachProductionObjectInState(state, p => {
+      ;(p.descriptors || [])
+        .filter(d => d.entity_type === 'Project')
+        .forEach(d => {
+          if (!byField.has(d.field_name)) {
+            byField.set(d.field_name, { ...d })
+          }
+        })
+    })
+    return Array.from(byField.values()).sort((a, b) => {
+      const positionA = a.position ?? 1000
+      const positionB = b.position ?? 1000
+      if (positionA !== positionB) {
+        return positionA - positionB
+      }
+      const nameA = a.name || ''
+      const nameB = b.name || ''
+      return nameA.localeCompare(nameB)
+    })
+  },
+
   currentProduction: state => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -386,7 +460,15 @@ const actions = {
   },
 
   editProduction({ commit, state }, data) {
-    return productionsApi.updateProduction(data).then(production => {
+    // The metadata bag (`data.data`) is replaced wholesale by the API, so when
+    // editing a single field we have to merge with the locally cached values
+    // first to avoid losing the others. Other top-level fields are sent as-is.
+    const payload = { ...data }
+    if (data.data) {
+      const previous = findProductionInState(state, data.id)
+      payload.data = { ...(previous?.data || {}), ...data.data }
+    }
+    return productionsApi.updateProduction(payload).then(production => {
       commit(UPDATE_PRODUCTION, production)
     })
   },
@@ -520,11 +602,106 @@ const actions = {
           })
         })
     } else {
-      return productionsApi.addMetadataDescriptor(
-        state.currentProduction.id,
-        descriptor
-      )
+      const { projectId, ...toSend } = descriptor
+      const targetId = projectId || state.currentProduction?.id
+      if (!targetId) {
+        return Promise.reject(new Error('No target project for metadata'))
+      }
+      return productionsApi
+        .addMetadataDescriptor(targetId, toSend)
+        .then(created => {
+          const production = findProductionInState(
+            state,
+            created.project_id || targetId
+          )
+          if (production) {
+            commit(ADD_METADATA_DESCRIPTOR_END, {
+              production,
+              descriptor: created
+            })
+          }
+        })
     }
+  },
+
+  /**
+   * Create the same Project-entity metadata descriptor on every production in
+   * the list (Zou still stores one row per project; this mirrors a studio-wide
+   * column in the all-projects view).
+   */
+  async addProjectMetadataDescriptorToAllProductions(
+    { commit, state },
+    descriptor
+  ) {
+    // Drop projectId — this action fans out to every loaded project.
+    // eslint-disable-next-line no-unused-vars
+    const { projectId, ...toSend } = descriptor
+    const targets = (state.productions || []).filter(
+      production =>
+        !(production.descriptors || []).some(
+          d => d.entity_type === 'Project' && d.name === toSend.name
+        )
+    )
+    await Promise.all(
+      targets.map(async production => {
+        const created = await productionsApi.addMetadataDescriptor(
+          production.id,
+          toSend
+        )
+        const target =
+          findProductionInState(state, created.project_id) || production
+        commit(ADD_METADATA_DESCRIPTOR_END, {
+          production: target,
+          descriptor: created
+        })
+      })
+    )
+  },
+
+  async updateProjectMetadataOnAll({ commit, state }, { fieldName, form }) {
+    // Strip id/projectId — each pair gets its own descriptor id below.
+    // eslint-disable-next-line no-unused-vars
+    const { id, projectId, ...formFields } = form
+    const pairs = (state.productions || [])
+      .map(production => {
+        const descriptor = (production.descriptors || []).find(
+          d => d.entity_type === 'Project' && d.field_name === fieldName
+        )
+        return descriptor ? { production, descriptor } : null
+      })
+      .filter(Boolean)
+    await Promise.all(
+      pairs.map(async ({ production, descriptor }) => {
+        const updated = await productionsApi.updateMetadataDescriptor(
+          production.id,
+          { ...formFields, id: descriptor.id, entity_type: 'Project' }
+        )
+        commit(UPDATE_METADATA_DESCRIPTOR_END, {
+          production: findProductionInState(state, production.id) || production,
+          descriptor: updated
+        })
+      })
+    )
+  },
+
+  async deleteProjectMetadataByFieldName({ commit, state }, fieldName) {
+    const pairs = (state.productions || [])
+      .map(production => {
+        const descriptor = (production.descriptors || []).find(
+          d => d.entity_type === 'Project' && d.field_name === fieldName
+        )
+        return descriptor ? { production, descriptor } : null
+      })
+      .filter(Boolean)
+    await Promise.all(
+      pairs.map(async ({ production, descriptor }) => {
+        await productionsApi.deleteMetadataDescriptor(
+          production.id,
+          descriptor.id
+        )
+        commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptor.id })
+      })
+    )
   },
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {
@@ -581,6 +758,46 @@ const actions = {
         })
         return updatedDescriptors
       })
+  },
+
+  /**
+   * Apply the same Project metadata column order on every loaded production
+   * (all-projects list). `fieldOrder` is `field_name` values in display order.
+   */
+  async reorderAllProjectsProjectMetadata(
+    { commit, state },
+    { entityType, fieldOrder }
+  ) {
+    if (!fieldOrder?.length || !entityType) return
+    const projects = (state.productions || []).filter(production =>
+      (production.descriptors || []).some(d => d.entity_type === entityType)
+    )
+    await Promise.all(
+      projects.map(async production => {
+        const projectDescs = production.descriptors.filter(
+          d => d.entity_type === entityType
+        )
+        const byField = new Map(projectDescs.map(d => [d.field_name, d]))
+        const orderedIds = fieldOrder
+          .map(fieldName => byField.get(fieldName)?.id)
+          .filter(Boolean)
+        const remaining = projectDescs
+          .map(d => d.id)
+          .filter(id => !orderedIds.includes(id))
+        const updated = await productionsApi.reorderMetadataDescriptors(
+          production.id,
+          entityType,
+          [...orderedIds, ...remaining]
+        )
+        updated.forEach(descriptor => {
+          commit(UPDATE_METADATA_DESCRIPTOR_END, {
+            production:
+              findProductionInState(state, descriptor.project_id) || production,
+            descriptor
+          })
+        })
+      })
+    )
   },
 
   async addBackgroundToProduction({ commit, state }, backgroundId) {
@@ -888,36 +1105,50 @@ const mutations = {
   },
 
   [ADD_METADATA_DESCRIPTOR_END](state, { production, descriptor }) {
-    if (production) {
-      if (production.descriptors) {
-        production.descriptors.push(descriptor)
-      } else {
-        production.descriptors = descriptor
-      }
+    if (!production || !descriptor) {
+      return
     }
+    forEachProductionAlias(
+      state,
+      production.id,
+      p => {
+        if (!p.descriptors) {
+          p.descriptors = []
+        }
+        if (!p.descriptors.some(d => d.id === descriptor.id)) {
+          p.descriptors.push(descriptor)
+        }
+      },
+      production
+    )
   },
 
   [UPDATE_METADATA_DESCRIPTOR_END](state, { production, descriptor }) {
-    if (production) {
-      if (production.descriptors) {
-        updateModelFromList(production.descriptors, descriptor)
-      } else {
-        production.descriptors = []
-      }
+    if (!descriptor?.id) {
+      return
     }
+    const pid = production?.id
+    if (!pid) {
+      return
+    }
+    forEachProductionAlias(
+      state,
+      pid,
+      p => {
+        if (p.descriptors) {
+          updateModelFromList(p.descriptors, descriptor)
+        }
+      },
+      production
+    )
   },
 
-  [DELETE_METADATA_DESCRIPTOR_END](state, descriptor) {
-    const production = state.openProductions.find(production => {
-      return production.descriptors.find(d => d.id === descriptor.id)
+  [DELETE_METADATA_DESCRIPTOR_END](state, { id }) {
+    forEachProductionObjectInState(state, p => {
+      if (p.descriptors?.some(d => d.id === id)) {
+        p.descriptors = removeModelFromList(p.descriptors, { id })
+      }
     })
-
-    if (production) {
-      production.descriptors = removeModelFromList(
-        production.descriptors,
-        descriptor
-      )
-    }
   },
 
   [ASSIGN_TASKS](state, { personId }) {

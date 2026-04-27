@@ -220,6 +220,7 @@ export default {
   },
 
   comments: {
+    title: 'Comments',
     add_attachment: 'Add attachment',
     add_attachment_to_reply: 'Add attachment to reply',
     add_checklist: 'Add checklist',
@@ -1127,6 +1128,23 @@ export default {
     mute: 'Mute',
     new_playlist: 'Add a playlist',
     notify_clients: 'Notify clients',
+    share: 'Share',
+    share_modal: {
+      title: 'Share playlist',
+      description: 'Generate a link to share this playlist with external reviewers. Anyone with the link can view the playlist and post comments without needing a Kitsu account. You can set an expiration date and revoke access at any time.',
+      active_links: 'Active links',
+      create_new: 'Create a new link',
+      expiration: 'Expiration date (optional)',
+      can_comment: 'Allow comments',
+      generate: 'Generate a new link',
+      copy: 'Copy link',
+      revoke: 'Revoke link',
+      expires: 'Expires',
+      no_expiration: 'No expiration',
+      comments_enabled: 'Comments enabled',
+      comments_disabled: 'Comments disabled',
+      error: 'An error occurred while creating the share link.'
+    },
     notify_clients_description: 'Inform clients of the selected studio that your playlist is ready. This operation will create a notification for them.',
     notify_clients_error: 'An error occurred while notifying clients.',
     no_build: 'No build',
@@ -1309,6 +1327,8 @@ export default {
     },
 
     metadata: {
+      applies_to_all_projects:
+        'This column is added to every project in the list. Each project can have its own value in the list view.',
       add_explaination: 'Add specific data required by this production.',
       add_failed: 'An error occurred while adding metadata to your production.',
       add_new_values: 'There are currently no available values.',
@@ -1316,6 +1336,8 @@ export default {
       boolean: 'Checkbox',
       checklist: 'Checklist',
       choices: 'List of values',
+      delete_list_column_text:
+        'This will remove the column “{name}” from all projects, including stored values. Continue?',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
@@ -1323,6 +1345,7 @@ export default {
       number: 'Number',
       string: 'Text',
       tags: 'List of tags',
+      target_project: 'Project',
       title: 'Add metadata column'
     },
 
@@ -1486,6 +1509,28 @@ export default {
       button: 'Save settings',
       error: 'A server error occurred while saving settings'
     }
+  },
+
+  share: {
+    error_title: 'Link not available',
+    error_text: 'This shared link is invalid, expired or has been revoked.',
+    guest_error:
+      'We could not sign you in. Check your connection and try again. If the problem persists, please contact the support team.',
+    identity_description: 'Enter your name to join the review session. You will be able to view the playlist and leave comments.',
+    your_name: 'Your name',
+    name_placeholder: 'John Doe',
+    enter_review: 'Enter review',
+    review_session: 'Review session',
+    player_placeholder: 'Player will be displayed here.',
+    no_preview: 'No preview',
+    no_comments_yet: 'No comments yet.',
+    comment_placeholder: 'Leave a comment...',
+    comments_disabled: 'Comments are disabled for this link.',
+    download_preview: 'Download preview',
+    identity_required: 'You need to enter your name before posting.',
+    no_status_available: 'No task statuses are configured for this project.',
+    logout: 'Leave review session',
+    kitsu_homepage: 'About Kitsu'
   },
 
   task_status: {
@@ -1874,6 +1919,8 @@ export default {
     preview: 'Previews',
     previous: 'previous task',
     revision_preview_file: 'If one of your selected files contains a revision number in its name (eg. "preview-v3.png"), then it will be suggested as a new revision name (eg. "revision 3") at the next step.',
+    retake_filter_none: 'No retakes',
+    retake_filter_with_retakes: 'With retakes',
     select_preview_file: 'Please select files (pictures, movies, etc) from your hard drive to be used as a new preview revision for the current task:',
     selected_entities: 'Selected entities',
     selected_tasks: 'Selected tasks',

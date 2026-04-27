@@ -1852,6 +1852,16 @@ tbody:last-child .empty-line:last-child {
     background-color: transparent;
     box-shadow: none;
   }
+
+  th.metadata-descriptor {
+    padding: 0;
+  }
+
+  td.metadata-descriptor {
+    padding: 0;
+    position: relative;
+    vertical-align: top;
+  }
 }
 
 .multi-section .datatable-row {

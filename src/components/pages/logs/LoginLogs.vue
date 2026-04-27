@@ -66,19 +66,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useStore } from 'vuex'
-import { useRoute, useRouter } from 'vue-router'
-import { useHead } from '@unhead/vue'
-import { useI18n } from 'vue-i18n'
 import moment from 'moment'
+import { computed, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHead } from '@unhead/vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useTime } from '@/composables/time'
 import {
   formatFullDateWithRevertedTimezone,
   formatSimpleDate,
   parseSimpleDate
 } from '@/lib/time'
-import { useTime } from '@/composables/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -89,41 +89,47 @@ import Spinner from '@/components/widgets/Spinner.vue'
 
 const PAGE_SIZE = 100
 
-const store = useStore()
-const route = useRoute()
-const router = useRouter()
 const { t } = useI18n()
 const { today, timezone, formatDate } = useTime()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-const people = computed(() => store.getters.people)
-const personMap = computed(() => store.getters.personMap)
+// State
 
 const currentDate = ref(null)
 const logs = ref([])
 const hasMoreLogs = ref(false)
 const selectedPerson = ref(null)
-const loading = ref({ logs: false, moreLogs: false })
+const loading = reactive({ logs: false, moreLogs: false })
+
+// Computed
+
+const people = computed(() => store.getters.people)
+const personMap = computed(() => store.getters.personMap)
 
 const filteredLogs = computed(() => {
   if (!selectedPerson.value) return logs.value
   return logs.value.filter(log => log.person?.id === selectedPerson.value.id)
 })
 
-function onDateChange(value) {
+// Functions
+
+const onDateChange = value => {
   const date = value ? formatSimpleDate(value) : undefined
   if (route.query.date !== date) {
     router.push({ query: { ...route.query, date } })
   }
 }
 
-function onPersonSelect(person) {
+const onPersonSelect = person => {
   const personId = person?.id
   if (route.query.person_id !== personId) {
     router.push({ query: { ...route.query, person_id: personId } })
   }
 }
 
-function getDateParams(date) {
+const getDateParams = date => {
   if (!date) return {}
   const after = moment(date)
   const before = moment(date).add(1, 'days')
@@ -133,7 +139,7 @@ function getDateParams(date) {
   }
 }
 
-function formatLogs(rawLogs) {
+const formatLogs = rawLogs => {
   return rawLogs.map(log => ({
     id: log.id,
     date: formatDate(log.created_at),
@@ -143,41 +149,44 @@ function formatLogs(rawLogs) {
   }))
 }
 
-async function loadLogs(date) {
+const loadLogs = async date => {
   logs.value = []
-  loading.value.logs = true
-  const params = { limit: PAGE_SIZE, ...getDateParams(date) }
+  loading.logs = true
   try {
-    const result = await store.dispatch('loadLoginLogs', params)
+    const result = await store.dispatch('loadLoginLogs', {
+      limit: PAGE_SIZE,
+      ...getDateParams(date)
+    })
     logs.value = formatLogs(result)
     hasMoreLogs.value = result.length >= PAGE_SIZE
   } catch (err) {
     console.error(err)
   } finally {
-    loading.value.logs = false
+    loading.logs = false
   }
 }
 
-async function loadMoreLogs(date) {
+const loadMoreLogs = async date => {
   if (!logs.value.length) return
 
-  loading.value.moreLogs = true
+  loading.moreLogs = true
   const lastLoginLogId = logs.value[logs.value.length - 1].id
-  const params = {
-    limit: PAGE_SIZE,
-    lastLoginLogId,
-    ...getDateParams(date)
-  }
   try {
-    const result = await store.dispatch('loadLoginLogs', params)
+    const result = await store.dispatch('loadLoginLogs', {
+      lastLoginLogId,
+      limit: PAGE_SIZE,
+      ...getDateParams(date)
+    })
     logs.value = [...logs.value, ...formatLogs(result)]
     hasMoreLogs.value = result.length >= PAGE_SIZE
   } catch (err) {
     console.error(err)
   } finally {
-    loading.value.moreLogs = false
+    loading.moreLogs = false
   }
 }
+
+// Watchers
 
 watch(
   () => route.query.date,
@@ -201,25 +210,20 @@ watch(
   { immediate: true }
 )
 
+// Head
+
 useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .tag {
-    color: $white;
-    background: $dark-grey;
-  }
+.dark .tag {
+  background: $dark-grey;
+  color: $white;
 }
 
 .empty {
   color: var(--text);
   font-style: italic;
-}
-
-.log-list {
-  width: auto;
-  color: var(--text);
 }
 
 .log-line {
@@ -229,25 +233,27 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
     background: var(--background-selectable);
   }
 
+  .tag {
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
   td {
     padding: 0.5em;
 
     &:first-child {
       padding-left: 0.25em;
     }
+
     &:last-child {
       padding-right: 0.25em;
     }
   }
+}
 
-  a:hover {
-    text-decoration: underline;
-  }
-
-  .tag {
-    border-radius: 4px;
-    font-variant-numeric: tabular-nums;
-    font-weight: 500;
-  }
+.log-list {
+  color: var(--text);
+  width: auto;
 }
 </style>

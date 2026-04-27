@@ -50,6 +50,9 @@ export default {
         production.is_publish_default_for_artists === 'true',
       homepage: production.homepage
     }
+    if (production.data !== undefined) {
+      data.data = production.data
+    }
     return client.pput(`/api/data/projects/${production.id}`, data)
   },
 
