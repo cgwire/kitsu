@@ -31,49 +31,28 @@
   </th>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
 import { ChevronDownIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
-export default {
-  name: 'metadata-header',
+const props = defineProps({
+  descriptor: { type: Object, required: true },
+  isStick: { type: Boolean, default: false },
+  left: { type: String, default: '0px' },
+  noMenu: { type: Boolean, default: false }
+})
 
-  props: {
-    descriptor: Object,
-    isStick: {
-      type: Boolean,
-      default: false
-    },
-    left: {
-      type: String,
-      default: '0px'
-    },
-    noMenu: {
-      type: Boolean,
-      default: false
-    }
-  },
+defineEmits(['show-metadata-header-menu'])
 
-  components: {
-    ChevronDownIcon,
-    DepartmentName
-  },
+const store = useStore()
+const departmentMap = computed(() => store.getters.departmentMap)
 
-  emits: ['show-metadata-header-menu'],
-
-  computed: {
-    ...mapGetters(['departmentMap']),
-
-    currentDepartments() {
-      const departemts = this.descriptor.departments || []
-      return departemts.map(departmentId =>
-        this.departmentMap.get(departmentId)
-      )
-    }
-  }
-}
+const currentDepartments = computed(() =>
+  (props.descriptor.departments || []).map(id => departmentMap.value.get(id))
+)
 </script>
 
 <style lang="scss" scoped>

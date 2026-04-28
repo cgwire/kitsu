@@ -5,7 +5,6 @@
       class="input-editor"
       :readonly="!isEditable"
       @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-      @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
       :value="getMetadataFieldValue(descriptor, entity)"
       v-if="!descriptor.data_type || descriptor.data_type === 'string'"
     />
@@ -17,7 +16,6 @@
       step="any"
       @keydown="onNumberFieldKeyDown"
       @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-      @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
       :value="getMetadataFieldValue(descriptor, entity)"
       v-else-if="descriptor.data_type === 'number'"
     />
@@ -26,7 +24,6 @@
       class="input-editor"
       :disabled="!isEditable"
       @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-      @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
       type="checkbox"
       :checked="getMetadataFieldValue(descriptor, entity) === 'true'"
       v-else-if="descriptor.data_type === 'boolean'"
@@ -67,7 +64,6 @@
     <span class="select" v-else-if="descriptor.data_type === 'list'">
       <select
         class="select-input"
-        @keyup.ctrl="event => onInputKeyUp(event, indexes.i, indexes.j)"
         @change="event => onMetadataFieldChanged(entity, descriptor, event)"
       >
         <option
@@ -100,59 +96,107 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
+import {
+  getDescriptorChecklistValues,
+  getDescriptorChoicesOptions,
+  getMetadataChecklistValues,
+  getMetadataFieldValue,
+  isSupervisorInDepartments
+} from '@/lib/descriptors'
 
 import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
 
-export default {
-  name: 'metadata-input',
+const props = defineProps({
+  descriptor: { type: Object, required: true },
+  entity: { type: Object, required: true },
+  // eslint-disable-next-line vue/no-unused-properties
+  indexes: { type: Object, default: () => ({}) }
+})
 
-  mixins: [descriptorMixin, domMixin, entityListMixin],
+const emit = defineEmits(['metadata-changed'])
 
-  components: {
-    ComboboxTag
-  },
+const store = useStore()
 
-  props: {
-    entity: {
-      type: Object,
-      required: true
-    },
-    descriptor: {
-      type: Object,
-      required: true
-    },
-    indexes: {
-      type: Object,
-      required: true
-    }
-  },
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const selectedAssets = computed(() => store.getters.selectedAssets)
+const selectedEdits = computed(() => store.getters.selectedEdits)
+const selectedShots = computed(() => store.getters.selectedShots)
+const user = computed(() => store.getters.user)
 
-  computed: {
-    ...mapGetters(['isCurrentUserManager', 'isCurrentUserSupervisor', 'user']),
+const isEditable = computed(
+  () =>
+    isCurrentUserManager.value ||
+    isSupervisorInDepartments(
+      user.value,
+      isCurrentUserSupervisor.value,
+      props.descriptor.departments
+    )
+)
 
-    isEditable() {
-      return (
-        this.isCurrentUserManager ||
-        this.isSupervisorInDepartments(this.descriptor.departments)
-      )
-    },
+const metadataInputClass = computed(() => ({
+  'is-boolean': props.descriptor.data_type === 'boolean',
+  'is-checklist':
+    props.descriptor.data_type === 'checklist' &&
+    getDescriptorChecklistValues(props.descriptor).length,
+  'is-list': props.descriptor.data_type === 'list',
+  'is-taglist': props.descriptor.data_type === 'taglist'
+}))
 
-    metadataInputClass() {
-      return {
-        'is-boolean': this.descriptor.data_type === 'boolean',
-        'is-checklist':
-          this.descriptor.data_type === 'checklist' &&
-          this.getDescriptorChecklistValues(this.descriptor).length,
-        'is-list': this.descriptor.data_type === 'list',
-        'is-taglist': this.descriptor.data_type === 'taglist'
-      }
-    }
+const emitMetadataChanged = (entry, descriptor, value) => {
+  emit('metadata-changed', { entry, descriptor, value })
+}
+
+const onMetadataFieldChanged = (entity, descriptor, event) => {
+  let value
+  if (typeof event === 'string') {
+    value = event
+  } else if (!event.target.validity.valid) {
+    return
+  } else if (descriptor.data_type === 'boolean') {
+    value = event.target.checked ? 'true' : 'false'
+  } else if (descriptor.data_type === 'number') {
+    value = !isNaN(event.target.valueAsNumber)
+      ? event.target.valueAsNumber
+      : null
+  } else {
+    value = event.target.value
+  }
+
+  if (selectedShots.value.has(entity.id)) {
+    selectedShots.value.forEach(shot =>
+      emitMetadataChanged(shot, descriptor, value)
+    )
+  } else if (selectedAssets.value.has(entity.id)) {
+    selectedAssets.value.forEach(asset =>
+      emitMetadataChanged(asset, descriptor, value)
+    )
+  } else if (selectedEdits.value.has(entity.id)) {
+    selectedEdits.value.forEach(edit =>
+      emitMetadataChanged(edit, descriptor, value)
+    )
+  } else {
+    emitMetadataChanged(entity, descriptor, value)
+  }
+}
+
+const onMetadataChecklistChanged = (entity, descriptor, option, event) => {
+  const values = getMetadataChecklistValues(descriptor, entity)
+  values[option] = event.target.checked
+  event.target.value = JSON.stringify(values)
+  onMetadataFieldChanged(entity, descriptor, event)
+}
+
+const onNumberFieldKeyDown = event => {
+  if (['ArrowDown', 'ArrowUp'].includes(event.key)) {
+    event.stopPropagation()
+    event.preventDefault()
   }
 }
 </script>
