@@ -25,47 +25,19 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'modal-footer',
+<script setup>
+defineProps({
+  cancelLabel: { type: String, default: '' },
+  confirmLabel: { type: String, default: '' },
+  errorText: { type: String, default: '' },
+  isDisabled: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isSuccess: { type: Boolean, default: false },
+  successText: { type: String, default: '' }
+})
 
-  props: {
-    cancelLabel: {
-      type: String,
-      default: ''
-    },
-    confirmLabel: {
-      type: String,
-      default: ''
-    },
-    errorText: {
-      type: String,
-      default: ''
-    },
-    isDisabled: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isSuccess: {
-      type: Boolean,
-      default: false
-    },
-    successText: {
-      type: String,
-      default: ''
-    }
-  },
-
-  emits: ['cancel', 'confirm']
-}
+defineEmits(['cancel', 'confirm'])
 </script>
 
 <style lang="scss" scoped>

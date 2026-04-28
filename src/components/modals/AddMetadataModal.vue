@@ -146,15 +146,18 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-import { descriptorMixin } from '@/components/mixins/descriptors'
-
+import { getDescriptorChecklistValues } from '@/lib/descriptors'
 import { remove } from '@/lib/models'
 
+import { useModal } from '@/composables/modal'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+// eslint-disable-next-line no-unused-vars
 import Checklist from '@/components/widgets/Checklist.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
@@ -163,257 +166,191 @@ import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'add-metadata-modal',
+const SIMPLE_TYPES = ['string', 'number', 'boolean']
+const VALUE_LIST_TYPES = ['list', 'taglist']
 
-  mixins: [descriptorMixin, modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  descriptorToEdit: { type: Object, default: () => ({}) },
+  entityType: { type: String, default: 'Asset' },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  components: {
-    ButtonSimple,
-    Checklist,
-    Combobox,
-    ComboboxBoolean,
-    ComboboxDepartment,
-    DepartmentName,
-    ModalFooter,
-    TextField
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    descriptorToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    entityType: {
-      type: String,
-      default: 'Asset'
+const { t } = useI18n()
+const store = useStore()
+
+useModal(toRef(props, 'active'), emit)
+
+const nameField = ref(null)
+const valueList = ref(null)
+
+const form = ref({
+  name: '',
+  data_type: 'string',
+  for_client: 'false',
+  values: [],
+  departments: []
+})
+const valueToAdd = ref('')
+const checklist = ref([])
+const selectedDepartment = ref(null)
+
+const typeOptions = [
+  { label: t('productions.metadata.string'), value: 'string' },
+  { label: t('productions.metadata.number'), value: 'number' },
+  { label: t('productions.metadata.boolean'), value: 'boolean' },
+  { label: t('productions.metadata.choices'), value: 'list' },
+  { label: t('productions.metadata.tags'), value: 'taglist' },
+  { label: t('productions.metadata.checklist'), value: 'checklist' }
+]
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const user = computed(() => store.getters.user)
+
+const isEditing = computed(() => Boolean(props.descriptorToEdit?.id))
+
+const selectableDepartments = computed(() => {
+  if (!currentProduction.value) return []
+
+  let departments = currentProduction.value.task_types
+    .map(taskTypeId => {
+      const taskType = taskTypeMap.value.get(taskTypeId)
+      return taskType && taskType.for_entity === props.entityType
+        ? departmentMap.value.get(taskType.department_id)
+        : false
+    })
+    .filter(
+      (department, index, self) =>
+        department &&
+        self.indexOf(department) === index &&
+        !form.value.departments.includes(department.id)
+    )
+  if (isCurrentUserSupervisor.value && user.value.departments.length > 0) {
+    departments = departments.filter(department =>
+      user.value.departments.includes(department.id)
+    )
+  }
+  return departments
+})
+
+const isFormFilled = computed(() => {
+  const dataTypeOk =
+    SIMPLE_TYPES.includes(form.value.data_type) ||
+    (VALUE_LIST_TYPES.includes(form.value.data_type) &&
+      form.value.values.length) ||
+    (form.value.data_type === 'checklist' && checklist.value?.[0]?.text)
+  const supervisorDeptOk =
+    !isCurrentUserSupervisor.value ||
+    !user.value.departments.length ||
+    form.value.departments.length ||
+    (props.entityType === 'Project' && selectableDepartments.value.length === 0)
+  return form.value.name.length && dataTypeOk && supervisorDeptOk
+})
+
+const reset = () => {
+  if (isEditing.value) {
+    form.value = {
+      id: props.descriptorToEdit.id,
+      name: props.descriptorToEdit.name,
+      data_type: props.descriptorToEdit.data_type,
+      for_client: props.descriptorToEdit.for_client ? 'true' : 'false',
+      values: [...props.descriptorToEdit.choices],
+      departments: [...props.descriptorToEdit.departments]
     }
-  },
-
-  emits: ['cancel', 'confirm'],
-
-  data() {
-    return {
-      form: {
-        name: '',
-        data_type: 'string',
-        for_client: 'false',
-        values: [],
-        departments: []
-      },
-      valueToAdd: '',
-      checklist: [],
-      typeOptions: [
-        {
-          label: this.$t('productions.metadata.string'),
-          value: 'string'
-        },
-        {
-          label: this.$t('productions.metadata.number'),
-          value: 'number'
-        },
-        {
-          label: this.$t('productions.metadata.boolean'),
-          value: 'boolean'
-        },
-        {
-          label: this.$t('productions.metadata.choices'),
-          value: 'list'
-        },
-        {
-          label: this.$t('productions.metadata.tags'),
-          value: 'taglist'
-        },
-        {
-          label: this.$t('productions.metadata.checklist'),
-          value: 'checklist'
-        }
-      ],
-      selectedDepartment: null
+    checklist.value = getDescriptorChecklistValues(props.descriptorToEdit)
+    if (form.value.data_type === 'taglist') {
+      form.value.values.sort()
     }
-  },
-
-  mounted() {
-    this.reset()
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departmentMap',
-      'isCurrentUserSupervisor',
-      'taskTypeMap',
-      'user'
-    ]),
-
-    isEditing() {
-      return Boolean(this.descriptorToEdit?.id)
-    },
-
-    selectableDepartments() {
-      if (!this.currentProduction) return []
-
-      let departments = this.currentProduction.task_types
-        .map(taskTypeId => {
-          const taskType = this.taskTypeMap.get(taskTypeId)
-          return taskType && taskType.for_entity === this.entityType
-            ? this.departmentMap.get(taskType.department_id)
-            : false
-        })
-        .filter(
-          (department, index, self) =>
-            department &&
-            self.indexOf(department) === index &&
-            this.form.departments.findIndex(
-              selectedDepartment => selectedDepartment === department.id
-            ) === -1
-        )
-      if (this.isCurrentUserSupervisor && this.user.departments.length > 0) {
-        departments = departments.filter(
-          department => this.user.departments.indexOf(department.id) >= 0
-        )
-      }
-      return departments
-    },
-
-    isFormFilled() {
-      const dataTypeOk =
-        ['string', 'number', 'boolean'].includes(this.form.data_type) ||
-        (['list', 'taglist'].includes(this.form.data_type) &&
-          this.form.values.length) ||
-        (this.form.data_type === 'checklist' && this.checklist?.[0]?.text)
-      const supervisorDeptOk =
-        !this.isCurrentUserSupervisor ||
-        !this.user.departments.length ||
-        this.form.departments.length ||
-        (this.entityType === 'Project' &&
-          this.selectableDepartments.length === 0)
-      return this.form.name.length && dataTypeOk && supervisorDeptOk
-    },
-
-    valueList() {
-      return this.$refs.valueList
+  } else {
+    form.value = {
+      name: '',
+      data_type: 'string',
+      for_client: 'false',
+      values: [],
+      departments: []
     }
-  },
+    checklist.value = []
+  }
+  valueToAdd.value = ''
+}
 
-  methods: {
-    addValue(value) {
-      const newValue = value
-      if (!this.form.values.find(v => v === newValue) && newValue) {
-        this.form.values.push(newValue)
-        if (this.form.data_type === 'taglist') {
-          this.form.values.sort()
-        }
-        this.valueToAdd = ''
-        this.$nextTick(() => {
-          const newValueIndex = this.form.values.findIndex(v => v === newValue)
-          const newValuePosition =
-            (this.valueList.scrollHeight / this.form.values.length) *
-            newValueIndex
-          this.valueList.scrollTop = newValuePosition
-        })
-      }
-      return newValue
-    },
+const addValue = value => {
+  if (!value || form.value.values.includes(value)) return value
+  form.value.values.push(value)
+  if (form.value.data_type === 'taglist') {
+    form.value.values.sort()
+  }
+  valueToAdd.value = ''
+  nextTick(() => {
+    if (!valueList.value) return
+    const newValueIndex = form.value.values.indexOf(value)
+    valueList.value.scrollTop =
+      (valueList.value.scrollHeight / form.value.values.length) * newValueIndex
+  })
+  return value
+}
 
-    confirm() {
-      if (['string', 'number', 'boolean'].includes(this.form.data_type)) {
-        this.form.values = []
-      } else if (this.form.data_type === 'checklist') {
-        this.form.values = this.checklist
-          .filter(Boolean)
-          .map(x => (x.checked ? '[x] ' : '[ ] ') + x.text)
-      }
-      return this.$emit('confirm', this.form)
-    },
+const removeValue = valueToRemove => {
+  form.value.values = remove(form.value.values, valueToRemove)
+}
 
-    removeValue(valueToRemove) {
-      this.form.values = remove(this.form.values, valueToRemove)
-    },
+const addDepartment = () => {
+  form.value.departments.push(selectedDepartment.value)
+  selectedDepartment.value = null
+}
 
-    addDepartment() {
-      this.form.departments.push(this.selectedDepartment)
-      this.selectedDepartment = null
-    },
-
-    removeDepartment(idToRemove) {
-      const departmentIndex = this.form.departments.indexOf(idToRemove)
-      if (departmentIndex >= 0) {
-        this.form.departments.splice(departmentIndex, 1)
-      }
-    },
-
-    addChecklistEntry(index) {
-      if (index === -1 || index === this.checklist.length - 1) {
-        this.checklist.push({
-          text: '',
-          checked: false
-        })
-      }
-    },
-
-    onAddChecklistItem(item) {
-      delete item.index
-      this.checklist.push(item)
-    },
-
-    removeTask(entry) {
-      this.checklist = remove(this.checklist, entry)
-    },
-
-    reset() {
-      if (this.isEditing) {
-        this.form = {
-          id: this.descriptorToEdit.id,
-          name: this.descriptorToEdit.name,
-          data_type: this.descriptorToEdit.data_type,
-          for_client: this.descriptorToEdit.for_client ? 'true' : 'false',
-          values: [...this.descriptorToEdit.choices],
-          departments: [...this.descriptorToEdit.departments]
-        }
-        this.checklist = this.getDescriptorChecklistValues(
-          this.descriptorToEdit
-        )
-        if (this.form.data_type === 'taglist') {
-          this.form.values.sort()
-        }
-      } else {
-        this.form = {
-          name: '',
-          data_type: 'string',
-          for_client: 'false',
-          values: [],
-          departments: []
-        }
-        this.checklist = []
-      }
-      this.valueToAdd = ''
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-        this.$nextTick(() => {
-          this.$refs.nameField.focus()
-        })
-      }
-    }
+const removeDepartment = idToRemove => {
+  const departmentIndex = form.value.departments.indexOf(idToRemove)
+  if (departmentIndex >= 0) {
+    form.value.departments.splice(departmentIndex, 1)
   }
 }
+
+const addChecklistEntry = index => {
+  if (index === -1 || index === checklist.value.length - 1) {
+    checklist.value.push({ text: '', checked: false })
+  }
+}
+
+const onAddChecklistItem = item => {
+  delete item.index
+  checklist.value.push(item)
+}
+
+const removeTask = entry => {
+  checklist.value = remove(checklist.value, entry)
+}
+
+const confirm = () => {
+  if (SIMPLE_TYPES.includes(form.value.data_type)) {
+    form.value.values = []
+  } else if (form.value.data_type === 'checklist') {
+    form.value.values = checklist.value
+      .filter(Boolean)
+      .map(x => (x.checked ? '[x] ' : '[ ] ') + x.text)
+  }
+  emit('confirm', form.value)
+}
+
+watch(
+  () => props.active,
+  isActive => {
+    if (isActive) {
+      reset()
+      nextTick(() => nameField.value?.focus())
+    }
+  }
+)
+
+onMounted(reset)
 </script>
 
 <style lang="scss" scoped>
