@@ -7,29 +7,29 @@
         {{ stats.amount || 0 }} {{ $t('tasks.tasks') }}
       </span>
       <span class="tag">
-        {{ formatDuration(stats.total_duration) }}
+        {{ formatDuration(organisation, stats.total_duration) }}
         {{
           isDurationInHours
-            ? $tc(
+            ? $t(
                 'main.hours_spent',
-                formatDuration(stats.total_duration, false)
+                formatDuration(organisation, stats.total_duration, false)
               )
-            : $tc(
+            : $t(
                 'main.days_spent',
-                formatDuration(stats.total_duration, false)
+                formatDuration(organisation, stats.total_duration, false)
               )
         }}
         /
-        {{ formatDuration(stats.total_estimation) }}
+        {{ formatDuration(organisation, stats.total_estimation) }}
         {{
           isDurationInHours
-            ? $tc(
+            ? $t(
                 'main.hours_estimated',
-                formatDuration(stats.total_estimation, false)
+                formatDuration(organisation, stats.total_estimation, false)
               )
-            : $tc(
+            : $t(
                 'main.days_estimated',
-                formatDuration(stats.total_estimation, false)
+                formatDuration(organisation, stats.total_estimation, false)
               )
         }}
       </span>
@@ -65,21 +65,33 @@
           {{ taskTypeStatsMap[taskType.id].amount }} {{ $t('tasks.tasks') }}
         </div>
         <div class="task-type-wrapper flexrow-item">
-          {{ formatDuration(taskTypeStatsMap[taskType.id].total_duration) }}
+          {{
+            formatDuration(
+              organisation,
+              taskTypeStatsMap[taskType.id].total_duration
+            )
+          }}
           /
-          {{ formatDuration(taskTypeStatsMap[taskType.id].total_estimation) }}
+          {{
+            formatDuration(
+              organisation,
+              taskTypeStatsMap[taskType.id].total_estimation
+            )
+          }}
           {{
             isDurationInHours
-              ? $tc(
+              ? $t(
                   'main.hours',
                   formatDuration(
+                    organisation,
                     taskTypeStatsMap[taskType.id].total_estimation,
                     false
                   )
                 )
-              : $tc(
+              : $t(
                   'main.days',
                   formatDuration(
+                    organisation,
                     taskTypeStatsMap[taskType.id].total_estimation,
                     false
                   )
@@ -106,136 +118,109 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
-  This component displays the stats of a given production.
-  It shows the number of tasks done, the number of tasks in total, the total
-  duration spent on tasks and the total estimation of the tasks.
-  It also shows the repartition of the tasks by status as colored line.
-  When expanded, it shows the repartition of the tasks by task type.
+  Displays the stats of a production: number of done tasks, totals duration,
+  estimation, and a status repartition bar. When expanded, shows the same
+  breakdown per task type.
 */
-import { mapGetters } from 'vuex'
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
-import { formatListMixin } from '@/components/mixins/format'
+import { formatDuration } from '@/lib/time'
+
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'production-stats',
+const ENTITY_PRIORITY = {
+  Asset: 1,
+  Shot: 2,
+  Sequence: 3,
+  Episode: 4,
+  Edit: 5,
+  Concept: 6
+}
 
-  mixins: [formatListMixin],
+const props = defineProps({
+  stats: { type: Object, default: () => ({}) }
+})
 
-  components: {
-    TaskTypeName
-  },
+const store = useStore()
 
-  props: {
-    stats: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const expanded = ref(false)
 
-  data() {
-    return {
-      expanded: false
-    }
-  },
+const organisation = computed(() => store.getters.organisation)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters(['taskStatusMap', 'taskTypeMap']),
+const isDurationInHours = computed(
+  () => organisation.value.format_duration_in_hours
+)
 
-    expandable() {
-      return this.stats.task_types?.length > 0
-    },
+const expandable = computed(() => props.stats.task_types?.length > 0)
 
-    statusIds() {
-      return Object.keys(this.statsByStatus).sort((a, b) => {
-        return (
-          this.taskStatusMap.get(a).priority <
-          this.taskStatusMap.get(b).priority
-        )
-      })
-    },
-
-    taskTypes() {
-      const entityPriority = {
-        Asset: 1,
-        Shot: 2,
-        Sequence: 3,
-        Episode: 4,
-        Edit: 5,
-        Concept: 6
+const taskTypeStatsMap = computed(() => {
+  const map = {}
+  props.stats.task_types?.forEach(stat => {
+    if (!map[stat.task_type_id]) {
+      map[stat.task_type_id] = {
+        task_type_id: stat.task_type_id,
+        amount: 0,
+        amount_done: 0,
+        total_duration: 0,
+        total_estimation: 0,
+        task_statuses: []
       }
-      return Object.keys(this.taskTypeStatsMap)
-        .map(taskTypeId => {
-          return this.taskTypeMap.get(taskTypeId)
-        })
-        .sort((a, b) => {
-          if (a.for_entity !== b.for_entity) {
-            return entityPriority[a.for_entity] > entityPriority[b.for_entity]
-          } else {
-            return a.priority > b.priority
-          }
-        })
-    },
-
-    taskTypeStatsMap() {
-      const taskTypeStatsMap = {}
-      this.stats.task_types?.forEach(taskTypeStat => {
-        if (!taskTypeStatsMap[taskTypeStat.task_type_id]) {
-          taskTypeStatsMap[taskTypeStat.task_type_id] = {
-            task_type_id: taskTypeStat.task_type_id,
-            amount: 0,
-            amount_done: 0,
-            total_duration: 0,
-            total_estimation: 0,
-            task_statuses: []
-          }
-        }
-        taskTypeStatsMap[taskTypeStat.task_type_id].amount +=
-          taskTypeStat.amount
-        taskTypeStatsMap[taskTypeStat.task_type_id].amount_done +=
-          taskTypeStat.amount_done
-        taskTypeStatsMap[taskTypeStat.task_type_id].total_duration +=
-          taskTypeStat.total_duration
-        taskTypeStatsMap[taskTypeStat.task_type_id].total_estimation +=
-          taskTypeStat.total_estimation
-        taskTypeStatsMap[taskTypeStat.task_type_id].task_statuses.push(
-          taskTypeStat
-        )
-      })
-      return taskTypeStatsMap
-    },
-
-    statsByStatus() {
-      const statsByStatus = {}
-      this.stats.task_types?.forEach(taskTypeStat => {
-        if (!statsByStatus[taskTypeStat.task_status_id]) {
-          statsByStatus[taskTypeStat.task_status_id] = 0
-        }
-        statsByStatus[taskTypeStat.task_status_id] += taskTypeStat.amount
-      })
-      return statsByStatus
     }
-  },
+    map[stat.task_type_id].amount += stat.amount
+    map[stat.task_type_id].amount_done += stat.amount_done
+    map[stat.task_type_id].total_duration += stat.total_duration
+    map[stat.task_type_id].total_estimation += stat.total_estimation
+    map[stat.task_type_id].task_statuses.push(stat)
+  })
+  return map
+})
 
-  methods: {
-    expandStats() {
-      if (this.expandable) {
-        this.expanded = !this.expanded
+const statsByStatus = computed(() => {
+  const result = {}
+  props.stats.task_types?.forEach(stat => {
+    if (!result[stat.task_status_id]) {
+      result[stat.task_status_id] = 0
+    }
+    result[stat.task_status_id] += stat.amount
+  })
+  return result
+})
+
+const statusIds = computed(() =>
+  Object.keys(statsByStatus.value).sort(
+    (a, b) =>
+      taskStatusMap.value.get(a).priority < taskStatusMap.value.get(b).priority
+  )
+)
+
+const taskTypes = computed(() =>
+  Object.keys(taskTypeStatsMap.value)
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .sort((a, b) => {
+      if (a.for_entity !== b.for_entity) {
+        return ENTITY_PRIORITY[a.for_entity] > ENTITY_PRIORITY[b.for_entity]
       }
-    },
+      return a.priority > b.priority
+    })
+)
 
-    sortStatuses(statuses) {
-      return statuses.sort((a, b) => {
-        return (
-          this.taskStatusMap.get(a.task_status_id).priority <
-          this.taskStatusMap.get(b.task_status_id).priority
-        )
-      })
-    }
+const expandStats = () => {
+  if (expandable.value) {
+    expanded.value = !expanded.value
   }
 }
+
+const sortStatuses = statuses =>
+  statuses.sort(
+    (a, b) =>
+      taskStatusMap.value.get(a.task_status_id).priority <
+      taskStatusMap.value.get(b.task_status_id).priority
+  )
 </script>
 
 <style lang="scss" scoped>
