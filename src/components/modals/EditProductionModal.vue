@@ -90,12 +90,11 @@
 import { computed, ref, toRef, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import { useModal } from '@/composables/modal'
 import {
   PRODUCTION_STYLE_OPTIONS,
   PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
-
-import { useModal } from '@/composables/modal'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
@@ -115,14 +114,20 @@ const store = useStore()
 
 useModal(toRef(props, 'active'), emit)
 
+// State
+
 const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
 const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
 
 const form = ref({})
 
+// Computed
+
 const productionStatusOptions = computed(
   () => store.getters.productionStatusOptions
 )
+
+// Functions
 
 const resetForm = () => {
   form.value = {
@@ -144,6 +149,8 @@ const runConfirmation = () => {
 const onFileSelected = formData => {
   emit('fileselected', formData)
 }
+
+// Watchers
 
 watch(() => props.productionToEdit, resetForm, { immediate: true })
 </script>

@@ -151,10 +151,9 @@ import { computed, nextTick, onMounted, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useModal } from '@/composables/modal'
 import { getDescriptorChecklistValues } from '@/lib/descriptors'
 import { remove } from '@/lib/models'
-
-import { useModal } from '@/composables/modal'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 // eslint-disable-next-line no-unused-vars
@@ -184,6 +183,8 @@ const store = useStore()
 
 useModal(toRef(props, 'active'), emit)
 
+// State
+
 const nameField = ref(null)
 const valueList = ref(null)
 
@@ -206,6 +207,8 @@ const typeOptions = [
   { label: t('productions.metadata.tags'), value: 'taglist' },
   { label: t('productions.metadata.checklist'), value: 'checklist' }
 ]
+
+// Computed
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const departmentMap = computed(() => store.getters.departmentMap)
@@ -254,6 +257,8 @@ const isFormFilled = computed(() => {
     (props.entityType === 'Project' && selectableDepartments.value.length === 0)
   return form.value.name.length && dataTypeOk && supervisorDeptOk
 })
+
+// Functions
 
 const reset = () => {
   if (isEditing.value) {
@@ -340,6 +345,8 @@ const confirm = () => {
   emit('confirm', form.value)
 }
 
+// Watchers
+
 watch(
   () => props.active,
   isActive => {
@@ -349,6 +356,8 @@ watch(
     }
   }
 )
+
+// Lifecycle
 
 onMounted(reset)
 </script>

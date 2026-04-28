@@ -121,6 +121,8 @@ const emit = defineEmits(['metadata-changed'])
 
 const store = useStore()
 
+// Computed
+
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -148,6 +150,8 @@ const metadataInputClass = computed(() => ({
   'is-list': props.descriptor.data_type === 'list',
   'is-taglist': props.descriptor.data_type === 'taglist'
 }))
+
+// Functions
 
 const emitMetadataChanged = (entry, descriptor, value) => {
   emit('metadata-changed', { entry, descriptor, value })

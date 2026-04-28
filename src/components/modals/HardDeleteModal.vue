@@ -72,6 +72,8 @@ const { t } = useI18n()
 
 useModal(toRef(props, 'active'), emit)
 
+// State
+
 const confirmationName = ref(null)
 const selectionOnly = ref('true')
 const userLockText = ref('')
@@ -81,9 +83,13 @@ const selectionOptions = [
   { label: t('tasks.for_project'), value: 'false' }
 ]
 
+// Computed
+
 const isLocked = computed(
   () => props.lockText === 'locked' || props.lockText !== userLockText.value
 )
+
+// Watchers
 
 watch(
   () => props.active,

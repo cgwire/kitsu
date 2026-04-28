@@ -119,11 +119,6 @@
 </template>
 
 <script setup>
-/*
-  Displays the stats of a production: number of done tasks, totals duration,
-  estimation, and a status repartition bar. When expanded, shows the same
-  breakdown per task type.
-*/
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
@@ -146,7 +141,11 @@ const props = defineProps({
 
 const store = useStore()
 
+// State
+
 const expanded = ref(false)
+
+// Computed
 
 const organisation = computed(() => store.getters.organisation)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -208,6 +207,8 @@ const taskTypes = computed(() =>
       return a.priority > b.priority
     })
 )
+
+// Functions
 
 const expandStats = () => {
   if (expandable.value) {

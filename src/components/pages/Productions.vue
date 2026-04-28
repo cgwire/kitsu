@@ -80,17 +80,19 @@ import { computed, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import ProductionList from '@/components/lists/ProductionList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditProductionModal from '@/components/modals/EditProductionModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
-import ProductionList from '@/components/lists/ProductionList.vue'
 import ButtonLink from '@/components/widgets/ButtonLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
 const { t } = useI18n()
 const store = useStore()
+
+// State
 
 const metadataDisplayHeaders = ref({})
 const descriptorToEdit = ref(null)
@@ -121,6 +123,8 @@ const modals = reactive({
   isDeleteProjectMetadata: false
 })
 
+// Computed
+
 const isProductionsLoading = computed(() => store.getters.isProductionsLoading)
 const isProductionsLoadingError = computed(
   () => store.getters.isProductionsLoadingError
@@ -129,6 +133,18 @@ const productionAvatarFormData = computed(
   () => store.getters.productionAvatarFormData
 )
 const productions = computed(() => store.getters.productions)
+
+const currentLockText = computed(() => productionToDelete.value?.name || '')
+
+const deleteProjectMetadataText = computed(() => {
+  const d = findFirstProjectDescriptorByFieldName(
+    fieldNameForDeleteMetadata.value
+  )
+  const colName = d?.name || fieldNameForDeleteMetadata.value || '—'
+  return t('productions.metadata.delete_list_column_text', { name: colName })
+})
+
+// Functions
 
 const findFirstProjectDescriptorByFieldName = fieldName => {
   if (!fieldName) return null
@@ -142,16 +158,6 @@ const findFirstProjectDescriptorByFieldName = fieldName => {
       .find(Boolean) || null
   )
 }
-
-const currentLockText = computed(() => productionToDelete.value?.name || '')
-
-const deleteProjectMetadataText = computed(() => {
-  const d = findFirstProjectDescriptorByFieldName(
-    fieldNameForDeleteMetadata.value
-  )
-  const colName = d?.name || fieldNameForDeleteMetadata.value || '—'
-  return t('productions.metadata.delete_list_column_text', { name: colName })
-})
 
 const deleteText = () => {
   const production = productionToDelete.value
@@ -295,7 +301,11 @@ const reloadStats = async () => {
   loading.stats = false
 }
 
+// Lifecycle
+
 store.dispatch('loadProductions')
+
+// Head
 
 useHead({ title: computed(() => `${t('productions.title')} - Kitsu`) })
 </script>

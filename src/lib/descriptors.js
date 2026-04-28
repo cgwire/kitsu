@@ -6,10 +6,6 @@
  * `<script setup>` yet. New code should import from here.
  */
 
-// Descriptor choices are static per descriptor — no need to reparse them
-// for every row. Cache keyed by descriptor.id, cleared when it grows too large.
-const _checklistValuesCache = new Map()
-
 export const getDescriptorChoicesOptions = (descriptor, emptyChoice = true) => {
   const values = (descriptor?.choices || []).map(c => ({ label: c, value: c }))
   if (emptyChoice) {
@@ -37,8 +33,6 @@ export const getMetadataFieldValue = (descriptor, entity) => {
 }
 
 export const getDescriptorChecklistValues = descriptor => {
-  const cached = _checklistValuesCache.get(descriptor.id)
-  if (cached) return cached
   const values = descriptor.choices.reduce((result, choice) => {
     if (choice && typeof choice === 'string' && choice.startsWith('[x] ')) {
       result.push({ text: choice.slice(4), checked: true })
@@ -51,9 +45,7 @@ export const getDescriptorChecklistValues = descriptor => {
     }
     return result
   }, [])
-  const result = values.length === descriptor.choices.length ? values : []
-  _checklistValuesCache.set(descriptor.id, result)
-  return result
+  return values.length === descriptor.choices.length ? values : []
 }
 
 export const getMetadataChecklistValues = (descriptor, entity) => {

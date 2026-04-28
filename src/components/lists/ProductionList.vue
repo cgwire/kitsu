@@ -252,12 +252,12 @@ import { useStore } from 'vuex'
 
 import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
-import ProductionStats from '@/components/pages/production/ProductionStats.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import ProductionStats from '@/components/pages/production/ProductionStats.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
@@ -282,9 +282,13 @@ const emit = defineEmits([
 
 const store = useStore()
 
+// State
+
 const columnSelectorDisplayed = ref(false)
 const headerMetadataMenu = ref(null)
 const lastMetadataHeaderMenuColumn = ref(null)
+
+// Computed
 
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
@@ -332,6 +336,8 @@ const projectDescriptorMap = computed(() => {
   })
   return map
 })
+
+// Functions
 
 const showMetadataHeaderMenu = (columnId, event) => {
   const headerMenuEl = headerMetadataMenu.value?.$el

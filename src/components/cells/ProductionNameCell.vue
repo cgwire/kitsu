@@ -59,42 +59,9 @@ const props = defineProps({
 const { t } = useI18n()
 const store = useStore()
 
-const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Computed
 
-const sectionPath = (production, section) => {
-  const routeName = isCurrentUserClient.value
-    ? 'playlists'
-    : production.homepage || section
-  const route = {
-    name: routeName,
-    params: { production_id: production.id },
-    query: {}
-  }
-  if (production.production_type === 'tvshow') {
-    if (routeName !== 'episodes') {
-      route.name = `episode-${routeName}`
-    }
-    if (
-      !['edits', 'episodes'].includes(routeName) &&
-      production.first_episode_id
-    ) {
-      route.params.episode_id = production.first_episode_id
-    } else {
-      route.params.episode_id = 'all'
-    }
-  } else if (production.production_type === 'shots' && routeName === 'assets') {
-    route.name = 'shots'
-  } else if (
-    production.production_type === 'assets' &&
-    ['shots', 'sequences'].includes(routeName)
-  ) {
-    route.name = 'assets'
-  }
-  if (ENTITY_PAGES.includes(routeName)) {
-    route.query.search = ''
-  }
-  return route
-}
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 
 const generatedAvatar = computed(() => {
   const firstLetter = props.entry.name?.[0] || 'P'
@@ -135,6 +102,43 @@ const thumbnailPath = computed(() => {
   const timestamp = Date.parse(lastUpdate)
   return `/api/pictures/thumbnails/projects/${props.entry.id}.png?t=${timestamp}`
 })
+
+// Functions
+
+const sectionPath = (production, section) => {
+  const routeName = isCurrentUserClient.value
+    ? 'playlists'
+    : production.homepage || section
+  const route = {
+    name: routeName,
+    params: { production_id: production.id },
+    query: {}
+  }
+  if (production.production_type === 'tvshow') {
+    if (routeName !== 'episodes') {
+      route.name = `episode-${routeName}`
+    }
+    if (
+      !['edits', 'episodes'].includes(routeName) &&
+      production.first_episode_id
+    ) {
+      route.params.episode_id = production.first_episode_id
+    } else {
+      route.params.episode_id = 'all'
+    }
+  } else if (production.production_type === 'shots' && routeName === 'assets') {
+    route.name = 'shots'
+  } else if (
+    production.production_type === 'assets' &&
+    ['shots', 'sequences'].includes(routeName)
+  ) {
+    route.name = 'assets'
+  }
+  if (ENTITY_PAGES.includes(routeName)) {
+    route.query.search = ''
+  }
+  return route
+}
 </script>
 
 <style lang="scss" scoped>
