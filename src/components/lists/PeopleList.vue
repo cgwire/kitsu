@@ -5,33 +5,39 @@
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="user datatable-row-header">
-              {{ isBots ? $t('bots.bots') : $t('people.persons') }}
+              {{
+                isBots
+                  ? $t('bots.bots')
+                  : isGuests
+                    ? $t('people.guests')
+                    : $t('people.persons')
+              }}
             </th>
-            <th scope="col" class="phone" v-if="!isBots">
+            <th scope="col" class="phone" v-if="!isBots && !isGuests">
               {{ $t('people.list.phone') }}
             </th>
             <th scope="col" class="expiration" v-if="isBots">
               {{ $t('people.list.expiration') }}
             </th>
-            <th scope="col" class="role">
+            <th scope="col" class="role" v-if="!isGuests">
               {{ $t('people.list.role') }}
             </th>
-            <th scope="col" class="departments">
+            <th scope="col" class="departments" v-if="!isGuests">
               {{ $t('people.list.departments') }}
             </th>
-            <th scope="col" class="studio" v-if="!isBots">
+            <th scope="col" class="studio" v-if="!isBots && !isGuests">
               {{ $t('people.list.studio') }}
             </th>
-            <th scope="col" class="contract" v-if="!isBots">
+            <th scope="col" class="contract" v-if="!isBots && !isGuests">
               {{ $t('people.list.contract') }}
             </th>
-            <th scope="col" class="position" v-if="!isBots">
+            <th scope="col" class="position" v-if="!isBots && !isGuests">
               {{ $t('people.list.position') }}
             </th>
-            <th scope="col" class="seniority" v-if="!isBots">
+            <th scope="col" class="seniority" v-if="!isBots && !isGuests">
               {{ $t('people.list.seniority') }}
             </th>
-            <th scope="col" class="salary" v-if="!isBots">
+            <th scope="col" class="salary" v-if="!isBots && !isGuests">
               {{ $t('people.fields.daily_salary') }}
             </th>
             <th scope="col" class="actions"></th>
@@ -48,7 +54,9 @@
               class="user datatable-row-header"
               :person="person"
             />
-            <td class="phone" v-if="!isBots">{{ person.phone }}</td>
+            <td class="phone" v-if="!isBots && !isGuests">
+              {{ person.phone }}
+            </td>
             <td
               class="expiration"
               :class="{
@@ -60,37 +68,41 @@
               {{ person.expiration_date }}
               <alert-triangle-icon class="icon mr05" />
             </td>
-            <td class="role">{{ $t(`people.role.${person.role}`) }}</td>
+            <td class="role" v-if="!isGuests">
+              {{ $t(`people.role.${person.role}`) }}
+            </td>
             <department-names-cell
               class="departments"
               :departments="person.departments"
+              v-if="!isGuests"
             />
-            <td class="studio" v-if="!isBots">
+            <td class="studio" v-if="!isBots && !isGuests">
               <studio-name :studio="person.studio" v-if="person.studio" />
             </td>
-            <td class="contract" v-if="!isBots">
+            <td class="contract" v-if="!isBots && !isGuests">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
-            <td class="position" v-if="!isBots">
+            <td class="position" v-if="!isBots && !isGuests">
               {{
                 person.position ? $t(`people.position.${person.position}`) : ''
               }}
             </td>
-            <td class="seniority" v-if="!isBots">
+            <td class="seniority" v-if="!isBots && !isGuests">
               {{
                 person.seniority
                   ? $t(`people.seniority.${person.seniority}`)
                   : ''
               }}
             </td>
-            <td class="salary" v-if="!isBots">
+            <td class="salary" v-if="!isBots && !isGuests">
               {{ person.daily_salary }}
             </td>
             <row-actions-cell
               class="datatable-row-footer"
-              :hide-avatar="!person.active"
-              :hide-change-password="isBots || !person.active"
-              :hide-delete="person.active"
+              :hide-avatar="isGuests || !person.active"
+              :hide-change-password="isBots || isGuests || !person.active"
+              :hide-delete="person.active && !isGuests"
+              :hide-edit="isGuests"
               :hide-refresh="!isBots || !person.active"
               @avatar-clicked="$emit('avatar-clicked', person)"
               @change-password-clicked="
@@ -155,6 +167,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isGuests: {
+      type: Boolean,
+      default: false
+    },
     isLoading: {
       type: Boolean,
       default: false
@@ -211,11 +227,13 @@ export default {
 
     nbUsersDetails() {
       const nbUsers = this.entries.length
-      const labelUsers = this.$tc(
-        this.isBots ? 'bots.bots' : 'people.persons',
-        nbUsers
-      )
-      if (!this.isBots && this.seatsRemaining !== null) {
+      const key = this.isBots
+        ? 'bots.bots'
+        : this.isGuests
+          ? 'people.guests'
+          : 'people.persons'
+      const labelUsers = this.$tc(key, nbUsers)
+      if (!this.isBots && !this.isGuests && this.seatsRemaining !== null) {
         const labelRemaining = this.$tc(
           'people.seats_remaining',
           this.seatsRemaining,

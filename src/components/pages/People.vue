@@ -70,6 +70,7 @@
 
     <people-list
       :entries="listEntries"
+      :is-guests="activeTab === 'guests'"
       :is-loading="isListLoading"
       :is-error="isListError"
       :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
