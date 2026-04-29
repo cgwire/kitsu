@@ -164,6 +164,10 @@ export default {
     backgroundUrl: {
       default: '',
       type: String
+    },
+    urlPrefix: {
+      default: '/api',
+      type: String
     }
   },
 
@@ -406,7 +410,7 @@ export default {
       const frameY = Math.floor(frame / 8)
       const frameHeight = 100
       const frameWidth = Math.ceil(frameHeight * this.videoRatio)
-      const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
+      const tilePath = `${this.urlPrefix}/movies/tiles/preview-files/${previewId}.png`
       return {
         background: `url(${tilePath})`,
         'background-position': `-${frameX * frameWidth}px -${
@@ -526,6 +530,15 @@ progress {
 
 .frame-number-rail {
   position: relative;
+}
+
+// Touch devices fire `touchstart` on the progress bar but never a clean
+// hover-leave, so the frame thumbnail would otherwise stick on screen.
+// Hide it entirely on hoverless / coarse pointers.
+@media (hover: none), (pointer: coarse) {
+  .frame-number {
+    display: none !important;
+  }
 }
 
 .handle-in {

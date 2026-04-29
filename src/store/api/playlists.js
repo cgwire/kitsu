@@ -114,6 +114,13 @@ export default {
     return client.pdel(`/api/data/playlists/${playlistId}/share/${token}`)
   },
 
+  sendShareInvitations(playlistId, token, data) {
+    return client.ppost(
+      `/api/data/playlists/${playlistId}/share/${token}/invite`,
+      data
+    )
+  },
+
   postSharedPlaylistGuest(shareToken, data) {
     return client.ppost(`/api/shared/playlists/${shareToken}/guest`, data)
   },

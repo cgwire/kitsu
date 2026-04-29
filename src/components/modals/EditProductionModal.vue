@@ -86,100 +86,73 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, ref, toRef, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
+import { useModal } from '@/composables/modal'
+import {
+  PRODUCTION_STYLE_OPTIONS,
+  PRODUCTION_TYPE_OPTIONS
+} from '@/lib/productions'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-import {
-  PRODUCTION_STYLE_OPTIONS,
-  PRODUCTION_TYPE_OPTIONS
-} from '@/lib/productions'
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  productionToEdit: { type: Object, required: true }
+})
 
-export default {
-  name: 'edit-production-modal',
+const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
 
-  mixins: [modalMixin],
+const store = useStore()
 
-  components: {
-    ComboboxStyled,
-    FileUpload,
-    ModalFooter,
-    TextField
-  },
+useModal(toRef(props, 'active'), emit)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    productionToEdit: {
-      type: Object,
-      required: true
-    }
-  },
+// State
 
-  emits: ['cancel', 'confirm', 'fileselected'],
+const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
+const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
 
-  data() {
-    return {
-      form: {},
-      formData: null,
-      productionStyleOptions: PRODUCTION_STYLE_OPTIONS,
-      productionTypeOptions: PRODUCTION_TYPE_OPTIONS
-    }
-  },
+const form = ref({})
 
-  computed: {
-    ...mapGetters(['productionStatusOptions'])
-  },
+// Computed
 
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    },
+const productionStatusOptions = computed(
+  () => store.getters.productionStatusOptions
+)
 
-    onFileSelected(formData) {
-      this.formData = formData
-      this.$emit('fileselected', formData)
-    },
+// Functions
 
-    resetForm() {
-      this.form = {
-        name: this.productionToEdit.name,
-        code: this.productionToEdit.code,
-        project_status_id: this.productionToEdit.project_status_id,
-        production_type: this.productionToEdit.production_type || 'short',
-        production_style: this.productionToEdit.production_style || '2d3d',
-        fps: this.productionToEdit.fps,
-        ratio: this.productionToEdit.ratio,
-        resolution: this.productionToEdit.resolution
-      }
-    }
-  },
-
-  watch: {
-    productionToEdit: {
-      immediate: true,
-      handler() {
-        this.resetForm()
-      }
-    }
+const resetForm = () => {
+  form.value = {
+    name: props.productionToEdit.name,
+    code: props.productionToEdit.code,
+    project_status_id: props.productionToEdit.project_status_id,
+    production_type: props.productionToEdit.production_type || 'short',
+    production_style: props.productionToEdit.production_style || '2d3d',
+    fps: props.productionToEdit.fps,
+    ratio: props.productionToEdit.ratio,
+    resolution: props.productionToEdit.resolution
   }
 }
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+const onFileSelected = formData => {
+  emit('fileselected', formData)
+}
+
+// Watchers
+
+watch(() => props.productionToEdit, resetForm, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

@@ -13,7 +13,7 @@
         <p>
           <input
             type="text"
-            ref="confirmation-name"
+            ref="confirmationName"
             class="input"
             v-model="userLockText"
           />
@@ -48,81 +48,58 @@
   </div>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, nextTick, ref, toRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import { useModal } from '@/composables/modal'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 
-export default {
-  name: 'hard-delete-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  errorText: { type: String, default: '' },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  lockText: { type: String, default: 'locked' },
+  selectionOption: { type: Boolean, default: false },
+  text: { type: String, default: '' }
+})
 
-  mixins: [modalMixin],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  components: { Combobox },
+const { t } = useI18n()
 
-  emits: ['cancel', 'confirm'],
+useModal(toRef(props, 'active'), emit)
 
-  data() {
-    return {
-      userLockText: '',
-      selectionOnly: 'true',
-      selectionOptions: [
-        { label: this.$t('tasks.for_selection'), value: 'true' },
-        { label: this.$t('tasks.for_project'), value: 'false' }
-      ]
-    }
-  },
+// State
 
-  props: {
-    text: {
-      type: String,
-      default: ''
-    },
-    active: {
-      type: Boolean,
-      default: false
-    },
-    errorText: {
-      type: String,
-      default: ''
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    lockText: {
-      type: String,
-      default: 'locked'
-    },
-    selectionOption: {
-      type: Boolean,
-      default: false
-    }
-  },
+const confirmationName = ref(null)
+const selectionOnly = ref('true')
+const userLockText = ref('')
 
-  computed: {
-    isLocked() {
-      return this.lockText === 'locked' || this.lockText !== this.userLockText
-    }
-  },
+const selectionOptions = [
+  { label: t('tasks.for_selection'), value: 'true' },
+  { label: t('tasks.for_project'), value: 'false' }
+]
 
-  watch: {
-    active() {
-      if (this.active) {
-        this.userLockText = ''
-        this.$nextTick(() => {
-          if (this.$refs['confirmation-name']) {
-            this.$refs['confirmation-name'].focus()
-          }
-        })
-      }
+// Computed
+
+const isLocked = computed(
+  () => props.lockText === 'locked' || props.lockText !== userLockText.value
+)
+
+// Watchers
+
+watch(
+  () => props.active,
+  isActive => {
+    if (isActive) {
+      userLockText.value = ''
+      nextTick(() => confirmationName.value?.focus())
     }
   }
-}
+)
 </script>
 
 <style lang="scss" scoped>

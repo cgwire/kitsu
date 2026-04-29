@@ -1019,6 +1019,7 @@ export default {
     team: 'Team',
     title: 'People',
     unactive: 'Inactive',
+    guests: 'Guests',
     email_domain_error: 'This email domain is not allowed.',
     email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
@@ -1139,6 +1140,16 @@ export default {
       generate: 'Generate a new link',
       copy: 'Copy link',
       revoke: 'Revoke link',
+      invite: 'Invite by email',
+      invite_recipients: 'Recipients',
+      invite_placeholder: 'Type an email and press Enter, or pick a client',
+      invite_add_email: 'Add this email',
+      invite_message_label: 'Custom message (optional)',
+      invite_message_placeholder: 'A short note that will be added to the email',
+      invite_send: 'Send invitations',
+      invite_sent: '{count} invitation sent | {count} invitations sent',
+      invite_invalid_email: 'That email address is not valid.',
+      invite_error: 'An error occurred while sending the invitations.',
       expires: 'Expires',
       no_expiration: 'No expiration',
       comments_enabled: 'Comments enabled',
@@ -1530,6 +1541,8 @@ export default {
     identity_required: 'You need to enter your name before posting.',
     no_status_available: 'No task statuses are configured for this project.',
     logout: 'Leave review session',
+    post_comment_error:
+      'Could not post the comment. Please reload the page and try again.',
     kitsu_homepage: 'About Kitsu'
   },
 

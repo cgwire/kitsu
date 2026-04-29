@@ -13,6 +13,9 @@ import {
   LOAD_PEOPLE_START,
   LOAD_PEOPLE_ERROR,
   LOAD_PEOPLE_END,
+  LOAD_GUESTS_START,
+  LOAD_GUESTS_END,
+  LOAD_GUESTS_ERROR,
   PERSON_CSV_FILE_SELECTED,
   IMPORT_PEOPLE_START,
   IMPORT_PEOPLE_ERROR,
@@ -116,7 +119,8 @@ const cache = {
   personDoneTasksIndex: {},
   personDoneTasks: [],
   personTasksIndex: {},
-  personMap: new Map()
+  personMap: new Map(),
+  guests: []
 }
 
 const initialState = {
@@ -137,6 +141,15 @@ const initialState = {
   peopleSearchQueries: [],
   isPeopleLoading: false,
   isPeopleLoadingError: true,
+
+  // Guests are loaded lazily — only when the user opens the dedicated
+  // tab in the People page — because they can be large and pollute the
+  // active/unactive lists. The flag is reset on RESET_ALL so a re-login
+  // forces a fresh fetch.
+  guests: [],
+  isGuestsLoading: false,
+  isGuestsLoadingError: false,
+  isGuestsLoaded: false,
 
   isImportPeopleLoading: false,
   isImportPeopleLoadingError: false,
@@ -194,6 +207,11 @@ const getters = {
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
   peopleSearchText: state => state.peopleSearchText,
+
+  guests: state => state.guests,
+  isGuestsLoading: state => state.isGuestsLoading,
+  isGuestsLoadingError: state => state.isGuestsLoadingError,
+  isGuestsLoaded: state => state.isGuestsLoaded,
 
   isImportPeopleLoading: state => state.isImportPeopleLoading,
   isImportPeopleLoadingError: state => state.isImportPeopleLoadingError,
@@ -261,6 +279,19 @@ const actions = {
       })
     } catch (err) {
       commit(LOAD_PEOPLE_ERROR)
+    }
+  },
+
+  async loadGuests({ commit, state }, { force = false } = {}) {
+    if (state.isGuestsLoading) return
+    if (state.isGuestsLoaded && !force) return
+    commit(LOAD_GUESTS_START)
+    try {
+      const guests = await peopleApi.getGuests()
+      commit(LOAD_GUESTS_END, { guests })
+    } catch (err) {
+      console.error(err)
+      commit(LOAD_GUESTS_ERROR)
     }
   },
 
@@ -630,6 +661,30 @@ const mutations = {
     state.peopleSearchQueries = userFilters.people?.all || []
   },
 
+  [LOAD_GUESTS_START](state) {
+    state.isGuestsLoading = true
+    state.isGuestsLoadingError = false
+  },
+
+  [LOAD_GUESTS_ERROR](state) {
+    state.isGuestsLoading = false
+    state.isGuestsLoadingError = true
+  },
+
+  [LOAD_GUESTS_END](state, { guests }) {
+    state.isGuestsLoading = false
+    state.isGuestsLoadingError = false
+    cache.guests = sortPeople(guests).map(person =>
+      helpers.addAdditionalInformation(person)
+    )
+    cache.guests.forEach(person => {
+      cache.personMap.set(person.id, person)
+    })
+    state.personMapVersion++
+    state.guests = cache.guests
+    state.isGuestsLoaded = true
+  },
+
   [DELETE_PEOPLE_END](state, person) {
     if (person) {
       const personToDeleteIndex = cache.people.findIndex(
@@ -897,6 +952,7 @@ const mutations = {
     cache.personTasksIndex = {}
     cache.personDoneTasksIndex = {}
     cache.personDoneTasks = []
+    cache.guests = []
   },
 
   [SAVE_PEOPLE_SEARCH_END](state, { searchQuery }) {

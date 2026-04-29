@@ -1,12 +1,12 @@
-import descriptors from '@/lib/descriptors'
+import { getDescriptorChoicesOptions } from '@/lib/descriptors'
 
 describe('descriptors', () => {
-  test('getChoiceOptions', () => {
+  test('getDescriptorChoicesOptions', () => {
     const descriptor = {
       field_name: 'difficulty',
       choices: ['easy', 'medium', 'difficult']
     }
-    expect(descriptors.getChoicesOptions(descriptor)).toEqual([
+    expect(getDescriptorChoicesOptions(descriptor)).toEqual([
       { label: '', value: '' },
       { label: 'easy', value: 'easy' },
       { label: 'medium', value: 'medium' },
@@ -14,12 +14,18 @@ describe('descriptors', () => {
     ])
   })
 
-  test('getChoiceOptions with missing choices', () => {
-    expect(descriptors.getChoicesOptions({})).toEqual([
+  test('getDescriptorChoicesOptions with missing choices', () => {
+    expect(getDescriptorChoicesOptions({})).toEqual([{ label: '', value: '' }])
+    expect(getDescriptorChoicesOptions(null)).toEqual([
       { label: '', value: '' }
     ])
-    expect(descriptors.getChoicesOptions(null)).toEqual([
-      { label: '', value: '' }
+  })
+
+  test('getDescriptorChoicesOptions without empty choice', () => {
+    const descriptor = { choices: ['a', 'b'] }
+    expect(getDescriptorChoicesOptions(descriptor, false)).toEqual([
+      { label: 'a', value: 'a' },
+      { label: 'b', value: 'b' }
     ])
   })
 })

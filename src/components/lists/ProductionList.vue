@@ -8,8 +8,6 @@
       :show-stick="false"
       @delete-clicked="onDeleteMetadataClicked"
       @edit-clicked="onEditMetadataClicked"
-      @sort-by-clicked="onSortByMetadataClicked"
-      @toggle-stick="onToggleProjectMetadataStick"
     />
     <div class="datatable-wrapper">
       <table class="datatable multi-section">
@@ -243,172 +241,150 @@
     <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
 
     <p class="has-text-centered nb-productions">
-      {{ entries.length }} {{ $tc('productions.number', entries.length) }}
+      {{ entries.length }} {{ $t('productions.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from 'vuex'
+<script setup>
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
 import { PRODUCTION_STYLE_OPTIONS } from '@/lib/productions'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
-import ProductionStats from '@/components/pages/production/ProductionStats.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import ProductionStats from '@/components/pages/production/ProductionStats.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 
-export default {
-  name: 'production-list',
+const props = defineProps({
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  metadataDisplayHeaders: { type: Object, default: () => ({}) },
+  productionStats: { type: Object, default: () => ({}) }
+})
 
-  mixins: [descriptorMixin],
+const emit = defineEmits([
+  'add-metadata',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-metadata',
+  'metadata-changed',
+  'update:metadataDisplayHeaders'
+])
 
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    productionStats: {
-      type: Object,
-      default: () => {}
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    metadataDisplayHeaders: {
-      type: Object,
-      default: () => ({})
-    }
-  },
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    MetadataHeader,
-    MetadataInput,
-    ProductionNameCell,
-    ProductionStats,
-    RowActionsCell,
-    TableInfo,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu
-  },
+// State
 
-  emits: [
-    'add-metadata',
-    'delete-clicked',
-    'edit-clicked',
-    'metadata-changed',
-    'update:metadataDisplayHeaders'
-  ],
+const columnSelectorDisplayed = ref(false)
+const headerMetadataMenu = ref(null)
+const lastMetadataHeaderMenuColumn = ref(null)
 
-  data() {
-    return {
-      columnSelectorDisplayed: false,
-      lastMetadaDataHeaderMenuDisplayed: null
-    }
-  },
+// Computed
 
-  computed: {
-    ...mapGetters([
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'mergedProjectMetadataDescriptors',
-      'openProductions',
-      'lastProductionScreen'
-    ]),
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
+const mergedProjectMetadataDescriptors = computed(
+  () => store.getters.mergedProjectMetadataDescriptors
+)
+const openProductions = computed(() => store.getters.openProductions)
 
-    isProjectMetadataMenuEditAllowed() {
-      const fieldName = this.lastMetadaDataHeaderMenuDisplayed
-      if (!fieldName) {
-        return false
+const closedProductions = computed(() =>
+  props.entries.filter(p => p.project_status_name === 'Closed')
+)
+
+const visibleProjectMetadataDescriptors = computed(() =>
+  mergedProjectMetadataDescriptors.value.filter(d => {
+    const header = props.metadataDisplayHeaders[d.field_name]
+    return header === undefined || header
+  })
+)
+
+const isProjectMetadataMenuEditAllowed = computed(() => {
+  const fieldName = lastMetadataHeaderMenuColumn.value
+  if (!fieldName) return false
+  const d = visibleProjectMetadataDescriptors.value.find(
+    x => x.field_name === fieldName
+  )
+  if (!d) return false
+  return isCurrentUserManager.value || isCurrentUserSupervisor.value
+})
+
+// Cache project descriptors per (entryId, fieldName) so the template doesn't
+// re-scan `production.descriptors` twice per cell on every render.
+const projectDescriptorMap = computed(() => {
+  const map = new Map()
+  props.entries.forEach(entry => {
+    const inner = new Map()
+    ;(entry.descriptors || []).forEach(descriptor => {
+      if (descriptor.entity_type === 'Project') {
+        inner.set(descriptor.field_name, descriptor)
       }
-      const d = this.visibleProjectMetadataDescriptors.find(
-        x => x.field_name === fieldName
-      )
-      if (!d) {
-        return false
-      }
-      return this.isCurrentUserManager || this.isCurrentUserSupervisor
-    },
+    })
+    map.set(entry.id, inner)
+  })
+  return map
+})
 
-    closedProductions() {
-      return this.entries.filter(p => p.project_status_name === 'Closed')
-    },
+// Functions
 
-    visibleProjectMetadataDescriptors() {
-      return this.mergedProjectMetadataDescriptors.filter(d => {
-        const header = this.metadataDisplayHeaders[d.field_name]
-        return header === undefined || header
-      })
-    },
-
-    /**
-     * Cache project descriptors per (entryId, fieldName) so the template
-     * doesn't re-scan `production.descriptors` twice per cell on every render.
-     */
-    projectDescriptorMap() {
-      const map = new Map()
-      this.entries.forEach(entry => {
-        const inner = new Map()
-        ;(entry.descriptors || []).forEach(descriptor => {
-          if (descriptor.entity_type === 'Project') {
-            inner.set(descriptor.field_name, descriptor)
-          }
-        })
-        map.set(entry.id, inner)
-      })
-      return map
-    }
-  },
-
-  methods: {
-    ...mapActions(['reorderAllProjectsProjectMetadata']),
-
-    onAddMetadataClick() {
-      this.$emit('add-metadata')
-    },
-
-    onAllProjectsMetadataReorder(ordered) {
-      return this.reorderAllProjectsProjectMetadata({
-        entityType: 'Project',
-        fieldOrder: (ordered || []).map(d => d.field_name)
-      })
-    },
-
-    onSortByMetadataClicked() {},
-
-    toggleColumnSelector() {
-      this.columnSelectorDisplayed = !this.columnSelectorDisplayed
-    },
-
-    onToggleProjectMetadataStick() {},
-
-    getProductionStyleLabel(value) {
-      return PRODUCTION_STYLE_OPTIONS.find(style => style.value === value)
-        ?.label
-    },
-
-    getProjectDescriptorForField(production, fieldName) {
-      return (
-        this.projectDescriptorMap.get(production.id)?.get(fieldName) || null
-      )
-    },
-
-    onProjectMetadataInCell({ entry, descriptor, value }) {
-      this.$emit('metadata-changed', { entry, descriptor, value })
-    }
+const showMetadataHeaderMenu = (columnId, event) => {
+  const headerMenuEl = headerMetadataMenu.value?.$el
+  if (!headerMenuEl) return
+  if (headerMenuEl.className === 'header-menu') {
+    headerMenuEl.className = 'header-menu hidden'
+  } else if (event) {
+    headerMenuEl.className = 'header-menu'
+    const headerElement = event.srcElement.parentNode.parentNode
+    const headerBox = headerElement.getBoundingClientRect()
+    headerMenuEl.style.left = `${headerBox.left - 3}px`
+    headerMenuEl.style.top = `${headerBox.bottom + 11}px`
+    headerMenuEl.style.width = `${Math.max(100, headerBox.width - 1)}px`
   }
+  lastMetadataHeaderMenuColumn.value = columnId
+}
+
+const onEditMetadataClicked = () => {
+  emit('edit-metadata', lastMetadataHeaderMenuColumn.value)
+  showMetadataHeaderMenu()
+}
+
+const onDeleteMetadataClicked = () => {
+  emit('delete-metadata', lastMetadataHeaderMenuColumn.value)
+  showMetadataHeaderMenu()
+}
+
+const onAddMetadataClick = () => emit('add-metadata')
+
+const onAllProjectsMetadataReorder = ordered =>
+  store.dispatch('reorderAllProjectsProjectMetadata', {
+    entityType: 'Project',
+    fieldOrder: (ordered || []).map(d => d.field_name)
+  })
+
+const toggleColumnSelector = () => {
+  columnSelectorDisplayed.value = !columnSelectorDisplayed.value
+}
+
+const getProductionStyleLabel = value =>
+  PRODUCTION_STYLE_OPTIONS.find(style => style.value === value)?.label
+
+const getProjectDescriptorForField = (production, fieldName) =>
+  projectDescriptorMap.value.get(production.id)?.get(fieldName) || null
+
+const onProjectMetadataInCell = ({ entry, descriptor, value }) => {
+  emit('metadata-changed', { entry, descriptor, value })
 }
 </script>
 

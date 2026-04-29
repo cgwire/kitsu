@@ -482,6 +482,15 @@ export default {
   font-variant-numeric: tabular-nums;
 }
 
+// Touch devices fire `touchstart` on the progress bar but never a clean
+// hover-leave, so the frame thumbnail would otherwise stick on screen.
+// Hide it entirely on hoverless / coarse pointers.
+@media (hover: none), (pointer: coarse) {
+  .frame-number {
+    display: none !important;
+  }
+}
+
 .entity-status {
   border-left: 0;
   border-right: 3px solid $dark-grey;

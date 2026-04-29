@@ -74,263 +74,238 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
+import ProductionList from '@/components/lists/ProductionList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
-import ButtonLink from '@/components/widgets/ButtonLink.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import EditProductionModal from '@/components/modals/EditProductionModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
-import ProductionList from '@/components/lists/ProductionList.vue'
+import ButtonLink from '@/components/widgets/ButtonLink.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
-export default {
-  name: 'productions',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    AddMetadataModal,
-    DeleteModal,
-    ButtonLink,
-    ButtonSimple,
-    HardDeleteModal,
-    EditProductionModal,
-    PageTitle,
-    ProductionList
-  },
+// State
 
-  data() {
-    return {
-      metadataDisplayHeaders: {},
-      descriptorToEdit: null,
-      fieldNameForDeleteMetadata: null,
-      errors: {
-        addMetadata: false,
-        deleteProjectMetadata: false,
-        del: false,
-        edit: false
-      },
-      loading: {
-        addMetadata: false,
-        deleteProjectMetadata: false,
-        del: false,
-        edit: false,
-        stats: false
-      },
-      modals: {
-        isAddProjectMetadata: false,
-        isEditDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteProjectMetadata: false
-      },
-      productionStats: {},
-      productionToDelete: null,
-      productionToEdit: null
-    }
-  },
+const metadataDisplayHeaders = ref({})
+const descriptorToEdit = ref(null)
+const fieldNameForDeleteMetadata = ref(null)
+const productionStats = ref({})
+const productionToDelete = ref(null)
+const productionToEdit = ref(null)
 
-  computed: {
-    ...mapGetters([
-      'isProductionsLoading',
-      'isProductionsLoadingError',
-      'productionAvatarFormData',
-      'productions'
-    ]),
+const errors = reactive({
+  addMetadata: false,
+  deleteProjectMetadata: false,
+  del: false,
+  edit: false
+})
 
-    currentLockText() {
-      return this.productionToDelete?.name || ''
-    },
+const loading = reactive({
+  addMetadata: false,
+  deleteProjectMetadata: false,
+  del: false,
+  edit: false,
+  stats: false
+})
 
-    deleteProjectMetadataText() {
-      const d = this.findFirstProjectDescriptorByFieldName(
-        this.fieldNameForDeleteMetadata
+const modals = reactive({
+  isAddProjectMetadata: false,
+  isEditDisplayed: false,
+  isDeleteDisplayed: false,
+  isDeleteProjectMetadata: false
+})
+
+// Computed
+
+const isProductionsLoading = computed(() => store.getters.isProductionsLoading)
+const isProductionsLoadingError = computed(
+  () => store.getters.isProductionsLoadingError
+)
+const productionAvatarFormData = computed(
+  () => store.getters.productionAvatarFormData
+)
+const productions = computed(() => store.getters.productions)
+
+const currentLockText = computed(() => productionToDelete.value?.name || '')
+
+const deleteProjectMetadataText = computed(() => {
+  const d = findFirstProjectDescriptorByFieldName(
+    fieldNameForDeleteMetadata.value
+  )
+  const colName = d?.name || fieldNameForDeleteMetadata.value || '—'
+  return t('productions.metadata.delete_list_column_text', { name: colName })
+})
+
+// Functions
+
+const findFirstProjectDescriptorByFieldName = fieldName => {
+  if (!fieldName) return null
+  return (
+    productions.value
+      .map(p =>
+        p.descriptors?.find(
+          d => d.entity_type === 'Project' && d.field_name === fieldName
+        )
       )
-      const colName = d?.name || this.fieldNameForDeleteMetadata || '—'
-      return this.$t('productions.metadata.delete_list_column_text', {
-        name: colName
-      })
-    }
-  },
-
-  async created() {
-    await this.loadProductions()
-  },
-
-  methods: {
-    ...mapActions([
-      'addProjectMetadataDescriptorToAllProductions',
-      'deleteProjectMetadataByFieldName',
-      'deleteProduction',
-      'editProduction',
-      'loadProductions',
-      'loadProductionStats',
-      'storeProductionPicture',
-      'updateProjectMetadataOnAll',
-      'uploadProductionAvatar'
-    ]),
-
-    // Actions
-
-    async confirmEditProduction(form) {
-      this.loading.edit = true
-      this.errors.edit = false
-      try {
-        if (this.productionAvatarFormData) {
-          await this.uploadProductionAvatar(this.productionToEdit.id)
-        }
-        await this.editProduction({
-          ...form,
-          id: this.productionToEdit.id
-        })
-        this.modals.isEditDisplayed = false
-      } catch (error) {
-        console.error(error)
-        this.errors.edit = true
-      }
-      this.loading.edit = false
-    },
-
-    confirmDeleteProduction() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteProduction(this.productionToDelete)
-        .then(() => {
-          this.modals.isDeleteDisplayed = false
-          this.loading.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-          this.loading.del = false
-        })
-    },
-
-    deleteText() {
-      const production = this.productionToDelete
-      if (production) {
-        return this.$t('productions.delete_text', { name: production.name })
-      } else {
-        return ''
-      }
-    },
-
-    // Events
-
-    onEditClicked(production) {
-      this.storeProductionPicture(null)
-      this.productionToEdit = production
-      this.modals.isEditDisplayed = true
-    },
-
-    onDeleteClicked(production) {
-      this.productionToDelete = production
-      this.modals.isDeleteDisplayed = true
-    },
-
-    onProductionPictureSelected(formData) {
-      this.storeProductionPicture(formData)
-    },
-
-    onProjectMetadataChanged({ entry, descriptor, value }) {
-      return this.editProduction({
-        id: entry.id,
-        data: { [descriptor.field_name]: value }
-      })
-    },
-
-    findFirstProjectDescriptorByFieldName(fieldName) {
-      if (!fieldName) return null
-      return (
-        this.productions
-          .map(p =>
-            p.descriptors?.find(
-              d => d.entity_type === 'Project' && d.field_name === fieldName
-            )
-          )
-          .find(Boolean) || null
-      )
-    },
-
-    onAddProjectMetadata() {
-      this.descriptorToEdit = null
-      this.modals.isAddProjectMetadata = true
-    },
-
-    onEditProjectMetadata(fieldName) {
-      const d = this.findFirstProjectDescriptorByFieldName(fieldName)
-      if (!d) return
-      this.descriptorToEdit = { ...d }
-      this.modals.isAddProjectMetadata = true
-    },
-
-    onDeleteProjectMetadataField(fieldName) {
-      this.fieldNameForDeleteMetadata = fieldName
-      this.modals.isDeleteProjectMetadata = true
-    },
-
-    onCancelAddProjectMetadata() {
-      this.modals.isAddProjectMetadata = false
-      this.descriptorToEdit = null
-    },
-
-    onCancelDeleteProjectMetadata() {
-      this.modals.isDeleteProjectMetadata = false
-      this.fieldNameForDeleteMetadata = null
-    },
-
-    confirmAddProjectMetadata(form) {
-      this.loading.addMetadata = true
-      this.errors.addMetadata = false
-      const payload = { ...form, entity_type: 'Project' }
-      const action = form.id
-        ? this.updateProjectMetadataOnAll({
-            fieldName: this.descriptorToEdit?.field_name,
-            form: payload
-          })
-        : this.addProjectMetadataDescriptorToAllProductions(payload)
-      action
-        .then(() => {
-          this.modals.isAddProjectMetadata = false
-          this.descriptorToEdit = null
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.addMetadata = true
-        })
-        .finally(() => {
-          this.loading.addMetadata = false
-        })
-    },
-
-    confirmDeleteProjectMetadata() {
-      this.loading.deleteProjectMetadata = true
-      this.errors.deleteProjectMetadata = false
-      this.deleteProjectMetadataByFieldName(this.fieldNameForDeleteMetadata)
-        .then(() => {
-          this.modals.isDeleteProjectMetadata = false
-          this.fieldNameForDeleteMetadata = null
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteProjectMetadata = true
-        })
-        .finally(() => {
-          this.loading.deleteProjectMetadata = false
-        })
-    },
-
-    async reloadStats() {
-      this.loading.stats = true
-      this.productionStats = await this.loadProductionStats()
-      this.loading.stats = false
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('productions.title')} - Kitsu`
-    }
-  }
+      .find(Boolean) || null
+  )
 }
+
+const deleteText = () => {
+  const production = productionToDelete.value
+  return production
+    ? t('productions.delete_text', { name: production.name })
+    : ''
+}
+
+const confirmEditProduction = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (productionAvatarFormData.value) {
+      await store.dispatch('uploadProductionAvatar', productionToEdit.value.id)
+    }
+    await store.dispatch('editProduction', {
+      ...form,
+      id: productionToEdit.value.id
+    })
+    modals.isEditDisplayed = false
+  } catch (error) {
+    console.error(error)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const confirmDeleteProduction = () => {
+  loading.del = true
+  errors.del = false
+  store
+    .dispatch('deleteProduction', productionToDelete.value)
+    .then(() => {
+      modals.isDeleteDisplayed = false
+    })
+    .catch(err => {
+      console.error(err)
+      errors.del = true
+    })
+    .finally(() => {
+      loading.del = false
+    })
+}
+
+const onEditClicked = production => {
+  store.dispatch('storeProductionPicture', null)
+  productionToEdit.value = production
+  modals.isEditDisplayed = true
+}
+
+const onDeleteClicked = production => {
+  productionToDelete.value = production
+  modals.isDeleteDisplayed = true
+}
+
+const onProductionPictureSelected = formData => {
+  store.dispatch('storeProductionPicture', formData)
+}
+
+const onProjectMetadataChanged = ({ entry, descriptor, value }) =>
+  store.dispatch('editProduction', {
+    id: entry.id,
+    data: { [descriptor.field_name]: value }
+  })
+
+const onAddProjectMetadata = () => {
+  descriptorToEdit.value = null
+  modals.isAddProjectMetadata = true
+}
+
+const onEditProjectMetadata = fieldName => {
+  const d = findFirstProjectDescriptorByFieldName(fieldName)
+  if (!d) return
+  descriptorToEdit.value = { ...d }
+  modals.isAddProjectMetadata = true
+}
+
+const onDeleteProjectMetadataField = fieldName => {
+  fieldNameForDeleteMetadata.value = fieldName
+  modals.isDeleteProjectMetadata = true
+}
+
+const onCancelAddProjectMetadata = () => {
+  modals.isAddProjectMetadata = false
+  descriptorToEdit.value = null
+}
+
+const onCancelDeleteProjectMetadata = () => {
+  modals.isDeleteProjectMetadata = false
+  fieldNameForDeleteMetadata.value = null
+}
+
+const confirmAddProjectMetadata = form => {
+  loading.addMetadata = true
+  errors.addMetadata = false
+  const payload = { ...form, entity_type: 'Project' }
+  const action = form.id
+    ? store.dispatch('updateProjectMetadataOnAll', {
+        fieldName: descriptorToEdit.value?.field_name,
+        form: payload
+      })
+    : store.dispatch('addProjectMetadataDescriptorToAllProductions', payload)
+  action
+    .then(() => {
+      modals.isAddProjectMetadata = false
+      descriptorToEdit.value = null
+    })
+    .catch(err => {
+      console.error(err)
+      errors.addMetadata = true
+    })
+    .finally(() => {
+      loading.addMetadata = false
+    })
+}
+
+const confirmDeleteProjectMetadata = () => {
+  loading.deleteProjectMetadata = true
+  errors.deleteProjectMetadata = false
+  store
+    .dispatch(
+      'deleteProjectMetadataByFieldName',
+      fieldNameForDeleteMetadata.value
+    )
+    .then(() => {
+      modals.isDeleteProjectMetadata = false
+      fieldNameForDeleteMetadata.value = null
+    })
+    .catch(err => {
+      console.error(err)
+      errors.deleteProjectMetadata = true
+    })
+    .finally(() => {
+      loading.deleteProjectMetadata = false
+    })
+}
+
+const reloadStats = async () => {
+  loading.stats = true
+  productionStats.value = await store.dispatch('loadProductionStats')
+  loading.stats = false
+}
+
+// Lifecycle
+
+store.dispatch('loadProductions')
+
+// Head
+
+useHead({ title: computed(() => `${t('productions.title')} - Kitsu`) })
 </script>

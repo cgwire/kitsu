@@ -37,7 +37,11 @@ export default {
   },
 
   getPeople() {
-    return client.pget('/api/data/persons?relations=true')
+    return client.pget('/api/data/persons?relations=true&is_guest=false')
+  },
+
+  getGuests() {
+    return client.pget('/api/data/persons?relations=true&is_guest=true')
   },
 
   getPerson(personId) {
