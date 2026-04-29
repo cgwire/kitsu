@@ -41,227 +41,193 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditSoftwareLicenseModal from '@/components/modals/EditSoftwareLicenseModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
-import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 
-export default {
-  name: 'software-licenses',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    DeleteModal,
-    EditSoftwareLicenseModal,
-    ListPageHeader,
-    RouteTabs,
-    SoftwareLicenseList
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      linkedSoftwareLicenses: {},
-      softwareLicenseToDelete: null,
-      softwareLicenseToEdit: {},
-      choices: [],
-      errors: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      modals: {
-        del: false,
-        edit: false
-      },
-      loading: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        }
-      ]
-    }
-  },
+const activeTab = ref('active')
+const linkedSoftwareLicenses = ref({})
+const softwareLicenseToDelete = ref(null)
+const softwareLicenseToEdit = ref({})
 
-  async mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-    this.linkedSoftwareLicenses = await this.loadLinkedSoftwareLicenses()
-  },
+const errors = reactive({ del: false, edit: false, list: false })
+const loading = reactive({ del: false, edit: false, list: false })
+const modals = reactive({ del: false, edit: false })
 
-  computed: {
-    ...mapGetters([
-      'activePeople',
-      'softwareLicenses',
-      'archivedSoftwareLicenses'
-    ]),
+// Computed
 
-    isActiveTab() {
-      return this.activeTab === 'active'
-    },
+const activePeople = computed(() => store.getters.activePeople)
+const archivedSoftwareLicenses = computed(
+  () => store.getters.archivedSoftwareLicenses
+)
+const softwareLicenses = computed(() => store.getters.softwareLicenses)
 
-    softwareLicensesList() {
-      return this.isActiveTab
-        ? this.softwareLicenses
-        : this.archivedSoftwareLicenses
-    },
+const isActiveTab = computed(() => activeTab.value === 'active')
 
-    usedAmounts() {
-      const usedAmounts = {}
-      this.activePeople.forEach(person => {
-        person.departments.forEach(departmentId => {
-          const departmentItems =
-            this.linkedSoftwareLicenses[departmentId] || []
-          departmentItems.forEach(item => {
-            if (!usedAmounts[item.id]) {
-              usedAmounts[item.id] = 0
-            }
-            usedAmounts[item.id] += 1
-          })
-        })
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') }
+])
+
+const softwareLicensesList = computed(() =>
+  isActiveTab.value ? softwareLicenses.value : archivedSoftwareLicenses.value
+)
+
+const deleteText = computed(() =>
+  softwareLicenseToDelete.value
+    ? t('software_licenses.delete_text', {
+        name: softwareLicenseToDelete.value.name
       })
-      return usedAmounts
-    },
+    : ''
+)
 
-    remainingSoftwareLicenses() {
-      const remainingAmounts = {}
-      this.softwareLicenses.forEach(license => {
-        remainingAmounts[license.id] =
-          license.inventory_amount - (this.usedAmounts[license.id] || 0)
+const usedAmounts = computed(() => {
+  const amounts = {}
+  activePeople.value.forEach(person => {
+    person.departments.forEach(departmentId => {
+      const departmentItems = linkedSoftwareLicenses.value[departmentId] || []
+      departmentItems.forEach(item => {
+        amounts[item.id] = (amounts[item.id] || 0) + 1
       })
-      return remainingAmounts
-    },
+    })
+  })
+  return amounts
+})
 
-    deleteText() {
-      const softwareLicense = this.softwareLicenseToDelete
-      if (softwareLicense) {
-        return this.$t('software_licenses.delete_text', {
-          name: softwareLicense.name
-        })
-      } else {
-        return ''
-      }
-    }
-  },
+const remainingSoftwareLicenses = computed(() =>
+  softwareLicenses.value.reduce((remaining, license) => {
+    remaining[license.id] =
+      license.inventory_amount - (usedAmounts.value[license.id] || 0)
+    return remaining
+  }, {})
+)
 
-  methods: {
-    ...mapActions([
-      'deleteSoftwareLicense',
-      'editSoftwareLicense',
-      'newSoftwareLicense',
-      'loadLinkedSoftwareLicenses'
-    ]),
+// Functions
 
-    confirmEditSoftwareLicense(form) {
-      let action = 'newSoftwareLicense'
-      if (this.softwareLicenseToEdit && this.softwareLicenseToEdit.id) {
-        action = 'editSoftwareLicense'
-        form.id = this.softwareLicenseToEdit.id
-      }
-
-      this.loading.edit = true
-      this.errors.edit = false
-      this[action](form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteSoftwareLicense() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteSoftwareLicense(this.softwareLicenseToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-          this.loading.del = false
-        })
-    },
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('software_licenses.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('software_licenses.fields.name'),
-        this.$t('software_licenses.fields.short_name'),
-        this.$t('software_licenses.fields.extension'),
-        this.$t('software_licenses.fields.version'),
-        this.$t('software_licenses.fields.monthly_cost'),
-        this.$t('software_licenses.fields.inventory_amount')
-      ]
-      const entries = [headers].concat(
-        this.softwareLicenses.map(softwareLicense => [
-          softwareLicense.type,
-          softwareLicense.name,
-          softwareLicense.short_name,
-          softwareLicense.file_extension,
-          softwareLicense.version,
-          softwareLicense.monthly_cost,
-          softwareLicense.inventory_amount
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.softwareLicenseToEdit = {}
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onEditClicked(softwareLicense) {
-      this.softwareLicenseToEdit = softwareLicense
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(softwareLicense) {
-      this.softwareLicenseToDelete = softwareLicense
-      this.errors.del = false
-      this.modals.del = true
-    }
-  },
-
-  watch: {
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('software_licenses.title')} - Kitsu`
-    }
-  }
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('software_licenses.title'))
+  const headers = [
+    t('main.type'),
+    t('software_licenses.fields.name'),
+    t('software_licenses.fields.short_name'),
+    t('software_licenses.fields.extension'),
+    t('software_licenses.fields.version'),
+    t('software_licenses.fields.monthly_cost'),
+    t('software_licenses.fields.inventory_amount')
+  ]
+  const rows = softwareLicenses.value.map(softwareLicense => [
+    softwareLicense.type,
+    softwareLicense.name,
+    softwareLicense.short_name,
+    softwareLicense.file_extension,
+    softwareLicense.version,
+    softwareLicense.monthly_cost,
+    softwareLicense.inventory_amount
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
 }
+
+const onNewClicked = () => {
+  softwareLicenseToEdit.value = {}
+  errors.edit = false
+  modals.edit = true
+}
+
+const onEditClicked = softwareLicense => {
+  softwareLicenseToEdit.value = softwareLicense
+  errors.edit = false
+  modals.edit = true
+}
+
+const onDeleteClicked = softwareLicense => {
+  softwareLicenseToDelete.value = softwareLicense
+  errors.del = false
+  modals.del = true
+}
+
+const confirmEditSoftwareLicense = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (softwareLicenseToEdit.value?.id) {
+      await store.dispatch('editSoftwareLicense', {
+        ...form,
+        id: softwareLicenseToEdit.value.id
+      })
+    } else {
+      await store.dispatch('newSoftwareLicense', form)
+    }
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const confirmDeleteSoftwareLicense = async () => {
+  loading.del = true
+  errors.del = false
+  try {
+    await store.dispatch('deleteSoftwareLicense', softwareLicenseToDelete.value)
+    modals.del = false
+  } catch (err) {
+    console.error(err)
+    errors.del = true
+  }
+  loading.del = false
+}
+
+// Watchers
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(async () => {
+  activeTab.value = route.query.tab || 'active'
+  linkedSoftwareLicenses.value = await store.dispatch(
+    'loadLinkedSoftwareLicenses'
+  )
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('software_licenses.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
 .software-license-list {
   margin-top: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .software-licenses {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
 }
 </style>
