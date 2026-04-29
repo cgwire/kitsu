@@ -460,9 +460,9 @@ const actions = {
   },
 
   editProduction({ commit, state }, data) {
-    // The metadata bag (`data.data`) is replaced wholesale by the API, so when
-    // editing a single field we have to merge with the locally cached values
-    // first to avoid losing the others. Other top-level fields are sent as-is.
+    // The metadata bag (`data.data`) is a JSONB column replaced wholesale by
+    // the API, so we merge it with the locally cached values to avoid losing
+    // the other fields.
     const payload = { ...data }
     if (data.data) {
       const previous = findProductionInState(state, data.id)

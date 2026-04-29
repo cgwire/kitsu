@@ -2244,7 +2244,7 @@ export default {
         this.currentProduction.start_date !== start_date
       ) {
         this.editProduction({
-          ...this.currentProduction,
+          id: this.currentProduction.id,
           start_date
         })
       }
@@ -2258,7 +2258,7 @@ export default {
         this.currentProduction.end_date !== end_date
       ) {
         this.editProduction({
-          ...this.currentProduction,
+          id: this.currentProduction.id,
           end_date
         })
       }
