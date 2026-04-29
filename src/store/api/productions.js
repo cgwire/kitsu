@@ -1,5 +1,7 @@
 import client from '@/store/api/client'
 
+const toBoolean = value => value === true || value === 'true'
+
 export default {
   getProductions() {
     return client.pget('/api/data/projects/all')
@@ -25,35 +27,23 @@ export default {
     return client.ppost('/api/data/projects/', production)
   },
 
+  // HTTP PUT, but Zou preserves any field absent from the payload — so
+  // callers can send a full or partial payload and only the fields they
+  // explicitly provide are forwarded.
   updateProduction(production) {
-    const data = {
-      name: production.name,
-      code: production.code,
-      description: production.description,
-      project_status_id: production.project_status_id,
-      production_type: production.production_type,
-      production_style: production.production_style,
-      fps: production.fps,
-      ratio: production.ratio,
-      resolution: production.resolution,
-      start_date: production.start_date,
-      end_date: production.end_date,
-      man_days: production.man_days,
-      max_retakes: production.max_retakes,
-      nb_episodes: production.nb_episodes,
-      episode_span: production.episode_span,
-      is_clients_isolated: production.is_clients_isolated === 'true',
-      is_preview_download_allowed:
-        production.is_preview_download_allowed === 'true',
-      is_set_preview_automated: production.is_set_preview_automated === 'true',
-      is_publish_default_for_artists:
-        production.is_publish_default_for_artists === 'true',
-      homepage: production.homepage
-    }
-    if (production.data !== undefined) {
-      data.data = production.data
-    }
-    return client.pput(`/api/data/projects/${production.id}`, data)
+    const BOOLEAN_FIELDS = [
+      'is_clients_isolated',
+      'is_preview_download_allowed',
+      'is_set_preview_automated',
+      'is_publish_default_for_artists'
+    ]
+    const { id, ...data } = production
+    BOOLEAN_FIELDS.forEach(field => {
+      if (data[field] !== undefined) {
+        data[field] = toBoolean(data[field])
+      }
+    })
+    return client.pput(`/api/data/projects/${id}`, data)
   },
 
   postAvatar(productionId, formData) {
@@ -145,7 +135,7 @@ export default {
       name: descriptor.name,
       data_type: descriptor.data_type,
       choices: descriptor.values,
-      for_client: descriptor.for_client === 'true',
+      for_client: toBoolean(descriptor.for_client),
       entity_type: descriptor.entity_type,
       departments: descriptor.departments
     }
@@ -167,7 +157,7 @@ export default {
       name: descriptor.name,
       data_type: descriptor.data_type,
       choices: descriptor.values,
-      for_client: descriptor.for_client === 'true',
+      for_client: toBoolean(descriptor.for_client),
       entity_type: descriptor.entity_type,
       departments: descriptor.departments
     }

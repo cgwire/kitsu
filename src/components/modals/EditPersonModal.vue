@@ -439,7 +439,22 @@ export default {
           departments: [...(this.personToEdit.departments || [])],
           studio_id: this.personToEdit.studio_id,
           expiration_date: this.personToEdit.expiration_date,
-          is_bot: this.personToEdit.is_bot
+          is_bot: this.personToEdit.is_bot,
+          notifications_enabled: this.personToEdit.notifications_enabled
+            ? 'true'
+            : 'false',
+          notifications_slack_enabled: this.personToEdit
+            .notifications_slack_enabled
+            ? 'true'
+            : 'false',
+          notifications_mattermost_enabled: this.personToEdit
+            .notifications_mattermost_enabled
+            ? 'true'
+            : 'false',
+          notifications_discord_enabled: this.personToEdit
+            .notifications_discord_enabled
+            ? 'true'
+            : 'false'
         }
       } else {
         this.form = {

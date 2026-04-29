@@ -3,7 +3,9 @@ import assetTypeStore from '@/store/modules/assettypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypeStore from '@/store/modules/tasktypes'
 
+import client from '@/store/api/client'
 import productionApi from '@/store/api/productions.js'
+
 import {
   ADD_METADATA_DESCRIPTOR_END,
   ADD_PRODUCTION,
@@ -350,22 +352,90 @@ describe('Productions store', () => {
       }
     })
 
-    test('editProduction', async () => {
-      let mockCommit = vi.fn()
-      productionApi.updateProduction = vi.fn(() => Promise.resolve({ id: '1' }))
-      await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
-      expect(productionApi.updateProduction).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, { id: '1' })
+    describe('editProduction', () => {
+      let updateProduction
 
-      mockCommit = vi.fn()
-      productionApi.updateProduction = vi.fn(() => Promise.reject(new Error('error')))
-      try {
-        await store.actions.editProduction({ commit: mockCommit, state: null }, 'production-id')
-      } catch {
-        expect(productionApi.updateProduction).toBeCalledTimes(1)
+      beforeEach(() => {
+        updateProduction = vi
+          .spyOn(productionApi, 'updateProduction')
+          .mockResolvedValue({ id: '1' })
+      })
+
+      afterEach(() => {
+        updateProduction.mockRestore()
+      })
+
+      test('dispatches API call and commits UPDATE_PRODUCTION', async () => {
+        const state = {
+          productionMap: new Map(),
+          productions: [],
+          openProductions: []
+        }
+        const mockCommit = vi.fn()
+        await store.actions.editProduction(
+          { commit: mockCommit, state },
+          { id: '1', start_date: '2026-01-01' }
+        )
+        expect(updateProduction).toBeCalledTimes(1)
+        expect(mockCommit).toBeCalledTimes(1)
+        expect(mockCommit).toHaveBeenNthCalledWith(1, UPDATE_PRODUCTION, {
+          id: '1'
+        })
+      })
+
+      test('does not commit when API rejects', async () => {
+        const state = {
+          productionMap: new Map(),
+          productions: [],
+          openProductions: []
+        }
+        const mockCommit = vi.fn()
+        updateProduction.mockRejectedValue(new Error('error'))
+        await expect(
+          store.actions.editProduction(
+            { commit: mockCommit, state },
+            { id: '1', start_date: '2026-01-01' }
+          )
+        ).rejects.toThrow('error')
+        expect(updateProduction).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
-      }
+      })
+
+      test('merges data.data with cached metadata', async () => {
+        const state = {
+          productionMap: new Map([
+            ['1', { id: '1', data: { existing: 'kept', other: 'kept' } }]
+          ]),
+          productions: [],
+          openProductions: []
+        }
+        await store.actions.editProduction(
+          { commit: vi.fn(), state },
+          { id: '1', data: { existing: 'updated' } }
+        )
+        expect(updateProduction).toHaveBeenCalledWith({
+          id: '1',
+          data: { existing: 'updated', other: 'kept' }
+        })
+      })
+
+      test('omits data when caller did not provide it', async () => {
+        const state = {
+          productionMap: new Map([
+            ['1', { id: '1', data: { should: 'not_be_sent' } }]
+          ]),
+          productions: [],
+          openProductions: []
+        }
+        await store.actions.editProduction(
+          { commit: vi.fn(), state },
+          { id: '1', start_date: '2026-01-01' }
+        )
+        expect(updateProduction).toHaveBeenCalledWith({
+          id: '1',
+          start_date: '2026-01-01'
+        })
+      })
     })
 
     test('deleteProduction', async () => {
@@ -937,6 +1007,64 @@ describe('Productions store', () => {
       expect(store.helpers.isEmptyArray({ arrayName: null }, 'arrayName')).toBeTruthy()
       expect(store.helpers.isEmptyArray({ arrayName: [] }, 'arrayName')).toBeTruthy()
       expect(store.helpers.isEmptyArray({ arrayName: [1] }, 'arrayName')).toBeFalsy()
+    })
+  })
+
+  describe('API', () => {
+    describe('updateProduction', () => {
+      let pput
+
+      beforeEach(() => {
+        pput = vi.spyOn(client, 'pput').mockResolvedValue({ id: '1' })
+      })
+
+      afterEach(() => {
+        pput.mockRestore()
+      })
+
+      test('coerces string boolean fields to real booleans', () => {
+        productionApi.updateProduction({
+          id: '1',
+          is_clients_isolated: 'true',
+          is_preview_download_allowed: 'false',
+          is_set_preview_automated: true,
+          is_publish_default_for_artists: false
+        })
+        expect(pput).toHaveBeenCalledWith('/api/data/projects/1', {
+          is_clients_isolated: true,
+          is_preview_download_allowed: false,
+          is_set_preview_automated: true,
+          is_publish_default_for_artists: false
+        })
+      })
+
+      test('omits boolean fields the caller did not provide', () => {
+        productionApi.updateProduction({
+          id: '1',
+          start_date: '2026-01-01'
+        })
+        expect(pput).toHaveBeenCalledWith('/api/data/projects/1', {
+          start_date: '2026-01-01'
+        })
+      })
+
+      // Guards the original bug: an explicitly `undefined` boolean must not be
+      // coerced to `false`, otherwise a partial spread with missing flags
+      // would silently reset them server-side.
+      test('does not coerce explicitly undefined booleans', () => {
+        productionApi.updateProduction({
+          id: '1',
+          is_clients_isolated: true,
+          is_preview_download_allowed: undefined,
+          is_set_preview_automated: undefined,
+          is_publish_default_for_artists: undefined
+        })
+        const [, payload] = pput.mock.calls[0]
+        expect(payload.is_clients_isolated).toBe(true)
+        expect(payload.is_preview_download_allowed).toBeUndefined()
+        expect(payload.is_set_preview_automated).toBeUndefined()
+        expect(payload.is_publish_default_for_artists).toBeUndefined()
+      })
     })
   })
 })
