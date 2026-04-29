@@ -313,7 +313,11 @@ const populatePersonMap = () => {
       byId.set(comment.person.id, {
         ...comment.person,
         full_name: comment.person.full_name || buildFullName(comment.person),
-        role: comment.person.role || 'client'
+        role: comment.person.role || 'client',
+        // The shared playlist is unauthenticated and the auth-protected
+        // /api/pictures/thumbnails/persons/<id>.png endpoint will 401.
+        // Force initials-fallback avatars instead.
+        has_avatar: false
       })
     }
   })
