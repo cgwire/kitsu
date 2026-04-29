@@ -100,8 +100,25 @@ export default {
   border-top: 0;
 }
 
+.name {
+  min-width: 200px;
+  padding: 1em;
+}
+
 .remaining-amount.negative {
   color: $red;
   font-weight: bold;
+}
+
+@media screen and (max-width: 768px) {
+  .name {
+    min-width: auto;
+    padding: 0.5em;
+  }
+
+  .datatable-body td,
+  .datatable-head th {
+    padding: 0.5em;
+  }
 }
 </style>
