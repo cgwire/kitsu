@@ -7,6 +7,7 @@
         rows="4"
         :placeholder="$t('share.comment_placeholder')"
         :disabled="submitting"
+        @keydown="onTextareaKeydown"
         v-autosize
         v-model="commentText"
       ></textarea>
@@ -571,6 +572,13 @@ const onChecklistUpdated = async updated => {
 }
 
 // Functions — text input
+
+const onTextareaKeydown = event => {
+  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault()
+    submitComment()
+  }
+}
 
 const insertAtCursor = text => {
   const textarea = textareaRef.value
