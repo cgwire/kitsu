@@ -1530,6 +1530,8 @@ export default {
     identity_required: 'You need to enter your name before posting.',
     no_status_available: 'No task statuses are configured for this project.',
     logout: 'Leave review session',
+    post_comment_error:
+      'Could not post the comment. Please reload the page and try again.',
     kitsu_homepage: 'About Kitsu'
   },
 

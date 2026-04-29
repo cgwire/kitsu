@@ -104,6 +104,9 @@
     <p class="post-disabled" v-else-if="availableStatuses.length === 0">
       {{ $t('share.no_status_available') }}
     </p>
+    <p class="post-error" v-if="postError">
+      {{ postError }}
+    </p>
 
     <div class="comments-list" ref="commentsList">
       <div class="loading-state" v-if="loading">
@@ -180,6 +183,7 @@
 <script setup>
 import { FilmIcon, ListIcon, PaperclipIcon, XIcon } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { replaceTimeWithTimecode } from '@/lib/render'
@@ -208,6 +212,7 @@ const props = defineProps({
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])
 
+const { t } = useI18n()
 const store = useStore()
 
 // State
@@ -227,6 +232,7 @@ const isEditing = ref(false)
 const isDeleting = ref(false)
 const editError = ref(false)
 const deleteError = ref(false)
+const postError = ref('')
 
 const modals = reactive({ edit: false, delete: false, attachment: false })
 
@@ -364,8 +370,20 @@ const uploadAttachments = async commentId => {
   return response.json()
 }
 
+const extractErrorMessage = async response => {
+  try {
+    const payload = await response.json()
+    if (payload?.error) return payload.error
+    if (payload?.message) return payload.message
+  } catch {
+    // body wasn't JSON — fall through to default
+  }
+  return ''
+}
+
 const submitComment = async () => {
   if (!canSubmit.value) return
+  postError.value = ''
   submitting.value = true
   try {
     const response = await fetch(`${apiBase.value}/comments`, {
@@ -384,6 +402,10 @@ const submitComment = async () => {
       const withAttachments = await uploadAttachments(comment.id)
       if (withAttachments) comment = withAttachments
       comments.value = [comment, ...comments.value]
+      // Make sure the freshly created guest lands in personMap so the
+      // Comment widget treats them as a client author and renders the
+      // name + avatar without waiting for a page reload.
+      populatePersonMap()
       // Reflect the new status colour on the surrounding entity so the
       // playlist progress bar repaints without waiting for a refetch.
       const status =
@@ -398,9 +420,12 @@ const submitComment = async () => {
       commentText.value = ''
       checklistItems.value = []
       pendingAttachments.value = []
+    } else {
+      const detail = await extractErrorMessage(response)
+      postError.value = detail || t('share.post_comment_error')
     }
   } catch {
-    // No-op
+    postError.value = t('share.post_comment_error')
   }
   submitting.value = false
 }
@@ -613,6 +638,13 @@ watch(
   () => props.token,
   token => {
     if (token) refresh()
+  }
+)
+
+watch(
+  () => props.currentTaskId,
+  () => {
+    postError.value = ''
   }
 )
 
@@ -1088,6 +1120,16 @@ onMounted(() => {
   font-size: 0.85em;
   margin: 0;
   padding: 0.9em;
+  text-align: center;
+}
+
+.post-error {
+  background: rgba(255, 87, 140, 0.12);
+  border-bottom: 1px solid rgba(255, 87, 140, 0.3);
+  color: #ff578c;
+  font-size: 0.85em;
+  margin: 0;
+  padding: 0.7em 0.9em;
   text-align: center;
 }
 

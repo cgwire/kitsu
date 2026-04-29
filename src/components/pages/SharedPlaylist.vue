@@ -105,6 +105,12 @@ const restoreStoredGuest = async () => {
       data: { guest_id: storedGuestId }
     })
     guestId.value = guest.id
+    // If the server replaced the stored guest (e.g. it was created from
+    // another share link before the per-link binding rollout), persist
+    // the new id so subsequent reloads don't loop through the fallback.
+    if (guest.id !== storedGuestId) {
+      localStorage.setItem(GUEST_STORAGE_PREFIX + token.value, guest.id)
+    }
     loginAsGuest(guest)
   } catch {
     // Guest not found, will ask for identity
