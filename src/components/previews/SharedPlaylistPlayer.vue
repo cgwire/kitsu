@@ -128,6 +128,7 @@
       :handle-in="-1"
       :handle-out="-1"
       :preview-id="currentPreview ? currentPreview.id : ''"
+      :url-prefix="sharedApiPrefix || '/api'"
       @progress-changed="onProgressChanged"
       v-show="!!currentPreview"
     />
@@ -478,10 +479,23 @@ const togglePlay = () => (isPlaying.value ? pause() : play())
 const selectEntity = index => {
   if (index < 0 || index >= entityList.value.length) return
   const wasPlaying = isPlaying.value
-  pause()
+  // Move the index before pausing: rawPlayer.pause() emits a synchronous
+  // `frame-update` carrying the *previous* entity's current frame, and
+  // onFrameUpdate uses playingEntityIndex to map the frame back onto
+  // currentPlaylistProgress. With the old index still in place the
+  // cursor was being snapped to the start of the previously selected
+  // shot.
   playingEntityIndex.value = index
   currentPreviewIndex.value = 0
   currentFrameNumber.value = 0
+  // Snap the global playlist marker to the new entity right away so the
+  // cursor jumps on the first click without waiting for the new video
+  // to load and emit its first frame-update.
+  const startDuration = playlistFrameData.value.startDurationByIndex[index]
+  if (typeof startDuration === 'number' && playlistDuration.value > 0) {
+    currentPlaylistProgress.value = startDuration
+  }
+  pause()
   rawPlayer.value?.loadEntity(index)
   if (wasPlaying) nextTick(play)
 }
