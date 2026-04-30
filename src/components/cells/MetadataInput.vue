@@ -240,9 +240,9 @@ const onNumberFieldKeyDown = event => {
 }
 
 .metadata-input.is-taglist :deep(> div) {
+  align-items: center;
   display: flex;
   flex: 1 1 auto;
-  flex-direction: column;
   min-height: 0;
   width: 100%;
 }
