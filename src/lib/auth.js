@@ -12,6 +12,7 @@ import {
 } from '@/store/mutation-types.js'
 
 let channel
+const AUTHENTICATED_REQUEST_TIMEOUT_MS = 10000
 
 const auth = {
   logIn(payload, callback) {
@@ -90,24 +91,27 @@ const auth = {
   },
 
   isServerLoggedIn(callback) {
-    superagent.get('/api/auth/authenticated').end((err, res) => {
-      if (err && res && [401, 422].includes(res.statusCode)) {
-        store.commit(USER_LOGIN_FAIL)
-        callback(null)
-      } else if (err) {
-        store.commit(USER_LOGIN_FAIL)
-        callback(err)
-      } else if (res && res.body === null) {
-        store.commit(USER_LOGIN_FAIL)
-        callback(err)
-      } else {
-        const user = res.body.user
-        const organisation = res.body.organisation || {}
-        store.commit(SET_ORGANISATION, organisation)
-        store.commit(USER_LOGIN, user)
-        callback(null)
-      }
-    })
+    superagent
+      .get('/api/auth/authenticated')
+      .timeout(AUTHENTICATED_REQUEST_TIMEOUT_MS)
+      .end((err, res) => {
+        if (err && res && [401, 422].includes(res.statusCode)) {
+          store.commit(USER_LOGIN_FAIL)
+          callback(null)
+        } else if (err) {
+          store.commit(USER_LOGIN_FAIL)
+          callback(err)
+        } else if (res && res.body === null) {
+          store.commit(USER_LOGIN_FAIL)
+          callback(err)
+        } else {
+          const user = res.body.user
+          const organisation = res.body.organisation || {}
+          store.commit(SET_ORGANISATION, organisation)
+          store.commit(USER_LOGIN, user)
+          callback(null)
+        }
+      })
   },
 
   // Needed for router to know if a redirection to login page is required or
