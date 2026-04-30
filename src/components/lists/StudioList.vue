@@ -7,7 +7,7 @@
             <th scope="col" class="name">
               {{ $t('studios.fields.name') }}
             </th>
-            <th scope="col">{{ $t('studios.fields.color') }}</th>
+            <th scope="col" class="color">{{ $t('studios.fields.color') }}</th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
@@ -42,18 +42,9 @@ import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 defineProps({
-  entries: {
-    type: Array,
-    default: () => []
-  },
-  isLoading: {
-    type: Boolean,
-    default: false
-  },
-  isError: {
-    type: Boolean,
-    default: false
-  }
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
 })
 
 defineEmits(['delete-clicked', 'edit-clicked'])
