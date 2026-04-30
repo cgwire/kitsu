@@ -39,27 +39,41 @@ export const buildPeopleIndex = (entries, split = true) => {
 }
 
 /*
+ * Build an exact-name index. Used by filter parsers like `fx=DONE` or
+ * `department=fx`, which must match the full name and not a substring —
+ * otherwise filtering by "fx" would also pick up "cfx", "vfx", etc.
+ */
+export const buildExactNameIndex = entries => {
+  const index = Object.create(null)
+  entries.forEach(entry => {
+    if (entry?.name) {
+      const name = entry.name.toLowerCase()
+      if (!index[name]) index[name] = []
+      index[name].push(entry)
+    }
+  })
+  return index
+}
+
+/*
  * Generate an index to find task type easily.
  */
 export const buildTaskTypeIndex = taskTypes => {
-  const sortedTaskTypes = [...taskTypes].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, {
-      numeric: true
-    })
-  )
-  return buildNameIndex(sortedTaskTypes, false)
+  return buildExactNameIndex(taskTypes)
 }
 
 /*
  * Generate an index to find task status easily.
  */
 export const buildTaskStatusIndex = taskStatuses => {
-  const taskStatusShortNameIndex = {}
+  const index = Object.create(null)
   taskStatuses.forEach(taskStatus => {
-    const shortName = taskStatus.short_name.toLowerCase()
-    taskStatusShortNameIndex[shortName] = taskStatus
+    if (taskStatus?.short_name) {
+      const shortName = taskStatus.short_name.toLowerCase()
+      index[shortName] = taskStatus
+    }
   })
-  return taskStatusShortNameIndex
+  return index
 }
 
 /*

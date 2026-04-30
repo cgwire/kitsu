@@ -1,6 +1,7 @@
 import {
-  buildNameIndex,
   buildAssetIndex,
+  buildExactNameIndex,
+  buildNameIndex,
   buildShotIndex,
   buildTaskIndex,
   indexSearch
@@ -23,6 +24,53 @@ describe('lib/indexing', () => {
     expect(index.bunny[0].id).toEqual(3)
     expect(index.nny).toHaveLength(1)
     expect(index.nny[0].id).toEqual(3)
+  })
+
+  describe('buildExactNameIndex', () => {
+    it('matches by full name only, not substring', () => {
+      const entries = [
+        { name: 'fx', id: 1 },
+        { name: 'cfx', id: 2 },
+        { name: 'vfx', id: 3 }
+      ]
+      const index = buildExactNameIndex(entries)
+      expect(index.fx).toHaveLength(1)
+      expect(index.fx[0].id).toEqual(1)
+      expect(index.cfx).toHaveLength(1)
+      expect(index.cfx[0].id).toEqual(2)
+      expect(index.f).toBeUndefined()
+      expect(index.x).toBeUndefined()
+    })
+
+    it('is case-insensitive', () => {
+      const index = buildExactNameIndex([{ name: 'Modeling', id: 1 }])
+      expect(index.modeling).toHaveLength(1)
+      expect(index.MODELING).toBeUndefined()
+    })
+
+    it('groups entries that share the same name', () => {
+      const index = buildExactNameIndex([
+        { name: 'Animation', id: 1 },
+        { name: 'Animation', id: 2 }
+      ])
+      expect(index.animation).toHaveLength(2)
+    })
+
+    it('skips entries without a name', () => {
+      const index = buildExactNameIndex([
+        null,
+        undefined,
+        {},
+        { name: 'fx', id: 1 }
+      ])
+      expect(index.fx).toHaveLength(1)
+    })
+
+    it('is safe against prototype keys', () => {
+      const index = buildExactNameIndex([{ name: 'constructor', id: 1 }])
+      expect(index.constructor).toHaveLength(1)
+      expect(index.toString).toBeUndefined()
+    })
   })
 
   it('buildAssetIndex', () => {

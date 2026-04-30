@@ -182,7 +182,7 @@ describe('lib/filtering', () => {
       expect(filters[0].taskStatuses).toEqual(['task-status-1', 'task-status-3'])
     })
 
-    it('shortcut case', () => {
+    it('partial task type name does not match (exact match only)', () => {
       const filters = getFilters({
         entryIndex,
         assetTypes,
@@ -192,10 +192,25 @@ describe('lib/filtering', () => {
         persons,
         query: 'mode=wip'
       })
-      expect(filters).toHaveLength(2) // the descriptor is included too
-      const filter = filters[0]
-      expect(filter.taskType).toEqual(taskTypes[1])
-      expect(filter.taskStatuses[0]).toEqual('task-status-1')
+      expect(filters.some(f => f.type === 'status')).toBe(false)
+    })
+
+    it('task types sharing a substring are not confused (cfx vs fx)', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes: [
+          { name: 'cfx', id: 'task-type-cfx' },
+          { name: 'fx', id: 'task-type-fx' }
+        ],
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'fx=wip'
+      })
+      const taskTypeFilters = filters.filter(f => f.type === 'status')
+      expect(taskTypeFilters).toHaveLength(1)
+      expect(taskTypeFilters[0].taskType.id).toEqual('task-type-fx')
     })
 
     it('several task types', () => {
