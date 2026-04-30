@@ -199,16 +199,16 @@ const valueToAdd = ref('')
 const checklist = ref([])
 const selectedDepartment = ref(null)
 
-const typeOptions = [
+// Computed
+
+const typeOptions = computed(() => [
   { label: t('productions.metadata.string'), value: 'string' },
   { label: t('productions.metadata.number'), value: 'number' },
   { label: t('productions.metadata.boolean'), value: 'boolean' },
   { label: t('productions.metadata.choices'), value: 'list' },
   { label: t('productions.metadata.tags'), value: 'taglist' },
   { label: t('productions.metadata.checklist'), value: 'checklist' }
-]
-
-// Computed
+])
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const departmentMap = computed(() => store.getters.departmentMap)
