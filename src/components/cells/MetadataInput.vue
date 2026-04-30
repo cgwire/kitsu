@@ -280,7 +280,7 @@ const onNumberFieldKeyDown = event => {
   padding: 0.35rem 0.5rem;
   text-overflow: ellipsis;
   width: 100%;
-  z-index: 100;
+  z-index: auto;
 
   &[type='checkbox'] {
     display: block;
