@@ -1861,6 +1861,10 @@ tbody:last-child .empty-line:last-child {
     padding: 0;
     position: relative;
     vertical-align: top;
+
+    &.datatable-row-header {
+      position: sticky;
+    }
   }
 }
 
