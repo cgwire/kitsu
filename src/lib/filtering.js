@@ -1,7 +1,7 @@
 import {
-  buildTaskTypeIndex,
+  buildExactNameIndex,
   buildTaskStatusIndex,
-  buildNameIndex,
+  buildTaskTypeIndex,
   indexSearch
 } from '@/lib/indexing'
 
@@ -507,7 +507,7 @@ export const getDescFilters = (descriptors, taskTypes, queryText) => {
   const rgxMatches = queryText.match(EQUAL_REGEX)
 
   if (rgxMatches) {
-    const descriptorNameIndex = buildNameIndex(descriptors, false)
+    const descriptorNameIndex = buildExactNameIndex(descriptors)
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       const descriptorName = cleanParenthesis(pattern[0])
@@ -551,7 +551,7 @@ export const getDepartmentFilters = (departments, queryText) => {
   const rgxMatches = queryText.match(EQUAL_PEOPLE_DEPARTMENT_REGEX)
 
   if (rgxMatches) {
-    const departmentNameIndex = buildNameIndex(departments, false)
+    const departmentNameIndex = buildExactNameIndex(departments)
 
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
