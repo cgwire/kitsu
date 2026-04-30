@@ -226,6 +226,10 @@ const onNumberFieldKeyDown = event => {
   justify-content: center;
 }
 
+.metadata-input.is-checklist {
+  position: static;
+}
+
 .metadata-input.is-checklist .metadata-value,
 .metadata-input:not(.is-boolean) .input-editor:not([type='checkbox']) {
   flex: 1 1 auto;
