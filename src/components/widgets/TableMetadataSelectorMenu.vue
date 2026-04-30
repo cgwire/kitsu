@@ -108,9 +108,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'update:isOpen'])
 
-// Constants (require t())
+// State
 
-const FIELD_TO_NAME = {
+const hostRef = ref(null)
+const menuStyle = ref({})
+const sortedMetadataDescriptors = ref([])
+
+// Computed
+
+const FIELD_TO_NAME = computed(() => ({
   estimation: t('main.estimation'),
   fps: t('main.fps'),
   frameIn: t('main.frame_in'),
@@ -121,22 +127,14 @@ const FIELD_TO_NAME = {
   resolution: t('shots.fields.resolution'),
   stdby: t('breakdown.fields.standby'),
   timeSpent: t('main.timeSpent')
-}
-
-// State
-
-const hostRef = ref(null)
-const menuStyle = ref({})
-const sortedMetadataDescriptors = ref([])
-
-// Computed
+}))
 
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 
 const filteredFixedColumns = computed(() =>
   Object.keys(props.modelValue)
-    .filter(name => FIELD_TO_NAME[name] && !props.exclude[name])
-    .map(name => ({ field_name: name, name: FIELD_TO_NAME[name] }))
+    .filter(name => FIELD_TO_NAME.value[name] && !props.exclude[name])
+    .map(name => ({ field_name: name, name: FIELD_TO_NAME.value[name] }))
 )
 
 const filteredMetadataDescriptors = computed(() =>

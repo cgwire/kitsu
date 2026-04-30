@@ -78,12 +78,12 @@ const confirmationName = ref(null)
 const selectionOnly = ref('true')
 const userLockText = ref('')
 
-const selectionOptions = [
+// Computed
+
+const selectionOptions = computed(() => [
   { label: t('tasks.for_selection'), value: 'true' },
   { label: t('tasks.for_project'), value: 'false' }
-]
-
-// Computed
+])
 
 const isLocked = computed(
   () => props.lockText === 'locked' || props.lockText !== userLockText.value

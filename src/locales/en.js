@@ -1910,7 +1910,7 @@ export default {
     feedback: 'feedback',
     full_screen: 'Display in full screen',
     for_selection: 'For current list and filters',
-    for_production: 'For production',
+    for_project: 'For production',
     hide_assignations: 'Hide assignments',
     hide_infos: 'Hide additional information',
     hookup_playlist: 'Generate a hook-up playlist',

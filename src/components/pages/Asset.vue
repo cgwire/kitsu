@@ -583,6 +583,7 @@ export default {
           if (assetId) {
             return this.loadAsset(assetId).then(() => {
               asset = assetStore.cache.assetMap.get(assetId)
+              if (!asset) return resolve(null)
               this.localTasks = asset.tasks
                 .map(taskId => this.taskMap.get(taskId))
                 .filter(Boolean)

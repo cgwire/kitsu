@@ -226,6 +226,10 @@ const onNumberFieldKeyDown = event => {
   justify-content: center;
 }
 
+.metadata-input.is-checklist {
+  position: static;
+}
+
 .metadata-input.is-checklist .metadata-value,
 .metadata-input:not(.is-boolean) .input-editor:not([type='checkbox']) {
   flex: 1 1 auto;
@@ -240,9 +244,9 @@ const onNumberFieldKeyDown = event => {
 }
 
 .metadata-input.is-taglist :deep(> div) {
+  align-items: center;
   display: flex;
   flex: 1 1 auto;
-  flex-direction: column;
   min-height: 0;
   width: 100%;
 }
@@ -280,7 +284,7 @@ const onNumberFieldKeyDown = event => {
   padding: 0.35rem 0.5rem;
   text-overflow: ellipsis;
   width: 100%;
-  z-index: 100;
+  z-index: auto;
 
   &[type='checkbox'] {
     display: block;
