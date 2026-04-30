@@ -52,264 +52,220 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import DeleteModal from '@/components/modals/DeleteModal.vue'
-import DepartmentLinks from '@/components/pages/departments/DepartmentLinks.vue'
+// eslint-disable-next-line no-unused-vars
 import DepartmentList from '@/components/lists/DepartmentList.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditDepartmentsModal from '@/components/modals/EditDepartmentsModal.vue'
+import DepartmentLinks from '@/components/pages/departments/DepartmentLinks.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
-export default {
-  name: 'departments',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    DeleteModal,
-    DepartmentLinks,
-    DepartmentList,
-    EditDepartmentsModal,
-    ListPageHeader,
-    RouteTabs
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      departmentToEdit: null,
-      departmentToDelete: null,
-      linkedHardwareItems: {},
-      linkedSoftwareLicenses: {},
-      errors: {
-        departments: false,
-        edit: false,
-        del: false
-      },
-      loading: {
-        departments: false,
-        edit: false,
-        del: false
-      },
-      modals: {
-        del: false,
-        edit: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        },
-        {
-          name: 'linked-hardware',
-          label: this.$t('departments.linked_hardware')
-        },
-        {
-          name: 'linked-software',
-          label: this.$t('departments.linked_software')
-        }
-      ]
+const activeTab = ref('active')
+const departmentToDelete = ref(null)
+const departmentToEdit = ref(null)
+const linkedHardwareItems = ref({})
+const linkedSoftwareLicenses = ref({})
+
+const errors = reactive({ del: false, departments: false, edit: false })
+const loading = reactive({ del: false, departments: false, edit: false })
+const modals = reactive({ del: false, edit: false })
+
+// Computed
+
+const archivedDepartments = computed(() => store.getters.archivedDepartments)
+const departments = computed(() => store.getters.departments)
+const hardwareItems = computed(() => store.getters.hardwareItems)
+const softwareLicenses = computed(() => store.getters.softwareLicenses)
+
+const isActiveTab = computed(() => activeTab.value === 'active')
+
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') },
+  { name: 'linked-hardware', label: t('departments.linked_hardware') },
+  { name: 'linked-software', label: t('departments.linked_software') }
+])
+
+const departmentList = computed(() =>
+  isActiveTab.value ? departments.value : archivedDepartments.value
+)
+
+const deleteText = computed(() =>
+  departmentToDelete.value
+    ? t('departments.delete_text', { name: departmentToDelete.value.name })
+    : ''
+)
+
+const linkedItems = computed(() =>
+  activeTab.value === 'linked-hardware'
+    ? linkedHardwareItems.value
+    : linkedSoftwareLicenses.value
+)
+
+const items = computed(() =>
+  activeTab.value === 'linked-hardware'
+    ? hardwareItems.value
+    : softwareLicenses.value
+)
+
+// Functions
+
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('departments.title'))
+  const headers = [
+    t('main.type'),
+    t('departments.fields.name'),
+    t('departments.fields.color')
+  ]
+  const rows = departments.value.map(department => [
+    department.type,
+    department.name,
+    department.color
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
+}
+
+const onNewClicked = () => {
+  departmentToEdit.value = { name: '', color: '#999999' }
+  modals.edit = true
+}
+
+const onEditClicked = department => {
+  departmentToEdit.value = department
+  modals.edit = true
+}
+
+const onDeleteClicked = department => {
+  departmentToDelete.value = department
+  modals.del = true
+}
+
+const confirmEditDepartment = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (departmentToEdit.value?.id) {
+      await store.dispatch('editDepartment', {
+        ...form,
+        id: departmentToEdit.value.id
+      })
+    } else {
+      await store.dispatch('newDepartment', form)
     }
-  },
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.edit = false
+}
 
-  async mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-    this.loading.departments = true
-    this.errors.departments = false
-    try {
-      await this.loadDepartments()
-      await this.loadHardwareItems()
-      await this.loadSoftwareLicenses()
-      this.linkedHardwareItems = await this.loadLinkedHardwareItems()
-      this.linkedSoftwareLicenses = await this.loadLinkedSoftwareLicenses()
-    } catch (error) {
-      console.error(error)
-      this.errors.departments = true
+const confirmDeleteDepartment = async () => {
+  loading.del = true
+  errors.del = false
+  try {
+    await store.dispatch('deleteDepartment', departmentToDelete.value)
+    modals.del = false
+  } catch (err) {
+    console.error(err)
+    errors.del = true
+  }
+  loading.del = false
+}
+
+const onLinkItem = ({ itemId, departmentId }) => {
+  if (activeTab.value === 'linked-hardware') {
+    store.dispatch('linkHardwareItem', {
+      hardwareItemId: itemId,
+      departmentId
+    })
+    const item = hardwareItems.value.find(i => i.id === itemId)
+    if (!linkedHardwareItems.value[departmentId]) {
+      linkedHardwareItems.value[departmentId] = []
     }
-    this.loading.departments = false
-  },
-
-  computed: {
-    ...mapGetters([
-      'departments',
-      'archivedDepartments',
-      'hardwareItems',
-      'softwareLicenses'
-    ]),
-
-    isActiveTab() {
-      return this.activeTab === 'active'
-    },
-
-    departmentList() {
-      return this.isActiveTab ? this.departments : this.archivedDepartments
-    },
-
-    deleteText() {
-      return this.departmentToDelete
-        ? this.$t('departments.delete_text', {
-            name: this.departmentToDelete.name
-          })
-        : ''
-    },
-
-    linkedItems() {
-      return this.activeTab === 'linked-hardware'
-        ? this.linkedHardwareItems
-        : this.linkedSoftwareLicenses
-    },
-
-    items() {
-      return this.activeTab === 'linked-hardware'
-        ? this.hardwareItems
-        : this.softwareLicenses
+    linkedHardwareItems.value[departmentId].push(item)
+  } else if (activeTab.value === 'linked-software') {
+    store.dispatch('linkSoftwareLicense', {
+      softwareLicenseId: itemId,
+      departmentId
+    })
+    const item = softwareLicenses.value.find(i => i.id === itemId)
+    if (!linkedSoftwareLicenses.value[departmentId]) {
+      linkedSoftwareLicenses.value[departmentId] = []
     }
-  },
-
-  methods: {
-    ...mapActions([
-      'deleteDepartment',
-      'linkHardwareItem',
-      'linkSoftwareLicense',
-      'loadDepartments',
-      'loadHardwareItems',
-      'loadSoftwareLicenses',
-      'loadLinkedHardwareItems',
-      'loadLinkedSoftwareLicenses',
-      'unlinkHardwareItem',
-      'unlinkSoftwareLicense'
-    ]),
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('departments.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('departments.fields.name'),
-        this.$t('departments.fields.color')
-      ]
-      const entries = [headers].concat(
-        this.departments.map(department => [
-          department.type,
-          department.name,
-          department.color
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.departmentToEdit = { name: '', color: '#999999' }
-      this.modals.edit = true
-    },
-
-    onEditClicked(department) {
-      this.departmentToEdit = department
-      this.modals.edit = true
-    },
-
-    confirmEditDepartment(form) {
-      let action = 'newDepartment'
-      if (this.departmentToEdit && this.departmentToEdit.id) {
-        action = 'editDepartment'
-        form.id = this.departmentToEdit.id
-      }
-      this.loading.edit = true
-      this.errors.edit = false
-      this.$store
-        .dispatch(action, form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.edit = false
-        })
-        .catch(() => {
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    onDeleteClicked(department) {
-      this.departmentToDelete = department
-      this.modals.del = true
-    },
-
-    async confirmDeleteDepartment() {
-      this.loading.del = true
-      this.errors.del = false
-      try {
-        await this.deleteDepartment(this.departmentToDelete)
-        this.loading.del = false
-        this.modals.del = false
-      } catch (e) {
-        this.loading.del = false
-        this.errors.del = true
-      }
-    },
-
-    onLinkItem(data) {
-      if (this.activeTab === 'linked-hardware') {
-        this.linkHardwareItem({
-          hardwareItemId: data.itemId,
-          departmentId: data.departmentId
-        })
-        const item = this.hardwareItems.find(i => i.id === data.itemId)
-        if (!this.linkedHardwareItems[data.departmentId]) {
-          this.linkedHardwareItems[data.departmentId] = []
-        }
-        this.linkedHardwareItems[data.departmentId].push(item)
-      } else if (this.activeTab === 'linked-software') {
-        this.linkSoftwareLicense({
-          softwareLicenseId: data.itemId,
-          departmentId: data.departmentId
-        })
-        const item = this.softwareLicenses.find(i => i.id === data.itemId)
-        if (!this.linkedSoftwareLicenses[data.departmentId]) {
-          this.linkedSoftwareLicenses[data.departmentId] = []
-        }
-        this.linkedSoftwareLicenses[data.departmentId].push(item)
-      }
-    },
-
-    onUnlinkItem(data) {
-      if (this.activeTab === 'linked-hardware') {
-        this.unlinkHardwareItem({
-          hardwareItemId: data.itemId,
-          departmentId: data.departmentId
-        })
-        this.linkedHardwareItems[data.departmentId] = this.linkedHardwareItems[
-          data.departmentId
-        ].filter(i => i.id !== data.itemId)
-      } else if (this.activeTab === 'linked-software') {
-        this.unlinkSoftwareLicense({
-          softwareLicenseId: data.itemId,
-          departmentId: data.departmentId
-        })
-        this.linkedSoftwareLicenses[data.departmentId] =
-          this.linkedSoftwareLicenses[data.departmentId].filter(
-            i => i.id !== data.itemId
-          )
-      }
-    }
-  },
-
-  watch: {
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('departments.title')} - Kitsu`
-    }
+    linkedSoftwareLicenses.value[departmentId].push(item)
   }
 }
+
+const onUnlinkItem = ({ itemId, departmentId }) => {
+  if (activeTab.value === 'linked-hardware') {
+    store.dispatch('unlinkHardwareItem', {
+      hardwareItemId: itemId,
+      departmentId
+    })
+    linkedHardwareItems.value[departmentId] = linkedHardwareItems.value[
+      departmentId
+    ].filter(i => i.id !== itemId)
+  } else if (activeTab.value === 'linked-software') {
+    store.dispatch('unlinkSoftwareLicense', {
+      softwareLicenseId: itemId,
+      departmentId
+    })
+    linkedSoftwareLicenses.value[departmentId] = linkedSoftwareLicenses.value[
+      departmentId
+    ].filter(i => i.id !== itemId)
+  }
+}
+
+// Watchers
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(async () => {
+  activeTab.value = route.query.tab || 'active'
+  loading.departments = true
+  errors.departments = false
+  try {
+    await store.dispatch('loadDepartments')
+    await store.dispatch('loadHardwareItems')
+    await store.dispatch('loadSoftwareLicenses')
+    linkedHardwareItems.value = await store.dispatch('loadLinkedHardwareItems')
+    linkedSoftwareLicenses.value = await store.dispatch(
+      'loadLinkedSoftwareLicenses'
+    )
+  } catch (err) {
+    console.error(err)
+    errors.departments = true
+  }
+  loading.departments = false
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('departments.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
@@ -320,5 +276,12 @@ export default {
 .tabs {
   min-height: 30px;
   margin-top: 1em;
+}
+
+@media screen and (max-width: 768px) {
+  .departments {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
 }
 </style>
