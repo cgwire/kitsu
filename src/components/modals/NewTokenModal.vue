@@ -1,5 +1,10 @@
 <template>
   <div class="modal" :class="{ 'is-active': active }">
+    <!--
+      Background click intentionally has no @click handler — accidental
+      dismissal would lose an unrecoverable token. Escape still cancels
+      via useModal.
+    -->
     <div class="modal-background"></div>
     <div class="modal-content">
       <div class="box">
@@ -42,7 +47,6 @@
           </p>
           <div class="token">
             <text-field
-              ref="token"
               :disabled="!visible"
               input-class=" token-input"
               :readonly="true"
@@ -79,94 +83,67 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { AlertTriangleIcon, EyeIcon, EyeOffIcon } from 'lucide-vue-next'
+import { computed, ref, toRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import { modalMixin } from '@/components/modals/base_modal'
-import { timeMixin } from '@/components/mixins/time'
+import { useModal } from '@/composables/modal'
+import { useTime } from '@/composables/time'
 
 import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'new-token-modal',
+const { t } = useI18n()
+const { today } = useTime()
 
-  mixins: [modalMixin, timeMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  person: { type: Object, default: () => ({}) }
+})
 
-  components: {
-    AlertTriangleIcon,
-    DateField,
-    EyeIcon,
-    EyeOffIcon,
-    TextField
-  },
+const emit = defineEmits(['cancel', 'close', 'generate-token'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    person: {
-      type: Object,
-      default: () => {}
-    }
-  },
+useModal(toRef(props, 'active'), emit)
 
-  emits: ['cancel', 'close', 'generate-token'],
+const form = ref({ expiration_date: null })
+const message = ref(null)
+const visible = ref(false)
 
-  data() {
-    return {
-      form: {
-        expiration_date: null
-      },
-      message: null,
-      visible: false
-    }
-  },
+const isValidExpirationDate = computed(
+  () =>
+    !form.value.expiration_date ||
+    new Date(form.value.expiration_date) > new Date()
+)
 
-  computed: {
-    isValidExpirationDate() {
-      return (
-        !this.form.expiration_date ||
-        new Date(this.form.expiration_date) > new Date()
-      )
-    }
-  },
-
-  methods: {
-    generateToken() {
-      this.$emit('generate-token', {
-        id: this.person.id,
-        expiration_date: this.form.expiration_date
-      })
-    },
-
-    async copyClicked() {
-      this.message = null
-      await navigator.clipboard.writeText(this.person.access_token)
-      this.message = this.$t('bots.token_copied')
-      setTimeout(() => {
-        this.message = null
-      }, 5000)
-    },
-
-    resetForm() {
-      this.form = {
-        expiration_date: this.person.expiration_date
-      }
-      this.message = null
-      this.visible = false
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.resetForm()
-      }
-    }
-  }
+const generateToken = () => {
+  emit('generate-token', {
+    id: props.person.id,
+    expiration_date: form.value.expiration_date
+  })
 }
+
+const copyClicked = async () => {
+  message.value = null
+  await navigator.clipboard.writeText(props.person.access_token)
+  message.value = t('bots.token_copied')
+  setTimeout(() => {
+    message.value = null
+  }, 5000)
+}
+
+const resetForm = () => {
+  form.value = { expiration_date: props.person.expiration_date }
+  message.value = null
+  visible.value = false
+}
+
+watch(
+  () => props.active,
+  active => {
+    if (active) resetForm()
+  }
+)
 </script>
 
 <style lang="scss" scoped>
