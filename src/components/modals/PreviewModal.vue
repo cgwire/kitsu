@@ -31,59 +31,38 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ArrowUpRightIcon, DownloadIcon, XIcon } from 'lucide-vue-next'
+import { computed, toRef } from 'vue'
 
+import { useModal } from '@/composables/modal'
 import { getDownloadAttachmentPath } from '@/lib/path'
 
-import { modalMixin } from '@/components/modals/base_modal'
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  attachment: { type: Object, default: () => ({}) },
+  previewFileId: { type: String, default: '' }
+})
 
-export default {
-  name: 'preview-modal',
+const emit = defineEmits(['cancel'])
 
-  mixins: [modalMixin],
+useModal(toRef(props, 'active'), emit)
 
-  components: {
-    ArrowUpRightIcon,
-    DownloadIcon,
-    XIcon
-  },
-
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    previewFileId: {
-      type: String,
-      default: ''
-    },
-    attachment: {
-      type: Object,
-      default: () => {}
-    }
-  },
-
-  emits: ['cancel'],
-
-  computed: {
-    previewPath() {
-      if (this.previewFileId) {
-        return this.active
-          ? `/api/pictures/originals/preview-files/${this.previewFileId}.png`
-          : ''
-      }
-      if (this.attachment) {
-        return getDownloadAttachmentPath(this.attachment)
-      }
-      return ''
-    },
-
-    previewDlPath() {
-      return `/api/pictures/originals/preview-files/${this.previewFileId}/download`
-    }
+const previewPath = computed(() => {
+  if (props.previewFileId) {
+    return props.active
+      ? `/api/pictures/originals/preview-files/${props.previewFileId}.png`
+      : ''
   }
-}
+  if (props.attachment) {
+    return getDownloadAttachmentPath(props.attachment)
+  }
+  return ''
+})
+
+const previewDlPath = computed(
+  () => `/api/pictures/originals/preview-files/${props.previewFileId}/download`
+)
 </script>
 
 <style lang="scss" scoped>
