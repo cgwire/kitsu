@@ -60,121 +60,95 @@
   </base-modal>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-software-license-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BaseModal,
-    ComboboxBoolean,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  softwareLicenseToEdit: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    softwareLicenseToEdit: {
-      type: Object,
-      default: () => {}
+const emit = defineEmits(['cancel', 'confirm'])
+
+// State
+
+const form = ref({ name: '', archived: 'false' })
+const nameField = ref(null)
+
+// Computed
+
+const isEditing = computed(() => Boolean(props.softwareLicenseToEdit?.id))
+
+const modalTitle = computed(() =>
+  isEditing.value
+    ? t('software_licenses.edit_title') + ' ' + props.softwareLicenseToEdit.name
+    : t('software_licenses.new_software_license')
+)
+
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+const resetForm = () => {
+  if (props.softwareLicenseToEdit.id) {
+    form.value = {
+      name: props.softwareLicenseToEdit.name,
+      short_name: props.softwareLicenseToEdit.short_name,
+      file_extension: props.softwareLicenseToEdit.file_extension,
+      version: props.softwareLicenseToEdit.version,
+      monthly_cost: props.softwareLicenseToEdit.monthly_cost,
+      inventory_amount: props.softwareLicenseToEdit.inventory_amount,
+      archived: String(props.softwareLicenseToEdit.archived === true)
     }
-  },
-
-  emits: ['cancel', 'confirm'],
-
-  data() {
-    return {
-      form: {
-        name: '',
-        archived: 'false'
-      }
-    }
-  },
-
-  mounted() {
-    this.loadSoftwareLicenses()
-  },
-
-  computed: {
-    isEditing() {
-      return Boolean(this.softwareLicenseToEdit?.id)
-    },
-
-    modalTitle() {
-      return this.isEditing
-        ? this.$t('software_licenses.edit_title') +
-            ' ' +
-            this.softwareLicenseToEdit.name
-        : this.$t('software_licenses.new_software_license')
-    }
-  },
-
-  methods: {
-    ...mapActions(['loadSoftwareLicenses']),
-
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    },
-
-    resetForm() {
-      if (this.softwareLicenseToEdit.id) {
-        this.form = {
-          name: this.softwareLicenseToEdit.name,
-          short_name: this.softwareLicenseToEdit.short_name,
-          file_extension: this.softwareLicenseToEdit.file_extension,
-          version: this.softwareLicenseToEdit.version,
-          monthly_cost: this.softwareLicenseToEdit.monthly_cost,
-          inventory_amount: this.softwareLicenseToEdit.inventory_amount,
-          archived: String(this.softwareLicenseToEdit.archived === true)
-        }
-      } else {
-        this.form = {
-          name: '',
-          short_name: '',
-          file_extension: '',
-          version: '',
-          monthly_cost: 0,
-          inventory_amount: 0,
-          archived: 'false'
-        }
-      }
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField?.focus()
-        }, 100)
-      }
-    },
-
-    softwareLicenseToEdit() {
-      this.resetForm()
+  } else {
+    form.value = {
+      name: '',
+      short_name: '',
+      file_extension: '',
+      version: '',
+      monthly_cost: 0,
+      inventory_amount: 0,
+      archived: 'false'
     }
   }
 }
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
+    }
+  }
+)
+
+watch(() => props.softwareLicenseToEdit, resetForm)
+
+// Lifecycle
+
+onMounted(() => {
+  store.dispatch('loadSoftwareLicenses')
+})
 </script>
 
 <style lang="scss" scoped>

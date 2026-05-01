@@ -10,7 +10,6 @@
 
     <combobox-studio
       class="mt1 mb1"
-      ref="studioField"
       all-studios-label
       :label="$t('main.studio')"
       v-model="form.studio_id"
@@ -18,7 +17,6 @@
 
     <combobox-department
       class="mt1 mb1"
-      ref="departmentField"
       all-departments-label
       :label="$t('people.fields.departments')"
       v-model="form.department_id"
@@ -56,90 +54,61 @@
   </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 
-export default {
-  name: 'notify-client-modal',
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BaseModal,
-    ComboboxDepartment,
-    ComboboxStudio,
-    ModalFooter,
-    PeopleAvatar,
-    PeopleName
-  },
+defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isSuccess: { type: Boolean, default: false }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isSuccess: {
-      type: Boolean,
-      default: false
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    return {
-      form: {
-        studio_id: '',
-        department_id: ''
-      }
-    }
-  },
+const form = ref({ studio_id: '', department_id: '' })
 
-  computed: {
-    ...mapGetters(['currentProduction', 'personMap']),
+// Computed
 
-    clients() {
-      return this.currentProduction.team
-        .map(personId => this.personMap.get(personId))
-        .filter(person => person?.role === 'client')
-        .filter(
-          person =>
-            !this.form.studio_id || person.studio_id === this.form.studio_id
-        )
-        .filter(
-          person =>
-            !this.form.department_id ||
-            (person.departments &&
-              person.departments.includes(this.form.department_id))
-        )
-        .sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
-    }
-  },
+const currentProduction = computed(() => store.getters.currentProduction)
+const personMap = computed(() => store.getters.personMap)
 
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', {
-        studio_id: this.form.studio_id,
-        department_id: this.form.department_id
-      })
-    }
-  }
+const clients = computed(() =>
+  currentProduction.value.team
+    .map(personId => personMap.value.get(personId))
+    .filter(person => person?.role === 'client')
+    .filter(
+      person =>
+        !form.value.studio_id || person.studio_id === form.value.studio_id
+    )
+    .filter(
+      person =>
+        !form.value.department_id ||
+        person.departments?.includes(form.value.department_id)
+    )
+    .sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
+)
+
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', {
+    studio_id: form.value.studio_id,
+    department_id: form.value.department_id
+  })
 }
 </script>

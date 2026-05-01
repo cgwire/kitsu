@@ -98,242 +98,198 @@
   </base-modal>
 </template>
 
-<script>
+<script setup>
 import moment from 'moment'
-import { mapGetters } from 'vuex'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
-import { parseSimpleDate, formatSimpleDate } from '@/lib/time'
+import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import MonthField from '@/components/widgets/MonthField.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-budget-entry-modal',
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BaseModal,
-    Combobox,
-    ComboboxDepartment,
-    ModalFooter,
-    MonthField,
-    PeopleField,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  budgetEntryToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  salaryScale: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    budgetEntryToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    salaryScale: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    return {
-      form: {
-        department_id: '',
-        person: null,
-        position: 'artist',
-        seniority: 'junior',
-        start_date: null,
-        months_duration: 1
-      },
-      positionOptions: [
-        { label: 'artist', value: 'artist' },
-        { label: 'supervisor', value: 'supervisor' },
-        { label: 'lead', value: 'lead' }
-      ],
-      refreshKeys: {
-        endMonth: 0
-      },
-      seniorityOptions: [
-        { label: 'junior', value: 'junior' },
-        { label: 'mid', value: 'mid' },
-        { label: 'senior', value: 'senior' }
-      ]
-    }
-  },
+const form = ref({
+  department_id: '',
+  person: null,
+  position: 'artist',
+  seniority: 'junior',
+  start_date: null,
+  months_duration: 1
+})
+const departmentField = ref(null)
 
-  mounted() {
-    this.resetForm()
-  },
+const positionOptions = [
+  { label: 'artist', value: 'artist' },
+  { label: 'supervisor', value: 'supervisor' },
+  { label: 'lead', value: 'lead' }
+]
+const seniorityOptions = [
+  { label: 'junior', value: 'junior' },
+  { label: 'mid', value: 'mid' },
+  { label: 'senior', value: 'senior' }
+]
 
-  computed: {
-    ...mapGetters(['activePeople', 'currentProduction', 'personMap']),
+// Computed
 
-    isDisabled() {
-      return !this.form.department_id || this.form.months_duration < 1
-    },
+const activePeople = computed(() => store.getters.activePeople)
+const currentProduction = computed(() => store.getters.currentProduction)
+const personMap = computed(() => store.getters.personMap)
 
-    isEditing() {
-      return this.budgetEntryToEdit && this.budgetEntryToEdit.id
-    },
+const isEditing = computed(() => Boolean(props.budgetEntryToEdit?.id))
 
-    projectStartDate() {
-      return parseSimpleDate(this.currentProduction.start_date).toDate()
-    },
+const isDisabled = computed(
+  () => !form.value.department_id || form.value.months_duration < 1
+)
 
-    projectEndDate() {
-      return parseSimpleDate(this.currentProduction.end_date).toDate()
-    },
+const projectStartDate = computed(() =>
+  parseSimpleDate(currentProduction.value.start_date).toDate()
+)
 
-    endMonth() {
-      this.refreshKeys.endMonth
-      const startDate = parseSimpleDate(this.form.start_date)
-      const projectEndDate = parseSimpleDate(this.currentProduction.end_date)
-      let endDate = startDate.add(this.form.months_duration, 'months')
-      endDate = moment.min(endDate, projectEndDate)
-      return endDate.format('YYYY-MM')
-    },
+const projectEndDate = computed(() =>
+  parseSimpleDate(currentProduction.value.end_date).toDate()
+)
 
-    dailySalary() {
-      if (!this.form.department_id) {
-        return 0
-      } else if (!this.form.person || !this.form.person.daily_salary) {
-        const departmentScale = this.salaryScale[this.form.department_id]
-        return departmentScale[this.form.position || 'artist'][
-          this.form.seniority || 'junior'
-        ].salary
-      } else {
-        return this.form.person.daily_salary
-      }
-    },
+const maxDuration = computed(() => {
+  const startDate = parseSimpleDate(form.value.start_date)
+  const end = parseSimpleDate(currentProduction.value.end_date).endOf('month')
+  const months = end.diff(startDate, 'months')
+  return months > 0 ? months : 1
+})
 
-    monthlySalary() {
-      return this.dailySalary * 20
-    },
+const endMonth = computed(() => {
+  const startDate = parseSimpleDate(form.value.start_date)
+  const projectEnd = parseSimpleDate(currentProduction.value.end_date)
+  const endDate = moment.min(
+    startDate.add(form.value.months_duration, 'months'),
+    projectEnd
+  )
+  return endDate.format('YYYY-MM')
+})
 
-    totalSalary() {
-      if (!this.form.department_id) {
-        return 0
-      } else {
-        const duration = Math.min(this.form.months_duration, this.maxDuration)
-        return this.monthlySalary * duration
-      }
-    },
+const dailySalary = computed(() => {
+  if (!form.value.department_id) return 0
+  if (!form.value.person || !form.value.person.daily_salary) {
+    const departmentScale = props.salaryScale[form.value.department_id]
+    return departmentScale[form.value.position || 'artist'][
+      form.value.seniority || 'junior'
+    ].salary
+  }
+  return form.value.person.daily_salary
+})
 
-    maxDuration() {
-      const startDate = parseSimpleDate(this.form.start_date)
-      const projectEndDate = parseSimpleDate(
-        this.currentProduction.end_date
-      ).endOf('month')
-      const maxDuration = projectEndDate.diff(startDate, 'months')
-      return maxDuration > 0 ? maxDuration : 1
-    },
+const monthlySalary = computed(() => dailySalary.value * 20)
 
-    departmentPeople() {
-      if (this.form.department_id) {
-        return this.activePeople.filter(person =>
-          person.departments.includes(this.form.department_id)
-        )
-      } else {
-        return this.activePeople
-      }
-    }
-  },
+const totalSalary = computed(() => {
+  if (!form.value.department_id) return 0
+  const duration = Math.min(form.value.months_duration, maxDuration.value)
+  return monthlySalary.value * duration
+})
 
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', {
-        ...this.form,
-        person_id: this.form.person?.id,
-        duration: Math.min(this.form.months_duration, this.maxDuration),
-        salary: this.monthlySalary,
-        total_salary: this.totalSalary
-      })
-    },
+const departmentPeople = computed(() => {
+  if (!form.value.department_id) return activePeople.value
+  return activePeople.value.filter(person =>
+    person.departments.includes(form.value.department_id)
+  )
+})
 
-    onPersonChanged(person) {
-      this.form.position = person?.position || 'artist'
-      this.form.seniority = person?.seniority || 'junior'
-    },
+// Functions
 
-    formatDate(date) {
-      return formatSimpleDate(date)
-    },
+const formatDate = date => formatSimpleDate(date)
 
-    resetForm() {
-      if (this.isEditing) {
-        const person = this.personMap.get(this.budgetEntryToEdit.person_id)
-        Object.assign(this.form, {
-          id: this.budgetEntryToEdit.id,
-          department_id: this.budgetEntryToEdit.department_id,
-          person,
-          position: this.budgetEntryToEdit.position || 'artist',
-          seniority: this.budgetEntryToEdit.seniority || 'junior',
-          start_date: parseSimpleDate(
-            this.budgetEntryToEdit.start_date
-          ).toDate(),
-          months_duration: this.budgetEntryToEdit.months_duration,
-          daily_salary: this.budgetEntryToEdit.daily_salary
-        })
-        this.form.person = person
-        // Needed to bypass watcher
-        this.$nextTick(() => {
-          this.form.daily_salary = this.budgetEntryToEdit.daily_salary
-        })
-      } else {
-        this.form = {
-          id: null,
-          department_id: '',
-          person: null,
-          position: 'artist',
-          seniority: 'junior',
-          start_date: parseSimpleDate(this.currentProduction.start_date)
-            .startOf('month')
-            .toDate(),
-          months_duration: 1,
-          daily_salary: 0
-        }
-      }
-    }
-  },
+const onPersonChanged = person => {
+  form.value.position = person?.position || 'artist'
+  form.value.seniority = person?.seniority || 'junior'
+}
 
-  watch: {
-    active() {
-      if (this.active) {
-        this.resetForm()
-        setTimeout(() => {
-          this.$refs.departmentField.focus()
-        }, 100)
-      }
-    },
+const runConfirmation = () => {
+  emit('confirm', {
+    ...form.value,
+    person_id: form.value.person?.id,
+    duration: Math.min(form.value.months_duration, maxDuration.value),
+    salary: monthlySalary.value,
+    total_salary: totalSalary.value
+  })
+}
 
-    dailySalary() {
-      this.form.daily_salary = this.dailySalary
-    },
-
-    budgetEntryToEdit() {
-      this.resetForm()
+const resetForm = () => {
+  if (isEditing.value) {
+    const entry = props.budgetEntryToEdit
+    const person = personMap.value.get(entry.person_id)
+    Object.assign(form.value, {
+      id: entry.id,
+      department_id: entry.department_id,
+      person,
+      position: entry.position || 'artist',
+      seniority: entry.seniority || 'junior',
+      start_date: parseSimpleDate(entry.start_date).toDate(),
+      months_duration: entry.months_duration,
+      daily_salary: entry.daily_salary
+    })
+    form.value.person = person
+    // Needed to bypass watcher
+    nextTick(() => {
+      form.value.daily_salary = entry.daily_salary
+    })
+  } else {
+    form.value = {
+      id: null,
+      department_id: '',
+      person: null,
+      position: 'artist',
+      seniority: 'junior',
+      start_date: parseSimpleDate(currentProduction.value.start_date)
+        .startOf('month')
+        .toDate(),
+      months_duration: 1,
+      daily_salary: 0
     }
   }
 }
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      resetForm()
+      setTimeout(() => {
+        departmentField.value?.focus()
+      }, 100)
+    }
+  }
+)
+
+watch(dailySalary, value => {
+  form.value.daily_salary = value
+})
+
+watch(() => props.budgetEntryToEdit, resetForm)
+
+// Lifecycle
+
+onMounted(resetForm)
 </script>
 
 <style lang="scss" scoped>

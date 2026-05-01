@@ -48,117 +48,91 @@
   </base-modal>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-hardware-item-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BaseModal,
-    ComboboxBoolean,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  hardwareItemToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    hardwareItemToEdit: {
-      type: Object,
-      default: () => {}
+const emit = defineEmits(['cancel', 'confirm'])
+
+// State
+
+const form = ref({ name: '', archived: 'false' })
+const nameField = ref(null)
+
+// Computed
+
+const isEditing = computed(() => Boolean(props.hardwareItemToEdit?.id))
+
+const modalTitle = computed(() =>
+  isEditing.value
+    ? t('hardware_items.edit_title') + ' ' + props.hardwareItemToEdit.name
+    : t('hardware_items.new_hardware_item')
+)
+
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+const resetForm = () => {
+  if (props.hardwareItemToEdit.id) {
+    form.value = {
+      name: props.hardwareItemToEdit.name,
+      short_name: props.hardwareItemToEdit.short_name,
+      monthly_cost: props.hardwareItemToEdit.monthly_cost,
+      inventory_amount: props.hardwareItemToEdit.inventory_amount,
+      archived: String(props.hardwareItemToEdit.archived === true)
     }
-  },
-
-  emits: ['cancel', 'confirm'],
-
-  data() {
-    return {
-      form: {
-        name: '',
-        archived: 'false'
-      }
-    }
-  },
-
-  mounted() {
-    this.loadHardwareItems()
-  },
-
-  computed: {
-    isEditing() {
-      return Boolean(this.hardwareItemToEdit?.id)
-    },
-
-    modalTitle() {
-      return this.isEditing
-        ? this.$t('hardware_items.edit_title') +
-            ' ' +
-            this.hardwareItemToEdit.name
-        : this.$t('hardware_items.new_hardware_item')
-    }
-  },
-
-  methods: {
-    ...mapActions(['loadHardwareItems']),
-
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    },
-
-    resetForm() {
-      if (this.hardwareItemToEdit.id) {
-        this.form = {
-          name: this.hardwareItemToEdit.name,
-          short_name: this.hardwareItemToEdit.short_name,
-          monthly_cost: this.hardwareItemToEdit.monthly_cost,
-          inventory_amount: this.hardwareItemToEdit.inventory_amount,
-          archived: String(this.hardwareItemToEdit.archived === true)
-        }
-      } else {
-        this.form = {
-          name: '',
-          short_name: '',
-          monthly_cost: 0,
-          inventory_amount: 0,
-          archived: 'false'
-        }
-      }
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField?.focus()
-        }, 100)
-      }
-    },
-
-    hardwareItemToEdit() {
-      this.resetForm()
+  } else {
+    form.value = {
+      name: '',
+      short_name: '',
+      monthly_cost: 0,
+      inventory_amount: 0,
+      archived: 'false'
     }
   }
 }
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
+    }
+  }
+)
+
+watch(() => props.hardwareItemToEdit, resetForm)
+
+// Lifecycle
+
+onMounted(() => {
+  store.dispatch('loadHardwareItems')
+})
 </script>
 
 <style lang="scss" scoped>
