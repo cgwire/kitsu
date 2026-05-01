@@ -1,186 +1,143 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('main.csv.import_title')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title">
-          {{ $t('main.csv.import_title') }}
-        </h1>
-
-        <div v-if="columns.length > 0" class="mb1">
-          {{ $t('main.csv.required_fields') }}
-          <ul>
-            <li v-for="column in columns" :key="column">
-              {{ column }}
-            </li>
-          </ul>
-        </div>
-        <div v-if="optionalColumns.length > 0" class="mb1">
-          {{ $t('main.csv.optional_fields') }}
-          <ul>
-            <li v-for="optionalColumn in optionalColumns" :key="optionalColumn">
-              {{ optionalColumn }}
-            </li>
-          </ul>
-        </div>
-        <div v-if="genericColumns.length > 0" class="mb1">
-          {{ $t('main.csv.generic_fields') }}
-          <ul>
-            <li v-for="genericColumn in genericColumns" :key="genericColumn">
-              {{ genericColumn }}
-            </li>
-          </ul>
-        </div>
-
-        <div class="tabs">
-          <ul>
-            <li
-              :class="{ 'is-active': activeTab === tab.id }"
-              :key="`tab-${tab.id}`"
-              v-for="tab in tabs"
-            >
-              <a @click="activeTab = tab.id">{{ tab.name }}</a>
-            </li>
-          </ul>
-        </div>
-        <div v-show="activeTab === 'file'">
-          <p>{{ $t('main.csv.select_file') }}</p>
-          <file-upload
-            @fileselected="onFileSelected"
-            :label="$t('main.csv.upload_file')"
-            ref="inputFile"
-          />
-        </div>
-        <div v-show="activeTab === 'text'">
-          <p>{{ $t('main.csv.paste_code') }}</p>
-          <textarea
-            class="paste-area"
-            :placeholder="pasteAreaPlaceholder"
-            v-model.trim="pastedCode"
-          ></textarea>
-        </div>
-
-        <modal-footer
-          :confirm-label="$t('main.csv.preview')"
-          :error-text="$t('main.csv.error_upload')"
-          :is-loading="isLoading"
-          :is-disabled="!isValid"
-          :is-error="isError"
-          @confirm="onConfirmClicked"
-          @cancel="$emit('cancel')"
-        />
-      </div>
+    <div v-if="columns.length > 0" class="mb1">
+      {{ $t('main.csv.required_fields') }}
+      <ul>
+        <li v-for="column in columns" :key="column">
+          {{ column }}
+        </li>
+      </ul>
     </div>
-  </div>
+    <div v-if="optionalColumns.length > 0" class="mb1">
+      {{ $t('main.csv.optional_fields') }}
+      <ul>
+        <li v-for="optionalColumn in optionalColumns" :key="optionalColumn">
+          {{ optionalColumn }}
+        </li>
+      </ul>
+    </div>
+    <div v-if="genericColumns.length > 0" class="mb1">
+      {{ $t('main.csv.generic_fields') }}
+      <ul>
+        <li v-for="genericColumn in genericColumns" :key="genericColumn">
+          {{ genericColumn }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="tabs">
+      <ul>
+        <li
+          :class="{ 'is-active': activeTab === tab.id }"
+          :key="`tab-${tab.id}`"
+          v-for="tab in tabs"
+        >
+          <a @click="activeTab = tab.id">{{ tab.name }}</a>
+        </li>
+      </ul>
+    </div>
+    <div v-show="activeTab === 'file'">
+      <p>{{ $t('main.csv.select_file') }}</p>
+      <file-upload
+        ref="inputFile"
+        @fileselected="onFileSelected"
+        :label="$t('main.csv.upload_file')"
+      />
+    </div>
+    <div v-show="activeTab === 'text'">
+      <p>{{ $t('main.csv.paste_code') }}</p>
+      <textarea
+        class="paste-area"
+        :placeholder="pasteAreaPlaceholder"
+        v-model.trim="pastedCode"
+      ></textarea>
+    </div>
+
+    <modal-footer
+      :confirm-label="$t('main.csv.preview')"
+      :error-text="$t('main.csv.error_upload')"
+      :is-loading="isLoading"
+      :is-disabled="!isValid"
+      :is-error="isError"
+      @confirm="onConfirmClicked"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import FileUpload from '@/components/widgets/FileUpload.vue'
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+// eslint-disable-next-line no-unused-vars
+import FileUpload from '@/components/widgets/FileUpload.vue'
 
-export default {
-  name: 'import-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    FileUpload,
-    ModalFooter
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  columns: { type: Array, default: () => [] },
+  genericColumns: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  optionalColumns: { type: Array, default: () => [] }
+})
 
-  emits: ['cancel', 'confirm'],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  data() {
-    return {
-      formData: null,
-      pastedCode: '',
-      activeTab: 'file',
-      tabs: [
-        {
-          id: 'file',
-          name: this.$t('main.csv.tab_select_file')
-        },
-        {
-          id: 'text',
-          name: this.$t('main.csv.tab_paste_code')
-        }
-      ]
-    }
-  },
+// State
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    columns: {
-      type: Array,
-      default: () => []
-    },
-    optionalColumns: {
-      type: Array,
-      default: () => []
-    },
-    genericColumns: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    }
-  },
+const activeTab = ref('file')
+const formData = ref(null)
+const inputFile = ref(null)
+const pastedCode = ref('')
 
-  computed: {
-    isValid() {
-      return (
-        (this.activeTab === 'file' && this.formData) ||
-        (this.activeTab === 'text' && this.pastedCode)
-      )
-    },
+// Computed
 
-    pasteAreaPlaceholder() {
-      return this.columns.join(';')
-    }
-  },
+const tabs = computed(() => [
+  { id: 'file', name: t('main.csv.tab_select_file') },
+  { id: 'text', name: t('main.csv.tab_paste_code') }
+])
 
-  methods: {
-    onFileSelected(formData) {
-      this.formData = formData
-      this.onConfirmClicked()
-    },
+const isValid = computed(
+  () =>
+    (activeTab.value === 'file' && formData.value) ||
+    (activeTab.value === 'text' && pastedCode.value)
+)
 
-    onConfirmClicked() {
-      const mode = this.activeTab
-      const data = mode === 'file' ? this.formData : this.pastedCode
-      this.$emit('confirm', data, mode)
-    },
+const pasteAreaPlaceholder = computed(() => props.columns.join(';'))
 
-    reset() {
-      this.$refs.inputFile?.reset()
-      this.activeTab = 'file'
-      this.formData = null
-      this.pastedCode = ''
-    }
-  },
+// Functions
 
-  watch: {
-    active() {
-      this.reset()
-    }
-  }
+const onConfirmClicked = () => {
+  const mode = activeTab.value
+  const data = mode === 'file' ? formData.value : pastedCode.value
+  emit('confirm', data, mode)
 }
+
+const onFileSelected = data => {
+  formData.value = data
+  onConfirmClicked()
+}
+
+const reset = () => {
+  inputFile.value?.reset()
+  activeTab.value = 'file'
+  formData.value = null
+  pastedCode.value = ''
+}
+
+// Watchers
+
+watch(() => props.active, reset)
 </script>
 
 <style lang="scss" scoped>

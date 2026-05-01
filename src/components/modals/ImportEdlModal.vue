@@ -1,177 +1,134 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('main.edl.import_title')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <p>
+      {{ $t('main.edl.explanation') }}
+    </p>
 
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('main.edl.import_title') }}
-        </h1>
+    <p>
+      {{ $t('main.edl.select_file') }}
+    </p>
+    <file-upload
+      ref="inputFile"
+      @fileselected="onFileSelected"
+      :label="$t('main.edl.upload_file')"
+      accept=".edl, .xml, .otio, .fcpxml"
+    />
 
-        <p>
-          {{ $t('main.edl.explanation') }}
-        </p>
+    <br />
+    <text-field
+      :label="$t('main.edl.naming_convention')"
+      v-model="form.namingConvention"
+      @enter="onConfirmClicked"
+      v-focus
+    />
 
-        <p>
-          {{ $t('main.edl.select_file') }}
-        </p>
-        <file-upload
-          @fileselected="onFileSelected"
-          :label="$t('main.edl.upload_file')"
-          accept=".edl, .xml, .otio, .fcpxml"
-          ref="inputFile"
-        />
+    <checkbox
+      :toggle="true"
+      :label="$t('main.edl.match_case')"
+      v-model="form.matchCase"
+    />
 
-        <br />
-        <text-field
-          ref="namingConventionField"
-          :label="$t('main.edl.naming_convention')"
-          v-model="form.namingConvention"
-          @enter="onConfirmClicked"
-          v-focus
-        />
-
-        <checkbox
-          :toggle="true"
-          :label="$t('main.edl.match_case')"
-          v-model="form.matchCase"
-        />
-
-        <modal-footer
-          :confirm-label="$t('main.edl.upload_edl')"
-          :error-text="errorText"
-          :is-loading="isLoading"
-          :is-disabled="formData === null"
-          :is-error="isError"
-          @confirm="onConfirmClicked"
-          @cancel="$emit('cancel')"
-        />
-      </div>
-    </div>
-  </div>
+    <modal-footer
+      :confirm-label="$t('main.edl.upload_edl')"
+      :error-text="errorText"
+      :is-loading="isLoading"
+      :is-disabled="formData === null"
+      :is-error="isError"
+      @confirm="onConfirmClicked"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
-import Checkbox from '@/components/widgets/Checkbox.vue'
-import FileUpload from '@/components/widgets/FileUpload.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+// eslint-disable-next-line no-unused-vars
+import FileUpload from '@/components/widgets/FileUpload.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'import-edl-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    Checkbox,
-    FileUpload,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  importError: { type: Error, default: null },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  emits: ['cancel', 'confirm'],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  data() {
-    return {
-      form: {
-        namingConvention: '${project_name}_${sequence_name}-${shot_name}',
-        matchCase: true
-      },
-      formData: null
-    }
-  },
+// State
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    importError: {
-      type: Error,
-      default: null
-    }
-  },
+const form = ref({
+  namingConvention: '${project_name}_${sequence_name}-${shot_name}',
+  matchCase: true
+})
+const formData = ref(null)
+const inputFile = ref(null)
 
-  mounted() {
-    this.formData = null
-    if (this.isTVShow)
-      this.form.namingConvention =
-        '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
-  },
+// Computed
 
-  computed: {
-    ...mapGetters(['currentProduction', 'isTVShow']),
+const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
 
-    errorText() {
-      let text = this.$t('main.edl.error_upload')
-      if (this.importError && this.importError.status === 400) {
-        const res = this.importError.response
-        text += ` ${res.body.message}`
-      }
-      return text
-    }
-  },
-
-  methods: {
-    onFileSelected(formData) {
-      this.formData = formData
-    },
-
-    onConfirmClicked() {
-      this.$emit(
-        'confirm',
-        this.formData.get('file'),
-        this.form.namingConvention,
-        this.form.matchCase
-      )
-    },
-
-    reset() {
-      this.$refs.inputFile.reset()
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      if (this.isTVShow)
-        this.form.namingConvention =
-          '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
-      else
-        this.form.namingConvention =
-          '${project_name}_${sequence_name}-${shot_name}'
-    },
-
-    active() {
-      this.formData = null
-      this.reset()
-    }
+const errorText = computed(() => {
+  let text = t('main.edl.error_upload')
+  if (props.importError?.status === 400) {
+    text += ` ${props.importError.response.body.message}`
   }
+  return text
+})
+
+// Functions
+
+const onFileSelected = data => {
+  formData.value = data
 }
+
+const onConfirmClicked = () => {
+  emit(
+    'confirm',
+    formData.value.get('file'),
+    form.value.namingConvention,
+    form.value.matchCase
+  )
+}
+
+const updateNamingConvention = () => {
+  form.value.namingConvention = isTVShow.value
+    ? '${project_name}_${episode_name}-${sequence_name}-${shot_name}'
+    : '${project_name}_${sequence_name}-${shot_name}'
+}
+
+// Watchers
+
+watch(currentProduction, updateNamingConvention)
+
+watch(
+  () => props.active,
+  () => {
+    formData.value = null
+    inputFile.value?.reset()
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  formData.value = null
+  if (isTVShow.value) updateNamingConvention()
+})
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.error {
-  margin-top: 1em;
-}
-</style>
