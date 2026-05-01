@@ -123,10 +123,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
 .revision-number {
   font-size: 1.4rem;
   font-weight: bold;

@@ -134,14 +134,3 @@ onMounted(() => {
   store.dispatch('loadHardwareItems')
 })
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-</style>

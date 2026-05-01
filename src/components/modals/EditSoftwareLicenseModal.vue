@@ -150,18 +150,3 @@ onMounted(() => {
   store.dispatch('loadSoftwareLicenses')
 })
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-
-.task-types {
-  flex-wrap: wrap;
-}
-</style>
