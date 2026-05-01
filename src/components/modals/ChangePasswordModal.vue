@@ -1,211 +1,166 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <text-field
+        ref="firstPassword"
+        autocomplete="new-password"
+        :disabled="person.is_generated_from_ldap"
+        :label="$t('people.fields.password')"
+        type="password"
+        @enter="confirmClicked"
+        v-model="form.password"
+      />
+      <text-field
+        autocomplete="new-password"
+        :disabled="person.is_generated_from_ldap"
+        :label="$t('people.fields.password_2')"
+        type="password"
+        @enter="confirmClicked"
+        v-model="form.password2"
+      />
+    </form>
 
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title">
-          {{ $t('people.change_password_for') }} {{ person.name }}
-        </h1>
+    <div class="flexrow">
+      <button
+        :class="{
+          button: true,
+          'is-primary': true,
+          'flexrow-item': true,
+          'is-loading': isLoading
+        }"
+        :disabled="person.is_generated_from_ldap"
+        @click="confirmClicked"
+      >
+        {{ $t('profile.change_password.button') }}
+      </button>
+      <button
+        :class="{
+          button: true,
+          'flexrow-item': true,
+          'is-loading': isLoading,
+          'is-warning': true
+        }"
+        :disabled="
+          !(
+            person.totp_enabled ||
+            person.email_otp_enabled ||
+            person.fido_enabled
+          )
+        "
+        @click="disableTwoFactorAuthenticationClicked"
+      >
+        {{ $t('people.disable_2FA') }}
+      </button>
+      <div class="filler"></div>
 
-        <form @submit.prevent>
-          <text-field
-            autocomplete="new-password"
-            :disabled="person.is_generated_from_ldap"
-            :label="$t('people.fields.password')"
-            ref="first-password"
-            type="password"
-            @enter="confirmClicked()"
-            v-model="form.password"
-          />
-          <text-field
-            autocomplete="new-password"
-            :disabled="person.is_generated_from_ldap"
-            :label="$t('people.fields.password_2')"
-            type="password"
-            @enter="confirmClicked()"
-            v-model="form.password2"
-          />
-        </form>
-
-        <div class="flexrow">
-          <button
-            :class="{
-              button: true,
-              'is-primary': true,
-              'flexrow-item': true,
-              'is-loading': isLoading
-            }"
-            :disabled="person.is_generated_from_ldap"
-            @click="confirmClicked"
-          >
-            {{ $t('profile.change_password.button') }}
-          </button>
-          <button
-            :class="{
-              button: true,
-              'flexrow-item': true,
-              'is-loading': isLoading,
-              'is-warning': true
-            }"
-            :disabled="
-              !(
-                person.totp_enabled ||
-                person.email_otp_enabled ||
-                person.fido_enabled
-              )
-            "
-            @click="disableTwoFactorAuthenticationClicked"
-          >
-            {{ $t('people.disable_2FA') }}
-          </button>
-          <div class="filler"></div>
-
-          <button class="button is-link flexrow-item" @click="$emit('cancel')">
-            {{ $t('main.cancel') }}
-          </button>
-        </div>
-
-        <div class="error has-text-right mt1" v-if="!isValid">
-          {{ $t('profile.change_password.unvalid') }}
-        </div>
-        <div class="error has-text-right mt1" v-if="isError">
-          {{ $t('people.change_password_error') }}
-        </div>
-        <div
-          class="error has-text-right mt1"
-          v-if="isErrorDisableTwoFactorAuthentication"
-        >
-          {{ $t('people.disable_2FA_error') }}
-        </div>
-      </div>
+      <button class="button is-link flexrow-item" @click="$emit('cancel')">
+        {{ $t('main.cancel') }}
+      </button>
     </div>
-  </div>
+
+    <div class="error has-text-right mt1" v-if="!isValid">
+      {{ $t('profile.change_password.unvalid') }}
+    </div>
+    <div class="error has-text-right mt1" v-if="isError">
+      {{ $t('people.change_password_error') }}
+    </div>
+    <div
+      class="error has-text-right mt1"
+      v-if="isErrorDisableTwoFactorAuthentication"
+    >
+      {{ $t('people.disable_2FA_error') }}
+    </div>
+  </base-modal>
 </template>
 
-<script>
-import { mapActions } from 'vuex'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
+import BaseModal from '@/components/modals/BaseModal.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'change-password-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    person: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  person: { type: Object, default: () => ({}) }
+})
 
-  emits: ['cancel', 'confirm'],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  data() {
-    return {
-      form: {
-        password: '',
-        password2: ''
-      },
-      isLoading: false,
-      isError: false,
-      isErrorDisableTwoFactorAuthentication: false,
-      isValid: true
-    }
-  },
+// State
 
-  components: {
-    TextField
-  },
+const form = ref({ password: '', password2: '' })
+const firstPassword = ref(null)
+const isError = ref(false)
+const isErrorDisableTwoFactorAuthentication = ref(false)
+const isLoading = ref(false)
+const isValid = ref(true)
 
-  methods: {
-    ...mapActions([
-      'changePasswordPerson',
-      'disableTwoFactorAuthenticationPerson'
-    ]),
+// Computed
 
-    confirmClicked() {
-      this.isErrorDisableTwoFactorAuthentication = false
-      this.isError = false
-      this.isLoading = true
-      this.changePasswordPerson({
-        person: this.person,
-        form: this.form
-      })
-        .then(() => {
-          this.$emit('confirm')
-        })
-        .catch(err => {
-          if (err.isValidPassword === false) this.isValid = false
-          else this.isError = true
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
-    },
+const modalTitle = computed(
+  () => `${t('people.change_password_for')} ${props.person.name}`
+)
 
-    disableTwoFactorAuthenticationClicked() {
-      this.isErrorDisableTwoFactorAuthentication = false
-      this.isError = false
-      this.isLoading = true
-      this.disableTwoFactorAuthenticationPerson(this.person)
-        .catch(() => {
-          this.isErrorDisableTwoFactorAuthentication = true
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
-    },
+// Functions
 
-    resetForm() {
-      if (this.person) {
-        this.form = {
-          password: '',
-          password2: ''
-        }
-        this.isLoading = false
-        this.isError = false
-        this.isErrorDisableTwoFactorAuthentication = false
-        this.isValid = true
-      }
-    }
-  },
+const confirmClicked = async () => {
+  isErrorDisableTwoFactorAuthentication.value = false
+  isError.value = false
+  isLoading.value = true
+  try {
+    await store.dispatch('changePasswordPerson', {
+      person: props.person,
+      form: form.value
+    })
+    emit('confirm')
+  } catch (err) {
+    if (err.isValidPassword === false) isValid.value = false
+    else isError.value = true
+  }
+  isLoading.value = false
+}
 
-  watch: {
-    person() {
-      this.resetForm()
-    },
+const disableTwoFactorAuthenticationClicked = async () => {
+  isErrorDisableTwoFactorAuthentication.value = false
+  isError.value = false
+  isLoading.value = true
+  try {
+    await store.dispatch('disableTwoFactorAuthenticationPerson', props.person)
+  } catch {
+    isErrorDisableTwoFactorAuthentication.value = true
+  }
+  isLoading.value = false
+}
 
-    active() {
-      if (this.active) {
-        this.resetForm()
-        setTimeout(() => {
-          this.$refs['first-password']?.focus()
-        }, 100)
-      }
+const resetForm = () => {
+  if (!props.person) return
+  form.value = { password: '', password2: '' }
+  isLoading.value = false
+  isError.value = false
+  isErrorDisableTwoFactorAuthentication.value = false
+  isValid.value = true
+}
+
+// Watchers
+
+watch(() => props.person, resetForm)
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      resetForm()
+      setTimeout(() => {
+        firstPassword.value?.focus()
+      }, 100)
     }
   }
-}
+)
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-</style>
