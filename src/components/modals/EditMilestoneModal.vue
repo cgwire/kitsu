@@ -1,139 +1,108 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title" v-if="!isEdit">
-          {{ $t('schedule.milestone.add_milestone') }}:
-          {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('schedule.milestone.edit_milestone') }}:
-          {{ milestoneToEdit.date.format('YYYY-MM-DD') }}
-        </h1>
-        <text-field
-          ref="nameField"
-          :label="$t('schedule.milestone.name')"
-          :maxlength="40"
-          v-model.trim="form.name"
-          @enter="confirm"
-          v-focus
-        />
-        <button-simple
-          class="button is-link error"
-          :text="$t('schedule.milestone.delete_milestone')"
-          @click="$emit('remove-milestone', milestoneToEdit)"
-          v-if="isEdit"
-        />
-        <modal-footer
-          :error-text="$t('schedule.milestone.error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          :is-disabled="!isFormFilled"
-          @confirm="confirm"
-          @cancel="$emit('cancel')"
-        />
-      </div>
-    </div>
-  </div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <text-field
+      ref="nameField"
+      :label="$t('schedule.milestone.name')"
+      :maxlength="40"
+      v-model.trim="form.name"
+      @enter="confirm"
+      v-focus
+    />
+    <button-simple
+      class="button is-link error"
+      :text="$t('schedule.milestone.delete_milestone')"
+      @click="$emit('remove-milestone', milestoneToEdit)"
+      v-if="isEdit"
+    />
+    <modal-footer
+      :error-text="$t('schedule.milestone.error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      :is-disabled="!isFormFilled"
+      @confirm="confirm"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
+<script setup>
 /*
  * Modal used to edit and create milestones.
  */
-import { modalMixin } from '@/components/modals/base_modal'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-milestone-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    ButtonSimple,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  milestoneToEdit: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    milestoneToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm', 'remove-milestone'])
 
-  emits: ['cancel', 'confirm', 'remove-milestone'],
+// State
 
-  data() {
-    return {
-      form: {
-        name: ''
-      }
-    }
-  },
+const form = ref({ name: '' })
+const nameField = ref(null)
 
-  mounted() {
-    this.reset()
-    this.$nextTick(() => {
-      this.$refs.nameField.focus()
-    })
-  },
+// Computed
 
-  computed: {
-    isEdit() {
-      return this.milestoneToEdit.id !== undefined
-    },
+const isEdit = computed(() => props.milestoneToEdit.id !== undefined)
 
-    isFormFilled() {
-      return this.form.name.length > 0
-    }
-  },
+const isFormFilled = computed(() => form.value.name.length > 0)
 
-  methods: {
-    confirm() {
-      return this.$emit('confirm', this.form)
-    },
+const modalTitle = computed(() => {
+  const dateStr = props.milestoneToEdit.date?.format('YYYY-MM-DD') ?? ''
+  const prefix = isEdit.value
+    ? t('schedule.milestone.edit_milestone')
+    : t('schedule.milestone.add_milestone')
+  return `${prefix}: ${dateStr}`
+})
 
-    reset() {
-      this.form = {
-        id: this.milestoneToEdit.id || undefined,
-        name: this.milestoneToEdit.name || '',
-        date: this.milestoneToEdit.date
-      }
-    }
-  },
+// Functions
 
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 1000)
-      }
-    }
+const confirm = () => {
+  emit('confirm', form.value)
+}
+
+const reset = () => {
+  form.value = {
+    id: props.milestoneToEdit.id || undefined,
+    name: props.milestoneToEdit.name || '',
+    date: props.milestoneToEdit.date
   }
 }
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      reset()
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 1000)
+    }
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  reset()
+  nextTick(() => {
+    nameField.value?.focus()
+  })
+})
 </script>

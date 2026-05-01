@@ -29,43 +29,23 @@
   </div>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { toRef } from 'vue'
 
-export default {
-  name: 'confirm-modal',
+import { useModal } from '@/composables/modal'
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  confirmButtonText: { type: String, default: '' },
+  errorText: { type: String, default: '' },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  text: { type: String, required: true }
+})
 
-  props: {
-    text: {
-      required: true,
-      type: String
-    },
-    active: {
-      default: false,
-      type: Boolean
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isError: {
-      default: false,
-      type: Boolean
-    },
-    errorText: {
-      default: '',
-      type: String
-    },
-    confirmButtonText: {
-      default: '',
-      type: String
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm']
-}
+useModal(toRef(props, 'active'), emit)
 </script>
 
 <style lang="scss" scoped>
