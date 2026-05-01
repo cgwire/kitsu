@@ -8,37 +8,27 @@
   </td>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { sortByName } from '@/lib/sorting'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
-export default {
-  name: 'department-names-cell',
+const store = useStore()
 
-  components: {
-    DepartmentName
-  },
+const props = defineProps({
+  departments: { type: Array, default: () => [] }
+})
 
-  props: {
-    departments: {
-      type: Array,
-      default: () => []
-    }
-  },
+const departmentMap = computed(() => store.getters.departmentMap)
 
-  computed: {
-    ...mapGetters(['departmentMap']),
-
-    sortedDepartments() {
-      return sortByName(
-        this.departments
-          .map(departmentId => this.departmentMap.get(departmentId))
-          .filter(Boolean)
-      )
-    }
-  }
-}
+const sortedDepartments = computed(() =>
+  sortByName(
+    props.departments
+      .map(departmentId => departmentMap.value.get(departmentId))
+      .filter(Boolean)
+  )
+)
 </script>

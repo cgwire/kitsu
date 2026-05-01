@@ -29,91 +29,51 @@
   </td>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
 import VueSlider from 'vue-3-slider-component'
+import { computed, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-  name: 'time-slider-cell',
+const store = useStore()
 
-  data() {
-    return {
-      value: this.duration,
-      marks: {
-        0: {
-          label: '0',
-          labelStyle: { fontSize: '.6em', top: '3px', left: '1px' }
-        },
-        2: { label: '' },
-        4: {
-          label: '4',
-          labelStyle: { fontSize: '.6em', top: '3px', left: '1px' }
-        },
-        6: { label: '' },
-        8: {
-          label: '8',
-          labelStyle: { fontSize: '.6em', top: '3px', left: '1px' }
-        },
-        10: { label: '' },
-        12: {
-          label: '12',
-          labelStyle: { fontSize: '.6em', top: '3px', left: '1px' }
-        }
-      }
-    }
-  },
+const props = defineProps({
+  duration: { type: Number, default: 0 },
+  taskId: { type: String, default: '' }
+})
 
-  components: {
-    VueSlider
-  },
+const emit = defineEmits(['change'])
 
-  props: {
-    taskId: {
-      type: String,
-      default: ''
-    },
-    duration: {
-      type: Number,
-      default: 0
-    }
-  },
-
-  emits: ['change'],
-
-  computed: {
-    ...mapGetters(['organisation']),
-
-    hoursByDay() {
-      return this.organisation.hours_by_day || 8
-    },
-
-    stepStyle() {
-      return {
-        display: 'block',
-        borderRadius: 0,
-        height: '10px',
-        width: '4px',
-        top: '-1px',
-        backgroundColor: 'gray'
-      }
-    }
-  },
-
-  methods: {
-    setValue(value) {
-      this.value = value || 0
-    }
-  },
-
-  watch: {
-    value() {
-      this.$emit('change', {
-        taskId: this.taskId,
-        duration: this.value
-      })
-    }
-  }
+const labelStyle = { fontSize: '.6em', top: '3px', left: '1px' }
+const marks = {
+  0: { label: '0', labelStyle },
+  2: { label: '' },
+  4: { label: '4', labelStyle },
+  6: { label: '' },
+  8: { label: '8', labelStyle },
+  10: { label: '' },
+  12: { label: '12', labelStyle }
 }
+const stepStyle = {
+  display: 'block',
+  borderRadius: 0,
+  height: '10px',
+  width: '4px',
+  top: '-1px',
+  backgroundColor: 'gray'
+}
+
+const value = ref(props.duration)
+
+const organisation = computed(() => store.getters.organisation)
+const hoursByDay = computed(() => organisation.value.hours_by_day || 8)
+
+const setValue = v => {
+  value.value = v || 0
+}
+
+watch(value, v => {
+  emit('change', { taskId: props.taskId, duration: v })
+})
 </script>
 
 <style lang="scss" scoped>

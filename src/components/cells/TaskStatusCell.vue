@@ -14,43 +14,28 @@
   </td>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
-export default {
-  name: 'task-status-cell',
+const store = useStore()
 
-  props: {
-    entry: {
-      type: Object,
-      default: () => {}
-    },
-    disable: {
-      type: Boolean,
-      default: false
-    }
-  },
+const props = defineProps({
+  disable: { type: Boolean, default: false },
+  entry: { type: Object, default: () => ({}) }
+})
 
-  computed: {
-    ...mapGetters(['isDarkTheme']),
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
 
-    color() {
-      if (this.entry.name === 'Todo' && this.isDarkTheme) {
-        return '#5F626A'
-      } else {
-        return this.entry.color
-      }
-    },
+const color = computed(() =>
+  props.entry.name === 'Todo' && isDarkTheme.value
+    ? '#5F626A'
+    : props.entry.color
+)
 
-    textColor() {
-      if (this.entry.name === 'Todo' && !this.isDarkTheme) {
-        return '#333'
-      } else {
-        return 'white'
-      }
-    }
-  }
-}
+const textColor = computed(() =>
+  props.entry.name === 'Todo' && !isDarkTheme.value ? '#333' : 'white'
+)
 </script>
 
 <style lang="scss" scoped>

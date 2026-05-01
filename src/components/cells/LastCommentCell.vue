@@ -27,49 +27,25 @@
   </td>
 </template>
 
-<script>
+<script setup>
+import { computed } from 'vue'
+
 import { renderMarkdown } from '@/lib/render'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'last-comment-cell',
+const props = defineProps({
+  task: { type: Object, required: true }
+})
 
-  emits: ['click'],
+defineEmits(['click'])
 
-  components: {
-    PeopleAvatar
-  },
-
-  data() {
-    return {
-      timeout: null
-    }
-  },
-
-  props: {
-    task: {
-      type: Object,
-      required: true
-    }
-  },
-
-  computed: {
-    commentText() {
-      const text = this.task.last_comment.text
-      const maxLength = 140
-      let result = text || ''
-      if (text !== undefined && text.length > maxLength) {
-        result = text.slice(0, maxLength) + '...'
-      }
-      return result
-    }
-  },
-
-  methods: {
-    renderMarkdown
-  }
-}
+const commentText = computed(() => {
+  const text = props.task.last_comment.text
+  const maxLength = 140
+  if (text === undefined) return ''
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
+})
 </script>
 
 <style lang="scss" scoped>

@@ -7,25 +7,13 @@
   </td>
 </template>
 
-<script>
+<script setup>
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 
-export default {
-  name: 'people-name-cell',
-
-  components: {
-    PeopleAvatar,
-    PeopleName
-  },
-
-  props: {
-    person: {
-      type: Object,
-      required: true
-    }
-  }
-}
+defineProps({
+  person: { type: Object, required: true }
+})
 </script>
 
 <style lang="scss" scoped>

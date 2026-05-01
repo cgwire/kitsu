@@ -41,90 +41,66 @@
   </th>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
 import { ChevronDownIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 
-export default {
-  name: 'validation-header',
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    DepartmentName
-  },
+const props = defineProps({
+  columnId: { type: String, default: null },
+  hiddenColumns: { type: Object, default: () => ({}) },
+  isStick: { type: Boolean, default: false },
+  left: { type: String, default: null },
+  type: { type: String, default: 'assets' },
+  validationStyle: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    hiddenColumns: Object,
-    columnId: String,
-    validationStyle: Object,
-    isStick: {
-      type: Boolean,
-      default: false
-    },
-    left: {
-      type: String
-    },
-    type: {
-      type: String,
-      default: 'assets'
-    }
-  },
+defineEmits(['show-header-menu'])
 
-  emits: ['show-header-menu'],
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isCurrentUserClient',
-      'isTVShow',
-      'departmentMap',
-      'taskTypeMap'
-    ]),
+const currentTaskType = computed(
+  () => taskTypeMap.value.get(props.columnId) ?? {}
+)
 
-    currentDepartment() {
-      return this.departmentMap.get(this.currentTaskType.department_id)
-    },
+const currentDepartment = computed(() =>
+  departmentMap.value.get(currentTaskType.value.department_id)
+)
 
-    currentTaskType() {
-      return this.taskTypeMap.get(this.columnId) ?? {}
-    },
+const isHiddenColumn = computed(() => props.hiddenColumns[props.columnId])
 
-    isHiddenColumn() {
-      return this.hiddenColumns[this.columnId]
-    }
-  },
-  methods: {
-    taskTypePath(taskTypeId) {
-      if (this.currentTaskType.for_entity === 'Episode') {
-        const route = {
-          name: 'episodes-task-type',
-          params: {
-            production_id: this.currentProduction.id,
-            task_type_id: taskTypeId
-          }
-        }
-        return route
-      } else {
-        const route = {
-          name: 'task-type',
-          params: {
-            production_id: this.currentProduction.id,
-            task_type_id: taskTypeId,
-            type: this.type
-          }
-        }
-
-        if (this.isTVShow && this.currentEpisode) {
-          route.name = 'episode-task-type'
-          route.params.episode_id = this.currentEpisode.id
-        }
-        return route
+const taskTypePath = taskTypeId => {
+  if (currentTaskType.value.for_entity === 'Episode') {
+    return {
+      name: 'episodes-task-type',
+      params: {
+        production_id: currentProduction.value.id,
+        task_type_id: taskTypeId
       }
     }
   }
+  const route = {
+    name: 'task-type',
+    params: {
+      production_id: currentProduction.value.id,
+      task_type_id: taskTypeId,
+      type: props.type
+    }
+  }
+  if (isTVShow.value && currentEpisode.value) {
+    route.name = 'episode-task-type'
+    route.params.episode_id = currentEpisode.value.id
+  }
+  return route
 }
 </script>
 
