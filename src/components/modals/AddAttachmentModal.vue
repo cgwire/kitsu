@@ -29,7 +29,7 @@
 
         <div class="flexrow buttons attachment-modal-buttons">
           <file-upload
-            ref="file-field"
+            ref="fileField"
             class="flexrow-item"
             :label="$t('main.select_file')"
             :accept="extensions"
@@ -103,159 +103,104 @@
   </div>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 
+import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
-export default {
-  name: 'add-attachment-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  extensions: { type: String, default: files.ALL_EXTENSIONS_STRING },
+  isEditing: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isMovie: { type: Boolean, default: false },
+  title: { type: String, default: '' }
+})
 
-  mixins: [modalMixin],
+const emit = defineEmits(['add-snapshots', 'cancel', 'confirm'])
 
-  components: {
-    FileUpload
-  },
+useModal(toRef(props, 'active'), emit)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isEditing: {
-      type: Boolean,
-      default: false
-    },
-    isMovie: {
-      type: Boolean,
-      default: false
-    },
-    extensions: {
-      type: String,
-      default: files.ALL_EXTENSIONS_STRING
-    },
-    title: {
-      type: String,
-      default: ''
-    }
-  },
+const fileField = ref(null)
+const forms = ref([])
+const isAnnotationLoading = ref(false)
+const isDraggingFile = ref(false)
 
-  emits: ['add-snapshots', 'cancel', 'confirm'],
+const onFileSelected = newForms => {
+  forms.value = forms.value.concat(newForms)
+}
 
-  data() {
-    return {
-      forms: [],
-      isAnnotationLoading: false,
-      isDraggingFile: false
-    }
-  },
+const confirm = () => {
+  emit('confirm', forms.value)
+}
 
-  computed: {
-    fileField() {
-      return this.$refs['file-field']
-    }
-  },
+const reset = () => {
+  fileField.value?.reset()
+  forms.value = []
+}
 
-  methods: {
-    onFileSelected(forms) {
-      this.forms = this.forms.concat(forms)
-    },
+const addFiles = fileList => {
+  fileField.value?.filesChange('', fileList)
+}
 
-    confirm() {
-      this.$emit('confirm', this.forms)
-    },
-
-    reset() {
-      this.fileField.reset()
-      this.forms = []
-    },
-
-    onPaste(event) {
-      if (this.active && event.clipboardData.files) {
-        this.addFiles(event.clipboardData.files)
-      }
-    },
-
-    getURL(form) {
-      return window.URL.createObjectURL(form.get('file'))
-    },
-
-    isImage(form) {
-      return form.get('file').type.startsWith('image')
-    },
-
-    isVideo(form) {
-      return form.get('file').type.startsWith('video')
-    },
-
-    isPdf(form) {
-      return form.get('file').type.indexOf('pdf') > 0
-    },
-
-    addFiles(files) {
-      this.fileField.filesChange('', files)
-    },
-
-    showAnnotationLoading() {
-      this.isAnnotationLoading = true
-    },
-
-    hideAnnotationLoading() {
-      this.isAnnotationLoading = false
-    },
-
-    removeAttachment(form) {
-      this.forms = this.forms.filter(f => f !== form)
-    },
-
-    onFileDragover(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.isDraggingFile = true
-    },
-
-    onFileDragLeave(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      if (event.target.id === 'drop-mask') {
-        this.isDraggingFile = false
-      }
-    },
-
-    onDrag(event) {},
-
-    onDrop(event) {
-      this.fileField.onDrop(event)
-      this.isDraggingFile = false
-      event.preventDefault()
-    }
-  },
-
-  watch: {
-    active() {
-      this.reset()
-    }
-  },
-
-  mounted() {
-    this.forms = []
-    window.addEventListener('paste', this.onPaste, false)
-  },
-
-  beforeUnmount() {
-    window.removeEventListener('paste', this.onPaste)
+const onPaste = event => {
+  if (props.active && event.clipboardData.files) {
+    addFiles(event.clipboardData.files)
   }
 }
+
+const getURL = form => window.URL.createObjectURL(form.get('file'))
+
+const isImage = form => form.get('file').type.startsWith('image')
+const isVideo = form => form.get('file').type.startsWith('video')
+const isPdf = form => form.get('file').type.indexOf('pdf') > 0
+
+const removeAttachment = form => {
+  forms.value = forms.value.filter(f => f !== form)
+}
+
+const onFileDragover = event => {
+  event.preventDefault()
+  event.stopPropagation()
+  isDraggingFile.value = true
+}
+
+const onFileDragLeave = event => {
+  event.preventDefault()
+  event.stopPropagation()
+  if (event.target.id === 'drop-mask') {
+    isDraggingFile.value = false
+  }
+}
+
+const onDrop = event => {
+  fileField.value?.onDrop(event)
+  isDraggingFile.value = false
+  event.preventDefault()
+}
+
+watch(() => props.active, reset)
+
+onMounted(() => {
+  window.addEventListener('paste', onPaste, false)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('paste', onPaste)
+})
+
+defineExpose({
+  showAnnotationLoading: () => {
+    isAnnotationLoading.value = true
+  },
+  hideAnnotationLoading: () => {
+    isAnnotationLoading.value = false
+  }
+})
 </script>
 
 <style lang="scss" scoped>
