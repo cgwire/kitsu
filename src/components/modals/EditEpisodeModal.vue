@@ -1,223 +1,154 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <text-field
+        :label="$t('episodes.fields.name')"
+        :maxlength="160"
+        v-model.trim="form.name"
+        @enter="runConfirmation"
+        v-focus
+      />
 
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="episodeToEdit && episodeToEdit.id">
-          {{ $t('episodes.edit_title') }} {{ episodeToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('episodes.new_episode') }}
-        </h1>
+      <combobox-styled
+        class="field"
+        :label="$t('main.status')"
+        :options="episodeStatusOptions"
+        v-model="form.status"
+      />
 
-        <form @submit.prevent>
-          <text-field
-            ref="nameField"
-            :label="$t('episodes.fields.name')"
-            :maxlength="160"
-            v-model.trim="form.name"
-            @enter="runConfirmation"
-            v-focus
-          />
+      <textarea-field
+        :label="$t('episodes.fields.description')"
+        @keyup.ctrl.enter="runConfirmation"
+        @keyup.meta.enter="runConfirmation"
+        v-model="form.description"
+      />
 
-          <combobox-styled
-            class="field"
-            :label="$t('main.status')"
-            :options="episodeStatusOptions"
-            v-model="form.status"
-          />
+      <text-field
+        :label="$t('shots.fields.resolution')"
+        :placeholder="currentProduction?.resolution"
+        v-model.trim="form.data.resolution"
+        @enter="runConfirmation"
+      />
 
-          <textarea-field
-            ref="descriptionField"
-            :label="$t('episodes.fields.description')"
-            @keyup.ctrl.enter="runConfirmation"
-            @keyup.meta.enter="runConfirmation"
-            v-model="form.description"
-          />
-
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            :placeholder="currentProduction?.resolution"
-            v-model.trim="form.data.resolution"
-            @enter="runConfirmation"
-          />
-
-          <template v-if="episodeToEdit">
-            <metadata-field
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              :entity="episodeToEdit"
-              @enter="runConfirmation"
-              v-model="form.data[descriptor.field_name]"
-              v-for="descriptor in episodeMetadataDescriptors"
-            />
-          </template>
-        </form>
-
-        <modal-footer
-          :error-text="$t('episodes.edit_error')"
-          :is-loading="isLoading"
-          :is-error="isError"
-          @confirm="runConfirmation"
-          @cancel="$emit('cancel')"
+      <template v-if="episodeToEdit">
+        <metadata-field
+          :key="descriptor.id"
+          :descriptor="descriptor"
+          :entity="episodeToEdit"
+          @enter="runConfirmation"
+          v-model="form.data[descriptor.field_name]"
+          v-for="descriptor in episodeMetadataDescriptors"
         />
-      </div>
-    </div>
-  </div>
+      </template>
+    </form>
+
+    <modal-footer
+      :error-text="$t('episodes.edit_error')"
+      :is-loading="isLoading"
+      :is-error="isError"
+      @confirm="runConfirmation"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import MetadataField from '@/components/widgets/MetadataField.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
 
-export default {
-  name: 'edit-episode-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    ComboboxStyled,
-    MetadataField,
-    ModalFooter,
-    TextField,
-    TextareaField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  episodeToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    episodeToEdit: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    let form = {
-      id: '',
-      name: '',
-      description: '',
-      fps: '',
+const form = ref({
+  id: '',
+  name: '',
+  description: '',
+  fps: '',
+  data: { resolution: '' }
+})
+
+const episodeStatusOptions = [
+  { label: 'canceled', value: 'canceled' },
+  { label: 'complete', value: 'complete' },
+  { label: 'running', value: 'running' },
+  { label: 'standby', value: 'standby' }
+]
+
+// Computed
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const episodeMetadataDescriptors = computed(
+  () => store.getters.episodeMetadataDescriptors
+)
+
+const isEditing = computed(() => Boolean(props.episodeToEdit?.id))
+
+const modalTitle = computed(() =>
+  isEditing.value
+    ? `${t('episodes.edit_title')} ${props.episodeToEdit.name}`
+    : t('episodes.new_episode')
+)
+
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+const resetForm = () => {
+  if (isEditing.value) {
+    form.value = {
+      id: props.episodeToEdit.id,
+      name: props.episodeToEdit.name,
+      status: props.episodeToEdit.status,
+      description: props.episodeToEdit.description,
       data: {
-        resolution: ''
+        ...props.episodeToEdit.data,
+        resolution: props.episodeToEdit.data.resolution || ''
       }
     }
-    if (this.episodeToEdit && this.episodeToEdit.id) {
-      form = {
-        id: this.episodeToEdit.id,
-        name: this.episodeToEdit.name,
-        description: this.episodeToEdit.description,
-        production_id: this.episodeToEdit.project_id,
-        data:
-          {
-            ...this.episodeToEdit.data,
-            resolution: this.episodeToEdit.data.resolution || ''
-          } || {}
-      }
-    }
-    return {
-      form,
-      episodeSuccessText: '',
-      episodeStatusOptions: [
-        { label: 'canceled', value: 'canceled' },
-        { label: 'complete', value: 'complete' },
-        { label: 'running', value: 'running' },
-        { label: 'standby', value: 'standby' }
-      ]
-    }
-  },
-
-  computed: {
-    ...mapGetters(['currentProduction', 'episodeMetadataDescriptors'])
-  },
-
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    },
-
-    isEditing() {
-      return this.episodeToEdit && this.episodeToEdit.id
-    },
-
-    resetForm() {
-      this.episodeSuccessText = ''
-      if (!this.isEditing()) {
-        this.form.id = null
-        this.form.name = ''
-        this.form.status = 'running'
-        this.form.description = ''
-        this.form.data = {}
-      } else {
-        this.form = {
-          id: this.episodeToEdit.id,
-          name: this.episodeToEdit.name,
-          status: this.episodeToEdit.status,
-          description: this.episodeToEdit.description,
-          data:
-            {
-              ...this.episodeToEdit.data,
-              resolution: this.episodeToEdit.data.resolution || ''
-            } || {}
-        }
-      }
-    }
-  },
-
-  mounted() {
-    this.resetForm()
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.resetForm()
-      }
-    },
-
-    episodeToEdit() {
-      this.resetForm()
-    }
+  } else {
+    form.value.id = null
+    form.value.name = ''
+    form.value.status = 'running'
+    form.value.description = ''
+    form.value.data = {}
   }
 }
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) resetForm()
+  }
+)
+
+watch(() => props.episodeToEdit, resetForm)
+
+// Lifecycle
+
+onMounted(resetForm)
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-
-.info-message {
-  margin-top: 1em;
-}
-</style>
