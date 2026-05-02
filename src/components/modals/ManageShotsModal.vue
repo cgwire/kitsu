@@ -14,7 +14,6 @@
         <div>
           <div class="flexrow">
             <combobox
-              ref="shot-padding"
               :label="$t('shots.padding')"
               :options="shotPaddingOptions"
               class="shot-padding flexrow-item"
@@ -151,236 +150,187 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, reactive, ref, toRef, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import shotStore from '@/store/modules/shots'
-
-import { modalMixin } from '@/components/modals/base_modal'
-
-import stringHelpers from '@/lib/string'
+import { useModal } from '@/composables/modal'
 import { sortByName } from '@/lib/sorting'
+import stringHelpers from '@/lib/string'
+import shotStore from '@/store/modules/shots'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
-export default {
-  name: 'manage-shots-modal',
+const router = useRouter()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: true }
+})
 
-  components: {
-    Combobox,
-    PageTitle
-  },
+const emit = defineEmits(['add-episode', 'add-sequence', 'add-shot', 'cancel'])
 
-  props: {
-    active: {
-      default: true,
-      type: Boolean
-    }
-  },
+useModal(toRef(props, 'active'), emit)
 
-  emits: ['add-episode', 'add-sequence', 'add-shot', 'cancel'],
+const shotPaddingOptions = [
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '10', value: '10' }
+]
 
-  data() {
-    return {
-      names: {
-        episode: '',
-        sequence: '',
-        shot: ''
-      },
-      loading: {
-        addEpisode: false,
-        addSequence: false,
-        addShot: false
-      },
-      sequences: [],
-      displayedShots: [],
-      selectedEpisodeId: null,
-      selectedSequenceId: null,
-      shotPaddingOptions: [
-        {
-          label: '1',
-          value: '1'
-        },
-        {
-          label: '2',
-          value: '2'
-        },
-        {
-          label: '10',
-          value: '10'
-        }
-      ],
-      shotPadding: '1'
-    }
-  },
+const addEpisodeInput = ref(null)
+const addSequenceInput = ref(null)
+const addShotInput = ref(null)
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'displayedEpisodes',
-      'displayedSequences',
-      'isTVShow'
-    ]),
+const names = reactive({ episode: '', sequence: '', shot: '' })
+const loading = reactive({
+  addEpisode: false,
+  addSequence: false,
+  addShot: false
+})
+const sequences = ref([])
+const displayedShots = ref([])
+const selectedEpisodeId = ref(null)
+const selectedSequenceId = ref(null)
+const shotPadding = ref('1')
 
-    isAddEpisodeAllowed() {
-      const isEmpty = this.names.episode === ''
-      const isExist = this.displayedEpisodes.find(episode => {
-        return this.names.episode === episode.name
-      })
-      return !isEmpty && !isExist
-    },
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
+const displayedSequences = computed(() => store.getters.displayedSequences)
+const isTVShow = computed(() => store.getters.isTVShow)
 
-    isAddSequenceAllowed() {
-      const isEmpty = this.names.sequence === ''
-      const isExist = this.displayedSequences.find(sequence => {
-        return this.names.sequence === sequence.name
-      })
-      return !isEmpty && !isExist && (this.selectedEpisodeId || !this.isTVShow)
-    },
+const shots = computed(() => shotStore.cache.shots)
 
-    isAddShotAllowed() {
-      const isEmpty = this.names.shot === ''
-      const isExist = this.displayedShots.find(shot => {
-        return this.names.shot === shot.name
-      })
-      return !isEmpty && !isExist && this.selectedSequenceId
-    },
+const isAddEpisodeAllowed = computed(() => {
+  if (!names.episode) return false
+  return !displayedEpisodes.value.find(
+    episode => names.episode === episode.name
+  )
+})
 
-    shots() {
-      return shotStore.cache.shots
-    }
-  },
+const isAddSequenceAllowed = computed(() => {
+  if (!names.sequence) return false
+  const exists = displayedSequences.value.find(
+    sequence => names.sequence === sequence.name
+  )
+  return !exists && (selectedEpisodeId.value || !isTVShow.value)
+})
 
-  methods: {
-    focusAddSequence() {
-      this.$refs.addSequenceInput.focus()
-    },
+const isAddShotAllowed = computed(() => {
+  if (!names.shot) return false
+  const exists = displayedShots.value.find(shot => names.shot === shot.name)
+  return !exists && selectedSequenceId.value
+})
 
-    focusAddShot() {
-      this.$refs.addShotInput.focus()
-    },
+const focusAddSequence = () => {
+  addSequenceInput.value?.focus()
+}
 
-    selectEpisode(episodeId) {
-      if (!this.isTVShow) {
-        this.selectedEpisodeId = episodeId
-        this.displayedShots = []
-      } else {
-        this.selectedEpisodeId = episodeId
-        this.$router.push({
-          name: 'episode-shots',
-          params: {
-            production_id: this.currentProduction.id,
-            episode_id: episodeId
-          }
-        })
+const focusAddShot = () => {
+  addShotInput.value?.focus()
+}
+
+const selectSequence = sequenceId => {
+  selectedSequenceId.value = sequenceId
+  displayedShots.value = sortByName(
+    shots.value.filter(shot => shot.sequence_id === sequenceId)
+  )
+}
+
+const selectEpisode = episodeId => {
+  selectedEpisodeId.value = episodeId
+  if (!isTVShow.value) {
+    displayedShots.value = []
+  } else {
+    router.push({
+      name: 'episode-shots',
+      params: {
+        production_id: currentProduction.value.id,
+        episode_id: episodeId
       }
-    },
-
-    selectSequence(sequenceId) {
-      this.selectedSequenceId = sequenceId
-      this.displayedShots = sortByName(
-        this.shots.filter(shot => {
-          return shot.sequence_id === sequenceId
-        })
-      )
-    },
-
-    addEpisode() {
-      if (this.isAddEpisodeAllowed) {
-        const episodeName = this.names.episode
-        if (episodeName.length > 0) {
-          this.loading.addEpisode = true
-          const episode = {
-            name: this.names.episode,
-            project_id: this.currentProduction.id
-          }
-          this.$emit('add-episode', episode, episode => {
-            this.loading.addEpisode = false
-            this.selectEpisode(episode.id)
-            this.names.episode = stringHelpers.generateNextName(episode.name)
-          })
-        }
-      }
-    },
-
-    addSequence() {
-      if (this.isAddSequenceAllowed) {
-        const sequenceName = this.names.sequence
-        if (
-          sequenceName.length > 0 &&
-          (this.selectedEpisodeId || !this.isTVShow)
-        ) {
-          this.loading.addSequence = true
-          const sequence = {
-            name: this.names.sequence,
-            episode_id: this.selectedEpisodeId,
-            project_id: this.currentProduction.id
-          }
-          this.$emit('add-sequence', sequence, sequence => {
-            this.loading.addSequence = false
-            this.selectEpisode(this.selectedEpisodeId)
-            this.selectSequence(sequence.id)
-            this.names.sequence = stringHelpers.generateNextName(sequence.name)
-          })
-        }
-      }
-    },
-
-    addShot() {
-      if (this.isAddShotAllowed && !this.loading.addShot) {
-        const shotName = this.names.shot
-        this.loading.addShot = true
-        if (shotName.length > 0 && this.selectedSequenceId) {
-          const shot = {
-            name: this.names.shot,
-            sequence_id: this.selectedSequenceId,
-            project_id: this.currentProduction.id
-          }
-          this.$emit('add-shot', shot, shot => {
-            this.loading.addShot = false
-            this.selectSequence(this.selectedSequenceId)
-            this.names.shot = stringHelpers.generateNextName(
-              shot.name,
-              parseInt(this.shotPadding)
-            )
-          })
-        }
-      }
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.shotPadding = '1'
-        this.sequences = this.displayedSequences
-        if (this.isTVShow) {
-          this.selectEpisode(this.displayedEpisodes[0].id)
-        } else if (this.sequences.length > 0) {
-          this.selectSequence(this.sequences[0].id)
-        }
-
-        setTimeout(() => {
-          if (this.isTVShow) {
-            this.$refs.addEpisodeInput.focus()
-          } else {
-            this.$refs.addSequenceInput.focus()
-          }
-        }, 100)
-      }
-    },
-
-    selectedEpisodeId() {
-      this.sequences = this.displayedSequences
-      if (this.sequences.length > 0) {
-        this.selectSequence(this.sequences[0].id)
-      }
-    }
+    })
   }
 }
+
+const addEpisode = () => {
+  if (!isAddEpisodeAllowed.value) return
+  loading.addEpisode = true
+  const episode = {
+    name: names.episode,
+    project_id: currentProduction.value.id
+  }
+  emit('add-episode', episode, created => {
+    loading.addEpisode = false
+    selectEpisode(created.id)
+    names.episode = stringHelpers.generateNextName(created.name)
+  })
+}
+
+const addSequence = () => {
+  if (!isAddSequenceAllowed.value) return
+  loading.addSequence = true
+  const sequence = {
+    name: names.sequence,
+    episode_id: selectedEpisodeId.value,
+    project_id: currentProduction.value.id
+  }
+  emit('add-sequence', sequence, created => {
+    loading.addSequence = false
+    selectEpisode(selectedEpisodeId.value)
+    selectSequence(created.id)
+    names.sequence = stringHelpers.generateNextName(created.name)
+  })
+}
+
+const addShot = () => {
+  if (!isAddShotAllowed.value || loading.addShot) return
+  loading.addShot = true
+  const shot = {
+    name: names.shot,
+    sequence_id: selectedSequenceId.value,
+    project_id: currentProduction.value.id
+  }
+  emit('add-shot', shot, created => {
+    loading.addShot = false
+    selectSequence(selectedSequenceId.value)
+    names.shot = stringHelpers.generateNextName(
+      created.name,
+      parseInt(shotPadding.value)
+    )
+  })
+}
+
+watch(
+  () => props.active,
+  active => {
+    if (!active) return
+    shotPadding.value = '1'
+    sequences.value = displayedSequences.value
+    if (isTVShow.value) {
+      selectEpisode(displayedEpisodes.value[0].id)
+    } else if (sequences.value.length > 0) {
+      selectSequence(sequences.value[0].id)
+    }
+    setTimeout(() => {
+      if (isTVShow.value) {
+        addEpisodeInput.value?.focus()
+      } else {
+        addSequenceInput.value?.focus()
+      }
+    }, 100)
+  }
+)
+
+watch(selectedEpisodeId, () => {
+  sequences.value = displayedSequences.value
+  if (sequences.value.length > 0) {
+    selectSequence(sequences.value[0].id)
+  }
+})
+
+defineExpose({ focusAddSequence, focusAddShot })
 </script>
 
 <style lang="scss" scoped>
