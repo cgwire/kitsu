@@ -1,218 +1,208 @@
 <template>
-  <div class="modal" :class="{ 'is-active': active }">
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <form @submit.prevent="emitForm('confirm')" class="box">
-        <h1 class="title" v-if="personToEdit.id !== undefined">
-          {{ isBot ? $t('bots.edit_title') : $t('people.edit_title') }}
-          {{ personToEdit.full_name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ isBot ? $t('bots.new_bot') : $t('people.new_person') }}
-        </h1>
-        <text-field
-          ref="name-field"
-          :errored="form.first_name && !isValidName"
-          :label="
-            isBot ? $t('bots.fields.name') : $t('people.fields.first_name')
-          "
-          :disabled="personToEdit.is_generated_from_ldap"
-          v-model.trim="form.first_name"
-        />
-        <text-field
-          :label="$t('people.fields.last_name')"
-          :disabled="personToEdit.is_generated_from_ldap"
-          v-model.trim="form.last_name"
-          v-if="!isBot"
-        />
-        <text-field
-          type="email"
-          :errored="form.email && !isValidEmail"
-          :error-text="emailErrorText"
-          :label="$t('people.fields.email')"
-          :disabled="personToEdit.is_generated_from_ldap"
-          v-model.trim="form.email"
-          @update:model-value="$emit('reset-error', 'email')"
-          v-if="!isBot"
-        />
-        <text-field
-          :label="$t('people.fields.phone')"
-          v-model.trim="form.phone"
-          v-if="!isBot"
-        />
-        <date-field
-          :label="$t('bots.fields.expiration_date')"
-          :min-date="today"
-          :disabled="isEditing"
-          v-model="form.expiration_date"
-          v-if="isBot"
-        />
-        <combobox
-          :label="$t('people.fields.role')"
-          :options="roleOptions"
-          locale-key-prefix="people.role."
-          v-model="form.role"
-        />
-        <combobox
-          :label="$t('people.fields.position')"
-          :options="positionOptions"
-          locale-key-prefix="people.position."
-          v-model="form.position"
-          v-if="!isBot"
-        />
-        <combobox
-          :label="$t('people.fields.seniority')"
-          :options="seniorityOptions"
-          locale-key-prefix="people.seniority."
-          v-model="form.seniority"
-          v-if="!isBot"
-        />
-        <text-field
-          type="number"
-          :label="$t('people.fields.daily_salary')"
-          v-model="form.daily_salary"
-          v-if="!isBot"
-        />
-        <combobox
-          :label="$t('people.fields.contract')"
-          :options="contractOptions"
-          locale-key-prefix="people.contract."
-          v-model="form.contract_type"
-          v-if="!isBot && form.role !== 'client'"
-        />
-        <div class="departments field">
-          <label class="label">{{ $t('people.fields.departments') }}</label>
-          <p
-            class="empty mb1"
-            v-if="form.departments && form.departments.length === 0"
-          >
-            {{
-              isBot
-                ? $t('bots.departments_empty')
-                : $t('people.departments_empty')
-            }}
-          </p>
-          <div
-            class="department-element mb1 mt05"
-            :key="departmentId"
-            @click="removeDepartment(departmentId)"
-            v-for="departmentId in form.departments"
-          >
-            <department-name
-              :department="departmentMap.get(departmentId)"
-              v-if="departmentId"
-            />
-          </div>
-          <div class="flexrow">
-            <combobox-department
-              class="flexrow-item"
-              :selectable-departments="selectableDepartments"
-              v-model="selectedDepartment"
-              v-if="selectableDepartments.length > 0"
-            />
-            <button
-              class="button is-success flexrow-item"
-              :class="{
-                'is-disabled': selectedDepartment === null
-              }"
-              type="button"
-              @click="addDepartment"
-              v-if="selectableDepartments.length > 0"
-            >
-              {{ $t('main.add') }}
-            </button>
-          </div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent="emitForm('confirm')">
+      <text-field
+        ref="nameField"
+        :errored="form.first_name && !isValidName"
+        :label="isBot ? $t('bots.fields.name') : $t('people.fields.first_name')"
+        :disabled="personToEdit.is_generated_from_ldap"
+        v-model.trim="form.first_name"
+      />
+      <text-field
+        :label="$t('people.fields.last_name')"
+        :disabled="personToEdit.is_generated_from_ldap"
+        v-model.trim="form.last_name"
+        v-if="!isBot"
+      />
+      <text-field
+        type="email"
+        :errored="form.email && !isValidEmail"
+        :error-text="emailErrorText"
+        :label="$t('people.fields.email')"
+        :disabled="personToEdit.is_generated_from_ldap"
+        v-model.trim="form.email"
+        @update:model-value="$emit('reset-error', 'email')"
+        v-if="!isBot"
+      />
+      <text-field
+        :label="$t('people.fields.phone')"
+        v-model.trim="form.phone"
+        v-if="!isBot"
+      />
+      <date-field
+        :label="$t('bots.fields.expiration_date')"
+        :min-date="today"
+        :disabled="isEditing"
+        v-model="form.expiration_date"
+        v-if="isBot"
+      />
+      <combobox
+        :label="$t('people.fields.role')"
+        :options="roleOptions"
+        locale-key-prefix="people.role."
+        v-model="form.role"
+      />
+      <combobox
+        :label="$t('people.fields.position')"
+        :options="positionOptions"
+        locale-key-prefix="people.position."
+        v-model="form.position"
+        v-if="!isBot"
+      />
+      <combobox
+        :label="$t('people.fields.seniority')"
+        :options="seniorityOptions"
+        locale-key-prefix="people.seniority."
+        v-model="form.seniority"
+        v-if="!isBot"
+      />
+      <text-field
+        type="number"
+        :label="$t('people.fields.daily_salary')"
+        v-model="form.daily_salary"
+        v-if="!isBot"
+      />
+      <combobox
+        :label="$t('people.fields.contract')"
+        :options="contractOptions"
+        locale-key-prefix="people.contract."
+        v-model="form.contract_type"
+        v-if="!isBot && form.role !== 'client'"
+      />
+      <div class="departments field">
+        <label class="label">{{ $t('people.fields.departments') }}</label>
+        <p
+          class="empty mb1"
+          v-if="form.departments && form.departments.length === 0"
+        >
+          {{
+            isBot
+              ? $t('bots.departments_empty')
+              : $t('people.departments_empty')
+          }}
+        </p>
+        <div
+          class="department-element mb1 mt05"
+          :key="departmentId"
+          @click="removeDepartment(departmentId)"
+          v-for="departmentId in form.departments"
+        >
+          <department-name
+            :department="departmentMap.get(departmentId)"
+            v-if="departmentId"
+          />
         </div>
-        <combobox-studio
-          class="field"
-          :label="$t('people.fields.studio')"
-          v-model="form.studio_id"
-          v-if="!isBot"
-        />
-        <combobox
-          :label="$t('people.fields.active')"
-          :options="activeOptions"
-          :disabled="personToEdit.is_generated_from_ldap"
-          v-model="form.active"
-        />
-
         <div class="flexrow">
+          <combobox-department
+            class="flexrow-item"
+            :selectable-departments="selectableDepartments"
+            v-model="selectedDepartment"
+            v-if="selectableDepartments.length > 0"
+          />
           <button
-            class="button flexrow-item"
+            class="button is-success flexrow-item"
             :class="{
-              'is-loading': isInviteLoading
+              'is-disabled': selectedDepartment === null
             }"
-            :disabled="!isValidEmail"
             type="button"
-            @click="emitForm('invite')"
-            v-if="isEditing && !isBot"
+            @click="addDepartment"
+            v-if="selectableDepartments.length > 0"
           >
-            {{ $t('people.invite') }}
+            {{ $t('main.add') }}
           </button>
-          <div class="filler"></div>
+        </div>
+      </div>
+      <combobox-studio
+        class="field"
+        :label="$t('people.fields.studio')"
+        v-model="form.studio_id"
+        v-if="!isBot"
+      />
+      <combobox
+        :label="$t('people.fields.active')"
+        :options="activeOptions"
+        :disabled="personToEdit.is_generated_from_ldap"
+        v-model="form.active"
+      />
 
-          <button
-            class="button is-primary flexrow-item"
-            :class="{
-              'is-loading': isCreateInviteLoading
-            }"
-            :disabled="!isValidForm"
-            type="button"
-            @click="emitForm('confirm-invite')"
-            v-if="!isEditing && !isBot"
-          >
-            {{ $t('people.create_invite') }}
-          </button>
-          <button
-            class="button is-primary flexrow-item"
-            :class="{
-              'is-loading': isLoading
-            }"
-            :disabled="!isValidForm"
-            type="submit"
-          >
-            {{
-              !isEditing
-                ? isBot
-                  ? $t('bots.create')
-                  : $t('people.create')
-                : isBot
-                  ? $t('bots.confirm_edit')
-                  : $t('people.confirm_edit')
-            }}
-          </button>
-          <button
-            class="button is-link flexrow-item"
-            type="button"
-            @click="$emit('cancel')"
-          >
-            {{ $t('main.cancel') }}
-          </button>
-        </div>
+      <div class="flexrow">
+        <button
+          class="button flexrow-item"
+          :class="{
+            'is-loading': isInviteLoading
+          }"
+          :disabled="!isValidEmail"
+          type="button"
+          @click="emitForm('invite')"
+          v-if="isEditing && !isBot"
+        >
+          {{ $t('people.invite') }}
+        </button>
+        <div class="filler"></div>
 
-        <div class="success has-text-right mt1" v-if="isInvitationSuccess">
-          {{ $t('people.invite_success') }}
-        </div>
-        <div class="error has-text-right mt1" v-if="isInvitationError">
-          {{ $t('people.invite_error') }}
-        </div>
-        <div class="error has-text-right mt1" v-if="isUserLimitError">
-          {{ $t('people.user_limit_error') }}
-        </div>
-        <div class="error has-text-right mt1" v-if="isError">
-          {{ $t('people.create_error') }}
-        </div>
-      </form>
-    </div>
-  </div>
+        <button
+          class="button is-primary flexrow-item"
+          :class="{
+            'is-loading': isCreateInviteLoading
+          }"
+          :disabled="!isValidForm"
+          type="button"
+          @click="emitForm('confirm-invite')"
+          v-if="!isEditing && !isBot"
+        >
+          {{ $t('people.create_invite') }}
+        </button>
+        <button
+          class="button is-primary flexrow-item"
+          :class="{
+            'is-loading': isLoading
+          }"
+          :disabled="!isValidForm"
+          type="submit"
+        >
+          {{
+            !isEditing
+              ? isBot
+                ? $t('bots.create')
+                : $t('people.create')
+              : isBot
+                ? $t('bots.confirm_edit')
+                : $t('people.confirm_edit')
+          }}
+        </button>
+        <button
+          class="button is-link flexrow-item"
+          type="button"
+          @click="$emit('cancel')"
+        >
+          {{ $t('main.cancel') }}
+        </button>
+      </div>
+
+      <div class="success has-text-right mt1" v-if="isInvitationSuccess">
+        {{ $t('people.invite_success') }}
+      </div>
+      <div class="error has-text-right mt1" v-if="isInvitationError">
+        {{ $t('people.invite_error') }}
+      </div>
+      <div class="error has-text-right mt1" v-if="isUserLimitError">
+        {{ $t('people.user_limit_error') }}
+      </div>
+      <div class="error has-text-right mt1" v-if="isError">
+        {{ $t('people.create_error') }}
+      </div>
+    </form>
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
-import { timeMixin } from '@/components/mixins/time'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
+import { useTime } from '@/composables/time'
+
+import BaseModal from '@/components/modals/BaseModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
@@ -220,280 +210,218 @@ import DateField from '@/components/widgets/DateField.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-person-modal',
+const { t } = useI18n()
+const { today } = useTime()
+const store = useStore()
 
-  mixins: [modalMixin, timeMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isBot: { type: Boolean, default: false },
+  isCreateInviteLoading: { type: Boolean, default: false },
+  isEmailDomainError: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isInvitationError: { type: Boolean, default: false },
+  isInvitationSuccess: { type: Boolean, default: false },
+  isInviteLoading: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isUserLimitError: { type: Boolean, default: false },
+  personToEdit: { type: Object, default: () => ({}) }
+})
 
-  components: {
-    Combobox,
-    ComboboxDepartment,
-    ComboboxStudio,
-    DateField,
-    DepartmentName,
-    TextField
-  },
+// emitForm() emits one of 'confirm' / 'confirm-invite' / 'invite' dynamically,
+// so vue/no-unused-emit-declarations can't statically prove they're used.
+/* eslint-disable vue/no-unused-emit-declarations */
+const emit = defineEmits([
+  'cancel',
+  'confirm',
+  'confirm-invite',
+  'invite',
+  'reset-error'
+])
+/* eslint-enable vue/no-unused-emit-declarations */
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isBot: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isCreateInviteLoading: {
-      type: Boolean,
-      default: false
-    },
-    isInviteLoading: {
-      type: Boolean,
-      default: false
-    },
-    isInvitationSuccess: {
-      type: Boolean,
-      default: false
-    },
-    isInvitationError: {
-      type: Boolean,
-      default: false
-    },
-    isUserLimitError: {
-      type: Boolean,
-      default: false
-    },
-    isEmailDomainError: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    personToEdit: {
-      type: Object,
-      default: () => {}
+const activeOptions = computed(() => [
+  { label: t('main.yes'), value: 'true' },
+  { label: t('main.no'), value: 'false' }
+])
+
+const contractOptions = [
+  { label: 'open-ended', value: 'open-ended' },
+  { label: 'fixed-term', value: 'fixed-term' },
+  { label: 'short-term', value: 'short-term' },
+  { label: 'freelance', value: 'freelance' },
+  { label: 'apprentice', value: 'apprentice' },
+  { label: 'internship', value: 'internship' }
+]
+
+const roleOptions = [
+  { label: 'user', value: 'user' },
+  { label: 'supervisor', value: 'supervisor' },
+  { label: 'manager', value: 'manager' },
+  { label: 'client', value: 'client' },
+  { label: 'vendor', value: 'vendor' },
+  { label: 'admin', value: 'admin' }
+]
+
+const positionOptions = [
+  { label: '', value: null },
+  { label: 'artist', value: 'artist' },
+  { label: 'supervisor', value: 'supervisor' },
+  { label: 'lead', value: 'lead' }
+]
+
+const seniorityOptions = [
+  { label: '', value: null },
+  { label: 'senior', value: 'senior' },
+  { label: 'mid', value: 'mid' },
+  { label: 'junior', value: 'junior' }
+]
+
+const form = ref({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  role: 'user',
+  position: 'artist',
+  seniority: 'mid',
+  daily_salary: 0,
+  contract_type: 'open-ended',
+  active: 'true',
+  departments: [],
+  studio_id: null,
+  expiration_date: null,
+  is_bot: false
+})
+const nameField = ref(null)
+const selectedDepartment = ref(null)
+
+const departments = computed(() => store.getters.departments)
+const departmentMap = computed(() => store.getters.departmentMap)
+const people = computed(() => store.getters.people)
+const user = computed(() => store.getters.user)
+
+const isEditing = computed(() => Boolean(props.personToEdit?.id))
+
+const modalTitle = computed(() => {
+  if (isEditing.value) {
+    const prefix = props.isBot ? t('bots.edit_title') : t('people.edit_title')
+    return `${prefix} ${props.personToEdit.full_name}`
+  }
+  return props.isBot ? t('bots.new_bot') : t('people.new_person')
+})
+
+const selectableDepartments = computed(() =>
+  departments.value.filter(d => !form.value.departments.includes(d.id))
+)
+
+const isValidName = computed(() => Boolean(form.value.first_name?.length))
+
+const isUniqEmail = computed(
+  () =>
+    !people.value.some(
+      person =>
+        !person.is_bot &&
+        person.email === form.value.email &&
+        (!props.personToEdit || props.personToEdit.email !== person.email)
+    )
+)
+
+const isValidEmail = computed(() => {
+  if (!form.value.email?.length) return false
+  const emailRegex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  if (!emailRegex.test(form.value.email)) return false
+  if (form.value.is_bot) return true
+  return isUniqEmail.value && !props.isEmailDomainError
+})
+
+const isValidForm = computed(() => isValidName.value && isValidEmail.value)
+
+const emailErrorText = computed(() => {
+  if (props.isEmailDomainError) return t('people.email_domain_error')
+  if (!isUniqEmail.value) return t('people.email_exist_error')
+  return ''
+})
+
+const emitForm = event => {
+  if (!isValidForm.value) return
+  emit(event, {
+    ...form.value,
+    last_name: form.value.last_name || '',
+    active: form.value.active === 'true' || form.value.active === true
+  })
+}
+
+const addDepartment = () => {
+  form.value.departments.push(selectedDepartment.value)
+  selectedDepartment.value = null
+}
+
+const removeDepartment = idToRemove => {
+  const index = form.value.departments.indexOf(idToRemove)
+  if (index >= 0) form.value.departments.splice(index, 1)
+}
+
+const resetForm = () => {
+  if (isEditing.value) {
+    const p = props.personToEdit
+    form.value = {
+      first_name: p.first_name,
+      last_name: p.last_name,
+      email: p.email,
+      phone: p.phone,
+      role: p.role,
+      position: p.position,
+      seniority: p.seniority,
+      daily_salary: p.daily_salary,
+      contract_type: p.contract_type,
+      active: p.active ? 'true' : 'false',
+      departments: [...(p.departments || [])],
+      studio_id: p.studio_id,
+      expiration_date: p.expiration_date,
+      is_bot: p.is_bot,
+      notifications_enabled: p.notifications_enabled ? 'true' : 'false',
+      notifications_slack_enabled: p.notifications_slack_enabled
+        ? 'true'
+        : 'false',
+      notifications_mattermost_enabled: p.notifications_mattermost_enabled
+        ? 'true'
+        : 'false',
+      notifications_discord_enabled: p.notifications_discord_enabled
+        ? 'true'
+        : 'false'
     }
-  },
-
-  // eslint-disable-next-line vue/no-unused-emit-declarations
-  emits: ['cancel', 'confirm', 'confirm-invite', 'invite', 'reset-error'],
-
-  data() {
-    return {
-      activeOptions: [
-        { label: this.$t('main.yes'), value: 'true' },
-        { label: this.$t('main.no'), value: 'false' }
-      ],
-      contractOptions: [
-        { label: 'open-ended', value: 'open-ended' },
-        { label: 'fixed-term', value: 'fixed-term' },
-        { label: 'short-term', value: 'short-term' },
-        { label: 'freelance', value: 'freelance' },
-        { label: 'apprentice', value: 'apprentice' },
-        { label: 'internship', value: 'internship' }
-      ],
-      form: {
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        role: 'user',
-        position: 'artist',
-        seniority: 'mid',
-        daily_salary: 0,
-        contract_type: 'open-ended',
-        active: 'true',
-        departments: [],
-        studio_id: null,
-        expiration_date: null,
-        is_bot: false
-      },
-      roleOptions: [
-        { label: 'user', value: 'user' },
-        { label: 'supervisor', value: 'supervisor' },
-        { label: 'manager', value: 'manager' },
-        { label: 'client', value: 'client' },
-        { label: 'vendor', value: 'vendor' },
-        { label: 'admin', value: 'admin' }
-      ],
-      positionOptions: [
-        { label: '', value: null },
-        { label: 'artist', value: 'artist' },
-        { label: 'supervisor', value: 'supervisor' },
-        { label: 'lead', value: 'lead' }
-      ],
-      seniorityOptions: [
-        { label: '', value: null },
-        { label: 'senior', value: 'senior' },
-        { label: 'mid', value: 'mid' },
-        { label: 'junior', value: 'junior' }
-      ],
-      selectedDepartment: null
-    }
-  },
-
-  computed: {
-    ...mapGetters(['departments', 'departmentMap', 'people']),
-
-    selectableDepartments() {
-      return this.departments.filter(
-        department => !this.form.departments.includes(department.id)
-      )
-    },
-
-    isEditing() {
-      return Boolean(this.personToEdit?.id)
-    },
-
-    isValidName() {
-      return Boolean(this.form.first_name?.length)
-    },
-
-    isValidEmail() {
-      if (!this.form.email?.length) {
-        return false
-      }
-
-      const emailRegex =
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
-      if (!emailRegex.test(this.form.email)) {
-        return false
-      }
-
-      if (this.form.is_bot) {
-        return true
-      }
-
-      return this.isUniqEmail && !this.isEmailDomainError
-    },
-
-    isUniqEmail() {
-      return !this.people.some(
-        person =>
-          !person.is_bot &&
-          person.email === this.form.email &&
-          (!this.personToEdit || this.personToEdit.email !== person.email)
-      )
-    },
-
-    isValidForm() {
-      return this.isValidName && this.isValidEmail
-    },
-
-    emailErrorText() {
-      if (this.isEmailDomainError) {
-        return this.$t('people.email_domain_error')
-      }
-      if (!this.isUniqEmail) {
-        return this.$t('people.email_exist_error')
-      }
-      return ''
-    }
-  },
-
-  methods: {
-    emitForm(event) {
-      if (!this.isValidForm) {
-        return
-      }
-      const form = {
-        ...this.form,
-        last_name: this.form.last_name || '',
-        active: this.form.active === 'true' || this.form.active === true
-      }
-      this.$emit(event, form)
-    },
-
-    addDepartment() {
-      this.form.departments.push(this.selectedDepartment)
-      this.selectedDepartment = null
-    },
-
-    removeDepartment(idToRemove) {
-      const departmentIndex = this.form.departments.indexOf(idToRemove)
-      if (departmentIndex >= 0) {
-        this.form.departments.splice(departmentIndex, 1)
-      }
-    },
-
-    resetForm() {
-      if (this.isEditing) {
-        this.form = {
-          first_name: this.personToEdit.first_name,
-          last_name: this.personToEdit.last_name,
-          email: this.personToEdit.email,
-          phone: this.personToEdit.phone,
-          role: this.personToEdit.role,
-          position: this.personToEdit.position,
-          seniority: this.personToEdit.seniority,
-          daily_salary: this.personToEdit.daily_salary,
-          contract_type: this.personToEdit.contract_type,
-          active: this.personToEdit.active ? 'true' : 'false',
-          departments: [...(this.personToEdit.departments || [])],
-          studio_id: this.personToEdit.studio_id,
-          expiration_date: this.personToEdit.expiration_date,
-          is_bot: this.personToEdit.is_bot,
-          notifications_enabled: this.personToEdit.notifications_enabled
-            ? 'true'
-            : 'false',
-          notifications_slack_enabled: this.personToEdit
-            .notifications_slack_enabled
-            ? 'true'
-            : 'false',
-          notifications_mattermost_enabled: this.personToEdit
-            .notifications_mattermost_enabled
-            ? 'true'
-            : 'false',
-          notifications_discord_enabled: this.personToEdit
-            .notifications_discord_enabled
-            ? 'true'
-            : 'false'
-        }
-      } else {
-        this.form = {
-          role: 'user',
-          position: 'artist',
-          seniority: 'mid',
-          daily_salary: 0,
-          contract_type: 'open-ended',
-          active: 'true',
-          departments: [],
-          studio_id: null,
-          expiration_date: null,
-          is_bot: this.isBot,
-          email: this.isBot ? this.user.email : null
-        }
-      }
-    }
-  },
-
-  watch: {
-    personToEdit: {
-      immediate: true,
-      handler() {
-        this.resetForm()
-      }
-    },
-
-    active: {
-      immediate: true,
-      handler() {
-        if (this.active) {
-          setTimeout(() => {
-            this.$refs['name-field']?.focus()
-          }, 100)
-        }
-      }
+  } else {
+    form.value = {
+      role: 'user',
+      position: 'artist',
+      seniority: 'mid',
+      daily_salary: 0,
+      contract_type: 'open-ended',
+      active: 'true',
+      departments: [],
+      studio_id: null,
+      expiration_date: null,
+      is_bot: props.isBot,
+      email: props.isBot ? user.value.email : null
     }
   }
 }
+
+watch(() => props.personToEdit, resetForm, { immediate: true })
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
@@ -501,15 +429,6 @@ export default {
   display: inline-block;
   margin-right: 0.2em;
   cursor: pointer;
-}
-
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
 }
 
 .empty {

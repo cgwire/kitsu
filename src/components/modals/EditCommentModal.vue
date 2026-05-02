@@ -84,7 +84,7 @@
             </at-ta>
           </div>
           <text-field
-            ref="input-link"
+            ref="inputLink"
             :label="$t('main.link')"
             placeholder="https://..."
             type="url"
@@ -144,7 +144,6 @@
 
         <div>
           <file-upload
-            ref="file-field"
             class="flexrow-item"
             :accept="extensions"
             :is-primary="false"
@@ -167,293 +166,241 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { XIcon } from 'lucide-vue-next'
 import AtTa from 'vue-at/dist/vue-at-textarea'
-import { mapGetters } from 'vuex'
+import { computed, ref, toRef, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
 import { replaceTimeWithTimecode } from '@/lib/render'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import FileUpload from '@/components/widgets/FileUpload.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import TextField from '@/components/widgets/TextField.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+// eslint-disable-next-line no-unused-vars
+import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-comment-modal',
+const route = useRoute()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  commentToEdit: { type: Object, default: () => ({}) },
+  fps: { type: Number, default: 25 },
+  frame: { type: Number, default: 0 },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  revision: { type: Number, default: 1 },
+  taskTypes: { type: Array, default: () => [] },
+  team: { type: Array, default: () => [] }
+})
 
-  components: {
-    AtTa,
-    Checklist,
-    ComboboxStatus,
-    FileUpload,
-    ModalFooter,
-    PeopleAvatar,
-    TaskTypeName,
-    TextField,
-    XIcon
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    frame: {
-      type: Number,
-      default: 0
-    },
-    commentToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    taskTypes: {
-      type: Array,
-      default: () => []
-    },
-    team: {
-      type: Array,
-      default: () => []
-    },
-    fps: {
-      type: Number,
-      default: 25
-    },
-    revision: {
-      type: Number,
-      default: 1
+useModal(toRef(props, 'active'), emit)
+
+const extensions = files.ALL_EXTENSIONS_STRING
+
+const attachmentFiles = ref([])
+const attachmentFilesToDelete = ref([])
+const inputLink = ref(null)
+const membersForAts = ref({ '@': [], '#': [] })
+const textField = ref(null)
+const form = ref({
+  text: '',
+  task_status_id: null,
+  checklist: [{ checked: false, text: '' }],
+  link: null
+})
+
+const departmentMap = computed(() => store.getters.departmentMap)
+const getTaskStatusForCurrentUser = computed(
+  () => store.getters.getTaskStatusForCurrentUser
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const productionDepartmentIds = computed(
+  () => store.getters.productionDepartmentIds
+)
+const taskStatusForCurrentUser = computed(
+  () => store.getters.taskStatusForCurrentUser
+)
+
+const isConceptTask = computed(() => route.path.includes('concept'))
+
+const taskStatuses = computed(() =>
+  isConceptTask.value
+    ? getTaskStatusForCurrentUser.value(null, true)
+    : taskStatusForCurrentUser.value.filter(status => !status.for_concept)
+)
+
+const isPreviewsComment = computed(
+  () => props.commentToEdit?.previews?.length > 0
+)
+
+const isValidForm = computed(() =>
+  Boolean(
+    !isPreviewsComment.value ||
+    !form.value.link ||
+    inputLink.value?.checkValidity()
+  )
+)
+
+const runConfirmation = event => {
+  if (!event || event.keyCode === 13 || !event.keyCode) {
+    emit('confirm', {
+      id: props.commentToEdit.id,
+      text: form.value.text,
+      task_status_id: form.value.task_status_id,
+      checklist: form.value.checklist.filter(item => item.text),
+      newAttachmentFiles: attachmentFiles.value,
+      attachmentFilesToDelete: attachmentFilesToDelete.value,
+      links: form.value.link ? [form.value.link] : null
+    })
+  }
+}
+
+const removeTask = entry => {
+  form.value.checklist = [...remove(form.value.checklist, entry)]
+}
+
+const removeAttachment = attachment => {
+  form.value.attachment_files = remove(form.value.attachment_files, attachment)
+  attachmentFilesToDelete.value.push(attachment)
+}
+
+const removeNewAttachment = attachment => {
+  attachmentFiles.value = remove(attachmentFiles.value, attachment)
+}
+
+const onFileSelected = files => {
+  attachmentFiles.value = files
+}
+
+const reset = () => {
+  attachmentFiles.value = []
+  attachmentFilesToDelete.value = []
+  if (props.commentToEdit?.id) {
+    form.value = {
+      text: props.commentToEdit.text,
+      task_status_id: props.commentToEdit.task_status_id,
+      checklist: [...props.commentToEdit.checklist],
+      attachment_files: [...props.commentToEdit.attachment_files],
+      link: props.commentToEdit.links?.[0]
     }
-  },
-
-  emits: ['cancel', 'confirm'],
-
-  data() {
-    return {
-      membersForAts: { '@': [], '#': [] },
-      attachmentFiles: [],
-      extensions: files.ALL_EXTENSIONS_STRING,
-      form: {
-        text: '',
-        task_status_id: null,
-        checklist: [{ checked: false, text: '' }],
-        link: null
-      }
+    if (form.value.checklist.length === 0) {
+      form.value.checklist = [{ checked: false, text: '' }]
     }
-  },
-
-  computed: {
-    ...mapGetters([
-      'departmentMap',
-      'getTaskStatusForCurrentUser',
-      'isCurrentUserClient',
-      'productionDepartmentIds',
-      'taskStatusForCurrentUser'
-    ]),
-
-    taskStatuses() {
-      return this.isConceptTask
-        ? this.getTaskStatusForCurrentUser(null, true)
-        : this.taskStatusForCurrentUser.filter(status => !status.for_concept)
-    },
-
-    isConceptTask() {
-      return this.$route.path.includes('concept')
-    },
-
-    isPreviewsComment() {
-      return this.commentToEdit?.previews?.length > 0
-    },
-
-    isValidForm() {
-      return Boolean(
-        !this.isPreviewsComment ||
-        !this.form.link ||
-        this.$refs['input-link']?.checkValidity()
-      )
-    }
-  },
-
-  methods: {
-    runConfirmation(event) {
-      if (!event || event.keyCode === 13 || !event.keyCode) {
-        const result = {
-          id: this.commentToEdit.id,
-          text: this.form.text,
-          task_status_id: this.form.task_status_id,
-          checklist: this.form.checklist.filter(item => item.text),
-          newAttachmentFiles: this.attachmentFiles,
-          attachmentFilesToDelete: this.attachmentFilesToDelete,
-          links: this.form.link ? [this.form.link] : null
-        }
-        this.$emit('confirm', result)
-      }
-    },
-
-    removeTask(entry) {
-      this.form.checklist = [...remove(this.form.checklist, entry)]
-    },
-
-    removeAttachment(attachment) {
-      this.form.attachment_files = remove(
-        this.form.attachment_files,
-        attachment
-      )
-      this.attachmentFilesToDelete.push(attachment)
-    },
-
-    removeNewAttachment(attachment) {
-      this.attachmentFiles = remove(this.attachmentFiles, attachment)
-    },
-
-    onFileSelected(attachmentFiles) {
-      this.attachmentFiles = attachmentFiles
-    },
-
-    reset() {
-      this.attachmentFiles = []
-      this.attachmentFilesToDelete = []
-      if (this.commentToEdit && this.commentToEdit.id) {
-        this.form = {
-          text: this.commentToEdit.text,
-          task_status_id: this.commentToEdit.task_status_id,
-          checklist: [...this.commentToEdit.checklist],
-          attachment_files: [...this.commentToEdit.attachment_files],
-          link: this.commentToEdit.links?.[0]
-        }
-        if (this.form.checklist.length === 0) {
-          this.form.checklist = [{ checked: false, text: '' }]
-        }
-      } else {
-        this.form = {
-          text: '',
-          task_status_id: null,
-          checklist: [{ checked: false, text: '' }],
-          attachment_files: [],
-          link: null
-        }
-      }
-    },
-
-    onAddChecklistItem(item) {
-      delete item.index
-      this.form.checklist.push(item)
-    },
-
-    onInsertChecklistItem(item) {
-      this.form.checklist.splice(item.index, 0, item)
-      for (let i = 0; i < this.form.checklist.length; i++) {
-        this.form.checklist[i].index = i
-      }
-    },
-
-    atOptionsFilter(name, chunk, at, v) {
-      // filter the list by the given at symbol
-      const option_at = v?.isTaskType ? '#' : '@'
-      // @ for team, # for task type
-      if (at !== option_at) return false
-      // match at lower-case
-      return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
-    },
-
-    onAtTextChanged(input) {
-      if (input.includes('@frame')) {
-        this.form.text = replaceTimeWithTimecode(
-          input,
-          this.revision,
-          this.frame + 1,
-          this.fps
-        )
-      }
-    }
-  },
-
-  watch: {
-    commentToEdit() {
-      this.reset()
-    },
-
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.reset()
-          this.$refs.textField.focus()
-        }, 100)
-      }
-    },
-
-    taskTypes: {
-      deep: true,
-      immediate: true,
-      handler(values) {
-        const taskTypeOptions = values.map(taskType => {
-          return {
-            isTaskType: true,
-            full_name: taskType.name,
-            color: taskType.color,
-            id: taskType.id,
-            url: taskType.url
-          }
-        })
-        taskTypeOptions.push({
-          isTaskType: true,
-          color: '#000',
-          full_name: 'All'
-        })
-        this.membersForAts['#'] = taskTypeOptions
-      }
-    },
-
-    team: {
-      deep: true,
-      immediate: true,
-      handler() {
-        let teamOptions
-        if (this.isCurrentUserClient) {
-          teamOptions = [
-            this.team.filter(person =>
-              ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
-            )
-          ]
-        } else {
-          teamOptions = [...this.team]
-        }
-        teamOptions = teamOptions.concat(
-          this.productionDepartmentIds.map(departmentId => {
-            const department = this.departmentMap.get(departmentId)
-            return {
-              isDepartment: true,
-              full_name: department.name,
-              color: department.color,
-              id: departmentId
-            }
-          })
-        )
-        teamOptions.push({
-          isTime: true,
-          full_name: 'frame'
-        })
-        this.membersForAts['@'] = teamOptions
-      }
+  } else {
+    form.value = {
+      text: '',
+      task_status_id: null,
+      checklist: [{ checked: false, text: '' }],
+      attachment_files: [],
+      link: null
     }
   }
 }
+
+const onAddChecklistItem = item => {
+  delete item.index
+  form.value.checklist.push(item)
+}
+
+const onInsertChecklistItem = item => {
+  form.value.checklist.splice(item.index, 0, item)
+  form.value.checklist.forEach((entry, i) => {
+    entry.index = i
+  })
+}
+
+const atOptionsFilter = (name, chunk, at, v) => {
+  // filter the list by the given at symbol (@ for team, # for task type)
+  const expectedAt = v?.isTaskType ? '#' : '@'
+  if (at !== expectedAt) return false
+  return name?.toLowerCase().indexOf(chunk.toLowerCase()) > -1
+}
+
+const onAtTextChanged = input => {
+  if (input.includes('@frame')) {
+    form.value.text = replaceTimeWithTimecode(
+      input,
+      props.revision,
+      props.frame + 1,
+      props.fps
+    )
+  }
+}
+
+watch(() => props.commentToEdit, reset)
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        reset()
+        textField.value?.focus()
+      }, 100)
+    }
+  }
+)
+
+watch(
+  () => props.taskTypes,
+  values => {
+    const taskTypeOptions = values.map(taskType => ({
+      isTaskType: true,
+      full_name: taskType.name,
+      color: taskType.color,
+      id: taskType.id,
+      url: taskType.url
+    }))
+    taskTypeOptions.push({
+      isTaskType: true,
+      color: '#000',
+      full_name: 'All'
+    })
+    membersForAts.value['#'] = taskTypeOptions
+  },
+  { deep: true, immediate: true }
+)
+
+watch(
+  () => props.team,
+  () => {
+    let teamOptions
+    if (isCurrentUserClient.value) {
+      teamOptions = [
+        props.team.filter(person =>
+          ['admin', 'manager', 'supervisor', 'client'].includes(person.role)
+        )
+      ]
+    } else {
+      teamOptions = [...props.team]
+    }
+    teamOptions = teamOptions.concat(
+      productionDepartmentIds.value.map(departmentId => {
+        const department = departmentMap.value.get(departmentId)
+        return {
+          isDepartment: true,
+          full_name: department.name,
+          color: department.color,
+          id: departmentId
+        }
+      })
+    )
+    teamOptions.push({ isTime: true, full_name: 'frame' })
+    membersForAts.value['@'] = teamOptions
+  },
+  { deep: true, immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
