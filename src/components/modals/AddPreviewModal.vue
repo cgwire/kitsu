@@ -229,6 +229,7 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
+  reset,
   setFiles: fileList => {
     previewField.value?.filesChange('file', fileList)
   }

@@ -194,6 +194,7 @@ onBeforeUnmount(() => {
 })
 
 defineExpose({
+  addFiles,
   showAnnotationLoading: () => {
     isAnnotationLoading.value = true
   },
