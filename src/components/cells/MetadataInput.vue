@@ -296,6 +296,16 @@ const onNumberFieldKeyDown = event => {
     width: 1.15rem;
   }
 
+  &[type='number'] {
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+
   &:active,
   &:focus,
   &:hover {
