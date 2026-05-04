@@ -1649,7 +1649,17 @@ tbody:last-child .empty-line:last-child {
     text-transform: uppercase;
     top: 0;
     vertical-align: middle;
-    z-index: 2;
+    // Header z-index hierarchy is built around the body taglist metadata
+    // cells which bump their own z-index up to 1000 so the open combo
+    // dropdown can spill over the next row (see td.metadata-descriptor
+    // inline z-index in AssetList.vue / ShotList.vue):
+    //   body taglist               ≤ 1000
+    //   body sticky-left            1001  (.datatable-row-header)
+    //   header non-sticky           1002  (this rule)
+    //   header sticky-left          1003  (.datatable-head .datatable-row-header)
+    // The +1 between body sticky-left and header non-sticky breaks the
+    // document-order tie at the vertical-scroll seam.
+    z-index: 1002;
 
     a {
       color: var(--text-alt);
@@ -1700,7 +1710,7 @@ tbody:last-child .empty-line:last-child {
   }
 
   .datatable-row-header {
-    z-index: 4;
+    z-index: 1003;
   }
   .header-icon {
     visibility: hidden;
@@ -1898,7 +1908,7 @@ tbody:last-child .empty-line:last-child {
 .datatable-row-header {
   position: sticky;
   left: 0;
-  z-index: 1;
+  z-index: 1001;
   border-right: 1px solid rgba(var(--border-rgb), 0.5);
 
   &::after {
