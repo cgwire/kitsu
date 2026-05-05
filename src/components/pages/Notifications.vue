@@ -563,7 +563,7 @@ export default {
         if (this.parameters.watchingMode) {
           params.watching = this.parameters.watchingMode === 'watching'
         }
-        await this.loadMoreNotifications(params)
+        await this.loadMoreNotifications(params).catch(console.error)
         this.loading.more = false
       }
     },
@@ -715,7 +715,7 @@ export default {
 
     async markAllNotificationsRead() {
       this.loading.markAll = true
-      await this.markAllNotificationsAsRead()
+      await this.markAllNotificationsAsRead().catch(console.error)
       this.loading.markAll = false
     }
   },
