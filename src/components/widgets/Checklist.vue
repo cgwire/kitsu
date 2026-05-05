@@ -28,6 +28,7 @@
       <span @click="setFrame(entry)" v-if="isMoviePreview">
         <clock-icon class="icon clock" />
       </span>
+      <span class="checklist-label" v-if="disabled">{{ entry.text }}</span>
       <textarea
         class="checklist-text"
         :ref="el => setChecklistEntryRef(el, index)"
@@ -37,9 +38,9 @@
         @keyup.backspace="removeChecklistEntry(index)"
         @keyup.up="focusPrevious(index)"
         @keyup.down="focusNext(index)"
-        :disabled="entry.text?.length !== 0 && disabled"
         v-autosize
         v-model.trim="entry.text"
+        v-else
       ></textarea>
     </div>
   </div>
@@ -167,8 +168,12 @@ const toggleEntryChecked = entry => {
 <style lang="scss" scoped>
 .dark {
   .checklist-entry {
+    .checklist-label,
     .checklist-text {
       color: $light-grey-light;
+    }
+
+    .checklist-text {
       background: transparent;
 
       &:active,
@@ -188,6 +193,7 @@ const toggleEntryChecked = entry => {
       }
     }
 
+    &.checked .checklist-label,
     &.checked .checklist-text {
       color: $grey;
     }
@@ -211,9 +217,19 @@ const toggleEntryChecked = entry => {
   align-items: flex-start;
   margin-bottom: 0.3em;
 
+  .checklist-label,
   .checklist-text {
     font-size: 0.9em;
     padding: 0.2em;
+  }
+
+  .checklist-label {
+    color: #333;
+    cursor: default;
+    margin-right: 0;
+  }
+
+  .checklist-text {
     padding-top: 0;
     margin-right: 0.5em;
     margin-top: 4px;
@@ -238,6 +254,7 @@ const toggleEntryChecked = entry => {
     }
   }
 
+  &.checked .checklist-label,
   &.checked .checklist-text {
     color: $light-grey-2;
   }
