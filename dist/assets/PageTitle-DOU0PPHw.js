@@ -1,0 +1,2 @@
+import{t as e}from"./_plugin-vue_export-helper-CXTkFu_Z.js";import{Lr as t,ai as n,br as r,ir as i,si as a}from"./index-CPIOWWV6.js";i();var o=e({__name:`PageTitle`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}},setup(e){return(i,o)=>(t(),r(`h1`,{class:n({title:!0,"hide-small-screen":!0,bold:e.bold})},a(e.text),3))}},[[`__scopeId`,`data-v-e097dae2`]]);export{o as t};
+//# sourceMappingURL=PageTitle-DOU0PPHw.js.map

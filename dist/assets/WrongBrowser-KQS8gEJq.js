@@ -1,0 +1,2 @@
+import{t as e}from"./_plugin-vue_export-helper-CXTkFu_Z.js";import{Lr as t,_r as n,br as r,ir as i,si as a}from"./index-CPIOWWV6.js";i();var o={name:`wrong-browser`},s={class:`server-down page`},c={class:`title`};function l(e,i,o,l,u,d){return t(),r(`div`,s,[n(`h1`,c,a(e.$t(`wrong_browser.title`)),1),n(`p`,null,a(e.$t(`wrong_browser.text`)),1)])}var u=e(o,[[`render`,l]]);export{u as default};
+//# sourceMappingURL=WrongBrowser-KQS8gEJq.js.map

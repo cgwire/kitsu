@@ -1,0 +1,2 @@
+import{Lr as e,Vt as t,_r as n,br as r,ir as i,si as a,vr as o,yr as s}from"./index-CPIOWWV6.js";i();var c={key:1,class:`has-text-centered table-info`},l={class:`tag is-danger`},u={__name:`TableInfo`,props:{isLoading:{type:Boolean,default:!1},isError:{type:Boolean,default:!1}},setup(i){return(u,d)=>(e(),r(`div`,null,[i.isLoading&&!i.isError?(e(),o(t,{key:0,class:`table-info`,"is-stylish":!0})):s(``,!0),i.isError?(e(),r(`div`,c,[n(`span`,l,a(u.$t(`main.loading_error`)),1)])):s(``,!0)]))}};export{u as t};
+//# sourceMappingURL=TableInfo-BerPyOwD.js.map
