@@ -13,7 +13,7 @@ import ko from '@/locales/ko.json'
 import pt from '@/locales/pt.json'
 import ru from '@/locales/ru.json'
 import zh from '@/locales/zh.json'
-import zhtw from '@/locales/zh_tw.json'
+import zh_tw from '@/locales/zh_tw.json'
 
 export default {
   da: da.default,
@@ -31,5 +31,5 @@ export default {
   pt: pt.default,
   ru: ru.default,
   zh: zh.default,
-  zw: zhtw.default
+  zh_tw: zh_tw.default
 }
