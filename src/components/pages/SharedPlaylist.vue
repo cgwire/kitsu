@@ -92,7 +92,8 @@ const loginAsGuest = guest => {
     role: 'client',
     is_guest: true,
     has_avatar: false,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    locale: guest.locale
   })
 }
 
