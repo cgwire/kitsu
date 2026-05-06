@@ -647,9 +647,9 @@ const previewRoute = computed(() => {
 })
 
 const isLikedBy = computed(() => {
-  const personList = props.comment.acknowledgements.map(personId =>
-    personMap.value.get(personId)
-  )
+  const personList = props.comment.acknowledgements
+    .map(personId => personMap.value.get(personId))
+    .filter(Boolean)
   return sortByName(personList)
     .map(p => p.name)
     .join(', ')
