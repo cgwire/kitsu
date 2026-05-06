@@ -105,7 +105,7 @@
         <global-search-field
           class="flexrow-item mr0"
           :class="{ 'hide-in-production': isProductionContext }"
-          v-if="mainConfig.indexer_configured"
+          v-if="mainConfig.indexer_configured && !isCurrentUserClient"
         />
         <div class="nav-item">
           <a
