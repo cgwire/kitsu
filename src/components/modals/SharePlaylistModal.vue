@@ -122,7 +122,7 @@
           <label class="label">
             {{ $t('playlists.share_modal.expiration') }}
           </label>
-          <date-field :can-delete="true" v-model="expirationDate" />
+          <date-field :can-delete="true" is-dark v-model="expirationDate" />
         </div>
         <div class="field">
           <combobox-boolean
