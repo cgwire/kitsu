@@ -12,9 +12,10 @@ export default {
    * @param {string} locale
    */
   setLocale(locale) {
+    const fallback = locale?.substring(0, 2) || 'en'
     const { language, localeCode } = LOCALE_MAP[locale] || {
-      language: locale.substring(0, 2),
-      localeCode: locale.substring(0, 2)
+      language: fallback,
+      localeCode: fallback
     }
 
     moment.locale(localeCode)
