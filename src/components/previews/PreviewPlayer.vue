@@ -1120,6 +1120,9 @@ export default {
     },
 
     setVideoFrameContext(frame) {
+      if (!Number.isFinite(frame) || !this.nbFrames || !this.frameDuration) {
+        return
+      }
       frame = Math.min(frame, this.nbFrames - 1)
       if (this.currentFrame !== frame) {
         const time = frame * this.frameDuration
