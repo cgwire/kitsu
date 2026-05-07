@@ -800,6 +800,10 @@ export default {
   beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
+    this.fabricCanvas?.dispose()
+    this.fabricCanvas = null
+    this.fabricCanvasComparison?.dispose()
+    this.fabricCanvasComparison = null
   },
 
   computed: {
@@ -1347,6 +1351,10 @@ export default {
     },
 
     setupFabricCanvas() {
+      // Guard against re-initializing on a canvas that already has a fabric instance attached (fabric throws otherwise).
+      this.fabricCanvas?.dispose()
+      this.fabricCanvasComparison?.dispose()
+
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
