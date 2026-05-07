@@ -432,28 +432,23 @@ export const entityListMixin = {
     },
 
     isMetadataColumnEditAllowed(descriptorId) {
-      if (typeof descriptorId === 'string') {
-        if (this.isCurrentUserManager) {
-          return true
-        } else if (this.isCurrentUserSupervisor) {
-          if (this.user.departments.length === 0) {
-            return true
-          } else {
-            const metadataDescriptor = this.visibleMetadataDescriptors.find(
-              descriptor => descriptor.id === descriptorId
-            )
-            if (
-              metadataDescriptor.departments.length ===
-              this.user.departments.length
-            ) {
-              return this.user.departments.every(department =>
-                metadataDescriptor.departments.includes(department)
-              )
-            }
-          }
-        }
+      if (typeof descriptorId !== 'string') return false
+      if (this.isCurrentUserManager) return true
+      if (!this.isCurrentUserSupervisor) return false
+
+      const metadataDescriptor = this.visibleMetadataDescriptors.find(
+        descriptor => descriptor.id === descriptorId
+      )
+      if (!metadataDescriptor) return false
+      if (!this.user.departments.length) return true
+      if (
+        metadataDescriptor.departments.length !== this.user.departments.length
+      ) {
+        return false
       }
-      return false
+      return this.user.departments.every(department =>
+        metadataDescriptor.departments.includes(department)
+      )
     },
 
     isValidResolution(shot) {
@@ -482,8 +477,8 @@ export const entityListMixin = {
     },
 
     metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
     },
 
     /*

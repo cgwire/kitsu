@@ -800,6 +800,10 @@ export default {
   beforeUnmount() {
     this.endAnnotationSaving()
     this.removeEvents()
+    this.fabricCanvas?.dispose()
+    this.fabricCanvas = null
+    this.fabricCanvasComparison?.dispose()
+    this.fabricCanvasComparison = null
   },
 
   computed: {
@@ -1116,6 +1120,9 @@ export default {
     },
 
     setVideoFrameContext(frame) {
+      if (!Number.isFinite(frame) || !this.nbFrames || !this.frameDuration) {
+        return
+      }
       frame = Math.min(frame, this.nbFrames - 1)
       if (this.currentFrame !== frame) {
         const time = frame * this.frameDuration
@@ -1249,8 +1256,8 @@ export default {
         if (this.is3DModel) {
           this.previewViewer.pauseModelAnimation()
         } else {
-          if (this.previewViewer) this.previewViewer.pause()
-          if (this.comparisonViewer) this.comparisonViewer.pause()
+          this.previewViewer.pause()
+          this.comparisonViewer.pause()
           this.$nextTick(() => {
             this.syncComparisonViewer()
           })
@@ -1260,13 +1267,13 @@ export default {
 
     goPreviousFrame() {
       this.clearCanvas()
-      this.previewViewer.goPreviousFrame()
+      this.previewViewer?.goPreviousFrame()
       this.syncComparisonViewer()
     },
 
     goNextFrame() {
       this.clearCanvas()
-      this.previewViewer.goNextFrame()
+      this.previewViewer?.goNextFrame()
       this.syncComparisonViewer()
     },
 
@@ -1347,6 +1354,10 @@ export default {
     },
 
     setupFabricCanvas() {
+      // Guard against re-initializing on a canvas that already has a fabric instance attached (fabric throws otherwise).
+      this.fabricCanvas?.dispose()
+      this.fabricCanvasComparison?.dispose()
+
       const dimensions = this.getDimensions()
       const width = dimensions.width
       const height = dimensions.height
@@ -1970,8 +1981,8 @@ export default {
       }
       this.endAnnotationSaving()
       this.$nextTick(() => {
-        this.previewViewer.resize()
-        this.comparisonViewer.resize()
+        this.previewViewer?.resize()
+        this.comparisonViewer?.resize()
         this.loadAnnotation()
       })
     },
@@ -2005,31 +2016,35 @@ export default {
     configureEvents() {
       window.addEventListener('keydown', this.onKeyDown, false)
       window.addEventListener('beforeunload', this.onWindowsClosed)
-      this.container.addEventListener(
-        'fullscreenchange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.addEventListener(
-        'webkitfullscreenchange', // Safari < 16.4
-        this.onFullScreenChange,
-        false
-      )
+      if (this.container) {
+        this.container.addEventListener(
+          'fullscreenchange',
+          this.onFullScreenChange,
+          false
+        )
+        this.container.addEventListener(
+          'webkitfullscreenchange', // Safari < 16.4
+          this.onFullScreenChange,
+          false
+        )
+      }
     },
 
     removeEvents() {
       window.removeEventListener('keydown', this.onKeyDown)
       window.removeEventListener('beforeunload', this.onWindowsClosed)
-      this.container.removeEventListener(
-        'fullscreenchange',
-        this.onFullScreenChange,
-        false
-      )
-      this.container.removeEventListener(
-        'webkitfullscreenchange', // Safari < 16.4
-        this.onFullScreenChange,
-        false
-      )
+      if (this.container) {
+        this.container.removeEventListener(
+          'fullscreenchange',
+          this.onFullScreenChange,
+          false
+        )
+        this.container.removeEventListener(
+          'webkitfullscreenchange', // Safari < 16.4
+          this.onFullScreenChange,
+          false
+        )
+      }
     },
 
     // Browsing
@@ -2191,7 +2206,7 @@ export default {
         this.fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
       }
       this.$nextTick(() => {
-        if (this.previewViewer && this.previewViewer.isBroken) {
+        if (this.previewViewer?.isBroken) {
           this.clearCanvas()
         }
       })
@@ -2213,8 +2228,8 @@ export default {
     previewToCompare() {
       this.comparisonPreviewIndex = 0
       this.$nextTick(() => {
-        this.previewViewer.resize()
-        this.comparisonViewer.resize()
+        this.previewViewer?.resize()
+        this.comparisonViewer?.resize()
       })
     },
 
@@ -2250,10 +2265,10 @@ export default {
         this.previewToCompareId = ''
       }
       this.$nextTick(() => {
-        this.previewViewer.resize()
-        this.comparisonViewer.resize()
-        this.previewViewer.resetZoom()
-        this.comparisonViewer.resetZoom()
+        this.previewViewer?.resize()
+        this.comparisonViewer?.resize()
+        this.previewViewer?.resetZoom()
+        this.comparisonViewer?.resetZoom()
       })
     },
 
@@ -2282,8 +2297,8 @@ export default {
 
     isOrdering() {
       this.$nextTick(() => {
-        this.previewViewer.resize()
-        this.comparisonViewer.resize()
+        this.previewViewer?.resize()
+        this.comparisonViewer?.resize()
       })
     },
 
@@ -2293,7 +2308,8 @@ export default {
       }
       const clickarea =
         this.canvasWrapper.getElementsByClassName('upper-canvas')[0]
-      if (this.isTyping && clickarea) {
+      if (!clickarea) return
+      if (this.isTyping) {
         clickarea.addEventListener('dblclick', this.addText)
       } else {
         clickarea.removeEventListener('dblclick', this.addText)

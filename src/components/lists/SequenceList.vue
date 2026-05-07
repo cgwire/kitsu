@@ -16,7 +16,7 @@
       <table-metadata-header-menu
         ref="headerMetadataMenu"
         :is-edit-allowed="isCurrentUserManager"
-        :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
+        :is-sticked="stickedColumns[lastMetadataHeaderMenuDisplayed]"
         @edit-clicked="onEditMetadataClicked()"
         @delete-clicked="onDeleteMetadataClicked()"
         @sort-by-clicked="onSortByMetadataClicked()"
@@ -566,7 +566,7 @@ export default {
       type: 'sequence',
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
-      lastMetadaDataHeaderMenuDisplayed: null,
+      lastMetadataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       lastSelectedSequence: null,
       lastSelection: null,

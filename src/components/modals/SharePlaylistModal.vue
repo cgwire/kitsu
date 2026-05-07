@@ -122,7 +122,12 @@
           <label class="label">
             {{ $t('playlists.share_modal.expiration') }}
           </label>
-          <date-field :can-delete="true" v-model="expirationDate" />
+          <date-field
+            can-delete
+            is-dark
+            :min-date="tomorrow"
+            v-model="expirationDate"
+          />
         </div>
         <div class="field">
           <combobox-boolean
@@ -154,15 +159,18 @@ import { CopyIcon, SendIcon, XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
+import { useTime } from '@/composables/time'
+import { formatSimpleDate } from '@/lib/time'
+import playlistsApi from '@/store/api/playlists'
+
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import DateField from '@/components/widgets/DateField.vue'
 
-import playlistsApi from '@/store/api/playlists'
-
 const { t } = useI18n()
+const { tomorrow } = useTime()
 const store = useStore()
 
 const props = defineProps({
@@ -307,11 +315,9 @@ const createLink = async () => {
   loading.create = true
   errors.create = false
   try {
-    let expDate
-    if (expirationDate.value) {
-      const d = new Date(expirationDate.value)
-      expDate = d.toISOString().slice(0, 10)
-    }
+    const expDate = expirationDate.value
+      ? formatSimpleDate(expirationDate.value)
+      : undefined
     await playlistsApi.createShareLink(props.playlist.id, {
       expiration_date: expDate,
       can_comment: canComment.value === 'true'

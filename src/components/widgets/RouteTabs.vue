@@ -40,6 +40,9 @@ defineProps({
   margin-left: 0;
   margin-right: 0;
 }
+.tabs li {
+  text-transform: capitalize;
+}
 .tabs li + li {
   margin: 0;
 }

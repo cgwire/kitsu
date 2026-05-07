@@ -43,7 +43,7 @@ export const frameToSeconds = (nbFrames, production, shot) => {
  * Display time in a timecode format.
  */
 export const formatTime = (rawTime, fps) => {
-  if (rawTime < 0) rawTime = 0
+  if (!Number.isFinite(rawTime) || rawTime < 0) rawTime = 0
 
   const time = new Date(1000 * rawTime).toISOString()
   const milliseconds = parseInt(time.substring(20, 23))

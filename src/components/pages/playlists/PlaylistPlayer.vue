@@ -2230,7 +2230,9 @@ export default {
         this.fullPlayer.currentTime = time
         this.playlistProgress = time
       }
-      const { index, start } = this.playlistShotPosition[frameNumber]
+      const position = this.playlistShotPosition[frameNumber]
+      if (!position) return
+      const { index, start } = position
       const frame = (frameNumber / this.fps - start) * this.fps + 1
       if (index !== this.playingEntityIndex) {
         this.$nextTick(() => {
@@ -2440,7 +2442,7 @@ export default {
 
       this.playingEntityIndex = 0
       this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
+      this.rawPlayer?.setCurrentFrame(0)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()

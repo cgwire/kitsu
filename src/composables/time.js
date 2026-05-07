@@ -16,9 +16,11 @@ export function useTime() {
 
   const today = computed(() => moment().toDate())
 
+  const tomorrow = computed(() => moment().add(1, 'day').toDate())
+
   function formatDate(eventDate) {
     return formatFullDateWithTimezone(eventDate, timezone.value)
   }
 
-  return { timezone, today, formatDate }
+  return { timezone, today, tomorrow, formatDate }
 }

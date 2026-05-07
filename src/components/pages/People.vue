@@ -320,8 +320,8 @@ export default {
           name: 'guests',
           label:
             guestCount === null
-              ? this.$t('people.guests')
-              : `${this.$t('people.guests')} (${guestCount})`
+              ? this.$tc('people.guests', 2)
+              : `${this.$tc('people.guests', 2)} (${guestCount})`
         }
       ]
     },

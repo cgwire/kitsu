@@ -480,6 +480,7 @@ export default {
       clearInterval(this.$options.playLoop)
       if (this.isRepeating) {
         this.$emit('video-end')
+        if (!this.video) return
         this.video.currentTime = 0
         this.play()
       } else {

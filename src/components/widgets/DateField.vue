@@ -5,7 +5,7 @@
       auto-apply
       class="datepicker"
       :clearable="canDelete"
-      :dark="isDarkTheme"
+      :dark="isDark || isDarkTheme"
       :disabled-week-days="weekDaysDisabled ? [6, 0] : []"
       :disabled="disabled"
       :enable-time-picker="false"
@@ -43,6 +43,10 @@ const props = defineProps({
   format: {
     default: 'yyyy-MM-dd',
     type: String
+  },
+  isDark: {
+    default: false,
+    type: Boolean
   },
   label: {
     default: '',

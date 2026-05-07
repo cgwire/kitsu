@@ -106,7 +106,7 @@ export const descriptorMixin = {
     },
 
     onSortByMetadataClicked() {
-      const columnId = this.lastMetadaDataHeaderMenuDisplayed
+      const columnId = this.lastMetadataHeaderMenuDisplayed
       const column = this.currentProduction.descriptors.find(
         d => d.id === columnId
       )
@@ -120,12 +120,12 @@ export const descriptorMixin = {
     },
 
     onEditMetadataClicked() {
-      this.$emit('edit-metadata', this.lastMetadaDataHeaderMenuDisplayed)
+      this.$emit('edit-metadata', this.lastMetadataHeaderMenuDisplayed)
       this.showMetadataHeaderMenu()
     },
 
     onDeleteMetadataClicked() {
-      this.$emit('delete-metadata', this.lastMetadaDataHeaderMenuDisplayed)
+      this.$emit('delete-metadata', this.lastMetadataHeaderMenuDisplayed)
       this.showMetadataHeaderMenu()
     },
 
@@ -144,7 +144,7 @@ export const descriptorMixin = {
         headerMenuEl.style.top = top + 'px'
         headerMenuEl.style.width = width + 'px'
       }
-      this.lastMetadaDataHeaderMenuDisplayed = columnId
+      this.lastMetadataHeaderMenuDisplayed = columnId
     },
 
     getDescriptorChoicesOptions(descriptor, emptyChoice = true) {

@@ -169,6 +169,52 @@ describe('path', () => {
         shot_id: 2
       }
     })
+    expect(getTaskEntityPath({
+      entity_type_name: 'Sequence',
+      entity: { id: 2 },
+      project_id: 3
+    }, null)).toEqual({
+      name: 'sequence',
+      params: {
+        production_id: 3,
+        sequence_id: 2
+      }
+    })
+    expect(getTaskEntityPath({
+      entity_type_name: 'Sequence',
+      entity: { id: 2 },
+      project_id: 3
+    }, 4)).toEqual({
+      name: 'episode-sequence',
+      params: {
+        production_id: 3,
+        sequence_id: 2,
+        episode_id: 4
+      }
+    })
+    expect(getTaskEntityPath({
+      entity_type_name: 'Edit',
+      entity: { id: 2 },
+      project_id: 3
+    }, null)).toEqual({
+      name: 'edit',
+      params: {
+        production_id: 3,
+        edit_id: 2
+      }
+    })
+    expect(getTaskEntityPath({
+      entity_type_name: 'Edit',
+      entity: { id: 2 },
+      project_id: 3
+    }, 4)).toEqual({
+      name: 'episode-edit',
+      params: {
+        production_id: 3,
+        edit_id: 2,
+        episode_id: 4
+      }
+    })
   })
   test('getEntityPath', () => {
     expect(getEntityPath(1, 2, 'other', null)).toEqual({

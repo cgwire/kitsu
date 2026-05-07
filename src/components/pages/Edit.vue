@@ -832,7 +832,7 @@ export default {
       this.framesPerImage[0] =
         this.currentEdit.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
       this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(1)
+      this.rawPlayer?.setCurrentFrame(1)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()

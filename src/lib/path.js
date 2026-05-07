@@ -31,7 +31,7 @@ export const getTaskPath = (
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     let type = task.entity_type_name
-    if (!['Shot', 'Edit', 'Episode'].includes(type)) {
+    if (!['Shot', 'Edit', 'Episode', 'Sequence'].includes(type)) {
       type = 'Asset'
     }
     const entityId = task.entity ? task.entity.id : task.entity_id

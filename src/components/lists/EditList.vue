@@ -16,9 +16,9 @@
       <table-metadata-header-menu
         ref="headerMetadataMenu"
         :is-edit-allowed="
-          isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)
+          isMetadataColumnEditAllowed(lastMetadataHeaderMenuDisplayed)
         "
-        :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
+        :is-sticked="stickedColumns[lastMetadataHeaderMenuDisplayed]"
         @edit-clicked="onEditMetadataClicked()"
         @delete-clicked="onDeleteMetadataClicked()"
         @sort-by-clicked="onSortByMetadataClicked()"
@@ -591,7 +591,7 @@ export default {
       type: 'edit',
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
-      lastMetadaDataHeaderMenuDisplayed: null,
+      lastMetadataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       lastSelectedEdit: null,
       lastSelection: null,
@@ -793,8 +793,8 @@ export default {
     },
 
     metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
     },
 
     updateOffsets() {

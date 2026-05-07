@@ -3,7 +3,7 @@ import i18n from '@/lib/i18n'
 
 const LOCALE_MAP = {
   zh_Hans_CN: { language: 'zh', localeCode: 'zh-cn' },
-  zh_Hant_TW: { language: 'zh', localeCode: 'zh-tw' }
+  zh_Hant_TW: { language: 'zh_tw', localeCode: 'zh-tw' }
 }
 
 export default {
@@ -12,9 +12,10 @@ export default {
    * @param {string} locale
    */
   setLocale(locale) {
+    const fallback = locale?.substring(0, 2) || 'en'
     const { language, localeCode } = LOCALE_MAP[locale] || {
-      language: locale.substring(0, 2),
-      localeCode: locale.substring(0, 2)
+      language: fallback,
+      localeCode: fallback
     }
 
     moment.locale(localeCode)

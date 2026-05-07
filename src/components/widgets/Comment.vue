@@ -23,6 +23,7 @@
             :size="25"
             :font-size="12"
             :person="comment.person"
+            :is-link="!isCurrentUserClient"
             v-if="!isCurrentUserClient || isAuthorClient"
           />
           <strong class="flexrow-item">
@@ -157,6 +158,7 @@
                     :size="18"
                     :font-size="10"
                     :person="personMap.get(replyComment.person_id)"
+                    :is-link="!isCurrentUserClient"
                   />
                   <strong class="flexrow-item">
                     <people-name
@@ -414,6 +416,7 @@
           :person="comment.person"
           :size="25"
           :font-size="12"
+          :is-link="!isCurrentUserClient"
         />
         <people-name class="flexrow-item" :person="comment.person" />
         <span class="filler"> </span>
@@ -647,9 +650,9 @@ const previewRoute = computed(() => {
 })
 
 const isLikedBy = computed(() => {
-  const personList = props.comment.acknowledgements.map(personId =>
-    personMap.value.get(personId)
-  )
+  const personList = props.comment.acknowledgements
+    .map(personId => personMap.value.get(personId))
+    .filter(Boolean)
   return sortByName(personList)
     .map(p => p.name)
     .join(', ')
