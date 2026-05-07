@@ -17,7 +17,7 @@
           {{ $t('main.csv.preview_required') }}
         </p>
         <div class="description">
-          <div v-show="!disableUpdate">
+          <div v-if="!disableUpdate">
             <h2 class="legend-title">
               {{ $t('main.csv.options.title') }}
             </h2>
@@ -58,7 +58,7 @@
                 <span class="legend-term disabled"></span>
                 {{ $t('main.csv.legend_disabled') }}
               </li>
-              <li v-show="!disableUpdate" class="legend-definition">
+              <li v-if="!disableUpdate" class="legend-definition">
                 <span class="legend-term overwrite"></span>
                 {{ $t('main.csv.legend_overwrite') }}
               </li>
