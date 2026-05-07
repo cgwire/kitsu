@@ -497,16 +497,16 @@ export const playerMixin = {
       if (entity && this.isMovie(entity.preview_file_extension)) {
         this.$nextTick(() => {
           this.scrollToEntity(this.playingEntityIndex)
-          this.rawPlayer.loadEntity(entityIndex)
+          this.rawPlayer?.loadEntity(entityIndex)
           this.annotations = entity.preview_file_annotations || []
           this.onProgressChanged(frame + 1, false)
           if (this.isComparing) {
-            this.$refs['raw-player-comparison'].loadEntity(entityIndex)
+            this.$refs['raw-player-comparison']?.loadEntity(entityIndex)
           }
           if (this.isPlaying) {
             if (!this.isFullMode) {
               this.rawPlayer.play()
-              if (this.isComparing) this.$refs['raw-player-comparison'].play()
+              if (this.isComparing) this.$refs['raw-player-comparison']?.play()
             }
           } else {
             if (updateFullPlaylist) {
@@ -854,7 +854,7 @@ export const playerMixin = {
           } else if (event.altKey) {
             this.onPlayPreviousEntityClicked()
             this.$nextTick(() => {
-              this.rawPlayer.setCurrentFrame(this.nbFrames - 1)
+              this.rawPlayer?.setCurrentFrame(this.nbFrames - 1)
               if (this.isFullMode) {
                 const time =
                   this.currentEntity.start_duration +
@@ -884,7 +884,7 @@ export const playerMixin = {
           } else if (event.altKey) {
             this.onPlayNextEntityClicked()
             this.$nextTick(() => {
-              this.rawPlayer.setCurrentFrame(0)
+              this.rawPlayer?.setCurrentFrame(0)
             })
           } else {
             this.onNextFrameClicked()
@@ -935,9 +935,7 @@ export const playerMixin = {
         } else if (event.keyCode === HOMEKEY) {
           if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
         } else if (event.keyCode === ENDKEY) {
-          if (this.rawPlayer) {
-            this.rawPlayer.setCurrentFrame(this.nbFrames - 1)
-          }
+          this.rawPlayer?.setCurrentFrame(this.nbFrames - 1)
         }
       }
     },

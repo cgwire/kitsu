@@ -1031,7 +1031,7 @@ export default {
           this.$refs['add-extra-preview-modal'].reset()
           this.reset()
           setTimeout(() => {
-            this.$refs['preview-player'].displayLast()
+            this.$refs['preview-player']?.displayLast()
           }, 0)
           this.modals.addExtraPreview = false
         })

@@ -2442,7 +2442,7 @@ export default {
 
       this.playingEntityIndex = 0
       this.pause()
-      if (this.rawPlayer) this.rawPlayer.setCurrentFrame(0)
+      this.rawPlayer?.setCurrentFrame(0)
       this.currentTimeRaw = 0
       this.updateProgressBar()
       this.updateTaskPanel()
