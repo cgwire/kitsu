@@ -443,7 +443,7 @@ export const entityListMixin = {
               descriptor => descriptor.id === descriptorId
             )
             if (
-              metadataDescriptor.departments.length ===
+              metadataDescriptor?.departments.length ===
               this.user.departments.length
             ) {
               return this.user.departments.every(department =>
