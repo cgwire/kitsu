@@ -477,8 +477,8 @@ export const entityListMixin = {
     },
 
     metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadaDataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadaDataHeaderMenuDisplayed, event)
+      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
+      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
     },
 
     /*

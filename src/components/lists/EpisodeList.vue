@@ -16,9 +16,9 @@
       <table-metadata-header-menu
         ref="headerMetadataMenu"
         :is-edit-allowed="
-          isMetadataColumnEditAllowed(lastMetadaDataHeaderMenuDisplayed)
+          isMetadataColumnEditAllowed(lastMetadataHeaderMenuDisplayed)
         "
-        :is-sticked="stickedColumns[lastMetadaDataHeaderMenuDisplayed]"
+        :is-sticked="stickedColumns[lastMetadataHeaderMenuDisplayed]"
         @edit-clicked="onEditMetadataClicked()"
         @delete-clicked="onDeleteMetadataClicked()"
         @sort-by-clicked="onSortByMetadataClicked()"
@@ -608,7 +608,7 @@ export default {
       type: 'episode',
       hiddenColumns: {},
       lastHeaderMenuDisplayed: null,
-      lastMetadaDataHeaderMenuDisplayed: null,
+      lastMetadataHeaderMenuDisplayed: null,
       lastHeaderMenuDisplayedIndexInGrid: null,
       lastSelectedEpisode: null,
       lastSelection: null,
