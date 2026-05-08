@@ -288,4 +288,12 @@ hr {
   margin-right: 0.8em;
   width: 20px;
 }
+
+svg.section-icon {
+  color: #515151;
+}
+
+.dark svg.section-icon {
+  color: #ffffff;
+}
 </style>
