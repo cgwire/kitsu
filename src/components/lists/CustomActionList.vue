@@ -57,7 +57,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="3"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-custom-actions">
       {{ entries.length }} {{ $t('custom_actions.number', entries.length) }}

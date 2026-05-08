@@ -63,7 +63,11 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-software-licenses">
       {{ entries.length }} {{ $t('software_licenses.number', entries.length) }}

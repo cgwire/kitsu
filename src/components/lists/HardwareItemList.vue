@@ -51,7 +51,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="4"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-hardware-items">
       {{ entries.length }} {{ $t('hardware_items.number', entries.length) }}

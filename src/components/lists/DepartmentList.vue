@@ -49,7 +49,12 @@
         </tbody>
       </table>
     </div>
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="2"
+      :with-thumbnail="false"
+    />
     <p class="has-text-centered nb-departments">
       {{ entries.length }} {{ $t('departments.number', entries.length) }}
     </p>

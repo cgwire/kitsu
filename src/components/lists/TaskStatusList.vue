@@ -82,7 +82,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="8"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-task-status">
       {{ entries.length }} {{ $tc('task_status.number', entries.length) }}

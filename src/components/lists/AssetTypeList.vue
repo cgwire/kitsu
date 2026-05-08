@@ -48,7 +48,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="2"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-asset-types">
       {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}

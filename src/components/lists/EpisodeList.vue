@@ -481,7 +481,7 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
     <div
       class="has-text-centered"

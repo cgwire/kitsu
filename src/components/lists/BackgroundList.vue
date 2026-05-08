@@ -43,7 +43,7 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" :is-error="isError" :cells="1" />
 
     <p class="has-text-centered">
       {{ entries.length }}

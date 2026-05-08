@@ -275,7 +275,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="10"
+      :with-actions="false"
+    />
 
     <div
       class="has-text-centered empty-list"

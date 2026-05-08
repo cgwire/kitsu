@@ -69,7 +69,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="4"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-task-types" v-if="entries.length > 0">
       {{ entries.length }} {{ $tc('task_types.number', entries.length) }}
