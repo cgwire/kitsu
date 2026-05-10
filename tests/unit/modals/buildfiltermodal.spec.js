@@ -7,8 +7,15 @@ import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 import productionStoreFixture from '../fixtures/production-store'
 
 // Minimal i18n in non-legacy mode so `useI18n()` works without colliding with
-// the global `$t` mock installed in tests/unit.setup.js.
-const i18n = createI18n({ legacy: false, locale: 'en', messages: {} })
+// the global `$t` mock installed in tests/unit.setup.js. Missing-key warnings
+// are silenced because the component reads keys we don't bother populating.
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en',
+  messages: {},
+  missingWarn: false,
+  fallbackWarn: false
+})
 
 describe('BuildFilterModal', () => {
   let store, assetStore, peopleStore, shotStore, taskStore

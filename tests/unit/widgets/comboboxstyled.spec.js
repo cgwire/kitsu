@@ -6,9 +6,11 @@ import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 import './setup'
 
+// Catch-all route so vue-router doesn't warn about the initial location not
+// matching any route (the component only needs `router.resolve(...)`).
 const router = createRouter({
   history: createWebHistory(),
-  routes: []
+  routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }]
 })
 
 describe('ComboboxStyled', () => {
