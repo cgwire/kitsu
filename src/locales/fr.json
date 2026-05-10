@@ -1001,6 +1001,7 @@
       "change_avatar": "Changer Avatar",
       "info_title": "Informations",
       "language": "Langue",
+      "notifications_title": "Notifications",
       "notifications_enabled": "Notifications email activées",
       "notifications_slack_enabled": "Notifications Slack activées",
       "notifications_slack_user": "ID member Slack",

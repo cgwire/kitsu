@@ -1418,6 +1418,7 @@ export default {
     clear_avatar: 'Remove avatar',
     info_title: 'Information',
     language: 'Language',
+    notifications_title: 'Notifications',
     notifications_enabled: 'Email notifications enabled',
     notifications_slack_enabled: 'Slack notifications enabled',
     notifications_slack_user: 'Slack member ID',
