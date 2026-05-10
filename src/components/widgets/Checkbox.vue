@@ -118,8 +118,9 @@ const onChange = event => {
       transition: background-color 200ms ease-in;
     }
     &:after {
-      width: 1.3rem;
-      height: 1.3rem;
+      left: 0.15rem;
+      width: 1.2rem;
+      height: 1.2rem;
       background-color: $white;
       border-radius: 50%;
       transition: left 150ms ease-in;
@@ -131,7 +132,7 @@ const onChange = event => {
     }
     &:after {
       content: '';
-      left: 1.3rem;
+      left: 1.25rem;
     }
   }
 }
