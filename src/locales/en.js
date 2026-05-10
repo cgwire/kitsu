@@ -1433,6 +1433,8 @@ export default {
     avatar: {
       title: 'Change avatar',
       error_upload: 'There was an error while uploading picture.',
+      preview: 'Preview',
+      preview_hint: 'Drag to reposition, use the slider to zoom.',
       updating: 'Updating...',
       removing: 'Removing...'
     },

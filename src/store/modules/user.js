@@ -312,8 +312,8 @@ const actions = {
     return tasks
   },
 
-  async uploadAvatar({ commit, state }) {
-    await peopleApi.postAvatar(state.user.id, state.avatarFormData)
+  async uploadAvatar({ commit, state }, formData) {
+    await peopleApi.postAvatar(state.user.id, formData || state.avatarFormData)
     commit(UPLOAD_AVATAR_END, state.user.id)
   },
 

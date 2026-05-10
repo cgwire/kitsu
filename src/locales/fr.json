@@ -1011,6 +1011,8 @@
       "avatar": {
         "title": "Changer votre avatar",
         "error_upload": "Une erreur est survenue en envoyant l'image.",
+        "preview": "Aperçu",
+        "preview_hint": "Glissez pour repositionner, utilisez le curseur pour zoomer.",
         "updating": "Mise à jour...",
         "removing": "Enlever..."
       },

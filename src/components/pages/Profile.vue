@@ -320,11 +320,11 @@ const selectFile = formData => {
   store.commit('CHANGE_AVATAR_FILE', formData)
 }
 
-const uploadAvatarFile = () => {
+const uploadAvatarFile = formData => {
   changeAvatar.isLoading = true
   changeAvatar.isLoadingError = false
   store
-    .dispatch('uploadAvatar')
+    .dispatch('uploadAvatar', formData)
     .catch(err => {
       console.error(err)
       changeAvatar.isLoadingError = true
