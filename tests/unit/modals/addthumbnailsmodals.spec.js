@@ -2,11 +2,11 @@ import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
-import i18n from '@/lib/i18n'
-import auth from '@/lib/auth'
+// Load @/store first (via @/lib/auth) to avoid a circular-import race when
+// AddThumbnailsModal transitively imports assets/shots store modules.
+import '@/lib/auth'
 
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
-import FileUpload from '@/components/widgets/FileUpload.vue'
 
 const router = createRouter({
   history: createMemoryHistory(),
@@ -25,10 +25,9 @@ describe('AddThumbnailsModal', () => {
       getters: {
         isAssets: () => true,
         assetValidationColumns: () => [],
-        shotValidationColumns: () => [],
+        shotValidationColumns: () => []
       },
-      actions: {
-      }
+      actions: {}
     }
     store = createStore({
       strict: true,
@@ -38,16 +37,14 @@ describe('AddThumbnailsModal', () => {
     })
 
     wrapper = shallowMount(AddThumbnailsModal, {
-      store,
-      i18n,
-      router,
-      auth,
       global: {
-        mocks: {
-          $store: store,
-        },
+        plugins: [store, router],
         stubs: {
-          'file-upload': FileUpload
+          BaseModal: { template: '<div><slot /></div>' },
+          FileUpload: {
+            template: '<div></div>',
+            methods: { reset() {} }
+          }
         }
       },
       props: {

@@ -1,21 +1,32 @@
 import { shallowMount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
-import { createRouter, createWebHistory } from 'vue-router'
-
-import i18n from '@/lib/i18n'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
 
 import productionStoreFixture from '../fixtures/production-store'
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes: []
-})
+// Minimal i18n in non-legacy mode so `useI18n()` works without colliding with
+// the global `$t` mock installed in tests/unit.setup.js.
+const i18n = createI18n({ legacy: false, locale: 'en', messages: {} })
 
 describe('BuildFilterModal', () => {
   let store, assetStore, peopleStore, shotStore, taskStore
   let wrapper
+
+  // Mutate reactive state exposed via defineExpose. Mirrors what the legacy
+  // tests did with vue-test-utils' `setData`, which no longer works for
+  // <script setup> components.
+  const setState = patch => {
+    Object.entries(patch).forEach(([key, value]) => {
+      const current = wrapper.vm[key]
+      if (current && typeof current === 'object' && !Array.isArray(current)) {
+        Object.assign(current, value)
+      } else {
+        wrapper.vm[key] = value
+      }
+    })
+  }
 
   beforeEach(() => {
     assetStore = {
@@ -133,13 +144,8 @@ describe('BuildFilterModal', () => {
     })
 
     wrapper = shallowMount(BuildFilterModal, {
-      store,
-      i18n,
-      router,
       global: {
-        mocks: {
-          $store: store
-        }
+        plugins: [store, i18n]
       },
       props: {
         entityType: 'asset'
@@ -154,7 +160,7 @@ describe('BuildFilterModal', () => {
     describe('mount with query', () => {
       it('task types', async () => {
           expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
-          wrapper.setData({
+          setState({
             taskTypeFilters: {
               values: [
                 {
@@ -170,7 +176,7 @@ describe('BuildFilterModal', () => {
         })
       it('descriptors', async () => {
           expect(wrapper.find('.descriptor-filter').exists()).toBeFalsy()
-          wrapper.setData({
+          setState({
             metadataDescriptorFilters: {
               values: [
                 {
@@ -223,7 +229,7 @@ describe('BuildFilterModal', () => {
 
     describe('methods', () => {
       it('applyFilter', () => {
-        wrapper.setData({
+        setState({
           taskTypeFilters: {
             values: [
               {
@@ -241,7 +247,7 @@ describe('BuildFilterModal', () => {
       describe('Build filter', () => {
         describe('asset types', () => {
           it('type is', () => {
-            wrapper.setData({
+            setState({
               assetTypeFilters: {
                 operator: '=',
                 value: 'asset-type-1'
@@ -251,7 +257,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('type=[chars]')
           })
           it('type is not', () => {
-            wrapper.setData({
+            setState({
               assetTypeFilters: {
                 operator: '=',
                 value: 'asset-type-1'
@@ -263,7 +269,7 @@ describe('BuildFilterModal', () => {
         })
         describe('task types', () => {
           it('status is', () => {
-            wrapper.setData({
+            setState({
               taskTypeFilters: {
                 values: [
                   {
@@ -278,7 +284,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('[Modeling]=[WIP]')
           })
           it('status is not', () => {
-            wrapper.setData({
+            setState({
               taskTypeFilters: {
                 values: [
                   {
@@ -295,7 +301,7 @@ describe('BuildFilterModal', () => {
         })
         describe('descriptors', () => {
           it('descriptor is', () => {
-            wrapper.setData({
+            setState({
               metadataDescriptorFilters: {
                 values: [
                   {
@@ -311,7 +317,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('[Difficulty]=[easy]')
           })
           it('descriptor is not', () => {
-            wrapper.setData({
+            setState({
               metadataDescriptorFilters: {
                 values: [
                   {
@@ -327,7 +333,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('[Difficulty]=[-easy]')
           })
           it('descriptor in', () => {
-            wrapper.setData({
+            setState({
               metadataDescriptorFilters: {
                 values: [
                   {
@@ -345,7 +351,7 @@ describe('BuildFilterModal', () => {
         })
         describe('assignation', () => {
           it('assigned', () => {
-            wrapper.setData({
+            setState({
               assignation: {
                 value: 'assigned',
                 taskTypeId: 'task-type-1'
@@ -355,7 +361,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('[Modeling]=assigned')
           })
           it('unassigned', () => {
-            wrapper.setData({
+            setState({
               assignation: {
                 value: 'unassigned',
                 taskTypeId: 'task-type-1'
@@ -365,7 +371,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('[Modeling]=unassigned')
           })
           it('assigned to', () => {
-            wrapper.setData({
+            setState({
               assignation: {
                 value: 'assignedto',
                 taskTypeId: 'task-type-1',
@@ -379,7 +385,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('assignedto[Modeling]=[John]')
           })
           it('not assigned to', () => {
-            wrapper.setData({
+            setState({
               assignation: {
                 value: '-assignedto',
                 taskTypeId: 'task-type-1',
@@ -392,7 +398,7 @@ describe('BuildFilterModal', () => {
         })
         describe('thumbnail', () => {
           it('with', () => {
-            wrapper.setData({
+            setState({
               hasThumbnail: {
                 value: 'withthumbnail'
               }
@@ -401,7 +407,7 @@ describe('BuildFilterModal', () => {
             expect(query).toBe('withthumbnail')
           })
           it('without', () => {
-            wrapper.setData({
+            setState({
               hasThumbnail: {
                 value: '-withthumbnail'
               }
@@ -412,7 +418,7 @@ describe('BuildFilterModal', () => {
         })
         describe('union', () => {
           it('or', () => {
-            wrapper.setData({
+            setState({
               assignation: {
                 value: 'assignedto',
                 taskTypeId: 'task-type-1',

@@ -928,6 +928,30 @@ onMounted(() => {
   reset()
   setFiltersFromCurrentQuery()
 })
+
+// Exposed for unit tests
+
+defineExpose({
+  assetTypeFilters,
+  assignation,
+  hasThumbnail,
+  metadataDescriptorFilters,
+  taskTypeFilters,
+  union,
+  isAssets,
+  taskTypeList,
+  team,
+  descriptorOptions,
+  metadataDescriptors,
+  applyFilter,
+  buildFilter,
+  setFiltersFromCurrentQuery,
+  addTaskTypeFilter,
+  removeTaskTypeFilter,
+  addDescriptorFilter,
+  removeDescriptorFilter,
+  getDescriptorChoiceOptions
+})
 </script>
 
 <style lang="scss" scoped>
