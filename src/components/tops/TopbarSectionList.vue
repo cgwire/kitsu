@@ -14,6 +14,8 @@
           <icon
             class="section-icon"
             :name="currentSection.icon"
+            :size="20"
+            :stroke-width="1.5"
             v-if="currentSection.type === 'plugin'"
           />
           <kitsu-icon
@@ -45,6 +47,8 @@
             <icon
               class="section-icon"
               :name="section.icon"
+              :size="20"
+              :stroke-width="1.5"
               v-if="section.type === 'plugin'"
             />
             <span class="flexrow-item">{{ section.label }}</span>
