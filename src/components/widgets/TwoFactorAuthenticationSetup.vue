@@ -1,58 +1,11 @@
 <template>
   <div class="two-factor-authentication-setup">
     <p
-      class="mb2 has-text-centered"
+      class="mb2"
       v-html="$t('profile.two_factor_authentication.description')"
     />
-    <p
-      v-if="showCancelButton && twoFAButtonsDisabled"
-      class="cancel-two-factor-action"
-    >
-      <x-circle-icon
-        class="action-icon"
-        :size="20"
-        @click="cancelCurrentTwoFactorAuthAction"
-      />
-    </p>
 
-    <div v-if="twoFA.TOTPPreEnabled" class="qrcode-informations">
-      <p>
-        {{ $t('profile.two_factor_authentication.scan_qrcode') }}
-      </p>
-
-      <qrcode-vue
-        class="qrcode"
-        :value="twoFA.TOTPProvisionningUri"
-        :size="300"
-        level="M"
-      />
-
-      <text-field
-        :label="$t('profile.two_factor_authentication.otp_secret')"
-        :readonly="true"
-        type="text"
-        v-model.trim="twoFA.OTPSecret"
-        v-if="twoFA.OTPSecret"
-      />
-    </div>
-
-    <div class="field" v-if="twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled">
-      <p class="control has-icon">
-        <input
-          class="input is-medium otp-input"
-          type="text"
-          v-model.trim="twoFA.validationOTP"
-          @keyup.enter="nextEnable"
-          :placeholder="placeholderInputEnableOTP"
-          v-focus
-        />
-        <span class="icon">
-          <lock-icon :size="20" />
-        </span>
-      </p>
-    </div>
-
-    <div v-if="twoFA.OTPRecoveryCodes">
+    <div v-if="twoFA.OTPRecoveryCodes" class="recovery-codes-panel">
       <label class="label label-recovery-codes">
         {{ $t('profile.two_factor_authentication.recovery_codes.title') }}
       </label>
@@ -83,7 +36,7 @@
     </div>
 
     <two-factor-authentication
-      v-else-if="twoFAVerificationNeeded"
+      v-else-if="twoFA.newRecoveryCodesNeedTwoFA"
       :preferred-two-fa="user.preferred_two_factor_authentication"
       :two-fas-enabled="twoFAsEnabled"
       :is-loading="twoFA.isLoading"
@@ -96,148 +49,312 @@
       @changed-two-fa="changedTwoFA"
     />
 
-    <button
-      v-if="twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled"
-      class="two-fa-button button save-button is-medium"
-      :class="{ 'is-loading': twoFA.isLoading }"
-      @click="nextEnable()"
-    >
-      {{ textValidateNewTwoFA }}
-    </button>
+    <div class="two-fa-methods">
+      <div class="two-fa-card">
+        <div class="two-fa-card-head">
+          <smartphone-icon class="two-fa-card-icon" :size="22" />
+          <span class="two-fa-card-title">
+            {{ $t('profile.two_factor_authentication.totp.name') }}
+          </span>
+          <span
+            class="status-badge"
+            :class="user.totp_enabled ? 'is-enabled' : 'is-disabled'"
+          >
+            <span class="status-dot" />
+            {{
+              user.totp_enabled
+                ? $t('profile.two_factor_authentication.status_enabled')
+                : $t('profile.two_factor_authentication.status_disabled')
+            }}
+          </span>
+        </div>
+        <p class="two-fa-card-description">
+          {{ $t('profile.two_factor_authentication.totp.description') }}
+        </p>
 
-    <p
-      class="show-message-2fa error"
-      :class="{
-        'is-hidden': !(
-          twoFA.error.isWrongOTP &&
-          (twoFA.TOTPPreEnabled || twoFA.emailOTPPreEnabled)
-        )
-      }"
-    >
-      {{ textWrongOTPError }}
-    </p>
+        <div v-if="twoFA.TOTPPreEnabled" class="two-fa-flow">
+          <div class="qrcode-block">
+            <p class="qrcode-instruction">
+              {{ $t('profile.two_factor_authentication.scan_qrcode') }}
+            </p>
+            <div class="qrcode-frame">
+              <qrcode-vue
+                :value="twoFA.TOTPProvisionningUri"
+                :size="240"
+                level="M"
+              />
+            </div>
+          </div>
+          <text-field
+            v-if="twoFA.OTPSecret"
+            :label="$t('profile.two_factor_authentication.otp_secret')"
+            :readonly="true"
+            type="text"
+            v-model.trim="twoFA.OTPSecret"
+          />
+          <div class="field">
+            <p class="control has-icon">
+              <input
+                class="input is-medium otp-input"
+                type="text"
+                v-model.trim="twoFA.validationOTP"
+                @keyup.enter="nextEnable"
+                :placeholder="placeholderInputEnableOTP"
+                v-focus
+              />
+              <span class="icon">
+                <lock-icon :size="20" />
+              </span>
+            </p>
+          </div>
+          <p class="show-message-2fa error" v-if="twoFA.error.isWrongOTP">
+            {{ textWrongOTPError }}
+          </p>
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button is-medium"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+            <button
+              class="button save-button is-medium"
+              :class="{ 'is-loading': twoFA.isLoading }"
+              @click="nextEnable()"
+            >
+              {{ textValidateNewTwoFA }}
+            </button>
+          </div>
+        </div>
 
-    <div class="field" v-if="twoFA.FIDOPreRegistered">
-      <p class="control has-icon">
-        <input
-          class="input is-medium otp-input"
-          type="text"
-          v-model.trim="twoFA.FIDONewDeviceName"
-          @keyup.enter="registerFIDORequested"
-          :placeholder="
-            $t('profile.two_factor_authentication.fido.device_name')
-          "
-          v-focus
+        <two-factor-authentication
+          v-else-if="twoFA.TOTPNeedTwoFA"
+          :preferred-two-fa="user.preferred_two_factor_authentication"
+          :two-fas-enabled="twoFAsEnabled"
+          :is-loading="twoFA.isLoading"
+          :email="user.email"
+          :text-validate-button="textValidateTwoFA"
+          :is-disable-button="validateTwoFAIsDisable"
+          :is-wrong-otp="twoFA.error.isWrongOTP"
+          :is-profile="true"
+          @validate="nextWithPayload"
+          @changed-two-fa="changedTwoFA"
         />
-        <span class="icon">
-          <key-icon :size="20" />
-        </span>
-      </p>
+
+        <div v-else class="two-fa-card-actions">
+          <button
+            v-if="!user.totp_enabled"
+            class="button two-fa-action enable-action is-medium"
+            :class="{
+              'is-disabled': twoFAButtonsDisabled,
+              'is-loading': twoFA.isLoading
+            }"
+            @click="preEnableTOTPRequested()"
+          >
+            {{ $t('profile.two_factor_authentication.totp.button_enable') }}
+          </button>
+          <button
+            v-else
+            class="button two-fa-action disable-action is-medium"
+            :class="{
+              'is-disabled': twoFAButtonsDisabled,
+              'is-loading': twoFA.isLoading
+            }"
+            @click="disableTOTPRequested()"
+          >
+            {{ $t('profile.two_factor_authentication.totp.button_disable') }}
+          </button>
+        </div>
+        <p class="card-error error" v-if="twoFA.error.enableTOTP">
+          {{ $t('profile.two_factor_authentication.totp.error_enable') }}
+        </p>
+        <p class="card-error error" v-if="twoFA.error.disableTOTP">
+          {{ $t('profile.two_factor_authentication.totp.error_disable') }}
+        </p>
+      </div>
+
+      <div class="two-fa-card">
+        <div class="two-fa-card-head">
+          <mail-icon class="two-fa-card-icon" :size="22" />
+          <span class="two-fa-card-title">
+            {{ $t('profile.two_factor_authentication.email_otp.name') }}
+          </span>
+          <span
+            class="status-badge"
+            :class="user.email_otp_enabled ? 'is-enabled' : 'is-disabled'"
+          >
+            <span class="status-dot" />
+            {{
+              user.email_otp_enabled
+                ? $t('profile.two_factor_authentication.status_enabled')
+                : $t('profile.two_factor_authentication.status_disabled')
+            }}
+          </span>
+        </div>
+        <p class="two-fa-card-description">
+          {{ $t('profile.two_factor_authentication.email_otp.description') }}
+        </p>
+
+        <div v-if="twoFA.emailOTPPreEnabled" class="two-fa-flow">
+          <div class="field">
+            <p class="control has-icon">
+              <input
+                class="input is-medium otp-input"
+                type="text"
+                v-model.trim="twoFA.validationOTP"
+                @keyup.enter="nextEnable"
+                :placeholder="placeholderInputEnableOTP"
+                v-focus
+              />
+              <span class="icon">
+                <lock-icon :size="20" />
+              </span>
+            </p>
+          </div>
+          <p class="show-message-2fa error" v-if="twoFA.error.isWrongOTP">
+            {{ textWrongOTPError }}
+          </p>
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button is-medium"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+            <button
+              class="button save-button is-medium"
+              :class="{ 'is-loading': twoFA.isLoading }"
+              @click="nextEnable()"
+            >
+              {{ textValidateNewTwoFA }}
+            </button>
+          </div>
+        </div>
+
+        <two-factor-authentication
+          v-else-if="twoFA.emailOTPNeedTwoFA"
+          :preferred-two-fa="user.preferred_two_factor_authentication"
+          :two-fas-enabled="twoFAsEnabled"
+          :is-loading="twoFA.isLoading"
+          :email="user.email"
+          :text-validate-button="textValidateTwoFA"
+          :is-disable-button="validateTwoFAIsDisable"
+          :is-wrong-otp="twoFA.error.isWrongOTP"
+          :is-profile="true"
+          @validate="nextWithPayload"
+          @changed-two-fa="changedTwoFA"
+        />
+
+        <div v-else class="two-fa-card-actions">
+          <button
+            v-if="!user.email_otp_enabled"
+            class="button two-fa-action enable-action is-medium"
+            :class="{
+              'is-disabled': twoFAButtonsDisabled,
+              'is-loading': twoFA.isLoading
+            }"
+            @click="preEnableEmailOTPRequested()"
+          >
+            {{
+              $t('profile.two_factor_authentication.email_otp.button_enable')
+            }}
+          </button>
+          <button
+            v-else
+            class="button two-fa-action disable-action is-medium"
+            :class="{
+              'is-disabled': twoFAButtonsDisabled,
+              'is-loading': twoFA.isLoading
+            }"
+            @click="disableEmailOTPRequested()"
+          >
+            {{
+              $t('profile.two_factor_authentication.email_otp.button_disable')
+            }}
+          </button>
+        </div>
+        <p class="card-error error" v-if="twoFA.error.enableEmailOTP">
+          {{ $t('profile.two_factor_authentication.email_otp.error_enable') }}
+        </p>
+        <p class="card-error error" v-if="twoFA.error.disableEmailOTP">
+          {{ $t('profile.two_factor_authentication.email_otp.error_disable') }}
+        </p>
+      </div>
+
+      <div class="two-fa-card">
+        <div class="two-fa-card-head">
+          <key-round-icon class="two-fa-card-icon" :size="22" />
+          <span class="two-fa-card-title">
+            {{ $t('profile.two_factor_authentication.fido.name') }}
+          </span>
+          <span
+            class="status-badge"
+            :class="user.fido_enabled ? 'is-enabled' : 'is-disabled'"
+          >
+            <span class="status-dot" />
+            {{
+              user.fido_enabled
+                ? $t('profile.two_factor_authentication.status_enabled')
+                : $t('profile.two_factor_authentication.status_disabled')
+            }}
+          </span>
+        </div>
+        <p class="two-fa-card-description">
+          {{ $t('profile.two_factor_authentication.fido.description') }}
+        </p>
+
+        <div v-if="twoFA.FIDOPreRegistered" class="two-fa-flow">
+          <div class="field">
+            <p class="control has-icon">
+              <input
+                class="input is-medium otp-input"
+                type="text"
+                v-model.trim="twoFA.FIDONewDeviceName"
+                @keyup.enter="registerFIDORequested"
+                :placeholder="
+                  $t('profile.two_factor_authentication.fido.device_name')
+                "
+                v-focus
+              />
+              <span class="icon">
+                <key-icon :size="20" />
+              </span>
+            </p>
+          </div>
+          <p class="show-message-2fa error" v-if="twoFA.error.registerFIDO">
+            {{ $t('profile.two_factor_authentication.fido.error_register') }}
+          </p>
+          <div class="two-fa-flow-actions">
+            <button
+              class="button cancel-flow-button is-medium"
+              @click="cancelCurrentTwoFactorAuthAction"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+            <button
+              class="button save-button is-medium"
+              :class="{ 'is-loading': twoFA.isLoading }"
+              @click="registerFIDORequested()"
+            >
+              {{ $t('profile.two_factor_authentication.fido.button_register') }}
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="two-fa-card-actions">
+          <button
+            class="button two-fa-action enable-action is-medium"
+            :class="{
+              'is-disabled': twoFAButtonsDisabled,
+              'is-loading': twoFA.isLoading
+            }"
+            @click="preRegisterFIDORequested()"
+          >
+            {{ $t('profile.two_factor_authentication.fido.button_register') }}
+          </button>
+        </div>
+      </div>
     </div>
-
-    <button
-      v-if="twoFA.FIDOPreRegistered"
-      class="two-fa-button button save-button is-medium"
-      :class="{ 'is-loading': twoFA.isLoading }"
-      @click="registerFIDORequested()"
-    >
-      {{ $t('profile.two_factor_authentication.fido.button_register') }}
-    </button>
-
-    <p
-      class="show-message-2fa error"
-      :class="{ 'is-hidden': !twoFA.error.registerFIDO }"
-    >
-      {{ $t('profile.two_factor_authentication.fido.error_register') }}
-    </p>
-
-    <button
-      v-if="!user.totp_enabled && !twoFA.TOTPPreEnabled"
-      class="two-fa-button button save-button is-medium"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
-      }"
-      @click="preEnableTOTPRequested()"
-    >
-      {{ $t('profile.two_factor_authentication.totp.button_enable') }}
-    </button>
-
-    <button
-      v-else-if="!twoFA.TOTPNeedTwoFA && !twoFA.TOTPPreEnabled"
-      class="two-fa-button button disable-button is-medium"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
-      }"
-      @click="disableTOTPRequested()"
-    >
-      {{ $t('profile.two_factor_authentication.totp.button_disable') }}
-    </button>
-
-    <p
-      class="show-message-2fa error"
-      :class="{ 'is-hidden': !twoFA.error.enableTOTP }"
-    >
-      {{ $t('profile.two_factor_authentication.totp.error_enable') }}
-    </p>
-
-    <p
-      class="show-message-2fa error"
-      :class="{ 'is-hidden': !twoFA.error.disableTOTP }"
-    >
-      {{ $t('profile.two_factor_authentication.totp.error_disable') }}
-    </p>
-
-    <button
-      v-if="!user.email_otp_enabled && !twoFA.emailOTPPreEnabled"
-      class="two-fa-button button save-button is-medium"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
-      }"
-      @click="preEnableEmailOTPRequested()"
-    >
-      {{ $t('profile.two_factor_authentication.email_otp.button_enable') }}
-    </button>
-
-    <button
-      v-else-if="!twoFA.emailOTPNeedTwoFA && !twoFA.emailOTPPreEnabled"
-      class="two-fa-button button disable-button is-medium"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
-      }"
-      @click="disableEmailOTPRequested()"
-    >
-      {{ $t('profile.two_factor_authentication.email_otp.button_disable') }}
-    </button>
-
-    <p
-      class="show-message-2fa error"
-      :class="{ 'is-hidden': !twoFA.error.enableEmailOTP }"
-    >
-      {{ $t('profile.two_factor_authentication.email_otp.error_enable') }}
-    </p>
-
-    <p
-      class="show-message-2fa error"
-      :class="{ 'is-hidden': !twoFA.error.disableEmailOTP }"
-    >
-      {{ $t('profile.two_factor_authentication.email_otp.error_disable') }}
-    </p>
-
-    <button
-      v-if="!twoFA.FIDOPreRegistered"
-      class="two-fa-button button save-button is-medium"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
-      }"
-      @click="preRegisterFIDORequested()"
-    >
-      {{ $t('profile.two_factor_authentication.fido.button_register') }}
-    </button>
 
     <button
       v-if="twoFAEnabled && !twoFA.newRecoveryCodesNeedTwoFA"
@@ -295,21 +412,17 @@ import QrcodeVue from 'qrcode.vue'
 import {
   CopyIcon,
   KeyIcon,
+  KeyRoundIcon,
   LockIcon,
+  MailIcon,
   SaveIcon,
+  SmartphoneIcon,
   TrashIcon,
   XCircleIcon
 } from 'lucide-vue-next'
 
 import TextField from '@/components/widgets/TextField.vue'
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
-
-defineProps({
-  showCancelButton: {
-    type: Boolean,
-    default: false
-  }
-})
 
 const { t } = useI18n()
 const store = useStore()
@@ -357,13 +470,6 @@ const twoFAEnabled = computed(
     user.value.totp_enabled ||
     user.value.email_otp_enabled ||
     user.value.fido_enabled
-)
-
-const twoFAVerificationNeeded = computed(
-  () =>
-    twoFA.TOTPNeedTwoFA ||
-    twoFA.emailOTPNeedTwoFA ||
-    twoFA.newRecoveryCodesNeedTwoFA
 )
 
 const twoFAButtonsDisabled = computed(
@@ -716,13 +822,23 @@ onUnmounted(() => {
   }
 }
 
-.qrcode {
+.qrcode-block {
+  text-align: center;
   margin-bottom: 1em;
-  margin-top: 1em;
 }
 
-.qrcode-informations {
-  text-align: center;
+.qrcode-frame {
+  display: inline-block;
+  margin: 0.5em 0;
+  padding: 1em;
+  background: $white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  line-height: 0;
+}
+
+.qrcode-instruction {
+  margin-bottom: 0.5em;
 }
 
 .recovery-codes {
@@ -752,29 +868,149 @@ onUnmounted(() => {
   }
 }
 
-.cancel-two-factor-action {
-  text-align: right;
-  margin-bottom: 0.2em;
+.label-recovery-codes {
+  float: left;
+}
 
-  .action-icon {
-    float: none;
+.recovery-codes-panel {
+  margin-bottom: 1.5em;
+}
+
+.two-fa-flow {
+  border-top: 1px dashed var(--border);
+  margin-top: 0.5em;
+  padding-top: 1em;
+
+  .field {
+    margin-bottom: 1em;
   }
 }
 
-.label-recovery-codes {
-  float: left;
+.two-fa-flow-actions {
+  display: flex;
+  gap: 0.6em;
+  justify-content: flex-end;
+
+  .button {
+    flex: 0 0 auto;
+  }
+
+  .save-button {
+    width: auto;
+    min-width: 140px;
+  }
+}
+
+.cancel-flow-button {
+  border-radius: 8px;
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+
+  &:hover {
+    background: var(--background-hover);
+  }
 }
 
 .recovery-codes-warning {
   margin-bottom: 1em;
 }
 
-.disable-button {
-  border-radius: 2em;
-  width: 100%;
-  background: $red;
-  border-color: $red;
-  color: white;
+.two-fa-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+  margin-bottom: 1.5em;
+}
+
+.two-fa-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1em 1.2em;
+  background: var(--background);
+}
+
+.two-fa-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-bottom: 0.4em;
+}
+
+.two-fa-card-icon {
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.two-fa-card-title {
+  font-weight: 600;
+  color: var(--text-strong);
+  flex: 1;
+  min-width: 0;
+}
+
+.two-fa-card-description {
+  color: var(--text);
+  font-size: 0.9em;
+  margin: 0 0 1em;
+}
+
+.two-fa-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.8em;
+  color: var(--text);
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $light-grey;
+  }
+
+  &.is-enabled .status-dot {
+    background: $green;
+  }
+}
+
+.two-fa-action {
+  border-radius: 8px;
+  font-weight: 500;
+  min-width: 140px;
+
+  &.enable-action {
+    background: $green;
+    border-color: $green;
+    color: $white;
+
+    &:hover:not(.is-disabled) {
+      background: $light-green;
+      border-color: $light-green;
+    }
+  }
+
+  &.disable-action {
+    background: transparent;
+    border-color: $red;
+    color: $red;
+
+    &:hover:not(.is-disabled) {
+      background: $red;
+      color: $white;
+    }
+  }
+}
+
+.card-error {
+  margin-top: 0.6em;
+  margin-bottom: 0;
+  font-size: 0.85em;
 }
 
 .show-message {

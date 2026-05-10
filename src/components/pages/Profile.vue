@@ -227,7 +227,7 @@
         </p>
 
         <h2>{{ $t('profile.two_factor_authentication.title') }}</h2>
-        <two-factor-authentication-setup show-cancel-button />
+        <two-factor-authentication-setup />
       </div>
     </div>
 

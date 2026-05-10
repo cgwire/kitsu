@@ -1446,9 +1446,13 @@ export default {
       description: 'Two-factor authentication (<abbr title="Two-Factor Authentication">2FA</abbr>) adds an extra layer of security to your account. When enabled, you will need to provide a second form of verification in addition to your password each time you log in. You can use an authenticator app (<abbr title="Time-based One-Time Password">TOTP</abbr>), email verification (<abbr title="One-Time Password">OTP</abbr>), or a hardware security key (<abbr title="Fast IDentity Online">FIDO</abbr>) as your second factor.',
       mandatory: 'Your organization requires two-factor authentication. Please enable at least one method to continue.',
       enabled: 'Two-factor authentication enabled',
+      status_enabled: 'Enabled',
+      status_disabled: 'Disabled',
       scan_qrcode: 'Please scan this QR code in your TOTP application.',
       otp_secret: 'OTP secret',
       totp: {
+        name: 'Authenticator app',
+        description: 'Use a TOTP app like Google Authenticator, Authy or 1Password.',
         button_enable: 'Enable TOTP',
         button_disable: 'Disable TOTP',
         button_validate_disable: 'Validate and disable TOTP',
@@ -1457,6 +1461,8 @@ export default {
         error_disable: 'An error occurred while disabling TOTP.'
       },
       email_otp: {
+        name: 'Email',
+        description: 'Receive a one-time code by email each time you sign in.',
         button_enable: 'Enable OTP via email',
         button_disable: 'Disable OTP via email',
         button_validate_disable: 'Validate and disable OTP via email',
@@ -1465,6 +1471,8 @@ export default {
         error_disable: 'An error occurred while disabling OTP via email.'
       },
       fido: {
+        name: 'Security key',
+        description: 'Use a hardware key (YubiKey) or a platform authenticator (Touch ID, Windows Hello).',
         device_name: 'FIDO device name',
         registered_devices_title: 'Registered FIDO devices:',
         button_register: 'Register new FIDO device',
