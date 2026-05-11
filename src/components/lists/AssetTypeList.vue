@@ -18,16 +18,25 @@
         </thead>
         <tbody class="datatable-body" v-if="entries.length">
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-            <td class="name">
+            <td class="name" :data-label="$t('asset_types.fields.name')">
               {{ entry.name }}
               <span :title="entry.description" v-if="entry.description">
                 <help-circle-icon class="icon is-small" />
               </span>
             </td>
-            <td class="short-name">
+            <td
+              class="short-name"
+              :data-label="$t('asset_types.fields.short_name')"
+              v-if="entry.short_name"
+            >
               {{ entry.short_name }}
             </td>
-            <td class="task-types" v-if="entry.task_types?.length">
+            <td class="short-name" v-else></td>
+            <td
+              class="task-types"
+              :data-label="$t('asset_types.fields.task_types')"
+              v-if="entry.task_types?.length"
+            >
               <span
                 :key="taskType.id"
                 class="task-type-name flexrow-item"
@@ -36,7 +45,11 @@
                 <task-type-name :task-type="taskType" v-if="taskType.id" />
               </span>
             </td>
-            <td class="task-types" v-else>
+            <td
+              class="task-types"
+              :data-label="$t('asset_types.fields.task_types')"
+              v-else
+            >
               {{ $t('asset_types.include_all') }}
             </td>
             <row-actions-cell
@@ -109,14 +122,77 @@ const sortedTaskTypes = taskTypeIds => {
 }
 
 @media screen and (max-width: 768px) {
-  .name {
-    width: auto;
-    padding: 0.5em;
+  // Turn each row into a card: the table head disappears, every cell is
+  // labelled via its data-label attribute, and the actions cell collapses
+  // to a footer row. Keep the wrapper's overflow-y: auto from the global
+  // .datatable-wrapper rule so the list still scrolls inside .fixed-page.
+  :deep(.datatable-wrapper) {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
   }
 
-  .datatable-body td,
-  .datatable-head th {
-    padding: 0.5em;
+  .datatable,
+  .datatable-body {
+    display: block;
+    width: 100%;
+  }
+
+  .datatable-head {
+    display: none;
+  }
+
+  .datatable-row {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: block;
+    margin-bottom: 0.75em;
+    padding: 0.85em 1em;
+  }
+
+  .dark .datatable-row {
+    background: var(--background-alt);
+  }
+
+  .datatable-row td {
+    border: 0;
+    display: block;
+    padding: 0.4em 0;
+    width: auto;
+  }
+
+  // Cells without a data-label are placeholders to keep the desktop
+  // table columns aligned — collapse them on mobile so empty fields
+  // don't leave gaps.
+  .datatable-row td:not([data-label]):not(.actions):not(.name) {
+    display: none;
+  }
+
+  .datatable-row td[data-label]::before {
+    color: var(--text-alt);
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75em;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.2em;
+    text-transform: uppercase;
+  }
+
+  // The name doubles as the card title — drop its label and bump the
+  // font weight.
+  .datatable-row .name {
+    font-size: 1.05em;
+    font-weight: 600;
+    padding-top: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .datatable-row .actions {
+    display: none;
   }
 }
 </style>
