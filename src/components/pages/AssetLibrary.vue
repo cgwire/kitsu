@@ -1,5 +1,5 @@
 <template>
-  <page-layout :side="isCurrentUserManager">
+  <page-layout :side="showSidePanel">
     <template #main>
       <div class="asset-library">
         <header class="flexrow">
@@ -99,7 +99,15 @@
 <script setup>
 import { useHead } from '@unhead/vue'
 import { firstBy } from 'thenby'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
@@ -118,6 +126,13 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
+
+const desktopQuery = window.matchMedia('(min-width: 769px)')
+const isDesktop = ref(desktopQuery.matches)
+const onMediaChange = event => {
+  isDesktop.value = event.matches
+}
+desktopQuery.addEventListener('change', onMediaChange)
 
 // State
 
@@ -143,6 +158,12 @@ const displayedSharedAssetsByType = computed(
   () => store.getters.displayedSharedAssetsByType
 )
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+// Hide the side panel under the 768px breakpoint — the asset grid takes
+// the full width on mobile and the "Add to library" workflow is desktop
+// territory anyway.
+const showSidePanel = computed(
+  () => isCurrentUserManager.value && isDesktop.value
+)
 const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedAssets = computed(() => store.getters.selectedAssets)
@@ -242,6 +263,10 @@ onMounted(() => {
   nextTick(onSearchChange)
 })
 
+onBeforeUnmount(() => {
+  desktopQuery.removeEventListener('change', onMediaChange)
+})
+
 // Head
 
 useHead({
@@ -260,11 +285,24 @@ useHead({
   padding: 4em 2em 1em 2em;
 }
 
+.filters {
+  flex-wrap: wrap;
+  gap: 0.5em;
+
+  > .flexrow-item {
+    margin-right: 0;
+  }
+}
+
 .entities {
   .items {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    // The global `ul { margin-left: 1em }` rule shifts the row right and
+    // breaks `justify-content: center`. Reset it here.
+    margin-left: 0;
+    padding-left: 0;
   }
 
   .item {
@@ -307,6 +345,53 @@ useHead({
         margin-left: 0.5em;
         word-break: break-word;
       }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .asset-library {
+    padding: 4.5em 0.75em 1em;
+  }
+
+  // Drop the mt1 utility on the page title so the heading hugs the page
+  // top padding instead of stacking another 1em on top.
+  header {
+    margin-bottom: 1em;
+
+    :deep(.page-title) {
+      margin-top: 0;
+    }
+  }
+
+  .filters {
+    gap: 0.75em;
+    margin-bottom: 1em;
+
+    // Stretch each filter to the full width so they stack cleanly when
+    // wrapped; the spacer between them collapses to nothing.
+    > .flexrow-item {
+      flex: 1 1 100%;
+    }
+
+    > .filler {
+      display: none;
+    }
+
+    // ComboboxProduction / Combobox wrap themselves in a global .field
+    // (margin-bottom: 2em) that compounds with the row gap. SearchField
+    // doesn't, so the stacked spacing reads as tight above the
+    // production combobox and loose below it. Reset the bottom margin
+    // and let `gap` alone drive the rhythm.
+    :deep(.field) {
+      margin-bottom: 0;
+    }
+  }
+
+  .entities {
+    .items {
+      gap: 12px;
+      justify-content: center;
     }
   }
 }
