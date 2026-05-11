@@ -115,6 +115,7 @@
       :active="modals.avatar"
       :is-loading="loading.saveAvatar"
       :is-error="errors.saveAvatar"
+      shape="rounded"
       :title="$t('settings.change_logo')"
       @confirm="uploadAvatarFile"
       @cancel="hideAvatarModal"

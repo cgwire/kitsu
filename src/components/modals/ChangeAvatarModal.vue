@@ -4,7 +4,7 @@
 
     <image-cropper
       ref="cropperRef"
-      shape="circle"
+      :shape="shape"
       @fileselected="onFileSelected"
     />
 
@@ -35,6 +35,11 @@ const props = defineProps({
   active: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  shape: {
+    type: String,
+    default: 'circle',
+    validator: value => ['circle', 'rounded'].includes(value)
+  },
   title: { type: String, default: '' }
 })
 
