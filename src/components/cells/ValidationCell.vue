@@ -75,241 +75,153 @@
   </td>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
 import { EyeIcon } from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
+import { useFormat } from '@/composables/format'
 import colors from '@/lib/colors'
 import { sortPeople } from '@/lib/sorting'
-import { formatListMixin } from '@/components/mixins/format'
 
-export default {
-  name: 'validation-cell',
+const store = useStore()
+const { formatPriority, formatPrioritySymbol } = useFormat()
 
-  mixins: [formatListMixin],
+const props = defineProps({
+  canceled: { type: Boolean, default: false },
+  castingTitle: { type: String, default: '' },
+  clickable: { type: Boolean, default: true },
+  column: { type: Object, default: null },
+  columnY: { type: Number, default: 0 },
+  contactSheet: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  entity: { type: Object, default: null },
+  isAssignees: { type: Boolean, default: true },
+  isBorder: { type: Boolean, default: true },
+  isCastingReady: { type: Boolean, default: false },
+  left: { type: String, default: '0px' },
+  minimized: { type: Boolean, default: false },
+  rowX: { type: Number, default: 0 },
+  selectable: { type: Boolean, default: true },
+  selected: { type: Boolean, default: false },
+  sticked: { type: Boolean, default: false },
+  taskTest: { type: Object, default: null }
+})
 
-  data() {
-    return {
-      task: null
-    }
-  },
+const emit = defineEmits(['select', 'unselect'])
 
-  components: {
-    EyeIcon
-  },
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const personMap = computed(() => store.getters.personMap)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-  props: {
-    column: {
-      default: null,
-      type: Object
-    },
-    entity: {
-      default: null,
-      type: Object
-    },
-    taskTest: {
-      default: null,
-      type: Object
-    },
-    isCastingReady: {
-      default: false,
-      type: Boolean
-    },
-    castingTitle: {
-      default: '',
-      type: String
-    },
-    isBorder: {
-      default: true,
-      type: Boolean
-    },
-    // FIXME: property no longer used in component
-    isStatic: {
-      default: false,
-      type: Boolean
-    },
-    isAssignees: {
-      default: true,
-      type: Boolean
-    },
-    minimized: {
-      default: false,
-      type: Boolean
-    },
-    selectable: {
-      default: true,
-      type: Boolean
-    },
-    clickable: {
-      default: true,
-      type: Boolean
-    },
-    selected: {
-      default: false,
-      type: Boolean
-    },
-    disabled: {
-      default: false,
-      type: Boolean
-    },
-    rowX: {
-      default: 0,
-      type: Number
-    },
-    columnY: {
-      default: 0,
-      type: Number
-    },
-    left: {
-      type: String,
-      default: '0px'
-    },
-    sticked: {
-      default: false,
-      type: Boolean
-    },
-    canceled: {
-      default: false,
-      type: Boolean
-    },
-    contactSheet: {
-      default: false,
-      type: Boolean
-    }
-  },
+const task = ref(null)
 
-  mounted() {
-    if (this.taskTest) {
-      this.task = this.taskTest
-    } else if (this.column && this.entity?.validations) {
-      this.task = this.taskMap.get(this.entity.validations.get(this.column.id))
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'isCurrentUserClient',
-      'isDarkTheme',
-      'personMap',
-      'taskMap',
-      'taskStatusMap'
-    ]),
-
-    assignees() {
-      return sortPeople(
-        this.task?.assignees
-          .map(personId => this.personMap.get(personId))
-          .filter(Boolean) ?? []
-      )
-    },
-
-    priority() {
-      return this.formatPrioritySymbol(this.task.priority)
-    },
-
-    cellStyle() {
-      let backgroundColor
-      if (this.isBorder && !this.sticked) {
-        const opacity = this.isDarkTheme ? 0.15 : 0.08
-        backgroundColor = colors.hexToRGBa(this.column.color, opacity)
-      }
-
-      return {
-        borderLeft: this.isBorder ? `1px solid ${this.column.color}` : 'none',
-        backgroundColor: backgroundColor,
-        left: this.left
-      }
-    },
-
-    tagStyle() {
-      const isTodo = this.taskStatus.name === 'Todo'
-      let backgroundColor
-      if (isTodo) {
-        backgroundColor = this.isDarkTheme ? '#5F626A' : '#ECECEC'
-      } else if (this.taskStatus.color) {
-        backgroundColor = this.isDarkTheme
-          ? colors.darkenColor(this.taskStatus.color)
-          : this.taskStatus.color
-      } else {
-        backgroundColor = 'transparent'
-      }
-      const color = !isTodo || this.isDarkTheme ? 'white' : '#333'
-      return {
-        backgroundColor,
-        color
-      }
-    },
-
-    wrapperStyle() {
-      if (!this.task || !this.contactSheet) return {}
-      const path =
-        '/api/pictures/thumbnails/preview-files/' +
-        this.task.last_preview_file_id +
-        '.png'
-      return {
-        'background-image': 'url(' + path + ')',
-        'background-color': this.taskStatus.color + '44',
-        height: '100px',
-        width: '150px',
-        display: 'flex',
-        'flex-direction': this.contactSheet ? 'column' : 'row'
-      }
-    },
-
-    statusWrapperStyle() {
-      if (!this.task || !this.contactSheet)
-        return {
-          padding: '6px'
-        }
-      return {
-        width: '150px',
-        padding: '6px',
-        'text-align:': 'right'
-      }
-    },
-
-    taskStatus() {
-      const taskStatusId = this.task?.task_status_id
-      return this.taskStatusMap?.get(taskStatusId) || {}
-    }
-  },
-
-  methods: {
-    onClick(event) {
-      if (this.clickable) {
-        this.select(event)
-      }
-    },
-
-    select(event) {
-      if (!this.selectable) {
-        return
-      }
-      this.$emit(!this.selected ? 'select' : 'unselect', {
-        entity: this.entity,
-        column: this.column,
-        task: this.task,
-        x: this.rowX,
-        y: this.columnY,
-        isCtrlKey: event.ctrlKey || event.metaKey,
-        isShiftKey: event.shiftKey,
-        isUserClick: event.isUserClick !== false
-      })
-    }
-  },
-
-  watch: {
-    taskTest() {
-      if (this.taskTest) {
-        this.task = this.taskTest
-      } else if (this.entity?.validations) {
-        this.task = this.taskMap.get(
-          this.entity.validations.get(this.column.id)
-        )
-      }
-    }
+const resolveTask = () => {
+  if (props.taskTest) {
+    task.value = props.taskTest
+  } else if (props.column && props.entity?.validations) {
+    task.value = taskMap.value.get(
+      props.entity.validations.get(props.column.id)
+    )
   }
 }
+
+const taskStatus = computed(
+  () => taskStatusMap.value?.get(task.value?.task_status_id) || {}
+)
+
+const assignees = computed(() =>
+  sortPeople(
+    task.value?.assignees
+      .map(personId => personMap.value.get(personId))
+      .filter(Boolean) ?? []
+  )
+)
+
+const priority = computed(() => formatPrioritySymbol(task.value.priority))
+
+const cellStyle = computed(() => {
+  let backgroundColor
+  if (props.isBorder && !props.sticked) {
+    const opacity = isDarkTheme.value ? 0.15 : 0.08
+    backgroundColor = colors.hexToRGBa(props.column.color, opacity)
+  }
+  return {
+    borderLeft: props.isBorder ? `1px solid ${props.column.color}` : 'none',
+    backgroundColor,
+    left: props.left
+  }
+})
+
+const tagStyle = computed(() => {
+  const isTodo = taskStatus.value.name === 'Todo'
+  let backgroundColor
+  if (isTodo) {
+    backgroundColor = isDarkTheme.value ? '#5F626A' : '#ECECEC'
+  } else if (taskStatus.value.color) {
+    backgroundColor = isDarkTheme.value
+      ? colors.darkenColor(taskStatus.value.color)
+      : taskStatus.value.color
+  } else {
+    backgroundColor = 'transparent'
+  }
+  const color = !isTodo || isDarkTheme.value ? 'white' : '#333'
+  return { backgroundColor, color }
+})
+
+const wrapperStyle = computed(() => {
+  if (!task.value || !props.contactSheet) return {}
+  const path =
+    '/api/pictures/thumbnails/preview-files/' +
+    task.value.last_preview_file_id +
+    '.png'
+  return {
+    'background-image': 'url(' + path + ')',
+    'background-color': taskStatus.value.color + '44',
+    height: '100px',
+    width: '150px',
+    display: 'flex',
+    'flex-direction': props.contactSheet ? 'column' : 'row'
+  }
+})
+
+const statusWrapperStyle = computed(() => {
+  if (!task.value || !props.contactSheet) return { padding: '6px' }
+  return {
+    width: '150px',
+    padding: '6px',
+    'text-align:': 'right'
+  }
+})
+
+const select = event => {
+  if (!props.selectable) return
+  const payload = {
+    entity: props.entity,
+    column: props.column,
+    task: task.value,
+    x: props.rowX,
+    y: props.columnY,
+    isCtrlKey: event.ctrlKey || event.metaKey,
+    isShiftKey: event.shiftKey,
+    isUserClick: event.isUserClick !== false
+  }
+  if (props.selected) {
+    emit('unselect', payload)
+  } else {
+    emit('select', payload)
+  }
+}
+
+const onClick = event => {
+  if (props.clickable) select(event)
+}
+
+watch(() => props.taskTest, resolveTask)
+
+onMounted(resolveTask)
 </script>
 
 <style lang="scss" scoped>

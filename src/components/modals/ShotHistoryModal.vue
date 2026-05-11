@@ -1,161 +1,129 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('shots.history')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <table class="table">
+      <thead class="table-header">
+        <tr>
+          <th class="date">{{ $t('main.date') }}</th>
+          <th class="name">{{ $t('shots.fields.name') }}</th>
+          <th class="frame-in">{{ $t('shots.fields.frame_in') }}</th>
+          <th class="frame-out">{{ $t('shots.fields.frame_out') }}</th>
+          <th class="person table-filler">
+            {{ $t('shots.fields.person') }}
+          </th>
+        </tr>
+      </thead>
+    </table>
 
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('shots.history') }}
-        </h1>
-
-        <table class="table" ref="headerWrapper">
-          <thead class="table-header">
-            <tr>
-              <th class="date">{{ $t('main.date') }}</th>
-              <th class="name">{{ $t('shots.fields.name') }}</th>
-              <th class="frame-in">{{ $t('shots.fields.frame_in') }}</th>
-              <th class="frame-out">{{ $t('shots.fields.frame_out') }}</th>
-              <th class="person table-filler">
-                {{ $t('shots.fields.person') }}
-              </th>
-            </tr>
-          </thead>
-        </table>
-
-        <div class="table-body" v-if="!isLoading">
-          <table class="table">
-            <tbody class="table-body">
-              <tr
-                class="shot-version"
-                :key="version.id"
-                v-for="version in versions"
-              >
-                <td class="date">
-                  {{ formatDate(version.created_at) }}
-                </td>
-                <td class="name">
-                  {{ version.name }}
-                </td>
-                <td class="frame-in">
-                  {{ version.data.frame_in }}
-                </td>
-                <td class="frame-out">
-                  {{ version.data.frame_out }}
-                </td>
-                <td class="person table-filler">
-                  {{ getPersonFullName(version.person_id) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <table-info :is-loading="isLoading" :is-error="isError" />
-
-        <div class="has-text-right modal-footer">
-          <button @click="$emit('cancel')" class="button is-link">
-            {{ $t('main.cancel') }}
-          </button>
-        </div>
-      </div>
+    <div class="table-body" v-if="!isLoading">
+      <table class="table">
+        <tbody class="table-body">
+          <tr
+            class="shot-version"
+            :key="version.id"
+            v-for="version in versions"
+          >
+            <td class="date">
+              {{ formatDate(version.created_at) }}
+            </td>
+            <td class="name">
+              {{ version.name }}
+            </td>
+            <td class="frame-in">
+              {{ version.data.frame_in }}
+            </td>
+            <td class="frame-out">
+              {{ version.data.frame_out }}
+            </td>
+            <td class="person table-filler">
+              {{ getPersonFullName(version.person_id) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </div>
+
+    <table-info :is-loading="isLoading" :is-error="isError" />
+
+    <div class="has-text-right modal-footer">
+      <button @click="$emit('cancel')" class="button is-link">
+        {{ $t('main.cancel') }}
+      </button>
+    </div>
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
 import { formatDate } from '@/lib/time'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'shot-history-modal',
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    TableInfo
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  shot: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    shot: {
-      type: Object,
-      default: () => {}
-    }
-  },
+defineEmits(['cancel'])
 
-  emits: ['cancel'],
+// State
 
-  data() {
-    return {
-      isError: false,
-      isLoading: false,
-      versions: []
-    }
-  },
+const isError = ref(false)
+const isLoading = ref(false)
+const versions = ref([])
 
-  mounted() {
-    this.reset()
-  },
+// Computed
 
-  computed: {
-    ...mapGetters(['personMap'])
-  },
+const personMap = computed(() => store.getters.personMap)
 
-  methods: {
-    ...mapActions(['loadShotHistory']),
+// Functions
 
-    formatDate(dateString) {
-      return formatDate(dateString)
-    },
+const getPersonFullName = personId =>
+  personMap.value.get(personId)?.full_name || ''
 
-    getPersonFullName(personId) {
-      const person = this.personMap.get(personId)
-      return person ? person.full_name : ''
-    },
+const reset = () => {
+  versions.value = []
+  isError.value = false
+  isLoading.value = false
+}
 
-    loadData() {
-      this.isError = false
-      this.isLoading = true
-      return this.loadShotHistory(this.shot.id)
-        .then(versions => {
-          this.versions = versions
-          this.isLoading = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.isLoading = false
-          this.isError = true
-        })
-    },
+const loadData = async () => {
+  isError.value = false
+  isLoading.value = true
+  try {
+    versions.value = await store.dispatch('loadShotHistory', props.shot.id)
+  } catch (err) {
+    console.error(err)
+    isError.value = true
+  }
+  isLoading.value = false
+}
 
-    reset() {
-      this.versions = []
-      this.isError = false
-      this.isLoading = false
-    }
-  },
+// Watchers
 
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-        this.loadData()
-      }
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      reset()
+      loadData()
     }
   }
-}
+)
+
+// Lifecycle
+
+onMounted(reset)
 </script>
 
 <style lang="scss" scoped>

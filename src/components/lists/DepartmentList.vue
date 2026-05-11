@@ -7,7 +7,9 @@
             <th scope="col" class="name">
               {{ $t('departments.fields.name') }}
             </th>
-            <th scope="col">{{ $t('departments.fields.color') }}</th>
+            <th scope="col" class="color">
+              {{ $t('departments.fields.color') }}
+            </th>
             <th scope="col">
               {{ $t('departments.hardware_used_by_artists') }}
             </th>
@@ -48,60 +50,40 @@
       </table>
     </div>
     <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
-    <p class="has-text-centered nb-asset-types">
-      {{ entries.length }} {{ $tc('departments.number', entries.length) }}
+    <p class="has-text-centered nb-departments">
+      {{ entries.length }} {{ $t('departments.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'department-list',
+defineProps({
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  linkedHardwareItems: { type: Object, default: () => ({}) },
+  linkedSoftwareLicenses: { type: Object, default: () => ({}) }
+})
 
-  emits: ['delete-clicked', 'edit-clicked'],
-
-  components: {
-    RowActionsCell,
-    TableInfo
-  },
-
-  props: {
-    entries: {
-      type: Array,
-      required: true
-    },
-    isLoading: {
-      type: Boolean,
-      required: true
-    },
-    isError: {
-      type: Boolean,
-      required: true
-    },
-    linkedHardwareItems: {
-      type: Object,
-      required: true
-    },
-    linkedSoftwareLicenses: {
-      type: Object,
-      required: true
-    }
-  }
-}
+defineEmits(['delete-clicked', 'edit-clicked'])
 </script>
 
 <style lang="scss" scoped>
+.datatable-body tr:first-child th,
+.datatable-body tr:first-child td {
+  border-top: 0;
+}
+
 .name {
-  width: 300px;
+  min-width: 300px;
   padding: 1em;
 }
 
 .color {
-  width: 20px;
-  height: 20px;
+  width: 60px;
   text-align: center;
 
   span {
@@ -113,13 +95,25 @@ export default {
 }
 
 .items {
-  padding: 1em;
   min-width: 200px;
   max-width: 200px;
+  padding: 1em;
 }
 
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
+@media screen and (max-width: 768px) {
+  .name {
+    min-width: auto;
+    padding: 0.5em;
+  }
+
+  .items {
+    min-width: auto;
+    padding: 0.5em;
+  }
+
+  .datatable-body td,
+  .datatable-head th {
+    padding: 0.5em;
+  }
 }
 </style>

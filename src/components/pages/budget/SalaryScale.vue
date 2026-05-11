@@ -23,203 +23,43 @@
                   :key="department.id"
                   v-for="department in departments"
                 >
-                  <tr class="datatable-row">
-                    <td rowspan="9">
-                      <department-name :department="department" />
-                    </td>
-                    <td rowspan="3">{{ $t('budget.positions.supervisor') }}</td>
-                    <td>{{ $t('budget.seniorities.senior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'supervisor',
-                              'senior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.supervisor.senior
-                            .salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.mid') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'supervisor',
-                              'mid',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.supervisor.mid.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.junior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'supervisor',
-                              'junior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.supervisor.junior
-                            .salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td rowspan="3">{{ $t('budget.positions.lead') }}</td>
-                    <td>{{ $t('budget.seniorities.senior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'lead',
-                              'senior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.lead.senior.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.mid') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'lead',
-                              'mid',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.lead.mid.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.junior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'lead',
-                              'junior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.lead.junior.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td rowspan="3">{{ $t('budget.positions.artist') }}</td>
-                    <td>{{ $t('budget.seniorities.senior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'artist',
-                              'senior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.artist.senior.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.mid') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'artist',
-                              'mid',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.artist.mid.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
-                  <tr class="datatable-row">
-                    <td>{{ $t('budget.seniorities.junior') }}</td>
-                    <td>
-                      <input
-                        type="number"
-                        class="input-editor"
-                        @input="
-                          value =>
-                            modifySalaryScale(
-                              department.id,
-                              'artist',
-                              'junior',
-                              value
-                            )
-                        "
-                        :value="
-                          salaryScale[department.id]?.artist.junior.salary || 0
-                        "
-                      />
-                    </td>
-                  </tr>
+                  <template
+                    :key="position"
+                    v-for="(position, pIdx) in positions"
+                  >
+                    <tr
+                      class="datatable-row"
+                      :key="seniority"
+                      v-for="(seniority, sIdx) in seniorities"
+                    >
+                      <td v-if="pIdx === 0 && sIdx === 0" rowspan="9">
+                        <department-name :department="department" />
+                      </td>
+                      <td v-if="sIdx === 0" rowspan="3">
+                        {{ $t(`budget.positions.${position}`) }}
+                      </td>
+                      <td>{{ $t(`budget.seniorities.${seniority}`) }}</td>
+                      <td>
+                        <input
+                          type="number"
+                          class="input-editor"
+                          @input="
+                            event =>
+                              modifySalaryScale(
+                                department.id,
+                                position,
+                                seniority,
+                                event
+                              )
+                          "
+                          :value="
+                            salaryScale[department.id]?.[position]?.[seniority]
+                              ?.salary || 0
+                          "
+                        />
+                      </td>
+                    </tr>
+                  </template>
                 </template>
               </tbody>
             </table>
@@ -230,55 +70,47 @@
   </page-layout>
 </template>
 
-<script>
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+import { useStore } from 'vuex'
+
 import PageLayout from '@/components/layouts/PageLayout.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import { mapGetters, mapActions } from 'vuex'
 
-export default {
-  name: 'salary-scale',
+const store = useStore()
 
-  components: {
-    DepartmentName,
-    PageLayout,
-    PageTitle,
-    Spinner
-  },
+const positions = ['supervisor', 'lead', 'artist']
+const seniorities = ['senior', 'mid', 'junior']
 
-  data() {
-    return {
-      isLoading: false,
-      salaryScale: {}
-    }
-  },
+// State
 
-  computed: {
-    ...mapGetters(['departments'])
-  },
+const isLoading = ref(false)
+const salaryScale = ref({})
 
-  mounted() {
-    this.setSalaryScale()
-  },
+// Computed
 
-  methods: {
-    ...mapActions(['loadSalaryScale', 'updateSalaryScale']),
+const departments = computed(() => store.getters.departments)
 
-    async setSalaryScale() {
-      this.isLoading = true
-      this.salaryScale = await this.loadSalaryScale()
-      this.isLoading = false
-    },
+// Functions
 
-    modifySalaryScale(departmentId, position, seniority, event) {
-      const salary = Math.trunc(event.target.valueAsNumber || 0)
-      const scaleEntry = this.salaryScale[departmentId][position][seniority]
-      scaleEntry.salary = salary
-      this.updateSalaryScale(scaleEntry)
-    }
-  }
+const setSalaryScale = async () => {
+  isLoading.value = true
+  salaryScale.value = await store.dispatch('loadSalaryScale')
+  isLoading.value = false
 }
+
+const modifySalaryScale = (departmentId, position, seniority, event) => {
+  const salary = Math.trunc(event.target.valueAsNumber || 0)
+  const scaleEntry = salaryScale.value[departmentId][position][seniority]
+  scaleEntry.salary = salary
+  store.dispatch('updateSalaryScale', scaleEntry)
+}
+
+// Lifecycle
+
+onMounted(setSalaryScale)
 </script>
 
 <style lang="scss" scoped>

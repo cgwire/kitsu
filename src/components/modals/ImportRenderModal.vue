@@ -1,372 +1,277 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('main.csv.preview_title')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('main.csv.preview_title') }}
-        </h1>
-
-        <p>
-          {{ $t('main.csv.preview_required') }}
-        </p>
-        <div class="description">
-          <div v-if="!disableUpdate">
-            <h2 class="legend-title">
-              {{ $t('main.csv.options.title') }}
-            </h2>
-            <checkbox
-              :toggle="true"
-              :label="$t('main.csv.options.update')"
-              v-model="updateData"
-            />
-          </div>
-          <h3 class="legend-title">
-            {{ $t('main.csv.legend') }}
-          </h3>
-          <div class="flexrow legends">
-            <ul class="legend flexrow-item">
-              <li class="legend-definition">
-                <span class="legend-term"></span>
-                {{ $t('main.csv.legend_ok') }}
-              </li>
-              <li class="legend-definition">
-                <span class="legend-term ignored"></span>
-                {{ $t('main.csv.legend_ignored') }}
-              </li>
-              <li class="legend-definition">
-                <span class="legend-term missing"></span>
-                {{ $t('main.csv.legend_missing') }}
-              </li>
-              <li class="legend-definition">
-                <span class="legend-term missing-optional"></span>
-                {{ $t('main.csv.legend_missing_optional') }}
-              </li>
-            </ul>
-            <ul class="legend flexrow-item">
-              <li class="legend-definition">
-                <span class="legend-term"></span>
-                {{ $t('main.csv.legend_line_ok') }}
-              </li>
-              <li class="legend-definition">
-                <span class="legend-term disabled"></span>
-                {{ $t('main.csv.legend_disabled') }}
-              </li>
-              <li v-if="!disableUpdate" class="legend-definition">
-                <span class="legend-term overwrite"></span>
-                {{ $t('main.csv.legend_overwrite') }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="render-container">
-          <table class="render">
-            <colgroup>
-              <col
-                :key="`col-missing-${item}`"
-                class="missing"
-                v-for="item in columnsRequired"
-              />
-              <col
-                :key="`col-${index}`"
-                :class="stateColumn(cell)"
-                v-for="(cell, index) in parsedCsv[0]"
-              />
-              <col
-                :key="`col-missing-${item}`"
-                class="missing-optional"
-                v-for="item in columnsOptional"
-              />
-            </colgroup>
-            <thead>
-              <tr class="render-headers">
-                <th
-                  class="required-header"
-                  :key="`header-${cell}`"
-                  v-for="cell in columnsRequired"
-                >
-                  {{ cell }}
-                </th>
-                <th
-                  :key="`header-${index}`"
-                  v-for="(cell, index) in parsedCsv[0]"
-                >
-                  <div class="render-select">
-                    <combobox
-                      :options="columnOptions"
-                      :value="cell"
-                      :error="isDuplicated(index)"
-                      v-model="columnSelect[index]"
-                      @update:model-value="checkForDuplicate"
-                    />
-                  </div>
-                  {{ cell || '-' }}
-                </th>
-                <th
-                  class="optional-header"
-                  :key="`header-${cell}`"
-                  v-for="cell in columnsOptional"
-                >
-                  {{ cell }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                :class="{
-                  overwrite: updateData && existingData(index),
-                  disabled: !updateData && existingData(index)
-                }"
-                :key="`line-${index}`"
-                v-for="(line, index) in parsedCsv
-                  .slice(1)
-                  .filter(line => line.length > 1)"
-              >
-                <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
-                  {{ '-' }}
-                </td>
-                <td v-for="(cell, index) in line" :key="`cell-${index}`">
-                  {{ cell || '-' }}
-                </td>
-                <td v-for="cell in columnsOptional" :key="`cell-${cell}`">
-                  {{ '-' }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="render-footer">
-          <button-simple
-            :text="$t('main.csv.preview_reupload')"
-            @click="onReupload"
-          />
-          <modal-footer
-            :error-text="errorText"
-            :is-loading="isLoading"
-            :is-disabled="formData === undefined"
-            :is-error="isError"
-            @confirm="onConfirmClicked"
-            @cancel="$emit('cancel')"
-          />
-        </div>
+    <p>
+      {{ $t('main.csv.preview_required') }}
+    </p>
+    <div class="description">
+      <div v-if="!disableUpdate">
+        <h2 class="legend-title">
+          {{ $t('main.csv.options.title') }}
+        </h2>
+        <checkbox
+          :toggle="true"
+          :label="$t('main.csv.options.update')"
+          v-model="updateData"
+        />
+      </div>
+      <h3 class="legend-title">
+        {{ $t('main.csv.legend') }}
+      </h3>
+      <div class="flexrow legends">
+        <ul class="legend flexrow-item">
+          <li class="legend-definition">
+            <span class="legend-term"></span>
+            {{ $t('main.csv.legend_ok') }}
+          </li>
+          <li class="legend-definition">
+            <span class="legend-term ignored"></span>
+            {{ $t('main.csv.legend_ignored') }}
+          </li>
+          <li class="legend-definition">
+            <span class="legend-term missing"></span>
+            {{ $t('main.csv.legend_missing') }}
+          </li>
+          <li class="legend-definition">
+            <span class="legend-term missing-optional"></span>
+            {{ $t('main.csv.legend_missing_optional') }}
+          </li>
+        </ul>
+        <ul class="legend flexrow-item">
+          <li class="legend-definition">
+            <span class="legend-term"></span>
+            {{ $t('main.csv.legend_line_ok') }}
+          </li>
+          <li class="legend-definition">
+            <span class="legend-term disabled"></span>
+            {{ $t('main.csv.legend_disabled') }}
+          </li>
+          <li v-if="!disableUpdate" class="legend-definition">
+            <span class="legend-term overwrite"></span>
+            {{ $t('main.csv.legend_overwrite') }}
+          </li>
+        </ul>
       </div>
     </div>
-  </div>
+
+    <div class="render-container">
+      <table class="render">
+        <colgroup>
+          <col
+            :key="`col-missing-${item}`"
+            class="missing"
+            v-for="item in columnsRequired"
+          />
+          <col
+            :key="`col-${index}`"
+            :class="stateColumn(cell)"
+            v-for="(cell, index) in parsedCsv[0]"
+          />
+          <col
+            :key="`col-missing-${item}`"
+            class="missing-optional"
+            v-for="item in columnsOptional"
+          />
+        </colgroup>
+        <thead>
+          <tr class="render-headers">
+            <th
+              class="required-header"
+              :key="`header-${cell}`"
+              v-for="cell in columnsRequired"
+            >
+              {{ cell }}
+            </th>
+            <th :key="`header-${index}`" v-for="(cell, index) in parsedCsv[0]">
+              <div class="render-select">
+                <combobox
+                  :options="columnOptions"
+                  :value="cell"
+                  :error="isDuplicated(index)"
+                  v-model="columnSelect[index]"
+                  @update:model-value="checkForDuplicate"
+                />
+              </div>
+              {{ cell || '-' }}
+            </th>
+            <th
+              class="optional-header"
+              :key="`header-${cell}`"
+              v-for="cell in columnsOptional"
+            >
+              {{ cell }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            :class="{
+              overwrite: updateData && existingData(index),
+              disabled: !updateData && existingData(index)
+            }"
+            :key="`line-${index}`"
+            v-for="(line, index) in parsedCsv
+              .slice(1)
+              .filter(line => line.length > 1)"
+          >
+            <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
+              {{ '-' }}
+            </td>
+            <td v-for="(cell, index) in line" :key="`cell-${index}`">
+              {{ cell || '-' }}
+            </td>
+            <td v-for="cell in columnsOptional" :key="`cell-${cell}`">
+              {{ '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="render-footer">
+      <button-simple
+        :text="$t('main.csv.preview_reupload')"
+        @click="$emit('reupload')"
+      />
+      <modal-footer
+        :error-text="errorText"
+        :is-loading="isLoading"
+        :is-disabled="formData === undefined"
+        :is-error="isError"
+        @confirm="$emit('confirm', parsedCsv, updateData)"
+        @cancel="$emit('cancel')"
+      />
+    </div>
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
-import Combobox from '@/components/widgets/Combobox.vue'
-import Checkbox from '@/components/widgets/Checkbox.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 
-export default {
-  name: 'import-render-modal',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  columns: { type: Array, default: () => [] },
+  dataMatchers: { type: Array, default: () => [] },
+  database: { type: Object, default: () => ({}) },
+  disableUpdate: { type: Boolean, default: false },
+  importError: { type: Error, default: null },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  parsedCsv: { type: Array, default: () => [] }
+})
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    Checkbox,
-    ModalFooter
-  },
+defineEmits(['cancel', 'confirm', 'reupload'])
 
-  emits: ['cancel', 'confirm', 'reupload'],
+const duplicates = ref([])
+const formData = ref(null)
+const updateData = ref(false)
 
-  data() {
-    return {
-      duplicates: [],
-      formData: null,
-      updateData: false
-    }
-  },
+const assetMetadataDescriptors = computed(
+  () => store.getters.assetMetadataDescriptors
+)
+const shotMetadataDescriptors = computed(
+  () => store.getters.shotMetadataDescriptors
+)
+const editMetadataDescriptors = computed(
+  () => store.getters.editMetadataDescriptors
+)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    parsedCsv: {
-      type: Array,
-      default: () => []
-    },
-    columns: {
-      type: Array,
-      default: () => []
-    },
-    dataMatchers: {
-      type: Array,
-      default: () => []
-    },
-    database: {
-      type: Object,
-      default: () => {}
-    },
-    disableUpdate: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    importError: {
-      type: Error,
-      default: null
-    }
-  },
+const columnsRequired = computed(() => {
+  if (props.parsedCsv.length === 0) return []
+  return props.columns.filter(
+    item =>
+      !props.parsedCsv[0].includes(item) && props.dataMatchers.includes(item)
+  )
+})
 
-  mounted() {
-    this.formData = null
-  },
+const columnsOptional = computed(() => {
+  if (props.parsedCsv.length === 0) return []
+  return props.columns.filter(
+    item =>
+      !props.parsedCsv[0].includes(item) && !props.dataMatchers.includes(item)
+  )
+})
 
-  computed: {
-    ...mapGetters([
-      'assetMetadataDescriptors',
-      'shotMetadataDescriptors',
-      'editMetadataDescriptors'
-    ]),
+const metadataDescriptors = computed(() => {
+  const path = route.path
+  if (path.indexOf('assets') > 0) return assetMetadataDescriptors.value
+  if (path.indexOf('shots') > 0) return shotMetadataDescriptors.value
+  if (path.indexOf('edits') > 0) return editMetadataDescriptors.value
+  return []
+})
 
-    columnsRequired() {
-      if (this.parsedCsv.length !== 0) {
-        return this.columns.filter(item => {
-          return (
-            !this.parsedCsv[0].includes(item) &&
-            this.dataMatchers.includes(item)
-          )
-        })
-      } else {
-        return []
-      }
-    },
+const columnsAllowed = computed(() => {
+  const list = [...props.columns]
+  metadataDescriptors.value.forEach(item => {
+    if (!list.includes(item.name)) list.push(item.name)
+  })
+  return list
+})
 
-    columnsOptional() {
-      if (this.parsedCsv.length !== 0) {
-        return this.columns.filter(item => {
-          return (
-            !this.parsedCsv[0].includes(item) &&
-            !this.dataMatchers.includes(item)
-          )
-        })
-      } else {
-        return []
-      }
-    },
+const columnOptions = computed(() => {
+  const options = [
+    { label: t('main.csv.choose'), value: t('main.csv.unknown') }
+  ]
+  columnsAllowed.value.forEach(item => {
+    options.push({ label: item, value: item })
+  })
+  return options
+})
 
-    metadataDescriptors() {
-      if (this.$route.path.indexOf('assets') > 0) {
-        return this.assetMetadataDescriptors
-      }
-      if (this.$route.path.indexOf('shots') > 0) {
-        return this.shotMetadataDescriptors
-      }
-      if (this.$route.path.indexOf('edits') > 0) {
-        return this.editMetadataDescriptors
-      }
-      return []
-    },
+// columnSelect intentionally returns parsedCsv[0] directly so that
+// `v-model="columnSelect[index]"` mutates the underlying array — the
+// template expects to write back into the parsed CSV header row.
+const columnSelect = computed(() => props.parsedCsv[0])
 
-    columnsAllowed() {
-      const list = [...this.columns]
-      this.metadataDescriptors.forEach(item => {
-        if (!list.includes(item.name)) {
-          list.push(item.name)
-        }
-      })
-      return list
-    },
+const indexMatchers = computed(() =>
+  props.dataMatchers.map(item => props.parsedCsv[0].indexOf(item))
+)
 
-    columnOptions() {
-      const options = [
-        {
-          label: this.$t('main.csv.choose'),
-          value: this.$t('main.csv.unknown')
-        }
-      ]
-      this.columnsAllowed.forEach(item => {
-        options.push({ label: item, value: item })
-      })
-      return options
-    },
-
-    columnSelect() {
-      return this.parsedCsv[0]
-    },
-
-    indexMatchers() {
-      const indexes = []
-      this.dataMatchers.forEach(item => {
-        indexes.push(this.parsedCsv[0].indexOf(item))
-      })
-      return indexes
-    },
-
-    errorText() {
-      let text = this.$t('main.csv.error_upload')
-      if (this.importError && this.importError.status === 400) {
-        const res = this.importError.response
-        text += ` (line: ${res.body.line_number}) ${res.body.message}`
-      }
-      return text
-    }
-  },
-
-  methods: {
-    onConfirmClicked() {
-      this.$emit('confirm', this.parsedCsv, this.updateData)
-    },
-
-    onReupload() {
-      this.$emit('reupload')
-    },
-
-    stateColumn(data) {
-      if (!this.columnsAllowed.includes(data)) {
-        return 'ignored'
-      }
-    },
-
-    checkForDuplicate() {
-      const ignoredItem = this.$t('main.csv.unknown')
-      this.duplicates = this.columnSelect
-        .filter((item, index) => this.columnSelect.indexOf(item) !== index)
-        .filter(item => item !== ignoredItem)
-    },
-
-    isDuplicated(index) {
-      if (this.duplicates.includes(this.columnSelect[index])) {
-        return true
-      }
-    },
-
-    existingData(index) {
-      const csv = this.parsedCsv[index + 1]
-      const db = this.database
-      const columns = this.indexMatchers
-      let itemName = ''
-      columns.forEach(col => {
-        itemName += csv[col]
-      })
-      return db[itemName]
-    }
+const errorText = computed(() => {
+  let text = t('main.csv.error_upload')
+  if (props.importError?.status === 400) {
+    const res = props.importError.response
+    text += ` (line: ${res.body.line_number}) ${res.body.message}`
   }
+  return text
+})
+
+const stateColumn = data =>
+  columnsAllowed.value.includes(data) ? undefined : 'ignored'
+
+const checkForDuplicate = () => {
+  const ignoredItem = t('main.csv.unknown')
+  duplicates.value = columnSelect.value
+    .filter((item, index) => columnSelect.value.indexOf(item) !== index)
+    .filter(item => item !== ignoredItem)
+}
+
+const isDuplicated = index =>
+  duplicates.value.includes(columnSelect.value[index])
+
+const existingData = index => {
+  const csv = props.parsedCsv[index + 1]
+  let itemName = ''
+  indexMatchers.value.forEach(col => {
+    itemName += csv[col]
+  })
+  return props.database[itemName]
 }
 </script>
 

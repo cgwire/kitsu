@@ -10,35 +10,15 @@
   </td>
 </template>
 
-<script>
+<script setup>
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'task-type-cell',
-
-  components: {
-    TaskTypeName
-  },
-
-  props: {
-    taskId: {
-      type: String,
-      default: null
-    },
-    taskType: {
-      type: Object,
-      default: null
-    },
-    productionId: {
-      type: String,
-      default: null
-    },
-    disable: {
-      type: Boolean,
-      default: false
-    }
-  }
-}
+defineProps({
+  disable: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
+  taskId: { type: String, default: null },
+  taskType: { type: Object, default: null }
+})
 </script>
 
 <style lang="scss" scoped>

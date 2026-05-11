@@ -11,7 +11,7 @@
     <div class="modal-content wide xyz-in" xyz="fade">
       <div class="box">
         <playlist-player
-          ref="playlist-player"
+          ref="playlistPlayer"
           :playlist="currentPlaylist"
           :entities="currentEntities"
           :is-loading="isLoading"
@@ -38,336 +38,251 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * This component is aimed at displaying a temporary playlist from any view. It
  * is used in entity list to display playlists from the selection.
  */
 
-import { mapActions, mapGetters } from 'vuex'
+import { computed, ref, toRef, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
+
+import { useModal } from '@/composables/modal'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
+// eslint-disable-next-line no-unused-vars
 import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
 
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
 import sequenceStore from '@/store/modules/sequences'
 
-export default {
-  name: 'view-playlist-modal',
+const route = useRoute()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  sort: { type: Boolean, default: false },
+  taskIds: { type: Array, default: null }
+})
 
-  components: {
-    EditPlaylistModal,
-    PlaylistPlayer
-  },
+const emit = defineEmits(['cancel'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    taskIds: {
-      type: Array
-    },
-    sort: {
-      type: Boolean,
-      default: false
+useModal(toRef(props, 'active'), emit)
+
+const currentEntities = ref([])
+const currentPlaylist = ref({
+  id: 'temp',
+  name: 'Temporary playlist',
+  shots: [],
+  for_entity: 'shot'
+})
+const errors = ref({ edit: false })
+const isLoading = ref(false)
+const loading = ref({ edit: false })
+const modals = ref({ edit: false })
+const playlistPlayer = ref(null)
+const playlistToEdit = ref({})
+let previewFileMap = new Map()
+let previewFileEntityMap = new Map()
+
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+
+const currentTaskIds = computed(
+  () => props.taskIds || Array.from(selectedTasks.value.keys())
+)
+
+const isPlaylistPage = computed(() => route.path.indexOf('playlist') > 0)
+
+const currentEntityType = computed(() => {
+  if (route.path.indexOf('asset') > 0) return 'asset'
+  if (route.path.indexOf('sequence') > 0) return 'sequence'
+  return 'shot'
+})
+
+const isAssetPlaylist = computed(() => currentEntityType.value === 'asset')
+const isSequencePlaylist = computed(
+  () => currentEntityType.value === 'sequence'
+)
+
+const onPreviewChanged = async ({
+  entity,
+  previewFileId,
+  previousPreviewFileId
+}) => {
+  await store.dispatch('changePlaylistPreview', {
+    playlist: currentPlaylist.value,
+    entity,
+    previewFileId,
+    previousPreviewFileId,
+    remote: false
+  })
+}
+
+const onAnnotationChanged = ({ preview, additions, deletions, updates }) => {
+  store.dispatch('updatePreviewAnnotation', {
+    taskId: preview.task_id,
+    preview,
+    additions,
+    deletions,
+    updates
+  })
+}
+
+const onAnnotationsRefreshed = preview => {
+  const entity = previewFileEntityMap.get(preview.id)
+  const localPreview = previewFileMap.get(preview.id)
+  if (entity) entity.preview_file_annotations = preview.annotations
+  if (localPreview) localPreview.annotations = preview.annotations
+}
+
+const lookupEntity = entityInfo => {
+  if (isAssetPlaylist.value) return assetStore.cache.assetMap.get(entityInfo.id)
+  if (isSequencePlaylist.value) {
+    const entity = sequenceStore.cache.sequenceMap.get(entityInfo.id)
+    if (entity && currentEpisode.value) {
+      entity.episode_name = currentEpisode.value.name
     }
-  },
+    return entity
+  }
+  return shotStore.cache.shotMap.get(entityInfo.id)
+}
 
-  emits: ['cancel'],
+const convertEntityToPlaylistFormat = entityInfo => {
+  const entity = lookupEntity(entityInfo)
+  if (!entity) return entityInfo
+  const playlistEntity = {
+    id: entityInfo.id,
+    name: entity.name,
+    nb_frames:
+      entityInfo.nb_frames || entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE,
+    parent_name:
+      entity.sequence_name || entity.episode_name || entity.asset_type_name,
+    preview_files: entityInfo.preview_files,
+    preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
+    preview_file_extension:
+      entityInfo.preview_file_extension || entity.preview_file_extension,
+    preview_file_revision:
+      entityInfo.preview_file_revision || entity.preview_file_revision,
+    preview_file_width:
+      entityInfo.preview_file_width || entity.preview_file_width,
+    preview_file_height:
+      entityInfo.preview_file_height || entity.preview_file_height,
+    preview_file_duration:
+      entityInfo.preview_file_duration || entity.preview_file_duration,
+    preview_file_task_id:
+      entityInfo.task_id ||
+      entityInfo.preview_file_task_id ||
+      entity.preview_file_task_id,
+    preview_file_annotations:
+      entityInfo.preview_file_annotations || entity.preview_file_annotations,
+    preview_file_previews:
+      entityInfo.preview_file_previews || entity.preview_file_previews,
+    preview_nb_frames:
+      entityInfo.nb_frames || entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE
+  }
+  Object.assign(entityInfo, playlistEntity)
+  previewFileEntityMap.set(playlistEntity.preview_file_id, playlistEntity)
+  const previews = playlistEntity.preview_file_previews || []
+  previews.forEach(preview => {
+    preview.duration = entity.preview_file_duration
+    previewFileMap.set(preview.id, preview)
+  })
+  return playlistEntity
+}
 
-  data() {
-    return {
-      previewFileMap: new Map(),
-      previewFileEntityMap: new Map(),
-      currentEntities: [],
-      currentPlaylist: {
-        id: 'temp',
-        name: 'Temporary playlist',
-        shots: [],
-        for_entity: 'shot'
-      },
-      errors: {
-        edit: false
-      },
-      loading: {
-        edit: false
-      },
-      modals: {
-        edit: false
-      },
-      playlistToEdit: {},
-      isLoading: false
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isTVShow',
-      'selectedTasks',
-      'taskMap'
-    ]),
-
-    currentTaskIds() {
-      return this.taskIds || Array.from(this.selectedTasks.keys())
-    },
-
-    isPlaylistPage() {
-      return this.$route.path.indexOf('playlist') > 0
-    },
-
-    playlistPlayer() {
-      return this.$refs['playlist-player']
-    },
-
-    isAssetPlaylist() {
-      return this.currentEntityType === 'asset'
-    },
-
-    isSequencePlaylist() {
-      return this.currentEntityType === 'sequence'
-    },
-
-    isShotPlaylist() {
-      return this.currentEntityType === 'shot'
-    },
-
-    currentEntityType() {
-      let type = 'shot'
-      if (this.$route.path.indexOf('asset') > 0) type = 'asset'
-      if (this.$route.path.indexOf('sequence') > 0) type = 'sequence'
-      return type
-    },
-
-    assetMap() {
-      return assetStore.cache.assetMap
-    },
-
-    shotMap() {
-      return shotStore.cache.shotMap
-    },
-
-    sequenceMap() {
-      return sequenceStore.cache.sequenceMap
-    },
-
-    frameDuration() {
-      return Math.round((1 / this.fps) * 10000) / 10000
-    },
-
-    fps() {
-      return parseFloat(this.currentProduction?.fps) || 25
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'changePlaylistPreview',
-      'editPlaylist',
-      'loadPlaylists',
-      'loadTempPlaylist',
-      'newPlaylist',
-      'updatePreviewAnnotation'
-    ]),
-
-    /* When a preview is modified, the change is persisted */
-    async onPreviewChanged({ entity, previewFileId, previousPreviewFileId }) {
-      await this.changePlaylistPreview({
-        playlist: this.currentPlaylist,
-        entity,
-        previewFileId,
-        previousPreviewFileId,
-        remote: false
+const setupEntities = entities => {
+  const entityMap = {}
+  entities.forEach(entity => {
+    previewFileEntityMap.set(entity.preview_file_id, entity)
+    const previewFileGroups = Object.values(entity.preview_files)
+    convertEntityToPlaylistFormat(entity)
+    previewFileGroups.forEach(previewFiles => {
+      previewFiles.forEach(previewFile => {
+        previewFileMap.set(previewFile.id, previewFile)
       })
-    },
+    })
+    entityMap[entity.id + '-' + entity.preview_file_id] = entity
+  })
+  store.commit('SET_PLAYLIST_ENTRY_MAP', entityMap)
+  currentPlaylist.value.shots = Object.values(entityMap)
+  currentEntities.value = Object.values(entityMap)
+}
 
-    onAnnotationChanged({ preview, additions, deletions, updates }) {
-      const taskId = preview.task_id
-      this.updatePreviewAnnotation({
-        taskId,
-        preview,
-        additions,
-        deletions,
-        updates
-      })
-    },
+const onSaveClicked = () => {
+  playlistToEdit.value = { for_entity: currentEntityType.value }
+  modals.value.edit = true
+}
 
-    onAnnotationsRefreshed(preview) {
-      const entity = this.previewFileEntityMap.get(preview.id)
-      const localPreview = this.previewFileMap.get(preview.id)
-      if (entity) {
-        entity.preview_file_annotations = preview.annotations
-      }
-      if (localPreview) {
-        localPreview.annotations = preview.annotations
-      }
-    },
-
-    setupEntities(entities) {
-      const entityMap = {}
-      entities.forEach(entity => {
-        this.previewFileEntityMap.set(entity.preview_file_id, entity)
-        const previewFileGroups = Object.values(entity.preview_files)
-        this.convertEntityToPlaylistFormat(entity)
-        previewFileGroups.forEach(previewFiles => {
-          previewFiles.forEach(previewFile => {
-            this.previewFileMap.set(previewFile.id, previewFile)
-          })
-        })
-        entityMap[entity.id + '-' + entity.preview_file_id] = entity
-      })
-      this.$store.commit('SET_PLAYLIST_ENTRY_MAP', entityMap)
-      this.currentPlaylist.shots = Object.values(entityMap)
-      this.currentEntities = Object.values(entityMap)
-    },
-
-    convertEntityToPlaylistFormat(entityInfo) {
-      let entity
-      if (this.isAssetPlaylist) {
-        entity = this.assetMap.get(entityInfo.id)
-      } else if (this.isSequencePlaylist) {
-        entity = this.sequenceMap.get(entityInfo.id)
-        if (this.currentEpisode) {
-          entity.episode_name = this.currentEpisode.name
-        }
-      } else {
-        entity = this.shotMap.get(entityInfo.id)
-      }
-      if (entity) {
-        const playlistEntity = {
-          id: entityInfo.id,
-          name: entity.name,
-          nb_frames:
-            entityInfo.nb_frames ||
-            entity.nb_frames ||
-            DEFAULT_NB_FRAMES_PICTURE,
-          parent_name:
-            entity.sequence_name ||
-            entity.episode_name ||
-            entity.asset_type_name,
-          preview_files: entityInfo.preview_files,
-          preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
-          preview_file_extension:
-            entityInfo.preview_file_extension || entity.preview_file_extension,
-          preview_file_revision:
-            entityInfo.preview_file_revision || entity.preview_file_revision,
-          preview_file_width:
-            entityInfo.preview_file_width || entity.preview_file_width,
-          preview_file_height:
-            entityInfo.preview_file_height || entity.preview_file_height,
-          preview_file_duration:
-            entityInfo.preview_file_duration || entity.preview_file_duration,
-          preview_file_task_id:
-            entityInfo.task_id ||
-            entityInfo.preview_file_task_id ||
-            entity.preview_file_task_id,
-          preview_file_annotations:
-            entityInfo.preview_file_annotations ||
-            entity.preview_file_annotations,
-          preview_file_previews:
-            entityInfo.preview_file_previews || entity.preview_file_previews,
-          preview_nb_frames:
-            entityInfo.nb_frames ||
-            entity.nb_frames ||
-            DEFAULT_NB_FRAMES_PICTURE
-        }
-        Object.assign(entityInfo, playlistEntity)
-        this.previewFileEntityMap.set(
-          playlistEntity.preview_file_id,
-          playlistEntity
-        )
-        const previews = playlistEntity.preview_file_previews || []
-        previews.forEach(preview => {
-          preview.duration = entity.preview_file_duration
-          this.previewFileMap.set(preview.id, preview)
-        })
-        return playlistEntity
-      } else {
-        return entityInfo
-      }
-    },
-
-    onSaveClicked() {
-      this.errors.editPlaylist = false
-      this.playlistToEdit = {
-        for_entity: this.currentEntityType
-      }
-      this.modals.edit = true
-    },
-
-    async savePlaylist(form) {
-      const newPlaylist = {
-        name: form.name,
-        production_id: this.currentProduction.id,
-        for_client: form.for_client,
-        for_entity: form.for_entity,
-        is_for_all: form.is_for_all,
-        task_type_id: form.task_type_id
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        newPlaylist.episode_id = this.currentEpisode.id
-      }
-      this.errors.edit = false
-      this.loading.edit = true
-      try {
-        const playlist = await this.newPlaylist(newPlaylist)
-        Object.assign(this.currentPlaylist, {
-          id: playlist.id,
-          name: playlist.name,
-          for_client: playlist.for_client,
-          for_entity: playlist.for_entity,
-          is_for_all: playlist.is_for_all
-        })
-        const playlistToSave = { ...this.currentPlaylist }
-        playlistToSave.shots = this.currentPlaylist.shots.map(shot => {
-          return {
-            entity_id: shot.id,
-            preview_file_id: shot.preview_file_id
-          }
-        })
-        await this.editPlaylist({
-          data: playlistToSave
-        })
-        this.modals.edit = false
-        this.loadPlaylists({})
-      } catch (err) {
-        console.error(err)
-        this.errors.edit = true
-        this.loading.edit = false
-      }
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.currentEntities = []
-        this.previewFileMap = new Map()
-        this.previewFileEntityMap = new Map()
-        this.isLoading = true
-        this.loadTempPlaylist({ taskIds: this.currentTaskIds, sort: this.sort })
-          .then(entities => {
-            this.currentPlaylist.for_entity = this.currentEntityType
-            this.setupEntities(entities)
-            this.isLoading = false
-          })
-          .catch(console.error)
-      } else {
-        this.playlistPlayer.pause()
-        this.playlistPlayer.clearCanvas()
-        this.currentEntities = []
-      }
-    }
+const savePlaylist = async form => {
+  const newPlaylist = {
+    name: form.name,
+    production_id: currentProduction.value.id,
+    for_client: form.for_client,
+    for_entity: form.for_entity,
+    is_for_all: form.is_for_all,
+    task_type_id: form.task_type_id
+  }
+  if (isTVShow.value && currentEpisode.value) {
+    newPlaylist.episode_id = currentEpisode.value.id
+  }
+  errors.value.edit = false
+  loading.value.edit = true
+  try {
+    const playlist = await store.dispatch('newPlaylist', newPlaylist)
+    Object.assign(currentPlaylist.value, {
+      id: playlist.id,
+      name: playlist.name,
+      for_client: playlist.for_client,
+      for_entity: playlist.for_entity,
+      is_for_all: playlist.is_for_all
+    })
+    const playlistToSave = { ...currentPlaylist.value }
+    playlistToSave.shots = currentPlaylist.value.shots.map(shot => ({
+      entity_id: shot.id,
+      preview_file_id: shot.preview_file_id
+    }))
+    await store.dispatch('editPlaylist', { data: playlistToSave })
+    modals.value.edit = false
+    store.dispatch('loadPlaylists', {})
+  } catch (err) {
+    console.error(err)
+    errors.value.edit = true
+    loading.value.edit = false
   }
 }
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      currentEntities.value = []
+      previewFileMap = new Map()
+      previewFileEntityMap = new Map()
+      isLoading.value = true
+      store
+        .dispatch('loadTempPlaylist', {
+          taskIds: currentTaskIds.value,
+          sort: props.sort
+        })
+        .then(entities => {
+          currentPlaylist.value.for_entity = currentEntityType.value
+          setupEntities(entities)
+          isLoading.value = false
+        })
+        .catch(console.error)
+    } else {
+      playlistPlayer.value?.pause()
+      playlistPlayer.value?.clearCanvas()
+      currentEntities.value = []
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>

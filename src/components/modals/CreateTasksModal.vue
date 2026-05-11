@@ -75,142 +75,90 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, toRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
+import { useModal } from '@/composables/modal'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
-export default {
-  name: 'create-tasks-modal',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  errorText: { type: String, default: '' },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isLoadingStay: { type: Boolean, default: false },
+  text: { type: String, default: '' },
+  title: { type: String, default: '' }
+})
 
-  components: {
-    Combobox,
-    ComboboxTaskType,
-    PageTitle
-  },
+const emit = defineEmits(['cancel', 'confirm', 'confirm-and-stay'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    errorText: {
-      type: String,
-      default: ''
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isLoadingStay: {
-      type: Boolean,
-      default: false
-    },
-    text: {
-      type: String,
-      default: ''
-    },
-    title: {
-      type: String,
-      default: ''
-    }
-  },
+useModal(toRef(props, 'active'), emit)
 
-  emits: ['cancel', 'confirm', 'confirm-and-stay'],
+const form = ref({ task_type_id: '' })
+const selectionOnly = ref('true')
 
-  data() {
-    return {
-      form: {
-        task_type_id: ''
-      },
-      selectionOnly: 'true',
-      selectionOptions: [
-        { label: this.$t('tasks.for_selection'), value: 'true' },
-        { label: this.$t('tasks.for_project'), value: 'false' }
-      ]
-    }
-  },
+const currentProduction = computed(() => store.getters.currentProduction)
+const productionAssetTaskTypes = computed(
+  () => store.getters.productionAssetTaskTypes
+)
+const productionEditTaskTypes = computed(
+  () => store.getters.productionEditTaskTypes
+)
+const productionEpisodeTaskTypes = computed(
+  () => store.getters.productionEpisodeTaskTypes
+)
+const productionSequenceTaskTypes = computed(
+  () => store.getters.productionSequenceTaskTypes
+)
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'productionAssetTaskTypes',
-      'productionEditTaskTypes',
-      'productionEpisodeTaskTypes',
-      'productionShotTaskTypes',
-      'productionSequenceTaskTypes'
-    ]),
+const selectionOptions = computed(() => [
+  { label: t('tasks.for_selection'), value: 'true' },
+  { label: t('tasks.for_project'), value: 'false' }
+])
 
-    isAssetTasks() {
-      return this.$route.path.includes('assets')
-    },
-    isShotsTasks() {
-      return this.$route.path.includes('shots')
-    },
-    isSequencesTasks() {
-      return this.$route.path.includes('sequences')
-    },
-    isEditsTasks() {
-      return this.$route.path.includes('edits')
-    },
-    isEpisodesTasks() {
-      return this.$route.path.includes('episodes')
-    }
-  },
-
-  methods: {
-    getApplicableTaskTypes() {
-      if (this.isAssetTasks) {
-        return this.productionAssetTaskTypes
-      }
-      if (this.isShotsTasks) {
-        return this.productionShotTaskTypes
-      }
-      if (this.isSequencesTasks) {
-        return this.productionSequenceTaskTypes
-      }
-      if (this.isEditsTasks) {
-        return this.productionEditTaskTypes
-      }
-      if (this.isEpisodesTasks) {
-        return this.productionEpisodeTaskTypes
-      }
-      return []
-    },
-
-    confirmClicked() {
-      this.$emit('confirm', {
-        form: this.form,
-        selectionOnly: this.selectionOnly === 'true'
-      })
-    },
-
-    confirmAndStayClicked() {
-      this.$emit('confirm-and-stay', {
-        form: this.form,
-        selectionOnly: this.selectionOnly === 'true'
-      })
-    }
-  },
-
-  mounted() {
-    const taskTypes = this.getApplicableTaskTypes()
-
-    if (taskTypes.length > 0) {
-      this.form.task_type_id = taskTypes[0].id
-    }
-  }
+const getApplicableTaskTypes = () => {
+  const path = route.path
+  if (path.includes('assets')) return productionAssetTaskTypes.value
+  if (path.includes('shots')) return productionShotTaskTypes.value
+  if (path.includes('sequences')) return productionSequenceTaskTypes.value
+  if (path.includes('edits')) return productionEditTaskTypes.value
+  if (path.includes('episodes')) return productionEpisodeTaskTypes.value
+  return []
 }
+
+const buildPayload = () => ({
+  form: form.value,
+  selectionOnly: selectionOnly.value === 'true'
+})
+
+const confirmClicked = () => {
+  emit('confirm', buildPayload())
+}
+
+const confirmAndStayClicked = () => {
+  emit('confirm-and-stay', buildPayload())
+}
+
+onMounted(() => {
+  const taskTypes = getApplicableTaskTypes()
+  if (taskTypes.length > 0) {
+    form.value.task_type_id = taskTypes[0].id
+  }
+})
 </script>
 
 <style lang="scss" scoped>

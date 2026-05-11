@@ -4,23 +4,12 @@
   </td>
 </template>
 
-<script>
+<script setup>
 import BooleanRep from '@/components/widgets/BooleanRep.vue'
 
-export default {
-  name: 'boolean-cell',
-
-  components: {
-    BooleanRep
-  },
-
-  props: {
-    value: {
-      default: false,
-      type: Boolean
-    }
-  }
-}
+defineProps({
+  value: { type: Boolean, default: false }
+})
 </script>
 
 <style lang="scss" scoped>

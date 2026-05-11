@@ -1,182 +1,139 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="isEditing">
-          {{ $t('backgrounds.edit_background') }} {{ backgroundToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('backgrounds.new_background') }}
-        </h1>
-
-        <form @submit.prevent>
-          <div class="field" v-if="!isEditing">
-            <label class="label"> {{ $t('backgrounds.fields.file') }}</label>
-            <file-upload
-              ref="fileUpload"
-              :label="$t('main.select_file')"
-              accept=".hdr"
-              :is-primary="false"
-              @fileselected="onFileSelected"
-            />
-          </div>
-          <text-field
-            ref="nameField"
-            input-class="task-status-name"
-            :label="$t('backgrounds.fields.name')"
-            :maxlength="40"
-            @enter="confirmClicked"
-            v-model.trim="form.name"
-          />
-          <boolean-field
-            is-field
-            :label="$t('backgrounds.fields.is_default')"
-            @enter="confirmClicked"
-            v-model="form.is_default"
-          />
-          <combobox-boolean
-            :label="$t('main.archived')"
-            @enter="confirmClicked"
-            v-model="form.archived"
-            v-if="isEditing"
-          />
-        </form>
-
-        <modal-footer
-          :error-text="$t('backgrounds.create_error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          @confirm="confirmClicked"
-          @cancel="$emit('cancel')"
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <div class="field" v-if="!isEditing">
+        <label class="label">{{ $t('backgrounds.fields.file') }}</label>
+        <file-upload
+          ref="fileUpload"
+          :label="$t('main.select_file')"
+          accept=".hdr"
+          :is-primary="false"
+          @fileselected="onFileSelected"
         />
       </div>
-    </div>
-  </div>
+      <text-field
+        ref="nameField"
+        input-class="task-status-name"
+        :label="$t('backgrounds.fields.name')"
+        :maxlength="40"
+        @enter="confirmClicked"
+        v-model.trim="form.name"
+      />
+      <boolean-field
+        is-field
+        :label="$t('backgrounds.fields.is_default')"
+        @enter="confirmClicked"
+        v-model="form.is_default"
+      />
+      <combobox-boolean
+        :label="$t('main.archived')"
+        @enter="confirmClicked"
+        v-model="form.archived"
+        v-if="isEditing"
+      />
+    </form>
+
+    <modal-footer
+      :error-text="$t('backgrounds.create_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      @confirm="confirmClicked"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+// eslint-disable-next-line no-unused-vars
 import FileUpload from '@/components/widgets/FileUpload.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-background-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BooleanField,
-    ComboboxBoolean,
-    FileUpload,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  backgroundToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    backgroundToEdit: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    return {
-      form: {
-        file: null,
-        name: '',
-        is_default: 'false',
-        archived: 'false'
-      }
-    }
-  },
+const form = ref({
+  file: null,
+  name: '',
+  is_default: 'false',
+  archived: 'false'
+})
+const nameField = ref(null)
+const fileUpload = ref(null)
 
-  computed: {
-    isEditing() {
-      return this.backgroundToEdit?.id
-    }
-  },
+// Computed
 
-  methods: {
-    confirmClicked() {
-      if (!this.isEditing && !this.form.file) {
-        return
-      }
-      if (!this.form.name) {
-        this.$refs.nameField.focus()
-        return
-      }
-      this.$emit('confirm', {
-        ...this.form,
-        is_default: this.form.is_default === 'true',
-        archived: this.form.archived === 'true'
-      })
-    },
+const isEditing = computed(() => Boolean(props.backgroundToEdit?.id))
 
-    onFileSelected(formData) {
-      const file = formData.get('file')
-      this.form.file = formData
-      if (!this.form.name.length) {
-        this.form.name = file.name.slice(0, -4)
-      }
-      this.$nextTick(() => {
-        this.$refs.nameField?.focus()
-      })
-    },
+const modalTitle = computed(() =>
+  isEditing.value
+    ? `${t('backgrounds.edit_background')} ${props.backgroundToEdit.name}`
+    : t('backgrounds.new_background')
+)
 
-    resetForm() {
-      if (this.backgroundToEdit) {
-        this.form = {
-          file: null,
-          name: this.backgroundToEdit.name || '',
-          is_default: String(this.backgroundToEdit.is_default || false),
-          archived: String(this.backgroundToEdit.archived || false)
-        }
-        this.$refs.fileUpload?.reset()
-      }
-    }
-  },
+// Functions
 
-  watch: {
-    backgroundToEdit() {
-      this.resetForm()
-    },
-
-    active() {
-      if (this.active) {
-        this.resetForm()
-      }
-    }
+const confirmClicked = () => {
+  if (!isEditing.value && !form.value.file) return
+  if (!form.value.name) {
+    nameField.value?.focus()
+    return
   }
+  emit('confirm', {
+    ...form.value,
+    is_default: form.value.is_default === 'true',
+    archived: form.value.archived === 'true'
+  })
 }
-</script>
 
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
+const onFileSelected = formData => {
+  const file = formData.get('file')
+  form.value.file = formData
+  if (!form.value.name.length) {
+    form.value.name = file.name.slice(0, -4)
+  }
+  nextTick(() => {
+    nameField.value?.focus()
+  })
 }
-</style>
+
+const resetForm = () => {
+  if (!props.backgroundToEdit) return
+  form.value = {
+    file: null,
+    name: props.backgroundToEdit.name || '',
+    is_default: String(props.backgroundToEdit.is_default || false),
+    archived: String(props.backgroundToEdit.archived || false)
+  }
+  fileUpload.value?.reset()
+}
+
+// Watchers
+
+watch(() => props.backgroundToEdit, resetForm)
+
+watch(
+  () => props.active,
+  active => {
+    if (active) resetForm()
+  }
+)
+</script>

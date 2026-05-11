@@ -1,146 +1,104 @@
 <template>
-  <div class="modal" :class="{ 'is-active': active }">
-    <div class="modal-background" @click="$emit('cancel')"></div>
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="isEditing">
-          {{ $t('departments.edit_title') }} {{ departmentToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('departments.new_departments') }}
-        </h1>
-        <form @submit.prevent>
-          <text-field
-            ref="nameField"
-            :label="$t('departments.fields.name')"
-            :maxlength="30"
-            v-model="form.name"
-            v-focus
-          />
-          <color-field
-            :label="$t('departments.fields.color')"
-            v-model="form.color"
-          />
-          <combobox-boolean
-            :label="$t('main.archived')"
-            @enter="runConfirmation"
-            v-model="form.archived"
-            v-if="isEditing"
-          />
-        </form>
-        <modal-footer
-          :error-text="$t('departments.create_error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          @confirm="runConfirmation"
-          @cancel="$emit('cancel')"
-        />
-      </div>
-    </div>
-  </div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <text-field
+        ref="nameField"
+        :label="$t('departments.fields.name')"
+        :maxlength="30"
+        v-model="form.name"
+        v-focus
+      />
+      <color-field
+        :label="$t('departments.fields.color')"
+        v-model="form.color"
+      />
+      <combobox-boolean
+        :label="$t('main.archived')"
+        @enter="runConfirmation"
+        v-model="form.archived"
+        v-if="isEditing"
+      />
+    </form>
+    <modal-footer
+      :error-text="$t('departments.create_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      @confirm="runConfirmation"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ColorField from '@/components/widgets/ColorField.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-departments-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    ColorField,
-    ComboboxBoolean,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  departmentToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    departmentToEdit: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    return {
-      form: {
-        id: null,
-        name: '',
-        color: '',
-        archived: 'false'
-      }
-    }
-  },
+const form = ref({ id: null, name: '', color: '', archived: 'false' })
+const nameField = ref(null)
 
-  computed: {
-    isEditing() {
-      return this.departmentToEdit?.id
-    }
-  },
+// Computed
 
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    }
-  },
+const isEditing = computed(() => Boolean(props.departmentToEdit?.id))
 
-  watch: {
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 100)
-      }
-    },
+const modalTitle = computed(() =>
+  isEditing.value
+    ? `${t('departments.edit_title')} ${props.departmentToEdit.name}`
+    : t('departments.new_departments')
+)
 
-    departmentToEdit() {
-      if (this.isEditing) {
-        this.form = {
-          id: this.departmentToEdit.id,
-          name: this.departmentToEdit.name,
-          color: this.departmentToEdit.color,
-          archived: String(this.departmentToEdit.archived === true)
-        }
-      } else {
-        this.form = {
-          id: null,
-          name: '',
-          color: '',
-          archived: 'false'
-        }
-      }
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
     }
   }
-}
+)
+
+watch(
+  () => props.departmentToEdit,
+  department => {
+    if (department?.id) {
+      form.value = {
+        id: department.id,
+        name: department.name,
+        color: department.color,
+        archived: String(department.archived === true)
+      }
+    } else {
+      form.value = { id: null, name: '', color: '', archived: 'false' }
+    }
+  }
+)
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-</style>

@@ -15,7 +15,7 @@
 
         <combobox
           class="flexrow-item"
-          :options="general.unionOptions"
+          :options="unionOptions"
           locale-key-prefix="entities.build_filter."
           v-model="union"
         />
@@ -27,7 +27,7 @@
         <div class="flexrow asset-type-filter" v-if="isAssets">
           <combobox
             class="flexrow-item"
-            :options="general.operatorOptions"
+            :options="operatorOptions"
             locale-key-prefix="entities.build_filter."
             v-model="assetTypeFilters.operator"
           />
@@ -54,7 +54,7 @@
           />
           <combobox
             class="flexrow-item"
-            :options="general.taskTypeOperatorOptions"
+            :options="taskTypeOperatorOptions"
             @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
             locale-key-prefix="entities.build_filter."
             v-model="taskTypeFilter.operator"
@@ -109,14 +109,14 @@
 
             <combobox
               class="flexrow-item"
-              :options="general.checklistOptions"
+              :options="checklistOptions"
               locale-key-prefix="entities.build_filter."
               v-model="descriptorFilter.values[0].checked"
               v-if="descriptorFilter.is_checklist"
             />
             <combobox
               class="flexrow-item"
-              :options="general.booleanOptions"
+              :options="booleanOptions"
               locale-key-prefix="entities.build_filter."
               v-model="descriptorFilter.values[0]"
               v-else-if="
@@ -125,7 +125,7 @@
             />
             <combobox
               class="flexrow-item"
-              :options="general.operatorOptions"
+              :options="operatorOptions"
               locale-key-prefix="entities.build_filter."
               @update:model-value="
                 operator => onOperatorChanged(operator, descriptorFilter)
@@ -306,680 +306,652 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { v4 as uuidv4 } from 'uuid'
+import { computed, onMounted, reactive, ref, toRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
+import { getDescriptorChecklistValues } from '@/components/mixins/descriptors'
+import { useModal } from '@/composables/modal'
 import { getFilters } from '@/lib/filtering'
 import { sortPeople } from '@/lib/sorting'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import MetadataField from '@/components/widgets/MetadataField.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
-import { v4 as uuidv4 } from 'uuid'
+const { t } = useI18n()
+const store = useStore()
 
-export default {
-  name: 'build-filter-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  entityType: { type: String, default: 'asset' }
+})
 
-  mixins: [modalMixin, descriptorMixin],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ComboboxStatus,
-    ComboboxStyled,
-    ComboboxTaskType,
-    MetadataField,
-    ModalFooter,
-    PeopleField
-  },
+useModal(toRef(props, 'active'), emit)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    entityType: {
-      type: String,
-      default: 'asset'
-    }
-  },
+// Static option arrays — extracted from data() at module scope so
+// they're not needlessly reactive.
 
-  emits: ['cancel', 'confirm'],
+const operatorOptions = [
+  { label: 'equal', value: '=' },
+  { label: 'not_equal', value: '=-' },
+  { label: 'in', value: 'in' }
+]
+const taskTypeOperatorOptions = operatorOptions
+const booleanOptions = [
+  { label: 'checked', value: 'true' },
+  { label: 'not_checked', value: '-true' }
+]
+const checklistOptions = [
+  { label: 'checked', value: true },
+  { label: 'not_checked', value: false }
+]
+const unionOptions = [
+  { label: 'union_and', value: 'and' },
+  { label: 'union_or', value: 'or' }
+]
+const priorityOptions = [
+  { label: 'priority.normal', value: '0' },
+  { label: 'priority.high', value: '1' },
+  { label: 'priority.very_high', value: '2' },
+  { label: 'priority.emergency', value: '3' }
+]
 
-  data() {
-    return {
-      assetTypeFilters: {
-        operator: '=',
-        value: ''
-      },
-      assignation: {
-        person: null,
-        taskTypeId: '',
-        value: 'nofilter',
-        options: [
-          { label: 'no_filter', value: 'nofilter' },
-          { label: 'assigned_to', value: 'assignedto' },
-          { label: 'not_assigned_to', value: '-assignedto' },
-          { label: 'assignation_exists_for', value: 'assigned' },
-          { label: 'no_assignation_for', value: 'unassigned' }
-        ]
-      },
-      general: {
-        operatorOptions: [
-          { label: 'equal', value: '=' },
-          { label: 'not_equal', value: '=-' },
-          { label: 'in', value: 'in' }
-        ],
-        booleanOptions: [
-          { label: 'checked', value: 'true' },
-          { label: 'not_checked', value: '-true' }
-        ],
-        checklistOptions: [
-          { label: 'checked', value: true },
-          { label: 'not_checked', value: false }
-        ],
-        taskTypeOperatorOptions: [
-          { label: 'equal', value: '=' },
-          { label: 'not_equal', value: '=-' },
-          { label: 'in', value: 'in' }
-        ],
-        unionOptions: [
-          { label: 'union_and', value: 'and' },
-          { label: 'union_or', value: 'or' }
-        ]
-      },
-      hasThumbnail: {
-        value: 'nofilter',
-        options: [
-          { label: 'no_filter', value: 'nofilter' },
-          { label: 'with_thumbnail', value: 'withthumbnail' },
-          { label: 'without_thumbnail', value: '-withthumbnail' }
-        ]
-      },
-      priorityOptions: [
-        { label: 'priority.normal', value: '0' },
-        { label: 'priority.high', value: '1' },
-        { label: 'priority.very_high', value: '2' },
-        { label: 'priority.emergency', value: '3' }
-      ],
-      priority: {
-        taskTypeId: '',
-        value: '-1'
-      },
-      readyFor: {
-        taskTypeId: ''
-      },
-      isAssetsReady: {
-        value: 'nofilter',
-        taskTypeId: '',
-        options: [
-          { label: 'no_filter', value: 'nofilter' },
-          { label: 'assets_ready', value: 'assetsready' },
-          { label: 'assets_not_ready', value: '-assetsready' }
-        ]
-      },
-      metadataDescriptorFilters: {
-        values: []
-      },
-      taskTypeFilters: {
-        values: []
-      },
-      union: 'and'
-    }
-  },
+// State
 
-  mounted() {
-    this.reset()
-    this.setFiltersFromCurrentQuery()
-  },
+const assetTypeFilters = reactive({ operator: '=', value: '' })
+const assignation = reactive({
+  person: null,
+  taskTypeId: '',
+  value: 'nofilter',
+  options: [
+    { label: 'no_filter', value: 'nofilter' },
+    { label: 'assigned_to', value: 'assignedto' },
+    { label: 'not_assigned_to', value: '-assignedto' },
+    { label: 'assignation_exists_for', value: 'assigned' },
+    { label: 'no_assignation_for', value: 'unassigned' }
+  ]
+})
+const hasThumbnail = reactive({
+  value: 'nofilter',
+  options: [
+    { label: 'no_filter', value: 'nofilter' },
+    { label: 'with_thumbnail', value: 'withthumbnail' },
+    { label: 'without_thumbnail', value: '-withthumbnail' }
+  ]
+})
+const priority = reactive({ taskTypeId: '', value: '-1' })
+const readyFor = reactive({ taskTypeId: '' })
+const isAssetsReady = reactive({
+  value: 'nofilter',
+  taskTypeId: '',
+  options: [
+    { label: 'no_filter', value: 'nofilter' },
+    { label: 'assets_ready', value: 'assetsready' },
+    { label: 'assets_not_ready', value: '-assetsready' }
+  ]
+})
+const metadataDescriptorFilters = reactive({ values: [] })
+const taskTypeFilters = reactive({ values: [] })
+const union = ref('and')
 
-  computed: {
-    ...mapGetters([
-      'assetMetadataDescriptors',
-      'assetTypeMap',
-      'assetSearchText',
-      'assetValidationColumns',
-      'currentProduction',
-      'editSearchText',
-      'editMetadataDescriptors',
-      'editValidationColumns',
-      'episodeSearchText',
-      'episodeMetadataDescriptors',
-      'episodeValidationColumns',
-      'isCurrentUserVendor',
-      'people',
-      'personMap',
-      'productionAssetTypes',
-      'productionTaskStatuses',
-      'productionTaskTypes',
-      'productionShotTaskTypes',
-      'sequenceSearchText',
-      'sequenceMetadataDescriptors',
-      'sequenceValidationColumns',
-      'shotMetadataDescriptors',
-      'shotSearchText',
-      'shotValidationColumns',
-      'taskTypeMap',
-      'taskStatusMap'
-    ]),
+// Computed
 
-    isAssets() {
-      return this.entityType === 'asset'
-    },
-    isShots() {
-      return this.entityType === 'shot'
-    },
+const assetMetadataDescriptors = computed(
+  () => store.getters.assetMetadataDescriptors
+)
+const assetTypeMap = computed(() => store.getters.assetTypeMap)
+const assetSearchText = computed(() => store.getters.assetSearchText)
+const assetValidationColumns = computed(
+  () => store.getters.assetValidationColumns
+)
+const currentProduction = computed(() => store.getters.currentProduction)
+const editSearchText = computed(() => store.getters.editSearchText)
+const editMetadataDescriptors = computed(
+  () => store.getters.editMetadataDescriptors
+)
+const editValidationColumns = computed(
+  () => store.getters.editValidationColumns
+)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
+const episodeMetadataDescriptors = computed(
+  () => store.getters.episodeMetadataDescriptors
+)
+const episodeValidationColumns = computed(
+  () => store.getters.episodeValidationColumns
+)
+const isCurrentUserVendor = computed(() => store.getters.isCurrentUserVendor)
+const people = computed(() => store.getters.people)
+const personMap = computed(() => store.getters.personMap)
+const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
+const productionTaskStatuses = computed(
+  () => store.getters.productionTaskStatuses
+)
+const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
+const sequenceMetadataDescriptors = computed(
+  () => store.getters.sequenceMetadataDescriptors
+)
+const sequenceValidationColumns = computed(
+  () => store.getters.sequenceValidationColumns
+)
+const shotMetadataDescriptors = computed(
+  () => store.getters.shotMetadataDescriptors
+)
+const shotSearchText = computed(() => store.getters.shotSearchText)
+const shotValidationColumns = computed(
+  () => store.getters.shotValidationColumns
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-    isAssetsOnly() {
-      return this.currentProduction?.production_type === 'assets'
-    },
+const isAssets = computed(() => props.entityType === 'asset')
+const isShots = computed(() => props.entityType === 'shot')
+const isAssetsOnly = computed(
+  () => currentProduction.value?.production_type === 'assets'
+)
 
-    assetTypeOptions() {
-      return [
-        { label: this.$t('entities.build_filter.all_types'), value: '-' },
-        ...this.productionAssetTypes
-          .filter(assetType => assetType !== undefined)
-          .map(assetType => ({
-            label: assetType.name,
-            value: assetType.id
-          }))
-      ]
-    },
+const taskStatuses = computed(() =>
+  productionTaskStatuses.value.filter(status => !status.for_concept)
+)
 
-    taskStatuses() {
-      return this.productionTaskStatuses.filter(status => !status.for_concept)
-    },
+const validationColumnsByEntity = {
+  asset: assetValidationColumns,
+  edit: editValidationColumns,
+  episode: episodeValidationColumns,
+  sequence: sequenceValidationColumns,
+  shot: shotValidationColumns
+}
 
-    taskTypeListWithAll() {
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('main.all')
-        }
-      ].concat(this.taskTypeList)
-    },
+const metadataDescriptorsByEntity = {
+  asset: assetMetadataDescriptors,
+  edit: editMetadataDescriptors,
+  episode: episodeMetadataDescriptors,
+  sequence: sequenceMetadataDescriptors,
+  shot: shotMetadataDescriptors
+}
 
-    taskTypeList() {
-      return this[`${this.entityType}ValidationColumns`].map(taskTypeId =>
-        this.taskTypeMap.get(taskTypeId)
-      )
-    },
+const searchTextByEntity = {
+  asset: assetSearchText,
+  edit: editSearchText,
+  episode: episodeSearchText,
+  sequence: sequenceSearchText,
+  shot: shotSearchText
+}
 
-    readyForTaskTypeList() {
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all')
-        }
-      ].concat(this.productionShotTaskTypes)
-    },
+const taskTypeList = computed(() =>
+  validationColumnsByEntity[props.entityType].value.map(taskTypeId =>
+    taskTypeMap.value.get(taskTypeId)
+  )
+)
 
-    team() {
-      return sortPeople(
-        this.currentProduction?.team
-          .map(personId => this.personMap.get(personId))
-          .filter(person => person && !person.is_bot) ?? []
-      )
-    },
+const taskTypeListWithAll = computed(() => [
+  { id: '', color: '#999', name: t('main.all') },
+  ...taskTypeList.value
+])
 
-    descriptorOptions() {
-      return this.metadataDescriptors.map(descriptor => ({
-        label: descriptor.name,
-        value: descriptor.id
-      }))
-    },
+const readyForTaskTypeList = computed(() => [
+  { id: '', color: '#999', name: t('news.all') },
+  ...productionShotTaskTypes.value
+])
 
-    metadataDescriptors() {
-      return this[`${this.entityType}MetadataDescriptors`]
-    },
+const team = computed(() =>
+  sortPeople(
+    currentProduction.value?.team
+      .map(personId => personMap.value.get(personId))
+      .filter(person => person && !person.is_bot) ?? []
+  )
+)
 
-    validDescriptorFilters() {
-      return this.metadataDescriptorFilters.values.filter(descriptor =>
-        this.getDescriptor(descriptor.id)
-      )
-    }
-  },
+const metadataDescriptors = computed(
+  () => metadataDescriptorsByEntity[props.entityType].value
+)
 
-  methods: {
-    applyFilter() {
-      const query = this.buildFilter()
-      this.$emit('confirm', query)
-    },
+const descriptorOptions = computed(() =>
+  metadataDescriptors.value.map(descriptor => ({
+    label: descriptor.name,
+    value: descriptor.id
+  }))
+)
 
-    buildFilter() {
-      let query = ''
-      query = this.applyAssetTypeChoice(query)
-      query = this.applyTaskTypeChoice(query)
-      query = this.applyDescriptorChoice(query)
-      query = this.applyAssignationChoice(query)
-      query = this.applyThumbnailChoice(query)
-      query = this.applyPriorityChoice(query)
-      query = this.applyReadyForChoice(query)
-      query = this.applyAssetsReadyChoice(query)
-      query = this.applyUnionChoice(query)
-      return query.trim()
-    },
+const assetTypeOptions = computed(() => [
+  { label: t('entities.build_filter.all_types'), value: '-' },
+  ...productionAssetTypes.value
+    .filter(assetType => assetType !== undefined)
+    .map(assetType => ({ label: assetType.name, value: assetType.id }))
+])
 
-    applyAssetTypeChoice(query) {
-      const value = this.assetTypeFilters.value
-      if (value && value !== '-') {
-        let operator = '=['
-        if (this.assetTypeFilters.operator === '=-') operator = '=[-'
-        const assetType = this.assetTypeMap.get(value)
-        query += ` type${operator}${assetType.name}]`
-      }
-      return query
-    },
+const getDescriptor = descriptorId =>
+  metadataDescriptors.value.find(d => d.id === descriptorId)
 
-    applyTaskTypeChoice(query) {
-      this.taskTypeFilters.values.forEach(taskTypeFilter => {
-        let operator = '=['
-        if (taskTypeFilter.operator === '=-') operator = '=[-'
-        const taskType = this.taskTypeMap.get(taskTypeFilter.id)
-        const value = taskTypeFilter.values
-          .map(statusId => {
-            return this.taskStatusMap.get(statusId).short_name
-          })
-          .join(',')
-        query += ` [${taskType.name}]${operator}${value}]`
-      })
-      return query
-    },
+const validDescriptorFilters = computed(() =>
+  metadataDescriptorFilters.values.filter(descriptor =>
+    getDescriptor(descriptor.id)
+  )
+)
 
-    applyDescriptorChoice(query) {
-      this.validDescriptorFilters.forEach(descriptorFilter => {
-        let operator = '=['
-        let value
-        if (descriptorFilter.is_checklist) {
-          value = descriptorFilter.values[0].text
-          value += descriptorFilter.values[0].checked ? ':true' : ':false'
-        } else {
-          if (descriptorFilter.operator === '=-') operator = '=[-'
-          const values = descriptorFilter.values
-          if (values.length === 0 || values[0] === '') {
-            const options = this.getDescriptorChoiceOptions(
-              descriptorFilter.id,
-              descriptorFilter.is_checklist
-            )
-            value = options[0]?.value ?? ''
-          } else {
-            value = descriptorFilter.values.join(',')
-          }
-        }
-        const descriptor = this.getDescriptor(descriptorFilter.id)
-        query += ` [${descriptor.name}]${operator}${value}]`
-      })
-      return query
-    },
+// Functions
 
-    applyAssignationChoice(query) {
-      if (this.assignation.value !== 'nofilter') {
-        if (this.assignation.person) {
-          let value = this.assignation.person.name
-          const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
-          if (this.assignation.value === '-assignedto') value = `-${value}`
-          if (taskType) {
-            query += ` assignedto[${taskType.name}]=[${value}]`
-          } else {
-            query += ` assignedto[]=[${value}]`
-          }
-        } else if (this.assignation.taskTypeId) {
-          const taskType = this.taskTypeMap.get(this.assignation.taskTypeId)
-          const value =
-            this.assignation.value === 'assigned' ? 'assigned' : 'unassigned'
-          query += ` [${taskType.name}]=${value}`
-        }
-      }
-      return query
-    },
+const getDescriptorChoiceOptions = (descriptorId, isChecklist) => {
+  const descriptor = getDescriptor(descriptorId)
+  if (!isChecklist) {
+    return descriptor.choices.map(choice => ({ label: choice, value: choice }))
+  }
+  return getDescriptorChecklistValues(descriptor).map(choice => ({
+    label: choice.text,
+    value: choice.text
+  }))
+}
 
-    applyThumbnailChoice(query) {
-      if (this.hasThumbnail.value !== 'nofilter') {
-        query += ` ${this.hasThumbnail.value}`
-      }
-      return query
-    },
+const applyAssetTypeChoice = query => {
+  const value = assetTypeFilters.value
+  if (value && value !== '-') {
+    let operator = '=['
+    if (assetTypeFilters.operator === '=-') operator = '=[-'
+    const assetType = assetTypeMap.value.get(value)
+    query += ` type${operator}${assetType.name}]`
+  }
+  return query
+}
 
-    applyPriorityChoice(query) {
-      if (this.priority.taskTypeId !== '' && this.priority.value !== '-1') {
-        const taskType = this.taskTypeMap.get(this.priority.taskTypeId)
-        const value = this.priority.value
-        query += ` priority-[${taskType.name.toLowerCase()}]=${value}`
-      }
-      return query
-    },
+const applyTaskTypeChoice = query => {
+  taskTypeFilters.values.forEach(taskTypeFilter => {
+    let operator = '=['
+    if (taskTypeFilter.operator === '=-') operator = '=[-'
+    const taskType = taskTypeMap.value.get(taskTypeFilter.id)
+    const value = taskTypeFilter.values
+      .map(statusId => taskStatusMap.value.get(statusId).short_name)
+      .join(',')
+    query += ` [${taskType.name}]${operator}${value}]`
+  })
+  return query
+}
 
-    applyReadyForChoice(query) {
-      if (this.readyFor.taskTypeId !== '') {
-        const taskType = this.taskTypeMap.get(this.readyFor.taskTypeId)
-        query += ` readyfor=[${taskType.name.toLowerCase()}]`
-      }
-      return query
-    },
-
-    applyAssetsReadyChoice(query) {
-      if (this.isAssetsReady.value !== 'nofilter') {
-        if (this.isAssetsReady.taskTypeId.length === 0) {
-          this.isAssetsReady.taskTypeId = this.taskTypeList[0].id
-        }
-        const taskType = this.taskTypeMap.get(this.isAssetsReady.taskTypeId)
-        const operator = this.isAssetsReady.value === 'assetsready' ? '' : '-'
-        query += ` assetsready=[${operator}${taskType.name}]`
-      }
-      return query
-    },
-
-    applyUnionChoice(query) {
-      if (this.union === 'or') {
-        query = `+(${query.trim()})`
-      }
-      return query
-    },
-
-    // Task types
-
-    addTaskTypeFilter() {
-      const filter = {
-        localId: uuidv4(),
-        id: this.taskTypeList[0].id,
-        operator: '=',
-        values: [this.taskStatuses[0].id]
-      }
-      this.taskTypeFilters.values.push(filter)
-      return filter
-    },
-
-    addInTaskTypeFilter(taskTypeFilter) {
-      taskTypeFilter.values.push(this.taskStatuses[0].id)
-    },
-
-    removeTaskTypeFilter(taskTypeFilter) {
-      this.taskTypeFilters.values = this.taskTypeFilters.values.filter(
-        f => f.localId !== taskTypeFilter.localId
-      )
-    },
-
-    addInDescriptorFilter(descriptorFilter) {
-      const descriptor = this.getDescriptor(descriptorFilter.id)
-      const value = descriptor.choices.length ? descriptor.choices[0] : ''
-      descriptorFilter.values.push(value)
-    },
-
-    // Descriptors
-
-    onDescriptorChanged(descriptorFilter, filter) {
-      const descriptor = this.getDescriptor(filter)
-
-      descriptorFilter.is_checklist = false
-      if (descriptor.choices.length > 0) {
-        const checklistValues = this.getDescriptorChecklistValues(descriptor)
-        if (checklistValues.length > 0) {
-          descriptorFilter.is_checklist = true
-          descriptorFilter.values = [checklistValues[0]]
-          descriptorFilter.operator = '='
-        } else {
-          descriptorFilter.values = [descriptor.choices[0]]
-        }
-      } else if (descriptor.data_type === 'boolean') {
-        descriptorFilter.values = ['-true']
-      } else {
-        descriptorFilter.values = ['']
-      }
-    },
-
-    addDescriptorFilter() {
-      const descriptor = this.getDescriptor(this.descriptorOptions[0].value)
-      const values = []
-      let isChecklist = false
-      if (descriptor.choices.length > 0) {
-        const checklistValues = this.getDescriptorChecklistValues(descriptor)
-        if (checklistValues.length > 0) {
-          isChecklist = true
-          values.push({
-            ...checklistValues[0],
-            checked: true
-          })
-        } else {
-          values.push(descriptor.choices[0])
-        }
-      } else if (descriptor.data_type === 'boolean') {
-        values.push('-true')
-      } else {
-        values.push('')
-      }
-      const filter = {
-        localId: uuidv4(),
-        id: this.descriptorOptions[0].value,
-        operator: '=',
-        values,
-        is_checklist: isChecklist
-      }
-      this.metadataDescriptorFilters.values.push(filter)
-      return filter
-    },
-
-    removeDescriptorFilter(descriptorFilter) {
-      this.metadataDescriptorFilters.values =
-        this.metadataDescriptorFilters.values.filter(
-          f => f.localId !== descriptorFilter.localId
+const applyDescriptorChoice = query => {
+  validDescriptorFilters.value.forEach(descriptorFilter => {
+    let operator = '=['
+    let value
+    if (descriptorFilter.is_checklist) {
+      value = descriptorFilter.values[0].text
+      value += descriptorFilter.values[0].checked ? ':true' : ':false'
+    } else {
+      if (descriptorFilter.operator === '=-') operator = '=[-'
+      const values = descriptorFilter.values
+      if (values.length === 0 || values[0] === '') {
+        const options = getDescriptorChoiceOptions(
+          descriptorFilter.id,
+          descriptorFilter.is_checklist
         )
-    },
-
-    getDescriptor(descriptorId) {
-      return this.metadataDescriptors.find(d => d.id === descriptorId)
-    },
-
-    getDescriptorChoiceOptions(descriptorId, isChecklist) {
-      const descriptor = this.getDescriptor(descriptorId)
-      if (!isChecklist) {
-        return descriptor.choices.map(choice => ({
-          label: choice,
-          value: choice
-        }))
+        value = options[0]?.value ?? ''
       } else {
-        return this.getDescriptorChecklistValues(descriptor).map(choice => ({
-          label: choice.text,
-          value: choice.text
-        }))
+        value = descriptorFilter.values.join(',')
       }
-    },
-
-    onOperatorChanged(operator, descriptorFilter) {
-      if (operator !== 'in') {
-        descriptorFilter.values = [descriptorFilter.values[0]]
-      }
-    },
-
-    // Helpers to set filters from search query
-
-    setFiltersFromCurrentQuery() {
-      const searchQuery = this[`${this.entityType}SearchText`]
-      if (searchQuery) {
-        const filters = getFilters({
-          entryIndex: [], // entry list is not needed,
-          assetTypes: this.productionAssetTypes,
-          taskTypes: this.productionTaskTypes,
-          taskStatuses: this.taskStatuses,
-          descriptors: this.metadataDescriptors,
-          persons: this.people,
-          query: searchQuery
-        })
-        filters.forEach(filter => {
-          if (filter.type === 'assettype') {
-            this.setFiltersFromAssetTypeQuery(filter)
-          } else if (filter.type === 'status') {
-            this.setFiltersFromStatusQuery(filter)
-          } else if (filter.type === 'descriptor') {
-            this.setFiltersFromDescriptorQuery(filter)
-          } else if (filter.type === 'assignation') {
-            this.setFiltersFromAssignationQuery(filter)
-          } else if (filter.type === 'assignedto') {
-            this.setFiltersFromAssignedToQuery(filter)
-          } else if (filter.type === 'thumbnail') {
-            this.setFiltersFromThumbnailQuery(filter)
-          } else if (filter.type === 'priority') {
-            this.setFiltersFromPriorityQuery(filter)
-          } else if (filter.type === 'readyfor') {
-            this.setFiltersFromReadyForQuery(filter)
-          } else if (filter.type === 'assetsready') {
-            this.setFiltersFromAssetsReadyQuery(filter)
-          }
-        })
-        if (filters.union) {
-          this.setUnion()
-        }
-      }
-    },
-
-    setFiltersFromAssetTypeQuery(filter) {
-      this.assetTypeFilters.operator = filter.excluding ? '=-' : '='
-      this.assetTypeFilters.value = filter.assetType.id
-    },
-
-    setFiltersFromStatusQuery(filter) {
-      let operator = '='
-      if (filter.taskStatuses.length > 1) {
-        operator = 'in'
-      } else if (filter.excluding) {
-        operator = '=-'
-      }
-      this.taskTypeFilters.values.push({
-        localId: uuidv4(),
-        id: filter.taskType.id,
-        operator,
-        values: filter.taskStatuses
-      })
-    },
-
-    setFiltersFromDescriptorQuery(filter) {
-      let operator = '='
-      let isChecklist = false
-      let values = filter.values
-      if (filter.values.length > 1) {
-        operator = 'in'
-      } else {
-        if (filter.values[0].endsWith(':true')) {
-          isChecklist = true
-          values = [
-            {
-              text: filter.values[0].replace(/:true$/, ''),
-              checked: true
-            }
-          ]
-        } else if (filter.values[0].endsWith(':false')) {
-          isChecklist = true
-          values = [
-            {
-              text: filter.values[0].replace(/:false$/, ''),
-              checked: false
-            }
-          ]
-        } else if (filter.excluding) {
-          if (filter.descriptor.data_type === 'boolean') {
-            values = [`-${filter.values[0]}`]
-          } else {
-            operator = '=-'
-          }
-        }
-      }
-      this.metadataDescriptorFilters.values.push({
-        localId: uuidv4(),
-        id: filter.descriptor.id,
-        operator,
-        values,
-        is_checklist: isChecklist
-      })
-    },
-
-    setFiltersFromAssignationQuery(filter) {
-      if (filter.assigned) {
-        this.assignation.value = 'assigned'
-      } else {
-        this.assignation.value = 'unassigned'
-      }
-      this.assignation.taskTypeId = filter.taskType.id
-    },
-
-    setFiltersFromAssignedToQuery(filter) {
-      this.assignation.value = filter.excluding ? '-assignedto' : 'assignedto'
-      this.assignation.person = this.people.find(
-        p => p.id === filter.personIds[0]
-      )
-      this.assignation.taskTypeId = filter.taskType?.id
-    },
-
-    setFiltersFromThumbnailQuery(filter) {
-      if (filter.excluding) {
-        this.hasThumbnail.value = '-withthumbnail'
-      } else {
-        this.hasThumbnail.value = 'withthumbnail'
-      }
-    },
-
-    setFiltersFromPriorityQuery(filter) {
-      this.priority.taskTypeId = filter.taskTypeId
-      this.priority.value = String(filter.value)
-    },
-
-    setFiltersFromReadyForQuery(filter) {
-      this.readyFor.taskTypeId = filter.value
-    },
-
-    setFiltersFromAssetsReadyQuery(filter) {
-      this.isAssetsReady.taskTypeId = filter.value
-      this.isAssetsReady.value = filter.excluding
-        ? '-assetsready'
-        : 'assetsready'
-    },
-
-    setUnion() {
-      this.union = 'or'
-    },
-
-    // General
-
-    onTaskTypeOperatorChanged(taskTypeFilter) {
-      if (taskTypeFilter.operator !== 'in') {
-        taskTypeFilter.values = [taskTypeFilter.values[0]]
-      }
-    },
-
-    reset() {
-      this.assignation.value = 'nofilter'
-      this.assignation.person = null
-      this.assignation.taskTypeId = ''
-      this.hasThumbnail.value = 'nofilter'
-      this.metadataDescriptorFilters.values = []
-      this.taskTypeFilters.values = []
-      this.assetTypeFilters.operator = '='
-      this.assetTypeFilters.value = '-'
     }
-  },
+    const descriptor = getDescriptor(descriptorFilter.id)
+    query += ` [${descriptor.name}]${operator}${value}]`
+  })
+  return query
+}
 
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-        this.assignation.taskTypeId =
-          this.taskTypeList.length > 0 ? this.taskTypeList[0].id : ''
-        this.readyFor.taskTypeId = ''
-        this.priority.taskTypeId = ''
-        this.priority.value = '0'
-        this.setFiltersFromCurrentQuery()
+const applyAssignationChoice = query => {
+  if (assignation.value !== 'nofilter') {
+    if (assignation.person) {
+      let value = assignation.person.name
+      const taskType = taskTypeMap.value.get(assignation.taskTypeId)
+      if (assignation.value === '-assignedto') value = `-${value}`
+      if (taskType) {
+        query += ` assignedto[${taskType.name}]=[${value}]`
+      } else {
+        query += ` assignedto[]=[${value}]`
+      }
+    } else if (assignation.taskTypeId) {
+      const taskType = taskTypeMap.value.get(assignation.taskTypeId)
+      const value = assignation.value === 'assigned' ? 'assigned' : 'unassigned'
+      query += ` [${taskType.name}]=${value}`
+    }
+  }
+  return query
+}
+
+const applyThumbnailChoice = query => {
+  if (hasThumbnail.value !== 'nofilter') {
+    query += ` ${hasThumbnail.value}`
+  }
+  return query
+}
+
+const applyPriorityChoice = query => {
+  if (priority.taskTypeId !== '' && priority.value !== '-1') {
+    const taskType = taskTypeMap.value.get(priority.taskTypeId)
+    query += ` priority-[${taskType.name.toLowerCase()}]=${priority.value}`
+  }
+  return query
+}
+
+const applyReadyForChoice = query => {
+  if (readyFor.taskTypeId !== '') {
+    const taskType = taskTypeMap.value.get(readyFor.taskTypeId)
+    query += ` readyfor=[${taskType.name.toLowerCase()}]`
+  }
+  return query
+}
+
+const applyAssetsReadyChoice = query => {
+  if (isAssetsReady.value !== 'nofilter') {
+    if (isAssetsReady.taskTypeId.length === 0) {
+      isAssetsReady.taskTypeId = taskTypeList.value[0].id
+    }
+    const taskType = taskTypeMap.value.get(isAssetsReady.taskTypeId)
+    const operator = isAssetsReady.value === 'assetsready' ? '' : '-'
+    query += ` assetsready=[${operator}${taskType.name}]`
+  }
+  return query
+}
+
+const applyUnionChoice = query => {
+  if (union.value === 'or') {
+    query = `+(${query.trim()})`
+  }
+  return query
+}
+
+const buildFilter = () => {
+  let query = ''
+  query = applyAssetTypeChoice(query)
+  query = applyTaskTypeChoice(query)
+  query = applyDescriptorChoice(query)
+  query = applyAssignationChoice(query)
+  query = applyThumbnailChoice(query)
+  query = applyPriorityChoice(query)
+  query = applyReadyForChoice(query)
+  query = applyAssetsReadyChoice(query)
+  query = applyUnionChoice(query)
+  return query.trim()
+}
+
+const applyFilter = () => {
+  emit('confirm', buildFilter())
+}
+
+// Task types
+
+const addTaskTypeFilter = () => {
+  const filter = {
+    localId: uuidv4(),
+    id: taskTypeList.value[0].id,
+    operator: '=',
+    values: [taskStatuses.value[0].id]
+  }
+  taskTypeFilters.values.push(filter)
+  return filter
+}
+
+const addInTaskTypeFilter = taskTypeFilter => {
+  taskTypeFilter.values.push(taskStatuses.value[0].id)
+}
+
+const removeTaskTypeFilter = taskTypeFilter => {
+  taskTypeFilters.values = taskTypeFilters.values.filter(
+    f => f.localId !== taskTypeFilter.localId
+  )
+}
+
+const addInDescriptorFilter = descriptorFilter => {
+  const descriptor = getDescriptor(descriptorFilter.id)
+  const value = descriptor.choices.length ? descriptor.choices[0] : ''
+  descriptorFilter.values.push(value)
+}
+
+// Descriptors
+
+const onDescriptorChanged = (descriptorFilter, filter) => {
+  const descriptor = getDescriptor(filter)
+  descriptorFilter.is_checklist = false
+  if (descriptor.choices.length > 0) {
+    const checklistValues = getDescriptorChecklistValues(descriptor)
+    if (checklistValues.length > 0) {
+      descriptorFilter.is_checklist = true
+      descriptorFilter.values = [checklistValues[0]]
+      descriptorFilter.operator = '='
+    } else {
+      descriptorFilter.values = [descriptor.choices[0]]
+    }
+  } else if (descriptor.data_type === 'boolean') {
+    descriptorFilter.values = ['-true']
+  } else {
+    descriptorFilter.values = ['']
+  }
+}
+
+const addDescriptorFilter = () => {
+  const descriptor = getDescriptor(descriptorOptions.value[0].value)
+  const values = []
+  let isChecklist = false
+  if (descriptor.choices.length > 0) {
+    const checklistValues = getDescriptorChecklistValues(descriptor)
+    if (checklistValues.length > 0) {
+      isChecklist = true
+      values.push({ ...checklistValues[0], checked: true })
+    } else {
+      values.push(descriptor.choices[0])
+    }
+  } else if (descriptor.data_type === 'boolean') {
+    values.push('-true')
+  } else {
+    values.push('')
+  }
+  const filter = {
+    localId: uuidv4(),
+    id: descriptorOptions.value[0].value,
+    operator: '=',
+    values,
+    is_checklist: isChecklist
+  }
+  metadataDescriptorFilters.values.push(filter)
+  return filter
+}
+
+const removeDescriptorFilter = descriptorFilter => {
+  metadataDescriptorFilters.values = metadataDescriptorFilters.values.filter(
+    f => f.localId !== descriptorFilter.localId
+  )
+}
+
+const onOperatorChanged = (operator, descriptorFilter) => {
+  if (operator !== 'in') {
+    descriptorFilter.values = [descriptorFilter.values[0]]
+  }
+}
+
+// Helpers to set filters from search query
+
+const setFiltersFromAssetTypeQuery = filter => {
+  assetTypeFilters.operator = filter.excluding ? '=-' : '='
+  assetTypeFilters.value = filter.assetType.id
+}
+
+const setFiltersFromStatusQuery = filter => {
+  let operator = '='
+  if (filter.taskStatuses.length > 1) operator = 'in'
+  else if (filter.excluding) operator = '=-'
+  taskTypeFilters.values.push({
+    localId: uuidv4(),
+    id: filter.taskType.id,
+    operator,
+    values: filter.taskStatuses
+  })
+}
+
+const setFiltersFromDescriptorQuery = filter => {
+  let operator = '='
+  let isChecklist = false
+  let values = filter.values
+  if (filter.values.length > 1) {
+    operator = 'in'
+  } else {
+    if (filter.values[0].endsWith(':true')) {
+      isChecklist = true
+      values = [{ text: filter.values[0].replace(/:true$/, ''), checked: true }]
+    } else if (filter.values[0].endsWith(':false')) {
+      isChecklist = true
+      values = [
+        { text: filter.values[0].replace(/:false$/, ''), checked: false }
+      ]
+    } else if (filter.excluding) {
+      if (filter.descriptor.data_type === 'boolean') {
+        values = [`-${filter.values[0]}`]
+      } else {
+        operator = '=-'
       }
     }
   }
+  metadataDescriptorFilters.values.push({
+    localId: uuidv4(),
+    id: filter.descriptor.id,
+    operator,
+    values,
+    is_checklist: isChecklist
+  })
 }
+
+const setFiltersFromAssignationQuery = filter => {
+  assignation.value = filter.assigned ? 'assigned' : 'unassigned'
+  assignation.taskTypeId = filter.taskType.id
+}
+
+const setFiltersFromAssignedToQuery = filter => {
+  assignation.value = filter.excluding ? '-assignedto' : 'assignedto'
+  assignation.person = people.value.find(p => p.id === filter.personIds[0])
+  assignation.taskTypeId = filter.taskType?.id
+}
+
+const setFiltersFromThumbnailQuery = filter => {
+  hasThumbnail.value = filter.excluding ? '-withthumbnail' : 'withthumbnail'
+}
+
+const setFiltersFromPriorityQuery = filter => {
+  priority.taskTypeId = filter.taskTypeId
+  priority.value = String(filter.value)
+}
+
+const setFiltersFromReadyForQuery = filter => {
+  readyFor.taskTypeId = filter.value
+}
+
+const setFiltersFromAssetsReadyQuery = filter => {
+  isAssetsReady.taskTypeId = filter.value
+  isAssetsReady.value = filter.excluding ? '-assetsready' : 'assetsready'
+}
+
+const setUnion = () => {
+  union.value = 'or'
+}
+
+const filterDispatchByType = {
+  assettype: setFiltersFromAssetTypeQuery,
+  status: setFiltersFromStatusQuery,
+  descriptor: setFiltersFromDescriptorQuery,
+  assignation: setFiltersFromAssignationQuery,
+  assignedto: setFiltersFromAssignedToQuery,
+  thumbnail: setFiltersFromThumbnailQuery,
+  priority: setFiltersFromPriorityQuery,
+  readyfor: setFiltersFromReadyForQuery,
+  assetsready: setFiltersFromAssetsReadyQuery
+}
+
+const setFiltersFromCurrentQuery = () => {
+  const searchQuery = searchTextByEntity[props.entityType]?.value
+  if (!searchQuery) return
+  const filters = getFilters({
+    entryIndex: [],
+    assetTypes: productionAssetTypes.value,
+    taskTypes: productionTaskTypes.value,
+    taskStatuses: taskStatuses.value,
+    descriptors: metadataDescriptors.value,
+    persons: people.value,
+    query: searchQuery
+  })
+  filters.forEach(filter => {
+    filterDispatchByType[filter.type]?.(filter)
+  })
+  if (filters.union) setUnion()
+}
+
+const onTaskTypeOperatorChanged = taskTypeFilter => {
+  if (taskTypeFilter.operator !== 'in') {
+    taskTypeFilter.values = [taskTypeFilter.values[0]]
+  }
+}
+
+const reset = () => {
+  assignation.value = 'nofilter'
+  assignation.person = null
+  assignation.taskTypeId = ''
+  hasThumbnail.value = 'nofilter'
+  metadataDescriptorFilters.values = []
+  taskTypeFilters.values = []
+  assetTypeFilters.operator = '='
+  assetTypeFilters.value = '-'
+}
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (!active) return
+    reset()
+    assignation.taskTypeId =
+      taskTypeList.value.length > 0 ? taskTypeList.value[0].id : ''
+    readyFor.taskTypeId = ''
+    priority.taskTypeId = ''
+    priority.value = '0'
+    setFiltersFromCurrentQuery()
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  reset()
+  setFiltersFromCurrentQuery()
+})
+
+// Exposed for unit tests
+
+defineExpose({
+  assetTypeFilters,
+  assignation,
+  hasThumbnail,
+  metadataDescriptorFilters,
+  taskTypeFilters,
+  union,
+  isAssets,
+  taskTypeList,
+  team,
+  descriptorOptions,
+  metadataDescriptors,
+  applyFilter,
+  buildFilter,
+  setFiltersFromCurrentQuery,
+  addTaskTypeFilter,
+  removeTaskTypeFilter,
+  addDescriptorFilter,
+  removeDescriptorFilter,
+  getDescriptorChoiceOptions
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1005,19 +977,10 @@ export default {
   text-transform: uppercase;
 }
 
-.field {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .task-type-filter,
 .descriptor-filter {
   margin-bottom: 0.3em;
   align-items: flex-start;
-
-  .descriptor-text-value {
-    padding: 0;
-  }
 }
 
 .value-column {
@@ -1030,6 +993,33 @@ export default {
 
   input {
     line-height: 30px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modal-content {
+    margin: 1rem 0.5rem;
+    max-height: calc(100vh - 2rem);
+    width: auto;
+  }
+
+  .box {
+    padding: 1.5em;
+  }
+
+  .title {
+    font-size: 1.5em;
+  }
+
+  .task-type-filter,
+  .descriptor-filter,
+  .assignation-filter,
+  .asset-type-filter {
+    flex-wrap: wrap;
+  }
+
+  .value-column {
+    width: 100%;
   }
 }
 </style>

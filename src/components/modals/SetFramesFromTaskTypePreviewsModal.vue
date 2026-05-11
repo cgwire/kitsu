@@ -1,117 +1,76 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('shots.get_frames_from_previews')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <p class="description">
+      {{ $t('shots.get_frames_from_previews_description') }}
+    </p>
 
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('shots.get_frames_from_previews') }}
-        </h1>
+    <combobox-task-type
+      :task-type-list="productionShotTaskTypes"
+      :placeholder="$t('task_types.select_task_type')"
+      add-placeholder
+      v-model="taskTypeId"
+    />
 
-        <p class="description">
-          {{ $t('shots.get_frames_from_previews_description') }}
-        </p>
-
-        <combobox-task-type
-          :task-type-list="productionShotTaskTypes"
-          :placeholder="$t('task_types.select_task_type')"
-          add-placeholder
-          v-model="taskTypeId"
-        />
-
-        <modal-footer
-          :error-text="$t('shots.get_frames_from_previews_error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          :is-disabled="!isFormFilled"
-          @confirm="confirm"
-          @cancel="$emit('cancel')"
-        />
-      </div>
-    </div>
-  </div>
+    <modal-footer
+      :error-text="$t('shots.get_frames_from_previews_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      :is-disabled="!isFormFilled"
+      @confirm="confirm"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
-export default {
-  name: 'set-frames-from-task-type-previews-modal',
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  errorText: { type: String, default: '' },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  components: {
-    ComboboxTaskType,
-    ModalFooter
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    errorText: {
-      type: String,
-      default: ''
-    }
-  },
+const taskTypeId = ref(null)
 
-  emits: ['cancel', 'confirm'],
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
 
-  data() {
-    return {
-      taskTypeId: null
-    }
-  },
+const isFormFilled = computed(
+  () => taskTypeId.value !== null && taskTypeId.value !== ''
+)
 
-  mounted() {
-    this.reset()
-  },
-
-  computed: {
-    ...mapGetters(['productionShotTaskTypes']),
-
-    isFormFilled() {
-      return this.taskTypeId !== null && this.taskTypeId !== ''
-    }
-  },
-
-  methods: {
-    confirm() {
-      return this.$emit('confirm', this.taskTypeId)
-    },
-
-    reset() {
-      this.taskType = null
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-      }
-    }
-  }
+const confirm = () => {
+  emit('confirm', taskTypeId.value)
 }
+
+const reset = () => {
+  taskTypeId.value = null
+}
+
+watch(
+  () => props.active,
+  active => {
+    if (active) reset()
+  }
+)
+
+onMounted(reset)
 </script>
 
 <style lang="scss" scoped>

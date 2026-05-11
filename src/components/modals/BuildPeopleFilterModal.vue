@@ -1,267 +1,175 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('entities.build_filter.title')"
+    @cancel="$emit('cancel')"
   >
-    <div @click="$emit('cancel')" class="modal-background"></div>
+    <h3 class="subtitle">
+      {{ $t('entities.build_filter.department') }}
+    </h3>
 
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('entities.build_filter.title') }}
-        </h1>
-
-        <!--combobox
+    <div
+      class="flexrow department-filter"
+      :key="'task-type-' + i"
+      v-for="(departmentFilter, i) in departmentFilters.values"
+    >
+      <combobox
         class="flexrow-item"
-        :options="general.unionOptions"
+        :options="operatorOptions"
+        @update:model-value="onDepartmentOperatorChanged(departmentFilter)"
         locale-key-prefix="entities.build_filter."
-        v-model="union"
-      /-->
-
-        <h3 class="subtitle">
-          {{ $t('entities.build_filter.department') }}
-        </h3>
-
+        v-model="departmentFilter.operator"
+      />
+      <div class="flexrow-item flexrow value-column">
         <div
-          class="flexrow department-filter"
-          :key="'task-type-' + i"
-          v-for="(departmentFilter, i) in departmentFilters.values"
+          :key="`department-${index}`"
+          v-for="(_, index) in departmentFilter.values"
         >
           <combobox
             class="flexrow-item"
-            :options="general.operatorOptions"
-            @update:model-value="onDepartmentOperatorChanged(departmentFilter)"
-            locale-key-prefix="entities.build_filter."
-            v-model="departmentFilter.operator"
+            :options="departmentsOptions"
+            v-model="departmentFilter.values[index]"
           />
-          <div class="flexrow-item flexrow value-column">
-            <div
-              :key="`department-${index}`"
-              v-for="(_, index) in departmentFilter.values"
-            >
-              <combobox
-                class="flexrow-item"
-                :options="departmentsOptions"
-                v-model="departmentFilter.values[index]"
-              />
-            </div>
-            <button-simple
-              class="mt05"
-              icon="plus"
-              @click="addInDepartmentFilter(departmentFilter)"
-              v-if="departmentFilter.operator === 'in'"
-            />
-          </div>
         </div>
-
-        <modal-footer
-          :error-text="$t('entities.thumbnails.error')"
-          @confirm="applyFilter"
-          @cancel="$emit('cancel')"
+        <button-simple
+          class="mt05"
+          icon="plus"
+          @click="addInDepartmentFilter(departmentFilter)"
+          v-if="departmentFilter.operator === 'in'"
         />
       </div>
     </div>
-  </div>
+
+    <modal-footer
+      :error-text="$t('entities.thumbnails.error')"
+      @confirm="applyFilter"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, reactive, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
 import { getFilters } from '@/lib/filtering'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 
-export default {
-  name: 'build-people-filter-modal',
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false }
+})
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ModalFooter
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    }
-  },
+const operatorOptions = [
+  { label: 'equal', value: '=' },
+  { label: 'not_equal', value: '=-' },
+  { label: 'in', value: 'in' }
+]
 
-  emits: ['cancel', 'confirm'],
+const departmentFilters = reactive({ values: [] })
+let union = 'and'
 
-  data() {
-    return {
-      general: {
-        operatorOptions: [
-          { label: 'equal', value: '=' },
-          { label: 'not_equal', value: '=-' },
-          { label: 'in', value: 'in' }
-        ],
-        unionOptions: [
-          { label: 'union_and', value: 'and' },
-          { label: 'union_or', value: 'or' }
-        ]
-      },
-      departmentFilters: {
-        values: []
-      },
-      union: 'and'
-    }
-  },
+const departmentMap = computed(() => store.getters.departmentMap)
+const departments = computed(() => store.getters.departments)
+const peopleSearchText = computed(() => store.getters.peopleSearchText)
 
-  mounted() {
-    this.reset()
-    this.setFiltersFromCurrentQuery()
-  },
+const departmentsOptions = computed(() =>
+  departments.value.map(department => ({
+    label: department.name,
+    value: department.id
+  }))
+)
 
-  computed: {
-    ...mapGetters([
-      'peopleSearchText',
-      'peopleSearchText',
-      'departmentMap',
-      'departments'
-    ]),
-
-    departmentsOptions() {
-      return this.departments.map(department => {
-        return {
-          label: department.name,
-          value: department.id
-        }
-      })
-    }
-  },
-
-  methods: {
-    // Build filter
-
-    applyFilter() {
-      const query = this.buildFilter()
-      this.$emit('confirm', query)
-    },
-
-    buildFilter() {
-      let query = ''
-      query = this.applyDepartmentChoice(query)
-      query = this.applyUnionChoice(query)
-      return query.trim()
-    },
-
-    addDepartmentFilter() {
-      const filter = {
-        operator: '=',
-        values: [this.departments[0].id]
-      }
-      this.departmentFilters.values.push(filter)
-      return filter
-    },
-
-    addInDepartmentFilter(departmentFilter) {
-      departmentFilter.values.push(this.departments[0].name)
-    },
-
-    removeDepartmentFilter(departmentFilter) {
-      this.departmentFilters.values = this.departmentFilters.values.filter(
-        f => f !== departmentFilter
-      )
-    },
-
-    applyDepartmentChoice(query) {
-      this.departmentFilters.values.forEach(departmentFilter => {
-        let operator = '=['
-        if (departmentFilter.operator === '=-') operator = '=[-'
-        const value = departmentFilter.values
-          .map(dId => {
-            return this.departmentMap.get(dId)
-              ? this.departmentMap.get(dId).name
-              : this.departments[0].name
-          })
-          .join(',')
-        query += ` department${operator}${value}]`
-      })
-      return query
-    },
-
-    applyUnionChoice(query) {
-      if (this.union === 'or') {
-        query = ` +(${query.trim()})`
-      }
-      return query
-    },
-
-    // Helpers to set filters from search query
-
-    setFiltersFromCurrentQuery() {
-      if (!this.peopleSearchText) {
-        return
-      }
-      this.departmentFilters.values = []
-
-      const filters = getFilters({
-        entryIndex: [],
-        departments: this.departments,
-        persons: [],
-        query: this.peopleSearchText
-      })
-      filters.forEach(filter => {
-        this.setFiltersFromDepartmentQuery(filter)
-      })
-      if (filters.union) {
-        this.setUnion()
-      }
-    },
-
-    setFiltersFromDepartmentQuery(filter) {
-      let operator = '='
-      if (filter.values.length > 1) {
-        operator = 'in'
-      } else if (filter.excluding) {
-        operator = '=-'
-      }
-      this.departmentFilters.values.push({
-        operator,
-        values: filter.values.map(d => d.id)
-      })
-    },
-
-    setUnion() {
-      this.union = 'or'
-    },
-
-    // General
-
-    onDepartmentOperatorChanged(departmentFilter) {
-      if (departmentFilter.operator !== 'in') {
-        departmentFilter.values = [departmentFilter.values[0]]
-      }
-    },
-
-    reset() {
-      this.departmentFilters.values = [
-        {
-          operator: '=',
-          values: this.departments.length > 0 ? [this.departments[0].id] : []
-        }
-      ]
-    }
-  },
-
-  watch: {
-    active() {
-      if (this.active) {
-        this.reset()
-        this.setFiltersFromCurrentQuery()
-      }
-    }
+const onDepartmentOperatorChanged = departmentFilter => {
+  if (departmentFilter.operator !== 'in') {
+    departmentFilter.values = [departmentFilter.values[0]]
   }
 }
+
+const addInDepartmentFilter = departmentFilter => {
+  departmentFilter.values.push(departments.value[0].name)
+}
+
+const applyDepartmentChoice = query => {
+  departmentFilters.values.forEach(departmentFilter => {
+    const operator = departmentFilter.operator === '=-' ? '=[-' : '=['
+    const value = departmentFilter.values
+      .map(
+        dId => departmentMap.value.get(dId)?.name || departments.value[0].name
+      )
+      .join(',')
+    query += ` department${operator}${value}]`
+  })
+  return query
+}
+
+const applyUnionChoice = query =>
+  union === 'or' ? ` +(${query.trim()})` : query
+
+const buildFilter = () => {
+  let query = ''
+  query = applyDepartmentChoice(query)
+  query = applyUnionChoice(query)
+  return query.trim()
+}
+
+const applyFilter = () => {
+  emit('confirm', buildFilter())
+}
+
+const setFiltersFromDepartmentQuery = filter => {
+  let operator = '='
+  if (filter.values.length > 1) operator = 'in'
+  else if (filter.excluding) operator = '=-'
+  departmentFilters.values.push({
+    operator,
+    values: filter.values.map(d => d.id)
+  })
+}
+
+const setFiltersFromCurrentQuery = () => {
+  if (!peopleSearchText.value) return
+  departmentFilters.values = []
+  const filters = getFilters({
+    entryIndex: [],
+    departments: departments.value,
+    persons: [],
+    query: peopleSearchText.value
+  })
+  filters.forEach(setFiltersFromDepartmentQuery)
+  if (filters.union) union = 'or'
+}
+
+const reset = () => {
+  departmentFilters.values = [
+    {
+      operator: '=',
+      values: departments.value.length > 0 ? [departments.value[0].id] : []
+    }
+  ]
+}
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      reset()
+      setFiltersFromCurrentQuery()
+    }
+  }
+)
+
+onMounted(() => {
+  reset()
+  setFiltersFromCurrentQuery()
+})
 </script>
 
 <style lang="scss" scoped>

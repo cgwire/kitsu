@@ -47,96 +47,71 @@
   </td>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, nextTick, ref } from 'vue'
+import { useStore } from 'vuex'
 
 import { renderMarkdown } from '@/lib/render'
 import stringHelpers from '@/lib/string'
 
-export default {
-  name: 'description-cell',
+const store = useStore()
 
-  data() {
-    return {
-      isEditing: false,
-      isOpen: false,
-      tooltipPosition: { top: 0, left: 0 }
-    }
-  },
+const props = defineProps({
+  editable: { type: Boolean, default: false },
+  entry: { type: Object, default: () => ({}) },
+  full: { type: Boolean, default: false }
+})
 
-  props: {
-    editable: {
-      type: Boolean,
-      default: false
-    },
-    entry: {
-      type: Object,
-      default: () => {}
-    },
-    full: {
-      type: Boolean,
-      default: false
-    }
-  },
+const emit = defineEmits(['description-changed'])
 
-  emits: ['description-changed'],
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
 
-  computed: {
-    ...mapGetters(['isDarkTheme']),
+const isEditing = ref(false)
+const isOpen = ref(false)
+const text = ref(null)
+const tooltipPosition = ref({ top: 0, left: 0 })
 
-    tooltipStyle() {
-      return {
-        top: this.tooltipPosition.top + 'px',
-        left: this.tooltipPosition.left + 'px'
+const tooltipStyle = computed(() => ({
+  top: tooltipPosition.value.top + 'px',
+  left: tooltipPosition.value.left + 'px'
+}))
+
+const shortenText = stringHelpers.shortenText
+
+const onClick = event => {
+  if (
+    (event.currentTarget.classList.contains('description-cell') &&
+      !event.target.closest('.description-cell .tooltip')) ||
+    event.keyCode === 27
+  ) {
+    isOpen.value = !isOpen.value
+    if (isOpen.value) {
+      const td = event.currentTarget
+      const rect = td.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const scrollLeft =
+        window.pageXOffset || document.documentElement.scrollLeft
+      tooltipPosition.value = {
+        top: rect.top + scrollTop - 105,
+        left: rect.left + scrollLeft + rect.width / 2 - 160
       }
+    } else if (isEditing.value) {
+      isEditing.value = false
+      emit('description-changed', text.value.value)
     }
-  },
+  }
+}
 
-  methods: {
-    renderMarkdown,
-
-    shortenText: stringHelpers.shortenText,
-
-    onClick(event) {
-      if (
-        (event.currentTarget.classList.contains('description-cell') &&
-          !event.target.closest('.description-cell .tooltip')) ||
-        event.keyCode === 27
-      ) {
-        this.isOpen = !this.isOpen
-        if (this.isOpen) {
-          const td = event.currentTarget
-          const rect = td.getBoundingClientRect()
-          const scrollTop =
-            window.pageYOffset || document.documentElement.scrollTop
-          const scrollLeft =
-            window.pageXOffset || document.documentElement.scrollLeft
-          this.tooltipPosition = {
-            top: rect.top + scrollTop - 105,
-            left: rect.left + scrollLeft + rect.width / 2 - 160
-          }
-        } else if (this.isEditing) {
-          this.isEditing = false
-          const val = this.$refs.text.value
-          this.$emit('description-changed', val)
-        }
-      }
-    },
-
-    onDoubleClick() {
-      if (this.editable) {
-        if (this.isEditing) {
-          const val = this.$refs.text.value
-          this.$emit('description-changed', val)
-        }
-        this.isEditing = !this.isEditing
-        if (this.isEditing) {
-          this.$nextTick(() => {
-            this.$refs.text.focus()
-          })
-        }
-      }
-    }
+const onDoubleClick = () => {
+  if (!props.editable) return
+  if (isEditing.value) {
+    emit('description-changed', text.value.value)
+  }
+  isEditing.value = !isEditing.value
+  if (isEditing.value) {
+    nextTick(() => {
+      text.value.focus()
+    })
   }
 }
 </script>

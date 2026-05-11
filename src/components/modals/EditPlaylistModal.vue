@@ -1,238 +1,175 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <text-field
+        ref="nameField"
+        :label="$t('playlists.fields.name')"
+        :maxlength="80"
+        @enter="runConfirmation"
+        v-model.trim="form.name"
+        v-focus
+      />
+      <combobox-simple
+        :label="$t('playlists.fields.for_client')"
+        :options="forClientOptions"
+        v-model="forClient"
+      />
+      <combobox-simple
+        :label="$t('playlists.fields.for_entity')"
+        :options="forEntityOptions"
+        :disabled="typeDisabled"
+        v-model="form.for_entity"
+        v-if="!isEditing"
+      />
+      <combobox-task-type
+        class="flexrow-item selector"
+        :label="$t('news.task_type')"
+        :task-type-list="taskTypeList"
+        :up="true"
+        v-model="form.task_type_id"
+      />
+    </form>
 
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="isEditing">
-          {{ $t('playlists.edit_title') }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('playlists.create_title') }}
-        </h1>
-
-        <form @submit.prevent>
-          <text-field
-            ref="nameField"
-            :label="$t('playlists.fields.name')"
-            :maxlength="80"
-            @enter="runConfirmation"
-            v-model.trim="form.name"
-            v-focus
-          />
-          <combobox-simple
-            :label="$t('playlists.fields.for_client')"
-            :options="forClientOptions"
-            v-model="forClient"
-          />
-          <combobox-simple
-            :label="$t('playlists.fields.for_entity')"
-            :options="forEntityOptions"
-            :disabled="typeDisabled"
-            v-model="form.for_entity"
-            v-if="!isEditing"
-          />
-          <combobox-task-type
-            class="flexrow-item selector"
-            :label="$t('news.task_type')"
-            :task-type-list="taskTypeList"
-            :up="true"
-            v-model="form.task_type_id"
-          />
-        </form>
-
-        <modal-footer
-          :error-text="$t('playlists.edit_error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          @confirm="runConfirmation"
-          @cancel="$emit('cancel')"
-        />
-      </div>
-    </div>
-  </div>
+    <modal-footer
+      :error-text="$t('playlists.edit_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      @confirm="runConfirmation"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
-
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { sortByName } from '@/lib/sorting'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ComboboxSimple from '@/components/widgets/ComboboxSimple.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-playlist-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  playlistToEdit: { type: Object, default: () => ({}) },
+  taskTypeId: { type: String, default: '' },
+  typeDisabled: { type: Boolean, default: false }
+})
 
-  components: {
-    ComboboxSimple,
-    ComboboxTaskType,
-    ModalFooter,
-    TextField
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  props: {
-    active: {
-      type: Boolean,
-      value: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    playlistToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    typeDisabled: {
-      type: Boolean,
-      default: false
-    },
-    taskTypeId: {
-      type: String,
-      default: ''
-    }
-  },
+const form = ref({
+  name: props.playlistToEdit.name,
+  for_entity: props.playlistToEdit.for_entity,
+  for_client: props.playlistToEdit.for_client,
+  is_for_all: false,
+  task_type_id: props.taskTypeId
+})
+const forClient = ref('false')
+const nameField = ref(null)
 
-  emits: ['cancel', 'confirm'],
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 
-  data() {
-    return {
-      forClient: 'false',
-      forClientOptions: [
-        { label: this.$t('playlists.for_client'), value: 'true' },
-        { label: this.$t('playlists.for_studio'), value: 'false' }
-      ],
-      form: {
-        name: this.playlistToEdit.name,
-        for_entity: this.playlistToEdit.for_entity,
-        for_client: this.playlistToEdit.for_client,
-        is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
-        task_type_id: this.taskTypeId
-      }
-    }
-  },
+const isEditing = computed(() => Boolean(props.playlistToEdit?.id))
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'productionTaskTypes'
-    ]),
+const modalTitle = computed(() =>
+  isEditing.value ? t('playlists.edit_title') : t('playlists.create_title')
+)
 
-    isEditing() {
-      return this.playlistToEdit && this.playlistToEdit.id
-    },
+const forClientOptions = computed(() => [
+  { label: t('playlists.for_client'), value: 'true' },
+  { label: t('playlists.for_studio'), value: 'false' }
+])
 
-    forEntityOptions() {
-      if (
-        (this.currentEpisode &&
-          ['main', 'all'].includes(this.currentEpisode.id)) ||
-        this.currentProduction?.production_type === 'assets'
-      ) {
-        return [{ label: this.$t('assets.title'), value: 'asset' }]
-      } else if (this.currentProduction?.production_type === 'shots') {
-        return [
-          { label: this.$t('shots.title'), value: 'shot' },
-          { label: this.$t('sequences.title'), value: 'sequence' }
-        ]
-      } else {
-        return [
-          { label: this.$t('assets.title'), value: 'asset' },
-          { label: this.$t('shots.title'), value: 'shot' },
-          { label: this.$t('sequences.title'), value: 'sequence' }
-        ]
-      }
-    },
+const forEntityOptions = computed(() => {
+  if (
+    ['main', 'all'].includes(currentEpisode.value?.id) ||
+    currentProduction.value?.production_type === 'assets'
+  ) {
+    return [{ label: t('assets.title'), value: 'asset' }]
+  }
+  if (currentProduction.value?.production_type === 'shots') {
+    return [
+      { label: t('shots.title'), value: 'shot' },
+      { label: t('sequences.title'), value: 'sequence' }
+    ]
+  }
+  return [
+    { label: t('assets.title'), value: 'asset' },
+    { label: t('shots.title'), value: 'shot' },
+    { label: t('sequences.title'), value: 'sequence' }
+  ]
+})
 
-    defaultForEntity() {
-      const isOnlyAssets = this.currentProduction?.production_type === 'assets'
-      const isOnlyShots = this.currentProduction?.production_type === 'shots'
-      const isAssetEpisode =
-        this.currentEpisode && ['all', 'main'].includes(this.currentEpisode.id)
-      return (isAssetEpisode || isOnlyAssets) && !isOnlyShots ? 'asset' : 'shot'
-    },
+const defaultForEntity = computed(() => {
+  const productionType = currentProduction.value?.production_type
+  const isOnlyAssets = productionType === 'assets'
+  const isOnlyShots = productionType === 'shots'
+  const isAssetEpisode = ['all', 'main'].includes(currentEpisode.value?.id)
+  return (isAssetEpisode || isOnlyAssets) && !isOnlyShots ? 'asset' : 'shot'
+})
 
-    taskTypeList() {
-      const taskTypes = [...this.productionTaskTypes].filter(
-        taskType => taskType.for_entity.toLowerCase() === this.form.for_entity
-      )
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all')
-        }
-      ].concat(sortByName([...taskTypes]))
-    }
-  },
+const taskTypeList = computed(() => {
+  const taskTypes = productionTaskTypes.value.filter(
+    taskType => taskType.for_entity.toLowerCase() === form.value.for_entity
+  )
+  return [
+    { id: '', color: '#999', name: t('news.all') },
+    ...sortByName([...taskTypes])
+  ]
+})
 
-  methods: {
-    runConfirmation() {
-      if (!this.form.name) {
-        this.$refs.nameField.focus()
-        return
-      }
-      this.form.for_client = this.forClient === 'true'
-      this.$emit('confirm', this.form)
-    },
+const runConfirmation = () => {
+  if (!form.value.name) {
+    nameField.value?.focus()
+    return
+  }
+  form.value.for_client = forClient.value === 'true'
+  emit('confirm', form.value)
+}
 
-    resetForm() {
-      if (this.isEditing) {
-        this.form.name = this.playlistToEdit.name
-        this.form.for_entity = this.playlistToEdit.for_entity
-        this.form.for_client = this.playlistToEdit.for_client
-        this.form.is_for_all =
-          this.currentEpisode && this.currentEpisode.id === 'all'
-        this.form.task_type_id = this.playlistToEdit.task_type_id
-      } else {
-        this.form = {
-          name: this.playlistToEdit.name,
-          for_entity: this.playlistToEdit.for_entity || this.defaultForEntity,
-          for_client: 'false',
-          is_for_all: this.currentEpisode && this.currentEpisode.id === 'all',
-          task_type_id: this.taskTypeId
-        }
-      }
-    }
-  },
-
-  watch: {
-    playlistToEdit() {
-      this.resetForm()
-    },
-
-    active() {
-      if (this.active) {
-        this.forClient = this.playlistToEdit.for_client ? 'true' : 'false'
-        this.resetForm()
-        setTimeout(() => {
-          this.$refs.nameField?.focus()
-        }, 100)
-      }
+const resetForm = () => {
+  const isAll = currentEpisode.value?.id === 'all'
+  if (isEditing.value) {
+    form.value.name = props.playlistToEdit.name
+    form.value.for_entity = props.playlistToEdit.for_entity
+    form.value.for_client = props.playlistToEdit.for_client
+    form.value.is_for_all = isAll
+    form.value.task_type_id = props.playlistToEdit.task_type_id
+  } else {
+    form.value = {
+      name: props.playlistToEdit.name,
+      for_entity: props.playlistToEdit.for_entity || defaultForEntity.value,
+      for_client: 'false',
+      is_for_all: isAll,
+      task_type_id: props.taskTypeId
     }
   }
 }
-</script>
 
-<style lang="scss" scoped>
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-</style>
+watch(() => props.playlistToEdit, resetForm)
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      forClient.value = props.playlistToEdit.for_client ? 'true' : 'false'
+      resetForm()
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
+    }
+  }
+)
+</script>

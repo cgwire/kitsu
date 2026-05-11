@@ -1,114 +1,78 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('breakdown.edit_label')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <form @submit.prevent>
+      <combobox
+        :label="$t('breakdown.label')"
+        :options="typeOptions"
+        @enter="confirm"
+        v-model="form.label"
+        v-focus
+      />
 
-    <div class="modal-content">
-      <div class="box content">
-        <h1 class="title">
-          {{ $t('breakdown.edit_label') }}
-        </h1>
-
-        <form @submit.prevent>
-          <combobox
-            ref="typeField"
-            :label="$t('breakdown.label')"
-            :options="typeOptions"
-            @enter="confirm"
-            v-model="form.label"
-            v-focus
-          />
-
-          <modal-footer
-            :is-error="isError"
-            :is-loading="isLoading"
-            @confirm="confirm"
-            @cancel="$emit('cancel')"
-          />
-        </form>
-      </div>
-    </div>
-  </div>
+      <modal-footer
+        :is-error="isError"
+        :is-loading="isLoading"
+        @confirm="confirm"
+        @cancel="$emit('cancel')"
+      />
+    </form>
+  </base-modal>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import Combobox from '@/components/widgets/Combobox.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 
-export default {
-  name: 'edit-label-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    Combobox,
-    ModalFooter
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  label: { type: String, default: 'animate' }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    label: {
-      type: String
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  mounted() {
-    this.form.label = this.label
-  },
+const form = ref({ label: 'animate' })
 
-  data() {
-    return {
-      form: {
-        label: 'animate'
-      },
-      typeOptions: [
-        {
-          label: this.$t('breakdown.options.animate'),
-          value: 'animate'
-        },
-        {
-          label: this.$t('breakdown.options.fixed'),
-          value: 'fixed'
-        }
-      ]
-    }
-  },
+// Computed
 
-  methods: {
-    confirm() {
-      return this.$emit('confirm', this.form)
-    }
-  },
+const typeOptions = computed(() => [
+  { label: t('breakdown.options.animate'), value: 'animate' },
+  { label: t('breakdown.options.fixed'), value: 'fixed' }
+])
 
-  watch: {
-    label() {
-      this.form.label = this.label
-    }
+// Functions
+
+const confirm = () => {
+  emit('confirm', form.value)
+}
+
+// Watchers
+
+watch(
+  () => props.label,
+  label => {
+    form.value.label = label
   }
-}
-</script>
+)
 
-<style lang="scss" scoped>
-.error {
-  margin-top: 1em;
-}
-</style>
+// Lifecycle
+
+onMounted(() => {
+  form.value.label = props.label
+})
+</script>

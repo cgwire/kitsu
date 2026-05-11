@@ -1,326 +1,203 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <combobox
+        :label="$t('shots.fields.sequence')"
+        :options="sequenceOptions"
+        v-model="form.sequence_id"
+      />
+      <text-field
+        ref="nameField"
+        :label="$t('shots.fields.name')"
+        :maxlength="160"
+        v-model.trim="form.name"
+        @enter="runConfirmation"
+        v-focus
+      />
+      <textarea-field
+        :label="$t('shots.fields.description')"
+        v-model="form.description"
+        @keyup.ctrl.enter="runConfirmation"
+        @keyup.meta.enter="runConfirmation"
+      />
+      <text-field
+        :label="$t('shots.fields.nb_frames')"
+        type="number"
+        v-model="form.nb_frames"
+        @enter="runConfirmation"
+        v-if="!isPaperProduction"
+      />
+      <text-field
+        :label="$t('shots.fields.frame_in')"
+        v-model="form.frameIn"
+        type="number"
+      />
+      <text-field
+        :label="$t('shots.fields.frame_out')"
+        v-model="form.frameOut"
+        type="number"
+        @enter="runConfirmation"
+      />
+      <text-field
+        :label="$t('shots.fields.fps')"
+        type="number"
+        :max="1000"
+        :step="0.001"
+        :placeholder="currentProduction?.fps"
+        v-model="form.fps"
+        @enter="runConfirmation"
+      />
+      <text-field
+        :label="$t('shots.fields.resolution')"
+        :placeholder="currentProduction?.resolution"
+        v-model.trim="form.resolution"
+        @enter="runConfirmation"
+      />
+      <text-field
+        type="number"
+        :label="$t('shots.fields.max_retakes')"
+        :placeholder="currentProduction?.max_retakes"
+        v-model="form.max_retakes"
+        @enter="runConfirmation"
+      />
 
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="shotToEdit && shotToEdit.id">
-          {{ $t('shots.edit_title') }} {{ shotToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('shots.new_shot') }}
-        </h1>
-
-        <form @submit.prevent>
-          <combobox
-            :label="$t('shots.fields.sequence')"
-            :options="sequenceOptions"
-            v-model="form.sequence_id"
-          />
-          <text-field
-            ref="nameField"
-            :label="$t('shots.fields.name')"
-            :maxlength="160"
-            v-model.trim="form.name"
-            @enter="runConfirmation"
-            v-focus
-          />
-          <textarea-field
-            ref="descriptionField"
-            :label="$t('shots.fields.description')"
-            v-model="form.description"
-            @keyup.ctrl.enter="runConfirmation"
-            @keyup.meta.enter="runConfirmation"
-          />
-          <text-field
-            ref="nbFramesField"
-            :label="$t('shots.fields.nb_frames')"
-            type="number"
-            v-model="form.nb_frames"
-            @enter="runConfirmation"
-            v-if="!isPaperProduction"
-          />
-          <text-field
-            ref="frameInField"
-            :label="$t('shots.fields.frame_in')"
-            v-model="form.frameIn"
-            type="number"
-          />
-          <text-field
-            ref="frameOutField"
-            :label="$t('shots.fields.frame_out')"
-            v-model="form.frameOut"
-            type="number"
-            @enter="runConfirmation"
-          />
-          <text-field
-            ref="fpsField"
-            :label="$t('shots.fields.fps')"
-            type="number"
-            :max="1000"
-            :step="0.001"
-            :placeholder="currentProduction?.fps"
-            v-model="form.fps"
-            @enter="runConfirmation"
-          />
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            :placeholder="currentProduction?.resolution"
-            v-model.trim="form.resolution"
-            @enter="runConfirmation"
-          />
-          <text-field
-            ref="maxRetakesField"
-            type="number"
-            :label="$t('shots.fields.max_retakes')"
-            :placeholder="currentProduction?.max_retakes"
-            v-model="form.max_retakes"
-            @enter="runConfirmation"
-          />
-
-          <template v-if="shotToEdit">
-            <metadata-field
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              :entity="shotToEdit"
-              @enter="runConfirmation"
-              v-model="form.data[descriptor.field_name]"
-              v-for="descriptor in shotMetadataDescriptors"
-            />
-          </template>
-        </form>
-
-        <modal-footer
-          :error-text="$t('shots.edit_fail')"
-          :is-loading="isLoading"
-          :is-error="isError"
-          @confirm="confirmClicked"
-          @cancel="$emit('cancel')"
+      <template v-if="shotToEdit">
+        <metadata-field
+          :key="descriptor.id"
+          :descriptor="descriptor"
+          :entity="shotToEdit"
+          @enter="runConfirmation"
+          v-model="form.data[descriptor.field_name]"
+          v-for="descriptor in shotMetadataDescriptors"
         />
-      </div>
-    </div>
-  </div>
+      </template>
+    </form>
+
+    <modal-footer
+      :error-text="$t('shots.edit_fail')"
+      :is-loading="isLoading"
+      :is-error="isError"
+      @confirm="confirmClicked"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
-import { modalMixin } from '@/components/modals/base_modal'
-import { formatListMixin } from '@/components/mixins/format'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
+import { sanitizeInteger } from '@/composables/format'
+
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import MetadataField from '@/components/widgets/MetadataField.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
 
-export default {
-  name: 'edit-shot-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [formatListMixin, modalMixin],
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  shotToEdit: { type: Object, default: () => ({}) }
+})
 
-  components: {
-    Combobox,
-    MetadataField,
-    ModalFooter,
-    TextField,
-    TextareaField
-  },
+const emit = defineEmits(['cancel', 'confirm', 'confirm-and-stay'])
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    shotToEdit: {
-      type: Object,
-      default: () => {}
+const form = ref({ data: {} })
+const nameField = ref(null)
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const openProductions = computed(() => store.getters.openProductions)
+const sequenceOptions = computed(() => store.getters.sequenceOptions)
+const sequences = computed(() => store.getters.sequences)
+const shotMetadataDescriptors = computed(
+  () => store.getters.shotMetadataDescriptors
+)
+
+const isEditing = computed(() => Boolean(props.shotToEdit?.id))
+
+const modalTitle = computed(() =>
+  isEditing.value
+    ? `${t('shots.edit_title')} ${props.shotToEdit.name}`
+    : t('shots.new_shot')
+)
+
+const confirmClicked = () => {
+  emit('confirm', form.value)
+}
+
+const confirmAndStayClicked = () => {
+  emit('confirm-and-stay', form.value)
+}
+
+const runConfirmation = () => {
+  if (isEditing.value) confirmClicked()
+  else confirmAndStayClicked()
+}
+
+const resetForm = () => {
+  if (isEditing.value) {
+    const shotData = props.shotToEdit.data || {}
+    form.value = {
+      sequence_id: props.shotToEdit.sequence_id,
+      project_id: props.shotToEdit.project_id,
+      name: props.shotToEdit.name,
+      description: props.shotToEdit.description,
+      nb_frames: props.shotToEdit.nb_frames,
+      frameIn: shotData.frame_in || '',
+      frameOut: shotData.frame_out || '',
+      fps: shotData.fps || '',
+      max_retakes: parseInt(shotData.max_retakes) || '',
+      resolution: shotData.resolution || '',
+      data: { ...shotData }
     }
-  },
-
-  emits: ['cancel', 'confirm', 'confirm-and-stay'],
-
-  data() {
-    return {
-      form: {
-        data: {}
-      },
-      shotSuccessText: ''
+  } else {
+    if (openProductions.value.length > 0) {
+      form.value.project_id = currentProduction.value?.id || ''
     }
-  },
-
-  mounted() {
-    this.resetForm()
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'isPaperProduction',
-      'openProductions',
-      'sequenceOptions',
-      'sequences',
-      'shotCreated',
-      'shotMetadataDescriptors'
-    ]),
-
-    frameIn() {
-      return this.shotToEdit.data ? this.shotToEdit.data.frame_in : ''
-    },
-
-    frameOut() {
-      return this.shotToEdit.data ? this.shotToEdit.data.frame_out : ''
-    },
-
-    fps() {
-      return this.shotToEdit.data ? this.shotToEdit.data.fps : ''
-    },
-
-    resolution() {
-      return this.shotToEdit.data ? this.shotToEdit.data.resolution : ''
-    },
-
-    maxRetakes() {
-      return parseInt(this.shotToEdit.data?.max_retakes) || ''
+    if (sequences.value.length > 0) {
+      form.value.sequence_id = sequences.value[0].id
     }
-  },
-
-  methods: {
-    ...mapActions(['loadSequences']),
-
-    runConfirmation() {
-      if (this.isEditing()) {
-        this.confirmClicked()
-      } else {
-        this.confirmAndStayClicked()
-      }
-    },
-
-    confirmAndStayClicked() {
-      this.$emit('confirm-and-stay', this.form)
-    },
-
-    confirmClicked() {
-      this.$emit('confirm', this.form)
-    },
-
-    isEditing() {
-      return this.shotToEdit && this.shotToEdit.id
-    },
-
-    resetForm() {
-      this.shotSuccessText = ''
-      if (!this.isEditing()) {
-        if (this.openProductions.length > 0) {
-          this.form.project_id = this.currentProduction
-            ? this.currentProduction.id
-            : ''
-        }
-        if (this.sequences.length > 0) {
-          this.form.sequence_id = this.sequences[0].id
-        }
-        this.form.name = ''
-        this.form.description = ''
-        this.form.nb_frames = 0
-        this.form.data = {}
-      } else {
-        this.form = {
-          sequence_id: this.shotToEdit.sequence_id,
-          project_id: this.shotToEdit.project_id,
-          name: this.shotToEdit.name,
-          description: this.shotToEdit.description,
-          nb_frames: this.shotToEdit.nb_frames,
-          frameIn: this.frameIn,
-          frameOut: this.frameOut,
-          fps: this.fps,
-          max_retakes: this.maxRetakes,
-          resolution: this.resolution,
-          data: { ...this.shotToEdit.data } || {}
-        }
-      }
-    }
-  },
-
-  watch: {
-    active() {
-      this.shotSuccessText = ''
-      this.resetForm()
-      if (this.sequences.length === 0) {
-        this.loadSequences()
-      }
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 100)
-      }
-    },
-
-    'form.frameIn'() {
-      const frameIn = this.sanitizeInteger(this.form.frameIn)
-      const frameOut = this.sanitizeInteger(this.form.frameOut)
-      if (frameIn && frameOut && frameOut > frameIn) {
-        this.form.nb_frames = frameOut - frameIn + 1
-      }
-    },
-
-    'form.frameOut'() {
-      const frameIn = this.sanitizeInteger(this.form.frameIn)
-      const frameOut = this.sanitizeInteger(this.form.frameOut)
-      if (frameIn && frameOut && frameOut > frameIn) {
-        this.form.nb_frames = frameOut - frameIn + 1
-      }
-    },
-
-    shotToEdit() {
-      this.resetForm()
-    },
-
-    shotCreated() {
-      if (this.isEditing()) {
-        this.shotSuccessText = this.$t('shots.edit_success', {
-          name: this.shotCreated
-        })
-      } else {
-        this.shotSuccessText = this.$t('shots.new_success', {
-          name: this.shotCreated
-        })
-      }
-    }
+    form.value.name = ''
+    form.value.description = ''
+    form.value.nb_frames = 0
+    form.value.data = {}
   }
 }
+
+const updateNbFramesFromRange = () => {
+  const frameIn = sanitizeInteger(form.value.frameIn)
+  const frameOut = sanitizeInteger(form.value.frameOut)
+  if (frameIn && frameOut && frameOut > frameIn) {
+    form.value.nb_frames = frameOut - frameIn + 1
+  }
+}
+
+watch(
+  () => props.active,
+  active => {
+    resetForm()
+    if (sequences.value.length === 0) {
+      store.dispatch('loadSequences')
+    }
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
+    }
+  }
+)
+
+watch(() => form.value.frameIn, updateNbFramesFromRange)
+watch(() => form.value.frameOut, updateNbFramesFromRange)
+watch(() => props.shotToEdit, resetForm)
+
+onMounted(resetForm)
 </script>
-
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-.title {
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 0.5em;
-  margin-bottom: 1.2em;
-}
-.info-message {
-  margin-top: 1em;
-}
-
-.modal-content {
-  max-height: 80%;
-}
-</style>

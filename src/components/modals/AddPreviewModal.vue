@@ -5,13 +5,8 @@
       modal: true,
       'is-active': active
     }"
-    ref="modal"
   >
-    <div
-      ref="background"
-      class="modal-background"
-      @click="$emit('cancel')"
-    ></div>
+    <div class="modal-background" @click="$emit('cancel')"></div>
 
     <div
       class="modal-content"
@@ -20,7 +15,6 @@
     >
       <div id="modal-content" class="box content" :class="{ dragging: true }">
         <div
-          ref="dropMask"
           id="drop-mask"
           class="drop-mask"
           @drop="onDrop"
@@ -41,7 +35,7 @@
         </p>
 
         <file-upload
-          ref="preview-field"
+          ref="previewField"
           class="preview-files-field"
           :accept="extensions"
           :is-primary="false"
@@ -70,7 +64,6 @@
             </p>
             <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
-              :ref="`video-${index}`"
               :src="getURL(form)"
               preload="auto"
               class="is-fullwidth"
@@ -78,6 +71,7 @@
               controls
               loop
               muted
+              @loadedmetadata="onVideoLoaded"
               v-else-if="isVideo(form)"
             />
             <iframe
@@ -128,194 +122,118 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { AlertTriangleIcon } from 'lucide-vue-next'
+import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 
+import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
-import { modalMixin } from '@/components/modals/base_modal'
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
-export default {
-  name: 'add-preview-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  confirmLabel: { type: String, default: '' },
+  expectedFrames: { type: Number, default: 0 },
+  extensions: { type: String, default: files.ALL_EXTENSIONS_STRING },
+  fps: { type: Number, default: 0 },
+  isConcept: { type: Boolean, default: false },
+  isEditing: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isMultiple: { type: Boolean, default: true },
+  message: { type: String, default: 'tasks.revision_preview_file' },
+  title: { type: String, default: '' }
+})
 
-  mixins: [modalMixin],
+const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
 
-  components: {
-    AlertTriangleIcon,
-    FileUpload
-  },
+useModal(toRef(props, 'active'), emit)
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    confirmLabel: {
-      type: String,
-      default: ''
-    },
-    extensions: {
-      type: String,
-      default: files.ALL_EXTENSIONS_STRING
-    },
-    isConcept: {
-      type: Boolean,
-      default: false
-    },
-    isEditing: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isMultiple: {
-      type: Boolean,
-      default: true
-    },
-    message: {
-      type: String,
-      default: 'tasks.revision_preview_file'
-    },
-    title: {
-      type: String,
-      default: ''
-    },
-    fps: {
-      type: Number,
-      default: 0
-    },
-    expectedFrames: {
-      type: Number,
-      default: 0
-    }
-  },
+const forms = ref([])
+const isDraggingFile = ref(false)
+const isWrongDuration = ref(false)
+const previewField = ref(null)
 
-  emits: ['cancel', 'confirm', 'fileselected'],
+const onFileSelected = newForms => {
+  forms.value = props.isMultiple ? forms.value.concat(newForms) : [newForms]
+  emit('fileselected', forms.value)
+}
 
-  data() {
-    return {
-      forms: [],
-      isWrongDuration: false,
-      isDraggingFile: false
-    }
-  },
+const reset = () => {
+  previewField.value?.reset()
+  forms.value = []
+  isWrongDuration.value = false
+}
 
-  computed: {
-    previewField() {
-      return this.$refs['preview-field']
-    }
-  },
-
-  methods: {
-    setFiles(files) {
-      this.previewField.filesChange('file', files)
-    },
-
-    onFileSelected(forms) {
-      this.forms = this.isMultiple ? this.forms.concat(forms) : [forms]
-      this.$emit('fileselected', this.forms)
-    },
-
-    reset() {
-      this.previewField?.reset()
-      this.forms = []
-      this.isWrongDuration = false
-    },
-
-    onPaste(event) {
-      if (this.active && event.clipboardData.files) {
-        this.previewField.filesChange('', event.clipboardData.files)
-      }
-    },
-
-    getURL(form) {
-      return window.URL.createObjectURL(form.get('file'))
-    },
-
-    isImage(form) {
-      return form.get('file').type.startsWith('image')
-    },
-
-    isVideo(form) {
-      return form.get('file').type.startsWith('video')
-    },
-
-    isPdf(form) {
-      return form.get('file').type.indexOf('pdf') > 0
-    },
-
-    removePreview(form) {
-      this.forms = this.forms.filter(f => f !== form)
-    },
-
-    onFileDragover(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.isDraggingFile = true
-    },
-
-    onFileDragLeave(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      if (event.target.id === 'drop-mask') {
-        this.isDraggingFile = false
-      }
-    },
-
-    onDrag(event) {},
-
-    onDrop(event) {
-      this.previewField.onDrop(event)
-      this.isDraggingFile = false
-      event.preventDefault()
-    }
-  },
-
-  watch: {
-    active() {
-      this.reset()
-    },
-
-    forms: {
-      deep: true,
-      handler() {
-        this.$nextTick(() => {
-          this.isWrongDuration = false
-          if (this.expectedFrames !== 0) {
-            Object.keys(this.$refs).forEach(key => {
-              const ref = this.$refs[key]
-              if (key.startsWith('video-') && ref[0]) {
-                ref[0].onloadedmetadata = () => {
-                  if (!ref[0]) return
-                  const frames = Math.round(ref[0].duration * this.fps)
-                  if (frames !== this.expectedFrames) {
-                    this.isWrongDuration = true
-                  }
-                }
-              }
-            })
-          }
-        })
-      }
-    }
-  },
-
-  mounted() {
-    this.forms = []
-    window.addEventListener('paste', this.onPaste, false)
-  },
-
-  beforeUnmount() {
-    window.removeEventListener('paste', this.onPaste)
+const onPaste = event => {
+  if (props.active && event.clipboardData.files) {
+    previewField.value?.filesChange('', event.clipboardData.files)
   }
 }
+
+const getURL = form => window.URL.createObjectURL(form.get('file'))
+
+const isImage = form => form.get('file').type.startsWith('image')
+const isVideo = form => form.get('file').type.startsWith('video')
+const isPdf = form => form.get('file').type.indexOf('pdf') > 0
+
+const removePreview = form => {
+  forms.value = forms.value.filter(f => f !== form)
+}
+
+const onVideoLoaded = event => {
+  if (props.expectedFrames === 0) return
+  const frames = Math.round(event.target.duration * props.fps)
+  if (frames !== props.expectedFrames) {
+    isWrongDuration.value = true
+  }
+}
+
+const onFileDragover = event => {
+  event.preventDefault()
+  event.stopPropagation()
+  isDraggingFile.value = true
+}
+
+const onFileDragLeave = event => {
+  event.preventDefault()
+  event.stopPropagation()
+  if (event.target.id === 'drop-mask') {
+    isDraggingFile.value = false
+  }
+}
+
+const onDrop = event => {
+  previewField.value?.onDrop(event)
+  isDraggingFile.value = false
+  event.preventDefault()
+}
+
+watch(() => props.active, reset)
+
+watch(
+  forms,
+  () => {
+    isWrongDuration.value = false
+  },
+  { deep: true }
+)
+
+onMounted(() => {
+  window.addEventListener('paste', onPaste, false)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('paste', onPaste)
+})
+
+defineExpose({
+  reset,
+  setFiles: fileList => {
+    previewField.value?.filesChange('file', fileList)
+  }
+})
 </script>
 
 <style lang="scss" scoped>

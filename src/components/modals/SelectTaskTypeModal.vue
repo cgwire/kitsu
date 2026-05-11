@@ -1,111 +1,64 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
+  <base-modal
+    :active="active"
+    :title="$t('playlists.select_task_type')"
+    @cancel="$emit('cancel')"
   >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+    <form @submit.prevent>
+      <combobox-task-type :task-type-list="taskTypeList" v-model="taskTypeId" />
+    </form>
 
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title">
-          {{ $t('playlists.select_task_type') }}
-        </h1>
+    <p>
+      {{ $t('playlists.apply_task_type_change') }}
+    </p>
 
-        <form @submit.prevent>
-          <combobox-task-type
-            :task-type-list="taskTypeList"
-            v-model="taskTypeId"
-          />
-        </form>
+    <p class="has-text-right mt2">
+      <a
+        :class="{
+          button: true,
+          'is-primary': true,
+          'is-loading': isLoading
+        }"
+        @click="runConfirmation"
+      >
+        {{ $t('main.confirmation') }}
+      </a>
+      <button @click="$emit('cancel')" class="button is-link">
+        {{ $t('main.cancel') }}
+      </button>
+    </p>
 
-        <p>
-          {{ $t('playlists.apply_task_type_change') }}
-        </p>
-
-        <p class="has-text-right mt2">
-          <a
-            :class="{
-              button: true,
-              'is-primary': true,
-              'is-loading': isLoading
-            }"
-            @click="runConfirmation"
-          >
-            {{ $t('main.confirmation') }}
-          </a>
-          <button @click="$emit('cancel')" class="button is-link">
-            {{ $t('main.cancel') }}
-          </button>
-        </p>
-
-        <p class="error has-text-right info-message" v-if="isError">
-          {{ $t('playlist.change_task_type_fails') }}
-        </p>
-      </div>
-    </div>
-  </div>
+    <p class="error has-text-right info-message" v-if="isError">
+      {{ $t('playlist.change_task_type_fails') }}
+    </p>
+  </base-modal>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { ref, watch } from 'vue'
 
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
-export default {
-  name: 'select-task-type-modal',
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  taskTypeList: { type: Array, default: () => [] }
+})
 
-  mixins: [modalMixin],
+const emit = defineEmits(['cancel', 'confirm'])
 
-  components: {
-    ComboboxTaskType
-  },
+const taskTypeId = ref('')
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    taskTypeList: {
-      type: Array,
-      default: () => {}
-    }
-  },
+const runConfirmation = () => {
+  emit('confirm', taskTypeId.value)
+}
 
-  emits: ['cancel', 'confirm'],
-
-  data() {
-    return {
-      taskTypeId: ''
-    }
-  },
-
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', this.taskTypeId)
-    }
-  },
-
-  watch: {
-    active() {
-      this.taskTypeId = this.taskTypeList[0].id
-    }
+watch(
+  () => props.active,
+  () => {
+    taskTypeId.value = props.taskTypeList[0]?.id || ''
   }
-}
+)
 </script>
-
-<style lang="scss" scoped>
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-</style>

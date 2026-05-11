@@ -41,41 +41,46 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import StudioList from '@/components/lists/StudioList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditStudiosModal from '@/components/modals/EditStudiosModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
-import StudioList from '@/components/lists/StudioList.vue'
 
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
+// State
+
 const activeTab = ref('active')
-const studioToEdit = ref(null)
 const studioToDelete = ref(null)
-const errors = reactive({ studios: false, edit: false, del: false })
-const loading = reactive({ studios: false, edit: false, del: false })
+const studioToEdit = ref(null)
+
+const errors = reactive({ del: false, edit: false, studios: false })
+const loading = reactive({ del: false, edit: false, studios: false })
 const modals = reactive({ del: false, edit: false })
 
-const studios = computed(() => store.getters.studios)
+// Computed
+
 const archivedStudios = computed(() => store.getters.archivedStudios)
+const studios = computed(() => store.getters.studios)
+
+const isActiveTab = computed(() => activeTab.value === 'active')
 
 const tabs = computed(() => [
   { name: 'active', label: t('main.active') },
   { name: 'archived', label: t('main.archived') }
 ])
-
-const isActiveTab = computed(() => activeTab.value === 'active')
 
 const displayedStudios = computed(() =>
   isActiveTab.value ? studios.value : archivedStudios.value
@@ -87,6 +92,8 @@ const deleteText = computed(() =>
     : ''
 )
 
+// Functions
+
 const onExportClicked = () => {
   const name = stringHelpers.slugify(t('studios.title'))
   const headers = [
@@ -94,10 +101,12 @@ const onExportClicked = () => {
     t('studios.fields.name'),
     t('studios.fields.color')
   ]
-  const entries = [headers].concat(
-    studios.value.map(studio => [studio.type, studio.name, studio.color])
-  )
-  csv.buildCsvFile(name, entries)
+  const rows = studios.value.map(studio => [
+    studio.type,
+    studio.name,
+    studio.color
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
 }
 
 const onNewClicked = () => {
@@ -110,27 +119,26 @@ const onEditClicked = studio => {
   modals.edit = true
 }
 
+const onDeleteClicked = studio => {
+  studioToDelete.value = studio
+  modals.del = true
+}
+
 const confirmEditStudio = async form => {
   loading.edit = true
   errors.edit = false
-  form.id = studioToEdit.value?.id
   try {
-    if (form.id) {
-      await store.dispatch('editStudio', form)
+    if (studioToEdit.value?.id) {
+      await store.dispatch('editStudio', { ...form, id: studioToEdit.value.id })
     } else {
       await store.dispatch('newStudio', form)
     }
     modals.edit = false
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     errors.edit = true
   }
   loading.edit = false
-}
-
-const onDeleteClicked = studio => {
-  studioToDelete.value = studio
-  modals.del = true
 }
 
 const confirmDeleteStudio = async () => {
@@ -139,12 +147,14 @@ const confirmDeleteStudio = async () => {
   try {
     await store.dispatch('deleteStudio', studioToDelete.value)
     modals.del = false
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     errors.del = true
   }
   loading.del = false
 }
+
+// Watchers
 
 watch(
   () => route.query.tab,
@@ -153,18 +163,22 @@ watch(
   }
 )
 
+// Lifecycle
+
 onMounted(async () => {
   activeTab.value = route.query.tab || 'active'
   loading.studios = true
   errors.studios = false
   try {
     await store.dispatch('loadStudios')
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    console.error(err)
     errors.studios = true
   }
   loading.studios = false
 })
+
+// Head
 
 useHead({ title: computed(() => `${t('studios.title')} - Kitsu`) })
 </script>

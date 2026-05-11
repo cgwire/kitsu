@@ -1,210 +1,130 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
-
-    <div class="modal-content">
-      <div class="box">
-        <h1 class="title" v-if="sequenceToEdit && sequenceToEdit.id">
-          {{ $t('sequences.edit_title') }} {{ sequenceToEdit.name }}
-        </h1>
-        <h1 class="title" v-else>
-          {{ $t('sequences.new_sequence') }}
-        </h1>
-
-        <form @submit.prevent>
-          <text-field
-            ref="nameField"
-            :label="$t('sequences.fields.name')"
-            :maxlength="160"
-            v-model.trim="form.name"
-            @enter="runConfirmation"
-            v-focus
-          />
-          <textarea-field
-            ref="descriptionField"
-            :label="$t('sequences.fields.description')"
-            @keyup.ctrl.enter="runConfirmation"
-            @keyup.meta.enter="runConfirmation"
-            v-model="form.description"
-          />
-          <text-field
-            ref="resolutionField"
-            :label="$t('shots.fields.resolution')"
-            :placeholder="currentProduction?.resolution"
-            v-model.trim="form.data.resolution"
-            @enter="runConfirmation"
-          />
-          <template v-if="sequenceToEdit">
-            <metadata-field
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              :entity="sequenceToEdit"
-              @enter="runConfirmation"
-              v-model="form.data[descriptor.field_name]"
-              v-for="descriptor in sequenceMetadataDescriptors"
-            />
-          </template>
-        </form>
-
-        <modal-footer
-          :error-text="$t('sequences.edit_error')"
-          :is-loading="isLoading"
-          :is-error="isError"
-          @confirm="runConfirmation"
-          @cancel="$emit('cancel')"
+  <base-modal :active="active" :title="modalTitle" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <text-field
+        :label="$t('sequences.fields.name')"
+        :maxlength="160"
+        v-model.trim="form.name"
+        @enter="runConfirmation"
+        v-focus
+      />
+      <textarea-field
+        :label="$t('sequences.fields.description')"
+        @keyup.ctrl.enter="runConfirmation"
+        @keyup.meta.enter="runConfirmation"
+        v-model="form.description"
+      />
+      <text-field
+        :label="$t('shots.fields.resolution')"
+        :placeholder="currentProduction?.resolution"
+        v-model.trim="form.data.resolution"
+        @enter="runConfirmation"
+      />
+      <template v-if="sequenceToEdit">
+        <metadata-field
+          :key="descriptor.id"
+          :descriptor="descriptor"
+          :entity="sequenceToEdit"
+          @enter="runConfirmation"
+          v-model="form.data[descriptor.field_name]"
+          v-for="descriptor in sequenceMetadataDescriptors"
         />
-      </div>
-    </div>
-  </div>
+      </template>
+    </form>
+
+    <modal-footer
+      :error-text="$t('sequences.edit_error')"
+      :is-loading="isLoading"
+      :is-error="isError"
+      @confirm="runConfirmation"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { modalMixin } from '@/components/modals/base_modal'
-
-import MetadataField from '@/components/widgets/MetadataField.vue'
+import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import MetadataField from '@/components/widgets/MetadataField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
 
-export default {
-  name: 'edit-sequence-modal',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    MetadataField,
-    ModalFooter,
-    TextField,
-    TextareaField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  sequenceToEdit: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    sequenceToEdit: {
-      type: Object,
-      default: () => {}
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    if (this.sequenceToEdit && this.sequenceToEdit.id) {
-      return {
-        form: {
-          id: this.sequenceToEdit.id,
-          name: this.sequenceToEdit.name,
-          description: this.sequenceToEdit.description,
-          production_id: this.sequenceToEdit.project_id,
-          data:
-            {
-              ...this.sequenceToEdit.data,
-              resolution: this.sequenceToEdit.data.resolution || ''
-            } || {}
-        },
-        sequenceSuccessText: ''
-      }
-    } else {
-      return {
-        form: {
-          id: '',
-          name: '',
-          description: '',
-          data: {
-            resolution: ''
-          }
-        },
-        sequenceSuccessText: ''
+const form = ref({
+  id: '',
+  name: '',
+  description: '',
+  data: { resolution: '' }
+})
+
+// Computed
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const sequenceMetadataDescriptors = computed(
+  () => store.getters.sequenceMetadataDescriptors
+)
+
+const isEditing = computed(() => Boolean(props.sequenceToEdit?.id))
+
+const modalTitle = computed(() =>
+  isEditing.value
+    ? `${t('sequences.edit_title')} ${props.sequenceToEdit.name}`
+    : t('sequences.new_sequence')
+)
+
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+const resetForm = () => {
+  if (isEditing.value) {
+    form.value = {
+      id: props.sequenceToEdit.id,
+      name: props.sequenceToEdit.name,
+      description: props.sequenceToEdit.description,
+      data: {
+        ...props.sequenceToEdit.data,
+        resolution: props.sequenceToEdit.data.resolution || ''
       }
     }
-  },
-
-  computed: {
-    ...mapGetters(['currentProduction', 'sequenceMetadataDescriptors'])
-  },
-
-  methods: {
-    runConfirmation() {
-      this.confirmClicked()
-    },
-
-    confirmClicked() {
-      this.$emit('confirm', this.form)
-    },
-
-    isEditing() {
-      return this.sequenceToEdit && this.sequenceToEdit.id
-    },
-
-    resetForm() {
-      this.sequenceSuccessText = ''
-      if (!this.isEditing()) {
-        this.form.id = null
-        this.form.name = ''
-        this.form.description = ''
-        this.form.data = {
-          resolution: ''
-        }
-      } else {
-        this.form = {
-          id: this.sequenceToEdit.id,
-          name: this.sequenceToEdit.name,
-          description: this.sequenceToEdit.description,
-          data:
-            {
-              ...this.sequenceToEdit.data,
-              resolution: this.sequenceToEdit.data.resolution || ''
-            } || {}
-        }
-      }
-    }
-  },
-
-  mounted() {
-    if (this.active) {
-      this.resetForm()
-    }
-  },
-
-  watch: {
-    active() {
-      this.resetForm()
-    },
-
-    sequenceToEdit() {
-      this.resetForm()
-    }
+  } else {
+    form.value.id = null
+    form.value.name = ''
+    form.value.description = ''
+    form.value.data = { resolution: '' }
   }
 }
-</script>
 
-<style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-.is-danger {
-  color: #ff3860;
-  font-style: italic;
-}
-.info-message {
-  margin-top: 1em;
-}
-</style>
+// Watchers
+
+watch(() => props.active, resetForm)
+
+watch(() => props.sequenceToEdit, resetForm)
+
+// Lifecycle
+
+onMounted(() => {
+  if (props.active) resetForm()
+})
+</script>

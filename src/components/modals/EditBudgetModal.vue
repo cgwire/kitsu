@@ -37,126 +37,92 @@
   </base-modal>
 </template>
 
-<script>
-import { modalMixin } from '@/components/modals/base_modal'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-export default {
-  name: 'edit-budget-modal',
+const { t } = useI18n()
 
-  mixins: [modalMixin],
+// Props / Emits
 
-  components: {
-    BaseModal,
-    Combobox,
-    ModalFooter,
-    TextField
-  },
+const props = defineProps({
+  active: { type: Boolean, default: false },
+  budgetToEdit: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  lastRevision: { type: Number, default: 0 }
+})
 
-  props: {
-    active: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    budgetToEdit: {
-      type: Object,
-      default: () => {}
-    },
-    lastRevision: {
-      type: Number,
-      default: 0
-    }
-  },
+const emit = defineEmits(['cancel', 'confirm'])
 
-  emits: ['cancel', 'confirm'],
+// State
 
-  data() {
-    return {
-      form: {
-        name: '',
-        currency: 'USD'
-      },
-      currencieOptions: [
-        { label: 'USD', value: 'USD' },
-        { label: 'EUR', value: 'EUR' },
-        { label: 'GBP', value: 'GBP' },
-        { label: 'CAD', value: 'CAD' },
-        { label: 'AUD', value: 'AUD' },
-        { label: 'CHF', value: 'CHF' },
-        { label: 'JPY', value: 'JPY' },
-        { label: 'CNY', value: 'CNY' },
-        { label: 'INR', value: 'INR' }
-      ]
-    }
-  },
+const form = ref({ name: '', currency: 'USD' })
+const nameField = ref(null)
 
-  computed: {
-    isDisabled() {
-      return this.form.name.length === 0
-    },
+const currencieOptions = [
+  { label: 'USD', value: 'USD' },
+  { label: 'EUR', value: 'EUR' },
+  { label: 'GBP', value: 'GBP' },
+  { label: 'CAD', value: 'CAD' },
+  { label: 'AUD', value: 'AUD' },
+  { label: 'CHF', value: 'CHF' },
+  { label: 'JPY', value: 'JPY' },
+  { label: 'CNY', value: 'CNY' },
+  { label: 'INR', value: 'INR' }
+]
 
-    isEditing() {
-      return this.budgetToEdit && this.budgetToEdit.id
-    },
+// Computed
 
-    modalTitle() {
-      return this.isEditing
-        ? this.$t('budget.edit_budget')
-        : this.$t('budget.create_budget')
-    }
-  },
+const isDisabled = computed(() => form.value.name.length === 0)
 
-  methods: {
-    runConfirmation() {
-      this.$emit('confirm', this.form)
-    }
-  },
+const isEditing = computed(() => Boolean(props.budgetToEdit?.id))
 
-  watch: {
-    active() {
-      if (this.active) {
-        setTimeout(() => {
-          this.$refs.nameField.focus()
-        }, 100)
-      }
-    },
+const modalTitle = computed(() =>
+  isEditing.value ? t('budget.edit_budget') : t('budget.create_budget')
+)
 
-    budgetToEdit() {
-      if (this.budgetToEdit.id) {
-        this.form = {
-          id: this.budgetToEdit.id,
-          name: this.budgetToEdit.name,
-          currency: this.budgetToEdit.currency || 'USD'
-        }
-      } else {
-        this.form = {
-          id: null,
-          name: '',
-          currency: 'USD'
-        }
-      }
+// Functions
+
+const runConfirmation = () => {
+  emit('confirm', form.value)
+}
+
+// Watchers
+
+watch(
+  () => props.active,
+  active => {
+    if (active) {
+      setTimeout(() => {
+        nameField.value?.focus()
+      }, 100)
     }
   }
-}
+)
+
+watch(
+  () => props.budgetToEdit,
+  budget => {
+    if (budget?.id) {
+      form.value = {
+        id: budget.id,
+        name: budget.name,
+        currency: budget.currency || 'USD'
+      }
+    } else {
+      form.value = { id: null, name: '', currency: 'USD' }
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>
-.modal-content .box p.text {
-  margin-bottom: 1em;
-}
-
 .revision-number {
   font-size: 1.4rem;
   font-weight: bold;

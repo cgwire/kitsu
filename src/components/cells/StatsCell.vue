@@ -40,7 +40,7 @@
   </td>
 </template>
 
-<script>
+<script setup>
 /**
  * Components to display statistics as a pie or as text depending on the
  * selected display mode. Stats are based on count data (nb of shots or assets)
@@ -48,75 +48,32 @@
  * Data format:
  * [['name', count, 'color'], ...  ]
  */
-export default {
-  name: 'stats-cell',
+import { computed } from 'vue'
 
-  props: {
-    colors: {
-      type: Array,
-      required: true
-    },
-    countMode: {
-      type: String,
-      default: 'count'
-    },
-    data: {
-      type: Array,
-      default: () => []
-    },
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    drawingsData: {
-      type: Array,
-      default: () => []
-    },
-    framesData: {
-      type: Array,
-      default: () => []
-    },
-    label: {
-      type: String,
-      default: ''
-    },
-    labelColor: {
-      type: String,
-      default: '#e67e22'
-    }
-  },
+const props = defineProps({
+  colors: { type: Array, required: true },
+  countMode: { type: String, default: 'count' },
+  data: { type: Array, default: () => [] },
+  displayMode: { type: String, default: 'pie' },
+  drawingsData: { type: Array, default: () => [] },
+  framesData: { type: Array, default: () => [] },
+  label: { type: String, default: '' },
+  labelColor: { type: String, default: '#e67e22' }
+})
 
-  computed: {
-    selectedData() {
-      if (this.countMode === 'frames') {
-        return this.framesData
-      } else if (this.countMode === 'drawings') {
-        return this.drawingsData
-      } else {
-        return this.data
-      }
-    },
+const selectedData = computed(() => {
+  if (props.countMode === 'frames') return props.framesData
+  if (props.countMode === 'drawings') return props.drawingsData
+  return props.data
+})
 
-    total() {
-      return this.selectedData.reduce((acc, entry) => {
-        if (entry[1]) {
-          return acc + entry[1]
-        } else {
-          return acc
-        }
-      }, 0)
-    }
-  },
+const total = computed(() =>
+  selectedData.value.reduce((acc, entry) => acc + (entry[1] || 0), 0)
+)
 
-  methods: {
-    percent(value) {
-      let percent = 0
-      if (this.total > 0) {
-        percent = (value / this.total) * 100
-      }
-      return percent.toFixed(2)
-    }
-  }
+const percent = value => {
+  if (total.value === 0) return '0.00'
+  return ((value / total.value) * 100).toFixed(2)
 }
 </script>
 

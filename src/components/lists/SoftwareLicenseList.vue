@@ -66,50 +66,34 @@
     <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
 
     <p class="has-text-centered nb-software-licenses">
-      {{ entries.length }} {{ $tc('software_licenses.number', entries.length) }}
+      {{ entries.length }} {{ $t('software_licenses.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'software-license-list',
+defineProps({
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  remainingSoftwareLicenses: { type: Object, default: () => ({}) }
+})
 
-  components: {
-    RowActionsCell,
-    TableInfo
-  },
-
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    remainingSoftwareLicenses: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-
-  emits: ['delete-clicked', 'edit-clicked']
-}
+defineEmits(['delete-clicked', 'edit-clicked'])
 </script>
 
 <style lang="scss" scoped>
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
+}
+
+.name {
+  min-width: 200px;
+  padding: 1em;
 }
 
 .extension,
@@ -121,5 +105,23 @@ export default {
 .remaining-amount.negative {
   color: $red;
   font-weight: bold;
+}
+
+@media screen and (max-width: 768px) {
+  .name {
+    min-width: auto;
+    padding: 0.5em;
+  }
+
+  .extension,
+  .version {
+    width: auto;
+    padding: 0.5em;
+  }
+
+  .datatable-body td,
+  .datatable-head th {
+    padding: 0.5em;
+  }
 }
 </style>

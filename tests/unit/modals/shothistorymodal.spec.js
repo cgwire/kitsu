@@ -1,8 +1,6 @@
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
-
-import i18n from '@/lib/i18n'
 
 import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -11,32 +9,40 @@ import peopleStoreFixture from '../fixtures/person-store'
 
 describe('ShotHistoryModal', () => {
   let store, shotStore
-  let wrapper
+  let resolveLoad
+
+  const versionsFixture = [
+    {
+      id: 'version-1',
+      name: 'SH01',
+      data: { frame_in: 12, frame_out: 22 }
+    },
+    {
+      id: 'version-2',
+      name: 'SH01',
+      data: { frame_in: 14, frame_out: 24 }
+    }
+  ]
+
+  const mountModal = (props = {}) =>
+    shallowMount(ShotHistoryModal, {
+      global: {
+        plugins: [store],
+        stubs: {
+          BaseModal: { template: '<div><slot /></div>' }
+        }
+      },
+      props: { active: false, shot: { id: 'shot-01' }, ...props }
+    })
 
   beforeEach(() => {
     shotStore = {
-      getters: {
-      },
+      getters: {},
       actions: {
-        loadShotHistory () {
-          return Promise.resolve([
-            {
-              id: 'version-1',
-              name: 'SH01',
-              data: {
-                frame_in: 12,
-                frame_out: 22
-              }
-            },
-            {
-              id: 'version-2',
-              name: 'SH01',
-              data: {
-                frame_in: 14,
-                frame_out: 24
-              }
-            }
-          ])
+        loadShotHistory() {
+          return new Promise(resolve => {
+            resolveLoad = resolve
+          })
         }
       }
     }
@@ -47,43 +53,33 @@ describe('ShotHistoryModal', () => {
         people: { ...peopleStoreFixture }
       }
     })
-
-    wrapper = shallowMount(ShotHistoryModal, {
-      store,
-      i18n,
-      global: {
-        mocks: {
-          $store: store
-        }
-      },
-      props: {
-        active: true,
-        shot: { id: 'shot-01' }
-      }
-    })
   })
 
   describe('Mount', () => {
     it('empty', () => {
-      const modal = wrapper.findComponent(ShotHistoryModal)
+      const wrapper = mountModal({ active: false })
       const tableInfo = wrapper.findComponent(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
-      expect(modal.findAll('.shot-version')).toHaveLength(0)
+      expect(wrapper.findAll('.shot-version')).toHaveLength(0)
     })
+
     it('spinner on loading', async () => {
-      wrapper.setData({ isLoading: true })
+      const wrapper = mountModal({ active: false })
+      await wrapper.setProps({ active: true })
       await nextTick()
-      const modal = wrapper.findComponent(ShotHistoryModal)
       const tableInfo = wrapper.findComponent(TableInfo)
       expect(tableInfo.props().isLoading).toBe(true)
-      expect(modal.findAll('.shot-version')).toHaveLength(0)
+      expect(wrapper.findAll('.shot-version')).toHaveLength(0)
     })
+
     it('data loaded', async () => {
-      await wrapper.vm.loadData()
-      const modal = wrapper.findComponent(ShotHistoryModal)
+      const wrapper = mountModal({ active: false })
+      await wrapper.setProps({ active: true })
+      resolveLoad(versionsFixture)
+      await flushPromises()
       const tableInfo = wrapper.findComponent(TableInfo)
       expect(tableInfo.props().isLoading).toBe(false)
-      expect(modal.findAll('.shot-version')).toHaveLength(2)
+      expect(wrapper.findAll('.shot-version')).toHaveLength(2)
     })
   })
 })

@@ -41,219 +41,185 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import HardwareItemList from '@/components/lists/HardwareItemList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditHardwareItemModal from '@/components/modals/EditHardwareItemModal.vue'
-import HardwareItemList from '@/components/lists/HardwareItemList.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
-export default {
-  name: 'hardware-items',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    DeleteModal,
-    EditHardwareItemModal,
-    HardwareItemList,
-    ListPageHeader,
-    RouteTabs
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      choices: [],
-      hardwareItemToDelete: null,
-      hardwareItemToEdit: {},
-      linkedHardwareItems: {},
-      errors: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      modals: {
-        del: false,
-        edit: false
-      },
-      loading: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        }
-      ]
-    }
-  },
+const activeTab = ref('active')
+const hardwareItemToDelete = ref(null)
+const hardwareItemToEdit = ref({})
+const linkedHardwareItems = ref({})
 
-  async mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-    this.linkedHardwareItems = await this.loadLinkedHardwareItems()
-  },
+const errors = reactive({ del: false, edit: false, list: false })
+const loading = reactive({ del: false, edit: false, list: false })
+const modals = reactive({ del: false, edit: false })
 
-  computed: {
-    ...mapGetters(['activePeople', 'hardwareItems', 'archivedHardwareItems']),
+// Computed
 
-    isActiveTab() {
-      return this.activeTab === 'active'
-    },
+const activePeople = computed(() => store.getters.activePeople)
+const archivedHardwareItems = computed(
+  () => store.getters.archivedHardwareItems
+)
+const hardwareItems = computed(() => store.getters.hardwareItems)
 
-    hardwareItemsList() {
-      return this.isActiveTab ? this.hardwareItems : this.archivedHardwareItems
-    },
+const isActiveTab = computed(() => activeTab.value === 'active')
 
-    deleteText() {
-      const hardwareItem = this.hardwareItemToDelete
-      if (hardwareItem) {
-        return this.$t('hardware_items.delete_text', {
-          name: hardwareItem.name
-        })
-      } else {
-        return ''
-      }
-    },
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') }
+])
 
-    usedAmounts() {
-      const usedAmounts = {}
-      this.activePeople.forEach(person => {
-        person.departments.forEach(departmentId => {
-          const departmentItems = this.linkedHardwareItems[departmentId] || []
-          departmentItems.forEach(item => {
-            if (!usedAmounts[item.id]) {
-              usedAmounts[item.id] = 0
-            }
-            usedAmounts[item.id] += 1
-          })
-        })
+const hardwareItemsList = computed(() =>
+  isActiveTab.value ? hardwareItems.value : archivedHardwareItems.value
+)
+
+const deleteText = computed(() =>
+  hardwareItemToDelete.value
+    ? t('hardware_items.delete_text', { name: hardwareItemToDelete.value.name })
+    : ''
+)
+
+const usedAmounts = computed(() => {
+  const amounts = {}
+  activePeople.value.forEach(person => {
+    person.departments.forEach(departmentId => {
+      const departmentItems = linkedHardwareItems.value[departmentId] || []
+      departmentItems.forEach(item => {
+        amounts[item.id] = (amounts[item.id] || 0) + 1
       })
-      return usedAmounts
-    },
+    })
+  })
+  return amounts
+})
 
-    remainingHardwareItems() {
-      const remainingAmounts = {}
+const remainingHardwareItems = computed(() =>
+  hardwareItems.value.reduce((remaining, hardwareItem) => {
+    remaining[hardwareItem.id] =
+      hardwareItem.inventory_amount - (usedAmounts.value[hardwareItem.id] || 0)
+    return remaining
+  }, {})
+)
 
-      this.hardwareItems.forEach(hardwareItem => {
-        remainingAmounts[hardwareItem.id] =
-          hardwareItem.inventory_amount -
-          (this.usedAmounts[hardwareItem.id] || 0)
-      })
-      return remainingAmounts
-    }
-  },
+// Functions
 
-  methods: {
-    ...mapActions([
-      'deleteHardwareItem',
-      'editHardwareItem',
-      'newHardwareItem',
-      'loadHardwareItems',
-      'loadLinkedHardwareItems'
-    ]),
-
-    confirmEditHardwareItem(form) {
-      let action = 'newHardwareItem'
-      if (this.hardwareItemToEdit && this.hardwareItemToEdit.id) {
-        action = 'editHardwareItem'
-        form.id = this.hardwareItemToEdit.id
-      }
-
-      this.loading.edit = true
-      this.errors.edit = false
-      this[action](form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteHardwareItem() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteHardwareItem(this.hardwareItemToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-          this.loading.del = false
-        })
-    },
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('hardware_items.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('hardware_items.fields.name'),
-        this.$t('hardware_items.fields.short_name'),
-        this.$t('hardware_items.fields.monthly_cost'),
-        this.$t('hardware_items.fields.inventory_amount')
-      ]
-      const entries = [headers].concat(
-        this.hardwareItems.map(hardwareItem => [
-          hardwareItem.type,
-          hardwareItem.name,
-          hardwareItem.short_name,
-          hardwareItem.monthly_cost,
-          hardwareItem.inventory_amount
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.hardwareItemToEdit = {}
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onEditClicked(hardwareItem) {
-      this.hardwareItemToEdit = hardwareItem
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(hardwareItem) {
-      this.hardwareItemToDelete = hardwareItem
-      this.errors.del = false
-      this.modals.del = true
-    }
-  },
-
-  watch: {
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('hardware_items.title')} - Kitsu`
-    }
-  }
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('hardware_items.title'))
+  const headers = [
+    t('main.type'),
+    t('hardware_items.fields.name'),
+    t('hardware_items.fields.short_name'),
+    t('hardware_items.fields.monthly_cost'),
+    t('hardware_items.fields.inventory_amount')
+  ]
+  const rows = hardwareItems.value.map(hardwareItem => [
+    hardwareItem.type,
+    hardwareItem.name,
+    hardwareItem.short_name,
+    hardwareItem.monthly_cost,
+    hardwareItem.inventory_amount
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
 }
+
+const onNewClicked = () => {
+  hardwareItemToEdit.value = {}
+  errors.edit = false
+  modals.edit = true
+}
+
+const onEditClicked = hardwareItem => {
+  hardwareItemToEdit.value = hardwareItem
+  errors.edit = false
+  modals.edit = true
+}
+
+const onDeleteClicked = hardwareItem => {
+  hardwareItemToDelete.value = hardwareItem
+  errors.del = false
+  modals.del = true
+}
+
+const confirmEditHardwareItem = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (hardwareItemToEdit.value?.id) {
+      await store.dispatch('editHardwareItem', {
+        ...form,
+        id: hardwareItemToEdit.value.id
+      })
+    } else {
+      await store.dispatch('newHardwareItem', form)
+    }
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const confirmDeleteHardwareItem = async () => {
+  loading.del = true
+  errors.del = false
+  try {
+    await store.dispatch('deleteHardwareItem', hardwareItemToDelete.value)
+    modals.del = false
+  } catch (err) {
+    console.error(err)
+    errors.del = true
+  }
+  loading.del = false
+}
+
+// Watchers
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(async () => {
+  activeTab.value = route.query.tab || 'active'
+  linkedHardwareItems.value = await store.dispatch('loadLinkedHardwareItems')
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('hardware_items.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.software-license-list {
+.hardware-item-list {
   margin-top: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .hardware-items {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
 }
 </style>
