@@ -8,7 +8,7 @@
 
         <div class="filters flexrow">
           <search-field
-            ref="search-field"
+            ref="searchFieldRef"
             class="flexrow-item"
             @change="onSearchChange"
             :can-save="false"
@@ -96,181 +96,168 @@
   </page-layout>
 </template>
 
-<script>
+<script setup>
+import { useHead } from '@unhead/vue'
 import { firstBy } from 'thenby'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { searchMixin } from '@/components/mixins/search'
-
+import PageLayout from '@/components/layouts/PageLayout.vue'
+import ManageLibrary from '@/components/sides/ManageLibrary.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
-import ManageLibrary from '@/components/sides/ManageLibrary.vue'
-import PageLayout from '@/components/layouts/PageLayout.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'asset-library',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
 
-  components: {
-    Combobox,
-    ComboboxProduction,
-    EntityPreview,
-    ManageLibrary,
-    PageLayout,
-    PageTitle,
-    ProductionName,
-    SearchField,
-    TableInfo
-  },
+const searchFieldRef = ref(null)
 
-  data() {
-    return {
-      errors: {
-        sharedAssets: false
-      },
-      filters: {
-        productionId: null
-      },
-      loading: {
-        sharedAssets: false
-      },
-      sorting: {
-        current: 'name',
-        options: ['name', 'production', 'created_at', 'updated_at'].map(
-          name => ({
-            label: name,
-            value: name
-          })
-        )
-      }
-    }
-  },
+const errors = reactive({ sharedAssets: false })
+const loading = reactive({ sharedAssets: false })
+const filters = reactive({ productionId: null })
+const sorting = reactive({
+  current: 'name',
+  options: ['name', 'production', 'created_at', 'updated_at'].map(name => ({
+    label: name,
+    value: name
+  }))
+})
 
-  mounted() {
-    this.filters.productionId = this.$route.query.production || undefined
-    this.searchField.setValue(this.$route.query.search || undefined)
-    this.$nextTick(() => {
-      this.onSearchChange()
+// Computed
+
+const displayedSharedAssets = computed(
+  () => store.getters.displayedSharedAssets
+)
+const displayedSharedAssetsByType = computed(
+  () => store.getters.displayedSharedAssetsByType
+)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const openProductions = computed(() => store.getters.openProductions)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedAssets = computed(() => store.getters.selectedAssets)
+
+const productionList = computed(() => [
+  { name: t('main.all') },
+  ...openProductions.value
+])
+
+const sortedSharedAssetsByType = computed(() => {
+  const nameFilter = (a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true })
+  const productionFilter = (a, b) =>
+    a.production.name.localeCompare(b.production.name, undefined, {
+      numeric: true
     })
-  },
-
-  computed: {
-    ...mapGetters([
-      'displayedSharedAssets',
-      'displayedSharedAssetsByType',
-      'isCurrentUserManager',
-      'openProductions',
-      'productionMap',
-      'selectedAssets'
-    ]),
-
-    searchField() {
-      return this.$refs['search-field']
-    },
-
-    productionList() {
-      return [{ name: this.$t('main.all') }, ...this.openProductions]
-    },
-
-    sortedSharedAssetsByType() {
-      const nameFilter = (a, b) =>
-        a.name.localeCompare(b.name, undefined, { numeric: true })
-      const productionFilter = (a, b) =>
-        a.production.name.localeCompare(b.production.name, undefined, {
-          numeric: true
-        })
-      return this.displayedSharedAssetsByType.map(type => {
-        if (this.sorting.current === 'production') {
-          return type.sort(firstBy(productionFilter).thenBy(nameFilter))
-        }
-        if (this.sorting.current === 'created_at') {
-          return type.sort(firstBy('created_at'))
-        }
-        if (this.sorting.current === 'updated_at') {
-          return type.sort(firstBy('updated_at', -1))
-        }
-        return type.sort(firstBy(nameFilter).thenBy(productionFilter))
-      })
+  return displayedSharedAssetsByType.value.map(type => {
+    if (sorting.current === 'production') {
+      return type.sort(firstBy(productionFilter).thenBy(nameFilter))
     }
-  },
-
-  methods: {
-    ...mapActions([
-      'loadSharedAssets',
-      'setAssetSelection',
-      'setSharedAssetSearch'
-    ]),
-
-    async refresh(silent = false) {
-      this.loading.sharedAssets = !silent
-      const production = this.productionMap.get(this.filters.productionId)
-      try {
-        await this.loadSharedAssets({ production })
-      } catch (error) {
-        console.error(error)
-        this.errors.sharedAssets = true
-      }
-      this.loading.sharedAssets = false
-    },
-
-    toggleEntity(entity) {
-      const selected = this.isSelected(entity)
-      this.setAssetSelection({ asset: entity, selected: !selected })
-    },
-
-    isSelected(entity) {
-      return this.selectedAssets.has(entity.id)
-    },
-
-    onSearchChange() {
-      const searchQuery = this.searchField.getValue() || ''
-      this.setSharedAssetSearch(searchQuery)
-      this.setSearchInUrl()
-    },
-
-    updateRoute({ production, search }) {
-      const query = {
-        ...this.$route.query,
-        production: production || undefined,
-        search: search || undefined
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        this.$router.push({ query })
-      }
+    if (sorting.current === 'created_at') {
+      return type.sort(firstBy('created_at'))
     }
-  },
-
-  watch: {
-    'filters.productionId'(value) {
-      this.updateRoute({ production: value })
-      this.refresh()
+    if (sorting.current === 'updated_at') {
+      return type.sort(firstBy('updated_at', -1))
     }
-  },
+    return type.sort(firstBy(nameFilter).thenBy(productionFilter))
+  })
+})
 
-  head() {
-    return {
-      title: `${this.$t('library.asset_library')} - Kitsu`
+// Functions
+
+const setSearchInUrl = query => {
+  const searchQuery = query ?? searchFieldRef.value?.getValue()
+  router.push({
+    query: {
+      ...route.query,
+      search: searchQuery || undefined
     }
+  })
+}
+
+const onSearchChange = () => {
+  const searchQuery = searchFieldRef.value?.getValue() || ''
+  store.dispatch('setSharedAssetSearch', searchQuery)
+  setSearchInUrl()
+}
+
+const refresh = async (silent = false) => {
+  loading.sharedAssets = !silent
+  errors.sharedAssets = false
+  const production = productionMap.value.get(filters.productionId)
+  try {
+    await store.dispatch('loadSharedAssets', { production })
+  } catch (error) {
+    console.error(error)
+    errors.sharedAssets = true
+  }
+  loading.sharedAssets = false
+}
+
+const isSelected = entity => selectedAssets.value.has(entity.id)
+
+const toggleEntity = entity => {
+  store.dispatch('setAssetSelection', {
+    asset: entity,
+    selected: !isSelected(entity)
+  })
+}
+
+const updateRoute = ({ production, search }) => {
+  const query = {
+    ...route.query,
+    production: production || undefined,
+    search: search || undefined
+  }
+  if (JSON.stringify(query) !== JSON.stringify(route.query)) {
+    router.push({ query })
   }
 }
+
+// Watchers
+
+watch(
+  () => filters.productionId,
+  value => {
+    updateRoute({ production: value })
+    refresh()
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  filters.productionId = route.query.production || undefined
+  searchFieldRef.value?.setValue(route.query.search || undefined)
+  nextTick(onSearchChange)
+})
+
+// Head
+
+useHead({
+  title: computed(() => `${t('library.asset_library')} - Kitsu`)
+})
 </script>
 
 <style lang="scss" scoped>
 .asset-library {
+  color: var(--text);
   display: flex;
   flex-direction: column;
-  max-height: 100%;
-  padding: 4em 2em 1em 2em;
-  color: var(--text);
   margin-left: auto;
   margin-right: auto;
+  max-height: 100%;
+  padding: 4em 2em 1em 2em;
 }
 
 .entities {
