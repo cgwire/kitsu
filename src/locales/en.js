@@ -1435,8 +1435,11 @@ export default {
     avatar: {
       title: 'Change avatar',
       error_upload: 'There was an error while uploading picture.',
+      intro: 'Pick a photo, then drag and zoom to frame it.',
+      drop_or_click: 'Click or drop a photo here',
       preview: 'Preview',
       preview_hint: 'Drag to reposition, use the slider to zoom.',
+      replace: 'Choose another photo',
       updating: 'Updating...',
       removing: 'Removing...'
     },

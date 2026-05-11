@@ -1013,8 +1013,11 @@
       "avatar": {
         "title": "Changer votre avatar",
         "error_upload": "Une erreur est survenue en envoyant l'image.",
+        "intro": "Choisissez une photo, puis glissez et zoomez pour la cadrer.",
+        "drop_or_click": "Cliquez ou déposez une photo ici",
         "preview": "Aperçu",
         "preview_hint": "Glissez pour repositionner, utilisez le curseur pour zoomer.",
+        "replace": "Choisir une autre photo",
         "updating": "Mise à jour...",
         "removing": "Enlever..."
       },

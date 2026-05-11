@@ -1,24 +1,36 @@
 <template>
   <base-modal :active="active" :title="title" @cancel="$emit('cancel')">
     <p class="explanation">
-      {{ $t('main.csv.select_file') }}
+      {{ $t('profile.avatar.intro') }}
     </p>
 
-    <file-upload
-      ref="uploadAvatarField"
-      :label="$t('main.csv.upload_file')"
-      @fileselected="onFileSelected"
-      accept=".png,.jpg,.jpeg"
-    />
+    <div class="preview">
+      <input
+        ref="fileInputRef"
+        class="hidden-input"
+        type="file"
+        accept=".png,.jpg,.jpeg"
+        @change="onFileChange"
+      />
 
-    <div class="preview" v-if="previewUrl">
-      <p class="preview-label">{{ $t('profile.avatar.preview') }}</p>
       <div
         ref="frameRef"
         class="preview-circle"
-        :class="{ dragging: isDragging }"
+        :class="{
+          dragging: isDragging,
+          'drag-over': isDragOver,
+          empty: !previewUrl
+        }"
+        :tabindex="previewUrl ? -1 : 0"
         @mousedown="onPointerDown"
         @touchstart.passive="onPointerDown"
+        @click="onPreviewClick"
+        @keydown.enter.prevent="openFilePicker"
+        @keydown.space.prevent="openFilePicker"
+        @dragenter.prevent="isDragOver = true"
+        @dragover.prevent="isDragOver = true"
+        @dragleave.prevent="isDragOver = false"
+        @drop.prevent="onDrop"
       >
         <img
           ref="imageRef"
@@ -28,23 +40,38 @@
           draggable="false"
           :style="imageStyle"
           @load="onImageLoad"
+          v-if="previewUrl"
         />
+        <div class="preview-placeholder" v-else>
+          <upload-icon
+            class="placeholder-icon"
+            :size="32"
+            :stroke-width="1.5"
+          />
+          <span class="placeholder-text">
+            {{ $t('profile.avatar.drop_or_click') }}
+          </span>
+        </div>
       </div>
 
-      <div class="zoom-row">
-        <span class="zoom-icon">−</span>
-        <input
-          class="zoom-slider"
-          type="range"
-          :min="minScale"
-          :max="maxScale"
-          step="0.001"
-          v-model.number="scale"
-        />
-        <span class="zoom-icon">+</span>
+      <div class="controls" v-if="previewUrl">
+        <div class="zoom-row">
+          <span class="zoom-icon" aria-hidden="true">−</span>
+          <input
+            class="zoom-slider"
+            type="range"
+            :min="minScale"
+            :max="maxScale"
+            step="0.001"
+            v-model.number="scale"
+          />
+          <span class="zoom-icon" aria-hidden="true">+</span>
+        </div>
+        <button class="replace-button" type="button" @click="openFilePicker">
+          {{ $t('profile.avatar.replace') }}
+        </button>
+        <p class="preview-hint">{{ $t('profile.avatar.preview_hint') }}</p>
       </div>
-
-      <p class="preview-hint">{{ $t('profile.avatar.preview_hint') }}</p>
     </div>
 
     <p class="error" v-if="isError">
@@ -62,6 +89,7 @@
 </template>
 
 <script setup>
+import { UploadIcon } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, ref, toRef, watch } from 'vue'
 
 import { useModal } from '@/composables/modal'
@@ -71,10 +99,9 @@ import ModalFooter from '@/components/modals/ModalFooter.vue'
 // eslint-disable-next-line no-unused-vars
 import FileUpload from '@/components/widgets/FileUpload.vue'
 
-// Output dimensions of the cropped avatar in pixels. The display frame is
-// driven by `.preview-circle` CSS (140px), but the canvas exports at a
-// higher resolution so the avatar still looks sharp on retina.
-const FRAME_SIZE = 140
+// Display frame is driven by `.preview-circle` CSS (180px); the canvas
+// exports at a higher resolution so the avatar stays sharp on retina.
+const FRAME_SIZE = 180
 const OUTPUT_SIZE = 400
 
 const props = defineProps({
@@ -90,9 +117,9 @@ useModal(toRef(props, 'active'), emit)
 
 // State
 
+const fileInputRef = ref(null)
 const frameRef = ref(null)
 const imageRef = ref(null)
-const uploadAvatarField = ref(null)
 const originalFile = ref(null)
 const formData = ref(null)
 const previewUrl = ref(null)
@@ -100,11 +127,11 @@ const naturalSize = ref({ width: 0, height: 0 })
 const scale = ref(1)
 const offset = ref({ x: 0, y: 0 })
 const isDragging = ref(false)
+const isDragOver = ref(false)
 const dragStart = ref({ pointerX: 0, pointerY: 0, offsetX: 0, offsetY: 0 })
 
 // Computed
 
-// Minimum scale so the scaled image still covers the circular frame.
 const minScale = computed(() => {
   const { width, height } = naturalSize.value
   if (!width || !height) return 1
@@ -157,17 +184,36 @@ const reset = () => {
   naturalSize.value = { width: 0, height: 0 }
   scale.value = 1
   offset.value = { x: 0, y: 0 }
-  uploadAvatarField.value?.reset()
+  isDragOver.value = false
+  if (fileInputRef.value) fileInputRef.value.value = ''
 }
 
-const onFileSelected = data => {
+const acceptFile = file => {
+  if (!file || !file.type?.startsWith('image/')) return
   releasePreview()
-  originalFile.value = data?.get('file') || null
+  originalFile.value = file
+  const data = new FormData()
+  data.append('file', file, file.name)
   formData.value = data
-  if (originalFile.value) {
-    previewUrl.value = URL.createObjectURL(originalFile.value)
-  }
+  previewUrl.value = URL.createObjectURL(file)
   emit('fileselected', data)
+}
+
+const onFileChange = event => {
+  acceptFile(event.target.files?.[0])
+}
+
+const onDrop = event => {
+  isDragOver.value = false
+  acceptFile(event.dataTransfer?.files?.[0])
+}
+
+const openFilePicker = () => fileInputRef.value?.click()
+
+const onPreviewClick = event => {
+  if (previewUrl.value) return
+  if (event.target.closest('.replace-button')) return
+  openFilePicker()
 }
 
 const onImageLoad = event => {
@@ -188,6 +234,7 @@ const pointerCoords = event => {
 }
 
 const onPointerDown = event => {
+  if (!previewUrl.value) return
   if (event.button !== undefined && event.button !== 0) return
   if (!naturalSize.value.width) return
   isDragging.value = true
@@ -277,8 +324,6 @@ const onConfirmClicked = async () => {
 
 watch(scale, (value, previous) => {
   if (!naturalSize.value.width) return
-  // Keep the point at the centre of the frame anchored while zooming so the
-  // user's framing stays predictable rather than jumping around.
   if (!previous || previous === value) {
     offset.value = clampOffset(offset.value.x, offset.value.y)
     return
@@ -308,27 +353,26 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .explanation {
-  margin-bottom: 1rem;
+  color: var(--text-alt);
+  margin-bottom: 1.25rem;
+  text-align: center;
 }
 
 .error {
   color: $red;
   margin-top: 1rem;
+  text-align: center;
 }
 
 .preview {
   align-items: center;
   display: flex;
   flex-direction: column;
-  margin-top: 1.5rem;
+  gap: 1rem;
 }
 
-.preview-label {
-  color: var(--text-alt);
-  font-size: 0.85rem;
-  letter-spacing: 1px;
-  margin: 0 0 0.75rem;
-  text-transform: uppercase;
+.hidden-input {
+  display: none;
 }
 
 .preview-circle {
@@ -336,15 +380,32 @@ onBeforeUnmount(() => {
   border: 1px solid var(--border);
   border-radius: 50%;
   cursor: grab;
-  height: 140px;
+  height: 180px;
+  outline: none;
   overflow: hidden;
   position: relative;
   touch-action: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
   user-select: none;
-  width: 140px;
+  width: 180px;
 
   &.dragging {
     cursor: grabbing;
+  }
+
+  &.empty {
+    border-style: dashed;
+    border-width: 2px;
+    cursor: pointer;
+
+    &:hover,
+    &:focus,
+    &.drag-over {
+      background: var(--background-hover);
+      border-color: $green;
+    }
   }
 }
 
@@ -358,12 +419,41 @@ onBeforeUnmount(() => {
   transform-origin: 0 0;
 }
 
+.preview-placeholder {
+  align-items: center;
+  color: var(--text-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  justify-content: center;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.placeholder-icon {
+  color: var(--text-alt);
+  opacity: 0.7;
+}
+
+.placeholder-text {
+  font-size: 0.9rem;
+}
+
+.controls {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 260px;
+}
+
 .zoom-row {
   align-items: center;
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  width: 200px;
+  gap: 0.6rem;
+  width: 100%;
 }
 
 .zoom-icon {
@@ -402,10 +492,23 @@ onBeforeUnmount(() => {
   }
 }
 
+.replace-button {
+  background: none;
+  border: none;
+  color: $green;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .preview-hint {
   color: var(--text-alt);
-  font-size: 0.85rem;
-  margin: 0.75rem 0 0;
+  font-size: 0.8rem;
+  margin: 0;
   text-align: center;
 }
 </style>
