@@ -32,9 +32,14 @@
         </div>
       </header>
 
-      <form ref="formRef" @submit.prevent="saveSettings">
-        <section class="card">
-          <h2 class="card-title">{{ $t('settings.title') }}</h2>
+      <div class="cards">
+        <card
+          :title="$t('settings.title')"
+          :error="errors.studio ? $t('settings.save.error') : ''"
+          :save-label="$t('settings.save.button')"
+          :loading="loading.studio"
+          @save="saveStudio"
+        >
           <text-field
             :label="$t('settings.fields.name')"
             :required="true"
@@ -48,23 +53,15 @@
             type="number"
             v-model="form.hours_by_day"
           />
-          <div class="card-actions">
-            <p class="error" v-if="errors.save">
-              {{ $t('settings.save.error') }}
-            </p>
-            <button
-              class="button save-button"
-              :class="{ 'is-loading': loading.save }"
-              :disabled="loading.save || !formRef?.checkValidity()"
-              type="submit"
-            >
-              {{ $t('settings.save.button') }}
-            </button>
-          </div>
-        </section>
+        </card>
 
-        <section class="card">
-          <h2 class="card-title">{{ $t('settings.preferences_title') }}</h2>
+        <card
+          :title="$t('settings.preferences_title')"
+          :error="errors.preferences ? $t('settings.save.error') : ''"
+          :save-label="$t('settings.save.button')"
+          :loading="loading.preferences"
+          @save="savePreferences"
+        >
           <div class="toggle-row">
             <checkbox
               :toggle="true"
@@ -100,20 +97,21 @@
               v-model="form.dark_theme_by_default"
             />
           </div>
-          <div class="card-actions">
-            <button
-              class="button save-button"
-              :class="{ 'is-loading': loading.save }"
-              :disabled="loading.save || !formRef?.checkValidity()"
-              type="submit"
-            >
-              {{ $t('settings.save.button') }}
-            </button>
-          </div>
-        </section>
+        </card>
 
-        <section class="card">
-          <h2 class="card-title">{{ $t('settings.integrations') }}</h2>
+        <card
+          :title="$t('settings.integrations')"
+          :error="
+            errors.webhook_error
+              ? $t('settings.webhook_error')
+              : errors.integrations
+                ? $t('settings.save.error')
+                : ''
+          "
+          :save-label="$t('settings.save.button')"
+          :loading="loading.integrations"
+          @save="saveIntegrations"
+        >
           <text-field
             :label="$t('settings.fields.slack_token')"
             v-model.trim="form.chat_token_slack"
@@ -126,21 +124,8 @@
             :label="$t('settings.fields.mattermost_webhook')"
             v-model.trim="form.chat_webhook_mattermost"
           />
-          <p class="error" v-if="errors.webhook_error">
-            {{ $t('settings.webhook_error') }}
-          </p>
-          <div class="card-actions">
-            <button
-              class="button save-button"
-              :class="{ 'is-loading': loading.save }"
-              :disabled="loading.save || !formRef?.checkValidity()"
-              type="submit"
-            >
-              {{ $t('settings.save.button') }}
-            </button>
-          </div>
-        </section>
-      </form>
+        </card>
+      </div>
     </div>
 
     <change-avatar-modal
@@ -162,6 +147,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
+import Card from '@/components/widgets/Card.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -184,19 +170,22 @@ const form = reactive({
   dark_theme_by_default: false
 })
 const errors = reactive({
-  save: false,
+  studio: false,
+  preferences: false,
+  integrations: false,
   saveAvatar: false,
   webhook_error: false
 })
 const loading = reactive({
-  save: false,
+  studio: false,
+  preferences: false,
+  integrations: false,
   saveAvatar: false
 })
 const modals = reactive({
   avatar: false
 })
 
-const formRef = ref(null)
 const organisationLogoPath = ref('')
 
 // Computed
@@ -229,20 +218,22 @@ const showAvatarModal = () => {
   modals.avatar = true
 }
 
-const saveSettings = () => {
-  if (!checkWebhook()) return
-  loading.save = true
-  errors.save = false
-  store
-    .dispatch('saveOrganisation', { ...form })
-    .catch(err => {
-      console.error(err)
-      errors.save = true
-    })
-    .finally(() => {
-      loading.save = false
-    })
+const saveSection = async (section, validate = null) => {
+  if (validate && !validate()) return
+  loading[section] = true
+  errors[section] = false
+  try {
+    await store.dispatch('saveOrganisation', { ...form })
+  } catch (err) {
+    console.error(err)
+    errors[section] = true
+  }
+  loading[section] = false
 }
+
+const saveStudio = () => saveSection('studio')
+const savePreferences = () => saveSection('preferences')
+const saveIntegrations = () => saveSection('integrations', checkWebhook)
 
 const uploadAvatarFile = formData => {
   loading.saveAvatar = true
@@ -266,16 +257,16 @@ const uploadAvatarFile = formData => {
 }
 
 const removeAvatar = () => {
-  loading.save = true
-  errors.save = false
+  loading.saveAvatar = true
+  errors.saveAvatar = false
   store
     .dispatch('deleteOrganisationLogo')
     .catch(err => {
       console.error(err)
-      errors.save = true
+      errors.saveAvatar = true
     })
     .finally(() => {
-      loading.save = false
+      loading.saveAvatar = false
     })
 }
 
@@ -412,73 +403,20 @@ useHead({ title: computed(() => `${t('settings.title')} - Kitsu`) })
   }
 }
 
-.card {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  padding: 1.75rem 2rem;
-
-  :deep(label.label) {
-    color: var(--text);
-  }
-
-  &:not(:last-child) {
-    margin-bottom: 1.5rem;
-  }
-}
-
-.dark .card {
-  background: var(--background-alt);
-}
-
-.card-title {
-  border-bottom: none;
-  color: var(--text);
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 2.5rem;
-  text-transform: uppercase;
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .toggle-row {
   margin-bottom: 1rem;
 }
 
-.card-actions {
-  align-items: center;
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-
-  .error {
-    flex: 1;
-    margin: 0;
-  }
-}
-
-.save-button {
-  background: $green;
-  border-color: $green;
-  color: $white;
-  min-width: 8rem;
-
-  &:hover:not([disabled]) {
-    background: $light-green;
-    border-color: $light-green;
-  }
-}
-
 @media screen and (max-width: 768px) {
   .settings-content {
     margin: 1.5rem auto;
     padding: 0 0.75rem;
-  }
-
-  .card {
-    padding: 1.25rem;
   }
 }
 </style>

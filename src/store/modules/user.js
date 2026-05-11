@@ -173,7 +173,7 @@ const getters = {
 const actions = {
   saveProfile({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
-    peopleApi
+    return peopleApi
       .updatePerson(payload.form)
       .then(() => {
         payload.form.id = state.user.id
@@ -182,6 +182,7 @@ const actions = {
       .catch(err => {
         console.error(err)
         commit(USER_SAVE_PROFILE_ERROR)
+        throw err
       })
   },
 

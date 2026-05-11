@@ -39,7 +39,7 @@
       v-else-if="twoFA.newRecoveryCodesNeedTwoFA"
       :preferred-two-fa="user.preferred_two_factor_authentication"
       :two-fas-enabled="twoFAsEnabled"
-      :is-loading="twoFA.isLoading"
+      :is-loading="twoFA.loadingAction === 'newRecoveryCodes'"
       :email="user.email"
       :text-validate-button="textValidateTwoFA"
       :is-disable-button="validateTwoFAIsDisable"
@@ -119,7 +119,7 @@
             </button>
             <button
               class="button save-button is-medium"
-              :class="{ 'is-loading': twoFA.isLoading }"
+              :class="{ 'is-loading': twoFA.loadingAction === 'enableTOTP' }"
               @click="nextEnable()"
             >
               {{ textValidateNewTwoFA }}
@@ -131,7 +131,7 @@
           v-else-if="twoFA.TOTPNeedTwoFA"
           :preferred-two-fa="user.preferred_two_factor_authentication"
           :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.isLoading"
+          :is-loading="twoFA.loadingAction === 'disableTOTP'"
           :email="user.email"
           :text-validate-button="textValidateTwoFA"
           :is-disable-button="validateTwoFAIsDisable"
@@ -147,7 +147,7 @@
             class="button two-fa-action enable-action is-medium"
             :class="{
               'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.isLoading
+              'is-loading': twoFA.loadingAction === 'preEnableTOTP'
             }"
             @click="preEnableTOTPRequested()"
           >
@@ -157,8 +157,7 @@
             v-else
             class="button two-fa-action disable-action is-medium"
             :class="{
-              'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.isLoading
+              'is-disabled': twoFAButtonsDisabled
             }"
             @click="disableTOTPRequested()"
           >
@@ -223,7 +222,9 @@
             </button>
             <button
               class="button save-button is-medium"
-              :class="{ 'is-loading': twoFA.isLoading }"
+              :class="{
+                'is-loading': twoFA.loadingAction === 'enableEmailOTP'
+              }"
               @click="nextEnable()"
             >
               {{ textValidateNewTwoFA }}
@@ -235,7 +236,7 @@
           v-else-if="twoFA.emailOTPNeedTwoFA"
           :preferred-two-fa="user.preferred_two_factor_authentication"
           :two-fas-enabled="twoFAsEnabled"
-          :is-loading="twoFA.isLoading"
+          :is-loading="twoFA.loadingAction === 'disableEmailOTP'"
           :email="user.email"
           :text-validate-button="textValidateTwoFA"
           :is-disable-button="validateTwoFAIsDisable"
@@ -251,7 +252,7 @@
             class="button two-fa-action enable-action is-medium"
             :class="{
               'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.isLoading
+              'is-loading': twoFA.loadingAction === 'preEnableEmailOTP'
             }"
             @click="preEnableEmailOTPRequested()"
           >
@@ -263,8 +264,7 @@
             v-else
             class="button two-fa-action disable-action is-medium"
             :class="{
-              'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.isLoading
+              'is-disabled': twoFAButtonsDisabled
             }"
             @click="disableEmailOTPRequested()"
           >
@@ -333,7 +333,7 @@
             </button>
             <button
               class="button save-button is-medium"
-              :class="{ 'is-loading': twoFA.isLoading }"
+              :class="{ 'is-loading': twoFA.loadingAction === 'registerFIDO' }"
               @click="registerFIDORequested()"
             >
               {{ $t('profile.two_factor_authentication.fido.button_register') }}
@@ -345,8 +345,7 @@
           <button
             class="button two-fa-action enable-action is-medium"
             :class="{
-              'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.isLoading
+              'is-disabled': twoFAButtonsDisabled
             }"
             @click="preRegisterFIDORequested()"
           >
@@ -360,8 +359,7 @@
       v-if="twoFAEnabled && !twoFA.newRecoveryCodesNeedTwoFA"
       class="two-fa-button button save-button is-medium"
       :class="{
-        'is-disabled': twoFAButtonsDisabled,
-        'is-loading': twoFA.isLoading
+        'is-disabled': twoFAButtonsDisabled
       }"
       @click="newRecoveryCodesRequested()"
     >
@@ -433,7 +431,10 @@ const twoFA = reactive({
   TOTPProvisionningUri: '',
   OTPSecret: '',
   OTPRecoveryCodes: null,
-  isLoading: false,
+  // Name of the action currently in flight (e.g. 'enableTOTP',
+  // 'preEnableEmailOTP') or null when idle. Each button checks for its own
+  // name so clicking on one TOTP action doesn't spin the rest.
+  loadingAction: null,
   TOTPPreEnabled: false,
   TOTPNeedTwoFA: false,
   emailOTPPreEnabled: false,
@@ -536,7 +537,7 @@ const removeTwoFactorErrors = () => {
 
 const enableTOTPRequested = () => {
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'enableTOTP'
   store
     .dispatch('enableTOTP', twoFA.validationOTP)
     .then(OTPRecoveryCodes => {
@@ -551,13 +552,13 @@ const enableTOTPRequested = () => {
       else twoFA.error.enableTOTP = true
     })
     .finally(() => {
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
     })
 }
 
 const preEnableTOTPRequested = () => {
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'preEnableTOTP'
   twoFA.TOTPPreEnabled = false
   store
     .dispatch('preEnableTOTP')
@@ -570,7 +571,7 @@ const preEnableTOTPRequested = () => {
       twoFA.error.enableTOTP = true
     })
     .finally(() => {
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
     })
 }
 
@@ -579,7 +580,7 @@ const disableTOTPRequested = payload => {
   if (!twoFA.TOTPNeedTwoFA) {
     twoFA.TOTPNeedTwoFA = true
   } else {
-    twoFA.isLoading = true
+    twoFA.loadingAction = 'disableTOTP'
     store
       .dispatch('disableTOTP', payload)
       .then(() => {
@@ -592,14 +593,14 @@ const disableTOTPRequested = payload => {
         else twoFA.error.disableTOTP = true
       })
       .finally(() => {
-        twoFA.isLoading = false
+        twoFA.loadingAction = null
       })
   }
 }
 
 const enableEmailOTPRequested = () => {
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'enableEmailOTP'
   store
     .dispatch('enableEmailOTP', twoFA.validationOTP)
     .then(OTPRecoveryCodes => {
@@ -613,13 +614,13 @@ const enableEmailOTPRequested = () => {
       else twoFA.error.enableEmailOTP = true
     })
     .finally(() => {
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
     })
 }
 
 const preEnableEmailOTPRequested = () => {
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'preEnableEmailOTP'
   twoFA.emailOTPPreEnabled = false
   twoFA.OTPRecoveryCodes = null
   store
@@ -631,7 +632,7 @@ const preEnableEmailOTPRequested = () => {
       twoFA.error.enableEmailOTP = true
     })
     .finally(() => {
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
     })
 }
 
@@ -641,7 +642,7 @@ const disableEmailOTPRequested = payload => {
   if (!twoFA.emailOTPNeedTwoFA) {
     twoFA.emailOTPNeedTwoFA = true
   } else {
-    twoFA.isLoading = true
+    twoFA.loadingAction = 'disableEmailOTP'
     store
       .dispatch('disableEmailOTP', payload)
       .then(() => {
@@ -654,7 +655,7 @@ const disableEmailOTPRequested = payload => {
         else twoFA.error.disableEmailOTP = true
       })
       .finally(() => {
-        twoFA.isLoading = false
+        twoFA.loadingAction = null
       })
   }
 }
@@ -668,7 +669,7 @@ const registerFIDORequested = () => {
   if (!twoFA.FIDONewDeviceName) return
 
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'registerFIDO'
   store
     .dispatch('preRegisterFIDO')
     .then(publicKey => navigator.credentials.create({ publicKey }))
@@ -687,14 +688,14 @@ const registerFIDORequested = () => {
     })
     .finally(() => {
       twoFA.FIDOPreRegistered = false
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
       twoFA.FIDONewDeviceName = ''
     })
 }
 
 const unregisterFIDORequested = deviceName => {
   removeTwoFactorErrors()
-  twoFA.isLoading = true
+  twoFA.loadingAction = 'unregisterFIDO'
   store
     .dispatch('unregisterFIDO', { deviceName })
     .then(() => {
@@ -706,7 +707,7 @@ const unregisterFIDORequested = deviceName => {
       else twoFA.error.unregisterFIDO = true
     })
     .finally(() => {
-      twoFA.isLoading = false
+      twoFA.loadingAction = null
     })
 }
 
@@ -715,7 +716,7 @@ const newRecoveryCodesRequested = payload => {
   if (!twoFA.newRecoveryCodesNeedTwoFA) {
     twoFA.newRecoveryCodesNeedTwoFA = true
   } else {
-    twoFA.isLoading = true
+    twoFA.loadingAction = 'newRecoveryCodes'
     store
       .dispatch('newRecoveryCodes', payload)
       .then(OTPRecoveryCodes => {
@@ -729,7 +730,7 @@ const newRecoveryCodesRequested = payload => {
         else twoFA.error.newRecoveryCodes = true
       })
       .finally(() => {
-        twoFA.isLoading = false
+        twoFA.loadingAction = null
       })
   }
 }
@@ -772,7 +773,7 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.newRecoveryCodesNeedTwoFA = false
   twoFA.FIDOPreRegistered = false
   twoFA.FIDONewDeviceName = ''
-  twoFA.isLoading = false
+  twoFA.loadingAction = null
   twoFA.validationOTP = ''
   twoFA.error.isWrongOTP = false
   twoFA.error.enableTOTP = false

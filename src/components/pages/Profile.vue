@@ -23,8 +23,13 @@
         </div>
       </header>
 
-      <section class="card">
-        <h2 class="card-title">{{ $t('profile.info_title') }}</h2>
+      <card
+        :title="$t('profile.info_title')"
+        :error="errors.info ? $t('profile.save.error') : ''"
+        :save-label="$t('profile.save.button')"
+        :loading="loading.info"
+        @save="saveInfo"
+      >
         <div class="grid-two">
           <text-field
             :label="$t('people.fields.first_name')"
@@ -56,24 +61,15 @@
             @update:model-value="localeChanged"
           />
         </div>
+      </card>
 
-        <div class="card-actions">
-          <p class="error" v-if="isSaveProfileLoadingError">
-            {{ $t('profile.save.error') }}
-          </p>
-          <button
-            class="button save-button"
-            :class="{ 'is-loading': isSaveProfileLoading }"
-            @click="saveProfile({ form })"
-          >
-            {{ $t('profile.save.button') }}
-          </button>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2 class="card-title">{{ $t('profile.notifications_title') }}</h2>
-
+      <card
+        :title="$t('profile.notifications_title')"
+        :error="errors.notifications ? $t('profile.save.error') : ''"
+        :save-label="$t('profile.save.button')"
+        :loading="loading.notifications"
+        @save="saveNotifications"
+      >
         <div class="toggle-row">
           <checkbox
             :toggle="true"
@@ -120,20 +116,25 @@
             v-if="form.notifications_discord_enabled"
           />
         </div>
+      </card>
 
-        <div class="card-actions">
-          <button
-            class="button save-button"
-            :class="{ 'is-loading': isSaveProfileLoading }"
-            @click="saveProfile({ form })"
-          >
-            {{ $t('profile.save.button') }}
-          </button>
-        </div>
-      </section>
-
-      <section class="card">
-        <h2 class="card-title">{{ $t('profile.password_title') }}</h2>
+      <card
+        :title="$t('profile.password_title')"
+        :error="
+          !changePassword.isValid
+            ? $t('profile.change_password.unvalid')
+            : changePassword.isError
+              ? $t('profile.change_password.error')
+              : ''
+        "
+        :success="
+          changePassword.isSuccess ? $t('profile.change_password.success') : ''
+        "
+        :save-label="$t('profile.change_password.button')"
+        :loading="changePassword.isLoading"
+        :disabled="user.is_generated_from_ldap"
+        @save="passwordChangeRequested"
+      >
         <text-field
           autocomplete="current-password"
           :label="$t('people.fields.old_password')"
@@ -156,33 +157,13 @@
           v-model="passwordForm.password2"
         />
 
-        <div class="card-actions">
-          <p class="error" v-if="!changePassword.isValid">
-            {{ $t('profile.change_password.unvalid') }}
-          </p>
-          <p class="success" v-if="changePassword.isSuccess">
-            {{ $t('profile.change_password.success') }}
-          </p>
-          <p class="error" v-if="changePassword.isError">
-            {{ $t('profile.change_password.error') }}
-          </p>
-          <button
-            class="button save-button"
-            :class="{ 'is-loading': changePassword.isLoading }"
-            :disabled="user.is_generated_from_ldap"
-            @click="passwordChangeRequested"
-          >
-            {{ $t('profile.change_password.button') }}
-          </button>
-        </div>
-
         <div class="two-factor">
           <h3 class="card-subtitle">
             {{ $t('profile.two_factor_authentication.title') }}
           </h3>
           <two-factor-authentication-setup />
         </div>
-      </section>
+      </card>
     </div>
 
     <change-avatar-modal
@@ -208,6 +189,7 @@ import { useStore } from 'vuex'
 import lang from '@/lib/lang'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
+import Card from '@/components/widgets/Card.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -248,6 +230,9 @@ const changeAvatar = reactive({
   formData: null
 })
 
+const loading = reactive({ info: false, notifications: false })
+const errors = reactive({ info: false, notifications: false })
+
 // Locale list — alphabetical by the English name (as in the original page),
 // with the native name in parentheses so it stays recognizable when the UI
 // language doesn't match.
@@ -272,10 +257,6 @@ const localeOptions = [
 
 const user = computed(() => store.getters.user)
 const changePassword = computed(() => store.getters.changePassword)
-const isSaveProfileLoading = computed(() => store.getters.isSaveProfileLoading)
-const isSaveProfileLoadingError = computed(
-  () => store.getters.isSaveProfileLoadingError
-)
 
 const timezoneOptions = computed(() =>
   moment.tz
@@ -300,7 +281,19 @@ const syncFormFromUser = () => {
   )
 }
 
-const saveProfile = payload => store.dispatch('saveProfile', payload)
+const saveSection = async section => {
+  loading[section] = true
+  errors[section] = false
+  try {
+    await store.dispatch('saveProfile', { form: form.value })
+  } catch {
+    errors[section] = true
+  }
+  loading[section] = false
+}
+
+const saveInfo = () => saveSection('info')
+const saveNotifications = () => saveSection('notifications')
 
 const localeChanged = value => {
   form.value.locale = value
@@ -430,43 +423,16 @@ useHead({ title: computed(() => `${t('profile.title')} - Kitsu`) })
   }
 }
 
-.card {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.75rem 2rem;
-  color: var(--text);
-
-  // Form labels rendered by TextField / Combobox use `.label` which the
-  // global stylesheet paints in $grey / $white-grey. Override so they
-  // track the theme like the rest of the card content.
-  :deep(label.label) {
-    color: var(--text);
-  }
-
-  // Combobox wraps its <select> in a Bulma .select span that is
-  // inline-block by default; force it block so the dropdown stretches to
-  // the same width as the TextField inputs above it.
+// Combobox wraps its <select> in a Bulma .select span that is
+// inline-block by default; force it block so the dropdown stretches to
+// the same width as the TextField inputs above it.
+.profile-content {
   :deep(.select) {
     display: block;
   }
   :deep(.combobox.select-input) {
     width: 100%;
   }
-}
-
-.dark .card {
-  background: var(--background-alt);
-}
-
-.card-title {
-  border-bottom: none;
-  color: var(--text);
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  margin: 0 0 2.5rem;
-  text-transform: uppercase;
 }
 
 .card-subtitle {
@@ -492,36 +458,6 @@ useHead({ title: computed(() => `${t('profile.title')} - Kitsu`) })
   margin-top: 0.5rem;
 }
 
-.card-actions {
-  align-items: center;
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-
-  .error,
-  .success {
-    flex: 1;
-    margin: 0;
-  }
-
-  .success {
-    color: $green;
-  }
-}
-
-.save-button {
-  background: $green;
-  border-color: $green;
-  color: $white;
-  min-width: 8rem;
-
-  &:hover:not([disabled]) {
-    background: $light-green;
-    border-color: $light-green;
-  }
-}
-
 .two-factor {
   border-top: 1px solid var(--border);
   margin-top: 1.5rem;
@@ -532,10 +468,6 @@ useHead({ title: computed(() => `${t('profile.title')} - Kitsu`) })
   .profile-content {
     margin: 1.5rem auto;
     padding: 0 0.75rem;
-  }
-
-  .card {
-    padding: 1.25rem;
   }
 
   .grid-two {
