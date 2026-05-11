@@ -64,11 +64,11 @@
             @enter="runConfirmation"
             v-model="form.resolution"
           />
-          <div>
+          <div class="picture-field">
             <label class="label">{{ $t('productions.picture') }}</label>
-            <file-upload
-              :label="$t('main.csv.upload_file')"
-              accept=".png,.jpg,.jpeg"
+            <image-cropper
+              ref="cropperRef"
+              shape="rounded"
               @fileselected="onFileSelected"
             />
           </div>
@@ -96,9 +96,9 @@ import {
   PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
 
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import FileUpload from '@/components/widgets/FileUpload.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ImageCropper from '@/components/widgets/ImageCropper.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 const props = defineProps({
@@ -120,6 +120,7 @@ const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
 const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
 
 const form = ref({})
+const cropperRef = ref(null)
 
 // Computed
 
@@ -142,7 +143,19 @@ const resetForm = () => {
   }
 }
 
-const runConfirmation = () => {
+const runConfirmation = async () => {
+  // If the cropper holds an image, crop it now so the parent uploads
+  // the framed version rather than the original file. The cropper also
+  // emits `fileselected` immediately when a file is picked, so the
+  // parent already has a fallback payload if cropping fails.
+  if (cropperRef.value?.hasFile) {
+    try {
+      const cropped = await cropperRef.value.cropToFormData()
+      if (cropped) emit('fileselected', cropped)
+    } catch (err) {
+      console.error(err)
+    }
+  }
   emit('confirm', form.value)
 }
 
@@ -158,5 +171,9 @@ watch(() => props.productionToEdit, resetForm, { immediate: true })
 <style lang="scss" scoped>
 .box {
   padding-bottom: 1.5em;
+}
+
+.picture-field {
+  margin-top: 1.5em;
 }
 </style>
