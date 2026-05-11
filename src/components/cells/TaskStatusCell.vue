@@ -1,5 +1,5 @@
 <template>
-  <td class="name">
+  <td>
     <div
       class="tag"
       :class="{ canceled: disable }"

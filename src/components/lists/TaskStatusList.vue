@@ -4,11 +4,11 @@
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
-            <th scope="col" class="name">
-              {{ $t('task_status.fields.name') }}
-            </th>
             <th scope="col" class="short-name">
               {{ $t('task_status.fields.short_name') }}
+            </th>
+            <th scope="col" class="name">
+              {{ $t('task_status.fields.name') }}
             </th>
             <th scope="col" class="is-default">
               {{ $t('task_status.fields.is_default') }}
@@ -43,17 +43,17 @@
         >
           <template #item="{ element: status }">
             <tr class="datatable-row task-status">
+              <task-status-cell
+                class="short-name"
+                :entry="status"
+                :data-label="$t('task_status.fields.short_name')"
+              />
               <td class="name" :data-label="$t('task_status.fields.name')">
                 {{ status.name }}
                 <span :title="status.description" v-if="status.description">
                   <help-circle-icon class="icon is-small" />
                 </span>
               </td>
-              <task-status-cell
-                class="short-name"
-                :entry="status"
-                :data-label="$t('task_status.fields.short_name')"
-              />
               <boolean-cell
                 class="is-default"
                 :value="status.is_default"
@@ -90,6 +90,7 @@
                 :data-label="$t('task_status.fields.is_feedback_request')"
               />
               <row-actions-cell
+                class="datatable-row-footer"
                 :hide-delete="status.is_default === true || status.for_concept"
                 @edit-clicked="$emit('edit-clicked', status)"
                 @delete-clicked="$emit('delete-clicked', status)"
