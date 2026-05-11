@@ -31,7 +31,7 @@
               <span
                 :key="taskType.id"
                 class="task-type-name flexrow-item"
-                v-for="taskType in sortTaskTypes(entry.task_types)"
+                v-for="taskType in sortedTaskTypes(entry.task_types)"
               >
                 <task-type-name :task-type="taskType" v-if="taskType.id" />
               </span>
@@ -56,14 +56,15 @@
     />
 
     <p class="has-text-centered nb-asset-types">
-      {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}
+      {{ entries.length }} {{ $t('asset_types.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import { HelpCircleIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { sortTaskTypes } from '@/lib/sorting'
 
@@ -71,46 +72,28 @@ import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'asset-type-list',
+const store = useStore()
 
-  components: {
-    HelpCircleIcon,
-    RowActionsCell,
-    TableInfo,
-    TaskTypeName
-  },
+defineProps({
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    }
-  },
+defineEmits(['delete-clicked', 'edit-clicked'])
 
-  emits: ['delete-clicked', 'edit-clicked'],
+// Computed
 
-  computed: {
-    ...mapGetters(['taskTypeMap'])
-  },
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  methods: {
-    sortTaskTypes(taskTypeIds) {
-      const taskTypes =
-        taskTypeIds
-          ?.map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-          .filter(Boolean) ?? []
-      return sortTaskTypes(taskTypes)
-    }
-  }
+// Functions
+
+const sortedTaskTypes = taskTypeIds => {
+  const taskTypes =
+    taskTypeIds
+      ?.map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+      .filter(Boolean) ?? []
+  return sortTaskTypes(taskTypes)
 }
 </script>
 
@@ -123,5 +106,17 @@ export default {
 .name {
   width: 300px;
   padding: 1em;
+}
+
+@media screen and (max-width: 768px) {
+  .name {
+    width: auto;
+    padding: 0.5em;
+  }
+
+  .datatable-body td,
+  .datatable-head th {
+    padding: 0.5em;
+  }
 }
 </style>

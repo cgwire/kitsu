@@ -40,8 +40,12 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
@@ -52,179 +56,147 @@ import EditAssetTypeModal from '@/components/modals/EditAssetTypeModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
-export default {
-  name: 'asset-types',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    AssetTypeList,
-    DeleteModal,
-    EditAssetTypeModal,
-    ListPageHeader,
-    RouteTabs
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      assetTypeToDelete: null,
-      assetTypeToEdit: {},
-      choices: [],
-      errors: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      modals: {
-        del: false,
-        edit: false
-      },
-      loading: {
-        del: false,
-        edit: false,
-        list: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        }
-      ]
+const activeTab = ref('active')
+const assetTypeToDelete = ref(null)
+const assetTypeToEdit = ref({})
+
+const errors = reactive({ del: false, edit: false, list: false })
+const loading = reactive({ del: false, edit: false, list: false })
+const modals = reactive({ del: false, edit: false })
+
+// Computed
+
+const archivedAssetTypes = computed(() => store.getters.archivedAssetTypes)
+const assetTypes = computed(() => store.getters.assetTypes)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const isActiveTab = computed(() => activeTab.value === 'active')
+
+const assetTypesList = computed(() =>
+  isActiveTab.value ? assetTypes.value : archivedAssetTypes.value
+)
+
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') }
+])
+
+const deleteText = computed(() => {
+  const assetType = assetTypeToDelete.value
+  return assetType ? t('asset_types.delete_text', { name: assetType.name }) : ''
+})
+
+// Functions
+
+const confirmEditAssetType = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (assetTypeToEdit.value?.id) {
+      await store.dispatch('editAssetType', {
+        ...form,
+        id: assetTypeToEdit.value.id
+      })
+    } else {
+      await store.dispatch('newAssetType', form)
     }
-  },
-
-  mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-  },
-
-  computed: {
-    ...mapGetters([
-      'assetTypes',
-      'archivedAssetTypes',
-      'getAssetType',
-      'taskTypeMap'
-    ]),
-
-    isActiveTab() {
-      return this.activeTab === 'active'
-    },
-
-    assetTypesList() {
-      return this.isActiveTab ? this.assetTypes : this.archivedAssetTypes
-    },
-
-    deleteText() {
-      const assetType = this.assetTypeToDelete
-      if (assetType) {
-        return this.$t('asset_types.delete_text', { name: assetType.name })
-      } else {
-        return ''
-      }
-    }
-  },
-
-  methods: {
-    ...mapActions(['deleteAssetType', 'editAssetType', 'newAssetType']),
-
-    confirmEditAssetType(form) {
-      let action = 'newAssetType'
-      if (this.assetTypeToEdit && this.assetTypeToEdit.id) {
-        action = 'editAssetType'
-        form.id = this.assetTypeToEdit.id
-      }
-
-      this.loading.edit = true
-      this.errors.edit = false
-      this[action](form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteAssetType() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteAssetType(this.assetTypeToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.del = true
-          this.loading.del = false
-        })
-    },
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('asset_types.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('asset_types.fields.name'),
-        this.$t('asset_types.fields.short_name'),
-        this.$t('asset_types.fields.description'),
-        this.$t('asset_types.fields.task_types')
-      ]
-      const entries = [headers].concat(
-        this.assetTypes.map(assetType => [
-          assetType.type,
-          assetType.name,
-          assetType.short_name,
-          assetType.description,
-          assetType.task_types.length
-            ? assetType.task_types
-                .map(taskTypeId => this.taskTypeMap.get(taskTypeId)?.name)
-                .join(', ')
-            : this.$t('asset_types.include_all')
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.assetTypeToEdit = {}
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onEditClicked(assetType) {
-      this.assetTypeToEdit = assetType
-      this.errors.edit = false
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(assetType) {
-      this.assetTypeToDelete = assetType
-      this.errors.del = false
-      this.modals.del = true
-    }
-  },
-
-  watch: {
-    '$route.query.tab'() {
-      this.activeTab = this.$route.query.tab || 'active'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('asset_types.title')} - Kitsu`
-    }
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
   }
+  loading.edit = false
 }
+
+const confirmDeleteAssetType = async () => {
+  loading.del = true
+  errors.del = false
+  try {
+    await store.dispatch('deleteAssetType', assetTypeToDelete.value)
+    modals.del = false
+  } catch (err) {
+    console.error(err)
+    errors.del = true
+  }
+  loading.del = false
+}
+
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('asset_types.title'))
+  const headers = [
+    t('main.type'),
+    t('asset_types.fields.name'),
+    t('asset_types.fields.short_name'),
+    t('asset_types.fields.description'),
+    t('asset_types.fields.task_types')
+  ]
+  const rows = assetTypes.value.map(assetType => [
+    assetType.type,
+    assetType.name,
+    assetType.short_name,
+    assetType.description,
+    assetType.task_types.length
+      ? assetType.task_types
+          .map(taskTypeId => taskTypeMap.value.get(taskTypeId)?.name)
+          .join(', ')
+      : t('asset_types.include_all')
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
+}
+
+const onNewClicked = () => {
+  assetTypeToEdit.value = {}
+  errors.edit = false
+  modals.edit = true
+}
+
+const onEditClicked = assetType => {
+  assetTypeToEdit.value = assetType
+  errors.edit = false
+  modals.edit = true
+}
+
+const onDeleteClicked = assetType => {
+  assetTypeToDelete.value = assetType
+  errors.del = false
+  modals.del = true
+}
+
+// Watchers
+
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tab || 'active'
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  activeTab.value = route.query.tab || 'active'
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('asset_types.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
 .asset-type-list {
   margin-top: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .asset-types {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
 }
 </style>
