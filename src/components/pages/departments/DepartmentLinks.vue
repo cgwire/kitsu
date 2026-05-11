@@ -165,4 +165,15 @@ ul.element-list {
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .columns {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .column-hardware {
+    display: none;
+  }
+}
 </style>

@@ -162,9 +162,11 @@ defineEmits(['delete-clicked', 'edit-clicked'])
   .datatable-row td {
     border: 0;
     display: block;
+    height: auto;
     max-width: none;
     min-width: 0;
     padding: 0.4em 0;
+    text-align: left;
     width: auto;
   }
 
