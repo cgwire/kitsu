@@ -1511,6 +1511,7 @@ export default {
     import_from_production: 'Import from another production',
     logo: 'Studio logo',
     no_logo: 'There is no logo set.',
+    preferences_title: 'Preferences',
     no_more_available_items: 'There are no more items available to add.',
     remove_logo: 'Remove studio logo',
     set_logo: 'Set studio logo',

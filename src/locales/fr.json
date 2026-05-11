@@ -1089,6 +1089,7 @@
       "integrations": "Intégrations",
       "logo": "Logo du studio",
       "no_logo": "Aucun logo n' a été positionné.",
+      "preferences_title": "Préférences",
       "set_logo": "Changer le logo",
       "title": "Paramètres",
       "fields": {
