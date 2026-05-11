@@ -64,8 +64,16 @@
             {{ $t('notifications.no_notifications') }}
           </p>
         </div>
-        <div class="has-text-centered" v-if="loading.notifications">
-          <spinner />
+        <div class="loading-skeleton" v-if="loading.notifications">
+          <div
+            class="skeleton-card"
+            :style="{
+              '--row-index': i - 1,
+              '--fadeout-delay': `${fadeoutDelayMs}ms`
+            }"
+            :key="`skeleton-${skeletonCycle}-${i}`"
+            v-for="i in SKELETON_ROWS"
+          ></div>
         </div>
         <div
           :class="{
@@ -89,10 +97,9 @@
                 />
                 <people-avatar
                   class="flexrow-item"
-                  :person="personMap.get(notification.author_id)"
+                  :person="notificationAuthor(notification)"
                   :size="30"
                   :is-link="false"
-                  v-if="personMap.get(notification.author_id)"
                 />
                 <production-name
                   class="flexrow-item"
@@ -127,7 +134,7 @@
               </div>
             </template>
             <template v-else>
-              <div class="flexrow notification-header">
+              <div class="flexrow notification-context-row">
                 <at-sign-icon
                   class="icon flexrow-item"
                   :title="$t('notifications.mention')"
@@ -153,17 +160,18 @@
                   :title="$t('notifications.comment')"
                   v-else-if="isComment(notification)"
                 />
-                <validation-tag
-                  class="validation-tag flexrow-item"
-                  :task="buildTaskFromNotification(notification)"
-                  v-if="notification.change"
-                />
-                <people-avatar
+                <production-name
                   class="flexrow-item"
-                  :person="personMap.get(notification.author_id)"
-                  :size="30"
-                  :is-link="false"
-                  v-if="personMap.get(notification.author_id)"
+                  :production="productionMap.get(notification.project_id)"
+                  :size="22"
+                  :with-avatar="true"
+                  :only-avatar="true"
+                  :title="notification.project_name"
+                />
+                <task-type-name
+                  class="task-type-name flexrow-item"
+                  :task-type="buildTaskTypeFromNotification(notification)"
+                  :production-id="notification.project_id"
                 />
                 <entity-thumbnail
                   class="flexrow-item"
@@ -172,16 +180,10 @@
                   }"
                   :height="30"
                 />
-                <task-type-name
-                  class="task-type-name flexrow-item"
-                  :task-type="buildTaskTypeFromNotification(notification)"
-                  :production-id="notification.project_id"
-                />
                 <router-link
-                  class="flexrow-item"
+                  class="flexrow-item entity-link"
                   :to="entityPath(notification)"
                 >
-                  {{ notification.project_name }} /
                   {{ notification.full_entity_name }}
                 </router-link>
                 <div class="filler"></div>
@@ -201,26 +203,27 @@
                 </div>
               </div>
 
-              <div class="flexrow-item comment-content">
-                <div
-                  class="notification-info flexrow"
-                  v-if="parameters.showComments || isSelected(notification)"
-                >
-                  <span class="person-name flexrow-item ml0">
-                    {{ personName(notification) }}
-                  </span>
-
-                  <div class="flexrow-item">
+              <div
+                class="flexrow notification-actor-row"
+                v-if="parameters.showComments || isSelected(notification)"
+              >
+                <people-avatar
+                  class="flexrow-item actor-avatar"
+                  :person="notificationAuthor(notification)"
+                  :size="30"
+                  :is-link="false"
+                />
+                <div class="actor-line flexrow-item">
+                  <span class="actor-name">{{ personName(notification) }}</span>
+                  <span class="verb">
                     <template v-if="isPublish(notification)">
                       {{ $t('notifications.published') }}
                     </template>
-
                     <template
                       v-if="isComment(notification) && !isPublish(notification)"
                     >
                       {{ $t('notifications.commented_on') }}
                     </template>
-
                     <template
                       v-if="
                         (isComment(notification) || isPublish(notification)) &&
@@ -229,15 +232,12 @@
                     >
                       {{ $t('notifications.and_change_status') }}
                     </template>
-
                     <template v-if="isReply(notification)">
                       {{ $t('notifications.replied_on') }}
                     </template>
-
                     <template v-if="isAssignation(notification)">
                       {{ $t('notifications.assigned_you') }}
                     </template>
-
                     <template
                       v-if="
                         isMention(notification) || isReplyMention(notification)
@@ -248,8 +248,21 @@
                         ({{ $t('main.reply') }})
                       </template>
                     </template>
-                  </div>
+                  </span>
+                  <template v-if="notification.change">
+                    <span class="to">{{ $t('notifications.to_status') }}</span>
+                    <validation-tag
+                      class="validation-tag"
+                      :task="buildTaskFromNotification(notification)"
+                    />
+                  </template>
                 </div>
+              </div>
+
+              <div
+                class="flexrow-item comment-content"
+                v-if="parameters.showComments || isSelected(notification)"
+              >
                 <div
                   class="comment-text content reply-text"
                   v-html="
@@ -340,6 +353,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useSkeletonCycle } from '@/composables/skeleton'
 import { pluralizeEntityType } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { renderComment } from '@/lib/render'
@@ -353,7 +367,6 @@ import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
@@ -365,12 +378,16 @@ const FILTER_KEYS = [
   'statusMode',
   'watchingMode'
 ]
+const SKELETON_ROWS = 6
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const instance = getCurrentInstance()
+const { cycle: skeletonCycle, fadeoutDelayMs } = useSkeletonCycle(
+  ref(SKELETON_ROWS)
+)
 const socket = instance.appContext.config.globalProperties.$socket
 
 // State
@@ -517,6 +534,23 @@ const formatDate = date => {
 
 const personName = notification =>
   personMap.value.get(notification.author_id)?.full_name || ''
+
+// Returns the notification's author when known, or a placeholder so the
+// avatar slot always renders something instead of disappearing when the
+// person hasn't loaded into personMap (deactivated / deleted user, or a
+// notification that arrived before the people cache was hydrated).
+const notificationAuthor = notification => {
+  const known = personMap.value.get(notification.author_id)
+  if (known) return known
+  return {
+    id: notification.author_id || 'unknown',
+    full_name: t('main.unknown'),
+    initials: '?',
+    color: '#999',
+    has_avatar: false,
+    is_bot: false
+  }
+}
 
 const playlistPath = notification => {
   const production = productionMap.value.get(notification.project_id)
@@ -782,6 +816,54 @@ a {
   margin: 0;
 }
 
+.loading-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.skeleton-card {
+  animation:
+    skeleton-card-in 0.4s ease-out forwards,
+    skeleton-card-out 0.35s ease-in forwards;
+  animation-delay: calc(var(--row-index) * 150ms), var(--fadeout-delay);
+  background: rgba(var(--skeleton-rgb), 0.45);
+  border-radius: 1em;
+  height: 72px;
+  opacity: 0;
+}
+
+.dark .skeleton-card {
+  background: rgba(var(--skeleton-rgb), 0.15);
+}
+
+@keyframes skeleton-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes skeleton-card-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-card {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .notification {
   align-items: flex-start;
   background: white;
@@ -799,15 +881,34 @@ a {
   }
 
   &:hover {
+    background-color: var(--background-hover);
     border-color: var(--background-selectable);
 
     &.playlist-ready-notification {
       border-color: var(--unread-border);
     }
+
+    .icon {
+      opacity: 1;
+    }
   }
 
   &.playlist-ready-notification {
     border-left: 3px solid $green;
+  }
+
+  .icon {
+    opacity: 0.7;
+    transition: opacity 0.15s ease-in-out;
+  }
+
+  .actor-avatar :deep(.avatar) {
+    border: 1px solid var(--border);
+  }
+
+  :deep(.validation-tag) {
+    font-size: 0.85em;
+    padding: 0.15em 0.5em;
   }
 }
 
@@ -818,6 +919,8 @@ a {
   --unread-border: #906571;
 }
 
+.notification-actor-row,
+.notification-context-row,
 .notification-header {
   align-items: center;
   gap: 0.6em;
@@ -829,6 +932,26 @@ a {
   .flexrow-item {
     margin-right: 0;
   }
+}
+
+.notification-actor-row {
+  margin-top: 0.5em;
+}
+
+.actor-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35em;
+  min-width: 0;
+}
+
+.actor-name {
+  font-weight: 600;
+}
+
+.verb {
+  color: var(--text-alt);
 }
 
 .person-name {
@@ -867,12 +990,20 @@ a {
 }
 
 .date {
-  font-size: 0.9em;
+  align-items: center;
   color: $grey;
+  display: inline-flex;
+  font-size: 0.9em;
+  line-height: 1;
 
   span {
     margin-left: 0;
   }
+}
+
+.notification-context-row .has-text-right {
+  align-items: center;
+  display: inline-flex;
 }
 
 .notification-line {
@@ -891,6 +1022,7 @@ a {
 
 .comment-content {
   flex: 1;
+  margin-top: 1em;
 
   .flexrow-item {
     margin-right: 0.5em;
@@ -1004,7 +1136,9 @@ a {
 
     .date,
     .thumbnail-wrapper,
-    .has-text-right {
+    .has-text-right,
+    .actor-name,
+    .verb {
       display: none;
     }
   }
