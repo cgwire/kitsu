@@ -109,10 +109,10 @@
                     {{ notification.playlist_name }}
                   </router-link>
                 </span>
+                <div class="filler"></div>
                 <span class="date flexrow-item">
                   {{ formatDate(notification.created_at) }}
                 </span>
-                <div class="filler"></div>
                 <div class="has-text-right flexrow-item mr0">
                   <boolean-field
                     class="selector"
@@ -153,6 +153,11 @@
                   :title="$t('notifications.comment')"
                   v-else-if="isComment(notification)"
                 />
+                <validation-tag
+                  class="validation-tag flexrow-item"
+                  :task="buildTaskFromNotification(notification)"
+                  v-if="notification.change"
+                />
                 <people-avatar
                   class="flexrow-item"
                   :person="personMap.get(notification.author_id)"
@@ -160,21 +165,18 @@
                   :is-link="false"
                   v-if="personMap.get(notification.author_id)"
                 />
-                <div class="flexrow-item">
-                  <entity-thumbnail
-                    :entity="{
-                      preview_file_id: notification.entity_preview_file_id
-                    }"
-                    :height="40"
-                  />
-                </div>
-                <div class="flexrow-item">
-                  <task-type-name
-                    class="task-type-name"
-                    :task-type="buildTaskTypeFromNotification(notification)"
-                    :production-id="notification.project_id"
-                  />
-                </div>
+                <entity-thumbnail
+                  class="flexrow-item"
+                  :entity="{
+                    preview_file_id: notification.entity_preview_file_id
+                  }"
+                  :height="30"
+                />
+                <task-type-name
+                  class="task-type-name flexrow-item"
+                  :task-type="buildTaskTypeFromNotification(notification)"
+                  :production-id="notification.project_id"
+                />
                 <router-link
                   class="flexrow-item"
                   :to="entityPath(notification)"
@@ -182,15 +184,10 @@
                   {{ notification.project_name }} /
                   {{ notification.full_entity_name }}
                 </router-link>
-                <validation-tag
-                  class="validation-tag flexrow-item"
-                  :task="buildTaskFromNotification(notification)"
-                  v-if="notification.change"
-                />
+                <div class="filler"></div>
                 <span class="date flexrow-item">
                   {{ formatDate(notification.created_at) }}
                 </span>
-                <div class="filler"></div>
                 <div class="has-text-right flexrow-item mr0">
                   <boolean-field
                     class="selector"
@@ -692,20 +689,11 @@ useHead({ title: computed(() => `${t('notifications.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-// Pink accent for "unread". Not in the global theme so we keep it
-// component-local but adapt the shade for dark mode.
-.notifications {
-  --unread-border: #f0c5d1;
-}
-.dark .notifications {
-  --unread-border: #906571;
-}
-
 .dark {
   .notification {
     background: $dark-grey-lighter;
     color: $white-grey;
-    box-shadow: 0 1px 1px 1px $dark-grey;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   }
 
   .icon,
@@ -731,7 +719,7 @@ a {
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 0.75em;
-  margin-bottom: 1em;
+  margin: 1em 0;
   padding: 1em 1em 0.75em;
 }
 
@@ -797,14 +785,14 @@ a {
 .notification {
   align-items: flex-start;
   background: white;
-  border: 4px solid transparent;
+  border: 3px solid transparent;
   border-radius: 1em;
-  box-shadow: 0 0 4px $light-grey;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   margin-bottom: 0.5em;
-  padding: 1rem;
-  transition: all 0.2s ease-in-out;
   overflow-x: auto;
+  padding: 1rem;
+  transition: border-color 0.15s ease-in-out;
 
   &.unread {
     border-color: var(--unread-border);
@@ -819,7 +807,27 @@ a {
   }
 
   &.playlist-ready-notification {
-    border-left: 4px solid $green;
+    border-left: 3px solid $green;
+  }
+}
+
+.notifications {
+  --unread-border: #f0c5d1;
+}
+.dark .notifications {
+  --unread-border: #906571;
+}
+
+.notification-header {
+  align-items: center;
+  gap: 0.6em;
+  width: 100%;
+
+  // The flexrow-item global rule adds margin-right: 1rem; reset it inside
+  // the header so the single `gap` controls horizontal spacing and every
+  // element stays aligned to the same rhythm.
+  .flexrow-item {
+    margin-right: 0;
   }
 }
 
@@ -953,5 +961,64 @@ a {
 
 .person-name.ml0 {
   margin-left: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .notifications {
+    padding: 0.5em;
+  }
+
+  .filter-bar {
+    padding: 0.75em 0.75em 0.5em;
+  }
+
+  // Wrap the 5 selectors across multiple lines instead of overflowing
+  // the row on narrow screens.
+  .filter-bar-row {
+    flex-wrap: wrap;
+    gap: 0.5em;
+
+    > .flexrow-item {
+      flex: 1 1 calc(50% - 0.5em);
+      margin-right: 0;
+      min-width: 0;
+    }
+
+    // ComboboxTaskType pins itself to 200px (`min-width: 200px;
+    // width: 200px`), and ComboboxStyled caps at 400px — both ignore
+    // the flex layout above. Reset them so the wrapping behaves.
+    :deep(.task-type-combo),
+    :deep(.status-combo),
+    :deep(.combo) {
+      max-width: none;
+      min-width: 0;
+      width: 100%;
+    }
+  }
+
+  // Strip non-essential elements on narrow screens (date, entity
+  // thumbnail, read toggle) and breathe the remaining content with
+  // more padding.
+  .notification {
+    padding: 1.25rem 1.5rem;
+
+    .date,
+    .thumbnail-wrapper,
+    .has-text-right {
+      display: none;
+    }
+  }
+
+  .notification-header {
+    flex-wrap: wrap;
+    row-gap: 0.4em;
+  }
+
+  // The fixed-width side column is already hidden via .is-hidden-mobile
+  // on the markup; this keeps the main column from inheriting padding
+  // that assumes the side column is visible.
+  .main-column {
+    padding-top: 50px;
+  }
 }
 </style>
