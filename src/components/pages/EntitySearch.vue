@@ -1,6 +1,6 @@
 <template>
   <div class="entity-search page">
-    <form class="search-form" @submit.prevent="onResultSelected()">
+    <form class="search-form" @submit.prevent="onResultSelected">
       <div>
         <combobox-production
           class="flexrow-item production-field"
@@ -15,7 +15,7 @@
           <search-icon :size="20" />
         </span>
         <input
-          ref="search-field"
+          ref="searchField"
           class="input"
           :placeholder="$t('search.placeholder')"
           v-model.trim="searchQuery"
@@ -191,15 +191,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Page to allow wide search on every entities stored in the open projects.
  */
-import { mapGetters, mapActions } from 'vuex'
-import { getEntityPath, getPersonPath } from '@/lib/path'
-
+import { useHead } from '@unhead/vue'
 import { SearchIcon } from 'lucide-vue-next'
-import stringHelpers from '@/lib/string'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+
+import { getEntityPath } from '@/lib/path'
 
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -209,245 +212,200 @@ import Spinner from '@/components/widgets/Spinner.vue'
 
 const AVAILABLE_LIMITS = [12, 24, 48]
 
-export default {
-  name: 'entity-search',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    Checkbox,
-    Combobox,
-    ComboboxProduction,
-    EntityPreview,
-    SearchIcon,
-    Spinner
-  },
+// State
 
-  data() {
-    return {
-      isLoading: false,
-      isLoadingMoreAssets: false,
-      isLoadingMoreShots: false,
-      limit: AVAILABLE_LIMITS[0],
-      limitOptions: AVAILABLE_LIMITS.map(value => ({ label: value, value })),
-      productionId: '',
-      selectedIndex: 0,
-      searchQuery: '',
-      searchFilter: {
-        assets: true,
-        shots: true,
-        persons: false
-      },
-      results: {
-        assets: [],
-        shots: [],
-        persons: []
-      }
-    }
-  },
+const isLoading = ref(false)
+const isLoadingMoreAssets = ref(false)
+const isLoadingMoreShots = ref(false)
+const limit = ref(AVAILABLE_LIMITS[0])
+const productionId = ref('')
+const searchField = ref(null)
+const searchQuery = ref('')
+const selectedIndex = ref(0)
 
-  mounted() {
-    window.addEventListener('keydown', this.onKeyDown)
+const limitOptions = AVAILABLE_LIMITS.map(value => ({ label: value, value }))
 
-    if (this.$route.query.search) {
-      this.searchQuery = this.$route.query.search
-    }
+const results = reactive({ assets: [], shots: [], persons: [] })
+const searchFilter = reactive({ assets: true, shots: true, persons: false })
 
-    this.searchField.focus()
-  },
+// Computed
 
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
-  },
+const openProductions = computed(() => store.getters.openProductions)
+const productionMap = computed(() => store.getters.productionMap)
 
-  computed: {
-    ...mapGetters(['openProductions', 'productionMap']),
+const flattenResults = computed(() => {
+  let values = []
+  if (searchFilter.assets) values = values.concat(results.assets)
+  if (searchFilter.shots) values = values.concat(results.shots)
+  if (searchFilter.persons) values = values.concat(results.persons)
+  return values
+})
 
-    searchField() {
-      return this.$refs['search-field']
-    },
+const noSearchFilters = computed(
+  () => !searchFilter.assets && !searchFilter.shots
+)
 
-    flattenResults() {
-      let values = []
-      if (this.searchFilter.assets) {
-        values = values.concat(this.results.assets)
-      }
-      if (this.searchFilter.shots) {
-        values = values.concat(this.results.shots)
-      }
-      if (this.searchFilter.persons) {
-        values = values.concat(this.results.persons)
-      }
-      return values
-    },
+const productionList = computed(() => [
+  { id: '', name: t('main.all') },
+  ...openProductions.value
+])
 
-    noSearchFilters() {
-      return (
-        !this.searchFilter.assets && !this.searchFilter.shots
-        // && !this.searchFilter.persons
-      )
-    },
+// Functions
 
-    productionList() {
-      return [
-        {
-          id: '',
-          name: this.$t('main.all')
-        }
-      ].concat([...this.openProductions])
-    }
-  },
+const search = () => {
+  isLoading.value = true
+  const index_names = Object.entries(searchFilter)
+    .map(([k, v]) => (v ? k : undefined))
+    .filter(Boolean)
 
-  methods: {
-    ...mapActions(['searchData']),
+  store
+    .dispatch('searchData', {
+      query: searchQuery.value,
+      limit: limit.value,
+      productionId: productionId.value,
+      index_names
+    })
+    .then(found => {
+      delete found.persons
+      Object.assign(results, found)
+    })
+    .catch(console.error)
+    .finally(() => {
+      isLoading.value = false
+    })
+}
 
-    onKeyDown(event) {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.altKey &&
-        event.code === 'KeyF'
-      ) {
-        this.searchField?.focus()
-      } else if (event.key === 'ArrowDown') {
-        this.selectNext()
-      } else if (event.key === 'ArrowUp') {
-        this.selectPrevious()
-      }
-    },
+const clearSearchResult = () => {
+  results.assets = []
+  results.shots = []
+  results.persons = []
+}
 
-    search() {
-      this.isLoading = true
-      const index_names = Object.entries(this.searchFilter)
-        .map(([k, v]) => (v ? k : undefined))
-        .filter(Boolean)
+const loadMoreResults = indexName => {
+  const loadingRef =
+    indexName === 'assets' ? isLoadingMoreAssets : isLoadingMoreShots
+  loadingRef.value = true
 
-      this.searchData({
-        query: this.searchQuery,
-        limit: this.limit,
-        productionId: this.productionId,
-        index_names
-      })
-        .then(results => {
-          delete results.persons
-          this.results = results
-        })
-        .catch(console.error)
-        .finally(() => {
-          this.isLoading = false
-        })
-    },
+  store
+    .dispatch('searchData', {
+      query: searchQuery.value,
+      limit: limit.value,
+      offset: results[indexName].length,
+      productionId: productionId.value,
+      index_names: [indexName]
+    })
+    .then(found => {
+      results[indexName] = results[indexName].concat(found[indexName])
+    })
+    .catch(console.error)
+    .finally(() => {
+      loadingRef.value = false
+    })
+}
 
-    loadMoreResults(indexName) {
-      const index_names = [indexName]
-      const loadingField = `isLoadingMore${stringHelpers.capitalize(indexName)}`
-      this[loadingField] = true
-
-      this.searchData({
-        query: this.searchQuery,
-        limit: this.limit,
-        offset: this.results[indexName].length,
-        productionId: this.productionId,
-        index_names
-      })
-        .then(results => {
-          this.results[indexName] = this.results[indexName].concat(
-            results[indexName]
-          )
-        })
-        .catch(console.error)
-        .finally(() => {
-          this[loadingField] = false
-        })
-    },
-
-    selectPrevious() {
-      this.selectedIndex--
-      if (this.selectedIndex < 0) {
-        this.selectedIndex = this.flattenResults.length - 1
-      }
-      this.scrollToSelection()
-    },
-
-    selectNext() {
-      this.selectedIndex++
-      if (this.selectedIndex >= this.flattenResults.length) {
-        this.selectedIndex = 0
-      }
-      this.scrollToSelection()
-    },
-
-    scrollToSelection() {
-      const item = this.flattenResults[this.selectedIndex]
-      if (item) {
-        document.getElementById(`result-link-${item.id}`)?.scrollIntoView(false)
-      }
-    },
-
-    selectResultById(id) {
-      this.selectedIndex = this.flattenResults.findIndex(item => item.id === id)
-    },
-
-    onResultSelected() {
-      const item = this.flattenResults[this.selectedIndex]
-      if (item) {
-        document.getElementById(`result-link-${item.id}`)?.click()
-      }
-    },
-
-    clearSearchResult() {
-      this.results = {
-        assets: [],
-        shots: [],
-        persons: []
-      }
-    },
-
-    entityPath(entity, section) {
-      const project = this.productionMap.get(entity.project_id)
-      const isTVShow = project.production_type === 'tvshow'
-      let episodeId = null
-      if (isTVShow) episodeId = entity.episode_id || 'main'
-      return getEntityPath(entity.id, entity.project_id, section, episodeId)
-    },
-
-    personPath(person) {
-      return getPersonPath(person.id)
-    },
-
-    getMatchDetails(entity) {
-      const target = entity.matched_terms.join(', ')
-      return this.$t('search.match_details', {
-        target
-      })
-    }
-  },
-
-  watch: {
-    productionId() {
-      this.search()
-    },
-
-    searchQuery() {
-      if (this.searchQuery.length) {
-        this.$router.push({ query: { search: this.searchQuery } })
-      } else {
-        this.$router.push({ query: {} })
-      }
-
-      if (this.searchQuery.length > 2) {
-        this.search()
-      } else {
-        this.clearSearchResult()
-      }
-
-      this.selectedIndex = 0
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('search.title')} - Kitsu`
-    }
+const scrollToSelection = () => {
+  const item = flattenResults.value[selectedIndex.value]
+  if (item) {
+    document.getElementById(`result-link-${item.id}`)?.scrollIntoView(false)
   }
 }
+
+const selectPrevious = () => {
+  selectedIndex.value--
+  if (selectedIndex.value < 0) {
+    selectedIndex.value = flattenResults.value.length - 1
+  }
+  scrollToSelection()
+}
+
+const selectNext = () => {
+  selectedIndex.value++
+  if (selectedIndex.value >= flattenResults.value.length) {
+    selectedIndex.value = 0
+  }
+  scrollToSelection()
+}
+
+const selectResultById = id => {
+  selectedIndex.value = flattenResults.value.findIndex(item => item.id === id)
+}
+
+const onResultSelected = () => {
+  const item = flattenResults.value[selectedIndex.value]
+  if (item) {
+    document.getElementById(`result-link-${item.id}`)?.click()
+  }
+}
+
+const entityPath = (entity, section) => {
+  const project = productionMap.value.get(entity.project_id)
+  const isTVShow = project.production_type === 'tvshow'
+  let episodeId = null
+  if (isTVShow) episodeId = entity.episode_id || 'main'
+  return getEntityPath(entity.id, entity.project_id, section, episodeId)
+}
+
+const getMatchDetails = entity =>
+  t('search.match_details', { target: entity.matched_terms.join(', ') })
+
+const onKeyDown = event => {
+  if (
+    (event.ctrlKey || event.metaKey) &&
+    event.altKey &&
+    event.code === 'KeyF'
+  ) {
+    searchField.value?.focus()
+  } else if (event.key === 'ArrowDown') {
+    selectNext()
+  } else if (event.key === 'ArrowUp') {
+    selectPrevious()
+  }
+}
+
+// Watchers
+
+watch(productionId, search)
+
+watch(searchQuery, () => {
+  if (searchQuery.value.length) {
+    router.push({ query: { search: searchQuery.value } })
+  } else {
+    router.push({ query: {} })
+  }
+
+  if (searchQuery.value.length > 2) {
+    search()
+  } else {
+    clearSearchResult()
+  }
+
+  selectedIndex.value = 0
+})
+
+// Lifecycle
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown)
+
+  if (route.query.search) {
+    searchQuery.value = route.query.search
+  }
+
+  searchField.value?.focus()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('search.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
@@ -510,6 +468,10 @@ export default {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+
+    @media screen and (max-width: 768px) {
+      justify-content: center;
+    }
   }
 
   .result {
