@@ -38,6 +38,7 @@
           class="datatable-body"
           item-key="id"
           tag="tbody"
+          :disabled="isMobile"
           @end="updateTaskStatusPriorities"
           v-model="taskStatuses"
         >
@@ -117,7 +118,7 @@
 <script setup>
 import { HelpCircleIcon } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
@@ -138,6 +139,7 @@ const emit = defineEmits([
 
 // State
 
+const isMobile = ref(false)
 const taskStatuses = ref([...props.entries])
 
 // Functions
@@ -160,6 +162,21 @@ watch(
     taskStatuses.value = [...entries]
   }
 )
+
+// Lifecycle
+
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  updateIsMobile()
+  window.addEventListener('resize', updateIsMobile)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateIsMobile)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -199,6 +216,12 @@ watch(
 }
 
 @media screen and (max-width: 768px) {
+  // Drag-and-drop is disabled on mobile, so reset the grab cursor.
+  .task-status,
+  .task-status[draggable='true'] {
+    cursor: default;
+  }
+
   // Stack each row as a card, mirroring the AssetTypeList mobile layout.
   :deep(.datatable-wrapper) {
     background: transparent;
