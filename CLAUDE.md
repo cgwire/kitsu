@@ -7,7 +7,7 @@ Kitsu is a production tracking web application for animation studios, built by C
 | Item | Value |
 |------|-------|
 | Stack | Vue 3.5, Vuex 4, Vue Router 5, vue-i18n 9, Vite 8, Vitest |
-| Node | >= 20.19 |
+| Node | >= 22.22.1 |
 | Default branch | `main` |
 | Dev server | `npm run dev` |
 | Tests | `npm run test:unit` (vitest) |
