@@ -95,7 +95,7 @@
     "vue-eslint-parser": "10.4.0"
   },
   "engines": {
-    "node": ">=20.19",
+    "node": ">=22.22.1",
     "npm": ">=10"
   },
   "lint-staged": {
