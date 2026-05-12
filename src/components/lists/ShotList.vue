@@ -61,6 +61,9 @@
                 event => showMetadataHeaderMenu(descriptor.id, event)
               "
               is-stick
+              :style="{
+                'z-index': 1001
+              }"
               v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
             />
 
