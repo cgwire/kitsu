@@ -51,6 +51,7 @@ import { useStore } from 'vuex'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+// eslint-disable-next-line no-unused-vars
 import SoftwareLicenseList from '@/components/lists/SoftwareLicenseList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditSoftwareLicenseModal from '@/components/modals/EditSoftwareLicenseModal.vue'
