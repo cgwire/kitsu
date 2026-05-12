@@ -403,9 +403,9 @@ const actions = {
 
     const [tasks, timeSpents] = await Promise.all([
       peopleApi.getPersonTasks(personId).catch(() => []),
-      peopleApi.getTimeSpents(personId, date)
+      peopleApi.getTimeSpents(personId, date).catch(() => [])
     ])
-    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents || [])
+    commit(PERSON_LOAD_TIME_SPENTS_END, timeSpents)
     commit(LOAD_PERSON_TASKS_END, {
       personId,
       tasks,

@@ -113,13 +113,15 @@
             :day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
-            :hide-done="false"
             :hide-day-off="!(isCurrentUserAdmin || user.id === person.id)"
             @date-changed="onDateChanged"
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"
             @unset-day-off="onUnsetDayOff"
-            v-else-if="isActiveTab('timesheets') && isCurrentUserManager"
+            v-else-if="
+              isActiveTab('timesheets') &&
+              (isCurrentUserManager || user.id === person.id)
+            "
           />
 
           <template v-else-if="isActiveTab('schedule')">
@@ -271,8 +273,10 @@ export default {
       'displayedPersonDoneTasks',
       'getProductionTaskStatuses',
       'isCurrentUserAdmin',
+      'isCurrentUserClient',
       'isCurrentUserManager',
       'isCurrentUserSupervisor',
+      'isCurrentUserVendor',
       'nbSelectedTasks',
       'personMap',
       'personTasksScrollPosition',
@@ -289,16 +293,10 @@ export default {
     ]),
 
     isCurrentUserAllowed() {
-      if (this.isCurrentUserManager || this.user.id === this.person.id) {
-        return true
-      }
-      if (this.isCurrentUserSupervisor) {
-        const isSupervisorInDepartments = this.user.departments.some(
-          department => this.person.departments.includes(department)
-        )
-        return isSupervisorInDepartments
-      }
-      return false
+      return (
+        this.user.id === this.person.id ||
+        !(this.isCurrentUserClient || this.isCurrentUserVendor)
+      )
     },
 
     loggablePersonTasks() {
@@ -690,12 +688,9 @@ export default {
     },
 
     async loadDaysOff() {
-      const personId = this.person.id
-      try {
-        this.daysOff = await this.loadAggregatedPersonDaysOff({ personId })
-      } catch (error) {
-        console.error(error)
-      }
+      this.daysOff = await this.loadAggregatedPersonDaysOff({
+        personId: this.person.id
+      }).catch(() => [])
     },
 
     async loadTimeSpents() {
