@@ -225,7 +225,9 @@ export const previewRoomMixin = {
           preview_file_id: eventData.previous_preview_file_id
         })
         const previewFile = this.getPreviewFileFromEntity(entity, previewFileId)
+        if (!previewFile) return
         const task = this.taskMap.get(previewFile.task_id)
+        if (!task) return
         const taskTypeId = task.task_type_id
         // Update selection
         this.changePreviewFile(entity, previewFile)
