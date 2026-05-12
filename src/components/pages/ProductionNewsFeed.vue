@@ -3,258 +3,53 @@
     <div class="column main-column">
       <div class="news page" ref="body" @scroll.passive="onBodyScroll">
         <div class="timeline-wrapper">
-          <div class="has-text-right filler filter-button">
-            <button-simple
-              icon="filter"
-              :active="isFiltersDisplayed"
-              :title="$t('main.more_filters')"
-              @click="toggleFilters"
-            />
-          </div>
+          <news-filters
+            :is-studio="isStudio"
+            v-model:episode-id="episodeId"
+            v-model:task-status-id="taskStatusId"
+            v-model:task-type-id="taskTypeId"
+            v-model:person="person"
+            v-model:before="before"
+            v-model:after="after"
+            v-model:preview-mode="previewMode"
+          />
 
-          <div class="filters flexrow">
-            <combobox
-              class="flexrow-item selector"
-              :label="$t('shots.fields.episode')"
-              :options="runningEpisodeOptions"
-              v-model="episodeId"
-              v-if="!isStudio && isTVShow"
-            />
-            <combobox-status
-              class="flexrow-item selector nowrap"
-              :label="$t('news.task_status')"
-              :task-status-list="taskStatusList"
-              v-model="taskStatusId"
-            />
-            <combobox-task-type
-              class="flexrow-item selector nowrap"
-              :label="$t('news.task_type')"
-              :task-type-list="taskTypeList"
-              v-model="taskTypeId"
-            />
-            <div class="flexrow-item selector">
-              <label class="label person-label">
-                {{ $t('main.person') }}
-              </label>
-              <people-field
-                class="person-field"
-                :people="isStudio ? displayedPeople : team"
-                v-model="person"
-              />
-            </div>
-          </div>
-
-          <div class="filters flexrow mt1" v-if="isFiltersDisplayed">
-            <date-field
-              class="flexrow-item"
-              :max-date="today"
-              :label="$t('main.from')"
-              :with-margin="false"
-              v-model="after"
-            />
-            <date-field
-              class="flexrow-item"
-              :max-date="today"
-              :label="$t('main.to')"
-              :with-margin="false"
-              v-model="before"
-            />
-            <combobox
-              class="flexrow-item selector"
-              :label="$t('news.infos')"
-              :options="previewOptions"
-              v-model="previewMode"
-            />
-          </div>
-
-          <div class="timeline">
+          <div :class="{ timeline: true, 'timeline-blank': isTimelineBlank }">
             <div
-              class="empty-list has-text-centered"
+              class="empty-state"
               v-if="!loading.news && (!newsList || newsList.length === 0)"
             >
-              {{ $t('news.no_news') }}
+              <newspaper-icon class="empty-icon" :size="48" />
+              <p class="empty-title">{{ $t('news.no_news') }}</p>
+              <p class="empty-hint">{{ $t('news.no_news_hint') }}</p>
             </div>
-            <div class="has-text-centered mt2" v-if="loading.news">
-              <spinner />
-            </div>
+            <news-skeleton v-if="loading.news" />
 
             <template v-if="!loading.news">
               <div
                 :key="dayList.length > 0 ? dayList[0].created_at : ''"
                 v-for="dayList in newsListByDay(timezone)"
               >
-                <div class="has-text-centered subtitle timeline-entry">
+                <div
+                  class="has-text-centered subtitle timeline-entry day-sticky"
+                >
                   <span class="big-dot"></span>
                   {{
                     dayList.length > 0 ? formatDay(dayList[0].created_at) : ''
                   }}
                 </div>
-                <div
+                <news-row
                   :key="`news-${news.id}`"
-                  :ref="`news-${news.id}`"
+                  :ref="el => setNewsRef(news.id, el)"
+                  :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
+                  :is-new="recentNewsIds.has(news.id)"
+                  :is-selected="news.id === currentNewsId"
+                  :is-studio="isStudio"
+                  :news="news"
+                  :preview-mode="previewMode"
+                  @select="onNewsSelected"
                   v-for="(news, index) in dayList"
-                >
-                  <div v-if="previewMode === 'comments'">
-                    <div
-                      :class="{
-                        'news-line': true,
-                        'timeline-entry': true,
-                        flexrow: true,
-                        selected: news.id === currentNewsId
-                      }"
-                      @click.prevent="onNewsSelected(news)"
-                    >
-                      <span
-                        :class="{
-                          dot: true,
-                          red: hasRetakeValue(news),
-                          green: hasDoneValue(news)
-                        }"
-                      ></span>
-                      <span class="date flexrow-item">
-                        {{ formatTime(news.created_at) }}
-                      </span>
-
-                      <div
-                        class="flexrow-item production-name-wrapper"
-                        v-if="isStudio"
-                      >
-                        <production-name
-                          :production="productionMap.get(news.project_id)"
-                          only-avatar
-                        />
-                      </div>
-
-                      <people-avatar
-                        class="flexrow-item"
-                        :person="personMap.get(news.author_id)"
-                        :size="30"
-                        :font-size="14"
-                        :is-link="false"
-                        v-if="personMap.get(news.author_id)"
-                      />
-
-                      <div class="flexrow-item task-type-wrapper">
-                        <task-type-name
-                          class="task-type-name"
-                          :task-type="buildTaskTypeFromNews(news)"
-                          :production-id="news.project_id"
-                          :is-static="true"
-                        />
-                      </div>
-
-                      <div class="flexrow-item validation-wrapper">
-                        <validation-tag
-                          class="validation-tag"
-                          :task="buildTaskFromNews(news)"
-                          :is-static="true"
-                          :thin="!news.change"
-                        />
-                      </div>
-
-                      <div class="flexrow-item comment-content">
-                        <div class="news-info flexrow">
-                          <span class="flexrow-item flexrow">
-                            <entity-thumbnail
-                              class="ml1 entity-thumbnail mr1 flexrow-item"
-                              :entity="{
-                                id: news.task_entity_id,
-                                preview_file_id: news.entity_preview_file_id
-                              }"
-                              :with-link="false"
-                            />
-                            <span class="strong ml05">
-                              {{ news.full_entity_name }}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    class="preview"
-                    v-if="news.preview_file_id && previewMode === 'previews'"
-                  >
-                    <div
-                      :class="{
-                        'news-line': true,
-                        'timeline-entry': true,
-                        flexrow: true,
-                        selected: news.id === currentNewsId
-                      }"
-                      @click.prevent="onNewsSelected(news)"
-                    >
-                      <span
-                        :class="{
-                          dot: true,
-                          red: hasRetakeValue(news),
-                          green: hasDoneValue(news)
-                        }"
-                      ></span>
-                      <span class="date flexrow-item">
-                        {{ formatTime(news.created_at) }}
-                      </span>
-
-                      <people-avatar
-                        class="flexrow-item"
-                        :person="personMap.get(news.author_id)"
-                        :size="30"
-                        :no-link="true"
-                        v-if="personMap.get(news.author_id)"
-                      />
-
-                      <div class="flexrow-item task-type-wrapper">
-                        <task-type-name
-                          class="task-type-name"
-                          :task-type="buildTaskTypeFromNews(news)"
-                          :production-id="news.project_id"
-                        />
-                      </div>
-
-                      <div class="flexrow-item comment-content">
-                        <div class="news-info flexrow">
-                          <span class="flexrow-item flexrow">
-                            <entity-thumbnail
-                              class="ml1"
-                              :entity="{
-                                id: news.task_entity_id,
-                                preview_file_id: news.entity_preview_file_id
-                              }"
-                              :with-link="false"
-                              v-if="news.entity_preview_file_id"
-                            />
-                            <span class="strong ml05 flexrow-item">
-                              {{ news.full_entity_name }}
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      class="has-text-centered"
-                      v-if="previewMode === 'previews'"
-                    >
-                      <preview-player
-                        :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(
-                          0,
-                          10
-                        )}-${index}`"
-                        :previews="news.preview_files"
-                        :task="{
-                          id: news.task_id,
-                          project_id: news.project_id,
-                          task_type_id: news.task_type_id,
-                          assignees: []
-                        }"
-                        :read-only="true"
-                        :light="true"
-                        :big="true"
-                      />
-                    </div>
-                  </div>
-                </div>
+                />
               </div>
             </template>
           </div>
@@ -273,502 +68,329 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
- * This modules aims at displaying what happened on the production during the
- * last few days.
- * News entry are fetched by page of 50. Loading of older news is done via
+ * This module displays what happened on the production during the last few
+ * days. News entries are fetched by page of 50; older entries load via
  * infinite scrolling.
  */
-import { mapGetters, mapActions } from 'vuex'
+import { useHead } from '@unhead/vue'
+import { NewspaperIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { sortByName, sortPeople } from '@/lib/sorting'
+import { useTime } from '@/composables/time'
 import { formatFullDateWithRevertedTimezone } from '@/lib/time'
-import { timeMixin } from '@/components/mixins/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
-import DateField from '@/components/widgets/DateField.vue'
-import PeopleField from '@/components/widgets/PeopleField.vue'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
-import ProductionName from '@/components/widgets/ProductionName.vue'
+import NewsFilters from '@/components/pages/news/NewsFilters.vue'
+import NewsRow from '@/components/pages/news/NewsRow.vue'
+import NewsSkeleton from '@/components/pages/news/NewsSkeleton.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
-export default {
-  name: 'production-news-feed',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const { timezone } = useTime()
 
-  mixins: [timeMixin],
+const instance = getCurrentInstance()
+const socket = instance.appContext.config.globalProperties.$socket
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ComboboxStatus,
-    ComboboxTaskType,
-    DateField,
-    EntityThumbnail,
-    PeopleAvatar,
-    PeopleField,
-    PreviewPlayer,
-    ProductionName,
-    TaskTypeName,
-    ValidationTag,
-    Spinner,
-    TaskInfo
-  },
+// State
 
-  data() {
-    return {
-      after: null,
-      before: null,
-      currentNewsId: null,
-      currentPage: 1,
-      currentTask: null,
-      episodeId: '',
-      isFiltersDisplayed: false,
-      isStatsDisplayed: false,
-      errors: {
-        news: false
-      },
-      loading: {
-        more: false,
-        news: false,
-        currentTask: true
-      },
-      person: null,
-      previewMode: 'comments',
-      previewOptions: [
-        {
-          label: this.$t('news.only_comments'),
-          value: 'comments'
-        },
-        {
-          label: this.$t('news.only_previews'),
-          value: 'previews'
-        }
-      ],
-      taskStatusId: '',
-      taskTypeId: ''
-    }
-  },
+const after = ref(null)
+const before = ref(null)
+const body = ref(null)
+const currentNewsId = ref(null)
+const currentPage = ref(1)
+const currentTask = ref(null)
+const episodeId = ref('')
+const person = ref(null)
+const previewMode = ref('comments')
+const recentNewsIds = ref(new Set())
+const taskStatusId = ref('')
+const taskTypeId = ref('')
 
-  mounted() {
-    this.$options.silent = true
-    this.previewMode = localStorage.getItem('news:preview-mode') || 'comments'
-    this.taskTypeId = localStorage.getItem('news:task-type-id') || ''
-    if (this.$route && this.$route.query && this.$route.query.task_type_id) {
-      this.taskTypeId = this.$route.query.task_type_id
-    }
-    this.taskStatusId = localStorage.getItem('news:task-status-id') || ''
-    if (this.$route && this.$route.query && this.$route.query.task_status_id) {
-      this.taskStatusId = this.$route.query.task_status_id
-    }
-    this.before = null
-    this.after = null
-    this.$options.silent = false
-    window.addEventListener('keydown', this.onKeyDown, false)
+const errors = reactive({ news: false })
+const loading = reactive({ more: false, news: false, currentTask: true })
 
-    if (!this.loading.news) {
-      this.init()
-    }
-  },
+// Non-reactive scheduling/selection state.
+const newsRefs = new Map()
+let lastSelection = null
+let silent = false
 
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
-  },
+const setNewsRef = (id, el) => {
+  if (el) newsRefs.set(id, el)
+  else newsRefs.delete(id)
+}
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'displayedPeople',
-      'isTVShow',
-      'newsList',
-      'newsTotal',
-      'newsStats',
-      'newsListByDay',
-      'personMap',
-      'productionMap',
-      'productionTaskStatuses',
-      'productionTaskTypes',
-      'runningEpisodes',
-      'taskStatusMap',
-      'taskTypeMap',
-      'taskStatusMap'
-    ]),
+// Computed
 
-    currentEntityType() {
-      return this.currentTask?.task_type?.for_entity
-    },
+const currentProduction = computed(() => store.getters.currentProduction)
+const newsList = computed(() => store.getters.newsList)
+const newsListByDay = computed(() => store.getters.newsListByDay)
 
-    statMax() {
-      if (this.newsStats) {
-        return Object.keys(this.newsStats).reduce((max, stat) => {
-          return Math.max(this.newsStats[stat], max)
-        }, 0)
-      } else {
-        return 0
-      }
-    },
+const isStudio = computed(() => !route.path.includes('productions'))
 
-    isStudio() {
-      return !this.$route.path.includes('productions')
-    },
+const currentEntityType = computed(
+  () => currentTask.value?.task_type?.for_entity
+)
 
-    params() {
-      return {
-        isStudio: this.isStudio || undefined,
-        productionId: !this.isStudio ? this.currentProduction?.id : undefined,
-        only_preview: this.previewMode === 'previews',
-        page_size: this.previewMode === 'previews' ? 6 : 50,
-        task_type_id: this.taskTypeId !== '' ? this.taskTypeId : undefined,
-        task_status_id:
-          this.taskStatusId !== '' ? this.taskStatusId : undefined,
-        person_id: this.person ? this.person.id : undefined,
-        page: this.currentPage,
-        episode_id: this.episodeId !== 'all' ? this.episodeId : undefined,
-        before: formatFullDateWithRevertedTimezone(this.before, this.timezone),
-        after: formatFullDateWithRevertedTimezone(this.after, this.timezone)
-      }
-    },
+const isTimelineBlank = computed(
+  () => loading.news || !newsList.value || newsList.value.length === 0
+)
 
-    taskStatusList() {
-      return [
-        {
-          id: '',
-          color: '#999',
-          short_name: this.$t('news.all')
-        }
-      ].concat(sortByName([...this.productionTaskStatuses]))
-    },
+const params = computed(() => ({
+  isStudio: isStudio.value || undefined,
+  productionId: !isStudio.value ? currentProduction.value?.id : undefined,
+  only_preview: previewMode.value === 'previews',
+  page_size: previewMode.value === 'previews' ? 6 : 50,
+  task_type_id: taskTypeId.value !== '' ? taskTypeId.value : undefined,
+  task_status_id: taskStatusId.value !== '' ? taskStatusId.value : undefined,
+  person_id: person.value ? person.value.id : undefined,
+  page: currentPage.value,
+  episode_id: episodeId.value !== 'all' ? episodeId.value : undefined,
+  before: formatFullDateWithRevertedTimezone(before.value, timezone.value),
+  after: formatFullDateWithRevertedTimezone(after.value, timezone.value)
+}))
 
-    taskTypeList() {
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all')
-        }
-      ].concat(sortByName([...this.productionTaskTypes]))
-    },
+// Functions
 
-    runningEpisodeOptions() {
-      return [
-        {
-          value: 'all',
-          label: this.$t('news.all')
-        }
-      ].concat(
-        this.runningEpisodes.map(episode => {
-          return {
-            label: episode.name,
-            value: episode.id
-          }
-        })
-      )
-    },
+const formatDay = date => moment.tz(date, 'UTC').tz(timezone.value).format('LL')
 
-    team() {
-      return sortPeople(
-        this.currentProduction?.team
-          .map(personId => this.personMap.get(personId))
-          .filter(Boolean) ?? []
-      )
-    },
+const setScrollPosition = scrollPosition => {
+  if (body.value) {
+    body.value.scrollTop = scrollPosition
+  }
+}
 
-    renderedStats() {
-      if (this.newsStats) {
-        return Object.keys(this.newsStats)
-          .map(taskStatusId => {
-            const { color, short_name } = this.taskStatusMap.get(taskStatusId)
-            return {
-              id: taskStatusId,
-              name: short_name.toUpperCase(),
-              color,
-              value: this.newsStats[taskStatusId]
-            }
-          })
-          .sort((a, b) => b.value - a.value)
-      } else {
-        return ''
-      }
-    }
-  },
+const scrollToLine = news => {
+  const newsLine = newsRefs.get(news.id)
+  if (newsLine && body.value) {
+    const margin = 30
+    const rect = newsLine.getBoundingClientRect()
+    const listRect = body.value.getBoundingClientRect()
+    const isBelow = rect.bottom > listRect.bottom - margin
+    const isAbove = rect.top < listRect.top + margin
 
-  methods: {
-    ...mapActions(['loadNews', 'loadSingleNews', 'loadMoreNews', 'loadTask']),
-
-    onKeyDown(event) {
-      if (this.newsList && this.newsList.length > 0 && event.altKey) {
-        let index = this.lastSelection ? this.lastSelection : 0
-        if ([37, 38].includes(event.keyCode)) {
-          index = index - 1 < 0 ? this.newsList.length - 1 : index - 1
-          this.onNewsSelected(this.newsList[index])
-        } else if ([39, 40].includes(event.keyCode)) {
-          index = index + 1 >= this.newsList.length ? 0 : index + 1
-          this.onNewsSelected(this.newsList[index])
-        }
-      }
-    },
-
-    loadFollowingNews() {
-      if (!this.loading.more && !this.loading.news) {
-        this.loading.more = true
-        this.currentPage += 1
-        this.loadMoreNews(this.params).then(() => {
-          this.loading.more = false
-        })
-      }
-    },
-
-    formatDay(date) {
-      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
-      return utcDate.format('LL')
-    },
-
-    formatTime(date) {
-      const utcDate = moment.tz(date, 'UTC').tz(this.timezone)
-      return utcDate.format('HH:mm')
-    },
-
-    personName(news) {
-      const person = this.personMap.get(news.author_id)
-      return person ? person.full_name : ''
-    },
-
-    buildTaskFromNews(news) {
-      return {
-        id: news.task_id,
-        task_status_id: news.task_status_id,
-        task_type_id: news.task_type_id,
-        episode_id: news.episode_id
-      }
-    },
-
-    buildTaskTypeFromNews(news) {
-      return {
-        ...this.taskTypeMap.get(news.task_type_id),
-        episode_id: news.episode_id
-      }
-    },
-
-    onNewsSelected(news) {
-      this.loading.currentTask = true
-      const index = this.newsList.findIndex(n => n.id === news.id)
-      if (this.lastSelection !== index) {
-        this.lastSelection = index
-        this.loadTask({
-          taskId: news.task_id
-        })
-          .then(task => {
-            this.loading.currentTask = false
-            this.currentTask = task
-            this.currentNewsId = news.id
-          })
-          .catch(console.error)
-        this.scrollToLine(news)
-      } else {
-        this.lastSelection = -1
-        this.currentTask = null
-        this.currentNewsId = ''
-      }
-    },
-
-    scrollToLine(news) {
-      const newsLine = this.$refs[`news-${news.id}`]
-      if (newsLine && this.$refs.body) {
-        const margin = 30
-        const rect = newsLine[0].getBoundingClientRect()
-        const listRect = this.$refs.body.getBoundingClientRect()
-        const isBelow = rect.bottom > listRect.bottom - margin
-        const isAbove = rect.top < listRect.top + margin
-
-        if (isBelow) {
-          const scrollingRequired = rect.bottom - listRect.bottom + margin
-          this.setScrollPosition(this.$refs.body.scrollTop + scrollingRequired)
-        } else if (isAbove) {
-          const scrollingRequired = listRect.top - rect.top + margin
-          this.setScrollPosition(this.$refs.body.scrollTop - scrollingRequired)
-        }
-      }
-    },
-
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
-    },
-
-    init() {
-      if (this.loading.news) return
-      if (!this.$options.silent) {
-        this.currentPage = 1
-        this.loading.news = true
-        this.errors.news = false
-        this.currentTask = null
-        const query = {
-          task_status_id: this.params.task_status_id,
-          task_type_id: this.params.task_type_id
-        }
-        this.$router.push({ query })
-        this.loadNews(this.params)
-          .then(() => {
-            this.loading.news = false
-          })
-          .catch(err => {
-            console.error(err)
-            this.loading.news = false
-            this.errors.news = true
-          })
-      }
-    },
-
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 200) {
-        this.loadFollowingNews()
-      }
-    },
-
-    getPreviewPath(news) {
-      const previewId = news.preview_file_id
-      const extension = news.preview_file_extension
-      return `/api/pictures/originals/preview-files/${previewId}.${extension}`
-    },
-
-    getPreviewDlPath(news) {
-      const previewId = news.preview_file_id
-      return `/api/pictures/originals/preview-files/${previewId}/download`
-    },
-
-    hasRetakeValue(news) {
-      const taskStatus = this.taskStatusMap.get(news.task_status_id)
-      return taskStatus ? news.change && taskStatus.is_retake : false
-    },
-
-    hasDoneValue(news) {
-      const taskStatus = this.taskStatusMap.get(news.task_status_id)
-      return taskStatus ? news.change && taskStatus.is_done : false
-    },
-
-    toggleFilters() {
-      this.isFiltersDisplayed = !this.isFiltersDisplayed
-    },
-
-    toggleStats() {
-      this.isStatsDisplayed = !this.isStatsDisplayed
-    }
-  },
-
-  socket: {
-    events: {
-      'preview-file:add-file'(eventData) {
-        const commentId = eventData.comment_id
-        const previewId = eventData.preview_file_id
-        const extension = eventData.extension
-        this.$store.commit('NEWS_ADD_PREVIEW', {
-          previewId,
-          commentId,
-          extension
-        })
-      },
-
-      'news:new'(eventData) {
-        if (
-          (this.isStudio ||
-            eventData.project_id === this.currentProduction.id) &&
-          (!this.taskTypeId || this.taskTypeId === eventData.task_type_id) &&
-          (!this.taskStatusId || this.taskStatusId === eventData.task_status_id)
-        ) {
-          this.loadSingleNews({
-            productionId: eventData.project_id,
-            newsId: eventData.news_id
-          })
-        }
-      },
-
-      'task:update'(eventData) {
-        const relatedNews = this.newsList.find(
-          news =>
-            news.project_id === eventData.project_id &&
-            news.task_id === eventData.task_id
-        )
-        if (relatedNews) {
-          this.loadSingleNews({
-            productionId: relatedNews.project_id,
-            newsId: relatedNews.id
-          })
-        }
-      }
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.init()
-    },
-
-    isStudio() {
-      this.init()
-    },
-
-    previewMode() {
-      localStorage.setItem('news:preview-mode', this.previewMode)
-      this.init()
-    },
-
-    taskTypeId() {
-      localStorage.setItem('news:task-type-id', this.taskTypeId)
-      this.init()
-    },
-
-    taskStatusId() {
-      localStorage.setItem('news:task-status-id', this.taskStatusId)
-      this.init()
-    },
-
-    person() {
-      this.init()
-    },
-
-    before() {
-      this.init()
-    },
-
-    after() {
-      this.init()
-    },
-
-    $route() {
-      this.init()
-    },
-
-    episodeId() {
-      this.init()
-    }
-  },
-
-  head() {
-    if (this.currentProduction) {
-      return {
-        title: `${this.currentProduction.name} | ${this.$t('news.title')} - Kitsu`
-      }
-    } else {
-      return {
-        title: `${this.$t('news.title')} - Kitsu`
-      }
+    if (isBelow) {
+      const scrollingRequired = rect.bottom - listRect.bottom + margin
+      setScrollPosition(body.value.scrollTop + scrollingRequired)
+    } else if (isAbove) {
+      const scrollingRequired = listRect.top - rect.top + margin
+      setScrollPosition(body.value.scrollTop - scrollingRequired)
     }
   }
 }
+
+const onNewsSelected = news => {
+  loading.currentTask = true
+  const index = newsList.value.findIndex(n => n.id === news.id)
+  if (lastSelection !== index) {
+    lastSelection = index
+    store
+      .dispatch('loadTask', { taskId: news.task_id })
+      .then(task => {
+        loading.currentTask = false
+        currentTask.value = task
+        currentNewsId.value = news.id
+      })
+      .catch(console.error)
+    scrollToLine(news)
+  } else {
+    lastSelection = -1
+    currentTask.value = null
+    currentNewsId.value = ''
+  }
+}
+
+const init = () => {
+  if (loading.news) return
+  if (!silent) {
+    currentPage.value = 1
+    loading.news = true
+    errors.news = false
+    currentTask.value = null
+    router.push({
+      query: {
+        task_status_id: params.value.task_status_id,
+        task_type_id: params.value.task_type_id
+      }
+    })
+    store
+      .dispatch('loadNews', params.value)
+      .then(() => {
+        loading.news = false
+      })
+      .catch(err => {
+        console.error(err)
+        loading.news = false
+        errors.news = true
+      })
+  }
+}
+
+const loadFollowingNews = () => {
+  if (!loading.more && !loading.news) {
+    loading.more = true
+    currentPage.value += 1
+    store.dispatch('loadMoreNews', params.value).then(() => {
+      loading.more = false
+    })
+  }
+}
+
+const onBodyScroll = event => {
+  if (!body.value) return
+  const position = event.target
+  const maxHeight = body.value.scrollHeight - body.value.offsetHeight
+  if (maxHeight < position.scrollTop + 200) {
+    loadFollowingNews()
+  }
+}
+
+const onKeyDown = event => {
+  if (newsList.value && newsList.value.length > 0 && event.altKey) {
+    let index = lastSelection ? lastSelection : 0
+    if ([37, 38].includes(event.keyCode)) {
+      index = index - 1 < 0 ? newsList.value.length - 1 : index - 1
+      onNewsSelected(newsList.value[index])
+    } else if ([39, 40].includes(event.keyCode)) {
+      index = index + 1 >= newsList.value.length ? 0 : index + 1
+      onNewsSelected(newsList.value[index])
+    }
+  }
+}
+
+// Socket event handlers
+
+const onPreviewFileAddFile = eventData => {
+  store.commit('NEWS_ADD_PREVIEW', {
+    previewId: eventData.preview_file_id,
+    commentId: eventData.comment_id,
+    extension: eventData.extension
+  })
+}
+
+const markRecent = newsId => {
+  const next = new Set(recentNewsIds.value)
+  next.add(newsId)
+  recentNewsIds.value = next
+  setTimeout(() => {
+    const after = new Set(recentNewsIds.value)
+    after.delete(newsId)
+    recentNewsIds.value = after
+  }, 3000)
+}
+
+const onNewsNew = eventData => {
+  if (
+    (isStudio.value || eventData.project_id === currentProduction.value.id) &&
+    (!taskTypeId.value || taskTypeId.value === eventData.task_type_id) &&
+    (!taskStatusId.value || taskStatusId.value === eventData.task_status_id)
+  ) {
+    store
+      .dispatch('loadSingleNews', {
+        productionId: eventData.project_id,
+        newsId: eventData.news_id
+      })
+      .then(() => markRecent(eventData.news_id))
+  }
+}
+
+const onTaskUpdate = eventData => {
+  const relatedNews = newsList.value.find(
+    news =>
+      news.project_id === eventData.project_id &&
+      news.task_id === eventData.task_id
+  )
+  if (relatedNews) {
+    store.dispatch('loadSingleNews', {
+      productionId: relatedNews.project_id,
+      newsId: relatedNews.id
+    })
+  }
+}
+
+// Watchers
+
+watch(currentProduction, init)
+watch(isStudio, init)
+watch(person, init)
+watch(before, init)
+watch(after, init)
+watch(episodeId, init)
+watch(() => route.fullPath, init)
+
+watch(previewMode, value => {
+  localStorage.setItem('news:preview-mode', value)
+  init()
+})
+
+watch(taskTypeId, value => {
+  localStorage.setItem('news:task-type-id', value)
+  init()
+})
+
+watch(taskStatusId, value => {
+  localStorage.setItem('news:task-status-id', value)
+  init()
+})
+
+// Lifecycle
+
+onMounted(() => {
+  silent = true
+  previewMode.value = localStorage.getItem('news:preview-mode') || 'comments'
+  taskTypeId.value = localStorage.getItem('news:task-type-id') || ''
+  if (route.query?.task_type_id) {
+    taskTypeId.value = route.query.task_type_id
+  }
+  taskStatusId.value = localStorage.getItem('news:task-status-id') || ''
+  if (route.query?.task_status_id) {
+    taskStatusId.value = route.query.task_status_id
+  }
+  before.value = null
+  after.value = null
+  silent = false
+
+  window.addEventListener('keydown', onKeyDown, false)
+  socket.on('preview-file:add-file', onPreviewFileAddFile)
+  socket.on('news:new', onNewsNew)
+  socket.on('task:update', onTaskUpdate)
+
+  if (!loading.news) {
+    init()
+  }
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+  socket.off('preview-file:add-file', onPreviewFileAddFile)
+  socket.off('news:new', onNewsNew)
+  socket.off('task:update', onTaskUpdate)
+})
+
+// Head
+
+useHead({
+  title: computed(() =>
+    currentProduction.value
+      ? `${currentProduction.value.name} | ${t('news.title')} - Kitsu`
+      : `${t('news.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>
@@ -793,16 +415,8 @@ export default {
   .timeline {
     border-color: $blue;
 
-    .dot {
-      background: $blue;
-    }
-
     .big-dot {
       background: $blue;
-    }
-
-    .selected .date {
-      color: $light-grey;
     }
   }
 }
@@ -847,6 +461,7 @@ export default {
   border-left: 4px solid $blue-light;
   padding-left: 25px;
   padding-bottom: 2em;
+  transition: border-left-color 0.2s ease;
 
   .subtitle {
     margin-top: 2em;
@@ -865,78 +480,54 @@ export default {
       height: 12px;
       border-radius: 6px;
     }
-
-    .dot {
-      position: absolute;
-      display: block;
-      left: -34px;
-      background: $blue-light;
-      width: 9px;
-      height: 9px;
-      border-radius: 4px;
-
-      &.red {
-        background: $red;
-      }
-
-      &.green {
-        background: $light-green;
-      }
-    }
-  }
-
-  .task-type-wrapper {
-    min-width: 100px;
-  }
-
-  .validation-wrapper {
-    min-width: 80px;
-  }
-
-  .date {
-    min-width: 30px;
   }
 }
 
-.date {
-  font-size: 0.8em;
-  color: $grey;
-}
+// Sticky day header: keep the original centered subtitle styling but pin
+// it to the top of the scroll container so the date stays visible while
+// scrolling long feeds. The compound `.timeline-entry.day-sticky` selector
+// is needed to outrank `.timeline .timeline-entry { position: relative }`,
+// which would otherwise win on specificity and disable sticky entirely.
+// `position: sticky` still establishes a positioning context for the
+// absolutely-placed `.big-dot`, so the dot keeps sitting on the rail.
+.timeline-entry.day-sticky {
+  background: $white;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 
-.news-info {
-  vertical-align: middle;
-
-  span,
-  a {
-    vertical-align: middle;
-    display: inline-flex;
-    align-items: center;
+  .dark & {
+    background: $dark-grey;
   }
 }
 
-.news-line {
-  padding-left: 1em;
-  align-items: middle;
-  border: 3px solid transparent;
-  cursor: pointer;
-  margin-bottom: 1px;
-  padding-top: 0.3em;
-  padding-bottom: 0.3em;
-  border-radius: 0.5em;
-  transition: border 0.1s linear;
-
-  &:hover {
-    border: 3px solid var(--background-selectable);
-  }
-
-  &.selected {
-    border: 3px solid var(--background-selected);
-  }
+.empty-state {
+  align-items: center;
+  color: var(--text-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 3em 1em;
+  text-align: center;
 }
 
-.preview {
-  margin: 0 auto 2em auto;
-  max-width: 800px;
+.empty-icon {
+  color: var(--text-alt);
+  opacity: 0.5;
+}
+
+.empty-title {
+  color: var(--text);
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.empty-hint {
+  margin: 0;
+  max-width: 380px;
 }
 
 .side-column {
@@ -945,62 +536,7 @@ export default {
   max-width: 450px;
 }
 
-.selector {
-  margin-bottom: 0;
-  margin-right: 1em;
-}
-
-.person-label {
-  margin-top: 5px;
-  margin-bottom: 4px;
-}
-
-.filter-button {
-  color: $grey;
-  cursor: pointer;
-  float: right;
-  text-transform: lowercase;
-}
-
-.stats {
-  text-align: left;
-  width: 100%;
-  flex: 1;
-
-  .news-number {
-    font-weight: bold;
-    border-bottom: 1px solid var(--border-alt);
-    padding: 0.6em;
-  }
-
-  .stat-tag {
-    border-radius: 6px;
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 0 2px var(--box-shadow);
-    display: inline-block;
-    font-size: 0.8em;
-    height: 32px;
-    padding-left: 4px;
-    margin-right: 1em;
-    margin-top: 0;
-    margin-bottom: 0.4em;
-    font-weight: bold;
-    width: 100%;
-  }
-
-  .stat-text {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.8);
-    font-weight: bold;
-    padding: 4px 8px;
-    margin-top: 3px;
-    color: $black;
-    border-radius: 6px;
-    white-space: nowrap;
-  }
-}
-
-.preview .news-line .dot {
-  left: -54px;
+.timeline.timeline-blank {
+  border-left-color: transparent;
 }
 </style>

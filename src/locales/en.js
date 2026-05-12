@@ -941,6 +941,7 @@ export default {
     hide_stats: 'Hide stats',
     news: 'news',
     no_news: 'There is no news.',
+    no_news_hint: 'Try widening the filters or come back later.',
     set_preview_on: 'set preview on',
     show_stats: 'Show stats',
     task_status: 'Task status',

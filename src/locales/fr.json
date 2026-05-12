@@ -578,6 +578,7 @@
       "commented_on": "a commenté sur",
       "infos": "Info",
       "no_news": "Il n'y a pas d'actualités.",
+      "no_news_hint": "Essayez d'élargir les filtres ou revenez plus tard.",
       "only_comments": "Seulement les commentaires",
       "only_previews": "Seulement les previews",
       "set_preview_on": "a mis un preview sur",
