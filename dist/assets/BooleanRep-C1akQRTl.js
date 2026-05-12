@@ -1,2 +1,0 @@
-import{t as e}from"./_plugin-vue_export-helper-CXTkFu_Z.js";import{Jn as t,Lr as n,Wt as r,ii as i,ir as a,vr as o}from"./index-CPIOWWV6.js";a();var s=e({__name:`BooleanRep`,props:{value:{default:!1,type:Boolean}},setup(e){return(a,s)=>e.value?(n(),o(i(t),{key:0,class:`true`,size:22,"stroke-width":3,title:a.$t(`main.yes`)},null,8,[`title`])):(n(),o(i(r),{key:1,class:`false`,size:16,"stroke-width":3,title:a.$t(`main.no`)},null,8,[`title`]))}},[[`__scopeId`,`data-v-07c5b4af`]]);export{s as t};
-//# sourceMappingURL=BooleanRep-C1akQRTl.js.map

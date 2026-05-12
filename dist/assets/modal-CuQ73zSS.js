@@ -1,2 +1,0 @@
-import{Pr as e,ir as t,qr as n}from"./index-CPIOWWV6.js";t();var r=(t,r)=>{let i=e=>{e.key===`Escape`&&r(`cancel`)};n(t,e=>{e?window.addEventListener(`keydown`,i,!1):window.removeEventListener(`keydown`,i)},{immediate:!0}),e(()=>{window.removeEventListener(`keydown`,i)})};export{r as t};
-//# sourceMappingURL=modal-CuQ73zSS.js.map

@@ -1,2 +1,0 @@
-import{Lr as e,Ur as t,Ut as n,gr as r,ir as i,vr as a}from"./index-CPIOWWV6.js";import{t as o}from"./string-DfkqZYiQ.js";i();var s={__name:`Icon`,props:{name:{type:String,required:!0},size:Number,color:String,strokeWidth:Number,defaultClass:String},setup(i){let s=i,c=r(()=>n[o.snakeToPascal(s.name)]);return(n,r)=>(e(),a(t(c.value),{size:i.size,color:i.color,"stroke-width":i.strokeWidth,"default-class":i.defaultClass},null,8,[`size`,`color`,`stroke-width`,`default-class`]))}};export{s as default};
-//# sourceMappingURL=Icon-D5-06ydw.js.map

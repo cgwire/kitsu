@@ -1,2 +1,0 @@
-import{t as e}from"./_plugin-vue_export-helper-CXTkFu_Z.js";import{Lr as t,br as n,ir as r,si as i}from"./index-CPIOWWV6.js";r();var a={class:`subtitle`},o=e({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(e){return(r,o)=>(t(),n(`h2`,a,i(e.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
-//# sourceMappingURL=PageSubtitle-C186Cfog.js.map

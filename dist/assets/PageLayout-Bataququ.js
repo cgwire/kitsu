@@ -1,2 +1,0 @@
-import{t as e}from"./_plugin-vue_export-helper-CXTkFu_Z.js";import{Br as t,Lr as n,_r as r,br as i,ir as a,yr as o}from"./index-CPIOWWV6.js";a();var s={name:`page-layout`,props:{side:{type:Boolean,default:!0}}},c={ref:`page`,class:`columns fixed-page`},l={class:`column main-column`},u={key:0,class:`column side-column`};function d(e,a,s,d,f,p){return n(),i(`div`,c,[r(`div`,l,[t(e.$slots,`main`)]),s.side?(n(),i(`div`,u,[t(e.$slots,`side`)])):o(``,!0)],512)}var f=e(s,[[`render`,d]]);export{f as t};
-//# sourceMappingURL=PageLayout-Bataququ.js.map

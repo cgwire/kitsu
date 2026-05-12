@@ -1,0 +1,2 @@
+import{B as e,rt as t,t as n}from"./vue.esm-bundler-Cz3q-qfd.js";n();var r=(n,r)=>{let i=e=>{e.key===`Escape`&&r(`cancel`)};t(n,e=>{e?window.addEventListener(`keydown`,i,!1):window.removeEventListener(`keydown`,i)},{immediate:!0}),e(()=>{window.removeEventListener(`keydown`,i)})};export{r as t};
+//# sourceMappingURL=modal-CAcxJBYB.js.map

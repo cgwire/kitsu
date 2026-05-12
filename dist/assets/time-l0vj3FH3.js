@@ -1,2 +1,0 @@
-import{o as e}from"./chunk-jRWAZmH_.js";import{er as t,it as n,z as r}from"./index-CPIOWWV6.js";var i=e(n(),1),a={computed:{...t([`user`]),timezone(){return this.user.timezone||i.default.tz.guess()},today(){return(0,i.default)().toDate()}},methods:{formatDate(e){return r(e,this.timezone)}}};export{a as t};
-//# sourceMappingURL=time-l0vj3FH3.js.map
