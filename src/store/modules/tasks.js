@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/vue'
+
 import tasksApi from '@/store/api/tasks'
 import peopleApi from '@/store/api/people'
 import playlistsApi from '@/store/api/playlists'
@@ -638,10 +640,18 @@ const actions = {
         return preview
       })
       .catch(err => {
-        console.error(err)
-        alert(
-          'An error occurred while saving your annotation, please wait 3s for another try.'
-        )
+        Sentry.captureException(err, {
+          tags: { feature: 'annotations' },
+          extra: {
+            previewId: preview?.id,
+            taskId,
+            additionsCount: additions?.length || 0,
+            updatesCount: updates?.length || 0,
+            deletionsCount: deletions?.length || 0,
+            status: err?.response?.status
+          }
+        })
+        throw err
       })
   },
 
@@ -1083,7 +1093,9 @@ const mutations = {
           }
         })
         if (p.id === preview.id) {
-          p.annotations = annotations
+          if (annotations) {
+            p.annotations = annotations
+          }
           p.status = preview.status
         }
       })
