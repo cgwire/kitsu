@@ -368,7 +368,7 @@ const isOtherFile = computed(
 const downloadUrl = computed(() => {
   if (!currentPreview.value) return ''
   if (props.token) {
-    return `/api/shared/playlists/${props.token}/movies/originals/preview-files/${currentPreview.value.id}.${extension.value}`
+    return `/api/shared/playlists/${props.token}/preview-files/${currentPreview.value.id}/download`
   }
   return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
 })
