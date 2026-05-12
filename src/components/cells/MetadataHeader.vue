@@ -62,6 +62,10 @@ th.metadata-descriptor {
   width: 120px;
   overflow-wrap: break-word;
   hyphens: auto;
+
+  &.datatable-row-header {
+    z-index: 1001; // above sticky cells
+  }
 }
 
 .metadata-wrapper-header {
