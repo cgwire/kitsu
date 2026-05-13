@@ -194,8 +194,8 @@ export default {
     entityProgress() {
       const doneTasks = this.entries.filter(task => {
         const fullTask = this.getTask(task.id)
-        const taskStatus = this.taskStatusMap.get(fullTask.task_status_id)
-        return taskStatus.is_done
+        const taskStatus = this.taskStatusMap.get(fullTask?.task_status_id)
+        return taskStatus?.is_done
       })
       return `${doneTasks.length} / ${this.entries.length}`
     },
