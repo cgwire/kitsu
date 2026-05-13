@@ -40,7 +40,7 @@
                 </div>
                 <news-row
                   :key="`news-${news.id}`"
-                  :ref="el => setNewsRef(news.id, el)"
+                  :ref="el => setNewsRef(news.id, el?.root)"
                   :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
                   :is-new="recentNewsIds.has(news.id)"
                   :is-selected="news.id === currentNewsId"
@@ -57,7 +57,24 @@
       </div>
     </div>
 
-    <div id="side-column" class="column side-column">
+    <div
+      class="drawer-backdrop"
+      :class="{ 'is-open': isDrawerOpen }"
+      @click="closeTask"
+    ></div>
+
+    <div
+      id="side-column"
+      :class="{ column: true, 'side-column': true, 'is-open': isDrawerOpen }"
+    >
+      <button
+        class="drawer-close"
+        type="button"
+        :title="$t('main.close')"
+        @click="closeTask"
+      >
+        <x-icon :size="20" />
+      </button>
       <task-info
         :entity-type="currentEntityType"
         :is-loading="loading.currentTask"
@@ -75,7 +92,7 @@
  * infinite scrolling.
  */
 import { useHead } from '@unhead/vue'
-import { NewspaperIcon } from 'lucide-vue-next'
+import { NewspaperIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import {
   computed,
@@ -151,6 +168,8 @@ const isTimelineBlank = computed(
   () => loading.news || !newsList.value || newsList.value.length === 0
 )
 
+const isDrawerOpen = computed(() => Boolean(currentNewsId.value))
+
 const params = computed(() => ({
   isStudio: isStudio.value || undefined,
   productionId: !isStudio.value ? currentProduction.value?.id : undefined,
@@ -194,6 +213,12 @@ const scrollToLine = news => {
   }
 }
 
+const closeTask = () => {
+  lastSelection = -1
+  currentTask.value = null
+  currentNewsId.value = ''
+}
+
 const onNewsSelected = news => {
   loading.currentTask = true
   const index = newsList.value.findIndex(n => n.id === news.id)
@@ -209,9 +234,7 @@ const onNewsSelected = news => {
       .catch(console.error)
     scrollToLine(news)
   } else {
-    lastSelection = -1
-    currentTask.value = null
-    currentNewsId.value = ''
+    closeTask()
   }
 }
 
@@ -261,6 +284,10 @@ const onBodyScroll = event => {
 }
 
 const onKeyDown = event => {
+  if (event.key === 'Escape' && isDrawerOpen.value) {
+    closeTask()
+    return
+  }
   if (newsList.value && newsList.value.length > 0 && event.altKey) {
     let index = lastSelection ? lastSelection : 0
     if ([37, 38].includes(event.keyCode)) {
@@ -536,7 +563,114 @@ useHead({
   max-width: 450px;
 }
 
+.drawer-close {
+  display: none;
+}
+
+.drawer-backdrop {
+  display: none;
+}
+
 .timeline.timeline-blank {
   border-left-color: transparent;
+}
+
+// Mobile: drop the timeline rail + big-dot — the chronological grouping
+// still reads via the sticky day headers, and the rail is visual noise
+// at narrow widths.
+@media screen and (max-width: 768px) {
+  .timeline {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .timeline .timeline-entry .big-dot {
+    display: none;
+  }
+
+  .timeline-wrapper {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+}
+
+// Mobile / tablet drawer: under 1024px the side panel slides in from
+// the right when a news is selected. Backdrop catches outside taps to
+// close.
+@media (max-width: 1024px) {
+  // Override App.vue's global `.side-column { max-width: 400px; width: 400px;
+  // margin-top: 60px }` — the drawer needs to span the full viewport and
+  // sit ABOVE the topbar (z-index 204), so no top offset and no width cap.
+  .side-column {
+    background: $white;
+    bottom: 0;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    margin-top: 0 !important;
+    max-width: min(100vw, 420px) !important;
+    min-width: 0 !important;
+    overflow-y: auto;
+    padding-top: 56px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    width: min(100vw, 420px) !important;
+    z-index: 250;
+
+    &.is-open {
+      transform: translateX(0);
+    }
+  }
+
+  .dark .side-column {
+    background: $dark-grey-light;
+  }
+
+  .drawer-close {
+    align-items: center;
+    align-self: flex-end;
+    background: var(--background);
+    border: 0;
+    border-radius: 50%;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    height: 36px;
+    justify-content: center;
+    margin: -44px 12px 8px 0;
+    padding: 6px;
+    position: sticky;
+    top: 12px;
+    width: 36px;
+    z-index: 2;
+
+    &:hover {
+      background: var(--background-hover);
+    }
+  }
+
+  // The drawer needs to be a flex column so the sticky close button can
+  // align itself to the right edge.
+  .side-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .drawer-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    display: block;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    transition: opacity 0.25s ease;
+    z-index: 249;
+
+    &.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
 }
 </style>

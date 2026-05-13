@@ -1,157 +1,159 @@
 <template>
-  <div v-if="previewMode === 'comments'">
-    <div
-      :class="{
-        'news-line': true,
-        'timeline-entry': true,
-        flexrow: true,
-        selected: isSelected,
-        'is-new': isNew
-      }"
-      @click.prevent="$emit('select', news)"
-    >
-      <span
+  <div ref="root" class="news-entry">
+    <div v-if="previewMode === 'comments'">
+      <div
         :class="{
-          dot: true,
-          red: hasRetakeValue,
-          green: hasDoneValue
+          'news-line': true,
+          'timeline-entry': true,
+          flexrow: true,
+          selected: isSelected,
+          'is-new': isNew
         }"
-      ></span>
-      <span class="date flexrow-item">
-        {{ formatTime(news.created_at) }}
-      </span>
+        @click.prevent="$emit('select', news)"
+      >
+        <span
+          :class="{
+            dot: true,
+            red: hasRetakeValue,
+            green: hasDoneValue
+          }"
+        ></span>
+        <span class="date flexrow-item">
+          {{ formatTime(news.created_at) }}
+        </span>
 
-      <div class="flexrow-item production-name-wrapper" v-if="isStudio">
-        <production-name
-          :production="productionMap.get(news.project_id)"
-          only-avatar
-        />
-      </div>
-
-      <people-avatar
-        class="flexrow-item"
-        :person="personMap.get(news.author_id)"
-        :size="30"
-        :font-size="14"
-        :is-link="false"
-        v-if="personMap.get(news.author_id)"
-      />
-
-      <div class="flexrow-item task-type-wrapper">
-        <task-type-name
-          class="task-type-name"
-          :task-type="taskType"
-          :production-id="news.project_id"
-          :is-static="true"
-        />
-      </div>
-
-      <div class="flexrow-item validation-wrapper">
-        <validation-tag
-          class="validation-tag"
-          :task="task"
-          :is-static="true"
-          :thin="!news.change"
-        />
-      </div>
-
-      <div class="flexrow-item comment-content">
-        <div class="news-info flexrow">
-          <span class="flexrow-item flexrow">
-            <entity-thumbnail
-              class="ml1 entity-thumbnail mr1 flexrow-item"
-              :entity="{
-                id: news.task_entity_id,
-                preview_file_id: news.entity_preview_file_id
-              }"
-              :with-link="false"
-            />
-            <span class="strong ml05">
-              {{ news.full_entity_name }}
-            </span>
-          </span>
+        <div class="flexrow-item production-name-wrapper" v-if="isStudio">
+          <production-name
+            :production="productionMap.get(news.project_id)"
+            only-avatar
+          />
         </div>
-      </div>
-    </div>
-  </div>
 
-  <div
-    class="preview"
-    v-if="news.preview_file_id && previewMode === 'previews'"
-  >
-    <div
-      :class="{
-        'news-line': true,
-        'timeline-entry': true,
-        flexrow: true,
-        selected: isSelected,
-        'is-new': isNew
-      }"
-      @click.prevent="$emit('select', news)"
-    >
-      <span
-        :class="{
-          dot: true,
-          red: hasRetakeValue,
-          green: hasDoneValue
-        }"
-      ></span>
-      <span class="date flexrow-item">
-        {{ formatTime(news.created_at) }}
-      </span>
-
-      <people-avatar
-        class="flexrow-item"
-        :person="personMap.get(news.author_id)"
-        :size="30"
-        :no-link="true"
-        v-if="personMap.get(news.author_id)"
-      />
-
-      <div class="flexrow-item task-type-wrapper">
-        <task-type-name
-          class="task-type-name"
-          :task-type="taskType"
-          :production-id="news.project_id"
+        <people-avatar
+          class="flexrow-item"
+          :person="personMap.get(news.author_id)"
+          :size="30"
+          :font-size="14"
+          :is-link="false"
+          v-if="personMap.get(news.author_id)"
         />
-      </div>
 
-      <div class="flexrow-item comment-content">
-        <div class="news-info flexrow">
-          <span class="flexrow-item flexrow">
-            <entity-thumbnail
-              class="ml1"
-              :entity="{
-                id: news.task_entity_id,
-                preview_file_id: news.entity_preview_file_id
-              }"
-              :with-link="false"
-              v-if="news.entity_preview_file_id"
-            />
-            <span class="strong ml05 flexrow-item">
-              {{ news.full_entity_name }}
+        <div class="flexrow-item task-type-wrapper">
+          <task-type-name
+            class="task-type-name"
+            :task-type="taskType"
+            :production-id="news.project_id"
+            :is-static="true"
+          />
+        </div>
+
+        <div class="flexrow-item validation-wrapper">
+          <validation-tag
+            class="validation-tag"
+            :task="task"
+            :is-static="true"
+            :thin="!news.change"
+          />
+        </div>
+
+        <div class="flexrow-item comment-content">
+          <div class="news-info flexrow">
+            <span class="flexrow-item flexrow">
+              <entity-thumbnail
+                class="ml1 entity-thumbnail mr1 flexrow-item"
+                :entity="{
+                  id: news.task_entity_id,
+                  preview_file_id: news.entity_preview_file_id
+                }"
+                :with-link="false"
+              />
+              <span class="strong ml05">
+                {{ news.full_entity_name }}
+              </span>
             </span>
-          </span>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="has-text-centered">
-      <preview-player
-        :canvas-id="canvasId"
-        :previews="news.preview_files"
-        :task="previewPlayerTask"
-        :read-only="true"
-        :light="true"
-        :big="true"
-      />
+    <div
+      class="preview"
+      v-if="news.preview_file_id && previewMode === 'previews'"
+    >
+      <div
+        :class="{
+          'news-line': true,
+          'timeline-entry': true,
+          flexrow: true,
+          selected: isSelected,
+          'is-new': isNew
+        }"
+        @click.prevent="$emit('select', news)"
+      >
+        <span
+          :class="{
+            dot: true,
+            red: hasRetakeValue,
+            green: hasDoneValue
+          }"
+        ></span>
+        <span class="date flexrow-item">
+          {{ formatTime(news.created_at) }}
+        </span>
+
+        <people-avatar
+          class="flexrow-item"
+          :person="personMap.get(news.author_id)"
+          :size="30"
+          :no-link="true"
+          v-if="personMap.get(news.author_id)"
+        />
+
+        <div class="flexrow-item task-type-wrapper">
+          <task-type-name
+            class="task-type-name"
+            :task-type="taskType"
+            :production-id="news.project_id"
+          />
+        </div>
+
+        <div class="flexrow-item comment-content">
+          <div class="news-info flexrow">
+            <span class="flexrow-item flexrow">
+              <entity-thumbnail
+                class="ml1"
+                :entity="{
+                  id: news.task_entity_id,
+                  preview_file_id: news.entity_preview_file_id
+                }"
+                :with-link="false"
+                v-if="news.entity_preview_file_id"
+              />
+              <span class="strong ml05 flexrow-item">
+                {{ news.full_entity_name }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="has-text-centered">
+        <preview-player
+          :canvas-id="canvasId"
+          :previews="news.preview_files"
+          :task="previewPlayerTask"
+          :read-only="true"
+          :light="true"
+          :big="true"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import moment from 'moment-timezone'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
@@ -176,6 +178,11 @@ const props = defineProps({
 })
 
 defineEmits(['select'])
+
+// Template refs
+
+const root = ref(null)
+defineExpose({ root })
 
 // Computed
 
@@ -278,7 +285,8 @@ const formatTime = date =>
   border-radius: 0.5em;
   transition: border 0.1s linear;
 
-  &:hover {
+  &:hover,
+  &:active {
     border: 3px solid var(--background-selectable);
   }
 
@@ -337,6 +345,39 @@ const formatTime = date =>
 
   .selected .date {
     color: $light-grey;
+  }
+}
+
+// Mobile: hide the timeline dot — the rail is also gone in
+// ProductionNewsFeed under 768px, so the orphan dot adds nothing.
+// Reset the min-widths on task-type / validation / date so short tags
+// (e.g. "WIP", "DONE") hug their content instead of floating in 100px /
+// 80px reserved space. The .comment-content (entity thumbnail + name)
+// wraps to a second line via `flex-basis: 100%`.
+@media screen and (max-width: 768px) {
+  .timeline-entry .dot {
+    display: none;
+  }
+
+  .news-line {
+    flex-wrap: wrap;
+    padding-left: 0.5em;
+    row-gap: 0.4em;
+  }
+
+  .task-type-wrapper,
+  .validation-wrapper,
+  .date {
+    min-width: 0;
+  }
+
+  .comment-content {
+    flex-basis: 100%;
+    margin-top: 0.1em;
+    // Align the entity thumbnail with the avatar on the first line
+    // (production-avatar in studio mode, people-avatar in project mode).
+    // Approx = `.date` width (~30px) + `.flexrow-item` margin-right (1rem).
+    padding-left: calc(30px + 1rem);
   }
 }
 </style>

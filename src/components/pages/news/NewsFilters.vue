@@ -11,7 +11,7 @@
 
     <div class="filters flexrow">
       <combobox
-        class="flexrow-item selector"
+        class="flexrow-item selector filter-episode"
         :label="$t('shots.fields.episode')"
         :options="runningEpisodeOptions"
         v-model="episodeId"
@@ -29,7 +29,7 @@
         :task-type-list="taskTypeList"
         v-model="taskTypeId"
       />
-      <div class="flexrow-item selector">
+      <div class="flexrow-item selector filter-person">
         <label class="label person-label">
           {{ $t('main.person') }}
         </label>
@@ -170,5 +170,15 @@ const toggleFilters = () => {
   cursor: pointer;
   float: right;
   text-transform: lowercase;
+}
+
+// Mobile: keep only task-status + task-type filters, drop the advanced
+// filter toggle and the episode/person fields to fit the narrow width.
+@media screen and (max-width: 768px) {
+  .filter-button,
+  .filter-episode,
+  .filter-person {
+    display: none;
+  }
 }
 </style>
