@@ -192,15 +192,24 @@ export default {
     },
 
     getDimensions() {
-      let ratio = 1
       const dimensions = this.getNaturalDimensions()
-      if (dimensions.width > 0) ratio = dimensions.height / dimensions.width
+      const ratio =
+        dimensions.width > 0 ? dimensions.height / dimensions.width : 1
+      const containerWidth = this.container ? this.container.offsetWidth : 0
+
+      if (this.fullScreen) {
+        let width = containerWidth
+        let height = Math.floor(width * ratio)
+        if (height > this.defaultHeight) {
+          height = this.defaultHeight
+          width = Math.floor(height / ratio)
+        }
+        return { width, height }
+      }
+
       let width = dimensions.width
-      if (
-        width > this.container.offsetWidth &&
-        this.container.offsetWidth > 0
-      ) {
-        width = this.container.offsetWidth
+      if (width > containerWidth && containerWidth > 0) {
+        width = containerWidth
       }
       let height = Math.floor(width * ratio)
       if (height > this.defaultHeight) {
