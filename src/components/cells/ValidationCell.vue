@@ -77,7 +77,7 @@
 
 <script setup>
 import { EyeIcon } from 'lucide-vue-next'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, toRef, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
@@ -222,6 +222,17 @@ const onClick = event => {
 watch(() => props.taskTest, resolveTask)
 
 onMounted(resolveTask)
+
+// Read via $refs by entity_list.js / selection.js for shift-click range selection.
+// <script setup> hides everything by default.
+defineExpose({
+  task,
+  selectable: toRef(props, 'selectable'),
+  entity: toRef(props, 'entity'),
+  column: toRef(props, 'column'),
+  rowX: toRef(props, 'rowX'),
+  columnY: toRef(props, 'columnY')
+})
 </script>
 
 <style lang="scss" scoped>
