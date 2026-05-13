@@ -1,2 +1,0 @@
-import{G as e,T as t,t as n,v as r,x as i}from"./vue.esm-bundler-Cz3q-qfd.js";import{t as a}from"./_plugin-vue_export-helper-1r9tKl2A.js";import{o,s}from"./index-DJIzPWpK.js";n();var c={scope:`row`},l={class:`flexrow`},u=a({__name:`PeopleNameCell`,props:{person:{type:Object,required:!0}},setup(n){return(a,u)=>(e(),i(`td`,c,[r(`div`,l,[t(s,{person:n.person},null,8,[`person`]),t(o,{"with-link":``,person:n.person},null,8,[`person`])])]))}},[[`__scopeId`,`data-v-eb27d442`]]);export{u as t};
-//# sourceMappingURL=PeopleNameCell-EXxJj6NW.js.map
