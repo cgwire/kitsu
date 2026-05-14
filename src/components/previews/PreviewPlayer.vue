@@ -362,6 +362,9 @@
 </template>
 
 <script setup>
+import { fabric } from 'fabric'
+import { PSBrush } from 'fabricjs-psbrush'
+import { ArrowUpRightIcon, DownloadIcon, LinkIcon } from 'lucide-vue-next'
 import {
   computed,
   defineAsyncComponent,
@@ -373,42 +376,41 @@ import {
   useTemplateRef,
   watch
 } from 'vue'
-import { useStore } from 'vuex'
 import { useI18n } from 'vue-i18n'
-import { fabric } from 'fabric'
-import { PSBrush } from 'fabricjs-psbrush'
-import { ArrowUpRightIcon, DownloadIcon, LinkIcon } from 'lucide-vue-next'
+import { useStore } from 'vuex'
 
 import { useAnnotation } from '@/composables/annotation'
+import { getEntityPath } from '@/lib/path'
+import localPreferences from '@/lib/preferences'
 import {
   formatFrame,
   formatTime,
   roundToFrame,
   floorToFrame
 } from '@/lib/video'
-import { getEntityPath } from '@/lib/path'
-import localPreferences from '@/lib/preferences'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import BrowsingBar from '@/components/previews/BrowsingBar.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PlayerAnnotationBar from '@/components/previews/PlayerAnnotationBar.vue'
 import PlayerComparisonBar from '@/components/previews/PlayerComparisonBar.vue'
 import PlayerPlaybackBar from '@/components/previews/PlayerPlaybackBar.vue'
-import PreviewViewer from '@/components/previews/PreviewViewer.vue' // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+import PreviewViewer from '@/components/previews/PreviewViewer.vue'
 import RevisionPreview from '@/components/previews/RevisionPreview.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
-
-const TaskInfo = defineAsyncComponent(
-  () => import('@/components/sides/TaskInfo.vue')
-)
-
-let lastIndex = 1
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 const FRAME_DELAY = 20
 const RENDER_DELAY = 100
 const SYNC_DELAY = 200
 const RESIZE_DELAY = 500
+
+const TaskInfo = defineAsyncComponent(
+  () => import('@/components/sides/TaskInfo.vue')
+)
+
+const store = useStore()
+const { t } = useI18n()
 
 // Props
 
@@ -477,25 +479,9 @@ const emit = defineEmits([
   'remove-extra-preview'
 ])
 
-// Store
+// State
 
-const store = useStore()
-const { t } = useI18n()
-
-const assetMap = computed(() => store.getters.assetMap)
-const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
-const isTVShow = computed(() => store.getters.isTVShow)
-const organisation = computed(() => store.getters.organisation)
-const productionMap = computed(() => store.getters.productionMap)
-const selectedConcepts = computed(() => store.getters.selectedConcepts)
-
-const userId = computed(() => store.getters.user?.id)
-
-const updateRevisionPreviewPosition = payload =>
-  store.dispatch('updateRevisionPreviewPosition', payload)
-
-// Template refs
-
+// — Template refs
 const container = useTemplateRef('container')
 const annotationCanvasRef = useTemplateRef('annotation-canvas')
 const previewViewer = useTemplateRef('preview-viewer')
@@ -507,14 +493,14 @@ const commentContainer = useTemplateRef('task-info-player')
 const progress = useTemplateRef('progress')
 const revisionPreviews = useTemplateRef('revision-previews')
 
-// Non-reactive state
-
+// — Non-reactive
+let lastIndex = 1
 let loupe = false
 let scrubbing = false
 let scrubStartX = 0
 let previewFileMap = {}
 
-// Reactive state
+// — Reactive
 
 const annotations = ref([])
 const available3DAnimations = ref([])
@@ -555,6 +541,18 @@ const videoDuration = ref(0)
 const volume = ref(50)
 const width = ref(0)
 const comparisonMode = ref('sidebyside')
+
+// Vuex getters
+// Declared before `useAnnotation` so the composable can consume them; the
+// rest of the computeds live under the `// Computed` section below.
+
+const assetMap = computed(() => store.getters.assetMap)
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const isTVShow = computed(() => store.getters.isTVShow)
+const organisation = computed(() => store.getters.organisation)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedConcepts = computed(() => store.getters.selectedConcepts)
+const userId = computed(() => store.getters.user?.id)
 
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
@@ -1892,13 +1890,15 @@ const onRevisionPreviewSelected = index => {
 
 const onRevisionPreviewDropped = ({ previousIndex, newIndex }) => {
   const preview = props.previews[previousIndex]
-  updateRevisionPreviewPosition({
-    previousIndex,
-    newIndex,
-    revision: currentPreview.value.revision,
-    taskId: currentPreview.value.task_id,
-    previewId: preview.id
-  }).catch(console.error)
+  store
+    .dispatch('updateRevisionPreviewPosition', {
+      previousIndex,
+      newIndex,
+      revision: currentPreview.value.revision,
+      taskId: currentPreview.value.task_id,
+      previewId: preview.id
+    })
+    .catch(console.error)
   emit('previews-order-changed')
   nextTick(() => {
     currentIndex.value = newIndex + 1
