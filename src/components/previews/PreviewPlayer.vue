@@ -720,17 +720,12 @@ const extension = computed(() =>
 )
 
 const isConcept = computed(() => props.entityType === 'Concept')
-
 const isPicture = computed(() =>
   ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
 )
-
 const isMovie = computed(() => extension.value === 'mp4')
-
 const is3DModel = computed(() => ['glb', 'gltf'].includes(extension.value))
-
 const isSound = computed(() => ['mp3', 'wav'].includes(extension.value))
-
 const isFile = computed(() => !isPicture.value && !isMovie.value)
 
 const isFullScreenEnabled = computed(
@@ -2172,6 +2167,11 @@ onMounted(() => {
       localPreferences.getPreference('player:volume') || volume.value
     previewViewer.value.setVolume(volume.value)
   }
+
+  // Initialize wrapper transforms to identity so canvas-wrapper has the
+  // same inline transform state at mount as after a zoom-pan toggle cycle.
+  applyTransformToWrapper(canvasWrapper.value, panzoomTransform.value)
+  applyTransformToWrapper(canvasComparisonWrapper.value, panzoomTransform.value)
 
   new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
     container.value
