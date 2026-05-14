@@ -298,13 +298,22 @@ const setupPanZoom = () => {
       minZoom: 1
     })
   )
+  const panzoomSmall = panzoomInstances.value[0]
   panzoomBig = panzoomInstances.value[1]
   panzoomGifInstance = panzoomInstances.value[2]
+  panzoomSmall.on('zoom', () => {
+    if (props.big || props.fullScreen || isGif.value) return
+    emitPanZoom(panzoomSmall)
+  })
+  panzoomSmall.on('pan', () => {
+    if (props.big || props.fullScreen || isGif.value) return
+    emitPanZoom(panzoomSmall)
+  })
   panzoomBig.on('zoom', () => {
     if (!props.big) return
     emitPanZoom(panzoomBig)
   })
-  panzoomBig.on('panend', () => {
+  panzoomBig.on('pan', () => {
     if (!props.big) return
     emitPanZoom(panzoomBig)
   })
@@ -312,10 +321,11 @@ const setupPanZoom = () => {
     if (!isGif.value) return
     emitPanZoom(panzoomGifInstance)
   })
-  panzoomGifInstance.on('panend', () => {
+  panzoomGifInstance.on('pan', () => {
     if (!isGif.value) return
     emitPanZoom(panzoomGifInstance)
   })
+  pausePanZoom()
 }
 
 const resetPanZoom = () => {

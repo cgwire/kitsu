@@ -115,6 +115,7 @@ const emit = defineEmits([
   'click',
   'duration-changed',
   'frame-update',
+  'panzoom-changed',
   'play-ended',
   'size-changed',
   'video-end',
@@ -131,6 +132,7 @@ const videoDuration = ref(0)
 const currentTimeRaw = ref(0)
 
 let panzoomInstance = null
+let panzoomSilent = false
 let currentTimeCalls = []
 let playLoop = null
 let isPlaying = false
@@ -357,6 +359,26 @@ const resetPanZoom = () => {
   }
 }
 
+const setPanZoom = (x, y, scale) => {
+  if (!panzoomInstance) return
+  panzoomSilent = true
+  const actualScale = panzoomInstance.getTransform().scale
+  const zoomFactor = scale / actualScale
+  panzoomInstance.moveTo(x, y)
+  panzoomInstance.setTransformOrigin({ x, y })
+  panzoomInstance.zoomTo(x, y, zoomFactor)
+  panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
+  nextTick(() => {
+    panzoomSilent = false
+  })
+}
+
+const emitPanZoom = () => {
+  if (panzoomSilent || !panzoomInstance) return
+  const { x, y, scale } = panzoomInstance.getTransform()
+  emit('panzoom-changed', { x, y, scale })
+}
+
 const pausePanZoom = () => {
   if (panzoomInstance) panzoomInstance.pause()
 }
@@ -446,6 +468,8 @@ onMounted(() => {
       maxZoom: 5,
       minZoom: 1
     })
+    panzoomInstance.on('zoom', emitPanZoom)
+    panzoomInstance.on('pan', emitPanZoom)
     pausePanZoom()
   }
 })
@@ -527,6 +551,7 @@ defineExpose({
   goPreviousFrame,
   goNextFrame,
   resetPanZoom,
+  setPanZoom,
   pausePanZoom,
   resumePanZoom,
   setSpeed,

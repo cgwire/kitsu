@@ -219,6 +219,7 @@ import {
 import { useStore } from 'vuex'
 
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
+import { usePanzoomSync } from '@/composables/panzoom'
 import { floorToFrame, formatTime } from '@/lib/video'
 
 import PictureViewer from '@/components/previews/PictureViewer.vue'
@@ -262,7 +263,8 @@ const currentFrameNumber = ref(0)
 const currentPlaylistProgress = ref(0)
 const maxDuration = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
-const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
+const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
+  usePanzoomSync()
 const volume = ref(100)
 
 const isPlaying = ref(false)
@@ -605,10 +607,6 @@ const onMaxDurationUpdate = duration => {
   maxDuration.value = duration ? floorToFrame(duration, fps.value) : 0
 }
 
-const onPanzoomChanged = ({ x, y, scale }) => {
-  panzoomTransform.value = { x, y, scale }
-}
-
 const onTimeCodeClicked = ({ frame }) => {
   if (!isMovie.value) return
   const frameNumber = Math.max(parseInt(frame, 10) || 0, 0)
@@ -741,7 +739,7 @@ watch(isZoomEnabled, enabled => {
   } else {
     target?.pausePanZoom?.()
     target?.resetPanZoom?.()
-    panzoomTransform.value = { x: 0, y: 0, scale: 1 }
+    resetPanzoomTransform()
   }
 })
 

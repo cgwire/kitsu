@@ -42,6 +42,7 @@
       :preview="preview"
       @duration-changed="duration => $emit('duration-changed', duration)"
       @frame-update="frameNumber => $emit('frame-update', frameNumber)"
+      @panzoom-changed="event => $emit('panzoom-changed', event)"
       @play-ended="$emit('play-ended')"
       @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
@@ -59,6 +60,7 @@
       :margin-bottom="marginBottom"
       :panzoom="true"
       :preview="preview"
+      @panzoom-changed="event => $emit('panzoom-changed', event)"
       @size-changed="onPictureSizeChanged"
       v-show="isPicture"
     />
@@ -210,6 +212,7 @@ const emit = defineEmits([
   'duration-changed',
   'frame-update',
   'model-loaded',
+  'panzoom-changed',
   'play-ended',
   'size-changed',
   'video-end',
@@ -404,6 +407,11 @@ const resetZoom = () => {
   if (videoViewer.value) videoViewer.value.resetPanZoom()
 }
 
+const setPanZoom = (x, y, scale) => {
+  if (pictureViewer.value) pictureViewer.value.setPanZoom(x, y, scale)
+  if (videoViewer.value) videoViewer.value.setPanZoom(x, y, scale)
+}
+
 const pauseZoom = () => {
   if (pictureViewer.value) pictureViewer.value.pausePanZoom()
   if (videoViewer.value) videoViewer.value.pausePanZoom()
@@ -461,6 +469,7 @@ defineExpose({
   updateLoupePosition,
   extractFrame,
   resetZoom,
+  setPanZoom,
   pauseZoom,
   resumeZoom,
   setSpeed,

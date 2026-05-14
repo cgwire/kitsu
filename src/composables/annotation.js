@@ -134,7 +134,7 @@ export const useAnnotation = ({
   let silentAnnotation = false
   let annotatedPreview = null
   let annotationToSave = null
-  let changesToSave = null
+  let pendingSave = null
 
   // Computed
   const annotationCanvasEl = computed(() => annotationCanvas.value)
@@ -1131,7 +1131,7 @@ export const useAnnotation = ({
   const endAnnotationSaving = () => {
     if (notSaved.value) {
       const preview = annotatedPreview
-      changesToSave = {
+      pendingSave = {
         preview,
         additions: [...additions.value],
         updates: [...updates.value],
@@ -1140,8 +1140,41 @@ export const useAnnotation = ({
       clearModifications()
       clearTimeout(annotationToSave)
       notSaved.value = false
-      emit('annotation-changed', changesToSave)
+      emit('annotation-changed', pendingSave)
     }
+  }
+
+  // Called by the parent component once the Vuex save action has resolved
+  // successfully. Drops the in-flight buffer; if drawings accumulated in
+  // the active arrays during the round-trip, flush them immediately rather
+  // than wait for another debounce cycle.
+  const confirmAnnotationsSaved = () => {
+    pendingSave = null
+    if (
+      additions.value.length > 0 ||
+      updates.value.length > 0 ||
+      deletions.value.length > 0
+    ) {
+      notSaved.value = true
+      endAnnotationSaving()
+    }
+  }
+
+  // Called by the parent component when the Vuex save action rejects.
+  // Pre-pends the in-flight items back to the head of the active arrays
+  // (so they take priority over anything drawn since), flips notSaved back
+  // on and schedules a retry with a longer backoff.
+  const restoreFailedAnnotations = () => {
+    if (!pendingSave) return
+    additions.value = [...pendingSave.additions, ...additions.value]
+    updates.value = [...pendingSave.updates, ...updates.value]
+    deletions.value = [...pendingSave.deletions, ...deletions.value]
+    pendingSave = null
+    notSaved.value = true
+    clearTimeout(annotationToSave)
+    annotationToSave = setTimeout(() => {
+      endAnnotationSaving()
+    }, 5000)
   }
 
   const copyAnnotationCanvas = (canvas, annotation) => {
@@ -1315,6 +1348,8 @@ export const useAnnotation = ({
     markLastAnnotationTime,
     startAnnotationSaving,
     endAnnotationSaving,
+    confirmAnnotationsSaved,
+    restoreFailedAnnotations,
     copyAnnotationCanvas,
 
     // Setters for component-specific callbacks

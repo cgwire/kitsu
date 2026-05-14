@@ -8,7 +8,8 @@
             ref="canvas-wrapper"
             oncontextmenu="return false"
             @click="onCanvasClicked"
-            v-show="!isZoomPan && isAnnotationsDisplayed"
+            :style="{ pointerEvents: isZoomPan ? 'none' : 'auto' }"
+            v-show="isAnnotationsDisplayed"
           >
             <canvas ref="annotation-canvas" class="canvas" :id="canvasId">
             </canvas>
@@ -18,8 +19,8 @@
             ref="canvas-comparison-wrapper"
             oncontextmenu="return false"
             @click="onCanvasClicked"
+            :style="{ pointerEvents: isZoomPan ? 'none' : 'auto' }"
             v-show="
-              !isZoomPan &&
               isAnnotationsDisplayed &&
               isComparing &&
               previewToCompare &&
@@ -61,6 +62,7 @@
               @duration-changed="changeMaxDuration"
               @frame-update="setVideoFrameContext"
               @model-loaded="onModelLoaded"
+              @panzoom-changed="onPanzoomChanged"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
               @video-end="onVideoEnd"
@@ -380,6 +382,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useAnnotation } from '@/composables/annotation'
+import { usePanzoomSync } from '@/composables/panzoom'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 import {
@@ -554,6 +557,14 @@ const productionMap = computed(() => store.getters.productionMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
 const userId = computed(() => store.getters.user?.id)
 
+// Panzoom transform sync — the main viewer drives both the fabric
+// annotation canvases (via applyPanzoomTo) and the comparison viewer's
+// underlying panzoom (via setPanZoom). Comparison viewer's own panzoom
+// stays paused; it only reflects the main viewer's transform.
+
+const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
+  usePanzoomSync()
+
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
 
@@ -602,7 +613,9 @@ const {
   copyAnnotations,
   pasteAnnotations,
   startAnnotationSaving,
-  endAnnotationSaving
+  endAnnotationSaving,
+  confirmAnnotationsSaved,
+  restoreFailedAnnotations
 } = annotation
 
 // Computed
@@ -1334,12 +1347,8 @@ const resetPreviewFileMap = () => {
 const onZoomPanClicked = () => {
   if (!isZoomPan.value) {
     isDrawing.value = false
-    isAnnotationsDisplayed.value = false
-    isZoomPan.value = true
-  } else {
-    isZoomPan.value = false
-    isAnnotationsDisplayed.value = true
   }
+  isZoomPan.value = !isZoomPan.value
 }
 
 const onObjectBackgroundSelected = () => {
@@ -1450,9 +1459,6 @@ const getPreviousAnnotationTime = time => {
 const onAnnotationDisplayedClicked = () => {
   clearFocus()
   isAnnotationsDisplayed.value = !isAnnotationsDisplayed.value
-  isZoomPan.value = false
-  previewViewer.value.resetZoom()
-  comparisonViewer.value.resetZoom()
 }
 
 const saveAnnotations = () => {
@@ -2020,6 +2026,7 @@ watch(isComparing, () => {
     comparisonViewer.value.resize()
     previewViewer.value.resetZoom()
     comparisonViewer.value.resetZoom()
+    resetPanzoomTransform()
   })
 })
 
@@ -2074,12 +2081,6 @@ watch(isTyping, () => {
 })
 
 watch(isAnnotationsDisplayed, () => {
-  if (isAnnotationsDisplayed.value) {
-    nextTick(() => {
-      previewViewer.value.resetZoom()
-      comparisonViewer.value.resetZoom()
-    })
-  }
   if (!isAnnotationsDisplayed.value) {
     isDrawing.value = false
   }
@@ -2092,13 +2093,44 @@ watch(isComparisonOverlay, () => {
   })
 })
 
-watch(isZoomPan, () => {
-  if (isZoomPan.value) {
-    previewViewer.value.resumeZoom()
+watch(isZoomPan, enabled => {
+  if (enabled) {
+    previewViewer.value?.resumeZoom()
   } else {
-    previewViewer.value.pauseZoom()
+    previewViewer.value?.pauseZoom()
+    previewViewer.value?.resetZoom()
+    comparisonViewer.value?.resetZoom()
+    resetPanzoomTransform()
   }
 })
+
+// Apply panzoom as a CSS transform on the canvas wrappers (matching
+// what panzoom does on the picture element), so the wrappers move and
+// scale with the underlying viewer instead of clipping content at the
+// fabric pixel buffer's bounds.
+const applyTransformToWrapper = (wrapper, transform) => {
+  if (!wrapper) return
+  wrapper.style.transformOrigin = '0 0'
+  wrapper.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`
+}
+
+watch(
+  panzoomTransform,
+  transform => {
+    applyTransformToWrapper(canvasWrapper.value, transform)
+    if (isComparing.value && !isComparisonOverlay.value) {
+      applyTransformToWrapper(canvasComparisonWrapper.value, transform)
+    }
+    if (isComparing.value) {
+      comparisonViewer.value?.setPanZoom(
+        transform.x,
+        transform.y,
+        transform.scale
+      )
+    }
+  },
+  { deep: true }
+)
 
 watch(speed, () => {
   const rates = [0.25, 0.5, 1, 1.5, 2]
@@ -2115,23 +2147,24 @@ watch(volume, () => {
 
 onMounted(() => {
   configureEvents()
+
   setupFabricCanvas()
   reloadAnnotations()
   if (isPicture.value) loadAnnotation()
+
   resetPreviewFileMap()
   initPreferences()
+
+  resetPencilConfiguration()
   if (isSound.value || is3DModel.value || isFile.value) {
     fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
   }
-  new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
-    container.value
-  )
   if (is3DModel.value) {
     currentBackground.value =
       productionBackgrounds.value.find(isDefaultBackground) || null
     onObjectBackgroundSelected()
   }
-  resetPencilConfiguration()
+
   if (isMuted.value) {
     previewViewer.value.setVolume(0)
   } else {
@@ -2139,6 +2172,10 @@ onMounted(() => {
       localPreferences.getPreference('player:volume') || volume.value
     previewViewer.value.setVolume(volume.value)
   }
+
+  new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
+    container.value
+  )
 })
 
 onBeforeUnmount(() => {
@@ -2175,7 +2212,9 @@ defineExpose({
   loadAnnotation,
   onCanvasMouseMoved,
   onCanvasReleased,
-  isValidPreviewModification
+  isValidPreviewModification,
+  confirmAnnotationsSaved,
+  restoreFailedAnnotations
 })
 </script>
 
@@ -2376,6 +2415,7 @@ defineExpose({
 
 .preview-container {
   position: relative;
+  overflow: hidden;
 }
 
 .viewers {
