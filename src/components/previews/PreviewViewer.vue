@@ -359,6 +359,12 @@ const resize = () => {
   else if (isMovie.value) videoViewer.value?.mountVideo()
 }
 
+const currentMediaElement = computed(() => {
+  if (isMovie.value) return videoViewer.value?.video || null
+  if (isPicture.value) return pictureViewer.value?.visibleImage || null
+  return null
+})
+
 const setCurrentFrame = frameNumber => {
   videoViewer.value.setCurrentFrame(frameNumber)
 }
@@ -451,6 +457,7 @@ defineExpose({
   container,
   videoViewer,
   pictureViewer,
+  currentMediaElement,
   resetVideo,
   play,
   pause,

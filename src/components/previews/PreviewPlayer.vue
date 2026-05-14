@@ -3,37 +3,31 @@
     <div class="preview filler">
       <div class="flexrow filler">
         <div class="preview-container filler" ref="preview-container">
-          <div
-            class="canvas-wrapper"
-            ref="canvas-wrapper"
-            oncontextmenu="return false"
-            @click="onCanvasClicked"
-            :style="{ pointerEvents: isZoomPan ? 'none' : 'auto' }"
+          <annotation-canvas
+            ref="main-annotation-canvas"
+            :canvas-id="canvasId"
+            :media-element="mainMediaElement"
+            :panzoom-transform="panzoomTransform"
+            :interactive="!isZoomPan"
             v-show="isAnnotationsDisplayed"
-          >
-            <canvas ref="annotation-canvas" class="canvas" :id="canvasId">
-            </canvas>
-          </div>
-          <div
-            class="canvas-comparison-wrapper"
-            ref="canvas-comparison-wrapper"
-            oncontextmenu="return false"
             @click="onCanvasClicked"
-            :style="{ pointerEvents: isZoomPan ? 'none' : 'auto' }"
+            @fabric-ready="onMainFabricReady"
+          />
+          <annotation-canvas
+            :canvas-id="`${canvasId}-comparison`"
+            :media-element="comparisonMediaElement"
+            :panzoom-transform="panzoomTransform"
+            :interactive="false"
+            :static="true"
             v-show="
               isAnnotationsDisplayed &&
               isComparing &&
               previewToCompare &&
               !isComparisonOverlay
             "
-          >
-            <canvas
-              ref="annotation-canvas-comparison"
-              class="canvas"
-              :id="`${canvasId}-comparison`"
-            >
-            </canvas>
-          </div>
+            @click="onCanvasClicked"
+            @fabric-ready="onComparisonFabricReady"
+          />
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
@@ -65,7 +59,6 @@
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
-              @size-changed="fixCanvasSize"
               @video-end="onVideoEnd"
               @video-loaded="onPreviewLoaded"
             />
@@ -88,7 +81,6 @@
               :style="{
                 opacity: overlayOpacity
               }"
-              @size-changed="fixCanvasComparisonSize"
               @video-loaded="syncComparisonViewer"
               v-show="isComparing && previewToCompare"
             />
@@ -366,12 +358,10 @@
 
 <script setup>
 import { fabric } from 'fabric'
-import { PSBrush } from 'fabricjs-psbrush'
 import { ArrowUpRightIcon, DownloadIcon, LinkIcon } from 'lucide-vue-next'
 import {
   computed,
   defineAsyncComponent,
-  markRaw,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -393,6 +383,7 @@ import {
   floorToFrame
 } from '@/lib/video'
 
+import AnnotationCanvas from '@/components/previews/AnnotationCanvas.vue'
 import BrowsingBar from '@/components/previews/BrowsingBar.vue'
 import PlayerAnnotationBar from '@/components/previews/PlayerAnnotationBar.vue'
 import PlayerComparisonBar from '@/components/previews/PlayerComparisonBar.vue'
@@ -487,13 +478,21 @@ const emit = defineEmits([
 
 // — Template refs
 const container = useTemplateRef('container')
-const annotationCanvasRef = useTemplateRef('annotation-canvas')
+const mainAnnotationCanvas = useTemplateRef('main-annotation-canvas')
 const previewViewer = useTemplateRef('preview-viewer')
 const comparisonViewer = useTemplateRef('comparison-preview-viewer')
-const canvasWrapper = useTemplateRef('canvas-wrapper')
-const canvasComparisonWrapper = useTemplateRef('canvas-comparison-wrapper')
 const previewContainer = useTemplateRef('preview-container')
 const commentContainer = useTemplateRef('task-info-player')
+
+const annotationCanvasRef = computed(() => mainAnnotationCanvas.value?.canvasEl)
+const canvasWrapper = computed(() => mainAnnotationCanvas.value?.overlay)
+
+const mainMediaElement = computed(
+  () => previewViewer.value?.currentMediaElement || null
+)
+const comparisonMediaElement = computed(
+  () => comparisonViewer.value?.currentMediaElement || null
+)
 const progress = useTemplateRef('progress')
 const revisionPreviews = useTemplateRef('revision-previews')
 
@@ -727,7 +726,6 @@ const isPicture = computed(() =>
 const isMovie = computed(() => extension.value === 'mp4')
 const is3DModel = computed(() => ['glb', 'gltf'].includes(extension.value))
 const isSound = computed(() => ['mp3', 'wav'].includes(extension.value))
-const isFile = computed(() => !isPicture.value && !isMovie.value)
 
 const isFullScreenEnabled = computed(
   () =>
@@ -1132,70 +1130,14 @@ const onToggleSoundClicked = () => {
 
 // Sizing
 
-const getDimensions = () => {
-  const dimensions = { width: 0, height: 0 }
-  if (previewContainer.value) {
-    dimensions.width = previewContainer.value.offsetWidth
-    dimensions.height = previewContainer.value.offsetHeight
-  }
-  return dimensions
+const onMainFabricReady = canvas => {
+  fabricCanvas.value = canvas
+  if (fabricCanvasComparison.value) configureCanvas()
 }
 
-const setupFabricCanvas = () => {
-  const dimensions = getDimensions()
-  const w = dimensions.width
-  const h = dimensions.height
-  fabricCanvas.value = markRaw(
-    new fabric.Canvas(props.canvasId, {
-      fireRightClick: true,
-      width: w,
-      height: h,
-      enablePointerEvents: true
-    })
-  )
-  const brush = new PSBrush(fabricCanvas.value)
-  brush.width = 20
-  brush.color = '#000'
-  brush.disableTouch = true
-  brush.disableMouse = true
-  brush.pressureManager.fallback = 0.5
-  fabricCanvas.value.freeDrawingBrush = brush
-  fabricCanvasComparison.value = new fabric.StaticCanvas(
-    props.canvasId + '-comparison'
-  )
-  configureCanvas()
-}
-
-const fixCanvasSize = dimensions => {
-  if (!fabricCanvas.value) return
-  if (isPicture.value && dimensions.source === 'movie') return
-  if (isMovie.value && dimensions.source === 'picture') return
-  const { height, left, top, width: w } = dimensions
-  canvasWrapper.value.style.top = top + 'px'
-  canvasWrapper.value.style.left = left + 'px'
-  canvasWrapper.value.style.width = w + 'px'
-  canvasWrapper.value.style.height = height + 'px'
-  if (fabricCanvas.value.width !== w || fabricCanvas.value.height !== height) {
-    fabricCanvas.value.setDimensions({ width: w, height })
-  }
-  refreshCanvas()
-}
-
-const fixCanvasComparisonSize = dimensions => {
-  if (!fabricCanvasComparison.value) return
-  const { height, left, top, width: w } = dimensions
-  canvasComparisonWrapper.value.style.top = top + 'px'
-  canvasComparisonWrapper.value.style.left =
-    getDimensions().width / 2 + left + 'px'
-  canvasComparisonWrapper.value.style.width = w + 'px'
-  canvasComparisonWrapper.value.style.height = height + 'px'
-  if (
-    fabricCanvasComparison.value.width !== w ||
-    fabricCanvasComparison.value.height !== height
-  ) {
-    fabricCanvasComparison.value.setDimensions({ width: w, height })
-  }
-  refreshCanvas()
+const onComparisonFabricReady = canvas => {
+  fabricCanvasComparison.value = canvas
+  if (fabricCanvas.value) configureCanvas()
 }
 
 // Screen
@@ -1495,7 +1437,6 @@ const loadAnnotation = annotation => {
       return
     }
   }
-  if (!fabricCanvas.value) setupFabricCanvas()
   if (isMovie.value && previewViewer.value && isPlaying.value) {
     previewViewer.value.pause()
   }
@@ -1742,30 +1683,6 @@ const onModelLoaded = () => {
   }
 }
 
-// Read the visible picture/video bounds from the DOM and write them
-// directly to the annotation canvas wrapper, without going through
-// resetPicture (which re-runs the whole load sizing path and can race
-// with the cleanup sequence). Called when the preview is actually
-// loaded, so the bounding rect is valid.
-const repositionCanvasOnPreview = () => {
-  if (!fabricCanvas.value || !previewContainer.value) return
-  const viewerContainer = previewViewer.value?.container
-  if (!viewerContainer) return
-  const visibleMedia = Array.from(
-    viewerContainer.querySelectorAll('img, video')
-  ).find(el => el.offsetWidth > 0 && el.offsetHeight > 0)
-  if (!visibleMedia) return
-  const mediaRect = visibleMedia.getBoundingClientRect()
-  const containerRect = previewContainer.value.getBoundingClientRect()
-  fixCanvasSize({
-    width: mediaRect.width,
-    height: mediaRect.height,
-    top: mediaRect.top - containerRect.top,
-    left: mediaRect.left - containerRect.left,
-    source: isMovie.value ? 'movie' : 'picture'
-  })
-}
-
 const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
@@ -1775,15 +1692,14 @@ const onPreviewLoaded = () => {
     setCurrentFrame(0)
     progress.value.updateProgressBar(0)
   }
-  // Replay the zoom-pan disable sequence so the panzoom transform is
-  // identity and the wrappers get their inline CSS transform set, then
-  // reposition the canvas wrapper to match the now-visible picture.
+  // Reset the panzoom state once the underlying media is laid out so any
+  // residual transform from a previous preview is cleared. The annotation
+  // canvases reposition themselves through their ResizeObserver.
   nextTick(() => {
     previewViewer.value?.pauseZoom()
     previewViewer.value?.resetZoom()
     comparisonViewer.value?.resetZoom()
     resetPanzoomTransform()
-    repositionCanvasOnPreview()
   })
 }
 
@@ -1984,10 +1900,7 @@ watch(currentPreview, () => {
       comparisonViewer.value?.resize()
     }, RESIZE_DELAY)
   } else if (is3DModel.value) {
-    fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
     previewViewer.value?.resize()
-  } else if (isSound.value || isFile.value) {
-    fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
   }
   nextTick(() => {
     if (previewViewer.value && previewViewer.value.isBroken) {
@@ -2134,23 +2047,12 @@ watch(isZoomPan, enabled => {
   }
 })
 
-// Apply panzoom as a CSS transform on the canvas wrappers (matching
-// what panzoom does on the picture element), so the wrappers move and
-// scale with the underlying viewer instead of clipping content at the
-// fabric pixel buffer's bounds.
-const applyTransformToWrapper = (wrapper, transform) => {
-  if (!wrapper) return
-  wrapper.style.transformOrigin = '0 0'
-  wrapper.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`
-}
-
+// Drive the comparison viewer's underlying panzoom from the main one so
+// both stay visually synced. The annotation canvases pick up the
+// transform directly via their panzoom-transform prop.
 watch(
   panzoomTransform,
   transform => {
-    applyTransformToWrapper(canvasWrapper.value, transform)
-    if (isComparing.value && !isComparisonOverlay.value) {
-      applyTransformToWrapper(canvasComparisonWrapper.value, transform)
-    }
     if (isComparing.value) {
       comparisonViewer.value?.setPanZoom(
         transform.x,
@@ -2178,7 +2080,6 @@ watch(volume, () => {
 onMounted(() => {
   configureEvents()
 
-  setupFabricCanvas()
   reloadAnnotations()
   if (isPicture.value) loadAnnotation()
 
@@ -2186,9 +2087,6 @@ onMounted(() => {
   initPreferences()
 
   resetPencilConfiguration()
-  if (isSound.value || is3DModel.value || isFile.value) {
-    fixCanvasSize({ width: 0, height: 0, left: 0, top: 0 })
-  }
   if (is3DModel.value) {
     currentBackground.value =
       productionBackgrounds.value.find(isDefaultBackground) || null
@@ -2202,13 +2100,6 @@ onMounted(() => {
       localPreferences.getPreference('player:volume') || volume.value
     previewViewer.value.setVolume(volume.value)
   }
-
-  // Initialize wrapper transforms to identity so canvas-wrapper has the
-  // same inline transform state at mount as after a zoom-pan toggle.
-  // The full cleanup sequence runs later, when the picture or video
-  // actually loads (see onPreviewLoaded).
-  applyTransformToWrapper(canvasWrapper.value, panzoomTransform.value)
-  applyTransformToWrapper(canvasComparisonWrapper.value, panzoomTransform.value)
 
   new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
     container.value
@@ -2244,7 +2135,6 @@ defineExpose({
   pause,
   play,
   reloadAnnotations,
-  setupFabricCanvas,
   saveAnnotations,
   loadAnnotation,
   onCanvasMouseMoved,
@@ -2361,19 +2251,6 @@ defineExpose({
   background: $dark-grey-stronger;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
-}
-
-.canvas-wrapper {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  z-index: 500;
-}
-.canvas-comparison-wrapper {
-  position: absolute;
-  width: 100%;
-  left: 0;
-  z-index: 5;
 }
 
 .center {

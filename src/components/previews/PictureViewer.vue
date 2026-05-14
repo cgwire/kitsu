@@ -118,6 +118,12 @@ const isPicture = computed(() =>
   ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
 )
 
+const visibleImage = computed(() => {
+  if (isGif.value) return pictureGif.value
+  if (props.fullScreen || props.big) return pictureBig.value
+  return picture.value
+})
+
 const getNaturalDimensions = () => {
   let pic = { naturalWidth: 0, naturalHeight: 0 }
   if (!props.fullScreen && picture.value.naturalWidth && !isGif.value) {
@@ -451,7 +457,8 @@ defineExpose({
   resetPanZoom,
   pausePanZoom,
   resumePanZoom,
-  setPanZoom
+  setPanZoom,
+  visibleImage
 })
 </script>
 
