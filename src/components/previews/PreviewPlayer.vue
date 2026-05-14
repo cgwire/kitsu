@@ -1752,18 +1752,15 @@ const onPreviewLoaded = () => {
     progress.value.updateProgressBar(0)
   }
   // Once the picture or video is actually visible, replay the zoom-pan
-  // disable sequence so the panzoom transform is identity, the wrappers
-  // get their inline CSS transform set, and a fresh size-changed fires
-  // with a valid bounding rect. Without this, fixCanvasSize races with
-  // the very first size-changed event (which fires while the picture
-  // subwrapper is still hidden or before fabricCanvas is set up) and
-  // never gets called again.
+  // disable sequence so the panzoom transform is identity and the
+  // wrappers get their inline CSS transform set. resetPicture/mountVideo
+  // is already called from endLoading via its own nextTick so we don't
+  // need to retrigger size-changed here.
   nextTick(() => {
     previewViewer.value?.pauseZoom()
     previewViewer.value?.resetZoom()
     comparisonViewer.value?.resetZoom()
     resetPanzoomTransform()
-    previewViewer.value?.resize()
   })
 }
 
