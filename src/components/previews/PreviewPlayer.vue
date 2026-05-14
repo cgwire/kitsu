@@ -63,10 +63,11 @@
               @frame-update="setVideoFrameContext"
               @model-loaded="onModelLoaded"
               @panzoom-changed="onPanzoomChanged"
+              @picture-loaded="onPreviewLoaded"
               @play-ended="pause"
               @size-changed="fixCanvasSize"
               @video-end="onVideoEnd"
-              @video-loaded="onVideoLoaded"
+              @video-loaded="onPreviewLoaded"
             />
 
             <preview-viewer
@@ -1741,7 +1742,7 @@ const onModelLoaded = () => {
   }
 }
 
-const onVideoLoaded = () => {
+const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
       width: currentPreview.value.width,
@@ -1750,6 +1751,20 @@ const onVideoLoaded = () => {
     setCurrentFrame(0)
     progress.value.updateProgressBar(0)
   }
+  // Once the picture or video is actually visible, replay the zoom-pan
+  // disable sequence so the panzoom transform is identity, the wrappers
+  // get their inline CSS transform set, and a fresh size-changed fires
+  // with a valid bounding rect. Without this, fixCanvasSize races with
+  // the very first size-changed event (which fires while the picture
+  // subwrapper is still hidden or before fabricCanvas is set up) and
+  // never gets called again.
+  nextTick(() => {
+    previewViewer.value?.pauseZoom()
+    previewViewer.value?.resetZoom()
+    comparisonViewer.value?.resetZoom()
+    resetPanzoomTransform()
+    previewViewer.value?.resize()
+  })
 }
 
 const configureEvents = () => {
@@ -2168,20 +2183,12 @@ onMounted(() => {
     previewViewer.value.setVolume(volume.value)
   }
 
-  // Replay the zoom-pan disable sequence at mount so the picture/video
-  // wrappers and tracked transform start in the same state they'd be in
-  // after the first toggle cycle, AND force a viewer resize to ensure
-  // fixCanvasSize runs with a valid bounding rect (timing of the initial
-  // size-changed event can race with fabricCanvas setup).
+  // Initialize wrapper transforms to identity so canvas-wrapper has the
+  // same inline transform state at mount as after a zoom-pan toggle.
+  // The full cleanup sequence runs later, when the picture or video
+  // actually loads (see onPreviewLoaded).
   applyTransformToWrapper(canvasWrapper.value, panzoomTransform.value)
   applyTransformToWrapper(canvasComparisonWrapper.value, panzoomTransform.value)
-  nextTick(() => {
-    previewViewer.value?.pauseZoom()
-    previewViewer.value?.resetZoom()
-    comparisonViewer.value?.resetZoom()
-    resetPanzoomTransform()
-    previewViewer.value?.resize()
-  })
 
   new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
     container.value

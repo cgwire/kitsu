@@ -60,6 +60,7 @@
       :margin-bottom="marginBottom"
       :panzoom="true"
       :preview="preview"
+      @loaded="$emit('picture-loaded')"
       @panzoom-changed="event => $emit('panzoom-changed', event)"
       @size-changed="onPictureSizeChanged"
       v-show="isPicture"
@@ -213,6 +214,7 @@ const emit = defineEmits([
   'frame-update',
   'model-loaded',
   'panzoom-changed',
+  'picture-loaded',
   'play-ended',
   'size-changed',
   'video-end',
