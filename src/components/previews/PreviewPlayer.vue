@@ -1742,6 +1742,30 @@ const onModelLoaded = () => {
   }
 }
 
+// Read the visible picture/video bounds from the DOM and write them
+// directly to the annotation canvas wrapper, without going through
+// resetPicture (which re-runs the whole load sizing path and can race
+// with the cleanup sequence). Called when the preview is actually
+// loaded, so the bounding rect is valid.
+const repositionCanvasOnPreview = () => {
+  if (!fabricCanvas.value || !previewContainer.value) return
+  const viewerContainer = previewViewer.value?.container
+  if (!viewerContainer) return
+  const visibleMedia = Array.from(
+    viewerContainer.querySelectorAll('img, video')
+  ).find(el => el.offsetWidth > 0 && el.offsetHeight > 0)
+  if (!visibleMedia) return
+  const mediaRect = visibleMedia.getBoundingClientRect()
+  const containerRect = previewContainer.value.getBoundingClientRect()
+  fixCanvasSize({
+    width: mediaRect.width,
+    height: mediaRect.height,
+    top: mediaRect.top - containerRect.top,
+    left: mediaRect.left - containerRect.left,
+    source: isMovie.value ? 'movie' : 'picture'
+  })
+}
+
 const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
@@ -1751,16 +1775,15 @@ const onPreviewLoaded = () => {
     setCurrentFrame(0)
     progress.value.updateProgressBar(0)
   }
-  // Once the picture or video is actually visible, replay the zoom-pan
-  // disable sequence so the panzoom transform is identity and the
-  // wrappers get their inline CSS transform set. resetPicture/mountVideo
-  // is already called from endLoading via its own nextTick so we don't
-  // need to retrigger size-changed here.
+  // Replay the zoom-pan disable sequence so the panzoom transform is
+  // identity and the wrappers get their inline CSS transform set, then
+  // reposition the canvas wrapper to match the now-visible picture.
   nextTick(() => {
     previewViewer.value?.pauseZoom()
     previewViewer.value?.resetZoom()
     comparisonViewer.value?.resetZoom()
     resetPanzoomTransform()
+    repositionCanvasOnPreview()
   })
 }
 
