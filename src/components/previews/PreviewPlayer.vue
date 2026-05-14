@@ -2168,10 +2168,20 @@ onMounted(() => {
     previewViewer.value.setVolume(volume.value)
   }
 
-  // Initialize wrapper transforms to identity so canvas-wrapper has the
-  // same inline transform state at mount as after a zoom-pan toggle cycle.
+  // Replay the zoom-pan disable sequence at mount so the picture/video
+  // wrappers and tracked transform start in the same state they'd be in
+  // after the first toggle cycle, AND force a viewer resize to ensure
+  // fixCanvasSize runs with a valid bounding rect (timing of the initial
+  // size-changed event can race with fabricCanvas setup).
   applyTransformToWrapper(canvasWrapper.value, panzoomTransform.value)
   applyTransformToWrapper(canvasComparisonWrapper.value, panzoomTransform.value)
+  nextTick(() => {
+    previewViewer.value?.pauseZoom()
+    previewViewer.value?.resetZoom()
+    comparisonViewer.value?.resetZoom()
+    resetPanzoomTransform()
+    previewViewer.value?.resize()
+  })
 
   new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
     container.value
