@@ -275,7 +275,12 @@ export const annotationMixin = {
      */
     deleteObject(activeObject) {
       if (activeObject && activeObject._objects) {
-        activeObject._objects.forEach(obj => {
+        // ActiveSelection children carry coords relative to the selection's
+        // center. discardActiveObject() restores them to absolute before we
+        // remove, so undo re-injects them at their original positions.
+        const children = [...activeObject._objects]
+        this.fabricCanvas.discardActiveObject()
+        children.forEach(obj => {
           this.fabricCanvas.remove(obj)
           this.addToDeletions(obj)
           this.doneActionStack.push({
