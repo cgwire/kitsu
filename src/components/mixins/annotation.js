@@ -1464,7 +1464,7 @@ export const annotationMixin = {
      */
     startAnnotationSaving(preview, annotations) {
       this.notSaved = true
-      this.annotatedPreview = preview
+      this.annotatedPreview = markRaw(preview)
       this.annotationToSave = setTimeout(() => {
         this.endAnnotationSaving()
       }, 3000)
@@ -1477,12 +1477,12 @@ export const annotationMixin = {
     endAnnotationSaving() {
       if (this.notSaved) {
         const preview = this.annotatedPreview
-        this.changesToSave = {
+        this.changesToSave = markRaw({
           preview,
           additions: [...this.additions],
           updates: [...this.updates],
           deletions: [...this.deletions]
-        }
+        })
         this.clearModifications()
         clearTimeout(this.annotationToSave)
         this.notSaved = false

@@ -1,4 +1,6 @@
+import { markRaw } from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+
 import {
   formatTime,
   formatFrame,
@@ -1360,7 +1362,7 @@ export const playerMixin = {
         if (!this.notSaved) {
           this.startAnnotationSaving(preview, annotations)
         } else {
-          this.changesToSave = { preview, annotations }
+          this.changesToSave = markRaw({ preview, annotations })
         }
 
         // Update information locally
