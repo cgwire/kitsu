@@ -88,7 +88,7 @@ export const annotationMixin = {
       updates: [],
       isShowingPalette: false,
       isShowingPencilPalette: false,
-      notSave: false,
+      notSaved: false,
       pencilColor: '#ff3860',
       pencilWidth: 'big',
       textColor: '#ff3860',
@@ -104,12 +104,17 @@ export const annotationMixin = {
       mouseDrawingMaxChangeRate: 0.03,
       mouseDrawingPrevPoint: null,
       mouseDrawingPrevPressure: null,
-      mouseDrawingDynamicDistanceMult: null
+      mouseDrawingDynamicDistanceMult: null,
+      // Per-instance to avoid mixing actions between sibling players
+      // (e.g. ProductionNewsFeed mounts many in a v-for). markRaw skips
+      // Vue's deep proxy on fabric.Object refs.
+      doneActionStack: markRaw([]),
+      undoneActionStack: markRaw([]),
+      silentAnnotation: false,
+      annotatedPreview: null,
+      annotationToSave: null,
+      changesToSave: null
     }
-  },
-
-  created() {
-    this.resetUndoStacks()
   },
 
   computed: {
@@ -179,13 +184,13 @@ export const annotationMixin = {
       if (activeObject._objects) {
         activeObject._objects.forEach(obj => {
           this.fabricCanvas.add(obj)
-          this.$options.doneActionStack.pop()
+          this.doneActionStack.pop()
         })
       } else {
         this.fabricCanvas.add(activeObject)
       }
       if (persist) {
-        this.$options.doneActionStack.push({ type: 'add', obj: activeObject })
+        this.doneActionStack.push({ type: 'add', obj: activeObject })
         this.saveAnnotations()
       }
     },
@@ -273,7 +278,7 @@ export const annotationMixin = {
         activeObject._objects.forEach(obj => {
           this.fabricCanvas.remove(obj)
           this.addToDeletions(obj)
-          this.$options.doneActionStack.push({
+          this.doneActionStack.push({
             type: 'remove',
             obj
           })
@@ -281,7 +286,7 @@ export const annotationMixin = {
       } else if (activeObject) {
         this.fabricCanvas.remove(activeObject)
         this.addToDeletions(activeObject)
-        this.$options.doneActionStack.push({
+        this.doneActionStack.push({
           type: 'remove',
           obj: activeObject
         })
@@ -646,9 +651,9 @@ export const annotationMixin = {
           tr: false,
           mtr: !this.isCurrentUserArtist
         })
-        this.$options.silentAnnnotation = true
+        this.silentAnnotation = true
         canvas.add(path)
-        this.$options.silentAnnnotation = false
+        this.silentAnnotation = false
       } else if (obj.type === 'i-text' || obj.type === 'text') {
         text = new fabric.IText(obj.text, {
           ...base,
@@ -675,9 +680,9 @@ export const annotationMixin = {
           tr: false,
           mtr: false
         })
-        this.$options.silentAnnnotation = true
+        this.silentAnnotation = true
         canvas.add(text)
-        this.$options.silentAnnnotation = false
+        this.silentAnnotation = false
       } else if (obj.type === 'PSStroke') {
         if (obj.canvasWidth) {
           let strokeMultiplier = canvasWidth / canvas.width
@@ -712,9 +717,9 @@ export const annotationMixin = {
             tr: false,
             mtr: !this.isCurrentUserArtist
           })
-          this.$options.silentAnnnotation = true
+          this.silentAnnotation = true
           canvas.add(psstroke)
-          this.$options.silentAnnnotation = false
+          this.silentAnnotation = false
         }
       } else if (
         obj.type === 'rect' ||
@@ -752,9 +757,9 @@ export const annotationMixin = {
           tr: false,
           mtr: !this.isCurrentUserArtist
         })
-        this.$options.silentAnnnotation = true
+        this.silentAnnotation = true
         canvas.add(shape)
-        this.$options.silentAnnnotation = false
+        this.silentAnnotation = false
         return shape
       }
       return path || text || psstroke
@@ -943,7 +948,7 @@ export const annotationMixin = {
      * stacks.
      */
     onObjectAdded(obj) {
-      if (this.$options.silentAnnnotation) return
+      if (this.silentAnnotation) return
       let o = obj.target ? obj.target : obj.targets[0]
       o = this.setObjectData(o)
       // if (this.fabricCanvas.width < 420) o.strokeWidth *= 2
@@ -1002,15 +1007,15 @@ export const annotationMixin = {
      * Clear all action stacks.
      */
     resetUndoStacks() {
-      this.$options.doneActionStack = []
-      this.$options.undoneActionStack = []
+      this.doneActionStack.length = 0
+      this.undoneActionStack.length = 0
     },
 
     /*
      * Add a add action to the stack.
      */
     stackAddAction({ target }) {
-      this.$options.doneActionStack.push({ type: 'add', obj: target })
+      this.doneActionStack.push({ type: 'add', obj: target })
       target.lockScalingX = true
       target.lockScalingY = true
       target.rotation = true
@@ -1020,7 +1025,7 @@ export const annotationMixin = {
      * Undo last action, update actions stack.
      */
     undoLastAction() {
-      const action = this.$options.doneActionStack.pop()
+      const action = this.doneActionStack.pop()
       if (action && action.obj) {
         if (action.type === 'add') {
           this.deleteObject(action.obj)
@@ -1031,8 +1036,8 @@ export const annotationMixin = {
           this.addToAdditions(action.obj)
           this.removeFromDeletions(action.obj)
         }
-        this.$options.doneActionStack.pop()
-        this.$options.undoneActionStack.push(action)
+        this.doneActionStack.pop()
+        this.undoneActionStack.push(action)
       }
     },
 
@@ -1040,7 +1045,7 @@ export const annotationMixin = {
      * Apply last undone action, update actions stack.
      */
     redoLastAction() {
-      const action = this.$options.undoneActionStack.pop()
+      const action = this.undoneActionStack.pop()
       if (action) {
         if (action.type === 'add') {
           this.addObject(action.obj)
@@ -1054,7 +1059,7 @@ export const annotationMixin = {
      * Clear all actions in the undone stack.
      */
     clearUndoneStack() {
-      this.$options.undoneActionStack = []
+      this.undoneActionStack.length = 0
     },
 
     // Canvas
@@ -1456,8 +1461,8 @@ export const annotationMixin = {
      */
     startAnnotationSaving(preview, annotations) {
       this.notSaved = true
-      this.$options.annotatedPreview = preview
-      this.$options.annotationToSave = setTimeout(() => {
+      this.annotatedPreview = preview
+      this.annotationToSave = setTimeout(() => {
         this.endAnnotationSaving()
       }, 3000)
     },
@@ -1468,19 +1473,19 @@ export const annotationMixin = {
      */
     endAnnotationSaving() {
       if (this.notSaved) {
-        const preview = this.$options.annotatedPreview
-        this.$options.changesToSave = {
+        const preview = this.annotatedPreview
+        this.changesToSave = {
           preview,
           additions: [...this.additions],
           updates: [...this.updates],
           deletions: [...this.deletions]
         }
         this.clearModifications()
-        clearTimeout(this.$options.annotationToSave)
+        clearTimeout(this.annotationToSave)
         this.notSaved = false
-        this.$emit('annotation-changed', this.$options.changesToSave)
+        this.$emit('annotation-changed', this.changesToSave)
         if (this.onAnnotationChanged) {
-          this.onAnnotationChanged(this.$options.changesToSave)
+          this.onAnnotationChanged(this.changesToSave)
         }
       }
     },

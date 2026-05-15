@@ -1360,7 +1360,7 @@ export const playerMixin = {
         if (!this.notSaved) {
           this.startAnnotationSaving(preview, annotations)
         } else {
-          this.$options.changesToSave = { preview, annotations }
+          this.changesToSave = { preview, annotations }
         }
 
         // Update information locally
