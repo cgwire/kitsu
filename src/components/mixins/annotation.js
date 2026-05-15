@@ -1050,8 +1050,8 @@ export const annotationMixin = {
         this.deleteObject(obj)
         this.removeFromAdditions(obj)
       } else if (action.type === 'remove') {
+        // addObject's 'object:added' fires onObjectAdded → addToAdditions.
         this.addObject(obj)
-        this.addToAdditions(obj)
         this.removeFromDeletions(obj)
       }
       this.doneActionStack.length = stackLengthBefore
