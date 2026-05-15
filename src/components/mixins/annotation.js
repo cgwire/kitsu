@@ -1022,20 +1022,32 @@ export const annotationMixin = {
     },
 
     /*
+     * Resolve the fabric.Object an action targets. After a canvas reload
+     * (e.g. Esc-exit fullscreen) the entry holds a stale instance; look it
+     * up by id on the live canvas. Groups aren't in the canvas as a whole,
+     * fall back to the stored reference.
+     */
+    resolveActionObject(action) {
+      if (action.obj?._objects) return action.obj
+      return this.getObjectById(action.obj.id) ?? action.obj
+    },
+
+    /*
      * Undo last action, update actions stack.
      */
     undoLastAction() {
       const action = this.doneActionStack.pop()
       if (!action?.obj) return
+      const obj = this.resolveActionObject(action)
       // Snapshot length to drop side-effect pushes from deleteObject/addObject (incl. groups)
       const stackLengthBefore = this.doneActionStack.length
       if (action.type === 'add') {
-        this.deleteObject(action.obj)
-        this.removeFromAdditions(action.obj)
+        this.deleteObject(obj)
+        this.removeFromAdditions(obj)
       } else if (action.type === 'remove') {
-        this.addObject(action.obj)
-        this.addToAdditions(action.obj)
-        this.removeFromDeletions(action.obj)
+        this.addObject(obj)
+        this.addToAdditions(obj)
+        this.removeFromDeletions(obj)
       }
       this.doneActionStack.length = stackLengthBefore
       this.undoneActionStack.push(action)
@@ -1047,12 +1059,13 @@ export const annotationMixin = {
     redoLastAction() {
       const action = this.undoneActionStack.pop()
       if (!action?.obj) return
+      const obj = this.resolveActionObject(action)
       // Snapshot length to drop side-effect pushes from deleteObject/addObject (incl. groups)
       const stackLengthBefore = this.doneActionStack.length
       if (action.type === 'add') {
-        this.addObject(action.obj)
+        this.addObject(obj)
       } else if (action.type === 'remove') {
-        this.deleteObject(action.obj)
+        this.deleteObject(obj)
       }
       this.doneActionStack.length = stackLengthBefore
       this.doneActionStack.push(action)
