@@ -1174,11 +1174,10 @@ export const annotationMixin = {
     setupFabricCanvas() {
       if (!this.annotationCanvas) return
 
-      const canvasId = this.annotationCanvas.id
-
+      // Pass the DOM element via $refs to avoid id collisions across instances.
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
-        new fabric.Canvas(canvasId, {
+        new fabric.Canvas(this.annotationCanvas, {
           fireRightClick: true
         })
       )

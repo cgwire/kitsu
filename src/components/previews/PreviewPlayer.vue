@@ -1362,9 +1362,11 @@ export default {
       const width = dimensions.width
       const height = dimensions.height
 
+      // Pass DOM elements via $refs to avoid id collisions across instances.
+
       // Use markRaw() to avoid reactivity on Fabric Canvas
       this.fabricCanvas = markRaw(
-        new fabric.Canvas(this.canvasId, {
+        new fabric.Canvas(this.$refs['annotation-canvas'], {
           fireRightClick: true,
           width,
           height,
@@ -1379,7 +1381,7 @@ export default {
       brush.pressureManager.fallback = 0.5 // Fallback value for mouse/touch
       this.fabricCanvas.freeDrawingBrush = brush
       this.fabricCanvasComparison = new fabric.StaticCanvas(
-        this.canvasId + '-comparison'
+        this.$refs['annotation-canvas-comparison']
       )
       this.configureCanvas()
     },
