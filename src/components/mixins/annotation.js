@@ -1026,19 +1026,19 @@ export const annotationMixin = {
      */
     undoLastAction() {
       const action = this.doneActionStack.pop()
-      if (action && action.obj) {
-        if (action.type === 'add') {
-          this.deleteObject(action.obj)
-          this.addToDeletions(action.obj)
-          this.removeFromAdditions(action.obj)
-        } else if (action.type === 'remove') {
-          this.addObject(action.obj)
-          this.addToAdditions(action.obj)
-          this.removeFromDeletions(action.obj)
-        }
-        this.doneActionStack.pop()
-        this.undoneActionStack.push(action)
+      if (!action?.obj) return
+      // Snapshot length to drop side-effect pushes from deleteObject/addObject (incl. groups)
+      const stackLengthBefore = this.doneActionStack.length
+      if (action.type === 'add') {
+        this.deleteObject(action.obj)
+        this.removeFromAdditions(action.obj)
+      } else if (action.type === 'remove') {
+        this.addObject(action.obj)
+        this.addToAdditions(action.obj)
+        this.removeFromDeletions(action.obj)
       }
+      this.doneActionStack.length = stackLengthBefore
+      this.undoneActionStack.push(action)
     },
 
     /*
@@ -1046,13 +1046,16 @@ export const annotationMixin = {
      */
     redoLastAction() {
       const action = this.undoneActionStack.pop()
-      if (action) {
-        if (action.type === 'add') {
-          this.addObject(action.obj)
-        } else if (action.type === 'remove') {
-          this.deleteObject(action.obj)
-        }
+      if (!action?.obj) return
+      // Snapshot length to drop side-effect pushes from deleteObject/addObject (incl. groups)
+      const stackLengthBefore = this.doneActionStack.length
+      if (action.type === 'add') {
+        this.addObject(action.obj)
+      } else if (action.type === 'remove') {
+        this.deleteObject(action.obj)
       }
+      this.doneActionStack.length = stackLengthBefore
+      this.doneActionStack.push(action)
     },
 
     /*
