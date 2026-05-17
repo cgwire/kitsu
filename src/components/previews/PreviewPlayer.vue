@@ -375,6 +375,7 @@ import { useStore } from 'vuex'
 import { useAnnotation } from '@/composables/annotation'
 import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
+import { usePreviewShortcuts } from '@/composables/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 import {
@@ -531,9 +532,6 @@ const isRepeating = ref(false)
 const isTyping = ref(false)
 const isWireframe = ref(false)
 const isZoomPan = ref(false)
-// Held while the user presses Space to temporarily switch from
-// drawing to panning when both modes are active simultaneously.
-const isSpaceHeld = ref(false)
 const maxDuration = ref('00:00:00:00')
 const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
@@ -877,14 +875,6 @@ const conceptLinkedEntities = computed(() =>
 
 const clearFocus = () => {
   document.activeElement.blur()
-}
-
-const pauseEvent = e => {
-  if (e.stopPropagation) e.stopPropagation()
-  if (e.preventDefault) e.preventDefault()
-  e.cancelBubble = true
-  e.returnValue = false
-  return false
 }
 
 const getClientX = event =>
@@ -1479,64 +1469,33 @@ const getLinkedEntities = concept => {
 
 // Events
 
-const onKeyDown = event => {
-  const PREVANNKEY = ','
-  const NEXTANNKEY = '.'
-  const OKEY = 'o'
-
-  if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-    if (event.key === 'Delete' || event.key === 'Backspace') {
-      deleteSelection()
-    } else if (event.key === 'ArrowLeft') {
-      goPreviousFrame()
-    } else if (event.key === 'ArrowRight') {
-      goNextFrame()
-    } else if (event.key === ' ') {
-      // While drawing on a zoomed view, Space becomes a temporary
-      // pan modifier instead of toggling play/pause. The overlay
-      // turns non-interactive so drag-to-pan reaches the media.
-      if (isZoomPan.value && isDrawing.value) {
-        isSpaceHeld.value = true
-        pauseEvent(event)
-        return false
-      }
-      let styles
-      const playlistModal = document.getElementById('temp-playlist-modal')
-      if (playlistModal) styles = window.getComputedStyle(playlistModal)
-      if (!styles || (styles && styles.display === 'none')) {
-        onPlayPauseClicked()
-        pauseEvent(event)
-      }
-      return false
-    } else if (event.key === NEXTANNKEY) {
-      goNextDrawing()
-    } else if (event.key === PREVANNKEY) {
-      goPreviousDrawing()
-    } else if (event.key === 'd') {
-      container.value.focus()
-      pauseEvent(event)
-      onPencilAnnotateClicked()
-    } else if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-      undoLastAction()
-    } else if (event.altKey && event.key === 'r') {
-      redoLastAction()
-    } else if (event.altKey && event.key === 'j') {
-      onPreviousClicked()
-    } else if (event.altKey && event.key === 'k') {
-      onNextClicked()
-    } else if ((event.ctrlKey || event.metaKey) && event.key === 'c') {
-      copyAnnotations()
-    } else if ((event.ctrlKey || event.metaKey) && event.key === 'v') {
-      pasteAnnotations()
-    } else if (event.altKey && event.key === OKEY) {
-      event.preventDefault()
-      event.stopPropagation()
-      toggleFullOverlayComparison()
-    }
-    // Escape is handled natively: the browser exits fullscreen which
-    // fires fullscreenchange, picked up by useFullScreen.
-  }
-}
+const { isSpaceHeld } = usePreviewShortcuts({
+  // Escape is not wired — the browser exits fullscreen on it and the
+  // useFullScreen listener picks up the resulting fullscreenchange.
+  isSpaceModifier: () => isZoomPan.value && isDrawing.value,
+  onDelete: () => deleteSelection(),
+  onPrevFrame: () => goPreviousFrame(),
+  onNextFrame: () => goNextFrame(),
+  onPlayPause: () => {
+    // Don't toggle play/pause while a shared playlist modal is open.
+    const playlistModal = document.getElementById('temp-playlist-modal')
+    const styles = playlistModal && window.getComputedStyle(playlistModal)
+    if (!styles || styles.display === 'none') onPlayPauseClicked()
+  },
+  onPrevAnnotation: () => goPreviousDrawing(),
+  onNextAnnotation: () => goNextDrawing(),
+  onAnnotate: () => {
+    container.value.focus()
+    onPencilAnnotateClicked()
+  },
+  onUndo: () => undoLastAction(),
+  onRedo: () => redoLastAction(),
+  onPrevPreview: () => onPreviousClicked(),
+  onNextPreview: () => onNextClicked(),
+  onCopy: () => copyAnnotations(),
+  onPaste: () => pasteAnnotations(),
+  onToggleOverlay: () => toggleFullOverlayComparison()
+})
 
 const toggleFullOverlayComparison = async () => {
   if (!isComparing.value) {
@@ -1617,21 +1576,11 @@ const onMainCanvasResized = () => {
   loadAnnotation()
 }
 
-const onKeyUp = event => {
-  if (event.key === ' ' && isSpaceHeld.value) {
-    isSpaceHeld.value = false
-  }
-}
-
 const configureEvents = () => {
-  window.addEventListener('keydown', onKeyDown, false)
-  window.addEventListener('keyup', onKeyUp, false)
   window.addEventListener('beforeunload', onWindowsClosed)
 }
 
 const removeEvents = () => {
-  window.removeEventListener('keydown', onKeyDown)
-  window.removeEventListener('keyup', onKeyUp)
   window.removeEventListener('beforeunload', onWindowsClosed)
 }
 
