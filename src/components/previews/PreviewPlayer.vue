@@ -8,7 +8,8 @@
             :canvas-id="canvasId"
             :media-element="mainMediaElement"
             :panzoom-transform="panzoomTransform"
-            :interactive="!isZoomPan"
+            :interactive="isOverlayInteractive"
+            :wheel-target="isZoomPan ? mainMediaElement : null"
             v-show="isAnnotationsDisplayed"
             @click="onCanvasClicked"
             @resized="onMainCanvasResized"
@@ -531,6 +532,9 @@ const isRepeating = ref(false)
 const isTyping = ref(false)
 const isWireframe = ref(false)
 const isZoomPan = ref(false)
+// Held while the user presses Space to temporarily switch from
+// drawing to panning when both modes are active simultaneously.
+const isSpaceHeld = ref(false)
 const maxDuration = ref('00:00:00:00')
 const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
@@ -566,6 +570,14 @@ const userId = computed(() => store.getters.user?.id)
 
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
+
+// Drawing and zoom-pan can be active at the same time. Overlay
+// captures mouse events for drawing unless the user holds Space, in
+// which case events pass through so the underlying panzoom can
+// process drag-to-pan.
+const isOverlayInteractive = computed(
+  () => !isZoomPan.value || (isDrawing.value && !isSpaceHeld.value)
+)
 
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
@@ -1257,9 +1269,6 @@ const resetPreviewFileMap = () => {
 }
 
 const onZoomPanClicked = () => {
-  if (!isZoomPan.value) {
-    isDrawing.value = false
-  }
   isZoomPan.value = !isZoomPan.value
 }
 
@@ -1533,6 +1542,14 @@ const onKeyDown = event => {
     } else if (event.key === 'ArrowRight') {
       goNextFrame()
     } else if (event.key === ' ') {
+      // While drawing on a zoomed view, Space becomes a temporary
+      // pan modifier instead of toggling play/pause. The overlay
+      // turns non-interactive so drag-to-pan reaches the media.
+      if (isZoomPan.value && isDrawing.value) {
+        isSpaceHeld.value = true
+        pauseEvent(event)
+        return false
+      }
       let styles
       const playlistModal = document.getElementById('temp-playlist-modal')
       if (playlistModal) styles = window.getComputedStyle(playlistModal)
@@ -1652,8 +1669,15 @@ const onMainCanvasResized = () => {
   loadAnnotation()
 }
 
+const onKeyUp = event => {
+  if (event.key === ' ' && isSpaceHeld.value) {
+    isSpaceHeld.value = false
+  }
+}
+
 const configureEvents = () => {
   window.addEventListener('keydown', onKeyDown, false)
+  window.addEventListener('keyup', onKeyUp, false)
   window.addEventListener('beforeunload', onWindowsClosed)
   container.value.addEventListener(
     'fullscreenchange',
@@ -1679,6 +1703,7 @@ const configureEvents = () => {
 
 const removeEvents = () => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('keyup', onKeyUp)
   window.removeEventListener('beforeunload', onWindowsClosed)
   container.value.removeEventListener(
     'fullscreenchange',
@@ -1940,7 +1965,6 @@ watch(isDrawing, () => {
   setAnnotationDrawingMode(isDrawing.value)
   if (isDrawing.value) {
     isAnnotationsDisplayed.value = true
-    isZoomPan.value = false
   }
 })
 
@@ -1981,7 +2005,10 @@ watch(isZoomPan, enabled => {
   if (enabled) {
     previewViewer.value?.resumeZoom()
   } else {
-    resetPlayerPositions()
+    // Pause panzoom inputs but keep the current transform: the user
+    // may toggle zoom-pan off only to draw on the zoomed view. Reset
+    // happens through other paths (preview change, fullscreen exit).
+    previewViewer.value?.pauseZoom()
   }
 })
 

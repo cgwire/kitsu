@@ -6,6 +6,7 @@
     :style="overlayStyle"
     oncontextmenu="return false"
     @click="$emit('click', $event)"
+    @wheel="onWheel"
   >
     <canvas ref="canvasEl" :id="canvasId" />
   </div>
@@ -24,7 +25,12 @@ const props = defineProps({
     default: () => ({ x: 0, y: 0, scale: 1 })
   },
   interactive: { type: Boolean, default: true },
-  static: { type: Boolean, default: false }
+  static: { type: Boolean, default: false },
+  // When set, wheel events that fire on the overlay are forwarded
+  // to this element. Used so drawing + zoom-pan can coexist: the
+  // overlay captures mouse for drawing while wheel still reaches
+  // the underlying media's panzoom instance.
+  wheelTarget: { type: HTMLElement, default: null }
 })
 
 const emit = defineEmits(['click', 'resized'])
@@ -115,6 +121,30 @@ watch(
     updateBounds()
   }
 )
+
+// Re-dispatch the wheel event on wheelTarget so its panzoom listener
+// fires as if the cursor were over the media directly. Without this,
+// drawing on a zoomed view would swallow wheel events and break
+// zoom-by-wheel. preventDefault stops the page from scrolling.
+const onWheel = event => {
+  if (!props.wheelTarget) return
+  event.preventDefault()
+  const forwarded = new WheelEvent('wheel', {
+    bubbles: true,
+    cancelable: true,
+    clientX: event.clientX,
+    clientY: event.clientY,
+    deltaX: event.deltaX,
+    deltaY: event.deltaY,
+    deltaZ: event.deltaZ,
+    deltaMode: event.deltaMode,
+    ctrlKey: event.ctrlKey,
+    shiftKey: event.shiftKey,
+    altKey: event.altKey,
+    metaKey: event.metaKey
+  })
+  props.wheelTarget.dispatchEvent(forwarded)
+}
 
 defineExpose({
   canvas: fabricCanvas,
