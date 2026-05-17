@@ -168,8 +168,8 @@
           v-model:preview-to-compare-id="previewToCompareId"
           v-model:task-type-id="taskTypeId"
           @compare-clicked="onCompareClicked"
-          @next-comparison-clicked="onNextComparisonClicked"
-          @previous-comparison-clicked="onPreviousComparisonClicked"
+          @next-comparison-clicked="goToNextComparison"
+          @previous-comparison-clicked="goToPreviousComparison"
         />
 
         <div class="filler"></div>
@@ -373,6 +373,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useAnnotation } from '@/composables/annotation'
+import { useComparison } from '@/composables/comparison'
 import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { usePreviewShortcuts } from '@/composables/previewShortcuts'
@@ -504,13 +505,11 @@ let lastIndex = 1
 let loupe = false
 let scrubbing = false
 let scrubStartX = 0
-let previewFileMap = {}
 
 // — Reactive
 
 const annotations = ref([])
 const available3DAnimations = ref([])
-const comparisonPreviewIndex = ref(0)
 const current3DAnimation = ref(null)
 const currentFrame = ref(0)
 const currentIndex = ref(1)
@@ -522,7 +521,6 @@ const isObjectBackground = ref(false)
 const isAnnotationsDisplayed = ref(true)
 const isEnvironmentSkybox = ref(false)
 const isCommentsHidden = ref(true)
-const isComparing = ref(false)
 const isDrawing = ref(false)
 const isHd = ref(false)
 const isMuted = ref(false)
@@ -536,16 +534,10 @@ const maxDuration = ref('00:00:00:00')
 const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['big', 'medium', 'small'])
-const previewToCompare = ref(null)
-const previewToCompareId = ref(null)
 const speed = ref(3)
-const taskTypeId = ref(
-  props.entityPreviewFiles ? Object.keys(props.entityPreviewFiles)[0] : null
-)
 const videoDuration = ref(0)
 const volume = ref(50)
 const width = ref(0)
-const comparisonMode = ref('sidebyside')
 
 // Vuex getters
 // Declared before `useAnnotation` so the composable can consume them; the
@@ -631,57 +623,6 @@ const {
 
 // Computed
 
-const comparisonModeOptions = computed(() => [
-  {
-    label: t('playlists.actions.side_by_side'),
-    value: 'sidebyside'
-  },
-  {
-    label: `${t('playlists.actions.overlay')} 0%`,
-    value: 'overlay0'
-  },
-  {
-    label: `${t('playlists.actions.overlay')} 25%`,
-    value: 'overlay25'
-  },
-  {
-    label: `${t('playlists.actions.overlay')} 50%`,
-    value: 'overlay50'
-  },
-  {
-    label: `${t('playlists.actions.overlay')} 75%`,
-    value: 'overlay75'
-  },
-  {
-    label: `${t('playlists.actions.overlay')} 100%`,
-    value: 'overlay100'
-  }
-])
-
-const comparisonPreview = computed(() => {
-  if (
-    previewToCompare.value?.previews?.length > 0 &&
-    comparisonPreviewIndex.value > 0
-  ) {
-    return previewToCompare.value.previews[comparisonPreviewIndex.value - 1]
-  }
-  return previewToCompare.value
-})
-
-const comparisonPreviewLength = computed(() => {
-  if (previewToCompare.value) {
-    const previews = previewToCompare.value.previews
-    return previews ? previews.length + 1 : 0
-  }
-  return 0
-})
-
-const comparisonAnnotations = computed(() =>
-  previewToCompare.value && isComparing.value
-    ? previewToCompare.value.annotations
-    : []
-)
-
 const currentFrameLabel = computed(() => {
   const frame = Math.min(nbFrames.value, currentFrame.value)
   return formatFrame(frame + 1)
@@ -699,6 +640,46 @@ const currentPreview = computed(() => {
 })
 
 annotation.setCurrentPreviewGetter(() => currentPreview.value)
+
+// Comparison state, options and selection actions. Side-effects
+// (sync the comparison viewer, load the comparison annotation) stay
+// in the watchers below where they have access to the viewer refs
+// and the annotation composable.
+const {
+  isComparing,
+  taskTypeId,
+  previewToCompareId,
+  previewToCompare,
+  comparisonPreviewIndex,
+  comparisonMode,
+  comparisonModeOptions,
+  comparisonPreview,
+  comparisonPreviewLength,
+  comparisonAnnotations,
+  taskTypeOptions,
+  previewFileOptions,
+  isComparisonOverlay,
+  overlayOpacity,
+  toggleComparison,
+  setDefaultComparisonTaskType,
+  setDefaultComparisonPreview,
+  goToPreviousComparison,
+  goToNextComparison,
+  toggleFullOverlay,
+  resetPreviewFileMap,
+  resolvePreviewToCompare
+} = useComparison({
+  entityPreviewFiles: computed(() => props.entityPreviewFiles),
+  currentPreview,
+  taskTypeMap: computed(() => props.taskTypeMap),
+  t
+})
+
+// Apply the initial task type from props, matching the previous
+// inline ref initializer.
+if (props.entityPreviewFiles) {
+  taskTypeId.value = Object.keys(props.entityPreviewFiles)[0] ?? ''
+}
 
 const currentProduction = computed(() =>
   productionMap.value.get(props.task.project_id)
@@ -768,22 +749,6 @@ const originalDlPath = computed(() => {
   return ''
 })
 
-const taskTypeOptions = computed(() => {
-  if (!props.entityPreviewFiles) return []
-  const taskTypeIds = Object.keys(props.entityPreviewFiles)
-  return taskTypeIds
-    .filter(id => {
-      const previewFiles = props.entityPreviewFiles[id].filter(p =>
-        ['mp4', 'png'].includes(p.extension)
-      )
-      return previewFiles.length > 0 && props.taskTypeMap.get(id)
-    })
-    .map(id => {
-      const taskType = props.taskTypeMap.get(id)
-      return { label: taskType.name, value: taskType.id }
-    })
-})
-
 const lastPreviewFileOptions = computed(() => {
   if (!props.lastPreviewFiles) return []
   return [...props.lastPreviewFiles]
@@ -795,18 +760,6 @@ const lastPreviewFileOptions = computed(() => {
     }))
 })
 
-const previewFileOptions = computed(() => {
-  if (!props.entityPreviewFiles) return []
-  const previewFiles = props.entityPreviewFiles[taskTypeId.value]
-  if (previewFiles && previewFiles.length > 0) {
-    return previewFiles.map(previewFile => ({
-      label: `v${previewFile.revision}`,
-      value: previewFile.id
-    }))
-  }
-  return []
-})
-
 const isComparisonEnabled = computed(() => fullScreen.value || props.extraWide)
 
 const nbFrames = computed(() => {
@@ -815,30 +768,6 @@ const nbFrames = computed(() => {
       ? currentPreview.value.duration
       : videoDuration.value
   return Math.round(duration * fps.value)
-})
-
-const isComparisonOverlay = computed(
-  () => comparisonMode.value !== 'sidebyside' && isComparing.value
-)
-
-const overlayOpacity = computed(() => {
-  if (isComparing.value && isComparisonOverlay.value) {
-    switch (comparisonMode.value) {
-      case 'overlay0':
-        return 0
-      case 'overlay25':
-        return 0.25
-      case 'overlay50':
-        return 0.5
-      case 'overlay75':
-        return 0.75
-      case 'overlay100':
-        return 1
-      default:
-        return 1
-    }
-  }
-  return 1
 })
 
 const backgroundOptions = computed(() => {
@@ -1134,78 +1063,8 @@ const onFullscreenClicked = () => {
 
 const onCompareClicked = () => {
   clearFocus()
-  if (isComparing.value) {
-    isComparing.value = false
-  } else {
-    isComparing.value = true
-    taskTypeId.value = taskTypeOptions.value[0].value
-    previewToCompareId.value = ''
-    nextTick(() => {
-      previewToCompareId.value = previewFileOptions.value[0].value
-    })
-    isDrawing.value = false
-  }
-}
-
-const setDefaultComparisonTaskType = () => {
-  if (!props.entityPreviewFiles) return ''
-  const taskTypeIds = Object.keys(props.entityPreviewFiles)
-  if (taskTypeIds && taskTypeIds.length > 0) {
-    const taskTypeOption = taskTypeOptions.value.find(option => {
-      return (
-        props.entityPreviewFiles[option.value].findIndex(
-          p => p.id === currentPreview.value.id
-        ) >= 0
-      )
-    })
-    if (taskTypeOption) {
-      taskTypeId.value = taskTypeOption.value
-    } else if (taskTypeOptions.value.length > 0) {
-      taskTypeId.value = taskTypeOptions.value[0].value
-    }
-    if (taskTypeId.value) setDefaultComparisonPreview()
-  } else {
-    previewToCompareId.value = null
-  }
-}
-
-const setDefaultComparisonPreview = () => {
-  if (!props.entityPreviewFiles) return ''
-  let previewFiles = props.entityPreviewFiles[taskTypeId.value]
-  if (previewFiles) {
-    previewFiles = previewFiles.filter(p => p.id !== currentPreview.value.id)
-    if (previewFiles.length > 0) {
-      previewToCompareId.value = previewFiles[0].id
-    } else {
-      previewToCompareId.value = null
-    }
-  } else {
-    previewToCompareId.value = null
-  }
-}
-
-const onPreviousComparisonClicked = () => {
-  const index = comparisonPreviewIndex.value - 1
-  comparisonPreviewIndex.value =
-    index < 0 ? comparisonPreviewLength.value - 1 : index
-}
-
-const onNextComparisonClicked = () => {
-  const index = comparisonPreviewIndex.value + 1
-  comparisonPreviewIndex.value =
-    index > comparisonPreviewLength.value - 1 ? 0 : index
-}
-
-const resetPreviewFileMap = () => {
-  previewFileMap = {}
-  if (props.entityPreviewFiles) {
-    const previewFiles = props.entityPreviewFiles[taskTypeId.value]
-    if (previewFiles) {
-      previewFiles.forEach(previewFile => {
-        previewFileMap[previewFile.id] = previewFile
-      })
-    }
-  }
+  if (!isComparing.value) isDrawing.value = false
+  toggleComparison()
 }
 
 const onZoomPanClicked = () => {
@@ -1368,7 +1227,7 @@ const loadAnnotation = annotation => {
 
 const loadComparisonAnnotation = time => {
   clearComparisonCanvas()
-  previewToCompare.value = previewFileMap[previewToCompareId.value]
+  previewToCompare.value = resolvePreviewToCompare(previewToCompareId.value)
   let anns = []
   if (previewToCompare.value && previewToCompare.value.annotations) {
     anns = previewToCompare.value.annotations
@@ -1494,23 +1353,8 @@ const { isSpaceHeld } = usePreviewShortcuts({
   onNextPreview: () => onNextClicked(),
   onCopy: () => copyAnnotations(),
   onPaste: () => pasteAnnotations(),
-  onToggleOverlay: () => toggleFullOverlayComparison()
+  onToggleOverlay: () => toggleFullOverlay()
 })
-
-const toggleFullOverlayComparison = async () => {
-  if (!isComparing.value) {
-    isComparing.value = true
-    await nextTick()
-    await nextTick()
-  }
-  nextTick(() => {
-    if (comparisonMode.value === 'overlay100') {
-      comparisonMode.value = 'overlay0'
-    } else {
-      comparisonMode.value = 'overlay100'
-    }
-  })
-}
 
 const onCommentClicked = () => {
   const height = previewContainer.value.offsetHeight
@@ -1767,7 +1611,7 @@ watch(previewToCompare, () => {
 watch(previewToCompareId, () => {
   nextTick(() => {
     if (comparisonViewer.value) comparisonViewer.value.pause()
-    previewToCompare.value = previewFileMap[previewToCompareId.value]
+    previewToCompare.value = resolvePreviewToCompare(previewToCompareId.value)
     if (isComparing.value) {
       setCurrentFrame(currentFrame.value - 1)
       setTimeout(() => {
