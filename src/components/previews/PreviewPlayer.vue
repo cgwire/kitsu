@@ -373,6 +373,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useAnnotation } from '@/composables/annotation'
+import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
@@ -512,7 +513,6 @@ const comparisonPreviewIndex = ref(0)
 const current3DAnimation = ref(null)
 const currentFrame = ref(0)
 const currentIndex = ref(1)
-const fullScreen = ref(false)
 const currentBackground = ref(null)
 const currentTime = ref('00:00:00:00')
 const currentTimeRaw = ref(0)
@@ -892,41 +892,6 @@ const getClientX = event =>
   event.changedTouches?.[0]?.clientX ??
   event.clientX
 
-// Fullscreen utility functions (inlined from fullScreenMixin)
-
-const isFullScreen = () =>
-  !!(
-    document.fullscreen ||
-    document.webkitIsFullScreen ||
-    document.mozFullScreen ||
-    document.msFullscreenElement ||
-    document.fullscreenElement
-  )
-
-const documentExitFullScreen = () => {
-  if (document.exitFullscreen) {
-    return document.exitFullscreen()
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen()
-  } else if (document.webkitCancelFullScreen) {
-    document.webkitCancelFullScreen()
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen()
-  }
-}
-
-const documentSetFullScreen = element => {
-  if (element.requestFullscreen) {
-    return element.requestFullscreen()
-  } else if (element.mozRequestFullScreen) {
-    element.mozRequestFullScreen()
-  } else if (element.webkitRequestFullScreen) {
-    element.webkitRequestFullScreen()
-  } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen()
-  }
-}
-
 // Methods
 
 const setVideoFrameContext = frame => {
@@ -1143,48 +1108,36 @@ const onToggleSoundClicked = () => {
 
 // Screen
 
-const setFullScreen = () => {
-  endAnnotationSaving()
-  documentSetFullScreen(container.value)
-}
-
-const exitFullScreen = () => {
-  endAnnotationSaving()
-  documentExitFullScreen()
-}
+const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
+  container,
+  onChange: nowFullScreen => {
+    endAnnotationSaving()
+    if (!nowFullScreen) {
+      isComparing.value = false
+      isCommentsHidden.value = true
+    }
+    nextTick(() => {
+      clearFocus()
+      previewViewer.value?.resize()
+      comparisonViewer.value?.resize()
+      if (!nowFullScreen) loadAnnotation()
+    })
+    // Fallback resize once the browser has fully settled the layout
+    // transition, which nextTick can miss.
+    setTimeout(() => {
+      previewViewer.value?.resize()
+      comparisonViewer.value?.resize()
+    }, RESIZE_DELAY)
+  }
+})
 
 const onFullscreenClicked = () => {
   if (fullScreen.value) {
     removeTypeArea()
-    exitFullScreen()
   } else {
     addTypeArea()
-    setFullScreen()
   }
-}
-
-// Native fullscreenchange fires in every path (button click and ESC),
-// so this is the single source of truth for state + side-effects.
-// The trailing setTimeout is a fallback resize after the browser has
-// fully settled the layout transition, which the nextTick can miss.
-const onFullScreenChange = () => {
-  const nowFullScreen = isFullScreen()
-  if (fullScreen.value === nowFullScreen) return
-  fullScreen.value = nowFullScreen
-  if (!nowFullScreen) {
-    isComparing.value = false
-    isCommentsHidden.value = true
-  }
-  nextTick(() => {
-    clearFocus()
-    previewViewer.value?.resize()
-    comparisonViewer.value?.resize()
-    if (!nowFullScreen) loadAnnotation()
-  })
-  setTimeout(() => {
-    previewViewer.value?.resize()
-    comparisonViewer.value?.resize()
-  }, RESIZE_DELAY)
+  toggleFullScreen()
 }
 
 // Comparison
@@ -1579,11 +1532,9 @@ const onKeyDown = event => {
       event.preventDefault()
       event.stopPropagation()
       toggleFullOverlayComparison()
-    } else if (event.key === 'Escape') {
-      if (fullScreen.value) {
-        onFullScreenChange()
-      }
     }
+    // Escape is handled natively: the browser exits fullscreen which
+    // fires fullscreenchange, picked up by useFullScreen.
   }
 }
 
@@ -1676,52 +1627,12 @@ const configureEvents = () => {
   window.addEventListener('keydown', onKeyDown, false)
   window.addEventListener('keyup', onKeyUp, false)
   window.addEventListener('beforeunload', onWindowsClosed)
-  container.value.addEventListener(
-    'fullscreenchange',
-    onFullScreenChange,
-    false
-  )
-  container.value.addEventListener(
-    'mozfullscreenchange',
-    onFullScreenChange,
-    false
-  )
-  container.value.addEventListener(
-    'MSFullscreenChange',
-    onFullScreenChange,
-    false
-  )
-  container.value.addEventListener(
-    'webkitfullscreenchange',
-    onFullScreenChange,
-    false
-  )
 }
 
 const removeEvents = () => {
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('keyup', onKeyUp)
   window.removeEventListener('beforeunload', onWindowsClosed)
-  container.value.removeEventListener(
-    'fullscreenchange',
-    onFullScreenChange,
-    false
-  )
-  container.value.removeEventListener(
-    'mozfullscreenchange',
-    onFullScreenChange,
-    false
-  )
-  container.value.removeEventListener(
-    'MSFullscreenChange',
-    onFullScreenChange,
-    false
-  )
-  container.value.removeEventListener(
-    'webkitfullscreenchange',
-    onFullScreenChange,
-    false
-  )
 }
 
 // Browsing
