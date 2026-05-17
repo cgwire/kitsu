@@ -1,14 +1,16 @@
 <template>
-  <div
-    ref="overlay"
-    class="annotation-canvas"
-    :class="{ 'non-interactive': !interactive }"
-    :style="overlayStyle"
-    oncontextmenu="return false"
-    @click="$emit('click', $event)"
-    @wheel="onWheel"
-  >
-    <canvas ref="canvasEl" :id="canvasId" />
+  <div ref="clip" class="annotation-clip" :style="clipStyle">
+    <div
+      ref="overlay"
+      class="annotation-canvas"
+      :class="{ 'non-interactive': !interactive }"
+      :style="overlayStyle"
+      oncontextmenu="return false"
+      @click="$emit('click', $event)"
+      @wheel="onWheel"
+    >
+      <canvas ref="canvasEl" :id="canvasId" />
+    </div>
   </div>
 </template>
 
@@ -35,18 +37,26 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'resized'])
 
+const clip = ref(null)
 const overlay = ref(null)
 const canvasEl = ref(null)
 const fabricCanvas = ref(null)
 const bounds = ref({ top: 0, left: 0, width: 0, height: 0 })
 
+// The clip wrapper is positioned at the media's screen coordinates
+// and has overflow: hidden, so it crops anything the inner
+// transformed overlay paints outside the media area (otherwise the
+// comparison overlay would bleed into the main viewer when panning).
+const clipStyle = computed(() => ({
+  top: `${bounds.value.top}px`,
+  left: `${bounds.value.left}px`,
+  width: `${bounds.value.width}px`,
+  height: `${bounds.value.height}px`
+}))
+
 const overlayStyle = computed(() => {
   const { x, y, scale } = props.panzoomTransform
   return {
-    top: `${bounds.value.top}px`,
-    left: `${bounds.value.left}px`,
-    width: `${bounds.value.width}px`,
-    height: `${bounds.value.height}px`,
     pointerEvents: props.interactive ? 'auto' : 'none',
     transform: `translate(${x}px, ${y}px) scale(${scale})`
   }
@@ -54,7 +64,7 @@ const overlayStyle = computed(() => {
 
 const updateBounds = () => {
   const media = props.mediaElement
-  const parent = overlay.value?.parentElement
+  const parent = clip.value?.parentElement
   if (!media || !parent) return
   const mediaRect = media.getBoundingClientRect()
   const parentRect = parent.getBoundingClientRect()
@@ -102,7 +112,7 @@ onMounted(() => {
   createFabric()
   resizeObserver = new ResizeObserver(updateBounds)
   observe(props.mediaElement)
-  observe(overlay.value?.parentElement)
+  observe(clip.value?.parentElement)
   updateBounds()
 })
 
@@ -155,20 +165,36 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-.annotation-canvas {
+.annotation-clip {
   position: absolute;
   z-index: 500;
+  // Clip only horizontally so the comparison overlay can't bleed
+  // into the main viewer (they sit side-by-side). Vertically the
+  // annotations are free to extend past the media bounds — there's
+  // no adjacent sibling to spill into, only header / controls.
+  clip-path: inset(-100vh 0 -100vh 0);
+  // The wrapper exists only to clip — never to capture events. The
+  // inner overlay decides for itself whether to be interactive.
+  pointer-events: none;
+}
+
+.annotation-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   transform-origin: 0 0;
 
   canvas {
     display: block;
   }
 
-  // When the overlay is not interactive (zoom-pan mode) we want wheel
-  // and pointer events to truly pass through to the media beneath.
-  // Fabric sets pointer-events: auto inline on its upper-canvas, so a
-  // simple pointer-events: none on the wrapper is not enough — kill
-  // events on every descendant too.
+  // When the overlay is not interactive (Shift held to pan), we want
+  // wheel and pointer events to truly pass through to the media
+  // beneath. Fabric sets pointer-events: auto inline on its
+  // upper-canvas, so a simple pointer-events: none on the wrapper is
+  // not enough — kill events on every descendant too.
   &.non-interactive,
   &.non-interactive :deep(*) {
     pointer-events: none !important;
