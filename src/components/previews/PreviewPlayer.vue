@@ -11,9 +11,10 @@
             :interactive="!isZoomPan"
             v-show="isAnnotationsDisplayed"
             @click="onCanvasClicked"
-            @fabric-ready="onMainFabricReady"
+            @resized="onMainCanvasResized"
           />
           <annotation-canvas
+            ref="comparison-annotation-canvas"
             :canvas-id="`${canvasId}-comparison`"
             :media-element="comparisonMediaElement"
             :panzoom-transform="panzoomTransform"
@@ -26,7 +27,6 @@
               !isComparisonOverlay
             "
             @click="onCanvasClicked"
-            @fabric-ready="onComparisonFabricReady"
           />
           <div class="viewers">
             <preview-viewer
@@ -357,7 +357,6 @@
 </template>
 
 <script setup>
-import { fabric } from 'fabric'
 import { ArrowUpRightIcon, DownloadIcon, LinkIcon } from 'lucide-vue-next'
 import {
   computed,
@@ -396,7 +395,6 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 const FRAME_DELAY = 20
-const RENDER_DELAY = 100
 const SYNC_DELAY = 200
 const RESIZE_DELAY = 500
 
@@ -479,6 +477,9 @@ const emit = defineEmits([
 // — Template refs
 const container = useTemplateRef('container')
 const mainAnnotationCanvas = useTemplateRef('main-annotation-canvas')
+const comparisonAnnotationCanvas = useTemplateRef(
+  'comparison-annotation-canvas'
+)
 const previewViewer = useTemplateRef('preview-viewer')
 const comparisonViewer = useTemplateRef('comparison-preview-viewer')
 const previewContainer = useTemplateRef('preview-container')
@@ -557,10 +558,11 @@ const productionMap = computed(() => store.getters.productionMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
 const userId = computed(() => store.getters.user?.id)
 
-// Panzoom transform sync — the main viewer drives both the fabric
-// annotation canvases (via applyPanzoomTo) and the comparison viewer's
-// underlying panzoom (via setPanZoom). Comparison viewer's own panzoom
-// stays paused; it only reflects the main viewer's transform.
+// Panzoom transform sync — the main viewer drives both the
+// annotation canvases (via applyPanzoomTo) and the comparison
+// viewer's underlying panzoom (via setPanZoom). Comparison viewer's
+// own panzoom stays paused; it only reflects the main viewer's
+// transform.
 
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
@@ -569,6 +571,8 @@ const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
 // Callbacks are wrapped in closures so they can reference functions defined later.
 
 const annotation = useAnnotation({
+  mainCanvasComponent: mainAnnotationCanvas,
+  comparisonCanvasComponent: comparisonAnnotationCanvas,
   annotationCanvas: annotationCanvasRef,
   canvasWrapper,
   annotations,
@@ -585,8 +589,6 @@ const annotation = useAnnotation({
 })
 
 const {
-  fabricCanvas,
-  fabricCanvasComparison,
   notSaved,
   pencilColor,
   pencilWidth,
@@ -609,9 +611,11 @@ const {
   undoLastAction,
   redoLastAction,
   clearCanvas,
-  configureCanvas,
+  clearComparisonCanvas,
   copyAnnotations,
+  copyAnnotationCanvas,
   pasteAnnotations,
+  setAnnotationDrawingMode,
   startAnnotationSaving,
   endAnnotationSaving,
   confirmAnnotationsSaved,
@@ -1128,49 +1132,16 @@ const onToggleSoundClicked = () => {
   localPreferences.setPreference('player:muted', isMuted.value)
 }
 
-// Sizing
-
-const onMainFabricReady = canvas => {
-  fabricCanvas.value = canvas
-  if (fabricCanvasComparison.value) configureCanvas()
-}
-
-const onComparisonFabricReady = canvas => {
-  fabricCanvasComparison.value = canvas
-  if (fabricCanvas.value) configureCanvas()
-}
-
 // Screen
 
 const setFullScreen = () => {
   endAnnotationSaving()
-  const promise = documentSetFullScreen(container.value)
-  Promise.resolve(promise).finally(() => {
-    fullScreen.value = true
-  })
-  nextTick(() => {
-    clearFocus()
-  })
+  documentSetFullScreen(container.value)
 }
 
 const exitFullScreen = () => {
   endAnnotationSaving()
-  const promise = documentExitFullScreen()
-  Promise.resolve(promise).finally(() => {
-    fullScreen.value = false
-    nextTick(() => {
-      previewViewer.value?.resize()
-      comparisonViewer.value?.resize()
-    })
-  })
-  isComparing.value = false
-  isCommentsHidden.value = true
-  nextTick(() => {
-    clearFocus()
-    previewViewer.value?.resize()
-    comparisonViewer.value?.resize()
-    triggerResize()
-  })
+  documentExitFullScreen()
 }
 
 const onFullscreenClicked = () => {
@@ -1183,21 +1154,24 @@ const onFullscreenClicked = () => {
   }
 }
 
+// Native fullscreenchange fires in every path (button click and ESC),
+// so this is the single source of truth for state + side-effects.
+// The trailing setTimeout is a fallback resize after the browser has
+// fully settled the layout transition, which the nextTick can miss.
 const onFullScreenChange = () => {
-  if (fullScreen.value && !isFullScreen()) {
+  const nowFullScreen = isFullScreen()
+  if (fullScreen.value === nowFullScreen) return
+  fullScreen.value = nowFullScreen
+  if (!nowFullScreen) {
     isComparing.value = false
-    fullScreen.value = false
     isCommentsHidden.value = true
-    endAnnotationSaving()
-    nextTick(() => {
-      previewViewer.value?.resize()
-      comparisonViewer.value?.resize()
-      clearFocus()
-      nextTick(() => {
-        loadAnnotation()
-      })
-    })
   }
+  nextTick(() => {
+    clearFocus()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
+    if (!nowFullScreen) loadAnnotation()
+  })
   setTimeout(() => {
     previewViewer.value?.resize()
     comparisonViewer.value?.resize()
@@ -1307,10 +1281,6 @@ const setPlayerSpeed = rate => {
 }
 
 // Annotations
-
-const triggerResize = () => {
-  window.dispatchEvent(new Event('resize'))
-}
 
 const onDeleteClicked = () => {
   clearFocus()
@@ -1448,7 +1418,7 @@ const loadAnnotation = annotation => {
 }
 
 const loadComparisonAnnotation = time => {
-  fabricCanvasComparison.value.clear()
+  clearComparisonCanvas()
   previewToCompare.value = previewFileMap[previewToCompareId.value]
   let anns = []
   if (previewToCompare.value && previewToCompare.value.annotations) {
@@ -1504,41 +1474,6 @@ const extractVideoFrame = (canvas, frame) => {
         resolve()
       }, RESIZE_DELAY)
     })
-  })
-}
-
-const copyAnnotationCanvas = (canvas, annotation) => {
-  return new Promise(resolve => {
-    clearCanvas()
-    loadSingleAnnotation(annotation)
-    setTimeout(() => {
-      const context = canvas.getContext('2d')
-      const scaleRatio = canvas.width / fabricCanvas.value.width
-      const tmpSource = document.getElementById('resize-annotation-canvas')
-      const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
-        width: canvas.width,
-        height: canvas.height
-      })
-      fabricCanvas.value.getObjects().forEach(obj => {
-        if (obj._objects) {
-          obj._objects.forEach(obj => {
-            tmpCanvas.add(obj)
-            obj.strokeWidth = obj.strokeWidth / scaleRatio
-          })
-        } else {
-          tmpCanvas.add(obj)
-          obj.strokeWidth = obj.strokeWidth / scaleRatio
-        }
-      })
-      tmpCanvas.setZoom(scaleRatio)
-      setTimeout(() => {
-        context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
-        setTimeout(() => {
-          tmpCanvas.dispose()
-        }, RENDER_DELAY)
-        return resolve()
-      }, RENDER_DELAY)
-    }, RENDER_DELAY)
   })
 }
 
@@ -1683,6 +1618,14 @@ const onModelLoaded = () => {
   }
 }
 
+const resetPlayerPositions = () => {
+  previewViewer.value?.resize()
+  comparisonViewer.value?.resize()
+  previewViewer.value?.resetZoom()
+  comparisonViewer.value?.resetZoom()
+  resetPanzoomTransform()
+}
+
 const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
@@ -1692,15 +1635,21 @@ const onPreviewLoaded = () => {
     setCurrentFrame(0)
     progress.value.updateProgressBar(0)
   }
-  // Reset the panzoom state once the underlying media is laid out so any
-  // residual transform from a previous preview is cleared. The annotation
-  // canvases reposition themselves through their ResizeObserver.
+  // Replay the same sequence that fires on a comparison toggle: it
+  // forces a resetPicture/mountVideo round-trip on the viewers, which
+  // re-applies the picture style.width/height and reliably triggers
+  // the AnnotationCanvas to realign its bounds. Annotation (re)loading
+  // is driven from @resized on AnnotationCanvas so it only runs once
+  // the annotation canvas has been resized — otherwise scale
+  // multipliers would be computed against a stale (or zero) width.
   nextTick(() => {
-    previewViewer.value?.pauseZoom()
-    previewViewer.value?.resetZoom()
-    comparisonViewer.value?.resetZoom()
-    resetPanzoomTransform()
+    resetPlayerPositions()
   })
+}
+
+const onMainCanvasResized = () => {
+  reloadAnnotations()
+  loadAnnotation()
 }
 
 const configureEvents = () => {
@@ -1965,11 +1914,7 @@ watch(isComparing, () => {
     previewToCompareId.value = ''
   }
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
-    previewViewer.value.resetZoom()
-    comparisonViewer.value.resetZoom()
-    resetPanzoomTransform()
+    resetPlayerPositions()
   })
 })
 
@@ -1992,11 +1937,7 @@ watch(
 )
 
 watch(isDrawing, () => {
-  if (fabricCanvas.value) {
-    fabricCanvas.value.isDrawingMode = isDrawing.value
-  } else {
-    endAnnotationSaving()
-  }
+  setAnnotationDrawingMode(isDrawing.value)
   if (isDrawing.value) {
     isAnnotationsDisplayed.value = true
     isZoomPan.value = false
@@ -2040,10 +1981,7 @@ watch(isZoomPan, enabled => {
   if (enabled) {
     previewViewer.value?.resumeZoom()
   } else {
-    previewViewer.value?.pauseZoom()
-    previewViewer.value?.resetZoom()
-    comparisonViewer.value?.resetZoom()
-    resetPanzoomTransform()
+    resetPlayerPositions()
   }
 })
 
@@ -2080,9 +2018,6 @@ watch(volume, () => {
 onMounted(() => {
   configureEvents()
 
-  reloadAnnotations()
-  if (isPicture.value) loadAnnotation()
-
   resetPreviewFileMap()
   initPreferences()
 
@@ -2101,9 +2036,13 @@ onMounted(() => {
     previewViewer.value.setVolume(volume.value)
   }
 
-  new ResizeObserver(() => comparisonViewer.value?.resize()).observe(
-    container.value
-  )
+  reloadAnnotations()
+  loadAnnotation()
+
+  new ResizeObserver(() => {
+    resetPlayerPositions()
+    if (isPicture.value || isMovie.value) loadAnnotation()
+  }).observe(container.value)
 })
 
 onBeforeUnmount(() => {

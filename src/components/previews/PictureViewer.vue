@@ -291,7 +291,7 @@ const updateLoupePosition = (event, canvasDimensions) => {
 const emitPanZoom = pz => {
   if (silent) return
   const { x, y, scale } = pz.getTransform()
-  emit('panzoom-changed', { x, y, scale })
+  emit('panzoom-changed', { x, y, scale, source: 'picture' })
 }
 
 const setupPanZoom = () => {
@@ -301,7 +301,8 @@ const setupPanZoom = () => {
       bounds: true,
       boundsPadding: 0.2,
       maxZoom: 5,
-      minZoom: 1
+      minZoom: 1,
+      smoothScroll: false
     })
   )
   const panzoomSmall = panzoomInstances.value[0]

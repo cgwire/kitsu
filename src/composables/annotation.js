@@ -6,7 +6,7 @@ import { fabric } from 'fabric'
 import moment from 'moment'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
-import { computed, markRaw, ref } from 'vue'
+import { computed, markRaw, ref, watch } from 'vue'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -89,6 +89,8 @@ if (PSStroke) {
  * @param {Function} options.onCanvasReleasedCb - callback for canvas mouse released
  */
 export const useAnnotation = ({
+  mainCanvasComponent,
+  comparisonCanvasComponent,
   annotationCanvas,
   canvasWrapper,
   annotations,
@@ -103,7 +105,11 @@ export const useAnnotation = ({
   onCanvasMouseMovedCb,
   onCanvasReleasedCb
 }) => {
-  // Reactive state
+  // Canvas instances are owned by AnnotationCanvas components when
+  // this composable is consumed from PreviewPlayer; we mirror them
+  // into local refs through watchers so internal code (and the legacy
+  // setupFabricCanvasMixin path) can keep treating fabricCanvas /
+  // fabricCanvasComparison as writable refs.
   const fabricCanvas = ref(null)
   const fabricCanvasComparison = ref(null)
   const lastAnnotationTime = ref('')
@@ -139,6 +145,33 @@ export const useAnnotation = ({
   // Computed
   const annotationCanvasEl = computed(() => annotationCanvas.value)
 
+  // Mirror the canvas instances from the AnnotationCanvas components.
+  // flush: 'sync' is critical: the parent's onMounted may immediately
+  // try to load annotations into the canvases, so we cannot wait for
+  // Vue's default microtask flush to propagate the assignment.
+  // configureCanvas is called whenever the main canvas becomes
+  // available so its event handlers are wired without parent
+  // involvement.
+  if (mainCanvasComponent) {
+    watch(
+      () => mainCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvas.value = canvas
+        if (canvas) configureCanvas()
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
+  if (comparisonCanvasComponent) {
+    watch(
+      () => comparisonCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvasComparison.value = canvas
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
+
   // Init
   const resetUndoStacks = () => {
     doneActionStack = []
@@ -153,6 +186,7 @@ export const useAnnotation = ({
   }
 
   const getObjectById = objectId => {
+    if (!fabricCanvas.value) return null
     return fabricCanvas.value.getObjects().find(obj => obj.id === objectId)
   }
 
@@ -1038,12 +1072,22 @@ export const useAnnotation = ({
     return true
   }
 
+  // fabric instances created on a canvas DOM element whose 2D context
+  // hasn't been initialised yet (mostly under HMR / when the wrapper is
+  // hidden at mount) end up with contextContainer === null. Touch them
+  // and we crash inside fabric.clearContext.
+  const isFabricReady = canvas => Boolean(canvas?.contextContainer)
+
   const clearCanvas = () => {
     endAnnotationSaving()
-    if (fabricCanvas.value) {
+    if (isFabricReady(fabricCanvas.value)) {
       fabricCanvas.value.clear()
     }
-    if (fabricCanvasComparison.value) {
+    clearComparisonCanvas()
+  }
+
+  const clearComparisonCanvas = () => {
+    if (isFabricReady(fabricCanvasComparison.value)) {
       fabricCanvasComparison.value.clear()
     }
   }
@@ -1339,6 +1383,7 @@ export const useAnnotation = ({
     // Canvas
     isEmptyCanvas,
     clearCanvas,
+    clearComparisonCanvas,
     copyAnnotations,
     pasteAnnotations,
     applyGroupChanges,

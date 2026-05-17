@@ -42,7 +42,7 @@
       :preview="preview"
       @duration-changed="duration => $emit('duration-changed', duration)"
       @frame-update="frameNumber => $emit('frame-update', frameNumber)"
-      @panzoom-changed="event => $emit('panzoom-changed', event)"
+      @panzoom-changed="onVideoPanzoomChanged"
       @play-ended="$emit('play-ended')"
       @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
@@ -61,7 +61,7 @@
       :panzoom="true"
       :preview="preview"
       @loaded="$emit('picture-loaded')"
-      @panzoom-changed="event => $emit('panzoom-changed', event)"
+      @panzoom-changed="onPicturePanzoomChanged"
       @size-changed="onPictureSizeChanged"
       v-show="isPicture"
     />
@@ -299,13 +299,13 @@ const resetVideo = () => {
 
 const play = () => {
   isPlaying = true
-  if (videoViewer.value) videoViewer.value.play()
+  if (isMovie.value) videoViewer.value.play()
   if (isSound.value) soundViewer.value.play()
 }
 
 const pause = () => {
   isPlaying = false
-  if (videoViewer.value) videoViewer.value.pause()
+  if (isMovie.value) videoViewer.value.pause()
   if (isSound.value) soundViewer.value.pause()
 }
 
@@ -356,7 +356,7 @@ const getDimensions = () => {
 
 const resize = () => {
   if (isPicture.value) pictureViewer.value?.resetPicture()
-  else if (isMovie.value) videoViewer.value?.mountVideo()
+  else if (isMovie.value) videoViewer.value?.resetSize()
 }
 
 const currentMediaElement = computed(() => {
@@ -377,6 +377,16 @@ const onPictureSizeChanged = dimensions => {
 const onVideoSizeChanged = dimensions => {
   dimensions.source = 'movie'
   emit('size-changed', dimensions)
+}
+
+const onVideoPanzoomChanged = event => {
+  if (!isMovie.value) return
+  emit('panzoom-changed', event)
+}
+
+const onPicturePanzoomChanged = event => {
+  if (!isPicture.value) return
+  emit('panzoom-changed', event)
 }
 
 const setCurrentTimeRawValue = time => {

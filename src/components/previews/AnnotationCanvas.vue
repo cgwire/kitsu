@@ -26,7 +26,7 @@ const props = defineProps({
   static: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['click', 'fabric-ready', 'fabric-resized'])
+const emit = defineEmits(['click', 'resized'])
 
 const overlay = ref(null)
 const canvasEl = ref(null)
@@ -63,7 +63,7 @@ const updateBounds = () => {
     (canvas.width !== mediaRect.width || canvas.height !== mediaRect.height)
   ) {
     canvas.setDimensions({ width: mediaRect.width, height: mediaRect.height })
-    emit('fabric-resized', { width: mediaRect.width, height: mediaRect.height })
+    emit('resized', { width: mediaRect.width, height: mediaRect.height })
   }
 }
 
@@ -89,7 +89,6 @@ const createFabric = () => {
     canvas.freeDrawingBrush = brush
   }
   fabricCanvas.value = markRaw(canvas)
-  emit('fabric-ready', canvas)
 }
 
 onMounted(() => {
@@ -117,7 +116,7 @@ watch(
 )
 
 defineExpose({
-  fabricCanvas,
+  canvas: fabricCanvas,
   canvasEl,
   overlay,
   updateBounds

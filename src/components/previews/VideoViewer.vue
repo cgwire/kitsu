@@ -376,7 +376,7 @@ const setPanZoom = (x, y, scale) => {
 const emitPanZoom = () => {
   if (panzoomSilent || !panzoomInstance) return
   const { x, y, scale } = panzoomInstance.getTransform()
-  emit('panzoom-changed', { x, y, scale })
+  emit('panzoom-changed', { x, y, scale, source: 'movie' })
 }
 
 const pausePanZoom = () => {
@@ -466,7 +466,8 @@ onMounted(() => {
       bounds: true,
       boundsPadding: 0.2,
       maxZoom: 5,
-      minZoom: 1
+      minZoom: 1,
+      smoothScroll: false
     })
     panzoomInstance.on('zoom', emitPanZoom)
     panzoomInstance.on('pan', emitPanZoom)
