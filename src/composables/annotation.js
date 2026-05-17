@@ -6,7 +6,7 @@ import { fabric } from 'fabric'
 import moment from 'moment'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
-import { computed, markRaw, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -74,7 +74,6 @@ if (PSStroke) {
  * Composable for annotation canvas management.
  *
  * @param {Object} options
- * @param {import('vue').Ref} options.annotationCanvas - template ref for the annotation canvas element
  * @param {import('vue').Ref} options.canvasWrapper - template ref for the canvas wrapper element
  * @param {import('vue').Ref} options.annotations - reactive ref for annotations array
  * @param {import('vue').ComputedRef} options.isCurrentUserArtist - computed ref for artist check
@@ -84,14 +83,12 @@ if (PSStroke) {
  * @param {Function} options.getCurrentTime - callback to get current time
  * @param {Function} options.getCurrentFrame - callback to get current frame
  * @param {Function} options.saveAnnotationsCb - callback for saving annotations
- * @param {Function} options.loadAnnotationCb - callback for loading annotations
  * @param {Function} options.onCanvasMouseMovedCb - callback for canvas mouse moved
  * @param {Function} options.onCanvasReleasedCb - callback for canvas mouse released
  */
 export const useAnnotation = ({
   mainCanvasComponent,
   comparisonCanvasComponent,
-  annotationCanvas,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -101,15 +98,13 @@ export const useAnnotation = ({
   getCurrentTime,
   getCurrentFrame,
   saveAnnotationsCb,
-  loadAnnotationCb,
   onCanvasMouseMovedCb,
   onCanvasReleasedCb
 }) => {
-  // Canvas instances are owned by AnnotationCanvas components when
-  // this composable is consumed from PreviewPlayer; we mirror them
-  // into local refs through watchers so internal code (and the legacy
-  // setupFabricCanvasMixin path) can keep treating fabricCanvas /
-  // fabricCanvasComparison as writable refs.
+  // Canvas instances are owned by AnnotationCanvas components; we
+  // mirror them into local refs through watchers so internal code
+  // can keep treating fabricCanvas / fabricCanvasComparison as
+  // writable refs.
   const fabricCanvas = ref(null)
   const fabricCanvasComparison = ref(null)
   const lastAnnotationTime = ref('')
@@ -141,9 +136,6 @@ export const useAnnotation = ({
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
-
-  // Computed
-  const annotationCanvasEl = computed(() => annotationCanvas.value)
 
   // Mirror the canvas instances from the AnnotationCanvas components.
   // flush: 'sync' is critical: the parent's onMounted may immediately
@@ -864,28 +856,6 @@ export const useAnnotation = ({
     }
   }
 
-  const resizeAnnotations = () => {
-    resetCanvas().then(() => {
-      reloadAnnotationsCb()
-      loadAnnotationCb()
-    })
-  }
-
-  const resetCanvas = () => {
-    clearCanvas()
-    return resetCanvasSize().then(() => {
-      if (fabricCanvas.value) fabricCanvas.value.renderAll()
-      resetCanvasVisibility()
-      return fabricCanvas.value
-    })
-  }
-
-  const resetCanvasVisibility = () => {
-    if (canvasWrapper.value) {
-      canvasWrapper.value.style.display = 'block'
-    }
-  }
-
   const isAnnotationCanvas = () => {
     return !!fabricCanvas.value
   }
@@ -896,28 +866,6 @@ export const useAnnotation = ({
 
   const setAnnotationDrawingMode = isDrawingMode => {
     fabricCanvas.value.isDrawingMode = isDrawingMode
-  }
-
-  const setupFabricCanvasMixin = () => {
-    if (!annotationCanvasEl.value) return
-
-    const canvasId = annotationCanvasEl.value.id
-
-    fabricCanvas.value = markRaw(
-      new fabric.Canvas(canvasId, {
-        fireRightClick: true
-      })
-    )
-    fabricCanvas.value.setDimensions({
-      width: 100,
-      height: 100
-    })
-    if (!fabricCanvas.value.freeDrawingBrush) {
-      const brush = new PSBrush(fabricCanvas.value)
-      fabricCanvas.value.freeDrawingBrush = brush
-    }
-    configureCanvas()
-    return fabricCanvas.value
   }
 
   const configureCanvas = () => {
@@ -1279,18 +1227,6 @@ export const useAnnotation = ({
     currentPreview = getter
   }
 
-  // Placeholder for resetCanvasSize (component-specific)
-  let resetCanvasSize = () => Promise.resolve()
-  const setResetCanvasSize = fn => {
-    resetCanvasSize = fn
-  }
-
-  // Placeholder for reloadAnnotations callback in resizeAnnotations
-  let reloadAnnotationsCb = () => {}
-  const setReloadAnnotationsCb = fn => {
-    reloadAnnotationsCb = fn
-  }
-
   return {
     // State
     fabricCanvas,
@@ -1365,13 +1301,9 @@ export const useAnnotation = ({
     // Canvas management
     deleteAllAnnotations,
     clearAnnotationSelection,
-    resizeAnnotations,
-    resetCanvas,
-    resetCanvasVisibility,
     isAnnotationCanvas,
     setAnnotationCanvasDimensions,
     setAnnotationDrawingMode,
-    setupFabricCanvas: setupFabricCanvasMixin,
     configureCanvas,
 
     // Mouse pressure
@@ -1397,9 +1329,7 @@ export const useAnnotation = ({
     restoreFailedAnnotations,
     copyAnnotationCanvas,
 
-    // Setters for component-specific callbacks
-    setCurrentPreviewGetter,
-    setResetCanvasSize,
-    setReloadAnnotationsCb
+    // Setter for component-specific callbacks
+    setCurrentPreviewGetter
   }
 }

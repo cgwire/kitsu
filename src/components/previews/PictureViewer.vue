@@ -166,18 +166,12 @@ const resetPicture = () => {
     pictureSubWrapper.value.style['height'] = heightValue
   }
   let { width, height } = getDimensions()
-  picture.value.style.width = width + 'px'
-  picture.value.style.height = height + 'px'
-  pictureBig.value.style.width = width + 'px'
-  pictureBig.value.style.height = height + 'px'
-  pictureGif.value.style.width = width + 'px'
-  pictureGif.value.style.height = height + 'px'
-  picture.value.width = width
-  picture.value.height = height
-  pictureBig.value.width = width
-  pictureBig.value.height = height
-  pictureGif.value.width = width
-  pictureGif.value.height = height
+  ;[picture.value, pictureBig.value, pictureGif.value].forEach(img => {
+    img.style.width = width + 'px'
+    img.style.height = height + 'px'
+    img.width = width
+    img.height = height
+  })
 
   if (props.fullScreen) {
     pictureBig.value.style.maxHeight = `calc(100vh - ${props.marginBottom}px)`

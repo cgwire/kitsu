@@ -486,7 +486,6 @@ const comparisonViewer = useTemplateRef('comparison-preview-viewer')
 const previewContainer = useTemplateRef('preview-container')
 const commentContainer = useTemplateRef('task-info-player')
 
-const annotationCanvasRef = computed(() => mainAnnotationCanvas.value?.canvasEl)
 const canvasWrapper = computed(() => mainAnnotationCanvas.value?.overlay)
 
 const mainMediaElement = computed(
@@ -585,7 +584,6 @@ const isOverlayInteractive = computed(
 const annotation = useAnnotation({
   mainCanvasComponent: mainAnnotationCanvas,
   comparisonCanvasComponent: comparisonAnnotationCanvas,
-  annotationCanvas: annotationCanvasRef,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -595,7 +593,6 @@ const annotation = useAnnotation({
   getCurrentTime: () => getCurrentTime(),
   getCurrentFrame: () => getCurrentFrame(),
   saveAnnotationsCb: () => saveAnnotations(),
-  loadAnnotationCb: () => loadAnnotation(),
   onCanvasMouseMovedCb: event => onCanvasMouseMoved(event),
   onCanvasReleasedCb: event => onCanvasReleased(event)
 })
