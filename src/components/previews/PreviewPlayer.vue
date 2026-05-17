@@ -502,7 +502,6 @@ const revisionPreviews = useTemplateRef('revision-previews')
 
 // — Non-reactive
 let lastIndex = 1
-let loupe = false
 let scrubbing = false
 let scrubStartX = 0
 
@@ -1473,45 +1472,29 @@ const displayLast = () => {
   currentIndex.value = props.previews.length
 }
 
-// Loupe
+// Canvas events (right-click drag scrubs the movie timeline)
 
 const onCanvasMouseMoved = event => {
-  if (isPicture.value && loupe) {
-    const w = canvasWrapper.value.style.width
-    const h = canvasWrapper.value.style.height
-    previewViewer.value.updateLoupePosition(event, { width: w, height: h })
-  } else if (isMovie.value && scrubbing) {
-    const x = getClientX(event.e)
-    if (x - scrubStartX < 0) {
-      goPreviousFrame()
-    } else {
-      goNextFrame()
-    }
-    scrubStartX = x
+  if (!isMovie.value || !scrubbing) return
+  const x = getClientX(event.e)
+  if (x - scrubStartX < 0) {
+    goPreviousFrame()
+  } else {
+    goNextFrame()
   }
+  scrubStartX = x
 }
 
 const onCanvasClicked = event => {
-  if (event.button > 1 && isPicture.value && fullScreen.value) {
-    loupe = true
-    previewViewer.value.showLoupe()
-    const w = canvasWrapper.value.style.width
-    const h = canvasWrapper.value.style.height
-    previewViewer.value.updateLoupePosition(event, { width: w, height: h })
-  } else if (event.button > 1 && isMovie.value) {
+  if (event.button > 1 && isMovie.value) {
     scrubbing = true
     scrubStartX = getClientX(event)
   }
   return false
 }
 
-const onCanvasReleased = event => {
-  if (isPicture.value && loupe) {
-    previewViewer.value.hideLoupe()
-    loupe = false
-  } else if (isMovie.value && scrubbing) {
-    scrubbing = false
-  }
+const onCanvasReleased = () => {
+  if (isMovie.value && scrubbing) scrubbing = false
   return false
 }
 

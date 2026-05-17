@@ -397,18 +397,6 @@ const getCurrentTimeRaw = () => {
   return isMovie.value ? videoViewer.value.currentTimeRaw : 0
 }
 
-const showLoupe = () => {
-  pictureViewer.value.showLoupe()
-}
-
-const hideLoupe = () => {
-  pictureViewer.value.hideLoupe()
-}
-
-const updateLoupePosition = (event, canvasDimensions) => {
-  pictureViewer.value.updateLoupePosition(event, canvasDimensions)
-}
-
 const extractFrame = (canvas, frame) => {
   videoViewer.value.setCurrentFrame(frame)
   const video = videoViewer.value.video
@@ -483,9 +471,6 @@ defineExpose({
   setCurrentFrame,
   setCurrentTimeRaw: setCurrentTimeRawValue,
   getCurrentTimeRaw,
-  showLoupe,
-  hideLoupe,
-  updateLoupePosition,
   extractFrame,
   resetZoom,
   setPanZoom,

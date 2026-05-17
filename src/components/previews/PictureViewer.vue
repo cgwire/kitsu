@@ -10,14 +10,6 @@
         class="picture-subwrapper"
         ref="pictureSubWrapper"
       >
-        <div
-          ref="loupe"
-          class="loupe"
-          id="loupe"
-          :style="{
-            background: 'url(' + pictureDlPath + ')'
-          }"
-        ></div>
         <div v-show="isGif">
           <img ref="pictureGif" :src="pictureGifPath" />
         </div>
@@ -85,7 +77,6 @@ const emit = defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 const container = ref(null)
 const pictureWrapper = ref(null)
 const pictureSubWrapper = ref(null)
-const loupe = ref(null)
 const picture = ref(null)
 const pictureBig = ref(null)
 const pictureGif = ref(null)
@@ -249,37 +240,6 @@ const endLoading = () => {
   }
   emit('loaded')
   nextTick(resetPicture)
-}
-
-const showLoupe = () => {
-  loupe.value.style.display = 'block'
-}
-
-const hideLoupe = () => {
-  loupe.value.style.display = 'none'
-}
-
-const updateLoupePosition = (event, canvasDimensions) => {
-  const w = canvasDimensions.width
-  const h = canvasDimensions.height
-  const maxWidth = parseInt(w.substring(0, w.length - 2))
-  const maxHeight = parseInt(h.substring(0, h.length - 2))
-  let x = Math.max(event.pointer.x - 150, 0)
-  let y = Math.max(event.pointer.y - 150, 0)
-  x = Math.min(x, maxWidth - 300)
-  y = Math.min(y, maxHeight - 300)
-  loupe.value.style.left = x + 'px'
-  loupe.value.style.top = y + 'px'
-
-  let zx = Math.max(event.pointer.x, 0)
-  let zy = Math.max(event.pointer.y, 0)
-  zx = Math.min(zx, maxWidth)
-  zy = Math.min(zy, maxHeight)
-  const naturalDimensions = getNaturalDimensions()
-  const ratioW = naturalDimensions.width / maxWidth
-  const bgX = Math.min(ratioW * zx - 150, naturalDimensions.width - 300)
-  const bgY = Math.min(ratioW * zy - 150, naturalDimensions.height - 300)
-  loupe.value.style['background-position'] = `-${bgX}px -${bgY}px`
 }
 
 const emitPanZoom = pz => {
@@ -449,9 +409,6 @@ defineExpose({
   getNaturalDimensions,
   getDimensions,
   resetPicture,
-  showLoupe,
-  hideLoupe,
-  updateLoupePosition,
   resetPanZoom,
   pausePanZoom,
   resumePanZoom,
@@ -502,24 +459,6 @@ defineExpose({
   // so panzoom's cursor-relative zoom math drifts.
   img {
     display: block;
-  }
-}
-
-.loupe {
-  display: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 300px;
-  width: 300px;
-  background: white;
-  z-index: 3000;
-  border-radius: 5px;
-  box-shadow: 0 0 8px 4px rgba(0, 0, 0, 0.2);
-
-  img {
-    position: relative;
-    width: 800px;
   }
 }
 </style>
