@@ -9,7 +9,7 @@
             :media-element="mainMediaElement"
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
-            :wheel-target="isZoomPan ? mainMediaElement : null"
+            :wheel-target="mainMediaElement"
             v-show="isAnnotationsDisplayed"
             @click="onCanvasClicked"
             @resized="onMainCanvasResized"
@@ -193,7 +193,7 @@
             :is-object-background="isObjectBackground"
             :is-picture="isPicture"
             :is-typing="isTyping"
-            :is-zoom-pan="isZoomPan"
+            :is-zoom-pan="false"
             :light="light"
             :object-background-url="objectBackgroundUrl"
             :pencil-color="pencilColor"
@@ -216,7 +216,7 @@
             @redo="redoLastAction"
             @type-clicked="onTypeClicked"
             @undo="undoLastAction"
-            @zoom-pan-clicked="onZoomPanClicked"
+            @zoom-pan-clicked="onResetZoomClicked"
           />
 
           <div
@@ -529,7 +529,6 @@ const isOrdering = ref(true)
 const isRepeating = ref(false)
 const isTyping = ref(false)
 const isWireframe = ref(false)
-const isZoomPan = ref(false)
 const maxDuration = ref('00:00:00:00')
 const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
@@ -560,12 +559,12 @@ const userId = computed(() => store.getters.user?.id)
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
-// Drawing and zoom-pan can be active at the same time. Overlay
-// captures mouse events for drawing unless the user holds Space, in
-// which case events pass through so the underlying panzoom can
-// process drag-to-pan.
+// Zoom-pan inputs are always live on the main viewer. The overlay
+// only captures mouse events while the user is drawing — and even
+// then, holding Space lets events pass through to the media so
+// drag-to-pan still works.
 const isOverlayInteractive = computed(
-  () => !isZoomPan.value || (isDrawing.value && !isSpaceHeld.value)
+  () => isDrawing.value && !isSpaceHeld.value
 )
 
 // Annotation composable
@@ -1067,8 +1066,11 @@ const onCompareClicked = () => {
   toggleComparison()
 }
 
-const onZoomPanClicked = () => {
-  isZoomPan.value = !isZoomPan.value
+const onResetZoomClicked = () => {
+  clearFocus()
+  previewViewer.value?.resetZoom()
+  comparisonViewer.value?.resetZoom()
+  resetPanzoomTransform()
 }
 
 const onObjectBackgroundSelected = () => {
@@ -1331,7 +1333,7 @@ const getLinkedEntities = concept => {
 const { isSpaceHeld } = usePreviewShortcuts({
   // Escape is not wired — the browser exits fullscreen on it and the
   // useFullScreen listener picks up the resulting fullscreenchange.
-  isSpaceModifier: () => isZoomPan.value && isDrawing.value,
+  isSpaceModifier: () => isDrawing.value,
   onDelete: () => deleteSelection(),
   onPrevFrame: () => goPreviousFrame(),
   onNextFrame: () => goNextFrame(),
@@ -1702,17 +1704,6 @@ watch(isComparisonOverlay, () => {
   })
 })
 
-watch(isZoomPan, enabled => {
-  if (enabled) {
-    previewViewer.value?.resumeZoom()
-  } else {
-    // Pause panzoom inputs but keep the current transform: the user
-    // may toggle zoom-pan off only to draw on the zoomed view. Reset
-    // happens through other paths (preview change, fullscreen exit).
-    previewViewer.value?.pauseZoom()
-  }
-})
-
 // Drive the comparison viewer's underlying panzoom from the main one so
 // both stay visually synced. The annotation canvases pick up the
 // transform directly via their panzoom-transform prop.
@@ -1766,6 +1757,12 @@ onMounted(() => {
 
   reloadAnnotations()
   loadAnnotation()
+
+  // Zoom-pan inputs are always active on the main viewer. The
+  // comparison viewer's panzoom stays paused (set by setupPanZoom in
+  // PictureViewer/VideoViewer) so it can only mirror the main
+  // viewer's transform through the panzoom-changed sync.
+  previewViewer.value?.resumeZoom()
 
   new ResizeObserver(() => {
     resetPlayerPositions()
