@@ -712,6 +712,9 @@ const extension = computed(() =>
 )
 
 const isConcept = computed(() => props.entityType === 'Concept')
+const isReady = computed(
+  () => !currentPreview.value?.status || currentPreview.value.status === 'ready'
+)
 const isPicture = computed(() =>
   ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
 )
