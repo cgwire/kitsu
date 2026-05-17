@@ -560,11 +560,12 @@ const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
 // Zoom-pan inputs are always live on the main viewer. The overlay
-// only captures mouse events while the user is drawing — and even
-// then, holding Space lets events pass through to the media so
-// drag-to-pan still works.
+// only captures mouse events while the user is drawing or in typing
+// mode (so dblclick reaches fabric's upper-canvas to add a text
+// annotation). Holding Space lets events pass through to the media
+// so drag-to-pan still works in either mode.
 const isOverlayInteractive = computed(
-  () => isDrawing.value && !isSpaceHeld.value
+  () => (isDrawing.value || isTyping.value) && !isSpaceHeld.value
 )
 
 // Annotation composable
@@ -1333,7 +1334,7 @@ const getLinkedEntities = concept => {
 const { isSpaceHeld } = usePreviewShortcuts({
   // Escape is not wired — the browser exits fullscreen on it and the
   // useFullScreen listener picks up the resulting fullscreenchange.
-  isSpaceModifier: () => isDrawing.value,
+  isSpaceModifier: () => isDrawing.value || isTyping.value,
   onDelete: () => deleteSelection(),
   onPrevFrame: () => goPreviousFrame(),
   onNextFrame: () => goNextFrame(),
