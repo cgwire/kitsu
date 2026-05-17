@@ -2,10 +2,10 @@
  * Keyboard shortcuts for the preview player.
  *
  * Registers global keydown / keyup listeners and dispatches to the
- * handlers passed in. The Space key has dual behaviour: when
- * isSpaceModifier() returns true it sets isSpaceHeld instead of
- * firing onPlayPause, so consumers can use it as a temporary
- * pan-mode toggle. Released Space always clears isSpaceHeld.
+ * handlers passed in. Also tracks whether Shift is currently held so
+ * consumers can use it as a temporary pan-mode modifier (Shift+drag
+ * lets pointer events reach the underlying media instead of the
+ * annotation overlay).
  *
  * Shortcuts are skipped while the user is typing in an <input> or
  * <textarea>.
@@ -21,8 +21,6 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
 
 /**
  * @param {Object} handlers
- * @param {Function} [handlers.isSpaceModifier] - return true if Space
- *   should set isSpaceHeld instead of firing onPlayPause
  * @param {Function} [handlers.onDelete]
  * @param {Function} [handlers.onPrevFrame]
  * @param {Function} [handlers.onNextFrame]
@@ -39,10 +37,14 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
  * @param {Function} [handlers.onToggleOverlay]
  */
 export const usePreviewShortcuts = handlers => {
-  const isSpaceHeld = ref(false)
+  const isShiftHeld = ref(false)
 
   const onKeyDown = event => {
     if (isTypingTarget(event.target)) return
+    if (event.key === 'Shift') {
+      isShiftHeld.value = true
+      return
+    }
     const mod = event.ctrlKey || event.metaKey
     const alt = event.altKey
 
@@ -59,11 +61,7 @@ export const usePreviewShortcuts = handlers => {
         break
       case ' ':
         pauseEvent(event)
-        if (handlers.isSpaceModifier?.()) {
-          isSpaceHeld.value = true
-        } else {
-          handlers.onPlayPause?.()
-        }
+        handlers.onPlayPause?.()
         break
       case ',':
         handlers.onPrevAnnotation?.()
@@ -103,7 +101,7 @@ export const usePreviewShortcuts = handlers => {
   }
 
   const onKeyUp = event => {
-    if (event.key === ' ') isSpaceHeld.value = false
+    if (event.key === 'Shift') isShiftHeld.value = false
   }
 
   onMounted(() => {
@@ -116,5 +114,5 @@ export const usePreviewShortcuts = handlers => {
     window.removeEventListener('keyup', onKeyUp)
   })
 
-  return { isSpaceHeld }
+  return { isShiftHeld }
 }

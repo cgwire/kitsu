@@ -558,14 +558,12 @@ const userId = computed(() => store.getters.user?.id)
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
-// Zoom-pan inputs are always live on the main viewer. The overlay
-// only captures mouse events while the user is drawing or in typing
-// mode (so dblclick reaches fabric's upper-canvas to add a text
-// annotation). Holding Space lets events pass through to the media
-// so drag-to-pan still works in either mode.
-const isOverlayInteractive = computed(
-  () => (isDrawing.value || isTyping.value) && !isSpaceHeld.value
-)
+// The annotation overlay always captures pointer events so the user
+// can select / move / draw / type annotations. Holding Shift turns
+// it transparent so the underlying media receives the drag and pans.
+// Wheel keeps zooming regardless (the overlay forwards wheel to the
+// media via the wheelTarget prop).
+const isOverlayInteractive = computed(() => !isShiftHeld.value)
 
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
@@ -1333,10 +1331,9 @@ const getLinkedEntities = concept => {
 
 // Events
 
-const { isSpaceHeld } = usePreviewShortcuts({
+const { isShiftHeld } = usePreviewShortcuts({
   // Escape is not wired — the browser exits fullscreen on it and the
   // useFullScreen listener picks up the resulting fullscreenchange.
-  isSpaceModifier: () => isDrawing.value || isTyping.value,
   onDelete: () => deleteSelection(),
   onPrevFrame: () => goPreviousFrame(),
   onNextFrame: () => goNextFrame(),
