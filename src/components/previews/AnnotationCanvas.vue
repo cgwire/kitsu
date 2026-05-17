@@ -2,6 +2,7 @@
   <div
     ref="overlay"
     class="annotation-canvas"
+    :class="{ 'non-interactive': !interactive }"
     :style="overlayStyle"
     oncontextmenu="return false"
     @click="$emit('click', $event)"
@@ -131,6 +132,16 @@ defineExpose({
 
   canvas {
     display: block;
+  }
+
+  // When the overlay is not interactive (zoom-pan mode) we want wheel
+  // and pointer events to truly pass through to the media beneath.
+  // Fabric sets pointer-events: auto inline on its upper-canvas, so a
+  // simple pointer-events: none on the wrapper is not enough — kill
+  // events on every descendant too.
+  &.non-interactive,
+  &.non-interactive :deep(*) {
+    pointer-events: none !important;
   }
 }
 </style>

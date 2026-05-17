@@ -367,7 +367,9 @@ const setPanZoom = (x, y, scale) => {
   panzoomInstance.moveTo(x, y)
   panzoomInstance.setTransformOrigin({ x, y })
   panzoomInstance.zoomTo(x, y, zoomFactor)
-  panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
+  // null restores cursor-relative wheel zoom; {x:0,y:0} would lock the
+  // focal point at the top-left corner.
+  panzoomInstance.setTransformOrigin(null)
   nextTick(() => {
     panzoomSilent = false
   })
@@ -462,7 +464,12 @@ onMounted(() => {
   }, 0)
 
   if (props.panzoom) {
-    panzoomInstance = createPanzoom(container.value, {
+    // Attach panzoom to the <video> element rather than the wrapping
+    // container: the video is flex-centered inside the wrapper, so
+    // scaling the wrapper multiplies the centering offset and the
+    // video drifts relative to the AnnotationCanvas overlay (which
+    // applies the same transform from its own top-left origin).
+    panzoomInstance = createPanzoom(movie.value, {
       bounds: true,
       boundsPadding: 0.2,
       maxZoom: 5,

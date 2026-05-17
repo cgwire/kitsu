@@ -361,7 +361,10 @@ const setPanZoom = (x, y, scale) => {
   pz.moveTo(x, y)
   pz.setTransformOrigin({ x, y })
   pz.zoomTo(x, y, zoomFactor)
-  pz.setTransformOrigin({ x: 0, y: 0 })
+  // Passing null clears the override so subsequent wheel zooms use the
+  // cursor as focal point. Passing {x:0,y:0} would lock zoom at the
+  // top-left corner.
+  pz.setTransformOrigin(null)
   nextTick(() => {
     silent = false
   })
@@ -498,6 +501,14 @@ defineExpose({
   position: relative;
   display: flex;
   align-items: center;
+
+  // The imgs panzoom is attached to default to display: inline, which
+  // adds a baseline descent gap below them inside their wrapper. The
+  // wrapper's bounding rect then doesn't match the img content rect,
+  // so panzoom's cursor-relative zoom math drifts.
+  img {
+    display: block;
+  }
 }
 
 .loupe {
