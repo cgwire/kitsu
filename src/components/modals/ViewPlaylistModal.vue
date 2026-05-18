@@ -103,6 +103,7 @@ const currentEntityType = computed(() => {
   if (route.path.indexOf('asset') > 0) return 'asset'
   if (route.path.indexOf('sequence') > 0) return 'sequence'
   if (route.path.indexOf('edit') > 0) return 'edit'
+  if (route.path.indexOf('episode') > 0) return 'episode'
   return 'shot'
 })
 

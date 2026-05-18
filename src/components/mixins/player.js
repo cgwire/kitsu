@@ -1098,7 +1098,7 @@ export const playerMixin = {
       }
       if (this.playlist && this.isPlaying) {
         const hasHandles =
-          ['shot', 'edit'].includes(this.playlist.for_entity) &&
+          ['shot', 'edit', 'episode'].includes(this.playlist.for_entity) &&
           this.handleOut < this.nbFrames
         const reachedEnd = hasHandles
           ? this.frameNumber >= this.handleOut

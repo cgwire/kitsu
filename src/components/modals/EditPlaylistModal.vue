@@ -103,14 +103,16 @@ const forEntityOptions = computed(() => {
     return [
       { label: t('shots.title'), value: 'shot' },
       { label: t('sequences.title'), value: 'sequence' },
-      { label: t('edits.title'), value: 'edit' }
+      { label: t('edits.title'), value: 'edit' },
+      { label: t('episodes.title'), value: 'episode' }
     ]
   }
   return [
     { label: t('assets.title'), value: 'asset' },
     { label: t('shots.title'), value: 'shot' },
     { label: t('sequences.title'), value: 'sequence' },
-    { label: t('edits.title'), value: 'edit' }
+    { label: t('edits.title'), value: 'edit' },
+    { label: t('episodes.title'), value: 'episode' }
   ]
 })
 

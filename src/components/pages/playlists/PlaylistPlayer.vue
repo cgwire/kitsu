@@ -121,7 +121,7 @@
           v-show="isFullMode"
         />
 
-        <raw-video-player
+        <multi-video-viewer
           ref="raw-player-comparison"
           class="raw-player"
           name="comparison"
@@ -134,10 +134,14 @@
           :is-repeating="isRepeating"
           :muted="true"
           :handle-in="
-            ['shot', 'edit'].includes(playlist.for_entity) ? handleIn : -1
+            ['shot', 'edit', 'episode'].includes(playlist.for_entity)
+              ? handleIn
+              : -1
           "
           :handle-out="
-            ['shot', 'edit'].includes(playlist.for_entity) ? handleOut : -1
+            ['shot', 'edit', 'episode'].includes(playlist.for_entity)
+              ? handleOut
+              : -1
           "
           v-show="
             isComparing &&
@@ -198,7 +202,7 @@
           </span>
         </div>
 
-        <raw-video-player
+        <multi-video-viewer
           ref="raw-player"
           class="raw-player"
           :style="{
@@ -1053,7 +1057,7 @@ import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
-import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+import MultiVideoViewer from '@/components/pages/playlists/MultiVideoViewer.vue'
 import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
@@ -1096,7 +1100,7 @@ export default {
     PlaylistProgress,
     PlaylistedEntity,
     PreviewRoom,
-    RawVideoPlayer,
+    MultiVideoViewer,
     SelectTaskTypeModal,
     SharePlaylistModal,
     SoundViewer,
@@ -1275,11 +1279,13 @@ export default {
       'organisation',
       'personMap',
       'editMap',
+      'episodeMap',
       'previewFileMap',
       'productionBackgrounds',
       'shotMap',
       'productionAssetTaskTypes',
       'productionEditTaskTypes',
+      'productionEpisodeTaskTypes',
       'productionSequenceTaskTypes',
       'productionShotTaskTypes',
       'taskMap',
@@ -1450,6 +1456,8 @@ export default {
           return this.productionAssetTaskTypes
         case 'edit':
           return this.productionEditTaskTypes
+        case 'episode':
+          return this.productionEpisodeTaskTypes
         case 'sequence':
           return this.productionSequenceTaskTypes
         case 'shot':
@@ -2330,11 +2338,16 @@ export default {
     },
 
     resetHandles(entity) {
-      if (!['shot', 'edit'].includes(this.playlist.for_entity)) return
+      if (!['shot', 'edit', 'episode'].includes(this.playlist.for_entity)) {
+        return
+      }
       entity = entity || this.currentEntity
-      const entityMap =
-        this.playlist.for_entity === 'edit' ? this.editMap : this.shotMap
-      const source = entityMap?.get(entity?.id)
+      const entityMapByType = {
+        edit: this.editMap,
+        episode: this.episodeMap,
+        shot: this.shotMap
+      }
+      const source = entityMapByType[this.playlist.for_entity]?.get(entity?.id)
       this.handleIn = source?.data?.handle_in || 0
       this.handleOut = source?.data?.handle_out || this.nbFrames
     },
