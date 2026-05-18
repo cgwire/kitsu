@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * To play several videos, to avoid blinking effects, it's required to use
  * two video players. When switching from a entity to another, we hide and show
@@ -31,685 +31,703 @@
  *    preview_file_extension: 'mp4'
  * }, ...]
  */
-import { mapGetters } from 'vuex'
-import panzoom from 'panzoom'
+import createPanzoom from 'panzoom'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useStore } from 'vuex'
 
 import { floorToFrame, roundToFrame } from '@/lib/video'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'multi-video-viewer',
+// Composables
 
-  components: {
-    Spinner
+const store = useStore()
+
+// Props / Emits
+
+const props = defineProps({
+  currentPreviewIndex: {
+    type: Number,
+    default: 0
   },
+  entities: {
+    type: Array,
+    default: () => []
+  },
+  fullScreen: {
+    type: Boolean,
+    default: false
+  },
+  handleIn: {
+    type: Number,
+    default: 0
+  },
+  handleOut: {
+    type: Number,
+    default: 0
+  },
+  isHd: {
+    type: Boolean,
+    default: false
+  },
+  isRepeating: {
+    type: Boolean,
+    default: false
+  },
+  movieUrlPrefix: {
+    type: String,
+    default: null
+  },
+  muted: {
+    type: Boolean,
+    default: false
+  },
+  name: {
+    // Debug purpose
+    type: String,
+    default: 'main'
+  },
+  panzoom: {
+    type: Boolean,
+    default: false
+  }
+})
 
-  props: {
-    currentPreviewIndex: {
-      type: Number,
-      default: 0
-    },
-    entities: {
-      type: Array,
-      default: () => []
-    },
-    fullScreen: {
-      type: Boolean,
-      default: false
-    },
-    handleIn: {
-      type: Number,
-      default: 0
-    },
-    handleOut: {
-      type: Number,
-      default: 0
-    },
-    name: {
-      // Debug purpose
-      type: String,
-      default: 'main'
-    },
-    muted: {
-      type: Boolean,
-      default: false
-    },
-    isHd: {
-      type: Boolean,
-      default: false
-    },
-    isRepeating: {
-      type: Boolean,
-      default: false
-    },
-    panzoom: {
-      type: Boolean,
-      default: false
-    },
-    movieUrlPrefix: {
-      type: String,
-      default: null
+const emit = defineEmits([
+  'entity-change',
+  'frame-update',
+  'max-duration-update',
+  'metadata-loaded',
+  'panzoom-changed',
+  'play-next',
+  'repeat',
+  'video-loaded'
+])
+
+// State
+
+const containerRef = useTemplateRef('container')
+const player1Ref = useTemplateRef('player1')
+const player2Ref = useTemplateRef('player2')
+
+const currentIndex = ref(0)
+const currentPlayer = shallowRef(undefined)
+const isLoading = ref(true)
+const isPlaying = ref(false)
+const nextPlayer = shallowRef(undefined)
+const playingIndex = ref(0)
+
+// Non-reactive locals (instance-private state previously stashed on $options)
+let containerResizeObserver = null
+let currentTimeCalls = []
+let currentTimeRaw = 0
+let firstPanZoom = null
+let panzoomInstances = []
+let playLoop = null
+let rate = 1
+let secondPanZoom = null
+let silent = false
+let showLoadingTimer = null
+
+// Computed
+
+const currentProduction = computed(() => store.getters.currentProduction)
+const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+const frameDuration = computed(
+  () => Math.round((1 / fps.value) * 10000) / 10000
+)
+
+// Functions
+
+const setupPanZoom = () => {
+  if (props.panzoom) {
+    firstPanZoom = createPanzoom(player1Ref.value, {
+      bounds: true,
+      boundsPadding: 0.2,
+      maxZoom: 5,
+      minZoom: 0.5
+    })
+    secondPanZoom = createPanzoom(player2Ref.value, {
+      bounds: true,
+      boundsPadding: 0.2,
+      maxZoom: 3,
+      minZoom: 0.5
+    })
+    panzoomInstances = [firstPanZoom, secondPanZoom]
+    const events = ['zoom', 'pan', 'panend', 'transform']
+    events.forEach(name => {
+      firstPanZoom.on(name, () => {
+        if (currentPlayer.value !== player1Ref.value) return
+        emitPanZoomChanged(firstPanZoom)
+      })
+      secondPanZoom.on(name, () => {
+        if (currentPlayer.value !== player2Ref.value) return
+        emitPanZoomChanged(secondPanZoom)
+      })
+    })
+    pausePanZoom()
+  }
+}
+
+const emitPanZoomChanged = panzoomInstance => {
+  if (silent) return
+  const { x, y, scale } = panzoomInstance.getTransform()
+  emit('panzoom-changed', { x, y, scale })
+}
+
+const hideLoading = () => {
+  if (showLoadingTimer) {
+    clearTimeout(showLoadingTimer)
+    showLoadingTimer = null
+  }
+  isLoading.value = false
+}
+
+const showLoading = () => {
+  if (showLoadingTimer) {
+    clearTimeout(showLoadingTimer)
+  }
+  showLoadingTimer = setTimeout(() => {
+    showLoadingTimer = null
+    if (currentPlayer.value && currentPlayer.value.readyState < 3) {
+      isLoading.value = true
     }
-  },
+  }, 150) // Hack to avoid blinking effect
+}
 
-  emits: [
-    'entity-change',
-    'frame-update',
-    'max-duration-update',
-    'metadata-loaded',
-    'panzoom-changed',
-    'play-next',
-    'repeat',
-    'video-loaded'
-  ],
+// Helpers
 
-  data() {
-    return {
-      currentPlayer: undefined,
-      isLoading: true,
-      isPlaying: false,
-      nextPlayer: undefined,
-      panzoomInstances: [],
-      playingIndex: 0,
-      showLoadingTimer: null
+const emitLoadedEvent = event => {
+  emit('metadata-loaded', event)
+}
+
+const getMoviePath = entity => {
+  if (entity.preview_file_extension === 'mp4') {
+    let previewId
+    if (
+      props.currentPreviewIndex === 0 ||
+      props.currentPreviewIndex > entity.preview_file_previews.length
+    ) {
+      previewId = entity.preview_file_id
+    } else {
+      previewId = entity.preview_file_previews[props.currentPreviewIndex - 1].id
     }
-  },
-
-  // Video need to be resized after each window size change. It's due
-  // to a HTML5 limitation related to video height.
-  mounted() {
-    this.resetHeight()
-    this.player1.addEventListener('loadedmetadata', this.emitLoadedEvent)
-    window.addEventListener('resize', this.resetHeight)
-    if (typeof ResizeObserver !== 'undefined' && this.container) {
-      this.containerResizeObserver = new ResizeObserver(() => {
-        this.resetHeight()
-      })
-      this.containerResizeObserver.observe(this.container)
+    if (props.movieUrlPrefix) {
+      return `${props.movieUrlPrefix}/movies/originals/preview-files/${previewId}.mp4`
+    } else if (props.isHd) {
+      return `/api/movies/originals/preview-files/${previewId}.mp4`
+    } else {
+      return `/api/movies/low/preview-files/${previewId}.mp4`
     }
-    this.$options.currentTimeCalls = []
+  } else {
+    return ''
+  }
+}
 
-    this.player1.addEventListener('canplay', this.hideLoading)
-    this.player1.addEventListener('stalled', this.showLoading)
-    this.player1.addEventListener('waiting', this.showLoading)
-    this.player1.addEventListener('loadstart', this.showLoading)
-    this.player1.addEventListener('error', this.hideLoading)
-    this.player2.addEventListener('canplay', this.hideLoading)
-    this.player2.addEventListener('stalled', this.showLoading)
-    this.player2.addEventListener('waiting', this.showLoading)
-    this.player2.addEventListener('loadstart', this.showLoading)
-    this.player2.addEventListener('error', this.hideLoading)
+const getWidth = () =>
+  currentPlayer.value ? currentPlayer.value.offsetWidth : 0
 
-    this.setupPanZoom()
-  },
+const getHeight = () =>
+  currentPlayer.value ? currentPlayer.value.offsetHeight : 0
 
-  beforeUnmount() {
-    clearInterval(this.$options.playLoop)
-    window.removeEventListener('resize', this.resetHeight)
-    this.containerResizeObserver?.disconnect()
-    this.player1.removeEventListener('loadedmetadata', this.emitLoadedEvent)
+const getVideoWidth = () =>
+  currentPlayer.value ? currentPlayer.value.videoWidth : 0
 
-    this.player1.removeEventListener('canplay', this.hideLoading)
-    this.player1.removeEventListener('stalled', this.showLoading)
-    this.player1.removeEventListener('waiting', this.showLoading)
-    this.player1.removeEventListener('loadstart', this.showLoading)
-    this.player1.removeEventListener('error', this.hideLoading)
-    this.player2.removeEventListener('canplay', this.hideLoading)
-    this.player2.removeEventListener('stalled', this.showLoading)
-    this.player2.removeEventListener('waiting', this.showLoading)
-    this.player2.removeEventListener('loadstart', this.showLoading)
-    this.player2.removeEventListener('error', this.hideLoading)
+const getVideoHeight = () =>
+  currentPlayer.value ? currentPlayer.value.videoHeight : 0
 
-    this.panzoomInstance?.dispose()
-  },
+const getVideoRatio = () => {
+  const height = getVideoHeight()
+  return height ? getVideoWidth() / height : 0
+}
 
-  computed: {
-    ...mapGetters(['currentProduction']),
+const clear = () => {
+  if (currentPlayer.value) {
+    currentPlayer.value.src = ''
+    currentPlayer.value.removeAttribute('src')
+    currentPlayer.value.load()
+  }
+}
 
-    container() {
-      return this.$refs.container
-    },
-
-    fps() {
-      return parseFloat(this.currentProduction?.fps) || 25
-    },
-
-    frameDuration() {
-      return Math.round((1 / this.fps) * 10000) / 10000
-    },
-
-    player1() {
-      return this.$refs.player1
-    },
-
-    player2() {
-      return this.$refs.player2
+const resetHeight = () => {
+  nextTick(() => {
+    if (currentPlayer.value) currentPlayer.value.style.height = '0px'
+    if (nextPlayer.value) nextPlayer.value.style.height = '0px'
+    if (containerRef.value) {
+      const height = containerRef.value.offsetHeight
+      if (currentPlayer.value) currentPlayer.value.style.height = `${height}px`
+      if (nextPlayer.value) nextPlayer.value.style.height = `${height}px`
     }
-  },
+  })
+}
 
-  methods: {
-    setupPanZoom() {
-      if (this.panzoom) {
-        this.firstPanZoom = panzoom(this.$refs.player1, {
-          bounds: true,
-          boundsPadding: 0.2,
-          maxZoom: 5,
-          minZoom: 0.5
-        })
-        this.secondPanZoom = panzoom(this.$refs.player2, {
-          bounds: true,
-          boundsPadding: 0.2,
-          maxZoom: 3,
-          minZoom: 0.5
-        })
-        this.panzoomInstances = [this.firstPanZoom, this.secondPanZoom]
-        const events = ['zoom', 'pan', 'panend', 'transform']
-        events.forEach(name => {
-          this.firstPanZoom.on(name, () => {
-            if (this.currentPlayer !== this.player1) return
-            this.emitPanZoomChanged(this.firstPanZoom)
-          })
-          this.secondPanZoom.on(name, () => {
-            if (this.currentPlayer !== this.player2) return
-            this.emitPanZoomChanged(this.secondPanZoom)
-          })
-        })
-        this.pausePanZoom()
-      }
-    },
+// Navigation
 
-    emitPanZoomChanged(panzoomInstance) {
-      if (this.$options.silent) return
-      const { x, y, scale } = panzoomInstance.getTransform()
-      this.$emit('panzoom-changed', { x, y, scale })
-    },
+const getNextIndex = index => {
+  let i = index + 1 >= props.entities.length ? 0 : index + 1
+  // While we don't come back to initial entity and we have video previews
+  while (
+    i !== index &&
+    props.entities[i] &&
+    props.entities[i].preview_file_extension !== 'mp4'
+  ) {
+    i++
+    if (i >= props.entities.length) i = 0
+  }
+  return i
+}
 
-    hideLoading() {
-      if (this.showLoadingTimer) {
-        clearTimeout(this.showLoadingTimer)
-        this.showLoadingTimer = null
-      }
-      this.isLoading = false
-    },
+const getPreviousIndex = index => {
+  let i = index - 1 >= 0 ? index - 1 : props.entities.length - 1
+  // While we don't come back to initial entity and we have video previews
+  while (
+    i !== index &&
+    props.entities[i] &&
+    props.entities[i].preview_file_extension !== 'mp4'
+  ) {
+    i--
+    if (i < 0) i = props.entities.length
+  }
+  return i
+}
 
-    showLoading() {
-      if (this.showLoadingTimer) {
-        clearTimeout(this.showLoadingTimer)
-      }
-      this.showLoadingTimer = setTimeout(() => {
-        this.showLoadingTimer = null
-        if (this.currentPlayer && this.currentPlayer.readyState < 3) {
-          this.isLoading = true
-        }
-      }, 150) // Hack to avoid blinking effect
-    },
+const goPreviousFrame = () => {
+  if (currentPlayer.value) {
+    const isChromium = !!window.chrome
+    const change = isChromium ? frameDuration.value : 0
+    const time = currentTimeRaw
+    let newTime = floorToFrame(time - frameDuration.value, fps.value)
+    newTime = newTime + change
+    newTime = _setCurrentTime(newTime)
+    const frameNumber = newTime / frameDuration.value
+    emit('frame-update', frameNumber)
+  }
+}
 
-    // Helpers
+const goNextFrame = () => {
+  if (currentPlayer.value) {
+    const time = currentTimeRaw
+    let newTime = floorToFrame(time + frameDuration.value, fps.value)
+    const isChromium = !!window.chrome
+    const change = isChromium ? frameDuration.value : 0
+    newTime = newTime + change
+    newTime = _setCurrentTime(newTime)
+    const frameNumber = newTime / frameDuration.value
+    emit('frame-update', frameNumber)
+  }
+}
 
-    emitLoadedEvent(event) {
-      this.$emit('metadata-loaded', event)
-    },
+const loadPreviousEntity = () => {
+  loadEntity(getPreviousIndex(currentIndex.value))
+  emit('entity-change', currentIndex.value)
+}
 
-    getMoviePath(entity) {
-      if (entity.preview_file_extension === 'mp4') {
-        let previewId
-        if (
-          this.currentPreviewIndex === 0 ||
-          this.currentPreviewIndex > entity.preview_file_previews.length
-        ) {
-          previewId = entity.preview_file_id
-        } else {
-          previewId =
-            entity.preview_file_previews[this.currentPreviewIndex - 1].id
-        }
-        if (this.movieUrlPrefix) {
-          return `${this.movieUrlPrefix}/movies/originals/preview-files/${previewId}.mp4`
-        } else if (this.isHd) {
-          return `/api/movies/originals/preview-files/${previewId}.mp4`
-        } else {
-          return `/api/movies/low/preview-files/${previewId}.mp4`
-        }
-      } else {
-        return ''
-      }
-    },
+const loadNextEntity = () => {
+  const newIndex = getNextIndex(currentIndex.value)
+  loadEntity(newIndex)
+  emit('entity-change', currentIndex.value)
+}
 
-    getWidth() {
-      return this.currentPlayer ? this.currentPlayer.offsetWidth : 0
-    },
+const reloadCurrentEntity = (silentReload = false) => {
+  loadEntity(currentIndex.value, currentPlayer.value.currentTime, silentReload)
+}
 
-    getHeight() {
-      return this.currentPlayer ? this.currentPlayer.offsetHeight : 0
-    },
+const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
+  if (index < props.entities.length) {
+    const nextIndex = getNextIndex(index)
+    const entity = props.entities[index]
+    const nextEntity = props.entities[nextIndex]
 
-    getVideoRatio() {
-      const height = this.getVideoHeight()
-      return height ? this.getVideoWidth() / height : 0
-    },
+    currentIndex.value = index
+    currentPlayer.value = player1Ref.value
+    nextPlayer.value = player2Ref.value
+    currentPlayer.value.removeEventListener('loadedmetadata', updateMaxDuration)
+    currentPlayer.value.addEventListener('loadedmetadata', updateMaxDuration)
 
-    getVideoWidth() {
-      return this.currentPlayer ? this.currentPlayer.videoWidth : 0
-    },
-
-    getVideoHeight() {
-      return this.currentPlayer ? this.currentPlayer.videoHeight : 0
-    },
-
-    clear() {
-      if (this.currentPlayer) {
-        this.currentPlayer.src = ''
-        this.currentPlayer.removeAttribute('src')
-        this.currentPlayer.load()
-      }
-    },
-
-    resetHeight() {
-      this.$nextTick(() => {
-        if (this.currentPlayer) this.currentPlayer.style.height = '0px'
-        if (this.nextPlayer) this.nextPlayer.style.height = '0px'
-        if (this.container) {
-          const height = this.container.offsetHeight
-          if (this.currentPlayer)
-            this.currentPlayer.style.height = `${height}px`
-          if (this.nextPlayer) this.nextPlayer.style.height = `${height}px`
-        }
-      })
-    },
-
-    // Navigation
-
-    getNextIndex(index) {
-      let i = index + 1 >= this.entities.length ? 0 : index + 1
-      // While we don't come back to initial entity and we have video previews
-      while (
-        i !== index &&
-        this.entities[i] &&
-        this.entities[i].preview_file_extension !== 'mp4'
-      ) {
-        i++
-        if (i >= this.entities.length) i = 0
-      }
-      return i
-    },
-
-    getPreviousIndex(index) {
-      let i = index - 1 >= 0 ? index - 1 : this.entities.length - 1
-      // While we don't come back to initial entity and we have video previews
-      while (
-        i !== index &&
-        this.entities[i] &&
-        this.entities[i].preview_file_extension !== 'mp4'
-      ) {
-        i--
-        if (i < 0) i = this.entities.length
-      }
-      return i
-    },
-
-    goPreviousFrame() {
-      if (this.currentPlayer) {
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        const time = this.currentTimeRaw
-        let newTime = floorToFrame(time - this.frameDuration, this.fps)
-        newTime = newTime + change
-        newTime = this._setCurrentTime(newTime)
-        const frameNumber = newTime / this.frameDuration
-        this.$emit('frame-update', frameNumber)
-      }
-    },
-
-    goNextFrame() {
-      if (this.currentPlayer) {
-        const time = this.currentTimeRaw
-        let newTime = floorToFrame(time + this.frameDuration, this.fps)
-        const isChromium = !!window.chrome
-        const change = isChromium ? this.frameDuration : 0
-        newTime = newTime + change
-        newTime = this._setCurrentTime(newTime)
-        const frameNumber = newTime / this.frameDuration
-        this.$emit('frame-update', frameNumber)
-      }
-    },
-
-    loadPreviousEntity() {
-      this.loadEntity(this.getPreviousIndex(this.currentIndex))
-      this.$emit('entity-change', this.currentIndex)
-    },
-
-    loadNextEntity() {
-      const newIndex = this.getNextIndex(this.currentIndex)
-      this.loadEntity(newIndex)
-      this.$emit('entity-change', this.currentIndex)
-    },
-
-    reloadCurrentEntity(silent = false) {
-      this.loadEntity(this.currentIndex, this.currentPlayer.currentTime, silent)
-    },
-
-    loadEntity(index = 0, currentTime = 0, silent = false) {
-      if (index < this.entities.length) {
-        const nextIndex = this.getNextIndex(index)
-        const entity = this.entities[index]
-        const nextEntity = this.entities[nextIndex]
-
-        this.currentIndex = index
-        this.currentPlayer = this.player1
-        this.nextPlayer = this.player2
-        this.currentPlayer.removeEventListener(
-          'loadedmetadata',
-          this.updateMaxDuration
-        )
-        this.currentPlayer.addEventListener(
-          'loadedmetadata',
-          this.updateMaxDuration
-        )
-        const rate = this.$options.rate || 1
-
-        if (entity.preview_file_extension === 'mp4' && this.currentPlayer) {
-          this.currentPlayer.src = this.getMoviePath(entity)
-        } else if (this.currentPlayer) {
-          this.currentPlayer.src = ''
-        }
-        if (nextEntity?.preview_file_extension === 'mp4' && this.nextPlayer) {
-          this.nextPlayer.src = this.getMoviePath(nextEntity)
-        } else if (this.nextPlayer) {
-          this.nextPlayer.src = ''
-        }
-        this.currentPlayer.style.display = 'block'
-        this.nextPlayer.style.display = 'none'
-        this.resetHeight()
-
-        this.setSpeed(rate)
-        this._setCurrentTime(currentTime)
-        if (!silent) {
-          this.$emit('entity-change', this.currentIndex)
-        }
-      }
-    },
-
-    // Playing
-
-    pause() {
-      if (this.currentPlayer) {
-        this.currentPlayer.pause()
-        this.currentPlayer.curentTime = roundToFrame(
-          this.currentPlayer.currentTime,
-          this.fps
-        )
-        this.currentTimeRaw = this.currentPlayer.currentTime
-        const frameNumber = Math.round(
-          this.currentPlayer.currentTime / this.frameDuration
-        )
-        this.$emit('frame-update', frameNumber)
-        clearInterval(this.$options.playLoop)
-      }
-      this.isPlaying = false
-    },
-
-    play() {
-      let entity = this.entities[this.currentIndex]
-      if (entity) {
-        if (!entity.preview_file_id) this.loadNextEntity()
-        entity = this.entities[this.currentIndex]
-        if (entity.preview_file_id) {
-          if (this.currentPlayer) {
-            if (this.name === 'main') {
-              this.runEmitTimeUpdateLoop()
-            }
-            this.currentPlayer.play()
-          }
-          this.isPlaying = true
-        }
-      }
-    },
-
-    runEmitTimeUpdateLoop() {
-      clearInterval(this.$options.playLoop)
-      this.$options.playLoop = setInterval(() => {
-        this.updateTime(this.currentPlayer.currentTime)
-      }, 1000 / this.fps)
-    },
-
-    playNext(handleIn) {
-      if (!this.isPlaying) return
-      handleIn = handleIn || this.handleIn
-      if (this.isRepeating) {
-        this.currentPlayer.currentTime = this.handleIn
-          ? this.handleIn * this.frameDuration
-          : this.frameDuration
-        this.currentPlayer.play()
-        this.$emit('repeat')
-      } else {
-        const nextIndex = this.getNextIndex(this.currentIndex)
-        this.currentIndex = nextIndex
-        this.$emit('entity-change', this.currentIndex)
-
-        if (this.currentPlayer) this.currentPlayer.style.display = 'none'
-        if (this.nextPlayer) {
-          this.nextPlayer.currentTime = handleIn
-            ? handleIn * this.frameDuration
-            : 0
-          this.nextPlayer.style.display = 'block'
-          this.nextPlayer.play()
-        }
-
-        this.switchPlayers()
-        this.updateMaxDuration()
-      }
-    },
-
-    getCurrentTime() {
-      if (this.currentPlayer) {
-        return this.currentPlayer.currentTime
-      } else {
-        return 0
-      }
-    },
-
-    getCurrentFrame() {
-      let time = this.getCurrentTime()
-      time = floorToFrame(time, this.fps)
-      const frameNumber = time / this.frameDuration
-      return frameNumber
-    },
-
-    getLastPushedCurrentTime() {
-      const length = this.$options.currentTimeCalls.length
-      if (length > 0) {
-        return this.$options.currentTimeCalls[length - 1]
-      } else {
-        return this.getCurrentTime()
-      }
-    },
-
-    getCurrentTimeRaw() {
-      return this.currentPlayer ? this.currentPlayer.currentTime : 0
-    },
-
-    setCurrentTimeRaw(currentTime) {
-      if (this.currentPlayer) {
-        this.currentPlayer.currentTime = currentTime
-      }
-    },
-
-    setCurrentFrame(frameNumber) {
-      this._setCurrentTime(frameNumber * this.frameDuration)
-    },
-
-    _setCurrentTime(newTime) {
-      if (!this.$options.currentTimeCalls) {
-        this.$options.currentTimeCalls = []
-      }
-      if (!this.currentPlayer) {
-        newTime = 0
-      } else if (newTime < 0) {
-        newTime = 0
-      } else {
-        const duration = floorToFrame(this.currentPlayer.duration, this.fps)
-        if (newTime > duration) {
-          newTime = duration
-        }
-      }
-      this.runSetCurrentTime(newTime)
-      return newTime
-    },
-
-    runSetCurrentTime(currentTime) {
-      if (
-        this.currentPlayer &&
-        this.currentPlayer.currentTime !== currentTime
-      ) {
-        // tweaks needed because the html video player is messy with frames
-        this.currentPlayer.currentTime = currentTime + 0.001
-        this.onTimeUpdate()
-      }
-    },
-
-    onTimeUpdate() {
-      const isChromium = !!window.chrome
-      const change = isChromium ? this.frameDuration : 0
-      if (this.currentPlayer) {
-        this.currentTimeRaw = this.currentPlayer.currentTime - change
-      } else {
-        this.currentTimeRaw = 0 + change
-      }
-      this.$emit(
-        'frame-update',
-        Math.round(this.currentTimeRaw / this.frameDuration)
-      )
-    },
-
-    switchPlayers() {
-      const nextIndex = this.getNextIndex(this.currentIndex)
-      const nextEntity = this.entities[nextIndex]
-      this.tmpPlayer = this.currentPlayer
-      this.currentPlayer = this.nextPlayer
-      this.nextPlayer = this.tmpPlayer
-      if (nextEntity) {
-        this.nextPlayer.src = this.getMoviePath(nextEntity)
-      }
-      this.resetHeight()
-      const rate = this.$options.rate || 1
-      this.setSpeed(rate)
-    },
-
-    updateTime(time) {
-      const frameNumber = Math.round(time / this.frameDuration)
-      if (this.name === 'main') {
-        this.$emit('frame-update', frameNumber)
-      }
-    },
-
-    updateMaxDuration() {
-      if (this.currentPlayer) {
-        this.$emit('max-duration-update', this.currentPlayer.duration)
-        this.$emit('video-loaded')
-      }
-    },
-
-    getSpeed(rate) {
-      return this.currentPlayer ? this.currentPlayer.playbackRate : 0
-    },
-
-    setSpeed(rate) {
-      this.$options.rate = rate
-      if (this.currentPlayer) this.currentPlayer.playbackRate = rate
-      if (this.nextPlayer) this.nextPlayer.playbackRate = rate
-    },
-
-    getNaturalDimensions() {
-      return {
-        height: this.currentPlayer.videoHeight,
-        width: this.currentPlayer.videoWidth
-      }
-    },
-
-    pausePanZoom() {
-      this.panzoomInstances.forEach(panzoomInstance => {
-        panzoomInstance.pause()
-      })
-    },
-
-    resumePanZoom() {
-      this.panzoomInstances.forEach(panzoomInstance => {
-        panzoomInstance.resume()
-      })
-    },
-
-    resetPanZoom() {
-      this.panzoomInstances.forEach(panzoomInstance => {
-        panzoomInstance.moveTo(0, 0)
-        panzoomInstance.zoomAbs(0, 0, 1)
-      })
-    },
-
-    setPanZoom(x, y, scale) {
-      this.$options.silent = true
-      this.panzoomInstances.forEach(panzoomInstance => {
-        const actualScale = panzoomInstance.getTransform().scale
-        const zoomFactor = scale / actualScale
-        panzoomInstance.moveTo(x, y)
-        panzoomInstance.setTransformOrigin({ x, y })
-        panzoomInstance.zoomTo(x, y, zoomFactor)
-        panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
-      })
-      this.$nextTick(() => {
-        this.$options.silent = false
-      })
-    },
-
-    setVolume(volume) {
-      if (!this.currentPlayer) return
-      this.currentPlayer.volume = volume / 100
-      this.nextPlayer.volume = volume / 100
+    if (entity.preview_file_extension === 'mp4' && currentPlayer.value) {
+      currentPlayer.value.src = getMoviePath(entity)
+    } else if (currentPlayer.value) {
+      currentPlayer.value.src = ''
     }
-  },
+    if (nextEntity?.preview_file_extension === 'mp4' && nextPlayer.value) {
+      nextPlayer.value.src = getMoviePath(nextEntity)
+    } else if (nextPlayer.value) {
+      nextPlayer.value.src = ''
+    }
+    currentPlayer.value.style.display = 'block'
+    nextPlayer.value.style.display = 'none'
+    resetHeight()
 
-  watch: {
-    currentPreviewIndex() {
-      if (!this.isPlaying) {
-        const silent = true
-        this.setCurrentTimeRaw(0)
-        this.reloadCurrentEntity(silent)
-      }
-    },
-
-    entities: {
-      handler() {
-        if (this.entities.length > 0) {
-          this.loadEntity(0)
-          this.pause()
-          this._setCurrentTime(0)
-
-          const entity = this.entities[this.currentIndex]
-          if (entity && !entity.preview_file_id) this.loadNextEntity()
-        }
-        setTimeout(() => {
-          this.resetHeight()
-        }, 300)
-      }
-    },
-
-    isHd() {
-      if (this.currentPlayer) {
-        this.reloadCurrentEntity()
-        if (this.isPlaying) this.play()
-      }
-    },
-
-    zoomEnabled() {
-      if (this.panzoom) {
-        this.setPanZoom()
-      } else {
-        this.panzoomInstances.forEach(panzoomInstance => {
-          panzoomInstance.dispose()
-        })
-      }
+    setSpeed(rate)
+    _setCurrentTime(currentTime)
+    if (!silentLoad) {
+      emit('entity-change', currentIndex.value)
     }
   }
 }
+
+// Playing
+
+const pause = () => {
+  if (currentPlayer.value) {
+    currentPlayer.value.pause()
+    currentPlayer.value.curentTime = roundToFrame(
+      currentPlayer.value.currentTime,
+      fps.value
+    )
+    currentTimeRaw = currentPlayer.value.currentTime
+    const frameNumber = Math.round(
+      currentPlayer.value.currentTime / frameDuration.value
+    )
+    emit('frame-update', frameNumber)
+    clearInterval(playLoop)
+  }
+  isPlaying.value = false
+}
+
+const play = () => {
+  let entity = props.entities[currentIndex.value]
+  if (entity) {
+    if (!entity.preview_file_id) loadNextEntity()
+    entity = props.entities[currentIndex.value]
+    if (entity.preview_file_id) {
+      if (currentPlayer.value) {
+        if (props.name === 'main') {
+          runEmitTimeUpdateLoop()
+        }
+        currentPlayer.value.play()
+      }
+      isPlaying.value = true
+    }
+  }
+}
+
+const runEmitTimeUpdateLoop = () => {
+  clearInterval(playLoop)
+  playLoop = setInterval(() => {
+    updateTime(currentPlayer.value.currentTime)
+  }, 1000 / fps.value)
+}
+
+const playNext = handleIn => {
+  if (!isPlaying.value) return
+  handleIn = handleIn || props.handleIn
+  if (props.isRepeating) {
+    currentPlayer.value.currentTime = props.handleIn
+      ? props.handleIn * frameDuration.value
+      : frameDuration.value
+    currentPlayer.value.play()
+    emit('repeat')
+  } else {
+    const nextIndex = getNextIndex(currentIndex.value)
+    currentIndex.value = nextIndex
+    emit('entity-change', currentIndex.value)
+
+    if (currentPlayer.value) currentPlayer.value.style.display = 'none'
+    if (nextPlayer.value) {
+      nextPlayer.value.currentTime = handleIn
+        ? handleIn * frameDuration.value
+        : 0
+      nextPlayer.value.style.display = 'block'
+      nextPlayer.value.play()
+    }
+
+    switchPlayers()
+    updateMaxDuration()
+  }
+}
+
+const getCurrentTime = () =>
+  currentPlayer.value ? currentPlayer.value.currentTime : 0
+
+const getCurrentFrame = () => {
+  let time = getCurrentTime()
+  time = floorToFrame(time, fps.value)
+  return time / frameDuration.value
+}
+
+const getLastPushedCurrentTime = () => {
+  const length = currentTimeCalls.length
+  if (length > 0) {
+    return currentTimeCalls[length - 1]
+  } else {
+    return getCurrentTime()
+  }
+}
+
+const getCurrentTimeRaw = () =>
+  currentPlayer.value ? currentPlayer.value.currentTime : 0
+
+const setCurrentTimeRaw = currentTime => {
+  if (currentPlayer.value) {
+    currentPlayer.value.currentTime = currentTime
+  }
+}
+
+const setCurrentFrame = frameNumber => {
+  _setCurrentTime(frameNumber * frameDuration.value)
+}
+
+const _setCurrentTime = newTime => {
+  if (!currentTimeCalls) {
+    currentTimeCalls = []
+  }
+  if (!currentPlayer.value) {
+    newTime = 0
+  } else if (newTime < 0) {
+    newTime = 0
+  } else {
+    const duration = floorToFrame(currentPlayer.value.duration, fps.value)
+    if (newTime > duration) {
+      newTime = duration
+    }
+  }
+  runSetCurrentTime(newTime)
+  return newTime
+}
+
+const runSetCurrentTime = currentTime => {
+  if (currentPlayer.value && currentPlayer.value.currentTime !== currentTime) {
+    // tweaks needed because the html video player is messy with frames
+    currentPlayer.value.currentTime = currentTime + 0.001
+    onTimeUpdate()
+  }
+}
+
+const onTimeUpdate = () => {
+  const isChromium = !!window.chrome
+  const change = isChromium ? frameDuration.value : 0
+  if (currentPlayer.value) {
+    currentTimeRaw = currentPlayer.value.currentTime - change
+  } else {
+    currentTimeRaw = 0 + change
+  }
+  emit('frame-update', Math.round(currentTimeRaw / frameDuration.value))
+}
+
+const switchPlayers = () => {
+  const nextIndex = getNextIndex(currentIndex.value)
+  const nextEntity = props.entities[nextIndex]
+  const tmpPlayer = currentPlayer.value
+  currentPlayer.value = nextPlayer.value
+  nextPlayer.value = tmpPlayer
+  if (nextEntity) {
+    nextPlayer.value.src = getMoviePath(nextEntity)
+  }
+  resetHeight()
+  setSpeed(rate)
+}
+
+const updateTime = time => {
+  const frameNumber = Math.round(time / frameDuration.value)
+  if (props.name === 'main') {
+    emit('frame-update', frameNumber)
+  }
+}
+
+const updateMaxDuration = () => {
+  if (currentPlayer.value) {
+    emit('max-duration-update', currentPlayer.value.duration)
+    emit('video-loaded')
+  }
+}
+
+const getSpeed = () =>
+  currentPlayer.value ? currentPlayer.value.playbackRate : 0
+
+const setSpeed = newRate => {
+  rate = newRate
+  if (currentPlayer.value) currentPlayer.value.playbackRate = newRate
+  if (nextPlayer.value) nextPlayer.value.playbackRate = newRate
+}
+
+const getNaturalDimensions = () => ({
+  height: currentPlayer.value.videoHeight,
+  width: currentPlayer.value.videoWidth
+})
+
+const pausePanZoom = () => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panzoomInstance.pause()
+  })
+}
+
+const resumePanZoom = () => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panzoomInstance.resume()
+  })
+}
+
+const resetPanZoom = () => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panzoomInstance.moveTo(0, 0)
+    panzoomInstance.zoomAbs(0, 0, 1)
+  })
+}
+
+const setPanZoom = (x, y, scale) => {
+  silent = true
+  panzoomInstances.forEach(panzoomInstance => {
+    const actualScale = panzoomInstance.getTransform().scale
+    const zoomFactor = scale / actualScale
+    panzoomInstance.moveTo(x, y)
+    panzoomInstance.setTransformOrigin({ x, y })
+    panzoomInstance.zoomTo(x, y, zoomFactor)
+    panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
+  })
+  nextTick(() => {
+    silent = false
+  })
+}
+
+const setVolume = volume => {
+  if (!currentPlayer.value) return
+  currentPlayer.value.volume = volume / 100
+  nextPlayer.value.volume = volume / 100
+}
+
+// Watchers
+
+watch(
+  () => props.currentPreviewIndex,
+  () => {
+    if (!isPlaying.value) {
+      setCurrentTimeRaw(0)
+      reloadCurrentEntity(true)
+    }
+  }
+)
+
+watch(
+  () => props.entities,
+  () => {
+    if (props.entities.length > 0) {
+      loadEntity(0)
+      pause()
+      _setCurrentTime(0)
+
+      const entity = props.entities[currentIndex.value]
+      if (entity && !entity.preview_file_id) loadNextEntity()
+    }
+    setTimeout(() => {
+      resetHeight()
+    }, 300)
+  }
+)
+
+watch(
+  () => props.isHd,
+  () => {
+    if (currentPlayer.value) {
+      reloadCurrentEntity()
+      if (isPlaying.value) play()
+    }
+  }
+)
+
+// Lifecycle
+
+// Video need to be resized after each window size change. It's due
+// to a HTML5 limitation related to video height.
+onMounted(() => {
+  resetHeight()
+  player1Ref.value.addEventListener('loadedmetadata', emitLoadedEvent)
+  window.addEventListener('resize', resetHeight)
+  if (typeof ResizeObserver !== 'undefined' && containerRef.value) {
+    containerResizeObserver = new ResizeObserver(() => {
+      resetHeight()
+    })
+    containerResizeObserver.observe(containerRef.value)
+  }
+  currentTimeCalls = []
+
+  player1Ref.value.addEventListener('canplay', hideLoading)
+  player1Ref.value.addEventListener('stalled', showLoading)
+  player1Ref.value.addEventListener('waiting', showLoading)
+  player1Ref.value.addEventListener('loadstart', showLoading)
+  player1Ref.value.addEventListener('error', hideLoading)
+  player2Ref.value.addEventListener('canplay', hideLoading)
+  player2Ref.value.addEventListener('stalled', showLoading)
+  player2Ref.value.addEventListener('waiting', showLoading)
+  player2Ref.value.addEventListener('loadstart', showLoading)
+  player2Ref.value.addEventListener('error', hideLoading)
+
+  setupPanZoom()
+})
+
+onBeforeUnmount(() => {
+  clearInterval(playLoop)
+  window.removeEventListener('resize', resetHeight)
+  containerResizeObserver?.disconnect()
+  player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
+
+  player1Ref.value?.removeEventListener('canplay', hideLoading)
+  player1Ref.value?.removeEventListener('stalled', showLoading)
+  player1Ref.value?.removeEventListener('waiting', showLoading)
+  player1Ref.value?.removeEventListener('loadstart', showLoading)
+  player1Ref.value?.removeEventListener('error', hideLoading)
+  player2Ref.value?.removeEventListener('canplay', hideLoading)
+  player2Ref.value?.removeEventListener('stalled', showLoading)
+  player2Ref.value?.removeEventListener('waiting', showLoading)
+  player2Ref.value?.removeEventListener('loadstart', showLoading)
+  player2Ref.value?.removeEventListener('error', hideLoading)
+})
+
+// Expose public surface for parent components ($refs['raw-player'])
+
+defineExpose({
+  // State
+  currentIndex,
+  currentPlayer,
+  isPlaying,
+  playingIndex,
+  // Navigation
+  loadEntity,
+  loadNextEntity,
+  loadPreviousEntity,
+  reloadCurrentEntity,
+  // Playback
+  pause,
+  play,
+  playNext,
+  // Time / frames
+  getCurrentFrame,
+  getCurrentTime,
+  getCurrentTimeRaw,
+  getLastPushedCurrentTime,
+  goNextFrame,
+  goPreviousFrame,
+  setCurrentFrame,
+  setCurrentTimeRaw,
+  // Speed / volume
+  getSpeed,
+  setSpeed,
+  setVolume,
+  // Dimensions
+  getHeight,
+  getNaturalDimensions,
+  getVideoHeight,
+  getVideoRatio,
+  getVideoWidth,
+  getWidth,
+  // Layout
+  clear,
+  resetHeight,
+  // Pan-zoom
+  pausePanZoom,
+  resetPanZoom,
+  resumePanZoom,
+  setPanZoom
+})
 </script>
 
 <style lang="scss" scoped>
