@@ -31,6 +31,8 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import createPanzoom from 'panzoom'
 
+import { isPicturePreview } from '@/lib/preview'
+
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
@@ -105,9 +107,7 @@ const extension = computed(() => (props.preview ? props.preview.extension : ''))
 
 const isGif = computed(() => extension.value === 'gif')
 
-const isPicture = computed(() =>
-  ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
-)
+const isPicture = computed(() => isPicturePreview(extension.value))
 
 const visibleImage = computed(() => {
   if (isGif.value) return pictureGif.value

@@ -220,6 +220,7 @@ import { useStore } from 'vuex'
 
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
+import { isMoviePreview, isPicturePreview, isSoundPreview } from '@/lib/preview'
 import { floorToFrame, formatTime } from '@/lib/video'
 
 import PictureViewer from '@/components/previews/PictureViewer.vue'
@@ -352,13 +353,9 @@ const currentAnnotations = computed(
 )
 
 const extension = computed(() => currentPreview.value?.extension || '')
-const isMovie = computed(() => extension.value === 'mp4')
-const isPicture = computed(() =>
-  ['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension.value)
-)
-const isSound = computed(() =>
-  ['mp3', 'wav', 'ogg', 'flac', 'aiff'].includes(extension.value)
-)
+const isMovie = computed(() => isMoviePreview(extension.value))
+const isPicture = computed(() => isPicturePreview(extension.value))
+const isSound = computed(() => isSoundPreview(extension.value))
 const isOtherFile = computed(
   () =>
     !!currentPreview.value &&

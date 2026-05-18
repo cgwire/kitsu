@@ -381,6 +381,12 @@ import { usePreviewShortcuts } from '@/composables/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 import {
+  isModelPreview,
+  isMoviePreview,
+  isPicturePreview,
+  isSoundPreview
+} from '@/lib/preview'
+import {
   formatFrame,
   formatTime,
   roundToFrame,
@@ -718,12 +724,10 @@ const isConcept = computed(() => props.entityType === 'Concept')
 const isReady = computed(
   () => !currentPreview.value?.status || currentPreview.value.status === 'ready'
 )
-const isPicture = computed(() =>
-  ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
-)
-const isMovie = computed(() => extension.value === 'mp4')
-const is3DModel = computed(() => ['glb', 'gltf'].includes(extension.value))
-const isSound = computed(() => ['mp3', 'wav'].includes(extension.value))
+const isPicture = computed(() => isPicturePreview(extension.value))
+const isMovie = computed(() => isMoviePreview(extension.value))
+const is3DModel = computed(() => isModelPreview(extension.value))
+const isSound = computed(() => isSoundPreview(extension.value))
 
 const isFullScreenEnabled = computed(
   () =>

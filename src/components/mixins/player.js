@@ -1,5 +1,12 @@
 import { mapActions, mapGetters } from 'vuex'
 import {
+  isModelPreview,
+  isMoviePreview,
+  isPdfPreview,
+  isPicturePreview,
+  isSoundPreview
+} from '@/lib/preview'
+import {
   formatTime,
   formatFrame,
   ceilToFrame,
@@ -282,23 +289,23 @@ export const playerMixin = {
     ...mapActions(['refreshPreview']),
 
     isMovie(extension) {
-      return extension === 'mp4'
+      return isMoviePreview(extension)
     },
 
     isPicture(extension) {
-      return ['gif', 'png', 'jpg', 'jpeg'].includes(extension)
+      return isPicturePreview(extension)
     },
 
     isModel(extension) {
-      return ['glb', 'gltf'].includes(extension)
+      return isModelPreview(extension)
     },
 
     isSound(extension) {
-      return ['mp3', 'wav'].includes(extension)
+      return isSoundPreview(extension)
     },
 
     isPdf(extension) {
-      return extension === 'pdf'
+      return isPdfPreview(extension)
     },
 
     exists(variable) {

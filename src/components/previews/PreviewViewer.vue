@@ -123,6 +123,14 @@
 import { ref, computed, watch } from 'vue'
 import { DownloadIcon } from 'lucide-vue-next'
 
+import {
+  isModelPreview,
+  isMoviePreview,
+  isPdfPreview,
+  isPicturePreview,
+  isSoundPreview
+} from '@/lib/preview'
+
 /* eslint-disable no-unused-vars */
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import DiffViewer from '@/components/previews/DiffViewer.vue'
@@ -248,20 +256,15 @@ const status = computed(() =>
 const isBroken = computed(() => status.value === 'broken')
 const isProcessing = computed(() => status.value === 'processing')
 const isReady = computed(() => status.value === 'ready')
-const isMovie = computed(() => isReady.value && extension.value === 'mp4')
-const isPdf = computed(() => isReady.value && extension.value === 'pdf')
-
+const isMovie = computed(() => isReady.value && isMoviePreview(extension.value))
+const isPdf = computed(() => isReady.value && isPdfPreview(extension.value))
 const isPicture = computed(
-  () => isReady.value && ['gif', 'png', 'jpg', 'jpeg'].includes(extension.value)
+  () => isReady.value && isPicturePreview(extension.value)
 )
-
 const is3DModel = computed(
-  () => isReady.value && ['glb', 'gltf'].includes(extension.value)
+  () => isReady.value && isModelPreview(extension.value)
 )
-
-const isSound = computed(
-  () => isReady.value && ['wav', 'mp3'].includes(extension.value)
-)
+const isSound = computed(() => isReady.value && isSoundPreview(extension.value))
 
 const isFile = computed(
   () =>
