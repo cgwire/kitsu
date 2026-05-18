@@ -564,11 +564,12 @@ const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
 // The annotation overlay always captures pointer events so the user
-// can select / move / draw / type annotations. Holding Shift turns
+// can select / move / draw / type annotations. Holding Alt turns
 // it transparent so the underlying media receives the drag and pans.
+// Shift is reserved for fabric.js's straight-line drawing constraint.
 // Wheel keeps zooming regardless (the overlay forwards wheel to the
 // media via the wheelTarget prop).
-const isOverlayInteractive = computed(() => !isShiftHeld.value)
+const isOverlayInteractive = computed(() => !isAltHeld.value)
 
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
@@ -1336,7 +1337,7 @@ const getLinkedEntities = concept => {
 
 // Events
 
-const { isShiftHeld } = usePreviewShortcuts({
+const { isAltHeld } = usePreviewShortcuts({
   // Escape is not wired — the browser exits fullscreen on it and the
   // useFullScreen listener picks up the resulting fullscreenchange.
   onDelete: () => deleteSelection(),

@@ -2,10 +2,11 @@
  * Keyboard shortcuts for the preview player.
  *
  * Registers global keydown / keyup listeners and dispatches to the
- * handlers passed in. Also tracks whether Shift is currently held so
- * consumers can use it as a temporary pan-mode modifier (Shift+drag
+ * handlers passed in. Also tracks whether Alt is currently held so
+ * consumers can use it as a temporary pan-mode modifier (Alt+drag
  * lets pointer events reach the underlying media instead of the
- * annotation overlay).
+ * annotation overlay). Shift is reserved for fabric.js's
+ * straight-line drawing constraint, so it can't be used here.
  *
  * Shortcuts are skipped while the user is typing in an <input> or
  * <textarea>.
@@ -37,12 +38,15 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
  * @param {Function} [handlers.onToggleOverlay]
  */
 export const usePreviewShortcuts = handlers => {
-  const isShiftHeld = ref(false)
+  const isAltHeld = ref(false)
 
   const onKeyDown = event => {
     if (isTypingTarget(event.target)) return
-    if (event.key === 'Shift') {
-      isShiftHeld.value = true
+    if (event.key === 'Alt') {
+      isAltHeld.value = true
+      // Suppress the browser menu-bar focus that some browsers
+      // trigger on Alt; the gesture is "Alt + drag to pan".
+      pauseEvent(event)
       return
     }
     const mod = event.ctrlKey || event.metaKey
@@ -101,7 +105,10 @@ export const usePreviewShortcuts = handlers => {
   }
 
   const onKeyUp = event => {
-    if (event.key === 'Shift') isShiftHeld.value = false
+    if (event.key === 'Alt') {
+      isAltHeld.value = false
+      pauseEvent(event)
+    }
   }
 
   onMounted(() => {
@@ -114,5 +121,5 @@ export const usePreviewShortcuts = handlers => {
     window.removeEventListener('keyup', onKeyUp)
   })
 
-  return { isShiftHeld }
+  return { isAltHeld }
 }
