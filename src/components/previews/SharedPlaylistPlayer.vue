@@ -16,7 +16,7 @@
     <div class="player-row">
       <div class="player-area">
         <div class="video-container" ref="videoContainer" @contextmenu.prevent>
-          <raw-video-player
+          <multi-video-viewer
             ref="rawPlayer"
             class="raw-player"
             :entities="entityList"
@@ -225,7 +225,7 @@ import { floorToFrame, formatTime } from '@/lib/video'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
-import RawVideoPlayer from '@/components/pages/playlists/RawVideoPlayer.vue'
+import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
 import SharedAnnotationOverlay from '@/components/previews/SharedAnnotationOverlay.vue'
 import SharedCommentsPanel from '@/components/previews/SharedCommentsPanel.vue'
 import SharedPlaylistButtonBar from '@/components/previews/SharedPlaylistButtonBar.vue'

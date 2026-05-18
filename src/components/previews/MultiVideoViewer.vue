@@ -39,7 +39,7 @@ import { floorToFrame, roundToFrame } from '@/lib/video'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 export default {
-  name: 'raw-video-player',
+  name: 'multi-video-viewer',
 
   components: {
     Spinner
