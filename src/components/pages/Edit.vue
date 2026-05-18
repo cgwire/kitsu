@@ -520,12 +520,6 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark .page {
-  background: $dark-grey-light;
-  height: 100%;
-  padding-bottom: 1em;
-}
-
 .dark .wrapper {
   background: $dark-grey-2;
 }
@@ -550,25 +544,13 @@ useHead({
   display: flex;
   flex: 1;
   flex-direction: column;
-  margin: 0 1em 0 1em;
+  margin: 0 1em;
   overflow: hidden;
   min-height: 300px;
 }
 
 .edit-metadata {
   width: 100%;
-}
-
-h2.subtitle {
-  border-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0.5em;
-  font-size: 1.5em;
-}
-
-.page {
-  background: #f9f9f9;
-  padding: 0;
 }
 
 .page-header {
@@ -586,22 +568,9 @@ h2.subtitle {
   }
 }
 
-.edit-thumbnail {
-  max-width: 100px;
-}
-
 .field-label {
   font-weight: bold;
   width: 140px;
-}
-
-.data-list {
-  max-width: 100%;
-}
-
-.page-header .thumbnail-picture {
-  margin: 0 1em 0 0;
-  max-width: 80px;
 }
 
 .back-link {
@@ -621,10 +590,6 @@ h2.subtitle {
   height: 300px;
   padding: 10px;
 
-  .schedule-title {
-    margin-bottom: 5px;
-  }
-
   .wrapper {
     height: 230px;
     border-radius: 10px;
@@ -636,11 +601,11 @@ h2.subtitle {
   padding-bottom: 1em;
 }
 
-@media screen and (max-width: 768px) {
-  .task-column {
-    margin-bottom: 1em;
-  }
+.player {
+  margin: 1em;
+}
 
+@media screen and (max-width: 768px) {
   .column:first-child {
     margin-right: 0;
   }
@@ -649,249 +614,5 @@ h2.subtitle {
     font-size: 1.3em;
     line-height: 1.5em;
   }
-}
-
-/* Player styles */
-
-.full-height {
-  height: 100%;
-}
-
-.player {
-  margin: 1em;
-
-  .player-button {
-    background: $white-grey;
-    margin: 0;
-    border: 0;
-    border-radius: 0;
-
-    &.active {
-      color: $green;
-    }
-
-    &.topbar-button {
-      border-radius: 10px;
-      margin-right: 0.5em;
-    }
-  }
-}
-
-.dark .player {
-  background: $dark-grey;
-
-  .player-button {
-    background: $dark-grey-light;
-    color: $white-grey;
-
-    &:hover {
-      background: $dark-grey-lighter;
-    }
-
-    &.active {
-      color: $green;
-    }
-
-    &.topbar-button {
-      border: 1px solid $dark-grey-strong;
-    }
-  }
-}
-
-.player-footer {
-  background: $white-grey;
-}
-
-.dark .player-footer {
-  background: $dark-grey-light;
-  color: $white-grey;
-}
-
-.loading-background {
-  width: 100%;
-  height: 100%;
-  background: black;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.spinner {
-  margin: auto;
-}
-
-.task-info-column {
-  min-width: 450px;
-  max-width: 450px;
-  overflow-y: auto;
-}
-
-.smaller {
-  height: 16px;
-}
-
-.right {
-  margin-left: auto;
-}
-
-.video-player {
-  display: flex;
-  flex-direction: column;
-  align-content: flex-end;
-  height: 100%;
-}
-
-.video-wrapper {
-  flex: 1;
-  display: flex;
-  background: black;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  margin: auto;
-  width: 100%;
-}
-
-.annotation-movie {
-  margin: auto;
-  width: 100%;
-}
-
-.dark .time-indicator {
-  color: $light-grey;
-  padding-left: 0.8em;
-  margin-right: 0;
-}
-
-.video-container {
-  position: relative;
-  margin: auto;
-  min-height: 480px;
-}
-
-.canvas-wrapper {
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.buttons {
-  height: 32px;
-}
-
-progress::-moz-progress-bar {
-  background-color: #43b581;
-}
-
-progress::-webkit-progress-value {
-  background-color: #43b581;
-}
-
-progress {
-  width: 100%;
-  border-radius: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: $grey;
-  height: 8px;
-  display: block;
-}
-
-.progress span#progress-bar {
-  width: 100%;
-  border-radius: 0;
-  margin: 0;
-  padding: 0;
-  background-color: #43b581;
-}
-
-.mr1 {
-  margin-right: 1em;
-}
-
-.mr0 {
-  margin-right: 0;
-}
-
-.video-progress {
-  transition: opacity 0.5s ease;
-}
-
-.spinner {
-  margin-top: 80px;
-  margin-left: 1em;
-}
-
-.annotation-tools {
-  display: flex;
-  align-items: stretch;
-  height: 100%;
-}
-
-.slide-enter-active {
-  transition: all 0.3s ease;
-}
-.slide-leave-active {
-  transition: all 0.3s ease;
-}
-.slide-enter,
-.slide-leave-to {
-  transform: translateX(100%);
-}
-
-.for-client {
-  background: $dark-purple-strong;
-  border: 2px solid $dark-purple-strong;
-  color: $white;
-  padding: 0.3em;
-  margin-left: 1em;
-  margin-right: 0;
-  border-radius: 5px;
-}
-
-#edit-annotation-canvas {
-  margin: auto;
-}
-
-.picture-preview-wrapper {
-  display: flex;
-  height: inherit;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-}
-
-.picture-preview {
-  max-height: 100%;
-  max-width: 100%;
-  color: var(--text);
-}
-
-.raw-player {
-  margin: auto;
-}
-
-.disabled {
-  color: $grey-strong;
-}
-
-.loading-wrapper {
-  width: 100%;
-}
-
-.disabled {
-  color: $grey;
-}
-
-.dark .frame-per-image-input {
-  padding: 2px;
-  margin-left: 3px;
-  background-color: $dark-grey-2;
-  border: 1px solid $dark-grey-stronger;
-  color: white;
-  width: 3rem;
 }
 </style>
