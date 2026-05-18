@@ -124,11 +124,9 @@ const currentPlayer = shallowRef(undefined)
 const isLoading = ref(true)
 const isPlaying = ref(false)
 const nextPlayer = shallowRef(undefined)
-const playingIndex = ref(0)
 
 // Non-reactive locals (instance-private state previously stashed on $options)
 let containerResizeObserver = null
-let currentTimeCalls = []
 let currentTimeRaw = 0
 let firstPanZoom = null
 let panzoomInstances = []
@@ -233,21 +231,10 @@ const getMoviePath = entity => {
   }
 }
 
-const getWidth = () =>
-  currentPlayer.value ? currentPlayer.value.offsetWidth : 0
-
-const getHeight = () =>
-  currentPlayer.value ? currentPlayer.value.offsetHeight : 0
-
-const getVideoWidth = () =>
-  currentPlayer.value ? currentPlayer.value.videoWidth : 0
-
-const getVideoHeight = () =>
-  currentPlayer.value ? currentPlayer.value.videoHeight : 0
-
 const getVideoRatio = () => {
-  const height = getVideoHeight()
-  return height ? getVideoWidth() / height : 0
+  if (!currentPlayer.value) return 0
+  const { videoWidth, videoHeight } = currentPlayer.value
+  return videoHeight ? videoWidth / videoHeight : 0
 }
 
 const clear = () => {
@@ -286,20 +273,6 @@ const getNextIndex = index => {
   return i
 }
 
-const getPreviousIndex = index => {
-  let i = index - 1 >= 0 ? index - 1 : props.entities.length - 1
-  // While we don't come back to initial entity and we have video previews
-  while (
-    i !== index &&
-    props.entities[i] &&
-    props.entities[i].preview_file_extension !== 'mp4'
-  ) {
-    i--
-    if (i < 0) i = props.entities.length
-  }
-  return i
-}
-
 const goPreviousFrame = () => {
   if (currentPlayer.value) {
     const isChromium = !!window.chrome
@@ -324,11 +297,6 @@ const goNextFrame = () => {
     const frameNumber = newTime / frameDuration.value
     emit('frame-update', frameNumber)
   }
-}
-
-const loadPreviousEntity = () => {
-  loadEntity(getPreviousIndex(currentIndex.value))
-  emit('entity-change', currentIndex.value)
 }
 
 const loadNextEntity = () => {
@@ -455,15 +423,6 @@ const getCurrentFrame = () => {
   return time / frameDuration.value
 }
 
-const getLastPushedCurrentTime = () => {
-  const length = currentTimeCalls.length
-  if (length > 0) {
-    return currentTimeCalls[length - 1]
-  } else {
-    return getCurrentTime()
-  }
-}
-
 const getCurrentTimeRaw = () =>
   currentPlayer.value ? currentPlayer.value.currentTime : 0
 
@@ -478,9 +437,6 @@ const setCurrentFrame = frameNumber => {
 }
 
 const _setCurrentTime = newTime => {
-  if (!currentTimeCalls) {
-    currentTimeCalls = []
-  }
   if (!currentPlayer.value) {
     newTime = 0
   } else if (newTime < 0) {
@@ -540,9 +496,6 @@ const updateMaxDuration = () => {
     emit('video-loaded')
   }
 }
-
-const getSpeed = () =>
-  currentPlayer.value ? currentPlayer.value.playbackRate : 0
 
 const setSpeed = newRate => {
   rate = newRate
@@ -636,6 +589,26 @@ watch(
 
 // Lifecycle
 
+const LOADING_HANDLERS = [
+  ['canplay', hideLoading],
+  ['stalled', showLoading],
+  ['waiting', showLoading],
+  ['loadstart', showLoading],
+  ['error', hideLoading]
+]
+
+const bindLoadingHandlers = player => {
+  LOADING_HANDLERS.forEach(([event, handler]) =>
+    player.addEventListener(event, handler)
+  )
+}
+
+const unbindLoadingHandlers = player => {
+  LOADING_HANDLERS.forEach(([event, handler]) =>
+    player?.removeEventListener(event, handler)
+  )
+}
+
 // Video need to be resized after each window size change. It's due
 // to a HTML5 limitation related to video height.
 onMounted(() => {
@@ -648,18 +621,9 @@ onMounted(() => {
     })
     containerResizeObserver.observe(containerRef.value)
   }
-  currentTimeCalls = []
 
-  player1Ref.value.addEventListener('canplay', hideLoading)
-  player1Ref.value.addEventListener('stalled', showLoading)
-  player1Ref.value.addEventListener('waiting', showLoading)
-  player1Ref.value.addEventListener('loadstart', showLoading)
-  player1Ref.value.addEventListener('error', hideLoading)
-  player2Ref.value.addEventListener('canplay', hideLoading)
-  player2Ref.value.addEventListener('stalled', showLoading)
-  player2Ref.value.addEventListener('waiting', showLoading)
-  player2Ref.value.addEventListener('loadstart', showLoading)
-  player2Ref.value.addEventListener('error', hideLoading)
+  bindLoadingHandlers(player1Ref.value)
+  bindLoadingHandlers(player2Ref.value)
 
   setupPanZoom()
 })
@@ -670,16 +634,11 @@ onBeforeUnmount(() => {
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
 
-  player1Ref.value?.removeEventListener('canplay', hideLoading)
-  player1Ref.value?.removeEventListener('stalled', showLoading)
-  player1Ref.value?.removeEventListener('waiting', showLoading)
-  player1Ref.value?.removeEventListener('loadstart', showLoading)
-  player1Ref.value?.removeEventListener('error', hideLoading)
-  player2Ref.value?.removeEventListener('canplay', hideLoading)
-  player2Ref.value?.removeEventListener('stalled', showLoading)
-  player2Ref.value?.removeEventListener('waiting', showLoading)
-  player2Ref.value?.removeEventListener('loadstart', showLoading)
-  player2Ref.value?.removeEventListener('error', hideLoading)
+  unbindLoadingHandlers(player1Ref.value)
+  unbindLoadingHandlers(player2Ref.value)
+
+  firstPanZoom?.dispose()
+  secondPanZoom?.dispose()
 })
 
 // Expose public surface for parent components ($refs['raw-player'])
@@ -689,11 +648,9 @@ defineExpose({
   currentIndex,
   currentPlayer,
   isPlaying,
-  playingIndex,
   // Navigation
   loadEntity,
   loadNextEntity,
-  loadPreviousEntity,
   reloadCurrentEntity,
   // Playback
   pause,
@@ -703,22 +660,16 @@ defineExpose({
   getCurrentFrame,
   getCurrentTime,
   getCurrentTimeRaw,
-  getLastPushedCurrentTime,
   goNextFrame,
   goPreviousFrame,
   setCurrentFrame,
   setCurrentTimeRaw,
   // Speed / volume
-  getSpeed,
   setSpeed,
   setVolume,
   // Dimensions
-  getHeight,
   getNaturalDimensions,
-  getVideoHeight,
   getVideoRatio,
-  getVideoWidth,
-  getWidth,
   // Layout
   clear,
   resetHeight,
@@ -751,10 +702,6 @@ defineExpose({
       margin: 0 auto;
     }
   }
-}
-
-.container {
-  max-height: 100%;
 }
 
 .video-loader {
