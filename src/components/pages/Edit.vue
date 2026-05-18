@@ -567,6 +567,12 @@ useHead({
   user-select: text;
 }
 
+.task-list {
+  flex: 1;
+  margin-bottom: 3em;
+  min-width: 100%;
+}
+
 .schedule {
   position: relative;
   height: 300px;
