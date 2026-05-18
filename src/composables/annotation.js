@@ -85,6 +85,16 @@ if (PSStroke) {
  * @param {Function} options.saveAnnotationsCb - callback for saving annotations
  * @param {Function} options.onCanvasMouseMovedCb - callback for canvas mouse moved
  * @param {Function} options.onCanvasReleasedCb - callback for canvas mouse released
+ * @param {import('vue').Ref<boolean>} [options.isLaserModeOn] - reactive ref;
+ *   when true, new objects fade out instead of being persisted and end-of-
+ *   stroke does not trigger a save. Defaults to a static `ref(false)`.
+ * @param {Function} [options.postAnnotationAddition] - hook fired after a
+ *   local addition is recorded. Receives `(currentTime, serializedObject)`.
+ *   Used by collaborative review to broadcast over sockets.
+ * @param {Function} [options.postAnnotationDeletion] - hook fired after a
+ *   local deletion is recorded. Receives `(currentTime, serializedObject)`.
+ * @param {Function} [options.postAnnotationUpdate] - hook fired after a
+ *   local update is recorded. Receives `(currentTime, serializedObject)`.
  */
 export const useAnnotation = ({
   mainCanvasComponent,
@@ -99,7 +109,11 @@ export const useAnnotation = ({
   getCurrentFrame,
   saveAnnotationsCb,
   onCanvasMouseMovedCb,
-  onCanvasReleasedCb
+  onCanvasReleasedCb,
+  isLaserModeOn = ref(false),
+  postAnnotationAddition = () => {},
+  postAnnotationDeletion = () => {},
+  postAnnotationUpdate = () => {}
 }) => {
   // Canvas instances are owned by AnnotationCanvas components; we
   // mirror them into local refs through watchers so internal code
@@ -341,10 +355,6 @@ export const useAnnotation = ({
     postAnnotationAddition(currentTime, serialized)
   }
 
-  const postAnnotationAddition = (_currentTime, _obj) => {
-    // Aimed at being supercharged
-  }
-
   const removeFromAdditions = obj => {
     const currentTime = getCurrentTime()
     const additionsEntry = findAnnotation(additions.value, currentTime)
@@ -373,10 +383,6 @@ export const useAnnotation = ({
       addSerialization(obj)
     }
     postAnnotationDeletion(currentTime, obj.serialize())
-  }
-
-  const postAnnotationDeletion = (_currentTime, _obj) => {
-    // Aimed at being supercharged
   }
 
   const removeFromDeletions = obj => {
@@ -412,10 +418,6 @@ export const useAnnotation = ({
       })
     }
     postAnnotationUpdate(currentTime, obj)
-  }
-
-  const postAnnotationUpdate = (_currentTime, _obj) => {
-    // Aimed at being supercharged
   }
 
   const clearModifications = () => {
@@ -762,8 +764,15 @@ export const useAnnotation = ({
     if (silentAnnotation) return
     let o = obj.target ? obj.target : obj.targets[0]
     o = setObjectData(o)
-    addToAdditions(o)
-    stackAddAction(obj)
+    if (isLaserModeOn.value) {
+      // Laser strokes fade out locally and are broadcast as ephemeral
+      // events; they are intentionally not added to the additions stack.
+      fadeObject(o)
+      postAnnotationAddition(getCurrentTime(), o.serialize())
+    } else {
+      addToAdditions(o)
+      stackAddAction(obj)
+    }
   }
 
   const onObjectModified = event => {
@@ -1009,7 +1018,9 @@ export const useAnnotation = ({
           mouseDrawingMaxPressure.value
       }
       clearUndoneStack()
-      saveAnnotationsCb()
+      if (!isLaserModeOn.value) {
+        saveAnnotationsCb()
+      }
     }
   }
 
