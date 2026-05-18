@@ -36,16 +36,6 @@
           </div>
         </div>
         <div class="filler"></div>
-        <div class="flexrow-item block mt0">
-          <preview-room
-            :ref="previewRoomRef"
-            :room="room"
-            @open-room="openRoom"
-            @join-room="joinRoom"
-            @leave-room="leaveRoom"
-            v-if="isValidRoomId(currentEdit) && currentPreview?.id"
-          />
-        </div>
         <router-link
           class="flexrow-item has-text-centered back-link ml1"
           :to="previousEntityPath"
@@ -231,7 +221,6 @@ import { entityMixin } from '@/components/mixins/entity'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { getEntitiesPath } from '@/lib/path'
 import { formatListMixin } from '@/components/mixins/format'
-import { previewRoomMixin } from '@/components/mixins/previewRoom'
 import { playerMixin } from '@/components/mixins/player'
 import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
@@ -248,7 +237,6 @@ import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
-import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 
@@ -261,7 +249,6 @@ export default {
     entityMixin,
     formatListMixin,
     fullScreenMixin,
-    previewRoomMixin,
     playerMixin
   ],
 
@@ -282,7 +269,6 @@ export default {
     MetadataValue,
     PageSubtitle,
     PreviewPlayer,
-    PreviewRoom,
     PreviewsPerTaskType,
     Schedule
   },
@@ -296,13 +282,7 @@ export default {
       isLoading: true,
       isError: false,
       movieDimensions: { width: 0, height: 0 },
-      previewRoomRef: 'edits-preview-room',
       previewFileMap: new Map(),
-      room: {
-        id: null,
-        people: [],
-        newComer: true
-      },
       tempMode: false,
       errors: {
         edit: false
@@ -538,10 +518,7 @@ export default {
         // TODO: handle the situation when now preview file is selected
         // (e.g. if selected task has none)
       }
-      const isDifferentPreviewFile =
-        this.playingPreviewFileId !== previewFile.id
       this.setPreviewFile(previewFile)
-      if (isDifferentPreviewFile) this.sendUpdatePlayingStatus()
     },
 
     onChangeCurrentPreview(previewFile) {
@@ -583,7 +560,6 @@ export default {
       this.$nextTick(() => {
         this.loadEdits().then(() => {
           this.currentEdit = this.getCurrentEdit()
-          this.room.id = this.currentEdit ? this.currentEdit.id : null
           if (!this.currentEdit) {
             return
           }
@@ -628,10 +604,6 @@ export default {
   },
 
   watch: {
-    currentEdit() {
-      this.room.id = this.currentEdit ? this.currentEdit.id : null
-    },
-
     // Needed when reloading the page with F5
     currentProduction() {
       if (!this.isTVShow) this.resetData()
@@ -673,7 +645,6 @@ export default {
 
   socket: {
     events: {
-      ...previewRoomMixin.socket.events,
       ...playerMixin.socket.events,
 
       'preview-file:add-file'(eventData) {
