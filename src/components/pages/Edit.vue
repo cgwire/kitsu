@@ -215,17 +215,15 @@ import {
 
 import editStore from '@/store/modules/edits'
 
-import { annotationMixin } from '@/components/mixins/annotation'
 import { domMixin } from '@/components/mixins/dom'
 import { entityMixin } from '@/components/mixins/entity'
+import { formatListMixin } from '@/components/mixins/format'
 import { fullScreenMixin } from '@/components/mixins/fullscreen'
 import { getEntitiesPath } from '@/lib/path'
-import { formatListMixin } from '@/components/mixins/format'
-import { playerMixin } from '@/components/mixins/player'
-import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
@@ -234,7 +232,6 @@ import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
@@ -243,14 +240,7 @@ import Schedule from '@/components/widgets/Schedule.vue'
 export default {
   name: 'edit',
 
-  mixins: [
-    annotationMixin,
-    domMixin,
-    entityMixin,
-    formatListMixin,
-    fullScreenMixin,
-    playerMixin
-  ],
+  mixins: [domMixin, entityMixin, formatListMixin, fullScreenMixin],
 
   components: {
     ButtonSimple,
@@ -277,13 +267,11 @@ export default {
     return {
       type: 'edit',
       currentEdit: null,
+      currentPreviewFile: null,
       currentSection: 'infos',
-      isAnnotationsDisplayed: true,
       isLoading: true,
       isError: false,
-      movieDimensions: { width: 0, height: 0 },
-      previewFileMap: new Map(),
-      tempMode: false,
+      previewFiles: {},
       errors: {
         edit: false
       },
@@ -339,18 +327,14 @@ export default {
       )
     },
 
-    currentTaskTypeId() {
-      return this.currentPreview?.task_type_id || null
+    currentTask() {
+      const taskId = this.currentPreviewFile?.task_id
+      if (!taskId) return undefined
+      return this.taskMap.get(taskId) || undefined
     },
 
-    currentTask() {
-      const taskTypeId = this.currentTaskTypeId
-      if (!taskTypeId || !this.currentEdit) return undefined
-      const editId = this.currentEdit.id
-      for (const t of this.taskMap.values()) {
-        if (t.entity_id === editId && t.task_type_id === taskTypeId) return t
-      }
-      return undefined
+    currentTaskTypeId() {
+      return this.currentTask?.task_type_id || null
     },
 
     currentRevisions() {
@@ -368,98 +352,6 @@ export default {
 
     init() {
       this.resetData()
-      this.$options.scrubbing = false
-      this.isHd = Boolean(this.organisation.hd_by_default)
-      if (this.picturePlayer) {
-        this.picturePlayer.addEventListener('load', async () => {
-          const wasPlaying = this.isPlaying
-          await this.resetPictureCanvas()
-          this.isPlaying = wasPlaying
-        })
-      }
-      this.$nextTick(() => {
-        this.configureEvents()
-        this.setupFabricCanvas()
-        this.setPlayerSpeed(1)
-        this.onFrameUpdate(1)
-      })
-    },
-
-    resetPreviewFileMap() {
-      this.previewFileMap.clear()
-      if (this.previewFiles) {
-        Object.values(this.previewFiles).forEach(previewFiles => {
-          previewFiles.forEach(previewFile => {
-            this.previewFileMap.set(previewFile.id, previewFile)
-          })
-        })
-      }
-    },
-
-    resetHeight() {
-      this.$nextTick(() => {
-        let height = window.innerHeight
-        height -= this.$refs.header ? this.$refs.header.offsetHeight : 0
-        if (this.$refs['button-bar']) {
-          height -= this.$refs['button-bar'].offsetHeight
-        }
-        if (this.$refs['video-progress']) {
-          height -= this.$refs['video-progress'].$el.offsetHeight
-        }
-        if (this.$refs['info-row']) {
-          height -= this.$refs['info-row'].offsetHeight
-        }
-        if (this.$refs['schedule-row']) {
-          height -= this.$refs['schedule-row'].offsetHeight
-        }
-        if (this.$refs['page-header-row']) {
-          height -= this.$refs['page-header-row'].offsetHeight
-        }
-        height = Math.min(window.innerHeight * 0.4, Math.max(480, height))
-        if (this.$refs['video-container']) {
-          this.$refs['video-container'].style.height = `${height}px`
-        }
-        if (!this.isCommentsHidden && this.$refs['task-info']) {
-          this.$refs['task-info'].$el.style.height = `${height + 66}px`
-        }
-        if (this.rawPlayer) this.rawPlayer.resetHeight(height)
-        this.$nextTick(() => {
-          this.resetCanvas()
-          this.updateProgressBar()
-        })
-      })
-    },
-
-    initPlayer() {
-      if (!this.currentEdit) return
-
-      this.currentPreviewIndex = 0
-      // There's only one entity in this player, which is current Edit entity,
-      // so playingEntityIndex is always 0
-      this.playingEntityIndex = 0
-      this.entityList = [
-        {
-          ...this.currentEdit,
-          preview_file_id: null,
-          preview_files: this.previewFiles
-        }
-      ]
-      this.framesPerImage[0] =
-        this.currentEdit.preview_nb_frames || DEFAULT_NB_FRAMES_PICTURE
-      this.pause()
-      this.rawPlayer?.setCurrentFrame(1)
-      this.currentTimeRaw = 0
-      this.updateProgressBar()
-      this.updateTaskPanel()
-      this.clearCanvas()
-      this.annotations = []
-      this.resetHeight()
-      this.resetCanvas().then(() => {
-        if (this.isCurrentPreview) {
-          this.annotations = this.currentEntity.preview_file_annotations
-          this.loadAnnotation(this.getAnnotation(0))
-        }
-      })
     },
 
     getCurrentEdit() {
@@ -482,54 +374,28 @@ export default {
         })
     },
 
-    setPreviewFile(previewFile) {
-      this.playingPreviewFileId = previewFile.id
-
-      this.currentEntity.preview_file_id = previewFile.id
-      this.currentEntity.preview_file_task_id = previewFile.task_id
-      this.currentEntity.preview_file_extension = previewFile.extension
-      this.currentEntity.preview_file_annotations =
-        previewFile.annotations || []
-      this.currentEntity.preview_file_previews = previewFile.previews
-
-      this.annotations = this.currentEntity.preview_file_annotations
-
-      if (this.rawPlayer) this.rawPlayer.reloadCurrentEntity()
-      this.clearCanvas()
-      this.updateTaskPanel()
-      this.updateProgressBar()
-    },
-
-    onPreviousPreviewClicked() {
-      const index = this.currentPreviewIndex - 1
-      this.currentPreviewIndex =
-        index < 0 ? this.currentEntityPreviewLength - 1 : index
-    },
-
-    onNextPreviewClicked() {
-      const index = this.currentPreviewIndex + 1
-      this.currentPreviewIndex =
-        index > this.currentEntityPreviewLength - 1 ? 0 : index
-    },
-
     onPreviewChanged(entity, previewFile) {
-      this.pause()
-      if (!previewFile) {
-        // TODO: handle the situation when now preview file is selected
-        // (e.g. if selected task has none)
+      // PreviewsPerTaskType emits preview-changed when the user picks a
+      // different task type or revision. Update the local selection so
+      // currentTaskTypeId / currentRevisions recompute and the
+      // <preview-player> stays in sync.
+      // TODO: handle the situation when no preview file is selected (e.g. if selected task has none)
+      this.currentPreviewFile = previewFile || null
+      if (previewFile && this.currentEntity) {
+        this.currentEntity.preview_file_id = previewFile.id
       }
-      this.setPreviewFile(previewFile)
     },
 
     onChangeCurrentPreview(previewFile) {
       // PreviewPlayer emits change-current-preview when the user picks a
-      // different revision. Route it through onPreviewChanged so the
-      // PreviewsPerTaskType combo stays in sync via the shared state.
+      // different revision inside the player. Mirror it back into the
+      // PreviewsPerTaskType combo via the shared state.
       if (previewFile) this.onPreviewChanged(this.currentEntity, previewFile)
     },
 
     async onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
+      const previewPlayer = this.$refs['preview-player']
       try {
         await this.updatePreviewAnnotation({
           taskId,
@@ -538,22 +404,10 @@ export default {
           deletions,
           updates
         })
-        this.confirmAnnotationsSaved()
+        previewPlayer?.confirmAnnotationsSaved()
       } catch {
-        this.restoreFailedAnnotations()
+        previewPlayer?.restoreFailedAnnotations()
       }
-    },
-
-    onVideoLoaded() {
-      this.movieDimensions = {
-        width: this.currentPreview.width,
-        height: this.currentPreview.height
-      }
-    },
-
-    scrollToEntity() {
-      // This method in unused here, required by PlaylistPlayer that shares
-      // playerMixin.
     },
 
     resetData() {
@@ -566,8 +420,7 @@ export default {
           this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
             previewFiles => {
               this.previewFiles = previewFiles
-              this.resetPreviewFileMap()
-              this.initPlayer()
+              this.currentPreviewFile = this.findCurrentPreviewFile()
               this.isLoading = false
             }
           )
@@ -575,31 +428,33 @@ export default {
       })
     },
 
+    findCurrentPreviewFile() {
+      // Pick the preview file flagged as current on the edit when it still
+      // matches one of the task-type buckets, otherwise fall back to the
+      // first available preview so <preview-player> has something to show.
+      const editPreviewId = this.currentEdit?.preview_file_id
+      for (const taskTypeId in this.previewFiles) {
+        const previewFile = this.previewFiles[taskTypeId].find(
+          p => p.id === editPreviewId
+        )
+        if (previewFile) return previewFile
+      }
+      const firstBucket = Object.values(this.previewFiles).find(
+        bucket => bucket.length > 0
+      )
+      return firstBucket ? firstBucket[0] : null
+    },
+
     onPreviewFilesUpdate() {
+      // FIXME: combo should continue displaying currently selected task preview unless it's no longer available (e.g. was deleted along with the comment)
       this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
         previewFiles => {
           this.previewFiles = previewFiles
-          this.currentEntity.preview_files = previewFiles
-          this.resetPreviewFileMap()
-          // FIXME: combo should continue displaying currently selected task preview
-          // unless it's no longer available (e.g. was deleted along with the comment)
-          if (
-            this.currentEntity &&
-            this.currentEntity.preview_file_id &&
-            !this.previewFileMap.has(this.currentEntity.preview_file_id)
-          ) {
-            // TODO: handle deletion of currently displayed preview file
+          if (this.currentEntity) {
+            this.currentEntity.preview_files = previewFiles
           }
         }
       )
-    },
-
-    resetPanZoom() {
-      if (this.isCurrentPreviewMovie) {
-        this.rawPlayer?.resetPanZoom()
-      } else if (this.isCurrentPreviewPicture) {
-        this.picturePlayer?.resetPanZoom()
-      }
     }
   },
 
@@ -613,45 +468,16 @@ export default {
       if (this.isTVShow && editStore.cache.editMap.size === 0) {
         this.resetData()
       }
-    },
-
-    playingPreviewFileId() {
-      // In case preview was switched by someone else in the room,
-      // make sure that comboboxes reflect this change too.
-      if (!this.currentEntity || !this.playingPreviewFileId) return
-
-      const previewsCombo = this.$refs['previews-per-task-type']
-      if (!previewsCombo) return
-
-      const previews = this.currentEntity.preview_files
-      for (const taskTypeId in previews) {
-        const previewFile = previews[taskTypeId].find(
-          p => p.id === this.playingPreviewFileId
-        )
-        if (previewFile) {
-          this.setPreviewFile(previewFile)
-          if (
-            previewsCombo.taskTypeId !== taskTypeId ||
-            previewsCombo.previewFileId !== this.playingPreviewFileId
-          ) {
-            previewsCombo.taskTypeId = taskTypeId
-            previewsCombo.previewFileId = this.playingPreviewFileId
-          }
-          break
-        }
-      }
     }
   },
 
   socket: {
     events: {
-      ...playerMixin.socket.events,
-
       'preview-file:add-file'(eventData) {
-        if (eventData.project_id !== this.task.project_id) return
+        if (eventData.project_id !== this.currentProduction.id) return
         const taskId = eventData.task_id
 
-        const previews = this.currentEntity.preview_files
+        const previews = this.previewFiles
         for (const taskTypeId in previews) {
           const previewFile = previews[taskTypeId].find(
             p => p.task_id === taskId
@@ -666,7 +492,7 @@ export default {
 
       'comment:delete'(eventData) {
         // Deleting a comment might remove a task preview, preview files must be refreshed
-        if (eventData.project_id !== this.task.project_id) return
+        if (eventData.project_id !== this.currentProduction.id) return
         this.onPreviewFilesUpdate()
       }
     }
