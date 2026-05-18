@@ -157,4 +157,13 @@ const currentProduction = computed(() => {
   padding-top: 0;
   margin-bottom: 5px;
 }
+
+// Force the production name back on under 768px — ProductionName hides
+// its .avatar-name by default to save space, but inside this combobox
+// the name is the whole point of the selection.
+@media screen and (max-width: 768px) {
+  .production-combo :deep(.avatar-name) {
+    display: inline;
+  }
+}
 </style>

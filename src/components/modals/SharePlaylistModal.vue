@@ -8,12 +8,18 @@
       <p class="description">
         {{ $t('playlists.share_modal.description') }}
       </p>
-      <div v-if="shareLinks.length > 0" class="existing-links">
+      <p class="empty-links" v-if="shareLinks.length === 0">
+        {{ $t('playlists.share_modal.no_links') }}
+      </p>
+      <div v-else class="existing-links">
         <h3 class="subtitle">
           {{ $t('playlists.share_modal.active_links') }}
         </h3>
         <div class="share-link-item" v-for="link in shareLinks" :key="link.id">
-          <div class="share-link-row flexrow">
+          <div
+            class="share-link-row flexrow"
+            v-if="confirmingRevoke !== link.token"
+          >
             <input
               class="input flexrow-item"
               :value="buildShareUrl(link.token)"
@@ -38,9 +44,26 @@
             <button
               class="button flexrow-item revoke-button"
               :title="$t('playlists.share_modal.revoke')"
-              @click="revokeLink(link.token)"
+              @click="askRevoke(link.token)"
             >
               <x-icon :size="16" />
+            </button>
+          </div>
+          <div class="revoke-confirm flexrow" v-else>
+            <span class="revoke-confirm-text flexrow-item filler">
+              {{ $t('playlists.share_modal.revoke_confirm') }}
+            </span>
+            <button
+              class="button flexrow-item"
+              @click="confirmingRevoke = null"
+            >
+              {{ $t('main.cancel') }}
+            </button>
+            <button
+              class="button is-danger flexrow-item"
+              @click="confirmRevoke(link.token)"
+            >
+              {{ $t('playlists.share_modal.revoke') }}
             </button>
           </div>
           <div class="share-link-info">
@@ -115,37 +138,55 @@
       </div>
 
       <div class="create-section">
-        <h3 class="subtitle" v-if="shareLinks.length > 0">
-          {{ $t('playlists.share_modal.create_new') }}
-        </h3>
-        <div class="field">
-          <label class="label">
-            {{ $t('playlists.share_modal.expiration') }}
-          </label>
-          <date-field
-            can-delete
-            is-dark
-            :min-date="tomorrow"
-            v-model="expirationDate"
+        <div class="add-row" v-if="!isCreateFormVisible">
+          <button-simple
+            icon="plus"
+            :text="$t('playlists.share_modal.add_link')"
+            @click="showCreateForm"
           />
         </div>
-        <div class="field">
-          <combobox-boolean
-            :label="$t('playlists.share_modal.can_comment')"
-            v-model="canComment"
-          />
+        <div class="create-card" v-else>
+          <h3 class="create-card-title">
+            {{ $t('playlists.share_modal.create_new') }}
+          </h3>
+          <div class="create-form">
+            <div class="field">
+              <checkbox
+                :toggle="true"
+                :label="$t('playlists.share_modal.can_comment')"
+                v-model="canComment"
+              />
+            </div>
+            <div class="field">
+              <label class="label">
+                {{ $t('playlists.share_modal.expiration') }}
+              </label>
+              <date-field
+                can-delete
+                is-dark
+                :min-date="tomorrow"
+                v-model="expirationDate"
+              />
+            </div>
+            <div class="form-actions">
+              <button-simple
+                :is-loading="loading.create"
+                :text="$t('playlists.share_modal.generate')"
+                @click="createLink"
+              />
+            </div>
+            <p class="create-error" v-if="errors.create">
+              {{ $t('playlists.share_modal.error') }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <modal-footer
-        :confirm-label="$t('playlists.share_modal.generate')"
-        :cancel-label="$t('main.close')"
-        :is-loading="loading.create"
-        :is-error="errors.create"
-        :error-text="$t('playlists.share_modal.error')"
-        @confirm="createLink"
-        @cancel="$emit('cancel')"
-      />
+      <div class="close-row">
+        <button class="button is-link" @click="$emit('cancel')">
+          {{ $t('main.close') }}
+        </button>
+      </div>
     </div>
   </base-modal>
 </template>
@@ -164,9 +205,8 @@ import { formatSimpleDate } from '@/lib/time'
 import playlistsApi from '@/store/api/playlists'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import DateField from '@/components/widgets/DateField.vue'
 
 const { t } = useI18n()
@@ -182,12 +222,14 @@ const emit = defineEmits(['cancel', 'links-updated'])
 
 const shareLinks = ref([])
 const expirationDate = ref(null)
-const canComment = ref('true')
+const canComment = ref(true)
 const loading = reactive({ create: false })
 const errors = reactive({ create: false })
 
 const openInviteToken = ref(null)
 const inviteState = reactive({})
+const confirmingRevoke = ref(null)
+const isCreateFormVisible = ref(false)
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -311,6 +353,18 @@ const loadLinks = async () => {
   }
 }
 
+const showCreateForm = () => {
+  errors.create = false
+  isCreateFormVisible.value = true
+}
+
+const hideCreateForm = () => {
+  isCreateFormVisible.value = false
+  errors.create = false
+  expirationDate.value = null
+  canComment.value = true
+}
+
 const createLink = async () => {
   loading.create = true
   errors.create = false
@@ -320,9 +374,10 @@ const createLink = async () => {
       : undefined
     await playlistsApi.createShareLink(props.playlist.id, {
       expiration_date: expDate,
-      can_comment: canComment.value === 'true'
+      can_comment: canComment.value
     })
     await loadLinks()
+    hideCreateForm()
   } catch (err) {
     console.error(err)
     errors.create = true
@@ -330,9 +385,14 @@ const createLink = async () => {
   loading.create = false
 }
 
-const revokeLink = async token => {
+const askRevoke = token => {
+  confirmingRevoke.value = token
+}
+
+const confirmRevoke = async token => {
   try {
     await playlistsApi.revokeShareLink(props.playlist.id, token)
+    confirmingRevoke.value = null
     await loadLinks()
   } catch (err) {
     console.error(err)
@@ -382,57 +442,141 @@ onMounted(() => {
 }
 
 .share-link-item {
-  margin-bottom: 1em;
+  background: var(--background-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 0.75em;
+  padding: 0.75em 0.85em;
+}
+
+.dark .share-link-item {
+  background: var(--background);
 }
 
 .share-link-row {
-  gap: 0;
+  align-items: center;
+  gap: 0.2em;
 
   .input {
-    font-size: 0.85em;
-    background: var(--background-alt);
-    color: var(--text);
+    background: var(--background);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
+    color: var(--text);
     cursor: text;
+    flex: 1 1 auto;
+    font-size: 0.85em;
+    margin-right: 0.5em;
     padding-left: 1em;
   }
 
+  .dark & .input {
+    background: var(--background-alt);
+  }
+
   .copy-button,
-  .invite-button {
-    flex: 0 0 auto;
-    border-radius: 10px;
-    margin-left: -1px;
-  }
-
-  .invite-button {
-    margin-left: 0.5em;
-
-    &.active {
-      background: var(--background-selectable);
-    }
-  }
-
+  .invite-button,
   .revoke-button {
+    border-radius: 8px;
     flex: 0 0 auto;
-    margin-left: 0.5em;
-    opacity: 0;
-    transition: opacity 0.15s;
+    margin: 0;
   }
 
-  &:hover .revoke-button {
-    opacity: 1;
+  .invite-button.active {
+    background: var(--background-selectable);
   }
 }
 
 .create-section {
-  .subtitle {
-    margin-bottom: 1em;
-  }
+  margin-top: 1.5em;
 
   .field {
-    margin-bottom: 1em;
+    margin-bottom: 0;
   }
+}
+
+.add-row {
+  display: flex;
+  justify-content: center;
+}
+
+.create-card {
+  background: var(--background-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25em 1em 1em;
+}
+
+.dark .create-card {
+  background: var(--background);
+}
+
+.create-card-title {
+  color: var(--text);
+  font-size: 1.1em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  margin: 0 0 1.25em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.create-form {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+
+  .field {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  .field .label {
+    margin: 0;
+  }
+}
+
+.form-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.6em;
+  justify-content: center;
+  margin-top: 0.5em;
+}
+
+.revoke-confirm {
+  align-items: center;
+  gap: 0.5em;
+}
+
+.revoke-confirm-text {
+  color: $red;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.empty-links {
+  color: var(--text-alt);
+  font-size: 0.9em;
+  margin: 0 0 1.25em;
+  text-align: center;
+}
+
+.create-error {
+  color: $red;
+  font-size: 0.85em;
+  margin: 0.75em 0 0;
+  text-align: right;
+}
+
+.close-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5em;
 }
 
 .share-link-info {

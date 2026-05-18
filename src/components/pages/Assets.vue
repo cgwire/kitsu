@@ -64,12 +64,11 @@
           </div>
           <div class="query-list">
             <search-query-list
-              :groups="assetSearchFilterGroups"
+              :groups="productionAssetFilterGroups"
               :is-group-enabled="true"
-              :queries="assetSearchQueries"
+              :queries="productionAssetSearchQueries"
               type="asset"
               @remove-search="removeSearchQuery"
-              v-if="!isAssetsLoading && !initialLoading"
             />
           </div>
         </div>
@@ -442,8 +441,6 @@ export default {
       'assetListScrollPosition',
       'assetsCsvFormData',
       'assetSearchText',
-      'assetSearchFilterGroups',
-      'assetSearchQueries',
       'assetSorting',
       'assetTypes',
       'assetValidationColumns',
@@ -467,8 +464,22 @@ export default {
       'productionAssetTaskTypes',
       'selectedAssets',
       'taskTypeMap',
-      'user'
+      'user',
+      'userFilters',
+      'userFilterGroups'
     ]),
+
+    productionAssetSearchQueries() {
+      const productionId = this.currentProduction?.id
+      if (!productionId) return []
+      return this.userFilters?.asset?.[productionId] || []
+    },
+
+    productionAssetFilterGroups() {
+      const productionId = this.currentProduction?.id
+      if (!productionId) return []
+      return this.userFilterGroups?.asset?.[productionId] || []
+    },
 
     addThumbnailsModal() {
       return this.$refs['add-thumbnails-modal']

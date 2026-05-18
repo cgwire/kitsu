@@ -14,6 +14,8 @@
           <icon
             class="section-icon"
             :name="currentSection.icon"
+            :size="20"
+            :stroke-width="1.5"
             v-if="currentSection.type === 'plugin'"
           />
           <kitsu-icon
@@ -45,6 +47,8 @@
             <icon
               class="section-icon"
               :name="section.icon"
+              :size="20"
+              :stroke-width="1.5"
               v-if="section.type === 'plugin'"
             />
             <span class="flexrow-item">{{ section.label }}</span>
@@ -287,5 +291,13 @@ hr {
   cursor: pointer;
   margin-right: 0.8em;
   width: 20px;
+}
+
+svg.section-icon {
+  color: #515151;
+}
+
+.dark svg.section-icon {
+  color: #ffffff;
 }
 </style>

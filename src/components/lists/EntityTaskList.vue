@@ -31,7 +31,12 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :with-thumbnail="false"
+      :with-actions="false"
+    />
 
     <div
       class="task-list-body"

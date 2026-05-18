@@ -9,7 +9,7 @@
         <p class="has-text-centered mandatory-message">
           {{ $t('profile.two_factor_authentication.mandatory') }}
         </p>
-        <two-factor-authentication-setup show-cancel-button />
+        <two-factor-authentication-setup />
         <hr />
         <button
           class="button save-button is-medium mt1"

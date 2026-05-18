@@ -111,7 +111,13 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="5"
+      :with-thumbnail="false"
+      :with-actions="false"
+    />
 
     <div
       class="has-text-centered"

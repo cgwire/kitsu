@@ -132,7 +132,12 @@
                   params: { plugin_id: plugin.plugin_id }
                 }"
               >
-                <icon :name="plugin.icon" />
+                <icon
+                  class="nav-icon"
+                  :name="plugin.icon"
+                  :size="20"
+                  :stroke-width="1.5"
+                />
                 {{ plugin.name }}
               </router-link>
             </p>

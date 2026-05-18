@@ -61,7 +61,12 @@
       <p>{{ $t('days_off.no_days_off') }}</p>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="1"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
       {{ sortedDaysOff.length }}

@@ -107,7 +107,7 @@
         </ol>
       </li>
     </ol>
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" :is-error="isError" variant="kanban" />
     <add-preview-modal
       ref="add-preview-modal"
       :active="modals.addPreview"

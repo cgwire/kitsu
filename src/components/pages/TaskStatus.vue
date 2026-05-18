@@ -46,7 +46,7 @@
       :active="modals.del"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('task_status.delete_error')"
       @cancel="modals.del = false"
       @confirm="confirmDeleteTaskStatus"
@@ -54,234 +54,207 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+// eslint-disable-next-line no-unused-vars
+import TaskStatusList from '@/components/lists/TaskStatusList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
 import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 import RouteTabs from '@/components/widgets/RouteTabs.vue'
-import TaskStatusList from '@/components/lists/TaskStatusList.vue'
 
-export default {
-  name: 'task-status',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    DeleteModal,
-    EditTaskStatusModal,
-    ListPageHeader,
-    RouteTabs,
-    TaskStatusList
-  },
+// State
 
-  data() {
-    return {
-      activeTab: 'active',
-      entityTab: 'entities',
-      entityTabs: [
-        {
-          name: 'entities',
-          label: this.$t('entities.title')
-        },
-        {
-          name: 'concepts',
-          label: this.$t('concepts.title')
-        }
-      ],
-      taskStatusToDelete: null,
-      taskStatusToEdit: { color: '#000000' },
-      modals: {
-        edit: false,
-        del: false
-      },
-      loading: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      errors: {
-        edit: false,
-        del: false,
-        list: false
-      },
-      tabs: [
-        {
-          name: 'active',
-          label: this.$t('main.active')
-        },
-        {
-          name: 'archived',
-          label: this.$t('main.archived')
-        }
-      ]
-    }
-  },
+const activeTab = ref('active')
+const entityTab = ref('entities')
+const taskStatusToDelete = ref(null)
+const taskStatusToEdit = ref({ color: '#000000' })
 
-  mounted() {
-    this.activeTab = this.$route.query.tab || 'active'
-    this.entityTab = this.$route.query.entity || 'entities'
-  },
+const errors = reactive({ del: false, edit: false, list: false })
+const loading = reactive({ del: false, edit: false, list: false })
+const modals = reactive({ del: false, edit: false })
 
-  computed: {
-    ...mapGetters(['archivedTaskStatus', 'taskStatus']),
+// Computed
 
-    isActiveTab() {
-      return this.activeTab === 'active'
-    },
+const archivedTaskStatus = computed(() => store.getters.archivedTaskStatus)
+const taskStatus = computed(() => store.getters.taskStatus)
 
-    activeTaskStatuses() {
-      return this.isActiveTab ? this.taskStatus : this.archivedTaskStatus
-    },
+const isActiveTab = computed(() => activeTab.value === 'active')
 
-    taskStatusList() {
-      return this.activeTaskStatuses
-        .filter(taskStatus => !taskStatus.for_concept)
-        .sort((a, b) => a.priority - b.priority)
-    },
+const activeTaskStatuses = computed(() =>
+  isActiveTab.value ? taskStatus.value : archivedTaskStatus.value
+)
 
-    conceptStatusList() {
-      return this.activeTaskStatuses
-        .filter(taskStatus => taskStatus.for_concept)
-        .sort((a, b) => a.priority - b.priority)
-    }
-  },
+const taskStatusList = computed(() =>
+  activeTaskStatuses.value
+    .filter(status => !status.for_concept)
+    .sort((a, b) => a.priority - b.priority)
+)
 
-  methods: {
-    ...mapActions(['deleteTaskStatus', 'updateTaskStatusPriority']),
+const conceptStatusList = computed(() =>
+  activeTaskStatuses.value
+    .filter(status => status.for_concept)
+    .sort((a, b) => a.priority - b.priority)
+)
 
-    async updatePriorities(taskStatuses) {
-      for (const taskStatus of taskStatuses) {
-        await this.updateTaskStatusPriority(taskStatus)
-      }
-    },
+const tabs = computed(() => [
+  { name: 'active', label: t('main.active') },
+  { name: 'archived', label: t('main.archived') }
+])
 
-    confirmEditTaskStatus(form) {
-      const isNew = !(this.taskStatusToEdit && this.taskStatusToEdit.id)
-      let action = 'newTaskStatus'
-      if (!isNew) {
-        action = 'saveTaskStatus'
-        form.id = this.taskStatusToEdit.id
-      }
+const entityTabs = computed(() => [
+  { name: 'entities', label: t('entities.title') },
+  { name: 'concepts', label: t('concepts.title') }
+])
 
-      this.loading.edit = true
-      this.errors.edit = false
-      this.$store
-        .dispatch(action, form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.edit = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
+const deleteText = computed(() =>
+  taskStatusToDelete.value
+    ? t('task_status.delete_text', { name: taskStatusToDelete.value.name })
+    : ''
+)
 
-    confirmDeleteTaskStatus() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteTaskStatus(this.taskStatusToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.del = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
+// Functions
 
-    deleteText() {
-      const taskStatus = this.taskStatusToDelete
-      if (taskStatus) {
-        return this.$t('task_status.delete_text', { name: taskStatus.name })
-      } else {
-        return ''
-      }
-    },
-
-    onExportClicked() {
-      const name = stringHelpers.slugify(this.$t('task_status.title'))
-      const headers = [
-        this.$t('main.type'),
-        this.$t('task_status.fields.name'),
-        this.$t('task_status.fields.short_name'),
-        this.$t('task_status.fields.description'),
-        this.$t('task_status.fields.color'),
-        this.$t('task_status.fields.is_default'),
-        this.$t('task_status.fields.is_wip'),
-        this.$t('task_status.fields.is_done'),
-        this.$t('task_status.fields.is_retake'),
-        this.$t('task_status.fields.is_artist_allowed'),
-        this.$t('task_status.fields.is_client_allowed'),
-        this.$t('task_status.fields.is_feedback_request')
-      ]
-      const entries = [headers].concat(
-        this.taskStatus.map(taskStatus => [
-          taskStatus.type,
-          taskStatus.name,
-          taskStatus.short_name,
-          taskStatus.description,
-          taskStatus.color,
-          taskStatus.is_default,
-          taskStatus.is_wip,
-          taskStatus.is_done,
-          taskStatus.is_retake,
-          taskStatus.is_artist_allowed,
-          taskStatus.is_client_allowed,
-          taskStatus.is_feedback_request
-        ])
-      )
-      csv.buildCsvFile(name, entries)
-    },
-
-    onNewClicked() {
-      this.taskStatusToEdit = { color: '#000000' }
-      this.modals.edit = true
-    },
-
-    onEditClicked(taskStatus) {
-      this.taskStatusToEdit = taskStatus
-      this.modals.edit = true
-    },
-
-    onDeleteClicked(taskStatus) {
-      this.taskStatusToDelete = taskStatus
-      this.modals.del = true
-    }
-  },
-
-  watch: {
-    '$route.query'() {
-      this.activeTab = this.$route.query.tab || 'active'
-      this.entityTab = this.$route.query.entity || 'entities'
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('task_status.title')} - Kitsu`
-    }
+const updatePriorities = async taskStatuses => {
+  for (const status of taskStatuses) {
+    await store.dispatch('updateTaskStatusPriority', status)
   }
 }
+
+const confirmEditTaskStatus = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (taskStatusToEdit.value?.id) {
+      await store.dispatch('saveTaskStatus', {
+        ...form,
+        id: taskStatusToEdit.value.id
+      })
+    } else {
+      await store.dispatch('newTaskStatus', form)
+    }
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const confirmDeleteTaskStatus = async () => {
+  loading.del = true
+  errors.del = false
+  try {
+    await store.dispatch('deleteTaskStatus', taskStatusToDelete.value)
+    modals.del = false
+  } catch (err) {
+    console.error(err)
+    errors.del = true
+  }
+  loading.del = false
+}
+
+const onExportClicked = () => {
+  const name = stringHelpers.slugify(t('task_status.title'))
+  const headers = [
+    t('main.type'),
+    t('task_status.fields.name'),
+    t('task_status.fields.short_name'),
+    t('task_status.fields.description'),
+    t('task_status.fields.color'),
+    t('task_status.fields.is_default'),
+    t('task_status.fields.is_wip'),
+    t('task_status.fields.is_done'),
+    t('task_status.fields.is_retake'),
+    t('task_status.fields.is_artist_allowed'),
+    t('task_status.fields.is_client_allowed'),
+    t('task_status.fields.is_feedback_request')
+  ]
+  const rows = taskStatus.value.map(status => [
+    status.type,
+    status.name,
+    status.short_name,
+    status.description,
+    status.color,
+    status.is_default,
+    status.is_wip,
+    status.is_done,
+    status.is_retake,
+    status.is_artist_allowed,
+    status.is_client_allowed,
+    status.is_feedback_request
+  ])
+  csv.buildCsvFile(name, [headers, ...rows])
+}
+
+const onNewClicked = () => {
+  taskStatusToEdit.value = { color: '#000000' }
+  modals.edit = true
+}
+
+const onEditClicked = status => {
+  taskStatusToEdit.value = status
+  modals.edit = true
+}
+
+const onDeleteClicked = status => {
+  taskStatusToDelete.value = status
+  modals.del = true
+}
+
+// Watchers
+
+watch(
+  () => route.query,
+  () => {
+    activeTab.value = route.query.tab || 'active'
+    entityTab.value = route.query.entity || 'entities'
+  }
+)
+
+// Lifecycle
+
+onMounted(() => {
+  activeTab.value = route.query.tab || 'active'
+  entityTab.value = route.query.entity || 'entities'
+})
+
+// Head
+
+useHead({ title: computed(() => `${t('task_status.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
 .help-tooltip {
+  margin-left: 0.25rem;
   opacity: 0.5;
   transition: opacity 0.3s ease;
-  margin-left: 0.25rem;
 
   &:hover {
     opacity: 1;
   }
+
   .icon.is-small {
     vertical-align: baseline;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .task-status {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
   }
 }
 </style>

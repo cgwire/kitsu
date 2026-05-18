@@ -1,14 +1,11 @@
 <template>
   <base-modal :active="active" :title="title" @cancel="$emit('cancel')">
-    <p>
-      {{ $t('main.csv.select_file') }}
-    </p>
+    <p class="explanation">{{ $t('profile.avatar.intro') }}</p>
 
-    <file-upload
-      ref="uploadAvatarField"
-      :label="$t('main.csv.upload_file')"
+    <image-cropper
+      ref="cropperRef"
+      :shape="shape"
       @fileselected="onFileSelected"
-      accept=".png,.jpg,.jpeg"
     />
 
     <p class="error" v-if="isError">
@@ -18,7 +15,7 @@
     <modal-footer
       :error-text="$t('productions.metadata.error')"
       :is-loading="isLoading"
-      :is-disabled="!formData"
+      :is-disabled="!hasFile"
       @confirm="onConfirmClicked"
       @cancel="$emit('cancel')"
     />
@@ -26,45 +23,70 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, toRef, watch } from 'vue'
+
+import { useModal } from '@/composables/modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
-// eslint-disable-next-line no-unused-vars
-import FileUpload from '@/components/widgets/FileUpload.vue'
+import ImageCropper from '@/components/widgets/ImageCropper.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  shape: {
+    type: String,
+    default: 'circle',
+    validator: value => ['circle', 'rounded'].includes(value)
+  },
   title: { type: String, default: '' }
 })
 
 const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
 
-const formData = ref(null)
-const uploadAvatarField = ref(null)
+useModal(toRef(props, 'active'), emit)
 
-const onFileSelected = data => {
-  formData.value = data
-  emit('fileselected', data)
+const cropperRef = ref(null)
+const hasFile = ref(false)
+const lastFormData = ref(null)
+
+const onFileSelected = formData => {
+  hasFile.value = true
+  lastFormData.value = formData
+  emit('fileselected', formData)
 }
 
-const onConfirmClicked = () => {
-  emit('confirm', formData.value)
+const onConfirmClicked = async () => {
+  try {
+    const cropped = await cropperRef.value?.cropToFormData()
+    emit('confirm', cropped ?? lastFormData.value)
+  } catch (err) {
+    console.error(err)
+    emit('confirm', lastFormData.value)
+  }
 }
 
 watch(
   () => props.active,
   () => {
-    formData.value = null
-    uploadAvatarField.value?.reset()
+    cropperRef.value?.reset()
+    hasFile.value = false
+    lastFormData.value = null
   }
 )
 </script>
 
 <style lang="scss" scoped>
+.explanation {
+  color: var(--text-alt);
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
 .error {
-  margin-top: 1em;
+  color: $red;
+  margin-top: 1rem;
+  text-align: center;
 }
 </style>

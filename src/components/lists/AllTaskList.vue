@@ -142,7 +142,12 @@
           {{ $t('main.load_more') }}
         </button>
       </div>
-      <table-info :is-loading="isLoading" :is-error="isError" />
+      <table-info
+        :is-loading="isLoading"
+        :is-error="isError"
+        :cells="10"
+        :with-actions="false"
+      />
     </div>
     <p class="has-text-centered nb-tasks" v-if="!isLoading">
       {{ stats.total }}

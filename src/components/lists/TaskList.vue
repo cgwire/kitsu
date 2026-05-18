@@ -257,7 +257,12 @@
           </tr>
         </tbody>
       </table>
-      <table-info :is-loading="isLoading" :is-error="isError" />
+      <table-info
+        :is-loading="isLoading"
+        :is-error="isError"
+        :cells="9"
+        :with-actions="false"
+      />
     </div>
     <div
       class="list-wrapper"

@@ -1394,15 +1394,21 @@ export default {
       return route
     },
 
-    onAnnotationChanged({ preview, additions, deletions, updates }) {
+    async onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = this.task.id
-      this.updatePreviewAnnotation({
-        taskId,
-        preview,
-        additions,
-        deletions,
-        updates
-      })
+      const previewPlayer = this.$refs['preview-player']
+      try {
+        await this.updatePreviewAnnotation({
+          taskId,
+          preview,
+          additions,
+          deletions,
+          updates
+        })
+        previewPlayer?.confirmAnnotationsSaved()
+      } catch {
+        previewPlayer?.restoreFailedAnnotations()
+      }
     },
 
     onAddExtraPreviewClicked() {

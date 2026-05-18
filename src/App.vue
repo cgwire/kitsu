@@ -2529,6 +2529,14 @@ th.validation-cell {
   height: 43px;
 }
 
+// vue-date-picker's default dark border (`#2d2d2d`) is too low-contrast
+// against the picker background. Bump it just enough to read as a
+// border without dominating, and keep the library defaults for
+// everything else (background, hover/focus stay untouched).
+.dp__theme_dark {
+  --dp-border-color: #3a3a3a !important;
+}
+
 #app .v3-emoji-picker.v3-color-theme-dark .v3-sticky {
   text-transform: uppercase;
   font-size: 0.8em;

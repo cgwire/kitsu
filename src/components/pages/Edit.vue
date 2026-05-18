@@ -909,15 +909,20 @@ export default {
       if (isDifferentPreviewFile) this.sendUpdatePlayingStatus()
     },
 
-    onAnnotationChanged({ preview, additions, deletions, updates }) {
+    async onAnnotationChanged({ preview, additions, deletions, updates }) {
       const taskId = preview.task_id
-      this.updatePreviewAnnotation({
-        taskId,
-        preview,
-        additions,
-        deletions,
-        updates
-      })
+      try {
+        await this.updatePreviewAnnotation({
+          taskId,
+          preview,
+          additions,
+          deletions,
+          updates
+        })
+        this.confirmAnnotationsSaved()
+      } catch {
+        this.restoreFailedAnnotations()
+      }
     },
 
     onVideoLoaded() {

@@ -173,7 +173,7 @@ const getters = {
 const actions = {
   saveProfile({ commit, state }, payload) {
     commit(USER_SAVE_PROFILE_LOADING)
-    peopleApi
+    return peopleApi
       .updatePerson(payload.form)
       .then(() => {
         payload.form.id = state.user.id
@@ -182,6 +182,7 @@ const actions = {
       .catch(err => {
         console.error(err)
         commit(USER_SAVE_PROFILE_ERROR)
+        throw err
       })
   },
 
@@ -312,8 +313,8 @@ const actions = {
     return tasks
   },
 
-  async uploadAvatar({ commit, state }) {
-    await peopleApi.postAvatar(state.user.id, state.avatarFormData)
+  async uploadAvatar({ commit, state }, formData) {
+    await peopleApi.postAvatar(state.user.id, formData || state.avatarFormData)
     commit(UPLOAD_AVATAR_END, state.user.id)
   },
 

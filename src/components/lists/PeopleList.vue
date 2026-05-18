@@ -119,7 +119,7 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" :is-error="isError" :cells="8" />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
       {{ nbUsersDetails }}

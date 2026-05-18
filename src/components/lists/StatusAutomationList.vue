@@ -97,7 +97,11 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-status-automations">
       {{ entries.length }}

@@ -176,7 +176,13 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="2"
+      :with-thumbnail="false"
+      :with-actions="false"
+    />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
       {{ tasks.length }} {{ $tc('tasks.tasks', tasks.length) }}

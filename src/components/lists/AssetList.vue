@@ -561,7 +561,7 @@
         <p class="info">{{ $t('assets.empty_list_client') }}</p>
       </div>
 
-      <table-info :is-loading="isLoading" :is-error="isError" />
+      <table-info :is-loading="isLoading" :is-error="isError" big-cells />
     </div>
 
     <asset-list-numbers

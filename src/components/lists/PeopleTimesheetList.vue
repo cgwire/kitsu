@@ -166,7 +166,7 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" :is-error="isError" variant="grid" />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
       {{ people.length }} {{ $tc('people.persons', people.length) }}

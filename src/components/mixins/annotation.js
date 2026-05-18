@@ -1465,24 +1465,72 @@ export const annotationMixin = {
     /*
      * Prepare the data to send to the server for persistance. Emit an event
      * suggesting that annotations should be saved.
+     *
+     * The active additions/updates/deletions arrays are *swapped* into a
+     * pendingSave buffer instead of being wiped, so the parent can call
+     * back via `restoreFailedAnnotations()` to put them back if the save
+     * action rejects (network blip, lock contention, 5xx). Drawings done
+     * during the round-trip land in fresh arrays and are saved on the
+     * next debounce cycle.
      */
     endAnnotationSaving() {
-      if (this.notSaved) {
-        const preview = this.$options.annotatedPreview
-        this.$options.changesToSave = {
-          preview,
-          additions: [...this.additions],
-          updates: [...this.updates],
-          deletions: [...this.deletions]
-        }
-        this.clearModifications()
-        clearTimeout(this.$options.annotationToSave)
-        this.notSaved = false
-        this.$emit('annotation-changed', this.$options.changesToSave)
-        if (this.onAnnotationChanged) {
-          this.onAnnotationChanged(this.$options.changesToSave)
-        }
+      if (!this.notSaved || this.$options.pendingSave) return
+      const preview = this.$options.annotatedPreview
+      const changesToSave = {
+        preview,
+        additions: this.additions,
+        updates: this.updates,
+        deletions: this.deletions
       }
+      this.$options.pendingSave = changesToSave
+      this.$options.changesToSave = changesToSave
+      this.additions = []
+      this.updates = []
+      this.deletions = []
+      clearTimeout(this.$options.annotationToSave)
+      this.notSaved = false
+      this.$emit('annotation-changed', changesToSave)
+      if (this.onAnnotationChanged) {
+        this.onAnnotationChanged(changesToSave)
+      }
+    },
+
+    /*
+     * Called by the parent component once the Vuex save action has
+     * resolved successfully. Drops the in-flight buffer; if drawings
+     * accumulated in the active arrays during the round-trip, flush
+     * them immediately rather than wait for another debounce cycle.
+     */
+    confirmAnnotationsSaved() {
+      this.$options.pendingSave = null
+      if (
+        this.additions.length > 0 ||
+        this.updates.length > 0 ||
+        this.deletions.length > 0
+      ) {
+        this.notSaved = true
+        this.endAnnotationSaving()
+      }
+    },
+
+    /*
+     * Called by the parent component when the Vuex save action rejects.
+     * Pre-pends the in-flight items back to the head of the active
+     * arrays (so they take priority over anything drawn since), flips
+     * notSaved back on and schedules a retry with a longer backoff.
+     */
+    restoreFailedAnnotations() {
+      const pending = this.$options.pendingSave
+      if (!pending) return
+      this.additions = [...pending.additions, ...this.additions]
+      this.updates = [...pending.updates, ...this.updates]
+      this.deletions = [...pending.deletions, ...this.deletions]
+      this.$options.pendingSave = null
+      this.notSaved = true
+      clearTimeout(this.$options.annotationToSave)
+      this.$options.annotationToSave = setTimeout(() => {
+        this.endAnnotationSaving()
+      }, 5000)
     },
 
     /*

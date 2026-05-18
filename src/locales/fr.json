@@ -462,6 +462,7 @@
       "stick": "Coller",
       "timeSpent": "Temps passé",
       "unstick": "Décoller",
+      "unknown": "Inconnu",
       "all_edits": "Tous les edits",
       "attach_snapshots": "Attacher les snapshots de vos annotations",
       "reply": "Répondre",
@@ -577,6 +578,7 @@
       "commented_on": "a commenté sur",
       "infos": "Info",
       "no_news": "Il n'y a pas d'actualités.",
+      "no_news_hint": "Essayez d'élargir les filtres ou revenez plus tard.",
       "only_comments": "Seulement les commentaires",
       "only_previews": "Seulement les previews",
       "set_preview_on": "a mis un preview sur",
@@ -619,6 +621,7 @@
       "only_unread": "Uniquement non lu",
       "only_watching": "Ne faire que regarder",
       "read": "lire",
+      "to_status": "à",
       "reply": "Répondre",
       "publish": "Publier",
       "published": "a publié un aperçu",
@@ -1001,6 +1004,7 @@
       "change_avatar": "Changer Avatar",
       "info_title": "Informations",
       "language": "Langue",
+      "notifications_title": "Notifications",
       "notifications_enabled": "Notifications email activées",
       "notifications_slack_enabled": "Notifications Slack activées",
       "notifications_slack_user": "ID member Slack",
@@ -1010,6 +1014,11 @@
       "avatar": {
         "title": "Changer votre avatar",
         "error_upload": "Une erreur est survenue en envoyant l'image.",
+        "intro": "Choisissez une photo, puis glissez et zoomez pour la cadrer.",
+        "drop_or_click": "Cliquez ou déposez une photo ici",
+        "preview": "Aperçu",
+        "preview_hint": "Glissez pour repositionner, utilisez le curseur pour zoomer.",
+        "replace": "Choisir une autre photo",
         "updating": "Mise à jour...",
         "removing": "Enlever..."
       },
@@ -1031,9 +1040,13 @@
       "clear_avatar": "Effacer avatar",
       "two_factor_authentication": {
         "title": "Authentification double facteur",
+        "status_enabled": "Activée",
+        "status_disabled": "Désactivée",
         "scan_qrcode": "Scannez le code QR dans votre application TOTP.",
         "otp_secret": "Secret OPT",
         "totp": {
+          "name": "Application d'authentification",
+          "description": "Utilisez une application TOTP comme Google Authenticator, Authy ou 1Password.",
           "button_enable": "Activer TOTP",
           "button_disable": "Désactiver TOTP",
           "button_validate_disable": "Valider et désactiver TOTP",
@@ -1042,6 +1055,8 @@
           "error_disable": "Une erreur est survenue en désactivant TOTP."
         },
         "email_otp": {
+          "name": "E-mail",
+          "description": "Recevez un code à usage unique par e-mail à chaque connexion.",
           "button_enable": "Activez l'authentification OTP par email",
           "button_disable": "Désactivez l'authentification OTP par email",
           "button_validate_disable": "Validez et désactivez l'authentification OTP par email",
@@ -1057,6 +1072,8 @@
           "error_new": "Une erreur est survenue en générant les nouveaux codes de récupération."
         },
         "fido": {
+          "name": "Clé de sécurité",
+          "description": "Utilisez une clé matérielle (YubiKey) ou un authentificateur intégré (Touch ID, Windows Hello).",
           "device_name": "Nom de l'appareil FIDO",
           "registered_devices_title": "Appareils FIDO enregistrés",
           "button_register": "Enregistrer un nouvel appareil FIDO",
@@ -1073,6 +1090,7 @@
       "integrations": "Intégrations",
       "logo": "Logo du studio",
       "no_logo": "Aucun logo n' a été positionné.",
+      "preferences_title": "Préférences",
       "set_logo": "Changer le logo",
       "title": "Paramètres",
       "fields": {

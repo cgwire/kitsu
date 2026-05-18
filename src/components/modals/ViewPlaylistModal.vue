@@ -124,14 +124,24 @@ const onPreviewChanged = async ({
   })
 }
 
-const onAnnotationChanged = ({ preview, additions, deletions, updates }) => {
-  store.dispatch('updatePreviewAnnotation', {
-    taskId: preview.task_id,
-    preview,
-    additions,
-    deletions,
-    updates
-  })
+const onAnnotationChanged = async ({
+  preview,
+  additions,
+  deletions,
+  updates
+}) => {
+  try {
+    await store.dispatch('updatePreviewAnnotation', {
+      taskId: preview.task_id,
+      preview,
+      additions,
+      deletions,
+      updates
+    })
+    playlistPlayer.value?.confirmAnnotationsSaved()
+  } catch {
+    playlistPlayer.value?.restoreFailedAnnotations()
+  }
 }
 
 const onAnnotationsRefreshed = preview => {

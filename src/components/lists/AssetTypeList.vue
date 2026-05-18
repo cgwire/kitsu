@@ -18,25 +18,38 @@
         </thead>
         <tbody class="datatable-body" v-if="entries.length">
           <tr class="datatable-row" v-for="entry in entries" :key="entry.id">
-            <td class="name">
+            <td class="name" :data-label="$t('asset_types.fields.name')">
               {{ entry.name }}
               <span :title="entry.description" v-if="entry.description">
                 <help-circle-icon class="icon is-small" />
               </span>
             </td>
-            <td class="short-name">
+            <td
+              class="short-name"
+              :data-label="$t('asset_types.fields.short_name')"
+              v-if="entry.short_name"
+            >
               {{ entry.short_name }}
             </td>
-            <td class="task-types" v-if="entry.task_types?.length">
+            <td class="short-name" v-else></td>
+            <td
+              class="task-types"
+              :data-label="$t('asset_types.fields.task_types')"
+              v-if="entry.task_types?.length"
+            >
               <span
                 :key="taskType.id"
                 class="task-type-name flexrow-item"
-                v-for="taskType in sortTaskTypes(entry.task_types)"
+                v-for="taskType in sortedTaskTypes(entry.task_types)"
               >
                 <task-type-name :task-type="taskType" v-if="taskType.id" />
               </span>
             </td>
-            <td class="task-types" v-else>
+            <td
+              class="task-types"
+              :data-label="$t('asset_types.fields.task_types')"
+              v-else
+            >
               {{ $t('asset_types.include_all') }}
             </td>
             <row-actions-cell
@@ -48,17 +61,23 @@
       </table>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="2"
+      :with-thumbnail="false"
+    />
 
     <p class="has-text-centered nb-asset-types">
-      {{ entries.length }} {{ $tc('asset_types.number', entries.length) }}
+      {{ entries.length }} {{ $t('asset_types.number', entries.length) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
 import { HelpCircleIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { sortTaskTypes } from '@/lib/sorting'
 
@@ -66,46 +85,28 @@ import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'asset-type-list',
+const store = useStore()
 
-  components: {
-    HelpCircleIcon,
-    RowActionsCell,
-    TableInfo,
-    TaskTypeName
-  },
+defineProps({
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false }
+})
 
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    }
-  },
+defineEmits(['delete-clicked', 'edit-clicked'])
 
-  emits: ['delete-clicked', 'edit-clicked'],
+// Computed
 
-  computed: {
-    ...mapGetters(['taskTypeMap'])
-  },
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  methods: {
-    sortTaskTypes(taskTypeIds) {
-      const taskTypes =
-        taskTypeIds
-          ?.map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-          .filter(Boolean) ?? []
-      return sortTaskTypes(taskTypes)
-    }
-  }
+// Functions
+
+const sortedTaskTypes = taskTypeIds => {
+  const taskTypes =
+    taskTypeIds
+      ?.map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+      .filter(Boolean) ?? []
+  return sortTaskTypes(taskTypes)
 }
 </script>
 
@@ -118,5 +119,80 @@ export default {
 .name {
   width: 300px;
   padding: 1em;
+}
+
+@media screen and (max-width: 768px) {
+  // Turn each row into a card: the table head disappears, every cell is
+  // labelled via its data-label attribute, and the actions cell collapses
+  // to a footer row. Keep the wrapper's overflow-y: auto from the global
+  // .datatable-wrapper rule so the list still scrolls inside .fixed-page.
+  :deep(.datatable-wrapper) {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  .datatable,
+  .datatable-body {
+    display: block;
+    width: 100%;
+  }
+
+  .datatable-head {
+    display: none;
+  }
+
+  .datatable-row {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: block;
+    margin-bottom: 0.75em;
+    padding: 0.85em 1em;
+  }
+
+  .dark .datatable-row {
+    background: var(--background-alt);
+  }
+
+  .datatable-row td {
+    border: 0;
+    display: block;
+    padding: 0.4em 0;
+    width: auto;
+  }
+
+  // Cells without a data-label are placeholders to keep the desktop
+  // table columns aligned — collapse them on mobile so empty fields
+  // don't leave gaps.
+  .datatable-row td:not([data-label]):not(.actions):not(.name) {
+    display: none;
+  }
+
+  .datatable-row td[data-label]::before {
+    color: var(--text-alt);
+    content: attr(data-label);
+    display: block;
+    font-size: 0.75em;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.2em;
+    text-transform: uppercase;
+  }
+
+  // The name doubles as the card title — drop its label and bump the
+  // font weight.
+  .datatable-row .name {
+    font-size: 1.05em;
+    font-weight: 600;
+    padding-top: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .datatable-row .actions {
+    display: none;
+  }
 }
 </style>

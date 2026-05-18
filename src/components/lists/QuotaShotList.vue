@@ -23,7 +23,13 @@
       </tbody>
     </table>
 
-    <table-info :is-loading="isLoading" :is-error="isLoadingError" />
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isLoadingError"
+      :cells="2"
+      :with-thumbnail="false"
+      :with-actions="false"
+    />
   </div>
 </template>
 

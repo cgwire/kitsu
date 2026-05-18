@@ -29,7 +29,12 @@
         </tbody>
       </table>
     </div>
-    <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
+    <table-info
+      :is-loading="isLoading"
+      :is-error="isError"
+      :cells="1"
+      :with-thumbnail="false"
+    />
     <p class="has-text-centered nb-studios">
       {{ entries.length }}
       {{ $t('studios.number', entries.length, { n: entries.length }) }}
