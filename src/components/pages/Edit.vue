@@ -226,7 +226,7 @@ import {
   CornerLeftUpIcon
 } from 'lucide-vue-next'
 
-import { entityMixin } from '@/components/mixins/entity'
+import { useEntity } from '@/composables/entity'
 import { getEntitiesPath } from '@/lib/path'
 import editStore from '@/store/modules/edits'
 
@@ -249,8 +249,7 @@ import Schedule from '@/components/widgets/Schedule.vue'
 /* eslint-enable no-unused-vars */
 
 defineOptions({
-  name: 'edit',
-  mixins: [entityMixin]
+  name: 'edit'
 })
 
 // Composables
@@ -261,14 +260,8 @@ const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
 
 // State
-// `type` is referenced indirectly by entityMixin (via `this.type`) so it
-// drives the `currentEntity` / `entityList` / `currentTasks` computeds; it
-// looks unused to ESLint but is load-bearing for the mixin.
-// eslint-disable-next-line no-unused-vars
-const type = 'edit'
 const currentEdit = ref(null)
 const currentPreviewFile = ref(null)
-const currentSection = ref('infos')
 const isLoading = ref(true)
 const previewFiles = ref({})
 const errors = ref({ edit: false })
@@ -289,14 +282,21 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const editMetadataDescriptors = computed(
   () => store.getters.editMetadataDescriptors
 )
-// `getTaskTypePriority` is read indirectly by entityMixin's `currentTasks`
-// computed via `this.getTaskTypePriority`; ESLint can't see that link.
-// eslint-disable-next-line no-unused-vars
-const getTaskTypePriority = computed(() => store.getters.getTaskTypePriority)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+// Single-entity page: `entityList` is just `[currentEdit]` when loaded.
+// The legacy mixin used `editsStore.cache.edits`, but Edit.vue doesn't
+// surface prev/next navigation beyond the loaded edit, and using a
+// computed wrapper keeps the composable contract reactive.
+const entityList = computed(() => Array.from(editStore.cache.editMap.values()))
+
+// `currentEntity` alias used in the template — for type='edit' it's the
+// same object as `currentEdit`, so we expose it under the mixin's old name
+// to avoid a template-wide rename.
+const currentEntity = currentEdit
 
 // Computed (local)
 const title = computed(() => {
@@ -329,13 +329,6 @@ const currentRevisions = computed(
 )
 
 // Functions
-// currentEntity / entityList / previousEntityPath / nextEntityPath /
-// currentTasks / scheduleItems / tasksStartDate / tasksEndDate / zoomLevel /
-// zoomOptions are still provided by entityMixin (declared via
-// defineOptions) and remain available on the component instance. In this
-// page `currentEntity === currentEdit` because `type === 'edit'`, so the
-// script uses `currentEdit` directly while the template keeps using
-// `currentEntity` from the mixin.
 const getCurrentEdit = () =>
   editStore.cache.editMap.get(route.params.edit_id) || null
 
@@ -374,13 +367,28 @@ const resetData = () => {
   })
 }
 
-// `init` is referenced by entityMixin's `$route` watcher via `this.init()`,
-// so it must remain accessible on the component instance — which it is
-// because top-level `<script setup>` bindings are exposed on the instance
-// proxy.
 const init = () => {
   resetData()
 }
+
+// `useEntity` mirrors the bits of the legacy entityMixin that Edit.vue
+// needs. It is wired here because its route watcher invokes `init`.
+const {
+  currentSection,
+  zoomLevel,
+  zoomOptions,
+  scheduleItems,
+  previousEntityPath,
+  nextEntityPath,
+  currentTasks,
+  tasksStartDate,
+  tasksEndDate
+} = useEntity({
+  type: 'edit',
+  currentEntity,
+  entityList,
+  init
+})
 
 const confirmEditEdit = form => {
   form.id = currentEdit.value.id
