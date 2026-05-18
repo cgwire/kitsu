@@ -563,10 +563,6 @@ useHead({
   padding-top: 3px;
 }
 
-.task-list {
-  width: 100%;
-}
-
 .datatable-row {
   user-select: text;
 }
