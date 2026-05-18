@@ -212,6 +212,8 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  provide,
+  reactive,
   ref,
   useTemplateRef,
   watch
@@ -273,6 +275,11 @@ const entityNavOptions = [
   { label: t('main.label.timelog'), value: 'time-logs' }
 ]
 const modals = ref({ edit: false })
+
+// AddComment (inside the player's TaskInfo) injects 'draftComment'.
+// Task.vue provides it at the page level; mirror the same here.
+const draftComment = reactive({})
+provide('draftComment', draftComment)
 
 const previewPlayer = useTemplateRef('preview-player')
 
