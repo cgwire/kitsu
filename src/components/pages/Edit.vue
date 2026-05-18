@@ -360,6 +360,9 @@ const resetData = () => {
         .dispatch('loadTaskEntityPreviewFiles', currentEdit.value.id)
         .then(loadedPreviewFiles => {
           previewFiles.value = loadedPreviewFiles
+          // PreviewsPerTaskType reads `entity.preview_files` directly so
+          // the store-backed edit needs the same map attached.
+          currentEdit.value.preview_files = loadedPreviewFiles
           currentPreviewFile.value = findCurrentPreviewFile()
           isLoading.value = false
         })
