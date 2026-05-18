@@ -41,7 +41,6 @@
       <template v-if="!readOnly">
         <div class="preview-choice" v-if="taskTypeOptions.length > 0">
           <combobox
-            ref="task-type-combobox"
             :thin="true"
             :width="150"
             :options="taskTypeOptions"
@@ -83,7 +82,7 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Widget to describe an entity listed in a playlist. It allows to select a
  * given prevision for a given task type for current entity.
@@ -91,261 +90,218 @@
  */
 import { XIcon } from 'lucide-vue-next'
 import { firstBy } from 'thenby'
-import { mapGetters } from 'vuex'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useStore } from 'vuex'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'playlisted-entity',
+const store = useStore()
 
-  components: {
-    Combobox,
-    LightEntityThumbnail,
-    TaskTypeName,
-    XIcon
+const props = defineProps({
+  entity: {
+    type: Object,
+    default: () => ({})
   },
+  index: {
+    type: Number,
+    default: 0
+  },
+  isPlaying: {
+    type: Boolean,
+    default: false
+  },
+  readOnly: {
+    type: Boolean,
+    default: false
+  },
+  thumbnailUrlPrefix: {
+    type: String,
+    default: ''
+  }
+})
 
-  emits: ['entity-dropped', 'play-click', 'preview-changed', 'remove-entity'],
+const emit = defineEmits([
+  'entity-dropped',
+  'play-click',
+  'preview-changed',
+  'remove-entity'
+])
 
-  data() {
-    return {
-      taskTypeId: null,
-      previewFileId: this.entity.preview_file_id
+const taskTypeId = ref(null)
+const previewFileId = ref(props.entity.preview_file_id)
+const dropAreaRef = useTemplateRef('drop-area')
+
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const playlistEntryMap = computed(() => store.getters.playlistEntryMap)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const previewFiles = computed(() => {
+  if (props.readOnly) return {}
+  const files = { ...props.entity.preview_files }
+  Object.keys(files).forEach(taskTypeId => {
+    files[taskTypeId] = files[taskTypeId].filter(previewFile => {
+      return (
+        !playlistEntryMap.value?.has(`${props.entity.id}-${previewFile.id}`) ||
+        previewFile.id === props.entity.preview_file_id
+      )
+    })
+  })
+  return files
+})
+
+const taskTypeOptions = computed(() => {
+  if (props.readOnly) return []
+  return previewFiles.value
+    ? Object.keys(previewFiles.value)
+        .filter(id => previewFiles.value[id].length > 0)
+        .map(id => taskTypeMap.value?.get(id))
+        .filter(Boolean)
+        .sort(firstBy('priority', 1).thenBy('name'))
+        .map(taskType => ({
+          label: taskType.name,
+          value: taskType.id
+        }))
+    : []
+})
+
+const previewFileOptions = computed(() => {
+  if (props.readOnly) return []
+  const files = previewFiles.value[taskTypeId.value] || []
+  return files.map(previewFile => ({
+    label: `v${previewFile.revision}`,
+    value: previewFile.id
+  }))
+})
+
+const taskStatus = computed(() => {
+  if (props.readOnly) return null
+  const taskId = props.entity.preview_file_task_id
+  if (taskId) {
+    const task = taskMap.value?.get(taskId)
+    if (!task) return null
+    return taskStatusMap.value?.get(task.task_status_id) || null
+  }
+  return null
+})
+
+const readOnlyTaskType = computed(() => {
+  if (!props.readOnly) return null
+  if (props.entity.preview_file_task_type) {
+    return props.entity.preview_file_task_type
+  }
+  const taskId = props.entity.preview_file_task_id
+  const task = taskMap.value?.get(taskId)
+  return (task && taskTypeMap.value?.get(task.task_type_id)) || null
+})
+
+const getTaskTypeIdForPreviewFile = (taskTypeIds, previewFileId) => {
+  return taskTypeIds.find(taskTypeId => {
+    const files = props.entity.preview_files[taskTypeId]
+    return files.some(previewFile => previewFile.id === previewFileId)
+  })
+}
+
+const setCurrentParameters = () => {
+  // Find task type matching current preview.
+  const taskTypeIds = Object.keys(props.entity.preview_files)
+  if (taskTypeIds.length > 0) {
+    if (props.entity.preview_file_id) {
+      taskTypeId.value = getTaskTypeIdForPreviewFile(
+        taskTypeIds,
+        props.entity.preview_file_id
+      )
     }
-  },
-
-  props: {
-    index: {
-      default: 0,
-      type: Number
-    },
-    isPlaying: {
-      default: false,
-      type: Boolean
-    },
-    entity: {
-      default: () => {},
-      type: Object
-    },
-    readOnly: {
-      default: false,
-      type: Boolean
-    },
-    thumbnailUrlPrefix: {
-      default: '',
-      type: String
-    }
-  },
-
-  mounted() {
-    this.setCurrentParameters()
-    this.setListeners()
-  },
-
-  computed: {
-    ...mapGetters([
-      'taskMap',
-      'taskTypeMap',
-      'taskStatusMap',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'playlistEntryMap'
-    ]),
-
-    dropArea() {
-      return this.$refs['drop-area']
-    },
-
-    previewFiles() {
-      if (this.readOnly) return {}
-      const previewFiles = { ...this.entity.preview_files }
-      Object.keys(previewFiles).forEach(taskTypeId => {
-        previewFiles[taskTypeId] = previewFiles[taskTypeId].filter(
-          previewFile => {
-            return (
-              !this.playlistEntryMap?.has(
-                `${this.entity.id}-${previewFile.id}`
-              ) || previewFile.id === this.entity.preview_file_id
-            )
-          }
-        )
-      })
-      return previewFiles
-    },
-
-    taskTypeOptions() {
-      if (this.readOnly) return []
-      return this.previewFiles
-        ? Object.keys(this.previewFiles)
-            .filter(id => this.previewFiles[id].length > 0)
-            .map(id => this.taskTypeMap?.get(id))
-            .filter(Boolean)
-            .sort(firstBy('priority', 1).thenBy('name'))
-            .map(taskType => ({
-              label: taskType.name,
-              value: taskType.id
-            }))
-        : []
-    },
-
-    previewFileOptions() {
-      if (this.readOnly) return []
-      const previewFiles = this.previewFiles[this.taskTypeId] || []
-      return previewFiles.map(previewFile => ({
-        label: `v${previewFile.revision}`,
-        value: previewFile.id
-      }))
-    },
-
-    taskStatus() {
-      if (this.readOnly) return null
-      const taskId = this.entity.preview_file_task_id
-      if (taskId) {
-        const task = this.taskMap?.get(taskId)
-        if (!task) return null
-        return this.taskStatusMap?.get(task.task_status_id) || null
-      }
-      return null
-    },
-
-    readOnlyTaskType() {
-      if (!this.readOnly) return null
-      if (this.entity.preview_file_task_type) {
-        return this.entity.preview_file_task_type
-      }
-      const taskId = this.entity.preview_file_task_id
-      const task = this.taskMap?.get(taskId)
-      return (task && this.taskTypeMap?.get(task.task_type_id)) || null
-    }
-  },
-
-  methods: {
-    getTaskTypeIdForPreviewFile(taskTypeIds, previewFileId) {
-      return taskTypeIds.find(taskTypeId => {
-        const previewFiles = this.entity.preview_files[taskTypeId]
-        return previewFiles.some(previewFile => {
-          return previewFile.id === previewFileId
-        })
-      })
-    },
-
-    setCurrentParameters() {
-      // Find task type matching current preview.
-      const taskTypeIds = Object.keys(this.entity.preview_files)
-      if (taskTypeIds.length > 0) {
-        if (this.entity.preview_file_id) {
-          this.taskTypeId = this.getTaskTypeIdForPreviewFile(
-            taskTypeIds,
-            this.entity.preview_file_id
-          )
-        }
-        if (!this.taskTypeId) {
-          this.taskTypeId = taskTypeIds[0]
-        }
-      }
-    },
-
-    onPlayClick() {
-      this.$emit('play-click', this.index)
-    },
-
-    onRemoveClick(event) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.$emit('remove-entity', {
-        entity: this.entity,
-        previewFileId: this.previewFileId
-      })
-    },
-
-    setListeners() {},
-
-    onDragged() {},
-
-    onDragleave() {
-      this.dropArea.style.width = '15px'
-    },
-
-    onDragover(event) {
-      event.preventDefault()
-      this.dropArea.style.width = '60px'
-    },
-
-    onDropped(event) {
-      this.dropArea.style.width = '15px'
-      this.$emit('entity-dropped', {
-        before: {
-          entity_id: this.entity.id,
-          preview_file_id: this.previewFileId
-        },
-        after: {
-          entity_id: event.dataTransfer.getData('entityId'),
-          preview_file_id: event.dataTransfer.getData('previewFileId')
-        }
-      })
-    },
-
-    setTaskTypeId(taskTypeId) {
-      this.$options.silent = true
-      this.taskTypeId = taskTypeId
-      this.$nextTick(() => {
-        this.$options.silent = false
-      })
-    },
-
-    setPreviewFileId(previewFileId) {
-      this.$options.silent = true
-      this.previewFileId = previewFileId
-      this.$nextTick(() => {
-        this.$options.silent = false
-      })
-    }
-  },
-
-  watch: {
-    taskTypeId() {
-      // Set current preview was last preview selected. If there is no preview
-      // matching this task type, it selects the first preview available for
-      // this task type.
-      const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles && previewFiles.length > 0) {
-        const isPreviewFile = previewFiles.some(previewFile => {
-          return previewFile.id === this.entity.preview_file_id
-        })
-        if (isPreviewFile) {
-          this.previewFileId = this.entity.preview_file_id
-        } else {
-          this.previewFileId = previewFiles[0].id
-        }
-      }
-    },
-
-    previewFileId(newValue, oldValue) {
-      let previewFile = null
-      const previewFiles = this.entity.preview_files[this.taskTypeId]
-      if (previewFiles && previewFiles.length > 0) {
-        previewFile = previewFiles.find(previewFile => {
-          return previewFile.id === this.previewFileId
-        })
-      }
-      if (!this.$options.silent) {
-        this.$emit('preview-changed', {
-          entity: this.entity,
-          previewFile: previewFile,
-          previousPreviewFileId: oldValue
-        })
-      }
-    },
-
-    'entity.preview_file_id'() {
-      if (this.previewFileId !== this.entity.preview_file_id) {
-        this.previewFileId = this.entity.preview_file_id
-      }
+    if (!taskTypeId.value) {
+      taskTypeId.value = taskTypeIds[0]
     }
   }
 }
+
+const onPlayClick = () => {
+  emit('play-click', props.index)
+}
+
+const onRemoveClick = event => {
+  event.preventDefault()
+  event.stopPropagation()
+  emit('remove-entity', {
+    entity: props.entity,
+    previewFileId: previewFileId.value
+  })
+}
+
+const onDragleave = () => {
+  dropAreaRef.value.style.width = '15px'
+}
+
+const onDragover = event => {
+  event.preventDefault()
+  dropAreaRef.value.style.width = '60px'
+}
+
+const onDropped = event => {
+  dropAreaRef.value.style.width = '15px'
+  emit('entity-dropped', {
+    before: {
+      entity_id: props.entity.id,
+      preview_file_id: previewFileId.value
+    },
+    after: {
+      entity_id: event.dataTransfer.getData('entityId'),
+      preview_file_id: event.dataTransfer.getData('previewFileId')
+    }
+  })
+}
+
+watch(taskTypeId, () => {
+  // Set current preview was last preview selected. If there is no preview
+  // matching this task type, it selects the first preview available for
+  // this task type.
+  const files = props.entity.preview_files[taskTypeId.value]
+  if (files && files.length > 0) {
+    const isPreviewFile = files.some(previewFile => {
+      return previewFile.id === props.entity.preview_file_id
+    })
+    if (isPreviewFile) {
+      previewFileId.value = props.entity.preview_file_id
+    } else {
+      previewFileId.value = files[0].id
+    }
+  }
+})
+
+watch(previewFileId, (newValue, oldValue) => {
+  let previewFile = null
+  const files = props.entity.preview_files[taskTypeId.value]
+  if (files && files.length > 0) {
+    previewFile = files.find(file => file.id === newValue)
+  }
+  emit('preview-changed', {
+    entity: props.entity,
+    previewFile,
+    previousPreviewFileId: oldValue
+  })
+})
+
+watch(
+  () => props.entity.preview_file_id,
+  () => {
+    if (previewFileId.value !== props.entity.preview_file_id) {
+      previewFileId.value = props.entity.preview_file_id
+    }
+  }
+)
+
+onMounted(() => {
+  setCurrentParameters()
+})
 </script>
 
 <style lang="scss" scoped>
