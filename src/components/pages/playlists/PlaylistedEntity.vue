@@ -144,16 +144,18 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const previewFiles = computed(() => {
   if (props.readOnly) return {}
-  const files = { ...props.entity.preview_files }
-  Object.keys(files).forEach(taskTypeId => {
-    files[taskTypeId] = files[taskTypeId].filter(previewFile => {
-      return (
-        !playlistEntryMap.value?.has(`${props.entity.id}-${previewFile.id}`) ||
-        previewFile.id === props.entity.preview_file_id
-      )
-    })
-  })
-  return files
+  return Object.fromEntries(
+    Object.entries(props.entity.preview_files).map(([taskTypeId, files]) => [
+      taskTypeId,
+      files.filter(previewFile => {
+        return (
+          !playlistEntryMap.value?.has(
+            `${props.entity.id}-${previewFile.id}`
+          ) || previewFile.id === props.entity.preview_file_id
+        )
+      })
+    ])
+  )
 })
 
 const taskTypeOptions = computed(() => {
@@ -317,15 +319,14 @@ onMounted(() => {
 }
 
 .playlisted-entity {
-  border-top: 3px solid transparent;
-  border-radius: 5px;
   border: 3px solid transparent;
+  border-radius: 5px;
   box-shadow: 2px 2px 2px $dark-grey-strong;
   background: $dark-grey-lighter;
   display: flex;
   flex-direction: column;
   min-width: 150px;
-  padding: 4px 4px;
+  padding: 4px;
 
   &:hover {
     border: 3px solid var(--background-selectable);
@@ -352,14 +353,6 @@ onMounted(() => {
   :deep(.thumbnail-picture) {
     background-color: #000;
   }
-
-  img {
-    border-radius: 5px;
-  }
-}
-
-.field {
-  margin-bottom: 0;
 }
 
 .version-combo {
