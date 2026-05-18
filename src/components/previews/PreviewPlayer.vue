@@ -201,6 +201,7 @@
             :pencil-width="pencilWidth"
             :production-backgrounds="productionBackgrounds"
             :read-only="readOnly"
+            :show-comments-button="showCommentsButton"
             :text-color="textColor"
             v-model:current-background="currentBackground"
             v-model:is-environment-skybox="isEnvironmentSkybox"
@@ -440,6 +441,10 @@ const props = defineProps({
     type: String
   },
   readOnly: {
+    type: Boolean,
+    default: false
+  },
+  showCommentsButton: {
     type: Boolean,
     default: false
   },

@@ -63,6 +63,7 @@
           :task-type-map="taskTypeMap"
           entity-type="Edit"
           :last-preview-files="currentRevisions"
+          :show-comments-button="true"
           @annotation-changed="onAnnotationChanged"
           @change-current-preview="onChangeCurrentPreview"
         />

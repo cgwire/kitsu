@@ -91,7 +91,7 @@
       :active="!isCommentsHidden"
       :title="$t('playlists.actions.comments')"
       @click="$emit('comment-clicked')"
-      v-if="!readOnly && fullScreen"
+      v-if="!readOnly && (fullScreen || showCommentsButton)"
     />
   </div>
 
@@ -214,6 +214,10 @@ defineProps({
     default: () => []
   },
   readOnly: {
+    type: Boolean,
+    default: false
+  },
+  showCommentsButton: {
     type: Boolean,
     default: false
   },
