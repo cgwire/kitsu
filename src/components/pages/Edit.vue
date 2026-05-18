@@ -69,17 +69,15 @@
       </div>
 
       <div class="edit-data block">
-        <div class="flexrow">
-          <combobox-styled
-            class="section-combo flexrow-item"
-            :options="entityNavOptions"
-            v-model="currentSection"
-          />
-          <div class="filler"></div>
-          <span
-            class="flexrow-item mt05"
-            v-show="currentSection === 'schedule'"
-          >
+        <route-section-tabs
+          class="section-tabs"
+          :active-tab="currentSection"
+          :route="route"
+          :tabs="editTabs"
+        />
+
+        <div class="flexrow mt1" v-if="currentSection === 'schedule'">
+          <span class="flexrow-item mt05">
             {{ $t('schedule.zoom_level') }}:
           </span>
           <combobox-number
@@ -87,7 +85,6 @@
             :options="zoomOptions"
             is-simple
             v-model="zoomLevel"
-            v-show="currentSection === 'schedule'"
           />
         </div>
 
@@ -235,7 +232,6 @@ import editStore from '@/store/modules/edits'
 /* eslint-disable no-unused-vars */
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
@@ -247,6 +243,7 @@ import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 /* eslint-enable no-unused-vars */
 
@@ -267,13 +264,13 @@ const currentPreviewFile = ref(null)
 const isLoading = ref(true)
 const previewFiles = ref({})
 const errors = ref({ edit: false })
-const entityNavOptions = [
-  { label: t('main.label.info'), value: 'infos' },
-  { label: t('main.label.schedule'), value: 'schedule' },
-  { label: t('main.label.preview_files'), value: 'preview-files' },
-  { label: t('main.activity'), value: 'activity' },
-  { label: t('main.label.timelog'), value: 'time-logs' }
-]
+const editTabs = computed(() => [
+  { label: t('main.label.info'), name: 'infos' },
+  { label: t('main.label.schedule'), name: 'schedule' },
+  { label: t('main.label.preview_files'), name: 'preview-files' },
+  { label: t('main.activity'), name: 'activity' },
+  { label: t('main.label.timelog'), name: 'time-logs' }
+])
 const modals = ref({ edit: false })
 
 // AddComment (inside the player's TaskInfo) injects 'draftComment'.
