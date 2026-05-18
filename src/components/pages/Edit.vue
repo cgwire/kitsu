@@ -88,62 +88,51 @@
           />
         </div>
 
-        <div
-          ref="info-row"
-          class="infos flexrow pa0"
-          v-if="currentSection === 'infos'"
-        >
-          <div class="flexrow-item">
-            <div class="flexrow">
-              <div class="flexcolumn flexrow-item">
-                <page-subtitle class="flerow-item" :text="$t('edits.tasks')" />
-                <entity-task-list
-                  class="task-list flexrow-item"
-                  :entries="currentTasks"
-                  :is-loading="!currentEdit"
-                  :is-error="false"
-                />
-              </div>
-
-              <div class="flexcolumn flexrow-item">
-                <div class="flexrow">
-                  <page-subtitle class="flerow-item" :text="$t('main.info')" />
-                  <div class="flexrow-item has-text-right">
-                    <button-simple
-                      icon="edit"
-                      :title="$t('edits.edit_title')"
-                      @click="modals.edit = true"
-                      v-if="isCurrentUserManager"
-                    />
-                  </div>
-                </div>
-                <div class="table-body edit-metadata flexrow-item">
-                  <table class="datatable no-header" v-if="currentEdit">
-                    <tbody class="datatable-body">
-                      <tr class="datatable-row">
-                        <td class="field-label">
-                          {{ $t('edits.fields.description') }}
-                        </td>
-                        <description-cell :entry="currentEdit" :full="true" />
-                      </tr>
-                      <tr
-                        :key="descriptor.id"
-                        class="datatable-row"
-                        v-for="descriptor in editMetadataDescriptors"
-                      >
-                        <td class="field-label">{{ descriptor.name }}</td>
-                        <td>
-                          <metadata-value
-                            :descriptor="descriptor"
-                            :entity="currentEdit"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
+          <page-subtitle :text="$t('edits.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="currentTasks"
+            :is-loading="!currentEdit"
+            :is-error="false"
+          />
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                :title="$t('edits.edit_title')"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
             </div>
+          </div>
+
+          <div class="table-body edit-metadata">
+            <table class="datatable no-header" v-if="currentEdit">
+              <tbody class="datatable-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('edits.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentEdit" :full="true" />
+                </tr>
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in editMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    <metadata-value
+                      :descriptor="descriptor"
+                      :entity="currentEdit"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -527,6 +516,7 @@ useHead({
 
 .entity-title {
   font-weight: bold;
+  margin-right: 1em;
 }
 
 .entity-thumbnail {
@@ -557,12 +547,11 @@ useHead({
 }
 
 .infos {
+  height: 100%;
   margin-top: 1em;
-
-  .flexrow-item {
-    align-self: flex-start;
-    flex: 1;
-  }
+  margin-bottom: 1em;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .field-label {
