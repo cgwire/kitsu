@@ -102,6 +102,7 @@ const isPlaylistPage = computed(() => route.path.indexOf('playlist') > 0)
 const currentEntityType = computed(() => {
   if (route.path.indexOf('asset') > 0) return 'asset'
   if (route.path.indexOf('sequence') > 0) return 'sequence'
+  if (route.path.indexOf('edit') > 0) return 'edit'
   return 'shot'
 })
 

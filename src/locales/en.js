@@ -1117,6 +1117,7 @@ export default {
     add_selection: 'Add selection',
     add_sequences: 'Add sequences',
     add_shots: 'Add shots',
+    add_edits: 'Add edits',
     add_sequence: 'Add entire sequence',
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',

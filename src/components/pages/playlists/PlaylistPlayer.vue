@@ -133,8 +133,12 @@
           :is-hd="isHd"
           :is-repeating="isRepeating"
           :muted="true"
-          :handle-in="playlist.for_entity === 'shot' ? handleIn : -1"
-          :handle-out="playlist.for_entity === 'shot' ? handleOut : -1"
+          :handle-in="
+            ['shot', 'edit'].includes(playlist.for_entity) ? handleIn : -1
+          "
+          :handle-out="
+            ['shot', 'edit'].includes(playlist.for_entity) ? handleOut : -1
+          "
           v-show="
             isComparing &&
             isCurrentPreviewMovie &&
@@ -1270,10 +1274,12 @@ export default {
       'isTVShow',
       'organisation',
       'personMap',
+      'editMap',
       'previewFileMap',
       'productionBackgrounds',
       'shotMap',
       'productionAssetTaskTypes',
+      'productionEditTaskTypes',
       'productionSequenceTaskTypes',
       'productionShotTaskTypes',
       'taskMap',
@@ -1439,12 +1445,16 @@ export default {
     },
 
     entityTaskTypes() {
-      if (this.playlist.for_entity === 'asset') {
-        return this.productionAssetTaskTypes
-      } else if (this.playlist.for_entity === 'shot') {
-        return this.productionShotTaskTypes
-      } else {
-        return this.productionSequenceTaskTypes
+      switch (this.playlist.for_entity) {
+        case 'asset':
+          return this.productionAssetTaskTypes
+        case 'edit':
+          return this.productionEditTaskTypes
+        case 'sequence':
+          return this.productionSequenceTaskTypes
+        case 'shot':
+        default:
+          return this.productionShotTaskTypes
       }
     },
 
@@ -2320,12 +2330,13 @@ export default {
     },
 
     resetHandles(entity) {
-      if (this.playlist.for_entity === 'shot') {
-        entity = entity || this.currentEntity
-        const shot = this.shotMap.get(entity?.id)
-        this.handleIn = shot?.data?.handle_in || 0
-        this.handleOut = shot?.data?.handle_out || this.nbFrames
-      }
+      if (!['shot', 'edit'].includes(this.playlist.for_entity)) return
+      entity = entity || this.currentEntity
+      const entityMap =
+        this.playlist.for_entity === 'edit' ? this.editMap : this.shotMap
+      const source = entityMap?.get(entity?.id)
+      this.handleIn = source?.data?.handle_in || 0
+      this.handleOut = source?.data?.handle_out || this.nbFrames
     },
 
     resetPlaylistFrameData() {
