@@ -205,22 +205,32 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useHead } from '@unhead/vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CornerLeftUpIcon
 } from 'lucide-vue-next'
 
+import { entityMixin } from '@/components/mixins/entity'
+import { getEntitiesPath } from '@/lib/path'
 import editStore from '@/store/modules/edits'
 
-import { domMixin } from '@/components/mixins/dom'
-import { entityMixin } from '@/components/mixins/entity'
-import { formatListMixin } from '@/components/mixins/format'
-import { fullScreenMixin } from '@/components/mixins/fullscreen'
-import { getEntitiesPath } from '@/lib/path'
-
+/* eslint-disable no-unused-vars */
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -229,281 +239,266 @@ import EditEditModal from '@/components/modals/EditEditModal.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
-import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import MetadataValue from '@/components/widgets/MetadataValue.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
 import PreviewsPerTaskType from '@/components/previews/PreviewsPerTaskType.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
+defineOptions({
   name: 'edit',
+  mixins: [entityMixin]
+})
 
-  mixins: [domMixin, entityMixin, formatListMixin, fullScreenMixin],
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
+const instance = getCurrentInstance()
+const socket = instance.appContext.config.globalProperties.$socket
 
-  components: {
-    ButtonSimple,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    CornerLeftUpIcon,
-    ComboboxStyled,
-    ComboboxNumber,
-    DescriptionCell,
-    EditEditModal,
-    EntityNews,
-    EntityPreviewFiles,
-    EntityTaskList,
-    EntityTimeLogs,
-    EntityThumbnail,
-    MetadataValue,
-    PageSubtitle,
-    PreviewPlayer,
-    PreviewsPerTaskType,
-    Schedule
-  },
+// State
+// `type` is referenced indirectly by entityMixin (via `this.type`) so it
+// drives the `currentEntity` / `entityList` / `currentTasks` computeds; it
+// looks unused to ESLint but is load-bearing for the mixin.
+// eslint-disable-next-line no-unused-vars
+const type = 'edit'
+const currentEdit = ref(null)
+const currentPreviewFile = ref(null)
+const currentSection = ref('infos')
+const isLoading = ref(true)
+const previewFiles = ref({})
+const errors = ref({ edit: false })
+const entityNavOptions = [
+  { label: t('main.label.info'), value: 'infos' },
+  { label: t('main.label.schedule'), value: 'schedule' },
+  { label: t('main.label.preview_files'), value: 'preview-files' },
+  { label: t('main.activity'), value: 'activity' },
+  { label: t('main.label.timelog'), value: 'time-logs' }
+]
+const modals = ref({ edit: false })
 
-  data() {
-    return {
-      type: 'edit',
-      currentEdit: null,
-      currentPreviewFile: null,
-      currentSection: 'infos',
-      isLoading: true,
-      isError: false,
-      previewFiles: {},
-      errors: {
-        edit: false
-      },
-      entityNavOptions: [
-        { label: this.$t('main.label.info'), value: 'infos' },
-        { label: this.$t('main.label.schedule'), value: 'schedule' },
-        { label: this.$t('main.label.preview_files'), value: 'preview-files' },
-        { label: this.$t('main.activity'), value: 'activity' },
-        { label: this.$t('main.label.timelog'), value: 'time-logs' }
-      ],
-      modals: {
-        edit: false
+const previewPlayer = useTemplateRef('preview-player')
+
+// Computed (Vuex getters)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const editMetadataDescriptors = computed(
+  () => store.getters.editMetadataDescriptors
+)
+// `getTaskTypePriority` is read indirectly by entityMixin's `currentTasks`
+// computed via `this.getTaskTypePriority`; ESLint can't see that link.
+// eslint-disable-next-line no-unused-vars
+const getTaskTypePriority = computed(() => store.getters.getTaskTypePriority)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+// Computed (local)
+const title = computed(() => {
+  if (!currentEdit.value) return t('main.loading')
+  return currentEdit.value.episode_name
+    ? `${currentEdit.value.episode_name} / ${currentEdit.value.name}`
+    : currentEdit.value.name
+})
+
+const editsPath = computed(() =>
+  getEntitiesPath(
+    currentProduction.value.id,
+    'edits',
+    currentEpisode.value ? currentEpisode.value.id : currentEpisode.value
+  )
+)
+
+const currentTask = computed(() => {
+  const taskId = currentPreviewFile.value?.task_id
+  if (!taskId) return undefined
+  return taskMap.value.get(taskId) || undefined
+})
+
+const currentTaskTypeId = computed(
+  () => currentTask.value?.task_type_id || null
+)
+
+const currentRevisions = computed(
+  () => previewFiles.value[currentTaskTypeId.value] || []
+)
+
+// Functions
+// currentEntity / entityList / previousEntityPath / nextEntityPath /
+// currentTasks / scheduleItems / tasksStartDate / tasksEndDate / zoomLevel /
+// zoomOptions are still provided by entityMixin (declared via
+// defineOptions) and remain available on the component instance. In this
+// page `currentEntity === currentEdit` because `type === 'edit'`, so the
+// script uses `currentEdit` directly while the template keeps using
+// `currentEntity` from the mixin.
+const getCurrentEdit = () =>
+  editStore.cache.editMap.get(route.params.edit_id) || null
+
+const findCurrentPreviewFile = () => {
+  // Pick the preview file flagged as current on the edit when it still
+  // matches one of the task-type buckets, otherwise fall back to the
+  // first available preview so <preview-player> has something to show.
+  const editPreviewId = currentEdit.value?.preview_file_id
+  for (const taskTypeId in previewFiles.value) {
+    const previewFile = previewFiles.value[taskTypeId].find(
+      p => p.id === editPreviewId
+    )
+    if (previewFile) return previewFile
+  }
+  const firstBucket = Object.values(previewFiles.value).find(
+    bucket => bucket.length > 0
+  )
+  return firstBucket ? firstBucket[0] : null
+}
+
+const resetData = () => {
+  nextTick(() => {
+    store.dispatch('loadEdits').then(() => {
+      currentEdit.value = getCurrentEdit()
+      if (!currentEdit.value) {
+        return
       }
-    }
-  },
-
-  mounted() {
-    this.init()
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'getTaskPreviews',
-      'getTaskTypePriority',
-      'isCurrentUserManager',
-      'isTVShow',
-      'route',
-      'editMetadataDescriptors',
-      'taskMap',
-      'taskTypeMap',
-      'user'
-    ]),
-
-    title() {
-      if (this.currentEdit) {
-        if (this.currentEdit.episode_name) {
-          return `${this.currentEdit.episode_name} / ${this.currentEdit.name}`
-        } else {
-          return `${this.currentEdit.name}`
-        }
-      } else {
-        return this.$t('main.loading')
-      }
-    },
-
-    editsPath() {
-      return getEntitiesPath(
-        this.currentProduction.id,
-        'edits',
-        this.currentEpisode ? this.currentEpisode.id : this.currentEpisode
-      )
-    },
-
-    currentTask() {
-      const taskId = this.currentPreviewFile?.task_id
-      if (!taskId) return undefined
-      return this.taskMap.get(taskId) || undefined
-    },
-
-    currentTaskTypeId() {
-      return this.currentTask?.task_type_id || null
-    },
-
-    currentRevisions() {
-      return this.previewFiles[this.currentTaskTypeId] || []
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'editEdit',
-      'loadEdits',
-      'loadTaskEntityPreviewFiles',
-      'updatePreviewAnnotation'
-    ]),
-
-    init() {
-      this.resetData()
-    },
-
-    getCurrentEdit() {
-      return editStore.cache.editMap.get(this.route.params.edit_id) || null
-    },
-
-    confirmEditEdit(form) {
-      form.id = this.currentEdit.id
-      this.isLoading = true
-      this.errors.edit = false
-      this.editEdit(form)
-        .then(() => {
-          this.isLoading = false
-          this.modals.edit = false
+      store
+        .dispatch('loadTaskEntityPreviewFiles', currentEdit.value.id)
+        .then(loadedPreviewFiles => {
+          previewFiles.value = loadedPreviewFiles
+          currentPreviewFile.value = findCurrentPreviewFile()
+          isLoading.value = false
         })
-        .catch(err => {
-          console.error(err)
-          this.isLoading = false
-          this.errors.edit = true
-        })
-    },
+    })
+  })
+}
 
-    onPreviewChanged(entity, previewFile) {
-      // PreviewsPerTaskType emits preview-changed when the user picks a
-      // different task type or revision. Update the local selection so
-      // currentTaskTypeId / currentRevisions recompute and the
-      // <preview-player> stays in sync.
-      // TODO: handle the situation when no preview file is selected (e.g. if selected task has none)
-      this.currentPreviewFile = previewFile || null
-      if (previewFile && this.currentEntity) {
-        this.currentEntity.preview_file_id = previewFile.id
+// `init` is referenced by entityMixin's `$route` watcher via `this.init()`,
+// so it must remain accessible on the component instance — which it is
+// because top-level `<script setup>` bindings are exposed on the instance
+// proxy.
+const init = () => {
+  resetData()
+}
+
+const confirmEditEdit = form => {
+  form.id = currentEdit.value.id
+  isLoading.value = true
+  errors.value.edit = false
+  store
+    .dispatch('editEdit', form)
+    .then(() => {
+      isLoading.value = false
+      modals.value.edit = false
+    })
+    .catch(err => {
+      console.error(err)
+      isLoading.value = false
+      errors.value.edit = true
+    })
+}
+
+const onPreviewChanged = (entity, previewFile) => {
+  // PreviewsPerTaskType emits preview-changed when the user picks a
+  // different task type or revision. Update the local selection so
+  // currentTaskTypeId / currentRevisions recompute and the
+  // <preview-player> stays in sync.
+  // TODO: handle the situation when no preview file is selected (e.g. if selected task has none)
+  currentPreviewFile.value = previewFile || null
+  if (previewFile && currentEdit.value) {
+    currentEdit.value.preview_file_id = previewFile.id
+  }
+}
+
+const onChangeCurrentPreview = previewFile => {
+  // PreviewPlayer emits change-current-preview when the user picks a
+  // different revision inside the player. Mirror it back into the
+  // PreviewsPerTaskType combo via the shared state.
+  if (previewFile) onPreviewChanged(currentEdit.value, previewFile)
+}
+
+const onAnnotationChanged = async ({
+  preview,
+  additions,
+  deletions,
+  updates
+}) => {
+  const taskId = preview.task_id
+  try {
+    await store.dispatch('updatePreviewAnnotation', {
+      taskId,
+      preview,
+      additions,
+      deletions,
+      updates
+    })
+    previewPlayer.value?.confirmAnnotationsSaved()
+  } catch {
+    previewPlayer.value?.restoreFailedAnnotations()
+  }
+}
+
+const onPreviewFilesUpdate = () => {
+  // FIXME: combo should continue displaying currently selected task preview unless it's no longer available (e.g. was deleted along with the comment)
+  store
+    .dispatch('loadTaskEntityPreviewFiles', currentEdit.value.id)
+    .then(loadedPreviewFiles => {
+      previewFiles.value = loadedPreviewFiles
+      if (currentEdit.value) {
+        currentEdit.value.preview_files = loadedPreviewFiles
       }
-    },
+    })
+}
 
-    onChangeCurrentPreview(previewFile) {
-      // PreviewPlayer emits change-current-preview when the user picks a
-      // different revision inside the player. Mirror it back into the
-      // PreviewsPerTaskType combo via the shared state.
-      if (previewFile) this.onPreviewChanged(this.currentEntity, previewFile)
-    },
-
-    async onAnnotationChanged({ preview, additions, deletions, updates }) {
-      const taskId = preview.task_id
-      const previewPlayer = this.$refs['preview-player']
-      try {
-        await this.updatePreviewAnnotation({
-          taskId,
-          preview,
-          additions,
-          deletions,
-          updates
-        })
-        previewPlayer?.confirmAnnotationsSaved()
-      } catch {
-        previewPlayer?.restoreFailedAnnotations()
-      }
-    },
-
-    resetData() {
-      this.$nextTick(() => {
-        this.loadEdits().then(() => {
-          this.currentEdit = this.getCurrentEdit()
-          if (!this.currentEdit) {
-            return
-          }
-          this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
-            previewFiles => {
-              this.previewFiles = previewFiles
-              this.currentPreviewFile = this.findCurrentPreviewFile()
-              this.isLoading = false
-            }
-          )
-        })
-      })
-    },
-
-    findCurrentPreviewFile() {
-      // Pick the preview file flagged as current on the edit when it still
-      // matches one of the task-type buckets, otherwise fall back to the
-      // first available preview so <preview-player> has something to show.
-      const editPreviewId = this.currentEdit?.preview_file_id
-      for (const taskTypeId in this.previewFiles) {
-        const previewFile = this.previewFiles[taskTypeId].find(
-          p => p.id === editPreviewId
-        )
-        if (previewFile) return previewFile
-      }
-      const firstBucket = Object.values(this.previewFiles).find(
-        bucket => bucket.length > 0
-      )
-      return firstBucket ? firstBucket[0] : null
-    },
-
-    onPreviewFilesUpdate() {
-      // FIXME: combo should continue displaying currently selected task preview unless it's no longer available (e.g. was deleted along with the comment)
-      this.loadTaskEntityPreviewFiles(this.currentEdit.id).then(
-        previewFiles => {
-          this.previewFiles = previewFiles
-          if (this.currentEntity) {
-            this.currentEntity.preview_files = previewFiles
-          }
-        }
-      )
-    }
-  },
-
-  watch: {
-    // Needed when reloading the page with F5
-    currentProduction() {
-      if (!this.isTVShow) this.resetData()
-    },
-
-    currentEpisode() {
-      if (this.isTVShow && editStore.cache.editMap.size === 0) {
-        this.resetData()
-      }
-    }
-  },
-
-  socket: {
-    events: {
-      'preview-file:add-file'(eventData) {
-        if (eventData.project_id !== this.currentProduction.id) return
-        const taskId = eventData.task_id
-
-        const previews = this.previewFiles
-        for (const taskTypeId in previews) {
-          const previewFile = previews[taskTypeId].find(
-            p => p.task_id === taskId
-          )
-          if (previewFile) {
-            // Added preview affects one of the tasks, preview files must be refreshed
-            this.onPreviewFilesUpdate()
-            break
-          }
-        }
-      },
-
-      'comment:delete'(eventData) {
-        // Deleting a comment might remove a task preview, preview files must be refreshed
-        if (eventData.project_id !== this.currentProduction.id) return
-        this.onPreviewFilesUpdate()
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.title} - Kitsu`
+const onPreviewFileAddFile = eventData => {
+  if (eventData.project_id !== currentProduction.value.id) return
+  const taskId = eventData.task_id
+  const previews = previewFiles.value
+  for (const taskTypeId in previews) {
+    const previewFile = previews[taskTypeId].find(p => p.task_id === taskId)
+    if (previewFile) {
+      // Added preview affects one of the tasks, preview files must be refreshed
+      onPreviewFilesUpdate()
+      break
     }
   }
 }
+
+const onCommentDelete = eventData => {
+  // Deleting a comment might remove a task preview, preview files must be refreshed
+  if (eventData.project_id !== currentProduction.value.id) return
+  onPreviewFilesUpdate()
+}
+
+// Watchers
+// Needed when reloading the page with F5
+watch(currentProduction, () => {
+  if (!isTVShow.value) resetData()
+})
+
+watch(currentEpisode, () => {
+  if (isTVShow.value && editStore.cache.editMap.size === 0) {
+    resetData()
+  }
+})
+
+// Lifecycle
+onMounted(() => {
+  socket.on('preview-file:add-file', onPreviewFileAddFile)
+  socket.on('comment:delete', onCommentDelete)
+  init()
+})
+
+onBeforeUnmount(() => {
+  socket.off('preview-file:add-file', onPreviewFileAddFile)
+  socket.off('comment:delete', onCommentDelete)
+})
+
+// Head
+useHead({
+  title: computed(() => `${title.value} - Kitsu`)
+})
 </script>
 
 <style lang="scss" scoped>
