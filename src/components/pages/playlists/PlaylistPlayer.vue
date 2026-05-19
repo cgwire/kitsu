@@ -143,10 +143,43 @@
               ? handleOut
               : -1
           "
+          @metadata-loaded="updateComparisonAnchor"
           v-show="
             isComparing &&
             isCurrentPreviewMovie &&
             isMovieComparison &&
+            !isFullMode &&
+            !isLoading
+          "
+        />
+
+        <div
+          ref="comparison-content-anchor"
+          class="comparison-content-anchor"
+          v-show="
+            isComparing &&
+            isCurrentPreviewMovie &&
+            isMovieComparison &&
+            !isComparisonOverlay &&
+            !isFullMode &&
+            !isLoading
+          "
+        />
+
+        <annotation-canvas
+          ref="comparison-annotation-canvas"
+          canvas-id="playlist-annotation-canvas-comparison"
+          :media-element="comparisonContentAnchorEl"
+          :interactive="false"
+          :static="true"
+          @resized="onComparisonCanvasResized"
+          v-show="
+            isAnnotationsDisplayed &&
+            isComparing &&
+            isCurrentPreviewMovie &&
+            isMovieComparison &&
+            currentRevisionToCompare &&
+            !isComparisonOverlay &&
             !isFullMode &&
             !isLoading
           "
@@ -351,6 +384,7 @@
       ref="video-progress"
       class="video-progress pull-bottom"
       :annotations="annotations"
+      :comparison-annotations="comparisonAnnotations"
       :empty="!isCurrentPreviewMovie"
       :frame-duration="frameDuration"
       :is-full-mode="isFullMode"
@@ -1077,6 +1111,7 @@ import SharePlaylistModal from '@/components/modals/SharePlaylistModal.vue'
 
 import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
 
+import AnnotationCanvas from '@/components/previews/AnnotationCanvas.vue'
 import MultiPictureViewer from '@/components/previews/MultiPictureViewer.vue'
 import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
@@ -1179,6 +1214,10 @@ const progress = useTemplateRef('video-progress')
 const playlistProgressRef = useTemplateRef('playlist-progress')
 const playlistedEntities = useTemplateRef('playlisted-entities')
 const taskInfoRef = useTemplateRef('task-info')
+const comparisonAnnotationCanvas = useTemplateRef(
+  'comparison-annotation-canvas'
+)
+const comparisonContentAnchor = useTemplateRef('comparison-content-anchor')
 
 // — Non-reactive (instance state)
 let isMounted = false
@@ -1522,6 +1561,22 @@ const currentComparisonPreviewLength = computed(() => {
   return previews ? previews.length + 1 : 0
 })
 
+const comparisonAnnotations = computed(() =>
+  isComparing.value && currentRevisionToCompare.value
+    ? currentRevisionToCompare.value.annotations || []
+    : []
+)
+
+// AnnotationCanvas overlays this anchor div instead of the comparison
+// <video> element. Its size and position are computed in
+// updateComparisonAnchor from `rawPlayerComparison.getVideoRatio()`, so
+// the canvas matches the rendered video content rect rather than the
+// element box (the <video> takes the full container height with the
+// content letterboxed inside).
+const comparisonContentAnchorEl = computed(
+  () => comparisonContentAnchor.value || null
+)
+
 const comparisonModeOptions = computed(() => [
   { label: t('playlists.actions.side_by_side'), value: 'sidebyside' },
   { label: `${t('playlists.actions.overlay')} 0%`, value: 'overlay0' },
@@ -1630,6 +1685,7 @@ const { postAnnotationAddition, postAnnotationDeletion, postAnnotationUpdate } =
 
 const annotation = useAnnotation({
   canvasWrapper,
+  comparisonCanvasComponent: comparisonAnnotationCanvas,
   annotations,
   isCurrentUserArtist,
   userId,
@@ -1665,6 +1721,8 @@ const {
   isWriting,
   getNewAnnotations,
   loadSingleAnnotation,
+  loadSingleAnnotationComparison,
+  clearComparisonCanvas,
   onPickPencilWidth,
   onPickPencilColor,
   onChangePencilColor,
@@ -2120,6 +2178,45 @@ const syncComparisonPlayer = () => {
   }
 }
 
+// Size the anchor div to the aspect-fitted content rect of the
+// comparison <video>. The video element itself takes the full container
+// height with the actual content letterboxed inside, so we can't pass it
+// straight to AnnotationCanvas. Mirrors the math used in resetCanvasSize
+// for the main canvas wrapper.
+const updateComparisonAnchor = () => {
+  const player = rawPlayerComparison.value
+  const anchor = comparisonContentAnchor.value
+  const container = videoContainer.value
+  if (!player || !anchor || !container) return
+  const playerEl = player.$el
+  const ratio = player.getVideoRatio()
+  const fullWidth = playerEl.offsetWidth
+  const fullHeight = playerEl.offsetHeight
+  const playerRect = playerEl.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  let width, height, leftOffset, topOffset
+  if (!ratio) {
+    width = fullWidth
+    height = fullHeight
+    leftOffset = 0
+    topOffset = 0
+  } else if (fullWidth > fullHeight * ratio) {
+    width = fullHeight * ratio
+    height = fullHeight
+    leftOffset = (fullWidth - width) / 2
+    topOffset = 0
+  } else {
+    width = fullWidth
+    height = fullWidth / ratio
+    leftOffset = 0
+    topOffset = (fullHeight - height) / 2
+  }
+  anchor.style.left = `${playerRect.left - containerRect.left + leftOffset}px`
+  anchor.style.top = `${playerRect.top - containerRect.top + topOffset}px`
+  anchor.style.width = `${width}px`
+  anchor.style.height = `${height}px`
+}
+
 const goPreviousFrame = () => {
   clearCanvas()
   if (isFullMode.value) {
@@ -2142,8 +2239,12 @@ const goPreviousFrame = () => {
     if (!rawPlayer.value) return
     rawPlayer.value.goPreviousFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const ann = getAnnotation(rawPlayer.value.getCurrentTime())
+    const time = rawPlayer.value.getCurrentTime()
+    const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
+    if (isComparing.value && !isComparisonOverlay.value) {
+      loadComparisonAnnotation(time)
+    }
   }
 }
 
@@ -2167,8 +2268,12 @@ const goNextFrame = () => {
     if (nextFrame >= nbFrames.value) return
     rawPlayer.value.goNextFrame()
     if (isComparing.value) syncComparisonPlayer()
-    const ann = getAnnotation(rawPlayer.value.getCurrentTime())
+    const time = rawPlayer.value.getCurrentTime()
+    const ann = getAnnotation(time)
     if (ann) loadSingleAnnotation(ann)
+    if (isComparing.value && !isComparisonOverlay.value) {
+      loadComparisonAnnotation(time)
+    }
   }
 }
 
@@ -2234,8 +2339,13 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
     rawPlayer.value.setCurrentFrame(frame)
     syncComparisonPlayer()
   }
-  const ann = getAnnotation(frame * frameDuration.value)
-  if (ann) loadAnnotation(ann)
+  const time = frame * frameDuration.value
+  const ann = getAnnotation(time)
+  if (ann) {
+    loadAnnotation(ann)
+  } else if (isComparing.value && !isComparisonOverlay.value) {
+    loadComparisonAnnotation(time)
+  }
   sendUpdatePlayingStatus()
   onFrameUpdate(frame)
   if (isFullMode.value && updatePlaylistProgress) {
@@ -2461,6 +2571,9 @@ const onFrameUpdate = frame => {
     const ann = getAnnotation(currentTimeRaw.value)
     clearCanvas()
     if (ann) loadSingleAnnotation(ann)
+    if (isComparing.value && !isComparisonOverlay.value) {
+      loadComparisonAnnotation(currentTimeRaw.value)
+    }
   }
   if (props.playlist && isPlaying.value) {
     const hasHandles =
@@ -2615,6 +2728,7 @@ const resetCanvasSize = () => {
       }
       setAnnotationCanvasDimensions(width, height)
     }
+    updateComparisonAnchor()
   })
 }
 
@@ -2640,6 +2754,29 @@ const loadAnnotation = ann => {
     }
     clearCanvas()
     loadSingleAnnotation(ann)
+    if (isComparing.value && !isComparisonOverlay.value) {
+      loadComparisonAnnotation(time)
+    }
+  }
+}
+
+const loadComparisonAnnotation = time => {
+  clearComparisonCanvas()
+  if (!isMovieComparison.value) return
+  const compared = currentRevisionToCompare.value
+  const anns = compared?.annotations || []
+  const annotation = anns.find(a => a.time === time)
+  if (annotation) loadSingleAnnotationComparison(annotation)
+}
+
+// Triggered when AnnotationCanvas's internal canvas has been resized to
+// match the comparison video bounds. We re-load the annotation here so
+// the scale multipliers in addObjectToCanvas are computed against the
+// final canvas width (otherwise paths and PSStrokes land at stale
+// coordinates — same pattern as PreviewPlayer.onMainCanvasResized).
+const onComparisonCanvasResized = () => {
+  if (isComparing.value && !isComparisonOverlay.value) {
+    loadComparisonAnnotation(currentTimeRaw.value)
   }
 }
 
@@ -3997,17 +4134,28 @@ watch(isComparing, () => {
     resetComparison()
     rebuildEntityListToCompare()
     rebuildComparisonOptions()
+  } else {
+    clearComparisonCanvas()
   }
   nextTick().then(() => {
     triggerResize()
     resetPictureCanvas()
     resetCanvas()
     syncComparisonPlayer()
+    if (isComparing.value && !isComparisonOverlay.value) {
+      loadComparisonAnnotation(currentTimeRaw.value)
+    }
   })
 })
 
 watch(taskTypeToCompare, () => {
   if (isComparing.value) resetComparison()
+})
+
+watch(currentRevisionToCompare, () => {
+  if (isComparing.value && !isComparisonOverlay.value) {
+    loadComparisonAnnotation(currentTimeRaw.value)
+  }
 })
 
 watch(
@@ -4346,6 +4494,12 @@ const playerProxy = {
   top: 0;
   left: 0;
 }
+
+.comparison-content-anchor {
+  position: absolute;
+  pointer-events: none;
+}
+
 .comparison-combobox {
   margin-bottom: 0;
 }
