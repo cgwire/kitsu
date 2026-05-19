@@ -170,6 +170,7 @@
           ref="comparison-annotation-canvas"
           canvas-id="playlist-annotation-canvas-comparison"
           :media-element="comparisonContentAnchorEl"
+          :panzoom-transform="panzoomTransform"
           :interactive="false"
           :static="true"
           @resized="onComparisonCanvasResized"
@@ -1576,6 +1577,13 @@ const comparisonAnnotations = computed(() =>
 const comparisonContentAnchorEl = computed(
   () => comparisonContentAnchor.value || null
 )
+
+// Main viewer's panzoom transform. Drives both the comparison
+// annotation overlay (via the annotation-canvas prop) and the
+// comparison <video>'s own panzoom (via the watcher below). Mirrors
+// PreviewPlayer's usePanzoomSync: main is the source of truth, the
+// comparison side just follows.
+const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
 
 const comparisonModeOptions = computed(() => [
   { label: t('playlists.actions.side_by_side'), value: 'sidebyside' },
@@ -3721,6 +3729,7 @@ const setComparisonPanZoom = (x, y, scale) => {
 }
 
 const onPanZoomChanged = ({ x, y, scale }) => {
+  panzoomTransform.value = { x, y, scale }
   postPanZoomChanged(x, y, scale)
 }
 
@@ -4136,6 +4145,7 @@ watch(isComparing, () => {
     rebuildComparisonOptions()
   } else {
     clearComparisonCanvas()
+    panzoomTransform.value = { x: 0, y: 0, scale: 1 }
   }
   nextTick().then(() => {
     triggerResize()
@@ -4157,6 +4167,19 @@ watch(currentRevisionToCompare, () => {
     loadComparisonAnnotation(currentTimeRaw.value)
   }
 })
+
+// Mirror the main viewer's panzoom on the comparison <video> so both
+// stay in sync. The annotation overlay picks up the same transform via
+// its panzoom-transform prop. setComparisonPanZoom runs in silent mode
+// inside MultiVideoViewer, so the resulting panzoom-changed event is
+// suppressed and we don't get a feedback loop.
+watch(
+  panzoomTransform,
+  ({ x, y, scale }) => {
+    if (isComparing.value) setComparisonPanZoom(x, y, scale)
+  },
+  { deep: true }
+)
 
 watch(
   () => props.entities,
