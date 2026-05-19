@@ -151,33 +151,6 @@ export const useAnnotation = ({
   let annotationToSave = null
   let pendingSave = null
 
-  // Mirror the canvas instances from the AnnotationCanvas components.
-  // flush: 'sync' is critical: the parent's onMounted may immediately
-  // try to load annotations into the canvases, so we cannot wait for
-  // Vue's default microtask flush to propagate the assignment.
-  // configureCanvas is called whenever the main canvas becomes
-  // available so its event handlers are wired without parent
-  // involvement.
-  if (mainCanvasComponent) {
-    watch(
-      () => mainCanvasComponent.value?.canvas || null,
-      canvas => {
-        fabricCanvas.value = canvas
-        if (canvas) configureCanvas()
-      },
-      { immediate: true, flush: 'sync' }
-    )
-  }
-  if (comparisonCanvasComponent) {
-    watch(
-      () => comparisonCanvasComponent.value?.canvas || null,
-      canvas => {
-        fabricCanvasComparison.value = canvas
-      },
-      { immediate: true, flush: 'sync' }
-    )
-  }
-
   // Init
   const resetUndoStacks = () => {
     doneActionStack = []
@@ -1236,6 +1209,36 @@ export const useAnnotation = ({
   let currentPreview = () => null
   const setCurrentPreviewGetter = getter => {
     currentPreview = getter
+  }
+
+  // Mirror the canvas instances from the AnnotationCanvas components.
+  // flush: 'sync' is critical: the parent's onMounted may immediately
+  // try to load annotations into the canvases, so we cannot wait for
+  // Vue's default microtask flush to propagate the assignment.
+  // configureCanvas is called whenever the main canvas becomes
+  // available so its event handlers are wired without parent
+  // involvement. The watches are set up after every function is
+  // declared to avoid TDZ when a caller mounts with an already-
+  // resolved canvas ref (immediate + flush: 'sync' fires the
+  // callback synchronously during initialization).
+  if (mainCanvasComponent) {
+    watch(
+      () => mainCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvas.value = canvas
+        if (canvas) configureCanvas()
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
+  if (comparisonCanvasComponent) {
+    watch(
+      () => comparisonCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvasComparison.value = canvas
+      },
+      { immediate: true, flush: 'sync' }
+    )
   }
 
   return {

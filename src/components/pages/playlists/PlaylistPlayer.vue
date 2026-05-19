@@ -1070,36 +1070,33 @@ import {
   roundToFrame
 } from '@/lib/video'
 
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import NotifyClientModal from '@/components/modals/NotifyClientModal.vue'
+import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
+import SharePlaylistModal from '@/components/modals/SharePlaylistModal.vue'
+
+import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
+
+import MultiPictureViewer from '@/components/previews/MultiPictureViewer.vue'
+import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
+import ObjectViewer from '@/components/previews/ObjectViewer.vue'
+import PdfViewer from '@/components/previews/PdfViewer.vue'
+import PictureViewer from '@/components/previews/PictureViewer.vue'
+// eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
+import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
+import SoundViewer from '@/components/previews/SoundViewer.vue'
+import VideoProgress from '@/components/previews/VideoProgress.vue'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import DeleteModal from '@/components/modals/DeleteModal.vue'
-// eslint-disable-next-line no-unused-vars
-import MultiPictureViewer from '@/components/previews/MultiPictureViewer.vue'
-// eslint-disable-next-line no-unused-vars
-import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
-import NotifyClientModal from '@/components/modals/NotifyClientModal.vue'
-// eslint-disable-next-line no-unused-vars
-import ObjectViewer from '@/components/previews/ObjectViewer.vue'
-// eslint-disable-next-line no-unused-vars
-import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
-// eslint-disable-next-line no-unused-vars
-import PictureViewer from '@/components/previews/PictureViewer.vue'
-// eslint-disable-next-line no-unused-vars
-import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
-import PlaylistedEntity from '@/components/pages/playlists/PlaylistedEntity.vue'
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars -- shadowed by const previewRoom in script
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
-import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
-import SharePlaylistModal from '@/components/modals/SharePlaylistModal.vue'
-// eslint-disable-next-line no-unused-vars
-import SoundViewer from '@/components/previews/SoundViewer.vue'
 import SpeedButton from '@/components/widgets/SpeedButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 // eslint-disable-next-line no-unused-vars
 const TaskInfo = defineAsyncComponent(
@@ -1380,32 +1377,26 @@ const nextEntityIndex = computed(() => {
   return index
 })
 
-const picturePreviews = computed(() => {
-  const previews = []
-  entityList.value.forEach(e => {
-    previews.push({
+const picturePreviews = computed(() =>
+  entityList.value.flatMap(e => [
+    {
       id: e.preview_file_id,
       height: e.preview_file_height,
       width: e.preview_file_width,
       extension: e.preview_file_extension,
       revision: e.preview_file_revision,
       position: 1
-    })
-    if (e.preview_file_previews) {
-      e.preview_file_previews.forEach((p, index) => {
-        previews.push({
-          id: p.id,
-          height: p.height,
-          width: p.width,
-          extension: p.extension,
-          revision: p.revision,
-          position: index + 2
-        })
-      })
-    }
-  })
-  return previews
-})
+    },
+    ...(e.preview_file_previews || []).map((p, index) => ({
+      id: p.id,
+      height: p.height,
+      width: p.width,
+      extension: p.extension,
+      revision: p.revision,
+      position: index + 2
+    }))
+  ])
+)
 
 const currentPreviewPath = computed(() => {
   if (!currentPreview.value) return ''
