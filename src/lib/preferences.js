@@ -1,10 +1,14 @@
 export default {
   setPreference(key, item) {
-    return localStorage.setItem(key, item)
+    localStorage.setItem(key, item)
   },
 
   getPreference(key) {
     return localStorage.getItem(key)
+  },
+
+  setBoolPreference(key, value) {
+    localStorage.setItem(key, value ? 'true' : 'false')
   },
 
   getBoolPreference(key, defaultValue = false) {
@@ -19,7 +23,7 @@ export default {
   },
 
   setObjectPreference(key, data) {
-    return localStorage.setItem(key, JSON.stringify(data))
+    localStorage.setItem(key, JSON.stringify(data))
   },
 
   getObjectPreference(key) {

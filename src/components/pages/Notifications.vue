@@ -2,6 +2,50 @@
   <div class="columns fixed-page">
     <div class="column main-column">
       <div ref="body" class="notifications page" @scroll.passive="onBodyScroll">
+        <div
+          :class="{
+            'desktop-banner': true,
+            blocked: isDesktopNotificationsBlocked
+          }"
+          v-if="shouldShowDesktopBanner"
+        >
+          <div class="desktop-banner-message">
+            <bell-off-icon
+              class="desktop-banner-icon"
+              :size="22"
+              :stroke-width="1.75"
+              aria-hidden="true"
+              v-if="isDesktopNotificationsBlocked"
+            />
+            <bell-ring-icon
+              class="desktop-banner-icon"
+              :size="22"
+              :stroke-width="1.75"
+              aria-hidden="true"
+              v-else
+            />
+            <span class="desktop-banner-text">
+              {{
+                isDesktopNotificationsBlocked
+                  ? $t('notifications.desktop.banner_blocked_text')
+                  : $t('notifications.desktop.banner_text')
+              }}
+            </span>
+          </div>
+          <div class="desktop-banner-actions">
+            <button-simple
+              class="desktop-banner-action"
+              :text="$t('notifications.desktop.banner_enable')"
+              @click="enableDesktopNotifications"
+              v-if="!isDesktopNotificationsBlocked"
+            />
+            <button-simple
+              class="desktop-banner-action ghost"
+              :text="$t('notifications.desktop.banner_dismiss')"
+              @click="dismissDesktopBanner"
+            />
+          </div>
+        </div>
         <div class="filter-bar">
           <div class="filter-bar-row flexrow">
             <combobox-task-type
@@ -183,9 +227,13 @@
                 <router-link
                   class="flexrow-item entity-link"
                   :to="entityPath(notification)"
+                  v-if="entityPath(notification)"
                 >
                   {{ notification.full_entity_name }}
                 </router-link>
+                <span class="flexrow-item entity-link" v-else>
+                  {{ notification.full_entity_name }}
+                </span>
                 <div class="filler"></div>
                 <span class="date flexrow-item">
                   {{ formatDate(notification.created_at) }}
@@ -219,9 +267,7 @@
                     <template v-if="isPublish(notification)">
                       {{ $t('notifications.published') }}
                     </template>
-                    <template
-                      v-if="isComment(notification) && !isPublish(notification)"
-                    >
+                    <template v-if="isComment(notification)">
                       {{ $t('notifications.commented_on') }}
                     </template>
                     <template
@@ -332,6 +378,8 @@
 import { useHead } from '@unhead/vue'
 import {
   AtSignIcon,
+  BellOffIcon,
+  BellRingIcon,
   CornerUpLeftIcon,
   ImageIcon,
   InboxIcon,
@@ -353,8 +401,20 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import { useSkeletonCycle } from '@/composables/skeleton'
-import { pluralizeEntityType } from '@/lib/path'
+import {
+  buildEntityRoute,
+  buildPlaylistRoute,
+  buildTestNotificationPayload,
+  isAssignation,
+  isComment,
+  isMention,
+  isPlaylistReady,
+  isPublish,
+  isReply,
+  isReplyMention
+} from '@/lib/notifications'
 import preferences from '@/lib/preferences'
 import { renderComment } from '@/lib/render'
 
@@ -389,6 +449,29 @@ const { cycle: skeletonCycle, fadeoutDelayMs } = useSkeletonCycle(
   ref(SKELETON_ROWS)
 )
 const socket = instance.appContext.config.globalProperties.$socket
+const {
+  permission: desktopNotificationsPermission,
+  shouldShowBanner: shouldShowDesktopBanner,
+  dismissBanner: dismissDesktopBanner,
+  setPreferenceEnabled
+} = useDesktopNotifications()
+
+const isDesktopNotificationsBlocked = computed(
+  () => desktopNotificationsPermission.value === 'denied'
+)
+
+const enableDesktopNotifications = async () => {
+  try {
+    const payload = testNotificationPayload.value
+    await setPreferenceEnabled(true, {
+      ...payload,
+      onClick: () =>
+        router.push(testNotificationPayload.value.route).catch(() => {})
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 // State
 
@@ -417,12 +500,17 @@ const parameters = reactive({
 
 const departmentMap = computed(() => store.getters.departmentMap)
 const notifications = computed(() => store.getters.notifications)
+const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatus = computed(() => store.getters.taskStatus)
 const taskTypes = computed(() => store.getters.taskTypes)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
+
+const testNotificationPayload = computed(() =>
+  buildTestNotificationPayload(t, organisation.value)
+)
 
 const taskStatusList = computed(() => [
   { id: '', color: '#999', short_name: t('news.all') },
@@ -511,20 +599,8 @@ const onBodyScroll = event => {
   }
 }
 
-const entityPath = notification => {
-  const taskType = taskTypeMap.value.get(notification.task_type_id)
-  if (!taskType) return router.currentRoute
-  const params = {
-    production_id: notification.project_id,
-    task_id: notification.task_id,
-    type: pluralizeEntityType(taskType.for_entity)
-  }
-  if (notification.episode_id) {
-    params.episode_id = notification.episode_id
-    return { name: 'episode-task', params }
-  }
-  return { name: 'task', params }
-}
+const entityPath = notification =>
+  buildEntityRoute(notification, taskTypeMap.value)
 
 const formatDate = date => {
   const utcDate = moment.tz(date, 'UTC')
@@ -552,23 +628,8 @@ const notificationAuthor = notification => {
   }
 }
 
-const playlistPath = notification => {
-  const production = productionMap.value.get(notification.project_id)
-  const params = {
-    production_id: notification.project_id,
-    playlist_id: notification.playlist_id
-  }
-  const isTVShow = production.production_type === 'tvshow'
-  if (isTVShow) {
-    if (notification.episode_id) {
-      params.episode_id = notification.episode_id
-    }
-    if (notification.playlist_for_entity === 'asset') {
-      params.episode_id = notification.playlist_is_for_all ? 'all' : 'main'
-    }
-  }
-  return { name: isTVShow ? 'episode-playlist' : 'playlist', params }
-}
+const playlistPath = notification =>
+  buildPlaylistRoute(notification, productionMap.value)
 
 const buildTaskFromNotification = notification => ({
   id: notification.task_id,
@@ -581,31 +642,6 @@ const buildTaskTypeFromNotification = notification => ({
   ...taskTypeMap.value.get(notification.task_type_id),
   episode_id: notification.episode_id
 })
-
-const isAssignation = notification =>
-  notification.notification_type === 'assignation'
-
-const isComment = notification =>
-  !notification.notification_type ||
-  (notification.notification_type === 'comment' &&
-    !notification.preview_file_id)
-
-const isMention = notification => notification.notification_type === 'mention'
-
-const isPlaylistReady = notification =>
-  notification.notification_type === 'playlist-ready'
-
-const isReplyMention = notification =>
-  notification.notification_type === 'reply-mention'
-
-const isReply = notification => notification.notification_type === 'reply'
-
-const isPublish = notification =>
-  notification &&
-  notification.preview_file_id &&
-  !isMention(notification) &&
-  !isReply(notification) &&
-  !isReplyMention(notification)
 
 const isSelected = notification =>
   notification.id === currentNotificationId.value
@@ -678,12 +714,14 @@ const restoreParameters = () => {
 
 // Socket handlers
 
+// Fetch unconditionally so non-leader tabs keep their list in sync.
+// The mutation dedups on id so the redundant leader-tab fetch is harmless.
 const onNewNotification = eventData => {
-  if (user.value?.id === eventData.person_id) {
-    store
-      .dispatch('loadNotification', eventData.notification_id)
-      .catch(console.error)
-  }
+  if (user.value?.id !== eventData.person_id) return
+  if (!eventData.notification_id) return
+  store
+    .dispatch('loadNotification', eventData.notification_id)
+    .catch(console.error)
 }
 
 const onPreviewFileAdd = eventData => {
@@ -759,6 +797,70 @@ a {
 
 .dark .filter-bar {
   background: var(--background-alt);
+}
+
+.desktop-banner {
+  align-items: center;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 0.75em;
+  box-shadow: 0 0 0 2px rgba($green, 0.3);
+  display: flex;
+  gap: 2em;
+  margin: 1em auto 2em;
+  max-width: 800px;
+  padding: 0.75em 1em;
+  width: fit-content;
+
+  &.blocked {
+    box-shadow: 0 0 0 2px rgba($orange, 0.3);
+
+    .desktop-banner-icon {
+      color: $orange;
+    }
+  }
+}
+
+.dark .desktop-banner {
+  background: var(--background-alt);
+}
+
+.desktop-banner-message {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 0.75em;
+  min-width: 0;
+}
+
+.desktop-banner-icon {
+  color: $green;
+  flex-shrink: 0;
+}
+
+.desktop-banner-text {
+  color: var(--text);
+}
+
+.desktop-banner-actions {
+  display: flex;
+  gap: 0.5em;
+}
+
+.desktop-banner-action.ghost {
+  opacity: 0.7;
+}
+
+@media screen and (max-width: 768px) {
+  .desktop-banner {
+    align-items: stretch;
+    flex-direction: column;
+    width: auto;
+  }
+
+  .desktop-banner-action {
+    flex: 1;
+  }
 }
 
 .filter-bar-row {

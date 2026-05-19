@@ -370,9 +370,11 @@
       "delete": "Supprimer",
       "delete_all": "Supprimer tout",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
+      "disable_desktop_notifications": "Désactiver les notifications de bureau",
       "documentation": "Documentation",
       "edit": "Modifier",
       "empty_comment": "Commentaire vide",
+      "enable_desktop_notifications": "Activer les notifications de bureau",
       "end_date": "Date de fin",
       "files_selected": "Fichiers sélectionnés",
       "for": "Pour",
@@ -594,6 +596,20 @@
       "title": "Page non trouvée..."
     },
     "notifications": {
+      "desktop": {
+        "assignation_title": "{name} vous a assigné",
+        "banner_blocked_text": "Les notifications de bureau sont bloquées. Autorisez-les dans les paramètres du site de votre navigateur pour les activer.",
+        "banner_dismiss": "Plus tard",
+        "banner_enable": "Activer",
+        "banner_text": "Recevez une notification de bureau à chaque nouvel événement.",
+        "comment_title": "{name} a commenté",
+        "mention_title": "{name} vous a mentionné",
+        "playlist_ready_title": "Playlist {name} prête",
+        "publish_title": "{name} a publié un aperçu",
+        "reply_title": "{name} a répondu",
+        "test_notification_title": "Notifications Kitsu activées",
+        "test_notification_body": "Vous recevrez désormais des notifications comme celle-ci pour les nouveaux événements."
+      },
       "and_change_status": " et a modifié le statut de la tâche",
       "assigned_you": "vous a assigné cette tâche",
       "commented_on": "commenté",

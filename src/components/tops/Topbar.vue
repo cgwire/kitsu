@@ -154,6 +154,33 @@
         <li @click="toggleDarkTheme">
           {{ !isDarkTheme ? $t('main.dark_theme') : $t('main.white_theme') }}
         </li>
+        <li
+          @click="toggleDesktopNotifications"
+          :class="{ disabled: desktopNotificationsPermission === 'denied' }"
+          :title="
+            desktopNotificationsPermission === 'denied'
+              ? $t('notifications.desktop.banner_blocked_text')
+              : null
+          "
+          :aria-disabled="desktopNotificationsPermission === 'denied'"
+          :aria-label="
+            desktopNotificationsPermission === 'denied'
+              ? $t('notifications.desktop.banner_blocked_text')
+              : isDesktopNotificationsActive
+                ? $t('main.disable_desktop_notifications')
+                : $t('main.enable_desktop_notifications')
+          "
+          v-if="isDesktopNotificationsSupported"
+        >
+          <span class="label-stack">
+            <span :class="{ ghost: isDesktopNotificationsActive }">
+              {{ $t('main.enable_desktop_notifications') }}
+            </span>
+            <span :class="{ ghost: !isDesktopNotificationsActive }">
+              {{ $t('main.disable_desktop_notifications') }}
+            </span>
+          </span>
+        </li>
         <li @click="setSupportChat(!isSupportChat)">
           {{
             isSupportChat
@@ -223,7 +250,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -231,18 +257,23 @@ import {
   LogOutIcon,
   ZapIcon
 } from 'lucide-vue-next'
+import { mapGetters, mapActions } from 'vuex'
 
+import { version } from '@/../package.json'
+import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import {
+  buildDesktopNotificationPayload,
+  buildTestNotificationPayload
+} from '@/lib/notifications'
 import localPreferences from '@/lib/preferences'
 
-import GlobalSearchField from '@/components/tops/GlobalSearchField.vue'
-import NotificationBell from '@/components/widgets/NotificationBell.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ShortcutModal from '@/components/modals/ShortcutModal.vue'
+import GlobalSearchField from '@/components/tops/GlobalSearchField.vue'
 import TopbarEpisodeList from '@/components/tops/TopbarEpisodeList.vue'
 import TopbarProductionList from '@/components/tops/TopbarProductionList.vue'
 import TopbarSectionList from '@/components/tops/TopbarSectionList.vue'
-
-import { version } from '@/../package.json'
+import NotificationBell from '@/components/widgets/NotificationBell.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 export default {
   name: 'topbar',
@@ -260,6 +291,27 @@ export default {
     TopbarSectionList,
     ShortcutModal,
     ZapIcon
+  },
+
+  setup() {
+    const {
+      isSupported,
+      isActive,
+      permission,
+      preferenceEnabled,
+      setPreferenceEnabled,
+      showNotification,
+      withDesktopNotificationLock
+    } = useDesktopNotifications()
+    return {
+      isDesktopNotificationsSupported: isSupported,
+      isDesktopNotificationsActive: isActive,
+      desktopNotificationsPermission: permission,
+      desktopNotificationsPreferenceEnabled: preferenceEnabled,
+      setDesktopNotificationsEnabled: setPreferenceEnabled,
+      showDesktopNotification: showNotification,
+      withDesktopNotificationLock
+    }
   },
 
   data() {
@@ -573,6 +625,51 @@ export default {
       }
     },
 
+    async toggleDesktopNotifications() {
+      if (this.desktopNotificationsPermission === 'denied') return
+      try {
+        const payload = buildTestNotificationPayload(this.$t, this.organisation)
+        await this.setDesktopNotificationsEnabled(
+          !this.desktopNotificationsPreferenceEnabled,
+          {
+            ...payload,
+            onClick: () => this.$router.push(payload.route).catch(() => {})
+          }
+        )
+      } catch (err) {
+        console.error(err)
+      }
+    },
+
+    async showDesktopNotificationForNew(notificationId) {
+      if (!this.isDesktopNotificationsActive) return
+      // Multi-tab lock: skips fetch + popup in non-leader tabs.
+      await this.withDesktopNotificationLock(notificationId, async () => {
+        try {
+          const notification = await this.$store.dispatch(
+            'loadNotification',
+            notificationId
+          )
+          if (!notification) return
+          // State may have changed during the fetch (user toggled off, permission revoked).
+          if (!this.isDesktopNotificationsActive) return
+          const payload = buildDesktopNotificationPayload(notification, {
+            t: this.$t,
+            personMap: this.$store.getters.personMap,
+            productionMap: this.$store.getters.productionMap,
+            taskTypeMap: this.$store.getters.taskTypeMap,
+            organisation: this.organisation
+          })
+          this.showDesktopNotification({
+            ...payload,
+            onClick: () => this.$router.push(payload.route).catch(() => {})
+          })
+        } catch (err) {
+          console.error(err)
+        }
+      })
+    },
+
     getCurrentSectionFromRoute() {
       if (this.$route.name.includes('production-plugin')) {
         return this.$route.params.plugin_id
@@ -852,12 +949,21 @@ export default {
   socket: {
     events: {
       'notification:new'(eventData) {
-        if (
-          this.user.id === eventData.person_id &&
-          this.$route.name !== 'notifications'
-        ) {
+        if (this.user.id !== eventData.person_id) return
+        const onNotificationsPage = this.$route.name === 'notifications'
+        // The bell badge is irrelevant on /notifications (list shown directly,
+        // refreshes on return for background tabs).
+        if (!onNotificationsPage) {
           this.incrementNotificationCounter()
         }
+        if (!eventData.notification_id) return
+        // Desktop popup is redundant only when /notifications is foregrounded;
+        // background tab can't see the list so the OS popup is still needed.
+        const pageIsVisible =
+          typeof document === 'undefined' ||
+          document.visibilityState === 'visible'
+        if (onNotificationsPage && pageIsVisible) return
+        this.showDesktopNotificationForNew(eventData.notification_id)
       },
 
       'notification:all-read'(eventData) {
@@ -948,13 +1054,38 @@ export default {
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
   border-bottom-left-radius: 10px;
+  max-width: 360px;
   min-width: 220px;
   padding: 10px;
   position: fixed;
   right: 0;
   top: 60px;
-  width: 220px;
   z-index: 203;
+}
+
+.user-menu li.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+
+  // Keep hover on the <li> so the title tooltip still surfaces.
+  > * {
+    pointer-events: none;
+  }
+}
+
+// Stack both label states in one cell so the menu doesn't jump width
+// on toggle (i18n: labels can differ in length).
+.label-stack {
+  display: grid;
+  grid-template-areas: 'stack';
+
+  > span {
+    grid-area: stack;
+  }
+
+  > .ghost {
+    visibility: hidden;
+  }
 }
 
 @keyframes slide-down {
