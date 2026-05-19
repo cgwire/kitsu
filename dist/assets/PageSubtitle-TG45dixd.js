@@ -1,0 +1,2 @@
+import{St as e,W as t,b as n,t as r}from"./vue.esm-bundler-Dr-1m_zu.js";import{t as i}from"./_plugin-vue_export-helper-1r9tKl2A.js";r();var a={class:`subtitle`},o=i({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(r){return(i,o)=>(t(),n(`h2`,a,e(r.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
+//# sourceMappingURL=PageSubtitle-TG45dixd.js.map
