@@ -37,7 +37,9 @@
           </span>
           <div
             class="flexrow-item menu-wrapper"
-            v-if="isPinnable || isEditable || canToggleForClient"
+            v-if="
+              isPinnable || isEditable || canToggleForClient || canMoveComment
+            "
           >
             <chevron-down-icon class="menu-icon" @click="toggleCommentMenu" />
             <comment-menu
@@ -45,6 +47,7 @@
               :is-pinned="comment.pinned"
               :is-editable="isEditable"
               :can-toggle-for-client="canToggleForClient"
+              :can-move="canMoveComment"
               :is-for-client="Boolean(comment.for_client)"
               @pin-clicked="
                 () => {
@@ -61,6 +64,12 @@
               @delete-clicked="
                 () => {
                   emit('delete-comment', comment)
+                  toggleCommentMenu()
+                }
+              "
+              @move-clicked="
+                () => {
+                  emit('move-comment', comment)
                   toggleCommentMenu()
                 }
               "
@@ -521,6 +530,7 @@ const emit = defineEmits([
   'delete-comment',
   'duplicate-comment',
   'edit-comment',
+  'move-comment',
   'pin-comment',
   'time-code-clicked',
   'toggle-for-client'
@@ -544,6 +554,10 @@ const props = defineProps({
     default: false
   },
   isCheckable: {
+    type: Boolean,
+    default: false
+  },
+  canMove: {
     type: Boolean,
     default: false
   },
@@ -613,6 +627,15 @@ const isConcept = computed(() => {
 })
 
 const canToggleForClient = computed(() => isCurrentUserManager.value)
+
+const isPreviewBound = computed(() => {
+  return Boolean(
+    props.comment.preview_file_id ||
+    (props.comment.previews && props.comment.previews.length > 0)
+  )
+})
+
+const canMoveComment = computed(() => props.canMove && !isPreviewBound.value)
 
 const isEmpty = computed(() => {
   return (

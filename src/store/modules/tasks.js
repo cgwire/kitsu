@@ -39,6 +39,7 @@ import {
   DELETE_TASK_END,
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
+  MOVE_COMMENT_END,
   PIN_COMMENT,
   ACK_COMMENT,
   REMOVE_TASK_COMMENT,
@@ -433,6 +434,19 @@ const actions = {
         todoStatus
       })
     })
+  },
+
+  moveCommentToTask({ commit }, { taskId, commentId, targetTaskId }) {
+    return tasksApi
+      .moveCommentToTask(taskId, commentId, targetTaskId)
+      .then(comment => {
+        commit(MOVE_COMMENT_END, {
+          sourceTaskId: taskId,
+          targetTaskId,
+          comment
+        })
+        return comment
+      })
   },
 
   commentTask(
@@ -1023,6 +1037,28 @@ const mutations = {
       ),
       checklist: comment.checklist || []
     })
+  },
+
+  [MOVE_COMMENT_END](state, { sourceTaskId, targetTaskId, comment }) {
+    const sourceComments = state.taskComments[sourceTaskId]
+    if (sourceComments) {
+      state.taskComments[sourceTaskId] = sourceComments.filter(
+        c => c.id !== comment.id
+      )
+    }
+    if (state.taskComments[targetTaskId]) {
+      const enriched = {
+        ...comment,
+        person: personStore.cache.personMap.get(comment.person_id),
+        task_status: taskStatusStore.cache.taskStatusMap.get(
+          comment.task_status_id
+        )
+      }
+      state.taskComments[targetTaskId] = sortComments([
+        ...state.taskComments[targetTaskId].filter(c => c.id !== comment.id),
+        enriched
+      ])
+    }
   },
 
   [PREVIEW_FILE_SELECTED](state, forms) {

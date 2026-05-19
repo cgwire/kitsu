@@ -9,6 +9,9 @@
     <div @click="$emit('edit-clicked')" v-if="isEditable">
       {{ $t('main.edit') }}
     </div>
+    <div @click="$emit('move-clicked')" v-if="canMove">
+      {{ $t('comments.move_to_task') }}
+    </div>
     <div class="error" @click="$emit('delete-clicked')" v-if="isEditable">
       {{ $t('main.delete') }}
     </div>
@@ -37,6 +40,10 @@ defineProps({
     type: Boolean,
     default: false
   },
+  canMove: {
+    type: Boolean,
+    default: false
+  },
   isForClient: {
     type: Boolean,
     default: false
@@ -46,6 +53,7 @@ defineProps({
 defineEmits([
   'delete-clicked',
   'edit-clicked',
+  'move-clicked',
   'pin-clicked',
   'toggle-for-client-clicked'
 ])

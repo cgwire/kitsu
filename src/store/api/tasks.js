@@ -117,6 +117,13 @@ export default {
     return client.pdel(`/api/data/tasks/${taskId}/comments/${commentId}`)
   },
 
+  moveCommentToTask(taskId, commentId, targetTaskId) {
+    return client.ppost(
+      `/api/actions/tasks/${taskId}/comments/${commentId}/move`,
+      { target_task_id: targetTaskId }
+    )
+  },
+
   createTasks(data) {
     const taskTypeId = data.task_type_id
     const type = data.type
