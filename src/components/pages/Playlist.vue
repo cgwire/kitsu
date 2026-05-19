@@ -1202,7 +1202,7 @@ export default {
     },
 
     addToPlayerPlaylist(entity, playlist, scrollRight = true) {
-      if (playlist.id !== this.playlistPlayer.playlist.id) {
+      if (playlist.id !== this.currentPlaylist.id) {
         return
       }
       const playlistEntity = this.convertEntityToPlaylistFormat(entity)

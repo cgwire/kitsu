@@ -43,6 +43,7 @@
           <combobox
             :thin="true"
             :width="150"
+            :with-margin="false"
             :options="taskTypeOptions"
             v-model="taskTypeId"
           />
@@ -50,6 +51,7 @@
             class="version-combo"
             :thin="true"
             :width="150"
+            :with-margin="false"
             :options="previewFileOptions"
             v-model="previewFileId"
           />

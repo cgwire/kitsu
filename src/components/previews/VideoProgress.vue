@@ -108,6 +108,10 @@ const props = defineProps({
     default: () => [],
     type: Array
   },
+  backgroundUrl: {
+    default: null,
+    type: String
+  },
   comparisonAnnotations: {
     default: () => [],
     type: Array

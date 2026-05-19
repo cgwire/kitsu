@@ -340,7 +340,7 @@
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
-        :player="this"
+        :player="playerProxy"
         :show-assignees="isCurrentUserManager || isCurrentUserSupervisor"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
@@ -1178,7 +1178,7 @@ const modelPlayer = useTemplateRef('object-player')
 const progress = useTemplateRef('video-progress')
 const playlistProgressRef = useTemplateRef('playlist-progress')
 const playlistedEntities = useTemplateRef('playlisted-entities')
-const taskInfo = useTemplateRef('task-info')
+const taskInfoRef = useTemplateRef('task-info')
 
 // — Non-reactive (instance state)
 let isMounted = false
@@ -2425,12 +2425,12 @@ const getPreviousAnnotationTime = time => {
 const onCommentClicked = () => {
   const height = videoContainer.value.offsetHeight
   isCommentsHidden.value = !isCommentsHidden.value
-  if (!isCommentsHidden.value && taskInfo.value?.$el) {
-    taskInfo.value.$el.style.height = `${height}px`
+  if (!isCommentsHidden.value && taskInfoRef.value?.$el) {
+    taskInfoRef.value.$el.style.height = `${height}px`
   }
   triggerResize()
   nextTick(() => {
-    taskInfo.value?.focusCommentTextarea()
+    taskInfoRef.value?.focusCommentTextarea()
     resetHeight()
   })
 }
@@ -3118,8 +3118,8 @@ const resetHeight = () => {
     if (isWaveformDisplayed.value) height -= 60
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
-    if (taskInfo.value?.$el && !isCommentsHidden.value) {
-      taskInfo.value.$el.style.height = `${height}px`
+    if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
+      taskInfoRef.value.$el.style.height = `${height}px`
     }
     if (fullPlaylistPlayer.value) {
       fullPlaylistPlayer.value.style.height = `${height}px`
@@ -4013,9 +4013,17 @@ watch(taskTypeToCompare, () => {
 watch(
   () => props.entities,
   () => {
-    if (!entityList.value || entityList.value.length === 0) {
-      resetPlaylist()
-    }
+    resetPlaylist()
+  }
+)
+
+watch(
+  () => props.entities?.length ?? 0,
+  () => {
+    // Parent mutates currentEntitiesList in place on add/remove (no ref
+    // change), so the ref-level watcher above misses it. Re-aliasing here
+    // forces the v-for over entityList to pick up the new content.
+    entityList.value = props.entities ?? []
   }
 )
 
@@ -4165,7 +4173,12 @@ onBeforeUnmount(() => {
   if (wavesurfer) wavesurfer.destroy()
 })
 
-// Expose API for TaskInfo (passed as :player="this" in the template)
+// Public API for the parent's `$refs['playlist-player']` and for the
+// `playerProxy` passed to TaskInfo. We can't bind `:player="this"` from
+// <script setup> — the public proxy is restricted and TaskInfo's internal
+// access patterns trigger enumeration warnings and a recursive update
+// cycle. The plain-object proxy below mirrors only what TaskInfo
+// actually calls on the player.
 
 defineExpose({
   extractAnnotationSnapshots,
@@ -4176,8 +4189,14 @@ defineExpose({
   showCanvas,
   isFullMode,
   joinedRoom,
-  fullScreen
+  fullScreen,
+  onEntityDropped,
+  onWindowResize
 })
+
+const playerProxy = {
+  extractAnnotationSnapshots: () => extractAnnotationSnapshots()
+}
 </script>
 
 <style lang="scss" scoped>
