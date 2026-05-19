@@ -346,22 +346,25 @@
         </div>
 
         <div
-          class="canvas-wrapper"
-          ref="canvas-wrapper"
-          oncontextmenu="return false"
+          ref="main-content-anchor"
+          class="main-content-anchor"
+          v-show="!isCurrentPreviewFile && !isCurrentPreviewModel && !isLoading"
+        />
+
+        <annotation-canvas
+          ref="main-annotation-canvas"
+          canvas-id="playlist-annotation-canvas"
+          :media-element="mainContentAnchorEl"
+          :panzoom-transform="panzoomTransform"
+          :wheel-target="mainContentAnchorEl"
+          @click="onCanvasClicked"
+          @resized="onMainCanvasResized"
           v-show="
             !isCurrentPreviewFile &&
             isAnnotationsDisplayed &&
             !isCurrentPreviewModel
           "
-        >
-          <canvas
-            id="playlist-annotation-canvas"
-            ref="annotation-canvas"
-            class="canvas"
-          >
-          </canvas>
-        </div>
+        />
       </div>
 
       <task-info
@@ -1072,7 +1075,6 @@ import {
   computed,
   defineAsyncComponent,
   getCurrentInstance,
-  markRaw,
   nextTick,
   onBeforeUnmount,
   onMounted,
@@ -1202,8 +1204,12 @@ const container = useTemplateRef('container')
 const header = useTemplateRef('header')
 const buttonBar = useTemplateRef('button-bar')
 const videoContainer = useTemplateRef('video-container')
-const annotationCanvasEl = useTemplateRef('annotation-canvas')
-const canvasWrapper = useTemplateRef('canvas-wrapper')
+const mainAnnotationCanvas = useTemplateRef('main-annotation-canvas')
+const mainContentAnchor = useTemplateRef('main-content-anchor')
+// canvasWrapper points to the AnnotationCanvas's overlay div so the
+// composable's legacy paths (addText, showCanvas) keep working with the
+// new component-based API.
+const canvasWrapper = computed(() => mainAnnotationCanvas.value?.overlay)
 const fullPlaylistPlayer = useTemplateRef('full-playlist-player')
 const rawPlayer = useTemplateRef('raw-player')
 const rawPlayerComparison = useTemplateRef('raw-player-comparison')
@@ -1577,6 +1583,7 @@ const comparisonAnnotations = computed(() =>
 const comparisonContentAnchorEl = computed(
   () => comparisonContentAnchor.value || null
 )
+const mainContentAnchorEl = computed(() => mainContentAnchor.value || null)
 
 // Main viewer's panzoom transform. Drives both the comparison
 // annotation overlay (via the annotation-canvas prop) and the
@@ -1692,8 +1699,9 @@ const { postAnnotationAddition, postAnnotationDeletion, postAnnotationUpdate } =
 // Annotation composable
 
 const annotation = useAnnotation({
-  canvasWrapper,
+  mainCanvasComponent: mainAnnotationCanvas,
   comparisonCanvasComponent: comparisonAnnotationCanvas,
+  canvasWrapper,
   annotations,
   isCurrentUserArtist,
   userId,
@@ -1743,7 +1751,6 @@ const {
   resetUndoStacks,
   undoLastAction,
   redoLastAction,
-  setAnnotationCanvasDimensions,
   setAnnotationDrawingMode,
   clearCanvas,
   copyAnnotations,
@@ -1751,7 +1758,6 @@ const {
   fadeObject,
   startAnnotationSaving,
   endAnnotationSaving,
-  isAnnotationCanvas,
   copyAnnotationCanvas
 } = annotation
 
@@ -2663,81 +2669,109 @@ const playModel = () => {
   modelPlayer.value?.play(objectModel.value.currentAnimation)
 }
 
+// Size the main anchor div to the aspect-fit content rect of the
+// current main preview. AnnotationCanvas reads it as `mediaElement` and
+// overlays the matching area. Movies use the comparison-style math
+// (rawPlayer.$el + getVideoRatio), pictures use natural dimensions and
+// the video-container minus any comparison space.
+const updateMainAnchor = () => {
+  const anchor = mainContentAnchor.value
+  if (!anchor) return
+
+  if (isCurrentPreviewMovie.value && rawPlayer.value) {
+    const playerEl = rawPlayer.value.$el
+    const containerRect = videoContainer.value?.getBoundingClientRect()
+    if (!containerRect) return
+    const playerRect = playerEl.getBoundingClientRect()
+    const ratio = rawPlayer.value.getVideoRatio()
+    const fullWidth = playerEl.offsetWidth
+    const fullHeight = playerEl.offsetHeight
+    let width, height, leftOffset, topOffset
+    if (!ratio) {
+      width = fullWidth
+      height = fullHeight
+      leftOffset = 0
+      topOffset = 0
+    } else if (fullWidth > fullHeight * ratio) {
+      width = fullHeight * ratio
+      height = fullHeight
+      leftOffset = (fullWidth - width) / 2
+      topOffset = 0
+    } else {
+      width = fullWidth
+      height = fullWidth / ratio
+      leftOffset = 0
+      topOffset = (fullHeight - height) / 2
+    }
+    anchor.style.left = `${playerRect.left - containerRect.left + leftOffset}px`
+    anchor.style.top = `${playerRect.top - containerRect.top + topOffset}px`
+    anchor.style.width = `${width}px`
+    anchor.style.height = `${height}px`
+    return
+  }
+
+  if (isCurrentPreviewPicture.value && videoContainer.value) {
+    const naturalDimensions = currentPreview.value?.width
+      ? {
+          width: currentPreview.value.width,
+          height: currentPreview.value.height
+        }
+      : picturePlayer.value?.getNaturalDimensions?.()
+    if (!naturalDimensions) return
+    const naturalWidth = naturalDimensions.width
+    const naturalHeight = naturalDimensions.height
+    const ratio = naturalWidth / naturalHeight
+
+    let fullWidth = videoContainer.value.offsetWidth
+    const fullHeight = videoContainer.value.offsetHeight
+    if (isComparing.value && !isComparisonOverlay.value) {
+      fullWidth = Math.round(fullWidth / 2)
+    }
+
+    let width = ratio ? fullHeight * ratio : fullWidth
+    let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
+    let left = 0
+    let top = 0
+
+    if (fullWidth > naturalWidth) {
+      left = Math.round((fullWidth - naturalWidth) / 2)
+      width = naturalWidth
+    } else if (fullWidth > width) {
+      left = Math.round((fullWidth - width) / 2)
+    } else {
+      width = fullWidth
+    }
+
+    if (fullHeight > naturalHeight) {
+      top = Math.round((fullHeight - naturalHeight) / 2)
+      height = naturalHeight
+    } else if (fullHeight > height) {
+      top = Math.round((fullHeight - height) / 2)
+    } else {
+      height = fullHeight
+      width = Math.round(height * ratio)
+      left = Math.round((fullWidth - width) / 2)
+    }
+
+    anchor.style.left = `${left}px`
+    anchor.style.top = `${top}px`
+    anchor.style.width = `${width}px`
+    anchor.style.height = `${height}px`
+  }
+}
+
 const resetCanvasSize = () => {
   return nextTick().then(() => {
     if (!isZoomEnabled.value) resetPanZoom()
-
-    if (isCurrentPreviewMovie.value && isAnnotationCanvas()) {
-      if (canvasWrapper.value && rawPlayer.value) {
-        const ratio = rawPlayer.value.getVideoRatio()
-        const fullWidth = rawPlayer.value.$el.offsetWidth
-        const fullHeight = rawPlayer.value.$el.offsetHeight
-        const width = ratio ? fullHeight * ratio : fullWidth
-        if (fullWidth > width) {
-          const left = Math.round((fullWidth - width) / 2)
-          canvasWrapper.value.style.left = left + 'px'
-          canvasWrapper.value.style.top = '0px'
-          setAnnotationCanvasDimensions(width, fullHeight)
-        } else {
-          const height = ratio ? Math.round(fullWidth / ratio) : fullHeight
-          const top = Math.round((fullHeight - height) / 2)
-          canvasWrapper.value.style.left = '0px'
-          canvasWrapper.value.style.top = top + 'px'
-          setAnnotationCanvasDimensions(fullWidth, height)
-        }
-      }
-    } else if (isCurrentPreviewPicture.value && isAnnotationCanvas()) {
-      if (!canvasWrapper.value || !videoContainer.value) return
-      const naturalDimensions = currentPreview.value?.width
-        ? {
-            width: currentPreview.value.width,
-            height: currentPreview.value.height
-          }
-        : picturePlayer.value?.getNaturalDimensions?.()
-      if (!naturalDimensions) return
-      const naturalWidth = naturalDimensions.width
-      const naturalHeight = naturalDimensions.height
-      const ratio = naturalWidth / naturalHeight
-
-      let fullWidth = videoContainer.value.offsetWidth
-      const fullHeight = videoContainer.value.offsetHeight
-      if (isComparing.value && !isComparisonOverlay.value) {
-        fullWidth = Math.round(fullWidth / 2)
-      }
-
-      let width = ratio ? fullHeight * ratio : fullWidth
-      let height = ratio ? Math.round(fullWidth / ratio) : fullHeight
-      canvasWrapper.value.style.top = '0px'
-      canvasWrapper.value.style.left = '0px'
-
-      if (fullWidth > naturalWidth) {
-        const left = Math.round((fullWidth - naturalWidth) / 2)
-        canvasWrapper.value.style.left = left + 'px'
-        width = naturalWidth
-      } else if (fullWidth > width) {
-        const left = Math.round((fullWidth - width) / 2)
-        canvasWrapper.value.style.left = left + 'px'
-      } else {
-        width = fullWidth
-      }
-
-      if (fullHeight > naturalHeight) {
-        const top = Math.round((fullHeight - naturalHeight) / 2)
-        canvasWrapper.value.style.top = top + 'px'
-        height = naturalHeight
-      } else if (fullHeight > height) {
-        const top = Math.round((fullHeight - height) / 2)
-        canvasWrapper.value.style.top = top + 'px'
-      } else {
-        height = fullHeight
-        width = Math.round(height * ratio)
-        const left = Math.round((fullWidth - width) / 2)
-        canvasWrapper.value.style.left = left + 'px'
-      }
-      setAnnotationCanvasDimensions(width, height)
-    }
+    updateMainAnchor()
     updateComparisonAnchor()
   })
+}
+
+const onMainCanvasResized = () => {
+  reloadAnnotations(false)
+  const ann = getAnnotation(currentTimeRaw.value)
+  if (ann) loadSingleAnnotation(ann)
 }
 
 const showCanvas = () => {
@@ -3847,27 +3881,6 @@ const resetCanvas = () => {
   })
 }
 
-// Fabric canvas setup (PlaylistPlayer uses a plain <canvas> element,
-// not the AnnotationCanvas component, so we must construct the Fabric
-// instance ourselves and feed it back to the composable.)
-
-const setupFabricCanvas = () => {
-  if (!annotationCanvasEl.value) return null
-  const canvasId = annotationCanvasEl.value.id
-  fabricCanvas.value = markRaw(
-    new fabric.Canvas(canvasId, { fireRightClick: true })
-  )
-  fabricCanvas.value.setDimensions({ width: 100, height: 100 })
-  if (!fabricCanvas.value.freeDrawingBrush) {
-    fabricCanvas.value.freeDrawingBrush = new PSBrush(fabricCanvas.value)
-  }
-  annotation.configureCanvas()
-  // The composable's configureCanvas binds an internal noop for
-  // mouse:down clicks; re-attach our scrubbing handler on top.
-  fabricCanvas.value.on('mouse:down', onCanvasClicked)
-  return fabricCanvas.value
-}
-
 // Preview-room helpers (kept in component because of heavy player deps)
 
 const sendUpdatePlayingStatus = () => {
@@ -4308,7 +4321,6 @@ onMounted(() => {
       container.value.onmousemove = onMouseMove
     }
     window.addEventListener('beforeunload', onWindowsClosed)
-    setupFabricCanvas()
     resetCanvas()
     setPlayerSpeed(1)
     rebuildComparisonOptions()
@@ -4511,13 +4523,7 @@ const playerProxy = {
   position: relative;
 }
 
-.canvas-wrapper {
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
+.main-content-anchor,
 .comparison-content-anchor {
   position: absolute;
   pointer-events: none;
@@ -4693,16 +4699,8 @@ progress {
   border-radius: 5px;
 }
 
-#playlist-annotation-canvas {
-  margin: auto;
-}
-
 .playlisted-wrapper {
   margin-right: 0;
-}
-
-.canvas-wrapper {
-  z-index: 5;
 }
 
 .picture-preview-wrapper {
