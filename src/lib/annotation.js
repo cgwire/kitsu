@@ -64,9 +64,8 @@ export const SHAPE_STROKE_WIDTH = 4
  * -----------------------------------------------------------------------*/
 
 /**
- * Mirrors `annotationMixin.addSerialization`. Adds a `serialize()` method
- * to the fabric object that includes the extra fields we persist (id,
- * canvasWidth/Height, angle, scale, createdBy).
+ * Adds a `serialize()` method to the fabric object that includes the extra
+ * fields we persist (id, canvasWidth/Height, angle, scale, createdBy).
  */
 export const addSerialization = object => {
   object.serialize = function () {
@@ -83,9 +82,9 @@ export const addSerialization = object => {
 }
 
 /**
- * Mirrors `annotationMixin.setObjectData`. Stamps id / canvas dimensions /
- * createdBy on a freshly created fabric object so subsequent saves include
- * the metadata that the backend uses to apply diffs.
+ * Stamps id / canvas dimensions / createdBy on a freshly created fabric
+ * object so subsequent saves include the metadata that the backend uses to
+ * apply diffs.
  */
 export const setObjectData = (object, canvas, userId) => {
   if (object.set) {
@@ -111,9 +110,8 @@ export const setObjectData = (object, canvas, userId) => {
 
 /**
  * Build the same PSBrush-backed `fabric.Canvas` the studio player uses.
- * The pressure-manager fallback mirrors `annotationMixin.onAnnotateClicked`
- * — without it, mouse strokes ship a low pressure and render way thinner
- * than on the studio side.
+ * The pressure-manager fallback is required — without it, mouse strokes ship
+ * a low pressure and render way thinner than on the studio side.
  */
 export const createAnnotationCanvas = (canvasEl, options = {}) => {
   const canvas = new fabric.Canvas(canvasEl, {
@@ -135,8 +133,8 @@ export const createAnnotationCanvas = (canvasEl, options = {}) => {
 }
 
 /**
- * Mirrors `annotationMixin._resetPencil`. Accepts either a width name
- * (`'big' | 'medium' | 'small'`) or a numeric pixel value.
+ * Accepts either a width name (`'big' | 'medium' | 'small'`) or a numeric
+ * pixel value.
  */
 export const applyPencilWidth = (canvas, width) => {
   if (!canvas?.freeDrawingBrush) return
@@ -146,9 +144,6 @@ export const applyPencilWidth = (canvas, width) => {
   }
 }
 
-/**
- * Mirrors `annotationMixin._resetColor`.
- */
 export const applyPencilColor = (canvas, color) => {
   if (!canvas?.freeDrawingBrush) return
   canvas.freeDrawingBrush.color = color
@@ -281,8 +276,7 @@ export const attachShapeDrawing = (
 /* -------------------------------------------------------------------------
  * Mouse pressure simulation
  *
- * Ports `annotationMixin.initalizeMouseDrawing / updateMousePressure /
- * endDrawing` so mouse-drawn strokes vary in width with cursor speed (the
+ * Makes mouse-drawn strokes vary in width with cursor speed (the
  * `'distance'` mode the studio uses by default). PSBrush still honours
  * actual stylus pressure from PointerEvents — the fallback we tweak here
  * only kicks in when no real pressure is reported, so real pen pressure
@@ -409,9 +403,8 @@ export const findAnnotationAtTime = (
  * -----------------------------------------------------------------------*/
 
 /**
- * Mirrors `annotationMixin.addToAdditions` for read-only consumers that
- * just need to push a new object into the additions list at the right
- * time slot.
+ * Pushes a new object into the additions list at the right time slot.
+ * Returns the same additions array (mutated).
  */
 export const pushAddition = (
   additions,
@@ -434,8 +427,7 @@ export const pushAddition = (
 }
 
 /**
- * Mirrors `annotationMixin.removeFromAdditions`. Drops empty annotation
- * entries once their last object is removed.
+ * Drops empty annotation entries once their last object is removed.
  */
 export const removeAddition = (additions, objectId) =>
   additions
@@ -460,9 +452,8 @@ export const deserializePSStroke = obj =>
 /* -------------------------------------------------------------------------
  * Read-only object rendering
  *
- * Lighter-weight version of `annotationMixin.addObjectToCanvas`: produces
- * a non-interactive shape ready to be `canvas.add()`-ed. Returns a Promise
- * because PSStroke deserialisation is async.
+ * Produces a non-interactive shape ready to be `canvas.add()`-ed. Returns a
+ * Promise because PSStroke deserialisation is async.
  * -----------------------------------------------------------------------*/
 
 export const buildReadOnlyShape = async (annotation, obj, canvas) => {
