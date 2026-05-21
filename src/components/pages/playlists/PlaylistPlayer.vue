@@ -585,40 +585,6 @@
 
       <span class="filler"></span>
 
-      <div class="flexrow" v-if="isCurrentPreviewModel">
-        <combobox-styled
-          class="background-combo mr05"
-          :active="Boolean(currentBackground)"
-          :disabled="!productionBackgrounds.length"
-          :is-compact="!productionBackgrounds.length"
-          is-reversed
-          keep-order
-          thin
-          :options="backgroundOptions"
-          v-model="currentBackground"
-          @change="onObjectBackgroundSelected()"
-        >
-          <template #icon>
-            <globe-icon class="icon is-small mr05" />
-          </template>
-        </combobox-styled>
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isObjectBackground && isEnvironmentSkybox"
-          :disabled="!objectBackgroundUrl || !isObjectBackground"
-          icon="image"
-          :title="$t('playlists.actions.toggle_environment_skybox')"
-          @click="isEnvironmentSkybox = !isEnvironmentSkybox"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isWireframe"
-          icon="codepen"
-          :title="$t('playlists.actions.toggle_wireframe')"
-          @click="isWireframe = !isWireframe"
-        />
-      </div>
-
       <template
         v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
       >
@@ -630,114 +596,47 @@
           icon="save"
         />
       </template>
-      <div
-        class="flexrow"
-        v-if="
-          !isCurrentUserArtist &&
-          (isCurrentPreviewMovie || isCurrentPreviewPicture) &&
-          !isFullMode
+
+      <player-annotation-bar
+        v-if="!isFullMode"
+        :background-options="backgroundOptions"
+        :full-screen="fullScreen"
+        :is-3-d-model="isCurrentPreviewModel"
+        :is-annotations-displayed="isAnnotationsDisplayed"
+        :is-comments-hidden="isCommentsHidden"
+        :is-concept="false"
+        :is-drawing="isDrawing"
+        :is-movie="isCurrentPreviewMovie"
+        :is-object-background="isObjectBackground"
+        :is-picture="isCurrentPreviewPicture"
+        :is-typing="isTyping"
+        :is-zoom-pan="isZoomEnabled"
+        :object-background-url="objectBackgroundUrl"
+        :pencil-color="pencilColor"
+        :pencil-palette="pencilPalette"
+        :pencil-width="pencilWidth"
+        :production-backgrounds="productionBackgrounds"
+        :read-only="isCurrentUserArtist"
+        :show-comments-button="true"
+        :text-color="textColor"
+        v-model:current-background="currentBackground"
+        v-model:is-environment-skybox="isEnvironmentSkybox"
+        v-model:is-laser-mode-on="isLaserModeOn"
+        v-model:is-wireframe="isWireframe"
+        @annotation-displayed-clicked="
+          isAnnotationsDisplayed = !isAnnotationsDisplayed
         "
-      >
-        <div
-          class="separator"
-          v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
-        ></div>
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isAnnotationsDisplayed"
-          icon="pen"
-          :title="$t('playlists.actions.toggle_annotations')"
-          v-if="
-            (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
-          "
-          @click="isAnnotationsDisplayed = !isAnnotationsDisplayed"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isZoomEnabled"
-          icon="loupe"
-          :title="$t('playlists.actions.annotation_zoom_pan')"
-          @click="onPanZoomClicked()"
-          v-if="isCurrentPreviewMovie || isCurrentPreviewPicture"
-        />
-        <transition name="slide">
-          <div class="annotation-tools" v-show="isTyping">
-            <color-picker
-              :color="textColor"
-              @toggle-palette="onPickPencilColor"
-              @change="onChangeTextColor"
-            />
-          </div>
-        </transition>
-        <button-simple
-          class="playlist-button flexrow-item"
-          :active="isTyping"
-          :title="$t('playlists.actions.annotation_text')"
-          @click="onTypeClicked"
-          icon="type"
-        />
-
-        <transition name="slide">
-          <div class="annotation-tools" v-show="isDrawing">
-            <pencil-picker
-              :pencil="pencilWidth"
-              :sizes="pencilPalette"
-              @toggle-palette="onPickPencilWidth"
-              @change="onChangePencilWidth"
-            />
-
-            <color-picker
-              :color="pencilColor"
-              @toggle-palette="onPickPencilColor"
-              @change="onChangePencilColor"
-            />
-          </div>
-        </transition>
-        <button-simple
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true,
-            active: isDrawing
-          }"
-          :title="$t('playlists.actions.annotation_draw')"
-          @click="onAnnotateClicked"
-          icon="pencil"
-        />
-        <button-simple
-          @click="isLaserModeOn = !isLaserModeOn"
-          class="playlist-button flexrow-item"
-          :active="isLaserModeOn"
-          icon="laser"
-          :title="$t('playlists.actions.toggle_laser')"
-          v-if="
-            (isCurrentUserManager || isCurrentUserSupervisor) && !isAddingEntity
-          "
-        />
-        <button-simple
-          :class="{
-            'playlist-button': true,
-            'flexrow-item': true,
-            active: isDrawing
-          }"
-          :title="$t('playlists.actions.annotation_erase')"
-          @click="onEraseClicked"
-          icon="eraser"
-          v-show="false"
-        />
-        <button-simple
-          class="playlist-button flexrow-item"
-          icon="delete"
-          :title="$t('playlists.actions.annotation_delete')"
-          @click="onDeleteClicked"
-        />
-      </div>
-      <div class="separator"></div>
-      <button-simple
-        class="button playlist-button flexrow-item"
-        :active="!isCommentsHidden"
-        :title="$t('playlists.actions.comments')"
-        @click="onCommentClicked"
-        icon="comment"
+        @change-pencil-color="onChangePencilColor"
+        @change-pencil-width="onChangePencilWidth"
+        @change-text-color="onChangeTextColor"
+        @comment-clicked="onCommentClicked"
+        @delete-clicked="onDeleteClicked"
+        @object-background-selected="onObjectBackgroundSelected"
+        @pencil-annotate-clicked="onAnnotateClicked"
+        @redo="redoLastAction"
+        @type-clicked="onTypeClicked"
+        @undo="undoLastAction"
+        @zoom-pan-clicked="onPanZoomClicked"
       />
       <button-simple
         class="playlist-button flexrow-item"
@@ -952,14 +851,8 @@
  * This modules manages all the options available while playing a playlist.
  * It is made to work with a single playlist.
  */
-import { fabric } from 'fabric'
 import { PSBrush } from 'fabricjs-psbrush'
-import {
-  ArrowUpRightIcon,
-  DownloadIcon,
-  GlobeIcon,
-  PlayIcon
-} from 'lucide-vue-next'
+import { ArrowUpRightIcon, DownloadIcon, PlayIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -1012,6 +905,7 @@ import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
+import PlayerAnnotationBar from '@/components/previews/PlayerAnnotationBar.vue'
 import PlayerComparisonBar from '@/components/previews/PlayerComparisonBar.vue'
 import PlayerPlaybackBar from '@/components/previews/PlayerPlaybackBar.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
@@ -1020,9 +914,6 @@ import SoundViewer from '@/components/previews/SoundViewer.vue'
 import VideoProgress from '@/components/previews/VideoProgress.vue'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ColorPicker from '@/components/widgets/ColorPicker.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import PencilPicker from '@/components/widgets/PencilPicker.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by const previewRoom in script
 import PreviewRoom from '@/components/widgets/PreviewRoom.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -1601,8 +1492,6 @@ const {
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
   clearComparisonCanvas,
-  onPickPencilWidth,
-  onPickPencilColor,
   onChangePencilColor,
   onChangePencilWidth,
   onChangeTextColor,
@@ -3574,24 +3463,6 @@ const onAnnotateClicked = () => {
   }
 }
 
-const onEraseClicked = () => {
-  showCanvas()
-  if (isDrawing.value) {
-    if (fabricCanvas.value) fabricCanvas.value.isDrawingMode = false
-    isDrawing.value = false
-  } else {
-    isTyping.value = false
-    if (fabricCanvas.value) {
-      fabricCanvas.value.isDrawingMode = true
-      fabricCanvas.value.freeDrawingBrush = new fabric.EraserBrush(
-        fabricCanvas.value
-      )
-      fabricCanvas.value.freeDrawingBrush.width = 10
-    }
-    isDrawing.value = true
-  }
-}
-
 const onTypeClicked = () => {
   const clickarea =
     canvasWrapper.value?.getElementsByClassName('upper-canvas')[0]
@@ -4308,18 +4179,6 @@ const playerProxy = {
   pointer-events: none;
 }
 
-.playlist-footer .background-combo {
-  max-width: 300px;
-
-  :deep(.combo) {
-    max-width: 100%;
-  }
-  .icon {
-    height: 1rem;
-    margin-top: 0;
-  }
-}
-
 .mr1 {
   margin-right: 1em;
 }
@@ -4412,12 +4271,6 @@ const playerProxy = {
   margin-left: 1em;
 }
 
-.annotation-tools {
-  display: flex;
-  align-items: stretch;
-  height: 100%;
-}
-
 .slide-enter-active {
   transition: all 0.3s ease;
 }
@@ -4505,8 +4358,7 @@ const playerProxy = {
   }
 }
 
-.playlist-button.button.active,
-.buttons .background-combo.active .icon {
+.playlist-button.button.active {
   color: var(--background-selectable);
 
   img.active {

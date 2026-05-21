@@ -17,11 +17,20 @@
     />
 
     <button-simple
+      icon="pen"
+      :title="$t('playlists.actions.toggle_annotations')"
+      :active="isAnnotationsDisplayed"
+      @click="$emit('annotation-displayed-clicked')"
+      v-if="(isPicture || isMovie) && (!light || fullScreen) && !isConcept"
+    />
+
+    <button-simple
       class="flexrow-item"
-      icon="delete"
-      :title="$t('playlists.actions.annotation_delete')"
-      @click="$emit('delete-clicked')"
-      v-if="!readOnly && fullScreen && !isConcept"
+      icon="loupe"
+      :active="isZoomPan"
+      :title="$t('playlists.actions.annotation_zoom_pan')"
+      @click="$emit('zoom-pan-clicked')"
+      v-if="(!light || fullScreen) && !isConcept"
     />
 
     <transition name="slide">
@@ -69,20 +78,25 @@
     />
 
     <button-simple
-      icon="pen"
-      :title="$t('playlists.actions.toggle_annotations')"
-      :active="isAnnotationsDisplayed"
-      @click="$emit('annotation-displayed-clicked')"
-      v-if="(isPicture || isMovie) && (!light || fullScreen) && !isConcept"
+      class="flexrow-item"
+      icon="laser"
+      :active="isLaserModeOn"
+      :title="$t('playlists.actions.toggle_laser')"
+      @click="isLaserModeOn = !isLaserModeOn"
+      v-if="
+        isLaserModeOn !== undefined &&
+        !readOnly &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
     />
 
     <button-simple
       class="flexrow-item"
-      icon="loupe"
-      :active="isZoomPan"
-      :title="$t('playlists.actions.annotation_zoom_pan')"
-      @click="$emit('zoom-pan-clicked')"
-      v-if="(!light || fullScreen) && !isConcept"
+      icon="delete"
+      :title="$t('playlists.actions.annotation_delete')"
+      @click="$emit('delete-clicked')"
+      v-if="!readOnly && fullScreen && !isConcept"
     />
 
     <button-simple
@@ -247,6 +261,7 @@ const isEnvironmentSkybox = defineModel('isEnvironmentSkybox', {
   default: false
 })
 const isWireframe = defineModel('isWireframe', { default: false })
+const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
 </script>
 
 <style lang="scss" scoped>
