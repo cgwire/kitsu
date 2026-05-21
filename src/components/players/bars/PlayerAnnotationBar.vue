@@ -185,10 +185,10 @@
 import { GlobeIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ColorPicker from '@/components/widgets/ColorPicker.vue'
+import ColorPicker from '@/components/players/bars/ColorPicker.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import PencilPicker from '@/components/widgets/PencilPicker.vue'
-import ShapePicker from '@/components/widgets/ShapePicker.vue'
+import PencilPicker from '@/components/players/bars/PencilPicker.vue'
+import ShapePicker from '@/components/players/bars/ShapePicker.vue'
 
 defineProps({
   backgroundOptions: {
