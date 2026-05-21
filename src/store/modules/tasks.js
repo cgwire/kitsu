@@ -119,6 +119,19 @@ const helpers = {
 
   getTaskStatus(taskStatusId) {
     return taskStatusStore.cache.taskStatusMap.get(taskStatusId)
+  },
+
+  // Fall back to the API-embedded author since guests aren't in personMap.
+  resolveAuthor(personId, embedded) {
+    const person = personStore.cache.personMap.get(personId) || embedded
+    return personStore.helpers.addAdditionalInformation(person)
+  },
+
+  enrichCommentAuthors(comment) {
+    comment.person = helpers.resolveAuthor(comment.person_id, comment.person)
+    comment.replies?.forEach(reply => {
+      reply.person = helpers.resolveAuthor(reply.person_id, reply.person)
+    })
   }
 }
 
@@ -878,9 +891,7 @@ const mutations = {
   },
 
   [LOAD_TASK_COMMENTS_END](state, { taskId, comments }) {
-    comments.forEach(comment => {
-      comment.person = personStore.cache.personMap.get(comment.person_id)
-    })
+    comments.forEach(comment => helpers.enrichCommentAuthors(comment))
     state.taskComments[taskId] = sortComments([...comments])
     state.taskPreviews[taskId] = comments.reduce((previews, comment) => {
       if (comment.previews && comment.previews.length > 0) {
@@ -926,14 +937,7 @@ const mutations = {
       comment.task_status = helpers.getTaskStatus(comment.task_status_id)
     }
 
-    if (comment.person === undefined) {
-      const getPerson = personStore.getters.getPerson(personStore.state)
-      comment.person = getPerson(comment.person_id)
-    }
-
-    comment.person = personStore.helpers.addAdditionalInformation(
-      comment.person
-    )
+    helpers.enrichCommentAuthors(comment)
 
     if (!taskId) {
       taskId = comment.object_id
@@ -1331,6 +1335,7 @@ const mutations = {
   [ADD_REPLY_TO_COMMENT](state, { comment, reply }) {
     if (!comment.replies) comment.replies = []
     if (!comment.replies.find(r => r.id === reply.id)) {
+      reply.person = helpers.resolveAuthor(reply.person_id, reply.person)
       comment.replies.push(reply)
       comment.attachment_files = [
         ...(comment.attachment_files || []),

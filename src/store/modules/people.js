@@ -78,7 +78,7 @@ const helpers = {
 
     if (person.has_avatar) {
       const lastUpdate = person.updated_at || person.created_at
-      const timestamp = Date.parse(lastUpdate)
+      const timestamp = Date.parse(lastUpdate) || ''
       person.avatarPath = `/api/pictures/thumbnails/persons/${person.id}.png?t=${timestamp}`
     }
 
