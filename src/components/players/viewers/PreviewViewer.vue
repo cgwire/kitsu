@@ -124,6 +124,8 @@ import { ref, computed, watch } from 'vue'
 import { DownloadIcon } from 'lucide-vue-next'
 
 import {
+  isDiffPreview,
+  isMarkdownPreview,
   isModelPreview,
   isMoviePreview,
   isPdfPreview,
@@ -256,6 +258,10 @@ const status = computed(() =>
 const isBroken = computed(() => status.value === 'broken')
 const isProcessing = computed(() => status.value === 'processing')
 const isReady = computed(() => status.value === 'ready')
+const isDiff = computed(() => isReady.value && isDiffPreview(extension.value))
+const isMarkdown = computed(
+  () => isReady.value && isMarkdownPreview(extension.value)
+)
 const isMovie = computed(() => isReady.value && isMoviePreview(extension.value))
 const isPdf = computed(() => isReady.value && isPdfPreview(extension.value))
 const isPicture = computed(

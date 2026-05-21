@@ -20,9 +20,15 @@ export const isSoundPreview = extension => ['mp3', 'wav'].includes(extension)
 
 export const isPdfPreview = extension => extension === 'pdf'
 
+export const isMarkdownPreview = extension => extension === 'md'
+
+export const isDiffPreview = extension => extension === 'diff'
+
 export const isFilePreview = extension =>
   !isMoviePreview(extension) &&
   !isPicturePreview(extension) &&
   !isModelPreview(extension) &&
   !isSoundPreview(extension) &&
-  !isPdfPreview(extension)
+  !isPdfPreview(extension) &&
+  !isMarkdownPreview(extension) &&
+  !isDiffPreview(extension)
