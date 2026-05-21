@@ -356,7 +356,8 @@
           canvas-id="playlist-annotation-canvas"
           :media-element="mainContentAnchorEl"
           :panzoom-transform="panzoomTransform"
-          :wheel-target="mainContentAnchorEl"
+          :interactive="isOverlayInteractive"
+          :wheel-target="mainMediaElement"
           @click="onCanvasClicked"
           @resized="onMainCanvasResized"
           v-show="
@@ -1585,6 +1586,21 @@ const comparisonContentAnchorEl = computed(
 )
 const mainContentAnchorEl = computed(() => mainContentAnchor.value || null)
 
+// Where wheel events forwarded by the main AnnotationCanvas should
+// land. Must be the element panzoom is bound to, so the user can zoom
+// the main viewer through the overlay. For movies that's the inner
+// <video>; for pictures, fall back to the picture viewer's root so
+// wheel still bubbles to its panzoom listener.
+const mainMediaElement = computed(() => {
+  if (isCurrentPreviewMovie.value) {
+    return rawPlayer.value?.currentPlayer || null
+  }
+  if (isCurrentPreviewPicture.value) {
+    return picturePlayer.value?.$el || null
+  }
+  return null
+})
+
 // Main viewer's panzoom transform. Drives both the comparison
 // annotation overlay (via the annotation-canvas prop) and the
 // comparison <video>'s own panzoom (via the watcher below). Mirrors
@@ -1852,7 +1868,7 @@ const {
 // Keyboard shortcuts (common subset; PlaylistPlayer-specific keys are
 // handled below in onKeyDown).
 
-usePreviewShortcuts({
+const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
@@ -1860,6 +1876,12 @@ usePreviewShortcuts({
   onPaste: () => pasteAnnotations(),
   onToggleOverlay: () => toggleFullOverlayComparison()
 })
+
+// Holding Alt makes the overlay transparent to pointer events so the
+// user can pan/drag the underlying media (panzoom captures the events
+// directly). Shift stays free for fabric's straight-line constraint,
+// and wheel always reaches the media via wheel-target.
+const isOverlayInteractive = computed(() => !isAltHeld.value)
 
 // DOM utility helpers (inlined from domMixin)
 
