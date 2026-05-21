@@ -56,6 +56,7 @@
         @click="$emit('next-comparison-clicked')"
       />
     </div>
+    <slot name="missing" />
   </div>
 </template>
 
