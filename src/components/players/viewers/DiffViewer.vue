@@ -22,6 +22,8 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { html as diff2html } from 'diff2html'
 
+import filesApi from '@/store/api/files'
+
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
@@ -45,12 +47,6 @@ const rawContent = ref('')
 
 // Computed
 
-const fileUrl = computed(() =>
-  props.preview?.id
-    ? `/api/pictures/originals/preview-files/${props.preview.id}.diff`
-    : ''
-)
-
 const renderedHtml = computed(() => {
   if (!rawContent.value) return ''
   return diff2html(rawContent.value, {
@@ -64,13 +60,14 @@ const renderedHtml = computed(() => {
 // Functions
 
 const loadContent = async () => {
-  if (!fileUrl.value) return
+  if (!props.preview?.id) return
   isLoading.value = true
   hasError.value = false
   try {
-    const response = await fetch(fileUrl.value)
-    if (!response.ok) throw new Error(response.statusText)
-    rawContent.value = await response.text()
+    rawContent.value = await filesApi.getPreviewFileText(
+      props.preview.id,
+      'diff'
+    )
   } catch (err) {
     console.error('Failed to load diff preview', err)
     hasError.value = true

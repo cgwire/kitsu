@@ -188,6 +188,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { replaceTimeWithTimecode } from '@/lib/render'
+import playlistsApi from '@/store/api/playlists'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
@@ -239,7 +240,6 @@ const modals = reactive({ edit: false, delete: false, attachment: false })
 
 // Computed
 
-const apiBase = computed(() => `/api/shared/playlists/${props.token}`)
 const currentProduction = computed(() => store.getters.currentProduction)
 const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
 
@@ -332,9 +332,7 @@ const populatePersonMap = () => {
 // Functions — load
 
 const loadContext = async () => {
-  const response = await fetch(`${apiBase.value}/context`)
-  if (!response.ok) throw new Error('Failed to load context')
-  const data = await response.json()
+  const data = await playlistsApi.loadSharedPlaylistContext(props.token)
   taskStatuses.value = data.task_statuses || []
   if (availableStatuses.value.length > 0 && !selectedStatusId.value) {
     selectedStatusId.value = availableStatuses.value[0].id
@@ -342,9 +340,7 @@ const loadContext = async () => {
 }
 
 const loadComments = async () => {
-  const response = await fetch(`${apiBase.value}/comments`)
-  if (!response.ok) throw new Error('Failed to load comments')
-  comments.value = await response.json()
+  comments.value = await playlistsApi.loadSharedPlaylistComments(props.token)
   populatePersonMap()
 }
 
@@ -367,23 +363,19 @@ const uploadAttachments = async commentId => {
   pendingAttachments.value.forEach((form, index) => {
     formData.append(`file-${index}`, form.get('file'))
   })
-  const response = await fetch(
-    `${apiBase.value}/comments/${commentId}/attachments`,
-    { method: 'POST', body: formData }
-  )
-  if (!response.ok) return null
-  return response.json()
+  try {
+    return await playlistsApi.postSharedPlaylistCommentAttachments(
+      props.token,
+      commentId,
+      formData
+    )
+  } catch {
+    return null
+  }
 }
 
-const extractErrorMessage = async response => {
-  try {
-    const payload = await response.json()
-    if (payload?.error) return payload.error
-    if (payload?.message) return payload.message
-  } catch {
-    // body wasn't JSON — fall through to default
-  }
-  return ''
+const extractErrorMessage = err => {
+  return err?.body?.error || err?.body?.message || ''
 }
 
 const submitComment = async () => {
@@ -391,46 +383,37 @@ const submitComment = async () => {
   postError.value = ''
   submitting.value = true
   try {
-    const response = await fetch(`${apiBase.value}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        guest_id: props.guestId,
-        task_id: props.currentTaskId,
-        task_status_id: selectedStatusId.value,
-        text: commentText.value,
-        checklist: checklistItems.value.filter(item => item.text.trim())
-      })
+    let comment = await playlistsApi.postSharedPlaylistComment(props.token, {
+      guest_id: props.guestId,
+      task_id: props.currentTaskId,
+      task_status_id: selectedStatusId.value,
+      text: commentText.value,
+      checklist: checklistItems.value.filter(item => item.text.trim())
     })
-    if (response.ok) {
-      let comment = await response.json()
-      const withAttachments = await uploadAttachments(comment.id)
-      if (withAttachments) comment = withAttachments
-      comments.value = [comment, ...comments.value]
-      // Make sure the freshly created guest lands in personMap so the
-      // Comment widget treats them as a client author and renders the
-      // name + avatar without waiting for a page reload.
-      populatePersonMap()
-      // Reflect the new status colour on the surrounding entity so the
-      // playlist progress bar repaints without waiting for a refetch.
-      const status =
-        comment.task_status ||
-        store.getters.taskStatusMap.get(selectedStatusId.value)
-      if (status?.color) {
-        emit('status-changed', {
-          taskStatusId: status.id || selectedStatusId.value,
-          color: status.color
-        })
-      }
-      commentText.value = ''
-      checklistItems.value = []
-      pendingAttachments.value = []
-    } else {
-      const detail = await extractErrorMessage(response)
-      postError.value = detail || t('share.post_comment_error')
+    const withAttachments = await uploadAttachments(comment.id)
+    if (withAttachments) comment = withAttachments
+    comments.value = [comment, ...comments.value]
+    // Make sure the freshly created guest lands in personMap so the
+    // Comment widget treats them as a client author and renders the
+    // name + avatar without waiting for a page reload.
+    populatePersonMap()
+    // Reflect the new status colour on the surrounding entity so the
+    // playlist progress bar repaints without waiting for a refetch.
+    const status =
+      comment.task_status ||
+      store.getters.taskStatusMap.get(selectedStatusId.value)
+    if (status?.color) {
+      emit('status-changed', {
+        taskStatusId: status.id || selectedStatusId.value,
+        color: status.color
+      })
     }
-  } catch {
-    postError.value = t('share.post_comment_error')
+    commentText.value = ''
+    checklistItems.value = []
+    pendingAttachments.value = []
+  } catch (err) {
+    const detail = extractErrorMessage(err)
+    postError.value = detail || t('share.post_comment_error')
   }
   submitting.value = false
 }
@@ -454,15 +437,16 @@ const confirmEditComment = async updatedComment => {
   isEditing.value = true
   editError.value = false
   const commentId = commentToEdit.value.id
-  const base = `${apiBase.value}/comments/${commentId}`
   const attachmentsToDelete = updatedComment.attachmentFilesToDelete || []
   const newAttachmentFiles = updatedComment.newAttachmentFiles || []
   try {
     await Promise.all(
       attachmentsToDelete.map(attachment =>
-        fetch(
-          `${base}/attachments/${attachment.id}?guest_id=${props.guestId}`,
-          { method: 'DELETE' }
+        playlistsApi.deleteSharedPlaylistCommentAttachment(
+          props.token,
+          commentId,
+          attachment.id,
+          props.guestId
         )
       )
     )
@@ -472,23 +456,22 @@ const confirmEditComment = async updatedComment => {
       newAttachmentFiles.forEach((attachment, index) => {
         formData.append(`file-${index}`, attachment.get('file'))
       })
-      await fetch(`${base}/attachments`, {
-        method: 'POST',
-        body: formData
-      })
+      await playlistsApi.postSharedPlaylistCommentAttachments(
+        props.token,
+        commentId,
+        formData
+      )
     }
-    const res = await fetch(base, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const saved = await playlistsApi.editSharedPlaylistComment(
+      props.token,
+      commentId,
+      {
         guest_id: props.guestId,
         text: updatedComment.text,
         checklist: updatedComment.checklist || [],
         task_status_id: updatedComment.task_status_id
-      })
-    })
-    if (!res.ok) throw new Error('edit failed')
-    const saved = await res.json()
+      }
+    )
     comments.value = comments.value.map(c =>
       c.id === saved.id ? { ...c, ...saved } : c
     )
@@ -512,11 +495,11 @@ const confirmDeleteComment = async () => {
   isDeleting.value = true
   deleteError.value = false
   try {
-    const res = await fetch(
-      `${apiBase.value}/comments/${commentToEdit.value.id}?guest_id=${props.guestId}`,
-      { method: 'DELETE' }
+    await playlistsApi.deleteSharedPlaylistComment(
+      props.token,
+      commentToEdit.value.id,
+      props.guestId
     )
-    if (!res.ok) throw new Error('delete failed')
     comments.value = comments.value.filter(c => c.id !== commentToEdit.value.id)
     modals.delete = false
   } catch {
@@ -555,18 +538,16 @@ const onChecklistUpdated = async updated => {
   const previous = existing.checklist
   existing.checklist = updated.checklist
   try {
-    const res = await fetch(`${apiBase.value}/comments/${updated.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const saved = await playlistsApi.editSharedPlaylistComment(
+      props.token,
+      updated.id,
+      {
         guest_id: props.guestId,
         text: existing.text,
         checklist: updated.checklist,
         task_status_id: existing.task_status_id
-      })
-    })
-    if (!res.ok) throw new Error('checklist update failed')
-    const saved = await res.json()
+      }
+    )
     comments.value = comments.value.map(c =>
       c.id === saved.id ? { ...c, ...saved } : c
     )

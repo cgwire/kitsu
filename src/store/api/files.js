@@ -11,5 +11,11 @@ export default {
 
   getEntityOutputFiles(entityId) {
     return client.pget(`/api/data/entities/${entityId}/output-files`)
+  },
+
+  getPreviewFileText(previewFileId, extension) {
+    return client.getText(
+      `/api/pictures/originals/preview-files/${previewFileId}.${extension}`
+    )
   }
 }
