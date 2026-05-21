@@ -45,7 +45,8 @@ export const usePlaylistComparison = ({
   const currentComparisonPreviewIndex = ref(0)
   const savedTaskTypeToCompare = ref(null)
 
-  // Playlist-specific computeds (placeholders, filled in subsequent tasks)
+  // Playlist-specific computeds
+
   const taskTypeOptions = computed(() => {
     const entity = currentEntity.value
     if (!entity?.preview_files) return []
@@ -197,7 +198,7 @@ export const usePlaylistComparison = ({
     currentComparisonPreviewIndex,
     savedTaskTypeToCompare,
 
-    // Playlist-specific computeds (filled in next tasks)
+    // Playlist-specific computeds
     taskTypeOptions,
     revisionOptions,
     currentRevisionToCompare,
