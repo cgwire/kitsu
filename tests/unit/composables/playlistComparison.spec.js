@@ -379,6 +379,67 @@ describe('composables/playlistComparison', () => {
     })
   })
 
+  describe('overlayOpacity', () => {
+    const setup = () => {
+      const entity = {
+        preview_files: {
+          'tt-anim': [{ id: 'p1', revision: 1, extension: 'mp4' }]
+        }
+      }
+      const c = usePlaylistComparison(
+        makeInputs({
+          entityList: [entity],
+          taskTypeMap: new Map([['tt-anim', { id: 'tt-anim', name: 'Anim' }]])
+        })
+      )
+      c.taskTypeId.value = 'tt-anim'
+      c.isComparing.value = true
+      return c
+    }
+
+    it('returns 1 when comparison is off', () => {
+      const c = setup()
+      c.isComparing.value = false
+      expect(c.overlayOpacity.value).toBe(1)
+    })
+
+    it('returns 1 in sidebyside mode', () => {
+      const c = setup()
+      c.comparisonMode.value = 'sidebyside'
+      expect(c.overlayOpacity.value).toBe(1)
+    })
+
+    it('returns 1 for overlay0 (main fully visible)', () => {
+      const c = setup()
+      c.comparisonMode.value = 'overlay0'
+      expect(c.overlayOpacity.value).toBe(1)
+    })
+
+    it('returns 0.25 for overlay25', () => {
+      const c = setup()
+      c.comparisonMode.value = 'overlay25'
+      expect(c.overlayOpacity.value).toBe(0.25)
+    })
+
+    it('returns 0.5 for overlay50', () => {
+      const c = setup()
+      c.comparisonMode.value = 'overlay50'
+      expect(c.overlayOpacity.value).toBe(0.5)
+    })
+
+    it('returns 0.75 for overlay75', () => {
+      const c = setup()
+      c.comparisonMode.value = 'overlay75'
+      expect(c.overlayOpacity.value).toBe(0.75)
+    })
+
+    it('returns 0 for overlay100 (main fully hidden)', () => {
+      const c = setup()
+      c.comparisonMode.value = 'overlay100'
+      expect(c.overlayOpacity.value).toBe(0)
+    })
+  })
+
   describe('comparisonEntityMissing', () => {
     it('is true when the saved task-type is not available on the current entity', () => {
       const entity = {

@@ -1090,6 +1090,7 @@ import WaveSurfer from 'wavesurfer.js'
 import { useAnnotation } from '@/composables/annotation'
 import { useAnnotationBroadcast } from '@/composables/annotationBroadcast'
 import { useFullScreen } from '@/composables/fullScreen'
+import { usePlaylistComparison } from '@/composables/playlistComparison'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import { usePreviewShortcuts } from '@/composables/previewShortcuts'
 import preferences from '@/lib/preferences'
@@ -1244,14 +1245,10 @@ let wavesurfer = null
 // — Reactive
 const annotations = ref([])
 const entityList = ref([])
-const entityListToCompare = ref([])
 const framesPerImage = ref([])
 const framesSeenOfPicture = ref(1)
 
-const comparisonEntityMissing = ref(false)
-const comparisonMode = ref('sidebyside')
 const currentBackground = ref(null)
-const currentComparisonPreviewIndex = ref(0)
 const currentPreviewIndex = ref(0)
 const currentTime = ref('00:00.000')
 const currentTimeRaw = ref(0)
@@ -1261,7 +1258,6 @@ const hasActiveShareLinks = ref(false)
 const isAnnotationsDisplayed = ref(true)
 const isBuildLaunched = ref(false)
 const isCommentsHidden = ref(true)
-const isComparing = ref(false)
 const isDlButtonsHidden = ref(true)
 const isDrawing = ref(false)
 const isEntitiesHidden = ref(false)
@@ -1294,17 +1290,12 @@ const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)
 const playlistProgress = ref(0)
 const playlistShotPosition = ref({})
-const revisionOptions = ref([])
-const revisionToCompare = ref(null)
 const room = ref({
   people: [],
   newComer: true
 })
-const savedTaskTypeToCompare = ref(null)
 const speed = ref(3)
 const task = ref(null)
-const taskTypeOptions = ref([])
-const taskTypeToCompare = ref(null)
 const volume = ref(50)
 
 const modals = ref({
@@ -1511,68 +1502,12 @@ const currentFrameMovieOrPicture = computed(() => {
 
 // Computed — comparison
 
-const isComparisonOverlay = computed(
-  () => comparisonMode.value !== 'sidebyside'
-)
-
-const overlayOpacity = computed(() => {
-  if (!isComparing.value || !isComparisonOverlay.value) return 1
-  switch (comparisonMode.value) {
-    case 'overlay0':
-      return 1
-    case 'overlay25':
-      return 0.25
-    case 'overlay50':
-      return 0.5
-    case 'overlay75':
-      return 0.75
-    case 'overlay100':
-      return 0
-    default:
-      return 1
-  }
-})
-
-const currentRevisionToCompare = computed(() => {
-  const entity = currentEntity.value
-  if (!entity) return null
-  const previewFiles = entity.preview_files?.[taskTypeToCompare.value]
-  if (previewFiles && previewFiles.length > 0) {
-    const preview = previewFiles.find(
-      p => `${p.revision}` === revisionToCompare.value
-    )
-    return preview || previewFiles[0]
-  }
-  return null
-})
-
-const currentPreviewToCompare = computed(() => {
-  if (!currentEntity.value) return null
-  if (currentComparisonPreviewIndex.value > 0) {
-    const index = currentComparisonPreviewIndex.value - 1
-    return currentRevisionToCompare.value?.previews?.[index]
-  }
-  return currentRevisionToCompare.value
-})
-
 const isMovieComparison = computed(
   () => currentPreviewToCompare.value?.extension === 'mp4'
 )
 
 const isPictureComparison = computed(() =>
   isPicturePreview(currentPreviewToCompare.value?.extension)
-)
-
-const currentComparisonPreviewLength = computed(() => {
-  if (!currentRevisionToCompare.value) return 0
-  const previews = currentRevisionToCompare.value.previews
-  return previews ? previews.length + 1 : 0
-})
-
-const comparisonAnnotations = computed(() =>
-  isComparing.value && currentRevisionToCompare.value
-    ? currentRevisionToCompare.value.annotations || []
-    : []
 )
 
 // AnnotationCanvas overlays this anchor div instead of the comparison
@@ -1607,15 +1542,6 @@ const mainMediaElement = computed(() => {
 // PreviewPlayer's usePanzoomSync: main is the source of truth, the
 // comparison side just follows.
 const panzoomTransform = ref({ x: 0, y: 0, scale: 1 })
-
-const comparisonModeOptions = computed(() => [
-  { label: t('playlists.actions.side_by_side'), value: 'sidebyside' },
-  { label: `${t('playlists.actions.overlay')} 0%`, value: 'overlay0' },
-  { label: `${t('playlists.actions.overlay')} 25%`, value: 'overlay25' },
-  { label: `${t('playlists.actions.overlay')} 50%`, value: 'overlay50' },
-  { label: `${t('playlists.actions.overlay')} 75%`, value: 'overlay75' },
-  { label: `${t('playlists.actions.overlay')} 100%`, value: 'overlay100' }
-])
 
 // Computed — playlist meta
 
@@ -1702,6 +1628,37 @@ const backgroundUrl = computed(() =>
 const isFullScreenEnabled = computed(() =>
   Boolean(document.fullscreenEnabled || document.webkitFullscreenEnabled)
 )
+
+// Comparison composable
+
+const {
+  isComparing,
+  taskTypeId: taskTypeToCompare,
+  comparisonMode,
+  comparisonModeOptions,
+  isComparisonOverlay,
+  overlayOpacity,
+  toggleFullOverlay: toggleFullOverlayComparison,
+  revisionToCompare,
+  entityListToCompare,
+  comparisonEntityMissing,
+  currentComparisonPreviewIndex,
+  savedTaskTypeToCompare,
+  taskTypeOptions,
+  revisionOptions,
+  currentRevisionToCompare,
+  currentPreviewToCompare,
+  currentComparisonPreviewLength,
+  comparisonAnnotations,
+  toggleComparison,
+  goToPreviousComparisonPicture,
+  goToNextComparisonPicture
+} = usePlaylistComparison({
+  currentEntity,
+  entityList,
+  taskTypeMap,
+  t
+})
 
 // Annotation broadcast (must be defined before useAnnotation)
 
@@ -2481,18 +2438,6 @@ const onFullscreenClicked = () => {
   toggleFullScreen()
 }
 
-const toggleFullOverlayComparison = async () => {
-  if (!isComparing.value) {
-    isComparing.value = true
-    await nextTick()
-    await nextTick()
-  }
-  nextTick(() => {
-    comparisonMode.value =
-      comparisonMode.value === 'overlay100' ? 'overlay0' : 'overlay100'
-  })
-}
-
 const reloadAnnotations = (current = true) => {
   if (!annotations.value) return
   annotations.value = annotations.value.map(a => ({ ...a }))
@@ -2579,15 +2524,6 @@ const onCommentClicked = () => {
     taskInfoRef.value?.focusCommentTextarea()
     resetHeight()
   })
-}
-
-const onCompareClicked = () => {
-  isComparing.value = !isComparing.value
-  nextTick(() => {
-    saveUserComparisonChoice()
-    comparisonEntityMissing.value = false
-  })
-  updateRoomStatus()
 }
 
 const setPlayerSpeed = rate => {
@@ -3337,107 +3273,49 @@ const resetHeight = () => {
   })
 }
 
-// Comparison helpers (PlaylistPlayer-specific)
+// Comparison side-effect wrappers (broadcast + player re-load belong here,
+// the pure selection state lives in usePlaylistComparison).
 
-const getComparisonTaskTypeOptions = () => {
-  if (!currentEntity.value) return []
-  const ids = Object.keys(currentEntity.value.preview_files).filter(
-    id => !!currentEntity.value.preview_files[id]
-  )
-  return ids
-    .map(id => ({
-      label: taskTypeMap.value.get(id)?.name,
-      value: taskTypeMap.value.get(id)?.id
-    }))
-    .sort(
-      (a, b) => -a.label.localeCompare(b.label, undefined, { numeric: true })
-    )
+const onCompareClicked = () => {
+  toggleComparison()
+  nextTick(() => {
+    if (isComparing.value) saveUserComparisonChoice()
+  })
+  updateRoomStatus()
 }
 
-const isComparisonTaskTypeAvailable = () => {
-  return (
-    taskTypeOptions.value.findIndex(
-      o => o.value === savedTaskTypeToCompare.value
-    ) !== -1
-  )
+const saveUserComparisonChoice = () => {
+  savedTaskTypeToCompare.value = taskTypeToCompare.value
+  sendUpdatePlayingStatus()
 }
 
-const rebuildComparisonOptions = () => {
-  comparisonEntityMissing.value = false
-  if (entityList.value.length > 0) {
-    taskTypeOptions.value = getComparisonTaskTypeOptions()
-    if (taskTypeOptions.value.length > 0) {
-      if (isComparisonTaskTypeAvailable()) {
-        taskTypeToCompare.value = savedTaskTypeToCompare.value
-      } else {
-        taskTypeToCompare.value = taskTypeOptions.value[0].value
-        comparisonEntityMissing.value = true
-      }
-    }
-    rebuildRevisionOptions()
-  } else {
-    taskTypeOptions.value = []
-    revisionOptions.value = []
-  }
+const onTaskTypeToCompareChanged = () => {
+  saveUserComparisonChoice()
+  updateRoomStatus()
 }
 
-const rebuildRevisionOptions = () => {
-  if (
-    currentEntity.value &&
-    currentEntity.value.preview_files[taskTypeToCompare.value]
-  ) {
-    const revisions = currentEntity.value.preview_files[
-      taskTypeToCompare.value
-    ].map(p => p.revision)
-    revisionOptions.value = [
-      { label: 'Last', value: null },
-      ...revisions
-        .sort((a, b) => b - a)
-        .map(revision => ({ label: `v${revision}`, value: `${revision}` }))
-    ]
-    if (revisionOptions.value.length > 0) {
-      revisionToCompare.value = revisionOptions.value[0].value
-    }
-  } else {
-    revisionOptions.value = []
-  }
-}
-
-const rebuildEntityListToCompare = () => {
-  if (taskTypeToCompare.value) {
-    entityListToCompare.value = entityList.value.map(entity => {
-      if (
-        !entity.preview_files ||
-        Object.keys(entity.preview_files).length === 0
-      ) {
-        return {
-          preview_file_id: '',
-          preview_file_extension: 'none'
-        }
-      }
-      let previewFiles = entity.preview_files[taskTypeToCompare.value]
-      let key = taskTypeToCompare.value
-      if (!previewFiles) {
-        key = Object.keys(entity.preview_files)[0]
-        previewFiles = entity.preview_files[key]
-      }
-      if (!previewFiles) return null
-      let preview = previewFiles.find(
-        p => `${p.revision}` === revisionToCompare.value
-      )
-      if (!preview) preview = entity.preview_files[key][0]
-      return {
-        preview_file_id: preview.id,
-        preview_file_extension: preview.extension
-      }
+const onRevisionToCompareChanged = () => {
+  if (isComparing.value) {
+    nextTick(() => {
+      pause()
+      rawPlayerComparison.value?.loadEntity(playingEntityIndex.value)
+      rawPlayerComparison.value?.setCurrentTimeRaw(currentTimeRaw.value)
+      updateRoomStatus()
     })
-  } else {
-    entityListToCompare.value = []
   }
+}
+
+const onPreviousComparisonPictureClicked = () => {
+  goToPreviousComparisonPicture()
+  updateRoomStatus()
+}
+
+const onNextComparisonPictureClicked = () => {
+  goToNextComparisonPicture()
+  updateRoomStatus()
 }
 
 const resetComparison = () => {
-  rebuildRevisionOptions()
   nextTick(() => {
     rawPlayerComparison.value?.loadEntity(playingEntityIndex.value)
     nextTick(() => {
@@ -3549,40 +3427,6 @@ const onNextPreviewClicked = () => {
   updateRoomStatus()
 }
 
-const onPreviousComparisonPictureClicked = () => {
-  const index = currentComparisonPreviewIndex.value - 1
-  currentComparisonPreviewIndex.value =
-    index < 0 ? currentComparisonPreviewLength.value - 1 : index
-  updateRoomStatus()
-}
-
-const onNextComparisonPictureClicked = () => {
-  const index = currentComparisonPreviewIndex.value + 1
-  currentComparisonPreviewIndex.value =
-    index > currentComparisonPreviewLength.value - 1 ? 0 : index
-  updateRoomStatus()
-}
-
-const onTaskTypeToCompareChanged = () => {
-  saveUserComparisonChoice()
-  rebuildEntityListToCompare()
-  updateRoomStatus()
-}
-
-const onRevisionToCompareChanged = () => {
-  if (isComparing.value) {
-    nextTick(() => {
-      rebuildEntityListToCompare()
-      nextTick(() => {
-        pause()
-        rawPlayerComparison.value?.loadEntity(playingEntityIndex.value)
-        rawPlayerComparison.value?.setCurrentTimeRaw(currentTimeRaw.value)
-        updateRoomStatus()
-      })
-    })
-  }
-}
-
 const onEntitiesWheel = event => {
   const isMouseWheelY = !event.deltaX
   if (isMouseWheelY) {
@@ -3615,11 +3459,6 @@ const onProgressPlaylistChanged = frameNumberValue => {
       setCurrentTimeRaw(frame / fps.value)
     }
   }
-}
-
-const saveUserComparisonChoice = () => {
-  savedTaskTypeToCompare.value = taskTypeToCompare.value
-  sendUpdatePlayingStatus()
 }
 
 const configureWaveForm = () => {
@@ -3805,7 +3644,6 @@ const resetPlaylist = () => {
   currentTimeRaw.value = 0
   updateProgressBar()
   updateTaskPanel()
-  rebuildComparisonOptions()
   clearCanvas()
   annotations.value = []
   movieDimensions.value = { width: 0, height: 0 }
@@ -4143,10 +3981,6 @@ watch(playingEntityIndex, () => {
     }
   }
   nextTick(() => {
-    if (isComparing.value) {
-      rebuildComparisonOptions()
-      rebuildRevisionOptions()
-    }
     nextTick(() => {
       if (isCurrentPreviewPicture.value && !isPlaying.value) {
         triggerResize()
@@ -4176,8 +4010,6 @@ watch(isComparing, () => {
   if (isComparing.value) {
     pause()
     resetComparison()
-    rebuildEntityListToCompare()
-    rebuildComparisonOptions()
   } else {
     clearComparisonCanvas()
     panzoomTransform.value = { x: 0, y: 0, scale: 1 }
@@ -4345,7 +4177,6 @@ onMounted(() => {
     window.addEventListener('beforeunload', onWindowsClosed)
     resetCanvas()
     setPlayerSpeed(1)
-    rebuildComparisonOptions()
     onFrameUpdate(0)
     configureWaveForm()
     configureFullPlayer()

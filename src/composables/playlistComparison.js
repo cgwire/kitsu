@@ -153,6 +153,28 @@ export const usePlaylistComparison = ({
     revisionToCompare.value = null
   }
 
+  // Playlist's overlayOpacity is inverted at the extremes vs. the generic
+  // one in useComparison: in PlaylistPlayer the value is applied to the
+  // main player (0% overlay = main fully visible, 100% = main hidden),
+  // whereas useComparison's table is sized for the comparison overlay.
+  const overlayOpacity = computed(() => {
+    if (!base.isComparing.value || !base.isComparisonOverlay.value) return 1
+    switch (base.comparisonMode.value) {
+      case 'overlay0':
+        return 1
+      case 'overlay25':
+        return 0.25
+      case 'overlay50':
+        return 0.5
+      case 'overlay75':
+        return 0.75
+      case 'overlay100':
+        return 0
+      default:
+        return 1
+    }
+  })
+
   return {
     // Shared from useComparison
     isComparing: base.isComparing,
@@ -160,7 +182,7 @@ export const usePlaylistComparison = ({
     comparisonMode: base.comparisonMode,
     comparisonModeOptions: base.comparisonModeOptions,
     isComparisonOverlay: base.isComparisonOverlay,
-    overlayOpacity: base.overlayOpacity,
+    overlayOpacity,
     toggleFullOverlay: base.toggleFullOverlay,
 
     // Playlist-specific actions
