@@ -1217,6 +1217,7 @@ export default {
       annotation_delete: 'Delete annotation',
       annotation_erase: 'Erase annotation',
       annotation_redo: 'Redo annotation',
+      annotation_shape: 'Shape',
       annotation_undo: 'Undo annotation',
       annotation_big: 'Big',
       annotation_medium: 'Medium',

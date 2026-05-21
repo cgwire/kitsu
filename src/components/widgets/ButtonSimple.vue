@@ -22,6 +22,7 @@
     <corner-left-down-icon class="icon" v-else-if="icon === 'undo'" />
     <corner-right-down-icon class="icon" v-else-if="icon === 'redo'" />
     <save-icon class="icon" v-else-if="icon === 'save'" />
+    <shapes-icon class="icon" v-else-if="icon === 'shapes'" />
     <plus-icon class="icon" v-else-if="icon === 'plus'" />
     <minus-icon class="icon" v-else-if="icon === 'minus'" />
     <message-square-icon class="icon" v-else-if="icon === 'comment'" />
@@ -124,6 +125,7 @@ import {
   RotateCcwIcon,
   SaveIcon,
   SendIcon,
+  ShapesIcon,
   SkipBackIcon,
   SkipForwardIcon,
   SmileIcon,

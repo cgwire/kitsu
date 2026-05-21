@@ -204,17 +204,21 @@
             :show-comments-button="showCommentsButton"
             :text-color="textColor"
             v-model:current-background="currentBackground"
+            v-model:current-shape="currentShape"
             v-model:is-environment-skybox="isEnvironmentSkybox"
+            v-model:is-shape-mode="isShapeMode"
             v-model:is-wireframe="isWireframe"
             @annotation-displayed-clicked="onAnnotationDisplayedClicked"
             @change-pencil-color="onChangePencilColor"
             @change-pencil-width="onChangePencilWidth"
+            @change-shape="setShapeTool"
             @change-text-color="onChangeTextColor"
             @comment-clicked="onCommentClicked"
             @delete-clicked="onDeleteClicked"
             @object-background-selected="onObjectBackgroundSelected"
             @pencil-annotate-clicked="onPencilAnnotateClicked"
             @redo="redoLastAction"
+            @shape-mode-clicked="onShapeModeClicked"
             @type-clicked="onTypeClicked"
             @undo="undoLastAction"
             @zoom-pan-clicked="onResetZoomClicked"
@@ -604,7 +608,9 @@ const {
   addText,
   addTypeArea,
   removeTypeArea,
+  currentShape,
   deleteSelection,
+  isShapeMode,
   isWriting,
   getNewAnnotations,
   loadSingleAnnotation,
@@ -624,10 +630,12 @@ const {
   copyAnnotationCanvas,
   pasteAnnotations,
   setAnnotationDrawingMode,
+  setShapeTool,
   startAnnotationSaving,
   endAnnotationSaving,
   confirmAnnotationsSaved,
-  restoreFailedAnnotations
+  restoreFailedAnnotations,
+  toggleShapeMode
 } = annotation
 
 // Computed
@@ -1115,6 +1123,7 @@ const onPencilAnnotateClicked = () => {
   } else {
     _resetColor()
     _resetPencil()
+    isShapeMode.value = false
     isTyping.value = false
     isDrawing.value = true
   }
@@ -1126,7 +1135,18 @@ const onTypeClicked = () => {
     isTyping.value = false
   } else {
     isDrawing.value = false
+    isShapeMode.value = false
     isTyping.value = true
+  }
+}
+
+const onShapeModeClicked = () => {
+  // toggleShapeMode flips isShapeMode and clears fabricCanvas.isDrawingMode.
+  // We also need to clear the PreviewPlayer-owned mode refs.
+  toggleShapeMode()
+  if (isShapeMode.value) {
+    isDrawing.value = false
+    isTyping.value = false
   }
 }
 

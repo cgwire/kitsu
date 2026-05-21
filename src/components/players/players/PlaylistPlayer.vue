@@ -620,20 +620,24 @@
         :show-comments-button="true"
         :text-color="textColor"
         v-model:current-background="currentBackground"
+        v-model:current-shape="currentShape"
         v-model:is-environment-skybox="isEnvironmentSkybox"
         v-model:is-laser-mode-on="isLaserModeOn"
+        v-model:is-shape-mode="isShapeMode"
         v-model:is-wireframe="isWireframe"
         @annotation-displayed-clicked="
           isAnnotationsDisplayed = !isAnnotationsDisplayed
         "
         @change-pencil-color="onChangePencilColor"
         @change-pencil-width="onChangePencilWidth"
+        @change-shape="setShapeTool"
         @change-text-color="onChangeTextColor"
         @comment-clicked="onCommentClicked"
         @delete-clicked="onDeleteClicked"
         @object-background-selected="onObjectBackgroundSelected"
         @pencil-annotate-clicked="onAnnotateClicked"
         @redo="redoLastAction"
+        @shape-mode-clicked="onShapeModeClicked"
         @type-clicked="onTypeClicked"
         @undo="undoLastAction"
         @zoom-pan-clicked="onPanZoomClicked"
@@ -1491,6 +1495,8 @@ const {
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
   clearComparisonCanvas,
+  currentShape,
+  isShapeMode,
   onChangePencilColor,
   onChangePencilWidth,
   onChangeTextColor,
@@ -1502,6 +1508,8 @@ const {
   undoLastAction,
   redoLastAction,
   setAnnotationDrawingMode,
+  setShapeTool,
+  toggleShapeMode,
   clearCanvas,
   copyAnnotations,
   pasteAnnotations,
@@ -3449,6 +3457,7 @@ const onAnnotateClicked = () => {
     if (fabricCanvas.value) fabricCanvas.value.isDrawingMode = false
     isDrawing.value = false
   } else {
+    isShapeMode.value = false
     isTyping.value = false
     if (fabricCanvas.value) {
       fabricCanvas.value.isDrawingMode = true
@@ -3471,9 +3480,18 @@ const onTypeClicked = () => {
     clickarea?.removeEventListener('dblclick', addText)
   } else {
     if (fabricCanvas.value) fabricCanvas.value.isDrawingMode = false
+    isShapeMode.value = false
     isDrawing.value = false
     isTyping.value = true
     clickarea?.addEventListener('dblclick', addText)
+  }
+}
+
+const onShapeModeClicked = () => {
+  toggleShapeMode()
+  if (isShapeMode.value) {
+    isDrawing.value = false
+    isTyping.value = false
   }
 }
 

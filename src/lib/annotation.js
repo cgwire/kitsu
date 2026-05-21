@@ -59,6 +59,14 @@ export const DEFAULT_PENCIL_COLOR = '#ff3860'
 // other UI strokes.
 export const SHAPE_STROKE_WIDTH = 4
 
+// Halved pencil widths — shapes don't get pressure modulation and would
+// look heavy at the pencil's 10/5/2 values.
+export const SHAPE_WIDTHS = {
+  big: 5,
+  medium: 3,
+  small: 2
+}
+
 /* -------------------------------------------------------------------------
  * Object helpers
  * -----------------------------------------------------------------------*/
@@ -224,7 +232,7 @@ const updateShape = (shape, tool, startX, startY, currentX, currentY) => {
 
 export const attachShapeDrawing = (
   canvas,
-  { getTool, getColor, getWidth, onShapeAdded }
+  { getTool, getColor, getWidth, onShapeAdded, onShapeStart }
 ) => {
   let drawing = null
   let startX = 0
@@ -239,6 +247,7 @@ export const attachShapeDrawing = (
     drawing = buildShape(tool, startX, startY, getColor(), getWidth())
     if (!drawing) return
     drawing.set({ selectable: false, evented: false })
+    onShapeStart?.()
     canvas.add(drawing)
     canvas.requestRenderAll()
   }

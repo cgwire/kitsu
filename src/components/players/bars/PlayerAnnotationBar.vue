@@ -77,6 +77,41 @@
       v-if="!readOnly && (!light || fullScreen) && !isConcept"
     />
 
+    <transition name="slide">
+      <div
+        class="annotation-tools"
+        v-show="isShapeMode && (!light || fullScreen)"
+      >
+        <shape-picker
+          :shape="currentShape"
+          @change="$emit('change-shape', $event)"
+        />
+        <pencil-picker
+          :pencil="pencilWidth"
+          :sizes="pencilPalette"
+          @change="$emit('change-pencil-width', $event)"
+        />
+        <color-picker
+          :color="pencilColor"
+          @change="$emit('change-pencil-color', $event)"
+        />
+      </div>
+    </transition>
+
+    <button-simple
+      class="flexrow-item"
+      icon="shapes"
+      :active="isShapeMode"
+      :title="$t('playlists.actions.annotation_shape')"
+      @click="$emit('shape-mode-clicked')"
+      v-if="
+        isShapeMode !== undefined &&
+        !readOnly &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
+    />
+
     <button-simple
       class="flexrow-item"
       icon="laser"
@@ -153,6 +188,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
+import ShapePicker from '@/components/widgets/ShapePicker.vue'
 
 defineProps({
   backgroundOptions: {
@@ -245,12 +281,14 @@ defineEmits([
   'annotation-displayed-clicked',
   'change-pencil-color',
   'change-pencil-width',
+  'change-shape',
   'change-text-color',
   'comment-clicked',
   'delete-clicked',
   'object-background-selected',
   'pencil-annotate-clicked',
   'redo',
+  'shape-mode-clicked',
   'type-clicked',
   'undo',
   'zoom-pan-clicked'
@@ -262,6 +300,8 @@ const isEnvironmentSkybox = defineModel('isEnvironmentSkybox', {
 })
 const isWireframe = defineModel('isWireframe', { default: false })
 const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
+const isShapeMode = defineModel('isShapeMode', { default: undefined })
+const currentShape = defineModel('currentShape', { default: undefined })
 </script>
 
 <style lang="scss" scoped>

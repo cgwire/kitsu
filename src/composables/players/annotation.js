@@ -8,6 +8,11 @@ import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 import { ref, watch } from 'vue'
 
+import {
+  SHAPE_WIDTHS,
+  attachShapeDrawing,
+  buildReadOnlyShape
+} from '@/lib/annotation'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
@@ -131,6 +136,8 @@ export const useAnnotation = ({
   const pencilColor = ref('#ff3860')
   const pencilWidth = ref('big')
   const textColor = ref('#ff3860')
+  const isShapeMode = ref(false)
+  const currentShape = ref('rectangle')
   const mouseIsDrawing = ref(false)
   const mouseDrawingPressureMode = ref('distance')
   const mouseDrawingStartTime = ref(null)
@@ -150,6 +157,7 @@ export const useAnnotation = ({
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
+  let detachShapeDrawing = null
 
   // Init
   const resetUndoStacks = () => {
@@ -503,7 +511,7 @@ export const useAnnotation = ({
     if (!obj) return
     if (getObjectById(obj.id) && !canvas) return
     if (!canvas) canvas = fabricCanvas.value
-    let path, text, psstroke
+    let path, shape, text, psstroke
     let scaleMultiplierX = 1
     let scaleMultiplierY = 1
     if (annotation?.width) {
@@ -637,8 +645,40 @@ export const useAnnotation = ({
         canvas.add(psstroke)
         silentAnnotation = false
       }
+    } else if (
+      obj.type === 'rect' ||
+      obj.type === 'circle' ||
+      obj.type === 'arrow'
+    ) {
+      // Reuse the shared shape rebuilder for rect / circle / arrow. It
+      // returns the shape with selectable/evented off (the read-only
+      // shape contract), so we flip them back on to match the path
+      // flow — studio users can scale and rotate shapes.
+      shape = await buildReadOnlyShape(annotation, obj, canvas)
+      if (shape) {
+        shape.set('id', obj.id)
+        shape.set('canvasWidth', canvasWidth)
+        shape.set('canvasHeight', canvasHeight)
+        shape.set('selectable', !isCurrentUserArtist.value)
+        shape.set('evented', true)
+        shape.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: !isCurrentUserArtist.value,
+          tl: false,
+          tr: false,
+          mtr: !isCurrentUserArtist.value
+        })
+        addSerialization(shape)
+        silentAnnotation = true
+        canvas.add(shape)
+        silentAnnotation = false
+      }
     }
-    return path || text || psstroke
+    return path || text || psstroke || shape
   }
 
   const deserializePSBrush = obj => {
@@ -847,8 +887,45 @@ export const useAnnotation = ({
   }
 
   const setAnnotationDrawingMode = isDrawingMode => {
+    if (isDrawingMode) isShapeMode.value = false
     fabricCanvas.value.isDrawingMode = isDrawingMode
   }
+
+  const toggleShapeMode = () => {
+    if (isShapeMode.value) {
+      isShapeMode.value = false
+      return
+    }
+    isShapeMode.value = true
+    // Mutex with the freehand drawing mode owned by the composable.
+    // Consumers (PreviewPlayer / PlaylistPlayer) own `isDrawing` /
+    // `isTyping` refs and clear them via a watcher on `isShapeMode`.
+    if (fabricCanvas.value) {
+      fabricCanvas.value.isDrawingMode = false
+    }
+  }
+
+  const setShapeTool = shape => {
+    currentShape.value = shape
+  }
+
+  // Suppress object selection while shape mode is active so a mousedown
+  // on an existing annotation starts a new shape instead of picking
+  // that object. Restores normal interaction when the mode turns off
+  // (including when the consumer flips the ref to enter pencil/type).
+  watch(isShapeMode, active => {
+    if (!fabricCanvas.value) return
+    if (active) {
+      fabricCanvas.value.isDrawingMode = false
+      fabricCanvas.value.skipTargetFind = true
+      fabricCanvas.value.selection = false
+      fabricCanvas.value.discardActiveObject()
+      fabricCanvas.value.requestRenderAll()
+    } else {
+      fabricCanvas.value.skipTargetFind = false
+      fabricCanvas.value.selection = true
+    }
+  })
 
   const configureCanvas = () => {
     fabricCanvas.value.off('object:moved', onObjectModified)
@@ -874,6 +951,55 @@ export const useAnnotation = ({
     fabricCanvas.value.on('mouse:move', updateMousePressure)
     fabricCanvas.value.on('mouse:up', endDrawing)
     fabricCanvas.value.on('mouse:up', onCanvasReleasedCb)
+
+    if (detachShapeDrawing) {
+      detachShapeDrawing()
+      detachShapeDrawing = null
+    }
+    detachShapeDrawing = attachShapeDrawing(fabricCanvas.value, {
+      getTool: () => (isShapeMode.value ? currentShape.value : null),
+      getColor: () => pencilColor.value,
+      getWidth: () => SHAPE_WIDTHS[pencilWidth.value],
+      onShapeStart: () => {
+        // Suppress the object:added listener for the in-progress 1×1
+        // shape; we'll add it to additions manually in onShapeAdded.
+        silentAnnotation = true
+      },
+      onShapeAdded: shape => {
+        silentAnnotation = false
+        setObjectData(shape)
+        // attachShapeDrawing creates the shape with selectable/evented
+        // off so its drag-to-resize doesn't fight fabric's selection.
+        // Once the shape is final we flip them back on (matching the
+        // path flow) so the user can click to scale / rotate it.
+        shape.set({
+          selectable: !isCurrentUserArtist.value,
+          evented: true
+        })
+        shape.setControlsVisibility({
+          mt: false,
+          mb: false,
+          ml: false,
+          mr: false,
+          bl: false,
+          br: !isCurrentUserArtist.value,
+          tl: false,
+          tr: false,
+          mtr: !isCurrentUserArtist.value
+        })
+        addToAdditions(shape)
+        stackAddAction({ target: shape })
+        // Push the shape into annotations.value (and trigger the
+        // backend save). The pencil flow gets this from `endDrawing`
+        // via the canvas's mouse:up handler, but `endDrawing` only
+        // fires when isDrawingMode is on — which it isn't in shape
+        // mode. Without this call the shape lives only in `additions`
+        // and disappears on the next canvas reload (frame change /
+        // fullscreen toggle) because getAnnotation() can't find it.
+        saveAnnotationsCb()
+      }
+    })
+
     fabricCanvas.value.freeDrawingBrush.color = pencilColor.value
     fabricCanvas.value.freeDrawingBrush.width = 4
 
@@ -1319,6 +1445,12 @@ export const useAnnotation = ({
     setAnnotationCanvasDimensions,
     setAnnotationDrawingMode,
     configureCanvas,
+
+    // Shape mode
+    currentShape,
+    isShapeMode,
+    setShapeTool,
+    toggleShapeMode,
 
     // Mouse pressure
     initializeMouseDrawing,
