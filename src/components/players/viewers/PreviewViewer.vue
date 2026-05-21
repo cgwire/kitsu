@@ -132,14 +132,14 @@ import {
 } from '@/lib/preview'
 
 /* eslint-disable no-unused-vars */
-import ObjectViewer from '@/components/previews/ObjectViewer.vue'
-import DiffViewer from '@/components/previews/DiffViewer.vue'
-import MarkdownViewer from '@/components/previews/MarkdownViewer.vue'
-import PdfViewer from '@/components/previews/PdfViewer.vue'
-import PictureViewer from '@/components/previews/PictureViewer.vue'
-import SoundViewer from '@/components/previews/SoundViewer.vue'
+import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
+import DiffViewer from '@/components/players/viewers/DiffViewer.vue'
+import MarkdownViewer from '@/components/players/viewers/MarkdownViewer.vue'
+import PdfViewer from '@/components/players/viewers/PdfViewer.vue'
+import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
+import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import VideoViewer from '@/components/previews/VideoViewer.vue'
+import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
 /* eslint-enable no-unused-vars */
 
 const props = defineProps({

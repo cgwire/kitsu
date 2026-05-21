@@ -53,7 +53,7 @@ import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 // eslint-disable-next-line no-unused-vars
-import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
+import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'

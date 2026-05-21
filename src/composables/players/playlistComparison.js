@@ -10,7 +10,7 @@
  */
 import { computed, ref } from 'vue'
 
-import { useComparison } from '@/composables/comparison'
+import { useComparison } from '@/composables/players/comparison'
 
 export const usePlaylistComparison = ({
   currentEntity,

@@ -27,7 +27,7 @@
 <script setup>
 import { nextTick, onMounted, reactive, ref, watch } from 'vue'
 
-import PictureViewer from '@/components/previews/PictureViewer.vue'
+import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 
 const props = defineProps({
   big: {

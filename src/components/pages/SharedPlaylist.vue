@@ -49,7 +49,7 @@ import {
 import crisp from '@/lib/crisp'
 
 import SharedPlaylistIdentityCard from '@/components/pages/SharedPlaylistIdentityCard.vue'
-import SharedPlaylistPlayer from '@/components/previews/SharedPlaylistPlayer.vue'
+import SharedPlaylistPlayer from '@/components/players/players/SharedPlaylistPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const GUEST_STORAGE_PREFIX = 'shared-playlist-guest-'

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-import { useAnnotationBroadcast } from '@/composables/annotationBroadcast'
+import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
 
 const makeSocket = () => ({ emit: vi.fn() })
 

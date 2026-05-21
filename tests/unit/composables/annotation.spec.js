@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref } from 'vue'
 
-import { useAnnotation } from '@/composables/annotation'
+import { useAnnotation } from '@/composables/players/annotation'
 
 /**
  * Build a fake fabric.Canvas-like object good enough for the composable's

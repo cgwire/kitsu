@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { describe, expect, it } from 'vitest'
 
-import { usePlaylistComparison } from '@/composables/playlistComparison'
+import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 
 const makeInputs = ({
   entityList = [],

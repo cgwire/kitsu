@@ -43,6 +43,8 @@ const canvasEl = ref(null)
 const fabricCanvas = ref(null)
 const bounds = ref({ top: 0, left: 0, width: 0, height: 0 })
 
+let resizeObserver = null
+
 // The clip wrapper is positioned at the media's screen coordinates
 // and has overflow: hidden, so it crops anything the inner
 // transformed overlay paints outside the media area (otherwise the
@@ -84,8 +86,6 @@ const updateBounds = () => {
   }
 }
 
-let resizeObserver = null
-
 const observe = el => el && resizeObserver?.observe(el)
 const unobserve = el => el && resizeObserver?.unobserve(el)
 
@@ -106,6 +106,30 @@ const createFabric = () => {
     canvas.freeDrawingBrush = brush
   }
   fabricCanvas.value = markRaw(canvas)
+}
+
+// Re-dispatch the wheel event on wheelTarget so its panzoom listener
+// fires as if the cursor were over the media directly. Without this,
+// drawing on a zoomed view would swallow wheel events and break
+// zoom-by-wheel. preventDefault stops the page from scrolling.
+const onWheel = event => {
+  if (!props.wheelTarget) return
+  event.preventDefault()
+  const forwarded = new WheelEvent('wheel', {
+    bubbles: true,
+    cancelable: true,
+    clientX: event.clientX,
+    clientY: event.clientY,
+    deltaX: event.deltaX,
+    deltaY: event.deltaY,
+    deltaZ: event.deltaZ,
+    deltaMode: event.deltaMode,
+    ctrlKey: event.ctrlKey,
+    shiftKey: event.shiftKey,
+    altKey: event.altKey,
+    metaKey: event.metaKey
+  })
+  props.wheelTarget.dispatchEvent(forwarded)
 }
 
 onMounted(() => {
@@ -131,30 +155,6 @@ watch(
     updateBounds()
   }
 )
-
-// Re-dispatch the wheel event on wheelTarget so its panzoom listener
-// fires as if the cursor were over the media directly. Without this,
-// drawing on a zoomed view would swallow wheel events and break
-// zoom-by-wheel. preventDefault stops the page from scrolling.
-const onWheel = event => {
-  if (!props.wheelTarget) return
-  event.preventDefault()
-  const forwarded = new WheelEvent('wheel', {
-    bubbles: true,
-    cancelable: true,
-    clientX: event.clientX,
-    clientY: event.clientY,
-    deltaX: event.deltaX,
-    deltaY: event.deltaY,
-    deltaZ: event.deltaZ,
-    deltaMode: event.deltaMode,
-    ctrlKey: event.ctrlKey,
-    shiftKey: event.shiftKey,
-    altKey: event.altKey,
-    metaKey: event.metaKey
-  })
-  props.wheelTarget.dispatchEvent(forwarded)
-}
 
 defineExpose({
   canvas: fabricCanvas,

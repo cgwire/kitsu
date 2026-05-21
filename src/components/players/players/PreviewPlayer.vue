@@ -373,11 +373,11 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useAnnotation } from '@/composables/annotation'
-import { useComparison } from '@/composables/comparison'
+import { useAnnotation } from '@/composables/players/annotation'
+import { useComparison } from '@/composables/players/comparison'
 import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
-import { usePreviewShortcuts } from '@/composables/previewShortcuts'
+import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 import {
@@ -393,15 +393,15 @@ import {
   floorToFrame
 } from '@/lib/video'
 
-import AnnotationCanvas from '@/components/previews/AnnotationCanvas.vue'
-import BrowsingBar from '@/components/previews/BrowsingBar.vue'
-import PlayerAnnotationBar from '@/components/previews/PlayerAnnotationBar.vue'
-import PlayerComparisonBar from '@/components/previews/PlayerComparisonBar.vue'
-import PlayerPlaybackBar from '@/components/previews/PlayerPlaybackBar.vue'
+import AnnotationCanvas from '@/components/players/annotations/AnnotationCanvas.vue'
+import BrowsingBar from '@/components/players/bars/BrowsingBar.vue'
+import PlayerAnnotationBar from '@/components/players/bars/PlayerAnnotationBar.vue'
+import PlayerComparisonBar from '@/components/players/bars/PlayerComparisonBar.vue'
+import PlayerPlaybackBar from '@/components/players/bars/PlayerPlaybackBar.vue'
 // eslint-disable-next-line no-unused-vars
-import PreviewViewer from '@/components/previews/PreviewViewer.vue'
-import RevisionPreview from '@/components/previews/RevisionPreview.vue'
-import VideoProgress from '@/components/previews/VideoProgress.vue'
+import PreviewViewer from '@/components/players/viewers/PreviewViewer.vue'
+import RevisionPreview from '@/components/players/headers/RevisionPreview.vue'
+import VideoProgress from '@/components/players/progress/VideoProgress.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 

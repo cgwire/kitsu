@@ -381,7 +381,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 

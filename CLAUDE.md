@@ -25,12 +25,14 @@ src/
     lists/          # List/table components (StudioList, etc.)
     modals/         # Modal dialogs (BaseModal, EditStudiosModal, etc.)
     pages/          # Page-level components (Studios, etc.)
-    previews/       # Preview/player components
+    players/        # Preview/playlist player components (annotations, bars, viewers, ...)
     sides/          # Sidebar components
     tops/           # Topbar components
     widgets/        # Reusable UI widgets (Combobox*, DateField, etc.)
-    mixins/         # Legacy Options API mixins (annotation.js, etc.)
-  composables/      # Composition API composables (modal.js, combobox.js, etc.)
+    mixins/         # Legacy Options API mixins still being migrated to composables
+  composables/
+    players/        # Player-specific composables (annotation, comparison, playlistComparison, ...)
+                    # Generic ones (modal, combobox, ...) stay at the root
   lib/              # Utility libraries (csv, string, sorting, etc.)
   locales/          # i18n translation files (en.js, fr.json, etc.)
   router/           # Vue Router configuration
@@ -301,7 +303,7 @@ The `modalMixin` in `src/components/modals/base_modal.js` is being replaced by t
 
 ## Key dependencies
 
-- **fabric.js** v5.1.0 (cgwire fork) — annotation canvas, used only in `src/components/mixins/annotation.js` and `src/components/previews/PreviewPlayer.vue`
+- **fabric.js** v5.1.0 (cgwire fork) — annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
 - **socket.io-client** — real-time events via `vue-websocket-next`
 - **moment / moment-timezone** — date handling (used throughout schedule and timesheet components)
 - **vue-multiselect** — people/entity selection dropdowns
