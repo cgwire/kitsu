@@ -417,7 +417,7 @@ defineExpose({ updateProgressBar })
 
 .progress-wrapper {
   background: $grey;
-  background-image: url('../../assets/background/player-timeslider.png');
+  background-image: url('../../../assets/background/player-timeslider.png');
   background-repeat: repeat-x;
   border: 0;
   cursor: pointer;
