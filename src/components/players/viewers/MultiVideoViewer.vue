@@ -548,6 +548,26 @@ const setVolume = volume => {
   nextPlayer.value.volume = volume / 100
 }
 
+const LOADING_HANDLERS = [
+  ['canplay', hideLoading],
+  ['stalled', showLoading],
+  ['waiting', showLoading],
+  ['loadstart', showLoading],
+  ['error', hideLoading]
+]
+
+const bindLoadingHandlers = player => {
+  LOADING_HANDLERS.forEach(([event, handler]) =>
+    player.addEventListener(event, handler)
+  )
+}
+
+const unbindLoadingHandlers = player => {
+  LOADING_HANDLERS.forEach(([event, handler]) =>
+    player?.removeEventListener(event, handler)
+  )
+}
+
 // Watchers
 
 watch(
@@ -588,26 +608,6 @@ watch(
 )
 
 // Lifecycle
-
-const LOADING_HANDLERS = [
-  ['canplay', hideLoading],
-  ['stalled', showLoading],
-  ['waiting', showLoading],
-  ['loadstart', showLoading],
-  ['error', hideLoading]
-]
-
-const bindLoadingHandlers = player => {
-  LOADING_HANDLERS.forEach(([event, handler]) =>
-    player.addEventListener(event, handler)
-  )
-}
-
-const unbindLoadingHandlers = player => {
-  LOADING_HANDLERS.forEach(([event, handler]) =>
-    player?.removeEventListener(event, handler)
-  )
-}
 
 // Video need to be resized after each window size change. It's due
 // to a HTML5 limitation related to video height.

@@ -29,6 +29,8 @@ import { useI18n } from 'vue-i18n'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
+const { t } = useI18n()
+
 const props = defineProps({
   preview: {
     type: Object,
@@ -40,12 +42,10 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['pdf-loaded', 'pdf-error'])
+const emit = defineEmits(['pdf-error', 'pdf-loaded'])
 
-const { t } = useI18n()
-
-const isLoading = ref(true)
 const hasError = ref(false)
+const isLoading = ref(true)
 
 const pdfUrl = computed(() =>
   props.preview?.id

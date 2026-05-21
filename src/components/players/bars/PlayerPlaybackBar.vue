@@ -180,15 +180,15 @@ defineEmits(['play-pause-clicked', 'repeat-clicked', 'toggle-sound-clicked'])
 const current3DAnimation = defineModel('current3DAnimation')
 const isHd = defineModel('isHd', { default: false })
 const isMuted = defineModel('isMuted', { default: false })
-const speed = defineModel('speed', { default: 3 })
-const volume = defineModel('volume', { default: 50 })
-const isWaveformDisplayed = defineModel('isWaveformDisplayed', {
-  default: undefined
-})
 const isShowAnnotationsWhilePlaying = defineModel(
   'isShowAnnotationsWhilePlaying',
   { default: undefined }
 )
+const isWaveformDisplayed = defineModel('isWaveformDisplayed', {
+  default: undefined
+})
+const speed = defineModel('speed', { default: 3 })
+const volume = defineModel('volume', { default: 50 })
 </script>
 
 <style lang="scss" scoped>

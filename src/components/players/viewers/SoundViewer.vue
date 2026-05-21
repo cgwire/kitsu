@@ -17,23 +17,23 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import WaveSurfer from 'wavesurfer.js'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
-  previewUrl: {
-    default: '',
-    type: String
-  },
-  fileName: {
-    default: '',
-    type: String
-  },
   defaultHeight: {
     type: Number,
     default: 200
+  },
+  fileName: {
+    type: String,
+    default: ''
+  },
+  previewUrl: {
+    type: String,
+    default: ''
   }
 })
 

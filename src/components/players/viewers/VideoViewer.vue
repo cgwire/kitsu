@@ -41,11 +41,19 @@ import { formatFrame } from '@/lib/video'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
-  name: {
-    type: String,
-    default: ''
-  },
   big: {
+    type: Boolean,
+    default: false
+  },
+  currentFrame: {
+    type: Number,
+    default: 0
+  },
+  defaultHeight: {
+    type: Number,
+    default: 0
+  },
+  fullScreen: {
     type: Boolean,
     default: false
   },
@@ -57,15 +65,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isHd: {
-    type: Boolean,
-    default: false
-  },
   isDrawing: {
     type: Boolean,
     default: false
   },
-  isTyping: {
+  isHd: {
     type: Boolean,
     default: false
   },
@@ -77,37 +81,33 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isRoundedTopBorder: {
+    type: Boolean,
+    default: false
+  },
+  isTyping: {
+    type: Boolean,
+    default: false
+  },
   light: {
     type: Boolean,
     default: false
   },
-  currentFrame: {
-    type: Number,
-    default: 0
+  name: {
+    type: String,
+    default: ''
   },
   nbFrames: {
     type: Number,
     default: 0
   },
-  preview: {
-    type: Object,
-    default: () => ({})
-  },
-  defaultHeight: {
-    type: Number,
-    default: 0
-  },
-  fullScreen: {
-    type: Boolean,
-    default: false
-  },
-  isRoundedTopBorder: {
-    type: Boolean,
-    default: false
-  },
   panzoom: {
     type: Boolean,
     default: false
+  },
+  preview: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -123,13 +123,12 @@ const emit = defineEmits([
 ])
 
 const store = useStore()
-const currentProduction = computed(() => store.getters.currentProduction)
 
 const container = ref(null)
-const movie = ref(null)
-const isLoading = ref(false)
-const videoDuration = ref(0)
 const currentTimeRaw = ref(0)
+const isLoading = ref(false)
+const movie = ref(null)
+const videoDuration = ref(0)
 
 let panzoomInstance = null
 let panzoomSilent = false
@@ -137,6 +136,8 @@ let currentTimeCalls = []
 let playLoop = null
 let isPlaying = false
 let previousDimensions = null
+
+const currentProduction = computed(() => store.getters.currentProduction)
 
 const video = computed(() => movie.value)
 
@@ -397,6 +398,62 @@ const setVolume = volume => {
   if (video.value) video.value.volume = volume / 100
 }
 
+// Watchers
+
+watch(
+  () => props.preview,
+  () => {
+    resetPanZoom()
+    pause()
+    nextTick(() => {
+      resetPanZoom()
+      setTimeout(() => {
+        resetPanZoom()
+      }, 100)
+    })
+  }
+)
+
+watch(
+  () => props.light,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isComparing,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isComparisonOverlay,
+  () => {
+    resetPanZoom()
+    mountVideo()
+  }
+)
+
+watch(
+  () => props.isMuted,
+  () => {
+    video.value.muted = props.isMuted
+  }
+)
+
+watch(
+  () => props.fullScreen,
+  () => {
+    resetPanZoom()
+  }
+)
+
+// Lifecycle
+
 onMounted(() => {
   currentTimeCalls = []
   container.value.style.height = props.defaultHeight + 'px'
@@ -487,58 +544,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize)
   panzoomInstance?.dispose()
 })
-
-watch(
-  () => props.preview,
-  () => {
-    resetPanZoom()
-    pause()
-    nextTick(() => {
-      resetPanZoom()
-      setTimeout(() => {
-        resetPanZoom()
-      }, 100)
-    })
-  }
-)
-
-watch(
-  () => props.light,
-  () => {
-    resetPanZoom()
-    mountVideo()
-  }
-)
-
-watch(
-  () => props.isComparing,
-  () => {
-    resetPanZoom()
-    mountVideo()
-  }
-)
-
-watch(
-  () => props.isComparisonOverlay,
-  () => {
-    resetPanZoom()
-    mountVideo()
-  }
-)
-
-watch(
-  () => props.isMuted,
-  () => {
-    video.value.muted = props.isMuted
-  }
-)
-
-watch(
-  () => props.fullScreen,
-  () => {
-    resetPanZoom()
-  }
-)
 
 defineExpose({
   currentTimeRaw,

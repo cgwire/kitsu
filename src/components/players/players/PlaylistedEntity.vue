@@ -131,9 +131,9 @@ const emit = defineEmits([
   'remove-entity'
 ])
 
-const taskTypeId = ref(null)
-const previewFileId = ref(props.entity.preview_file_id)
 const dropAreaRef = useTemplateRef('drop-area')
+const previewFileId = ref(props.entity.preview_file_id)
+const taskTypeId = ref(null)
 
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
@@ -143,6 +143,15 @@ const playlistEntryMap = computed(() => store.getters.playlistEntryMap)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const previewFileOptions = computed(() => {
+  if (props.readOnly) return []
+  const files = previewFiles.value[taskTypeId.value] || []
+  return files.map(previewFile => ({
+    label: `v${previewFile.revision}`,
+    value: previewFile.id
+  }))
+})
 
 const previewFiles = computed(() => {
   if (props.readOnly) return {}
@@ -160,28 +169,14 @@ const previewFiles = computed(() => {
   )
 })
 
-const taskTypeOptions = computed(() => {
-  if (props.readOnly) return []
-  return previewFiles.value
-    ? Object.keys(previewFiles.value)
-        .filter(id => previewFiles.value[id].length > 0)
-        .map(id => taskTypeMap.value?.get(id))
-        .filter(Boolean)
-        .sort(firstBy('priority', 1).thenBy('name'))
-        .map(taskType => ({
-          label: taskType.name,
-          value: taskType.id
-        }))
-    : []
-})
-
-const previewFileOptions = computed(() => {
-  if (props.readOnly) return []
-  const files = previewFiles.value[taskTypeId.value] || []
-  return files.map(previewFile => ({
-    label: `v${previewFile.revision}`,
-    value: previewFile.id
-  }))
+const readOnlyTaskType = computed(() => {
+  if (!props.readOnly) return null
+  if (props.entity.preview_file_task_type) {
+    return props.entity.preview_file_task_type
+  }
+  const taskId = props.entity.preview_file_task_id
+  const task = taskMap.value?.get(taskId)
+  return (task && taskTypeMap.value?.get(task.task_type_id)) || null
 })
 
 const taskStatus = computed(() => {
@@ -195,14 +190,19 @@ const taskStatus = computed(() => {
   return null
 })
 
-const readOnlyTaskType = computed(() => {
-  if (!props.readOnly) return null
-  if (props.entity.preview_file_task_type) {
-    return props.entity.preview_file_task_type
-  }
-  const taskId = props.entity.preview_file_task_id
-  const task = taskMap.value?.get(taskId)
-  return (task && taskTypeMap.value?.get(task.task_type_id)) || null
+const taskTypeOptions = computed(() => {
+  if (props.readOnly) return []
+  return previewFiles.value
+    ? Object.keys(previewFiles.value)
+        .filter(id => previewFiles.value[id].length > 0)
+        .map(id => taskTypeMap.value?.get(id))
+        .filter(Boolean)
+        .sort(firstBy('priority', 1).thenBy('name'))
+        .map(taskType => ({
+          label: taskType.name,
+          value: taskType.id
+        }))
+    : []
 })
 
 const getTaskTypeIdForPreviewFile = (taskTypeIds, previewFileId) => {

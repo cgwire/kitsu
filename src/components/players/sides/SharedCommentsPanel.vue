@@ -196,10 +196,15 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
+import TaskComment from '@/components/widgets/Comment.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import TaskComment from '@/components/widgets/Comment.vue'
+
+// Composables
+
+const { t } = useI18n()
+const store = useStore()
 
 // Props / Emits
 
@@ -214,19 +219,16 @@ const props = defineProps({
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])
 
-const { t } = useI18n()
-const store = useStore()
-
 // State
 
-const comments = ref([])
-const taskStatuses = ref([])
-const commentText = ref('')
-const selectedStatusId = ref('')
 const checklistItems = ref([])
-const pendingAttachments = ref([])
-const textareaRef = ref(null)
+const commentText = ref('')
 const commentToEdit = ref(null)
+const comments = ref([])
+const pendingAttachments = ref([])
+const selectedStatusId = ref('')
+const taskStatuses = ref([])
+const textareaRef = ref(null)
 
 const loading = ref(true)
 const submitting = ref(false)

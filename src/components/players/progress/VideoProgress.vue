@@ -124,6 +124,14 @@ const props = defineProps({
     default: 0,
     type: Number
   },
+  handleIn: {
+    default: 3,
+    type: Number
+  },
+  handleOut: {
+    default: 3,
+    type: Number
+  },
   isFullMode: {
     default: false,
     type: Boolean
@@ -140,14 +148,6 @@ const props = defineProps({
     default: 0,
     type: Number
   },
-  handleIn: {
-    default: 3,
-    type: Number
-  },
-  handleOut: {
-    default: 3,
-    type: Number
-  },
   previewId: {
     default: '',
     type: String
@@ -162,15 +162,16 @@ const emit = defineEmits([
   'start-scrub'
 ])
 
-const progress = ref(null)
-const isFrameNumberVisible = ref(false)
+const frameNumberLeftPosition = ref(0)
 const handleInDragging = ref(false)
 const handleOutDragging = ref(false)
 const hoverFrame = ref(0)
+const isFrameNumberVisible = ref(false)
+const progress = ref(null)
 const progressDragging = ref(false)
 const width = ref(0)
-const frameNumberLeftPosition = ref(0)
 
+// Mouse scratch state; not reactive — written from event handlers, never read by template
 let currentMouseFrame = {}
 
 const getClientX = event =>
@@ -384,17 +385,17 @@ onMounted(() => {
   progress.value.setAttribute('max', videoDuration.value)
 })
 
-onBeforeUnmount(() => {
-  domEvents.forEach(([type, listener]) =>
-    document.removeEventListener(type, listener)
-  )
-})
-
 watch(videoDuration, () => {
   const coords = progress.value.getBoundingClientRect()
   width.value = coords.width
   progress.value.setAttribute('max', videoDuration.value)
   updateProgressBar(0)
+})
+
+onBeforeUnmount(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.removeEventListener(type, listener)
+  )
 })
 
 defineExpose({ updateProgressBar })

@@ -37,11 +37,11 @@ const props = defineProps({
 
 const emit = defineEmits(['click', 'resized'])
 
-const clip = ref(null)
-const overlay = ref(null)
-const canvasEl = ref(null)
-const fabricCanvas = ref(null)
 const bounds = ref({ top: 0, left: 0, width: 0, height: 0 })
+const canvasEl = ref(null)
+const clip = ref(null)
+const fabricCanvas = ref(null)
+const overlay = ref(null)
 
 let resizeObserver = null
 

@@ -28,8 +28,8 @@
  * Widget displaying entity's revisions of previews per task type.
  * It allows to select a given revision for a given task type for current entity.
  */
-import { ref, computed, watch, onMounted } from 'vue'
 import { firstBy } from 'thenby'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 import editStore from '@/store/modules/edits'
@@ -37,16 +37,20 @@ import editStore from '@/store/modules/edits'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+// Composables
+const store = useStore()
+
+// Props / Emits
 const props = defineProps({
   entity: {
-    default: () => ({}),
-    type: Object
+    type: Object,
+    default: () => ({})
   }
 })
 
 const emit = defineEmits(['preview-changed'])
 
-const store = useStore()
+// Computed
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -110,10 +114,7 @@ const setCurrentParameters = () => {
   }
 }
 
-onMounted(() => {
-  setCurrentParameters()
-})
-
+// Watchers
 watch(taskTypeId, () => {
   const previewFiles = props.entity.preview_files[taskTypeId.value]
   if (previewFiles?.length) {
@@ -147,4 +148,9 @@ watch(
     }
   }
 )
+
+// Lifecycle
+onMounted(() => {
+  setCurrentParameters()
+})
 </script>

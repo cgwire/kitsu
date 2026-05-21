@@ -132,9 +132,9 @@ import {
 } from '@/lib/preview'
 
 /* eslint-disable no-unused-vars */
-import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
 import DiffViewer from '@/components/players/viewers/DiffViewer.vue'
 import MarkdownViewer from '@/components/players/viewers/MarkdownViewer.vue'
+import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
 import PdfViewer from '@/components/players/viewers/PdfViewer.vue'
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
@@ -143,23 +143,11 @@ import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
 /* eslint-enable no-unused-vars */
 
 const props = defineProps({
-  name: {
-    type: String,
-    default: ''
-  },
-  defaultHeight: {
-    type: Number,
-    default: 0
-  },
   currentFrame: {
     type: Number,
     default: 0
   },
-  marginBottom: {
-    type: Number,
-    default: 0
-  },
-  nbFrames: {
+  defaultHeight: {
     type: Number,
     default: 0
   },
@@ -168,6 +156,10 @@ const props = defineProps({
     default: false
   },
   isComparing: {
+    type: Boolean,
+    default: false
+  },
+  isComparisonOverlay: {
     type: Boolean,
     default: false
   },
@@ -180,10 +172,6 @@ const props = defineProps({
     default: false
   },
   isHd: {
-    type: Boolean,
-    default: false
-  },
-  isComparisonOverlay: {
     type: Boolean,
     default: false
   },
@@ -206,6 +194,18 @@ const props = defineProps({
   isWireframe: {
     type: Boolean,
     default: false
+  },
+  marginBottom: {
+    type: Number,
+    default: 0
+  },
+  name: {
+    type: String,
+    default: ''
+  },
+  nbFrames: {
+    type: Number,
+    default: 0
   },
   objectBackgroundUrl: {
     type: String,

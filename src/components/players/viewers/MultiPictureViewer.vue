@@ -34,11 +34,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  defaultHeight: {
-    type: Number,
-    default: 0
+  currentPreview: {
+    type: Object,
+    default: () => null
   },
-  marginBottom: {
+  defaultHeight: {
     type: Number,
     default: 0
   },
@@ -58,13 +58,13 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  marginBottom: {
+    type: Number,
+    default: 0
+  },
   panzoom: {
     type: Boolean,
     default: false
-  },
-  currentPreview: {
-    type: Object,
-    default: () => null
   },
   previews: {
     type: Array,

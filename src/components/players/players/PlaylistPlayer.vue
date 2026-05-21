@@ -870,12 +870,12 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import WaveSurfer from 'wavesurfer.js'
 
+import { useFullScreen } from '@/composables/fullScreen'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
-import { useFullScreen } from '@/composables/fullScreen'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
-import { usePreviewRoom } from '@/composables/previewRoom'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
+import { usePreviewRoom } from '@/composables/previewRoom'
 import preferences from '@/lib/preferences'
 import {
   isModelPreview,
@@ -897,21 +897,20 @@ import NotifyClientModal from '@/components/modals/NotifyClientModal.vue'
 import SelectTaskTypeModal from '@/components/modals/SelectTaskTypeModal.vue'
 import SharePlaylistModal from '@/components/modals/SharePlaylistModal.vue'
 
-import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
-
 import AnnotationCanvas from '@/components/players/annotations/AnnotationCanvas.vue'
+import PlayerAnnotationBar from '@/components/players/bars/PlayerAnnotationBar.vue'
+import PlayerComparisonBar from '@/components/players/bars/PlayerComparisonBar.vue'
+import PlayerPlaybackBar from '@/components/players/bars/PlayerPlaybackBar.vue'
+import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
+// eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
+import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
+import VideoProgress from '@/components/players/progress/VideoProgress.vue'
 import MultiPictureViewer from '@/components/players/viewers/MultiPictureViewer.vue'
 import MultiVideoViewer from '@/components/players/viewers/MultiVideoViewer.vue'
 import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
 import PdfViewer from '@/components/players/viewers/PdfViewer.vue'
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
-import PlayerAnnotationBar from '@/components/players/bars/PlayerAnnotationBar.vue'
-import PlayerComparisonBar from '@/components/players/bars/PlayerComparisonBar.vue'
-import PlayerPlaybackBar from '@/components/players/bars/PlayerPlaybackBar.vue'
-// eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
-import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
 import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
-import VideoProgress from '@/components/players/progress/VideoProgress.vue'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by const previewRoom in script
@@ -934,29 +933,29 @@ const $socket = instance.appContext.config.globalProperties.$socket
 // Props
 
 const props = defineProps({
-  playlist: {
-    type: Object,
-    default: () => ({})
+  currentEntityType: {
+    type: String,
+    default: 'shot'
   },
   entities: {
     type: Array,
     default: () => []
   },
-  isLoading: {
-    type: Boolean,
-    default: false
+  initialShareLinksCount: {
+    type: Number,
+    default: 0
   },
   isAddingEntity: {
     type: Boolean,
     default: false
   },
-  initialShareLinksCount: {
-    type: Number,
-    default: 0
+  isLoading: {
+    type: Boolean,
+    default: false
   },
-  currentEntityType: {
-    type: String,
-    default: 'shot'
+  playlist: {
+    type: Object,
+    default: () => ({})
   },
   tempMode: {
     type: Boolean,
@@ -973,9 +972,9 @@ const emit = defineEmits([
   'order-change',
   'playlist-deleted',
   'preview-changed',
+  'remove-entity',
   'save-clicked',
   'show-add-entities',
-  'remove-entity',
   'task-type-changed'
 ])
 

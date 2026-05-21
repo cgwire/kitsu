@@ -44,10 +44,6 @@ const props = defineProps({
     type: Number,
     default: 0
   },
-  marginBottom: {
-    type: Number,
-    default: 0
-  },
   fullScreen: {
     type: Boolean,
     default: false
@@ -64,30 +60,33 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  preview: {
-    type: Object,
-    default: () => ({})
+  marginBottom: {
+    type: Number,
+    default: 0
   },
   panzoom: {
     type: Boolean,
     default: false
+  },
+  preview: {
+    type: Object,
+    default: () => ({})
   }
 })
 
 const emit = defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 
 const container = ref(null)
-const pictureWrapper = ref(null)
-const pictureSubWrapper = ref(null)
+const isLoading = ref(true)
+const panzoomInstances = ref([])
 const picture = ref(null)
 const pictureBig = ref(null)
-const pictureGif = ref(null)
-
-const isLoading = ref(true)
-const picturePath = ref('')
 const pictureDlPath = ref('')
+const pictureGif = ref(null)
 const pictureGifPath = ref('')
-const panzoomInstances = ref([])
+const picturePath = ref('')
+const pictureSubWrapper = ref(null)
+const pictureWrapper = ref(null)
 
 let panzoomBig = null
 let panzoomGifInstance = null
@@ -324,25 +323,7 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
-onMounted(() => {
-  container.value.style.height = props.defaultHeight + 'px'
-  isLoading.value = true
-  setPictureEmptyPath()
-  if (picture.value.complete) {
-    resetPicture()
-  }
-  picture.value.addEventListener('load', endLoading)
-  pictureBig.value.addEventListener('load', endLoading)
-  pictureGif.value.addEventListener('load', endLoading)
-  window.addEventListener('resize', resetPicture)
-  setPicturePath()
-  setupPanZoom()
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', resetPicture)
-  panzoomInstances.value.forEach(pz => pz.dispose())
-})
+// Watchers
 
 watch(
   () => props.fullScreen,
@@ -404,6 +385,28 @@ watch(
     }
   }
 )
+
+// Lifecycle
+
+onMounted(() => {
+  container.value.style.height = props.defaultHeight + 'px'
+  isLoading.value = true
+  setPictureEmptyPath()
+  if (picture.value.complete) {
+    resetPicture()
+  }
+  picture.value.addEventListener('load', endLoading)
+  pictureBig.value.addEventListener('load', endLoading)
+  pictureGif.value.addEventListener('load', endLoading)
+  window.addEventListener('resize', resetPicture)
+  setPicturePath()
+  setupPanZoom()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', resetPicture)
+  panzoomInstances.value.forEach(pz => pz.dispose())
+})
 
 defineExpose({
   getNaturalDimensions,

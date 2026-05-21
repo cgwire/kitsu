@@ -18,13 +18,15 @@
 </template>
 
 <script setup>
+import { html as diff2html } from 'diff2html'
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { html as diff2html } from 'diff2html'
 
 import filesApi from '@/store/api/files'
 
 import Spinner from '@/components/widgets/Spinner.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   preview: {
@@ -36,8 +38,6 @@ const props = defineProps({
     default: 600
   }
 })
-
-const { t } = useI18n()
 
 // State
 

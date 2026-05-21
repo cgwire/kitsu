@@ -373,10 +373,10 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useAnnotation } from '@/composables/players/annotation'
-import { useComparison } from '@/composables/players/comparison'
 import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
+import { useAnnotation } from '@/composables/players/annotation'
+import { useComparison } from '@/composables/players/comparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
@@ -387,10 +387,10 @@ import {
   isSoundPreview
 } from '@/lib/preview'
 import {
+  floorToFrame,
   formatFrame,
   formatTime,
-  roundToFrame,
-  floorToFrame
+  roundToFrame
 } from '@/lib/video'
 
 import AnnotationCanvas from '@/components/players/annotations/AnnotationCanvas.vue'
@@ -419,17 +419,24 @@ const { t } = useI18n()
 // Props
 
 const props = defineProps({
-  canvasId: {
-    type: String,
-    default: 'annotation-canvas'
-  },
   big: {
     type: Boolean,
     default: false
   },
+  canvasId: {
+    type: String,
+    default: 'annotation-canvas'
+  },
   entityPreviewFiles: {
     type: Object,
     default: () => ({})
+  },
+  entityType: {
+    type: String
+  },
+  extraWide: {
+    type: Boolean,
+    default: false
   },
   isAssigned: {
     type: Boolean,
@@ -446,6 +453,10 @@ const props = defineProps({
   link: {
     type: String
   },
+  previews: {
+    type: Array,
+    default: () => []
+  },
   readOnly: {
     type: Boolean,
     default: false
@@ -454,10 +465,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  previews: {
-    type: Array,
-    default: () => []
-  },
   task: {
     type: Object,
     default: () => ({})
@@ -465,13 +472,6 @@ const props = defineProps({
   taskTypeMap: {
     type: Map,
     default: () => new Map()
-  },
-  extraWide: {
-    type: Boolean,
-    default: false
-  },
-  entityType: {
-    type: String
   }
 })
 
@@ -521,21 +521,21 @@ let scrubStartX = 0
 const annotations = ref([])
 const available3DAnimations = ref([])
 const current3DAnimation = ref(null)
+const currentBackground = ref(null)
 const currentFrame = ref(0)
 const currentIndex = ref(1)
-const currentBackground = ref(null)
 const currentTime = ref('00:00:00:00')
 const currentTimeRaw = ref(0)
 const is3DAnimation = ref(false)
-const isObjectBackground = ref(false)
 const isAnnotationsDisplayed = ref(true)
-const isEnvironmentSkybox = ref(false)
 const isCommentsHidden = ref(true)
 const isDrawing = ref(false)
+const isEnvironmentSkybox = ref(false)
 const isHd = ref(false)
 const isMuted = ref(false)
-const isPlaying = ref(false)
+const isObjectBackground = ref(false)
 const isOrdering = ref(true)
+const isPlaying = ref(false)
 const isRepeating = ref(false)
 const isTyping = ref(false)
 const isWireframe = ref(false)

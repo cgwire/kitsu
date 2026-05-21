@@ -62,32 +62,33 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
-  previewUrl: {
-    default: null,
-    type: String
-  },
-  light: {
-    default: false,
-    type: Boolean
-  },
-  readOnly: {
-    default: false,
-    type: Boolean
+  backgroundUrl: {
+    type: String,
+    default: ''
   },
   defaultHeight: {
-    default: 0,
-    type: Number
-  },
-  backgroundUrl: {
-    type: String
+    type: Number,
+    default: 0
   },
   isEnvironmentSkybox: {
-    default: false,
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   isWireframe: {
-    default: false,
-    type: Boolean
+    type: Boolean,
+    default: false
+  },
+  light: {
+    type: Boolean,
+    default: false
+  },
+  previewUrl: {
+    type: String,
+    default: null
+  },
+  readOnly: {
+    type: Boolean,
+    default: false
   }
 })
 

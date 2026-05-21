@@ -114,11 +114,11 @@ const canvasId = `shared-annotation-canvas-${Math.random()
   .toString(36)
   .slice(2, 9)}`
 
-const wrapper = ref(null)
+const annotation = useSharedAnnotationCanvas()
+
 const containerSize = ref({ width: 0, height: 0 })
 const isSaving = ref(false)
-
-const annotation = useSharedAnnotationCanvas()
+const wrapper = ref(null)
 
 let resizeObserver = null
 

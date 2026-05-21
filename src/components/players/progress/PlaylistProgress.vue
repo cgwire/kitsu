@@ -105,17 +105,13 @@ const props = defineProps({
     default: false,
     type: Boolean
   },
-  nbFrames: {
-    default: 0,
-    type: Number
-  },
   movieDimensions: {
     default: () => ({}),
     type: Object
   },
-  previewId: {
-    default: '',
-    type: String
+  nbFrames: {
+    default: 0,
+    type: Number
   },
   playlistDuration: {
     default: 0,
@@ -128,6 +124,10 @@ const props = defineProps({
   playlistShotPosition: {
     default: () => ({}),
     type: Object
+  },
+  previewId: {
+    default: '',
+    type: String
   }
 })
 
@@ -137,14 +137,14 @@ const emit = defineEmits([
   'start-scrub'
 ])
 
-const playlistProgressWidget = ref(null)
+const frameNumberLeftPosition = ref(0)
+const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
 const isTileLoading = ref(false)
-const hoverFrame = ref(0)
-const progressDragging = ref(false)
 const playlistProgressDragging = ref(false)
+const playlistProgressWidget = ref(null)
+const progressDragging = ref(false)
 const width = ref(0)
-const frameNumberLeftPosition = ref(0)
 
 const getClientX = event =>
   event.touches?.[0]?.clientX ??
@@ -323,20 +323,6 @@ const domEvents = [
   ['touchcancel', stopPlaylistProgressDrag]
 ]
 
-onMounted(() => {
-  domEvents.forEach(([type, listener]) =>
-    document.addEventListener(type, listener)
-  )
-  new ResizeObserver(resetWidth).observe(playlistProgressWidget.value)
-  resetWidth()
-})
-
-onBeforeUnmount(() => {
-  domEvents.forEach(([type, listener]) =>
-    document.removeEventListener(type, listener)
-  )
-})
-
 watch(
   () => props.previewId,
   () => {
@@ -359,6 +345,20 @@ watch(
   () => props.entityList,
   () => resetWidth()
 )
+
+onMounted(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.addEventListener(type, listener)
+  )
+  new ResizeObserver(resetWidth).observe(playlistProgressWidget.value)
+  resetWidth()
+})
+
+onBeforeUnmount(() => {
+  domEvents.forEach(([type, listener]) =>
+    document.removeEventListener(type, listener)
+  )
+})
 </script>
 
 <style lang="scss" scoped>

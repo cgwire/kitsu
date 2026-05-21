@@ -1,3 +1,12 @@
+/*
+ * Composable for the shared-playlist annotation overlay.
+ *
+ * Owns the fabric canvas lifecycle for the guest / read-only overlay
+ * view: canvas creation and disposal, pencil settings (color, width),
+ * drawing and shape tool modes, local undo stack, and the additions
+ * diff needed by `update_preview_file_annotations`. Does not handle
+ * the full annotation feature set (that lives in useAnnotation).
+ */
 import { ref, shallowRef } from 'vue'
 
 import {
@@ -181,27 +190,27 @@ export const useSharedAnnotationCanvas = () => {
 
   return {
     PENCIL_WIDTHS,
-    isDrawing,
+    additions: additionsRef,
+    clearLocal,
     currentTool,
+    dispose,
+    getDiff,
+    getCanvas,
+    hasChanges,
+    isDrawing,
+    localStack,
     pencilColor,
     pencilWidth,
-    localStack,
-    additions: additionsRef,
-    setup,
-    setDrawingMode,
-    setTool,
-    setColor,
-    setWidth,
-    setUserId,
-    setTime,
-    setCanvasSize,
-    setAnnotationDimensions,
-    undo,
-    clearLocal,
-    hasChanges,
-    getDiff,
     reset,
-    dispose,
-    getCanvas
+    setAnnotationDimensions,
+    setCanvasSize,
+    setColor,
+    setDrawingMode,
+    setTime,
+    setTool,
+    setUserId,
+    setWidth,
+    setup,
+    undo
   }
 }

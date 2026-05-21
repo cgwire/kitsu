@@ -3,8 +3,8 @@
  * Converted from the annotation mixin for use in Composition API components.
  */
 import { fabric } from 'fabric'
-import moment from 'moment'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
+import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
 import { ref, watch } from 'vue'
 
@@ -856,7 +856,7 @@ export const useAnnotation = ({
     fabricCanvas.value.off('object:modified', onObjectModified)
     fabricCanvas.value.off('object:added', onObjectAdded)
     fabricCanvas.value.off('mouse:down', onCanvasClickedInternal)
-    fabricCanvas.value.off('mouse:down', initalizeMouseDrawing)
+    fabricCanvas.value.off('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.off('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.off('mouse:move', updateMousePressure)
     fabricCanvas.value.off('mouse:up', endDrawing)
@@ -869,7 +869,7 @@ export const useAnnotation = ({
     fabricCanvas.value.on('object:added', onObjectAdded)
     fabricCanvas.value.on('erasing:end', onObjectAdded)
     fabricCanvas.value.on('mouse:down', onCanvasClickedInternal)
-    fabricCanvas.value.on('mouse:down', initalizeMouseDrawing)
+    fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.on('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.on('mouse:move', updateMousePressure)
     fabricCanvas.value.on('mouse:up', endDrawing)
@@ -898,7 +898,7 @@ export const useAnnotation = ({
 
   // Mouse pressure
 
-  const initalizeMouseDrawing = () => {
+  const initializeMouseDrawing = () => {
     if (
       mouseIsDrawing.value === false &&
       fabricCanvas.value?.isDrawingMode &&
@@ -1321,7 +1321,7 @@ export const useAnnotation = ({
     configureCanvas,
 
     // Mouse pressure
-    initalizeMouseDrawing,
+    initializeMouseDrawing,
     getCanvasRelativePointDrawingDifference,
     updateMousePressure,
     endDrawing,

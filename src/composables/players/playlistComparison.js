@@ -34,7 +34,9 @@ export const usePlaylistComparison = ({
   })
 
   // Playlist-specific state
+  const currentComparisonPreviewIndex = ref(0)
   const revisionToCompare = ref(null)
+  const savedTaskTypeToCompare = ref(null)
   const comparisonEntityMissing = computed(() => {
     if (!savedTaskTypeToCompare.value) return false
     if (taskTypeOptions.value.length === 0) return false
@@ -42,8 +44,6 @@ export const usePlaylistComparison = ({
       o => o.value === savedTaskTypeToCompare.value
     )
   })
-  const currentComparisonPreviewIndex = ref(0)
-  const savedTaskTypeToCompare = ref(null)
 
   // Playlist-specific computeds
 
@@ -192,10 +192,10 @@ export const usePlaylistComparison = ({
     goToNextComparisonPicture,
 
     // Playlist-specific state
-    revisionToCompare,
-    entityListToCompare,
     comparisonEntityMissing,
     currentComparisonPreviewIndex,
+    entityListToCompare,
+    revisionToCompare,
     savedTaskTypeToCompare,
 
     // Playlist-specific computeds

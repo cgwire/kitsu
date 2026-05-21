@@ -223,63 +223,62 @@ import { usePanzoomSync } from '@/composables/panzoom'
 import { isMoviePreview, isPicturePreview, isSoundPreview } from '@/lib/preview'
 import { floorToFrame, formatTime } from '@/lib/video'
 
-import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
-import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
-import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
-import MultiVideoViewer from '@/components/players/viewers/MultiVideoViewer.vue'
 import SharedAnnotationOverlay from '@/components/players/annotations/SharedAnnotationOverlay.vue'
-import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
 import SharedPlaylistButtonBar from '@/components/players/bars/SharedPlaylistButtonBar.vue'
 import SharedPlaylistHeader from '@/components/players/headers/SharedPlaylistHeader.vue'
-import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
+import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
+import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
 import VideoProgress from '@/components/players/progress/VideoProgress.vue'
+import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
+import MultiVideoViewer from '@/components/players/viewers/MultiVideoViewer.vue'
+import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
+import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+
+const store = useStore()
 
 // Props / Emits
 
 const props = defineProps({
-  playlist: { type: Object, default: () => ({}) },
+  canComment: { type: Boolean, default: false },
   entities: { type: Array, default: () => [] },
-  loading: { type: Boolean, default: false },
-  token: { type: String, default: '' },
   guestId: { type: String, default: '' },
-  canComment: { type: Boolean, default: false }
+  loading: { type: Boolean, default: false },
+  playlist: { type: Object, default: () => ({}) },
+  token: { type: String, default: '' }
 })
 
 const emit = defineEmits(['logout'])
 
-const store = useStore()
-
 // State
 
-const container = ref(null)
-const rawPlayer = ref(null)
-const picturePlayer = ref(null)
-const playlistedEntities = ref(null)
-const videoProgressRef = ref(null)
-
-const playingEntityIndex = ref(0)
-const currentPreviewIndex = ref(0)
-const currentFrameNumber = ref(0)
-const currentPlaylistProgress = ref(0)
-const maxDuration = ref(0)
-const movieDimensions = ref({ width: 0, height: 0 })
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
-const volume = ref(100)
 
-const isPlaying = ref(false)
-const isRepeating = ref(false)
-const isMuted = ref(false)
-const isHd = ref(true)
-const isZoomEnabled = ref(false)
+const container = ref(null)
+const currentFrameNumber = ref(0)
+const currentPlaylistProgress = ref(0)
+const currentPreviewIndex = ref(0)
 const isAnnotating = ref(false)
-const isFullScreen = ref(false)
-const isEntitiesHidden = ref(false)
 const isCommentsHidden = ref(
   typeof window !== 'undefined' &&
     window.matchMedia?.('(max-width: 768px)').matches
 )
+const isEntitiesHidden = ref(false)
+const isFullScreen = ref(false)
+const isHd = ref(true)
+const isMuted = ref(false)
+const isPlaying = ref(false)
+const isRepeating = ref(false)
+const isZoomEnabled = ref(false)
+const maxDuration = ref(0)
+const movieDimensions = ref({ width: 0, height: 0 })
+const picturePlayer = ref(null)
+const playingEntityIndex = ref(0)
+const playlistedEntities = ref(null)
+const rawPlayer = ref(null)
+const videoProgressRef = ref(null)
+const volume = ref(100)
 
 // Tracks whether the very first entity has been auto-loaded after mount.
 // Plain `let` (not ref) — only used by the watchers below.
@@ -289,8 +288,8 @@ let firstEntityLoaded = false
 
 const entityList = computed(() => props.entities || [])
 
-const projectName = computed(() => props.playlist?.project_name || '')
 const playlistName = computed(() => props.playlist?.name || '')
+const projectName = computed(() => props.playlist?.project_name || '')
 
 const sharedApiPrefix = computed(() =>
   props.token ? `/api/shared/playlists/${props.token}` : ''
