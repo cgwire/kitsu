@@ -631,66 +631,32 @@
         class="flexrow flexrow-item comparison-buttons"
         v-if="(isCurrentPreviewMovie || isCurrentPreviewPicture) && !isFullMode"
       >
-        <button-simple
-          class="comparison-button flexrow-item playlist-button"
-          :active="isComparing"
-          :title="$t('playlists.actions.split_screen')"
-          icon="compare"
-          @click="onCompareClicked"
-          v-if="taskTypeOptions && taskTypeOptions.length > 0"
-        />
-        <div class="flexrow comparison-combos">
-          <combobox
-            class="playlist-button flexrow-item comparison-list"
-            :options="taskTypeOptions"
-            v-model="taskTypeToCompare"
-            @update:model-value="onTaskTypeToCompareChanged"
-            v-if="isComparing"
-          />
-          <combobox
-            class="playlist-button flexrow-item comparison-list"
-            :options="revisionOptions"
-            @update:model-value="onRevisionToCompareChanged"
-            v-model="revisionToCompare"
-            v-if="isComparing"
-          />
-          <combobox
-            class="playlist-button flexrow-item comparison-list"
-            :options="comparisonModeOptions"
-            v-model="comparisonMode"
-            @update:model-value="updateRoomStatus"
-            v-if="isComparing"
-          />
-          <div
-            class="flexrow flexrow-item comparison-list"
-            v-if="
-              isComparing &&
-              currentRevisionToCompare &&
-              currentComparisonPreviewLength > 1
-            "
-          >
-            <button-simple
-              class="button playlist-button flexrow-item"
-              icon="left"
-              @click="onPreviousComparisonPictureClicked"
-            />
-            <span class="flexrow-item comparison-index">
-              {{ currentComparisonPreviewIndex + 1 }} /
-              {{ currentComparisonPreviewLength }}
-            </span>
-            <button-simple
-              class="button playlist-button flexrow-item"
-              icon="right"
-              @click="onNextComparisonPictureClicked"
-            />
-          </div>
-          <div
-            class="flexrow flexrow-item comparison-missing"
-            v-if="isComparing && comparisonEntityMissing"
-          >
-            ⚠️ {{ $t('playlists.comparing_missing_plan') }}
-          </div>
-        </div>
+        <player-comparison-bar
+          :comparison-mode-options="comparisonModeOptions"
+          :comparison-preview-index="currentComparisonPreviewIndex"
+          :comparison-preview-length="currentComparisonPreviewLength"
+          :is-comparing="isComparing"
+          :is-comparison-enabled="true"
+          :is-movie="isCurrentPreviewMovie"
+          :is-sound="isCurrentPreviewSound"
+          :preview-file-options="revisionOptions"
+          :task-type-options="taskTypeOptions"
+          v-model:comparison-mode="comparisonMode"
+          v-model:preview-to-compare-id="revisionToCompare"
+          v-model:task-type-id="taskTypeToCompare"
+          @compare-clicked="onCompareClicked"
+          @previous-comparison-clicked="onPreviousComparisonPictureClicked"
+          @next-comparison-clicked="onNextComparisonPictureClicked"
+        >
+          <template #missing>
+            <div
+              class="flexrow flexrow-item comparison-missing"
+              v-if="isComparing && comparisonEntityMissing"
+            >
+              ⚠️ {{ $t('playlists.comparing_missing_plan') }}
+            </div>
+          </template>
+        </player-comparison-bar>
       </div>
 
       <span class="filler"></span>
@@ -1122,6 +1088,7 @@ import MultiVideoViewer from '@/components/previews/MultiVideoViewer.vue'
 import ObjectViewer from '@/components/previews/ObjectViewer.vue'
 import PdfViewer from '@/components/previews/PdfViewer.vue'
 import PictureViewer from '@/components/previews/PictureViewer.vue'
+import PlayerComparisonBar from '@/components/previews/PlayerComparisonBar.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
 import PlaylistProgress from '@/components/previews/PlaylistProgress.vue'
 import SoundViewer from '@/components/previews/SoundViewer.vue'
@@ -1130,7 +1097,6 @@ import VideoProgress from '@/components/previews/VideoProgress.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import ColorPicker from '@/components/widgets/ColorPicker.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PencilPicker from '@/components/widgets/PencilPicker.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by const previewRoom in script
@@ -4025,14 +3991,31 @@ watch(isComparing, () => {
   })
 })
 
-watch(taskTypeToCompare, () => {
-  if (isComparing.value) resetComparison()
-})
-
 watch(currentRevisionToCompare, () => {
   if (isComparing.value && !isComparisonOverlay.value) {
     loadComparisonAnnotation(currentTimeRaw.value)
   }
+})
+
+// PlayerComparisonBar drives these via v-model only (no change events), so we
+// re-derive the side effects the inline @update:model-value handlers used to
+// run: refresh the saved choice + broadcast, reload the comparison player on
+// revision change, and rebroadcast the room status on mode change.
+watch(taskTypeToCompare, (newVal, oldVal) => {
+  if (newVal && oldVal !== null && newVal !== oldVal) {
+    onTaskTypeToCompareChanged()
+  }
+  if (isComparing.value) resetComparison()
+})
+
+watch(revisionToCompare, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    onRevisionToCompareChanged()
+  }
+})
+
+watch(comparisonMode, () => {
+  if (isComparing.value) updateRoomStatus()
 })
 
 // Mirror the main viewer's panzoom on the comparison <video> so both
@@ -4382,10 +4365,6 @@ const playerProxy = {
   pointer-events: none;
 }
 
-.comparison-combobox {
-  margin-bottom: 0;
-}
-
 .playlist-footer .background-combo {
   max-width: 300px;
 
@@ -4439,14 +4418,6 @@ progress {
   transition: opacity 0.5s ease;
 }
 
-.comparison-list,
-.comparison-list p,
-.comparison-list select {
-  font-size: 0.8em;
-}
-.comparison-list select {
-  height: 2.2em;
-}
 .comparison-missing {
   padding: 6px 10px;
   border: 1px solid $dark-grey;
@@ -4603,11 +4574,6 @@ progress {
   position: relative;
 }
 
-.comparison-index {
-  min-width: 30px;
-  margin: 0;
-}
-
 .disabled {
   color: $grey;
 }
@@ -4662,13 +4628,6 @@ input[type='number'] {
     filter: invert(59%) sepia(38%) saturate(660%) hue-rotate(201deg)
       brightness(95%) contrast(93%);
     box-shadow: none;
-  }
-}
-
-@media only screen and (min-width: 1600px) {
-  .comparison-combos {
-    top: -1px;
-    left: 33px;
   }
 }
 </style>
