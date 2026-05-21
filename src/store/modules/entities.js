@@ -1,4 +1,5 @@
 import entitiesApi from '@/store/api/entities'
+import peopleStore from '@/store/modules/people'
 import { RESET_ALL } from '@/store/mutation-types'
 
 const initialState = {}
@@ -9,7 +10,15 @@ const getters = {}
 
 const actions = {
   async getEntityNews({ commit }, entityId) {
-    return entitiesApi.getEntityNews(entityId)
+    const news = await entitiesApi.getEntityNews(entityId)
+    // Resolve the author once: live personMap, API-embedded fallback for
+    // guests, then enrich it (initials, color, avatar) for the avatar.
+    news.data?.forEach(entry => {
+      entry.person =
+        peopleStore.cache.personMap.get(entry.author_id) || entry.person
+      peopleStore.helpers.addAdditionalInformation(entry.person)
+    })
+    return news
   },
 
   async getEntityPreviewFiles({ commit }, entityId) {

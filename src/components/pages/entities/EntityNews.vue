@@ -24,9 +24,9 @@
           class="flexrow-item"
           :font-size="14"
           :is-link="false"
-          :person="personMap.get(news.author_id)"
+          :person="news.person"
           :size="30"
-          v-if="personMap.get(news.author_id)"
+          v-if="news.person"
         />
 
         <div class="flexrow-item task-type-wrapper ml1">
@@ -95,12 +95,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'personMap',
-      'taskTypeMap',
-      'taskStatusMap'
-    ])
+    ...mapGetters(['currentProduction', 'taskTypeMap', 'taskStatusMap'])
   },
 
   methods: {
@@ -136,6 +131,7 @@ export default {
       this.isLoading = true
       this.getEntityNews(this.entity.id)
         .then(data => {
+          // The author is already resolved and enriched by the store action.
           this.newsList = data.data
         })
         .catch(err => {
