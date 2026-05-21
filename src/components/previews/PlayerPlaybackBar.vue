@@ -1,7 +1,7 @@
 <template>
   <div
     class="left flexrow"
-    v-if="isMovie || isSound || (is3DModel && is3DAnimation)"
+    v-if="isMovie || isSound || (is3DModel && is3DAnimation) || isPicture"
   >
     <button-simple
       class="flexrow-item"
@@ -28,31 +28,7 @@
     />
   </div>
 
-  <div class="left flexrow" v-if="isMovie">
-    <button-simple
-      :active="isRepeating"
-      :title="$t('playlists.actions.looping')"
-      icon="repeat"
-      @click="$emit('repeat-clicked')"
-      v-if="!light || fullScreen"
-    />
-    <button-simple
-      class="flexrow-item"
-      :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-      :text="isHd ? 'HD' : 'LD'"
-      @click="isHd = !isHd"
-      v-if="(!light || fullScreen) && isMovie"
-    />
-
-    <button-sound
-      class="flexrow-item"
-      @change-sound="$emit('toggle-sound-clicked')"
-      v-model:muted="isMuted"
-      v-model:volume="volume"
-    />
-
-    <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
-
+  <div class="left flexrow" v-if="isMovie && !compact">
     <span
       class="flexrow-item time-indicator"
       :title="$t('playlists.actions.current_time')"
@@ -79,7 +55,55 @@
       }}</span
       >)
     </div>
+
+    <div class="separator"></div>
+
+    <button-simple
+      :active="isRepeating"
+      :title="$t('playlists.actions.looping')"
+      icon="repeat"
+      @click="$emit('repeat-clicked')"
+      v-if="!light || fullScreen"
+    />
+    <button-simple
+      class="flexrow-item"
+      :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
+      :text="isHd ? 'HD' : 'LD'"
+      @click="isHd = !isHd"
+      v-if="(!light || fullScreen) && isMovie"
+    />
+
+    <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
+
+    <button-simple
+      class="flexrow-item"
+      :active="isShowAnnotationsWhilePlaying"
+      :title="$t('playlists.actions.toggle_playing_annotations')"
+      icon="triangle"
+      @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
+      v-if="
+        isShowAnnotationsWhilePlaying !== undefined && (!light || fullScreen)
+      "
+    />
+
+    <button-sound
+      class="flexrow-item"
+      @change-sound="$emit('toggle-sound-clicked')"
+      v-model:muted="isMuted"
+      v-model:volume="volume"
+    />
+
+    <button-simple
+      class="flexrow-item"
+      :active="isWaveformDisplayed"
+      :title="$t('playlists.actions.toggle_waveform')"
+      icon="waveform"
+      @click="isWaveformDisplayed = !isWaveformDisplayed"
+      v-if="isWaveformDisplayed !== undefined && (!light || fullScreen)"
+    />
   </div>
+
+  <slot name="extra-controls" />
 </template>
 
 <script setup>
@@ -92,6 +116,10 @@ defineProps({
   available3DAnimations: {
     type: Array,
     default: () => []
+  },
+  compact: {
+    type: Boolean,
+    default: false
   },
   currentFrameLabel: {
     type: String,
@@ -114,6 +142,10 @@ defineProps({
     default: false
   },
   isMovie: {
+    type: Boolean,
+    default: false
+  },
+  isPicture: {
     type: Boolean,
     default: false
   },
@@ -150,6 +182,13 @@ const isHd = defineModel('isHd', { default: false })
 const isMuted = defineModel('isMuted', { default: false })
 const speed = defineModel('speed', { default: 3 })
 const volume = defineModel('volume', { default: 50 })
+const isWaveformDisplayed = defineModel('isWaveformDisplayed', {
+  default: undefined
+})
+const isShowAnnotationsWhilePlaying = defineModel(
+  'isShowAnnotationsWhilePlaying',
+  { default: undefined }
+)
 </script>
 
 <style lang="scss" scoped>
