@@ -270,11 +270,15 @@ const setupPanZoom = () => {
     emitPanZoom(panzoomSmall)
   })
   panzoomBig.on('zoom', () => {
-    if (!props.big) return
+    // The big <img> is displayed in both `big` and `fullScreen` modes
+    // (see template's v-show), so its panzoom needs to emit in both
+    // — otherwise the annotation overlay sits still while the picture
+    // moves under it in fullscreen.
+    if (!props.big && !props.fullScreen) return
     emitPanZoom(panzoomBig)
   })
   panzoomBig.on('pan', () => {
-    if (!props.big) return
+    if (!props.big && !props.fullScreen) return
     emitPanZoom(panzoomBig)
   })
   panzoomGifInstance.on('zoom', () => {
