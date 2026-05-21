@@ -70,13 +70,16 @@
 
     <people-list
       :entries="listEntries"
-      :is-guests="activeTab === 'guests'"
+      :is-guests="isGuestTab"
+      :is-archived-guests="activeTab === 'archived-guests'"
       :is-loading="isListLoading"
       :is-error="isListError"
       :seats-remaining="activeTab === 'active' ? seatsRemaining : null"
+      @archive-clicked="onArchiveClicked"
       @avatar-clicked="onAvatarClicked"
       @delete-clicked="onDeleteClicked"
       @edit-clicked="onEditClicked"
+      @restore-clicked="onRestoreClicked"
       @change-password-clicked="onChangePasswordClicked"
     />
 
@@ -159,6 +162,16 @@
       @confirm="confirmDeletePeople"
       v-if="modals.del"
     />
+
+    <confirm-modal
+      :active="modals.archiveGuest"
+      :error-text="$t('people.archive_guest_error')"
+      :is-error="errors.archiveGuest"
+      :is-loading="loading.archiveGuest"
+      :text="$t('people.archive_guest_confirm')"
+      @cancel="modals.archiveGuest = false"
+      @confirm="confirmArchiveGuest"
+    />
   </div>
 </template>
 
@@ -173,6 +186,7 @@ import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ChangePasswordModal from '@/components/modals/ChangePasswordModal.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import EditAvatarModal from '@/components/modals/EditAvatarModal.vue'
@@ -197,6 +211,7 @@ export default {
     ChangePasswordModal,
     ComboboxDepartment,
     ComboboxStudio,
+    ConfirmModal,
     ComboboxStyled,
     EditAvatarModal,
     EditPersonModal,
@@ -233,6 +248,7 @@ export default {
         { label: 'vendor', value: 'vendor' }
       ],
       errors: {
+        archiveGuest: false,
         avatar: false,
         del: false,
         edit: false,
@@ -241,6 +257,7 @@ export default {
         userLimit: false
       },
       loading: {
+        archiveGuest: false,
         createAndInvite: false,
         del: false,
         deletingAvatar: false,
@@ -250,6 +267,7 @@ export default {
         updatingAvatar: false
       },
       modals: {
+        archiveGuest: false,
         avatar: false,
         changePassword: false,
         del: false,
@@ -258,6 +276,7 @@ export default {
         isImportRenderDisplayed: false
       },
       parsedCSV: [],
+      personToArchive: null,
       personToDelete: {},
       personToEdit: { role: 'user' },
       personToChangePassword: {},
@@ -307,6 +326,9 @@ export default {
 
     tabs() {
       const guestCount = this.isGuestsLoaded ? this.currentGuests.length : null
+      const archivedGuestCount = this.isGuestsLoaded
+        ? this.archivedGuests.length
+        : null
       return [
         {
           name: 'active',
@@ -322,6 +344,13 @@ export default {
             guestCount === null
               ? this.$tc('people.guests', 2)
               : `${this.$tc('people.guests', 2)} (${guestCount})`
+        },
+        {
+          name: 'archived-guests',
+          label:
+            archivedGuestCount === null
+              ? this.$t('people.archived_guests')
+              : `${this.$t('people.archived_guests')} (${archivedGuestCount})`
         }
       ]
     },
@@ -373,7 +402,7 @@ export default {
       return this.currentPeople.filter(person => !person.active)
     },
 
-    currentGuests() {
+    filteredGuests() {
       // Apply the same role / department / studio / search-text filters as
       // the regular people list so the guests tab honours the toolbar
       // controls. Guests typically have role=client; we still respect the
@@ -405,20 +434,31 @@ export default {
       }))
     },
 
+    currentGuests() {
+      return this.filteredGuests.filter(person => person.active)
+    },
+
+    archivedGuests() {
+      return this.filteredGuests.filter(person => !person.active)
+    },
+
+    isGuestTab() {
+      return ['guests', 'archived-guests'].includes(this.activeTab)
+    },
+
     listEntries() {
       if (this.activeTab === 'guests') return this.currentGuests
+      if (this.activeTab === 'archived-guests') return this.archivedGuests
       if (this.activeTab === 'unactive') return this.unactivePeople
       return this.activePeople
     },
 
     isListLoading() {
-      return this.activeTab === 'guests'
-        ? this.isGuestsLoading
-        : this.isPeopleLoading
+      return this.isGuestTab ? this.isGuestsLoading : this.isPeopleLoading
     },
 
     isListError() {
-      return this.activeTab === 'guests'
+      return this.isGuestTab
         ? this.isGuestsLoadingError
         : this.isPeopleLoadingError
     }
@@ -426,6 +466,7 @@ export default {
 
   methods: {
     ...mapActions([
+      'archivePerson',
       'clearPersonAvatar',
       'deletePeople',
       'editPerson',
@@ -435,6 +476,7 @@ export default {
       'newPerson',
       'newPersonAndInvite',
       'removePeopleSearch',
+      'restorePerson',
       'savePeopleSearch',
       'setPeopleSearch',
       'uploadPersonAvatar',
@@ -442,7 +484,7 @@ export default {
     ]),
 
     ensureGuestsLoaded() {
-      if (this.activeTab !== 'guests') return
+      if (!this.isGuestTab) return
       this.loadGuests().catch(console.error)
     },
 
@@ -635,6 +677,36 @@ export default {
     onDeleteClicked(person) {
       this.personToDelete = person
       this.modals.del = true
+    },
+
+    onArchiveClicked(person) {
+      this.personToArchive = person
+      this.errors.archiveGuest = false
+      this.modals.archiveGuest = true
+    },
+
+    async confirmArchiveGuest() {
+      if (!this.personToArchive) return
+      this.loading.archiveGuest = true
+      this.errors.archiveGuest = false
+      try {
+        await this.archivePerson(this.personToArchive)
+        this.modals.archiveGuest = false
+        this.personToArchive = null
+      } catch (err) {
+        console.error(err)
+        this.errors.archiveGuest = true
+      } finally {
+        this.loading.archiveGuest = false
+      }
+    },
+
+    async onRestoreClicked(person) {
+      try {
+        await this.restorePerson(person)
+      } catch (err) {
+        console.error(err)
+      }
     },
 
     onEditClicked(person) {

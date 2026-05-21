@@ -81,6 +81,10 @@ export default {
     return client.pput(`/api/data/persons/${person.id}`, data)
   },
 
+  setPersonActive(personId, active) {
+    return client.pput(`/api/data/persons/${personId}`, { active })
+  },
+
   updatePerson(person) {
     const data = {
       first_name: person.first_name,

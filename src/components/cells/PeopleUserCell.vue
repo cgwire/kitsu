@@ -4,11 +4,21 @@
       <people-avatar :is-link="true" :person="person" />
       <div class="filler">
         <people-name class="name" :person="person" with-link />
-        <div v-if="person.email && !person.is_bot" class="email nowrap">
+        <div
+          v-if="person.email && !person.is_bot && !person.is_guest"
+          class="email nowrap"
+        >
           {{ person.email }}
           <span class="copy-icon" :title="$t('main.copy')" @click="copyEmail">
             <copy-icon :size="12" />
           </span>
+        </div>
+        <div
+          v-else-if="person.is_guest && person.created_at"
+          class="email nowrap"
+          :title="$t('people.fields.created_at')"
+        >
+          {{ formatSimpleDate(person.created_at) }}
         </div>
       </div>
       <span
@@ -26,6 +36,8 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { CopyIcon, ShieldCheckIcon } from 'lucide-vue-next'
+
+import { formatSimpleDate } from '@/lib/time'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'

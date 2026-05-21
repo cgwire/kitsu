@@ -46,11 +46,22 @@
 
     <button
       class="button"
+      :title="$t('row_actions.archive')"
+      data-test="button-archive"
+      tabindex="-1"
+      @click="$emit('archive-clicked')"
+      v-if="!hideArchive && !entry.canceled"
+    >
+      <archive-icon class="icon is-small" />
+    </button>
+
+    <button
+      class="button"
       :title="$t('row_actions.restore')"
       data-test="button-restore"
       tabindex="-1"
       @click="$emit('restore-clicked')"
-      v-if="entry.canceled"
+      v-if="!hideRestore || entry.canceled"
     >
       <rotate-ccw-icon class="icon is-small" />
     </button>
@@ -92,6 +103,7 @@
 
 <script setup>
 import {
+  ArchiveIcon,
   CameraIcon,
   ClockIcon,
   EditIcon,
@@ -105,15 +117,18 @@ import { useStore } from 'vuex'
 
 defineProps({
   entry: { type: Object, default: () => ({}) },
+  hideArchive: { type: Boolean, default: true },
   hideAvatar: { type: Boolean, default: true },
   hideChangePassword: { type: Boolean, default: true },
   hideDelete: { type: Boolean, default: false },
   hideEdit: { type: Boolean, default: false },
   hideHistory: { type: Boolean, default: true },
-  hideRefresh: { type: Boolean, default: true }
+  hideRefresh: { type: Boolean, default: true },
+  hideRestore: { type: Boolean, default: true }
 })
 
 defineEmits([
+  'archive-clicked',
   'avatar-clicked',
   'change-password-clicked',
   'delete-clicked',

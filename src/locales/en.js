@@ -1039,6 +1039,10 @@ export default {
     title: 'People',
     unactive: 'Inactive',
     guests: 'guest | guests',
+    archived_guests: 'Archived guests',
+    archive_guest_confirm: 'Archive this guest? Their comments stay in place, but they no longer appear in the active guests list.',
+    archive_guest_error: 'Could not archive this guest. Please try again.',
+    restore_guest_error: 'Could not restore this guest. Please try again.',
     email_domain_error: 'This email domain is not allowed.',
     email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
@@ -1049,6 +1053,7 @@ export default {
     fields: {
       active: 'Active',
       contract: 'Contract',
+      created_at: 'Creation date',
       daily_salary: 'Daily rate',
       departments: 'Departments',
       email: 'Email',
@@ -2155,6 +2160,7 @@ export default {
   },
 
   row_actions: {
+    archive: 'Archive',
     change_avatar: 'Change avatar',
     change_password: 'Change password',
     delete: 'Delete',

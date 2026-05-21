@@ -99,17 +99,22 @@
             </td>
             <row-actions-cell
               class="datatable-row-footer"
+              :entry="person"
+              :hide-archive="!isGuests || isArchivedGuests"
               :hide-avatar="isGuests || !person.active"
               :hide-change-password="isBots || isGuests || !person.active"
-              :hide-delete="person.active && !isGuests"
+              :hide-delete="isGuests ? !isArchivedGuests : person.active"
               :hide-edit="isGuests"
               :hide-refresh="!isBots || !person.active"
+              :hide-restore="!isArchivedGuests"
+              @archive-clicked="$emit('archive-clicked', person)"
               @avatar-clicked="$emit('avatar-clicked', person)"
               @change-password-clicked="
                 $emit('change-password-clicked', person)
               "
               @edit-clicked="$emit('edit-clicked', person)"
               @refresh-clicked="$emit('refresh-clicked', person)"
+              @restore-clicked="$emit('restore-clicked', person)"
               @delete-clicked="$emit('delete-clicked', person)"
               v-if="isCurrentUserAdmin"
             />
@@ -159,6 +164,10 @@ export default {
       type: Array,
       default: () => []
     },
+    isArchivedGuests: {
+      type: Boolean,
+      default: false
+    },
     isBots: {
       type: Boolean,
       default: false
@@ -182,11 +191,13 @@ export default {
   },
 
   emits: [
+    'archive-clicked',
     'avatar-clicked',
     'change-password-clicked',
     'delete-clicked',
     'edit-clicked',
-    'refresh-clicked'
+    'refresh-clicked',
+    'restore-clicked'
   ],
 
   data() {
