@@ -27,8 +27,7 @@
       min-field-of-view="10deg"
       max-field-of-view="100deg"
       :variant-name="isWireframe ? 'variant-wireframe' : null"
-      @before-render="createWireframeVariant($event.target.model)"
-      @load="$emit('model-loaded')"
+      @load="onModelLoaded"
     />
     <div
       v-if="overlayText"
@@ -61,7 +60,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-const props = defineProps({
+defineProps({
   backgroundUrl: {
     type: String,
     default: ''
@@ -92,7 +91,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['model-loaded'])
+const emit = defineEmits(['model-loaded'])
 
 const modelViewer = ref(null)
 const panningHDR = ref(false)
@@ -107,6 +106,12 @@ let lockCameraTarget = null
 let skyboxAngle = 0
 let radiansPerPixel = 0
 
+// Build the wireframe variant once per loaded model. Called from
+// @load — running it on @before-render (the previous wiring) mutated
+// model materials on every frame which made model-viewer (Lit) flag a
+// "property set during update" warning and reschedule extra updates.
+// The template's :variant-name binding handles switching between the
+// default and wireframe variants from here on.
 const createWireframeVariant = model => {
   const maxIndex = model.materials.length
   for (let i = 0; i < maxIndex; i++) {
@@ -114,7 +119,7 @@ const createWireframeVariant = model => {
       i,
       `material-wireframe-${i}`,
       'variant-wireframe',
-      props.isWireframe
+      false
     )
     if (!variantMaterial) continue
     const texture = variantMaterial.normalTexture
@@ -130,6 +135,11 @@ const createWireframeVariant = model => {
       material.envMapIntensity = 0
     })
   }
+}
+
+const onModelLoaded = event => {
+  createWireframeVariant(event.target.model)
+  emit('model-loaded')
 }
 
 const getAnimations = () => {
