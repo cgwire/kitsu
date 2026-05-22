@@ -94,7 +94,13 @@ const createFabric = () => {
     ? new fabric.StaticCanvas(props.canvasId)
     : new fabric.Canvas(props.canvasId, {
         fireRightClick: true,
-        enablePointerEvents: true
+        enablePointerEvents: true,
+        // Marquee must fully contain an annotation to pick it up.
+        // Without this, even a 1-2 pixel jitter on click can finalise
+        // a tiny marquee that grabs nearby objects whose bboxes
+        // overlap that point — the user reports this as "clicking
+        // between two elements selects the group".
+        selectionFullyContained: true
       })
   if (!props.static) {
     const brush = new PSBrush(canvas)
