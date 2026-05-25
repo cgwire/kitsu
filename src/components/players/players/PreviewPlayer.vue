@@ -1028,13 +1028,17 @@ const onVideoEnd = () => {
   }
 }
 
+// Toggle play/pause without touching focus, so the Alt+P shortcut
+// can fire from inside the comment textarea without losing the
+// caret. The click handler below adds the focus reset.
+const togglePlayPause = () => {
+  if (!isPlaying.value) play()
+  else pause()
+}
+
 const onPlayPauseClicked = () => {
   clearFocus()
-  if (!isPlaying.value) {
-    play()
-  } else {
-    pause()
-  }
+  togglePlayPause()
 }
 
 const onRepeatClicked = () => {
@@ -1377,7 +1381,7 @@ const { isAltHeld } = usePreviewShortcuts({
     // Don't toggle play/pause while a shared playlist modal is open.
     const playlistModal = document.getElementById('temp-playlist-modal')
     const styles = playlistModal && window.getComputedStyle(playlistModal)
-    if (!styles || styles.display === 'none') onPlayPauseClicked()
+    if (!styles || styles.display === 'none') togglePlayPause()
   },
   onPrevAnnotation: () => goPreviousDrawing(),
   onNextAnnotation: () => goNextDrawing(),

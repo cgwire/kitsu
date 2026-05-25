@@ -1614,6 +1614,7 @@ const {
 
 const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
+  onPlayPause: () => togglePlayPause(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
   onCopy: () => copyAnnotations(),
@@ -2193,8 +2194,10 @@ const onNextDrawingClicked = () => {
   sendUpdatePlayingStatus()
 }
 
-const onPlayPauseClicked = () => {
-  clearFocus()
+// Toggle play/pause without touching focus, so the Alt+P shortcut
+// can fire from inside the comment textarea without losing the
+// caret. The click handler below adds the focus reset.
+const togglePlayPause = () => {
   if (!isPlaying.value) {
     playClicked()
   } else {
@@ -2203,6 +2206,11 @@ const onPlayPauseClicked = () => {
     if (ann) loadAnnotation(ann)
     updateRoomStatus()
   }
+}
+
+const onPlayPauseClicked = () => {
+  clearFocus()
+  togglePlayPause()
 }
 
 const onVideoRepeated = () => {

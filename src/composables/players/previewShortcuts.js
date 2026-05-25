@@ -41,6 +41,15 @@ export const usePreviewShortcuts = handlers => {
   const isAltHeld = ref(false)
 
   const onKeyDown = event => {
+    // Alt+P plays/pauses even when an <input> / <textarea> has focus,
+    // so users can pause / resume while typing a comment without
+    // leaving the field. All other shortcuts stay blocked inside text
+    // inputs to avoid accidental triggers.
+    if (event.altKey && (event.key === 'p' || event.key === 'P')) {
+      pauseEvent(event)
+      handlers.onPlayPause?.()
+      return
+    }
     if (isTypingTarget(event.target)) return
     if (event.key === 'Alt') {
       isAltHeld.value = true
