@@ -21,6 +21,9 @@ import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   canvasId: { type: String, required: true },
+  // CSS cursor value (keyword or url(...)). When null, the overlay
+  // inherits whatever cursor its parent provides.
+  cursor: { type: String, default: null },
   mediaElement: { type: HTMLElement, default: null },
   panzoomTransform: {
     type: Object,
@@ -59,6 +62,7 @@ const clipStyle = computed(() => ({
 const overlayStyle = computed(() => {
   const { x, y, scale } = props.panzoomTransform
   return {
+    cursor: props.cursor || null,
     pointerEvents: props.interactive ? 'auto' : 'none',
     transform: `translate(${x}px, ${y}px) scale(${scale})`
   }
@@ -159,6 +163,22 @@ watch(
     unobserve(oldEl)
     observe(newEl)
     updateBounds()
+  }
+)
+
+// Fabric sets the cursor on its own upper-canvas element directly,
+// which would override the CSS we put on the overlay div. Keep both
+// in sync by feeding fabric the same value so pencil / shape / laser
+// cursors survive into drawing mode and over hovered objects.
+watch(
+  () => props.cursor,
+  cursor => {
+    const canvas = fabricCanvas.value
+    if (!canvas) return
+    const value = cursor || 'default'
+    canvas.defaultCursor = value
+    canvas.freeDrawingCursor = value
+    canvas.hoverCursor = value
   }
 )
 

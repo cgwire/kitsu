@@ -110,6 +110,7 @@
           'video-container': true,
           'flexrow-reverse': !isComparisonOverlay
         }"
+        :style="{ cursor: annotationCursor || null }"
         ref="video-container"
       >
         <video
@@ -354,6 +355,7 @@
         <annotation-canvas
           ref="main-annotation-canvas"
           canvas-id="playlist-annotation-canvas"
+          :cursor="annotationCursor"
           :media-element="mainContentAnchorEl"
           :panzoom-transform="panzoomTransform"
           :interactive="isOverlayInteractive"
@@ -878,6 +880,7 @@ import WaveSurfer from 'wavesurfer.js'
 import { useFullScreen } from '@/composables/fullScreen'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
+import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePreviewRoom } from '@/composables/previewRoom'
@@ -1625,6 +1628,14 @@ const { isAltHeld } = usePreviewShortcuts({
 // directly). Shift stays free for fabric's straight-line constraint,
 // and wheel always reaches the media via wheel-target.
 const isOverlayInteractive = computed(() => !isAltHeld.value)
+
+const { cursor: annotationCursor } = useAnnotationCursor({
+  isAltHeld,
+  isDrawing,
+  isTyping,
+  isShapeMode,
+  isLaserModeOn
+})
 
 // DOM utility helpers (inlined from domMixin)
 

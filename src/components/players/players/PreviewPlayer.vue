@@ -2,10 +2,15 @@
   <div ref="container" class="preview-player dark" tabindex="-1">
     <div class="preview filler">
       <div class="flexrow filler">
-        <div class="preview-container filler" ref="preview-container">
+        <div
+          class="preview-container filler"
+          :style="{ cursor: annotationCursor || null }"
+          ref="preview-container"
+        >
           <annotation-canvas
             ref="main-annotation-canvas"
             :canvas-id="canvasId"
+            :cursor="annotationCursor"
             :media-element="mainMediaElement"
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
@@ -380,6 +385,7 @@ import { useStore } from 'vuex'
 import { useFullScreen } from '@/composables/fullScreen'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
+import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { useComparison } from '@/composables/players/comparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
@@ -1386,6 +1392,13 @@ const { isAltHeld } = usePreviewShortcuts({
   onCopy: () => copyAnnotations(),
   onPaste: () => pasteAnnotations(),
   onToggleOverlay: () => toggleFullOverlay()
+})
+
+const { cursor: annotationCursor } = useAnnotationCursor({
+  isAltHeld,
+  isDrawing,
+  isTyping,
+  isShapeMode
 })
 
 const onCommentClicked = () => {
