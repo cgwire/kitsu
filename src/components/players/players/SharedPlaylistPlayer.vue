@@ -617,9 +617,9 @@ const onAnnotationsSaved = annotations => {
 
 const onStatusChanged = ({ taskStatusId, color }) => {
   const entity = currentEntity.value
-  if (!entity) return
-  if (color) entity.task_status_color = color
-  if (taskStatusId) entity.task_status_id = taskStatusId
+  if (!entity || !taskStatusId || !color) return
+  entity.task_status_id = taskStatusId
+  entity.task_status_color = color
 }
 
 // Functions — entity strip

@@ -380,6 +380,7 @@
         :task="task"
         :player="playerProxy"
         :show-assignees="isCurrentUserManager || isCurrentUserSupervisor"
+        @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
       />
@@ -2309,6 +2310,20 @@ const onCommentClicked = () => {
     taskInfoRef.value?.focusCommentTextarea()
     resetHeight()
   })
+}
+
+// Refresh the current entity's task status so the playlist progress bar
+// reflects the new status right after the comment is posted (otherwise the
+// fields stay the ones captured when the playlist was loaded).
+const onCommentAdded = () => {
+  const entity = currentEntity.value
+  if (!entity) return
+  const task = taskMap.value.get(entity.preview_file_task_id)
+  if (!task) return
+  const taskStatus = taskStatusMap.value.get(task.task_status_id)
+  if (!taskStatus) return
+  entity.task_status_id = task.task_status_id
+  entity.task_status_color = taskStatus.color
 }
 
 const setPlayerSpeed = rate => {
