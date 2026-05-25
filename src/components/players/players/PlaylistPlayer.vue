@@ -613,7 +613,7 @@
         :is-object-background="isObjectBackground"
         :is-picture="isCurrentPreviewPicture"
         :is-typing="isTyping"
-        :is-zoom-pan="isZoomEnabled"
+        :is-zoom-pan="false"
         :object-background-url="objectBackgroundUrl"
         :pencil-color="pencilColor"
         :pencil-palette="pencilPalette"
@@ -643,7 +643,7 @@
         @shape-mode-clicked="onShapeModeClicked"
         @type-clicked="onTypeClicked"
         @undo="undoLastAction"
-        @zoom-pan-clicked="onPanZoomClicked"
+        @zoom-pan-clicked="onResetZoomClicked"
       />
       <button-simple
         class="playlist-button flexrow-item"
@@ -1060,7 +1060,6 @@ const isShowAnnotationsWhilePlaying = ref(false)
 const isTyping = ref(false)
 const isWaveformDisplayed = ref(false)
 const isWireframe = ref(false)
-const isZoomEnabled = ref(false)
 const maxDuration = ref('00:00.000')
 const maxDurationRaw = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
@@ -1563,7 +1562,6 @@ const previewRoom = usePreviewRoom({
   isLaserModeOn,
   isAnnotationsDisplayed,
   isWaveformDisplayed,
-  isZoomEnabled,
   handleIn,
   handleOut,
   speed,
@@ -2531,7 +2529,6 @@ const updateMainAnchor = () => {
 
 const resetCanvasSize = () => {
   return nextTick().then(() => {
-    if (!isZoomEnabled.value) resetPanZoom()
     updateMainAnchor()
     updateComparisonAnchor()
   })
@@ -3383,31 +3380,18 @@ const onEntityDragStart = (event, entity) => {
 
 // Pan & zoom
 
-const onPanZoomClicked = () => {
-  if (!isZoomEnabled.value) {
-    isDrawing.value = false
-    isAnnotationsDisplayed.value = false
-    isZoomEnabled.value = true
-  } else {
-    isZoomEnabled.value = false
-    isAnnotationsDisplayed.value = true
-  }
+const onResetZoomClicked = () => {
+  clearFocus()
+  resetPanZoom()
+  panzoomTransform.value = { x: 0, y: 0, scale: 1 }
 }
 
+// Wheel-zoom and Alt+drag pan are always active on the main viewer,
+// mirroring PreviewPlayer. The button only resets the transform —
+// it does not toggle a mode any more.
 const resumePanZoom = () => {
-  if (isCurrentPreviewMovie.value) {
-    rawPlayer.value?.resumePanZoom()
-  } else if (isCurrentPreviewPicture.value) {
-    picturePlayer.value?.resumePanZoom()
-  }
-}
-
-const pausePanZoom = () => {
-  if (isCurrentPreviewMovie.value) {
-    rawPlayer.value?.pausePanZoom()
-  } else if (isCurrentPreviewPicture.value) {
-    picturePlayer.value?.pausePanZoom()
-  }
+  rawPlayer.value?.resumePanZoom()
+  picturePlayer.value?.resumePanZoom()
 }
 
 const resetPanZoom = () => {
@@ -3682,9 +3666,6 @@ const onPreviewFileAnnotationUpdate = eventData => {
 
 watch(isAnnotationsDisplayed, () => {
   isRoomSilent = true
-  if (isAnnotationsDisplayed.value && isZoomEnabled.value) {
-    isZoomEnabled.value = false
-  }
   if (!isAnnotationsDisplayed.value) {
     if (isDrawing.value) onAnnotateClicked()
     else if (isTyping.value) onTypeClicked()
@@ -3695,7 +3676,6 @@ watch(isAnnotationsDisplayed, () => {
 })
 
 watch(isDrawing, () => {
-  if (isDrawing.value && isZoomEnabled.value) isZoomEnabled.value = false
   if (!isDrawing.value && isLaserModeOn.value) isLaserModeOn.value = false
   if (isDrawing.value && !isAnnotationsDisplayed.value) {
     isAnnotationsDisplayed.value = true
@@ -3703,24 +3683,15 @@ watch(isDrawing, () => {
 })
 
 watch(isTyping, () => {
-  if (isTyping.value && isZoomEnabled.value) isZoomEnabled.value = false
   if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
 })
 
-watch(isZoomEnabled, () => {
-  if (isZoomEnabled.value) {
-    resumePanZoom()
-    if (isDrawing.value) onAnnotateClicked()
-    else if (isTyping.value) onTypeClicked()
-    nextTick(() => {
-      if (isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = false
-      resetCanvasVisibility()
-    })
-  } else {
-    pausePanZoom()
-    resetPanZoom()
-  }
-  nextTick(() => updateRoomStatus())
+// New PictureViewer instances mount paused (their setupPanZoom calls
+// pausePanZoom on init). Re-resume the picture player after each
+// preview-list change so wheel-zoom and Alt-pan stay active on the
+// fresh viewer.
+watch(picturePreviews, () => {
+  nextTick(() => picturePlayer.value?.resumePanZoom())
 })
 
 watch(
@@ -4000,6 +3971,7 @@ onMounted(() => {
     onFrameUpdate(0)
     configureWaveForm()
     configureFullPlayer()
+    resumePanZoom()
   })
   currentBackground.value =
     productionBackgrounds.value.find(isDefaultBackground) || null
