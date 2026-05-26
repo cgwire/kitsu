@@ -168,6 +168,7 @@
           :is-sound="isSound"
           :light="light"
           :preview-file-options="previewFileOptions"
+          :show-panel="fullScreen"
           :task-type-options="taskTypeOptions"
           v-model:comparison-mode="comparisonMode"
           v-model:preview-to-compare-id="previewToCompareId"
@@ -319,6 +320,28 @@
             icon="maximize"
             v-if="isFullScreenEnabled"
             @click="onFullscreenClicked"
+          />
+        </div>
+
+        <div class="comparison-dock flexrow" v-if="!fullScreen && isComparing">
+          <player-comparison-bar
+            :comparison-mode-options="comparisonModeOptions"
+            :comparison-preview-index="comparisonPreviewIndex"
+            :comparison-preview-length="comparisonPreviewLength"
+            :is-comparing="isComparing"
+            :is-comparison-enabled="isComparisonEnabled"
+            :is-concept="isConcept"
+            :is-movie="isMovie"
+            :is-sound="isSound"
+            :light="light"
+            :preview-file-options="previewFileOptions"
+            :show-toggle="false"
+            :task-type-options="taskTypeOptions"
+            v-model:comparison-mode="comparisonMode"
+            v-model:preview-to-compare-id="previewToCompareId"
+            v-model:task-type-id="taskTypeId"
+            @next-comparison-clicked="goToNextComparison"
+            @previous-comparison-clicked="goToPreviousComparison"
           />
         </div>
       </div>
@@ -1875,10 +1898,29 @@ defineExpose({
 
 .buttons {
   background: $dark-grey-2;
-  height: 32px;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   font-variant-numeric: tabular-nums;
+  height: 32px;
+  position: relative;
+}
+
+// Out of fullscreen the comparison panel lives in a separate dock so
+// it can't push the buttons row out of layout. Anchored to the bottom
+// of .buttons via top: 100%, it overlaps whatever sits underneath the
+// player. A border + extra padding visually detach the dock from the
+// main button row.
+.comparison-dock {
+  background: $dark-grey-2;
+  border: 1px solid $dark-grey-strong;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  left: 0;
+  padding: 0.4rem 0.75rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 5;
 }
 
 .buttons :deep(.button:first-child) {
@@ -1911,8 +1953,8 @@ defineExpose({
 }
 
 .buttons :deep(.button:hover) {
+  background: var(--background-tag-button);
   border-radius: 5px;
-  transform: scale(1.2);
 }
 
 .buttons :deep(.comparison-button) {

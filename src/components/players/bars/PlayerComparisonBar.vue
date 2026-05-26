@@ -1,12 +1,11 @@
 <template>
   <div class="flexrow flexrow-item" v-if="!isConcept">
     <button-simple
-      :class="{ ml1: isMovie || isSound }"
       :active="isComparing"
       icon="compare"
       :title="$t('playlists.actions.split_screen')"
       @click="$emit('compare-clicked')"
-      v-if="taskTypeOptions.length > 0 && isComparisonEnabled"
+      v-if="showToggle && taskTypeOptions.length > 0 && isComparisonEnabled"
     />
 
     <combobox
@@ -15,7 +14,7 @@
       :is-dark="true"
       :thin="true"
       v-model="taskTypeId"
-      v-if="isComparing && (!light || isComparisonEnabled)"
+      v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
     />
     <combobox
       class="comparison-combobox dark"
@@ -23,7 +22,7 @@
       :is-dark="true"
       :thin="true"
       v-model="previewToCompareId"
-      v-if="isComparing && (!light || isComparisonEnabled)"
+      v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
     />
     <combobox
       class="comparison-combobox"
@@ -31,11 +30,12 @@
       :is-dark="true"
       :thin="true"
       v-model="comparisonMode"
-      v-if="isComparing && (!light || isComparisonEnabled)"
+      v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
     />
     <div
       class="flexrow flexrow-item comparison-list"
       v-if="
+        showPanel &&
         isComparing &&
         (!light || isComparisonEnabled) &&
         comparisonPreviewLength > 0
@@ -56,7 +56,7 @@
         @click="$emit('next-comparison-clicked')"
       />
     </div>
-    <slot name="missing" />
+    <slot name="missing" v-if="showPanel" />
   </div>
 </template>
 
@@ -104,6 +104,19 @@ defineProps({
   previewFileOptions: {
     type: Array,
     default: () => []
+  },
+  showPanel: {
+    // Controls the expanded controls (comboboxes + navigation arrows).
+    // Setting it to false alongside showToggle=true keeps only the
+    // compare toggle visible, so consumers can render the panel in a
+    // different place (e.g. a floating dock).
+    type: Boolean,
+    default: true
+  },
+  showToggle: {
+    // Controls the compare toggle button.
+    type: Boolean,
+    default: true
   },
   taskTypeOptions: {
     type: Array,
