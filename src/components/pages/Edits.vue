@@ -548,11 +548,6 @@ export default {
         })
     },
 
-    onDeleteMetadataClicked(descriptorId) {
-      this.descriptorIdToDelete = descriptorId
-      this.modals.isDeleteMetadataDisplayed = true
-    },
-
     onDeleteClicked(edit) {
       this.editToDelete = edit
       this.modals.isDeleteDisplayed = true

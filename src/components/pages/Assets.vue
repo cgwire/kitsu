@@ -897,11 +897,6 @@ export default {
       })
     },
 
-    onDeleteMetadataClicked(descriptorId) {
-      this.descriptorIdToDelete = descriptorId
-      this.modals.isDeleteMetadataDisplayed = true
-    },
-
     onEditMetadataClicked(descriptorId) {
       this.descriptorToEdit = this.currentProduction.descriptors.find(
         d => d.id === descriptorId
