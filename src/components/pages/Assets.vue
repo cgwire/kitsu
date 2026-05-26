@@ -855,13 +855,6 @@ export default {
       })
     },
 
-    onDeleteAllTasksClicked(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
-      this.taskTypeForTaskDeletion = taskType
-      this.deleteAllTasksLockText = taskType.name
-      this.modals.isDeleteAllTasksDisplayed = true
-    },
-
     confirmAddMetadata(form) {
       this.loading.addMetadata = true
       form.entity_type = 'Asset'

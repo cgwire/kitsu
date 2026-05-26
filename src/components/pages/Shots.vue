@@ -949,13 +949,6 @@ export default {
       this.showImportModal()
     },
 
-    onDeleteAllTasksClicked(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
-      this.taskTypeForTaskDeletion = taskType
-      this.deleteAllTasksLockText = taskType.name
-      this.modals.isDeleteAllTasksDisplayed = true
-    },
-
     onSequenceClicked(sequenceName) {
       if (sequenceName.includes(' ')) {
         sequenceName = `"${sequenceName}"`
