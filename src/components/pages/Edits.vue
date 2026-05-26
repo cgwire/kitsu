@@ -255,7 +255,6 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
@@ -597,33 +596,6 @@ export default {
           this.loading.restore = false
           this.errors.restore = true
         })
-    },
-
-    confirmAddThumbnails(forms) {
-      const addPreview = form => {
-        this.addThumbnailsModal?.markLoading(form.task.entity_id)
-        return this.commentTaskWithPreview({
-          taskId: form.task.id,
-          commentText: '',
-          taskStatusId: form.task.task_status_id,
-          form
-        })
-          .then(({ newComment, preview }) => {
-            return this.setPreview({
-              taskId: form.task.id,
-              entityId: form.task.entity_id,
-              previewId: preview.id
-            })
-          })
-          .then(() => {
-            this.addThumbnailsModal?.markUploaded(form.task.entity_id)
-          })
-      }
-      this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
-        this.loading.addThumbnails = false
-        this.modals.isAddThumbnailsDisplayed = false
-      })
     },
 
     runTasksCreation(form, selectionOnly) {
