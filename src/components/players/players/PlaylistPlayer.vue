@@ -2564,6 +2564,11 @@ const resetCanvasSize = () => {
 }
 
 const onMainCanvasResized = () => {
+  // Wipe the canvas before reloading: addObjectToCanvas skips
+  // objects that already have a fabric instance, so without this
+  // the wrongly-scaled strokes drawn at mount-time (when the anchor
+  // had no size yet) would stay on screen forever.
+  clearCanvas()
   reloadAnnotations(false)
   const ann = getAnnotation(currentTimeRaw.value)
   if (ann) loadSingleAnnotation(ann)
