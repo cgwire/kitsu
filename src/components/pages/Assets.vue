@@ -208,7 +208,7 @@
     <create-tasks-modal
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
-      :is-loading-stay="loading.taskStay"
+      :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :title="$t('tasks.create_tasks_asset')"
       :text="$t('tasks.create_tasks_asset_explaination')"
@@ -357,6 +357,7 @@ export default {
         addMetadata: false,
         addThumbnails: false,
         creatingTasks: false,
+        creatingTasksStay: false,
         deleteAllTasks: false,
         deleteMetadata: false,
         delete: false,
@@ -364,8 +365,7 @@ export default {
         importing: false,
         restore: false,
         savingSearch: false,
-        stay: false,
-        taskStay: false
+        stay: false
       },
       modals: {
         isAddMetadataDisplayed: false,
@@ -680,14 +680,6 @@ export default {
           this.loading.restore = false
           this.errors.restore = true
         })
-    },
-
-    confirmCreateTasksAndStay({ form, selectionOnly }) {
-      this.loading.taskStay = true
-      this.runTasksCreation(form, selectionOnly).then(() => {
-        this.reset()
-        this.loading.taskStay = false
-      })
     },
 
     runTasksCreation(form, selectionOnly) {
