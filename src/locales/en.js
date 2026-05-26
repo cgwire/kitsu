@@ -1170,6 +1170,7 @@ export default {
       can_comment: 'Allow comments',
       generate: 'Generate a new link',
       copy: 'Copy link',
+      open: 'Open link in a new tab',
       revoke: 'Revoke link',
       revoke_confirm: 'Revoke this link? Anyone using it will lose access.',
       no_links: 'No share links yet. Create one below to give external reviewers access.',
