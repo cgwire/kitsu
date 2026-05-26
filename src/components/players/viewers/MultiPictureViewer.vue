@@ -2,13 +2,8 @@
   <div ref="container" class="multi-picture-player">
     <picture-viewer
       :ref="el => setPictureRef(preview, el)"
-      v-for="preview in previews"
-      v-show="
-        preview.id === currentPreview.id &&
-        preview.position === currentPreview.position
-      "
-      :key="preview.id"
-      :big="big"
+      :key="`${preview.id}-${preview.position}`"
+      :big="true"
       :preview="preview"
       :full-screen="fullScreen"
       :high-quality="highQuality"
@@ -20,20 +15,21 @@
       @loaded="() => $emit('loaded')"
       @panzoom-changed="$event => $emit('panzoom-changed', $event)"
       @size-changed="() => $emit('size-changed')"
+      v-show="
+        preview.id === currentPreview.id &&
+        preview.position === currentPreview.position
+      "
+      v-for="preview in validPreviews"
     />
   </div>
 </template>
 
 <script setup>
-import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 
 const props = defineProps({
-  big: {
-    type: Boolean,
-    default: false
-  },
   currentPreview: {
     type: Object,
     default: () => null
@@ -77,6 +73,11 @@ defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 const container = ref(null)
 const pictureRefs = reactive({})
 
+// Drop placeholder entries (no id yet) so we never mount an empty
+// PictureViewer whose panzoom would bind to a stale slot before the
+// real preview arrives — the cause of the wrong-image dispatch.
+const validPreviews = computed(() => props.previews.filter(p => p?.id))
+
 const setPictureRef = (preview, el) => {
   const key = `${preview.id}-${preview.position}`
   if (el) {
@@ -96,6 +97,15 @@ const getNaturalDimensions = () => {
   const viewer = getCurrentRef()
   if (viewer) return viewer.getNaturalDimensions()
   return { height: 0, width: 0 }
+}
+
+// Returns the actual <img> the current PictureViewer's panzoom is
+// bound to. Called by the parent to wire wheel-target / media-element
+// on its AnnotationCanvas. Skipping the auto-unwrapped ref chain
+// avoids the wrong-image dispatch seen earlier with v-for nesting.
+const getPictureElement = () => {
+  const viewer = getCurrentRef()
+  return viewer?.getPictureElement?.() || null
 }
 
 const getDimensions = () => {
@@ -163,11 +173,12 @@ watch(
 )
 
 defineExpose({
-  getNaturalDimensions,
   getDimensions,
-  resetPicture,
-  resetPanZoom,
+  getNaturalDimensions,
+  getPictureElement,
   pausePanZoom,
+  resetPanZoom,
+  resetPicture,
   resumePanZoom,
   setPanZoom
 })

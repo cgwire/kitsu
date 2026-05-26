@@ -78,7 +78,6 @@ const emit = defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 
 const container = ref(null)
 const isLoading = ref(true)
-const panzoomInstances = ref([])
 const picture = ref(null)
 const pictureBig = ref(null)
 const pictureDlPath = ref('')
@@ -88,8 +87,7 @@ const picturePath = ref('')
 const pictureSubWrapper = ref(null)
 const pictureWrapper = ref(null)
 
-let panzoomBig = null
-let panzoomGifInstance = null
+let panzoomInstance = null
 let previousDimensions = null
 let lastPreviewId = null
 let silent = false
@@ -147,6 +145,11 @@ const getDimensions = () => {
 }
 
 const resetPicture = () => {
+  // resetPicture runs asynchronously (nextTick from endLoading, watcher
+  // callbacks, ResizeObserver, …) so the component may have been torn
+  // down by a parent v-for in the meantime — bail out cleanly instead
+  // of crashing on the now-null template refs.
+  if (!container.value) return
   const heightValue = props.defaultHeight + 'px'
   container.value.style.height = heightValue
   if (pictureWrapper.value) pictureWrapper.value.style.height = heightValue
@@ -157,6 +160,7 @@ const resetPicture = () => {
   }
   let { width, height } = getDimensions()
   ;[picture.value, pictureBig.value, pictureGif.value].forEach(img => {
+    if (!img) return
     img.style.width = width + 'px'
     img.style.height = height + 'px'
     img.width = width
@@ -180,7 +184,11 @@ const resetPicture = () => {
     width = picturePosition.width
     height = picturePosition.height
 
-    resetPanZoom()
+    // resetPanZoom is intentionally NOT called here: resetPicture
+    // runs on every load / resize / mode toggle, and zeroing the
+    // panzoom transform on each tick would erase any user zoom right
+    // as panzoom's rAF tries to apply it. Preview-swap watchers
+    // (below) still reset explicitly.
 
     if (
       !previousDimensions ||
@@ -229,12 +237,16 @@ const setPicturePath = () => {
 }
 
 const endLoading = () => {
+  // Refs can be null while the component is being torn down / rebuilt
+  // by a parent v-for (previews change). The optional chain keeps the
+  // listener safe in that window instead of throwing and aborting the
+  // post-mount setup (which is what was leaving panzoom paused).
   if (
     props.fullScreen &&
-    (pictureBig.value.complete || pictureGif.value.complete)
+    (pictureBig.value?.complete || pictureGif.value?.complete)
   ) {
     isLoading.value = false
-  } else if (!props.fullScreen && picture.value.complete) {
+  } else if (!props.fullScreen && picture.value?.complete) {
     isLoading.value = false
   }
   emit('loaded')
@@ -247,49 +259,33 @@ const emitPanZoom = pz => {
   emit('panzoom-changed', { x, y, scale, source: 'picture' })
 }
 
+// Bind a single panzoom to whichever img is currently visible.
+// The three <img> tags (picture / pictureBig / pictureGif) share the
+// same parent, and panzoom attaches its wheel listener on
+// `domElement.parentElement`. Creating one panzoom per img would
+// stack three listeners on the same div, all responding to every
+// wheel event and racing on the shared focal-point math. The hidden
+// images (bbox 0×0) bypass bounds, win the race, and the visible
+// one's transform never lands.
 const setupPanZoom = () => {
-  const pictures = [picture.value, pictureBig.value, pictureGif.value]
-  panzoomInstances.value = pictures.map(pic =>
-    createPanzoom(pic, {
-      bounds: true,
-      boundsPadding: 0.2,
-      maxZoom: 5,
-      minZoom: 1,
-      smoothScroll: false
-    })
-  )
-  const panzoomSmall = panzoomInstances.value[0]
-  panzoomBig = panzoomInstances.value[1]
-  panzoomGifInstance = panzoomInstances.value[2]
-  panzoomSmall.on('zoom', () => {
-    if (props.big || props.fullScreen || isGif.value) return
-    emitPanZoom(panzoomSmall)
+  if (panzoomInstance) {
+    panzoomInstance.dispose()
+    panzoomInstance = null
+  }
+  const target = visibleImage.value
+  if (!target) return
+  panzoomInstance = createPanzoom(target, {
+    bounds: true,
+    boundsPadding: 0.2,
+    maxZoom: 5,
+    minZoom: 1,
+    smoothScroll: false
   })
-  panzoomSmall.on('pan', () => {
-    if (props.big || props.fullScreen || isGif.value) return
-    emitPanZoom(panzoomSmall)
-  })
-  panzoomBig.on('zoom', () => {
-    // The big <img> is displayed in both `big` and `fullScreen` modes
-    // (see template's v-show), so its panzoom needs to emit in both
-    // — otherwise the annotation overlay sits still while the picture
-    // moves under it in fullscreen.
-    if (!props.big && !props.fullScreen) return
-    emitPanZoom(panzoomBig)
-  })
-  panzoomBig.on('pan', () => {
-    if (!props.big && !props.fullScreen) return
-    emitPanZoom(panzoomBig)
-  })
-  panzoomGifInstance.on('zoom', () => {
-    if (!isGif.value) return
-    emitPanZoom(panzoomGifInstance)
-  })
-  panzoomGifInstance.on('pan', () => {
-    if (!isGif.value) return
-    emitPanZoom(panzoomGifInstance)
-  })
-  pausePanZoom()
+  panzoomInstance.on('zoom', () => emitPanZoom(panzoomInstance))
+  panzoomInstance.on('pan', () => emitPanZoom(panzoomInstance))
+  // Panzoom is live by default. Consumers that want it paused
+  // (e.g. SharedPlaylistPlayer's "enable zoom" toggle) call
+  // pausePanZoom() through the exposed method.
 }
 
 const resetPanZoom = () => {
@@ -297,31 +293,25 @@ const resetPanZoom = () => {
 }
 
 const pausePanZoom = () => {
-  panzoomInstances.value.forEach(pz => pz.pause())
+  panzoomInstance?.pause()
 }
 
 const resumePanZoom = () => {
-  panzoomInstances.value.forEach(pz => pz.resume())
+  panzoomInstance?.resume()
 }
 
 const setPanZoom = (x, y, scale) => {
+  if (!panzoomInstance) return
   silent = true
-  if (panzoomInstances.value.length === 0) return
-  let pz = panzoomInstances.value[1]
-  if (isGif.value) {
-    pz = panzoomInstances.value[2]
-  } else if (!props.big && !props.fullScreen) {
-    pz = panzoomInstances.value[0]
-  }
-  const actualScale = pz.getTransform().scale
+  const actualScale = panzoomInstance.getTransform().scale
   const zoomFactor = scale / actualScale
-  pz.moveTo(x, y)
-  pz.setTransformOrigin({ x, y })
-  pz.zoomTo(x, y, zoomFactor)
+  panzoomInstance.moveTo(x, y)
+  panzoomInstance.setTransformOrigin({ x, y })
+  panzoomInstance.zoomTo(x, y, zoomFactor)
   // Passing null clears the override so subsequent wheel zooms use the
   // cursor as focal point. Passing {x:0,y:0} would lock zoom at the
   // top-left corner.
-  pz.setTransformOrigin(null)
+  panzoomInstance.setTransformOrigin(null)
   nextTick(() => {
     silent = false
   })
@@ -409,15 +399,34 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resetPicture)
-  panzoomInstances.value.forEach(pz => pz.dispose())
+  panzoomInstance?.dispose()
+  panzoomInstance = null
 })
 
+// Re-bind panzoom whenever the visible image changes (mode toggle,
+// preview swap, gif/png switch). Otherwise the single instance would
+// stay bound to the previous img and lose sync with the displayed
+// one.
+watch(visibleImage, () => {
+  setupPanZoom()
+})
+
+// Direct accessor so consumers can read the visible <img> without
+// going through Vue's exposed-ref auto-unwrap, which has been
+// returning the wrong element in MultiPictureViewer's nested setup.
+const getPictureElement = () => {
+  if (isGif.value) return pictureGif.value
+  if (props.fullScreen || props.big) return pictureBig.value
+  return picture.value
+}
+
 defineExpose({
-  getNaturalDimensions,
   getDimensions,
-  resetPicture,
-  resetPanZoom,
+  getNaturalDimensions,
+  getPictureElement,
   pausePanZoom,
+  resetPanZoom,
+  resetPicture,
   resumePanZoom,
   setPanZoom,
   visibleImage

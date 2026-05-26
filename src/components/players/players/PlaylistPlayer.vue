@@ -326,7 +326,6 @@
         >
           <multi-picture-viewer
             ref="picture-player"
-            :big="true"
             :default-height="pictureDefaultHeight"
             :full-screen="fullScreen"
             :light="false"
@@ -337,8 +336,9 @@
               position: currentPreviewIndex + 1
             }"
             :previews="picturePreviews"
+            @loaded="onPictureLoaded"
             @panzoom-changed="onPanZoomChanged"
-            high-qualiy
+            high-quality
           />
         </div>
 
@@ -1321,14 +1321,18 @@ const mainContentAnchorEl = computed(() => mainContentAnchor.value || null)
 // Where wheel events forwarded by the main AnnotationCanvas should
 // land. Must be the element panzoom is bound to, so the user can zoom
 // the main viewer through the overlay. For movies that's the inner
-// <video>; for pictures it's the visible <img> exposed by the current
-// PictureViewer (the wrapping div catches no panzoom listener).
+// <video>; for pictures it's the visible <img> resolved by
+// MultiPictureViewer's getPictureElement() (a plain function, not an
+// exposed ref — Vue's auto-unwrap was handing back the wrong slot).
+// `currentPreview` is read so the computed re-runs whenever the
+// active picture switches (entity change, revision change, …).
 const mainMediaElement = computed(() => {
   if (isCurrentPreviewMovie.value) {
     return rawPlayer.value?.currentPlayer || null
   }
   if (isCurrentPreviewPicture.value) {
-    return picturePlayer.value?.currentMediaElement || null
+    currentPreview.value // dependency trigger
+    return picturePlayer.value?.getPictureElement?.() || null
   }
   return null
 })
@@ -3698,14 +3702,6 @@ watch(isDrawing, () => {
 
 watch(isTyping, () => {
   if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
-})
-
-// New PictureViewer instances mount paused (their setupPanZoom calls
-// pausePanZoom on init). Re-resume the picture player after each
-// preview-list change so wheel-zoom and Alt-pan stay active on the
-// fresh viewer.
-watch(picturePreviews, () => {
-  nextTick(() => picturePlayer.value?.resumePanZoom())
 })
 
 watch(
