@@ -61,26 +61,43 @@ import {
   ShapesIcon,
   StickyNoteIcon
 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   shape: {
     type: String,
     default: 'rectangle'
+  },
+  modelValue: {
+    // When the parent passes a Boolean here, the picker is
+    // controlled — open/close decisions go through update:modelValue
+    // so siblings can be coordinated (one panel open at a time).
+    // Leaving it undefined falls back to internal state.
+    type: Boolean,
+    default: undefined
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'update:modelValue'])
 
-const isOpen = ref(false)
+const internalOpen = ref(false)
+const isControlled = () => props.modelValue !== undefined
+const isOpen = computed(() =>
+  isControlled() ? props.modelValue : internalOpen.value
+)
+
+const setOpen = value => {
+  if (isControlled()) emit('update:modelValue', value)
+  else internalOpen.value = value
+}
 
 const togglePalette = () => {
-  isOpen.value = !isOpen.value
+  setOpen(!isOpen.value)
 }
 
 const onShapePicked = newShape => {
   emit('change', newShape)
-  isOpen.value = false
+  setOpen(false)
 }
 </script>
 
@@ -107,16 +124,17 @@ const onShapePicked = newShape => {
 }
 
 .shape-palette {
-  position: absolute;
-  z-index: 900;
-  left: 0;
-  bottom: calc(100% - 0.25rem);
   background-color: $dark-grey-light;
   border-radius: 5px;
-  padding: 0.25rem;
+  bottom: calc(100% + 0.1rem);
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  left: 50%;
+  padding: 0.5rem;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 900;
 }
 
 .preview .shape-palette {
@@ -126,16 +144,20 @@ const onShapePicked = newShape => {
 .shape-option {
   background: transparent;
   border: 0;
+  border-radius: 4px;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 3px;
+  padding: 0.4rem;
+  transition: background-color 0.15s ease;
 
   .icon {
     color: white;
   }
 }
 
-.shape-option:hover,
+.shape-option:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
 .shape-option.active {
   background-color: $dark-grey-strong;
   color: $white;

@@ -1157,6 +1157,7 @@ const onShapeModeClicked = () => {
   if (isShapeMode.value) {
     isDrawing.value = false
     isTyping.value = false
+    if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
   }
 }
 

@@ -1682,6 +1682,9 @@ const displayBars = () => {
   if (header.value) header.value.style.opacity = 1
   buttonBar.value.style.opacity = 1
   if (progress.value?.$el) progress.value.$el.style.opacity = 1
+  if (playlistProgressRef.value?.$el) {
+    playlistProgressRef.value.$el.style.opacity = 1
+  }
   if (container.value) container.value.style.cursor = 'default'
 }
 
@@ -1689,6 +1692,9 @@ const hideBars = () => {
   if (header.value) header.value.style.opacity = 0
   if (buttonBar.value) buttonBar.value.style.opacity = 0
   if (progress.value?.$el) progress.value.$el.style.opacity = 0
+  if (playlistProgressRef.value?.$el) {
+    playlistProgressRef.value.$el.style.opacity = 0
+  }
 }
 
 // Modal handling
@@ -3526,6 +3532,7 @@ const onShapeModeClicked = () => {
   if (isShapeMode.value) {
     isDrawing.value = false
     isTyping.value = false
+    if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
   }
 }
 

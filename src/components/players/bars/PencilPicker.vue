@@ -27,28 +27,45 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   pencil: {
     type: String
+  },
+  modelValue: {
+    // When the parent passes a Boolean here, the picker is
+    // controlled — open/close decisions go through update:modelValue
+    // so siblings can be coordinated (one panel open at a time).
+    // Leaving it undefined falls back to internal state.
+    type: Boolean,
+    default: undefined
   },
   sizes: {
     type: Array
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'update:modelValue'])
 
-const isOpen = ref(false)
+const internalOpen = ref(false)
+const isControlled = () => props.modelValue !== undefined
+const isOpen = computed(() =>
+  isControlled() ? props.modelValue : internalOpen.value
+)
+
+const setOpen = value => {
+  if (isControlled()) emit('update:modelValue', value)
+  else internalOpen.value = value
+}
 
 const togglePalette = () => {
-  isOpen.value = !isOpen.value
+  setOpen(!isOpen.value)
 }
 
 const onPencilPicked = width => {
   emit('change', width)
-  isOpen.value = false
+  setOpen(false)
 }
 </script>
 
@@ -92,21 +109,28 @@ const onPencilPicked = width => {
 }
 
 .pencil-palette {
-  position: absolute;
-  z-index: 900;
-  left: 0;
-  bottom: calc(100% - 0.25rem);
   background-color: $dark-grey-light;
   border-radius: 5px;
-  padding: 0 0.25rem;
+  bottom: calc(100% + 0.1rem);
+  left: 50%;
+  padding: 0.5rem;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 900;
 }
 .preview .pencil-palette {
   background-color: $dark-grey;
 }
 .pencil-palette label {
-  display: block;
-  margin: 0.5rem 0;
+  border-radius: 4px;
   cursor: pointer;
+  display: block;
+  margin: 0.25rem 0;
+  padding: 0.15rem 0.4rem;
+  transition: background-color 0.15s ease;
+}
+.pencil-palette label:hover {
+  background-color: rgba(255, 255, 255, 0.12);
 }
 .pencil-palette input {
   display: none;

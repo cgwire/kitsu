@@ -36,6 +36,7 @@
     <transition name="slide">
       <div class="annotation-tools" v-show="isTyping && (!light || fullScreen)">
         <color-picker
+          v-bind="pickerState('text-color')"
           :color="textColor"
           @change="$emit('change-text-color', $event)"
         />
@@ -57,11 +58,13 @@
         v-show="isDrawing && (!light || fullScreen)"
       >
         <pencil-picker
+          v-bind="pickerState('draw-pencil')"
           :pencil="pencilWidth"
           :sizes="pencilPalette"
           @change="$emit('change-pencil-width', $event)"
         />
         <color-picker
+          v-bind="pickerState('draw-color')"
           :color="pencilColor"
           @change="$emit('change-pencil-color', $event)"
         />
@@ -83,15 +86,18 @@
         v-show="isShapeMode && (!light || fullScreen)"
       >
         <shape-picker
+          v-bind="pickerState('shape')"
           :shape="currentShape"
           @change="$emit('change-shape', $event)"
         />
         <pencil-picker
+          v-bind="pickerState('shape-pencil')"
           :pencil="pencilWidth"
           :sizes="pencilPalette"
           @change="$emit('change-pencil-width', $event)"
         />
         <color-picker
+          v-bind="pickerState('shape-color')"
           :color="pencilColor"
           @change="$emit('change-pencil-color', $event)"
         />
@@ -183,6 +189,7 @@
 
 <script setup>
 import { GlobeIcon } from 'lucide-vue-next'
+import { ref } from 'vue'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ColorPicker from '@/components/players/bars/ColorPicker.vue'
@@ -302,29 +309,39 @@ const isWireframe = defineModel('isWireframe', { default: false })
 const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
 const isShapeMode = defineModel('isShapeMode', { default: undefined })
 const currentShape = defineModel('currentShape', { default: undefined })
+
+// Tracks which picker dropdown is currently open. Each picker is
+// driven through v-model so opening one closes the others — only
+// one panel is visible at a time.
+const openPicker = ref(null)
+const pickerState = id => ({
+  modelValue: openPicker.value === id,
+  'onUpdate:modelValue': value => (openPicker.value = value ? id : null)
+})
 </script>
 
 <style lang="scss" scoped>
 .annotation-tools {
   align-items: stretch;
   background: $dark-grey;
-  // max-width is animated by the .slide transition below. clip-path
-  // (rather than overflow: hidden) keeps children clipped to the
-  // shrinking horizontal box without trapping the picker dropdowns
-  // that pop above the bar — the -9999px top inset lets them escape.
-  clip-path: inset(-9999px 0 0 0);
   display: flex;
   height: 33px;
   max-width: 200px;
-  // clip-path creates a stacking context, so lift the whole tools
-  // group above the annotation overlay (z-index 500) — otherwise the
-  // picker dropdowns end up rendered underneath the drawing canvas.
+  // position + z-index lift the whole tools group above the
+  // annotation overlay (z-index 500) so picker dropdowns aren't
+  // rendered underneath the drawing canvas.
   position: relative;
   z-index: 600;
 }
 
+// clip-path is only applied DURING the slide animation — it clips
+// the shrinking horizontal box (with -9999px on top to let picker
+// dropdowns escape upwards), then drops away in static state so the
+// color palette / shape picker can grow wider than the bar without
+// getting cut at its edge.
 .slide-enter-active,
 .slide-leave-active {
+  clip-path: inset(-9999px 0 0 0);
   transition:
     max-width 0.3s ease,
     opacity 0.2s ease;
