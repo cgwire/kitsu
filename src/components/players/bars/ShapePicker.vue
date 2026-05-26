@@ -9,6 +9,7 @@
       <rectangle-horizontal-icon class="icon" v-if="shape === 'rectangle'" />
       <circle-icon class="icon" v-else-if="shape === 'circle'" />
       <arrow-up-right-icon class="icon" v-else-if="shape === 'arrow'" />
+      <sticky-note-icon class="icon" v-else-if="shape === 'whiteboard'" />
       <shapes-icon class="icon" v-else />
     </button>
     <div v-show="isOpen" class="shape-palette">
@@ -39,6 +40,15 @@
       >
         <arrow-up-right-icon class="icon" />
       </button>
+      <button
+        type="button"
+        class="shape-option"
+        :class="{ active: shape === 'whiteboard' }"
+        title="Whiteboard"
+        @click="onShapePicked('whiteboard')"
+      >
+        <sticky-note-icon class="icon" />
+      </button>
     </div>
   </div>
 </template>
@@ -48,7 +58,8 @@ import {
   ArrowUpRightIcon,
   CircleIcon,
   RectangleHorizontalIcon,
-  ShapesIcon
+  ShapesIcon,
+  StickyNoteIcon
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 

@@ -158,12 +158,12 @@ export const applyPencilColor = (canvas, color) => {
 }
 
 /* -------------------------------------------------------------------------
- * Shape drawing (drag-to-create rectangle / circle / arrow)
+ * Shape drawing (drag-to-create rectangle / circle / arrow / whiteboard)
  *
  * Adapted from cgwire/kitsu#1830. Uses fabric mouse events instead of raw
  * DOM listeners so the canvas's pointer offset / panzoom transforms are
  * resolved correctly. The caller passes:
- *   - getTool(): one of 'rectangle' | 'circle' | 'arrow' | null
+ *   - getTool(): 'rectangle' | 'circle' | 'arrow' | 'whiteboard' | null
  *   - getColor(): current stroke color
  *   - getWidth(): current stroke width (px)
  *   - onShapeAdded(shape): callback fired when the user releases mouse,
@@ -174,6 +174,17 @@ export const applyPencilColor = (canvas, color) => {
  * -----------------------------------------------------------------------*/
 
 const PREVIEW_FILL = 'rgba(128, 128, 128, 0.25)'
+const WHITEBOARD_FILL = 'rgba(255, 255, 255, 0.7)'
+
+// Fill kept on the shape after mouse-up. Outline shapes go transparent
+// (only stroke remains) — the whiteboard is the exception, its fill
+// is the whole point.
+const FINAL_FILLS = {
+  rectangle: 'transparent',
+  circle: 'transparent',
+  arrow: 'transparent',
+  whiteboard: WHITEBOARD_FILL
+}
 
 const buildShape = (tool, startX, startY, color, width) => {
   const base = {
@@ -198,13 +209,26 @@ const buildShape = (tool, startX, startY, color, width) => {
       arrowHeadWidth: 12
     })
   }
+  if (tool === 'whiteboard') {
+    // No stroke / strokeWidth: the whiteboard is a fill-only sticker
+    // reviewers slap on the image so they can write on top of it.
+    return new fabric.Rect({
+      left: startX,
+      top: startY,
+      width: 1,
+      height: 1,
+      fill: WHITEBOARD_FILL,
+      stroke: undefined,
+      strokeWidth: 0
+    })
+  }
   return null
 }
 
 const updateShape = (shape, tool, startX, startY, currentX, currentY) => {
   const dx = currentX - startX
   const dy = currentY - startY
-  if (tool === 'rectangle') {
+  if (tool === 'rectangle' || tool === 'whiteboard') {
     const width = Math.abs(dx)
     const height = Math.abs(dy)
     shape.set({
@@ -238,6 +262,8 @@ export const attachShapeDrawing = (
   let startX = 0
   let startY = 0
 
+  let drawingTool = null
+
   const onMouseDown = e => {
     const tool = getTool?.()
     if (!tool || tool === 'pen') return
@@ -246,6 +272,7 @@ export const attachShapeDrawing = (
     startY = pointer.y
     drawing = buildShape(tool, startX, startY, getColor(), getWidth())
     if (!drawing) return
+    drawingTool = tool
     drawing.set({ selectable: false, evented: false })
     onShapeStart?.()
     canvas.add(drawing)
@@ -264,11 +291,12 @@ export const attachShapeDrawing = (
 
   const onMouseUp = () => {
     if (!drawing) return
-    drawing.set({ fill: 'transparent' })
+    drawing.set({ fill: FINAL_FILLS[drawingTool] ?? 'transparent' })
     drawing.setCoords()
     canvas.requestRenderAll()
     onShapeAdded?.(drawing)
     drawing = null
+    drawingTool = null
   }
 
   canvas.on('mouse:down', onMouseDown)
