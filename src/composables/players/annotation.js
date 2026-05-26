@@ -6,7 +6,7 @@ import { fabric } from 'fabric'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
-import { ref, watch } from 'vue'
+import { markRaw, ref, watch } from 'vue'
 
 import {
   SHAPE_WIDTHS,
@@ -152,8 +152,8 @@ export const useAnnotation = ({
   const mouseDrawingDynamicDistanceMult = ref(null)
 
   // Per-instance non-reactive state (replaces this.$options.xxx)
-  let doneActionStack = []
-  let undoneActionStack = []
+  const doneActionStack = []
+  const undoneActionStack = []
   let silentAnnotation = false
   let annotatedPreview = null
   let annotationToSave = null
@@ -162,8 +162,8 @@ export const useAnnotation = ({
 
   // Init
   const resetUndoStacks = () => {
-    doneActionStack = []
-    undoneActionStack = []
+    doneActionStack.length = 0
+    undoneActionStack.length = 0
   }
   resetUndoStacks()
 
@@ -284,7 +284,14 @@ export const useAnnotation = ({
 
   const deleteObject = activeObject => {
     if (activeObject && activeObject._objects) {
-      activeObject._objects.forEach(obj => {
+      // ActiveSelection children carry coords relative to the
+      // selection's center. discardActiveObject() restores them to
+      // absolute first so undo can re-inject them at the right place,
+      // and we clone _objects up-front in case fabric clears it on
+      // discard.
+      const children = [...activeObject._objects]
+      fabricCanvas.value.discardActiveObject()
+      children.forEach(obj => {
         fabricCanvas.value.remove(obj)
         addToDeletions(obj)
         doneActionStack.push({ type: 'remove', obj })
@@ -835,35 +842,53 @@ export const useAnnotation = ({
     target.rotation = true
   }
 
+  // After a canvas reload (e.g. Esc-exit fullscreen) the stack entry
+  // holds a stale fabric.Object that's no longer on the live canvas;
+  // look it up by id. Groups (_objects) aren't on the canvas as a
+  // whole, fall back to the stored reference.
+  const resolveActionObject = action => {
+    if (action.obj?._objects) return action.obj
+    return getObjectById(action.obj.id) ?? action.obj
+  }
+
   const undoLastAction = () => {
     const action = doneActionStack.pop()
-    if (action && action.obj) {
-      if (action.type === 'add') {
-        deleteObject(action.obj)
-        removeFromAdditions(action.obj)
-      } else if (action.type === 'remove') {
-        addObject(action.obj)
-        addToAdditions(action.obj)
-        removeFromDeletions(action.obj)
-      }
-      doneActionStack.pop()
-      undoneActionStack.push(action)
+    if (!action?.obj) return
+    const obj = resolveActionObject(action)
+    // Snapshot length so the side-effect pushes addObject / deleteObject
+    // make (object:added → stackAddAction for re-adds, per-child remove
+    // for groups) are dropped before we move the action to the undone
+    // stack — otherwise undo grows the done stack instead of shrinking it.
+    const stackLengthBefore = doneActionStack.length
+    if (action.type === 'add') {
+      deleteObject(obj)
+      removeFromAdditions(obj)
+    } else if (action.type === 'remove') {
+      // addObject's 'object:added' already fires addToAdditions; no
+      // explicit call needed (it would double-record the addition).
+      addObject(obj)
+      removeFromDeletions(obj)
     }
+    doneActionStack.length = stackLengthBefore
+    undoneActionStack.push(action)
   }
 
   const redoLastAction = () => {
     const action = undoneActionStack.pop()
-    if (action) {
-      if (action.type === 'add') {
-        addObject(action.obj)
-      } else if (action.type === 'remove') {
-        deleteObject(action.obj)
-      }
+    if (!action?.obj) return
+    const obj = resolveActionObject(action)
+    const stackLengthBefore = doneActionStack.length
+    if (action.type === 'add') {
+      addObject(obj)
+    } else if (action.type === 'remove') {
+      deleteObject(obj)
     }
+    doneActionStack.length = stackLengthBefore
+    doneActionStack.push(action)
   }
 
   const clearUndoneStack = () => {
-    undoneActionStack = []
+    undoneActionStack.length = 0
   }
 
   // Canvas management
@@ -1226,7 +1251,10 @@ export const useAnnotation = ({
 
   const startAnnotationSaving = (preview, _annotations) => {
     notSaved.value = true
-    annotatedPreview = preview
+    // markRaw skips Vue's deep proxy on the preview / fabric.Object
+    // refs the payload eventually carries — the parent emits this
+    // straight to a Vuex action that doesn't need reactivity.
+    annotatedPreview = markRaw(preview)
     annotationToSave = setTimeout(() => {
       endAnnotationSaving()
     }, 3000)
@@ -1235,12 +1263,12 @@ export const useAnnotation = ({
   const endAnnotationSaving = () => {
     if (notSaved.value) {
       const preview = annotatedPreview
-      pendingSave = {
+      pendingSave = markRaw({
         preview,
         additions: [...additions.value],
         updates: [...updates.value],
         deletions: [...deletions.value]
-      }
+      })
       clearModifications()
       clearTimeout(annotationToSave)
       notSaved.value = false

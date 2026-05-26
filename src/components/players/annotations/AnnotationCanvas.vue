@@ -96,9 +96,15 @@ const observe = el => el && resizeObserver?.observe(el)
 const unobserve = el => el && resizeObserver?.unobserve(el)
 
 const createFabric = () => {
+  // Pass the DOM element directly to avoid fabric resolving the canvas
+  // by id — multiple AnnotationCanvas instances on the same page (the
+  // playlist player's main + comparison overlays, two preview players
+  // side by side, …) can share the same canvasId, and the by-id lookup
+  // would silently bind both fabric instances to the first match.
+  if (!canvasEl.value) return
   const canvas = props.static
-    ? new fabric.StaticCanvas(props.canvasId)
-    : new fabric.Canvas(props.canvasId, {
+    ? new fabric.StaticCanvas(canvasEl.value)
+    : new fabric.Canvas(canvasEl.value, {
         fireRightClick: true,
         enablePointerEvents: true,
         // Marquee must fully contain an annotation to pick it up.
