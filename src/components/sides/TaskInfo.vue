@@ -62,34 +62,16 @@
       </div>
 
       <div v-else-if="task">
-        <div class="flexrow extra-buttons pa05">
+        <div class="flexrow extra-buttons pa05 mr1">
           <div class="filler"></div>
-          <a
-            class="pointer annotation-dl"
-            :href="annotationsZipPath"
-            :title="$t('main.annotations.download_zip')"
-            v-if="canDownloadAnnotations"
-          >
-            <archive-icon :size="16" />
-          </a>
-          <a
-            class="pointer annotation-dl"
-            :href="annotationsPdfPath"
-            :title="$t('main.annotations.download_pdf')"
-            target="_blank"
-            rel="noopener noreferrer"
-            v-if="canDownloadAnnotations"
-          >
-            <file-text-icon :size="16" />
-          </a>
-          <div
-            class="pointer"
-            :title="$t('main.csv.export_file')"
-            @click="onExportClick"
-            v-if="!withActions && !isCurrentUserClient"
-          >
-            <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
-          </div>
+          <combobox-actions
+            class="flexrow-item export-combo"
+            align-right
+            thin
+            :title="$t('main.export')"
+            :actions="exportActions"
+            v-if="exportActions.length > 0"
+          />
         </div>
 
         <div class="pa1 pb0 pt0">
@@ -369,12 +351,7 @@
 </template>
 
 <script>
-import {
-  ArchiveIcon,
-  CornerRightUpIcon,
-  FileTextIcon,
-  XIcon
-} from 'lucide-vue-next'
+import { CornerRightUpIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -399,10 +376,10 @@ import ActionPanel from '@/components/tops/ActionPanel.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import Comment from '@/components/widgets/Comment.vue'
+import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
-import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -419,14 +396,12 @@ export default {
     ActionPanel,
     AddComment,
     AddPreviewModal,
-    ArchiveIcon,
+    ComboboxActions,
     ComboboxStyled,
     Comment,
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
-    FileTextIcon,
-    KitsuIcon,
     PeopleAvatar,
     PreviewPlayer,
     Spinner,
@@ -788,6 +763,26 @@ export default {
       return this.currentPreviewId
         ? `/api/actions/preview-files/${this.currentPreviewId}/extract-annotated-frames-pdf`
         : null
+    },
+
+    exportActions() {
+      return [
+        {
+          label: 'annotations.zip',
+          href: this.annotationsZipPath,
+          visible: this.canDownloadAnnotations
+        },
+        {
+          label: 'annotations.pdf',
+          href: this.annotationsPdfPath,
+          visible: this.canDownloadAnnotations
+        },
+        {
+          label: 'comments.csv',
+          handler: () => this.onExportClick(),
+          visible: !this.withActions && !this.isCurrentUserClient
+        }
+      ].filter(action => action.visible !== false)
     },
 
     currentFps() {

@@ -763,6 +763,7 @@ export default {
     estimation: 'Estimation',
     estimation_short: 'Est.',
     expand_all: 'Expand all',
+    export: 'Export',
     feedback: 'Roadmap / Feedback',
     files_selected: 'files selected',
     filter_group: 'Filter Group',
