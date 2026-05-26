@@ -1081,7 +1081,6 @@ const room = ref({
   newComer: true
 })
 const speed = ref(3)
-const task = ref(null)
 const volume = ref(50)
 
 const modals = ref({
@@ -1164,6 +1163,18 @@ const isCurrentPreviewFile = computed(
 // Computed — entity & preview state
 
 const currentEntity = computed(() => entityList.value[playingEntityIndex.value])
+
+// Derived from currentEntity + the store's taskMap so the right panel
+// fills in as soon as both are available, no matter the order in
+// which they arrive (entity-list watcher / mount / async task fetch).
+// Replaces the previous imperative updateTaskPanel() calls — on
+// Firefox those callers were racing the taskMap fetch and leaving
+// the TaskInfo panel stuck on "no task selected".
+const task = computed(() => {
+  const entity = currentEntity.value
+  if (!entity) return null
+  return taskMap.value.get(entity.preview_file_task_id) || null
+})
 
 const currentPreview = computed(() => {
   const entity = currentEntity.value
@@ -1310,14 +1321,14 @@ const mainContentAnchorEl = computed(() => mainContentAnchor.value || null)
 // Where wheel events forwarded by the main AnnotationCanvas should
 // land. Must be the element panzoom is bound to, so the user can zoom
 // the main viewer through the overlay. For movies that's the inner
-// <video>; for pictures, fall back to the picture viewer's root so
-// wheel still bubbles to its panzoom listener.
+// <video>; for pictures it's the visible <img> exposed by the current
+// PictureViewer (the wrapping div catches no panzoom listener).
 const mainMediaElement = computed(() => {
   if (isCurrentPreviewMovie.value) {
     return rawPlayer.value?.currentPlayer || null
   }
   if (isCurrentPreviewPicture.value) {
-    return picturePlayer.value?.$el || null
+    return picturePlayer.value?.currentMediaElement || null
   }
   return null
 })
@@ -1519,6 +1530,7 @@ const {
   fadeObject,
   startAnnotationSaving,
   endAnnotationSaving,
+  restoreFailedAnnotations,
   copyAnnotationCanvas
 } = annotation
 
@@ -2264,6 +2276,11 @@ const onFilmClicked = () => {
 }
 
 const getCurrentTime = () => {
+  // A picture / model / pdf preview has a single canonical time (0),
+  // so pin annotations to frame 0 there. Without this the playlist
+  // scrub position leaks into the annotation key and strokes drawn
+  // mid-shot disappear when the user comes back to the start.
+  if (!isCurrentPreviewMovie.value) return 0
   const time = roundToFrame(currentTimeRaw.value, fps.value) || 0
   return Number(time.toPrecision(4))
 }
@@ -2800,15 +2817,6 @@ const getFileFromCanvas = (canvas, filename) => {
   })
 }
 
-const updateTaskPanel = () => {
-  if (entityList.value.length > 0) {
-    const entity = entityList.value[playingEntityIndex.value]
-    task.value = entity ? taskMap.value.get(entity.preview_file_task_id) : null
-  } else {
-    task.value = null
-  }
-}
-
 const updateProgressBar = f => {
   const frame = f !== undefined ? f : frameNumber.value
   if (progress.value) progress.value.updateProgressBar(frame + 1)
@@ -2974,7 +2982,6 @@ const changePreviewFile = (entity, previewFile, previousPreviewFileId) => {
     previousPreviewFileId
   })
   clearCanvas()
-  updateTaskPanel()
 }
 
 const onEntityDropped = info => {
@@ -3446,7 +3453,6 @@ const resetPlaylist = () => {
   rawPlayer.value?.setCurrentFrame(0)
   currentTimeRaw.value = 0
   updateProgressBar()
-  updateTaskPanel()
   clearCanvas()
   annotations.value = []
   movieDimensions.value = { width: 0, height: 0 }
@@ -3743,7 +3749,6 @@ watch(currentPreviewIndex, () => {
 
 watch(playingEntityIndex, () => {
   endAnnotationSaving()
-  updateTaskPanel()
   resetUndoStacks()
   currentPreviewIndex.value = 0
   currentComparisonPreviewIndex.value = 0
@@ -4027,7 +4032,8 @@ defineExpose({
   joinedRoom,
   fullScreen,
   onEntityDropped,
-  onWindowResize
+  onWindowResize,
+  restoreFailedAnnotations
 })
 
 const playerProxy = {
