@@ -590,4 +590,149 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
   })
+
+  describe('deleteObject', () => {
+    it('removes a lone object, records the deletion and saves', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      canvas._objects.push(obj)
+      const { api, wrapper, saveAnnotationsCb } = mountAnnotation({ canvas })
+
+      api.deleteObject(obj)
+
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      expect(canvas._objects).not.toContain(obj)
+      expect(saveAnnotationsCb).toHaveBeenCalled()
+      // The deletion is now tracked at the current annotation time.
+      const deletion = api.deletions.value.find(d => d.time === 1)
+      expect(deletion?.objects).toEqual(['a'])
+      wrapper.unmount()
+    })
+
+    it('discards the ActiveSelection before iterating its children', () => {
+      // Mirror real fabric: discardActiveObject() clears _objects on the
+      // selection. If deleteObject didn't snapshot _objects up-front the
+      // iteration would skip every child after the first.
+      const child1 = createSerializableObject({ id: 'a' })
+      const child2 = createSerializableObject({ id: 'b' })
+      const selection = { _objects: [child1, child2] }
+      const canvas = createFakeCanvas()
+      canvas._objects.push(child1, child2)
+      canvas.discardActiveObject = vi.fn(() => {
+        selection._objects.length = 0
+      })
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.deleteObject(selection)
+
+      expect(canvas.discardActiveObject).toHaveBeenCalled()
+      expect(canvas.remove).toHaveBeenCalledTimes(2)
+      expect(canvas.remove).toHaveBeenNthCalledWith(1, child1)
+      expect(canvas.remove).toHaveBeenNthCalledWith(2, child2)
+      wrapper.unmount()
+    })
+  })
+
+  describe('undoLastAction', () => {
+    it('no-ops on an empty done stack', () => {
+      const { api, wrapper, saveAnnotationsCb } = mountAnnotation()
+      api.undoLastAction()
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it("undoes an 'add' by removing the live object and moving it to the undone stack", () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj) // pushes { type: 'add', obj } onto done
+      api.undoLastAction()
+
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      // Redoing now should re-add it — proves the action landed on the
+      // undone stack and that doing it twice is idempotent.
+      api.redoLastAction()
+      expect(canvas.add).toHaveBeenCalledWith(obj)
+      wrapper.unmount()
+    })
+
+    it("undoes a 'remove' by re-adding the object and clearing the deletion", () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      canvas._objects.push(obj)
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.deleteObject(obj) // pushes { type: 'remove', obj } onto done
+      canvas.add.mockClear()
+      api.undoLastAction()
+
+      expect(canvas.add).toHaveBeenCalledWith(obj)
+      // The id is removed from the deletion entry — the entry itself
+      // stays around with an empty objects array (we only undo one
+      // object, not the whole entry, since a stroke and a delete can
+      // share the same time bucket).
+      const deletion = api.deletions.value[0]
+      expect(deletion?.objects).toEqual([])
+      wrapper.unmount()
+    })
+
+    it('resolves the live canvas instance when the stack holds a stale ref', () => {
+      // Esc-exit fullscreen and similar canvas reloads rebuild every
+      // fabric.Object; the stack still holds the previous instance.
+      // resolveActionObject() looks the id up on the live canvas.
+      const stale = createSerializableObject({ id: 'a' })
+      const live = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(stale) // done stack now holds the stale ref
+      // Simulate a canvas reload: stale isn't on the canvas any more,
+      // a fresh instance with the same id is.
+      canvas._objects.length = 0
+      canvas._objects.push(live)
+      api.undoLastAction()
+
+      expect(canvas.remove).toHaveBeenCalledWith(live)
+      expect(canvas.remove).not.toHaveBeenCalledWith(stale)
+      wrapper.unmount()
+    })
+  })
+
+  describe('redoLastAction', () => {
+    it('no-ops on an empty undone stack', () => {
+      const { api, wrapper, saveAnnotationsCb } = mountAnnotation()
+      api.redoLastAction()
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it("redoes an 'add' and puts the action back on the done stack", () => {
+      // Regression: addObject for a single object pushes onto done as
+      // a side effect. The snapshot pattern must drop that push before
+      // re-pushing the action, otherwise the done stack grows by two
+      // entries per redo.
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj)
+      api.undoLastAction()
+      canvas.add.mockClear()
+      canvas.remove.mockClear()
+
+      api.redoLastAction()
+
+      expect(canvas.add).toHaveBeenCalledWith(obj)
+      // Calling undo again must put us back to the post-undo state in
+      // a single step (one entry on done, not two).
+      api.undoLastAction()
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      // Empty done stack now — another undo is a no-op.
+      const removeCallsBefore = canvas.remove.mock.calls.length
+      api.undoLastAction()
+      expect(canvas.remove.mock.calls.length).toBe(removeCallsBefore)
+      wrapper.unmount()
+    })
+  })
 })
