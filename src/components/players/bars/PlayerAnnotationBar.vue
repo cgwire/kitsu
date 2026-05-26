@@ -307,22 +307,27 @@ const currentShape = defineModel('currentShape', { default: undefined })
 <style lang="scss" scoped>
 .annotation-tools {
   align-items: stretch;
+  background: $dark-grey;
   display: flex;
   height: 33px;
-  background: $dark-grey;
+  // max-width is animated by the .slide transition below. overflow
+  // is hidden so children stay clipped inside the shrinking box
+  // instead of spilling on top of the neighbouring buttons.
+  max-width: 200px;
+  overflow: hidden;
 }
 
-.slide-enter-active {
-  transition: all 0.3s ease;
-}
-
+.slide-enter-active,
 .slide-leave-active {
-  transition: all 0.3s ease;
+  transition:
+    max-width 0.3s ease,
+    opacity 0.2s ease;
 }
 
-.slide-enter,
+.slide-enter-from,
 .slide-leave-to {
-  transform: translateX(100%);
+  max-width: 0;
+  opacity: 0;
 }
 
 .background-combo {
