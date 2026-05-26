@@ -519,7 +519,7 @@ const goNextFrame = () => {
 
 const loadFirstEntity = () => {
   if (firstEntityLoaded) return
-  if (entityList.value.length > 0 && rawPlayer.value?.player1) {
+  if (entityList.value.length > 0 && rawPlayer.value) {
     firstEntityLoaded = true
     rawPlayer.value.loadEntity(0)
   }
