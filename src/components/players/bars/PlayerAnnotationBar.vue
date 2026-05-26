@@ -308,13 +308,14 @@ const currentShape = defineModel('currentShape', { default: undefined })
 .annotation-tools {
   align-items: stretch;
   background: $dark-grey;
+  // max-width is animated by the .slide transition below. clip-path
+  // (rather than overflow: hidden) keeps children clipped to the
+  // shrinking horizontal box without trapping the picker dropdowns
+  // that pop above the bar — the -9999px top inset lets them escape.
+  clip-path: inset(-9999px 0 0 0);
   display: flex;
   height: 33px;
-  // max-width is animated by the .slide transition below. overflow
-  // is hidden so children stay clipped inside the shrinking box
-  // instead of spilling on top of the neighbouring buttons.
   max-width: 200px;
-  overflow: hidden;
 }
 
 .slide-enter-active,
