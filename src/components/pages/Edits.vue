@@ -870,10 +870,6 @@ export default {
       })
     },
 
-    onChangeSortClicked(sortInfo) {
-      this.changeEditSort(sortInfo)
-    },
-
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,

@@ -1040,10 +1040,6 @@ export default {
       })
     },
 
-    onChangeSortClicked(sortInfo) {
-      this.changeShotSort(sortInfo)
-    },
-
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,

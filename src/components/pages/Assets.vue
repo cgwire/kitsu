@@ -943,10 +943,6 @@ export default {
       this.onSearchChange()
     },
 
-    onChangeSortClicked(sortInfo) {
-      this.changeAssetSort(sortInfo)
-    },
-
     async onFieldChanged({ entry, fieldName, value }) {
       const data = {
         id: entry.id,
