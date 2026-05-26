@@ -420,7 +420,7 @@ export default {
       'changeSequenceSort',
       'clearSelectedSequences',
       'commentTaskWithPreview',
-      'deleteAllTasks',
+      'deleteAllSequenceTasks',
       'deleteSequence',
       'deleteMetadataDescriptor',
       'editSequence',

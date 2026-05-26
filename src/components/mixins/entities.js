@@ -228,7 +228,11 @@ export const entitiesMixin = {
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
-      this.deleteAllTasks({ projectId, taskTypeId, selectionOnly })
+      this[`deleteAll${this.entityTypeName}Tasks`]({
+        projectId,
+        taskTypeId,
+        selectionOnly
+      })
         .then(() => {
           if (!selectionOnly) this.reset()
           this.modals.isDeleteAllTasksDisplayed = false

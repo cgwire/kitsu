@@ -628,15 +628,12 @@ const actions = {
     })
   },
 
-  deleteAllEditTasks(
-    { commit, dispatch, state },
-    { projectId, taskTypeId, selectionOnly }
-  ) {
+  deleteAllEditTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
     let taskIds = []
     if (selectionOnly) {
       taskIds = cache.result
-        .filter(a => a.validations.get(taskTypeId))
-        .map(a => a.validations.get(taskTypeId))
+        .filter(edit => edit.validations.get(taskTypeId))
+        .map(edit => edit.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },

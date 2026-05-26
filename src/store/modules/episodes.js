@@ -340,6 +340,19 @@ const actions = {
     commit(CLEAR_SELECTED_EPISODES)
   },
 
+  deleteAllEpisodeTasks(
+    { dispatch },
+    { projectId, taskTypeId, selectionOnly }
+  ) {
+    let taskIds = []
+    if (selectionOnly) {
+      taskIds = cache.result
+        .filter(episode => episode.validations.get(taskTypeId))
+        .map(episode => episode.validations.get(taskTypeId))
+    }
+    return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
+  },
+
   initEpisodeStats({ commit, dispatch, state, rootState, rootGetters }) {
     const productionId = rootState.route.params.production_id
     const isTVShow = rootGetters.isTVShow
