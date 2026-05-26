@@ -4031,6 +4031,7 @@ onBeforeUnmount(() => {
 // actually calls on the player.
 
 defineExpose({
+  clearCanvas,
   confirmAnnotationsSaved,
   extractAnnotationSnapshots,
   fullScreen,
@@ -4039,6 +4040,7 @@ defineExpose({
   joinedRoom,
   onEntityDropped,
   onWindowResize,
+  pause,
   resetHeight,
   resetPlaylist,
   restoreFailedAnnotations,
