@@ -897,13 +897,6 @@ export default {
       })
     },
 
-    onEditMetadataClicked(descriptorId) {
-      this.descriptorToEdit = this.currentProduction.descriptors.find(
-        d => d.id === descriptorId
-      )
-      this.modals.isAddMetadataDisplayed = true
-    },
-
     onExportClick() {
       this.getAssetsCsvLines().then(assetLines => {
         const nameData = [

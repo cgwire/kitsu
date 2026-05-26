@@ -568,13 +568,6 @@ export default {
       this.modals.isRestoreDisplayed = true
     },
 
-    onEditMetadataClicked(descriptorId) {
-      this.descriptorToEdit = this.currentProduction.descriptors.find(
-        d => d.id === descriptorId
-      )
-      this.modals.isAddMetadataDisplayed = true
-    },
-
     confirmEditEdit(form) {
       let action = 'newEdit'
       this.loading.edit = true
