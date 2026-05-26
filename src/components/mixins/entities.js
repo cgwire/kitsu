@@ -90,6 +90,13 @@ export const entitiesMixin = {
         return new Map()
       }
       return this[`selected${this.entityTypeName}s`]
+    },
+
+    deleteAllTasksText() {
+      const taskType = this.taskTypeForTaskDeletion
+      return taskType
+        ? this.$t('tasks.delete_all_text', { name: taskType.name })
+        : ''
     }
   },
 
@@ -261,15 +268,6 @@ export const entitiesMixin = {
           this.errors.creatingTasks = true
           console.error(err)
         })
-    },
-
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      } else {
-        return ''
-      }
     },
 
     onDeleteAllTasksClicked(taskTypeId) {

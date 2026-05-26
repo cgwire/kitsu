@@ -122,7 +122,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"

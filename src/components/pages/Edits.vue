@@ -163,7 +163,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -739,14 +739,6 @@ export default {
         return this.$t('edits.delete_text', { name: edit.name })
       } else if (edit) {
         return this.$t('edits.cancel_text', { name: edit.name })
-      }
-      return ''
-    },
-
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
       }
       return ''
     },
