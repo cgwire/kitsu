@@ -693,8 +693,8 @@ const actions = {
     })
   },
 
-  setAssetTypeListScrollPosition({ commit }) {
-    commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION)
+  setAssetTypeListScrollPosition({ commit }, scrollPosition) {
+    commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION, scrollPosition)
   },
 
   computeAssetTypeStats({ commit, rootGetters }) {
