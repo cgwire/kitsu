@@ -86,7 +86,9 @@ export const entitiesMixin = {
     },
 
     selectedEntities() {
-      if (['Episode', 'Sequence'].includes(this.entityTypeName)) return []
+      if (['Episode', 'Sequence'].includes(this.entityTypeName)) {
+        return new Map()
+      }
       return this[`selected${this.entityTypeName}s`]
     }
   },
