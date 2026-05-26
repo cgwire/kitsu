@@ -1535,6 +1535,7 @@ const {
   startAnnotationSaving,
   endAnnotationSaving,
   restoreFailedAnnotations,
+  confirmAnnotationsSaved,
   copyAnnotationCanvas
 } = annotation
 
@@ -4023,18 +4024,19 @@ onBeforeUnmount(() => {
 // actually calls on the player.
 
 defineExpose({
+  confirmAnnotationsSaved,
   extractAnnotationSnapshots,
-  scrollToRight,
-  resetPlaylist,
-  resetHeight,
+  fullScreen,
   hideCanvas,
-  showCanvas,
   isFullMode,
   joinedRoom,
-  fullScreen,
   onEntityDropped,
   onWindowResize,
-  restoreFailedAnnotations
+  resetHeight,
+  resetPlaylist,
+  restoreFailedAnnotations,
+  scrollToRight,
+  showCanvas
 })
 
 const playerProxy = {
