@@ -317,6 +317,15 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
+// Direct accessor so consumers can read the visible <img> without
+// going through Vue's exposed-ref auto-unwrap, which has been
+// returning the wrong element in MultiPictureViewer's nested setup.
+const getPictureElement = () => {
+  if (isGif.value) return pictureGif.value
+  if (props.fullScreen || props.big) return pictureBig.value
+  return picture.value
+}
+
 // Watchers
 
 watch(
@@ -380,6 +389,14 @@ watch(
   }
 )
 
+// Re-bind panzoom whenever the visible image changes (mode toggle,
+// preview swap, gif/png switch). Otherwise the single instance would
+// stay bound to the previous img and lose sync with the displayed
+// one.
+watch(visibleImage, () => {
+  setupPanZoom()
+})
+
 // Lifecycle
 
 onMounted(() => {
@@ -402,23 +419,6 @@ onBeforeUnmount(() => {
   panzoomInstance?.dispose()
   panzoomInstance = null
 })
-
-// Re-bind panzoom whenever the visible image changes (mode toggle,
-// preview swap, gif/png switch). Otherwise the single instance would
-// stay bound to the previous img and lose sync with the displayed
-// one.
-watch(visibleImage, () => {
-  setupPanZoom()
-})
-
-// Direct accessor so consumers can read the visible <img> without
-// going through Vue's exposed-ref auto-unwrap, which has been
-// returning the wrong element in MultiPictureViewer's nested setup.
-const getPictureElement = () => {
-  if (isGif.value) return pictureGif.value
-  if (props.fullScreen || props.big) return pictureBig.value
-  return picture.value
-}
 
 defineExpose({
   getDimensions,

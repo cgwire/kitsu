@@ -1,25 +1,25 @@
 <template>
   <div ref="container" class="multi-picture-player">
     <picture-viewer
-      :ref="el => setPictureRef(preview, el)"
       :key="`${preview.id}-${preview.position}`"
+      :ref="el => setPictureRef(preview, el)"
       :big="true"
-      :preview="preview"
+      :default-height="defaultHeight"
       :full-screen="fullScreen"
       :high-quality="highQuality"
       :is-comparing="isComparing"
       :light="light"
-      :panzoom="panzoom"
-      :default-height="defaultHeight"
       :margin-bottom="marginBottom"
+      :panzoom="panzoom"
+      :preview="preview"
       @loaded="() => $emit('loaded')"
       @panzoom-changed="$event => $emit('panzoom-changed', $event)"
       @size-changed="() => $emit('size-changed')"
+      v-for="preview in validPreviews"
       v-show="
         preview.id === currentPreview.id &&
         preview.position === currentPreview.position
       "
-      v-for="preview in validPreviews"
     />
   </div>
 </template>
@@ -73,9 +73,8 @@ defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
 const container = ref(null)
 const pictureRefs = reactive({})
 
-// Drop placeholder entries (no id yet) so we never mount an empty
-// PictureViewer whose panzoom would bind to a stale slot before the
-// real preview arrives — the cause of the wrong-image dispatch.
+// Computed
+
 const validPreviews = computed(() => props.previews.filter(p => p?.id))
 
 const setPictureRef = (preview, el) => {
@@ -87,14 +86,14 @@ const setPictureRef = (preview, el) => {
   }
 }
 
-const getCurrentRef = () => {
+const getCurrentViewer = () => {
   if (!props.currentPreview) return null
   const key = `${props.currentPreview.id}-${props.currentPreview.position}`
   return pictureRefs[key] || null
 }
 
 const getNaturalDimensions = () => {
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   if (viewer) return viewer.getNaturalDimensions()
   return { height: 0, width: 0 }
 }
@@ -104,24 +103,24 @@ const getNaturalDimensions = () => {
 // on its AnnotationCanvas. Skipping the auto-unwrapped ref chain
 // avoids the wrong-image dispatch seen earlier with v-for nesting.
 const getPictureElement = () => {
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   return viewer?.getPictureElement?.() || null
 }
 
 const getDimensions = () => {
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   if (viewer) return viewer.getDimensions()
   return { height: 0, width: 0 }
 }
 
 const resetPicture = () => {
   container.value.style.height = props.defaultHeight + 'px'
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   if (viewer) viewer.resetPicture()
 }
 
 const resetPanZoom = () => {
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   if (viewer) viewer.resetPanZoom()
 }
 
@@ -138,13 +137,17 @@ const resumePanZoom = () => {
 }
 
 const setPanZoom = (x, y, scale) => {
-  const viewer = getCurrentRef()
+  const viewer = getCurrentViewer()
   if (viewer) viewer.setPanZoom(x, y, scale)
 }
+
+// Lifecycle
 
 onMounted(() => {
   container.value.style.height = props.defaultHeight + 'px'
 })
+
+// Watchers
 
 watch(
   () => props.fullScreen,
@@ -186,13 +189,13 @@ defineExpose({
 
 <style lang="scss" scoped>
 .multi-picture-player {
+  align-content: flex-end;
+  background: $dark-grey-2;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
-  align-content: flex-end;
-  border-radius: 5px;
   height: 100%;
-  width: 100%;
   text-align: center;
-  background: $dark-grey-2;
+  width: 100%;
 }
 </style>
