@@ -281,7 +281,10 @@ export const entitiesMixin = {
     },
 
     saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
+      this.$store.commit(
+        `SET_${this.type.toUpperCase()}_LIST_SCROLL_POSITION`,
+        scrollPosition
+      )
     },
 
     onChangeSortClicked(sortInfo) {

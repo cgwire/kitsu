@@ -829,10 +829,6 @@ export default {
       }
     },
 
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
     saveSearchQuery(searchQuery) {
       if (this.loading.savingSearch) {
         return

@@ -271,7 +271,7 @@ export default {
   watch: {
     currentProduction() {
       this.searchField.setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
       this.reset()
     },
 

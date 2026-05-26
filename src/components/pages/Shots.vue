@@ -988,10 +988,6 @@ export default {
       this.removeShotSearch(searchQuery).catch(console.error)
     },
 
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
     getPath(section) {
       const route = {
         name: section,

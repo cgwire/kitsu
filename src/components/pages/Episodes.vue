@@ -622,7 +622,7 @@ export default {
 
   watch: {
     currentProduction() {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
+      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
     },

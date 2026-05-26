@@ -863,10 +863,6 @@ export default {
       })
     },
 
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
     onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
