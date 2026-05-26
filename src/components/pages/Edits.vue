@@ -528,10 +528,6 @@ export default {
         })
     },
 
-    closeMetadataModal() {
-      this.modals.isAddMetadataDisplayed = false
-    },
-
     confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true
