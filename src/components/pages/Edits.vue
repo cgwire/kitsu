@@ -528,22 +528,6 @@ export default {
         })
     },
 
-    confirmDeleteMetadata() {
-      this.errors.deleteMetadata = false
-      this.loading.deleteMetadata = true
-      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
-        .then(() => {
-          this.errors.deleteMetadata = false
-          this.loading.deleteMetadata = false
-          this.modals.isDeleteMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteMetadata = true
-          this.loading.deleteMetadata = false
-        })
-    },
-
     onDeleteClicked(edit) {
       this.editToDelete = edit
       this.modals.isDeleteDisplayed = true

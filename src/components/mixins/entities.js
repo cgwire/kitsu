@@ -172,12 +172,13 @@ export const entitiesMixin = {
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
         .then(() => {
-          this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
         })
         .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
+        })
+        .finally(() => {
           this.loading.deleteMetadata = false
         })
     },
