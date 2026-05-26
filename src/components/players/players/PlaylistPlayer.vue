@@ -3815,6 +3815,15 @@ watch(isComparing, () => {
     resetPictureCanvas()
     resetCanvas()
     syncComparisonPlayer()
+    if (isComparing.value) {
+      // Apply the main viewer's current panzoom to the comparison
+      // viewer. The PictureViewer-side isComparing watcher resets its
+      // own panzoom on activation, and MultiVideoViewer starts at the
+      // identity transform — without this push the two viewers end up
+      // visually out of sync until the user nudges the wheel again.
+      const { x, y, scale } = panzoomTransform.value
+      setComparisonPanZoom(x, y, scale)
+    }
     if (isComparing.value && !isComparisonOverlay.value) {
       loadComparisonAnnotation(currentTimeRaw.value)
     }
