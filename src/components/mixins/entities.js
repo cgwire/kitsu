@@ -156,12 +156,6 @@ export const entitiesMixin = {
         )
     },
 
-    onEntityThumbnailClicked(entityId) {
-      if (!entityId) return
-      this.previvewFileIdToShow = entityId
-      this.modals.isPreviewDisplayed = true
-    },
-
     closeMetadataModal() {
       this.modals.isAddMetadataDisplayed = false
     },
