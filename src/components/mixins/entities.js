@@ -145,17 +145,15 @@ export const entitiesMixin = {
       if (!this.currentProduction) {
         return []
       }
-      return this.currentProduction.task_types
-        .map(taskTypeId => {
-          const taskType = this.taskTypeMap.get(taskTypeId)
-          return taskType && taskType.for_entity === forEntity
-            ? this.departmentMap.get(taskType.department_id)
-            : false
-        })
-        .filter(
-          (department, index, self) =>
-            department && self.indexOf(department) === index
+      return [
+        ...new Set(
+          this.currentProduction.task_types
+            .map(id => this.taskTypeMap.get(id))
+            .filter(taskType => taskType?.for_entity === forEntity)
+            .map(taskType => this.departmentMap.get(taskType.department_id))
+            .filter(Boolean)
         )
+      ]
     },
 
     closeMetadataModal() {
