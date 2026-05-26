@@ -311,6 +311,12 @@ export const entitiesMixin = {
       this.onSelectedDepartmentChanged()
     },
 
+    currentProduction(newProd, oldProd) {
+      if (!oldProd || !newProd || oldProd.id === newProd.id) return
+      this.keepTaskPanelOpen = false
+      this.clearSelection()
+    },
+
     displaySettings: {
       deep: true,
       handler(newSettings) {
