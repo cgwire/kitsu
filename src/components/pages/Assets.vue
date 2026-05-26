@@ -681,19 +681,6 @@ export default {
         })
     },
 
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'assets',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      }).catch(err => {
-        this.errors.creatingTasks = true
-        console.error(err)
-      })
-    },
-
     resetLightEditModal() {
       const form = {
         name: '',

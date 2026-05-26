@@ -741,16 +741,6 @@ export default {
         })
     },
 
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        type: 'shots',
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = true
       this.loadShots(err => {

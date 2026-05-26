@@ -598,16 +598,6 @@ export default {
         })
     },
 
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'edits',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = true
       this.loadEdits(err => {

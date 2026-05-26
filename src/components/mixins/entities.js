@@ -273,6 +273,16 @@ export const entitiesMixin = {
         })
     },
 
+    runTasksCreation(form, selectionOnly) {
+      this.errors.creatingTasks = false
+      return this.createTasks({
+        type: `${this.type}s`,
+        task_type_id: form.task_type_id,
+        project_id: this.currentProduction.id,
+        selectionOnly
+      })
+    },
+
     onDeleteAllTasksClicked(taskTypeId) {
       const taskType = this.taskTypeMap.get(taskTypeId)
       this.taskTypeForTaskDeletion = taskType
