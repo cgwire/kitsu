@@ -5,7 +5,7 @@ import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 
 /*
- * Common functions to shots and assets pages.
+ * Common functions to entity pages (assets, shots, sequences, edits, episodes).
  */
 export const entitiesMixin = {
   data() {
@@ -167,7 +167,6 @@ export const entitiesMixin = {
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
         .then(() => {
-          this.errors.deleteMetadata = false
           this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
         })
@@ -221,7 +220,7 @@ export const entitiesMixin = {
           taskStatusId: form.task.task_status_id,
           form
         })
-          .then(({ newComment, preview }) => {
+          .then(({ preview }) => {
             return this.setPreview({
               taskId: form.task.id,
               entityId: form.task.entity_id,
