@@ -643,20 +643,6 @@ export default {
       })
     },
 
-    confirmCreateTasks({ form, selectionOnly }) {
-      this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.hideCreateTasksModal()
-          this.loading.creatingTasks = false
-        })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
-    },
-
     confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.creatingTasksStay = true
       this.runTasksCreation(form, selectionOnly)

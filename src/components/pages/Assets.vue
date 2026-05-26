@@ -682,15 +682,6 @@ export default {
         })
     },
 
-    confirmCreateTasks({ form, selectionOnly }) {
-      this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly).then(() => {
-        this.reset()
-        this.hideCreateTasksModal()
-        this.loading.creatingTasks = false
-      })
-    },
-
     confirmCreateTasksAndStay({ form, selectionOnly }) {
       this.loading.taskStay = true
       this.runTasksCreation(form, selectionOnly).then(() => {
