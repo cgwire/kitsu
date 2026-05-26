@@ -863,6 +863,10 @@ export default {
       no_result: 'There are no results for this search',
       no_filter: 'Select at least one filter to perform the search'
     },
+    annotations: {
+      download_pdf: 'Download annotations as PDF',
+      download_zip: 'Download annotations as ZIP'
+    },
     csv: {
       choose: 'Choose',
       error_upload: 'An error occurred while uploading your CSV.',

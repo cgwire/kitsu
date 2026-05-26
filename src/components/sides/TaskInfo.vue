@@ -64,6 +64,24 @@
       <div v-else-if="task">
         <div class="flexrow extra-buttons pa05">
           <div class="filler"></div>
+          <a
+            class="pointer annotation-dl"
+            :href="annotationsZipPath"
+            :title="$t('main.annotations.download_zip')"
+            v-if="canDownloadAnnotations"
+          >
+            <archive-icon :size="16" />
+          </a>
+          <a
+            class="pointer annotation-dl"
+            :href="annotationsPdfPath"
+            :title="$t('main.annotations.download_pdf')"
+            target="_blank"
+            rel="noopener noreferrer"
+            v-if="canDownloadAnnotations"
+          >
+            <file-text-icon :size="16" />
+          </a>
           <div
             class="pointer"
             :title="$t('main.csv.export_file')"
@@ -351,7 +369,12 @@
 </template>
 
 <script>
-import { CornerRightUpIcon, XIcon } from 'lucide-vue-next'
+import {
+  ArchiveIcon,
+  CornerRightUpIcon,
+  FileTextIcon,
+  XIcon
+} from 'lucide-vue-next'
 import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -396,11 +419,13 @@ export default {
     ActionPanel,
     AddComment,
     AddPreviewModal,
+    ArchiveIcon,
     ComboboxStyled,
     Comment,
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
+    FileTextIcon,
     KitsuIcon,
     PeopleAvatar,
     PreviewPlayer,
@@ -743,6 +768,26 @@ export default {
       } else {
         return null
       }
+    },
+
+    canDownloadAnnotations() {
+      return (
+        this.isCurrentUserManager &&
+        this.currentPreviewId &&
+        (this.currentPreview?.annotations?.length || 0) > 0
+      )
+    },
+
+    annotationsZipPath() {
+      return this.currentPreviewId
+        ? `/api/actions/preview-files/${this.currentPreviewId}/extract-annotated-frames`
+        : null
+    },
+
+    annotationsPdfPath() {
+      return this.currentPreviewId
+        ? `/api/actions/preview-files/${this.currentPreviewId}/extract-annotated-frames-pdf`
+        : null
     },
 
     currentFps() {
@@ -1870,5 +1915,13 @@ export default {
   img {
     width: 16px;
   }
+}
+
+.annotation-dl {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5em;
+  text-decoration: none;
 }
 </style>
