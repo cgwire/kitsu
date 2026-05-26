@@ -1,7 +1,7 @@
 <template>
   <div
+    class="modal"
     :class="{
-      modal: true,
       'is-active': active
     }"
   >
@@ -14,9 +14,8 @@
         </h1>
 
         <combobox
-          class="flexrow-item"
-          :options="unionOptions"
           locale-key-prefix="entities.build_filter."
+          :options="unionOptions"
           v-model="union"
         />
 
@@ -27,13 +26,15 @@
         <div class="flexrow asset-type-filter" v-if="isAssets">
           <combobox
             class="flexrow-item"
-            :options="operatorOptions"
             locale-key-prefix="entities.build_filter."
+            :options="operatorOptions"
+            :with-margin="false"
             v-model="assetTypeFilters.operator"
           />
           <combobox
             class="flexrow-item"
             :options="assetTypeOptions"
+            :with-margin="false"
             v-model="assetTypeFilters.value"
           />
         </div>
@@ -50,13 +51,15 @@
           <combobox-task-type
             class="flexrow-item"
             :task-type-list="taskTypeList"
+            :with-margin="false"
             v-model="taskTypeFilter.id"
           />
           <combobox
             class="flexrow-item"
-            :options="taskTypeOperatorOptions"
-            @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
             locale-key-prefix="entities.build_filter."
+            :options="taskTypeOperatorOptions"
+            :with-margin="false"
+            @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
             v-model="taskTypeFilter.operator"
           />
           <div class="flexrow-item flexrow value-column">
@@ -64,6 +67,7 @@
               class="flexrow-item"
               :key="`task-type-value-${i}-${index}`"
               :task-status-list="taskStatuses"
+              :with-margin="false"
               v-model="taskTypeFilter.values[index]"
               v-for="(statusId, index) in taskTypeFilter.values"
             />
@@ -101,6 +105,7 @@
             <combobox
               class="flexrow-item"
               :options="descriptorOptions"
+              :with-margin="false"
               @update:model-value="
                 filterId => onDescriptorChanged(descriptorFilter, filterId)
               "
@@ -109,15 +114,17 @@
 
             <combobox
               class="flexrow-item"
-              :options="checklistOptions"
               locale-key-prefix="entities.build_filter."
+              :options="checklistOptions"
+              :with-margin="false"
               v-model="descriptorFilter.values[0].checked"
               v-if="descriptorFilter.is_checklist"
             />
             <combobox
               class="flexrow-item"
-              :options="booleanOptions"
               locale-key-prefix="entities.build_filter."
+              :options="booleanOptions"
+              :with-margin="false"
               v-model="descriptorFilter.values[0]"
               v-else-if="
                 getDescriptor(descriptorFilter.id).data_type === 'boolean'
@@ -125,8 +132,9 @@
             />
             <combobox
               class="flexrow-item"
-              :options="operatorOptions"
               locale-key-prefix="entities.build_filter."
+              :options="operatorOptions"
+              :with-margin="false"
               @update:model-value="
                 operator => onOperatorChanged(operator, descriptorFilter)
               "
@@ -198,8 +206,9 @@
         <div class="flexrow assignation-filter" v-if="!isCurrentUserVendor">
           <combobox
             class="flexrow-item"
-            :options="assignation.options"
             locale-key-prefix="entities.build_filter."
+            :options="assignation.options"
+            :with-margin="false"
             v-model="assignation.value"
           />
 
@@ -224,6 +233,7 @@
                   ? taskTypeList
                   : taskTypeListWithAll
               "
+              :with-margin="false"
               v-model="assignation.taskTypeId"
               v-if="
                 [
@@ -247,7 +257,7 @@
           v-model="hasThumbnail.value"
         />
 
-        <h3 class="subtitle flexrow-item mt2">
+        <h3 class="subtitle mt2">
           {{ $t('task_types.fields.priority') }}
         </h3>
         <div class="flexrow">
@@ -255,6 +265,7 @@
             class="flexrow-item"
             :task-type-list="taskTypeListWithAll"
             open-top
+            :with-margin="false"
             v-model="priority.taskTypeId"
           />
           <combobox-styled
@@ -265,7 +276,7 @@
             v-show="priority.taskTypeId !== ''"
           />
         </div>
-        <h3 class="subtitle flexrow-item mt2" v-if="isAssets && !isAssetsOnly">
+        <h3 class="subtitle mt2" v-if="isAssets && !isAssetsOnly">
           {{ $t('assets.fields.ready_for') }}
         </h3>
         <div class="flexrow" v-if="isAssets && !isAssetsOnly">
@@ -273,11 +284,12 @@
             class="flexrow-item"
             :task-type-list="readyForTaskTypeList"
             open-top
+            :with-margin="false"
             v-model="readyFor.taskTypeId"
           />
         </div>
 
-        <h3 class="subtitle flexrow-item mt2" v-if="isShots">
+        <h3 class="subtitle mt2" v-if="isShots">
           {{ $t('entities.build_filter.is_assets_ready') }}
         </h3>
         <div class="flexrow" v-if="isShots">
@@ -285,6 +297,7 @@
             class="flexrow-item"
             :task-type-list="taskTypeList"
             open-top
+            :with-margin="false"
             v-model="isAssetsReady.taskTypeId"
           />
 
