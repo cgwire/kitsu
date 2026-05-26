@@ -316,6 +316,11 @@ const currentShape = defineModel('currentShape', { default: undefined })
   display: flex;
   height: 33px;
   max-width: 200px;
+  // clip-path creates a stacking context, so lift the whole tools
+  // group above the annotation overlay (z-index 500) — otherwise the
+  // picker dropdowns end up rendered underneath the drawing canvas.
+  position: relative;
+  z-index: 600;
 }
 
 .slide-enter-active,
