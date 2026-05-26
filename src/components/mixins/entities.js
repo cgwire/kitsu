@@ -1,8 +1,8 @@
 import { mapGetters, mapActions } from 'vuex'
 
-import stringHelpers from '@/lib/string'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
+import stringHelpers from '@/lib/string'
 
 /*
  * Common functions to shots and assets pages.
@@ -25,7 +25,7 @@ export const entitiesMixin = {
       `${this.pageName}:department`
     )
     const selectableDepartments = this.selectableDepartments(
-      stringHelpers.capitalize(this.type)
+      this.entityTypeName
     ).map(department => department.id)
 
     if (
@@ -82,7 +82,7 @@ export const entitiesMixin = {
     },
 
     entityTypeName() {
-      return `${this.type[0].toUpperCase()}${this.type.slice(1)}`
+      return stringHelpers.capitalize(this.type)
     },
 
     selectedEntities() {
@@ -290,9 +290,7 @@ export const entitiesMixin = {
     },
 
     onChangeSortClicked(sortInfo) {
-      this[`change${this.type[0].toUpperCase()}${this.type.slice(1)}Sort`](
-        sortInfo
-      )
+      this[`change${this.entityTypeName}Sort`](sortInfo)
     },
 
     onKeepTaskPanelOpenChanged(keepOpen) {
