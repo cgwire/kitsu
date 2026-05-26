@@ -695,25 +695,6 @@ export default {
       })
     },
 
-    confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypeForTaskDeletion.id
-      const projectId = this.currentProduction.id
-      this.errors.deleteAllTasks = false
-      this.loading.deleteAllTasks = true
-      this.deleteAllAssetTasks({ projectId, taskTypeId, selectionOnly })
-        .then(() => {
-          if (!selectionOnly) this.loadAssets()
-          this.modals.isDeleteAllTasksDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteAllTasks = true
-        })
-        .finally(() => {
-          this.loading.deleteAllTasks = false
-        })
-    },
-
     resetLightEditModal() {
       const form = {
         name: '',

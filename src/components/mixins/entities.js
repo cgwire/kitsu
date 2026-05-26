@@ -207,13 +207,15 @@ export const entitiesMixin = {
       this.loading.deleteAllTasks = true
       this.deleteAllTasks({ projectId, taskTypeId, selectionOnly })
         .then(() => {
-          this.loading.deleteAllTasks = false
+          if (!selectionOnly) this.reset()
           this.modals.isDeleteAllTasksDisplayed = false
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
+        })
+        .finally(() => {
+          this.loading.deleteAllTasks = false
         })
     },
 

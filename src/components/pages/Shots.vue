@@ -712,23 +712,6 @@ export default {
         })
     },
 
-    confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypeForTaskDeletion.id
-      const projectId = this.currentProduction.id
-      this.errors.deleteAllTasks = false
-      this.loading.deleteAllTasks = true
-      this.deleteAllShotTasks({ projectId, taskTypeId, selectionOnly })
-        .then(() => {
-          this.loading.deleteAllTasks = false
-          this.modals.isDeleteAllTasksDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.deleteAllTasks = false
-          this.errors.deleteAllTasks = true
-        })
-    },
-
     confirmDeleteShot() {
       this.loading.del = true
       this.errors.del = false
