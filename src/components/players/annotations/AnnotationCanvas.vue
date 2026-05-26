@@ -19,6 +19,8 @@ import { fabric } from 'fabric'
 import { PSBrush } from 'fabricjs-psbrush'
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { lockBrushToFirstPointer } from '@/lib/annotation'
+
 const props = defineProps({
   canvasId: { type: String, required: true },
   // CSS cursor value (keyword or url(...)). When null, the overlay
@@ -111,8 +113,8 @@ const createFabric = () => {
     brush.width = 20
     brush.color = '#000'
     brush.disableTouch = true
-    brush.disableMouse = true
     brush.pressureManager.fallback = 0.5
+    lockBrushToFirstPointer(brush)
     canvas.freeDrawingBrush = brush
   }
   fabricCanvas.value = markRaw(canvas)

@@ -11,7 +11,8 @@ import { ref, watch } from 'vue'
 import {
   SHAPE_WIDTHS,
   attachShapeDrawing,
-  buildReadOnlyShape
+  buildReadOnlyShape,
+  lockBrushToFirstPointer
 } from '@/lib/annotation'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -766,8 +767,9 @@ export const useAnnotation = ({
         fabricCanvas.value.isDrawingMode = true
       }
       const brush = new PSBrush(fabricCanvas.value)
-      fabricCanvas.value.freeDrawingBrush = brush
       brush.pressureManager.fallback = 0.5
+      lockBrushToFirstPointer(brush)
+      fabricCanvas.value.freeDrawingBrush = brush
       _resetColor()
       _resetPencil()
     }

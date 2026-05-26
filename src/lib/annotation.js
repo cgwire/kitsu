@@ -41,6 +41,61 @@ if (PSStroke) {
   }
 }
 
+/**
+ * Lock a PSBrush instance to the pointer type that opens each stroke.
+ *
+ * PSBrush honours `disableTouch` but doesn't separate mouse vs pen, so
+ * a tablet user drawing with the stylus while the mouse cursor still
+ * hovers the canvas gets hover pointermoves interleaved between the
+ * pen events and the path zigzags between the two positions.
+ *
+ * Must be applied per-instance: PSBrush is built with fabric's
+ * createClass, which copies methods onto each instance via
+ * Object.assign — they shadow the prototype, so patching
+ * PSBrush.prototype.onMouseMove has no effect on real strokes.
+ *
+ * Idempotent — calling it twice on the same brush is a no-op.
+ */
+export const lockBrushToFirstPointer = brush => {
+  if (!brush || brush._pointerTypeLocked) return brush
+  brush._pointerTypeLocked = true
+  const origDown = brush.onMouseDown.bind(brush)
+  const origMove = brush.onMouseMove.bind(brush)
+  const origUp = brush.onMouseUp.bind(brush)
+  const eventPointerType = ev => (ev?.e || ev?.pointer?.e)?.pointerType
+  console.log('[lockBrushToFirstPointer] installed on brush', brush)
+  brush.onMouseDown = function (pointer, ev) {
+    this._activePointerType =
+      eventPointerType(ev) || pointer?.e?.pointerType || null
+    console.log('[brush down]', {
+      type: this._activePointerType,
+      hasE: !!ev?.e
+    })
+    return origDown(pointer, ev)
+  }
+  brush.onMouseMove = function (pointer, ev) {
+    const type = eventPointerType(ev) || pointer?.e?.pointerType
+    if (this._activePointerType && type && type !== this._activePointerType) {
+      console.log('[brush move blocked]', {
+        eventType: type,
+        active: this._activePointerType
+      })
+      return
+    }
+    return origMove(pointer, ev)
+  }
+  brush.onMouseUp = function (ev) {
+    const type = eventPointerType(ev)
+    if (this._activePointerType && type && type !== this._activePointerType) {
+      return
+    }
+    const result = origUp(ev)
+    this._activePointerType = null
+    return result
+  }
+  return brush
+}
+
 /* -------------------------------------------------------------------------
  * Constants
  * -----------------------------------------------------------------------*/
@@ -134,6 +189,7 @@ export const createAnnotationCanvas = (canvasEl, options = {}) => {
   if (brush.pressureManager) {
     brush.pressureManager.fallback = 0.5
   }
+  lockBrushToFirstPointer(brush)
   canvas.freeDrawingBrush = brush
   canvas.isDrawingMode = false
   canvas.skipTargetFind = true
