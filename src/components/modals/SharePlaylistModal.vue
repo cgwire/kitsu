@@ -33,6 +33,15 @@
             >
               <copy-icon :size="16" />
             </button>
+            <a
+              class="button flexrow-item open-button"
+              :href="buildShareUrl(link.token)"
+              :title="$t('playlists.share_modal.open')"
+              target="_blank"
+              rel="noopener"
+            >
+              <external-link-icon :size="16" />
+            </a>
             <button
               class="button flexrow-item invite-button"
               :class="{ active: openInviteToken === link.token }"
@@ -196,7 +205,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { CopyIcon, SendIcon, XIcon } from 'lucide-vue-next'
+import { CopyIcon, ExternalLinkIcon, SendIcon, XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
@@ -474,10 +483,14 @@ onMounted(() => {
   }
 
   .copy-button,
+  .open-button,
   .invite-button,
   .revoke-button {
+    align-items: center;
     border-radius: 8px;
+    display: inline-flex;
     flex: 0 0 auto;
+    justify-content: center;
     margin: 0;
   }
 

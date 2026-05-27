@@ -437,7 +437,7 @@ import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 
 import assetsStore from '@/store/modules/assets'

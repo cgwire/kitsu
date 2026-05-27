@@ -78,6 +78,10 @@ const thumbnailPath = computed(() => {
   margin: 0;
 }
 
+.avatar {
+  flex-shrink: 0;
+}
+
 .avatar-name {
   color: $black;
 

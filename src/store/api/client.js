@@ -48,6 +48,12 @@ const client = {
     return client.request('DELETE', path, data)
   },
 
+  getText(path) {
+    return superagent('GET', path)
+      .then(res => res.text)
+      .catch(handleError)
+  },
+
   getConfig() {
     const path = '/api/config'
     return client.pget(path)

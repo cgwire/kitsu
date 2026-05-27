@@ -38,8 +38,8 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useStore } from 'vuex'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import PreviewFileList from '@/components/lists/PreviewFileList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const PAGE_SIZE = 100

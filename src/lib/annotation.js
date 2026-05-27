@@ -41,6 +41,52 @@ if (PSStroke) {
   }
 }
 
+/**
+ * Lock a PSBrush instance to the pointer type that opens each stroke.
+ *
+ * PSBrush honours `disableTouch` but doesn't separate mouse vs pen, so
+ * a tablet user drawing with the stylus while the mouse cursor still
+ * hovers the canvas gets hover pointermoves interleaved between the
+ * pen events and the path zigzags between the two positions.
+ *
+ * Must be applied per-instance: PSBrush is built with fabric's
+ * createClass, which copies methods onto each instance via
+ * Object.assign — they shadow the prototype, so patching
+ * PSBrush.prototype.onMouseMove has no effect on real strokes.
+ *
+ * Idempotent — calling it twice on the same brush is a no-op.
+ */
+export const lockBrushToFirstPointer = brush => {
+  if (!brush || brush._pointerTypeLocked) return brush
+  brush._pointerTypeLocked = true
+  const origDown = brush.onMouseDown.bind(brush)
+  const origMove = brush.onMouseMove.bind(brush)
+  const origUp = brush.onMouseUp.bind(brush)
+  const eventPointerType = ev => (ev?.e || ev?.pointer?.e)?.pointerType
+  brush.onMouseDown = function (pointer, ev) {
+    this._activePointerType =
+      eventPointerType(ev) || pointer?.e?.pointerType || null
+    return origDown(pointer, ev)
+  }
+  brush.onMouseMove = function (pointer, ev) {
+    const type = eventPointerType(ev) || pointer?.e?.pointerType
+    if (this._activePointerType && type && type !== this._activePointerType) {
+      return
+    }
+    return origMove(pointer, ev)
+  }
+  brush.onMouseUp = function (ev) {
+    const type = eventPointerType(ev)
+    if (this._activePointerType && type && type !== this._activePointerType) {
+      return
+    }
+    const result = origUp(ev)
+    this._activePointerType = null
+    return result
+  }
+  return brush
+}
+
 /* -------------------------------------------------------------------------
  * Constants
  * -----------------------------------------------------------------------*/
@@ -59,14 +105,23 @@ export const DEFAULT_PENCIL_COLOR = '#ff3860'
 // other UI strokes.
 export const SHAPE_STROKE_WIDTH = 4
 
+// Halved pencil widths — shapes don't get pressure modulation and would
+// look heavy at the pencil's 15/10/5/2/1 values.
+export const SHAPE_WIDTHS = {
+  huge: 8,
+  big: 5,
+  medium: 3,
+  small: 2,
+  tiny: 1
+}
+
 /* -------------------------------------------------------------------------
  * Object helpers
  * -----------------------------------------------------------------------*/
 
 /**
- * Mirrors `annotationMixin.addSerialization`. Adds a `serialize()` method
- * to the fabric object that includes the extra fields we persist (id,
- * canvasWidth/Height, angle, scale, createdBy).
+ * Adds a `serialize()` method to the fabric object that includes the extra
+ * fields we persist (id, canvasWidth/Height, angle, scale, createdBy).
  */
 export const addSerialization = object => {
   object.serialize = function () {
@@ -83,9 +138,9 @@ export const addSerialization = object => {
 }
 
 /**
- * Mirrors `annotationMixin.setObjectData`. Stamps id / canvas dimensions /
- * createdBy on a freshly created fabric object so subsequent saves include
- * the metadata that the backend uses to apply diffs.
+ * Stamps id / canvas dimensions / createdBy on a freshly created fabric
+ * object so subsequent saves include the metadata that the backend uses to
+ * apply diffs.
  */
 export const setObjectData = (object, canvas, userId) => {
   if (object.set) {
@@ -111,9 +166,8 @@ export const setObjectData = (object, canvas, userId) => {
 
 /**
  * Build the same PSBrush-backed `fabric.Canvas` the studio player uses.
- * The pressure-manager fallback mirrors `annotationMixin.onAnnotateClicked`
- * — without it, mouse strokes ship a low pressure and render way thinner
- * than on the studio side.
+ * The pressure-manager fallback is required — without it, mouse strokes ship
+ * a low pressure and render way thinner than on the studio side.
  */
 export const createAnnotationCanvas = (canvasEl, options = {}) => {
   const canvas = new fabric.Canvas(canvasEl, {
@@ -128,6 +182,7 @@ export const createAnnotationCanvas = (canvasEl, options = {}) => {
   if (brush.pressureManager) {
     brush.pressureManager.fallback = 0.5
   }
+  lockBrushToFirstPointer(brush)
   canvas.freeDrawingBrush = brush
   canvas.isDrawingMode = false
   canvas.skipTargetFind = true
@@ -135,8 +190,8 @@ export const createAnnotationCanvas = (canvasEl, options = {}) => {
 }
 
 /**
- * Mirrors `annotationMixin._resetPencil`. Accepts either a width name
- * (`'big' | 'medium' | 'small'`) or a numeric pixel value.
+ * Accepts either a width name (`'big' | 'medium' | 'small'`) or a numeric
+ * pixel value.
  */
 export const applyPencilWidth = (canvas, width) => {
   if (!canvas?.freeDrawingBrush) return
@@ -146,21 +201,18 @@ export const applyPencilWidth = (canvas, width) => {
   }
 }
 
-/**
- * Mirrors `annotationMixin._resetColor`.
- */
 export const applyPencilColor = (canvas, color) => {
   if (!canvas?.freeDrawingBrush) return
   canvas.freeDrawingBrush.color = color
 }
 
 /* -------------------------------------------------------------------------
- * Shape drawing (drag-to-create rectangle / circle / arrow)
+ * Shape drawing (drag-to-create rectangle / circle / arrow / whiteboard)
  *
  * Adapted from cgwire/kitsu#1830. Uses fabric mouse events instead of raw
  * DOM listeners so the canvas's pointer offset / panzoom transforms are
  * resolved correctly. The caller passes:
- *   - getTool(): one of 'rectangle' | 'circle' | 'arrow' | null
+ *   - getTool(): 'rectangle' | 'circle' | 'arrow' | 'whiteboard' | null
  *   - getColor(): current stroke color
  *   - getWidth(): current stroke width (px)
  *   - onShapeAdded(shape): callback fired when the user releases mouse,
@@ -171,6 +223,17 @@ export const applyPencilColor = (canvas, color) => {
  * -----------------------------------------------------------------------*/
 
 const PREVIEW_FILL = 'rgba(128, 128, 128, 0.25)'
+const WHITEBOARD_FILL = 'rgba(255, 255, 255, 0.7)'
+
+// Fill kept on the shape after mouse-up. Outline shapes go transparent
+// (only stroke remains) — the whiteboard is the exception, its fill
+// is the whole point.
+const FINAL_FILLS = {
+  rectangle: 'transparent',
+  circle: 'transparent',
+  arrow: 'transparent',
+  whiteboard: WHITEBOARD_FILL
+}
 
 const buildShape = (tool, startX, startY, color, width) => {
   const base = {
@@ -195,13 +258,26 @@ const buildShape = (tool, startX, startY, color, width) => {
       arrowHeadWidth: 12
     })
   }
+  if (tool === 'whiteboard') {
+    // No stroke / strokeWidth: the whiteboard is a fill-only sticker
+    // reviewers slap on the image so they can write on top of it.
+    return new fabric.Rect({
+      left: startX,
+      top: startY,
+      width: 1,
+      height: 1,
+      fill: WHITEBOARD_FILL,
+      stroke: undefined,
+      strokeWidth: 0
+    })
+  }
   return null
 }
 
 const updateShape = (shape, tool, startX, startY, currentX, currentY) => {
   const dx = currentX - startX
   const dy = currentY - startY
-  if (tool === 'rectangle') {
+  if (tool === 'rectangle' || tool === 'whiteboard') {
     const width = Math.abs(dx)
     const height = Math.abs(dy)
     shape.set({
@@ -229,11 +305,13 @@ const updateShape = (shape, tool, startX, startY, currentX, currentY) => {
 
 export const attachShapeDrawing = (
   canvas,
-  { getTool, getColor, getWidth, onShapeAdded }
+  { getTool, getColor, getWidth, onShapeAdded, onShapeStart }
 ) => {
   let drawing = null
   let startX = 0
   let startY = 0
+
+  let drawingTool = null
 
   const onMouseDown = e => {
     const tool = getTool?.()
@@ -243,7 +321,9 @@ export const attachShapeDrawing = (
     startY = pointer.y
     drawing = buildShape(tool, startX, startY, getColor(), getWidth())
     if (!drawing) return
+    drawingTool = tool
     drawing.set({ selectable: false, evented: false })
+    onShapeStart?.()
     canvas.add(drawing)
     canvas.requestRenderAll()
   }
@@ -260,11 +340,12 @@ export const attachShapeDrawing = (
 
   const onMouseUp = () => {
     if (!drawing) return
-    drawing.set({ fill: 'transparent' })
+    drawing.set({ fill: FINAL_FILLS[drawingTool] ?? 'transparent' })
     drawing.setCoords()
     canvas.requestRenderAll()
     onShapeAdded?.(drawing)
     drawing = null
+    drawingTool = null
   }
 
   canvas.on('mouse:down', onMouseDown)
@@ -281,8 +362,7 @@ export const attachShapeDrawing = (
 /* -------------------------------------------------------------------------
  * Mouse pressure simulation
  *
- * Ports `annotationMixin.initalizeMouseDrawing / updateMousePressure /
- * endDrawing` so mouse-drawn strokes vary in width with cursor speed (the
+ * Makes mouse-drawn strokes vary in width with cursor speed (the
  * `'distance'` mode the studio uses by default). PSBrush still honours
  * actual stylus pressure from PointerEvents — the fallback we tweak here
  * only kicks in when no real pressure is reported, so real pen pressure
@@ -409,9 +489,8 @@ export const findAnnotationAtTime = (
  * -----------------------------------------------------------------------*/
 
 /**
- * Mirrors `annotationMixin.addToAdditions` for read-only consumers that
- * just need to push a new object into the additions list at the right
- * time slot.
+ * Pushes a new object into the additions list at the right time slot.
+ * Returns the same additions array (mutated).
  */
 export const pushAddition = (
   additions,
@@ -434,8 +513,7 @@ export const pushAddition = (
 }
 
 /**
- * Mirrors `annotationMixin.removeFromAdditions`. Drops empty annotation
- * entries once their last object is removed.
+ * Drops empty annotation entries once their last object is removed.
  */
 export const removeAddition = (additions, objectId) =>
   additions
@@ -460,9 +538,8 @@ export const deserializePSStroke = obj =>
 /* -------------------------------------------------------------------------
  * Read-only object rendering
  *
- * Lighter-weight version of `annotationMixin.addObjectToCanvas`: produces
- * a non-interactive shape ready to be `canvas.add()`-ed. Returns a Promise
- * because PSStroke deserialisation is async.
+ * Produces a non-interactive shape ready to be `canvas.add()`-ed. Returns a
+ * Promise because PSStroke deserialisation is async.
  * -----------------------------------------------------------------------*/
 
 export const buildReadOnlyShape = async (annotation, obj, canvas) => {

@@ -58,7 +58,7 @@ import { useStore } from 'vuex'
 import { EyeIcon } from 'lucide-vue-next'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import VideoViewer from '@/components/previews/VideoViewer.vue'
+import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
 
 const store = useStore()
 

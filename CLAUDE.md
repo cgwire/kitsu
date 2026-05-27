@@ -25,12 +25,14 @@ src/
     lists/          # List/table components (StudioList, etc.)
     modals/         # Modal dialogs (BaseModal, EditStudiosModal, etc.)
     pages/          # Page-level components (Studios, etc.)
-    previews/       # Preview/player components
+    players/        # Preview/playlist player components (annotations, bars, viewers, ...)
     sides/          # Sidebar components
     tops/           # Topbar components
     widgets/        # Reusable UI widgets (Combobox*, DateField, etc.)
-    mixins/         # Legacy Options API mixins (annotation.js, etc.)
-  composables/      # Composition API composables (modal.js, combobox.js, etc.)
+    mixins/         # Legacy Options API mixins still being migrated to composables
+  composables/
+    players/        # Player-specific composables (annotation, comparison, playlistComparison, ...)
+                    # Generic ones (modal, combobox, ...) stay at the root
   lib/              # Utility libraries (csv, string, sorting, etc.)
   locales/          # i18n translation files (en.js, fr.json, etc.)
   router/           # Vue Router configuration
@@ -301,7 +303,80 @@ The `modalMixin` in `src/components/modals/base_modal.js` is being replaced by t
 
 ## Key dependencies
 
-- **fabric.js** v5.1.0 (cgwire fork) — annotation canvas, used only in `src/components/mixins/annotation.js` and `src/components/previews/PreviewPlayer.vue`
+- **fabric.js** v5.1.0 (cgwire fork) — annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
 - **socket.io-client** — real-time events via `vue-websocket-next`
 - **moment / moment-timezone** — date handling (used throughout schedule and timesheet components)
 - **vue-multiselect** — people/entity selection dropdowns
+
+## Intégration des fonctionnalités IA dans Kitsu
+
+Cette section définit les règles à appliquer pour toute fonctionnalité IA ajoutée à Kitsu (cloud et self-hosted). Elle s'inspire de l'enquête [*Le forcing de l'IA*](https://limitesnumeriques.fr/travaux-productions/ai-forcing) (Limites Numériques, février 2025), qui documente les patterns par lesquels les éditeurs imposent l'IA via le design, au détriment des usages réels.
+
+**Principe directeur** : Kitsu intègre l'IA sans forcing. L'IA est une fonctionnalité comme une autre, justifiée par un usage validé, et non un produit poussé pour lui-même.
+
+### 1. Design d'interface
+
+- Pas de couleur dédiée à l'IA (pas de violet, mauve, dégradé bleu-rose, gradient shimmer).
+- Pas d'icône évoquant la magie (pas de ✨, pas d'étoile, pas de baguette).
+- Pas d'animation spécifique aux boutons ou zones IA quand les autres fonctions sont statiques.
+- Les fonctionnalités IA utilisent les mêmes composants visuels (couleurs, typographie, iconographie Material) que le reste de Kitsu.
+- Pas de placement privilégié : l'IA ne prend pas le bouton principal d'une vue (Tâches, Casting, Breakdown, Playlists). Elle se loge dans le contexte métier où elle a un sens.
+- Pas de répétition de la même fonction IA à plusieurs endroits de l'interface.
+
+### 2. Activation et contrôle
+
+- Activation explicite. Pas de déclenchement par raccourci clavier fréquent ou par clic accidentel sur la zone de saisie principale.
+- Opt-in par défaut, pas opt-out, pour toute fonctionnalité IA significative.
+- En self-hosted, IA désactivée par défaut, activable explicitement par l'administrateur du studio.
+- Bouton clair de désactivation par projet et par studio.
+
+### 3. Nommage et vocabulaire
+
+- Pas de prénom d'assistant ("Kit", "Kitty", "Kitsubot", etc.).
+- Pas de visage, d'avatar ou de mascotte associé à l'IA.
+- Pas de métaphore de l'"assistant" qui aide sans remplacer.
+- Pas de vocabulaire magique ("magie", "boost", "wow", "intelligent").
+- Décrire ce que la fonction fait, factuellement. Exemple : "Générer un résumé des notes de review", pas "Résumer ✨".
+- Indiquer aussi ce que la fonction ne fait pas et ses limites connues (taux d'erreur, hallucinations possibles, types de contenus mal traités).
+
+### 4. Transparence
+
+- Pour chaque appel IA, le studio peut savoir : quel modèle est utilisé, où il tourne (local ou cloud), quelles données sortent du studio, vers quel fournisseur.
+- Cette information est accessible dans les paramètres et dans la documentation, pas cachée derrière plusieurs clics.
+- Quand pertinent, exposer le coût (tokens, latence, ordre de grandeur énergétique) à l'admin du studio.
+- Privilégier les modèles locaux ou auto-hébergeables quand c'est viable, surtout pour le self-hosted.
+
+### 5. Choix de fonctionnalités
+
+- Une fonctionnalité IA n'est développée que pour répondre à un point de douleur identifié et validé avec 2 ou 3 studios pilotes.
+- Pas de fonctionnalité IA "parce qu'il en faut" ou "parce que les concurrents en ont".
+- Pas de "tâtonnement" public : les expérimentations restent en feature flag ou en bêta privée tant que l'usage n'est pas démontré.
+- Mesure de l'usage réel (pas le premier clic d'essai). Une fonction non utilisée au bout de 3 mois est retirée, pas conservée par inertie.
+
+### 6. Communication produit
+
+- Pas de pop-up d'annonce, de modal d'onboarding ou de tour guidé poussant à essayer l'IA.
+- Pas de badge "Nouveau" ou "AI" clignotant sur le bouton.
+- Une page de documentation dédiée suffit. Le changelog mentionne la fonctionnalité au même niveau que les autres.
+- Sur le blog et la roadmap, expliquer **pourquoi** la fonction arrive (quel problème studio elle résout), pas seulement qu'elle arrive.
+
+### 7. Cadrage éditorial
+
+- L'IA est cadrée en empowerment des équipes (artistes, supes, prod), pas en remplacement.
+- Le ton évite l'emphase sur la performance brute du modèle, et insiste sur l'intégration dans le workflow.
+- Cohérent avec la sensibilité de la communauté open source VFX/animation : transparence, respect des métiers, attention à l'empreinte.
+
+### 8. Positionnement
+
+Cette charte n'est pas seulement défensive. Elle ouvre un angle de différenciation : Kitsu peut se positionner comme **le production tracker qui intègre l'IA sans forcing**, à rebours des patterns documentés par Limites Numériques. Cet angle peut être assumé publiquement (article de blog dédié, mention dans la doc, communication communauté).
+
+### Checklist de revue avant merge d'une feature IA
+
+- [ ] Aucune couleur, icône ou animation spécifique IA
+- [ ] Activation explicite, pas de raccourci ambigu
+- [ ] Opt-in (et désactivé par défaut en self-hosted)
+- [ ] Pas d'anthropomorphisation
+- [ ] Modèle, hébergement et données documentés et visibles
+- [ ] Point de douleur validé avec au moins 2 studios pilotes
+- [ ] Métriques d'usage en place
+- [ ] Pas de pop-up ou onboarding poussant à l'essai

@@ -53,7 +53,7 @@ import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
 
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 // eslint-disable-next-line no-unused-vars
-import PlaylistPlayer from '@/components/pages/playlists/PlaylistPlayer.vue'
+import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 
 import assetStore from '@/store/modules/assets'
 import shotStore from '@/store/modules/shots'
@@ -102,6 +102,8 @@ const isPlaylistPage = computed(() => route.path.indexOf('playlist') > 0)
 const currentEntityType = computed(() => {
   if (route.path.indexOf('asset') > 0) return 'asset'
   if (route.path.indexOf('sequence') > 0) return 'sequence'
+  if (route.path.indexOf('edit') > 0) return 'edit'
+  if (route.path.indexOf('episode') > 0) return 'episode'
   return 'shot'
 })
 

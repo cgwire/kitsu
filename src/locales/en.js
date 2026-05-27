@@ -763,6 +763,7 @@ export default {
     estimation: 'Estimation',
     estimation_short: 'Est.',
     expand_all: 'Expand all',
+    export: 'Export',
     feedback: 'Roadmap / Feedback',
     files_selected: 'files selected',
     filter_group: 'Filter Group',
@@ -862,6 +863,10 @@ export default {
       type: 'Type at least 3 characters to perform the search',
       no_result: 'There are no results for this search',
       no_filter: 'Select at least one filter to perform the search'
+    },
+    annotations: {
+      download_pdf: 'Download annotations as PDF',
+      download_zip: 'Download annotations as ZIP'
     },
     csv: {
       choose: 'Choose',
@@ -1039,6 +1044,10 @@ export default {
     title: 'People',
     unactive: 'Inactive',
     guests: 'guest | guests',
+    archived_guests: 'Archived guests',
+    archive_guest_confirm: 'Archive this guest? Their comments stay in place, but they no longer appear in the active guests list.',
+    archive_guest_error: 'Could not archive this guest. Please try again.',
+    restore_guest_error: 'Could not restore this guest. Please try again.',
     email_domain_error: 'This email domain is not allowed.',
     email_exist_error: 'This email is already in use by another user.',
     user_limit_error: 'You have reached your user limit. Please contact our team to upgrade your plan.',
@@ -1049,6 +1058,7 @@ export default {
     fields: {
       active: 'Active',
       contract: 'Contract',
+      created_at: 'Creation date',
       daily_salary: 'Daily rate',
       departments: 'Departments',
       email: 'Email',
@@ -1117,6 +1127,8 @@ export default {
     add_selection: 'Add selection',
     add_sequences: 'Add sequences',
     add_shots: 'Add shots',
+    add_edits: 'Add edits',
+    add_episodes: 'Add episodes',
     add_sequence: 'Add entire sequence',
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',
@@ -1158,6 +1170,7 @@ export default {
       can_comment: 'Allow comments',
       generate: 'Generate a new link',
       copy: 'Copy link',
+      open: 'Open link in a new tab',
       revoke: 'Revoke link',
       revoke_confirm: 'Revoke this link? Anyone using it will lose access.',
       no_links: 'No share links yet. Create one below to give external reviewers access.',
@@ -1210,11 +1223,14 @@ export default {
       annotation_delete: 'Delete annotation',
       annotation_erase: 'Erase annotation',
       annotation_redo: 'Redo annotation',
+      annotation_shape: 'Shape',
       annotation_undo: 'Undo annotation',
+      annotation_huge: 'Huge',
       annotation_big: 'Big',
       annotation_medium: 'Medium',
       annotation_small: 'Small',
-      annotation_zoom_pan: 'Enable zoom and pan',
+      annotation_tiny: 'Tiny',
+      annotation_zoom_pan: 'Reset zoom',
       change_task_type: 'Change task type',
       current_time: 'Position in the video',
       comments: 'Show/Hide comments',
@@ -2153,6 +2169,7 @@ export default {
   },
 
   row_actions: {
+    archive: 'Archive',
     change_avatar: 'Change avatar',
     change_password: 'Change password',
     delete: 'Delete',

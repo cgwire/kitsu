@@ -15,6 +15,13 @@ export class Arrow extends fabric.Line {
     this.type = 'arrow'
     this.arrowHeadSize = options.arrowHeadSize || 15
     this.arrowHeadWidth = options.arrowHeadWidth || 12
+    // Cache the rendering ourselves via _render. fabric's default
+    // object cache is sized to width × height computed from x1/y1/x2/y2
+    // and uses the Line's local _x1/_y1/_x2/_y2; when fabric reaches
+    // for that cache during selection the line body renders to the
+    // wrong local coordinates and the body vanishes. Skipping the
+    // cache keeps every draw consistent.
+    this.objectCaching = false
     this._setupControls()
 
     // Keep x1/y1/x2/y2 in sync when the user drags the whole shape.

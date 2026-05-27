@@ -102,13 +102,19 @@ const forEntityOptions = computed(() => {
   if (currentProduction.value?.production_type === 'shots') {
     return [
       { label: t('shots.title'), value: 'shot' },
-      { label: t('sequences.title'), value: 'sequence' }
+      { label: t('sequences.title'), value: 'sequence' },
+      { label: t('edits.title'), value: 'edit' }
+      // { label: t('episodes.title'), value: 'episode' }
+      // Episode playlists need an "all shots" cross-episode view first.
     ]
   }
   return [
     { label: t('assets.title'), value: 'asset' },
     { label: t('shots.title'), value: 'shot' },
-    { label: t('sequences.title'), value: 'sequence' }
+    { label: t('sequences.title'), value: 'sequence' },
+    { label: t('edits.title'), value: 'edit' }
+    // { label: t('episodes.title'), value: 'episode' }
+    // Episode playlists need an "all shots" cross-episode view first.
   ]
 })
 

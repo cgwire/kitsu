@@ -148,6 +148,7 @@ const sectionPath = (production, section) => {
 
 .avatar {
   border-radius: 12px;
+  flex-shrink: 0;
   img {
     border-radius: 12px;
   }

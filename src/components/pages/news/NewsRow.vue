@@ -158,7 +158,7 @@ import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
 
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'

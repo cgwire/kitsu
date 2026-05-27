@@ -62,16 +62,16 @@
       </div>
 
       <div v-else-if="task">
-        <div class="flexrow extra-buttons pa05">
+        <div class="flexrow extra-buttons pa05 mr1">
           <div class="filler"></div>
-          <div
-            class="pointer"
-            :title="$t('main.csv.export_file')"
-            @click="onExportClick"
-            v-if="!withActions && !isCurrentUserClient"
-          >
-            <kitsu-icon name="export" :title="$t('main.csv.export_file')" />
-          </div>
+          <combobox-actions
+            class="flexrow-item export-combo"
+            align-right
+            thin
+            :title="$t('main.export')"
+            :actions="exportActions"
+            v-if="exportActions.length > 0"
+          />
         </div>
 
         <div class="pa1 pb0 pt0">
@@ -376,12 +376,12 @@ import ActionPanel from '@/components/tops/ActionPanel.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import Comment from '@/components/widgets/Comment.vue'
+import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
-import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PreviewPlayer from '@/components/previews/PreviewPlayer.vue'
+import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
@@ -396,12 +396,12 @@ export default {
     ActionPanel,
     AddComment,
     AddPreviewModal,
+    ComboboxActions,
     ComboboxStyled,
     Comment,
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
-    KitsuIcon,
     PeopleAvatar,
     PreviewPlayer,
     Spinner,
@@ -745,6 +745,46 @@ export default {
       }
     },
 
+    canDownloadAnnotations() {
+      return (
+        this.isCurrentUserManager &&
+        this.currentPreviewId &&
+        (this.currentPreview?.annotations?.length || 0) > 0
+      )
+    },
+
+    annotationsZipPath() {
+      return this.currentPreviewId
+        ? `/api/actions/preview-files/${this.currentPreviewId}/extract-annotated-frames`
+        : null
+    },
+
+    annotationsPdfPath() {
+      return this.currentPreviewId
+        ? `/api/actions/preview-files/${this.currentPreviewId}/extract-annotated-frames-pdf`
+        : null
+    },
+
+    exportActions() {
+      return [
+        {
+          label: 'annotations.zip',
+          href: this.annotationsZipPath,
+          visible: this.canDownloadAnnotations
+        },
+        {
+          label: 'annotations.pdf',
+          href: this.annotationsPdfPath,
+          visible: this.canDownloadAnnotations
+        },
+        {
+          label: 'comments.csv',
+          handler: () => this.onExportClick(),
+          visible: !this.withActions && !this.isCurrentUserClient
+        }
+      ].filter(action => action.visible !== false)
+    },
+
     currentFps() {
       return parseInt(this.productionMap.get(this.task.project_id)?.fps) || 25
     },
@@ -1079,17 +1119,22 @@ export default {
       this.currentPreviewDlPath = this.getOriginalDlPath()
     },
 
-    onAnnotationChanged({ preview, additions, deletions, updates }) {
+    async onAnnotationChanged({ preview, additions, deletions, updates }) {
       let taskId = this.task ? this.task.id : this.previousTaskId
       taskId = taskId || preview.task_id
-      if (taskId) {
-        this.updatePreviewAnnotation({
+      if (!taskId) return
+      const previewPlayer = this.$refs['preview-player']
+      try {
+        await this.updatePreviewAnnotation({
           taskId,
           preview,
           additions,
           deletions,
           updates
         })
+        previewPlayer?.confirmAnnotationsSaved()
+      } catch {
+        previewPlayer?.restoreFailedAnnotations()
       }
     },
 
@@ -1870,5 +1915,13 @@ export default {
   img {
     width: 16px;
   }
+}
+
+.annotation-dl {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5em;
+  text-decoration: none;
 }
 </style>
