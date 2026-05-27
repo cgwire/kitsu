@@ -1,0 +1,2 @@
+import{Kr as e,Wi as t}from"./index-tpOXPn6x.js";e();var n=e=>{let n=t(!1);return{showList:n,toggle:()=>{n.value=!n.value},select:t=>{e(`update:modelValue`,t.id),n.value=!1}}};export{n as t};
+//# sourceMappingURL=combobox-D0NzVL-p.js.map

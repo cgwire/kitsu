@@ -1,2 +1,0 @@
-import{W as e,_ as t,b as n,q as r,t as i,y as a}from"./vue.esm-bundler-Dr-1m_zu.js";i();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(i){return(l,u)=>(e(),n(`div`,o,[t(`div`,s,[r(l.$slots,`main`)]),i.side?(e(),n(`div`,c,[r(l.$slots,`side`)])):a(``,!0)]))}};export{l as t};
-//# sourceMappingURL=PageLayout-CsHVnt1K.js.map
