@@ -667,20 +667,6 @@ export default {
       }
     },
 
-    getPath(section) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
-    },
-
     showEditHistoryModal(edit) {
       this.historyEdit = edit
       this.modals.isEditHistoryDisplayed = true

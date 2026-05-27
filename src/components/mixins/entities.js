@@ -341,6 +341,20 @@ export const entitiesMixin = {
       )
     },
 
+    getPath(section) {
+      const route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
+    },
+
     onChangeSortClicked(sortInfo) {
       this[`change${this.entityTypeName}Sort`](sortInfo)
     },
