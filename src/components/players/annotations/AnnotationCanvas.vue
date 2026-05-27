@@ -90,6 +90,11 @@ const updateBounds = () => {
     canvas.setDimensions({ width: mediaRect.width, height: mediaRect.height })
     emit('resized', { width: mediaRect.width, height: mediaRect.height })
   }
+  // Refresh fabric's cached canvas offset. setDimensions doesn't
+  // always trigger it on its own, and a stale offset shifts pointer
+  // coordinates (so freshly drawn strokes land at the wrong y) until
+  // any window resize forces a recalculation.
+  canvas?.calcOffset()
 }
 
 const observe = el => el && resizeObserver?.observe(el)
