@@ -1079,17 +1079,22 @@ export default {
       this.currentPreviewDlPath = this.getOriginalDlPath()
     },
 
-    onAnnotationChanged({ preview, additions, deletions, updates }) {
+    async onAnnotationChanged({ preview, additions, deletions, updates }) {
       let taskId = this.task ? this.task.id : this.previousTaskId
       taskId = taskId || preview.task_id
-      if (taskId) {
-        this.updatePreviewAnnotation({
+      if (!taskId) return
+      const previewPlayer = this.$refs['preview-player']
+      try {
+        await this.updatePreviewAnnotation({
           taskId,
           preview,
           additions,
           deletions,
           updates
         })
+        previewPlayer?.confirmAnnotationsSaved()
+      } catch {
+        previewPlayer?.restoreFailedAnnotations()
       }
     },
 
