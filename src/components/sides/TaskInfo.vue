@@ -70,7 +70,7 @@
             thin
             :title="$t('main.export')"
             :actions="exportActions"
-            v-if="exportActions.length > 0"
+            v-if="inPlaylist && exportActions.length > 0"
           />
         </div>
 
@@ -439,6 +439,10 @@ export default {
     extendable: {
       type: Boolean,
       default: true
+    },
+    inPlaylist: {
+      type: Boolean,
+      default: false
     },
     isLoading: {
       type: Boolean,

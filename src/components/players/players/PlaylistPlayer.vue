@@ -378,6 +378,7 @@
         :current-parent-preview="currentPreview"
         :fps="fps"
         :extendable="false"
+        :in-playlist="true"
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
