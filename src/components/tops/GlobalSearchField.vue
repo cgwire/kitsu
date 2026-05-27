@@ -22,6 +22,7 @@
       :style="{
         'min-height': `${(nbResults || 1) * 60}px`
       }"
+      @mousedown.prevent
       v-if="isSearchActive"
     >
       <div class="result-line" v-if="searchQuery.length < 3">

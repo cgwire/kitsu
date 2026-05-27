@@ -32,7 +32,7 @@
     </div>
 
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable multi-section">
+      <table class="datatable">
         <thead class="datatable-head">
           <tr>
             <th
@@ -438,13 +438,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.datatable-row-header {
-  z-index: 6; // over the .vue-slider (z-index: 5)
+.datatable-head .datatable-row-header {
+  z-index: 8; // sticky <th> must be above all
 
   &.time-spent {
-    position: relative;
+    z-index: 6; // <th> must be under the sticky <th> on horizontal scroll
+  }
+}
+
+.datatable-body .datatable-row-header {
+  z-index: 7; // <th> must be over the .vue-slider (z-index: 5) and .vue-slider-dot (z-index: 6)
+
+  &.time-spent {
     z-index: 5; // <th> must be under <td> on vertical scroll
   }
+}
+
+:deep(.vue-slider-dot:hover) {
+  z-index: 6; // hack to put slider tooltip hover the header
 }
 
 .datatable-body tr:first-child th,

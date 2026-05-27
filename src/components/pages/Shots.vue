@@ -171,7 +171,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('shots.restore_error')"
       @cancel="modals.isRestoreDisplayed = false"
       @confirm="confirmRestoreShot"
@@ -193,7 +193,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -305,7 +305,6 @@ import { mapGetters, mapActions } from 'vuex'
 import shotStore from '@/store/modules/shots'
 
 import csv from '@/lib/csv'
-import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
@@ -540,14 +539,6 @@ export default {
       return shotStore.cache.shotMap
     },
 
-    searchField() {
-      return this.$refs['shot-search-field']
-    },
-
-    addThumbnailsModal() {
-      return this.$refs['add-thumbnails-modal']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 
@@ -660,51 +651,6 @@ export default {
       this.newShot(shot).then(callback).catch(console.error)
     },
 
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Shot'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
-    closeMetadataModal() {
-      this.modals.isAddMetadataDisplayed = false
-    },
-
-    confirmDeleteMetadata() {
-      this.errors.deleteMetadata = false
-      this.loading.deleteMetadata = true
-      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
-        .then(() => {
-          this.errors.deleteMetadata = false
-          this.loading.deleteMetadata = false
-          this.modals.isDeleteMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteMetadata = true
-          this.loading.deleteMetadata = false
-        })
-    },
-
-    onAddMetadataClicked() {
-      this.descriptorToEdit = {}
-      this.modals.isAddMetadataDisplayed = true
-    },
-
-    onDeleteMetadataClicked(descriptorId) {
-      this.descriptorIdToDelete = descriptorId
-      this.modals.isDeleteMetadataDisplayed = true
-    },
-
     onDeleteClicked(shot) {
       this.shotToDelete = shot
       this.modals.isDeleteDisplayed = true
@@ -713,18 +659,6 @@ export default {
     onEditClicked(shot) {
       this.shotToEdit = shot
       this.modals.isNewDisplayed = true
-    },
-
-    onRestoreClicked(shot) {
-      this.shotToRestore = shot
-      this.modals.isRestoreDisplayed = true
-    },
-
-    onEditMetadataClicked(descriptorId) {
-      this.descriptorToEdit = this.currentProduction.descriptors.find(
-        d => d.id === descriptorId
-      )
-      this.modals.isAddMetadataDisplayed = true
     },
 
     confirmEditShot(form) {
@@ -746,23 +680,6 @@ export default {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
-        })
-    },
-
-    confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypeForTaskDeletion.id
-      const projectId = this.currentProduction.id
-      this.errors.deleteAllTasks = false
-      this.loading.deleteAllTasks = true
-      this.deleteAllShotTasks({ projectId, taskTypeId, selectionOnly })
-        .then(() => {
-          this.loading.deleteAllTasks = false
-          this.modals.isDeleteAllTasksDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.deleteAllTasks = false
-          this.errors.deleteAllTasks = true
         })
     },
 
@@ -796,70 +713,6 @@ export default {
         })
     },
 
-    confirmAddThumbnails(forms) {
-      const addPreview = form => {
-        this.addThumbnailsModal?.markLoading(form.task.entity_id)
-        return this.commentTaskWithPreview({
-          taskId: form.task.id,
-          commentText: '',
-          taskStatusId: form.task.task_status_id,
-          form
-        })
-          .then(({ newComment, preview }) => {
-            return this.setPreview({
-              taskId: form.task.id,
-              entityId: form.task.entity_id,
-              previewId: preview.id
-            })
-          })
-          .then(() => {
-            this.addThumbnailsModal?.markUploaded(form.task.entity_id)
-          })
-      }
-      this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
-        this.loading.addThumbnails = false
-        this.modals.isAddThumbnailsDisplayed = false
-      })
-    },
-
-    confirmCreateTasks({ form, selectionOnly }) {
-      this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.hideCreateTasksModal()
-          this.loading.creatingTasks = false
-        })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
-    },
-
-    confirmCreateTasksAndStay({ form, selectionOnly }) {
-      this.loading.creatingTasksStay = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.loading.creatingTasksStay = false
-        })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
-    },
-
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        type: 'shots',
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = true
       this.loadShots(err => {
@@ -885,22 +738,6 @@ export default {
         return this.$t('shots.delete_text', { name: shot.name })
       } else if (shot) {
         return this.$t('shots.cancel_text', { name: shot.name })
-      }
-      return ''
-    },
-
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const shot = this.shotToRestore
-      if (shot) {
-        return this.$t('shots.restore_text', { name: shot.name })
       }
       return ''
     },
@@ -957,53 +794,12 @@ export default {
       this.showImportModal()
     },
 
-    onDeleteAllTasksClicked(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
-      this.taskTypeForTaskDeletion = taskType
-      this.deleteAllTasksLockText = taskType.name
-      this.modals.isDeleteAllTasksDisplayed = true
-    },
-
     onSequenceClicked(sequenceName) {
       if (sequenceName.includes(' ')) {
         sequenceName = `"${sequenceName}"`
       }
       this.searchField.setValue(`${this.shotSearchText} ${sequenceName}`)
       this.onSearchChange()
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveShotSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeShotSearch(searchQuery).catch(console.error)
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
-    getPath(section) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
     },
 
     showManageShots() {
@@ -1078,10 +874,6 @@ export default {
         })
         csv.buildCsvFile(name, [headers].concat(shotLines))
       })
-    },
-
-    onChangeSortClicked(sortInfo) {
-      this.changeShotSort(sortInfo)
     },
 
     async onFieldChanged({ entry, fieldName, value }) {

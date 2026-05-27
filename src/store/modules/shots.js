@@ -750,15 +750,12 @@ const actions = {
     })
   },
 
-  deleteAllShotTasks(
-    { commit, dispatch, state },
-    { projectId, taskTypeId, selectionOnly }
-  ) {
+  deleteAllShotTasks({ dispatch }, { projectId, taskTypeId, selectionOnly }) {
     let taskIds = []
     if (selectionOnly) {
       taskIds = cache.result
-        .filter(a => a.validations.get(taskTypeId))
-        .map(a => a.validations.get(taskTypeId))
+        .filter(shot => shot.validations.get(taskTypeId))
+        .map(shot => shot.validations.get(taskTypeId))
     }
     return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
   },

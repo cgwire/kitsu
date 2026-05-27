@@ -1,11 +1,11 @@
 import { mapGetters, mapActions } from 'vuex'
 
-import stringHelpers from '@/lib/string'
 import func from '@/lib/func'
 import preferences from '@/lib/preferences'
+import stringHelpers from '@/lib/string'
 
 /*
- * Common functions to shots and assets pages.
+ * Common functions to entity pages (assets, shots, sequences, edits, episodes).
  */
 export const entitiesMixin = {
   data() {
@@ -25,7 +25,7 @@ export const entitiesMixin = {
       `${this.pageName}:department`
     )
     const selectableDepartments = this.selectableDepartments(
-      stringHelpers.capitalize(this.type)
+      this.entityTypeName
     ).map(department => department.id)
 
     if (
@@ -82,12 +82,28 @@ export const entitiesMixin = {
     },
 
     entityTypeName() {
-      return `${this.type[0].toUpperCase()}${this.type.slice(1)}`
+      return stringHelpers.capitalize(this.type)
     },
 
     selectedEntities() {
-      if (['Episode', 'Sequence'].includes(this.entityTypeName)) return []
+      if (['Episode', 'Sequence'].includes(this.entityTypeName)) {
+        return new Map()
+      }
       return this[`selected${this.entityTypeName}s`]
+    },
+
+    deleteAllTasksText() {
+      const taskType = this.taskTypeForTaskDeletion
+      return taskType
+        ? this.$t('tasks.delete_all_text', { name: taskType.name })
+        : ''
+    },
+
+    restoreText() {
+      const entity = this[`${this.type}ToRestore`]
+      return entity
+        ? this.$t(`${this.type}s.restore_text`, { name: entity.name })
+        : ''
     }
   },
 
@@ -135,7 +151,7 @@ export const entitiesMixin = {
       } else {
         this.departmentFilter = [departmentId]
       }
-      this.$store.commit('CLEAR_SELECTED_TASKS')
+      this.clearSelectedTasks()
       preferences.setPreference(`${this.pageName}:department`, departmentId)
     },
 
@@ -143,27 +159,35 @@ export const entitiesMixin = {
       if (!this.currentProduction) {
         return []
       }
-      return this.currentProduction.task_types
-        .map(taskTypeId => {
-          const taskType = this.taskTypeMap.get(taskTypeId)
-          return taskType && taskType.for_entity === forEntity
-            ? this.departmentMap.get(taskType.department_id)
-            : false
-        })
-        .filter(
-          (department, index, self) =>
-            department && self.indexOf(department) === index
+      return [
+        ...new Set(
+          this.currentProduction.task_types
+            .map(id => this.taskTypeMap.get(id))
+            .filter(taskType => taskType?.for_entity === forEntity)
+            .map(taskType => this.departmentMap.get(taskType.department_id))
+            .filter(Boolean)
         )
-    },
-
-    onEntityThumbnailClicked(entityId) {
-      if (!entityId) return
-      this.previvewFileIdToShow = entityId
-      this.modals.isPreviewDisplayed = true
+      ]
     },
 
     closeMetadataModal() {
       this.modals.isAddMetadataDisplayed = false
+    },
+
+    confirmAddMetadata(form) {
+      this.loading.addMetadata = true
+      form.entity_type = this.entityTypeName
+      this.addMetadataDescriptor(form)
+        .then(() => {
+          this.modals.isAddMetadataDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.errors.addMetadata = true
+        })
+        .finally(() => {
+          this.loading.addMetadata = false
+        })
     },
 
     confirmDeleteMetadata() {
@@ -171,13 +195,13 @@ export const entitiesMixin = {
       this.loading.deleteMetadata = true
       this.deleteMetadataDescriptor(this.descriptorIdToDelete)
         .then(() => {
-          this.errors.deleteMetadata = false
-          this.loading.deleteMetadata = false
           this.modals.isDeleteMetadataDisplayed = false
         })
         .catch(err => {
           console.error(err)
           this.errors.deleteMetadata = true
+        })
+        .finally(() => {
           this.loading.deleteMetadata = false
         })
     },
@@ -204,15 +228,21 @@ export const entitiesMixin = {
       const projectId = this.currentProduction.id
       this.errors.deleteAllTasks = false
       this.loading.deleteAllTasks = true
-      this.deleteAllTasks({ projectId, taskTypeId, selectionOnly })
+      this[`deleteAll${this.entityTypeName}Tasks`]({
+        projectId,
+        taskTypeId,
+        selectionOnly
+      })
         .then(() => {
-          this.loading.deleteAllTasks = false
+          if (!selectionOnly) this.reset()
           this.modals.isDeleteAllTasksDisplayed = false
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteAllTasks = false
           this.errors.deleteAllTasks = true
+        })
+        .finally(() => {
+          this.loading.deleteAllTasks = false
         })
     },
 
@@ -225,7 +255,7 @@ export const entitiesMixin = {
           taskStatusId: form.task.task_status_id,
           form
         })
-          .then(({ newComment, preview }) => {
+          .then(({ preview }) => {
             return this.setPreview({
               taskId: form.task.id,
               entityId: form.task.entity_id,
@@ -270,13 +300,14 @@ export const entitiesMixin = {
         })
     },
 
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      } else {
-        return ''
-      }
+    runTasksCreation(form, selectionOnly) {
+      this.errors.creatingTasks = false
+      return this.createTasks({
+        type: `${this.type}s`,
+        task_type_id: form.task_type_id,
+        project_id: this.currentProduction.id,
+        selectionOnly
+      })
     },
 
     onDeleteAllTasksClicked(taskTypeId) {
@@ -286,14 +317,50 @@ export const entitiesMixin = {
       this.modals.isDeleteAllTasksDisplayed = true
     },
 
+    onRestoreClicked(entity) {
+      this[`${this.type}ToRestore`] = entity
+      this.modals.isRestoreDisplayed = true
+    },
+
     saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
+      this.$store.commit(
+        `SET_${this.type.toUpperCase()}_LIST_SCROLL_POSITION`,
+        scrollPosition
+      )
+    },
+
+    saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) return
+      this.loading.savingSearch = true
+      this[`save${this.entityTypeName}Search`](searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
+    },
+
+    removeSearchQuery(searchQuery) {
+      this[`remove${this.entityTypeName}Search`](searchQuery).catch(
+        console.error
+      )
+    },
+
+    getPath(section) {
+      const route = {
+        name: section,
+        params: {
+          production_id: this.currentProduction.id
+        }
+      }
+      if (this.isTVShow && this.currentEpisode) {
+        route.name = `episode-${section}`
+        route.params.episode_id = this.currentEpisode.id
+      }
+      return route
     },
 
     onChangeSortClicked(sortInfo) {
-      this[`change${this.type[0].toUpperCase()}${this.type.slice(1)}Sort`](
-        sortInfo
-      )
+      this[`change${this.entityTypeName}Sort`](sortInfo)
     },
 
     onKeepTaskPanelOpenChanged(keepOpen) {
@@ -309,6 +376,12 @@ export const entitiesMixin = {
   watch: {
     selectedDepartment() {
       this.onSelectedDepartmentChanged()
+    },
+
+    currentProduction(newProd, oldProd) {
+      if (!oldProd || !newProd || oldProd.id === newProd.id) return
+      this.keepTaskPanelOpen = false
+      this.clearSelection()
     },
 
     displaySettings: {

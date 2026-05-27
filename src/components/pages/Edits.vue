@@ -141,7 +141,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('edits.restore_error')"
       @cancel="modals.isRestoreDisplayed = false"
       @confirm="confirmRestoreEdit"
@@ -163,7 +163,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -255,7 +255,6 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
@@ -443,14 +442,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['edit-search-field']
-    },
-
-    addThumbnailsModal() {
-      return this.$refs['add-thumbnails-modal']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 
@@ -513,51 +504,6 @@ export default {
       'uploadEditFile'
     ]),
 
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Edit'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
-    closeMetadataModal() {
-      this.modals.isAddMetadataDisplayed = false
-    },
-
-    confirmDeleteMetadata() {
-      this.errors.deleteMetadata = false
-      this.loading.deleteMetadata = true
-      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
-        .then(() => {
-          this.errors.deleteMetadata = false
-          this.loading.deleteMetadata = false
-          this.modals.isDeleteMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteMetadata = true
-          this.loading.deleteMetadata = false
-        })
-    },
-
-    onAddMetadataClicked() {
-      this.descriptorToEdit = {}
-      this.modals.isAddMetadataDisplayed = true
-    },
-
-    onDeleteMetadataClicked(descriptorId) {
-      this.descriptorIdToDelete = descriptorId
-      this.modals.isDeleteMetadataDisplayed = true
-    },
-
     onDeleteClicked(edit) {
       this.editToDelete = edit
       this.modals.isDeleteDisplayed = true
@@ -571,18 +517,6 @@ export default {
     onEditClicked(edit) {
       this.editToEdit = edit
       this.modals.isNewDisplayed = true
-    },
-
-    onRestoreClicked(edit) {
-      this.editToRestore = edit
-      this.modals.isRestoreDisplayed = true
-    },
-
-    onEditMetadataClicked(descriptorId) {
-      this.descriptorToEdit = this.currentProduction.descriptors.find(
-        d => d.id === descriptorId
-      )
-      this.modals.isAddMetadataDisplayed = true
     },
 
     confirmEditEdit(form) {
@@ -603,23 +537,6 @@ export default {
           console.error(err)
           this.loading.edit = false
           this.errors.edit = true
-        })
-    },
-
-    confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypeForTaskDeletion.id
-      const projectId = this.currentProduction.id
-      this.errors.deleteAllTasks = false
-      this.loading.deleteAllTasks = true
-      this.deleteAllEditTasks({ projectId, taskTypeId, selectionOnly })
-        .then(() => {
-          this.loading.deleteAllTasks = false
-          this.modals.isDeleteAllTasksDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.deleteAllTasks = false
-          this.errors.deleteAllTasks = true
         })
     },
 
@@ -653,70 +570,6 @@ export default {
         })
     },
 
-    confirmAddThumbnails(forms) {
-      const addPreview = form => {
-        this.addThumbnailsModal?.markLoading(form.task.entity_id)
-        return this.commentTaskWithPreview({
-          taskId: form.task.id,
-          commentText: '',
-          taskStatusId: form.task.task_status_id,
-          form
-        })
-          .then(({ newComment, preview }) => {
-            return this.setPreview({
-              taskId: form.task.id,
-              entityId: form.task.entity_id,
-              previewId: preview.id
-            })
-          })
-          .then(() => {
-            this.addThumbnailsModal?.markUploaded(form.task.entity_id)
-          })
-      }
-      this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
-        this.loading.addThumbnails = false
-        this.modals.isAddThumbnailsDisplayed = false
-      })
-    },
-
-    confirmCreateTasks({ form, selectionOnly }) {
-      this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.hideCreateTasksModal()
-          this.loading.creatingTasks = false
-        })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
-    },
-
-    confirmCreateTasksAndStay({ form, selectionOnly }) {
-      this.loading.creatingTasksStay = true
-      this.runTasksCreation(form, selectionOnly)
-        .then(() => {
-          this.reset()
-          this.loading.creatingTasksStay = false
-        })
-        .catch(err => {
-          this.errors.creatingTasks = true
-          console.error(err)
-        })
-    },
-
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'edits',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = true
       this.loadEdits(err => {
@@ -739,22 +592,6 @@ export default {
         return this.$t('edits.delete_text', { name: edit.name })
       } else if (edit) {
         return this.$t('edits.cancel_text', { name: edit.name })
-      }
-      return ''
-    },
-
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const edit = this.editToRestore
-      if (edit) {
-        return this.$t('edits.restore_text', { name: edit.name })
       }
       return ''
     },
@@ -810,13 +647,6 @@ export default {
       this.showImportModal()
     },
 
-    onDeleteAllTasksClicked(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
-      this.taskTypeForTaskDeletion = taskType
-      this.deleteAllTasksLockText = taskType.name
-      this.modals.isDeleteAllTasksDisplayed = true
-    },
-
     onSearchChange(clearSelection = true) {
       if (!this.searchField) return
       const searchQuery = this.searchField.getValue() || ''
@@ -827,40 +657,6 @@ export default {
       if (clearSelection) {
         this.clearSelection()
       }
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveEditSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeEditSearch(searchQuery).catch(console.error)
-    },
-
-    getPath(section) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      return route
     },
 
     showEditHistoryModal(edit) {
@@ -908,10 +704,6 @@ export default {
         })
         csv.buildCsvFile(name, [headers].concat(editLines))
       })
-    },
-
-    onChangeSortClicked(sortInfo) {
-      this.changeEditSort(sortInfo)
     },
 
     async onFieldChanged({ entry, fieldName, value }) {

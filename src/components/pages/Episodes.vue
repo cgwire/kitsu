@@ -121,7 +121,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -386,10 +386,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['episode-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 
@@ -421,7 +417,7 @@ export default {
       'changeEpisodeSort',
       'clearSelectedEpisodes',
       'commentTaskWithPreview',
-      'deleteAllTasks',
+      'deleteAllEpisodeTasks',
       'deleteEpisode',
       'deleteMetadataDescriptor',
       'editEpisode',
@@ -437,21 +433,6 @@ export default {
       'showAssignations',
       'uploadEpisodeFile'
     ]),
-
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Episode'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
 
     showNewModal() {
       this.episodeToEdit = {}
@@ -473,16 +454,6 @@ export default {
         })
     },
 
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'episodes',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = false
       this.loadEpisodesWithTasks(err => {
@@ -497,22 +468,6 @@ export default {
         form.production_id = this.openProductions[0].id
       }
       this.episodeToEdit = form
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveEpisodeSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeEpisodeSearch(searchQuery).catch(console.error)
     },
 
     onExportClick() {
@@ -622,7 +577,7 @@ export default {
 
   watch: {
     currentProduction() {
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
+      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
       this.initialLoading = false
       this.reset()
     },

@@ -122,7 +122,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -389,10 +389,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['sequence-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 
@@ -424,7 +420,7 @@ export default {
       'changeSequenceSort',
       'clearSelectedSequences',
       'commentTaskWithPreview',
-      'deleteAllTasks',
+      'deleteAllSequenceTasks',
       'deleteSequence',
       'deleteMetadataDescriptor',
       'editSequence',
@@ -440,21 +436,6 @@ export default {
       'showAssignations',
       'uploadSequenceFile'
     ]),
-
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Sequence'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
 
     showNewModal() {
       this.sequenceToEdit = {}
@@ -476,16 +457,6 @@ export default {
         })
     },
 
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'sequences',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      })
-    },
-
     reset() {
       this.initialLoading = false
       this.loadSequencesWithTasks(err => {
@@ -501,22 +472,6 @@ export default {
         form.production_id = this.openProductions[0].id
       }
       this.sequenceToEdit = form
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveSequenceSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeSequenceSearch(searchQuery).catch(console.error)
     },
 
     onExportClick() {

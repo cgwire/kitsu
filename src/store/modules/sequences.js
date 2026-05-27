@@ -329,6 +329,19 @@ const actions = {
     commit(CLEAR_SELECTED_SEQUENCES)
   },
 
+  deleteAllSequenceTasks(
+    { dispatch },
+    { projectId, taskTypeId, selectionOnly }
+  ) {
+    let taskIds = []
+    if (selectionOnly) {
+      taskIds = cache.result
+        .filter(sequence => sequence.validations.get(taskTypeId))
+        .map(sequence => sequence.validations.get(taskTypeId))
+    }
+    return dispatch('deleteAllTasks', { projectId, taskTypeId, taskIds })
+  },
+
   initSequences({ commit, dispatch, state, rootState, rootGetters }) {
     const productionId = rootState.route.params.production_id
     dispatch('setLastProductionScreen', 'sequences')

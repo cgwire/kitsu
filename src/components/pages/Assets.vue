@@ -147,7 +147,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="loading.delete"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('assets.restore_error')"
       @confirm="confirmRestoreAsset"
       @cancel="modals.isRestoreDisplayed = false"
@@ -158,7 +158,7 @@
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
-      :text="deleteAllTasksText()"
+      :text="deleteAllTasksText"
       :error-text="$t('tasks.delete_all_error')"
       :lock-text="deleteAllTasksLockText"
       :selection-option="true"
@@ -208,7 +208,7 @@
     <create-tasks-modal
       :active="modals.isCreateTasksDisplayed"
       :is-loading="loading.creatingTasks"
-      :is-loading-stay="loading.taskStay"
+      :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :title="$t('tasks.create_tasks_asset')"
       :text="$t('tasks.create_tasks_asset_explaination')"
@@ -254,7 +254,6 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 
@@ -357,6 +356,7 @@ export default {
         addMetadata: false,
         addThumbnails: false,
         creatingTasks: false,
+        creatingTasksStay: false,
         deleteAllTasks: false,
         deleteMetadata: false,
         delete: false,
@@ -364,8 +364,7 @@ export default {
         importing: false,
         restore: false,
         savingSearch: false,
-        stay: false,
-        taskStay: false
+        stay: false
       },
       modals: {
         isAddMetadataDisplayed: false,
@@ -479,14 +478,6 @@ export default {
       const productionId = this.currentProduction?.id
       if (!productionId) return []
       return this.userFilterGroups?.asset?.[productionId] || []
-    },
-
-    addThumbnailsModal() {
-      return this.$refs['add-thumbnails-modal']
-    },
-
-    searchField() {
-      return this.$refs['asset-search-field']
     },
 
     filteredAssets() {
@@ -603,11 +594,6 @@ export default {
       this.modals.isDeleteDisplayed = true
     },
 
-    onRestoreClicked(asset) {
-      this.assetToRestore = asset
-      this.modals.isRestoreDisplayed = true
-    },
-
     confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
@@ -682,72 +668,6 @@ export default {
         })
     },
 
-    confirmCreateTasks({ form, selectionOnly }) {
-      this.loading.creatingTasks = true
-      this.runTasksCreation(form, selectionOnly).then(() => {
-        this.reset()
-        this.hideCreateTasksModal()
-        this.loading.creatingTasks = false
-      })
-    },
-
-    confirmCreateTasksAndStay({ form, selectionOnly }) {
-      this.loading.taskStay = true
-      this.runTasksCreation(form, selectionOnly).then(() => {
-        this.reset()
-        this.loading.taskStay = false
-      })
-    },
-
-    runTasksCreation(form, selectionOnly) {
-      this.errors.creatingTasks = false
-      return this.createTasks({
-        type: 'assets',
-        task_type_id: form.task_type_id,
-        project_id: this.currentProduction.id,
-        selectionOnly
-      }).catch(err => {
-        this.errors.creatingTasks = true
-        console.error(err)
-      })
-    },
-
-    confirmDeleteAllTasks(selectionOnly) {
-      const taskTypeId = this.taskTypeForTaskDeletion.id
-      const projectId = this.currentProduction.id
-      this.errors.deleteAllTasks = false
-      this.loading.deleteAllTasks = true
-      this.deleteAllAssetTasks({ projectId, taskTypeId, selectionOnly })
-        .then(() => {
-          if (!selectionOnly) this.loadAssets()
-          this.modals.isDeleteAllTasksDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteAllTasks = true
-        })
-        .finally(() => {
-          this.loading.deleteAllTasks = false
-        })
-    },
-
-    confirmDeleteMetadata() {
-      this.errors.deleteMetadata = false
-      this.loading.deleteMetadata = true
-      this.deleteMetadataDescriptor(this.descriptorIdToDelete)
-        .then(() => {
-          this.errors.deleteMetadata = false
-          this.modals.isDeleteMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.deleteMetadata = true
-        })
-        .finally(() => {
-          this.loading.deleteMetadata = false
-        })
-    },
-
     resetLightEditModal() {
       const form = {
         name: '',
@@ -775,22 +695,6 @@ export default {
         return this.$t('assets.delete_text', { name: asset.name })
       } else if (asset) {
         return this.$t('assets.cancel_text', { name: asset.name })
-      }
-      return ''
-    },
-
-    deleteAllTasksText() {
-      const taskType = this.taskTypeForTaskDeletion
-      if (taskType) {
-        return this.$t('tasks.delete_all_text', { name: taskType.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const asset = this.assetToRestore
-      if (asset) {
-        return this.$t('assets.restore_text', { name: asset.name })
       }
       return ''
     },
@@ -845,94 +749,6 @@ export default {
       this.showImportModal()
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveAssetSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeAssetSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', scrollPosition)
-    },
-
-    onDeleteAllTasksClicked(taskTypeId) {
-      const taskType = this.taskTypeMap.get(taskTypeId)
-      this.taskTypeForTaskDeletion = taskType
-      this.deleteAllTasksLockText = taskType.name
-      this.modals.isDeleteAllTasksDisplayed = true
-    },
-
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Asset'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
-    confirmAddThumbnails(forms) {
-      const addPreview = form => {
-        this.addThumbnailsModal?.markLoading(form.task.entity_id)
-        return this.commentTaskWithPreview({
-          taskId: form.task.id,
-          commentText: '',
-          taskStatusId: form.task.task_status_id,
-          form
-        })
-          .then(({ newComment, preview }) => {
-            return this.setPreview({
-              taskId: form.task.id,
-              entityId: form.task.entity_id,
-              previewId: preview.id
-            })
-          })
-          .then(() => {
-            this.addThumbnailsModal?.markUploaded(form.task.entity_id)
-          })
-      }
-      this.loading.addThumbnails = true
-      func.runPromiseMapAsSeries(forms, addPreview).then(() => {
-        this.loading.addThumbnails = false
-        this.modals.isAddThumbnailsDisplayed = false
-      })
-    },
-
-    onAddMetadataClicked() {
-      this.descriptorToEdit = {}
-      this.modals.isAddMetadataDisplayed = true
-    },
-
-    onDeleteMetadataClicked(descriptorId) {
-      this.descriptorIdToDelete = descriptorId
-      this.modals.isDeleteMetadataDisplayed = true
-    },
-
-    onEditMetadataClicked(descriptorId) {
-      this.descriptorToEdit = this.currentProduction.descriptors.find(
-        d => d.id === descriptorId
-      )
-      this.modals.isAddMetadataDisplayed = true
-    },
-
     onExportClick() {
       this.getAssetsCsvLines().then(assetLines => {
         const nameData = [
@@ -977,10 +793,6 @@ export default {
     onAssetTypeClicked(assetType) {
       this.searchField.setValue(`${this.assetSearchText} type=[${assetType}]`)
       this.onSearchChange()
-    },
-
-    onChangeSortClicked(sortInfo) {
-      this.changeAssetSort(sortInfo)
     },
 
     async onFieldChanged({ entry, fieldName, value }) {
