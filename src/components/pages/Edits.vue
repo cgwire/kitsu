@@ -141,7 +141,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('edits.restore_error')"
       @cancel="modals.isRestoreDisplayed = false"
       @confirm="confirmRestoreEdit"
@@ -527,11 +527,6 @@ export default {
       this.modals.isNewDisplayed = true
     },
 
-    onRestoreClicked(edit) {
-      this.editToRestore = edit
-      this.modals.isRestoreDisplayed = true
-    },
-
     confirmEditEdit(form) {
       let action = 'newEdit'
       this.loading.edit = true
@@ -605,14 +600,6 @@ export default {
         return this.$t('edits.delete_text', { name: edit.name })
       } else if (edit) {
         return this.$t('edits.cancel_text', { name: edit.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const edit = this.editToRestore
-      if (edit) {
-        return this.$t('edits.restore_text', { name: edit.name })
       }
       return ''
     },

@@ -147,7 +147,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="loading.delete"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('assets.restore_error')"
       @confirm="confirmRestoreAsset"
       @cancel="modals.isRestoreDisplayed = false"
@@ -602,11 +602,6 @@ export default {
       this.modals.isDeleteDisplayed = true
     },
 
-    onRestoreClicked(asset) {
-      this.assetToRestore = asset
-      this.modals.isRestoreDisplayed = true
-    },
-
     confirmNewAssetStay(form) {
       this.loading.stay = true
       this.success.edit = false
@@ -708,14 +703,6 @@ export default {
         return this.$t('assets.delete_text', { name: asset.name })
       } else if (asset) {
         return this.$t('assets.cancel_text', { name: asset.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const asset = this.assetToRestore
-      if (asset) {
-        return this.$t('assets.restore_text', { name: asset.name })
       }
       return ''
     },

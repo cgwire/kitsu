@@ -171,7 +171,7 @@
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
-      :text="restoreText()"
+      :text="restoreText"
       :error-text="$t('shots.restore_error')"
       @cancel="modals.isRestoreDisplayed = false"
       @confirm="confirmRestoreShot"
@@ -669,11 +669,6 @@ export default {
       this.modals.isNewDisplayed = true
     },
 
-    onRestoreClicked(shot) {
-      this.shotToRestore = shot
-      this.modals.isRestoreDisplayed = true
-    },
-
     confirmEditShot(form) {
       form.id = this.shotToEdit.id
       form.data.resolution = form.resolution
@@ -751,14 +746,6 @@ export default {
         return this.$t('shots.delete_text', { name: shot.name })
       } else if (shot) {
         return this.$t('shots.cancel_text', { name: shot.name })
-      }
-      return ''
-    },
-
-    restoreText() {
-      const shot = this.shotToRestore
-      if (shot) {
-        return this.$t('shots.restore_text', { name: shot.name })
       }
       return ''
     },

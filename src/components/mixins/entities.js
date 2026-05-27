@@ -97,6 +97,13 @@ export const entitiesMixin = {
       return taskType
         ? this.$t('tasks.delete_all_text', { name: taskType.name })
         : ''
+    },
+
+    restoreText() {
+      const entity = this[`${this.type}ToRestore`]
+      return entity
+        ? this.$t(`${this.type}s.restore_text`, { name: entity.name })
+        : ''
     }
   },
 
@@ -304,6 +311,11 @@ export const entitiesMixin = {
       this.taskTypeForTaskDeletion = taskType
       this.deleteAllTasksLockText = taskType.name
       this.modals.isDeleteAllTasksDisplayed = true
+    },
+
+    onRestoreClicked(entity) {
+      this[`${this.type}ToRestore`] = entity
+      this.modals.isRestoreDisplayed = true
     },
 
     saveScrollPosition(scrollPosition) {
