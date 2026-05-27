@@ -3703,10 +3703,6 @@ const onKeyDown = event => {
     } else {
       onNextFrameClicked()
     }
-  } else if (event.keyCode === 32) {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayPauseClicked()
   } else if (event.altKey && event.keyCode === 74) {
     event.preventDefault()
     event.stopPropagation()
