@@ -328,6 +328,7 @@
       :is-loading="loading.addCommentAttachment"
       :is-error="errors.addCommentAttachment"
       :is-movie="isMovie"
+      :is-picture="isPicture"
       :title="`${task.entity_name} / ${
         taskTypeMap.get(task.task_type_id).name
       }`"
@@ -410,6 +411,10 @@ const props = defineProps({
     default: null
   },
   isMovie: {
+    type: Boolean,
+    default: false
+  },
+  isPicture: {
     type: Boolean,
     default: false
   },

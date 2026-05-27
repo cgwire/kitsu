@@ -257,6 +257,7 @@
                 :is-max-retakes-error="errors.addCommentMaxRetakes"
                 :is-loading="loading.addComment"
                 :is-movie="isMovie"
+                :is-picture="isPicture"
                 :team="currentTeam"
                 :task-types="currentTaskTypes"
                 :task="task"
@@ -628,6 +629,10 @@ export default {
 
     isMovie() {
       return this.extension === 'mp4'
+    },
+
+    isPicture() {
+      return ['png', 'gif'].includes(this.extension)
     },
 
     isPreviewPlayerReadOnly() {

@@ -414,6 +414,7 @@ import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
 import {
+  buildAnnotationSnapshotFilename,
   isModelPreview,
   isMoviePreview,
   isPicturePreview,
@@ -657,6 +658,7 @@ const {
   clearComparisonCanvas,
   copyAnnotations,
   copyAnnotationCanvas,
+  compositeLiveAnnotationsOntoCanvas,
   pasteAnnotations,
   setAnnotationDrawingMode,
   setShapeTool,
@@ -1353,25 +1355,81 @@ const extractVideoFrame = (canvas, frame) => {
 }
 
 const extractAnnotationSnapshots = async () => {
+  if (isPicture.value) return extractPicturePreviewSnapshots()
+  return extractVideoAnnotationSnapshots()
+}
+
+const snapshotFilename = ({ revision, frame, index } = {}) =>
+  buildAnnotationSnapshotFilename({
+    production: currentProduction.value?.name,
+    entity: props.task?.entity_name,
+    taskType: props.taskTypeMap.get(props.task?.task_type_id)?.name,
+    revision,
+    frame,
+    index
+  })
+
+// Video preview: one PNG per annotation, each captured at the
+// annotation's frame with its drawing composited on top.
+const extractVideoAnnotationSnapshots = async () => {
   const files = []
   const sortedAnnotations = annotations.value.sort((a, b) => {
     return parseInt(b.frame) < parseInt(a.frame) ? 1 : -1
   })
-  let index = 1
+  const revision = currentPreview.value?.revision
   for (const annotation of sortedAnnotations) {
     const canvas = document.getElementById('annotation-snapshot')
-    const filename = `annotation ${index}.png`
-    const frame = roundToFrame(annotation.time, fps.value) / frameDuration.value
+    const frame = Math.round(
+      roundToFrame(annotation.time, fps.value) / frameDuration.value
+    )
     await extractVideoFrame(canvas, frame)
     await copyAnnotationCanvas(canvas, annotation)
-    const file = await getFileFromCanvas(canvas, filename)
-    files.push(file)
-    index++
+    files.push(
+      await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
+    )
   }
   previewViewer.value.setCurrentFrame(currentFrame.value - 1)
   nextTick(() => {
     clearCanvas()
   })
+  return files
+}
+
+// Picture revisions can hold several preview files. Walk them all and
+// emit one PNG per picture preview, with that preview's annotations
+// composited on top. Briefly switches the displayed preview file in
+// order to reuse the live extract/composite pipeline.
+const extractPicturePreviewSnapshots = async () => {
+  const savedIndex = currentIndex.value
+  const picturePreviews = props.previews
+    .map((preview, index) => ({ preview, index: index + 1 }))
+    .filter(({ preview }) => isPicturePreview(preview.extension))
+
+  const files = []
+  for (const { preview, index } of picturePreviews) {
+    if (currentIndex.value !== index) {
+      currentIndex.value = index
+      // Wait for the picture to swap and annotations to reload. The
+      // chain is async (image load -> resetPlayerPositions ->
+      // AnnotationCanvas resized -> reloadAnnotations) so a single tick
+      // isn't enough.
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    const canvas = document.getElementById('annotation-snapshot')
+    previewViewer.value.extractPicture(canvas)
+    await compositeLiveAnnotationsOntoCanvas(canvas)
+    files.push(
+      await getFileFromCanvas(
+        canvas,
+        snapshotFilename({ revision: preview.revision, index })
+      )
+    )
+  }
+  if (currentIndex.value !== savedIndex) {
+    currentIndex.value = savedIndex
+    await new Promise(resolve => setTimeout(resolve, 500))
+  }
+  nextTick(() => clearCanvas())
   return files
 }
 

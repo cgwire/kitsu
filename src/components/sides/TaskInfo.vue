@@ -187,6 +187,7 @@
                   :frame="currentFrame || currentFrameRaw"
                   :revision="currentRevision"
                   :is-movie="isMoviePreview"
+                  :is-picture="isPicturePreview"
                   @add-comment="addComment"
                   @add-preview="onAddPreviewClicked"
                   @file-drop="selectFile"

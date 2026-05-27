@@ -1311,37 +1311,50 @@ export const useAnnotation = ({
     }, 5000)
   }
 
+  // Render whatever is currently on the live fabric canvas onto the
+  // target canvas, scaling strokes to match the target dimensions.
+  // Destructive: the objects are moved out of the live canvas (callers
+  // who need the live canvas restored afterwards should reload it).
+  const compositeLiveAnnotationsOntoCanvas = canvas => {
+    return new Promise(resolve => {
+      const context = canvas.getContext('2d')
+      const scaleRatio = canvas.width / fabricCanvas.value.width
+      const tmpSource = document.getElementById('resize-annotation-canvas')
+      const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
+        width: canvas.width,
+        height: canvas.height
+      })
+      fabricCanvas.value.getObjects().forEach(obj => {
+        if (obj._objects) {
+          obj._objects.forEach(obj => {
+            tmpCanvas.add(obj)
+            obj.strokeWidth = obj.strokeWidth / scaleRatio
+          })
+        } else {
+          tmpCanvas.add(obj)
+          obj.strokeWidth = obj.strokeWidth / scaleRatio
+        }
+      })
+      tmpCanvas.setZoom(scaleRatio)
+      setTimeout(() => {
+        context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
+        setTimeout(() => {
+          tmpCanvas.dispose()
+        }, 100)
+        return resolve()
+      }, 100)
+    })
+  }
+
+  // Per-annotation composite for video: clear and reload only the
+  // requested annotation onto the live canvas before compositing, so a
+  // caller iterating frame-by-frame gets one PNG per annotation.
   const copyAnnotationCanvas = (canvas, annotation) => {
     return new Promise(resolve => {
       clearCanvas()
       loadSingleAnnotation(annotation)
       setTimeout(() => {
-        const context = canvas.getContext('2d')
-        const scaleRatio = canvas.width / fabricCanvas.value.width
-        const tmpSource = document.getElementById('resize-annotation-canvas')
-        const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
-          width: canvas.width,
-          height: canvas.height
-        })
-        fabricCanvas.value.getObjects().forEach(obj => {
-          if (obj._objects) {
-            obj._objects.forEach(obj => {
-              tmpCanvas.add(obj)
-              obj.strokeWidth = obj.strokeWidth / scaleRatio
-            })
-          } else {
-            tmpCanvas.add(obj)
-            obj.strokeWidth = obj.strokeWidth / scaleRatio
-          }
-        })
-        tmpCanvas.setZoom(scaleRatio)
-        setTimeout(() => {
-          context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
-          setTimeout(() => {
-            tmpCanvas.dispose()
-          }, 100)
-          return resolve()
-        }, 100)
+        compositeLiveAnnotationsOntoCanvas(canvas).then(resolve)
       }, 100)
     })
   }
@@ -1506,6 +1519,7 @@ export const useAnnotation = ({
     confirmAnnotationsSaved,
     restoreFailedAnnotations,
     copyAnnotationCanvas,
+    compositeLiveAnnotationsOntoCanvas,
 
     // Setter for component-specific callbacks
     setCurrentPreviewGetter

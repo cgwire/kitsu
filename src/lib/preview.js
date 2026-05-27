@@ -32,3 +32,34 @@ export const isFilePreview = extension =>
   !isPdfPreview(extension) &&
   !isMarkdownPreview(extension) &&
   !isDiffPreview(extension)
+
+// Build the .png filename for an exported annotation snapshot from a
+// task context. Sanitises each part so it's safe across filesystems,
+// lowercases the result and joins parts with underscores:
+//   `productionname_fullentityname_tasktypename_v{revision}_annotation[_{frame|index}].png`
+// Pass `frame` for video snapshots and `index` for picture batches
+// that need disambiguation.
+export const buildAnnotationSnapshotFilename = ({
+  production,
+  entity,
+  taskType,
+  revision,
+  frame,
+  index
+}) => {
+  const sanitize = part =>
+    String(part || '')
+      .replace(/[\s/\\:?<>|"*]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+  const suffix = frame != null ? Math.round(frame) : index
+  const parts = [
+    sanitize(production),
+    sanitize(entity),
+    sanitize(taskType),
+    revision != null && revision !== '' ? `v${revision}` : '',
+    'annotation',
+    suffix != null ? String(suffix) : ''
+  ].filter(Boolean)
+  return `${parts.join('_')}.png`.toLowerCase()
+}

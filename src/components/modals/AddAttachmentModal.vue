@@ -38,10 +38,10 @@
             @fileselected="onFileSelected"
             hide-file-names
           />
-          <p class="flexrow-item mt1" v-if="isMovie">
+          <p class="flexrow-item mt1" v-if="isMovie || isPicture">
             {{ $t('main.or') }}
           </p>
-          <p class="flexrow-item" v-if="isMovie">
+          <p class="flexrow-item" v-if="isMovie || isPicture">
             <button
               :class="{
                 button: true,
@@ -118,6 +118,7 @@ const props = defineProps({
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   isMovie: { type: Boolean, default: false },
+  isPicture: { type: Boolean, default: false },
   title: { type: String, default: '' }
 })
 
