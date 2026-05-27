@@ -4297,6 +4297,7 @@ const playerProxy = {
 }
 
 .video-container {
+  overflow: hidden;
   position: relative;
 }
 
