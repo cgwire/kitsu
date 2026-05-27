@@ -262,6 +262,14 @@ export default {
     unpin: 'Unpin',
     validated: 'Validated!',
     validation_required: 'Validation Required',
+    move_to_task: 'Move to',
+    move_modal: {
+      title: 'Move comment to another task',
+      intro: 'Pick a task of the same entity to move this comment to. Notifications will be sent on the destination task as for a new comment.',
+      target_label: 'Destination task',
+      no_target: 'No other task is available on this entity.',
+      error: 'Could not move the comment. Please contact our support team.'
+    },
     fields: {
       text: 'Text',
       created_at: 'Creation date',

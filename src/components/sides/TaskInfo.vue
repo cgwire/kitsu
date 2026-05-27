@@ -231,6 +231,7 @@
                         isCurrentUserManager ||
                         isClientFromSameStudio(comment.person)
                       "
+                      :can-move="isCurrentUserManager"
                       :revision="currentRevision"
                       :task="task"
                       :team="currentTeam"
@@ -240,6 +241,7 @@
                       @pin-comment="onPinComment"
                       @edit-comment="onEditComment"
                       @delete-comment="onDeleteComment"
+                      @move-comment="onMoveComment"
                       @toggle-for-client="onToggleForClient"
                       @checklist-updated="saveComment"
                       @time-code-clicked="timeCodeClicked"
@@ -305,6 +307,16 @@
           :error-text="$t('tasks.delete_comment_error')"
           @confirm="confirmDeleteTaskComment"
           @cancel="onCancelDeleteComment"
+        />
+
+        <move-comment-modal
+          :active="modals.moveComment"
+          :comment="commentToMove"
+          :source-task="task"
+          :is-loading="loading.moveComment"
+          :is-error="errors.moveComment"
+          @cancel="onCancelMoveComment"
+          @confirm="confirmMoveComment"
         />
 
         <delete-modal
@@ -380,6 +392,7 @@ import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
+import MoveCommentModal from '@/components/modals/MoveCommentModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -402,6 +415,7 @@ export default {
     CornerRightUpIcon,
     DeleteModal,
     EditCommentModal,
+    MoveCommentModal,
     PeopleAvatar,
     PreviewPlayer,
     Spinner,
@@ -483,6 +497,7 @@ export default {
       currentPreviewDlPath: '',
       currentTask: null,
       commentToEdit: null,
+      commentToMove: null,
       isWide: false,
       isExtraWide: false,
       otherPreviews: [],
@@ -506,6 +521,7 @@ export default {
         addExtraPreview: false,
         editComment: false,
         deleteComment: false,
+        moveComment: false,
         confirmDeleteTaskPreview: false,
         task: false
       },
@@ -515,6 +531,7 @@ export default {
         addExtraPreview: false,
         editComment: false,
         deleteComment: false,
+        moveComment: false,
         confirmDeleteTaskPreview: false,
         task: false,
         setFrameThumbnail: false
@@ -524,6 +541,7 @@ export default {
         addExtraPreview: false,
         editComment: false,
         deleteComment: false,
+        moveComment: false,
         deleteExtraPreview: false
       }
     }
@@ -1229,12 +1247,43 @@ export default {
       this.modals.deleteComment = true
     },
 
+    onMoveComment(comment) {
+      this.commentToMove = comment
+      this.errors.moveComment = false
+      this.modals.moveComment = true
+    },
+
     onCancelEditComment() {
       this.modals.editComment = false
     },
 
     onCancelDeleteComment() {
       this.modals.deleteComment = false
+    },
+
+    onCancelMoveComment() {
+      this.modals.moveComment = false
+    },
+
+    async confirmMoveComment(targetTaskId) {
+      this.animOn = true
+      this.loading.moveComment = true
+      this.errors.moveComment = false
+      try {
+        await this.$store.dispatch('moveCommentToTask', {
+          taskId: this.task.id,
+          commentId: this.commentToMove.id,
+          targetTaskId
+        })
+        this.taskComments = this.getTaskComments(this.task.id)
+        this.modals.moveComment = false
+        this.commentToMove = null
+      } catch (err) {
+        console.error(err)
+        this.errors.moveComment = true
+      } finally {
+        this.loading.moveComment = false
+      }
     },
 
     isClientFromSameStudio(person) {
