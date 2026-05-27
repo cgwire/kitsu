@@ -743,9 +743,11 @@ export const useAnnotation = ({
   const _resetPencil = () => {
     if (!fabricCanvas.value) return
     const converter = {
+      huge: 15,
       big: 10,
       medium: 5,
-      small: 2
+      small: 2,
+      tiny: 1
     }
     const strokeWidth = converter[pencilWidth.value]
     fabricCanvas.value.freeDrawingBrush.width = strokeWidth

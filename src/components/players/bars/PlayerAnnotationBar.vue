@@ -260,7 +260,7 @@ defineProps({
   },
   pencilPalette: {
     type: Array,
-    default: () => ['big', 'medium', 'small']
+    default: () => ['huge', 'big', 'medium', 'small', 'tiny']
   },
   pencilWidth: {
     type: String,

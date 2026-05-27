@@ -1071,7 +1071,7 @@ const objectModel = ref({
   isAnimation: null
 })
 const onNextTimeUpdateActions = ref([])
-const pencilPalette = ref(['big', 'medium', 'small'])
+const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureDefaultHeight = ref(0)
 const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)

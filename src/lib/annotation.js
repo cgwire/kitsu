@@ -115,11 +115,13 @@ export const DEFAULT_PENCIL_COLOR = '#ff3860'
 export const SHAPE_STROKE_WIDTH = 4
 
 // Halved pencil widths — shapes don't get pressure modulation and would
-// look heavy at the pencil's 10/5/2 values.
+// look heavy at the pencil's 15/10/5/2/1 values.
 export const SHAPE_WIDTHS = {
+  huge: 8,
   big: 5,
   medium: 3,
-  small: 2
+  small: 2,
+  tiny: 1
 }
 
 /* -------------------------------------------------------------------------

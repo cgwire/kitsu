@@ -4,20 +4,14 @@
       type="button"
       class="pencil-picker"
       :title="$t(`playlists.actions.annotation_${pencil}`)"
-      :class="{
-        medium: pencil === 'medium',
-        small: pencil === 'small'
-      }"
+      :class="[pencil]"
       @click="togglePalette"
     />
     <div v-show="isOpen" class="pencil-palette">
       <label
         :key="pencil"
         :title="$t(`playlists.actions.annotation_${pencil}`)"
-        :class="{
-          medium: pencil === 'medium',
-          small: pencil === 'small'
-        }"
+        :class="[pencil]"
         v-for="pencil in sizes"
       >
         <input type="radio" :value="pencil" @click="onPencilPicked(pencil)" />
@@ -94,6 +88,13 @@ const onPencilPicked = width => {
   background-color: $light-grey;
 }
 
+.pencil-picker.huge::before,
+.pencil-palette label.huge::before {
+  margin: 0.25rem auto;
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
 .pencil-picker.medium::before,
 .pencil-palette label.medium::before {
   margin: 0.5rem auto;
@@ -106,6 +107,13 @@ const onPencilPicked = width => {
   margin: 0.55rem auto;
   width: 0.5rem;
   height: 0.5rem;
+}
+
+.pencil-picker.tiny::before,
+.pencil-palette label.tiny::before {
+  margin: 0.6rem auto;
+  width: 0.3rem;
+  height: 0.3rem;
 }
 
 .pencil-palette {
