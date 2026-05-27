@@ -209,14 +209,25 @@
         <div class="attachment-title" v-if="attachments.length > 0">
           {{ $t('comments.attachments') }}
         </div>
-        <div
+        <template
           :key="'attachment-' + index"
-          class="attachment-file"
-          v-for="(attach, index) in attachments"
+          v-for="(attach, index) in sortedAttachments"
         >
-          {{ shortenText(attach.get('file').name, 40) }}
-          <span @click="removeAttachment(attach)">x</span>
-        </div>
+          <div
+            class="attachment-image"
+            :title="attach.get('file').name"
+            v-if="isImageAttachment(attach)"
+          >
+            <img :src="attachmentURL(attach)" :alt="attach.get('file').name" />
+            <span class="attachment-remove" @click="removeAttachment(attach)">
+              x
+            </span>
+          </div>
+          <div class="attachment-file" :title="attach.get('file').name" v-else>
+            {{ shortenText(attach.get('file').name, 70) }}
+            <span @click="removeAttachment(attach)">x</span>
+          </div>
+        </template>
 
         <div class="flexrow button-row mt1">
           <emoji-button @select="onSelectEmoji" v-if="mode === 'status'" />
@@ -509,6 +520,20 @@ const attachments = computed({
   set: value => {
     draftComment.attachments = value
   }
+})
+
+const isImageAttachment = form => form.get('file').type.startsWith('image')
+
+const attachmentURL = form => URL.createObjectURL(form.get('file'))
+
+// Show non-image attachments first, image thumbnails last, so the
+// preview wall doesn't push lighter rows out of sight.
+const sortedAttachments = computed(() => {
+  const list = attachments.value || []
+  return [
+    ...list.filter(form => !isImageAttachment(form)),
+    ...list.filter(form => isImageAttachment(form))
+  ]
 })
 
 const checklistItems = computed({
@@ -1114,6 +1139,37 @@ article.add-comment {
   span {
     cursor: pointer;
     float: right;
+  }
+}
+
+.attachment-image {
+  display: inline-block;
+  margin: 3px;
+  position: relative;
+  vertical-align: top;
+
+  img {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: block;
+    max-height: 80px;
+    max-width: 120px;
+    object-fit: cover;
+  }
+
+  .attachment-remove {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    font-size: 0.8em;
+    height: 18px;
+    line-height: 18px;
+    position: absolute;
+    right: 2px;
+    text-align: center;
+    top: 2px;
+    width: 18px;
   }
 }
 
