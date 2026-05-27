@@ -134,6 +134,7 @@
           :is-hd="isHd"
           :is-repeating="isRepeating"
           :muted="true"
+          :panzoom="true"
           :handle-in="
             ['shot', 'edit', 'episode'].includes(playlist.for_entity)
               ? handleIn
