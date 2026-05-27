@@ -313,6 +313,16 @@ export const entitiesMixin = {
       )
     },
 
+    saveSearchQuery(searchQuery) {
+      if (this.loading.savingSearch) return
+      this.loading.savingSearch = true
+      this[`save${this.entityTypeName}Search`](searchQuery)
+        .catch(console.error)
+        .finally(() => {
+          this.loading.savingSearch = false
+        })
+    },
+
     onChangeSortClicked(sortInfo) {
       this[`change${this.entityTypeName}Sort`](sortInfo)
     },

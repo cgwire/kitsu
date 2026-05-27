@@ -680,18 +680,6 @@ export default {
       }
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveEditSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeEditSearch(searchQuery).catch(console.error)
     },

@@ -474,18 +474,6 @@ export default {
       this.episodeToEdit = form
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveEpisodeSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeEpisodeSearch(searchQuery).catch(console.error)
     },

@@ -823,18 +823,6 @@ export default {
       this.onSearchChange()
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveShotSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeShotSearch(searchQuery).catch(console.error)
     },

@@ -770,18 +770,6 @@ export default {
       this.showImportModal()
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveAssetSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeAssetSearch(searchQuery).catch(err => {
         if (err) console.error(err)

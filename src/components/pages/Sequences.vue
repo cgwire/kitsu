@@ -478,18 +478,6 @@ export default {
       this.sequenceToEdit = form
     },
 
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveSequenceSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
     removeSearchQuery(searchQuery) {
       this.removeSequenceSearch(searchQuery).catch(console.error)
     },
