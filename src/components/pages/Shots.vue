@@ -659,21 +659,6 @@ export default {
       this.newShot(shot).then(callback).catch(console.error)
     },
 
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Shot'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
     onDeleteClicked(shot) {
       this.shotToDelete = shot
       this.modals.isDeleteDisplayed = true

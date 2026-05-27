@@ -167,6 +167,22 @@ export const entitiesMixin = {
       this.modals.isAddMetadataDisplayed = false
     },
 
+    confirmAddMetadata(form) {
+      this.loading.addMetadata = true
+      form.entity_type = this.entityTypeName
+      this.addMetadataDescriptor(form)
+        .then(() => {
+          this.modals.isAddMetadataDisplayed = false
+        })
+        .catch(err => {
+          console.error(err)
+          this.errors.addMetadata = true
+        })
+        .finally(() => {
+          this.loading.addMetadata = false
+        })
+    },
+
     confirmDeleteMetadata() {
       this.errors.deleteMetadata = false
       this.loading.deleteMetadata = true

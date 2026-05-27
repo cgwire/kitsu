@@ -512,21 +512,6 @@ export default {
       'uploadEditFile'
     ]),
 
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Edit'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
     onDeleteClicked(edit) {
       this.editToDelete = edit
       this.modals.isDeleteDisplayed = true

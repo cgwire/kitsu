@@ -441,21 +441,6 @@ export default {
       'uploadSequenceFile'
     ]),
 
-    confirmAddMetadata(form) {
-      this.loading.addMetadata = true
-      form.entity_type = 'Sequence'
-      this.addMetadataDescriptor(form)
-        .then(() => {
-          this.loading.addMetadata = false
-          this.modals.isAddMetadataDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.addMetadata = false
-          this.errors.addMetadata = true
-        })
-    },
-
     showNewModal() {
       this.sequenceToEdit = {}
       this.modals.isNewDisplayed = true
