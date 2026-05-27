@@ -389,10 +389,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['sequence-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 

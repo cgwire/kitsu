@@ -539,10 +539,6 @@ export default {
       return shotStore.cache.shotMap
     },
 
-    searchField() {
-      return this.$refs['shot-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 

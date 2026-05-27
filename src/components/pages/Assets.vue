@@ -480,10 +480,6 @@ export default {
       return this.userFilterGroups?.asset?.[productionId] || []
     },
 
-    searchField() {
-      return this.$refs['asset-search-field']
-    },
-
     filteredAssets() {
       const assets = {}
       this.displayedAssetsByType.forEach(type => {

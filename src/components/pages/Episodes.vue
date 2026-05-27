@@ -386,10 +386,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['episode-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 

@@ -442,10 +442,6 @@ export default {
       'user'
     ]),
 
-    searchField() {
-      return this.$refs['edit-search-field']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 
