@@ -1667,6 +1667,11 @@ watch(current3DAnimation, () => {
 
 watch(currentPreview, () => {
   endAnnotationSaving()
+  // Wipe the fabric canvas before the new preview's annotations are
+  // re-loaded — otherwise switching between tasks (or between
+  // previews on the same task) leaves the previous task's strokes
+  // visible until the new video reaches frame 0.
+  clearCanvas()
   reloadAnnotations()
   isComparing.value = false
   if (isMovie.value) {
@@ -1902,6 +1907,7 @@ const playerApi = computed(() => ({
 // Expose
 
 defineExpose({
+  currentPreview,
   extractAnnotationSnapshots,
   setCurrentFrame,
   getCurrentFrame,
@@ -1909,6 +1915,7 @@ defineExpose({
   displayFirst,
   displayLast,
   focus,
+  notSaved,
   pause,
   play,
   reloadAnnotations,
