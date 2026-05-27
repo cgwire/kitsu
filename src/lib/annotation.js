@@ -63,23 +63,14 @@ export const lockBrushToFirstPointer = brush => {
   const origMove = brush.onMouseMove.bind(brush)
   const origUp = brush.onMouseUp.bind(brush)
   const eventPointerType = ev => (ev?.e || ev?.pointer?.e)?.pointerType
-  console.log('[lockBrushToFirstPointer] installed on brush', brush)
   brush.onMouseDown = function (pointer, ev) {
     this._activePointerType =
       eventPointerType(ev) || pointer?.e?.pointerType || null
-    console.log('[brush down]', {
-      type: this._activePointerType,
-      hasE: !!ev?.e
-    })
     return origDown(pointer, ev)
   }
   brush.onMouseMove = function (pointer, ev) {
     const type = eventPointerType(ev) || pointer?.e?.pointerType
     if (this._activePointerType && type && type !== this._activePointerType) {
-      console.log('[brush move blocked]', {
-        eventType: type,
-        active: this._activePointerType
-      })
       return
     }
     return origMove(pointer, ev)
