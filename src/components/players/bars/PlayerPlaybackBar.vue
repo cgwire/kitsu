@@ -30,7 +30,7 @@
 
   <div class="left flexrow" v-if="isMovie && !compact">
     <span
-      class="flexrow-item time-indicator"
+      class="flexrow-item time-indicator current-time"
       :title="$t('playlists.actions.current_time')"
     >
       {{ currentTime }}
@@ -194,7 +194,15 @@ const volume = defineModel('volume', { default: 50 })
 <style lang="scss" scoped>
 .time-indicator {
   color: $light-grey;
-  padding-left: 0.8em;
+  padding-left: 0.2em;
   margin-right: 0;
+}
+
+// Hide the timecode when PreviewPlayer is narrow — the frame counter
+// next to it carries enough position info on its own.
+@container preview-player (max-width: 600px) {
+  .current-time {
+    display: none;
+  }
 }
 </style>

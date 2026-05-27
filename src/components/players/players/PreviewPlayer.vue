@@ -2057,6 +2057,10 @@ defineExpose({
 
 .preview-player {
   background: $dark-grey-light;
+  // Container query anchor so child components (PlayerPlaybackBar etc.)
+  // can react to the player's own width rather than the viewport.
+  container-name: preview-player;
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   border-radius: 5px;
