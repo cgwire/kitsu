@@ -823,10 +823,6 @@ export default {
       this.onSearchChange()
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeShotSearch(searchQuery).catch(console.error)
-    },
-
     getPath(section) {
       const route = {
         name: section,

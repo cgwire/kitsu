@@ -680,10 +680,6 @@ export default {
       }
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeEditSearch(searchQuery).catch(console.error)
-    },
-
     getPath(section) {
       const route = {
         name: section,

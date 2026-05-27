@@ -474,10 +474,6 @@ export default {
       this.episodeToEdit = form
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeEpisodeSearch(searchQuery).catch(console.error)
-    },
-
     onExportClick() {
       this.getEpisodesCsvLines().then(episodeLines => {
         const nameData = [

@@ -770,12 +770,6 @@ export default {
       this.showImportModal()
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeAssetSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
-    },
-
     onExportClick() {
       this.getAssetsCsvLines().then(assetLines => {
         const nameData = [

@@ -323,6 +323,12 @@ export const entitiesMixin = {
         })
     },
 
+    removeSearchQuery(searchQuery) {
+      this[`remove${this.entityTypeName}Search`](searchQuery).catch(
+        console.error
+      )
+    },
+
     onChangeSortClicked(sortInfo) {
       this[`change${this.entityTypeName}Sort`](sortInfo)
     },

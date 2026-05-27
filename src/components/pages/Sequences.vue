@@ -478,10 +478,6 @@ export default {
       this.sequenceToEdit = form
     },
 
-    removeSearchQuery(searchQuery) {
-      this.removeSequenceSearch(searchQuery).catch(console.error)
-    },
-
     onExportClick() {
       this.getSequencesCsvLines().then(sequenceLines => {
         const nameData = [
