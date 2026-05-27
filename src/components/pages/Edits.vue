@@ -446,10 +446,6 @@ export default {
       return this.$refs['edit-search-field']
     },
 
-    addThumbnailsModal() {
-      return this.$refs['add-thumbnails-modal']
-    },
-
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]
 

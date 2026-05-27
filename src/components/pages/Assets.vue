@@ -480,10 +480,6 @@ export default {
       return this.userFilterGroups?.asset?.[productionId] || []
     },
 
-    addThumbnailsModal() {
-      return this.$refs['add-thumbnails-modal']
-    },
-
     searchField() {
       return this.$refs['asset-search-field']
     },
