@@ -133,7 +133,20 @@
       "edited_by": "Édité par {name}",
       "add_attachment_to_reply": "Ajouter une pièce jointe à la réponse",
       "add_frame_to_comment": "Ajouter le cadre actuel au commentaire",
-      "add_emoji": "Ajouter un emoji"
+      "add_emoji": "Ajouter un emoji",
+      "for_client_badge": "Texte visible par le client",
+      "for_client_off": "Texte non visible par les clients. Cliquez pour rendre le texte visible par les clients",
+      "for_client_on": "Texte visible par les clients. Cliquez pour rendre le texte non visible par les clients",
+      "move_modal": {
+        "error": "Impossible de déplacer le commentaire. Veuillez contacter notre support.",
+        "intro": "Choisissez une tâche de la même entité vers laquelle déplacer ce commentaire. Des notifications seront envoyées sur la tâche de destination comme pour un nouveau commentaire.",
+        "no_target": "Aucune autre tâche n'est disponible sur cette entité.",
+        "target_label": "Tâche de destination",
+        "title": "Déplacer le commentaire vers une autre tâche"
+      },
+      "move_to_task": "Déplacer vers",
+      "title": "Commentaires",
+      "toggle_for_client": "Visibilité client"
     },
     "custom_actions": {
       "create_error": "Une erreur est survenue en sauvegardant cette action personnalisée. Êtes-vous sûr qu'aucune autre action a un nom similaire ?",
@@ -292,7 +305,19 @@
       "object_viewer": "Visualisateur d'objets",
       "rotate_hdr": "Rotation de l'environnement",
       "change_fov": "Modification de la longueur focale",
-      "plalto": "Passer d'une opacité de 0 % à 100 % en mode comparaison"
+      "plalto": "Passer d'une opacité de 0 % à 100 % en mode comparaison",
+      "copy_annotation": "Copier l'annotation sélectionnée",
+      "move_entity_left": "Déplacer l'entité sélectionnée vers la gauche",
+      "move_entity_right": "Déplacer l'entité sélectionnée vers la droite",
+      "next_annotation": "Annotation suivante",
+      "next_frame": "Image suivante",
+      "pan_image": "Déplacer l'image",
+      "paste_annotation": "Coller l'annotation",
+      "play_pause": "Lecture / pause",
+      "play_pause_typing": "Lecture / pause (même en saisissant un commentaire)",
+      "player": "Lecteur",
+      "previous_annotation": "Annotation précédente",
+      "previous_frame": "Image précédente"
     },
     "login": {
       "back_to_login": "Revenir à la page de connexion",
@@ -556,7 +581,13 @@
       "shared_by": "Partagé par {name}",
       "continue": "Continuer",
       "developer_documentation": "Documentation pour développeurs",
-      "feedback": "Feuille de route / Suggestions"
+      "feedback": "Feuille de route / Suggestions",
+      "annotations": {
+        "download_pdf": "Télécharger les annotations en PDF",
+        "download_zip": "Télécharger les annotations en ZIP"
+      },
+      "attach_snapshots_with_label": "Joindre les captures avec une étiquette incrustée",
+      "export": "Exporter"
     },
     "menu": {
       "assign_tasks": "Assigner des tâches",
@@ -683,7 +714,8 @@
         "studio": "Studio",
         "daily_salary": "Taux journalier",
         "position": "Position",
-        "seniority": "Ancienneté"
+        "seniority": "Ancienneté",
+        "created_at": "Date de création"
       },
       "list": {
         "name": "Nom",
@@ -740,7 +772,13 @@
         "mid": "Moyen",
         "senior": "Senior"
       },
-      "email_domain_error": "Ce domaine de messagerie n'est pas autorisé."
+      "email_domain_error": "Ce domaine de messagerie n'est pas autorisé.",
+      "archive_guest_confirm": "Archiver cet invité ? Ses commentaires sont conservés, mais il n'apparaîtra plus dans la liste des invités actifs.",
+      "archive_guest_error": "Impossible d'archiver cet invité. Veuillez réessayer.",
+      "archived_guests": "Invités archivés",
+      "guests": "invité | invités",
+      "restore_guest_error": "Impossible de restaurer cet invité. Veuillez réessayer.",
+      "seats_remaining": "aucun siège restant | {count} siège restant | {count} sièges restants"
     },
     "playlists": {
       "add_assets": "Ajouter des assets",
@@ -850,7 +888,10 @@
         "select_background": "Sélectionner un arrière-plan",
         "toggle_environment_skybox": "Afficher/masquer l'arrière-plan de la skybox",
         "toggle_wireframe": "Activer/désactiver le rendu de l'image filaire",
-        "open_link": "Ouvrir le lien"
+        "open_link": "Ouvrir le lien",
+        "annotation_huge": "Énorme",
+        "annotation_shape": "Forme",
+        "annotation_tiny": "Minuscule"
       },
       "download_csv": "Télécharger .csv",
       "filter_task_type": "Filtré par type de tâche",
@@ -864,7 +905,43 @@
       "no_clients_to_notify": "Il n'y a pas de clients à notifier.",
       "notify_clients_success": "La notification a été envoyée avec succès.",
       "unmute": "Rétablir le son",
-      "volume_level": "Volume : {level}%"
+      "volume_level": "Volume : {level}%",
+      "add_edits": "Ajouter des edits",
+      "add_episodes": "Ajouter des épisodes",
+      "share": "Partager",
+      "share_modal": {
+        "active_links": "Liens actifs",
+        "add_link": "Ajouter un nouveau lien",
+        "can_comment": "Autoriser les commentaires",
+        "comments_disabled": "Commentaires désactivés",
+        "comments_enabled": "Commentaires activés",
+        "copy": "Copier le lien",
+        "create_new": "Créer un nouveau lien",
+        "description": "Générez un lien pour partager cette playlist avec des relecteurs externes. Toute personne disposant du lien peut consulter la playlist et publier des commentaires sans compte Kitsu. Vous pouvez définir une date d'expiration et révoquer l'accès à tout moment.",
+        "error": "Une erreur est survenue lors de la création du lien de partage.",
+        "expiration": "Date d'expiration (optionnelle)",
+        "expires": "Expire le",
+        "generate": "Générer un nouveau lien",
+        "invite": "Inviter par email",
+        "invite_add_email": "Ajouter cet email",
+        "invite_error": "Une erreur est survenue lors de l'envoi des invitations.",
+        "invite_invalid_email": "Cette adresse email n'est pas valide.",
+        "invite_message_label": "Message personnalisé (optionnel)",
+        "invite_message_placeholder": "Une courte note qui sera ajoutée à l'email",
+        "invite_placeholder": "Saisissez un email et appuyez sur Entrée, ou choisissez un client",
+        "invite_recipients": "Destinataires",
+        "invite_send": "Envoyer les invitations",
+        "invite_sent": "{count} invitation envoyée | {count} invitations envoyées",
+        "no_expiration": "Pas d'expiration",
+        "no_links": "Aucun lien de partage pour le moment. Créez-en un ci-dessous pour donner accès à des relecteurs externes.",
+        "open": "Ouvrir le lien dans un nouvel onglet",
+        "revoke": "Révoquer le lien",
+        "revoke_confirm": "Révoquer ce lien ? Toute personne l'utilisant perdra l'accès.",
+        "title": "Partager la playlist"
+      },
+      "update_to_latest_version": "Mettre à jour vers la dernière version",
+      "update_to_latest_version_help": "Utilise la dernière révision de chaque entité, en conservant son type de tâche actuel.",
+      "update_versions_title": "Mettre à jour les versions sélectionnées"
     },
     "productions": {
       "current": "Production sélectionnée ",
@@ -920,7 +997,9 @@
         "boolean": "Choix vrai/faux",
         "number": "Nombre",
         "string": "Texte",
-        "tags": "Liste des étiquettes"
+        "tags": "Liste des étiquettes",
+        "applies_to_all_projects": "Cette colonne est ajoutée à tous les projets de la liste. Chaque projet peut avoir sa propre valeur dans la vue en liste.",
+        "target_project": "Projet"
       },
       "status": {
         "closed": "Fermé",
@@ -990,7 +1069,10 @@
         "start_and_end_dates": "Date de début et de fin",
         "shots_to_import": "Plans à importer",
         "select_edit_task_type": "Sélectionner les types de tâches pour les edits",
-        "select_edit_task_type_description": "Ces types de tâches décrivent les étapes nécessaires pour fabriquer votre edit"
+        "select_edit_task_type_description": "Ces types de tâches décrivent les étapes nécessaires pour fabriquer votre edit",
+        "choose_template": "Appliquer un modèle de production (optionnel)",
+        "choose_template_description": "Choisissez un modèle pour pré-remplir les types de tâches, statuts de tâche, types d'assets, métadonnées et paramètres. Laissez vide pour tout configurer à partir de zéro.",
+        "no_template": "Aucun modèle"
       },
       "style": {
         "2d": "2D",
@@ -1123,7 +1205,10 @@
       },
       "production": {
         "empty_list": "La liste est vide. Cela signifie que tous les entrées sont disponibles aux utilisateurs. Ajouter des éléments à cette liste si vous voulez limiter les choix disponibles aux utilisateurs.",
-        "empty_automation_list": "Il n'a pas d'automatisations pour cette production"
+        "empty_automation_list": "Il n'a pas d'automatisations pour cette production",
+        "empty_backgrounds": "Aucun arrière-plan lié. Choisissez-en un dans la liste ci-dessus pour l'ajouter.",
+        "empty_board": "Ajoutez d'abord des statuts de tâche pour configurer leur visibilité sur le tableau.",
+        "empty_metadata": "Aucun descripteur de métadonnée défini pour ce type d'entité pour le moment."
       },
       "save": {
         "button": "Sauvegarder les paramètres",
@@ -1559,7 +1644,9 @@
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les tâches sélectionnées ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
       "delete_for_selection_hard_lock_text": "DELETE",
       "hookup_playlist": "Créer une liste de lecture pour les rencontres",
-      "assignation_error": "Il y a eu un problème d'assignation de cette personne aux tâches sélectionnées. Toutes les tâches n'ont pas été assignées."
+      "assignation_error": "Il y a eu un problème d'assignation de cette personne aux tâches sélectionnées. Toutes les tâches n'ont pas été assignées.",
+      "retake_filter_none": "Sans reprise",
+      "retake_filter_with_retakes": "Avec reprises"
     },
     "timesheets": {
       "detail_level": "Niveau de détail",
@@ -1601,6 +1688,12 @@
         "title": "Previews",
         "mark_broken": "Marquer comme cassé",
         "explanation": "Cette page répertorie tous les fichiers de prévisualisation dans un état intermédiaire : en cours de traitement ou interrompus. Elle indique le nombre de fichiers de prévisualisation en cours de traitement ou les fichiers qui n'ont pas abouti."
+      },
+      "audit": {
+        "title": "Journaux d'activité"
+      },
+      "logins": {
+        "title": "Journaux de connexion"
       }
     },
     "departments": {
@@ -1972,7 +2065,64 @@
       "edit": "Editer",
       "history": "L'histoire",
       "refresh": "Rafraîchir",
-      "restore": "Restaurer"
+      "restore": "Restaurer",
+      "archive": "Archiver"
+    },
+    "project_templates": {
+      "add_metadata": "Ajouter une métadonnée",
+      "apply": "Appliquer le modèle",
+      "apply_confirm": "Cela ajoutera à cette production les types de tâches, statuts, types d'assets, automatisations et descripteurs de métadonnées du modèle. Les paramètres existants sont conservés. Continuer ?",
+      "apply_to": "Appliquer un modèle",
+      "apply_to_description": "Ajoute la configuration d'un modèle à cette production. Les paramètres existants sont conservés.",
+      "click_name_to_edit": "Cliquez sur le nom d'un modèle pour modifier sa configuration.",
+      "create_error": "Une erreur est survenue lors de l'enregistrement de ce modèle. Êtes-vous sûr qu'aucun modèle ne porte un nom similaire ?",
+      "delete_error": "Une erreur est survenue lors de la suppression de ce modèle.",
+      "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ?",
+      "duplicate_name": "Un modèle de production portant ce nom existe déjà.",
+      "edit_title": "Modifier le modèle de production",
+      "empty": "Aucun modèle de production pour le moment. Créez-en un pour configurer rapidement de nouvelles productions.",
+      "fields": {
+        "description": "Description",
+        "entity_type": "Type d'entité",
+        "name": "Nom"
+      },
+      "fps_error": "Le FPS doit être un entier compris entre 1 et 200.",
+      "from_production": "Créer à partir d'une production",
+      "name_required": "Un nom est requis.",
+      "new_project_template": "Ajouter un modèle de production",
+      "number": "modèle de production | modèles de production",
+      "ratio_error": "Le ratio doit respecter le format x:y (ex. 16:9).",
+      "resolution_error": "La résolution doit respecter le format LxH (ex. 1920x1080).",
+      "select": "Sélectionner un modèle",
+      "tabs": {
+        "asset_types": "Types d'assets",
+        "metadata_descriptors": "Métadonnées",
+        "status_automations": "Automatisations de statut",
+        "task_statuses": "Statuts de tâche",
+        "task_types": "Types de tâches"
+      },
+      "title": "Modèles"
+    },
+    "share": {
+      "comment_placeholder": "Laissez un commentaire...",
+      "comments_disabled": "Les commentaires sont désactivés pour ce lien.",
+      "download_preview": "Télécharger le preview",
+      "enter_review": "Accéder à la review",
+      "error_text": "Ce lien partagé est invalide, expiré ou a été révoqué.",
+      "error_title": "Lien indisponible",
+      "guest_error": "Nous n'avons pas pu vous connecter. Vérifiez votre connexion et réessayez. Si le problème persiste, veuillez contacter le support.",
+      "identity_description": "Saisissez votre nom pour rejoindre la session de review. Vous pourrez consulter la playlist et laisser des commentaires.",
+      "identity_required": "Vous devez saisir votre nom avant de publier.",
+      "kitsu_homepage": "À propos de Kitsu",
+      "logout": "Quitter la session de review",
+      "name_placeholder": "Jean Dupont",
+      "no_comments_yet": "Aucun commentaire pour le moment.",
+      "no_preview": "Aucun preview",
+      "no_status_available": "Aucun statut de tâche n'est configuré pour ce projet.",
+      "player_placeholder": "Le lecteur s'affichera ici.",
+      "post_comment_error": "Impossible de publier le commentaire. Veuillez recharger la page et réessayer.",
+      "review_session": "Session de review",
+      "your_name": "Votre nom"
     }
   }
 }
