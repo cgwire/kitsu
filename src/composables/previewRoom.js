@@ -147,6 +147,7 @@ export const usePreviewRoom = options => {
     updateProgressBar = noop,
     onWindowResize = noop,
     findEntity = () => null,
+    findEntityIndex = () => -1,
     changePreviewFile = noop,
     setRawPlayerFrame = noop,
     setCurrentTimeRaw = noop,
@@ -341,11 +342,24 @@ export const usePreviewRoom = options => {
 
     let isEntityChanged = false
 
-    if (
-      exists(eventData.current_entity_index) &&
-      eventData.current_entity_index !== unref(playingEntityIndex)
-    ) {
-      playEntity(eventData.current_entity_index)
+    // Resolve the target entity by id, not by the sender's index: a
+    // task-type change rebuilds the receiver's playlist from the backend,
+    // which can return the shots in a different order than the sender's
+    // (the sender mutates in place). A raw index would then point at the
+    // wrong entity and the two screens would fight each other. Fall back to
+    // the index for older senders or when the entity isn't found locally.
+    let targetIndex = -1
+    if (exists(eventData.current_entity_id)) {
+      targetIndex = findEntityIndex({
+        entity_id: eventData.current_entity_id,
+        preview_file_id: eventData.current_preview_file_id
+      })
+    }
+    if (targetIndex < 0 && exists(eventData.current_entity_index)) {
+      targetIndex = eventData.current_entity_index
+    }
+    if (targetIndex >= 0 && targetIndex !== unref(playingEntityIndex)) {
+      playEntity(targetIndex)
       isEntityChanged = true
     } else if (
       exists(eventData.current_preview_file_id) &&
