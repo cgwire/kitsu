@@ -1,2 +1,0 @@
-import{Ei as e,Kr as t,ci as n,fi as r,on as i}from"./index-tpOXPn6x.js";import{t as a}from"./BooleanRep-CTxpqsD5.js";t();var o={class:`has-text-centered`},s=i({__name:`BooleanCell`,props:{value:{type:Boolean,default:!1}},setup(t){return(i,s)=>(e(),n(`td`,o,[r(a,{value:t.value},null,8,[`value`])]))}},[[`__scopeId`,`data-v-4d234e26`]]);export{s as t};
-//# sourceMappingURL=BooleanCell-CUmuJxjj.js.map

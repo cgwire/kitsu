@@ -1,0 +1,2 @@
+import{Ei as e,Kr as t,Oi as n,Ur as r,ci as i,ii as a,ni as o,oi as s,zt as c}from"./index-BkganQ8Z.js";import{t as l}from"./DepartmentName-BLL45ie1.js";t();var u={__name:`DepartmentNamesCell`,props:{departments:{type:Array,default:()=>[]}},setup(t){let u=r(),d=t,f=a(()=>u.getters.departmentMap),p=a(()=>c(d.departments.map(e=>f.value.get(e)).filter(Boolean)));return(t,r)=>(e(),i(`td`,null,[(e(!0),i(o,null,n(p.value,t=>(e(),s(l,{key:t.id,department:t},null,8,[`department`]))),128))]))}};export{u as t};
+//# sourceMappingURL=DepartmentNamesCell-BwdYUw28.js.map

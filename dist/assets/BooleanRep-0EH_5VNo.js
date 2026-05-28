@@ -1,0 +1,2 @@
+import{Ei as e,Ji as t,Kr as n,Nr as r,Sn as i,oi as a,on as o}from"./index-BkganQ8Z.js";n();var s=o({__name:`BooleanRep`,props:{value:{default:!1,type:Boolean}},setup(n){return(o,s)=>n.value?(e(),a(t(r),{key:0,class:`true`,size:22,"stroke-width":3,title:o.$t(`main.yes`)},null,8,[`title`])):(e(),a(t(i),{key:1,class:`false`,size:16,"stroke-width":3,title:o.$t(`main.no`)},null,8,[`title`]))}},[[`__scopeId`,`data-v-07c5b4af`]]);export{s as t};
+//# sourceMappingURL=BooleanRep-0EH_5VNo.js.map

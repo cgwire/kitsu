@@ -1,0 +1,2 @@
+import{Ei as e,Kr as t,ai as n,ci as r,ki as i,si as a}from"./index-BkganQ8Z.js";t();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(t){return(l,u)=>(e(),r(`div`,o,[n(`div`,s,[i(l.$slots,`main`)]),t.side?(e(),r(`div`,c,[i(l.$slots,`side`)])):a(``,!0)]))}};export{l as t};
+//# sourceMappingURL=PageLayout-B5M5uLMQ.js.map
