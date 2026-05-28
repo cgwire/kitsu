@@ -2416,9 +2416,16 @@ const onFrameUpdate = frame => {
       }
     }
   }
-  if (isCurrentPreviewMovie.value && wavesurfer && isWaveformDisplayed.value) {
-    const position = currentTimeRaw.value / maxDurationRaw.value
-    wavesurfer.seekTo(position)
+  if (
+    isCurrentPreviewMovie.value &&
+    wavesurfer &&
+    isWaveformDisplayed.value &&
+    maxDurationRaw.value > 0
+  ) {
+    // Guard the divisor: while a playlist reset is in flight the next
+    // media's duration isn't known yet (maxDurationRaw is 0), and seeking
+    // to a non-finite position throws in WaveSurfer's currentTime setter.
+    wavesurfer.seekTo(currentTimeRaw.value / maxDurationRaw.value)
   }
   nextTick(() => {
     const actions = onNextTimeUpdateActions.value
