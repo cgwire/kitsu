@@ -1741,8 +1741,14 @@ export default {
           }).then(() => {
             if (!previewPlayer.notSaved) {
               this.taskPreviews = this.getTaskPreviews(this.task.id)
-              previewPlayer.reloadAnnotations()
-              previewPlayer.loadAnnotation()
+              // Wait for the refreshed previews prop to propagate to the
+              // player before reloading — otherwise reloadAnnotations
+              // reads the stale currentPreview and the remote drawing
+              // never shows up outside a review room.
+              this.$nextTick(() => {
+                previewPlayer.reloadAnnotations()
+                previewPlayer.loadAnnotation()
+              })
             }
           })
         }

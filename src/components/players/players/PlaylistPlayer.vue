@@ -979,6 +979,7 @@ const props = defineProps({
 // Emits
 
 const emit = defineEmits([
+  'annotation-changed',
   'edit-clicked',
   'entity-to-add',
   'new-entity-dropped',
@@ -3777,11 +3778,15 @@ const onPreviewFileAnnotationUpdate = eventData => {
         currentPreview.value?.id === eventData.preview_file_id &&
         !isWriting(eventData.updated_at)
       ) {
-        const isAnnotationSizeChanged =
-          annotations.value.length !== preview.annotations.length
         annotations.value = preview.annotations
+        // Reload on every update, not only when the number of annotated frames
+        // changes: adding or moving a stroke on a frame that is already
+        // annotated leaves the entry count unchanged, so gating on it dropped
+        // those updates outside a review room (the "syncs once then stops"
+        // bug). In a live room the boolean skips the canvas reload — the live
+        // broadcast already painted it.
         const isLiveRoom = !room.value?.people?.length
-        if (isAnnotationSizeChanged) reloadAnnotations(isLiveRoom)
+        reloadAnnotations(isLiveRoom)
       }
     })
 }

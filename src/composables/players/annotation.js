@@ -1211,8 +1211,14 @@ export const useAnnotation = ({
 
   // Saving
 
+  // Guards against a freshly-saved annotation being immediately reloaded by
+  // the socket echo of our own save (which would clear + reload the canvas and
+  // drop strokes drawn since). isWriting() compares this against the event's
+  // UTC updated_at, so it must be UTC too — the previous `moment().add(2,'h')`
+  // only landed on UTC by accident in a UTC+2 zone, and elsewhere it either
+  // blocked remote updates for ~2h or never guarded at all.
   const markLastAnnotationTime = () => {
-    const time = moment().add(2, 'hour').add(6, 'seconds')
+    const time = moment.utc().add(6, 'seconds')
     lastAnnotationTime.value = formatFullDate(time).replace(' ', 'T')
   }
 
