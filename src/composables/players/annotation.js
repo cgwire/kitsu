@@ -1296,37 +1296,20 @@ export const useAnnotation = ({
   }
 
   // Render whatever is currently on the live fabric canvas onto the
-  // target canvas, scaling strokes to match the target dimensions.
-  // Destructive: the objects are moved out of the live canvas (callers
-  // who need the live canvas restored afterwards should reload it).
+  // target canvas. Non-destructive: it draws the live canvas's pixels
+  // straight onto the target (scaled to fit), so objects stay on the
+  // live canvas — no per-object moves and no fabric "object belongs to
+  // a different canvas" warnings.
   const compositeLiveAnnotationsOntoCanvas = canvas => {
     return new Promise(resolve => {
+      const live = fabricCanvas.value
+      if (!live) return resolve()
+      live.renderAll()
+      const source = live.lowerCanvasEl
+      if (!source) return resolve()
       const context = canvas.getContext('2d')
-      const scaleRatio = canvas.width / fabricCanvas.value.width
-      const tmpSource = document.getElementById('resize-annotation-canvas')
-      const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
-        width: canvas.width,
-        height: canvas.height
-      })
-      fabricCanvas.value.getObjects().forEach(obj => {
-        if (obj._objects) {
-          obj._objects.forEach(obj => {
-            tmpCanvas.add(obj)
-            obj.strokeWidth = obj.strokeWidth / scaleRatio
-          })
-        } else {
-          tmpCanvas.add(obj)
-          obj.strokeWidth = obj.strokeWidth / scaleRatio
-        }
-      })
-      tmpCanvas.setZoom(scaleRatio)
-      setTimeout(() => {
-        context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
-        setTimeout(() => {
-          tmpCanvas.dispose()
-        }, 100)
-        return resolve()
-      }, 100)
+      context.drawImage(source, 0, 0, canvas.width, canvas.height)
+      resolve()
     })
   }
 
