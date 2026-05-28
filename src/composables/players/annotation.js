@@ -12,7 +12,9 @@ import {
   SHAPE_WIDTHS,
   attachShapeDrawing,
   buildReadOnlyShape,
-  lockBrushToFirstPointer
+  getAnnotationContainMapping,
+  lockBrushToFirstPointer,
+  normalizeSerializedAnnotation
 } from '@/lib/annotation'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -159,6 +161,9 @@ export const useAnnotation = ({
   const doneActionStack = []
   const undoneActionStack = []
   let silentAnnotation = false
+  // Bumped on every comparison-canvas clear so an in-flight async load can tell
+  // it was superseded and stop repopulating a canvas meant to be cleared.
+  let comparisonLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
@@ -191,7 +196,7 @@ export const useAnnotation = ({
       result.angle = this.angle
       result.scale = this.scale
       result.createdBy = this.createdBy
-      return result
+      return normalizeSerializedAnnotation(this, result)
     }
     return object
   }
@@ -521,10 +526,20 @@ export const useAnnotation = ({
     })
   }
 
-  const loadSingleAnnotationComparison = annotation => {
-    annotation.drawing.objects.forEach(obj => {
-      addObjectToCanvas(annotation, obj, fabricCanvasComparison.value)
-    })
+  const loadSingleAnnotationComparison = async annotation => {
+    const canvas = fabricCanvasComparison.value
+    // The comparison viewer mounts at 0x0 and only gets its real size once the
+    // side-by-side layout settles. Painting before then places every object at
+    // scale 0; onComparisonCanvasResized reloads once it has a size.
+    if (!canvas || !canvas.width || !canvas.height) return
+    // Adding PSStrokes / shapes is async, so load sequentially and bail if a
+    // clear (or newer load) superseded us — otherwise late adds repopulate a
+    // canvas that was just cleared, leaving an incomplete/garbled overlay.
+    const token = comparisonLoadToken
+    for (const obj of annotation.drawing.objects) {
+      if (token !== comparisonLoadToken) return
+      await addObjectToCanvas(annotation, obj, canvas)
+    }
   }
 
   const addObjectToCanvas = async (annotation, obj, canvas = null) => {
@@ -532,38 +547,26 @@ export const useAnnotation = ({
     if (getObjectById(obj.id) && !canvas) return
     if (!canvas) canvas = fabricCanvas.value
     let path, shape, text, psstroke
-    let scaleMultiplierX = 1
-    let scaleMultiplierY = 1
-    if (annotation?.width) {
-      scaleMultiplierX = canvas.width / annotation.width
-      scaleMultiplierY = canvas.width / annotation.width
-    }
-    if (annotation?.height) {
-      scaleMultiplierY = canvas.height / annotation.height
-    }
-    const canvasWidth = obj.canvasWidth || annotation.width
-    const canvasHeight = obj.canvasHeight
-
-    if (canvasWidth) {
-      scaleMultiplierX = canvas.width / canvasWidth
-      scaleMultiplierY = canvas.width / canvasWidth
-    }
-    if (canvasHeight) {
-      scaleMultiplierY = canvas.height / canvasHeight
-    }
+    const canvasWidth = obj.canvasWidth || annotation?.width
+    const canvasHeight = obj.canvasHeight || annotation?.height
+    const { scale, offsetX, offsetY } = getAnnotationContainMapping(
+      canvas,
+      canvasWidth,
+      canvasHeight
+    )
 
     const base = {
       id: obj.id,
       fill: 'transparent',
-      left: obj.left * scaleMultiplierX,
-      top: obj.top * scaleMultiplierY,
+      left: obj.left * scale + offsetX,
+      top: obj.top * scale + offsetY,
       stroke: obj.stroke,
       strokeWidth: obj.strokeWidth,
       radius: obj.radius,
       width: obj.width,
       height: obj.height,
-      scaleX: obj.scaleX * scaleMultiplierX,
-      scaleY: obj.scaleY * scaleMultiplierY,
+      scaleX: obj.scaleX * scale,
+      scaleY: obj.scaleY * scale,
       angle: obj.angle,
       scale: obj.scale,
       editable: !isCurrentUserArtist.value,
@@ -571,16 +574,10 @@ export const useAnnotation = ({
     }
 
     if (obj.type === 'path') {
-      let strokeMultiplier = 1
-      if (obj.canvasWidth) {
-        strokeMultiplier = canvasWidth / canvas.width
-      }
-      if (canvas.width < 420) strokeMultiplier /= 2
       path = new fabric.Path(obj.path, {
         ...base
       })
       path.set('id', obj.id)
-      path.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
       path.set('canvasWidth', canvasWidth)
       path.set('canvasHeight', canvasHeight)
       addSerialization(path)
@@ -602,8 +599,8 @@ export const useAnnotation = ({
       text = new fabric.IText(obj.text, {
         ...base,
         fill: obj.fill,
-        left: obj.left * scaleMultiplierX,
-        top: obj.top * scaleMultiplierY,
+        left: obj.left * scale + offsetX,
+        top: obj.top * scale + offsetY,
         fontFamily: obj.fontFamily,
         fontSize: obj.fontSize,
         backgroundColor: 'rgba(255,255,255, 0.8)',
@@ -629,22 +626,20 @@ export const useAnnotation = ({
       silentAnnotation = false
     } else if (obj.type === 'PSStroke') {
       if (obj.canvasWidth) {
-        let strokeMultiplier = canvasWidth / canvas.width
-        if (canvas.width < 420) strokeMultiplier /= 2
         psstroke = await deserializePSBrush(obj)
         psstroke.set('id', obj.id)
-        psstroke.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+        psstroke.set('strokeWidth', obj.strokeWidth)
         psstroke.set('canvasWidth', canvasWidth)
         psstroke.set('canvasHeight', canvasHeight)
-        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
-        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
-        psstroke.set('left', obj.left * scaleMultiplierX)
-        psstroke.set('top', obj.top * scaleMultiplierY)
+        psstroke.set('scaleX', obj.scaleX * scale)
+        psstroke.set('scaleY', obj.scaleY * scale)
+        psstroke.set('left', obj.left * scale + offsetX)
+        psstroke.set('top', obj.top * scale + offsetY)
         psstroke.set('radius', obj.radius)
         psstroke.set('width', obj.width)
         psstroke.set('height', obj.height)
-        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
-        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('scaleX', obj.scaleX * scale)
+        psstroke.set('scaleY', obj.scaleY * scale)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
         psstroke.set('editable', !isCurrentUserArtist.value)
@@ -740,11 +735,11 @@ export const useAnnotation = ({
   const _resetPencil = () => {
     if (!fabricCanvas.value) return
     const converter = {
-      huge: 15,
-      big: 10,
-      medium: 5,
-      small: 2,
-      tiny: 1
+      huge: 30,
+      big: 20,
+      medium: 10,
+      small: 4,
+      tiny: 2
     }
     const strokeWidth = converter[pencilWidth.value]
     fabricCanvas.value.freeDrawingBrush.width = strokeWidth
@@ -1020,7 +1015,10 @@ export const useAnnotation = ({
     })
 
     fabricCanvas.value.freeDrawingBrush.color = pencilColor.value
-    fabricCanvas.value.freeDrawingBrush.width = 4
+    // Apply the selected pencil width rather than a hardcoded value — the
+    // drawing-mode toggle (setAnnotationDrawingMode) doesn't reset the brush,
+    // so a hardcoded width here stuck every freehand stroke at that size.
+    _resetPencil()
 
     fabric.Group.prototype._controlsVisibility = {
       tl: false,
@@ -1158,6 +1156,9 @@ export const useAnnotation = ({
   }
 
   const clearComparisonCanvas = () => {
+    // Cancel any in-flight comparison load so its remaining async adds don't
+    // land after this clear.
+    comparisonLoadToken++
     if (isFabricReady(fabricCanvasComparison.value)) {
       fabricCanvasComparison.value.clear()
     }
@@ -1230,8 +1231,14 @@ export const useAnnotation = ({
 
   // Saving
 
+  // Guards against a freshly-saved annotation being immediately reloaded by
+  // the socket echo of our own save (which would clear + reload the canvas and
+  // drop strokes drawn since). isWriting() compares this against the event's
+  // UTC updated_at, so it must be UTC too — the previous `moment().add(2,'h')`
+  // only landed on UTC by accident in a UTC+2 zone, and elsewhere it either
+  // blocked remote updates for ~2h or never guarded at all.
   const markLastAnnotationTime = () => {
-    const time = moment().add(2, 'hour').add(6, 'seconds')
+    const time = moment.utc().add(6, 'seconds')
     lastAnnotationTime.value = formatFullDate(time).replace(' ', 'T')
   }
 

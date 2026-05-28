@@ -421,10 +421,10 @@
     <div
       id="sound-container"
       :style="{
-        height: isWaveformDisplayed ? '60px' : '0px',
+        height: isWaveformDisplayed && isCurrentPreviewMovie ? '60px' : '0px',
         width: '100%'
       }"
-      v-show="isWaveformDisplayed"
+      v-show="isWaveformDisplayed && isCurrentPreviewMovie"
     >
       <div id="waveform"></div>
     </div>
@@ -979,6 +979,7 @@ const props = defineProps({
 // Emits
 
 const emit = defineEmits([
+  'annotation-changed',
   'edit-clicked',
   'entity-to-add',
   'new-entity-dropped',
@@ -2415,9 +2416,16 @@ const onFrameUpdate = frame => {
       }
     }
   }
-  if (isCurrentPreviewMovie.value && wavesurfer && isWaveformDisplayed.value) {
-    const position = currentTimeRaw.value / maxDurationRaw.value
-    wavesurfer.seekTo(position)
+  if (
+    isCurrentPreviewMovie.value &&
+    wavesurfer &&
+    isWaveformDisplayed.value &&
+    maxDurationRaw.value > 0
+  ) {
+    // Guard the divisor: while a playlist reset is in flight the next
+    // media's duration isn't known yet (maxDurationRaw is 0), and seeking
+    // to a non-finite position throws in WaveSurfer's currentTime setter.
+    wavesurfer.seekTo(currentTimeRaw.value / maxDurationRaw.value)
   }
   nextTick(() => {
     const actions = onNextTimeUpdateActions.value
@@ -3188,7 +3196,7 @@ const resetHeight = () => {
     if (playlistProgressRef.value?.$el) {
       height -= playlistProgressRef.value.$el.offsetHeight
     }
-    if (isWaveformDisplayed.value) height -= 60
+    if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
     if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
@@ -3777,11 +3785,15 @@ const onPreviewFileAnnotationUpdate = eventData => {
         currentPreview.value?.id === eventData.preview_file_id &&
         !isWriting(eventData.updated_at)
       ) {
-        const isAnnotationSizeChanged =
-          annotations.value.length !== preview.annotations.length
         annotations.value = preview.annotations
+        // Reload on every update, not only when the number of annotated frames
+        // changes: adding or moving a stroke on a frame that is already
+        // annotated leaves the entry count unchanged, so gating on it dropped
+        // those updates outside a review room (the "syncs once then stops"
+        // bug). In a live room the boolean skips the canvas reload — the live
+        // broadcast already painted it.
         const isLiveRoom = !room.value?.people?.length
-        if (isAnnotationSizeChanged) reloadAnnotations(isLiveRoom)
+        reloadAnnotations(isLiveRoom)
       }
     })
 }

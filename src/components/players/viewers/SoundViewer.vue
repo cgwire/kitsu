@@ -12,7 +12,7 @@
     <div class="file-name" v-show="!isLoading">
       {{ fileName }}
     </div>
-    <div id="waveform"></div>
+    <div ref="waveform" class="waveform"></div>
   </div>
 </template>
 
@@ -39,6 +39,10 @@ const props = defineProps({
 
 const emit = defineEmits(['play-ended'])
 
+// A template ref, not a global '#waveform' id: PreviewPlayer mounts a
+// main and a comparison PreviewViewer, each with its own SoundViewer, so
+// an id selector would bind every WaveSurfer instance to the first match.
+const waveform = ref(null)
 const isLoading = ref(false)
 let wavesurfer = null
 
@@ -53,7 +57,7 @@ const pause = () => {
 onMounted(() => {
   isLoading.value = true
   wavesurfer = WaveSurfer.create({
-    container: '#waveform',
+    container: waveform.value,
     waveColor: '#00B242',
     progressColor: '#008732',
     height: props.defaultHeight
@@ -103,7 +107,7 @@ defineExpose({ play, pause })
   color: white;
 }
 
-#waveform {
+.waveform {
   flex: 1;
   margin: auto;
 }

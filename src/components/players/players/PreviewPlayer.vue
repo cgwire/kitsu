@@ -33,6 +33,7 @@
               !isComparisonOverlay
             "
             @click="onCanvasClicked"
+            @resized="onComparisonCanvasResized"
           />
           <div class="viewers">
             <preview-viewer
@@ -87,7 +88,7 @@
               :style="{
                 opacity: overlayOpacity
               }"
-              @video-loaded="syncComparisonViewer"
+              @video-loaded="onComparisonVideoLoaded"
               v-show="isComparing && previewToCompare"
             />
           </div>
@@ -1036,6 +1037,38 @@ const syncComparisonViewer = () => {
   }
 }
 
+const loadComparisonAnnotationAtCurrentFrame = () => {
+  if (!isComparing.value || isComparisonOverlay.value) return
+  if (isMovie.value) {
+    loadComparisonAnnotation(currentFrame.value * frameDuration.value)
+  } else if (isPicture.value) {
+    loadComparisonAnnotation(0)
+  }
+}
+
+const realignComparisonCanvas = () => {
+  previewViewer.value?.resize()
+  comparisonViewer.value?.resize()
+  comparisonAnnotationCanvas.value?.updateBounds()
+  loadComparisonAnnotationAtCurrentFrame()
+}
+
+const onComparisonVideoLoaded = () => {
+  syncComparisonViewer()
+  // The comparison canvas position and size are derived from the
+  // comparison media element's on-screen rect, which is only final once
+  // the 0.3s side-by-side layout transition has settled — and the
+  // comparison viewer's left edge depends on the main viewer's width.
+  // Draw once after RESIZE_DELAY rather than on nextTick: painting before
+  // the transition settles places the annotation at a mid-transition
+  // position, so it visibly jumps when corrected.
+  setTimeout(realignComparisonCanvas, RESIZE_DELAY)
+}
+
+const onComparisonCanvasResized = () => {
+  loadComparisonAnnotationAtCurrentFrame()
+}
+
 const onProgressChanged = frame => {
   reloadAnnotations()
   if (currentFrame.value !== frame) {
@@ -1747,14 +1780,12 @@ watch(previewToCompareId, () => {
     if (comparisonViewer.value) comparisonViewer.value.pause()
     previewToCompare.value = resolvePreviewToCompare(previewToCompareId.value)
     if (isComparing.value) {
-      setCurrentFrame(currentFrame.value - 1)
+      syncComparisonViewer()
       setTimeout(() => {
         syncComparisonViewer()
       }, SYNC_DELAY)
       pause()
-      if (isMovie.value) {
-        loadComparisonAnnotation(currentTime.value)
-      } else if (isPicture.value) {
+      if (isPicture.value) {
         loadComparisonAnnotation(0)
       }
     }
