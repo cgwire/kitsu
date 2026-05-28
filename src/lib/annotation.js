@@ -182,6 +182,10 @@ export const createAnnotationCanvas = (canvasEl, options = {}) => {
   if (brush.pressureManager) {
     brush.pressureManager.fallback = 0.5
   }
+  // PSBrush overrides BaseBrush.initialize without super, losing the round
+  // cap/join defaults — restore them so strokes don't render with flat ends.
+  brush.strokeLineCap = 'round'
+  brush.strokeLineJoin = 'round'
   lockBrushToFirstPointer(brush)
   canvas.freeDrawingBrush = brush
   canvas.isDrawingMode = false
@@ -612,6 +616,8 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
     selectable: false,
     stroke: obj.stroke,
     strokeWidth: obj.strokeWidth || 1,
+    strokeLineCap: 'round',
+    strokeLineJoin: 'round',
     top: (obj.top || 0) * scale + offsetY,
     width: obj.width
   }
@@ -640,6 +646,8 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
       selectable: false,
       stroke: base.stroke,
       strokeWidth: obj.strokeWidth || 1,
+      strokeLineCap: 'round',
+      strokeLineJoin: 'round',
       top: base.top,
       canvasWidth,
       canvasHeight
