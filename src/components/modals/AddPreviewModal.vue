@@ -34,15 +34,12 @@
           {{ $t('tasks.select_preview_file') }}
         </p>
 
-        <file-upload
+        <file-upload-zone
           ref="previewField"
-          class="preview-files-field"
           :accept="extensions"
-          :is-primary="false"
           :label="$t('main.select_file')"
           :multiple="isMultiple"
           @fileselected="onFileSelected"
-          hide-file-names
         />
 
         <p class="error" v-if="isError">
@@ -129,7 +126,7 @@ import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
-import FileUpload from '@/components/widgets/FileUpload.vue'
+import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -299,10 +296,6 @@ h3.subtitle {
 
 .message-body {
   border-width: 0 0 0 4px;
-}
-
-.preview-files-field {
-  margin: auto;
 }
 
 .box.content {
