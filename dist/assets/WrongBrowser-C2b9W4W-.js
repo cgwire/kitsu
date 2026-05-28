@@ -1,0 +1,2 @@
+import{Ei as e,Kr as t,Qi as n,ai as r,ci as i,on as a}from"./index-B-35f47_.js";t();var o={name:`wrong-browser`},s={class:`server-down page`},c={class:`title`};function l(t,a,o,l,u,d){return e(),i(`div`,s,[r(`h1`,c,n(t.$t(`wrong_browser.title`)),1),r(`p`,null,n(t.$t(`wrong_browser.text`)),1)])}var u=a(o,[[`render`,l]]);export{u as default};
+//# sourceMappingURL=WrongBrowser-C2b9W4W-.js.map

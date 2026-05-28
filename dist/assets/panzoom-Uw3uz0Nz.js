@@ -1,0 +1,2 @@
+import{Kr as e,Wi as t}from"./index-B-35f47_.js";e();var n=()=>{let e=t({x:0,y:0,scale:1});return{panzoomTransform:e,onPanzoomChanged:({x:t,y:n,scale:r})=>{e.value={x:t,y:n,scale:r}},resetPanzoomTransform:()=>{e.value={x:0,y:0,scale:1}},applyPanzoomTo:t=>{if(!t)return;let{x:n,y:r,scale:i}=e.value;t.setViewportTransform([i,0,0,i,n,r]),t.requestRenderAll()}}};export{n as t};
+//# sourceMappingURL=panzoom-Uw3uz0Nz.js.map

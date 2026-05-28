@@ -1,0 +1,2 @@
+import{Ei as e,Kr as t,Qi as n,Xi as r,ci as i,on as a}from"./index-B-35f47_.js";t();var o=a({__name:`PageTitle`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}},setup(t){return(a,o)=>(e(),i(`h1`,{class:r({title:!0,"hide-small-screen":!0,bold:t.bold})},n(t.text),3))}},[[`__scopeId`,`data-v-e097dae2`]]);export{o as t};
+//# sourceMappingURL=PageTitle-BQNcjLq2.js.map

@@ -1,2 +1,0 @@
-import{Ei as e,Kr as t,Qi as n,ci as r,on as i}from"./index-BkganQ8Z.js";t();var a={class:`subtitle`},o=i({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(t){return(i,o)=>(e(),r(`h2`,a,n(t.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
-//# sourceMappingURL=PageSubtitle-B6qfauNK.js.map

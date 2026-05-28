@@ -1,0 +1,2 @@
+import{It as e,Kr as t,Ur as n,ii as r}from"./index-B-35f47_.js";t();var i=()=>{let t=n(),i=r(()=>t.getters.isDarkTheme);return{backgroundColor:t=>(!t||t.name===`Todo`)&&!i.value?`#ECECEC`:(!t||t.name===`Todo`)&&i.value?`#5F626A`:i.value?e.darkenColor(t.color):t.color,color:e=>!e||e.name!==`Todo`||i.value?`white`:`#333`,isDarkTheme:i}};export{i as t};
+//# sourceMappingURL=taskStatus-BoCr-unf.js.map

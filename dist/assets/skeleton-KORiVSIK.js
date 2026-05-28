@@ -1,2 +1,0 @@
-import{Ci as e,Kr as t,Wi as n,ii as r,wi as i}from"./index-BkganQ8Z.js";t();var a=150,o=400,s=300,c=350,l=150,u=t=>{let u=r(()=>(t.value-1)*a+o+s),d=r(()=>u.value+c+l),f=n(0),p=null;return i(()=>{p=setInterval(()=>{f.value++},d.value)}),e(()=>{p&&clearInterval(p)}),{cycle:f,fadeoutDelayMs:u}};export{u as t};
-//# sourceMappingURL=skeleton-KORiVSIK.js.map

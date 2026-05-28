@@ -1,0 +1,2 @@
+import{Ei as e,Kr as t,a as n,ai as r,ci as i,fi as a,i as o,on as s}from"./index-B-35f47_.js";t();var c={scope:`row`},l={class:`flexrow`},u=s({__name:`PeopleNameCell`,props:{person:{type:Object,required:!0}},setup(t){return(s,u)=>(e(),i(`td`,c,[r(`div`,l,[a(n,{person:t.person},null,8,[`person`]),a(o,{"with-link":``,person:t.person},null,8,[`person`])])]))}},[[`__scopeId`,`data-v-eb27d442`]]);export{u as t};
+//# sourceMappingURL=PeopleNameCell-CLoLLu0y.js.map
