@@ -1343,7 +1343,7 @@ export default {
       give_a_name: 'Give your production a name',
       give_a_name_description: 'Start by giving your production a meaningful name.',
       choose_template: 'Apply a production template (optional)',
-      choose_template_description: 'Pick a template to pre-fill task types, task statuses, asset types, metadata and settings. Leave empty to configure the  from scratch.',
+      choose_template_description: 'Pick a template to pre-fill task types, task statuses, asset types, metadata and settings. Leave empty to configure the production from scratch.',
       no_template: 'No template',
       import_assets_button: 'Import assets',
       import_shots_button: 'Import shots',
