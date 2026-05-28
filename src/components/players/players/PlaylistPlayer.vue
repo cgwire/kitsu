@@ -421,10 +421,10 @@
     <div
       id="sound-container"
       :style="{
-        height: isWaveformDisplayed ? '60px' : '0px',
+        height: isWaveformDisplayed && isCurrentPreviewMovie ? '60px' : '0px',
         width: '100%'
       }"
-      v-show="isWaveformDisplayed"
+      v-show="isWaveformDisplayed && isCurrentPreviewMovie"
     >
       <div id="waveform"></div>
     </div>
@@ -3196,7 +3196,7 @@ const resetHeight = () => {
     if (playlistProgressRef.value?.$el) {
       height -= playlistProgressRef.value.$el.offsetHeight
     }
-    if (isWaveformDisplayed.value) height -= 60
+    if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
     if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
