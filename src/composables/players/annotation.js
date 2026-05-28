@@ -161,6 +161,9 @@ export const useAnnotation = ({
   const doneActionStack = []
   const undoneActionStack = []
   let silentAnnotation = false
+  // Bumped on every comparison-canvas clear so an in-flight async load can tell
+  // it was superseded and stop repopulating a canvas meant to be cleared.
+  let comparisonLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
@@ -523,10 +526,20 @@ export const useAnnotation = ({
     })
   }
 
-  const loadSingleAnnotationComparison = annotation => {
-    annotation.drawing.objects.forEach(obj => {
-      addObjectToCanvas(annotation, obj, fabricCanvasComparison.value)
-    })
+  const loadSingleAnnotationComparison = async annotation => {
+    const canvas = fabricCanvasComparison.value
+    // The comparison viewer mounts at 0x0 and only gets its real size once the
+    // side-by-side layout settles. Painting before then places every object at
+    // scale 0; onComparisonCanvasResized reloads once it has a size.
+    if (!canvas || !canvas.width || !canvas.height) return
+    // Adding PSStrokes / shapes is async, so load sequentially and bail if a
+    // clear (or newer load) superseded us — otherwise late adds repopulate a
+    // canvas that was just cleared, leaving an incomplete/garbled overlay.
+    const token = comparisonLoadToken
+    for (const obj of annotation.drawing.objects) {
+      if (token !== comparisonLoadToken) return
+      await addObjectToCanvas(annotation, obj, canvas)
+    }
   }
 
   const addObjectToCanvas = async (annotation, obj, canvas = null) => {
@@ -1140,6 +1153,9 @@ export const useAnnotation = ({
   }
 
   const clearComparisonCanvas = () => {
+    // Cancel any in-flight comparison load so its remaining async adds don't
+    // land after this clear.
+    comparisonLoadToken++
     if (isFabricReady(fabricCanvasComparison.value)) {
       fabricCanvasComparison.value.clear()
     }
