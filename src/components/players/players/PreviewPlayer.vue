@@ -1747,7 +1747,7 @@ watch(previewToCompareId, () => {
     if (comparisonViewer.value) comparisonViewer.value.pause()
     previewToCompare.value = resolvePreviewToCompare(previewToCompareId.value)
     if (isComparing.value) {
-      setCurrentFrame(currentFrame.value - 1)
+      syncComparisonViewer()
       setTimeout(() => {
         syncComparisonViewer()
       }, SYNC_DELAY)
