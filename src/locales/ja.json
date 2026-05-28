@@ -133,7 +133,20 @@
       "edited_by": "{name} が編集",
       "add_attachment_to_reply": "返信に添付ファイルを追加",
       "add_frame_to_comment": "現在のフレームをコメントに追加",
-      "add_emoji": "絵文字を追加する"
+      "add_emoji": "絵文字を追加する",
+      "for_client_badge": "クライアントに表示されるテキスト",
+      "for_client_off": "クライアントには表示されないテキストです。クリックするとクライアントに表示されます",
+      "for_client_on": "クライアントに表示されるテキストです。クリックするとクライアントに表示されなくなります",
+      "move_modal": {
+        "error": "コメントを移動できませんでした。サポートチームにお問い合わせください。",
+        "intro": "このコメントの移動先として、同じエンティティのタスクを選択してください。移動先のタスクには新しいコメントと同様に通知が送信されます。",
+        "no_target": "このエンティティには他に利用可能なタスクがありません。",
+        "target_label": "移動先のタスク",
+        "title": "コメントを別のタスクに移動"
+      },
+      "move_to_task": "移動先",
+      "title": "コメント",
+      "toggle_for_client": "クライアントへの表示"
     },
     "custom_actions": {
       "create_error": "カスタムアクションの保存中にエラーが発生しました。同名のアクションが存在しないか確認してください。",
@@ -292,7 +305,19 @@
       "object_viewer": "オブジェクト・ビューワ",
       "rotate_hdr": "環境マップの回転",
       "change_fov": "焦点距離の変更",
-      "plalto": "比較モードで不透明度を0%と100%に切り替える"
+      "plalto": "比較モードで不透明度を0%と100%に切り替える",
+      "copy_annotation": "選択した注釈をコピー",
+      "move_entity_left": "選択したエンティティを左に移動",
+      "move_entity_right": "選択したエンティティを右に移動",
+      "next_annotation": "次の注釈",
+      "next_frame": "次のフレーム",
+      "pan_image": "画像をパン",
+      "paste_annotation": "注釈を貼り付け",
+      "play_pause": "再生 / 一時停止",
+      "play_pause_typing": "再生 / 一時停止（コメント入力中でも）",
+      "player": "プレイヤー",
+      "previous_annotation": "前の注釈",
+      "previous_frame": "前のフレーム"
     },
     "login": {
       "back_to_login": "ログインページに戻る",
@@ -553,7 +578,16 @@
       "shared_by": "{name} によって共有される",
       "continue": "続ける",
       "developer_documentation": "開発者向けドキュメント",
-      "feedback": "ロードマップ / フィードバック"
+      "feedback": "ロードマップ / フィードバック",
+      "annotations": {
+        "download_pdf": "注釈を PDF でダウンロード",
+        "download_zip": "注釈を ZIP でダウンロード"
+      },
+      "attach_snapshots_with_label": "ラベルを焼き込んだスナップショットを添付",
+      "disable_desktop_notifications": "デスクトップ通知を無効化",
+      "enable_desktop_notifications": "デスクトップ通知を有効化",
+      "export": "エクスポート",
+      "unknown": "不明"
     },
     "menu": {
       "assign_tasks": "タスクにアサイン",
@@ -585,7 +619,8 @@
       "title": "ニュースフィード",
       "hide_stats": "統計を隠す",
       "news": "ニュース",
-      "show_stats": "統計を表示"
+      "show_stats": "統計を表示",
+      "no_news_hint": "フィルターを広げるか、後でもう一度お試しください。"
     },
     "not_found": {
       "text": "クリックしたリンクが壊れているか、対象が見つかりません。ホームページに戻ってください。",
@@ -626,7 +661,22 @@
       "watching": "ウォッチ中",
       "only_playlists_ready": "準備の整ったプレイリストのみ",
       "playlist_is_ready": "プレイリストが完成",
-      "playlist_ready_text": "新しいプレイリストが出来上がりました："
+      "playlist_ready_text": "新しいプレイリストが出来上がりました：",
+      "desktop": {
+        "assignation_title": "{name} があなたをアサインしました",
+        "banner_blocked_text": "デスクトップ通知がブロックされています。有効にするにはブラウザのサイト設定で許可してください。",
+        "banner_dismiss": "後で",
+        "banner_enable": "有効化",
+        "banner_text": "新しいイベントごとにデスクトップ通知を受け取りましょう。",
+        "comment_title": "{name} がコメントしました",
+        "mention_title": "{name} があなたにメンションしました",
+        "playlist_ready_title": "プレイリスト {name} の準備ができました",
+        "publish_title": "{name} がプレビューを公開しました",
+        "reply_title": "{name} が返信しました",
+        "test_notification_body": "今後、新しいイベントについてこのような通知を受け取ります。",
+        "test_notification_title": "Kitsu の通知が有効になりました"
+      },
+      "to_status": "→"
     },
     "people": {
       "active": "アクティブ",
@@ -664,7 +714,8 @@
         "studio": "スタジオ",
         "daily_salary": "日当",
         "position": "ポジション",
-        "seniority": "年功"
+        "seniority": "年功",
+        "created_at": "作成日"
       },
       "list": {
         "name": "名前",
@@ -721,7 +772,13 @@
         "mid": "ミッド",
         "senior": "シニア"
       },
-      "email_domain_error": "このメールドメインは許可されていません。"
+      "email_domain_error": "このメールドメインは許可されていません。",
+      "archive_guest_confirm": "このゲストをアーカイブしますか？コメントはそのまま残りますが、アクティブなゲスト一覧には表示されなくなります。",
+      "archive_guest_error": "このゲストをアーカイブできませんでした。もう一度お試しください。",
+      "archived_guests": "アーカイブされたゲスト",
+      "guests": "ゲスト | ゲスト",
+      "restore_guest_error": "このゲストを復元できませんでした。もう一度お試しください。",
+      "seats_remaining": "残りのシートはありません | 残り {count} シート | 残り {count} シート"
     },
     "playlists": {
       "add_assets": "アセットを追加",
@@ -831,7 +888,10 @@
         "select_background": "背景を選択",
         "toggle_environment_skybox": "スカイボックス背景を表示/非表示",
         "toggle_wireframe": "ワイヤーフレームレンダリングを有効/無効",
-        "open_link": "リンクを開く"
+        "open_link": "リンクを開く",
+        "annotation_huge": "特大",
+        "annotation_shape": "シェイプ",
+        "annotation_tiny": "極小"
       },
       "download_csv": ".csv をダウンロード",
       "filter_task_type": "タスクタイプでフィルター",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "通知する顧客はいない。",
       "notify_clients_success": "通知は正常に送信されました。",
       "unmute": "ミュート解除",
-      "volume_level": "ボリューム{level}%。"
+      "volume_level": "ボリューム{level}%。",
+      "add_edits": "エディットを追加",
+      "add_episodes": "エピソードを追加",
+      "share": "共有",
+      "share_modal": {
+        "active_links": "アクティブなリンク",
+        "add_link": "新しいリンクを追加",
+        "can_comment": "コメントを許可",
+        "comments_disabled": "コメントは無効",
+        "comments_enabled": "コメントは有効",
+        "copy": "リンクをコピー",
+        "create_new": "新しいリンクを作成",
+        "description": "このプレイリストを外部のレビュアーと共有するリンクを生成します。リンクを知っている人は、Kitsu アカウントがなくてもプレイリストを表示してコメントを投稿できます。有効期限を設定したり、いつでもアクセスを取り消したりできます。",
+        "error": "共有リンクの作成中にエラーが発生しました。",
+        "expiration": "有効期限（任意）",
+        "expires": "有効期限",
+        "generate": "新しいリンクを生成",
+        "invite": "メールで招待",
+        "invite_add_email": "このメールを追加",
+        "invite_error": "招待状の送信中にエラーが発生しました。",
+        "invite_invalid_email": "そのメールアドレスは無効です。",
+        "invite_message_label": "カスタムメッセージ（任意）",
+        "invite_message_placeholder": "メールに追加される短いメモ",
+        "invite_placeholder": "メールアドレスを入力して Enter キーを押すか、クライアントを選択してください",
+        "invite_recipients": "宛先",
+        "invite_send": "招待状を送信",
+        "invite_sent": "{count} 件の招待状を送信しました | {count} 件の招待状を送信しました",
+        "no_expiration": "有効期限なし",
+        "no_links": "共有リンクはまだありません。外部のレビュアーにアクセスを許可するには、下でリンクを作成してください。",
+        "open": "新しいタブでリンクを開く",
+        "revoke": "リンクを取り消す",
+        "revoke_confirm": "このリンクを取り消しますか？このリンクを使用しているすべての人がアクセスできなくなります。",
+        "title": "プレイリストを共有"
+      },
+      "update_to_latest_version": "最新バージョンに更新",
+      "update_to_latest_version_help": "各エンティティの現在のタスクタイプを保ったまま、最新のリビジョンを設定します。",
+      "update_versions_title": "選択したバージョンを更新"
     },
     "productions": {
       "current": "選択されたプロダクション",
@@ -900,7 +996,10 @@
         "boolean": "チェックボックス",
         "number": "数値",
         "string": "テキスト",
-        "tags": "タグのリスト"
+        "tags": "タグのリスト",
+        "applies_to_all_projects": "この列はリスト内のすべてのプロジェクトに追加されます。各プロジェクトはリストビューで独自の値を持つことができます。",
+        "delete_list_column_text": "これにより、保存された値も含めて、すべてのプロジェクトから列「{name}」が削除されます。続行しますか？",
+        "target_project": "プロジェクト"
       },
       "status": {
         "closed": "クローズ",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "開始日と終了日",
         "shots_to_import": "インポートするショット",
         "select_edit_task_type": "タスクタイプの編集を選択する",
-        "select_edit_task_type_description": "エディットの制作工程を定義します。"
+        "select_edit_task_type_description": "エディットの制作工程を定義します。",
+        "choose_template": "プロダクションテンプレートを適用（任意）",
+        "choose_template_description": "テンプレートを選択すると、タスクタイプ、タスクステータス、アセットタイプ、メタデータ、設定があらかじめ入力されます。最初から設定する場合は空のままにしてください。",
+        "no_template": "テンプレートなし"
       },
       "style": {
         "2d": "アニメーション（デジタル工程）",
@@ -1010,7 +1112,12 @@
         "title": "アバターを変更",
         "error_upload": "画像のアップロード中にエラーが発生しました。",
         "updating": "更新中…",
-        "removing": "削除中…"
+        "removing": "削除中…",
+        "drop_or_click": "ここをクリックするか、写真をドロップしてください",
+        "intro": "写真を選択し、ドラッグとズームで構図を調整してください。",
+        "preview": "プレビュー",
+        "preview_hint": "ドラッグで位置を調整し、スライダーでズームします。",
+        "replace": "別の写真を選択"
       },
       "change_password": {
         "button": "パスワードを変更",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "検証してTOTP を無効化",
           "button_validate": "検証してTOTP を有効化",
           "error_enable": "TOTP の有効化中にエラーが発生しました。",
-          "error_disable": "TOTP の無効化中にエラーが発生しました。"
+          "error_disable": "TOTP の無効化中にエラーが発生しました。",
+          "description": "Google Authenticator、Authy、1Password などの TOTP アプリを使用します。",
+          "name": "認証アプリ"
         },
         "email_otp": {
           "button_enable": "メールによる OTP を有効化",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "検証してメールによる OTP を無効化",
           "button_validate": "検証してメールによる OTP を有効化",
           "error_enable": "メールによる OTP の有効化中にエラーが発生しました。",
-          "error_disable": "メールによる OTP の無効化中にエラーが発生しました。"
+          "error_disable": "メールによる OTP の無効化中にエラーが発生しました。",
+          "description": "ログインのたびにメールでワンタイムコードを受け取ります。",
+          "name": "メール"
         },
         "recovery_codes": {
           "title": "リカバリーコード",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "登録された FIDO デバイス:",
           "button_register": "新しい FIDO デバイスを登録",
           "error_register": "FIDO デバイスの登録中にエラーが発生しました。",
-          "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。"
+          "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。",
+          "description": "ハードウェアキー（YubiKey）またはプラットフォーム認証器（Touch ID、Windows Hello）を使用します。",
+          "name": "セキュリティキー"
         },
         "enabled": "二要素認証が有効",
         "mandatory": "お客様の組織では二要素認証が必要です。続行するには、少なくとも1つの方法を有効にしてください。",
-        "description": "二要素認証（<abbr title=\"二要素認証\">2FA</abbr>）は、アカウントに追加のセキュリティ層を追加します。有効にすると、ログインのたびにパスワードに加えて2つ目の認証が必要になります。認証アプリ（<abbr title=\"Time-based One-Time Password\">TOTP</abbr>）、メール認証（<abbr title=\"One-Time Password\">OTP</abbr>）、ハードウェア・セキュリティ・キー（<abbr title=\"Fast IDentity Online\">FIDO</abbr>）を2つ目の認証要素として使用できます。"
-      }
+        "description": "二要素認証（<abbr title=\"二要素認証\">2FA</abbr>）は、アカウントに追加のセキュリティ層を追加します。有効にすると、ログインのたびにパスワードに加えて2つ目の認証が必要になります。認証アプリ（<abbr title=\"Time-based One-Time Password\">TOTP</abbr>）、メール認証（<abbr title=\"One-Time Password\">OTP</abbr>）、ハードウェア・セキュリティ・キー（<abbr title=\"Fast IDentity Online\">FIDO</abbr>）を2つ目の認証要素として使用できます。",
+        "status_disabled": "無効",
+        "status_enabled": "有効"
+      },
+      "notifications_title": "通知"
     },
     "settings": {
       "change_logo": "ロゴを変更",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "現在、リストは空です。これは、メイン設定のすべてのデータがユーザーに利用可能であることを意味します。このプロダクションの選択肢を制限するために、いくつかのエントリーを追加してください。",
-        "empty_automation_list": "このプロダクションに設定された自動化はありません。"
+        "empty_automation_list": "このプロダクションに設定された自動化はありません。",
+        "empty_backgrounds": "リンクされた背景はありません。上のリストから選択して追加してください。",
+        "empty_board": "ボードでの表示を設定するには、まずタスクステータスを追加してください。",
+        "empty_metadata": "このエンティティタイプにはまだメタデータ記述子が定義されていません。"
       },
       "save": {
         "button": "設定を保存",
@@ -1098,7 +1217,8 @@
       "remove_logo": "スタジオロゴを削除",
       "available_items": "利用可能なアイテム",
       "import_from_production": "別のプロダクションからインポート",
-      "no_more_available_items": "追加できるアイテムがありません。"
+      "no_more_available_items": "追加できるアイテムがありません。",
+      "preferences_title": "環境設定"
     },
     "task_status": {
       "create_error": "タスクステータスの保存中にエラーが発生しました。類似の名前のタスクステータスがないか確認してください。",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "選択したタスクを永久に削除してもよろしいですか？関連するコメントとプレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
       "hookup_playlist": "フックアップ・プレイリストを作成する",
-      "assignation_error": "選択したタスクにこの人物を割り当てるには問題がありました。すべてのタスクが割り当てられていません。"
+      "assignation_error": "選択したタスクにこの人物を割り当てるには問題がありました。すべてのタスクが割り当てられていません。",
+      "retake_filter_none": "リテイクなし",
+      "retake_filter_with_retakes": "リテイクあり"
     },
     "timesheets": {
       "detail_level": "詳細レベル",
@@ -1541,7 +1663,8 @@
       "unit": "単位",
       "confirm_day_offs": "これらの日を休日として設定すると、影響を受ける日に記録されたすべての時間が消去されます。続行してもよろしいですか？",
       "confirm_unset_day_offs": "休日は現在 {start} から {end} まで適用されています。この期間を削除してもよろしいですか？",
-      "off": "オフ"
+      "off": "オフ",
+      "day_off_no_logging": "休日には作業時間を記録できません"
     },
     "wrong_browser": {
       "title": "お使いのブラウザはKitsuでサポートされていません",
@@ -1565,6 +1688,12 @@
         "title": "プレビューファイル",
         "mark_broken": "破損としてマーク",
         "explanation": "このページではプレビューファイルの処理状況を確認できます。現在処理中のファイル、処理が完了しなかったファイル、破損したファイルなどが一覧で表示されます。"
+      },
+      "audit": {
+        "title": "アクティビティログ"
+      },
+      "logins": {
+        "title": "ログインログ"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "編集",
       "history": "歴史",
       "refresh": "リフレッシュ",
-      "restore": "リストア"
+      "restore": "リストア",
+      "archive": "アーカイブ"
+    },
+    "project_templates": {
+      "add_metadata": "メタデータを追加",
+      "apply": "テンプレートを適用",
+      "apply_confirm": "これにより、テンプレートのタスクタイプ、ステータス、アセットタイプ、自動化、メタデータ記述子がこのプロダクションに追加されます。既存の設定は保持されます。続行しますか？",
+      "apply_to": "テンプレートを適用",
+      "apply_to_description": "テンプレートの設定をこのプロダクションに追加します。既存の設定は保持されます。",
+      "click_name_to_edit": "テンプレート名をクリックすると設定を編集できます。",
+      "create_error": "このテンプレートの保存中にエラーが発生しました。類似の名前のテンプレートがないか確認してください。",
+      "delete_error": "このテンプレートの削除中にエラーが発生しました。",
+      "delete_text": "{name} をデータベースから削除してもよろしいですか？",
+      "duplicate_name": "この名前のプロダクションテンプレートはすでに存在します。",
+      "edit_title": "プロダクションテンプレートを編集",
+      "empty": "プロダクションテンプレートはまだありません。作成すると新しいプロダクションをすばやく設定できます。",
+      "fields": {
+        "description": "説明",
+        "entity_type": "エンティティタイプ",
+        "name": "名前"
+      },
+      "fps_error": "FPS は 1 から 200 までの整数である必要があります。",
+      "from_production": "プロダクションから作成",
+      "name_required": "名前は必須です。",
+      "new_project_template": "プロダクションテンプレートを追加",
+      "number": "プロダクションテンプレート | プロダクションテンプレート",
+      "ratio_error": "比率は x:y 形式（例: 16:9）である必要があります。",
+      "resolution_error": "解像度は WxH 形式（例: 1920x1080）である必要があります。",
+      "select": "テンプレートを選択",
+      "tabs": {
+        "asset_types": "アセットタイプ",
+        "metadata_descriptors": "メタデータ",
+        "status_automations": "ステータス自動化",
+        "task_statuses": "タスクステータス",
+        "task_types": "タスクタイプ"
+      },
+      "title": "テンプレート"
+    },
+    "share": {
+      "comment_placeholder": "コメントを入力...",
+      "comments_disabled": "このリンクではコメントは無効になっています。",
+      "download_preview": "プレビューをダウンロード",
+      "enter_review": "レビューに入る",
+      "error_text": "この共有リンクは無効、期限切れ、または取り消されています。",
+      "error_title": "リンクは利用できません",
+      "guest_error": "サインインできませんでした。接続を確認してもう一度お試しください。問題が解決しない場合は、サポートチームにお問い合わせください。",
+      "identity_description": "レビューセッションに参加するには名前を入力してください。プレイリストを表示してコメントを残すことができます。",
+      "identity_required": "投稿する前に名前を入力する必要があります。",
+      "kitsu_homepage": "Kitsu について",
+      "logout": "レビューセッションから退出",
+      "name_placeholder": "山田 太郎",
+      "no_comments_yet": "まだコメントはありません。",
+      "no_preview": "プレビューなし",
+      "no_status_available": "このプロジェクトにはタスクステータスが設定されていません。",
+      "player_placeholder": "ここにプレイヤーが表示されます。",
+      "post_comment_error": "コメントを投稿できませんでした。ページを再読み込みしてもう一度お試しください。",
+      "review_session": "レビューセッション",
+      "your_name": "あなたの名前"
     }
   }
 }

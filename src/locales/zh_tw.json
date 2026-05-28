@@ -133,7 +133,20 @@
       "edited_by": "由 {name} 編輯",
       "add_attachment_to_reply": "在回覆中加入附件",
       "add_frame_to_comment": "將目前的畫格加入註解",
-      "add_emoji": "新增表情符號"
+      "add_emoji": "新增表情符號",
+      "for_client_badge": "客戶可見的文字",
+      "for_client_off": "客戶看不到的文字。按一下以讓客戶看到文字",
+      "for_client_on": "客戶可見的文字。按一下以讓客戶看不到文字",
+      "move_modal": {
+        "error": "無法移動此評論。請聯絡我們的支援團隊。",
+        "intro": "選擇同一實體的任務以將此評論移至該處。系統會在目標任務上發送通知，如同新評論一般。",
+        "no_target": "此實體上沒有其他可用的任務。",
+        "target_label": "目標任務",
+        "title": "將評論移至另一個任務"
+      },
+      "move_to_task": "移至",
+      "title": "評論",
+      "toggle_for_client": "客戶可見性"
     },
     "custom_actions": {
       "create_error": "儲存此自定義操作時發生錯誤. 您確定沒有其他同名操作嗎?",
@@ -292,7 +305,19 @@
       "object_viewer": "物件檢視器",
       "rotate_hdr": "旋轉環境地圖",
       "change_fov": "變更焦距",
-      "plalto": "在比較模式中切換 0% 和 100% 不透明度"
+      "plalto": "在比較模式中切換 0% 和 100% 不透明度",
+      "copy_annotation": "複製選取的註解",
+      "move_entity_left": "向左移動選取的實體",
+      "move_entity_right": "向右移動選取的實體",
+      "next_annotation": "下一個註解",
+      "next_frame": "下一幀",
+      "pan_image": "平移影像",
+      "paste_annotation": "貼上註解",
+      "play_pause": "播放／暫停",
+      "play_pause_typing": "播放／暫停（即使在輸入評論時）",
+      "player": "播放器",
+      "previous_annotation": "上一個註解",
+      "previous_frame": "上一幀"
     },
     "login": {
       "back_to_login": "返回登入頁面",
@@ -553,7 +578,16 @@
       "shared_by": "由 {name} 分享",
       "continue": "繼續",
       "developer_documentation": "開發人員文件",
-      "feedback": "路線圖 / 意見回饋"
+      "feedback": "路線圖 / 意見回饋",
+      "annotations": {
+        "download_pdf": "以 PDF 格式下載註解",
+        "download_zip": "以 ZIP 格式下載註解"
+      },
+      "attach_snapshots_with_label": "附加帶有燒錄標籤的快照",
+      "disable_desktop_notifications": "停用桌面通知",
+      "enable_desktop_notifications": "啟用桌面通知",
+      "export": "匯出",
+      "unknown": "未知"
     },
     "menu": {
       "assign_tasks": "分配任務",
@@ -585,7 +619,8 @@
       "title": "消息提要",
       "hide_stats": "隱藏統計",
       "news": "新聞",
-      "show_stats": "顯示統計資料"
+      "show_stats": "顯示統計資料",
+      "no_news_hint": "請嘗試放寬篩選條件或稍後再回來查看。"
     },
     "not_found": {
       "text": "您所點擊的連接有問題，我們建議您返回首頁。",
@@ -626,7 +661,22 @@
       "watching": "觀看",
       "only_playlists_ready": "只有準備好的播放清單",
       "playlist_is_ready": "播放清單已準備就緒",
-      "playlist_ready_text": "新的播放清單已準備就緒，可供檢閱："
+      "playlist_ready_text": "新的播放清單已準備就緒，可供檢閱：",
+      "desktop": {
+        "assignation_title": "{name} 指派了任務給您",
+        "banner_blocked_text": "桌面通知已被封鎖。請在瀏覽器的網站設定中允許通知以啟用。",
+        "banner_dismiss": "暫時不要",
+        "banner_enable": "啟用",
+        "banner_text": "為每個新事件取得桌面通知。",
+        "comment_title": "{name} 發表了評論",
+        "mention_title": "{name} 提到了您",
+        "playlist_ready_title": "播放清單 {name} 已準備就緒",
+        "publish_title": "{name} 發佈了預覽",
+        "reply_title": "{name} 回覆了",
+        "test_notification_body": "您現在將會收到類似的新事件通知。",
+        "test_notification_title": "Kitsu 通知已啟用"
+      },
+      "to_status": "至"
     },
     "people": {
       "active": "活動",
@@ -664,7 +714,8 @@
         "studio": "工作室",
         "daily_salary": "每日費率",
         "position": "職位",
-        "seniority": "年資"
+        "seniority": "年資",
+        "created_at": "建立日期"
       },
       "list": {
         "name": "名稱",
@@ -721,7 +772,13 @@
         "mid": "中間",
         "senior": "資深"
       },
-      "email_domain_error": "不允許使用此電子郵件網域。"
+      "email_domain_error": "不允許使用此電子郵件網域。",
+      "archive_guest_confirm": "要將此來賓存檔嗎？他們的評論仍會保留，但不再顯示於活躍來賓清單中。",
+      "archive_guest_error": "無法將此來賓存檔。請再試一次。",
+      "archived_guests": "已存檔的來賓",
+      "guests": "來賓 | 來賓",
+      "restore_guest_error": "無法還原此來賓。請再試一次。",
+      "seats_remaining": "沒有剩餘席位 | 剩餘 {count} 個席位 | 剩餘 {count} 個席位"
     },
     "playlists": {
       "add_assets": "新增Asset",
@@ -831,7 +888,10 @@
         "select_background": "選擇背景",
         "toggle_environment_skybox": "顯示/隱藏天空盒背景",
         "toggle_wireframe": "啟用/停用線框渲染",
-        "open_link": "開啟連結"
+        "open_link": "開啟連結",
+        "annotation_huge": "極大",
+        "annotation_shape": "形狀",
+        "annotation_tiny": "極小"
       },
       "download_csv": "下載 .csv",
       "filter_task_type": "依工作類型篩選",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "沒有客戶需要通知。",
       "notify_clients_success": "通知已成功傳送。",
       "unmute": "解除靜音",
-      "volume_level": "音量：{level}%"
+      "volume_level": "音量：{level}%",
+      "add_edits": "新增編輯",
+      "add_episodes": "新增集數",
+      "share": "分享",
+      "share_modal": {
+        "active_links": "有效連結",
+        "add_link": "新增連結",
+        "can_comment": "允許評論",
+        "comments_disabled": "評論已停用",
+        "comments_enabled": "評論已啟用",
+        "copy": "複製連結",
+        "create_new": "建立新連結",
+        "description": "產生連結以與外部審閱者分享此播放清單。任何擁有連結的人都可以檢視播放清單並發表評論，而無需 Kitsu 帳戶。您可以設定到期日，並隨時撤銷存取權。",
+        "error": "建立分享連結時發生錯誤。",
+        "expiration": "到期日（選填）",
+        "expires": "到期於",
+        "generate": "產生新連結",
+        "invite": "以電子郵件邀請",
+        "invite_add_email": "新增此電子郵件",
+        "invite_error": "發送邀請時發生錯誤。",
+        "invite_invalid_email": "該電子郵件地址無效。",
+        "invite_message_label": "自訂訊息（選填）",
+        "invite_message_placeholder": "將加入電子郵件中的簡短備註",
+        "invite_placeholder": "輸入電子郵件並按 Enter，或選擇一位客戶",
+        "invite_recipients": "收件者",
+        "invite_send": "發送邀請",
+        "invite_sent": "已發送 {count} 個邀請 | 已發送 {count} 個邀請",
+        "no_expiration": "無到期日",
+        "no_links": "尚無分享連結。請在下方建立一個，以授予外部審閱者存取權。",
+        "open": "在新分頁中開啟連結",
+        "revoke": "撤銷連結",
+        "revoke_confirm": "要撤銷此連結嗎？任何使用它的人都將失去存取權。",
+        "title": "分享播放清單"
+      },
+      "update_to_latest_version": "更新至最新版本",
+      "update_to_latest_version_help": "為每個實體設定最新修訂，並保留其目前的任務類型。",
+      "update_versions_title": "更新選取的版本"
     },
     "productions": {
       "current": "所選製作項目",
@@ -900,7 +996,10 @@
         "boolean": "複選框",
         "number": "數量",
         "string": "正文",
-        "tags": "標籤清單"
+        "tags": "標籤清單",
+        "applies_to_all_projects": "此欄會新增至清單中的每個項目。每個項目可在清單檢視中擁有自己的值。",
+        "delete_list_column_text": "這將從所有項目中移除「{name}」欄，包括已儲存的值。要繼續嗎？",
+        "target_project": "項目"
       },
       "status": {
         "closed": "已關閉",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "開始和結束日期",
         "shots_to_import": "要匯入的鏡頭",
         "select_edit_task_type": "選擇編輯工作類型",
-        "select_edit_task_type_description": "這些任務類型定義了編輯的建立步驟。"
+        "select_edit_task_type_description": "這些任務類型定義了編輯的建立步驟。",
+        "choose_template": "套用製作項目範本（選填）",
+        "choose_template_description": "選擇一個範本以預先填入任務類型、任務狀態、Asset類型、Metadata與設定。留空以從頭開始設定。",
+        "no_template": "無範本"
       },
       "style": {
         "2d": "2D 動畫",
@@ -1010,7 +1112,12 @@
         "title": "更換頭像",
         "error_upload": "上傳圖片時出錯",
         "updating": "更新...",
-        "removing": "移除..."
+        "removing": "移除...",
+        "drop_or_click": "按一下或將相片拖放至此處",
+        "intro": "選擇一張相片，然後拖曳並縮放以調整構圖。",
+        "preview": "預覽",
+        "preview_hint": "拖曳以重新定位，使用滑桿來縮放。",
+        "replace": "選擇另一張相片"
       },
       "change_password": {
         "button": "更改密碼",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "驗證並停用 TOTP",
           "button_validate": "驗證並啟用 TOTP",
           "error_enable": "啟用 TOTP 時發生錯誤。",
-          "error_disable": "停用 TOTP 時發生錯誤。"
+          "error_disable": "停用 TOTP 時發生錯誤。",
+          "description": "使用 TOTP 應用程式，例如 Google Authenticator、Authy 或 1Password。",
+          "name": "驗證器應用程式"
         },
         "email_otp": {
           "button_enable": "透過電子郵件啟用 OTP",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "透過電子郵件驗證及停用 OTP",
           "button_validate": "透過電子郵件驗證並啟用 OTP",
           "error_enable": "透過電子郵件啟用 OTP 時發生錯誤。",
-          "error_disable": "透過電子郵件停用 OTP 時發生錯誤。"
+          "error_disable": "透過電子郵件停用 OTP 時發生錯誤。",
+          "description": "每次登入時透過電子郵件接收一次性驗證碼。",
+          "name": "電子郵件"
         },
         "recovery_codes": {
           "title": "恢復代碼",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "已註冊的 FIDO 裝置：",
           "button_register": "註冊新的 FIDO 裝置",
           "error_register": "註冊 FIDO 裝置時發生錯誤。",
-          "error_unregister": "取消註冊 FIDO 裝置時發生錯誤。"
+          "error_unregister": "取消註冊 FIDO 裝置時發生錯誤。",
+          "description": "使用硬體金鑰（YubiKey）或平台驗證器（Touch ID、Windows Hello）。",
+          "name": "安全金鑰"
         },
         "enabled": "啟用雙重認證",
         "mandatory": "您的組織需要雙因素驗證。請啟用至少一種方法以繼續。",
-        "description": "雙因素驗證 (<abbr title=「雙因素驗證」>2FA</abbr>) 為您的帳戶增加了一層額外的安全性。啟用後，您每次登入時，除了密碼之外，還需要提供第二種驗證方式。您可以使用驗證器應用程式 (<abbr title=「基於時間的一次性密碼」>TOTP</abbr>)、電子郵件驗證 (<abbr title=「一次性密碼」>OTP</abbr>) 或硬件安全鑰匙 (<abbr title=「快速身份在線」>FIDO</abbr>) 作為您的第二個因素。"
-      }
+        "description": "雙因素驗證 (<abbr title=「雙因素驗證」>2FA</abbr>) 為您的帳戶增加了一層額外的安全性。啟用後，您每次登入時，除了密碼之外，還需要提供第二種驗證方式。您可以使用驗證器應用程式 (<abbr title=「基於時間的一次性密碼」>TOTP</abbr>)、電子郵件驗證 (<abbr title=「一次性密碼」>OTP</abbr>) 或硬件安全鑰匙 (<abbr title=「快速身份在線」>FIDO</abbr>) 作為您的第二個因素。",
+        "status_disabled": "已停用",
+        "status_enabled": "已啟用"
+      },
+      "notifications_title": "通知"
     },
     "settings": {
       "change_logo": "更改Logo",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "該列表當前為空。 這意味着用戶可以使用主設置中的所有數據。 新增一些條目以限制此製作項目的選擇。",
-        "empty_automation_list": "本製作沒有自動化設定。"
+        "empty_automation_list": "本製作沒有自動化設定。",
+        "empty_backgrounds": "沒有連結的背景。請從上方清單中選擇一個以新增。",
+        "empty_board": "請先新增任務狀態，以設定其在看板上的可見性。",
+        "empty_metadata": "尚未為此實體類型定義Metadata描述子。"
       },
       "save": {
         "button": "儲存設置",
@@ -1098,7 +1217,8 @@
       "remove_logo": "移除工作室標誌",
       "available_items": "可用項目",
       "import_from_production": "從其他生產導入",
-      "no_more_available_items": "沒有更多項目可供新增。"
+      "no_more_available_items": "沒有更多項目可供新增。",
+      "preferences_title": "偏好設定"
     },
     "task_status": {
       "create_error": "儲存此任務狀態時發生錯誤。 您確定沒有名稱相似的任務狀態嗎？",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "您確定要永久移除選取的工作嗎？所有相關的註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
       "hookup_playlist": "產生勾搭播放清單",
-      "assignation_error": "指派此人執行所選任務時出現問題。並未指派所有任務。"
+      "assignation_error": "指派此人執行所選任務時出現問題。並未指派所有任務。",
+      "retake_filter_none": "無重拍",
+      "retake_filter_with_retakes": "有重拍"
     },
     "timesheets": {
       "detail_level": "細節層次",
@@ -1541,7 +1663,8 @@
       "unit": "單位",
       "confirm_day_offs": "將這些日子設定為休息日會清除受影響日子的所有時間記錄。您確定要繼續嗎？",
       "confirm_unset_day_offs": "休息日目前適用於 {start} 到 {end}。您確定要移除這個期間嗎？",
-      "off": "關閉"
+      "off": "關閉",
+      "day_off_no_logging": "休息日無法記錄時間"
     },
     "wrong_browser": {
       "title": "Kitsu不支持您的瀏覽器",
@@ -1565,6 +1688,12 @@
         "title": "預覽檔案",
         "mark_broken": "標記為已損壞",
         "explanation": "此頁面列出所有處於中間狀態的預覽檔案：處理中或已損壞。它顯示有多少預覽檔案正在處理或哪些檔案未能完成。"
+      },
+      "audit": {
+        "title": "活動日誌"
+      },
+      "logins": {
+        "title": "登入日誌"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "編輯",
       "history": "歷史",
       "refresh": "刷新",
-      "restore": "還原"
+      "restore": "還原",
+      "archive": "存檔"
+    },
+    "project_templates": {
+      "add_metadata": "新增Metadata",
+      "apply": "套用範本",
+      "apply_confirm": "這將把範本的任務類型、狀態、Asset類型、自動化與Metadata描述子新增至此製作項目。現有設定會被保留。要繼續嗎？",
+      "apply_to": "套用範本",
+      "apply_to_description": "將範本的設定新增至此製作項目。現有設定會被保留。",
+      "click_name_to_edit": "按一下範本名稱以編輯其設定。",
+      "create_error": "儲存此範本時發生錯誤。您確定沒有名稱相似的範本嗎？",
+      "delete_error": "刪除此範本時發生錯誤。",
+      "delete_text": "您確定要從您的資料庫移除 {name} 嗎？",
+      "duplicate_name": "已存在使用此名稱的製作項目範本。",
+      "edit_title": "編輯製作項目範本",
+      "empty": "尚無製作項目範本。建立一個以快速設定新的製作項目。",
+      "fields": {
+        "description": "說明",
+        "entity_type": "實體類型",
+        "name": "名稱"
+      },
+      "fps_error": "FPS 必須是介於 1 到 200 之間的整數。",
+      "from_production": "從製作項目建立",
+      "name_required": "需要名稱。",
+      "new_project_template": "新增製作項目範本",
+      "number": "製作項目範本 | 製作項目範本",
+      "ratio_error": "寬高比必須符合 x:y 格式（例如 16:9）。",
+      "resolution_error": "解析度必須符合 WxH 格式（例如 1920x1080）。",
+      "select": "選擇範本",
+      "tabs": {
+        "asset_types": "Asset類型",
+        "metadata_descriptors": "Metadata",
+        "status_automations": "狀態自動化",
+        "task_statuses": "任務狀態",
+        "task_types": "任務類型"
+      },
+      "title": "範本"
+    },
+    "share": {
+      "comment_placeholder": "留下評論...",
+      "comments_disabled": "此連結的評論已停用。",
+      "download_preview": "下載預覽",
+      "enter_review": "進入審閱",
+      "error_text": "此分享連結無效、已過期或已被撤銷。",
+      "error_title": "連結無法使用",
+      "guest_error": "我們無法為您登入。請檢查您的連線並再試一次。如果問題仍然存在，請聯絡支援團隊。",
+      "identity_description": "輸入您的名稱以加入審閱工作階段。您將可以檢視播放清單並留下評論。",
+      "identity_required": "您需要先輸入您的名稱才能發表。",
+      "kitsu_homepage": "關於 Kitsu",
+      "logout": "離開審閱工作階段",
+      "name_placeholder": "王小明",
+      "no_comments_yet": "尚無評論。",
+      "no_preview": "無預覽",
+      "no_status_available": "此項目尚未設定任何任務狀態。",
+      "player_placeholder": "播放器將顯示於此處。",
+      "post_comment_error": "無法發表評論。請重新載入頁面並再試一次。",
+      "review_session": "審閱工作階段",
+      "your_name": "您的名稱"
     }
   }
 }

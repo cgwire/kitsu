@@ -133,7 +133,20 @@
       "edited_by": "Editado por {name}",
       "add_attachment_to_reply": "Añadir archivo adjunto a la respuesta",
       "add_frame_to_comment": "Añadir el fotograma actual al comentario",
-      "add_emoji": "Añade un emoji"
+      "add_emoji": "Añade un emoji",
+      "for_client_badge": "Texto visible para el cliente",
+      "for_client_off": "Texto no visible para los clientes. Haz clic para hacer el texto visible para los clientes",
+      "for_client_on": "Texto visible para los clientes. Haz clic para hacer el texto no visible para los clientes",
+      "move_modal": {
+        "error": "No se ha podido mover el comentario. Por favor, contacta con nuestro equipo de soporte.",
+        "intro": "Elige una tarea de la misma entidad a la que mover este comentario. Se enviarán notificaciones en la tarea de destino como si fuera un nuevo comentario.",
+        "no_target": "No hay ninguna otra tarea disponible en esta entidad.",
+        "target_label": "Tarea de destino",
+        "title": "Mover comentario a otra tarea"
+      },
+      "move_to_task": "Mover a",
+      "title": "Comentarios",
+      "toggle_for_client": "Visibilidad para el cliente"
     },
     "custom_actions": {
       "create_error": "Se ha producido un error al guardar esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -292,7 +305,19 @@
       "object_viewer": "Visor de objetos",
       "rotate_hdr": "Rotar mapa de entorno",
       "change_fov": "Cambiar la distancia focal",
-      "plalto": "Cambiar entre 0% y 100% de opacidad en modo comparación"
+      "plalto": "Cambiar entre 0% y 100% de opacidad en modo comparación",
+      "copy_annotation": "Copiar anotación seleccionada",
+      "move_entity_left": "Mover entidad seleccionada a la izquierda",
+      "move_entity_right": "Mover entidad seleccionada a la derecha",
+      "next_annotation": "Anotación siguiente",
+      "next_frame": "Fotograma siguiente",
+      "pan_image": "Desplazar la imagen",
+      "paste_annotation": "Pegar anotación",
+      "play_pause": "Reproducir / pausar",
+      "play_pause_typing": "Reproducir / pausar (incluso mientras se escribe un comentario)",
+      "player": "Reproductor",
+      "previous_annotation": "Anotación anterior",
+      "previous_frame": "Fotograma anterior"
     },
     "login": {
       "back_to_login": "Voler al login",
@@ -553,7 +578,16 @@
       "shared_by": "Compartido por {name}",
       "continue": "Continúe en",
       "developer_documentation": "Documentación para desarrolladores",
-      "feedback": "Hoja de ruta / Comentarios"
+      "feedback": "Hoja de ruta / Comentarios",
+      "annotations": {
+        "download_pdf": "Descargar anotaciones como PDF",
+        "download_zip": "Descargar anotaciones como ZIP"
+      },
+      "attach_snapshots_with_label": "Adjuntar instantáneas con una etiqueta incrustada",
+      "disable_desktop_notifications": "Desactivar notificaciones de escritorio",
+      "enable_desktop_notifications": "Activar notificaciones de escritorio",
+      "export": "Exportar",
+      "unknown": "Desconocido"
     },
     "menu": {
       "assign_tasks": "Asignar tareas",
@@ -585,7 +619,8 @@
       "title": "Últimas noticias",
       "hide_stats": "Ocultar estadísticas",
       "news": "novedades",
-      "show_stats": "Mostrar estadísticas"
+      "show_stats": "Mostrar estadísticas",
+      "no_news_hint": "Prueba a ampliar los filtros o vuelve más tarde."
     },
     "not_found": {
       "text": "Había algo mal en el enlace en el que hiciste clic, te animamos a que vuelvas a la página de inicio.",
@@ -626,7 +661,22 @@
       "watching": "ver",
       "only_playlists_ready": "Sólo listas de reproducción listas",
       "playlist_is_ready": "Lista de reproducción lista",
-      "playlist_ready_text": "Una nueva lista de reproducción está lista para ser revisada:"
+      "playlist_ready_text": "Una nueva lista de reproducción está lista para ser revisada:",
+      "desktop": {
+        "assignation_title": "{name} te ha asignado",
+        "banner_blocked_text": "Las notificaciones de escritorio están bloqueadas. Permítelas en la configuración del sitio de tu navegador para activarlas.",
+        "banner_dismiss": "Ahora no",
+        "banner_enable": "Activar",
+        "banner_text": "Recibe una notificación de escritorio por cada nuevo evento.",
+        "comment_title": "{name} ha comentado",
+        "mention_title": "{name} te ha mencionado",
+        "playlist_ready_title": "La lista de reproducción {name} está lista",
+        "publish_title": "{name} ha publicado una vista previa",
+        "reply_title": "{name} ha respondido",
+        "test_notification_body": "A partir de ahora recibirás notificaciones como esta para los nuevos eventos.",
+        "test_notification_title": "Notificaciones de Kitsu activadas"
+      },
+      "to_status": "a"
     },
     "people": {
       "active": "Activo",
@@ -664,7 +714,8 @@
         "studio": "Estudio",
         "daily_salary": "Tarifa diaria",
         "position": "Posición",
-        "seniority": "Antigüedad"
+        "seniority": "Antigüedad",
+        "created_at": "Fecha de creación"
       },
       "list": {
         "name": "Nombre",
@@ -721,7 +772,13 @@
         "mid": "Medio",
         "senior": "Senior"
       },
-      "email_domain_error": "Este dominio de correo electrónico no está permitido."
+      "email_domain_error": "Este dominio de correo electrónico no está permitido.",
+      "archive_guest_confirm": "¿Archivar este invitado? Sus comentarios se mantienen, pero ya no aparecerá en la lista de invitados activos.",
+      "archive_guest_error": "No se ha podido archivar este invitado. Por favor, inténtalo de nuevo.",
+      "archived_guests": "Invitados archivados",
+      "guests": "invitado | invitados",
+      "restore_guest_error": "No se ha podido restaurar este invitado. Por favor, inténtalo de nuevo.",
+      "seats_remaining": "no quedan plazas | queda {count} plaza | quedan {count} plazas"
     },
     "playlists": {
       "add_assets": "Añadir assets",
@@ -831,7 +888,10 @@
         "select_background": "Seleccione un fondo",
         "toggle_environment_skybox": "Mostrar/ocultar el fondo de la caja celeste",
         "toggle_wireframe": "Activar/desactivar el renderizado wireframe",
-        "open_link": "Abrir enlace"
+        "open_link": "Abrir enlace",
+        "annotation_huge": "Enorme",
+        "annotation_shape": "Forma",
+        "annotation_tiny": "Diminuta"
       },
       "download_csv": "Descargar .csv",
       "filter_task_type": "Filtrado por tipo de tarea",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "No hay clientes a los que notificar.",
       "notify_clients_success": "La notificación se ha enviado correctamente.",
       "unmute": "Desactivar",
-      "volume_level": "Volumen: {level}%"
+      "volume_level": "Volumen: {level}%",
+      "add_edits": "Añadir modificaciones",
+      "add_episodes": "Añadir episodios",
+      "share": "Compartir",
+      "share_modal": {
+        "active_links": "Enlaces activos",
+        "add_link": "Añadir un nuevo enlace",
+        "can_comment": "Permitir comentarios",
+        "comments_disabled": "Comentarios desactivados",
+        "comments_enabled": "Comentarios activados",
+        "copy": "Copiar enlace",
+        "create_new": "Crear un nuevo enlace",
+        "description": "Genera un enlace para compartir esta lista de reproducción con revisores externos. Cualquiera con el enlace puede ver la lista de reproducción y publicar comentarios sin necesidad de una cuenta de Kitsu. Puedes establecer una fecha de caducidad y revocar el acceso en cualquier momento.",
+        "error": "Se ha producido un error al crear el enlace para compartir.",
+        "expiration": "Fecha de caducidad (opcional)",
+        "expires": "Caduca",
+        "generate": "Generar un nuevo enlace",
+        "invite": "Invitar por correo electrónico",
+        "invite_add_email": "Añadir este correo electrónico",
+        "invite_error": "Se ha producido un error al enviar las invitaciones.",
+        "invite_invalid_email": "Esa dirección de correo electrónico no es válida.",
+        "invite_message_label": "Mensaje personalizado (opcional)",
+        "invite_message_placeholder": "Una breve nota que se añadirá al correo electrónico",
+        "invite_placeholder": "Escribe un correo electrónico y pulsa Intro, o elige un cliente",
+        "invite_recipients": "Destinatarios",
+        "invite_send": "Enviar invitaciones",
+        "invite_sent": "{count} invitación enviada | {count} invitaciones enviadas",
+        "no_expiration": "Sin caducidad",
+        "no_links": "Todavía no hay enlaces para compartir. Crea uno abajo para dar acceso a revisores externos.",
+        "open": "Abrir enlace en una nueva pestaña",
+        "revoke": "Revocar enlace",
+        "revoke_confirm": "¿Revocar este enlace? Cualquiera que lo esté usando perderá el acceso.",
+        "title": "Compartir lista de reproducción"
+      },
+      "update_to_latest_version": "Actualizar a la última versión",
+      "update_to_latest_version_help": "Establece la última revisión para cada entidad, manteniendo su tipo de tarea actual.",
+      "update_versions_title": "Actualizar versiones seleccionadas"
     },
     "productions": {
       "current": "Producción seleccionada",
@@ -900,7 +996,10 @@
         "boolean": "Casilla de verificación",
         "number": "Número",
         "string": "Texto",
-        "tags": "Lista de etiquetas"
+        "tags": "Lista de etiquetas",
+        "applies_to_all_projects": "Esta columna se añade a todos los proyectos de la lista. Cada proyecto puede tener su propio valor en la vista de lista.",
+        "delete_list_column_text": "Esto eliminará la columna «{name}» de todos los proyectos, incluidos los valores almacenados. ¿Continuar?",
+        "target_project": "Proyecto"
       },
       "status": {
         "closed": "Cerrado",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "Fechas de inicio y fin",
         "shots_to_import": "tomas a importar",
         "select_edit_task_type": "Seleccione el tipo de tarea de edición",
-        "select_edit_task_type_description": "Estos tipos de tarea definen la construcción de las modificaciones."
+        "select_edit_task_type_description": "Estos tipos de tarea definen la construcción de las modificaciones.",
+        "choose_template": "Aplicar una plantilla de producción (opcional)",
+        "choose_template_description": "Elige una plantilla para rellenar previamente los tipos de tarea, los estados de tarea, los tipos de recurso, los metadatos y los ajustes. Déjalo vacío para configurarla desde cero.",
+        "no_template": "Sin plantilla"
       },
       "style": {
         "2d": "2D",
@@ -1010,7 +1112,12 @@
         "title": "Cambiar avatar",
         "error_upload": "Se ha producido un error al subir la imagen.",
         "updating": "Actualizando...",
-        "removing": "Quitando..."
+        "removing": "Quitando...",
+        "drop_or_click": "Haz clic o suelta una foto aquí",
+        "intro": "Elige una foto y, después, arrastra y haz zoom para encuadrarla.",
+        "preview": "Vista previa",
+        "preview_hint": "Arrastra para reposicionar, usa el control deslizante para hacer zoom.",
+        "replace": "Elegir otra foto"
       },
       "change_password": {
         "button": "Cambiar contraseña",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "Validar y desactivar TOTP",
           "button_validate": "Validar y activar TOTP",
           "error_enable": "Se ha producido un error al activar TOTP.",
-          "error_disable": "Se ha producido un error al desactivar TOTP."
+          "error_disable": "Se ha producido un error al desactivar TOTP.",
+          "description": "Usa una aplicación TOTP como Google Authenticator, Authy o 1Password.",
+          "name": "Aplicación de autenticación"
         },
         "email_otp": {
           "button_enable": "Activar OTP por correo electrónico",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "Validar y desactivar OTP por correo electrónico",
           "button_validate": "Validar y activar OTP por correo electrónico",
           "error_enable": "Se ha producido un error al activar OTP por correo electrónico.",
-          "error_disable": "Se ha producido un error al desactivar OTP por correo electrónico."
+          "error_disable": "Se ha producido un error al desactivar OTP por correo electrónico.",
+          "description": "Recibe un código de un solo uso por correo electrónico cada vez que inicies sesión.",
+          "name": "Correo electrónico"
         },
         "recovery_codes": {
           "title": "Códigos de recuperación",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "Dispositivos FIDO registrados:",
           "button_register": "Registrar nuevo dispositivo FIDO",
           "error_register": "Se ha producido un error al registrar el dispositivo FIDO.",
-          "error_unregister": "Se ha producido un error al anular el registro del dispositivo FIDO."
+          "error_unregister": "Se ha producido un error al anular el registro del dispositivo FIDO.",
+          "description": "Usa una llave de hardware (YubiKey) o un autenticador de plataforma (Touch ID, Windows Hello).",
+          "name": "Llave de seguridad"
         },
         "enabled": "Autenticación de dos factores activada",
         "mandatory": "Su organización requiere autenticación de dos factores. Habilite al menos un método para continuar.",
-        "description": "La autenticación de dos factores (<abbr title=\"Autenticación de dos factores\">2FA</abbr>) añade una capa adicional de seguridad a tu cuenta. Cuando esté activada, tendrás que proporcionar una segunda forma de verificación además de tu contraseña cada vez que inicies sesión. Puedes utilizar una aplicación de autenticación (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), verificación por correo electrónico (<abbr title=\"One-Time Password\">OTP</abbr>) o una llave de seguridad de hardware (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) como segundo factor."
-      }
+        "description": "La autenticación de dos factores (<abbr title=\"Autenticación de dos factores\">2FA</abbr>) añade una capa adicional de seguridad a tu cuenta. Cuando esté activada, tendrás que proporcionar una segunda forma de verificación además de tu contraseña cada vez que inicies sesión. Puedes utilizar una aplicación de autenticación (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), verificación por correo electrónico (<abbr title=\"One-Time Password\">OTP</abbr>) o una llave de seguridad de hardware (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) como segundo factor.",
+        "status_disabled": "Desactivada",
+        "status_enabled": "Activada"
+      },
+      "notifications_title": "Notificaciones"
     },
     "settings": {
       "change_logo": "Cambiar logotipo",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "La lista está actualmente vacía. Significa que todos los datos de los ajustes principales están disponibles para los usuarios. Añada algunas entradas para limitar las opciones de esta producción.",
-        "empty_automation_list": "No hay ningún conjunto de automatización para esta producción."
+        "empty_automation_list": "No hay ningún conjunto de automatización para esta producción.",
+        "empty_backgrounds": "No hay ningún fondo vinculado. Elige uno de la lista de arriba para añadirlo.",
+        "empty_board": "Añade primero estados de tarea para configurar su visibilidad en el tablero.",
+        "empty_metadata": "Todavía no hay ningún descriptor de metadatos definido para este tipo de entidad."
       },
       "save": {
         "button": "Grabar parametrizaciones",
@@ -1098,7 +1217,8 @@
       "remove_logo": "Eliminar el logotipo del estudio",
       "available_items": "Artículos disponibles",
       "import_from_production": "Importar desde otra producción",
-      "no_more_available_items": "No hay más artículos disponibles para añadir."
+      "no_more_available_items": "No hay más artículos disponibles para añadir.",
+      "preferences_title": "Preferencias"
     },
     "task_status": {
       "create_error": "Se ha producido un error al guardar la secuencia. ¿Está seguro que no hay otro estado de tarea con un nombre similar?",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tareas seleccionadas? También se eliminarán todos los comentarios y previsualizaciones relacionados. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
       "hookup_playlist": "Generar una lista de reproducción para ligar",
-      "assignation_error": "Hubo un problema al asignar esta persona a las tareas seleccionadas. No se han asignado todas las tareas."
+      "assignation_error": "Hubo un problema al asignar esta persona a las tareas seleccionadas. No se han asignado todas las tareas.",
+      "retake_filter_none": "Sin retomas",
+      "retake_filter_with_retakes": "Con retomas"
     },
     "timesheets": {
       "detail_level": "Nivel de detalle",
@@ -1541,7 +1663,8 @@
       "unit": "Unidad",
       "confirm_day_offs": "Al establecer estos días como días libres, se borrará todo el tiempo registrado para los días afectados. ¿Está seguro de que desea continuar?",
       "confirm_unset_day_offs": "Los días libres se aplican actualmente de {start} a {end}. ¿Está seguro de que desea eliminar este periodo?",
-      "off": "Fuera de"
+      "off": "Fuera de",
+      "day_off_no_logging": "No se puede registrar tiempo en un día libre"
     },
     "wrong_browser": {
       "title": "Tu navegador no es compatible con Kitsu",
@@ -1565,6 +1688,12 @@
         "title": "Archivos de vista previa",
         "mark_broken": "Marcar como roto",
         "explanation": "Esta página enumera todos los archivos de previsualización en un estado intermedio: en proceso o rotos. Muestra cuántos archivos de previsualización se están procesando o qué archivos no han podido completarse."
+      },
+      "audit": {
+        "title": "Registros de actividad"
+      },
+      "logins": {
+        "title": "Registros de inicio de sesión"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "Editar",
       "history": "Historia",
       "refresh": "Actualizar",
-      "restore": "Restaurar"
+      "restore": "Restaurar",
+      "archive": "Archivar"
+    },
+    "project_templates": {
+      "add_metadata": "Añadir metadatos",
+      "apply": "Aplicar plantilla",
+      "apply_confirm": "Esto añadirá los tipos de tarea, estados, tipos de recurso, automatizaciones y descriptores de metadatos de la plantilla a esta producción. Los ajustes existentes se conservan. ¿Continuar?",
+      "apply_to": "Aplicar una plantilla",
+      "apply_to_description": "Añade la configuración de una plantilla a esta producción. Los ajustes existentes se conservan.",
+      "click_name_to_edit": "Haz clic en el nombre de una plantilla para editar su configuración.",
+      "create_error": "Se ha producido un error al guardar esta plantilla. ¿Estás seguro de que no hay ninguna plantilla con un nombre similar?",
+      "delete_error": "Se ha producido un error al eliminar esta plantilla.",
+      "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
+      "duplicate_name": "Ya existe una plantilla de producción con este nombre.",
+      "edit_title": "Modificar plantilla de producción",
+      "empty": "Todavía no hay ninguna plantilla de producción. Crea una para configurar rápidamente nuevas producciones.",
+      "fields": {
+        "description": "Descripción",
+        "entity_type": "Tipo de entidad",
+        "name": "Nombre"
+      },
+      "fps_error": "Los FPS deben ser un número entero entre 1 y 200.",
+      "from_production": "Crear a partir de una producción",
+      "name_required": "Se requiere un nombre.",
+      "new_project_template": "Añadir una plantilla de producción",
+      "number": "plantilla de producción | plantillas de producción",
+      "ratio_error": "La relación de aspecto debe seguir el formato x:y (p. ej. 16:9).",
+      "resolution_error": "La resolución debe seguir el formato WxH (p. ej. 1920x1080).",
+      "select": "Selecciona una plantilla",
+      "tabs": {
+        "asset_types": "Tipos de recurso",
+        "metadata_descriptors": "Metadatos",
+        "status_automations": "Automatizaciones de estado",
+        "task_statuses": "Estados de tarea",
+        "task_types": "Tipos de tarea"
+      },
+      "title": "Plantillas"
+    },
+    "share": {
+      "comment_placeholder": "Deja un comentario...",
+      "comments_disabled": "Los comentarios están desactivados para este enlace.",
+      "download_preview": "Descargar vista previa",
+      "enter_review": "Entrar en la revisión",
+      "error_text": "Este enlace compartido no es válido, ha caducado o ha sido revocado.",
+      "error_title": "Enlace no disponible",
+      "guest_error": "No hemos podido iniciar tu sesión. Comprueba tu conexión e inténtalo de nuevo. Si el problema persiste, por favor contacta con el equipo de soporte.",
+      "identity_description": "Introduce tu nombre para unirte a la sesión de revisión. Podrás ver la lista de reproducción y dejar comentarios.",
+      "identity_required": "Tienes que introducir tu nombre antes de publicar.",
+      "kitsu_homepage": "Acerca de Kitsu",
+      "logout": "Salir de la sesión de revisión",
+      "name_placeholder": "Juan Pérez",
+      "no_comments_yet": "Todavía no hay comentarios.",
+      "no_preview": "Sin vista previa",
+      "no_status_available": "No hay ningún estado de tarea configurado para este proyecto.",
+      "player_placeholder": "El reproductor se mostrará aquí.",
+      "post_comment_error": "No se ha podido publicar el comentario. Por favor, recarga la página e inténtalo de nuevo.",
+      "review_session": "Sesión de revisión",
+      "your_name": "Tu nombre"
     }
   }
 }

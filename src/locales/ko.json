@@ -133,7 +133,20 @@
       "edited_by": "{name} 편집자",
       "add_attachment_to_reply": "답장에 첨부파일 추가",
       "add_frame_to_comment": "댓글에 현재 프레임 추가",
-      "add_emoji": "이모티콘 추가"
+      "add_emoji": "이모티콘 추가",
+      "for_client_badge": "클라이언트에게 표시되는 텍스트",
+      "for_client_off": "클라이언트에게 표시되지 않는 텍스트입니다. 클릭하면 클라이언트에게 표시됩니다.",
+      "for_client_on": "클라이언트에게 표시되는 텍스트입니다. 클릭하면 클라이언트에게 표시되지 않습니다.",
+      "move_modal": {
+        "error": "댓글을 이동할 수 없습니다. 지원팀에 문의해 주세요.",
+        "intro": "이 댓글을 이동할 동일한 엔티티의 작업을 선택하세요. 대상 작업에는 새 댓글과 동일하게 알림이 전송됩니다.",
+        "no_target": "이 엔티티에 사용 가능한 다른 작업이 없습니다.",
+        "target_label": "대상 작업",
+        "title": "댓글을 다른 작업으로 이동"
+      },
+      "move_to_task": "이동",
+      "title": "댓글",
+      "toggle_for_client": "클라이언트 표시 여부"
     },
     "custom_actions": {
       "create_error": "이 사용자 지정 행동을 저장하는 도중 오류가 발생했습니다. 같은 이름으로 다른 행동이 없는지 확인하셨습니까?",
@@ -292,7 +305,19 @@
       "object_viewer": "개체 뷰어",
       "rotate_hdr": "환경 맵 회전",
       "change_fov": "초점 거리 변경",
-      "plalto": "비교 모드에서 0%와 100% 불투명도 사이를 전환합니다."
+      "plalto": "비교 모드에서 0%와 100% 불투명도 사이를 전환합니다.",
+      "copy_annotation": "선택한 주석 복사",
+      "move_entity_left": "선택한 엔티티를 왼쪽으로 이동",
+      "move_entity_right": "선택한 엔티티를 오른쪽으로 이동",
+      "next_annotation": "다음 주석",
+      "next_frame": "다음 프레임",
+      "pan_image": "이미지 이동",
+      "paste_annotation": "주석 붙여넣기",
+      "play_pause": "재생 / 멈춤",
+      "play_pause_typing": "재생 / 멈춤 (댓글을 입력하는 중에도)",
+      "player": "플레이어",
+      "previous_annotation": "이전 주석",
+      "previous_frame": "이전 프레임"
     },
     "login": {
       "back_to_login": "로그인 페이지로 돌아가기",
@@ -553,7 +578,16 @@
       "shared_by": "{name}이 공유",
       "continue": "계속하기",
       "developer_documentation": "개발자 문서",
-      "feedback": "로드맵 / 피드백"
+      "feedback": "로드맵 / 피드백",
+      "annotations": {
+        "download_pdf": "주석을 PDF로 다운로드",
+        "download_zip": "주석을 ZIP으로 다운로드"
+      },
+      "attach_snapshots_with_label": "레이블이 새겨진 스냅사진 첨부",
+      "disable_desktop_notifications": "데스크톱 알림 비활성화",
+      "enable_desktop_notifications": "데스크톱 알림 활성화",
+      "export": "내보내기",
+      "unknown": "알 수 없음"
     },
     "menu": {
       "assign_tasks": "작업 할당",
@@ -585,7 +619,8 @@
       "title": "뉴스피드",
       "hide_stats": "통계 숨기기",
       "news": "뉴스",
-      "show_stats": "통계 표시"
+      "show_stats": "통계 표시",
+      "no_news_hint": "필터 범위를 넓히거나 나중에 다시 확인해 주세요."
     },
     "not_found": {
       "text": "클릭하신 링크와 관련하여 뭔가 잘못되었습니다, 홈페이지로 복귀하시기를 권장합니다.",
@@ -626,7 +661,22 @@
       "watching": "시청 중",
       "only_playlists_ready": "준비된 재생 목록만",
       "playlist_is_ready": "재생 목록이 준비되었습니다.",
-      "playlist_ready_text": "새 재생목록을 검토할 준비가 되었습니다:"
+      "playlist_ready_text": "새 재생목록을 검토할 준비가 되었습니다:",
+      "desktop": {
+        "assignation_title": "{name}님이 귀하에게 할당했습니다",
+        "banner_blocked_text": "데스크톱 알림이 차단되어 있습니다. 사용하려면 브라우저 사이트 설정에서 허용하세요.",
+        "banner_dismiss": "나중에",
+        "banner_enable": "활성화",
+        "banner_text": "새 이벤트가 있을 때마다 데스크톱 알림을 받습니다.",
+        "comment_title": "{name}님이 댓글을 남겼습니다",
+        "mention_title": "{name}님이 귀하를 언급했습니다",
+        "playlist_ready_title": "재생 목록 {name}이(가) 준비되었습니다",
+        "publish_title": "{name}님이 미리 보기를 게시했습니다",
+        "reply_title": "{name}님이 답장했습니다",
+        "test_notification_body": "이제 새 이벤트에 대해 이와 같은 알림을 받게 됩니다.",
+        "test_notification_title": "Kitsu 알림이 활성화되었습니다"
+      },
+      "to_status": "다음으로"
     },
     "people": {
       "active": "활성",
@@ -664,7 +714,8 @@
         "studio": "스튜디오",
         "daily_salary": "일일 요금",
         "position": "위치",
-        "seniority": "시니어"
+        "seniority": "시니어",
+        "created_at": "생성 날짜"
       },
       "list": {
         "name": "이름",
@@ -721,7 +772,13 @@
         "mid": "Mid",
         "senior": "Senior"
       },
-      "email_domain_error": "이 이메일 도메인은 허용되지 않습니다."
+      "email_domain_error": "이 이메일 도메인은 허용되지 않습니다.",
+      "archive_guest_confirm": "이 게스트를 보관하시겠습니까? 댓글은 그대로 유지되지만, 활성 게스트 목록에는 더 이상 표시되지 않습니다.",
+      "archive_guest_error": "이 게스트를 보관할 수 없습니다. 다시 시도해 주세요.",
+      "archived_guests": "보관된 게스트",
+      "guests": "게스트 | 게스트",
+      "restore_guest_error": "이 게스트를 복원할 수 없습니다. 다시 시도해 주세요.",
+      "seats_remaining": "남은 좌석 없음 | {count}개 좌석 남음 | {count}개 좌석 남음"
     },
     "playlists": {
       "add_assets": "어셋 추가",
@@ -831,7 +888,10 @@
         "select_background": "배경 선택",
         "toggle_environment_skybox": "스카이박스 배경 표시/숨기기",
         "toggle_wireframe": "와이어프레임 렌더링 활성화/비활성화",
-        "open_link": "링크 열기"
+        "open_link": "링크 열기",
+        "annotation_huge": "특대",
+        "annotation_shape": "도형",
+        "annotation_tiny": "초소형"
       },
       "download_csv": ".csv 다운로드",
       "filter_task_type": "자산 유형으로 필터됨",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "알릴 클라이언트가 없습니다.",
       "notify_clients_success": "알림이 성공적으로 전송되었습니다.",
       "unmute": "음소거 해제",
-      "volume_level": "볼륨: 볼륨: {level}%"
+      "volume_level": "볼륨: 볼륨: {level}%",
+      "add_edits": "편집 추가",
+      "add_episodes": "에피소드 추가",
+      "share": "공유",
+      "share_modal": {
+        "active_links": "활성 링크",
+        "add_link": "새 링크 추가",
+        "can_comment": "댓글 허용",
+        "comments_disabled": "댓글 비활성화됨",
+        "comments_enabled": "댓글 활성화됨",
+        "copy": "링크 복사",
+        "create_new": "새 링크 만들기",
+        "description": "외부 리뷰어와 이 재생 목록을 공유할 링크를 생성합니다. 링크가 있는 사람은 누구나 Kitsu 계정 없이도 재생 목록을 보고 댓글을 남길 수 있습니다. 만료일을 설정하고 언제든지 접근을 취소할 수 있습니다.",
+        "error": "공유 링크를 생성하는 동안 오류가 발생했습니다.",
+        "expiration": "만료일 (선택 사항)",
+        "expires": "만료",
+        "generate": "새 링크 생성",
+        "invite": "이메일로 초대",
+        "invite_add_email": "이 이메일 추가",
+        "invite_error": "초대장을 보내는 동안 오류가 발생했습니다.",
+        "invite_invalid_email": "유효한 이메일 주소가 아닙니다.",
+        "invite_message_label": "맞춤 메시지 (선택 사항)",
+        "invite_message_placeholder": "이메일에 추가될 짧은 메모",
+        "invite_placeholder": "이메일을 입력하고 Enter를 누르거나 클라이언트를 선택하세요",
+        "invite_recipients": "수신자",
+        "invite_send": "초대장 보내기",
+        "invite_sent": "초대장 {count}개 전송됨 | 초대장 {count}개 전송됨",
+        "no_expiration": "만료 없음",
+        "no_links": "아직 공유 링크가 없습니다. 외부 리뷰어에게 접근 권한을 주려면 아래에서 하나 만드세요.",
+        "open": "새 탭에서 링크 열기",
+        "revoke": "링크 취소",
+        "revoke_confirm": "이 링크를 취소하시겠습니까? 링크를 사용하는 사람은 누구나 접근 권한을 잃게 됩니다.",
+        "title": "재생 목록 공유"
+      },
+      "update_to_latest_version": "최신 버전으로 업데이트",
+      "update_to_latest_version_help": "각 엔티티의 현재 작업 유형을 유지하면서 최신 수정본으로 설정합니다.",
+      "update_versions_title": "선택한 버전 업데이트"
     },
     "productions": {
       "current": "선택된 프로덕션",
@@ -900,7 +996,10 @@
         "boolean": "체크박스",
         "number": "숫자",
         "string": "문자",
-        "tags": "태그 목록"
+        "tags": "태그 목록",
+        "applies_to_all_projects": "이 열은 목록의 모든 프로젝트에 추가됩니다. 각 프로젝트는 목록 보기에서 고유한 값을 가질 수 있습니다.",
+        "delete_list_column_text": "이 작업은 저장된 값을 포함하여 모든 프로젝트에서 “{name}” 열을 제거합니다. 계속하시겠습니까?",
+        "target_project": "프로젝트"
       },
       "status": {
         "closed": "닫힘",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "시작 및 종료 날짜",
         "shots_to_import": "가져올 장면",
         "select_edit_task_type": "편집 작업 유형 선택",
-        "select_edit_task_type_description": "이 작업 유형은 편집의 제작 단계를 정의합니다."
+        "select_edit_task_type_description": "이 작업 유형은 편집의 제작 단계를 정의합니다.",
+        "choose_template": "프로덕션 템플릿 적용 (선택 사항)",
+        "choose_template_description": "작업 유형, 작업 상태, 어셋 종류, 메타데이터 및 설정을 미리 채울 템플릿을 선택하세요. 처음부터 구성하려면 비워 두세요.",
+        "no_template": "템플릿 없음"
       },
       "style": {
         "2d": "2D",
@@ -1010,7 +1112,12 @@
         "title": "아바타 변경",
         "error_upload": "사진을 업로드하는 동안 오류가 발생했습니다.",
         "updating": "업데이트 중...",
-        "removing": "제거..."
+        "removing": "제거...",
+        "drop_or_click": "여기를 클릭하거나 사진을 드롭하세요",
+        "intro": "사진을 선택한 다음 드래그하고 확대하여 프레임을 맞추세요.",
+        "preview": "미리 보기",
+        "preview_hint": "드래그하여 위치를 조정하고, 슬라이더로 확대하세요.",
+        "replace": "다른 사진 선택"
       },
       "change_password": {
         "button": "비밀번호 변경",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "확인하고 TOTP 비활성화하기",
           "button_validate": "확인하고 TOTP 활성화하기",
           "error_enable": "TOTP를 활성화하는 동안 오류가 발생했습니다.",
-          "error_disable": "TOTP를 비활성화하는 동안 오류가 발생했습니다."
+          "error_disable": "TOTP를 비활성화하는 동안 오류가 발생했습니다.",
+          "description": "Google Authenticator, Authy 또는 1Password 같은 TOTP 앱을 사용하세요.",
+          "name": "인증 앱"
         },
         "email_otp": {
           "button_enable": "이메일을 통해 OTP 활성화하기",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "확인하고 이메일을 통해 OTP 비활성화하기",
           "button_validate": "확인하고 이메일을 통해 OTP 활성화하기",
           "error_enable": "이메일을 통해 OTP를 활성화하는 동안 오류가 발생했습니다.",
-          "error_disable": "이메일을 통해 OTP를 비활성화하는 동안 오류가 발생했습니다."
+          "error_disable": "이메일을 통해 OTP를 비활성화하는 동안 오류가 발생했습니다.",
+          "description": "로그인할 때마다 이메일로 일회용 코드를 받습니다.",
+          "name": "이메일"
         },
         "recovery_codes": {
           "title": "복구 코드",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "등록된 FIDO 기기:",
           "button_register": "새 FIDO 기기 등록",
           "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
-          "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다."
+          "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다.",
+          "description": "하드웨어 키(YubiKey) 또는 플랫폼 인증기(Touch ID, Windows Hello)를 사용하세요.",
+          "name": "보안 키"
         },
         "enabled": "2단계 인증 사용",
         "mandatory": "조직에 2단계 인증이 필요합니다. 계속하려면 하나 이상의 방법을 사용하도록 설정하세요.",
-        "description": "2단계 인증(<abbr title=\"2단계 인증\">2FA</abbr>)은 계정에 보안을 한층 더 강화합니다. 이 기능을 활성화하면 로그인할 때마다 비밀번호 외에 두 번째 인증 수단을 제공해야 합니다. 두 번째 인증 수단으로 인증 앱(<abbr title=\"시간 기반 일회용 비밀번호\">TOTP</abbr>), 이메일 인증(<abbr title=\"일회용 비밀번호\">OTP</abbr>) 또는 하드웨어 보안 키(<abbr title=\"Fast IDentity Online\">FIDO</abbr>)를 사용할 수 있습니다."
-      }
+        "description": "2단계 인증(<abbr title=\"2단계 인증\">2FA</abbr>)은 계정에 보안을 한층 더 강화합니다. 이 기능을 활성화하면 로그인할 때마다 비밀번호 외에 두 번째 인증 수단을 제공해야 합니다. 두 번째 인증 수단으로 인증 앱(<abbr title=\"시간 기반 일회용 비밀번호\">TOTP</abbr>), 이메일 인증(<abbr title=\"일회용 비밀번호\">OTP</abbr>) 또는 하드웨어 보안 키(<abbr title=\"Fast IDentity Online\">FIDO</abbr>)를 사용할 수 있습니다.",
+        "status_disabled": "비활성화됨",
+        "status_enabled": "활성화됨"
+      },
+      "notifications_title": "알림"
     },
     "settings": {
       "change_logo": "로고 변경",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "목록이 현재 비어 있습니다. 이는 사용자가 기본 설정의 모든 데이터를 사용할 수 있다는 것을 뜻합니다. 이 프로덕션에 대한 선택을 제한하려면 일부 항목을 추가합니다.",
-        "empty_automation_list": "이 제작에 대해 설정된 자동화가 없습니다."
+        "empty_automation_list": "이 제작에 대해 설정된 자동화가 없습니다.",
+        "empty_backgrounds": "연결된 배경이 없습니다. 위 목록에서 하나를 선택하여 추가하세요.",
+        "empty_board": "보드에서의 표시 여부를 구성하려면 먼저 작업 상태를 추가하세요.",
+        "empty_metadata": "이 엔티티 유형에 대해 정의된 메타데이터 디스크립터가 아직 없습니다."
       },
       "save": {
         "button": "설정 저장",
@@ -1098,7 +1217,8 @@
       "remove_logo": "스튜디오 로고 제거",
       "available_items": "사용 가능한 항목",
       "import_from_production": "다른 프로덕션에서 가져오기",
-      "no_more_available_items": "더 이상 추가할 수 있는 항목이 없습니다."
+      "no_more_available_items": "더 이상 추가할 수 있는 항목이 없습니다.",
+      "preferences_title": "환경설정"
     },
     "task_status": {
       "create_error": "이 작업 상태를 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 작업 상태가 정말로 없습니까?",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "선택한 작업을 영구적으로 제거하시겠습니까? 관련 댓글과 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
       "delete_for_selection_hard_lock_text": "삭제",
       "hookup_playlist": "훅업 재생목록 생성",
-      "assignation_error": "이 사람을 선택한 작업에 할당하는 데 문제가 있습니다. 모든 작업이 할당되지 않았습니다."
+      "assignation_error": "이 사람을 선택한 작업에 할당하는 데 문제가 있습니다. 모든 작업이 할당되지 않았습니다.",
+      "retake_filter_none": "재촬영 없음",
+      "retake_filter_with_retakes": "재촬영 있음"
     },
     "timesheets": {
       "detail_level": "세부 사항 레벨",
@@ -1541,7 +1663,8 @@
       "unit": "단위",
       "confirm_day_offs": "이 날짜를 휴무일로 설정하면 해당 날짜에 기록된 모든 시간이 지워집니다. 계속하시겠습니까?",
       "confirm_unset_day_offs": "현재 {start}부터 {end}까지 휴무일이 적용됩니다. 이 기간을 제거하시겠습니까?",
-      "off": "꺼짐"
+      "off": "꺼짐",
+      "day_off_no_logging": "휴무일에는 시간 기록 불가"
     },
     "wrong_browser": {
       "title": "Kitsu가 지원하지 않는 브라우저입니다",
@@ -1565,6 +1688,12 @@
         "title": "미리 보기 파일",
         "mark_broken": "고장난 것으로 표시",
         "explanation": "이 페이지에는 중간 상태(처리 중 또는 중단됨)의 모든 미리 보기 파일이 나열됩니다. 처리 중인 미리 보기 파일 수 또는 완료하지 못한 파일이 표시됩니다."
+      },
+      "audit": {
+        "title": "활동 로그"
+      },
+      "logins": {
+        "title": "로그인 로그"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "편집",
       "history": "역사",
       "refresh": "새로 고침",
-      "restore": "복원"
+      "restore": "복원",
+      "archive": "보관"
+    },
+    "project_templates": {
+      "add_metadata": "메타데이터 추가",
+      "apply": "템플릿 적용",
+      "apply_confirm": "이 작업은 템플릿의 작업 유형, 상태, 어셋 종류, 자동화 및 메타데이터 디스크립터를 이 프로덕션에 추가합니다. 기존 설정은 유지됩니다. 계속하시겠습니까?",
+      "apply_to": "템플릿 적용",
+      "apply_to_description": "템플릿의 구성을 이 프로덕션에 추가합니다. 기존 설정은 유지됩니다.",
+      "click_name_to_edit": "구성을 편집하려면 템플릿 이름을 클릭하세요.",
+      "create_error": "이 템플릿을 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 템플릿이 없는 것이 확실합니까?",
+      "delete_error": "이 템플릿을 삭제하는 동안 오류가 발생했습니다.",
+      "delete_text": "데이터베이스에서 {name}을(를) 제거하시겠습니까?",
+      "duplicate_name": "이 이름의 프로덕션 템플릿이 이미 존재합니다.",
+      "edit_title": "프로덕션 템플릿 편집",
+      "empty": "아직 프로덕션 템플릿이 없습니다. 새 프로덕션을 빠르게 구성하려면 하나 만드세요.",
+      "fields": {
+        "description": "설명",
+        "entity_type": "엔티티 유형",
+        "name": "이름"
+      },
+      "fps_error": "FPS는 1에서 200 사이의 정수여야 합니다.",
+      "from_production": "프로덕션에서 만들기",
+      "name_required": "이름이 필요합니다.",
+      "new_project_template": "프로덕션 템플릿 추가",
+      "number": "프로덕션 템플릿 | 프로덕션 템플릿",
+      "ratio_error": "비율은 x:y 형식을 따라야 합니다 (예: 16:9).",
+      "resolution_error": "해상도는 WxH 형식을 따라야 합니다 (예: 1920x1080).",
+      "select": "템플릿 선택",
+      "tabs": {
+        "asset_types": "어셋 종류",
+        "metadata_descriptors": "메타데이터",
+        "status_automations": "상태 자동화",
+        "task_statuses": "작업 상태",
+        "task_types": "작업 유형"
+      },
+      "title": "템플릿"
+    },
+    "share": {
+      "comment_placeholder": "댓글을 남기세요...",
+      "comments_disabled": "이 링크에는 댓글이 비활성화되어 있습니다.",
+      "download_preview": "미리 보기 다운로드",
+      "enter_review": "검토 시작",
+      "error_text": "이 공유 링크는 유효하지 않거나 만료되었거나 취소되었습니다.",
+      "error_title": "링크를 사용할 수 없음",
+      "guest_error": "로그인할 수 없습니다. 연결을 확인하고 다시 시도해 주세요. 문제가 계속되면 지원팀에 문의해 주세요.",
+      "identity_description": "검토 세션에 참여하려면 이름을 입력하세요. 재생 목록을 보고 댓글을 남길 수 있습니다.",
+      "identity_required": "게시하기 전에 이름을 입력해야 합니다.",
+      "kitsu_homepage": "Kitsu 소개",
+      "logout": "검토 세션 나가기",
+      "name_placeholder": "홍길동",
+      "no_comments_yet": "아직 댓글이 없습니다.",
+      "no_preview": "미리 보기 없음",
+      "no_status_available": "이 프로젝트에 대해 구성된 작업 상태가 없습니다.",
+      "player_placeholder": "플레이어가 여기에 표시됩니다.",
+      "post_comment_error": "댓글을 게시할 수 없습니다. 페이지를 새로 고치고 다시 시도해 주세요.",
+      "review_session": "검토 세션",
+      "your_name": "귀하의 이름"
     }
   }
 }
