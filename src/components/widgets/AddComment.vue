@@ -346,6 +346,9 @@
       @cancel="onCloseCommentAttachment"
       @confirm="addCommentAttachment"
       @add-snapshots="$emit('annotation-snapshots-requested')"
+      @add-snapshots-with-label="
+        $emit('annotation-snapshots-with-label-requested')
+      "
     />
     <confirm-modal
       :active="modals.confirmFeedbackPublish"
@@ -471,6 +474,7 @@ const emit = defineEmits([
   'add-comment',
   'add-preview',
   'annotation-snapshots-requested',
+  'annotation-snapshots-with-label-requested',
   'clear-files',
   'file-drop',
   'remove-preview'
@@ -869,8 +873,8 @@ const setAnnotationSnapshots = files => {
   getAttachmentModal().addFiles(files)
 }
 
-const showAnnotationLoading = () => {
-  getAttachmentModal().showAnnotationLoading()
+const showAnnotationLoading = (kind = 'standard') => {
+  getAttachmentModal().showAnnotationLoading(kind)
 }
 
 const hideAnnotationLoading = () => {

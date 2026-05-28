@@ -889,6 +889,8 @@ import { usePreviewRoom } from '@/composables/previewRoom'
 import preferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,
+  buildAnnotationSnapshotTitle,
+  drawSnapshotTitle,
   isModelPreview,
   isMoviePreview,
   isPdfPreview,
@@ -2816,24 +2818,31 @@ const extractPicture = canvas => {
   context.drawImage(image, 0, 0, canvas.width, canvas.height)
 }
 
-const extractAnnotationSnapshots = async () => {
-  if (isCurrentPreviewPicture.value) return extractPicturePreviewSnapshots()
-  return extractVideoAnnotationSnapshots()
+const extractAnnotationSnapshots = async ({ withLabel = false } = {}) => {
+  if (isCurrentPreviewPicture.value) {
+    return extractPicturePreviewSnapshots({ withLabel })
+  }
+  return extractVideoAnnotationSnapshots({ withLabel })
 }
 
-const snapshotFilename = ({ revision, frame, index } = {}) =>
-  buildAnnotationSnapshotFilename({
-    production: currentProduction.value?.name,
-    entity: task.value?.entity_name,
-    taskType: taskTypeMap.value.get(task.value?.task_type_id)?.name,
-    revision,
-    frame,
-    index
-  })
+const snapshotIdentity = ({ revision, frame, index } = {}) => ({
+  production: currentProduction.value?.name,
+  entity: task.value?.entity_name,
+  taskType: taskTypeMap.value.get(task.value?.task_type_id)?.name,
+  revision,
+  frame,
+  index
+})
+
+const snapshotFilename = identity =>
+  buildAnnotationSnapshotFilename(snapshotIdentity(identity))
+
+const snapshotTitle = identity =>
+  buildAnnotationSnapshotTitle(snapshotIdentity(identity))
 
 // Video preview: one PNG per annotation, each captured at the
 // annotation's frame with its drawing composited on top.
-const extractVideoAnnotationSnapshots = async () => {
+const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
   const cur = currentFrame.value
   const sorted = annotations.value.sort((a, b) => a.time - b.time)
   const files = []
@@ -2845,6 +2854,7 @@ const extractVideoAnnotationSnapshots = async () => {
     )
     await extractVideoFrame(canvas, frame)
     await copyAnnotationCanvas(canvas, ann)
+    if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
     files.push(
       await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
     )
@@ -2859,7 +2869,7 @@ const extractVideoAnnotationSnapshots = async () => {
 // preview's annotations composited on top. Briefly switches the
 // displayed picture in order to reuse the live extract/composite
 // pipeline.
-const extractPicturePreviewSnapshots = async () => {
+const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   const entity = currentEntity.value
   if (!entity) return []
   const picturePreviews = [
@@ -2885,6 +2895,12 @@ const extractPicturePreviewSnapshots = async () => {
     const canvas = document.getElementById('annotation-snapshot')
     extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
+    if (withLabel) {
+      drawSnapshotTitle(
+        canvas,
+        snapshotTitle({ revision: preview.revision, index: fileIndex })
+      )
+    }
     files.push(
       await getFileFromCanvas(
         canvas,
@@ -4135,7 +4151,7 @@ defineExpose({
 })
 
 const playerProxy = {
-  extractAnnotationSnapshots: () => extractAnnotationSnapshots()
+  extractAnnotationSnapshots: options => extractAnnotationSnapshots(options)
 }
 </script>
 

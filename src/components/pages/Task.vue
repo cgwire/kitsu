@@ -270,6 +270,9 @@
                 @file-drop="selectFile"
                 @clear-files="clearPreviewFiles"
                 @annotation-snapshots-requested="extractAnnotationSnapshots"
+                @annotation-snapshots-with-label-requested="
+                  extractAnnotationSnapshots(true)
+                "
                 @remove-preview="onPreviewFormRemoved"
                 v-if="isCommentingAllowed"
               />
@@ -1548,10 +1551,13 @@ export default {
       this.taskPreviews = this.getCurrentTaskPreviews()
     },
 
-    async extractAnnotationSnapshots() {
-      this.$refs['add-comment'].showAnnotationLoading()
-      const files =
-        await this.$refs['preview-player'].extractAnnotationSnapshots()
+    async extractAnnotationSnapshots(withLabel = false) {
+      this.$refs['add-comment'].showAnnotationLoading(
+        withLabel ? 'label' : 'standard'
+      )
+      const files = await this.$refs[
+        'preview-player'
+      ].extractAnnotationSnapshots({ withLabel })
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files
