@@ -378,6 +378,7 @@
         :current-parent-preview="currentPreview"
         :fps="fps"
         :extendable="false"
+        :in-playlist="true"
         :is-preview="false"
         :silent="isCommentsHidden"
         :task="task"
@@ -887,6 +888,9 @@ import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import preferences from '@/lib/preferences'
 import {
+  buildAnnotationSnapshotFilename,
+  buildAnnotationSnapshotTitle,
+  drawSnapshotTitle,
   isModelPreview,
   isMoviePreview,
   isPdfPreview,
@@ -1537,7 +1541,8 @@ const {
   endAnnotationSaving,
   restoreFailedAnnotations,
   confirmAnnotationsSaved,
-  copyAnnotationCanvas
+  copyAnnotationCanvas,
+  compositeLiveAnnotationsOntoCanvas
 } = annotation
 
 // FullScreen composable
@@ -2801,22 +2806,113 @@ const extractVideoFrame = (canvas, f) => {
   })
 }
 
-const extractAnnotationSnapshots = async () => {
+const extractPicture = canvas => {
+  if (!picturePlayer.value) return
+  const image = picturePlayer.value.getPictureElement()
+  if (!image) return
+  const { width, height } = picturePlayer.value.getNaturalDimensions()
+  const context = canvas.getContext('2d')
+  canvas.width = width
+  canvas.height = height
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+}
+
+const extractAnnotationSnapshots = async ({ withLabel = false } = {}) => {
+  if (isCurrentPreviewPicture.value) {
+    return extractPicturePreviewSnapshots({ withLabel })
+  }
+  return extractVideoAnnotationSnapshots({ withLabel })
+}
+
+const snapshotIdentity = ({ revision, frame, index } = {}) => ({
+  production: currentProduction.value?.name,
+  entity: task.value?.entity_name,
+  taskType: taskTypeMap.value.get(task.value?.task_type_id)?.name,
+  revision,
+  frame,
+  index
+})
+
+const snapshotFilename = identity =>
+  buildAnnotationSnapshotFilename(snapshotIdentity(identity))
+
+const snapshotTitle = identity =>
+  buildAnnotationSnapshotTitle(snapshotIdentity(identity))
+
+// Video preview: one PNG per annotation, each captured at the
+// annotation's frame with its drawing composited on top.
+const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
   const cur = currentFrame.value
   const sorted = annotations.value.sort((a, b) => a.time - b.time)
   const files = []
-  let index = 1
+  const revision = currentPreview.value?.revision
   for (const ann of sorted) {
     const canvas = document.getElementById('annotation-snapshot')
-    const filename = `annotation ${index}.png`
-    const f = roundToFrame(ann.time, fps.value) / frameDuration.value
-    await extractVideoFrame(canvas, f)
+    const frame = Math.round(
+      roundToFrame(ann.time, fps.value) / frameDuration.value
+    )
+    await extractVideoFrame(canvas, frame)
     await copyAnnotationCanvas(canvas, ann)
-    const file = await getFileFromCanvas(canvas, filename)
-    files.push(file)
-    index++
+    if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
+    files.push(
+      await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
+    )
   }
   rawPlayer.value.setCurrentFrame(cur - 1)
+  nextTick(() => clearCanvas())
+  return files
+}
+
+// Picture revisions can hold several preview files (main + extras).
+// Walk them all and emit one PNG per picture preview, with that
+// preview's annotations composited on top. Briefly switches the
+// displayed picture in order to reuse the live extract/composite
+// pipeline.
+const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
+  const entity = currentEntity.value
+  if (!entity) return []
+  const picturePreviews = [
+    {
+      id: entity.preview_file_id,
+      extension: entity.preview_file_extension,
+      revision: entity.preview_file_revision,
+      annotations: entity.preview_file_annotations || []
+    },
+    ...(entity.preview_file_previews || [])
+  ]
+    .map((preview, index) => ({ preview, index }))
+    .filter(({ preview }) => isPicturePreview(preview.extension))
+
+  const savedIndex = currentPreviewIndex.value
+  const files = []
+  let fileIndex = 1
+  for (const { preview, index } of picturePreviews) {
+    if (currentPreviewIndex.value !== index) {
+      currentPreviewIndex.value = index
+      await new Promise(resolve => setTimeout(resolve, 500))
+    }
+    const canvas = document.getElementById('annotation-snapshot')
+    extractPicture(canvas)
+    await compositeLiveAnnotationsOntoCanvas(canvas)
+    if (withLabel) {
+      drawSnapshotTitle(
+        canvas,
+        snapshotTitle({ revision: preview.revision, index: fileIndex })
+      )
+    }
+    files.push(
+      await getFileFromCanvas(
+        canvas,
+        snapshotFilename({ revision: preview.revision, index: fileIndex })
+      )
+    )
+    fileIndex++
+  }
+  if (currentPreviewIndex.value !== savedIndex) {
+    currentPreviewIndex.value = savedIndex
+    await new Promise(resolve => setTimeout(resolve, 500))
+  }
   nextTick(() => clearCanvas())
   return files
 }
@@ -3623,10 +3719,6 @@ const onKeyDown = event => {
     } else {
       onNextFrameClicked()
     }
-  } else if (event.keyCode === 32) {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayPauseClicked()
   } else if (event.altKey && event.keyCode === 74) {
     event.preventDefault()
     event.stopPropagation()
@@ -4059,7 +4151,7 @@ defineExpose({
 })
 
 const playerProxy = {
-  extractAnnotationSnapshots: () => extractAnnotationSnapshots()
+  extractAnnotationSnapshots: options => extractAnnotationSnapshots(options)
 }
 </script>
 
@@ -4221,6 +4313,7 @@ const playerProxy = {
 }
 
 .video-container {
+  overflow: hidden;
   position: relative;
 }
 

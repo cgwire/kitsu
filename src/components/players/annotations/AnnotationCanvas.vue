@@ -90,6 +90,11 @@ const updateBounds = () => {
     canvas.setDimensions({ width: mediaRect.width, height: mediaRect.height })
     emit('resized', { width: mediaRect.width, height: mediaRect.height })
   }
+  // Refresh fabric's cached canvas offset. setDimensions doesn't
+  // always trigger it on its own, and a stale offset shifts pointer
+  // coordinates (so freshly drawn strokes land at the wrong y) until
+  // any window resize forces a recalculation.
+  canvas?.calcOffset()
 }
 
 const observe = el => el && resizeObserver?.observe(el)
@@ -202,12 +207,11 @@ defineExpose({
 .annotation-clip {
   position: absolute;
   z-index: 500;
-  // Clip on all sides so a zoomed / panned overlay stays within the
-  // media bounds — otherwise strokes spill onto the header above and
-  // the playback / progress bars below.
-  clip-path: inset(0);
-  // The wrapper exists only to clip — never to capture events. The
-  // inner overlay decides for itself whether to be interactive.
+  // Clipping is delegated to the player's outer container
+  // (PreviewPlayer's .preview-container, PlaylistPlayer's
+  // .video-container — both with overflow: hidden) so the overlay
+  // can extend with the panzoom transform without being cropped to
+  // the media's un-zoomed bounds.
   pointer-events: none;
 }
 

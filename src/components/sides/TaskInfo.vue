@@ -70,7 +70,7 @@
             thin
             :title="$t('main.export')"
             :actions="exportActions"
-            v-if="exportActions.length > 0"
+            v-if="inPlaylist && exportActions.length > 0"
           />
         </div>
 
@@ -187,12 +187,16 @@
                   :frame="currentFrame || currentFrameRaw"
                   :revision="currentRevision"
                   :is-movie="isMoviePreview"
+                  :is-picture="isPicturePreview"
                   @add-comment="addComment"
                   @add-preview="onAddPreviewClicked"
                   @file-drop="selectFile"
                   @clear-files="clearPreviewFiles"
                   @remove-preview="onPreviewFormRemoved"
                   @annotation-snapshots-requested="extractAnnotationSnapshots"
+                  @annotation-snapshots-with-label-requested="
+                    () => extractAnnotationSnapshots(true)
+                  "
                   v-if="isCommentingAllowed"
                 />
 
@@ -439,6 +443,10 @@ export default {
     extendable: {
       type: Boolean,
       default: true
+    },
+    inPlaylist: {
+      type: Boolean,
+      default: false
     },
     isLoading: {
       type: Boolean,
@@ -1417,11 +1425,15 @@ export default {
       this.currentFrameRaw = frame
     },
 
-    async extractAnnotationSnapshots() {
+    async extractAnnotationSnapshots(withLabel = false) {
       let previewPlayer = this.$refs['preview-player']
       if (!previewPlayer) previewPlayer = this.player
-      this.$refs['add-comment'].showAnnotationLoading()
-      const files = await previewPlayer.extractAnnotationSnapshots()
+      this.$refs['add-comment'].showAnnotationLoading(
+        withLabel ? 'label' : 'standard'
+      )
+      const files = await previewPlayer.extractAnnotationSnapshots({
+        withLabel
+      })
       this.$refs['add-comment'].hideAnnotationLoading()
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       return files

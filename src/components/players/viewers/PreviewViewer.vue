@@ -417,6 +417,18 @@ const extractFrame = (canvas, frame) => {
   context.drawImage(video, 0, 0, canvas.width, canvas.height)
 }
 
+const extractPicture = canvas => {
+  if (!pictureViewer.value) return
+  const image = pictureViewer.value.getPictureElement()
+  if (!image) return
+  const context = canvas.getContext('2d')
+  const { width, height } = pictureViewer.value.getNaturalDimensions()
+  canvas.width = width
+  canvas.height = height
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+}
+
 const resetZoom = () => {
   if (pictureViewer.value) pictureViewer.value.resetPanZoom()
   if (videoViewer.value) videoViewer.value.resetPanZoom()
@@ -481,6 +493,7 @@ defineExpose({
   setCurrentTimeRaw: setCurrentTimeRawValue,
   getCurrentTimeRaw,
   extractFrame,
+  extractPicture,
   resetZoom,
   setPanZoom,
   pauseZoom,

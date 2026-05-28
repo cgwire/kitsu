@@ -27,10 +27,9 @@
           {{ $t('tasks.comment_image') }}
         </h1>
 
-        <div class="flexrow buttons attachment-modal-buttons">
+        <div class="attachment-upload-zone">
           <file-upload
             ref="fileField"
-            class="flexrow-item"
             :label="$t('main.select_file')"
             :accept="extensions"
             :multiple="true"
@@ -38,20 +37,31 @@
             @fileselected="onFileSelected"
             hide-file-names
           />
-          <p class="flexrow-item mt1" v-if="isMovie">
-            {{ $t('main.or') }}
-          </p>
-          <p class="flexrow-item" v-if="isMovie">
-            <button
-              :class="{
-                button: true,
-                'is-loading': isAnnotationLoading
-              }"
-              @click="$emit('add-snapshots')"
-            >
-              {{ $t('main.attach_snapshots') }}
-            </button>
-          </p>
+        </div>
+
+        <div class="snapshot-actions" v-if="isMovie || isPicture">
+          <button
+            :class="{
+              button: true,
+              'snapshot-button': true,
+              'is-loading': snapshotLoading === 'standard'
+            }"
+            :disabled="snapshotLoading && snapshotLoading !== 'standard'"
+            @click="$emit('add-snapshots')"
+          >
+            {{ $t('main.attach_snapshots') }}
+          </button>
+          <button
+            :class="{
+              button: true,
+              'snapshot-button': true,
+              'is-loading': snapshotLoading === 'label'
+            }"
+            :disabled="snapshotLoading && snapshotLoading !== 'label'"
+            @click="$emit('add-snapshots-with-label')"
+          >
+            {{ $t('main.attach_snapshots_with_label') }}
+          </button>
         </div>
 
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
@@ -118,16 +128,24 @@ const props = defineProps({
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   isMovie: { type: Boolean, default: false },
+  isPicture: { type: Boolean, default: false },
   title: { type: String, default: '' }
 })
 
-const emit = defineEmits(['add-snapshots', 'cancel', 'confirm'])
+const emit = defineEmits([
+  'add-snapshots',
+  'add-snapshots-with-label',
+  'cancel',
+  'confirm'
+])
 
 useModal(toRef(props, 'active'), emit)
 
 const fileField = ref(null)
 const forms = ref([])
-const isAnnotationLoading = ref(false)
+// Tracks which snapshot button is currently extracting:
+// 'standard', 'label', or null when idle.
+const snapshotLoading = ref(null)
 const isDraggingFile = ref(false)
 
 const onFileSelected = newForms => {
@@ -195,11 +213,11 @@ onBeforeUnmount(() => {
 
 defineExpose({
   addFiles,
-  showAnnotationLoading: () => {
-    isAnnotationLoading.value = true
+  showAnnotationLoading: (kind = 'standard') => {
+    snapshotLoading.value = kind
   },
   hideAnnotationLoading: () => {
-    isAnnotationLoading.value = false
+    snapshotLoading.value = null
   }
 })
 </script>
@@ -262,6 +280,57 @@ h3.subtitle {
 
 .buttons {
   flex-wrap: wrap;
+}
+
+.attachment-upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  margin: 1em 0;
+  padding: 1.5em;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    background: var(--background-hover, rgba(255, 255, 255, 0.03));
+    border-color: var(--background-selectable, $purple-strong);
+  }
+
+  // Strip Bulma's button background off the file-upload label so the
+  // dropzone's outline is the single visual container — the text sits
+  // directly on the dashed area, no inner button chip.
+  :deep(.dropbox) {
+    background: transparent;
+    border: 0;
+    justify-content: center;
+    padding: 0;
+  }
+
+  :deep(.dropbox label.button) {
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      background: transparent;
+      color: var(--background-selectable, $purple-strong);
+    }
+  }
+}
+
+.snapshot-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.snapshot-button {
+  width: 100%;
+  margin-left: 0;
 }
 
 .drop-mask {

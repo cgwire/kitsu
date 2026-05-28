@@ -257,6 +257,7 @@
                 :is-max-retakes-error="errors.addCommentMaxRetakes"
                 :is-loading="loading.addComment"
                 :is-movie="isMovie"
+                :is-picture="isPicture"
                 :team="currentTeam"
                 :task-types="currentTaskTypes"
                 :task="task"
@@ -269,6 +270,9 @@
                 @file-drop="selectFile"
                 @clear-files="clearPreviewFiles"
                 @annotation-snapshots-requested="extractAnnotationSnapshots"
+                @annotation-snapshots-with-label-requested="
+                  extractAnnotationSnapshots(true)
+                "
                 @remove-preview="onPreviewFormRemoved"
                 v-if="isCommentingAllowed"
               />
@@ -628,6 +632,10 @@ export default {
 
     isMovie() {
       return this.extension === 'mp4'
+    },
+
+    isPicture() {
+      return ['png', 'gif'].includes(this.extension)
     },
 
     isPreviewPlayerReadOnly() {
@@ -1543,10 +1551,13 @@ export default {
       this.taskPreviews = this.getCurrentTaskPreviews()
     },
 
-    async extractAnnotationSnapshots() {
-      this.$refs['add-comment'].showAnnotationLoading()
-      const files =
-        await this.$refs['preview-player'].extractAnnotationSnapshots()
+    async extractAnnotationSnapshots(withLabel = false) {
+      this.$refs['add-comment'].showAnnotationLoading(
+        withLabel ? 'label' : 'standard'
+      )
+      const files = await this.$refs[
+        'preview-player'
+      ].extractAnnotationSnapshots({ withLabel })
       this.$refs['add-comment'].setAnnotationSnapshots(files)
       this.$refs['add-comment'].hideAnnotationLoading()
       return files

@@ -18,6 +18,12 @@ import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
 
+/* Force scaling / rotation handles to show on grouped selections so a
+ * marquee around several annotations stays scalable / rotatable. */
+if (fabric) {
+  fabric.Group.prototype.hasControls = true
+}
+
 /* Monkey patch needed to have text background including the padding. */
 if (fabric) {
   fabric.Text.prototype.set({
@@ -131,8 +137,6 @@ export const useAnnotation = ({
   const additions = ref([])
   const deletions = ref([])
   const updates = ref([])
-  const isShowingPalette = ref(false)
-  const isShowingPencilPalette = ref(false)
   const notSaved = ref(false)
   const pencilColor = ref('#ff3860')
   const pencilWidth = ref('big')
@@ -193,15 +197,23 @@ export const useAnnotation = ({
   }
 
   const setObjectData = object => {
+    // canvasWidth / canvasHeight are the dimensions the object's left /
+    // top were authored against — never refresh them, or a later save
+    // will pair the old coords with the new (resized) canvas and the
+    // re-loaded annotation will drift on the Y axis.
     if (object.set) {
       if (!object.id) object.set('id', uuidv4())
-      object.set('canvasWidth', fabricCanvas.value.width)
-      object.set('canvasHeight', fabricCanvas.value.height)
+      if (!object.canvasWidth) {
+        object.set('canvasWidth', fabricCanvas.value.width)
+      }
+      if (!object.canvasHeight) {
+        object.set('canvasHeight', fabricCanvas.value.height)
+      }
       if (!object.createdBy) object.set('createdBy', userId.value)
     } else {
       if (!object.id) object.id = uuidv4()
-      object.canvasWidth = fabricCanvas.value.width
-      object.canvasHeight = fabricCanvas.value.height
+      if (!object.canvasWidth) object.canvasWidth = fabricCanvas.value.width
+      if (!object.canvasHeight) object.canvasHeight = fabricCanvas.value.height
       if (!object.createdBy) object.createdBy = userId.value
     }
     addSerialization(object)
@@ -703,35 +715,20 @@ export const useAnnotation = ({
 
   // Events
 
-  const onPickPencilWidth = () => {
-    isShowingPencilPalette.value = !isShowingPencilPalette.value
-  }
-
-  const onPickPencilColor = () => {
-    isShowingPalette.value = !isShowingPalette.value
-  }
-
-  const onPickTextColor = () => {
-    isShowingPalette.value = !isShowingPalette.value
-  }
-
   const onChangePencilColor = color => {
     pencilColor.value = color
     _resetColor()
-    isShowingPalette.value = false
     localPreferences.setPreference('player:pencil-color', pencilColor.value)
   }
 
   const onChangePencilWidth = pencil => {
     pencilWidth.value = pencil
     _resetPencil()
-    isShowingPalette.value = false
     localPreferences.setPreference('player:pencil-width', pencilWidth.value)
   }
 
   const onChangeTextColor = newValue => {
     textColor.value = newValue
-    isShowingPalette.value = false
     localPreferences.setPreference('player:text-color', textColor.value)
   }
 
@@ -839,9 +836,6 @@ export const useAnnotation = ({
 
   const stackAddAction = ({ target }) => {
     doneActionStack.push({ type: 'add', obj: target })
-    target.lockScalingX = true
-    target.lockScalingY = true
-    target.rotation = true
   }
 
   // After a canvas reload (e.g. Esc-exit fullscreen) the stack entry
@@ -961,20 +955,16 @@ export const useAnnotation = ({
     fabricCanvas.value.off('text:changed', onObjectModified)
     fabricCanvas.value.off('object:modified', onObjectModified)
     fabricCanvas.value.off('object:added', onObjectAdded)
-    fabricCanvas.value.off('mouse:down', onCanvasClickedInternal)
     fabricCanvas.value.off('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.off('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.off('mouse:move', updateMousePressure)
     fabricCanvas.value.off('mouse:up', endDrawing)
     fabricCanvas.value.off('mouse:up', onCanvasReleasedCb)
-    fabricCanvas.value.off('mouse:move', onCanvasMouseMovedCb)
-    fabricCanvas.value.off('mouse:down', onCanvasClickedInternal)
     fabricCanvas.value.on('object:moved', onObjectModified)
     fabricCanvas.value.on('object:modified', onObjectModified)
     fabricCanvas.value.on('text:changed', onObjectModified)
     fabricCanvas.value.on('object:added', onObjectAdded)
     fabricCanvas.value.on('erasing:end', onObjectAdded)
-    fabricCanvas.value.on('mouse:down', onCanvasClickedInternal)
     fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.on('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.on('mouse:move', updateMousePressure)
@@ -1042,13 +1032,7 @@ export const useAnnotation = ({
       mb: false,
       mt: false
     }
-    fabric.Group.prototype.hasControls = true
     return fabricCanvas.value
-  }
-
-  const onCanvasClickedInternal = event => {
-    // This is the canvas click handler registered on the fabric canvas
-    // Different from the template @click handler
   }
 
   // Mouse pressure
@@ -1311,37 +1295,33 @@ export const useAnnotation = ({
     }, 5000)
   }
 
+  // Render whatever is currently on the live fabric canvas onto the
+  // target canvas. Non-destructive: it draws the live canvas's pixels
+  // straight onto the target (scaled to fit), so objects stay on the
+  // live canvas — no per-object moves and no fabric "object belongs to
+  // a different canvas" warnings.
+  const compositeLiveAnnotationsOntoCanvas = canvas => {
+    return new Promise(resolve => {
+      const live = fabricCanvas.value
+      if (!live) return resolve()
+      live.renderAll()
+      const source = live.lowerCanvasEl
+      if (!source) return resolve()
+      const context = canvas.getContext('2d')
+      context.drawImage(source, 0, 0, canvas.width, canvas.height)
+      resolve()
+    })
+  }
+
+  // Per-annotation composite for video: clear and reload only the
+  // requested annotation onto the live canvas before compositing, so a
+  // caller iterating frame-by-frame gets one PNG per annotation.
   const copyAnnotationCanvas = (canvas, annotation) => {
     return new Promise(resolve => {
       clearCanvas()
       loadSingleAnnotation(annotation)
       setTimeout(() => {
-        const context = canvas.getContext('2d')
-        const scaleRatio = canvas.width / fabricCanvas.value.width
-        const tmpSource = document.getElementById('resize-annotation-canvas')
-        const tmpCanvas = new fabric.Canvas('resize-annotation-canvas', {
-          width: canvas.width,
-          height: canvas.height
-        })
-        fabricCanvas.value.getObjects().forEach(obj => {
-          if (obj._objects) {
-            obj._objects.forEach(obj => {
-              tmpCanvas.add(obj)
-              obj.strokeWidth = obj.strokeWidth / scaleRatio
-            })
-          } else {
-            tmpCanvas.add(obj)
-            obj.strokeWidth = obj.strokeWidth / scaleRatio
-          }
-        })
-        tmpCanvas.setZoom(scaleRatio)
-        setTimeout(() => {
-          context.drawImage(tmpSource, 0, 0, canvas.width, canvas.height)
-          setTimeout(() => {
-            tmpCanvas.dispose()
-          }, 100)
-          return resolve()
-        }, 100)
+        compositeLiveAnnotationsOntoCanvas(canvas).then(resolve)
       }, 100)
     })
   }
@@ -1407,8 +1387,6 @@ export const useAnnotation = ({
     additions,
     deletions,
     updates,
-    isShowingPalette,
-    isShowingPencilPalette,
     notSaved,
     pencilColor,
     pencilWidth,
@@ -1449,9 +1427,6 @@ export const useAnnotation = ({
     addObjectToCanvas,
 
     // Events
-    onPickPencilWidth,
-    onPickPencilColor,
-    onPickTextColor,
     onChangePencilColor,
     onChangePencilWidth,
     onChangeTextColor,
@@ -1506,6 +1481,7 @@ export const useAnnotation = ({
     confirmAnnotationsSaved,
     restoreFailedAnnotations,
     copyAnnotationCanvas,
+    compositeLiveAnnotationsOntoCanvas,
 
     // Setter for component-specific callbacks
     setCurrentPreviewGetter

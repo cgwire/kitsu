@@ -404,60 +404,27 @@ describe('composables/annotation', () => {
     })
   })
 
-  describe('palette toggles', () => {
-    it('onPickPencilWidth toggles the pencil palette flag', () => {
-      const { api, wrapper } = mountAnnotation()
-      expect(api.isShowingPencilPalette.value).toBe(false)
-      api.onPickPencilWidth()
-      expect(api.isShowingPencilPalette.value).toBe(true)
-      api.onPickPencilWidth()
-      expect(api.isShowingPencilPalette.value).toBe(false)
-      wrapper.unmount()
-    })
-
-    it('onPickPencilColor toggles the palette flag', () => {
-      const { api, wrapper } = mountAnnotation()
-      expect(api.isShowingPalette.value).toBe(false)
-      api.onPickPencilColor()
-      expect(api.isShowingPalette.value).toBe(true)
-      wrapper.unmount()
-    })
-
-    it('onPickTextColor toggles the palette flag', () => {
-      const { api, wrapper } = mountAnnotation()
-      api.onPickTextColor()
-      expect(api.isShowingPalette.value).toBe(true)
-      wrapper.unmount()
-    })
-  })
-
   describe('color and pencil changes', () => {
-    it('onChangePencilColor updates the color and closes the palette', () => {
+    it('onChangePencilColor updates the color', () => {
       const { api, canvas, wrapper } = mountAnnotation()
-      api.isShowingPalette.value = true
       api.onChangePencilColor('#00ff00')
       expect(api.pencilColor.value).toBe('#00ff00')
-      expect(api.isShowingPalette.value).toBe(false)
       expect(canvas.freeDrawingBrush.color).toBe('#00ff00')
       wrapper.unmount()
     })
 
-    it('onChangePencilWidth updates the width and closes the palette', () => {
+    it('onChangePencilWidth updates the width', () => {
       const { api, canvas, wrapper } = mountAnnotation()
-      api.isShowingPalette.value = true
       api.onChangePencilWidth('small')
       expect(api.pencilWidth.value).toBe('small')
-      expect(api.isShowingPalette.value).toBe(false)
       expect(canvas.freeDrawingBrush.width).toBe(2)
       wrapper.unmount()
     })
 
-    it('onChangeTextColor updates the text color and closes the palette', () => {
+    it('onChangeTextColor updates the text color', () => {
       const { api, wrapper } = mountAnnotation()
-      api.isShowingPalette.value = true
       api.onChangeTextColor('#0000ff')
       expect(api.textColor.value).toBe('#0000ff')
-      expect(api.isShowingPalette.value).toBe(false)
       wrapper.unmount()
     })
   })

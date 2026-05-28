@@ -727,6 +727,7 @@ export default {
     apply: 'Apply',
     archived: 'Archived',
     attach_snapshots: 'Attach snapshots from your annotation',
+    attach_snapshots_with_label: 'Attach snapshots with a label burned in',
     avatar: {
       open_page: 'Open {personName} page',
       unassign: 'Unassign {personName}'
