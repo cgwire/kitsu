@@ -132,7 +132,7 @@ export const addSerialization = object => {
     result.angle = this.angle
     result.scale = this.scale
     result.createdBy = this.createdBy
-    return result
+    return normalizeSerializedAnnotation(this, result)
   }
   return object
 }
@@ -562,6 +562,30 @@ export const getAnnotationContainMapping = (canvas, refWidth, refHeight) => {
     return { scale: canvas.width / refWidth, offsetX: 0, offsetY: 0 }
   }
   return { scale: 1, offsetX: 0, offsetY: 0 }
+}
+
+// serialize() reads the fabric object's live left/top/scale, which the load
+// transform scaled to the *current* canvas. Persisting those against the
+// stored canvasWidth/Height — a different frame — made every resize+save cycle
+// re-multiply the coordinates (annotations drifting badly after drawing in
+// fullscreen). Invert the load transform on the object's own canvas so the
+// stored form is always expressed in its canvasWidth reference frame and
+// round-trips stably. No-op for objects drawn at the current size (scale 1) and
+// for objects not attached to a canvas.
+export const normalizeSerializedAnnotation = (object, result) => {
+  const canvas = object.canvas
+  if (!canvas || !object.canvasWidth) return result
+  const { scale, offsetX, offsetY } = getAnnotationContainMapping(
+    canvas,
+    object.canvasWidth,
+    object.canvasHeight
+  )
+  if (!scale) return result
+  result.left = (result.left - offsetX) / scale
+  result.top = (result.top - offsetY) / scale
+  result.scaleX = result.scaleX / scale
+  result.scaleY = result.scaleY / scale
+  return result
 }
 
 export const buildReadOnlyShape = async (annotation, obj, canvas) => {

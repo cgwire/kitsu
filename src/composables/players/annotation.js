@@ -13,7 +13,8 @@ import {
   attachShapeDrawing,
   buildReadOnlyShape,
   getAnnotationContainMapping,
-  lockBrushToFirstPointer
+  lockBrushToFirstPointer,
+  normalizeSerializedAnnotation
 } from '@/lib/annotation'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
@@ -192,7 +193,7 @@ export const useAnnotation = ({
       result.angle = this.angle
       result.scale = this.scale
       result.createdBy = this.createdBy
-      return result
+      return normalizeSerializedAnnotation(this, result)
     }
     return object
   }
