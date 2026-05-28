@@ -12,6 +12,7 @@ import {
   SHAPE_WIDTHS,
   attachShapeDrawing,
   buildReadOnlyShape,
+  getAnnotationContainMapping,
   lockBrushToFirstPointer
 } from '@/lib/annotation'
 import clipboard from '@/lib/clipboard'
@@ -532,38 +533,26 @@ export const useAnnotation = ({
     if (getObjectById(obj.id) && !canvas) return
     if (!canvas) canvas = fabricCanvas.value
     let path, shape, text, psstroke
-    let scaleMultiplierX = 1
-    let scaleMultiplierY = 1
-    if (annotation?.width) {
-      scaleMultiplierX = canvas.width / annotation.width
-      scaleMultiplierY = canvas.width / annotation.width
-    }
-    if (annotation?.height) {
-      scaleMultiplierY = canvas.height / annotation.height
-    }
-    const canvasWidth = obj.canvasWidth || annotation.width
-    const canvasHeight = obj.canvasHeight
-
-    if (canvasWidth) {
-      scaleMultiplierX = canvas.width / canvasWidth
-      scaleMultiplierY = canvas.width / canvasWidth
-    }
-    if (canvasHeight) {
-      scaleMultiplierY = canvas.height / canvasHeight
-    }
+    const canvasWidth = obj.canvasWidth || annotation?.width
+    const canvasHeight = obj.canvasHeight || annotation?.height
+    const { scale, offsetX, offsetY } = getAnnotationContainMapping(
+      canvas,
+      canvasWidth,
+      canvasHeight
+    )
 
     const base = {
       id: obj.id,
       fill: 'transparent',
-      left: obj.left * scaleMultiplierX,
-      top: obj.top * scaleMultiplierY,
+      left: obj.left * scale + offsetX,
+      top: obj.top * scale + offsetY,
       stroke: obj.stroke,
       strokeWidth: obj.strokeWidth,
       radius: obj.radius,
       width: obj.width,
       height: obj.height,
-      scaleX: obj.scaleX * scaleMultiplierX,
-      scaleY: obj.scaleY * scaleMultiplierY,
+      scaleX: obj.scaleX * scale,
+      scaleY: obj.scaleY * scale,
       angle: obj.angle,
       scale: obj.scale,
       editable: !isCurrentUserArtist.value,
@@ -571,16 +560,10 @@ export const useAnnotation = ({
     }
 
     if (obj.type === 'path') {
-      let strokeMultiplier = 1
-      if (obj.canvasWidth) {
-        strokeMultiplier = canvasWidth / canvas.width
-      }
-      if (canvas.width < 420) strokeMultiplier /= 2
       path = new fabric.Path(obj.path, {
         ...base
       })
       path.set('id', obj.id)
-      path.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
       path.set('canvasWidth', canvasWidth)
       path.set('canvasHeight', canvasHeight)
       addSerialization(path)
@@ -602,8 +585,8 @@ export const useAnnotation = ({
       text = new fabric.IText(obj.text, {
         ...base,
         fill: obj.fill,
-        left: obj.left * scaleMultiplierX,
-        top: obj.top * scaleMultiplierY,
+        left: obj.left * scale + offsetX,
+        top: obj.top * scale + offsetY,
         fontFamily: obj.fontFamily,
         fontSize: obj.fontSize,
         backgroundColor: 'rgba(255,255,255, 0.8)',
@@ -629,22 +612,20 @@ export const useAnnotation = ({
       silentAnnotation = false
     } else if (obj.type === 'PSStroke') {
       if (obj.canvasWidth) {
-        let strokeMultiplier = canvasWidth / canvas.width
-        if (canvas.width < 420) strokeMultiplier /= 2
         psstroke = await deserializePSBrush(obj)
         psstroke.set('id', obj.id)
-        psstroke.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
+        psstroke.set('strokeWidth', obj.strokeWidth)
         psstroke.set('canvasWidth', canvasWidth)
         psstroke.set('canvasHeight', canvasHeight)
-        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
-        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
-        psstroke.set('left', obj.left * scaleMultiplierX)
-        psstroke.set('top', obj.top * scaleMultiplierY)
+        psstroke.set('scaleX', obj.scaleX * scale)
+        psstroke.set('scaleY', obj.scaleY * scale)
+        psstroke.set('left', obj.left * scale + offsetX)
+        psstroke.set('top', obj.top * scale + offsetY)
         psstroke.set('radius', obj.radius)
         psstroke.set('width', obj.width)
         psstroke.set('height', obj.height)
-        psstroke.set('scaleX', obj.scaleX * scaleMultiplierX)
-        psstroke.set('scaleY', obj.scaleY * scaleMultiplierY)
+        psstroke.set('scaleX', obj.scaleX * scale)
+        psstroke.set('scaleY', obj.scaleY * scale)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
         psstroke.set('editable', !isCurrentUserArtist.value)

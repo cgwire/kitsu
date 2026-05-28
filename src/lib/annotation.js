@@ -542,27 +542,38 @@ export const deserializePSStroke = obj =>
  * Promise because PSStroke deserialisation is async.
  * -----------------------------------------------------------------------*/
 
+// Maps coordinates authored on a canvas of `refWidth × refHeight` onto the
+// current `canvas` the way object-fit:contain lays media out: one uniform scale
+// plus centering. The media element is always sized to its natural aspect
+// ratio, so the authoring canvas shares that aspect — a single factor (rather
+// than separate X/Y) keeps annotations aligned and undistorted even when the
+// current box aspect differs (comparison halves the width, fullscreen enlarges
+// it). Falls back to a width-only scale when the reference height is unknown.
+export const getAnnotationContainMapping = (canvas, refWidth, refHeight) => {
+  if (refWidth && refHeight) {
+    const scale = Math.min(canvas.width / refWidth, canvas.height / refHeight)
+    return {
+      scale,
+      offsetX: (canvas.width - refWidth * scale) / 2,
+      offsetY: (canvas.height - refHeight * scale) / 2
+    }
+  }
+  if (refWidth) {
+    return { scale: canvas.width / refWidth, offsetX: 0, offsetY: 0 }
+  }
+  return { scale: 1, offsetX: 0, offsetY: 0 }
+}
+
 export const buildReadOnlyShape = async (annotation, obj, canvas) => {
   if (!obj || !obj.type) return null
 
-  let scaleMultiplierX = 1
-  let scaleMultiplierY = 1
-  if (annotation?.width) {
-    scaleMultiplierX = canvas.width / annotation.width
-    scaleMultiplierY = canvas.width / annotation.width
-  }
-  if (annotation?.height) {
-    scaleMultiplierY = canvas.height / annotation.height
-  }
-  const canvasWidth = obj.canvasWidth || annotation.width
-  const canvasHeight = obj.canvasHeight
-  if (canvasWidth) {
-    scaleMultiplierX = canvas.width / canvasWidth
-    scaleMultiplierY = canvas.width / canvasWidth
-  }
-  if (canvasHeight) {
-    scaleMultiplierY = canvas.height / canvasHeight
-  }
+  const canvasWidth = obj.canvasWidth || annotation?.width
+  const canvasHeight = obj.canvasHeight || annotation?.height
+  const { scale, offsetX, offsetY } = getAnnotationContainMapping(
+    canvas,
+    canvasWidth,
+    canvasHeight
+  )
 
   const base = {
     angle: obj.angle || 0,
@@ -570,24 +581,20 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
     fill: obj.fill || 'transparent',
     height: obj.height,
     hoverCursor: 'default',
-    left: (obj.left || 0) * scaleMultiplierX,
+    left: (obj.left || 0) * scale + offsetX,
     radius: obj.radius,
-    scaleX: (obj.scaleX || 1) * scaleMultiplierX,
-    scaleY: (obj.scaleY || 1) * scaleMultiplierY,
+    scaleX: (obj.scaleX || 1) * scale,
+    scaleY: (obj.scaleY || 1) * scale,
     selectable: false,
     stroke: obj.stroke,
     strokeWidth: obj.strokeWidth || 1,
-    top: (obj.top || 0) * scaleMultiplierY,
+    top: (obj.top || 0) * scale + offsetY,
     width: obj.width
   }
 
   if (obj.type === 'path') {
-    let strokeMultiplier = 1
-    if (obj.canvasWidth) strokeMultiplier = canvasWidth / canvas.width
-    if (canvas.width < 420) strokeMultiplier /= 2
     const path = new fabric.Path(obj.path, base)
     path.set('id', obj.id)
-    path.set('strokeWidth', obj.strokeWidth * strokeMultiplier)
     path.set('canvasWidth', canvasWidth)
     path.set('canvasHeight', canvasHeight)
     addSerialization(path)
@@ -597,9 +604,6 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
   if (obj.type === 'PSStroke') {
     const stroke = await deserializePSStroke(obj)
     if (!stroke) return null
-    let strokeMultiplier = 1
-    if (obj.canvasWidth) strokeMultiplier = canvasWidth / canvas.width
-    if (canvas.width < 420) strokeMultiplier /= 2
     stroke.set({
       id: obj.id,
       angle: base.angle,
@@ -611,7 +615,7 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
       scaleY: base.scaleY,
       selectable: false,
       stroke: base.stroke,
-      strokeWidth: (obj.strokeWidth || 1) * strokeMultiplier,
+      strokeWidth: obj.strokeWidth || 1,
       top: base.top,
       canvasWidth,
       canvasHeight
