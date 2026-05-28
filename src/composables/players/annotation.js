@@ -735,11 +735,11 @@ export const useAnnotation = ({
   const _resetPencil = () => {
     if (!fabricCanvas.value) return
     const converter = {
-      huge: 15,
-      big: 10,
-      medium: 5,
-      small: 2,
-      tiny: 1
+      huge: 30,
+      big: 20,
+      medium: 10,
+      small: 4,
+      tiny: 2
     }
     const strokeWidth = converter[pencilWidth.value]
     fabricCanvas.value.freeDrawingBrush.width = strokeWidth
@@ -1015,7 +1015,10 @@ export const useAnnotation = ({
     })
 
     fabricCanvas.value.freeDrawingBrush.color = pencilColor.value
-    fabricCanvas.value.freeDrawingBrush.width = 4
+    // Apply the selected pencil width rather than a hardcoded value — the
+    // drawing-mode toggle (setAnnotationDrawingMode) doesn't reset the brush,
+    // so a hardcoded width here stuck every freehand stroke at that size.
+    _resetPencil()
 
     fabric.Group.prototype._controlsVisibility = {
       tl: false,
