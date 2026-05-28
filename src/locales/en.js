@@ -1142,6 +1142,10 @@ export default {
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',
     apply_task_type_change: 'This will set the last revision for the given task type on all entities.',
+    update_versions_title: 'Update selected versions',
+    update_to_latest_version: 'Update to latest version',
+    update_to_latest_version_help:
+      'Set the latest revision for each entity, keeping its current task type.',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',

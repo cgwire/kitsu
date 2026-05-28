@@ -216,6 +216,7 @@
           @show-add-entities="toggleAddEntities"
           @preview-changed="onPreviewChanged"
           @task-type-changed="onTaskTypeChanged"
+          @update-to-latest-version="onUpdateToLatestVersion"
           @playlist-deleted="goFirstPlaylist"
           @remove-entity="removeEntity"
           @order-change="onOrderChange"
@@ -823,6 +824,7 @@ export default {
       'changePlaylistOrder',
       'changePlaylistPreview',
       'changePlaylistType',
+      'updatePlaylistToLatestVersion',
       'displayMoreAssets',
       'displayMoreShots',
       'editPlaylist',
@@ -1554,6 +1556,20 @@ export default {
         await this.changePlaylistType({
           playlist: this.currentPlaylist,
           taskTypeId
+        })
+        this.rebuildCurrentEntities()
+      } catch (err) {
+        console.error(err)
+      } finally {
+        this.clearSilent()
+      }
+    },
+
+    async onUpdateToLatestVersion() {
+      this.setSilent('onUpdateToLatestVersion')
+      try {
+        await this.updatePlaylistToLatestVersion({
+          playlist: this.currentPlaylist
         })
         this.rebuildCurrentEntities()
       } catch (err) {

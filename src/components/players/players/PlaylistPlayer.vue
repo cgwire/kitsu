@@ -836,6 +836,7 @@
       :active="modals.taskType"
       :task-type-list="entityTaskTypes"
       @confirm="confirmChangeTaskType"
+      @update-latest="confirmUpdateToLatestVersion"
       @cancel="hideTaskTypeModal"
     />
 
@@ -989,7 +990,8 @@ const emit = defineEmits([
   'remove-entity',
   'save-clicked',
   'show-add-entities',
-  'task-type-changed'
+  'task-type-changed',
+  'update-to-latest-version'
 ])
 
 // State
@@ -1725,6 +1727,11 @@ const hideTaskTypeModal = () => {
 
 const confirmChangeTaskType = taskTypeId => {
   emit('task-type-changed', taskTypeId)
+  modals.value.taskType = false
+}
+
+const confirmUpdateToLatestVersion = () => {
+  emit('update-to-latest-version')
   modals.value.taskType = false
 }
 
