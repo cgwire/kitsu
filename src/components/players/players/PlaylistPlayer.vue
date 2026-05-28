@@ -3743,11 +3743,7 @@ const onKeyDown = event => {
     event.preventDefault()
     event.stopPropagation()
     onPlayNextEntityClicked()
-  } else if (
-    (event.ctrlKey || event.metaKey) &&
-    event.altKey &&
-    event.keyCode === 68
-  ) {
+  } else if (event.keyCode === 68) {
     onAnnotateClicked()
   } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
     event.preventDefault()

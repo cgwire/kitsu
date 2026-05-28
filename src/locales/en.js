@@ -611,7 +611,19 @@ export default {
     undo: 'Undo',
     playlist_navigation: 'Playlist navigation',
     remove_annotation: 'Remove annotation',
-    shortcuts: 'Shortcuts'
+    shortcuts: 'Shortcuts',
+    player: 'Player',
+    play_pause: 'Play / pause',
+    play_pause_typing: 'Play / pause (even while typing a comment)',
+    previous_frame: 'Previous frame',
+    next_frame: 'Next frame',
+    previous_annotation: 'Previous annotation',
+    next_annotation: 'Next annotation',
+    copy_annotation: 'Copy selected annotation',
+    paste_annotation: 'Paste annotation',
+    pan_image: 'Pan the image',
+    move_entity_left: 'Move selected entity to the left',
+    move_entity_right: 'Move selected entity to the right'
   },
 
   intro: {

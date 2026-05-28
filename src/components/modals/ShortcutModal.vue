@@ -70,6 +70,17 @@ const shortcutGroups = computed(() => [
     ]
   },
   {
+    label: 'keyboard.player',
+    shortcuts: [
+      { keys: ['Space'], text: t('keyboard.play_pause') },
+      { keys: ['Alt', 'p'], text: t('keyboard.play_pause_typing') },
+      { keys: ['←'], text: t('keyboard.previous_frame') },
+      { keys: ['→'], text: t('keyboard.next_frame') },
+      { keys: [','], text: t('keyboard.previous_annotation') },
+      { keys: ['.'], text: t('keyboard.next_annotation') }
+    ]
+  },
+  {
     label: 'keyboard.playlist_navigation',
     shortcuts: [
       { keys: ['Alt', 'j'], text: t('keyboard.altj') },
@@ -78,7 +89,21 @@ const shortcutGroups = computed(() => [
       { keys: ['End'], text: t('keyboard.plend') },
       { keys: ['Alt', '→'], text: t('keyboard.plaltright') },
       { keys: ['Alt', '←'], text: t('keyboard.plaltleft') },
-      { keys: ['Alt', 'o'], text: t('keyboard.plalto') }
+      { keys: ['Alt', 'o'], text: t('keyboard.plalto') },
+      { keys: ['Ctrl', 'Shift', '←'], text: t('keyboard.move_entity_left') },
+      { keys: ['Ctrl', 'Shift', '→'], text: t('keyboard.move_entity_right') }
+    ]
+  },
+  {
+    label: 'keyboard.annotations',
+    shortcuts: [
+      { keys: ['d'], text: t('keyboard.draw') },
+      { keys: ['Ctrl', 'z'], text: t('keyboard.undo') },
+      { keys: ['Alt', 'r'], text: t('keyboard.redo') },
+      { keys: ['Ctrl', 'c'], text: t('keyboard.copy_annotation') },
+      { keys: ['Ctrl', 'v'], text: t('keyboard.paste_annotation') },
+      { keys: ['Suppr'], text: t('keyboard.remove_annotation') },
+      { keys: ['Alt', 'Mouse Drag'], text: t('keyboard.pan_image') }
     ]
   },
   {
@@ -96,15 +121,6 @@ const shortcutGroups = computed(() => [
         keys: ['Alt', 'Mouse Left Click', 'Drag Vertical'],
         text: t('keyboard.change_fov')
       }
-    ]
-  },
-  {
-    label: 'keyboard.annotations',
-    shortcuts: [
-      { keys: ['Ctrl', 'z'], text: t('keyboard.undo') },
-      { keys: ['Alt', 'r'], text: t('keyboard.redo') },
-      { keys: ['Alt', 'd'], text: t('keyboard.draw') },
-      { keys: ['Suppr'], text: t('keyboard.remove_annotation') }
     ]
   }
 ])
