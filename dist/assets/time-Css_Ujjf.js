@@ -1,0 +1,2 @@
+import{$ as e,Wr as t,aa as n,ai as r,qr as i,vt as a}from"./index-BrcQKHtP.js";i();var o=n(a(),1);function s(){let n=t(),i=r(()=>n.getters.user?.timezone||o.default.tz.guess()),a=r(()=>(0,o.default)().toDate()),s=r(()=>(0,o.default)().add(1,`day`).toDate());function c(t){return e(t,i.value)}return{timezone:i,today:a,tomorrow:s,formatDate:c}}export{s as t};
+//# sourceMappingURL=time-Css_Ujjf.js.map

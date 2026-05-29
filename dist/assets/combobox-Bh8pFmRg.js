@@ -1,0 +1,2 @@
+import{Gi as e,qr as t}from"./index-BrcQKHtP.js";t();var n=t=>{let n=e(!1);return{showList:n,toggle:()=>{n.value=!n.value},select:e=>{t(`update:modelValue`,e.id),n.value=!1}}};export{n as t};
+//# sourceMappingURL=combobox-Bh8pFmRg.js.map

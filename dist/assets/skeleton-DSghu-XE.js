@@ -1,0 +1,2 @@
+import{Gi as e,Ti as t,ai as n,qr as r,wi as i}from"./index-BrcQKHtP.js";r();var a=150,o=400,s=300,c=350,l=150,u=r=>{let u=n(()=>(r.value-1)*a+o+s),d=n(()=>u.value+c+l),f=e(0),p=null;return t(()=>{p=setInterval(()=>{f.value++},d.value)}),i(()=>{p&&clearInterval(p)}),{cycle:f,fadeoutDelayMs:u}};export{u as t};
+//# sourceMappingURL=skeleton-DSghu-XE.js.map

@@ -1,0 +1,2 @@
+import{Cn as e,Di as t,Pr as n,Yi as r,qr as i,si as a,sn as o}from"./index-BrcQKHtP.js";i();var s=o({__name:`BooleanRep`,props:{value:{default:!1,type:Boolean}},setup(i){return(o,s)=>i.value?(t(),a(r(n),{key:0,class:`true`,size:22,"stroke-width":3,title:o.$t(`main.yes`)},null,8,[`title`])):(t(),a(r(e),{key:1,class:`false`,size:16,"stroke-width":3,title:o.$t(`main.no`)},null,8,[`title`]))}},[[`__scopeId`,`data-v-07c5b4af`]]);export{s as t};
+//# sourceMappingURL=BooleanRep-B6khUk7b.js.map
