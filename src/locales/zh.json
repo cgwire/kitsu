@@ -133,7 +133,20 @@
       "edited_by": "编辑：{name｝",
       "add_attachment_to_reply": "在回复中添加附件",
       "add_frame_to_comment": "将当前帧添加到注释中",
-      "add_emoji": "添加表情符号"
+      "add_emoji": "添加表情符号",
+      "for_client_badge": "客户可见的文本",
+      "for_client_off": "文本对客户不可见。点击使文本对客户可见",
+      "for_client_on": "文本对客户可见。点击使文本对客户不可见",
+      "move_modal": {
+        "error": "无法移动该评论。请联系我们的支持团队。",
+        "intro": "选择同一实体下的一个任务，将此评论移动到该任务。系统会在目标任务上发送通知，如同发布新评论一样。",
+        "no_target": "该实体没有其他可用任务。",
+        "target_label": "目标任务",
+        "title": "将评论移动到另一个任务"
+      },
+      "move_to_task": "移动到",
+      "title": "评论",
+      "toggle_for_client": "客户可见性"
     },
     "custom_actions": {
       "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
@@ -292,7 +305,19 @@
       "object_viewer": "对象浏览器",
       "rotate_hdr": "旋转环境地图",
       "change_fov": "更改焦距",
-      "plalto": "在对比模式下，在 0% 和 100% 不透明度之间切换"
+      "plalto": "在对比模式下，在 0% 和 100% 不透明度之间切换",
+      "copy_annotation": "复制所选注解",
+      "move_entity_left": "将所选实体向左移动",
+      "move_entity_right": "将所选实体向右移动",
+      "next_annotation": "下一个注解",
+      "next_frame": "下一帧",
+      "pan_image": "平移图像",
+      "paste_annotation": "粘贴注解",
+      "play_pause": "播放 / 暂停",
+      "play_pause_typing": "播放 / 暂停（即使在输入评论时）",
+      "player": "播放器",
+      "previous_annotation": "上一个注解",
+      "previous_frame": "上一帧"
     },
     "login": {
       "back_to_login": "返回登录页面",
@@ -553,7 +578,16 @@
       "shared_by": "由 {name} 共享",
       "continue": "继续",
       "developer_documentation": "开发人员文档",
-      "feedback": "路线图/反馈意见"
+      "feedback": "路线图/反馈意见",
+      "annotations": {
+        "download_pdf": "将注解下载为 PDF",
+        "download_zip": "将注解下载为 ZIP"
+      },
+      "attach_snapshots_with_label": "附加带有标签的快照",
+      "disable_desktop_notifications": "禁用桌面通知",
+      "enable_desktop_notifications": "启用桌面通知",
+      "export": "导出",
+      "unknown": "未知"
     },
     "menu": {
       "assign_tasks": "分配任务",
@@ -585,7 +619,8 @@
       "title": "消息提要",
       "hide_stats": "隐藏统计",
       "news": "消息",
-      "show_stats": "显示统计数据"
+      "show_stats": "显示统计数据",
+      "no_news_hint": "尝试放宽筛选条件，或稍后再来查看。"
     },
     "not_found": {
       "text": "您所点击的链接有问题，我们建议您返回首页。",
@@ -626,7 +661,22 @@
       "watching": "观看",
       "only_playlists_ready": "只准备播放列表",
       "playlist_is_ready": "播放列表已准备就绪",
-      "playlist_ready_text": "新的播放列表已准备就绪，可供审核："
+      "playlist_ready_text": "新的播放列表已准备就绪，可供审核：",
+      "desktop": {
+        "assignation_title": "{name} 给您分配了任务",
+        "banner_blocked_text": "桌面通知已被阻止。请在浏览器的网站设置中允许通知以启用此功能。",
+        "banner_dismiss": "暂不",
+        "banner_enable": "启用",
+        "banner_text": "在每次发生新事件时获取桌面通知。",
+        "comment_title": "{name} 发表了评论",
+        "mention_title": "{name} 提到了您",
+        "playlist_ready_title": "播放列表 {name} 已准备就绪",
+        "publish_title": "{name} 发布了一个预览",
+        "reply_title": "{name} 进行了回复",
+        "test_notification_body": "您现在将收到这样的新事件通知。",
+        "test_notification_title": "Kitsu 通知已启用"
+      },
+      "to_status": "至"
     },
     "people": {
       "active": "活动",
@@ -664,7 +714,8 @@
         "studio": "工作室",
         "daily_salary": "每日费率",
         "position": "职位",
-        "seniority": "资历"
+        "seniority": "资历",
+        "created_at": "创建日期"
       },
       "list": {
         "name": "名称",
@@ -721,7 +772,13 @@
         "mid": "中层",
         "senior": "高级"
       },
-      "email_domain_error": "不允许使用此电子邮件域。"
+      "email_domain_error": "不允许使用此电子邮件域。",
+      "archive_guest_confirm": "归档此访客？他们的评论将保留，但不再出现在活跃访客列表中。",
+      "archive_guest_error": "无法归档此访客。请重试。",
+      "archived_guests": "已归档的访客",
+      "guests": "访客 | 访客",
+      "restore_guest_error": "无法恢复此访客。请重试。",
+      "seats_remaining": "无剩余席位 | 剩余 {count} 个席位 | 剩余 {count} 个席位"
     },
     "playlists": {
       "add_assets": "添加资产",
@@ -831,7 +888,10 @@
         "select_background": "选择背景",
         "toggle_environment_skybox": "显示/隐藏天空盒背景",
         "toggle_wireframe": "启用/禁用线框渲染",
-        "open_link": "打开链接"
+        "open_link": "打开链接",
+        "annotation_huge": "超大",
+        "annotation_shape": "形状",
+        "annotation_tiny": "极小"
       },
       "download_csv": "下载 .csv",
       "filter_task_type": "按任务类型过滤",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "没有客户需要通知。",
       "notify_clients_success": "通知已成功发送。",
       "unmute": "取消静音",
-      "volume_level": "量：{level}%"
+      "volume_level": "量：{level}%",
+      "add_edits": "添加编辑",
+      "add_episodes": "添加剧集",
+      "share": "共享",
+      "share_modal": {
+        "active_links": "活跃链接",
+        "add_link": "添加新链接",
+        "can_comment": "允许评论",
+        "comments_disabled": "评论已禁用",
+        "comments_enabled": "评论已启用",
+        "copy": "复制链接",
+        "create_new": "创建新链接",
+        "description": "生成一个链接，与外部审核者共享此播放列表。任何持有该链接的人都可以查看播放列表并发表评论，无需 Kitsu 账户。您可以设置过期日期并随时撤销访问权限。",
+        "error": "创建共享链接时发生错误。",
+        "expiration": "过期日期（可选）",
+        "expires": "过期",
+        "generate": "生成新链接",
+        "invite": "通过电子邮件邀请",
+        "invite_add_email": "添加此电子邮件",
+        "invite_error": "发送邀请时发生错误。",
+        "invite_invalid_email": "该电子邮件地址无效。",
+        "invite_message_label": "自定义消息（可选）",
+        "invite_message_placeholder": "一条将添加到电子邮件中的简短备注",
+        "invite_placeholder": "输入电子邮件并按回车键，或选择一个客户",
+        "invite_recipients": "收件人",
+        "invite_send": "发送邀请",
+        "invite_sent": "已发送 {count} 个邀请 | 已发送 {count} 个邀请",
+        "no_expiration": "无过期时间",
+        "no_links": "尚无共享链接。在下方创建一个，以便外部审核者访问。",
+        "open": "在新标签页中打开链接",
+        "revoke": "撤销链接",
+        "revoke_confirm": "撤销此链接？任何正在使用它的人将失去访问权限。",
+        "title": "共享播放列表"
+      },
+      "update_to_latest_version": "更新到最新版本",
+      "update_to_latest_version_help": "为每个实体设置最新的修订版，并保持其当前的任务类型。",
+      "update_versions_title": "更新所选版本"
     },
     "productions": {
       "current": "所选制作",
@@ -900,7 +996,10 @@
         "boolean": "复选框",
         "number": "数量",
         "string": "文本",
-        "tags": "标签列表"
+        "tags": "标签列表",
+        "applies_to_all_projects": "此列将添加到列表中的每个项目。每个项目在列表视图中都可以有自己的值。",
+        "delete_list_column_text": "这将从所有项目中移除列“{name}”，包括已存储的值。是否继续？",
+        "target_project": "项目"
       },
       "status": {
         "closed": "已关闭",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "开始和结束日期",
         "shots_to_import": "要导入的镜头",
         "select_edit_task_type": "选择编辑任务类型",
-        "select_edit_task_type_description": "选择编辑任务类型描述"
+        "select_edit_task_type_description": "选择编辑任务类型描述",
+        "choose_template": "应用制作模板（可选）",
+        "choose_template_description": "选择一个模板以预填充任务类型、任务状态、资产类型、元数据和设置。留空则从头开始配置。",
+        "no_template": "无模板"
       },
       "style": {
         "2d": "2D动画",
@@ -1010,7 +1112,12 @@
         "title": "更换头像",
         "error_upload": "上传图片时出错",
         "updating": "更新...",
-        "removing": "移除..."
+        "removing": "移除...",
+        "drop_or_click": "点击或将照片拖放到此处",
+        "intro": "选择一张照片，然后拖动并缩放以调整取景。",
+        "preview": "预览",
+        "preview_hint": "拖动以重新定位，使用滑块进行缩放。",
+        "replace": "选择另一张照片"
       },
       "change_password": {
         "button": "更改密码",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "验证并禁用动态验证码",
           "button_validate": "验证并启用动态验证码",
           "error_enable": "动态验证码启用错误",
-          "error_disable": "动态验证码禁用错误"
+          "error_disable": "动态验证码禁用错误",
+          "description": "使用 TOTP 应用，如 Google Authenticator、Authy 或 1Password。",
+          "name": "验证器应用"
         },
         "email_otp": {
           "button_enable": "启用电子邮件验证",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "验证并启用电子邮件验证",
           "button_validate": "验证并禁用电子邮件验证",
           "error_enable": "启用电子邮件验证错误",
-          "error_disable": "禁用电子邮件验证错误"
+          "error_disable": "禁用电子邮件验证错误",
+          "description": "每次登录时通过电子邮件接收一次性验证码。",
+          "name": "电子邮件"
         },
         "recovery_codes": {
           "title": "恢复代码",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "已注册的 FIDO 设备：",
           "button_register": "注册新的 FIDO 设备",
           "error_register": "注册 FIDO 设备时发生错误。",
-          "error_unregister": "取消注册 FIDO 设备时发生错误。"
+          "error_unregister": "取消注册 FIDO 设备时发生错误。",
+          "description": "使用硬件密钥（YubiKey）或平台验证器（Touch ID、Windows Hello）。",
+          "name": "安全密钥"
         },
         "enabled": "启用双因素验证",
         "mandatory": "贵机构需要双因素身份验证。请启用至少一种方法以继续。",
-        "description": "双因素身份验证（<abbr title=\"双因素身份验证\">2FA</abbr>）为您的账户增加了一层额外的安全保护。启用后，每次登录时除了密码外，您还需要提供第二种验证方式。您可以使用验证器应用程序（<abbr title=\"基于时间的一次性密码\">TOTP</abbr>）、电子邮件验证（<abbr title=\"一次性密码\">OTP</abbr>）或硬件安全密钥（<abbr title=\"快速身份在线验证\">FIDO</abbr>）作为第二个因素。"
-      }
+        "description": "双因素身份验证（<abbr title=\"双因素身份验证\">2FA</abbr>）为您的账户增加了一层额外的安全保护。启用后，每次登录时除了密码外，您还需要提供第二种验证方式。您可以使用验证器应用程序（<abbr title=\"基于时间的一次性密码\">TOTP</abbr>）、电子邮件验证（<abbr title=\"一次性密码\">OTP</abbr>）或硬件安全密钥（<abbr title=\"快速身份在线验证\">FIDO</abbr>）作为第二个因素。",
+        "status_disabled": "已禁用",
+        "status_enabled": "已启用"
+      },
+      "notifications_title": "通知"
     },
     "settings": {
       "change_logo": "更改Logo",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "该列表当前为空。 这意味着用户可以使用主设置中的所有数据。 添加一些条目以限制此产品的选择。",
-        "empty_automation_list": "该生产没有自动化装置。"
+        "empty_automation_list": "该生产没有自动化装置。",
+        "empty_backgrounds": "未链接任何背景。从上方列表中选择一个以添加。",
+        "empty_board": "请先添加任务状态，以配置它们在看板上的可见性。",
+        "empty_metadata": "尚未为此实体类型定义元数据描述符。"
       },
       "save": {
         "button": "保存设置",
@@ -1098,7 +1217,8 @@
       "remove_logo": "移除工作室徽标",
       "available_items": "现有项目",
       "import_from_production": "从其他产品导入",
-      "no_more_available_items": "没有更多项目可添加了。"
+      "no_more_available_items": "没有更多项目可添加了。",
+      "preferences_title": "偏好设置"
     },
     "task_status": {
       "create_error": "保存此任务状态时发生错误。 您确定没有名称相似的任务状态吗？",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "您确定要永久删除所选任务吗？所有相关评论和预览也将被删除。请在下面输入 \"删除 \"确认。",
       "delete_for_selection_hard_lock_text": "删除",
       "hookup_playlist": "生成约会播放列表",
-      "assignation_error": "将此人分配到所选任务时出现问题。并非所有任务都已分配。"
+      "assignation_error": "将此人分配到所选任务时出现问题。并非所有任务都已分配。",
+      "retake_filter_none": "无返修",
+      "retake_filter_with_retakes": "有返修"
     },
     "timesheets": {
       "detail_level": "细节层次",
@@ -1541,7 +1663,8 @@
       "unit": "单位",
       "confirm_day_offs": "将这些天设置为休息日将清除受影响天数的所有时间记录。您确定要继续吗？",
       "confirm_unset_day_offs": "目前的休息日是从 {start} 到 {end}。您确定要删除这段时间吗？",
-      "off": "关闭"
+      "off": "关闭",
+      "day_off_no_logging": "休息日不记录时间"
     },
     "wrong_browser": {
       "title": "Kitsu不支持您的浏览器",
@@ -1565,6 +1688,12 @@
         "title": "预览文件",
         "mark_broken": "标记为已损坏",
         "explanation": "本页列出处于中间状态的所有预览文件：正在处理或已损坏。它显示有多少预览文件正在处理或哪些文件未能完成。"
+      },
+      "audit": {
+        "title": "活动日志"
+      },
+      "logins": {
+        "title": "登录日志"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "编辑",
       "history": "历史",
       "refresh": "刷新",
-      "restore": "恢复"
+      "restore": "恢复",
+      "archive": "归档"
+    },
+    "project_templates": {
+      "add_metadata": "添加元数据",
+      "apply": "应用模板",
+      "apply_confirm": "这将把该模板的任务类型、状态、资产类型、自动化和元数据描述符添加到此制作中。现有设置将被保留。是否继续？",
+      "apply_to": "应用模板",
+      "apply_to_description": "将模板的配置添加到此制作中。现有设置将被保留。",
+      "click_name_to_edit": "点击模板名称以编辑其配置。",
+      "create_error": "保存此模板时发生错误。您确定没有名称相似的模板吗？",
+      "delete_error": "删除此模板时发生错误。",
+      "delete_text": "您确定要从您的数据库移除 {name} 吗？",
+      "duplicate_name": "已存在使用此名称的制作模板。",
+      "edit_title": "编辑制作模板",
+      "empty": "尚无制作模板。创建一个以快速配置新制作。",
+      "fields": {
+        "description": "说明",
+        "entity_type": "实体类型",
+        "name": "名称"
+      },
+      "fps_error": "FPS 必须是 1 到 200 之间的整数。",
+      "from_production": "从制作创建",
+      "name_required": "需要填写名称。",
+      "new_project_template": "添加制作模板",
+      "number": "制作模板 | 制作模板",
+      "ratio_error": "宽高比必须遵循 x:y 格式（例如 16:9）。",
+      "resolution_error": "分辨率必须遵循 WxH 格式（例如 1920x1080）。",
+      "select": "选择一个模板",
+      "tabs": {
+        "asset_types": "资产类型",
+        "metadata_descriptors": "元数据",
+        "status_automations": "状态自动化",
+        "task_statuses": "任务状态",
+        "task_types": "任务类型"
+      },
+      "title": "模板"
+    },
+    "share": {
+      "comment_placeholder": "留下评论...",
+      "comments_disabled": "此链接已禁用评论。",
+      "download_preview": "下载预览",
+      "enter_review": "进入审核",
+      "error_text": "此共享链接无效、已过期或已被撤销。",
+      "error_title": "链接不可用",
+      "guest_error": "我们无法让您登录。请检查您的网络连接并重试。如果问题仍然存在，请联系支持团队。",
+      "identity_description": "输入您的姓名以加入审核会话。您将能够查看播放列表并留下评论。",
+      "identity_required": "您需要先输入姓名，然后才能发布。",
+      "kitsu_homepage": "关于 Kitsu",
+      "logout": "离开审核会话",
+      "name_placeholder": "张三",
+      "no_comments_yet": "尚无评论。",
+      "no_preview": "无预览",
+      "no_status_available": "此项目未配置任何任务状态。",
+      "player_placeholder": "播放器将显示在此处。",
+      "post_comment_error": "无法发布评论。请重新加载页面并重试。",
+      "review_session": "审核会话",
+      "your_name": "您的姓名"
     }
   }
 }

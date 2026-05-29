@@ -562,6 +562,8 @@ export const useAnnotation = ({
       top: obj.top * scale + offsetY,
       stroke: obj.stroke,
       strokeWidth: obj.strokeWidth,
+      strokeLineCap: 'round',
+      strokeLineJoin: 'round',
       radius: obj.radius,
       width: obj.width,
       height: obj.height,
@@ -629,6 +631,8 @@ export const useAnnotation = ({
         psstroke = await deserializePSBrush(obj)
         psstroke.set('id', obj.id)
         psstroke.set('strokeWidth', obj.strokeWidth)
+        psstroke.set('strokeLineCap', 'round')
+        psstroke.set('strokeLineJoin', 'round')
         psstroke.set('canvasWidth', canvasWidth)
         psstroke.set('canvasHeight', canvasHeight)
         psstroke.set('scaleX', obj.scaleX * scale)
@@ -769,6 +773,10 @@ export const useAnnotation = ({
       }
       const brush = new PSBrush(fabricCanvas.value)
       brush.pressureManager.fallback = 0.5
+      // PSBrush drops BaseBrush's round cap/join defaults (its initialize
+      // doesn't call super), so restore them or strokes get flat ends.
+      brush.strokeLineCap = 'round'
+      brush.strokeLineJoin = 'round'
       lockBrushToFirstPointer(brush)
       fabricCanvas.value.freeDrawingBrush = brush
       _resetColor()

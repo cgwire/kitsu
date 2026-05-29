@@ -836,6 +836,7 @@
       :active="modals.taskType"
       :task-type-list="entityTaskTypes"
       @confirm="confirmChangeTaskType"
+      @update-latest="confirmUpdateToLatestVersion"
       @cancel="hideTaskTypeModal"
     />
 
@@ -989,7 +990,8 @@ const emit = defineEmits([
   'remove-entity',
   'save-clicked',
   'show-add-entities',
-  'task-type-changed'
+  'task-type-changed',
+  'update-to-latest-version'
 ])
 
 // State
@@ -1602,6 +1604,7 @@ const previewRoom = usePreviewRoom({
   updateProgressBar: f => updateProgressBar(f),
   onWindowResize: () => onWindowResize(),
   findEntity: info => findEntity(info),
+  findEntityIndex: info => findEntityIndex(info),
   changePreviewFile: (entity, previewFile) =>
     changePreviewFile(entity, previewFile),
   setRawPlayerFrame: f => rawPlayer.value?.setCurrentFrame(f),
@@ -1724,6 +1727,11 @@ const hideTaskTypeModal = () => {
 
 const confirmChangeTaskType = taskTypeId => {
   emit('task-type-changed', taskTypeId)
+  modals.value.taskType = false
+}
+
+const confirmUpdateToLatestVersion = () => {
+  emit('update-to-latest-version')
   modals.value.taskType = false
 }
 
@@ -3735,11 +3743,7 @@ const onKeyDown = event => {
     event.preventDefault()
     event.stopPropagation()
     onPlayNextEntityClicked()
-  } else if (
-    (event.ctrlKey || event.metaKey) &&
-    event.altKey &&
-    event.keyCode === 68
-  ) {
+  } else if (event.keyCode === 68) {
     onAnnotateClicked()
   } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
     event.preventDefault()
@@ -3975,10 +3979,27 @@ watch(
   { deep: true }
 )
 
+// Preserve the current entity across an entities rebuild. A task-type
+// change rebuilds the list with the same entities (the parent does it via
+// a transient empty array), which would otherwise reset the player to the
+// first entity — and in a review room that reset is broadcast, yanking
+// every other screen back to the first element. Remember the last real
+// entity and re-select it when it survives the rebuild; only the genuine
+// case of a different playlist (entity gone) falls back to the first one.
+let entityIdBeforeRebuild = null
 watch(
   () => props.entities,
-  () => {
+  newEntities => {
+    const currentId = currentEntity.value?.id
+    if (currentId) entityIdBeforeRebuild = currentId
     resetPlaylist()
+    if (newEntities?.length) {
+      const index = newEntities.findIndex(
+        entity => entity.id === entityIdBeforeRebuild
+      )
+      if (index > 0) playEntity(index)
+      entityIdBeforeRebuild = null
+    }
   }
 )
 
@@ -3995,6 +4016,11 @@ watch(
 watch(
   () => props.playlist,
   (newPlaylist, oldPlaylist) => {
+    // A same-id refresh (e.g. a playlist:update triggered by a task-type
+    // change) must not tear down the live room: leaving and rejoining
+    // desyncs the other screens. Only churn the room when actually
+    // navigating to a different playlist.
+    if (oldPlaylist && oldPlaylist.id === newPlaylist?.id) return
     if (oldPlaylist) {
       if (room.value?.people?.includes(user.value?.id)) leaveRoom()
       closeRoom(oldPlaylist.id)

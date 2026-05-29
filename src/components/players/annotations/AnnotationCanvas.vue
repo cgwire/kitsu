@@ -125,6 +125,10 @@ const createFabric = () => {
     brush.color = '#000'
     brush.disableTouch = true
     brush.pressureManager.fallback = 0.5
+    // PSBrush overrides BaseBrush.initialize without calling super, so the
+    // round cap/join defaults are lost and strokes render with flat ends.
+    brush.strokeLineCap = 'round'
+    brush.strokeLineJoin = 'round'
     lockBrushToFirstPointer(brush)
     canvas.freeDrawingBrush = brush
   }

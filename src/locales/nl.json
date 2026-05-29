@@ -133,7 +133,20 @@
       "edited_by": "Bewerkt door {name}",
       "add_attachment_to_reply": "Bijlage toevoegen aan antwoord",
       "add_frame_to_comment": "Huidig frame toevoegen aan commentaar",
-      "add_emoji": "Een emoji toevoegen"
+      "add_emoji": "Een emoji toevoegen",
+      "for_client_badge": "Tekst zichtbaar voor klant",
+      "for_client_off": "Tekst niet zichtbaar voor klanten. Klik om de tekst zichtbaar te maken voor klanten",
+      "for_client_on": "Tekst zichtbaar voor klanten. Klik om de tekst onzichtbaar te maken voor klanten",
+      "move_modal": {
+        "error": "Kon de opmerking niet verplaatsen. Neem contact op met ons support team.",
+        "intro": "Kies een taak van dezelfde entiteit om deze opmerking naartoe te verplaatsen. Op de doeltaak worden meldingen verstuurd zoals voor een nieuwe opmerking.",
+        "no_target": "Er is geen andere taak beschikbaar op deze entiteit.",
+        "target_label": "Doeltaak",
+        "title": "Opmerking naar een andere taak verplaatsen"
+      },
+      "move_to_task": "Verplaats naar",
+      "title": "Opmerkingen",
+      "toggle_for_client": "Zichtbaarheid voor klant"
     },
     "custom_actions": {
       "create_error": "Er is een fout opgetreden bij het opslaan van de zelfbepaalde actie. Weet je zeker dat er geen andere actie is met dezelfde naam?",
@@ -292,7 +305,19 @@
       "object_viewer": "Objecten Viewer",
       "rotate_hdr": "Omgevingskaart draaien",
       "change_fov": "Verander brandpuntsafstand",
-      "plalto": "Schakelen tussen 0% en 100% ondoorzichtigheid in vergelijkingsmodus"
+      "plalto": "Schakelen tussen 0% en 100% ondoorzichtigheid in vergelijkingsmodus",
+      "copy_annotation": "Geselecteerde annotatie kopiëren",
+      "move_entity_left": "Geselecteerde entiteit naar links verplaatsen",
+      "move_entity_right": "Geselecteerde entiteit naar rechts verplaatsen",
+      "next_annotation": "Volgende annotatie",
+      "next_frame": "Volgend frame",
+      "pan_image": "De afbeelding pannen",
+      "paste_annotation": "Annotatie plakken",
+      "play_pause": "Afspelen / pauzeren",
+      "play_pause_typing": "Afspelen / pauzeren (ook tijdens het typen van een opmerking)",
+      "player": "Player",
+      "previous_annotation": "Vorige annotatie",
+      "previous_frame": "Vorig frame"
     },
     "login": {
       "back_to_login": "Ga terug naar de log-in pagina",
@@ -553,7 +578,16 @@
       "shared_by": "Gedeeld door {name}",
       "continue": "Ga verder",
       "developer_documentation": "Documentatie voor ontwikkelaars",
-      "feedback": "Stappenplan / Feedback"
+      "feedback": "Stappenplan / Feedback",
+      "annotations": {
+        "download_pdf": "Annotaties downloaden als PDF",
+        "download_zip": "Annotaties downloaden als ZIP"
+      },
+      "attach_snapshots_with_label": "Snapshots toevoegen met ingebrand label",
+      "disable_desktop_notifications": "Desktopmeldingen uitschakelen",
+      "enable_desktop_notifications": "Desktopmeldingen inschakelen",
+      "export": "Exporteren",
+      "unknown": "Onbekend"
     },
     "menu": {
       "assign_tasks": "Taak toewijzen",
@@ -585,7 +619,8 @@
       "title": "Nieuwsfeed",
       "hide_stats": "Verberg statistieken",
       "news": "nieuws",
-      "show_stats": "Toon statistieken"
+      "show_stats": "Toon statistieken",
+      "no_news_hint": "Probeer de filters te verruimen of kom later terug."
     },
     "not_found": {
       "text": "Er is iets fout gegaan met de link waar je op geklikt hebt, we raden je aan om terug te gaan naar de thuis pagina.",
@@ -626,7 +661,22 @@
       "watching": "kijken naar",
       "only_playlists_ready": "Alleen kant-en-klare afspeellijsten",
       "playlist_is_ready": "Afspeellijst is klaar",
-      "playlist_ready_text": "Een nieuwe afspeellijst is klaar om bekeken te worden:"
+      "playlist_ready_text": "Een nieuwe afspeellijst is klaar om bekeken te worden:",
+      "desktop": {
+        "assignation_title": "{name} heeft jou toegewezen",
+        "banner_blocked_text": "Desktopmeldingen zijn geblokkeerd. Sta ze toe in de site-instellingen van je browser om ze in te schakelen.",
+        "banner_dismiss": "Niet nu",
+        "banner_enable": "Inschakelen",
+        "banner_text": "Ontvang een desktopmelding voor elke nieuwe gebeurtenis.",
+        "comment_title": "{name} heeft gereageerd",
+        "mention_title": "{name} heeft jou genoemd",
+        "playlist_ready_title": "Afspeellijst {name} is klaar",
+        "publish_title": "{name} heeft een preview gepubliceerd",
+        "reply_title": "{name} heeft geantwoord",
+        "test_notification_body": "Je ontvangt vanaf nu meldingen zoals deze voor nieuwe gebeurtenissen.",
+        "test_notification_title": "Kitsu-meldingen ingeschakeld"
+      },
+      "to_status": "naar"
     },
     "people": {
       "active": "Actied",
@@ -664,7 +714,8 @@
         "studio": "Studio",
         "daily_salary": "Dagtarief",
         "position": "Positie",
-        "seniority": "Anciënniteit"
+        "seniority": "Anciënniteit",
+        "created_at": "Aanmaakdatum"
       },
       "list": {
         "name": "Naam",
@@ -721,7 +772,13 @@
         "mid": "Midden",
         "senior": "Senior"
       },
-      "email_domain_error": "Dit e-maildomein is niet toegestaan."
+      "email_domain_error": "Dit e-maildomein is niet toegestaan.",
+      "archive_guest_confirm": "Deze gast archiveren? Hun opmerkingen blijven staan, maar ze verschijnen niet langer in de lijst met actieve gasten.",
+      "archive_guest_error": "Kon deze gast niet archiveren. Probeer het opnieuw.",
+      "archived_guests": "Gearchiveerde gasten",
+      "guests": "gast | gasten",
+      "restore_guest_error": "Kon deze gast niet herstellen. Probeer het opnieuw.",
+      "seats_remaining": "geen plaatsen meer beschikbaar | {count} plaats beschikbaar | {count} plaatsen beschikbaar"
     },
     "playlists": {
       "add_assets": "Asset toevoegen",
@@ -831,7 +888,10 @@
         "select_background": "Selecteer een achtergrond",
         "toggle_environment_skybox": "Achtergrond skybox tonen/verbergen",
         "toggle_wireframe": "Draadframe rendering inschakelen/uitschakelen",
-        "open_link": "Open link"
+        "open_link": "Open link",
+        "annotation_huge": "Enorm",
+        "annotation_shape": "Vorm",
+        "annotation_tiny": "Heel klein"
       },
       "download_csv": "download .csv",
       "filter_task_type": "Gefilterd op taaktype",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "Er zijn geen klanten te verwittigen.",
       "notify_clients_success": "De melding is succesvol verzonden.",
       "unmute": "Unmute",
-      "volume_level": "Volume: {level}%"
+      "volume_level": "Volume: {level}%",
+      "add_edits": "Bewerkingen toevoegen",
+      "add_episodes": "Afleveringen toevoegen",
+      "share": "Delen",
+      "share_modal": {
+        "active_links": "Actieve links",
+        "add_link": "Een nieuwe link toevoegen",
+        "can_comment": "Opmerkingen toestaan",
+        "comments_disabled": "Opmerkingen uitgeschakeld",
+        "comments_enabled": "Opmerkingen ingeschakeld",
+        "copy": "Link kopiëren",
+        "create_new": "Een nieuwe link maken",
+        "description": "Genereer een link om deze afspeellijst te delen met externe reviewers. Iedereen met de link kan de afspeellijst bekijken en opmerkingen plaatsen zonder een Kitsu-account nodig te hebben. Je kunt een vervaldatum instellen en de toegang op elk moment intrekken.",
+        "error": "Er is een fout opgetreden tijdens het maken van de deellink.",
+        "expiration": "Vervaldatum (optioneel)",
+        "expires": "Verloopt",
+        "generate": "Een nieuwe link genereren",
+        "invite": "Uitnodigen per e-mail",
+        "invite_add_email": "Deze e-mail toevoegen",
+        "invite_error": "Er is een fout opgetreden tijdens het versturen van de uitnodigingen.",
+        "invite_invalid_email": "Dat e-mailadres is niet geldig.",
+        "invite_message_label": "Aangepast bericht (optioneel)",
+        "invite_message_placeholder": "Een korte notitie die aan de e-mail wordt toegevoegd",
+        "invite_placeholder": "Typ een e-mail en druk op Enter, of kies een klant",
+        "invite_recipients": "Ontvangers",
+        "invite_send": "Uitnodigingen versturen",
+        "invite_sent": "{count} uitnodiging verzonden | {count} uitnodigingen verzonden",
+        "no_expiration": "Geen vervaldatum",
+        "no_links": "Nog geen deellinks. Maak er hieronder een om externe reviewers toegang te geven.",
+        "open": "Link openen in een nieuw tabblad",
+        "revoke": "Link intrekken",
+        "revoke_confirm": "Deze link intrekken? Iedereen die hem gebruikt, verliest de toegang.",
+        "title": "Afspeellijst delen"
+      },
+      "update_to_latest_version": "Bijwerken naar nieuwste versie",
+      "update_to_latest_version_help": "Stel voor elke entiteit de nieuwste revisie in, met behoud van het huidige taaktype.",
+      "update_versions_title": "Geselecteerde versies bijwerken"
     },
     "productions": {
       "current": "Geselecteerde productie",
@@ -900,7 +996,10 @@
         "boolean": "Selectievakje",
         "number": "Aantal",
         "string": "Tekst",
-        "tags": "Lijst met tags"
+        "tags": "Lijst met tags",
+        "applies_to_all_projects": "Deze kolom wordt toegevoegd aan elk project in de lijst. Elk project kan zijn eigen waarde hebben in de lijstweergave.",
+        "delete_list_column_text": "Hiermee wordt de kolom “{name}” uit alle projecten verwijderd, inclusief opgeslagen waarden. Doorgaan?",
+        "target_project": "Project"
       },
       "status": {
         "closed": "Gesloten",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "Start- en einddatum",
         "shots_to_import": "te importeren opnamen",
         "select_edit_task_type": "Selecteer bewerk taak type",
-        "select_edit_task_type_description": "Deze taaktypen definiëren de bouwstappen van je edits."
+        "select_edit_task_type_description": "Deze taaktypen definiëren de bouwstappen van je edits.",
+        "choose_template": "Een productiesjabloon toepassen (optioneel)",
+        "choose_template_description": "Kies een sjabloon om taaktypes, taakstatussen, assettypes, metadata en instellingen vooraf in te vullen. Laat leeg om de productie vanaf nul te configureren.",
+        "no_template": "Geen sjabloon"
       },
       "style": {
         "2d": "2D-animatie",
@@ -1010,7 +1112,12 @@
         "title": "Wijzig avatar",
         "error_upload": "Er is een fout opgetreden bij het uploaden van de afbeelding.",
         "updating": "Bijwerken...",
-        "removing": "Verwijderen..."
+        "removing": "Verwijderen...",
+        "drop_or_click": "Klik of sleep hier een foto",
+        "intro": "Kies een foto, sleep en zoom vervolgens om hem uit te lijnen.",
+        "preview": "Preview",
+        "preview_hint": "Sleep om te verplaatsen, gebruik de schuifregelaar om te zoomen.",
+        "replace": "Een andere foto kiezen"
       },
       "change_password": {
         "button": "Wijzig wachtwoord",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "TOTP valideren en uitschakelen",
           "button_validate": "TOTP valideren en inschakelen",
           "error_enable": "Er is een fout opgetreden bij het inschakelen van TOTP.",
-          "error_disable": "Er is een fout opgetreden bij het uitschakelen van TOTP."
+          "error_disable": "Er is een fout opgetreden bij het uitschakelen van TOTP.",
+          "description": "Gebruik een TOTP-app zoals Google Authenticator, Authy of 1Password.",
+          "name": "Authenticator-app"
         },
         "email_otp": {
           "button_enable": "OTP via e-mail inschakelen",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "OTP valideren en uitschakelen via e-mail",
           "button_validate": "OTP valideren en inschakelen via e-mail",
           "error_enable": "Er is een fout opgetreden bij het inschakelen van OTP via e-mail.",
-          "error_disable": "Er is een fout opgetreden bij het uitschakelen van OTP via e-mail."
+          "error_disable": "Er is een fout opgetreden bij het uitschakelen van OTP via e-mail.",
+          "description": "Ontvang elke keer dat je inlogt een eenmalige code per e-mail.",
+          "name": "E-mail"
         },
         "recovery_codes": {
           "title": "Herstelcodes",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "Geregistreerde FIDO-apparaten",
           "button_register": "Nieuw FIDO-apparaat registreren",
           "error_register": "Er is een fout opgetreden tijdens het registreren van het FIDO-apparaat.",
-          "error_unregister": "Er is een fout opgetreden bij het ongedaan maken van de registratie van het FIDO-apparaat."
+          "error_unregister": "Er is een fout opgetreden bij het ongedaan maken van de registratie van het FIDO-apparaat.",
+          "description": "Gebruik een hardwaresleutel (YubiKey) of een platformauthenticator (Touch ID, Windows Hello).",
+          "name": "Beveiligingssleutel"
         },
         "enabled": "Authenticatie met twee factoren ingeschakeld",
         "mandatory": "Uw organisatie vereist twee-factor authenticatie. Schakel ten minste één methode in om door te gaan.",
-        "description": "Authenticatie met twee factoren (<abbr title=\"Authenticatie met twee factoren\">2FA</abbr>) voegt een extra beveiligingslaag toe aan je account. Als dit is ingeschakeld, moet je elke keer dat je inlogt een tweede vorm van verificatie opgeven naast je wachtwoord. Je kunt een authenticatie app (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailverificatie (<abbr title=\"One-Time Password\">OTP</abbr>) of een hardware beveiligingssleutel (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) gebruiken als je tweede factor."
-      }
+        "description": "Authenticatie met twee factoren (<abbr title=\"Authenticatie met twee factoren\">2FA</abbr>) voegt een extra beveiligingslaag toe aan je account. Als dit is ingeschakeld, moet je elke keer dat je inlogt een tweede vorm van verificatie opgeven naast je wachtwoord. Je kunt een authenticatie app (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailverificatie (<abbr title=\"One-Time Password\">OTP</abbr>) of een hardware beveiligingssleutel (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) gebruiken als je tweede factor.",
+        "status_disabled": "Uitgeschakeld",
+        "status_enabled": "Ingeschakeld"
+      },
+      "notifications_title": "Notificaties"
     },
     "settings": {
       "change_logo": "Wijzig logo",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "De lijst is momenteel leeg. Dit betekent dat alle gegevens uit de hoofdinstellingen beschikbaar zijn voor gebruikers. Voeg enkele gegevens toe om de keuzes voor deze productie te beperken.",
-        "empty_automation_list": "Er is geen automatisering ingesteld voor deze productie."
+        "empty_automation_list": "Er is geen automatisering ingesteld voor deze productie.",
+        "empty_backgrounds": "Geen achtergrond gekoppeld. Kies er een uit de lijst hierboven om hem toe te voegen.",
+        "empty_board": "Voeg eerst taakstatussen toe om hun zichtbaarheid op het bord te configureren.",
+        "empty_metadata": "Nog geen metadatadescriptor gedefinieerd voor dit entiteitstype."
       },
       "save": {
         "button": "Instellingen opslaan",
@@ -1098,7 +1217,8 @@
       "remove_logo": "Studiologo verwijderen",
       "available_items": "Beschikbare items",
       "import_from_production": "Importeren uit een andere productie",
-      "no_more_available_items": "Er zijn geen items meer beschikbaar om toe te voegen."
+      "no_more_available_items": "Er zijn geen items meer beschikbaar om toe te voegen.",
+      "preferences_title": "Voorkeuren"
     },
     "task_status": {
       "create_error": "Er is een fout opgetreden bij het opslaan van deze taakstatus. Weet je zeker dat er geen taakstatus is met een vergelijkbare naam?",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde taken permanent wilt verwijderen? Alle gerelateerde opmerkingen en voorvertoningen worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
       "delete_for_selection_hard_lock_text": "WISSEN",
       "hookup_playlist": "Genereer een afspeellijst",
-      "assignation_error": "Er was een probleem met het toewijzen van deze persoon aan de geselecteerde taken. Niet alle taken werden toegewezen."
+      "assignation_error": "Er was een probleem met het toewijzen van deze persoon aan de geselecteerde taken. Niet alle taken werden toegewezen.",
+      "retake_filter_none": "Geen retakes",
+      "retake_filter_with_retakes": "Met retakes"
     },
     "timesheets": {
       "detail_level": "Detailniveau",
@@ -1541,7 +1663,8 @@
       "unit": "Eenheid",
       "confirm_day_offs": "Als je deze dagen als vrije dagen instelt, wordt alle gelogde tijd voor de betreffende dagen gewist. Weet je zeker dat je wilt doorgaan?",
       "confirm_unset_day_offs": "Vrije dagen worden momenteel toegepast van {start} tot {end}. Weet je zeker dat je deze periode wilt verwijderen?",
-      "off": "Uit"
+      "off": "Uit",
+      "day_off_no_logging": "Geen tijdregistratie op een vrije dag"
     },
     "wrong_browser": {
       "title": "Je browser wordt niet ondersteund door Kitsu",
@@ -1565,6 +1688,12 @@
         "title": "Previewbestanden",
         "mark_broken": "Markeer als kapot",
         "explanation": "Deze pagina geeft een overzicht van alle voorbeeldbestanden in een tussenstatus: verwerkt of afgebroken. Je kunt zien hoeveel voorbeeldbestanden worden verwerkt of welke bestanden niet zijn voltooid."
+      },
+      "audit": {
+        "title": "Activiteitenlogboeken"
+      },
+      "logins": {
+        "title": "Inloglogboeken"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "Bewerk",
       "history": "Geschiedenis",
       "refresh": "Vernieuw",
-      "restore": "Herstel"
+      "restore": "Herstel",
+      "archive": "Archiveren"
+    },
+    "project_templates": {
+      "add_metadata": "Een metadata toevoegen",
+      "apply": "Sjabloon toepassen",
+      "apply_confirm": "Hiermee worden de taaktypes, statussen, assettypes, automatiseringen en metadatadescriptoren van het sjabloon aan deze productie toegevoegd. Bestaande instellingen blijven behouden. Doorgaan?",
+      "apply_to": "Een sjabloon toepassen",
+      "apply_to_description": "Voeg de configuratie van een sjabloon toe aan deze productie. Bestaande instellingen blijven behouden.",
+      "click_name_to_edit": "Klik op een sjabloonnaam om de configuratie ervan te bewerken.",
+      "create_error": "Er is een fout opgetreden tijdens het opslaan van dit sjabloon. Weet je zeker dat er geen sjabloon met een vergelijkbare naam is?",
+      "delete_error": "Er is een fout opgetreden tijdens het verwijderen van dit sjabloon.",
+      "delete_text": "Weet je zeker dat je {name} uit je database wilt verwijderen?",
+      "duplicate_name": "Er bestaat al een productiesjabloon met deze naam.",
+      "edit_title": "Productiesjabloon bewerken",
+      "empty": "Nog geen productiesjabloon. Maak er een om snel nieuwe producties te configureren.",
+      "fields": {
+        "description": "Beschrijving",
+        "entity_type": "Entiteitstype",
+        "name": "Naam"
+      },
+      "fps_error": "FPS moet een geheel getal tussen 1 en 200 zijn.",
+      "from_production": "Maken vanuit productie",
+      "name_required": "Een naam is vereist.",
+      "new_project_template": "Een productiesjabloon toevoegen",
+      "number": "productiesjabloon | productiesjablonen",
+      "ratio_error": "Ratio moet de notatie x:y volgen (bijv. 16:9).",
+      "resolution_error": "Resolutie moet de notatie BxH volgen (bijv. 1920x1080).",
+      "select": "Selecteer een sjabloon",
+      "tabs": {
+        "asset_types": "Assettypes",
+        "metadata_descriptors": "Metadata",
+        "status_automations": "Statusautomatiseringen",
+        "task_statuses": "Taakstatussen",
+        "task_types": "Taaktypes"
+      },
+      "title": "Sjablonen"
+    },
+    "share": {
+      "comment_placeholder": "Laat een opmerking achter...",
+      "comments_disabled": "Opmerkingen zijn uitgeschakeld voor deze link.",
+      "download_preview": "Preview downloaden",
+      "enter_review": "Review betreden",
+      "error_text": "Deze gedeelde link is ongeldig, verlopen of ingetrokken.",
+      "error_title": "Link niet beschikbaar",
+      "guest_error": "We konden je niet aanmelden. Controleer je verbinding en probeer het opnieuw. Als het probleem zich blijft voordoen, neem dan contact op met het support team.",
+      "identity_description": "Voer je naam in om deel te nemen aan de reviewsessie. Je kunt de afspeellijst bekijken en opmerkingen achterlaten.",
+      "identity_required": "Je moet je naam invoeren voordat je een bericht plaatst.",
+      "kitsu_homepage": "Over Kitsu",
+      "logout": "Reviewsessie verlaten",
+      "name_placeholder": "Jan Jansen",
+      "no_comments_yet": "Nog geen opmerkingen.",
+      "no_preview": "Geen preview",
+      "no_status_available": "Er zijn geen taakstatussen geconfigureerd voor dit project.",
+      "player_placeholder": "De player wordt hier weergegeven.",
+      "post_comment_error": "Kon de opmerking niet plaatsen. Herlaad de pagina en probeer het opnieuw.",
+      "review_session": "Reviewsessie",
+      "your_name": "Je naam"
     }
   }
 }

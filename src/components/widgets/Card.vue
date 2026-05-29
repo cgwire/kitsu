@@ -41,6 +41,9 @@ defineEmits(['save'])
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: 12px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 6px 16px rgba(0, 0, 0, 0.06);
   color: var(--text);
   padding: 1.75rem 2rem;
 

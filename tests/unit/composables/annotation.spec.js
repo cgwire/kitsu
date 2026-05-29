@@ -417,7 +417,7 @@ describe('composables/annotation', () => {
       const { api, canvas, wrapper } = mountAnnotation()
       api.onChangePencilWidth('small')
       expect(api.pencilWidth.value).toBe('small')
-      expect(canvas.freeDrawingBrush.width).toBe(2)
+      expect(canvas.freeDrawingBrush.width).toBe(4)
       wrapper.unmount()
     })
 
@@ -434,13 +434,13 @@ describe('composables/annotation', () => {
       const { api, canvas, wrapper } = mountAnnotation()
       api.pencilWidth.value = 'big'
       api._resetPencil()
-      expect(canvas.freeDrawingBrush.width).toBe(10)
+      expect(canvas.freeDrawingBrush.width).toBe(20)
       api.pencilWidth.value = 'medium'
       api._resetPencil()
-      expect(canvas.freeDrawingBrush.width).toBe(5)
+      expect(canvas.freeDrawingBrush.width).toBe(10)
       api.pencilWidth.value = 'small'
       api._resetPencil()
-      expect(canvas.freeDrawingBrush.width).toBe(2)
+      expect(canvas.freeDrawingBrush.width).toBe(4)
       wrapper.unmount()
     })
 

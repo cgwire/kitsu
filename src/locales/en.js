@@ -611,7 +611,19 @@ export default {
     undo: 'Undo',
     playlist_navigation: 'Playlist navigation',
     remove_annotation: 'Remove annotation',
-    shortcuts: 'Shortcuts'
+    shortcuts: 'Shortcuts',
+    player: 'Player',
+    play_pause: 'Play / pause',
+    play_pause_typing: 'Play / pause (even while typing a comment)',
+    previous_frame: 'Previous frame',
+    next_frame: 'Next frame',
+    previous_annotation: 'Previous annotation',
+    next_annotation: 'Next annotation',
+    copy_annotation: 'Copy selected annotation',
+    paste_annotation: 'Paste annotation',
+    pan_image: 'Pan the image',
+    move_entity_left: 'Move selected entity to the left',
+    move_entity_right: 'Move selected entity to the right'
   },
 
   intro: {
@@ -1142,6 +1154,10 @@ export default {
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',
     apply_task_type_change: 'This will set the last revision for the given task type on all entities.',
+    update_versions_title: 'Update selected versions',
+    update_to_latest_version: 'Update to latest version',
+    update_to_latest_version_help:
+      'Set the latest revision for each entity, keeping its current task type.',
     available_build: 'Available builds',
     build_daily: 'Daily pending',
     build_weekly: 'All Pending',
@@ -1327,7 +1343,7 @@ export default {
       give_a_name: 'Give your production a name',
       give_a_name_description: 'Start by giving your production a meaningful name.',
       choose_template: 'Apply a production template (optional)',
-      choose_template_description: 'Pick a template to pre-fill task types, task statuses, asset types, metadata and settings. Leave empty to configure the  from scratch.',
+      choose_template_description: 'Pick a template to pre-fill task types, task statuses, asset types, metadata and settings. Leave empty to configure the production from scratch.',
       no_template: 'No template',
       import_assets_button: 'Import assets',
       import_shots_button: 'Import shots',

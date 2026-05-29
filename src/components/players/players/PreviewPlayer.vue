@@ -1134,6 +1134,13 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
     setTimeout(() => {
       previewViewer.value?.resize()
       comparisonViewer.value?.resize()
+      // Exiting fullscreen can move the media without changing its size (e.g.
+      // back into the narrow task-info panel), and the AnnotationCanvas
+      // ResizeObserver only fires on size changes — so the overlay stays at its
+      // fullscreen rect until a manual resize. Recompute the bounds explicitly,
+      // which is what that manual resize would have done.
+      mainAnnotationCanvas.value?.updateBounds()
+      comparisonAnnotationCanvas.value?.updateBounds()
     }, RESIZE_DELAY)
   }
 })

@@ -133,7 +133,20 @@
       "edited_by": "Redigeret af {name}",
       "add_attachment_to_reply": "Tilføj vedhæftet fil til svar",
       "add_frame_to_comment": "Føj den aktuelle ramme til kommentaren",
-      "add_emoji": "Tilføj en emoji"
+      "add_emoji": "Tilføj en emoji",
+      "for_client_badge": "Tekst synlig for klient",
+      "for_client_off": "Tekst ikke synlig for klienter. Klik for at gøre teksten synlig for klienter",
+      "for_client_on": "Tekst synlig for klienter. Klik for at gøre teksten ikke-synlig for klienter",
+      "move_modal": {
+        "error": "Kommentaren kunne ikke flyttes. Kontakt venligst vores supportteam.",
+        "intro": "Vælg en opgave på samme enhed, som denne kommentar skal flyttes til. Der vil blive sendt notifikationer på destinationsopgaven, som ved en ny kommentar.",
+        "no_target": "Der er ingen anden opgave tilgængelig på denne enhed.",
+        "target_label": "Destinationsopgave",
+        "title": "Flyt kommentar til en anden opgave"
+      },
+      "move_to_task": "Flyt til",
+      "title": "Kommentarer",
+      "toggle_for_client": "Klientsynlighed"
     },
     "custom_actions": {
       "create_error": "Der opstod en fejl under gemning af denne brugerdefinerede handling. Er du sikker på, at der ikke findes en anden handling med samme navn?",
@@ -292,7 +305,19 @@
       "object_viewer": "Objektfremviser",
       "rotate_hdr": "Roter miljøkortet",
       "change_fov": "Skift brændvidde",
-      "plalto": "Skift mellem 0% og 100% opacitet i sammenligningstilstand"
+      "plalto": "Skift mellem 0% og 100% opacitet i sammenligningstilstand",
+      "copy_annotation": "Kopier valgte annotering",
+      "move_entity_left": "Flyt valgte enhed til venstre",
+      "move_entity_right": "Flyt valgte enhed til højre",
+      "next_annotation": "Næste annotering",
+      "next_frame": "Næste frame",
+      "pan_image": "Panorer billedet",
+      "paste_annotation": "Indsæt annotering",
+      "play_pause": "Play / pause",
+      "play_pause_typing": "Play / pause (selv når du skriver en kommentar)",
+      "player": "Afspiller",
+      "previous_annotation": "Forrige annotering",
+      "previous_frame": "Forrige frame"
     },
     "login": {
       "back_to_login": "Gå tilbage til login side",
@@ -553,7 +578,16 @@
       "shared_by": "Delt af {name}",
       "continue": "Fortsæt",
       "developer_documentation": "Dokumentation til udviklere",
-      "feedback": "Køreplan / Feedback"
+      "feedback": "Køreplan / Feedback",
+      "annotations": {
+        "download_pdf": "Download annoteringer som PDF",
+        "download_zip": "Download annoteringer som ZIP"
+      },
+      "attach_snapshots_with_label": "Vedhæft snapshots med en indbrændt label",
+      "disable_desktop_notifications": "Deaktiver skrivebordsnotifikationer",
+      "enable_desktop_notifications": "Aktivér skrivebordsnotifikationer",
+      "export": "Eksporter",
+      "unknown": "Ukendt"
     },
     "menu": {
       "assign_tasks": "Tildel opgaver",
@@ -585,7 +619,8 @@
       "title": "Nyhedsfeed",
       "hide_stats": "Skjul statistikker",
       "news": "nyheder",
-      "show_stats": "Vis statistikker"
+      "show_stats": "Vis statistikker",
+      "no_news_hint": "Prøv at udvide filtrene eller kom tilbage senere."
     },
     "not_found": {
       "text": "Linket, du klikkede på, er gået i stykker, eller destinationen blev ikke fundet. Gå venligst tilbage til hjemmesiden.",
@@ -626,7 +661,22 @@
       "watching": "ser på",
       "only_playlists_ready": "Kun færdige playlister",
       "playlist_is_ready": "Playlisten er klar",
-      "playlist_ready_text": "En ny playliste er klar til gennemgang:"
+      "playlist_ready_text": "En ny playliste er klar til gennemgang:",
+      "desktop": {
+        "assignation_title": "{name} tildelte dig",
+        "banner_blocked_text": "Skrivebordsnotifikationer er blokeret. Tillad dem i din browsers webstedsindstillinger for at aktivere dem.",
+        "banner_dismiss": "Ikke nu",
+        "banner_enable": "Aktivér",
+        "banner_text": "Få en skrivebordsnotifikation for hver ny begivenhed.",
+        "comment_title": "{name} kommenterede",
+        "mention_title": "{name} nævnte dig",
+        "playlist_ready_title": "Playlisten {name} er klar",
+        "publish_title": "{name} publicerede et preview",
+        "reply_title": "{name} svarede",
+        "test_notification_body": "Du vil nu modtage notifikationer som denne for nye begivenheder.",
+        "test_notification_title": "Kitsu-notifikationer aktiveret"
+      },
+      "to_status": "til"
     },
     "people": {
       "active": "Aktiv",
@@ -664,7 +714,8 @@
         "studio": "Studio",
         "daily_salary": "Daglig pris",
         "position": "Position",
-        "seniority": "Anciennitet"
+        "seniority": "Anciennitet",
+        "created_at": "Oprettelsesdato"
       },
       "list": {
         "name": "Navn",
@@ -721,7 +772,13 @@
         "mid": "Midt",
         "senior": "Senior"
       },
-      "email_domain_error": "Dette e-mail-domæne er ikke tilladt."
+      "email_domain_error": "Dette e-mail-domæne er ikke tilladt.",
+      "archive_guest_confirm": "Arkivér denne gæst? Deres kommentarer forbliver på plads, men de vises ikke længere på listen over aktive gæster.",
+      "archive_guest_error": "Denne gæst kunne ikke arkiveres. Prøv venligst igen.",
+      "archived_guests": "Arkiverede gæster",
+      "guests": "gæst | gæster",
+      "restore_guest_error": "Denne gæst kunne ikke gendannes. Prøv venligst igen.",
+      "seats_remaining": "ingen pladser tilbage | {count} plads tilbage | {count} pladser tilbage"
     },
     "playlists": {
       "add_assets": "Tilføj assets",
@@ -831,7 +888,10 @@
         "select_background": "Vælg en baggrund",
         "toggle_environment_skybox": "Vis/Skjul skybox-baggrund",
         "toggle_wireframe": "Aktiver/Deaktiver wireframe-rendering",
-        "open_link": "Åben link"
+        "open_link": "Åben link",
+        "annotation_huge": "Kæmpe",
+        "annotation_shape": "Form",
+        "annotation_tiny": "Bittelille"
       },
       "download_csv": "Download .csv",
       "filter_task_type": "Filtreret efter opgavetype",
@@ -845,7 +905,43 @@
       "no_clients_to_notify": "Der er ingen kunder at underrette.",
       "notify_clients_success": "Meddelelsen er blevet sendt med succes.",
       "unmute": "Slå lyden fra",
-      "volume_level": "Volumen: {level}%."
+      "volume_level": "Volumen: {level}%.",
+      "add_edits": "Tilføj edits",
+      "add_episodes": "Tilføj episoder",
+      "share": "Del",
+      "share_modal": {
+        "active_links": "Aktive links",
+        "add_link": "Tilføj et nyt link",
+        "can_comment": "Tillad kommentarer",
+        "comments_disabled": "Kommentarer deaktiveret",
+        "comments_enabled": "Kommentarer aktiveret",
+        "copy": "Kopier link",
+        "create_new": "Opret et nyt link",
+        "description": "Generer et link til at dele denne playlist med eksterne anmeldere. Alle med linket kan se playlisten og skrive kommentarer uden at have brug for en Kitsu-konto. Du kan angive en udløbsdato og tilbagekalde adgangen når som helst.",
+        "error": "Der opstod en fejl under oprettelse af delingslinket.",
+        "expiration": "Udløbsdato (valgfri)",
+        "expires": "Udløber",
+        "generate": "Generer et nyt link",
+        "invite": "Inviter via e-mail",
+        "invite_add_email": "Tilføj denne e-mail",
+        "invite_error": "Der opstod en fejl under afsendelse af invitationerne.",
+        "invite_invalid_email": "Den e-mailadresse er ikke gyldig.",
+        "invite_message_label": "Brugerdefineret besked (valgfri)",
+        "invite_message_placeholder": "En kort note, der vil blive tilføjet til e-mailen",
+        "invite_placeholder": "Skriv en e-mail og tryk Enter, eller vælg en klient",
+        "invite_recipients": "Modtagere",
+        "invite_send": "Send invitationer",
+        "invite_sent": "{count} invitation sendt | {count} invitationer sendt",
+        "no_expiration": "Ingen udløb",
+        "no_links": "Ingen delingslinks endnu. Opret et nedenfor for at give eksterne anmeldere adgang.",
+        "open": "Åbn link i en ny fane",
+        "revoke": "Tilbagekald link",
+        "revoke_confirm": "Tilbagekald dette link? Alle, der bruger det, mister adgangen.",
+        "title": "Del playlist"
+      },
+      "update_to_latest_version": "Opdater til seneste version",
+      "update_to_latest_version_help": "Angiv den seneste revision for hver enhed, idet dens aktuelle opgavetype bevares.",
+      "update_versions_title": "Opdater valgte versioner"
     },
     "productions": {
       "current": "Valgt produktion",
@@ -900,7 +996,10 @@
         "boolean": "Afkrydsningsfelt",
         "number": "Nummer",
         "string": "Tekst",
-        "tags": "Liste over tags"
+        "tags": "Liste over tags",
+        "applies_to_all_projects": "Denne kolonne føjes til alle projekter på listen. Hvert projekt kan have sin egen værdi i listevisningen.",
+        "delete_list_column_text": "Dette vil fjerne kolonnen “{name}” fra alle projekter, inklusive gemte værdier. Fortsæt?",
+        "target_project": "Projekt"
       },
       "status": {
         "closed": "Lukket",
@@ -970,7 +1069,10 @@
         "start_and_end_dates": "Start- og slutdatoer",
         "shots_to_import": "shots til import",
         "select_edit_task_type": "Vælg edit-opgavetype",
-        "select_edit_task_type_description": "Disse opgavetyper definerer byggetrinene for dine edits."
+        "select_edit_task_type_description": "Disse opgavetyper definerer byggetrinene for dine edits.",
+        "choose_template": "Anvend en produktionsskabelon (valgfri)",
+        "choose_template_description": "Vælg en skabelon til at forhåndsudfylde opgavetyper, opgavestatusser, asset-typer, metadata og indstillinger. Lad være tom for at konfigurere fra bunden.",
+        "no_template": "Ingen skabelon"
       },
       "style": {
         "2d": "2D Animation",
@@ -1010,7 +1112,12 @@
         "title": "Skift avatar",
         "error_upload": "Der opstod en fejl under upload af billede.",
         "updating": "Opdaterer...",
-        "removing": "Fjerner..."
+        "removing": "Fjerner...",
+        "drop_or_click": "Klik eller slip et foto her",
+        "intro": "Vælg et foto, og træk og zoom derefter for at indramme det.",
+        "preview": "Preview",
+        "preview_hint": "Træk for at flytte, brug skyderen for at zoome.",
+        "replace": "Vælg et andet foto"
       },
       "change_password": {
         "button": "Skift adgangskode",
@@ -1038,7 +1145,9 @@
           "button_validate_disable": "Valider og deaktiver TOTP",
           "button_validate": "Valider og aktivér TOTP",
           "error_enable": "Der opstod en fejl under aktivering af TOTP.",
-          "error_disable": "Der opstod en fejl under deaktivering af TOTP."
+          "error_disable": "Der opstod en fejl under deaktivering af TOTP.",
+          "description": "Brug en TOTP-app som Google Authenticator, Authy eller 1Password.",
+          "name": "Godkendelsesapp"
         },
         "email_otp": {
           "button_enable": "Aktivér OTP via e-mail",
@@ -1046,7 +1155,9 @@
           "button_validate_disable": "Valider og deaktiver OTP via e-mail",
           "button_validate": "Valider og aktivér OTP via e-mail",
           "error_enable": "Der opstod en fejl under aktivering af OTP via e-mail.",
-          "error_disable": "Der opstod en fejl under deaktivering af OTP via e-mail."
+          "error_disable": "Der opstod en fejl under deaktivering af OTP via e-mail.",
+          "description": "Modtag en engangskode via e-mail, hver gang du logger ind.",
+          "name": "E-mail"
         },
         "recovery_codes": {
           "title": "Gendannelseskoder",
@@ -1060,12 +1171,17 @@
           "registered_devices_title": "Registrerede FIDO-enheder:",
           "button_register": "Registrer ny FIDO-enhed",
           "error_register": "Der opstod en fejl under registrering af FIDO-enhed.",
-          "error_unregister": "Der opstod en fejl under afregistrering af FIDO-enhed."
+          "error_unregister": "Der opstod en fejl under afregistrering af FIDO-enhed.",
+          "description": "Brug en hardwarenøgle (YubiKey) eller en platformsautentificering (Touch ID, Windows Hello).",
+          "name": "Sikkerhedsnøgle"
         },
         "enabled": "To-faktor-autentificering aktiveret",
         "mandatory": "Din organisation kræver to-faktor-godkendelse. Aktivér venligst mindst én metode for at fortsætte.",
-        "description": "To-faktor-autentificering (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) tilføjer et ekstra lag af sikkerhed til din konto. Når det er aktiveret, skal du angive en anden form for bekræftelse ud over din adgangskode, hver gang du logger ind. Du kan bruge en godkendelsesapp (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailbekræftelse (<abbr title=\"One-Time Password\">OTP</abbr>) eller en hardwaresikkerhedsnøgle (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) som din anden faktor."
-      }
+        "description": "To-faktor-autentificering (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) tilføjer et ekstra lag af sikkerhed til din konto. Når det er aktiveret, skal du angive en anden form for bekræftelse ud over din adgangskode, hver gang du logger ind. Du kan bruge en godkendelsesapp (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), e-mailbekræftelse (<abbr title=\"One-Time Password\">OTP</abbr>) eller en hardwaresikkerhedsnøgle (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) som din anden faktor.",
+        "status_disabled": "Deaktiveret",
+        "status_enabled": "Aktiveret"
+      },
+      "notifications_title": "Notifikationer"
     },
     "settings": {
       "change_logo": "Skift logo",
@@ -1088,7 +1204,10 @@
       },
       "production": {
         "empty_list": "Listen er i øjeblikket tom. Det betyder, at alle data fra hovedindstillingerne er tilgængelige for brugerne. Tilføj nogle listeelementer for at begrænse valgmulighederne for denne produktion.",
-        "empty_automation_list": "Der er ingen automatisering angivet for denne produktion."
+        "empty_automation_list": "Der er ingen automatisering angivet for denne produktion.",
+        "empty_backgrounds": "Ingen baggrund tilknyttet. Vælg en fra listen ovenfor for at tilføje den.",
+        "empty_board": "Tilføj først opgavestatusser for at konfigurere deres synlighed på tavlen.",
+        "empty_metadata": "Der er endnu ikke defineret nogen metadata-deskriptor for denne enhedstype."
       },
       "save": {
         "button": "Gem indstillinger",
@@ -1098,7 +1217,8 @@
       "remove_logo": "Fjern studio logo",
       "available_items": "Tilgængelige elementer",
       "import_from_production": "Importer fra en anden produktion",
-      "no_more_available_items": "Der er ikke flere elementer tilgængelige til tilføjelse."
+      "no_more_available_items": "Der er ikke flere elementer tilgængelige til tilføjelse.",
+      "preferences_title": "Præferencer"
     },
     "task_status": {
       "create_error": "Der opstod en fejl under gemning af denne opgavestatus. Er du sikker på, at der ikke allerede findes en opgavestatus med et lignende navn?",
@@ -1524,7 +1644,9 @@
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte opgaver permanent? Alle relaterede kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "hookup_playlist": "Skab en playliste til opkobling",
-      "assignation_error": "Der var et problem med at tildele denne person de valgte opgaver. Ikke alle opgaver blev tildelt."
+      "assignation_error": "Der var et problem med at tildele denne person de valgte opgaver. Ikke alle opgaver blev tildelt.",
+      "retake_filter_none": "Ingen retakes",
+      "retake_filter_with_retakes": "Med retakes"
     },
     "timesheets": {
       "detail_level": "Detaljeniveau",
@@ -1541,7 +1663,8 @@
       "unit": "Enhed",
       "confirm_day_offs": "Hvis du markerer disse dage som fridage, vil al registreret tid for de berørte dage blive slettet. Er du sikker på, at du vil fortsætte?",
       "confirm_unset_day_offs": "Fridage er i øjeblikket anvendt fra {start} til {end}. Er du sikker på, at du vil fjerne denne periode?",
-      "off": "Slukket"
+      "off": "Slukket",
+      "day_off_no_logging": "Ingen tidsregistrering på en fridag"
     },
     "wrong_browser": {
       "title": "Din browser understøttes ikke af Kitsu",
@@ -1565,6 +1688,12 @@
         "title": "Preview-filer",
         "mark_broken": "Markér som ødelagt",
         "explanation": "Denne side viser alle preview-filer i en mellemtilstand: under behandling eller ødelagte. Den viser, hvor mange preview-filer der er under behandling, eller hvilke filer der ikke blev færdiggjort."
+      },
+      "audit": {
+        "title": "Aktivitetslogfiler"
+      },
+      "logins": {
+        "title": "Loginlogfiler"
       }
     },
     "departments": {
@@ -1936,7 +2065,64 @@
       "edit": "Rediger",
       "history": "Historie",
       "refresh": "Opdatering",
-      "restore": "Gendan"
+      "restore": "Gendan",
+      "archive": "Arkivér"
+    },
+    "project_templates": {
+      "add_metadata": "Tilføj en metadata",
+      "apply": "Anvend skabelon",
+      "apply_confirm": "Dette vil føje skabelonens opgavetyper, statusser, asset-typer, automatiseringer og metadata-deskriptorer til denne produktion. Eksisterende indstillinger bevares. Fortsæt?",
+      "apply_to": "Anvend en skabelon",
+      "apply_to_description": "Føj en skabelons konfiguration til denne produktion. Eksisterende indstillinger bevares.",
+      "click_name_to_edit": "Klik på et skabelonnavn for at redigere dets konfiguration.",
+      "create_error": "Der opstod en fejl under gemning af denne skabelon. Er du sikker på, at der ikke findes en skabelon med et lignende navn?",
+      "delete_error": "Der opstod en fejl under sletning af denne skabelon.",
+      "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
+      "duplicate_name": "Der findes allerede en produktionsskabelon med dette navn.",
+      "edit_title": "Rediger produktionsskabelon",
+      "empty": "Ingen produktionsskabelon endnu. Opret en for hurtigt at konfigurere nye produktioner.",
+      "fields": {
+        "description": "Beskrivelse",
+        "entity_type": "Enhedstype",
+        "name": "Navn"
+      },
+      "fps_error": "FPS skal være et heltal mellem 1 og 200.",
+      "from_production": "Opret ud fra produktion",
+      "name_required": "Et navn er påkrævet.",
+      "new_project_template": "Tilføj en produktionsskabelon",
+      "number": "produktionsskabelon | produktionsskabeloner",
+      "ratio_error": "Ratio skal følge formatet x:y (fx 16:9).",
+      "resolution_error": "Opløsning skal følge formatet BxH (fx 1920x1080).",
+      "select": "Vælg en skabelon",
+      "tabs": {
+        "asset_types": "Asset-typer",
+        "metadata_descriptors": "Metadata",
+        "status_automations": "Statusautomatiseringer",
+        "task_statuses": "Opgavestatusser",
+        "task_types": "Opgavetyper"
+      },
+      "title": "Skabeloner"
+    },
+    "share": {
+      "comment_placeholder": "Efterlad en kommentar...",
+      "comments_disabled": "Kommentarer er deaktiveret for dette link.",
+      "download_preview": "Download preview",
+      "enter_review": "Gå til gennemgang",
+      "error_text": "Dette delte link er ugyldigt, udløbet eller er blevet tilbagekaldt.",
+      "error_title": "Link ikke tilgængeligt",
+      "guest_error": "Vi kunne ikke logge dig ind. Tjek din forbindelse og prøv igen. Hvis problemet fortsætter, kontakt venligst supportteamet.",
+      "identity_description": "Indtast dit navn for at deltage i gennemgangssessionen. Du vil kunne se playlisten og efterlade kommentarer.",
+      "identity_required": "Du skal indtaste dit navn, før du skriver.",
+      "kitsu_homepage": "Om Kitsu",
+      "logout": "Forlad gennemgangssession",
+      "name_placeholder": "John Doe",
+      "no_comments_yet": "Ingen kommentarer endnu.",
+      "no_preview": "Intet preview",
+      "no_status_available": "Der er ikke konfigureret nogen opgavestatusser for dette projekt.",
+      "player_placeholder": "Afspilleren vil blive vist her.",
+      "post_comment_error": "Kommentaren kunne ikke sendes. Genindlæs venligst siden og prøv igen.",
+      "review_session": "Gennemgangssession",
+      "your_name": "Dit navn"
     }
   }
 }

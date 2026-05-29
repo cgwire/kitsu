@@ -27,17 +27,13 @@
           {{ $t('tasks.comment_image') }}
         </h1>
 
-        <div class="attachment-upload-zone">
-          <file-upload
-            ref="fileField"
-            :label="$t('main.select_file')"
-            :accept="extensions"
-            :multiple="true"
-            :is-primary="false"
-            @fileselected="onFileSelected"
-            hide-file-names
-          />
-        </div>
+        <file-upload-zone
+          ref="fileField"
+          :label="$t('main.select_file')"
+          :accept="extensions"
+          :multiple="true"
+          @fileselected="onFileSelected"
+        />
 
         <div class="snapshot-actions" v-if="isMovie || isPicture">
           <button
@@ -119,7 +115,7 @@ import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
-import FileUpload from '@/components/widgets/FileUpload.vue'
+import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -280,45 +276,6 @@ h3.subtitle {
 
 .buttons {
   flex-wrap: wrap;
-}
-
-.attachment-upload-zone {
-  border: 2px dashed var(--border);
-  border-radius: 10px;
-  margin: 1em 0;
-  padding: 1.5em;
-  text-align: center;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-
-  &:hover {
-    background: var(--background-hover, rgba(255, 255, 255, 0.03));
-    border-color: var(--background-selectable, $purple-strong);
-  }
-
-  // Strip Bulma's button background off the file-upload label so the
-  // dropzone's outline is the single visual container — the text sits
-  // directly on the dashed area, no inner button chip.
-  :deep(.dropbox) {
-    background: transparent;
-    border: 0;
-    justify-content: center;
-    padding: 0;
-  }
-
-  :deep(.dropbox label.button) {
-    background: transparent;
-    border: 0;
-    color: var(--text);
-    cursor: pointer;
-    font-weight: 500;
-
-    &:hover {
-      background: transparent;
-      color: var(--background-selectable, $purple-strong);
-    }
-  }
 }
 
 .snapshot-actions {
