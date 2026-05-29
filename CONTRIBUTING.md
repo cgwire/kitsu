@@ -47,9 +47,10 @@ If you find any issue with Kitsu
 
 ## Translations
 
-If you want to contribute to translations, we have an account on the POEditor platform that you can use to participate.
-
-[Contribute to the translation](https://poeditor.com/join/project?hash=fpUejpWDVo)
+The source strings live in `src/locales/en.js`. The other locale files in
+`src/locales/` are kept in sync with it. If you spot a missing or incorrect
+translation, open an issue or a pull request editing the relevant file in
+`src/locales/`.
 
 
 ## Improve the documentation
