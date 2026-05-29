@@ -41,6 +41,7 @@
               class="preview-viewer"
               :current-frame="currentFrame"
               :default-height="defaultHeight"
+              :fps="fps"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-comparison-overlay="isComparisonOverlay"
@@ -76,6 +77,7 @@
               name="comparison-preview-viewer"
               :current-frame="currentFrame"
               :default-height="defaultHeight"
+              :fps="fps"
               :is-big="big"
               :is-comparing="isComparing && isComparisonEnabled"
               :is-full-screen="fullScreen"
@@ -475,6 +477,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  fps: {
+    type: Number,
+    default: null
+  },
   isAssigned: {
     type: Boolean,
     default: false
@@ -752,7 +758,9 @@ const defaultHeight = computed(() => {
   return screen.width > 1300 && (!props.light || props.big) ? bigHeight : 200
 })
 
-const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+const fps = computed(
+  () => props.fps || parseFloat(currentProduction.value?.fps) || 25
+)
 
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000

@@ -173,6 +173,7 @@
                   ref="preview-player"
                   :entity-preview-files="taskEntityPreviews"
                   :extra-wide="true"
+                  :fps="currentFps"
                   :last-preview-files="taskPreviews || []"
                   :link="currentPreviewComment?.links?.[0]"
                   :previews="currentPreview.previews"

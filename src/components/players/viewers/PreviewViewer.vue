@@ -26,6 +26,7 @@
     <video-viewer
       ref="videoViewer"
       class="video-viewer"
+      :fps="fps"
       :name="name"
       :big="isBig"
       :default-height="defaultHeight"
@@ -152,6 +153,10 @@ const props = defineProps({
   defaultHeight: {
     type: Number,
     default: 0
+  },
+  fps: {
+    type: Number,
+    default: null
   },
   isBig: {
     type: Boolean,

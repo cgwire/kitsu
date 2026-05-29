@@ -53,6 +53,10 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  fps: {
+    type: Number,
+    default: null
+  },
   fullScreen: {
     type: Boolean,
     default: false
@@ -143,7 +147,9 @@ const video = computed(() => movie.value)
 
 const extension = computed(() => (props.preview ? props.preview.extension : ''))
 
-const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+const fps = computed(
+  () => props.fps || parseFloat(currentProduction.value?.fps) || 25
+)
 
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000
@@ -203,8 +209,17 @@ const getLastPushedCurrentTime = () => {
   }
 }
 
+// Seek to the middle of the target frame rather than its boundary.
+// frame / fps lands right on the edge between two frames, and the rounding
+// in frameDuration (0.0833 instead of 0.083333… at 12fps) drifts ~1ms per
+// frame, so past ~frame 30 the seek tips into the previous frame and the
+// player renders a duplicate. Half a frame of slack dwarfs any rounding
+// error, so the correct frame is always decoded — and fps (unrounded) is
+// used so there is no drift to begin with.
+const frameToTime = frame => (frame + 0.5) / fps.value
+
 const setCurrentFrame = frame => {
-  setCurrentTime(frame * frameDuration.value)
+  setCurrentTime(frameToTime(frame))
 }
 
 const setCurrentTimeRaw = currentTime => {
@@ -218,7 +233,7 @@ const runSetCurrentTime = () => {
   } else {
     const currentTime = currentTimeCalls.shift()
     if (video.value.currentTime !== currentTime) {
-      video.value.currentTime = Number(currentTime.toPrecision(4)) + 0.001
+      video.value.currentTime = currentTime
     }
     setTimeout(() => {
       runSetCurrentTime()
@@ -313,7 +328,7 @@ const play = () => {
 const pause = () => {
   video.value.pause()
   clearInterval(playLoop)
-  video.value.currentTime = props.currentFrame * frameDuration.value
+  video.value.currentTime = frameToTime(props.currentFrame)
   emit('frame-update', props.currentFrame)
 }
 
@@ -324,7 +339,7 @@ const toggleMute = () => {
 const goPreviousFrame = () => {
   const nextFrame = props.currentFrame - 1
   if (nextFrame < 0) return
-  video.value.currentTime = nextFrame * frameDuration.value + 0.001
+  video.value.currentTime = frameToTime(nextFrame)
   emit('frame-update', nextFrame)
   return nextFrame
 }
@@ -332,7 +347,7 @@ const goPreviousFrame = () => {
 const goNextFrame = () => {
   const nextFrame = props.currentFrame + 1
   if (nextFrame >= props.nbFrames) return
-  video.value.currentTime = nextFrame * frameDuration.value + 0.001
+  video.value.currentTime = frameToTime(nextFrame)
   emit('frame-update', nextFrame)
   return nextFrame
 }
