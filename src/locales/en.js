@@ -622,6 +622,8 @@ export default {
     copy_annotation: 'Copy selected annotation',
     paste_annotation: 'Paste annotation',
     pan_image: 'Pan the image',
+    straight_line: 'Draw a straight line',
+    constant_width: 'Draw at a constant width (no pressure)',
     move_entity_left: 'Move selected entity to the left',
     move_entity_right: 'Move selected entity to the right'
   },

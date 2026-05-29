@@ -112,6 +112,8 @@ const shortcutGroups = computed(() => [
     icon: markRaw(Pencil),
     shortcuts: [
       { keys: ['d'], text: t('keyboard.draw') },
+      { keys: ['Shift', 'Mouse Drag'], text: t('keyboard.straight_line') },
+      { keys: ['Ctrl', 'Mouse Drag'], text: t('keyboard.constant_width') },
       { keys: ['Ctrl', 'z'], text: t('keyboard.undo') },
       { keys: ['Alt', 'r'], text: t('keyboard.redo') },
       { keys: ['Ctrl', 'c'], text: t('keyboard.copy_annotation') },
