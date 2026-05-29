@@ -1021,20 +1021,23 @@ const goNextFrame = () => {
 }
 
 const goPreviousDrawing = () => {
-  const time = getPreviousAnnotationTime(currentTimeRaw.value)
-  jumpToAnnotationFrame(time)
+  jumpToAnnotationFrame(getPreviousAnnotationTime(currentTimeRaw.value))
 }
 
 const goNextDrawing = () => {
-  const time = getNextAnnotationTime(currentTimeRaw.value)
-  jumpToAnnotationFrame(time)
+  jumpToAnnotationFrame(getNextAnnotationTime(currentTimeRaw.value))
 }
 
-const jumpToAnnotationFrame = time => {
-  if (time) {
-    const annotationTime = time.frame - 1
+const jumpToAnnotationFrame = annotation => {
+  if (annotation) {
+    // Jump by the annotation's time, not its stored frame. The find and
+    // the on-screen display both key off time, whereas annotation.frame
+    // can be stale or off by a frame (sometimes even a zero-padded
+    // string), which landed 1-2 frames past the drawing and lost the
+    // next step.
+    const frame = Math.round(annotation.time / frameDuration.value)
     clearCanvas()
-    setCurrentFrame(annotationTime)
+    setCurrentFrame(frame)
     syncComparisonViewer()
   }
 }
