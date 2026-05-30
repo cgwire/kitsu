@@ -2312,9 +2312,12 @@ const getCurrentTime = () => {
 }
 
 const getCurrentFrame = () => {
-  if (currentFrame.value) return currentFrame.value
-  const time = roundToFrame(currentTimeRaw.value, fps.value) || 0
-  return Math.round(time / frameDuration.value)
+  // Persist exactly the frame the user sees (currentFrame is the on-screen
+  // 1-based label), as a number. It was stored as the zero-padded display
+  // string from formatFrame. The annotation seek round-trips on this value
+  // (goPreviousDrawing / goNextDrawing read `Number(frame) - 1`), so it is
+  // the navigation source of truth, not the player time.
+  return parseInt(currentFrame.value)
 }
 
 const setCurrentTimeRaw = time => {
