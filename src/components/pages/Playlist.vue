@@ -1117,6 +1117,13 @@ export default {
             entity.sequence_name ||
             entity.episode_name ||
             entity.asset_type_name,
+          // Per-entity fps: an entity can override the production fps via
+          // data.fps. Carried here so the player uses the right rate for
+          // whichever entity is playing (a playlist can mix fps).
+          fps:
+            parseFloat(entity.data?.fps) ||
+            parseFloat(this.currentProduction?.fps) ||
+            25,
           preview_files: entityInfo.preview_files,
           preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
           preview_file_extension:

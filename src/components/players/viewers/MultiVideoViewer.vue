@@ -139,7 +139,13 @@ let showLoadingTimer = null
 // Computed
 
 const currentProduction = computed(() => store.getters.currentProduction)
-const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+// Use the currently-playing entity's fps (a playlist can mix fps); fall
+// back to the production default. Reactive to currentIndex so it switches
+// as the playlist advances.
+const fps = computed(() => {
+  const entityFps = parseFloat(props.entities[currentIndex.value]?.fps)
+  return entityFps || parseFloat(currentProduction.value?.fps) || 25
+})
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000
 )
@@ -433,7 +439,12 @@ const setCurrentTimeRaw = currentTime => {
 }
 
 const setCurrentFrame = frameNumber => {
-  _setCurrentTime(frameNumber * frameDuration.value)
+  // Seek with the unrounded 1/fps, not frameNumber * frameDuration:
+  // frameDuration is rounded to 4 decimals (0.0833 at 12fps), so the
+  // target drifts ~1ms per frame and tips into the previous frame past
+  // ~frame 30 (duplicate). The +0.001 nudge in runSetCurrentTime then
+  // lands it inside the correct frame. Readback math is left untouched.
+  _setCurrentTime(frameNumber / fps.value)
 }
 
 const _setCurrentTime = newTime => {

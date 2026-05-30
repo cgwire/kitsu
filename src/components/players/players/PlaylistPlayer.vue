@@ -1273,7 +1273,12 @@ const currentPreviewDlPath = computed(() => {
 
 // Computed — frames
 
-const fps = computed(() => parseFloat(currentProduction.value?.fps) || 25)
+const fps = computed(
+  () =>
+    parseFloat(currentEntity.value?.fps) ||
+    parseFloat(currentProduction.value?.fps) ||
+    25
+)
 const frameDuration = computed(
   () => Math.round((1 / fps.value) * 10000) / 10000
 )
