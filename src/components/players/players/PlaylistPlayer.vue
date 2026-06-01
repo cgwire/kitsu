@@ -769,6 +769,7 @@
       :is-full-mode="isFullMode"
       :is-full-screen="fullScreen || isEntitiesHidden"
       :nb-frames="isCurrentPreviewMovie ? nbFrames : 0"
+      :preview-id="currentPreview ? currentPreview.id : ''"
       :playlist-duration="playlistDuration"
       :playlist-progress="playlistProgress"
       :playlist-shot-position="playlistShotPosition"
