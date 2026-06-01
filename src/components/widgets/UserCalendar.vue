@@ -72,6 +72,8 @@ import allLocales from '@fullcalendar/core/locales-all'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
+import { localeCode } from '@/lib/lang'
+
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -113,7 +115,7 @@ const calendarOptions = ref({
   initialView: 'dayGridMonth',
   firstDay: 1,
   locales: allLocales,
-  locale: 'en'
+  locale: localeCode.value
 })
 
 const resetEvents = () => {
@@ -231,6 +233,11 @@ watch(
     resetEvents()
   }
 )
+
+watch(localeCode, code => {
+  calendarOptions.value.locale = code
+  calendarRef.value?.getApi().setOption('locale', code)
+})
 </script>
 
 <style lang="scss" scoped>
