@@ -196,6 +196,10 @@ watch(
     canvas.defaultCursor = value
     canvas.freeDrawingCursor = value
     canvas.hoverCursor = value
+    // Fabric only flushes its cursor properties to the DOM during its own
+    // mouse events, so a tool switch via keyboard / button (pointer idle)
+    // wouldn't show until the next move. Push it to the element directly.
+    if (canvas.upperCanvasEl) canvas.upperCanvasEl.style.cursor = value
   }
 )
 
