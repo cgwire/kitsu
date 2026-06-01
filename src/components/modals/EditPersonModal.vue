@@ -119,6 +119,12 @@
         v-if="!isBot"
       />
       <combobox
+        :label="$t('people.fields.country')"
+        :options="countryOptions"
+        v-model="form.country"
+        v-if="showCountryField"
+      />
+      <combobox
         :label="$t('people.fields.active')"
         :options="activeOptions"
         :disabled="personToEdit.is_generated_from_ldap"
@@ -201,6 +207,8 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { getCountryOptions } from '@/lib/countries'
+import { localeCode } from '@/lib/lang'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -244,6 +252,8 @@ const activeOptions = computed(() => [
   { label: t('main.yes'), value: 'true' },
   { label: t('main.no'), value: 'false' }
 ])
+
+const countryOptions = computed(() => getCountryOptions(localeCode.value))
 
 const contractOptions = [
   { label: 'open-ended', value: 'open-ended' },
@@ -290,6 +300,7 @@ const form = ref({
   active: 'true',
   departments: [],
   studio_id: null,
+  country: null,
   expiration_date: null,
   is_bot: false
 })
@@ -302,6 +313,11 @@ const people = computed(() => store.getters.people)
 const user = computed(() => store.getters.user)
 
 const isEditing = computed(() => Boolean(props.personToEdit?.id))
+
+// Country feeds the carbon footprint calculation; hidden for bots/clients (guests never reach this modal).
+const showCountryField = computed(
+  () => !props.isBot && form.value.role !== 'client'
+)
 
 const modalTitle = computed(() => {
   if (isEditing.value) {
@@ -349,7 +365,9 @@ const emitForm = event => {
   emit(event, {
     ...form.value,
     last_name: form.value.last_name || '',
-    active: form.value.active === 'true' || form.value.active === true
+    active: form.value.active === 'true' || form.value.active === true,
+    // Don't store a country for excluded roles (field hidden but value kept).
+    country: showCountryField.value ? form.value.country : null
   })
 }
 
@@ -379,6 +397,7 @@ const resetForm = () => {
       active: p.active ? 'true' : 'false',
       departments: [...(p.departments || [])],
       studio_id: p.studio_id,
+      country: p.country || null,
       expiration_date: p.expiration_date,
       is_bot: p.is_bot,
       notifications_enabled: p.notifications_enabled ? 'true' : 'false',
@@ -402,6 +421,7 @@ const resetForm = () => {
       active: 'true',
       departments: [],
       studio_id: null,
+      country: null,
       expiration_date: null,
       is_bot: props.isBot,
       email: props.isBot ? user.value.email : null
