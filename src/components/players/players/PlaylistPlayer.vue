@@ -2915,8 +2915,14 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   for (const { preview, index } of picturePreviews) {
     if (currentPreviewIndex.value !== index) {
       currentPreviewIndex.value = index
-      await new Promise(resolve => setTimeout(resolve, 500))
     }
+    // Always wait for the live canvas to settle before compositing.
+    // Iteration #1 often skips the index switch (the user is already
+    // on the main preview), but the live canvas can still be mid-load
+    // when the snapshot is triggered right after opening the task —
+    // composite would then capture an empty canvas and the resulting
+    // PNG would come out without any annotation.
+    await new Promise(resolve => setTimeout(resolve, 500))
     const canvas = document.getElementById('annotation-snapshot')
     extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)

@@ -1474,12 +1474,15 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   for (const { preview, index } of picturePreviews) {
     if (currentIndex.value !== index) {
       currentIndex.value = index
-      // Wait for the picture to swap and annotations to reload. The
-      // chain is async (image load -> resetPlayerPositions ->
-      // AnnotationCanvas resized -> reloadAnnotations) so a single tick
-      // isn't enough.
-      await new Promise(resolve => setTimeout(resolve, 500))
     }
+    // Always wait for the picture to load and the live canvas to
+    // settle before compositing. Iteration #1 often skips the index
+    // switch (the user is already on the main preview), but the chain
+    // is async (image load -> resetPlayerPositions -> AnnotationCanvas
+    // resized -> reloadAnnotations) and composite would otherwise
+    // capture an empty live canvas, producing a PNG without any
+    // annotation.
+    await new Promise(resolve => setTimeout(resolve, 500))
     const canvas = document.getElementById('annotation-snapshot')
     previewViewer.value.extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
