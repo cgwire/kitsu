@@ -121,6 +121,10 @@
                 v-model="params.is_set_preview_automated"
               />
               <combobox-boolean
+                :label="$t('productions.fields.is_single_preview_per_revision')"
+                v-model="params.is_single_preview_per_revision"
+              />
+              <combobox-boolean
                 :label="$t('productions.fields.is_publish_default')"
                 v-model="params.is_publish_default_for_artists"
               />
@@ -403,6 +407,7 @@ const params = ref({
   is_clients_isolated: 'false',
   is_preview_download_allowed: 'false',
   is_set_preview_automated: 'false',
+  is_single_preview_per_revision: 'false',
   is_publish_default_for_artists: 'false',
   max_retakes: 0
 })
@@ -464,6 +469,9 @@ const loadTemplateData = async () => {
       ? 'true'
       : 'false',
     is_set_preview_automated: tmpl.is_set_preview_automated ? 'true' : 'false',
+    is_single_preview_per_revision: tmpl.is_single_preview_per_revision
+      ? 'true'
+      : 'false',
     is_publish_default_for_artists: tmpl.is_publish_default_for_artists
       ? 'true'
       : 'false',
@@ -512,6 +520,8 @@ const saveParameters = async () => {
         params.value.is_preview_download_allowed === 'true',
       is_set_preview_automated:
         params.value.is_set_preview_automated === 'true',
+      is_single_preview_per_revision:
+        params.value.is_single_preview_per_revision === 'true',
       is_publish_default_for_artists:
         params.value.is_publish_default_for_artists === 'true'
     })

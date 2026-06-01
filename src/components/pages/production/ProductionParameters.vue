@@ -128,6 +128,12 @@
           v-if="currentProduction && currentProduction.id"
         />
         <combobox-boolean
+          :label="$t('productions.fields.is_single_preview_per_revision')"
+          @enter="runConfirmation"
+          v-model="form.is_single_preview_per_revision"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <combobox-boolean
           :label="$t('productions.fields.is_publish_default')"
           @enter="runConfirmation"
           v-model="form.is_publish_default_for_artists"
@@ -212,6 +218,7 @@ const emptyForm = () => ({
   is_clients_isolated: 'false',
   is_preview_download_allowed: 'false',
   is_set_preview_automated: 'false',
+  is_single_preview_per_revision: 'false',
   is_publish_default_for_artists: 'false',
   fps: '',
   ratio: '',
@@ -268,6 +275,9 @@ const resetForm = () => {
         ? 'true'
         : 'false',
       is_set_preview_automated: production.is_set_preview_automated
+        ? 'true'
+        : 'false',
+      is_single_preview_per_revision: production.is_single_preview_per_revision
         ? 'true'
         : 'false',
       is_publish_default_for_artists: production.is_publish_default_for_artists

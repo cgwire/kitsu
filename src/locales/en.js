@@ -1382,6 +1382,7 @@ export default {
       is_preview_download_allowed: 'Allow artists to download previews',
       is_publish_default: 'Set comment widget for artists on publish mode by default',
       is_set_preview_automated: 'Set new preview as entity thumbnail automatically',
+      is_single_preview_per_revision: 'Allow only one preview file per revision',
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',

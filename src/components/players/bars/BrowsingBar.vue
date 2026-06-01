@@ -31,7 +31,7 @@
       icon="plus"
       :title="$t('playlists.actions.files_add')"
       @click="$emit('add-preview-clicked')"
-      v-if="(isAssigned || !readOnly) && !fullScreen"
+      v-if="(isAssigned || !readOnly) && !fullScreen && allowExtraPreview"
     />
 
     <button-simple
@@ -52,6 +52,10 @@ import { computed } from 'vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 const props = defineProps({
+  allowExtraPreview: {
+    type: Boolean,
+    default: true
+  },
   currentIndex: {
     type: Number,
     default: 0

@@ -266,6 +266,7 @@
           ></div>
 
           <browsing-bar
+            :allow-extra-preview="allowExtraPreview"
             :current-index="currentIndex"
             :previews="previews"
             :read-only="readOnly"
@@ -749,6 +750,10 @@ if (props.entityPreviewFiles) {
 
 const currentProduction = computed(() =>
   productionMap.value.get(props.task.project_id)
+)
+
+const allowExtraPreview = computed(
+  () => !currentProduction.value?.is_single_preview_per_revision
 )
 
 const marginBottom = computed(() => {
