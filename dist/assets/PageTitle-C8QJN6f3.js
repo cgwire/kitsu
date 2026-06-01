@@ -1,0 +1,2 @@
+import{$i as e,Di as t,Zi as n,li as r,qr as i,sn as a}from"./index-CZoAGimD.js";i();var o=a({__name:`PageTitle`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}},setup(i){return(a,o)=>(t(),r(`h1`,{class:n({title:!0,"hide-small-screen":!0,bold:i.bold})},e(i.text),3))}},[[`__scopeId`,`data-v-e097dae2`]]);export{o as t};
+//# sourceMappingURL=PageTitle-C8QJN6f3.js.map

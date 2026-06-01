@@ -1,0 +1,2 @@
+import{$i as e,Di as t,li as n,oi as r,qr as i,sn as a}from"./index-CZoAGimD.js";i();var o={name:`wrong-browser`},s={class:`server-down page`},c={class:`title`};function l(i,a,o,l,u,d){return t(),n(`div`,s,[r(`h1`,c,e(i.$t(`wrong_browser.title`)),1),r(`p`,null,e(i.$t(`wrong_browser.text`)),1)])}var u=a(o,[[`render`,l]]);export{u as default};
+//# sourceMappingURL=WrongBrowser-7OqOnKgp.js.map

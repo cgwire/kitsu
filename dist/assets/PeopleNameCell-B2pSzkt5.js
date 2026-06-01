@@ -1,0 +1,2 @@
+import{Di as e,a as t,i as n,li as r,oi as i,pi as a,qr as o,sn as s}from"./index-CZoAGimD.js";o();var c={scope:`row`},l={class:`flexrow`},u=s({__name:`PeopleNameCell`,props:{person:{type:Object,required:!0}},setup(o){return(s,u)=>(e(),r(`td`,c,[i(`div`,l,[a(t,{person:o.person},null,8,[`person`]),a(n,{"with-link":``,person:o.person},null,8,[`person`])])]))}},[[`__scopeId`,`data-v-eb27d442`]]);export{u as t};
+//# sourceMappingURL=PeopleNameCell-B2pSzkt5.js.map

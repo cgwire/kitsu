@@ -1,0 +1,2 @@
+import{Gi as e,qr as t}from"./index-CZoAGimD.js";t();var n=()=>{let t=e({x:0,y:0,scale:1});return{panzoomTransform:t,onPanzoomChanged:({x:e,y:n,scale:r})=>{t.value={x:e,y:n,scale:r}},resetPanzoomTransform:()=>{t.value={x:0,y:0,scale:1}},applyPanzoomTo:e=>{if(!e)return;let{x:n,y:r,scale:i}=t.value;e.setViewportTransform([i,0,0,i,n,r]),e.requestRenderAll()}}};export{n as t};
+//# sourceMappingURL=panzoom-LGL2zXQy.js.map

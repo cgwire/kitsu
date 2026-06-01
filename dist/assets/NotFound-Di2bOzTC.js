@@ -1,2 +1,0 @@
-import{$i as e,Di as t,li as n,oi as r,qr as i,sn as a}from"./index-BrcQKHtP.js";i();var o={name:`not-found`},s={class:`not-found page has-text-centered`},c={class:`title`},l={href:`/`};function u(i,a,o,u,d,f){return t(),n(`div`,s,[a[0]||(a[0]=r(`img`,{class:`illustration`,src:`/assets/404-VtGghZp-.png`},null,-1)),r(`h1`,c,e(i.$t(`not_found.title`)),1),r(`p`,null,e(i.$t(`not_found.text`)),1),r(`p`,null,[r(`a`,l,e(i.$t(`main.home`)),1)])])}var d=a(o,[[`render`,u],[`__scopeId`,`data-v-de57cd59`]]);export{d as default};
-//# sourceMappingURL=NotFound-Di2bOzTC.js.map

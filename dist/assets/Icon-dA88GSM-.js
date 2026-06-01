@@ -1,0 +1,2 @@
+import{Di as e,Ni as t,Sn as n,ai as r,qr as i,si as a}from"./index-CZoAGimD.js";import{t as o}from"./string-DFqkLV55.js";i();var s={__name:`Icon`,props:{name:{type:String,required:!0},size:Number,color:String,strokeWidth:Number,defaultClass:String},setup(i){let s=i,c=r(()=>n[o.snakeToPascal(s.name)]);return(n,r)=>(e(),a(t(c.value),{size:i.size,color:i.color,"stroke-width":i.strokeWidth,"default-class":i.defaultClass},null,8,[`size`,`color`,`stroke-width`,`default-class`]))}};export{s as default};
+//# sourceMappingURL=Icon-dA88GSM-.js.map

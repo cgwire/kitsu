@@ -1,2 +1,0 @@
-import{Lt as e,Wr as t,ai as n,qr as r}from"./index-BrcQKHtP.js";r();var i=()=>{let r=t(),i=n(()=>r.getters.isDarkTheme);return{backgroundColor:t=>(!t||t.name===`Todo`)&&!i.value?`#ECECEC`:(!t||t.name===`Todo`)&&i.value?`#5F626A`:i.value?e.darkenColor(t.color):t.color,color:e=>!e||e.name!==`Todo`||i.value?`white`:`#333`,isDarkTheme:i}};export{i as t};
-//# sourceMappingURL=taskStatus-C3KcxOGG.js.map
