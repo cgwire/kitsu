@@ -394,7 +394,7 @@ The remaining settings on this page are global settings that affect every produc
 
 ![Kitsu Settings](./docs/img/getting-started/kitsu_setting.png)
 
-Finally, you will also find settings relating to various chat integrations. Please refer to [Chat Integration](../chat-integration/README.md) section for more information on how to configure this.
+Finally, you will also find settings relating to various chat integrations. Please refer to [Chat Integration](../chat-integration) section for more information on how to configure this.
 
 ::: warning
 Remember to **Save Settings** at the end once you are finished.
@@ -701,7 +701,7 @@ To create your **Production Workflow**, select Task Types from the Global Librar
 
 If you realize you missed some Task Types, you can create them later.
 
-[See Getting Started With Kitsu](../configure-kitsu/README.md)
+[See Getting Started With Kitsu](../configure-kitsu)
 :::
 
 Then, steps 7 and 8 are optional. If you already have a spreadsheet with your assets or shots, refer to the **import CSV** section for more details.
@@ -889,7 +889,7 @@ A pop-up window opens:
 - It asks you to choose the **Asset Type** (1). If you haven't added a new asset type, Kitsu will provide examples such as Characters, Environment, FX, Props. Let's start with a character.
 
 ::: tip
-You can also customize the asset type list and the task pipeline. [See Asset Types Workflow](../configure-kitsu/README.md#specific-asset-types-workflow)
+You can also customize the asset type list and the task pipeline. [See Asset Types Workflow](../configure-kitsu#specific-asset-types-workflow)
 :::
 
 Link this asset to an Episode (Kitsu provides the **Main Pack** by default, which is not editable or removable) and select a first episode to help you get started **E01**. You can rename or delete E01.
@@ -1059,7 +1059,7 @@ Now, you have imported all your assets into Kitsu and updated the tasks accordin
 
 If you realize **after** creating the assets that tasks are missing, you can still add them.
 
-First, ensure that the missing task type is added in the settings page under the task type tab (otherwise, [See Getting Started with Kitsu](../configure-kitsu/README.md)).
+First, ensure that the missing task type is added in the settings page under the task type tab (otherwise, [See Getting Started with Kitsu](../configure-kitsu)).
 
 Then, go back to the asset page and click on **+ Add Tasks**.
 
@@ -1154,7 +1154,7 @@ Click on the **Add Shots** button to start with shot creation.
 ::: warning
 When you create a shot, the task workflow you have designed will be applied, and all the tasks will be created at the same time as the shot.
 
-[See Getting Started With Kitsu](../configure-kitsu/README.md)
+[See Getting Started With Kitsu](../configure-kitsu)
 :::
 
 A new pop-up opens for the creation of the shots.
@@ -1503,7 +1503,7 @@ This new page behaves like the asset and shot global page.
 To use this page, You first need to create dedicated task types on your **Global Library**
  with the **Sequence** attribute.
 
- [See How to Create a New Task Type](../configure-kitsu/README.md#studio-workflow-create-a-new-task-type)
+ [See How to Create a New Task Type](../configure-kitsu#studio-workflow-create-a-new-task-type)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -1541,7 +1541,7 @@ It's especially useful when you have several edits to track through several vali
 ::: warning
 By default, the **Edit** page will not be displayed until you have task types for it in your **production library** (setting page).
 
-[See How to Create a New Task Type](../configure-kitsu/README.md#studio-workflow-create-a-new-task-type)
+[See How to Create a New Task Type](../configure-kitsu#studio-workflow-create-a-new-task-type)
 :::
 
 To use this page, you need to first create a dedicated task type in your **Global Library** with the **Edit** attribute.
@@ -1742,7 +1742,7 @@ You can use the **automations** to do the heavy lifting for you.
 
 You can set automation with the **ready for** trigger.
 
-[See How to Create Status Automation](../configure-kitsu/README.md#automation)
+[See How to Create Status Automation](../configure-kitsu#automation)
 
 :::
 
@@ -1799,16 +1799,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio) section.
+See the [Studio Workflow](../configure-kitsu#studio) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
 See the **import CSV** section for more details.
 
-[Import asset](../feature/README.md#create-an-asset)
+[Import asset](../feature#create-an-asset)
 
-[Import shot](../feature/README.md#create-shots-from-an-edl-file)
+[Import shot](../feature#create-shots-from-an-edl-file)
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -2001,7 +2001,7 @@ Let's start with a character.
 
 ::: tip
 You can also customize the asset type list and the tasks pipeline. See the guide (
-[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
+[Customization of the workflow](../configure-kitsu#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the asset.
@@ -2544,7 +2544,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../feature/README.md#update-your-shots)
+ [Update Shots information with CSV Import](../feature#update-your-shots)
 
 You can also access the history of shot values.
 
@@ -2652,7 +2652,7 @@ To use this page, You first need to create dedicated task types on your **Global
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -2705,7 +2705,7 @@ To use this page, you need to first create a dedicated task type on your **Globa
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
@@ -2964,16 +2964,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
+See the [Studio Workflow](../configure-kitsu#studio-workflows) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
 See the **import CSV** section for more details.
 
-[Import asset](../short/README.md#create-an-asset)
+[Import asset](../short#create-an-asset)
 
-[Import shot](../short/README.md#create-shots-from-an-edl-file)
+[Import shot](../short#create-shots-from-an-edl-file)
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -3172,7 +3172,7 @@ Let's start with a character.
 
 ::: tip
 You can also customize the asset type list and the tasks pipeline. See the guide (
-[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
+[Customization of the workflow](../configure-kitsu#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the asset.
@@ -3710,7 +3710,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../short/README.md#update-your-shots)
+ [Update Shots information with CSV Import](../short#update-your-shots)
 
 You can also access the history of shot values.
 
@@ -3814,7 +3814,7 @@ To use this page, You first need to create dedicated task types on your **Global
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -3860,7 +3860,7 @@ To use this page, you need to first create a dedicated task type on your **Globa
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
@@ -4111,14 +4111,14 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
+See the [Studio Workflow](../configure-kitsu#studio-workflows) section.
 :::
 
 Then, 5 is the option parts. If you already have a spreadsheet with your shot.
 
 See the **import CSV** section for more details.
 
-[Import shot](../short-shot/README.md#create-shots-from-an-edl-file
+[Import shot](../short-shot#create-shots-from-an-edl-file
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -4573,7 +4573,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 
 You can also use the **CSV Import** to update your frame range quickly.
- [Update Shots information with CSV Import](../short-shot/README.md#update-your-shots)
+ [Update Shots information with CSV Import](../short-shot#update-your-shots)
 
 You can also access the history of shot values.
 
@@ -4678,7 +4678,7 @@ To use this page, You first need to create dedicated task types on your **Global
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -4725,7 +4725,7 @@ To use this page, you need to first create a dedicated task type on your **Globa
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
@@ -4786,14 +4786,14 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you will be able to create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
+See the [Studio Workflow](../configure-kitsu#studio-workflows) section.
 :::
 
 Then, 6 is the option part. If you already have a spreadsheet with your Asset.
 
 See the **import CSV** section for more details.
 
-[Import asset](../short-asset/README.md#create-an-asset)
+[Import asset](../short-asset#create-an-asset)
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -4987,7 +4987,7 @@ Let's start with a character.
 
 ::: tip
 You can also customize the asset type list and the tasks pipeline. See the guide (
-[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
+[Customization of the workflow](../configure-kitsu#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the Asset.
@@ -5341,7 +5341,7 @@ To use this page, you need to first create a dedicated task type on your **Globa
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
@@ -5534,16 +5534,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
+See the [Studio Workflow](../configure-kitsu#studio-workflows) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/map.
 
 See the **import CSV** section for more details.
 
-[Import asset](../videogame/README.md#create-an-asset)
+[Import asset](../videogame#create-an-asset)
 
-[Import map](../videogame/README.md#create-maps-from-an-edl-file)
+[Import map](../videogame#create-maps-from-an-edl-file)
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -5741,7 +5741,7 @@ Let's start with a character.
 
 ::: tip
 You can also customize the asset type list and the tasks pipeline. See the guide (
-[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
+[Customization of the workflow](../configure-kitsu#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the asset.
@@ -6280,7 +6280,7 @@ If you enter the **Frame In** and **Frame Out**, Kitsu automatically calculates 
 
 You can also use the **CSV Import** to update your frame range quickly.
 
- [Update maps information with CSV Import](../videogame/README.md#update-your-maps)
+ [Update maps information with CSV Import](../videogame#update-your-maps)
 
 You can also access the map values history.
 
@@ -6386,7 +6386,7 @@ To use this page, You first need to create dedicated task types on your **Global
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -6434,7 +6434,7 @@ To use this page, you need to first create a dedicated task type on your **Globa
 
 See the **Creating a New Task Type** Section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/README.md#task-types)
+[Creating a New Task Type](../configure-kitsu#task-types)
 
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
@@ -6690,16 +6690,16 @@ To create your **Production Workflow**, you will select Task Types from the Glob
 
 If you realize you missed some Task Types, you can create them later.
 
-See the [Studio Workflow](../configure-kitsu/README.md#studio-workflows) section.
+See the [Studio Workflow](../configure-kitsu#studio-workflows) section.
 :::
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/NFT Collection.
 
 See the **import CSV** section for more details.
 
-[Import asset](../nft/README.md#create-an-asset)
+[Import asset](../nft#create-an-asset)
 
-[Import NFT Collection](../nft/README.md#create-a-nft-collection)
+[Import NFT Collection](../nft#create-a-nft-collection)
 
 Validate everything with the ![All done](./docs/img/getting-started/all_done_go.png) button.
 
@@ -6897,7 +6897,7 @@ Let's start with a character.
 
 ::: tip
 You can also customize the asset type list and the tasks pipeline. See the guide (
-[Customization of the workflow](../configure-kitsu/README.md#asset-types)) for more details
+[Customization of the workflow](../configure-kitsu#asset-types)) for more details
 :::
 
 We give it a **Name** (2) and enter a description that helps the Artist know what to do and quickly identify the asset.
@@ -7639,7 +7639,7 @@ Type the list elements below **Available values**, and confirm them by clicking 
 
 You can also link the **metadata column** to one or several **departments**. The artists/supervisors will see it on their to-do page and in the department-filtered view.
 
-To create more departments, see [Create Departments](../configure-kitsu/README.md#create-departments).
+To create more departments, see [Create Departments](../configure-kitsu#create-departments).
 
 You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to confirm.
 
@@ -7914,7 +7914,7 @@ You can filter a task type with a specific level of priority.
 
 ::: tip
 To learn more about priorities, see
-[Change Priorities](../estimation/README.md#change-priorities)
+[Change Priorities](../estimation#change-priorities)
 :::
 
 First, select your task type, then you can choose between
@@ -8217,7 +8217,7 @@ Assigning a task to a user offers several benefits:
 
 ## Add Users to the Team
 
-In the [section on preparing your team](../team/README.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
+In the [section on preparing your team](../team), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
 
 ::: tip
 In order for a user to be assigned to a task, they must first be added to a production. Please note that you cannot assign tasks to users outside of the production.
@@ -8360,7 +8360,7 @@ You can also select multiple tasks simultaneously to edit them all at once.
 
 Every time you change the **Estimation** (in the number of days) on the right side, you will see that the **Average Quota** updates in real time.
 
-For more information about the **Schedule** tab, refer to [Task Type Schedule](../schedules/README.md#Set-a-Task-Estimation).
+For more information about the **Schedule** tab, refer to [Task Type Schedule](../schedules#Set-a-Task-Estimation).
 
 ## Quotas
 
@@ -8781,7 +8781,7 @@ You can add one or several previews to any comments. These can be a picture (`.p
 
 You can also review a `.glb` file as a wireframe or add a `.HDR` file to check the lighting. See the **Customization** section for more details.
 
-[Pipeline Customization](../configure-kitsu/README.md#3d-backgrounds)
+[Pipeline Customization](../configure-kitsu#3d-backgrounds)
 
 Other files like `.pdf`, `.zip`, `.rar`, `.ma`, or `.mb` cannot be viewed in the browser and need to be downloaded to be reviewed.
 
@@ -8803,7 +8803,7 @@ On top of your preview, you can add a **Comment**. Click the **Leave a Comment**
 
 You can then select your status and publish your preview with the **Post** Button.
 
-For more information on using publishes as thumbnails, [see this section here on thumbnails](../thumbnails/README.md).
+For more information on using publishes as thumbnails, [see this section here on thumbnails](../thumbnails).
 
 ## Combining Previews Into a Version
 
@@ -8884,7 +8884,7 @@ You can move around the 3D file by dragging and dropping your cursor and zooming
 ![Preview background example](./docs/img/getting-started/preview_background_example.png)
 
 See the **Customization** section for more details.
-[Pipeline Customization](../configure-kitsu/README.md#3d-backgrounds)
+[Pipeline Customization](../configure-kitsu#3d-backgrounds)
 
 You can select a color to use and then draw directly on the preview with the **Pencil** tool ![Pencil](./docs/img/getting-started/draw.png).
 
@@ -9048,13 +9048,13 @@ You can see the drawing comment on the video (the red dot below the timeline).
 
 ![Playlist comment](./docs/img/getting-started/playlist_comment.png)
 
-You can draw or type on the video (similar to [Perform a review](../status-publish-review/README.md#perform-a-review)) using the **draw** button ![draw button](./docs/img/getting-started/draw.png).
+You can draw or type on the video (similar to [Perform a review](../status-publish-review#perform-a-review)) using the **draw** button ![draw button](./docs/img/getting-started/draw.png).
 
 ## Review Room
 
 The Review Room is a collaborative space designed for efficient and synchronized dailies review sessions. It ensures that all participants are viewing the same content simultaneously, facilitating real-time feedback and discussion.
 
-To learn more about the Review Room, [visit this section here](../playlist-client/README.md#review-room).
+To learn more about the Review Room, [visit this section here](../playlist-client#review-room).
 
 # Daily & Weekly review
 
@@ -9165,7 +9165,7 @@ You can draw or type on the video with the **draw** button ![draw button](./docs
 
 The first step in preparing a review with your client is to create a playlist of the content you wish to share and review. The process is similar to creating a regular playlist but Kitsu includes some nice features to aid with collaborate from parties outside your studio.
 
-To get started, you'll need to create your playlist and add the items you want to review. [See this section here for a reminder on how to do this](../review/README.md#create-a-playlist).
+To get started, you'll need to create your playlist and add the items you want to review. [See this section here for a reminder on how to do this](../review#create-a-playlist).
 
 The main difference is to ensure under **To Be Shared With** you select **The Client**. This will ensure the proper permissions and only provide the client access to this specific playlist.
 

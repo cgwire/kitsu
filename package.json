@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "Documentation for Kitsu, CG production manager",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "deploy": "wrangler deploy"
   },
   "repository": {
     "type": "git",
@@ -23,6 +28,11 @@
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "vuepress": "1.9.10"
+    "vitepress": "^2.0.0-alpha.16",
+    "vue": "^3.5.13",
+    "wrangler": "^4.61.1"
+  },
+  "dependencies": {
+    "mermaid": "^11.13.0"
   }
 }
