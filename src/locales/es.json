@@ -288,6 +288,7 @@
       "altup": "Mover tarea seleccionada arriba",
       "annotations": "Anotaciones",
       "draw": "Activar el modo de dibujo",
+      "erase": "Activar el modo de borrador",
       "navigation": "Navegación",
       "redo": "Rehacer",
       "undo": "Deshacer",
