@@ -1238,22 +1238,30 @@ export default {
     onNewEntityDropped(info) {
       let entity
       this.setSilent()
+      const entityId = info.after.entity_id
       if (this.isAssetPlaylist) {
-        entity = assetStore.cache.assetMap.get(info.after)
+        entity = assetStore.cache.assetMap.get(entityId)
       } else if (this.isSequencePlaylist) {
-        entity = sequenceStore.cache.sequenceMap.get(info.after)
+        entity = sequenceStore.cache.sequenceMap.get(entityId)
       } else if (this.isEditPlaylist) {
-        entity = editStore.cache.editMap.get(info.after)
+        entity = editStore.cache.editMap.get(entityId)
       } else if (this.isEpisodePlaylist) {
-        entity = episodeStore.cache.episodeMap.get(info.after)
+        entity = episodeStore.cache.episodeMap.get(entityId)
       } else {
-        entity = shotStore.cache.shotMap.get(info.after)
+        entity = shotStore.cache.shotMap.get(entityId)
       }
 
       if (entity && !this.currentEntitiesMap[entity.id]) {
         const notScrollRight = false
         const playlist = this.currentPlaylist
-        this.addEntity(entity, playlist, notScrollRight).then(() => {
+        this.addEntity(entity, playlist, notScrollRight).then(addedEntity => {
+          // The preview file id is only resolved when the entity is added, so
+          // the dragged payload can't carry it. Patch it in before replaying
+          // the drop so findEntity can locate the newly added entity and move
+          // it to the drop position instead of leaving it at the end.
+          if (addedEntity) {
+            info.after.preview_file_id = addedEntity.preview_file_id
+          }
           this.playlistPlayer.onEntityDropped(info)
           this.clearSilent()
         })
