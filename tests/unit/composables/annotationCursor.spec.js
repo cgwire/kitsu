@@ -4,6 +4,7 @@ import { defineComponent, ref } from 'vue'
 import {
   CURSOR_LASER,
   CURSOR_PENCIL,
+  buildEraserCursor,
   useAnnotationCursor
 } from '@/composables/players/annotationCursor'
 
@@ -19,6 +20,8 @@ const mountCursor = (overrides = {}) => {
     isTyping: ref(false),
     isShapeMode: ref(false),
     isLaserModeOn: ref(false),
+    isEraserModeOn: ref(false),
+    pencilWidth: ref('big'),
     ...overrides
   }
   let api
@@ -71,6 +74,26 @@ describe('composables/annotationCursor', () => {
       expect(cursor.value).toBe(CURSOR_LASER)
       wrapper.unmount()
     })
+
+    it('maps isEraserModeOn to a round eraser cursor sized to the width', () => {
+      const { cursor, modes, wrapper } = mountCursor()
+      modes.isEraserModeOn.value = true
+      modes.pencilWidth.value = 'big'
+      expect(cursor.value).toBe(buildEraserCursor('big'))
+      expect(cursor.value).toContain('circle')
+      wrapper.unmount()
+    })
+
+    it('resizes the eraser cursor when the width preset changes', () => {
+      const { cursor, modes, wrapper } = mountCursor()
+      modes.isEraserModeOn.value = true
+      modes.pencilWidth.value = 'tiny'
+      const tiny = cursor.value
+      modes.pencilWidth.value = 'huge'
+      expect(cursor.value).not.toBe(tiny)
+      expect(cursor.value).toBe(buildEraserCursor('huge'))
+      wrapper.unmount()
+    })
   })
 
   describe('Alt-pan', () => {
@@ -113,6 +136,16 @@ describe('composables/annotationCursor', () => {
       modes.isShapeMode.value = true
       modes.isDrawing.value = true
       expect(cursor.value).toBe('text')
+      wrapper.unmount()
+    })
+
+    it('prefers the eraser over laser, shape and drawing', () => {
+      const { cursor, modes, wrapper } = mountCursor()
+      modes.isEraserModeOn.value = true
+      modes.isLaserModeOn.value = true
+      modes.isShapeMode.value = true
+      modes.isDrawing.value = true
+      expect(cursor.value).toBe(buildEraserCursor('big'))
       wrapper.unmount()
     })
 

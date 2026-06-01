@@ -43,7 +43,7 @@
     <list-icon class="icon" v-else-if="icon === 'list'" />
     <triangle-icon class="icon" v-else-if="icon === 'triangle'" />
     <music-icon class="icon" v-else-if="icon === 'music'" />
-    <square-icon class="icon" v-else-if="icon === 'eraser'" />
+    <eraser-icon class="icon" v-else-if="icon === 'eraser'" />
     <key-icon class="icon" v-else-if="icon === 'key'" />
     <zoom-in-icon class="icon" v-else-if="icon === 'loupe'" />
     <globe-icon class="icon" v-else-if="icon === 'globe'" />
@@ -106,6 +106,7 @@ import {
   FileDigitIcon,
   EditIcon,
   Edit2Icon,
+  EraserIcon,
   GlobeIcon,
   GridIcon,
   FileDownIcon,
@@ -129,7 +130,6 @@ import {
   SkipBackIcon,
   SkipForwardIcon,
   SmileIcon,
-  SquareIcon,
   TriangleIcon,
   XIcon,
   ZoomInIcon

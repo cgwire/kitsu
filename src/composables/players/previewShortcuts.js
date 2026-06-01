@@ -29,6 +29,7 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
  * @param {Function} [handlers.onPrevAnnotation]
  * @param {Function} [handlers.onNextAnnotation]
  * @param {Function} [handlers.onAnnotate]
+ * @param {Function} [handlers.onErase]
  * @param {Function} [handlers.onUndo]
  * @param {Function} [handlers.onRedo]
  * @param {Function} [handlers.onPrevPreview]
@@ -41,6 +42,10 @@ export const usePreviewShortcuts = handlers => {
   const isAltHeld = ref(false)
 
   const onKeyDown = event => {
+    // Ignore auto-repeat keydowns from a held key: toggles (draw `d`, eraser
+    // `e`) would otherwise flip twice and appear to do nothing every other
+    // press, depending on how long the key was held.
+    if (event.repeat) return
     // Alt+P plays/pauses even when an <input> / <textarea> has focus,
     // so users can pause / resume while typing a comment without
     // leaving the field. All other shortcuts stay blocked inside text
@@ -85,6 +90,10 @@ export const usePreviewShortcuts = handlers => {
       case 'd':
         pauseEvent(event)
         handlers.onAnnotate?.()
+        break
+      case 'e':
+        pauseEvent(event)
+        handlers.onErase?.()
         break
       case 'z':
         if (mod) handlers.onUndo?.()

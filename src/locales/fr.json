@@ -288,6 +288,7 @@
       "altup": "Déplace la sélection d'une tâche vers le haut",
       "annotations": "Annotations",
       "draw": "Démarre le mode dessin",
+      "erase": "Démarre le mode gomme",
       "navigation": "Navigation",
       "redo": "Redo",
       "undo": "Undo",

@@ -18,6 +18,7 @@ const mountShortcuts = (handlerOverrides = {}) => {
     onPrevAnnotation: vi.fn(),
     onNextAnnotation: vi.fn(),
     onAnnotate: vi.fn(),
+    onErase: vi.fn(),
     onUndo: vi.fn(),
     onRedo: vi.fn(),
     onPrevPreview: vi.fn(),
@@ -119,6 +120,22 @@ describe('composables/previewShortcuts', () => {
       const { handlers, wrapper } = mountShortcuts()
       dispatchKeydown({ key: 'd' })
       expect(handlers.onAnnotate).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('`e` triggers onErase', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      dispatchKeydown({ key: 'e' })
+      expect(handlers.onErase).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('ignores auto-repeat keydowns so a held key does not double-toggle', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      dispatchKeydown({ key: 'e', repeat: true })
+      dispatchKeydown({ key: 'd', repeat: true })
+      expect(handlers.onErase).not.toHaveBeenCalled()
+      expect(handlers.onAnnotate).not.toHaveBeenCalled()
       wrapper.unmount()
     })
   })

@@ -132,6 +132,34 @@
       "
     />
 
+    <transition name="slide">
+      <div
+        class="annotation-tools"
+        v-show="isEraserModeOn && (!light || fullScreen)"
+      >
+        <pencil-picker
+          v-bind="pickerState('eraser-pencil')"
+          :pencil="pencilWidth"
+          :sizes="pencilPalette"
+          @change="$emit('change-pencil-width', $event)"
+        />
+      </div>
+    </transition>
+
+    <button-simple
+      class="flexrow-item"
+      icon="eraser"
+      :active="isEraserModeOn"
+      :title="$t('playlists.actions.annotation_erase')"
+      @click="$emit('erase-clicked')"
+      v-if="
+        isEraserModeOn !== undefined &&
+        !readOnly &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
+    />
+
     <button-simple
       class="flexrow-item"
       icon="delete"
@@ -292,6 +320,7 @@ defineEmits([
   'change-text-color',
   'comment-clicked',
   'delete-clicked',
+  'erase-clicked',
   'object-background-selected',
   'pencil-annotate-clicked',
   'redo',
@@ -307,6 +336,7 @@ const isEnvironmentSkybox = defineModel('isEnvironmentSkybox', {
 })
 const isWireframe = defineModel('isWireframe', { default: false })
 const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
+const isEraserModeOn = defineModel('isEraserModeOn', { default: undefined })
 const isShapeMode = defineModel('isShapeMode', { default: undefined })
 const currentShape = defineModel('currentShape', { default: undefined })
 

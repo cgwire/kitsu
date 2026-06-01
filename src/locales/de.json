@@ -288,6 +288,7 @@
       "altup": "Verschiebt die Auswahl einer Aufgabe nach oben",
       "annotations": "Anmerkungen",
       "draw": "Zeichnungsmodus einschalten",
+      "erase": "Radiermodus einschalten",
       "navigation": "Navigation",
       "redo": "Redo",
       "undo": "Undo",

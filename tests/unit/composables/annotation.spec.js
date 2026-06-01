@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref } from 'vue'
 
 import { useAnnotation } from '@/composables/players/annotation'
+import { Eraser, EraserBrush } from '@/lib/eraserbrush'
 
 /**
  * Build a fake fabric.Canvas-like object good enough for the composable's
@@ -98,6 +99,7 @@ const mountAnnotation = (options = {}) => {
     currentTime = 1.0,
     currentFrame = 24,
     isLaserModeOn = ref(false),
+    isEraserModeOn = ref(false),
     storeOverrides = {},
     emitSpy = vi.fn(),
     saveAnnotationsCb = vi.fn(),
@@ -142,6 +144,7 @@ const mountAnnotation = (options = {}) => {
         onCanvasMouseMovedCb,
         onCanvasReleasedCb,
         isLaserModeOn,
+        isEraserModeOn,
         postAnnotationAddition,
         postAnnotationDeletion,
         postAnnotationUpdate
@@ -166,7 +169,8 @@ const mountAnnotation = (options = {}) => {
     postAnnotationUpdate,
     store,
     mainCanvasComponent,
-    isLaserModeOn
+    isLaserModeOn,
+    isEraserModeOn
   }
 }
 
@@ -353,6 +357,30 @@ describe('composables/annotation', () => {
     })
   })
 
+  describe('onErasingEnd', () => {
+    it('routes erased objects to updates, not additions', () => {
+      const { api, postAnnotationUpdate, saveAnnotationsCb, wrapper } =
+        mountAnnotation()
+      const objA = createSerializableObject({ id: 'a' })
+      const objB = createSerializableObject({ id: 'b' })
+      api.onErasingEnd({ targets: [objA, objB], path: {} })
+      expect(api.updates.value).toHaveLength(1)
+      expect(api.updates.value[0].drawing.objects).toHaveLength(2)
+      expect(api.additions.value).toHaveLength(0)
+      expect(postAnnotationUpdate).toHaveBeenCalledTimes(2)
+      expect(saveAnnotationsCb).toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('ignores an erasing:end that touched no object', () => {
+      const { api, saveAnnotationsCb, wrapper } = mountAnnotation()
+      api.onErasingEnd({ targets: [], subTargets: [] })
+      expect(api.updates.value).toHaveLength(0)
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+  })
+
   describe('isWriting', () => {
     it('returns true when last annotation time is after the given date', () => {
       const { api, wrapper } = mountAnnotation()
@@ -451,6 +479,52 @@ describe('composables/annotation', () => {
     })
   })
 
+  describe('onEraseClicked', () => {
+    it('installs an EraserBrush, enables drawing, exits shape mode', () => {
+      const isEraserModeOn = ref(false)
+      const { api, canvas, wrapper } = mountAnnotation({ isEraserModeOn })
+      api.isShapeMode.value = true
+      api.onEraseClicked()
+      expect(isEraserModeOn.value).toBe(true)
+      expect(canvas.isDrawingMode).toBe(true)
+      expect(api.isShapeMode.value).toBe(false)
+      expect(canvas.freeDrawingBrush).toBeInstanceOf(EraserBrush)
+      wrapper.unmount()
+    })
+
+    it('toggles the eraser off on a second click', () => {
+      const isEraserModeOn = ref(false)
+      const { api, canvas, wrapper } = mountAnnotation({ isEraserModeOn })
+      api.onEraseClicked()
+      api.onEraseClicked()
+      expect(isEraserModeOn.value).toBe(false)
+      expect(canvas.isDrawingMode).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('leaving the pencil mode turns the eraser off', () => {
+      const isEraserModeOn = ref(false)
+      const { api, canvas, wrapper } = mountAnnotation({ isEraserModeOn })
+      api.onEraseClicked()
+      expect(isEraserModeOn.value).toBe(true)
+      api.onAnnotateClicked()
+      expect(isEraserModeOn.value).toBe(false)
+      expect(canvas.isDrawingMode).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('keeps drawing mode on when the eraser owns it (stray leave-drawing)', () => {
+      const isEraserModeOn = ref(false)
+      const { api, canvas, wrapper } = mountAnnotation({ isEraserModeOn })
+      api.onEraseClicked()
+      expect(canvas.isDrawingMode).toBe(true)
+      // Mirrors the isDrawing watcher firing async after pencil→eraser.
+      api.setAnnotationDrawingMode(false)
+      expect(canvas.isDrawingMode).toBe(true)
+      wrapper.unmount()
+    })
+  })
+
   describe('applyGroupChanges', () => {
     it('returns the object unchanged when it is not in a group', () => {
       const { api, wrapper } = mountAnnotation()
@@ -470,6 +544,116 @@ describe('composables/annotation', () => {
       api.deleteSelection()
       expect(canvas.remove).toHaveBeenCalledWith(obj)
       expect(saveAnnotationsCb).toHaveBeenCalled()
+      wrapper.unmount()
+    })
+  })
+
+  describe('addObjectToCanvas — eraser selectivity', () => {
+    // fabric.IText internally calls getContext('2d') to measure text.
+    // jsdom returns null for canvas 2D contexts, so we install a minimal stub.
+    let originalGetContext
+    beforeAll(() => {
+      originalGetContext = HTMLCanvasElement.prototype.getContext
+      HTMLCanvasElement.prototype.getContext = function (type) {
+        if (type !== '2d') return originalGetContext.call(this, type)
+        return {
+          textBaseline: '',
+          font: '',
+          fillStyle: '',
+          fillText: () => {},
+          measureText: () => ({ width: 10 }),
+          save: () => {},
+          restore: () => {},
+          scale: () => {},
+          setTransform: () => {}
+        }
+      }
+    })
+    afterAll(() => {
+      HTMLCanvasElement.prototype.getContext = originalGetContext
+    })
+
+    it('text object loaded via addObjectToCanvas has erasable === false', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'txt-load-1',
+        type: 'i-text',
+        text: 'hello',
+        left: 10,
+        top: 20,
+        width: 100,
+        height: 30,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        fill: '#ff0000',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        textAlign: 'left',
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      const added = canvas._objects.find(o => o.id === 'txt-load-1')
+      expect(added).toBeDefined()
+      expect(added.erasable).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('path object loaded via addObjectToCanvas does NOT have erasable === false', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'path-load-1',
+        type: 'path',
+        path: 'M 0 0 L 10 10',
+        left: 0,
+        top: 0,
+        width: 10,
+        height: 10,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        stroke: '#ff0000',
+        strokeWidth: 2,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      const added = canvas._objects.find(o => o.id === 'path-load-1')
+      expect(added).toBeDefined()
+      expect(added.erasable).not.toBe(false)
+      wrapper.unmount()
+    })
+
+    it('revives a serialized eraser mask on a reloaded path', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'path-erased',
+        type: 'path',
+        path: 'M 0 0 L 10 10',
+        left: 0,
+        top: 0,
+        width: 10,
+        height: 10,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        stroke: '#ff0000',
+        strokeWidth: 2,
+        canvasWidth: 800,
+        canvasHeight: 600,
+        eraser: { type: 'eraser', objects: [{ path: 'M 0 0 L 5 5' }] }
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      const added = canvas._objects.find(o => o.id === 'path-erased')
+      expect(added.eraser).toBeInstanceOf(Eraser)
+      expect(added.eraser.getObjects()).toHaveLength(1)
       wrapper.unmount()
     })
   })
@@ -699,6 +883,60 @@ describe('composables/annotation', () => {
       const removeCallsBefore = canvas.remove.mock.calls.length
       api.undoLastAction()
       expect(canvas.remove.mock.calls.length).toBe(removeCallsBefore)
+      wrapper.unmount()
+    })
+  })
+
+  describe('eraser undo/redo', () => {
+    const makeErasable = (id, pathData = 'M 0 0 L 5 5') => {
+      const eraser = {
+        _objects: [{ path: pathData }],
+        getObjects() {
+          return this._objects
+        }
+      }
+      return createSerializableObject({ id, eraser })
+    }
+
+    it("undoes an 'erase' by removing the last eraser path", () => {
+      const { api, wrapper } = mountAnnotation()
+      const obj = makeErasable('e1')
+      api.onErasingEnd({ targets: [obj], path: {} })
+      api.undoLastAction()
+      // Single path popped → eraser emptied → dropped from the object.
+      expect(obj.eraser).toBeUndefined()
+      expect(obj.set).toHaveBeenCalledWith('dirty', true)
+      wrapper.unmount()
+    })
+
+    it('redo restores the removed eraser path exactly', () => {
+      const { api, wrapper } = mountAnnotation()
+      const obj = makeErasable('e1')
+      api.onErasingEnd({ targets: [obj], path: {} })
+      api.undoLastAction()
+      api.redoLastAction()
+      expect(obj.eraser).toBeDefined()
+      expect(obj.eraser.getObjects()).toHaveLength(1)
+      expect(obj.eraser.getObjects()[0].path).toBe('M 0 0 L 5 5')
+      wrapper.unmount()
+    })
+
+    it('redo targets the live object after a reload (fresh instance, same id)', () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const obj = makeErasable('e1')
+      canvas._objects.push(obj)
+      api.onErasingEnd({ targets: [obj], path: {} })
+      api.undoLastAction()
+      // Simulate a save/reload: the original object is swapped for a fresh
+      // instance carrying the same id (and, post-undo, no eraser).
+      const fresh = createSerializableObject({ id: 'e1' })
+      canvas._objects.length = 0
+      canvas._objects.push(fresh)
+      api.redoLastAction()
+      expect(fresh.eraser).toBeDefined()
+      expect(fresh.eraser.getObjects()).toHaveLength(1)
+      expect(obj.eraser).toBeUndefined() // the stale instance is untouched
       wrapper.unmount()
     })
   })

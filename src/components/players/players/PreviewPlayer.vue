@@ -221,6 +221,7 @@
             v-model:current-background="currentBackground"
             v-model:current-shape="currentShape"
             v-model:is-environment-skybox="isEnvironmentSkybox"
+            v-model:is-eraser-mode-on="isEraserModeOn"
             v-model:is-shape-mode="isShapeMode"
             v-model:is-wireframe="isWireframe"
             @annotation-displayed-clicked="onAnnotationDisplayedClicked"
@@ -230,6 +231,7 @@
             @change-text-color="onChangeTextColor"
             @comment-clicked="onCommentClicked"
             @delete-clicked="onDeleteClicked"
+            @erase-clicked="onEraseClicked"
             @object-background-selected="onObjectBackgroundSelected"
             @pencil-annotate-clicked="onPencilAnnotateClicked"
             @redo="redoLastAction"
@@ -656,6 +658,7 @@ const {
   currentShape,
   deleteSelection,
   isShapeMode,
+  isEraserModeOn,
   isWriting,
   getNewAnnotations,
   loadSingleAnnotation,
@@ -1219,8 +1222,22 @@ const onPencilAnnotateClicked = () => {
     _resetPencil()
     isShapeMode.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     isDrawing.value = true
   }
+}
+
+// Eraser is a fourth mutually-exclusive tool. The wrapper clears the
+// player-owned mode refs on entry, then delegates the brush swap and the
+// isEraserModeOn toggle to the composable.
+const onEraseClicked = () => {
+  clearFocus()
+  if (!isEraserModeOn.value) {
+    isDrawing.value = false
+    isShapeMode.value = false
+    isTyping.value = false
+  }
+  annotation.onEraseClicked()
 }
 
 const onTypeClicked = () => {
@@ -1230,6 +1247,7 @@ const onTypeClicked = () => {
   } else {
     isDrawing.value = false
     isShapeMode.value = false
+    isEraserModeOn.value = false
     isTyping.value = true
   }
 }
@@ -1241,6 +1259,7 @@ const onShapeModeClicked = () => {
   if (isShapeMode.value) {
     isDrawing.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
   }
 }
@@ -1545,6 +1564,10 @@ const { isAltHeld } = usePreviewShortcuts({
     container.value.focus()
     onPencilAnnotateClicked()
   },
+  onErase: () => {
+    container.value.focus()
+    onEraseClicked()
+  },
   onUndo: () => undoLastAction(),
   onRedo: () => redoLastAction(),
   onPrevPreview: () => onPreviousClicked(),
@@ -1558,7 +1581,9 @@ const { cursor: annotationCursor } = useAnnotationCursor({
   isAltHeld,
   isDrawing,
   isTyping,
-  isShapeMode
+  isShapeMode,
+  isEraserModeOn,
+  pencilWidth
 })
 
 const onCommentClicked = () => {
@@ -1884,6 +1909,7 @@ watch(isTyping, () => {
 watch(isAnnotationsDisplayed, () => {
   if (!isAnnotationsDisplayed.value) {
     isDrawing.value = false
+    if (isEraserModeOn.value) onEraseClicked()
   }
 })
 

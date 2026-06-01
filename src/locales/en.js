@@ -601,6 +601,7 @@ export default {
     ctrlright: 'Move metadata cell selection right',
     ctrlup: 'Move metadata cell selection up',
     draw: 'Set draw mode on',
+    erase: 'Set eraser mode on',
     plhome: 'Go to the first frame',
     plend: 'Go to the last frame',
     plaltleft: 'Go to the last frame of the previous shot',
