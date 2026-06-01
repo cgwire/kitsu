@@ -15,7 +15,11 @@
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
             :wheel-target="mainMediaElement"
-            v-show="isAnnotationsDisplayed"
+            v-show="
+              isAnnotationsDisplayed &&
+              (isMovie || isPicture) &&
+              mainMediaElement
+            "
             @click="onCanvasClicked"
             @resized="onMainCanvasResized"
           />
@@ -30,7 +34,9 @@
               isAnnotationsDisplayed &&
               isComparing &&
               previewToCompare &&
-              !isComparisonOverlay
+              !isComparisonOverlay &&
+              (isMovie || isPicture) &&
+              comparisonMediaElement
             "
             @click="onCanvasClicked"
             @resized="onComparisonCanvasResized"
