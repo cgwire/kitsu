@@ -24,12 +24,12 @@
             :font-size="12"
             :person="comment.person"
             :is-link="!isCurrentUserClient"
-            v-if="!isCurrentUserClient || isAuthorClient"
+            v-if="comment.person?.id"
           />
           <people-name
             class="flexrow-item strong"
             :person="comment.person"
-            v-if="!isCurrentUserClient || isAuthorClient"
+            v-if="comment.person?.id"
           />
           <div class="filler"></div>
           <span class="flexrow-item date" :title="fullDate">
@@ -161,11 +161,7 @@
                 v-for="replyComment in comment.replies || []"
               >
                 <div class="flexrow">
-                  <template
-                    v-if="
-                      !isCurrentUserClient || isReplyAuthorClient(replyComment)
-                    "
-                  >
+                  <template v-if="replyComment.person?.id">
                     <people-avatar
                       class="flexrow-item"
                       :size="18"
@@ -749,11 +745,6 @@ const isAuthorClient = computed(() => {
     personMap.value.get(props.comment.person_id) || props.comment.person
   return author?.role === 'client'
 })
-
-const isReplyAuthorClient = reply => {
-  const author = personMap.value.get(reply.person_id) || reply.person
-  return author?.role === 'client'
-}
 
 const shortenText = (text, length) => {
   return stringHelpers.shortenText(text, length)

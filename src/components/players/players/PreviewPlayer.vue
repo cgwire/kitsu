@@ -7,40 +7,48 @@
           :style="{ cursor: annotationCursor || null }"
           ref="preview-container"
         >
-          <annotation-canvas
-            ref="main-annotation-canvas"
-            :canvas-id="canvasId"
-            :cursor="annotationCursor"
-            :media-element="mainMediaElement"
-            :panzoom-transform="panzoomTransform"
-            :interactive="isOverlayInteractive"
-            :wheel-target="mainMediaElement"
-            v-show="
-              isAnnotationsDisplayed &&
-              (isMovie || isPicture) &&
-              mainMediaElement
-            "
-            @click="onCanvasClicked"
-            @resized="onMainCanvasResized"
-          />
-          <annotation-canvas
-            ref="comparison-annotation-canvas"
-            :canvas-id="`${canvasId}-comparison`"
-            :media-element="comparisonMediaElement"
-            :panzoom-transform="panzoomTransform"
-            :interactive="false"
-            :static="true"
-            v-show="
-              isAnnotationsDisplayed &&
-              isComparing &&
-              previewToCompare &&
-              !isComparisonOverlay &&
-              (isMovie || isPicture) &&
-              comparisonMediaElement
-            "
-            @click="onCanvasClicked"
-            @resized="onComparisonCanvasResized"
-          />
+          <div
+            class="annotation-slot"
+            :class="{ 'side-by-side': isSideBySideComparison }"
+          >
+            <annotation-canvas
+              ref="main-annotation-canvas"
+              :canvas-id="canvasId"
+              :cursor="annotationCursor"
+              :media-element="mainMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="isOverlayInteractive"
+              :wheel-target="mainMediaElement"
+              v-show="
+                isAnnotationsDisplayed &&
+                (isMovie || isPicture) &&
+                mainMediaElement
+              "
+              @click="onCanvasClicked"
+              @resized="onMainCanvasResized"
+            />
+          </div>
+          <div
+            class="annotation-slot comparison-slot"
+            v-if="isSideBySideComparison"
+          >
+            <annotation-canvas
+              ref="comparison-annotation-canvas"
+              :canvas-id="`${canvasId}-comparison`"
+              :media-element="comparisonMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="false"
+              :static="true"
+              v-show="
+                isAnnotationsDisplayed &&
+                previewToCompare &&
+                (isMovie || isPicture) &&
+                comparisonMediaElement
+              "
+              @click="onCanvasClicked"
+              @resized="onComparisonCanvasResized"
+            />
+          </div>
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
@@ -756,6 +764,13 @@ const allowExtraPreview = computed(
   () => !currentProduction.value?.is_single_preview_per_revision
 )
 
+// Side-by-side is the only layout where each viewer occupies a distinct
+// slot in the container; in overlay mode they stack and the comparison
+// annotation canvas is hidden anyway.
+const isSideBySideComparison = computed(
+  () => isComparing.value && !isComparisonOverlay.value
+)
+
 const marginBottom = computed(() => {
   let margin = 32
   if (isMovie.value) margin += 28
@@ -1031,6 +1046,20 @@ const goPreviousFrame = () => {
 const goNextFrame = () => {
   clearCanvas()
   previewViewer.value.goNextFrame()
+  syncComparisonViewer()
+}
+
+const goToFirstFrame = () => {
+  if (!isMovie.value) return
+  clearCanvas()
+  setCurrentFrame(0)
+  syncComparisonViewer()
+}
+
+const goToLastFrame = () => {
+  if (!isMovie.value) return
+  clearCanvas()
+  setCurrentFrame(nbFrames.value - 1)
   syncComparisonViewer()
 }
 
@@ -1557,6 +1586,8 @@ const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
   onPrevFrame: () => goPreviousFrame(),
   onNextFrame: () => goNextFrame(),
+  onFirstFrame: () => goToFirstFrame(),
+  onLastFrame: () => goToLastFrame(),
   onPlayPause: () => {
     // Don't toggle play/pause while a shared playlist modal is open.
     const playlistModal = document.getElementById('temp-playlist-modal')
@@ -1778,6 +1809,14 @@ watch(currentPreview, () => {
   clearCanvas()
   reloadAnnotations()
   isComparing.value = false
+  // Reset the frame bookkeeping synchronously. onPreviewLoaded() also
+  // sets frame 0, but only once the media-load event fires; until then
+  // currentFrame still holds the previous preview's playhead, so a
+  // single-frame shortcut (arrow keys) advances from the stale frame
+  // even though the timeline already shows frame 0.
+  currentFrame.value = 0
+  currentTimeRaw.value = 0
+  currentTime.value = formatTime(0, fps.value)
   if (isMovie.value) {
     configureVideo()
     pause()
@@ -2220,6 +2259,32 @@ defineExpose({
 
 .comparison-preview-viewer {
   z-index: 2;
+}
+
+// Per-viewer annotation slot. The annotation canvases used to sit
+// directly under .preview-container, so a panned overlay in one viewer
+// could only be clipped at the outermost container — in side-by-side
+// comparison mode that meant it spilled into the other viewer. Each
+// slot now covers just its viewer's screen area and clips at that edge.
+// pointer-events stays open so the canvas inside can still receive
+// drawing input; empty slot space falls through to the viewer beneath.
+.annotation-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+
+  &.side-by-side {
+    width: 50%;
+  }
+}
+
+.comparison-slot {
+  left: 50%;
+  width: 50%;
 }
 
 .separator {

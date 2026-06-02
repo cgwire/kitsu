@@ -25,6 +25,8 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
  * @param {Function} [handlers.onDelete]
  * @param {Function} [handlers.onPrevFrame]
  * @param {Function} [handlers.onNextFrame]
+ * @param {Function} [handlers.onFirstFrame]
+ * @param {Function} [handlers.onLastFrame]
  * @param {Function} [handlers.onPlayPause]
  * @param {Function} [handlers.onPrevAnnotation]
  * @param {Function} [handlers.onNextAnnotation]
@@ -76,6 +78,14 @@ export const usePreviewShortcuts = handlers => {
         break
       case 'ArrowRight':
         handlers.onNextFrame?.()
+        break
+      case 'Home':
+        pauseEvent(event)
+        handlers.onFirstFrame?.()
+        break
+      case 'End':
+        pauseEvent(event)
+        handlers.onLastFrame?.()
         break
       case ' ':
         pauseEvent(event)

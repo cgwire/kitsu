@@ -136,6 +136,13 @@ const videoDuration = ref(0)
 
 let panzoomInstance = null
 let panzoomSilent = false
+// Track whether the panzoom should be active across instance
+// recreations. The instance is only built after the video metadata
+// loads (so its bounds clamp doesn't race a 0×0 target), which can
+// happen after PreviewPlayer already called resumeZoom() at mount —
+// so we remember that intent here and apply it when the instance
+// finally exists.
+let panzoomActive = false
 let currentTimeCalls = []
 let playLoop = null
 let isPlaying = false
@@ -397,12 +404,39 @@ const emitPanZoom = () => {
   emit('panzoom-changed', { x, y, scale, source: 'movie' })
 }
 
+// Bind panzoom to the <video> rather than the wrapping container: the
+// video is flex-centered inside the wrapper, so scaling the wrapper
+// multiplies the centering offset and the video drifts relative to the
+// AnnotationCanvas overlay (which applies the same transform from its
+// own top-left origin). Setup is deferred until metadata is loaded so
+// panzoom's bounds clamp doesn't compute against a 0×0 target — that
+// raced the load on slow connections and left the video off-centre.
+const setupPanZoom = () => {
+  if (!props.panzoom || !movie.value) return
+  if (panzoomInstance) {
+    panzoomInstance.dispose()
+    panzoomInstance = null
+  }
+  panzoomInstance = createPanzoom(movie.value, {
+    bounds: true,
+    boundsPadding: 0.2,
+    maxZoom: 5,
+    minZoom: 1,
+    smoothScroll: false
+  })
+  panzoomInstance.on('zoom', emitPanZoom)
+  panzoomInstance.on('pan', emitPanZoom)
+  if (!panzoomActive) panzoomInstance.pause()
+}
+
 const pausePanZoom = () => {
-  if (panzoomInstance) panzoomInstance.pause()
+  panzoomActive = false
+  panzoomInstance?.pause()
 }
 
 const resumePanZoom = () => {
-  if (panzoomInstance) panzoomInstance.resume()
+  panzoomActive = true
+  panzoomInstance?.resume()
 }
 
 const setSpeed = rate => {
@@ -488,6 +522,7 @@ onMounted(() => {
           video.value.currentTime = 0
         })
         emit('video-loaded')
+        setupPanZoom()
       }
       video.value.addEventListener('focus', e => e.target.blur())
       video.value.addEventListener('resize', resetSize)
@@ -499,6 +534,7 @@ onMounted(() => {
         setCurrentTime(0)
         setCurrentTimeRaw(0)
         emit('video-loaded')
+        setupPanZoom()
       })
 
       video.value.addEventListener('canplay', () => {
@@ -534,24 +570,6 @@ onMounted(() => {
       window.addEventListener('resize', onWindowResize)
     }
   }, 0)
-
-  if (props.panzoom) {
-    // Attach panzoom to the <video> element rather than the wrapping
-    // container: the video is flex-centered inside the wrapper, so
-    // scaling the wrapper multiplies the centering offset and the
-    // video drifts relative to the AnnotationCanvas overlay (which
-    // applies the same transform from its own top-left origin).
-    panzoomInstance = createPanzoom(movie.value, {
-      bounds: true,
-      boundsPadding: 0.2,
-      maxZoom: 5,
-      minZoom: 1,
-      smoothScroll: false
-    })
-    panzoomInstance.on('zoom', emitPanZoom)
-    panzoomInstance.on('pan', emitPanZoom)
-    pausePanZoom()
-  }
 })
 
 onBeforeUnmount(() => {
