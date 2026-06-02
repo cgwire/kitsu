@@ -74,7 +74,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
+const emit = defineEmits([
+  'loaded',
+  'panzoom-changed',
+  'panzoom-ready',
+  'size-changed'
+])
 
 const container = ref(null)
 const isLoading = ref(true)
@@ -319,6 +324,10 @@ const setupPanZoom = () => {
   // Panzoom is live by default. Consumers that want it paused
   // (e.g. SharedPlaylistPlayer's "enable zoom" toggle) call
   // pausePanZoom() through the exposed method.
+  // Tell the parent that a fresh instance exists so it can re-push
+  // the comparison sync transform that arrived earlier (while the
+  // panzoom didn't exist yet and the setPanZoom call was a no-op).
+  emit('panzoom-ready')
 }
 
 const resetPanZoom = () => {

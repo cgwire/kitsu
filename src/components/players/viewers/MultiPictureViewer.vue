@@ -14,6 +14,7 @@
       :preview="preview"
       @loaded="() => $emit('loaded')"
       @panzoom-changed="$event => $emit('panzoom-changed', $event)"
+      @panzoom-ready="() => $emit('panzoom-ready')"
       @size-changed="() => $emit('size-changed')"
       v-for="preview in validPreviews"
       v-show="
@@ -68,7 +69,7 @@ const props = defineProps({
   }
 })
 
-defineEmits(['loaded', 'panzoom-changed', 'size-changed'])
+defineEmits(['loaded', 'panzoom-changed', 'panzoom-ready', 'size-changed'])
 
 const container = ref(null)
 const pictureRefs = reactive({})

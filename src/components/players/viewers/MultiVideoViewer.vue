@@ -108,6 +108,7 @@ const emit = defineEmits([
   'max-duration-update',
   'metadata-loaded',
   'panzoom-changed',
+  'panzoom-ready',
   'play-next',
   'repeat',
   'video-loaded'
@@ -135,6 +136,13 @@ let rate = 1
 let secondPanZoom = null
 let silent = false
 let showLoadingTimer = null
+// Track whether the panzoom should be active across instance
+// recreations. The instances are only built after each video's
+// metadata loads (so their bounds clamp doesn't race a 0×0 target),
+// which can happen after PlaylistPlayer already called resumePanZoom
+// at mount — remember that intent here and apply it when each
+// instance finally exists.
+let panzoomActive = false
 
 // Computed
 
@@ -152,47 +160,70 @@ const frameDuration = computed(
 
 // Functions
 
-const setupPanZoom = () => {
-  if (props.panzoom) {
-    // panzoom listens on the target's parentElement, which stretches
-    // with the surrounding flex layout and leaves gutters on the sides
-    // of the video. Skip events whose target isn't the video itself so
-    // clicks / wheel in the gutter don't trigger pan or zoom.
-    firstPanZoom = createPanzoom(player1Ref.value, {
-      bounds: true,
-      boundsPadding: 0.2,
-      maxZoom: 5,
-      minZoom: 0.5,
-      beforeMouseDown: e => e.target !== player1Ref.value,
-      beforeWheel: e => e.target !== player1Ref.value,
-      // panzoom otherwise puts tabindex=0 on the owner and steals
-      // arrow keys / +/- — those shortcuts belong to the playlist
-      // player (next/previous entity, frame stepping).
-      disableKeyboardInteraction: true
+const PANZOOM_EVENTS = ['zoom', 'pan', 'panend', 'transform']
+
+// Setup is deferred until each video's metadata loads, since panzoom's
+// bounds clamp computed against a 0×0 target leaves the media off-
+// centre as soon as the parent applies a transform — most visibly the
+// comparison viewer drifting when the user first opens the panel.
+const setupPlayer1PanZoom = () => {
+  if (!props.panzoom || !player1Ref.value) return
+  firstPanZoom?.dispose()
+  // panzoom listens on the target's parentElement, which stretches
+  // with the surrounding flex layout and leaves gutters on the sides
+  // of the video. Skip events whose target isn't the video itself so
+  // clicks / wheel in the gutter don't trigger pan or zoom.
+  firstPanZoom = createPanzoom(player1Ref.value, {
+    bounds: true,
+    boundsPadding: 0.2,
+    maxZoom: 5,
+    minZoom: 0.5,
+    beforeMouseDown: e => e.target !== player1Ref.value,
+    beforeWheel: e => e.target !== player1Ref.value,
+    // panzoom otherwise puts tabindex=0 on the owner and steals arrow
+    // keys / +/- — those shortcuts belong to the playlist player
+    // (next/previous entity, frame stepping).
+    disableKeyboardInteraction: true
+  })
+  PANZOOM_EVENTS.forEach(name => {
+    firstPanZoom.on(name, () => {
+      if (currentPlayer.value !== player1Ref.value) return
+      emitPanZoomChanged(firstPanZoom)
     })
-    secondPanZoom = createPanzoom(player2Ref.value, {
-      bounds: true,
-      boundsPadding: 0.2,
-      maxZoom: 3,
-      minZoom: 0.5,
-      beforeMouseDown: e => e.target !== player2Ref.value,
-      beforeWheel: e => e.target !== player2Ref.value,
-      disableKeyboardInteraction: true
+  })
+  if (!panzoomActive) firstPanZoom.pause()
+  refreshPanzoomInstances()
+  // Tell the parent that a fresh instance exists, so it can re-push
+  // the comparison sync transform that arrived earlier (while the
+  // panzoom didn't exist yet and the setPanZoom call was a no-op).
+  emit('panzoom-ready')
+}
+
+const setupPlayer2PanZoom = () => {
+  if (!props.panzoom || !player2Ref.value) return
+  secondPanZoom?.dispose()
+  secondPanZoom = createPanzoom(player2Ref.value, {
+    bounds: true,
+    boundsPadding: 0.2,
+    maxZoom: 3,
+    minZoom: 0.5,
+    beforeMouseDown: e => e.target !== player2Ref.value,
+    beforeWheel: e => e.target !== player2Ref.value,
+    disableKeyboardInteraction: true
+  })
+  PANZOOM_EVENTS.forEach(name => {
+    secondPanZoom.on(name, () => {
+      if (currentPlayer.value !== player2Ref.value) return
+      emitPanZoomChanged(secondPanZoom)
     })
-    panzoomInstances = [firstPanZoom, secondPanZoom]
-    const events = ['zoom', 'pan', 'panend', 'transform']
-    events.forEach(name => {
-      firstPanZoom.on(name, () => {
-        if (currentPlayer.value !== player1Ref.value) return
-        emitPanZoomChanged(firstPanZoom)
-      })
-      secondPanZoom.on(name, () => {
-        if (currentPlayer.value !== player2Ref.value) return
-        emitPanZoomChanged(secondPanZoom)
-      })
-    })
-    pausePanZoom()
-  }
+  })
+  if (!panzoomActive) secondPanZoom.pause()
+  refreshPanzoomInstances()
+  emit('panzoom-ready')
+}
+
+const refreshPanzoomInstances = () => {
+  panzoomInstances = [firstPanZoom, secondPanZoom].filter(Boolean)
 }
 
 const emitPanZoomChanged = panzoomInstance => {
@@ -533,12 +564,14 @@ const getNaturalDimensions = () => ({
 })
 
 const pausePanZoom = () => {
+  panzoomActive = false
   panzoomInstances.forEach(panzoomInstance => {
     panzoomInstance.pause()
   })
 }
 
 const resumePanZoom = () => {
+  panzoomActive = true
   panzoomInstances.forEach(panzoomInstance => {
     panzoomInstance.resume()
   })
@@ -638,6 +671,10 @@ watch(
 onMounted(() => {
   resetHeight()
   player1Ref.value.addEventListener('loadedmetadata', emitLoadedEvent)
+  // Defer panzoom binding until each video has metadata so the bounds
+  // clamp doesn't compute against a 0×0 target.
+  player1Ref.value.addEventListener('loadedmetadata', setupPlayer1PanZoom)
+  player2Ref.value.addEventListener('loadedmetadata', setupPlayer2PanZoom)
   window.addEventListener('resize', resetHeight)
   if (typeof ResizeObserver !== 'undefined' && containerRef.value) {
     containerResizeObserver = new ResizeObserver(() => {
@@ -649,7 +686,10 @@ onMounted(() => {
   bindLoadingHandlers(player1Ref.value)
   bindLoadingHandlers(player2Ref.value)
 
-  setupPanZoom()
+  // Cached-video case: metadata may already be present, in which case
+  // the load events above won't fire.
+  if (player1Ref.value.readyState >= 1) setupPlayer1PanZoom()
+  if (player2Ref.value.readyState >= 1) setupPlayer2PanZoom()
 })
 
 onBeforeUnmount(() => {
@@ -657,6 +697,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', resetHeight)
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
+  player1Ref.value?.removeEventListener('loadedmetadata', setupPlayer1PanZoom)
+  player2Ref.value?.removeEventListener('loadedmetadata', setupPlayer2PanZoom)
 
   unbindLoadingHandlers(player1Ref.value)
   unbindLoadingHandlers(player2Ref.value)

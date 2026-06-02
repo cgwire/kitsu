@@ -146,6 +146,7 @@
               : -1
           "
           @metadata-loaded="updateComparisonAnchor"
+          @panzoom-ready="onResetZoomClicked"
           v-show="
             isComparing &&
             isCurrentPreviewMovie &&
@@ -219,6 +220,7 @@
             :preview="currentPreviewToCompare"
             :is-comparing="isComparing"
             @panzoom-changed="onComparisonPanZoomChanged"
+            @panzoom-ready="onResetZoomClicked"
             @loaded="onPictureLoaded"
             high-quality
             v-show="isComparing && isPictureComparison"
@@ -3982,13 +3984,12 @@ watch(isComparing, () => {
     resetCanvas()
     syncComparisonPlayer()
     if (isComparing.value) {
-      // Apply the main viewer's current panzoom to the comparison
-      // viewer. The PictureViewer-side isComparing watcher resets its
-      // own panzoom on activation, and MultiVideoViewer starts at the
-      // identity transform — without this push the two viewers end up
-      // visually out of sync until the user nudges the wheel again.
-      const { x, y, scale } = panzoomTransform.value
-      setComparisonPanZoom(x, y, scale)
+      // Reset both viewers to identity rather than mirroring the
+      // main viewer's transform. The two viewers have independent
+      // media bounds, so a 1-to-1 transform copy left the comparison
+      // visibly off-centre when opening the panel. nextTick lets the
+      // layout reflow finish before the reset lands.
+      nextTick(onResetZoomClicked)
     }
     if (isComparing.value && !isComparisonOverlay.value) {
       loadComparisonAnnotation(currentTimeRaw.value)
