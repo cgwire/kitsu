@@ -6,6 +6,7 @@
       'full-height': !isAddingEntity || isLoading,
       'playlist-player': true
     }"
+    tabindex="-1"
   >
     <div ref="header" class="playlist-header flexrow" v-if="!tempMode">
       <div
@@ -2817,6 +2818,86 @@ const onCanvasReleased = () => {
   return false
 }
 
+// Shift+drag scrub. Mousedown is captured on the video-container so
+// fabric / panzoom never see the gesture (no stray marquee / pan).
+// Move / up listen on the document so the drag survives a cursor
+// that leaves the player area. Advances 1 frame per pixel of
+// horizontal movement (per-event, not per goNextFrame call) so fast
+// drags scrub proportionally instead of crawling at one frame per
+// mouse event.
+const onShiftScrubMove = event => {
+  if (!scrubbing) return
+  const x = event.clientX
+  const delta = x - scrubStartX
+  if (delta === 0) return
+  const cur = parseInt(currentFrame.value)
+  const newFrame = Math.max(0, Math.min(nbFrames.value - 1, cur + delta))
+  if (newFrame !== cur) rawPlayer.value?.setCurrentFrame(newFrame)
+  scrubStartX = x
+}
+
+const onShiftScrubEnd = () => {
+  scrubbing = false
+  document.removeEventListener('mousemove', onShiftScrubMove)
+  document.removeEventListener('mouseup', onShiftScrubEnd)
+}
+
+const onContainerMouseDown = event => {
+  // A click anywhere in the player area pulls focus to the root
+  // (tabindex=-1). Canvas / video aren't focusable by default, so
+  // without this nudge the activeElement stays on the previously
+  // focused textarea — Shift+Tab then thinks the user is "in the
+  // comment block" and ping-pongs them back to the player.
+  if (event.button === 0) container.value?.focus()
+  if (!isCurrentPreviewMovie.value || !event.shiftKey || event.button !== 0)
+    return
+  event.preventDefault()
+  event.stopPropagation()
+  scrubbing = true
+  scrubStartX = event.clientX
+  document.addEventListener('mousemove', onShiftScrubMove)
+  document.addEventListener('mouseup', onShiftScrubEnd)
+}
+
+// Shift+Tab toggles focus between the player area and the comment
+// textarea so reviewers can switch from drawing / playback to typing
+// (and back) without leaving the keyboard.
+const onFocusToggle = event => {
+  if (!event.shiftKey || event.key !== 'Tab') return
+  // When this PlaylistPlayer is shown inside a ViewPlaylistModal on
+  // top of a task page, the page's PreviewPlayer also registers this
+  // listener on document. Skip if the event's closest player
+  // ancestor isn't us — the innermost player wins.
+  const closestPlayer = event.target?.closest?.(
+    '.preview-player, .playlist-player'
+  )
+  if (closestPlayer && closestPlayer !== container.value) return
+  const active = document.activeElement
+  // Walk up from active to find an .add-comment ancestor — handles
+  // multiple AddComment instances cleanly. If active is inside any
+  // add-comment, jump back to the player; otherwise focus the
+  // first add-comment textarea.
+  if (active?.closest?.('.add-comment')) {
+    event.preventDefault()
+    container.value?.focus()
+    return
+  }
+  // Multiple AddComment instances can co-exist in the DOM (a hidden
+  // one in a collapsed side panel, another in the visible one). Pick
+  // the first visible & enabled textarea — focus on a hidden one is a
+  // no-op and leaves the user stuck where they were.
+  const commentTextarea = Array.from(
+    document.querySelectorAll('.add-comment textarea')
+  ).find(ta => ta.offsetParent !== null && !ta.disabled)
+  if (!commentTextarea) return
+  event.preventDefault()
+  event.stopPropagation()
+  // Focus synchronously and once more on the next tick to outlast
+  // any focus-restoration that fires after our keydown returns.
+  commentTextarea.focus()
+  setTimeout(() => commentTextarea.focus(), 0)
+}
+
 const onTimeCodeClicked = ({ versionRevision, frame }) => {
   const previews = currentEntity.value?.preview_files[task.value?.task_type_id]
   if (!previews) return
@@ -4192,6 +4273,12 @@ onMounted(() => {
     configureWaveForm()
     configureFullPlayer()
     resumePanZoom()
+    videoContainer.value?.addEventListener('mousedown', onContainerMouseDown, {
+      capture: true
+    })
+    // Capture phase so Shift+Tab is intercepted before the textarea's
+    // own keydown handlers can stop propagation and swallow it.
+    document.addEventListener('keydown', onFocusToggle, true)
   })
   currentBackground.value =
     productionBackgrounds.value.find(isDefaultBackground) || null
@@ -4216,6 +4303,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)
   if (container.value) container.value.onmousemove = null
+  videoContainer.value?.removeEventListener('mousedown', onContainerMouseDown, {
+    capture: true
+  })
+  document.removeEventListener('mousemove', onShiftScrubMove)
+  document.removeEventListener('mouseup', onShiftScrubEnd)
+  document.removeEventListener('keydown', onFocusToggle, true)
   leaveRoom()
   $socket.off('preview-file:annotation-update', onPreviewFileAnnotationUpdate)
   if (wavesurfer) wavesurfer.destroy()

@@ -778,13 +778,27 @@ const marginBottom = computed(() => {
   return margin
 })
 
+// Track the viewport in reactive refs so defaultHeight follows the
+// browser zoom level (it emits a resize event). `screen.*` returns
+// physical pixels and ignores zoom, so a 75 % zoomed-out fullscreen
+// player used to leave a black bar at the bottom — see issue #1541.
+const windowHeight = ref(window.innerHeight)
+const windowWidth = ref(window.innerWidth)
+
+const onWindowResize = () => {
+  windowHeight.value = window.innerHeight
+  windowWidth.value = window.innerWidth
+}
+
 const defaultHeight = computed(() => {
   if (fullScreen.value) {
-    return screen.height - marginBottom.value
+    return windowHeight.value - marginBottom.value
   }
-  let bigHeight = screen.height > 800 ? 470 : 300
-  if (isMovie.value) bigHeight = screen.height > 800 ? 442 : 272
-  return screen.width > 1300 && (!props.light || props.big) ? bigHeight : 200
+  let bigHeight = windowHeight.value > 800 ? 470 : 300
+  if (isMovie.value) bigHeight = windowHeight.value > 800 ? 442 : 272
+  return windowWidth.value > 1300 && (!props.light || props.big)
+    ? bigHeight
+    : 200
 })
 
 const fps = computed(
@@ -1733,7 +1747,9 @@ const displayLast = () => {
   currentIndex.value = props.previews.length
 }
 
-// Canvas events (right-click drag scrubs the movie timeline)
+// Canvas events (Shift+drag anywhere in the player scrubs the movie
+// timeline; the AnnotationCanvas's own click is forwarded for
+// drawing-related logic).
 
 const onCanvasMouseMoved = event => {
   if (!isMovie.value || !scrubbing) return
@@ -1757,6 +1773,84 @@ const onCanvasClicked = event => {
 const onCanvasReleased = () => {
   if (isMovie.value && scrubbing) scrubbing = false
   return false
+}
+
+// Shift+drag scrub. Mousedown is captured on the player container so
+// fabric never sees the gesture (no stray marquee / brush). Move /
+// up listen on the document so the drag survives a cursor that
+// leaves the player area. Advances 1 frame per pixel of horizontal
+// movement (per-event, not per goNextFrame call) so fast drags scrub
+// proportionally instead of crawling at one frame per mouse event.
+const onScrubMove = event => {
+  if (!scrubbing) return
+  const x = event.clientX
+  const delta = x - scrubStartX
+  if (delta === 0) return
+  const newFrame = Math.max(
+    0,
+    Math.min(nbFrames.value - 1, currentFrame.value + delta)
+  )
+  if (newFrame !== currentFrame.value) setCurrentFrame(newFrame)
+  scrubStartX = x
+}
+
+const onScrubEnd = () => {
+  scrubbing = false
+  document.removeEventListener('mousemove', onScrubMove)
+  document.removeEventListener('mouseup', onScrubEnd)
+}
+
+const onContainerMouseDown = event => {
+  // A click anywhere in the player area pulls focus to the root
+  // (tabindex=-1). Canvas / video aren't focusable by default, so
+  // without this nudge the activeElement stays on the previously
+  // focused textarea — Shift+Tab then thinks the user is "in the
+  // comment block" and ping-pongs them back to the player.
+  if (event.button === 0) container.value?.focus()
+  if (!isMovie.value || !event.shiftKey || event.button !== 0) return
+  event.preventDefault()
+  event.stopPropagation()
+  scrubbing = true
+  scrubStartX = event.clientX
+  document.addEventListener('mousemove', onScrubMove)
+  document.addEventListener('mouseup', onScrubEnd)
+}
+
+// Shift+Tab toggles focus between the player area and the comment
+// textarea so reviewers can switch from drawing / playback to typing
+// (and back) without leaving the keyboard. Plain Tab keeps its
+// normal forward-tab behaviour inside the textarea.
+const onFocusToggle = event => {
+  if (!event.shiftKey || event.key !== 'Tab') return
+  // When a ViewPlaylistModal is open on top of the task page, both
+  // PlaylistPlayer and PreviewPlayer register this listener on
+  // document. Skip if the event's closest player ancestor isn't us —
+  // the innermost player wins.
+  const closestPlayer = event.target?.closest?.(
+    '.preview-player, .playlist-player'
+  )
+  if (closestPlayer && closestPlayer !== container.value) return
+  const active = document.activeElement
+  if (active?.closest?.('.add-comment')) {
+    event.preventDefault()
+    event.stopPropagation()
+    container.value?.focus()
+    return
+  }
+  // Multiple AddComment instances can co-exist in the DOM (a hidden
+  // one in a collapsed side panel, another in the visible one). Pick
+  // the first visible & enabled textarea — focus on a hidden one is
+  // a no-op and leaves the user stuck where they were.
+  const commentTextarea = Array.from(
+    document.querySelectorAll('.add-comment textarea')
+  ).find(ta => ta.offsetParent !== null && !ta.disabled)
+  if (!commentTextarea) return
+  event.preventDefault()
+  event.stopPropagation()
+  // Focus synchronously and once more on the next tick to outlast
+  // any focus-restoration that fires after our keydown returns.
+  commentTextarea.focus()
+  setTimeout(() => commentTextarea.focus(), 0)
 }
 
 // Revision previews
@@ -2028,11 +2122,29 @@ onMounted(() => {
     resetPlayerPositions()
     if (isPicture.value || isMovie.value) loadAnnotation()
   }).observe(container.value)
+
+  window.addEventListener('resize', onWindowResize)
+  // Capture phase so Shift+Tab is intercepted before the textarea's
+  // own keydown handlers (Ctrl+Enter, etc.) or any nested listener
+  // can stop propagation and swallow it.
+  document.addEventListener('keydown', onFocusToggle, true)
+  previewContainer.value?.addEventListener('mousedown', onContainerMouseDown, {
+    capture: true
+  })
 })
 
 onBeforeUnmount(() => {
   endAnnotationSaving()
   removeEvents()
+  window.removeEventListener('resize', onWindowResize)
+  document.removeEventListener('keydown', onFocusToggle, true)
+  previewContainer.value?.removeEventListener(
+    'mousedown',
+    onContainerMouseDown,
+    { capture: true }
+  )
+  document.removeEventListener('mousemove', onScrubMove)
+  document.removeEventListener('mouseup', onScrubEnd)
 })
 
 // Player API (passed to TaskInfo via :player prop)
