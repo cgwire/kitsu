@@ -390,6 +390,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
 import { getPersonPath } from '@/lib/path'
+import preferences from '@/lib/preferences'
 import { sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
@@ -699,6 +700,10 @@ export default {
       return
     }
 
+    this.displaySettings = {
+      ...this.displaySettings,
+      ...preferences.getObjectPreference('tasktype:display_settings')
+    }
     this.setOptionalImportColumns()
     this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
@@ -2014,6 +2019,16 @@ export default {
 
     'displaySettings.showLinkedAssets'() {
       this.resetTasks()
+    },
+
+    displaySettings: {
+      deep: true,
+      handler(newSettings) {
+        preferences.setObjectPreference(
+          'tasktype:display_settings',
+          newSettings
+        )
+      }
     },
 
     '$route.query.search'() {
