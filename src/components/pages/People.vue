@@ -232,8 +232,13 @@ export default {
       optionalCsvColumns: [
         'Phone',
         'Role',
-        'Contract Type',
+        'Departments',
         'Studio',
+        'Country',
+        'Contract Type',
+        'Position',
+        'Seniority',
+        'Daily Salary',
         'Active'
       ],
       dataMatchers: ['Email'],
