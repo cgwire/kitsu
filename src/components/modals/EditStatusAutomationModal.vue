@@ -150,7 +150,8 @@ const entityTypeOptions = [
   { label: 'asset', value: 'asset' },
   { label: 'shot', value: 'shot' },
   { label: 'sequence', value: 'sequence' },
-  { label: 'episode', value: 'episode' }
+  { label: 'episode', value: 'episode' },
+  { label: 'edit', value: 'edit' }
 ]
 const fieldTypeOptions = [
   { label: 'status', value: 'status' },
@@ -178,6 +179,7 @@ const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
 const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
 const sequenceTaskTypes = computed(() => store.getters.sequenceTaskTypes)
 const episodeTaskTypes = computed(() => store.getters.episodeTaskTypes)
+const editTaskTypes = computed(() => store.getters.editTaskTypes)
 const taskStatuses = computed(() => store.getters.taskStatuses)
 
 const taskStatusList = computed(() =>
@@ -207,6 +209,10 @@ const setTaskTypes = fieldType => {
     form.inEntityTaskTypes = episodeTaskTypes.value
     form.outFieldType = 'status'
     form.outEntityTaskTypes = episodeTaskTypes.value
+  } else if (fieldType === 'edit') {
+    form.inEntityTaskTypes = editTaskTypes.value
+    form.outFieldType = 'status'
+    form.outEntityTaskTypes = editTaskTypes.value
   }
 }
 
@@ -230,6 +236,8 @@ watch(
       entityTaskTypes = sequenceTaskTypes.value
     } else if (entityType === 'episode') {
       entityTaskTypes = episodeTaskTypes.value
+    } else if (entityType === 'edit') {
+      entityTaskTypes = editTaskTypes.value
     }
     Object.assign(form, {
       entityType,
