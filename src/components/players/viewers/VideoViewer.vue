@@ -417,12 +417,25 @@ const setupPanZoom = () => {
     panzoomInstance.dispose()
     panzoomInstance = null
   }
+  // panzoom listens on `movie.parentElement` (.video-wrapper), which
+  // is forced to 100% of the viewer and leaves gutters on the sides
+  // of the video. Without these guards a click / wheel in the gutter
+  // would still trigger pan or zoom. Ignore any event whose target
+  // isn't the video itself. The AnnotationCanvas wheel forwarder
+  // dispatches on movie.value directly, so wheel-from-overlay (zoom
+  // while drawing) keeps working.
   panzoomInstance = createPanzoom(movie.value, {
     bounds: true,
     boundsPadding: 0.2,
     maxZoom: 5,
     minZoom: 1,
-    smoothScroll: false
+    smoothScroll: false,
+    beforeMouseDown: e => e.target !== movie.value,
+    beforeWheel: e => e.target !== movie.value,
+    // panzoom otherwise puts tabindex=0 on the owner and steals arrow
+    // keys / +/- to pan and zoom — those shortcuts are owned by the
+    // player (frame stepping, annotation navigation), so disable them.
+    disableKeyboardInteraction: true
   })
   panzoomInstance.on('zoom', emitPanZoom)
   panzoomInstance.on('pan', emitPanZoom)

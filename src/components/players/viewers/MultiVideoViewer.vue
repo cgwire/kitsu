@@ -154,17 +154,30 @@ const frameDuration = computed(
 
 const setupPanZoom = () => {
   if (props.panzoom) {
+    // panzoom listens on the target's parentElement, which stretches
+    // with the surrounding flex layout and leaves gutters on the sides
+    // of the video. Skip events whose target isn't the video itself so
+    // clicks / wheel in the gutter don't trigger pan or zoom.
     firstPanZoom = createPanzoom(player1Ref.value, {
       bounds: true,
       boundsPadding: 0.2,
       maxZoom: 5,
-      minZoom: 0.5
+      minZoom: 0.5,
+      beforeMouseDown: e => e.target !== player1Ref.value,
+      beforeWheel: e => e.target !== player1Ref.value,
+      // panzoom otherwise puts tabindex=0 on the owner and steals
+      // arrow keys / +/- — those shortcuts belong to the playlist
+      // player (next/previous entity, frame stepping).
+      disableKeyboardInteraction: true
     })
     secondPanZoom = createPanzoom(player2Ref.value, {
       bounds: true,
       boundsPadding: 0.2,
       maxZoom: 3,
-      minZoom: 0.5
+      minZoom: 0.5,
+      beforeMouseDown: e => e.target !== player2Ref.value,
+      beforeWheel: e => e.target !== player2Ref.value,
+      disableKeyboardInteraction: true
     })
     panzoomInstances = [firstPanZoom, secondPanZoom]
     const events = ['zoom', 'pan', 'panend', 'transform']

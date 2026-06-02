@@ -2265,9 +2265,10 @@ defineExpose({
 // directly under .preview-container, so a panned overlay in one viewer
 // could only be clipped at the outermost container — in side-by-side
 // comparison mode that meant it spilled into the other viewer. Each
-// slot now covers just its viewer's screen area and clips at that edge.
-// pointer-events stays open so the canvas inside can still receive
-// drawing input; empty slot space falls through to the viewer beneath.
+// slot now covers just its viewer's screen area and clips at that
+// edge. pointer-events: none lets clicks fall through to whatever is
+// underneath; the canvas inside keeps its own pointer-events: auto
+// for drawing.
 .annotation-slot {
   position: absolute;
   top: 0;

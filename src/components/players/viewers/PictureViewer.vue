@@ -293,12 +293,26 @@ const setupPanZoom = () => {
   }
   const target = visibleImage.value
   if (!target) return
+  // panzoom listens on `target.parentElement`, which is the unstyled
+  // v-show wrapper around the imgs. That wrapper stretches with the
+  // surrounding flex layout and gains gutters on the sides of the
+  // image, so without these guards a click / wheel in the empty area
+  // around the picture would still trigger pan or zoom. Ignore any
+  // event whose target isn't the image itself. The AnnotationCanvas
+  // wheel forwarder dispatches on `target` directly, so wheel-from-
+  // overlay (zoom while drawing) keeps working.
   panzoomInstance = createPanzoom(target, {
     bounds: true,
     boundsPadding: 0.2,
     maxZoom: 5,
     minZoom: 1,
-    smoothScroll: false
+    smoothScroll: false,
+    beforeMouseDown: e => e.target !== target,
+    beforeWheel: e => e.target !== target,
+    // panzoom otherwise puts tabindex=0 on the owner and steals arrow
+    // keys / +/- to pan and zoom — those shortcuts are owned by the
+    // player (frame stepping, annotation navigation), so disable them.
+    disableKeyboardInteraction: true
   })
   panzoomInstance.on('zoom', () => emitPanZoom(panzoomInstance))
   panzoomInstance.on('pan', () => emitPanZoom(panzoomInstance))
