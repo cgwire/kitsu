@@ -64,7 +64,7 @@ validate your choice with the "Add" button.
 
 You can also see the sum up of the parameters of each status.
 
-(To add new Task Status, see [Customization of the workflow](../customization/README.md#create-a-new-task-status) )
+(To add new Task Status, see [Customization of the workflow](../customization#create-a-new-task-status) )
 
 
 ### Select specific Task Types for a production
@@ -75,7 +75,7 @@ Per default, Kitsu will load all the Task Types of your Task Types library into 
 ![Setting Task Type new](../img/getting-started/setting_task_new.png)
 
 But you can choose to use only specific Task Types, depending on the type of your production.
-(To add a new Task Type, see [Customization of the workflow](../customization/README.md#create-a-new-task-type) )
+(To add a new Task Type, see [Customization of the workflow](../customization#create-a-new-task-type) )
 
 For example, you can create a 2D and A CGI workflow on your library and add the needed task types into this production.
 

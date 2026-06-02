@@ -1,0 +1,655 @@
+## from vuepress/config
+
+- **Introduction to Kitsu**
+  - Introduction
+  - Configure Kitsu
+  - Team
+- **Create Your Production**
+  - TV Show
+  - Feature
+  - Short
+  - Short Shot
+  - Short Asset
+  - Video Game
+  - NFT
+- **Meta Columns, Filters and Production Settings**
+  - Meta Column
+  - Filter
+  - Configure Production
+- **Assignments, Estimates and Scheduling**
+  - Assignation
+  - Estimation
+  - Schedules
+- **Statuses, Publishes, and Thumbnails**
+  - Status
+  - Publish
+  - Thumbnails
+- **Internal Review and Client Playlists**
+  - Review
+  - Review Weekly
+  - Playlist Client
+- **Supervisor Workflows**
+  - Supervisor Team
+  - Supervisor Tasks
+- **Producer Workflows**
+  - Production Report
+  - Studio Report
+- **Artist Workflows**
+  - Artist
+- **Developer Workflows**
+  - Custom Actions
+  - Bots
+  - Publisher
+  - Chat Integration
+  - Installation
+- **Frequently Asked Questions**
+  - FAQ
+
+## BEFORE from markdown docs
+
+- Getting Started With Kitsu
+  - Studio Workflows
+    - Understanding Studio Workflows
+    - Global Library VS Production Library
+  - Departments
+    - Creating Departments
+  - Task Types
+    - Creating a New Task Type
+  - Asset Types
+    - Define Your Asset Workflow
+  - Task Statuses
+    - Define Your Approval Workflow
+  - Automation
+    - Create a New Status Automation
+  - 3D Backgrounds
+    - Create a Global Library of HDR Files
+  - Asset Library
+    - What is the Asset Library?
+    - How to Use the Asset Library
+    - Adding Assets to the Library
+  - Settings
+    - Configuring Kitsu
+    - Studio Settings
+- Preparing Your Team
+  - Creating Users
+    - Creating Users and Linking Them to Departments
+  - Permission Roles
+    - Understanding Permission Roles
+      - Create and edit a production
+      - Manage the studio
+      - Manage productions
+  - Two-Factor Authentication
+    - Add Additional Security to Your Studio
+    - Available Two-Factor Authentication Methods
+  - Adding Users to the Team
+- Create Your Production
+  - Create a TV Show Production
+    - Introduction to Kitsu's Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification, and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity Spreadsheet
+      - Filters
+      - Simplify the Display
+      - Import / Export
+      - Metadata Column
+      - Customize the View
+      - Sum-up of your view
+    - Create an Asset
+      - Create Your First Asset
+      - Viewing Details of an Asset
+    - Update Your Assets
+    - Add More Tasks After Creating the Assets
+    - Create a Concept
+      - Upload a Concept
+      - Link a Concept to an Asset
+    - Create a Shot
+      - Create Your First Shot
+    - Create Shots from an EDL File
+      - See the Details of a Shot
+    - Update your shots
+    - Add more tasks after creating the shots
+    - Adding Frame Numbers and Ranges to Shots
+    - Creating Custom Metadata Columns
+    - Create a Sequence
+    - Create an Edit
+    - Create a Breakdown List
+    - Casting from the Asset Library
+    - Introduction to Asset State: Ready For
+  - Create a Feature Film Production
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create an Asset
+      - Create your first asset
+      - See the Details of an Asset
+    - Add more tasks after creating the assets
+      - Update your assets
+    - Create a Concept
+      - Upload a Concept
+      - Link a Concept to an Asset
+    - Create a Shot
+      - Create your first shot
+    - Create Shots from an EDL File
+      - See the Details of a Shot
+    - Add more tasks after creating the shots
+      - Update your shots
+    - Add the number of Frames and Frame ranges to the shots
+    - Create Custom Metadata Columns
+    - Create a Sequence
+    - Create an Edit
+    - Create a Breakdown List
+    - Casting from the Asset Library
+    - Introduction to Asset State: Ready For
+  - Create a Short Production (assets and shots)
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create an Asset
+      - Create your first asset
+      - See the Details of an Asset
+    - Add more tasks after creating the assets
+      - Update your assets
+    - Create a Concept
+      - Upload a concept
+      - Link a Concept to an Asset
+    - Create a Shot
+      - Create your first shot
+    - Create Shots from an EDL File
+      - See the Details of a Shot
+    - Add more tasks after creating the shots
+      - Update your shots
+    - Add the number of Frames and Frame ranges to the shots
+    - Create Custom Metadata Columns
+    - Create a Sequence
+    - Create an Edit
+    - Create a Breakdown List
+    - Casting from the Asset Library
+    - Introduction to Asset State: Ready For
+  - Create a SHOTS-only Production
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create a Shot
+      - Create your first shot
+    - Create Shots from an EDL File
+      - See the Details of a Shot
+    - Add more tasks after creating the shots
+      - Update your shots
+    - Add the number of Frames and Frame ranges to the shots
+    - Create Custom Metadata Columns
+    - Create a Sequence
+    - Create an Edit
+  - Create an ASSET-only Production
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create an Asset
+      - Create your first Asset
+      - See the Details of an Asset
+    - Add more tasks after creating the assets
+      - Update your assets
+    - Create a Concept
+      - Upload a Concept
+      - Link a Concept to an Asset
+    - Create Custom Metadata Columns
+    - Create an Edit
+    - Create a Breakdown List
+    - Casting from the Asset Library
+  - Create a Video Game Production
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create an Asset
+      - Create your first asset
+      - See the Details of an Asset
+    - Add more tasks after creating the assets
+      - Update your assets
+    - Create a Concept
+      - Upload a Concept
+      - Link a Concept to an Asset
+    - Create a map
+      - Create your first map
+    - Create maps from an EDL File
+      - See the Details of a map
+    - Add more tasks after creating the maps
+      - Update your maps
+    - Add the number of Frames and Frame ranges to the maps
+    - Create Custom Metadata Columns
+    - Create a level
+    - Create an Edit
+    - Create a Breakdown List
+    - Casting from the Asset Library
+    - Introduction to Asset State: Ready For
+  - Create a NFT Collection
+    - Introduction to the Kitsu Global Page
+      - Main Menu
+      - Navigation
+      - Global Search, News, Notification and Documentation
+      - Personal Settings
+    - The Tasks Spreadsheet
+      - Entity spreadsheet
+      - Filters
+      - Simplify the display
+      - Import / Export
+      - Metadata column
+      - Customize the view
+      - Sum-up of your view
+    - Create an Asset
+      - Create your first asset
+      - See the Details of an Asset
+    - Add more tasks after creating the assets
+      - Update your assets
+    - Create a Concept
+      - Upload a Concept
+      - Link a Concept to an Asset
+    - Create a NFT Collection
+      - Create your first NFT Collection
+      - See the Details of an NFT Collection
+    - Add more tasks after creating the NFT Collections
+      - Update your NFT Collections
+    - Create Custom Metadata Columns
+    - Create a Breakdown List
+    - Casting from the Asset Library
+    - Introduction to Asset State: Ready For
+- Meta Columns, Filters and Production Settings
+  - Meta Columns
+    - Create Metadata Columns
+      - Linking Metadata Columns to Departments
+    - Organizing Metadata Columns
+      - Display or Hide All Metadata Columns
+      - Display or Hide a single Metadata Column
+    - Sticky Columns
+  - Filters
+    - The Search Bar
+      - Using the Search Bar to Create Filters
+      - Example Filters
+    - Creating Filters
+      - Utilising the Filter Builder
+      - Task Status Filtering
+      - Metadata Filtering
+      - Assignment Filtering
+      - Thumbnail Filtering
+      - Priority Filtering
+      - Using the "Ready For" status
+    - Managing Saved Filters
+      - Deleting a Filter
+      - Pre-built Filters
+  - Production Specific Workflow Settings
+    - Configure Production-Specific Settings
+    - Task Statuses
+      - Configuring Specific Task Types for a Production
+    - Task Types
+      - Enabling Specific Task Types for a Production
+    - Asset Types
+      - Enabling Specific Asset Types for a Production
+    - Status Automation
+      - Configuring Status Automation for a Production
+    - Preview Backgrounds
+      - Select Specific Preview Background for a Production
+    - Artist Board
+      - Artist Board Status Configuration
+- Assignments, Estimates and Scheduling
+  - Tasks Assignments
+    - Add Users to the Team
+    - How to Assign Tasks
+      - Assign Tasks From the Global Page
+      - Assign Tasks From the Detailed Task Type Page
+  - Estimates & Team Quotas
+    - Add an Estimate for a Task
+      - Detailed Task Type View Features:
+    - Forecasting Team Speed
+      - Forecast Your Team's Speed Using Estimated Quotas
+    - Quotas
+      - Using Quotas to Understand Your Teams Speed
+      - Quotas Based on Timesheets
+      - Quotas Based on Status Changes
+    - Changing Priorities
+  - Schedules
+    - Production Schedule
+      - The Production Schedule Gantt Chart
+      - Milestones
+    - Task Type Schedule
+    - Asset and Shot Schedule
+    - Studio Schedule
+    - Team Schedule
+- Statuses, Publishes, and Thumbnails
+  - Statuses and Feedback
+    - The Comment Panel
+      - Tagging Team Members
+      - Adding Checklists
+      - Adding Attachments
+    - Changing Statuses In Bulk
+      - Updating Multiple Statuses at Once
+    - Artist Board Statuses
+      - Customizing Statuses Used on the Artist Board Page
+  - Publishes
+    - Publishing a Concept
+    - Linking a Concept to an Asset
+    - Publish a Preview as a Version
+    - Combining Previews Into a Version
+  - Thumbnails
+    - Add Thumbnails Manually
+    - Add Thumbnails Automatically
+    - Batch Upload Previews (as Thumbnails)
+- Internal Review and Client Playlists
+  - Reviews
+    - Reviewing Tasks
+      - Drawing Annotations
+      - Tagging Frames
+      - Exporting Annotations
+      - Deleting Annotations
+      - Comparing Images
+    - Reviewing Concepts
+    - Playlists
+      - Create a Playlist
+      - Populating a Playlist
+    - Review Controls
+    - Review Room
+  - Daily & Weekly review
+    - Create a Playlist for your internal review
+    - Review and Validations
+  - Client Playlists
+    - Creating Client Playlists
+    - Reviewing Client Playlists
+    - Playback Controls
+    - Review Room
+- Supervisor Workflows
+  - Managing Your Department
+    - Assigning Tasks & Bidding Estimates
+    - Daily Supervision Tasks
+    - Managing Your Department's Schedule
+    - Managing Department Quotas
+    - Department Timesheets
+  - Task Supervision
+    - Check Your Tasks
+    - Reviewing Previews
+    - Reviewing Concepts
+- Producer Workflows
+  - Building Production Reports
+    - Production Overview
+      - News Feed Features
+        - Using Filters
+        - Example
+    - Know the Current State of the Production
+      - Short / Feature Specific
+        - Sequence Stats
+        - Asset Types Stats
+        - Count View
+        - Exporting Data
+      - TV Show Specific
+      - Retakes Display
+      - Status Display
+    - Ensure Tasks are On Time
+      - Methods to Compare Estimations and Actuals
+      - Filtering by Due Date Status
+      - Using the Late Status Filter
+      - Using the Gantt Diagram
+    - Understanding Why a Task is Late
+      - Checking an Artist's Workload
+      - Identifying Back-and-Forth
+      - Checking if the Task is Underestimated
+      - Checking the Previous Task
+    - Durations over Estimates
+      - Estimation Summary
+      - Task Type Duration over Estimation
+      - Durations over Estimations for an Asset / Shot
+      - Detailed Analysis
+    - Checking Quotas
+      - Method 1: Timesheet-Based Calculation
+      - Method 2: Status-Based Calculation
+      - Detailed Quota Calculation
+    - Team Timesheets
+      - Viewing Timesheets
+      - Exporting Timesheets
+  - Building Studio Reports
+    - Studio Resource Overview
+    - Current State of All Productions
+      - Stats Pages
+    - Studio Occupancy Rate
+      - Focusing on Specific Timeframes
+      - Modifying the Schedule
+    - Utilize the Main Schedule
+- Artist Workflows
+  - Getting Started as an Artist
+  - Initial Setup and Profile Customization
+  - Managing Your Assignments
+    - Key Information Available:
+    - Additional Features:
+  - Updating Task Progress
+    - Updating Task Statuses
+  - View Your Assignments (Board View)
+  - View Your Assignments (Calendar View)
+  - Share Your Concepts
+    - Uploading Concepts:
+    - Linking Concepts to Assets:
+  - Request a Review
+  - Complete Your Timesheet
+    - How to Log Time:
+    - Missed a Day?
+- Developer Workflows
+  - Custom Actions
+    - What are Custom Actions?
+      - Goal
+    - How to Setup a Custom Action
+      - Creation
+      - Data Sent via a Custom Action
+  - Bots
+    - Why Use a Bot
+    - How to Create a Bot
+    - Managing Bots
+    - Example Bot Usage
+    - Security Considerations
+  - Kitsu Publisher
+    - DCC Integrations Status:
+    - Installation
+      - Installation of the Kitsu Publisher
+        - Pre-Requisites
+        - On Linux
+        - On Windows
+        - On MacOS
+    - Development Environment
+      - Pre-Requisites
+      - Dependencies
+      - Run
+      - Build the Electron App
+        - Pre-Requisites
+        - Building the App
+    - Installation of the DCCs connectors
+        - Pre-requisites
+        - Blender (version>2.80)
+        - Toon Boom Harmony
+        - Unreal Editor (version>=5)
+    - Publishing Previews with the Kitsu Publisher
+    - Consult Your To-Do List
+    - Publish a Preview From the Publisher
+    - Setup the Publisher
+      - Change the Save Directory and Add Scripts
+      - View the Result of the Setting on the Export Pop-Up
+  - Chat Integration
+    - Discord Integration
+      - Create a Bot Account
+      - Inviting Your Bot
+      - Enable Discord Notifications
+    - Slack Integration
+      - Create a Kitsu Application in Slack
+      - Set the Right Permissions
+      - Install the App in Your Workspace
+      - Get the Token
+      - Link Kitsu to Your New Slack Application
+      - Enable Slack Notifications in Your Profile
+    - Mattermost Integration
+      - Enable Incoming Webhooks, Custom Username, and Profile Picture for Webhooks
+      - Set a Webhook in Mattermost
+      - Enable Mattermost Notifications
+  - Open Source Setup
+    - Cloud Hosting
+    - Self-Hosting
+    - Development Environment
+      - Prerequisites
+      - Using Docker Image
+    - Development
+    - Build
+    - Tests
+    - Architecture
+- Frequently Asked Questions
+  - Login Issues
+    - I can't log in to Kitsu anymore
+  - Task Management
+    - I created a new Task Type, but I don't see it in my production
+      - Understanding the Difference:
+      - Steps to Add Task Types to Your Production
+    - My Task Type columns are not in the right order
+    - Task Type columns are missing
+  - Team and Assignments
+    - I can't assign anyone to a task
+      - Steps to Add People to a Production
+    - All assignments have disappeared
+  - Production Management
+    - How to Delete or Archive a Production
+      - Steps to Archive a Production
+      - Steps to Delete a Production
+  - Miscellaneous
+    - Where can I see the storage I'm using?
+
+## AFTER proposed new structure
+
+<!-- Start Here -->
+- Getting Started
+  - Why Kitsu
+  - Cloud vs self-hosted vs on-premise
+  - how to start a new studio (studio CRUD, studio settings)
+  - how to start a new production
+- Migration
+  - General Process Overview
+  - From Shotgrid
+  - From ftrack
+- Concepts / Glossary
+  - the Kitsu interface: Main Menu, Navigation, Global Search, Personal Settings
+  - studio, department, production, asset, episode, sequence, shot, task, etc.
+- Self-hosting (link to self-hosting page in developer documentation)
+<!-- Guides -->
+- Team Management
+  - department CRUD
+  - Roles: artist, supervisor, producer, client, vendor, etc.
+  - preparing your team: onboarding & adoption, invite team members, link them to departments, two-factor auth
+  - people CRUD
+  - people page
+- Pre-production
+  - creating the production: Meta Columns and Production Settings
+  - production structure: episode, sequence, shot
+  - asset CRUD, task type CRUD, task status CRUD, breakdowns, casting
+  - importing csv data
+  - Concepts
+- Scheduling & estimates
+  - task CRUD, assignments, scheduling, estimates
+  - My Tasks page
+- Review & approval
+  - status updates, publishing previews, notifications & communication, thumbnails, internal playlists, client playlists, annotation, feedback loops
+  - My Checks page
+  - Entity Chats page
+  - Edits page
+- Tracking & Reporting
+  - search bar, filters, quotas, metadata, schedule health, producer/supervisor views & charts, budget
+  - timesheets page
+  - main schedule page
+  - team schedule page
+  - production schedule page
+  - all tasks page
+  - news feed page
+  - sequence stats
+  - episodes stats
+  - asset types stats
+  - Budget
+    - budget page
+    - salary scale page
+    - software licenses page
+    - hardware items page
+- File storage
+  - where files are stored, supported formats, preview generation, storage backends
+  - asset library page
+- Privacy & Security
+  - IP Protection
+  - Authentication
+  - Authorization
+<!-- Workflows -->
+- For Supervisors
+- For Producers
+- For Artists
+- For Developers (links to developer doc)
+  - Plugins
+  - Custom Actions
+  - Automations
+  - Bots
+- For Clients
+<!-- Recipes -->
+- for TV Show
+- for Feature Film
+- for Shorts
+- for video games
+- for nfts
+- Create a SHOTS-only Production
+- Create an ASSET-only Production
+- client portal
+- 3D backgrounds
+<!-- Resources -->
+- Support
+- FAQ
+- Changelog
+- Roadmap
+- Discord
+- Youtube
+- Blog
+- Github
