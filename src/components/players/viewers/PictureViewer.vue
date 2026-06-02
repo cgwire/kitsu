@@ -250,7 +250,15 @@ const endLoading = () => {
     isLoading.value = false
   }
   emit('loaded')
-  nextTick(resetPicture)
+  nextTick(() => {
+    resetPicture()
+    // Bind (or rebind) panzoom only once the visible image has actual
+    // pixel dimensions. Wiring it on an unsized img leaves panzoom's
+    // bounds clamp computing against a 0×0 bbox, so the next pan / zoom
+    // / cross-viewer sync ends up off-centre — which is what users on
+    // slow connections were observing.
+    if (visibleImage.value?.complete) setupPanZoom()
+  })
 }
 
 const emitPanZoom = pz => {
@@ -394,7 +402,11 @@ watch(
 // stay bound to the previous img and lose sync with the displayed
 // one.
 watch(visibleImage, () => {
-  setupPanZoom()
+  // Wait for the new visible image to be loaded before binding panzoom;
+  // endLoading will rebind once its load event fires. Binding now would
+  // recreate the instance against an unsized target and leave the
+  // picture off-centre on slow loads.
+  if (visibleImage.value?.complete) setupPanZoom()
 })
 
 // Lifecycle
@@ -411,7 +423,9 @@ onMounted(() => {
   pictureGif.value.addEventListener('load', endLoading)
   window.addEventListener('resize', resetPicture)
   setPicturePath()
-  setupPanZoom()
+  // Cached-image case: load may have fired before the listener was
+  // attached. For uncached images the bind happens later in endLoading.
+  if (visibleImage.value?.complete) setupPanZoom()
 })
 
 onBeforeUnmount(() => {
