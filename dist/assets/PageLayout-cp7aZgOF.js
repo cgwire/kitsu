@@ -1,2 +1,0 @@
-import{Ai as e,Di as t,ci as n,li as r,oi as i,qr as a}from"./index-CZoAGimD.js";a();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(a){return(l,u)=>(t(),r(`div`,o,[i(`div`,s,[e(l.$slots,`main`)]),a.side?(t(),r(`div`,c,[e(l.$slots,`side`)])):n(``,!0)]))}};export{l as t};
-//# sourceMappingURL=PageLayout-cp7aZgOF.js.map

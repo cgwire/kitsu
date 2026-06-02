@@ -1,0 +1,2 @@
+import{G as e,Tt as t,t as n,v as r,x as i}from"./vue.esm-bundler-CqULMgs1.js";import{t as a}from"./_plugin-vue_export-helper-BDNMzG2s.js";n();var o={name:`wrong-browser`},s={class:`server-down page`},c={class:`title`};function l(n,a,o,l,u,d){return e(),i(`div`,s,[r(`h1`,c,t(n.$t(`wrong_browser.title`)),1),r(`p`,null,t(n.$t(`wrong_browser.text`)),1)])}var u=a(o,[[`render`,l]]);export{u as default};
+//# sourceMappingURL=WrongBrowser-C735AN54.js.map
