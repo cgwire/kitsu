@@ -704,6 +704,10 @@ export default {
       ...this.displaySettings,
       ...preferences.getObjectPreference('tasktype:display_settings')
     }
+    this.dataDisplay = {
+      ...this.dataDisplay,
+      ...preferences.getObjectPreference('tasktype:data_display')
+    }
     this.setOptionalImportColumns()
     this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
@@ -1066,6 +1070,9 @@ export default {
               this.setSearchFromUrl()
               this.resetTaskTypeDates()
             }, 200)
+            if (this.dataDisplay.beforeAfterTasks) {
+              this.setDefaultBeforeAfterTaskTypes()
+            }
             this.resetScheduleItems(true)
 
             this.dueDateFilter = this.$route.query.duedate || 'all'
@@ -1099,6 +1106,9 @@ export default {
             searchQuery = this.searchField.getValue()
           }
           if (searchQuery) this.onSearchChange(searchQuery)
+          if (this.dataDisplay.beforeAfterTasks) {
+            this.setDefaultBeforeAfterTaskTypes()
+          }
           this.resetScheduleItems(true)
         })
       }
@@ -1461,13 +1471,17 @@ export default {
       }
 
       if (item.key === 'beforeAfterTasks' && item.value) {
-        if (!this.schedule.taskTypeBefore) {
-          this.schedule.taskTypeBefore = this.taskTypeListBeforeFilter[1]?.id
-        }
-        if (!this.schedule.taskTypeAfter) {
-          this.schedule.taskTypeAfter = this.taskTypeListAfterFilter[1]?.id
-        }
+        this.setDefaultBeforeAfterTaskTypes()
         this.resetScheduleItems()
+      }
+    },
+
+    setDefaultBeforeAfterTaskTypes() {
+      if (!this.schedule.taskTypeBefore) {
+        this.schedule.taskTypeBefore = this.taskTypeListBeforeFilter[1]?.id
+      }
+      if (!this.schedule.taskTypeAfter) {
+        this.schedule.taskTypeAfter = this.taskTypeListAfterFilter[1]?.id
       }
     },
 
@@ -2028,6 +2042,13 @@ export default {
           'tasktype:display_settings',
           newSettings
         )
+      }
+    },
+
+    dataDisplay: {
+      deep: true,
+      handler(newSettings) {
+        preferences.setObjectPreference('tasktype:data_display', newSettings)
       }
     },
 
