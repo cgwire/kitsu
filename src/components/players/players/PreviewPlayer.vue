@@ -1778,6 +1778,14 @@ watch(currentPreview, () => {
   clearCanvas()
   reloadAnnotations()
   isComparing.value = false
+  // Reset the frame bookkeeping synchronously. onPreviewLoaded() also
+  // sets frame 0, but only once the media-load event fires; until then
+  // currentFrame still holds the previous preview's playhead, so a
+  // single-frame shortcut (arrow keys) advances from the stale frame
+  // even though the timeline already shows frame 0.
+  currentFrame.value = 0
+  currentTimeRaw.value = 0
+  currentTime.value = formatTime(0, fps.value)
   if (isMovie.value) {
     configureVideo()
     pause()
