@@ -1948,7 +1948,7 @@ export default {
       this.errors.importingError = null
       this.hideImportRenderModal()
       this.importCsvFormData = undefined
-      this.$refs['import-modal'].reset()
+      this.$refs['import-modal']?.reset()
       this.showImportModal()
     },
 
