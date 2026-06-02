@@ -14,6 +14,8 @@ const mountShortcuts = (handlerOverrides = {}) => {
     onDelete: vi.fn(),
     onPrevFrame: vi.fn(),
     onNextFrame: vi.fn(),
+    onFirstFrame: vi.fn(),
+    onLastFrame: vi.fn(),
     onPlayPause: vi.fn(),
     onPrevAnnotation: vi.fn(),
     onNextAnnotation: vi.fn(),
@@ -104,6 +106,17 @@ describe('composables/previewShortcuts', () => {
       dispatchKeydown({ key: 'ArrowRight' })
       expect(handlers.onPrevFrame).toHaveBeenCalledTimes(1)
       expect(handlers.onNextFrame).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('Home and End jump to the first / last frame and suppress page scroll', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const home = dispatchKeydown({ key: 'Home' })
+      const end = dispatchKeydown({ key: 'End' })
+      expect(handlers.onFirstFrame).toHaveBeenCalledTimes(1)
+      expect(handlers.onLastFrame).toHaveBeenCalledTimes(1)
+      expect(home.defaultPrevented).toBe(true)
+      expect(end.defaultPrevented).toBe(true)
       wrapper.unmount()
     })
 

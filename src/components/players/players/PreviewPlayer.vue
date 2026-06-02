@@ -1034,6 +1034,20 @@ const goNextFrame = () => {
   syncComparisonViewer()
 }
 
+const goToFirstFrame = () => {
+  if (!isMovie.value) return
+  clearCanvas()
+  setCurrentFrame(0)
+  syncComparisonViewer()
+}
+
+const goToLastFrame = () => {
+  if (!isMovie.value) return
+  clearCanvas()
+  setCurrentFrame(nbFrames.value - 1)
+  syncComparisonViewer()
+}
+
 const goPreviousDrawing = () => {
   jumpToAnnotationFrame(getPreviousAnnotationTime(currentTimeRaw.value))
 }
@@ -1557,6 +1571,8 @@ const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
   onPrevFrame: () => goPreviousFrame(),
   onNextFrame: () => goNextFrame(),
+  onFirstFrame: () => goToFirstFrame(),
+  onLastFrame: () => goToLastFrame(),
   onPlayPause: () => {
     // Don't toggle play/pause while a shared playlist modal is open.
     const playlistModal = document.getElementById('temp-playlist-modal')
