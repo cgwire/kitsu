@@ -89,7 +89,7 @@ watch(
 watch(
   () => props.modelValue,
   () => {
-    selectedOption.value = props.options.find(o => o.value === props.modelValue)
+    resetOptions()
   }
 )
 </script>

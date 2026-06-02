@@ -390,6 +390,7 @@ import { mapGetters, mapActions } from 'vuex'
 import csv from '@/lib/csv'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
 import { getPersonPath } from '@/lib/path'
+import preferences from '@/lib/preferences'
 import { sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
@@ -699,6 +700,14 @@ export default {
       return
     }
 
+    this.displaySettings = {
+      ...this.displaySettings,
+      ...preferences.getObjectPreference('tasktype:display_settings')
+    }
+    this.dataDisplay = {
+      ...this.dataDisplay,
+      ...preferences.getObjectPreference('tasktype:data_display')
+    }
     this.setOptionalImportColumns()
     this.searchField?.setValue(this.$route.query.search || '')
     this.clearSelectedTasks()
@@ -1061,6 +1070,9 @@ export default {
               this.setSearchFromUrl()
               this.resetTaskTypeDates()
             }, 200)
+            if (this.dataDisplay.beforeAfterTasks) {
+              this.setDefaultBeforeAfterTaskTypes()
+            }
             this.resetScheduleItems(true)
 
             this.dueDateFilter = this.$route.query.duedate || 'all'
@@ -1094,6 +1106,9 @@ export default {
             searchQuery = this.searchField.getValue()
           }
           if (searchQuery) this.onSearchChange(searchQuery)
+          if (this.dataDisplay.beforeAfterTasks) {
+            this.setDefaultBeforeAfterTaskTypes()
+          }
           this.resetScheduleItems(true)
         })
       }
@@ -1456,13 +1471,17 @@ export default {
       }
 
       if (item.key === 'beforeAfterTasks' && item.value) {
-        if (!this.schedule.taskTypeBefore) {
-          this.schedule.taskTypeBefore = this.taskTypeListBeforeFilter[1]?.id
-        }
-        if (!this.schedule.taskTypeAfter) {
-          this.schedule.taskTypeAfter = this.taskTypeListAfterFilter[1]?.id
-        }
+        this.setDefaultBeforeAfterTaskTypes()
         this.resetScheduleItems()
+      }
+    },
+
+    setDefaultBeforeAfterTaskTypes() {
+      if (!this.schedule.taskTypeBefore) {
+        this.schedule.taskTypeBefore = this.taskTypeListBeforeFilter[1]?.id
+      }
+      if (!this.schedule.taskTypeAfter) {
+        this.schedule.taskTypeAfter = this.taskTypeListAfterFilter[1]?.id
       }
     },
 
@@ -1929,7 +1948,7 @@ export default {
       this.errors.importingError = null
       this.hideImportRenderModal()
       this.importCsvFormData = undefined
-      this.$refs['import-modal'].reset()
+      this.$refs['import-modal']?.reset()
       this.showImportModal()
     },
 
@@ -2014,6 +2033,23 @@ export default {
 
     'displaySettings.showLinkedAssets'() {
       this.resetTasks()
+    },
+
+    displaySettings: {
+      deep: true,
+      handler(newSettings) {
+        preferences.setObjectPreference(
+          'tasktype:display_settings',
+          newSettings
+        )
+      }
+    },
+
+    dataDisplay: {
+      deep: true,
+      handler(newSettings) {
+        preferences.setObjectPreference('tasktype:data_display', newSettings)
+      }
     },
 
     '$route.query.search'() {

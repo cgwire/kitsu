@@ -60,7 +60,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-defineProps({
+const props = defineProps({
   backgroundUrl: {
     type: String,
     default: ''
@@ -139,6 +139,11 @@ const createWireframeVariant = model => {
 
 const onModelLoaded = event => {
   createWireframeVariant(event.target.model)
+  if (props.isWireframe) {
+    // model-viewer only re-applies a variant when `variantName` changes; a new
+    // model leaves it unchanged, so re-trigger it to keep the wireframe active.
+    event.target.requestUpdate('variantName')
+  }
   emit('model-loaded')
 }
 
