@@ -1,13 +1,17 @@
+import { fabric } from 'fabric'
 import {
   PENCIL_WIDTHS,
   addSerialization,
   applyPencilColor,
   applyPencilWidth,
+  buildReadOnlyShape,
   findAnnotationAtTime,
+  hasOpaqueFill,
   pushAddition,
   removeAddition,
   setObjectData
 } from '@/lib/annotation'
+import { Eraser } from '@/lib/eraserbrush'
 
 const createCanvas = () => ({
   width: 800,
@@ -112,6 +116,32 @@ describe('lib/annotation', () => {
     it('returns the object so it can be chained', () => {
       const obj = { toJSON: () => ({}) }
       expect(addSerialization(obj)).toBe(obj)
+    })
+
+    it('serializes the eraser mask even when toJSON omits it (PSStroke case)', () => {
+      const obj = {
+        id: 'stroke-1',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        // toJSON drops the eraser (mirrors PSStroke's custom toObject).
+        toJSON: () => ({ type: 'PSStroke' }),
+        eraser: { toObject: () => ({ type: 'eraser', objects: [{ path: 'M 0 0' }] }) }
+      }
+      addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.eraser).toEqual({
+        type: 'eraser',
+        objects: [{ path: 'M 0 0' }]
+      })
+    })
+
+    it('does not persist an eraser when the object has none', () => {
+      const obj = {
+        id: 'clean-1',
+        toJSON: () => ({ type: 'path', eraser: { stale: true } })
+      }
+      addSerialization(obj)
+      expect(obj.serialize().eraser).toBeUndefined()
     })
   })
 
@@ -312,6 +342,156 @@ describe('lib/annotation', () => {
     it('does nothing when the canvas has no freeDrawingBrush', () => {
       const canvas = { width: 0, height: 0 }
       expect(() => applyPencilColor(canvas, '#000')).not.toThrow()
+    })
+  })
+
+  describe('eraser object support installation', () => {
+    it('installs eraser support on fabric.Object at import time', () => {
+      expect(fabric.Object.prototype.erasable).toBe(true)
+      expect(typeof fabric.Object.prototype._drawClipPath).toBe('function')
+    })
+  })
+
+  describe('buildReadOnlyShape — eraser selectivity', () => {
+    const fakeCanvas = { width: 800, height: 600 }
+    const annotation = { width: 800, height: 600 }
+
+    // fabric.Text internally calls getContext('2d') to measure text.
+    // jsdom returns null for canvas 2D contexts, so we install a minimal stub.
+    let originalGetContext
+    beforeAll(() => {
+      originalGetContext = HTMLCanvasElement.prototype.getContext
+      HTMLCanvasElement.prototype.getContext = function (type) {
+        if (type !== '2d') return originalGetContext.call(this, type)
+        return {
+          textBaseline: '',
+          font: '',
+          fillStyle: '',
+          fillText: () => {},
+          measureText: () => ({ width: 10 }),
+          save: () => {},
+          restore: () => {},
+          scale: () => {},
+          setTransform: () => {}
+        }
+      }
+    })
+    afterAll(() => {
+      HTMLCanvasElement.prototype.getContext = originalGetContext
+    })
+
+    it('text shape has erasable === false', async () => {
+      const obj = {
+        type: 'i-text',
+        text: 'hello',
+        left: 10,
+        top: 20,
+        width: 100,
+        height: 30,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        textAlign: 'left',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        id: 'txt-1'
+      }
+      const shape = await buildReadOnlyShape(annotation, obj, fakeCanvas)
+      expect(shape).not.toBeNull()
+      expect(shape.erasable).toBe(false)
+    })
+
+    it('non-text shape does NOT have erasable === false (defaults to true via prototype)', async () => {
+      const obj = {
+        type: 'rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600,
+        id: 'rect-1'
+      }
+      const shape = await buildReadOnlyShape(annotation, obj, fakeCanvas)
+      expect(shape).not.toBeNull()
+      expect(shape.erasable).not.toBe(false)
+    })
+
+    it('revives a serialized eraser mask onto the shape', async () => {
+      const obj = {
+        type: 'rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600,
+        id: 'rect-erased',
+        eraser: { type: 'eraser', objects: [{ path: 'M 0 0 L 5 5' }] }
+      }
+      const shape = await buildReadOnlyShape(annotation, obj, fakeCanvas)
+      expect(shape.eraser).toBeInstanceOf(Eraser)
+      expect(shape.eraser.getObjects()).toHaveLength(1)
+    })
+
+    it('leaves shapes without a serialized eraser untouched', async () => {
+      const obj = {
+        type: 'rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600,
+        id: 'rect-clean'
+      }
+      const shape = await buildReadOnlyShape(annotation, obj, fakeCanvas)
+      expect(shape.eraser).toBeUndefined()
+    })
+
+    it('a filled shape (whiteboard sticker) is non-erasable', async () => {
+      const obj = {
+        type: 'rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600,
+        id: 'whiteboard-1',
+        fill: 'rgba(255, 255, 255, 0.7)'
+      }
+      const shape = await buildReadOnlyShape(annotation, obj, fakeCanvas)
+      expect(shape.erasable).toBe(false)
+    })
+  })
+
+  describe('hasOpaqueFill', () => {
+    it('treats the whiteboard fill and solid colours as opaque', () => {
+      expect(hasOpaqueFill('rgba(255, 255, 255, 0.7)')).toBe(true)
+      expect(hasOpaqueFill('#ffffff')).toBe(true)
+      expect(hasOpaqueFill('white')).toBe(true)
+      expect(hasOpaqueFill('rgb(0, 0, 0)')).toBe(true)
+    })
+
+    it('treats transparent / empty / fully-transparent fills as not opaque', () => {
+      expect(hasOpaqueFill('transparent')).toBe(false)
+      expect(hasOpaqueFill(undefined)).toBe(false)
+      expect(hasOpaqueFill(null)).toBe(false)
+      expect(hasOpaqueFill('')).toBe(false)
+      expect(hasOpaqueFill('rgba(0, 0, 0, 0)')).toBe(false)
     })
   })
 })

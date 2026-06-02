@@ -16,6 +16,7 @@ import {
   lockBrushToFirstPointer,
   normalizeSerializedAnnotation
 } from '@/lib/annotation'
+import { Eraser, EraserBrush, reviveObjectEraser } from '@/lib/eraserbrush'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
@@ -125,6 +126,7 @@ export const useAnnotation = ({
   onCanvasMouseMovedCb,
   onCanvasReleasedCb,
   isLaserModeOn = ref(false),
+  isEraserModeOn = ref(false),
   postAnnotationAddition = () => {},
   postAnnotationDeletion = () => {},
   postAnnotationUpdate = () => {}
@@ -254,6 +256,7 @@ export const useAnnotation = ({
     const fabricText = new fabric.IText('Type...', {
       left: posX,
       top: posY,
+      erasable: false,
       fontFamily: 'arial',
       fill: textColor.value,
       fontSize: fontSize,
@@ -600,6 +603,7 @@ export const useAnnotation = ({
     } else if (obj.type === 'i-text' || obj.type === 'text') {
       text = new fabric.IText(obj.text, {
         ...base,
+        erasable: false,
         fill: obj.fill,
         left: obj.left * scale + offsetX,
         top: obj.top * scale + offsetY,
@@ -697,7 +701,11 @@ export const useAnnotation = ({
         silentAnnotation = false
       }
     }
-    return path || text || psstroke || shape
+    // Reattach the serialized eraser mask (local coords) to whatever was built.
+    // Text is non-erasable so it never carries one; the helper is a no-op then.
+    const built = path || text || psstroke || shape
+    if (built) await reviveObjectEraser(built, obj)
+    return built
   }
 
   const deserializePSBrush = obj => {
@@ -765,23 +773,56 @@ export const useAnnotation = ({
 
   const onAnnotateClicked = () => {
     showCanvas()
-    if (fabricCanvas.value.isDrawingMode) {
+    // Toggle off only when the pencil itself is the active brush. If the
+    // eraser is on, switch over to the pencil instead of turning drawing off.
+    if (fabricCanvas.value.isDrawingMode && !isEraserModeOn.value) {
       fabricCanvas.value.isDrawingMode = false
-    } else {
-      if (fabricCanvas.value) {
-        fabricCanvas.value.isDrawingMode = true
-      }
-      const brush = new PSBrush(fabricCanvas.value)
-      brush.pressureManager.fallback = 0.5
-      // PSBrush drops BaseBrush's round cap/join defaults (its initialize
-      // doesn't call super), so restore them or strokes get flat ends.
+      return
+    }
+    isEraserModeOn.value = false
+    if (fabricCanvas.value) {
+      fabricCanvas.value.isDrawingMode = true
+    }
+    const brush = new PSBrush(fabricCanvas.value)
+    brush.pressureManager.fallback = 0.5
+    // PSBrush drops BaseBrush's round cap/join defaults (its initialize
+    // doesn't call super), so restore them or strokes get flat ends.
+    brush.strokeLineCap = 'round'
+    brush.strokeLineJoin = 'round'
+    lockBrushToFirstPointer(brush)
+    fabricCanvas.value.freeDrawingBrush = brush
+    _resetColor()
+    _resetPencil()
+  }
+
+  // Eraser tool — mirror of onAnnotateClicked. Installs the v2 EraserBrush
+  // (destination-out). Type-selectivity is handled per-object by the
+  // `erasable` flag (IText is non-erasable), not by z-order.
+  const onEraseClicked = () => {
+    showCanvas()
+    if (isEraserModeOn.value) {
+      isEraserModeOn.value = false
+      if (fabricCanvas.value) fabricCanvas.value.isDrawingMode = false
+      return
+    }
+    isEraserModeOn.value = true
+    isShapeMode.value = false
+    if (fabricCanvas.value) {
+      fabricCanvas.value.isDrawingMode = true
+      const brush = new EraserBrush(fabricCanvas.value)
       brush.strokeLineCap = 'round'
       brush.strokeLineJoin = 'round'
       lockBrushToFirstPointer(brush)
       fabricCanvas.value.freeDrawingBrush = brush
-      _resetColor()
-      _resetPencil()
+      _resetEraserWidth()
     }
+  }
+
+  const _resetEraserWidth = () => {
+    if (!fabricCanvas.value?.freeDrawingBrush) return
+    // Reuse the pencil-width preference (same mapping as _resetPencil).
+    const converter = { huge: 30, big: 20, medium: 10, small: 4, tiny: 2 }
+    fabricCanvas.value.freeDrawingBrush.width = converter[pencilWidth.value]
   }
 
   const onObjectAdded = obj => {
@@ -797,6 +838,20 @@ export const useAnnotation = ({
       addToAdditions(o)
       stackAddAction(obj)
     }
+  }
+
+  // Erasing mutates existing objects (it appends a path to each object's
+  // `eraser` mask), so it is an UPDATE, not an addition. We re-serialise the
+  // affected objects — their patched toObject() carries the new eraser — and
+  // record a single undoable 'erase' action.
+  const onErasingEnd = ({ targets = [], subTargets = [], path } = {}) => {
+    if (silentAnnotation) return
+    const affected = [...targets, ...subTargets]
+    if (affected.length === 0) return
+    affected.forEach(obj => addToUpdates(obj))
+    doneActionStack.push({ type: 'erase', targets: affected, path })
+    clearUndoneStack()
+    saveAnnotationsCb()
   }
 
   const onObjectModified = event => {
@@ -850,7 +905,46 @@ export const useAnnotation = ({
     return getObjectById(action.obj.id) ?? action.obj
   }
 
+  // Undo an erase: pop the last path off each affected object's eraser mask,
+  // stashing the removed paths on the action so redo can restore them exactly.
+  const undoEraseAction = action => {
+    action.removed = []
+    action.targets.forEach(t => {
+      const obj = getObjectById(t.id) ?? t
+      const paths = obj.eraser?.getObjects?.() ?? []
+      if (!paths.length) return
+      // Stash the id too: redo must re-resolve the live object, because a
+      // save/reload between undo and redo replaces it with a fresh instance
+      // (the stored ref would then point at an off-canvas object → no-op).
+      action.removed.push({ id: obj.id, obj, path: obj.eraser._objects.pop() })
+      if (obj.eraser._objects.length === 0) obj.eraser = undefined
+      obj.set('dirty', true)
+      addToUpdates(obj)
+    })
+    fabricCanvas.value?.requestRenderAll()
+  }
+
+  // Redo an erase: push the stashed paths back onto each object's eraser,
+  // re-resolving the live canvas object by id (see undoEraseAction).
+  const redoEraseAction = action => {
+    ;(action.removed ?? []).forEach(({ id, obj, path }) => {
+      const target = getObjectById(id) ?? obj
+      if (!target) return
+      if (!target.eraser) target.eraser = new Eraser()
+      target.eraser._objects.push(path)
+      target.set('dirty', true)
+      addToUpdates(target)
+    })
+    fabricCanvas.value?.requestRenderAll()
+  }
+
   const undoLastAction = () => {
+    if (doneActionStack[doneActionStack.length - 1]?.type === 'erase') {
+      const action = doneActionStack.pop()
+      undoEraseAction(action)
+      undoneActionStack.push(action)
+      return
+    }
     const action = doneActionStack.pop()
     if (!action?.obj) return
     const obj = resolveActionObject(action)
@@ -873,6 +967,12 @@ export const useAnnotation = ({
   }
 
   const redoLastAction = () => {
+    if (undoneActionStack[undoneActionStack.length - 1]?.type === 'erase') {
+      const action = undoneActionStack.pop()
+      redoEraseAction(action)
+      doneActionStack.push(action)
+      return
+    }
     const action = undoneActionStack.pop()
     if (!action?.obj) return
     const obj = resolveActionObject(action)
@@ -913,7 +1013,30 @@ export const useAnnotation = ({
   }
 
   const setAnnotationDrawingMode = isDrawingMode => {
-    if (isDrawingMode) isShapeMode.value = false
+    if (isDrawingMode) {
+      isShapeMode.value = false
+      // Coming back to the pencil from the eraser: the eraser swapped
+      // freeDrawingBrush for an EraserBrush, so restore the pressure brush
+      // (consumers that toggle drawing through this entry point — e.g.
+      // PreviewPlayer — never re-create a PSBrush themselves).
+      if (fabricCanvas.value?.freeDrawingBrush instanceof EraserBrush) {
+        isEraserModeOn.value = false
+        const brush = new PSBrush(fabricCanvas.value)
+        brush.pressureManager.fallback = 0.5
+        brush.strokeLineCap = 'round'
+        brush.strokeLineJoin = 'round'
+        lockBrushToFirstPointer(brush)
+        fabricCanvas.value.freeDrawingBrush = brush
+        _resetColor()
+        _resetPencil()
+      }
+    } else if (isEraserModeOn.value) {
+      // The eraser runs in drawing mode. A stray "leave drawing" — typically
+      // the isDrawing watcher firing async as the user switches pencil→eraser
+      // (onEraseClicked set isDrawing=false) — must not tear it down, or the
+      // eraser stops working and its ring cursor reverts to the default.
+      return
+    }
     fabricCanvas.value.isDrawingMode = isDrawingMode
   }
 
@@ -958,6 +1081,7 @@ export const useAnnotation = ({
     fabricCanvas.value.off('text:changed', onObjectModified)
     fabricCanvas.value.off('object:modified', onObjectModified)
     fabricCanvas.value.off('object:added', onObjectAdded)
+    fabricCanvas.value.off('erasing:end', onErasingEnd)
     fabricCanvas.value.off('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.off('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.off('mouse:move', updateMousePressure)
@@ -967,7 +1091,7 @@ export const useAnnotation = ({
     fabricCanvas.value.on('object:modified', onObjectModified)
     fabricCanvas.value.on('text:changed', onObjectModified)
     fabricCanvas.value.on('object:added', onObjectAdded)
-    fabricCanvas.value.on('erasing:end', onObjectAdded)
+    fabricCanvas.value.on('erasing:end', onErasingEnd)
     fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
     fabricCanvas.value.on('mouse:move', onCanvasMouseMovedCb)
     fabricCanvas.value.on('mouse:move', updateMousePressure)
@@ -1449,7 +1573,10 @@ export const useAnnotation = ({
     _resetPencil,
     resetPencilConfiguration,
     onAnnotateClicked,
+    onEraseClicked,
+    isEraserModeOn,
     onObjectAdded,
+    onErasingEnd,
     onObjectModified,
     onWindowsClosed,
 

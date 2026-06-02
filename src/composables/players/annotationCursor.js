@@ -22,6 +22,25 @@ const LASER_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20
 export const CURSOR_PENCIL = `${svgUri(PENCIL_SVG)} 2 22, crosshair`
 export const CURSOR_LASER = `${svgUri(LASER_SVG)} 10 10, crosshair`
 
+// Eraser ring sized to the brush, so the user sees the area they'll clear.
+// Same px mapping as the brush width converter (annotation composable).
+const ERASER_DIAMETERS = { huge: 30, big: 20, medium: 10, small: 4, tiny: 2 }
+
+export const buildEraserCursor = widthName => {
+  const diameter = Math.max(ERASER_DIAMETERS[widthName] ?? 10, 6)
+  const size = Math.ceil(diameter + 6)
+  const c = size / 2
+  const r = diameter / 2
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}' ` +
+    `viewBox='0 0 ${size} ${size}'>` +
+    `<circle cx='${c}' cy='${c}' r='${r}' fill='none' stroke='white' stroke-width='3'/>` +
+    `<circle cx='${c}' cy='${c}' r='${r}' fill='none' stroke='black' stroke-width='1'/>` +
+    `</svg>`
+  // Hot-spot at the centre so the ring is concentric with the pointer.
+  return `${svgUri(svg)} ${Math.round(c)} ${Math.round(c)}, crosshair`
+}
+
 /**
  * @param {Object} modes - reactive refs describing the player state.
  * @param {import('vue').Ref<boolean>} modes.isAltHeld
@@ -29,13 +48,18 @@ export const CURSOR_LASER = `${svgUri(LASER_SVG)} 10 10, crosshair`
  * @param {import('vue').Ref<boolean>} modes.isTyping
  * @param {import('vue').Ref<boolean>} modes.isShapeMode
  * @param {import('vue').Ref<boolean>} [modes.isLaserModeOn]
+ * @param {import('vue').Ref<boolean>} [modes.isEraserModeOn]
+ * @param {import('vue').Ref<string>} [modes.pencilWidth] - width preset name
+ *   (huge/big/…) used to size the eraser ring cursor.
  */
 export const useAnnotationCursor = ({
   isAltHeld,
   isDrawing,
   isTyping,
   isShapeMode,
-  isLaserModeOn = ref(false)
+  isLaserModeOn = ref(false),
+  isEraserModeOn = ref(false),
+  pencilWidth = ref('big')
 }) => {
   const isMouseDown = ref(false)
 
@@ -62,6 +86,7 @@ export const useAnnotationCursor = ({
   const cursor = computed(() => {
     if (isAltHeld.value) return isMouseDown.value ? 'grabbing' : 'grab'
     if (isTyping.value) return 'text'
+    if (isEraserModeOn.value) return buildEraserCursor(pencilWidth.value)
     if (isLaserModeOn.value) return CURSOR_LASER
     if (isShapeMode.value) return 'crosshair'
     if (isDrawing.value) return CURSOR_PENCIL

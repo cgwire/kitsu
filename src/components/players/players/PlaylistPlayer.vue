@@ -627,6 +627,7 @@
         v-model:current-background="currentBackground"
         v-model:current-shape="currentShape"
         v-model:is-environment-skybox="isEnvironmentSkybox"
+        v-model:is-eraser-mode-on="isEraserModeOn"
         v-model:is-laser-mode-on="isLaserModeOn"
         v-model:is-shape-mode="isShapeMode"
         v-model:is-wireframe="isWireframe"
@@ -639,6 +640,7 @@
         @change-text-color="onChangeTextColor"
         @comment-clicked="onCommentClicked"
         @delete-clicked="onDeleteClicked"
+        @erase-clicked="onEraseClicked"
         @object-background-selected="onObjectBackgroundSelected"
         @pencil-annotate-clicked="onAnnotateClicked"
         @redo="redoLastAction"
@@ -1529,6 +1531,7 @@ const {
   clearComparisonCanvas,
   currentShape,
   isShapeMode,
+  isEraserModeOn,
   onChangePencilColor,
   onChangePencilWidth,
   onChangeTextColor,
@@ -1666,7 +1669,9 @@ const { cursor: annotationCursor } = useAnnotationCursor({
   isDrawing,
   isTyping,
   isShapeMode,
-  isLaserModeOn
+  isLaserModeOn,
+  isEraserModeOn,
+  pencilWidth
 })
 
 // DOM utility helpers (inlined from domMixin)
@@ -2915,8 +2920,14 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   for (const { preview, index } of picturePreviews) {
     if (currentPreviewIndex.value !== index) {
       currentPreviewIndex.value = index
-      await new Promise(resolve => setTimeout(resolve, 500))
     }
+    // Always wait for the live canvas to settle before compositing.
+    // Iteration #1 often skips the index switch (the user is already
+    // on the main preview), but the live canvas can still be mid-load
+    // when the snapshot is triggered right after opening the task —
+    // composite would then capture an empty canvas and the resulting
+    // PNG would come out without any annotation.
+    await new Promise(resolve => setTimeout(resolve, 500))
     const canvas = document.getElementById('annotation-snapshot')
     extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
@@ -3621,6 +3632,7 @@ const onAnnotateClicked = () => {
   } else {
     isShapeMode.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     if (fabricCanvas.value) {
       fabricCanvas.value.isDrawingMode = true
       const brush = new PSBrush(fabricCanvas.value)
@@ -3631,6 +3643,19 @@ const onAnnotateClicked = () => {
     _resetPencil()
     isDrawing.value = true
   }
+}
+
+// Eraser is a fourth mutually-exclusive tool. The wrapper clears the
+// player-owned mode refs on entry, then delegates the brush swap and the
+// isEraserModeOn toggle to the composable.
+const onEraseClicked = () => {
+  showCanvas()
+  if (!isEraserModeOn.value) {
+    isDrawing.value = false
+    isShapeMode.value = false
+    isTyping.value = false
+  }
+  annotation.onEraseClicked()
 }
 
 const onTypeClicked = () => {
@@ -3644,6 +3669,7 @@ const onTypeClicked = () => {
     if (fabricCanvas.value) fabricCanvas.value.isDrawingMode = false
     isShapeMode.value = false
     isDrawing.value = false
+    isEraserModeOn.value = false
     isTyping.value = true
     clickarea?.addEventListener('dblclick', addText)
   }
@@ -3654,6 +3680,7 @@ const onShapeModeClicked = () => {
   if (isShapeMode.value) {
     isDrawing.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
   }
 }
@@ -3818,6 +3845,7 @@ watch(isAnnotationsDisplayed, () => {
   if (!isAnnotationsDisplayed.value) {
     if (isDrawing.value) onAnnotateClicked()
     else if (isTyping.value) onTypeClicked()
+    else if (isEraserModeOn.value) onEraseClicked()
   }
   isRoomSilent = false
   resetCanvasVisibility()

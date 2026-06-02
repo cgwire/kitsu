@@ -288,6 +288,7 @@
       "altup": "上移任务选择",
       "annotations": "注解",
       "draw": "启用绘图模式",
+      "erase": "启用橡皮擦模式",
       "navigation": "导航",
       "redo": "准备",
       "undo": "撤消",

@@ -11,10 +11,13 @@ import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Arrow, registerArrowFabricShape } from './arrowshape'
+import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 
 // Make sure fabric.Arrow is reachable from the global fabric namespace
 // (the deserialiser branches on `obj.type === 'arrow'`).
 registerArrowFabricShape()
+// Patch fabric.Object.prototype with eraser-mask support (idempotent).
+installEraserObjectSupport()
 
 /* -------------------------------------------------------------------------
  * PSBrush prototype patches (idempotent — safe to import from many places)
@@ -132,6 +135,16 @@ export const addSerialization = object => {
     result.angle = this.angle
     result.scale = this.scale
     result.createdBy = this.createdBy
+    // Persist the eraser mask centrally: PSStroke's custom toObject() goes
+    // through the psbrush callSuper shim and doesn't reliably reach the patched
+    // fabric.Object.prototype.toObject, so relying on that alone loses the mask
+    // for freehand strokes. The mask is in the object's LOCAL coordinates;
+    // normalizeSerializedAnnotation only rescales left/top/scale, never eraser.
+    if (this.eraser && !this.eraser.excludeFromExport) {
+      result.eraser = this.eraser.toObject()
+    } else {
+      delete result.eraser
+    }
     return normalizeSerializedAnnotation(this, result)
   }
   return object
@@ -239,6 +252,20 @@ const FINAL_FILLS = {
   whiteboard: WHITEBOARD_FILL
 }
 
+// A shape with an opaque fill (the whiteboard sticker, or any filled shape) is
+// a backdrop reviewers draw on top of, so the eraser must not pierce it.
+// Outline shapes end up `fill: transparent` and stay erasable, as do strokes.
+export const hasOpaqueFill = fill => {
+  if (!fill || fill === 'transparent') return false
+  // Only an explicit rgba()/hsla() alpha of 0 counts as transparent. rgb()
+  // (no alpha) and named/hex colours are always opaque.
+  const alpha = /^(?:rgba|hsla)\([^)]*,\s*([\d.]+)\s*\)$/i.exec(
+    String(fill).trim()
+  )
+  if (alpha && parseFloat(alpha[1]) === 0) return false
+  return true
+}
+
 const buildShape = (tool, startX, startY, color, width) => {
   const base = {
     left: startX,
@@ -344,7 +371,8 @@ export const attachShapeDrawing = (
 
   const onMouseUp = () => {
     if (!drawing) return
-    drawing.set({ fill: FINAL_FILLS[drawingTool] ?? 'transparent' })
+    const finalFill = FINAL_FILLS[drawingTool] ?? 'transparent'
+    drawing.set({ fill: finalFill, erasable: !hasOpaqueFill(finalFill) })
     drawing.setCoords()
     canvas.requestRenderAll()
     onShapeAdded?.(drawing)
@@ -592,7 +620,7 @@ export const normalizeSerializedAnnotation = (object, result) => {
   return result
 }
 
-export const buildReadOnlyShape = async (annotation, obj, canvas) => {
+const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
   if (!obj || !obj.type) return null
 
   const canvasWidth = obj.canvasWidth || annotation?.width
@@ -605,6 +633,7 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
 
   const base = {
     angle: obj.angle || 0,
+    erasable: !hasOpaqueFill(obj.fill),
     evented: false,
     fill: obj.fill || 'transparent',
     height: obj.height,
@@ -660,6 +689,7 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
     const text = new fabric.Text(obj.text || '', {
       ...base,
       backgroundColor: obj.backgroundColor || 'rgba(255, 255, 255, 0.8)',
+      erasable: false,
       fontFamily: obj.fontFamily || 'Arial',
       fontSize: obj.fontSize || 16,
       fontWeight: obj.fontWeight,
@@ -706,4 +736,12 @@ export const buildReadOnlyShape = async (annotation, obj, canvas) => {
   }
 
   return null
+}
+
+// Public builder: build the read-only shape, then revive its serialized eraser
+// mask (kept in the shape's LOCAL coordinates — never normalized). Recurses via
+// the inner builder so group children get their masks revived too.
+export const buildReadOnlyShape = async (annotation, obj, canvas) => {
+  const shape = await buildReadOnlyShapeInner(annotation, obj, canvas)
+  return reviveObjectEraser(shape, obj)
 }

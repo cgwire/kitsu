@@ -288,6 +288,7 @@
       "altup": "上移任務選擇",
       "annotations": "注解",
       "draw": "啟用繪圖模式",
+      "erase": "啟用橡皮擦模式",
       "navigation": "導覽",
       "redo": "重做",
       "undo": "取消",

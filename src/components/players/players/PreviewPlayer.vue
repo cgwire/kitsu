@@ -15,7 +15,11 @@
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
             :wheel-target="mainMediaElement"
-            v-show="isAnnotationsDisplayed"
+            v-show="
+              isAnnotationsDisplayed &&
+              (isMovie || isPicture) &&
+              mainMediaElement
+            "
             @click="onCanvasClicked"
             @resized="onMainCanvasResized"
           />
@@ -30,7 +34,9 @@
               isAnnotationsDisplayed &&
               isComparing &&
               previewToCompare &&
-              !isComparisonOverlay
+              !isComparisonOverlay &&
+              (isMovie || isPicture) &&
+              comparisonMediaElement
             "
             @click="onCanvasClicked"
             @resized="onComparisonCanvasResized"
@@ -215,6 +221,7 @@
             v-model:current-background="currentBackground"
             v-model:current-shape="currentShape"
             v-model:is-environment-skybox="isEnvironmentSkybox"
+            v-model:is-eraser-mode-on="isEraserModeOn"
             v-model:is-shape-mode="isShapeMode"
             v-model:is-wireframe="isWireframe"
             @annotation-displayed-clicked="onAnnotationDisplayedClicked"
@@ -224,6 +231,7 @@
             @change-text-color="onChangeTextColor"
             @comment-clicked="onCommentClicked"
             @delete-clicked="onDeleteClicked"
+            @erase-clicked="onEraseClicked"
             @object-background-selected="onObjectBackgroundSelected"
             @pencil-annotate-clicked="onPencilAnnotateClicked"
             @redo="redoLastAction"
@@ -650,6 +658,7 @@ const {
   currentShape,
   deleteSelection,
   isShapeMode,
+  isEraserModeOn,
   isWriting,
   getNewAnnotations,
   loadSingleAnnotation,
@@ -1213,8 +1222,22 @@ const onPencilAnnotateClicked = () => {
     _resetPencil()
     isShapeMode.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     isDrawing.value = true
   }
+}
+
+// Eraser is a fourth mutually-exclusive tool. The wrapper clears the
+// player-owned mode refs on entry, then delegates the brush swap and the
+// isEraserModeOn toggle to the composable.
+const onEraseClicked = () => {
+  clearFocus()
+  if (!isEraserModeOn.value) {
+    isDrawing.value = false
+    isShapeMode.value = false
+    isTyping.value = false
+  }
+  annotation.onEraseClicked()
 }
 
 const onTypeClicked = () => {
@@ -1224,6 +1247,7 @@ const onTypeClicked = () => {
   } else {
     isDrawing.value = false
     isShapeMode.value = false
+    isEraserModeOn.value = false
     isTyping.value = true
   }
 }
@@ -1235,6 +1259,7 @@ const onShapeModeClicked = () => {
   if (isShapeMode.value) {
     isDrawing.value = false
     isTyping.value = false
+    isEraserModeOn.value = false
     if (!isAnnotationsDisplayed.value) isAnnotationsDisplayed.value = true
   }
 }
@@ -1468,12 +1493,15 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
   for (const { preview, index } of picturePreviews) {
     if (currentIndex.value !== index) {
       currentIndex.value = index
-      // Wait for the picture to swap and annotations to reload. The
-      // chain is async (image load -> resetPlayerPositions ->
-      // AnnotationCanvas resized -> reloadAnnotations) so a single tick
-      // isn't enough.
-      await new Promise(resolve => setTimeout(resolve, 500))
     }
+    // Always wait for the picture to load and the live canvas to
+    // settle before compositing. Iteration #1 often skips the index
+    // switch (the user is already on the main preview), but the chain
+    // is async (image load -> resetPlayerPositions -> AnnotationCanvas
+    // resized -> reloadAnnotations) and composite would otherwise
+    // capture an empty live canvas, producing a PNG without any
+    // annotation.
+    await new Promise(resolve => setTimeout(resolve, 500))
     const canvas = document.getElementById('annotation-snapshot')
     previewViewer.value.extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
@@ -1536,6 +1564,10 @@ const { isAltHeld } = usePreviewShortcuts({
     container.value.focus()
     onPencilAnnotateClicked()
   },
+  onErase: () => {
+    container.value.focus()
+    onEraseClicked()
+  },
   onUndo: () => undoLastAction(),
   onRedo: () => redoLastAction(),
   onPrevPreview: () => onPreviousClicked(),
@@ -1549,7 +1581,9 @@ const { cursor: annotationCursor } = useAnnotationCursor({
   isAltHeld,
   isDrawing,
   isTyping,
-  isShapeMode
+  isShapeMode,
+  isEraserModeOn,
+  pencilWidth
 })
 
 const onCommentClicked = () => {
@@ -1875,6 +1909,7 @@ watch(isTyping, () => {
 watch(isAnnotationsDisplayed, () => {
   if (!isAnnotationsDisplayed.value) {
     isDrawing.value = false
+    if (isEraserModeOn.value) onEraseClicked()
   }
 })
 
