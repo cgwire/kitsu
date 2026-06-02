@@ -112,6 +112,17 @@ const visibleImage = computed(() => {
   return picture.value
 })
 
+// An <img> with no src is reported as `complete` by the HTML spec, so
+// guarding setupPanZoom on `.complete` alone fires the panzoom against
+// a 0×0 element when the component mounts without a preview (notably
+// the comparison viewer before the user picks a comparison preview).
+// naturalWidth > 0 narrows the check to images that actually have
+// pixel dimensions.
+const isVisibleImageReady = () => {
+  const img = visibleImage.value
+  return !!(img && img.complete && img.naturalWidth > 0)
+}
+
 const getNaturalDimensions = () => {
   let pic = { naturalWidth: 0, naturalHeight: 0 }
   if (!props.fullScreen && picture.value.naturalWidth && !isGif.value) {
@@ -257,7 +268,7 @@ const endLoading = () => {
     // bounds clamp computing against a 0×0 bbox, so the next pan / zoom
     // / cross-viewer sync ends up off-centre — which is what users on
     // slow connections were observing.
-    if (visibleImage.value?.complete) setupPanZoom()
+    if (isVisibleImageReady()) setupPanZoom()
   })
 }
 
@@ -406,7 +417,7 @@ watch(visibleImage, () => {
   // endLoading will rebind once its load event fires. Binding now would
   // recreate the instance against an unsized target and leave the
   // picture off-centre on slow loads.
-  if (visibleImage.value?.complete) setupPanZoom()
+  if (isVisibleImageReady()) setupPanZoom()
 })
 
 // Lifecycle
@@ -425,7 +436,7 @@ onMounted(() => {
   setPicturePath()
   // Cached-image case: load may have fired before the listener was
   // attached. For uncached images the bind happens later in endLoading.
-  if (visibleImage.value?.complete) setupPanZoom()
+  if (isVisibleImageReady()) setupPanZoom()
 })
 
 onBeforeUnmount(() => {
