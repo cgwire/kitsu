@@ -168,25 +168,29 @@
           "
         />
 
-        <annotation-canvas
-          ref="comparison-annotation-canvas"
-          canvas-id="playlist-annotation-canvas-comparison"
-          :media-element="comparisonContentAnchorEl"
-          :panzoom-transform="panzoomTransform"
-          :interactive="false"
-          :static="true"
-          @resized="onComparisonCanvasResized"
-          v-show="
-            isAnnotationsDisplayed &&
+        <div
+          class="annotation-slot comparison-slot"
+          v-if="
             isComparing &&
             isCurrentPreviewMovie &&
             isMovieComparison &&
-            currentRevisionToCompare &&
             !isComparisonOverlay &&
-            !isFullMode &&
-            !isLoading
+            !isFullMode
           "
-        />
+        >
+          <annotation-canvas
+            ref="comparison-annotation-canvas"
+            canvas-id="playlist-annotation-canvas-comparison"
+            :media-element="comparisonContentAnchorEl"
+            :panzoom-transform="panzoomTransform"
+            :interactive="false"
+            :static="true"
+            @resized="onComparisonCanvasResized"
+            v-show="
+              isAnnotationsDisplayed && currentRevisionToCompare && !isLoading
+            "
+          />
+        </div>
 
         <div
           class="picture-preview-comparison-wrapper"
@@ -353,22 +357,27 @@
           v-show="!isCurrentPreviewFile && !isCurrentPreviewModel && !isLoading"
         />
 
-        <annotation-canvas
-          ref="main-annotation-canvas"
-          canvas-id="playlist-annotation-canvas"
-          :cursor="annotationCursor"
-          :media-element="mainContentAnchorEl"
-          :panzoom-transform="panzoomTransform"
-          :interactive="isOverlayInteractive"
-          :wheel-target="mainMediaElement"
-          @click="onCanvasClicked"
-          @resized="onMainCanvasResized"
-          v-show="
-            !isCurrentPreviewFile &&
-            isAnnotationsDisplayed &&
-            !isCurrentPreviewModel
-          "
-        />
+        <div
+          class="annotation-slot"
+          :class="{ 'side-by-side': isSideBySideComparison }"
+        >
+          <annotation-canvas
+            ref="main-annotation-canvas"
+            canvas-id="playlist-annotation-canvas"
+            :cursor="annotationCursor"
+            :media-element="mainContentAnchorEl"
+            :panzoom-transform="panzoomTransform"
+            :interactive="isOverlayInteractive"
+            :wheel-target="mainMediaElement"
+            @click="onCanvasClicked"
+            @resized="onMainCanvasResized"
+            v-show="
+              !isCurrentPreviewFile &&
+              isAnnotationsDisplayed &&
+              !isCurrentPreviewModel
+            "
+          />
+        </div>
       </div>
 
       <task-info
@@ -1321,6 +1330,17 @@ const isMovieComparison = computed(
 
 const isPictureComparison = computed(() =>
   isPicturePreview(currentPreviewToCompare.value?.extension)
+)
+
+// True when the two viewers are laid out side-by-side in the
+// container. Drives the per-viewer annotation slots so a panned
+// overlay can't spill from one viewer into the other.
+const isSideBySideComparison = computed(
+  () =>
+    isComparing.value &&
+    !isComparisonOverlay.value &&
+    !isFullMode.value &&
+    (isMovieComparison.value || isPictureComparison.value)
 )
 
 // AnnotationCanvas overlays this anchor div instead of the comparison
@@ -4396,6 +4416,35 @@ const playerProxy = {
 .comparison-content-anchor {
   position: absolute;
   pointer-events: none;
+}
+
+// Per-viewer annotation slot. The annotation canvases used to sit
+// directly under .video-container, so a panned overlay could only be
+// clipped at the outermost container — in side-by-side comparison
+// that meant it spilled into the other viewer. Each slot now covers
+// just its viewer's screen area and clips at that edge.
+// pointer-events: none lets clicks fall through to whatever is
+// underneath; the canvas inside keeps its own pointer-events: auto
+// for drawing. .video-container is flexrow-reverse in side-by-side
+// mode, so the main viewer sits on the LEFT and the comparison on the
+// RIGHT — the slot positions match.
+.annotation-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+
+  &.side-by-side {
+    width: 50%;
+  }
+}
+
+.comparison-slot {
+  left: 50%;
+  width: 50%;
 }
 
 .mr1 {
