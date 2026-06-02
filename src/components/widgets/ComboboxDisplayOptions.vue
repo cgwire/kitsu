@@ -19,7 +19,11 @@ const props = defineProps({
   },
   hasLinkedAssets: {
     type: Boolean,
-    required: false
+    default: false
+  },
+  isAllEpisodes: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -63,7 +67,8 @@ const options = computed(() => {
       value: 'showLinkedAssets',
       when:
         (props.type === 'asset' || props.type === 'tasktype-asset') &&
-        props.hasLinkedAssets
+        props.hasLinkedAssets &&
+        !props.isAllEpisodes
     }
   ]
     .filter(opt => opt.when !== false)

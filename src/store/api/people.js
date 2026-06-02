@@ -64,6 +64,7 @@ export default {
       daily_salary: person.daily_salary,
       departments: person.departments,
       studio_id: person.studio_id,
+      country: person.country,
       is_bot: person.is_bot,
       expiration_date: person.expiration_date?.toJSON().slice(0, 10)
     }
@@ -111,7 +112,8 @@ export default {
       ),
       notifications_discord_userid: person.notifications_discord_userid,
       departments: person.departments,
-      studio_id: person.studio_id
+      studio_id: person.studio_id,
+      country: person.country
     }
     return client.pput(`/api/data/persons/${person.id}`, data)
   },

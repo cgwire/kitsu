@@ -60,6 +60,12 @@
             v-model="form.locale"
             @update:model-value="localeChanged"
           />
+          <combobox
+            :label="$t('people.fields.country')"
+            :options="countryOptions"
+            v-model="form.country"
+            v-if="user.role !== 'client' && !user.is_guest"
+          />
         </div>
       </card>
 
@@ -183,7 +189,8 @@ import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
 import { useStore } from 'vuex'
 
-import lang from '@/lib/lang'
+import { getCountryOptions } from '@/lib/countries'
+import lang, { localeCode } from '@/lib/lang'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import Card from '@/components/widgets/Card.vue'
@@ -210,6 +217,7 @@ const form = ref({
   notifications_discord_userid: '',
   email: '',
   phone: '',
+  country: null,
   timezone: 'Europe/Paris',
   locale: 'en_US'
 })
@@ -261,6 +269,8 @@ const timezoneOptions = computed(() =>
     .filter(tz => tz.indexOf('/') > 0 && tz.indexOf('Etc') < 0)
     .map(tz => ({ label: tz, value: tz }))
 )
+
+const countryOptions = computed(() => getCountryOptions(localeCode.value))
 
 // Functions
 

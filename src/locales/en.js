@@ -1082,6 +1082,7 @@ export default {
     fields: {
       active: 'Active',
       contract: 'Contract',
+      country: 'Country',
       created_at: 'Creation date',
       daily_salary: 'Daily rate',
       departments: 'Departments',
@@ -1100,6 +1101,7 @@ export default {
     list: {
       active: 'Active',
       contract: 'Contract',
+      country: 'Country',
       departments: 'Departments',
       email: 'Email',
       expiration: 'Expiration',
