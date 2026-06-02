@@ -30,8 +30,9 @@
               />
               <combobox-display-options
                 class="flexrow-item"
-                :type="type"
                 :has-linked-assets="isTVShow"
+                :is-all-episodes="currentEpisode?.id === 'all'"
+                :type="type"
                 v-model="displaySettings"
               />
             </div>

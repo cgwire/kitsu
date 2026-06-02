@@ -16,8 +16,9 @@
             <div class="filler"></div>
             <combobox-display-options
               class="flexrow-item"
-              :type="displayTaskType"
               :has-linked-assets="isTVShow"
+              :is-all-episodes="currentEpisode?.id === 'all'"
+              :type="displayTaskType"
               v-model="displaySettings"
             />
             <div
