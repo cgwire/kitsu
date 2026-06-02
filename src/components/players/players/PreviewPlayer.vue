@@ -7,40 +7,48 @@
           :style="{ cursor: annotationCursor || null }"
           ref="preview-container"
         >
-          <annotation-canvas
-            ref="main-annotation-canvas"
-            :canvas-id="canvasId"
-            :cursor="annotationCursor"
-            :media-element="mainMediaElement"
-            :panzoom-transform="panzoomTransform"
-            :interactive="isOverlayInteractive"
-            :wheel-target="mainMediaElement"
-            v-show="
-              isAnnotationsDisplayed &&
-              (isMovie || isPicture) &&
-              mainMediaElement
-            "
-            @click="onCanvasClicked"
-            @resized="onMainCanvasResized"
-          />
-          <annotation-canvas
-            ref="comparison-annotation-canvas"
-            :canvas-id="`${canvasId}-comparison`"
-            :media-element="comparisonMediaElement"
-            :panzoom-transform="panzoomTransform"
-            :interactive="false"
-            :static="true"
-            v-show="
-              isAnnotationsDisplayed &&
-              isComparing &&
-              previewToCompare &&
-              !isComparisonOverlay &&
-              (isMovie || isPicture) &&
-              comparisonMediaElement
-            "
-            @click="onCanvasClicked"
-            @resized="onComparisonCanvasResized"
-          />
+          <div
+            class="annotation-slot"
+            :class="{ 'side-by-side': isSideBySideComparison }"
+          >
+            <annotation-canvas
+              ref="main-annotation-canvas"
+              :canvas-id="canvasId"
+              :cursor="annotationCursor"
+              :media-element="mainMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="isOverlayInteractive"
+              :wheel-target="mainMediaElement"
+              v-show="
+                isAnnotationsDisplayed &&
+                (isMovie || isPicture) &&
+                mainMediaElement
+              "
+              @click="onCanvasClicked"
+              @resized="onMainCanvasResized"
+            />
+          </div>
+          <div
+            class="annotation-slot comparison-slot"
+            v-if="isSideBySideComparison"
+          >
+            <annotation-canvas
+              ref="comparison-annotation-canvas"
+              :canvas-id="`${canvasId}-comparison`"
+              :media-element="comparisonMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="false"
+              :static="true"
+              v-show="
+                isAnnotationsDisplayed &&
+                previewToCompare &&
+                (isMovie || isPicture) &&
+                comparisonMediaElement
+              "
+              @click="onCanvasClicked"
+              @resized="onComparisonCanvasResized"
+            />
+          </div>
           <div class="viewers">
             <preview-viewer
               ref="preview-viewer"
@@ -754,6 +762,13 @@ const currentProduction = computed(() =>
 
 const allowExtraPreview = computed(
   () => !currentProduction.value?.is_single_preview_per_revision
+)
+
+// Side-by-side is the only layout where each viewer occupies a distinct
+// slot in the container; in overlay mode they stack and the comparison
+// annotation canvas is hidden anyway.
+const isSideBySideComparison = computed(
+  () => isComparing.value && !isComparisonOverlay.value
 )
 
 const marginBottom = computed(() => {
@@ -2244,6 +2259,32 @@ defineExpose({
 
 .comparison-preview-viewer {
   z-index: 2;
+}
+
+// Per-viewer annotation slot. The annotation canvases used to sit
+// directly under .preview-container, so a panned overlay in one viewer
+// could only be clipped at the outermost container — in side-by-side
+// comparison mode that meant it spilled into the other viewer. Each
+// slot now covers just its viewer's screen area and clips at that edge.
+// pointer-events stays open so the canvas inside can still receive
+// drawing input; empty slot space falls through to the viewer beneath.
+.annotation-slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+
+  &.side-by-side {
+    width: 50%;
+  }
+}
+
+.comparison-slot {
+  left: 50%;
+  width: 50%;
 }
 
 .separator {
