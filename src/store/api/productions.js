@@ -35,7 +35,8 @@ export default {
       'is_clients_isolated',
       'is_preview_download_allowed',
       'is_set_preview_automated',
-      'is_publish_default_for_artists'
+      'is_publish_default_for_artists',
+      'is_single_preview_per_revision'
     ]
     const { id, ...data } = production
     BOOLEAN_FIELDS.forEach(field => {
