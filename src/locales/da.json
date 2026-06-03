@@ -318,7 +318,9 @@
       "play_pause_typing": "Play / pause (selv når du skriver en kommentar)",
       "player": "Afspiller",
       "previous_annotation": "Forrige annotering",
-      "previous_frame": "Forrige frame"
+      "previous_frame": "Forrige frame",
+      "scrub_anywhere": "Scrub tidslinjen fra hvor som helst i afspilleren",
+      "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet"
     },
     "login": {
       "back_to_login": "Gå tilbage til login side",

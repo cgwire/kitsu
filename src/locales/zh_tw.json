@@ -318,7 +318,9 @@
       "play_pause_typing": "播放／暫停（即使在輸入評論時）",
       "player": "播放器",
       "previous_annotation": "上一個註解",
-      "previous_frame": "上一幀"
+      "previous_frame": "上一幀",
+      "scrub_anywhere": "在播放器任意位置拖動以瀏覽時間軸",
+      "focus_comment": "在播放器與評論框之間切換焦點"
     },
     "login": {
       "back_to_login": "返回登入頁面",

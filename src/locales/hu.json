@@ -318,7 +318,9 @@
       "plhome": "Ugrás az első képkockára",
       "previous_annotation": "Előző megjegyzés",
       "previous_frame": "Előző képkocka",
-      "rotate_hdr": "Környezeti térkép forgatása"
+      "rotate_hdr": "Környezeti térkép forgatása",
+      "scrub_anywhere": "Az idővonal görgetése a lejátszó bármely pontjáról",
+      "focus_comment": "Fókusz váltása a lejátszó és a megjegyzés mező között"
     },
     "login": {
       "back_to_login": "Vissza a belépő oldalra",

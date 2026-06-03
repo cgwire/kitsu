@@ -626,7 +626,9 @@ export default {
     straight_line: 'Draw a straight line',
     constant_width: 'Draw at a constant width (no pressure)',
     move_entity_left: 'Move selected entity to the left',
-    move_entity_right: 'Move selected entity to the right'
+    move_entity_right: 'Move selected entity to the right',
+    scrub_anywhere: 'Scrub the timeline from anywhere in the player',
+    focus_comment: 'Toggle focus between the player and the comment box'
   },
 
   intro: {

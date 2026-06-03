@@ -318,7 +318,9 @@
       "play_pause_typing": "再生 / 一時停止（コメント入力中でも）",
       "player": "プレイヤー",
       "previous_annotation": "前の注釈",
-      "previous_frame": "前のフレーム"
+      "previous_frame": "前のフレーム",
+      "scrub_anywhere": "プレイヤー上のどこからでもタイムラインをスクラブ",
+      "focus_comment": "プレイヤーとコメント欄の間でフォーカスを切り替え"
     },
     "login": {
       "back_to_login": "ログインページに戻る",

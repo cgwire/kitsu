@@ -318,7 +318,9 @@
       "play_pause_typing": "Abspielen / Pause (auch während des Schreibens eines Kommentars)",
       "player": "Player",
       "previous_annotation": "Vorherige Anmerkung",
-      "previous_frame": "Vorheriges Bild"
+      "previous_frame": "Vorheriges Bild",
+      "scrub_anywhere": "Die Zeitleiste von überall im Player durchsuchen",
+      "focus_comment": "Fokus zwischen Player und Kommentarfeld umschalten"
     },
     "login": {
       "back_to_login": "Zurück zum Login",

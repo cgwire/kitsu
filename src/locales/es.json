@@ -318,7 +318,9 @@
       "play_pause_typing": "Reproducir / pausar (incluso mientras se escribe un comentario)",
       "player": "Reproductor",
       "previous_annotation": "Anotación anterior",
-      "previous_frame": "Fotograma anterior"
+      "previous_frame": "Fotograma anterior",
+      "scrub_anywhere": "Recorrer la línea de tiempo desde cualquier parte del reproductor",
+      "focus_comment": "Alternar el foco entre el reproductor y el cuadro de comentarios"
     },
     "login": {
       "back_to_login": "Voler al login",

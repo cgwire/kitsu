@@ -318,7 +318,9 @@
       "play_pause_typing": "재생 / 멈춤 (댓글을 입력하는 중에도)",
       "player": "플레이어",
       "previous_annotation": "이전 주석",
-      "previous_frame": "이전 프레임"
+      "previous_frame": "이전 프레임",
+      "scrub_anywhere": "플레이어 어디서든 타임라인 스크럽",
+      "focus_comment": "플레이어와 코멘트 입력란 사이에서 포커스 전환"
     },
     "login": {
       "back_to_login": "로그인 페이지로 돌아가기",

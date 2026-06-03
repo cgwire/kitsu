@@ -318,7 +318,9 @@
       "play_pause_typing": "Lecture / pause (même en saisissant un commentaire)",
       "player": "Lecteur",
       "previous_annotation": "Annotation précédente",
-      "previous_frame": "Image précédente"
+      "previous_frame": "Image précédente",
+      "scrub_anywhere": "Faire défiler la timeline depuis n'importe où dans le lecteur",
+      "focus_comment": "Basculer le focus entre le lecteur et la zone de commentaire"
     },
     "login": {
       "back_to_login": "Revenir à la page de connexion",

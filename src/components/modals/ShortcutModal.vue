@@ -89,7 +89,9 @@ const shortcutGroups = computed(() => [
       { keys: ['←'], text: t('keyboard.previous_frame') },
       { keys: ['→'], text: t('keyboard.next_frame') },
       { keys: [','], text: t('keyboard.previous_annotation') },
-      { keys: ['.'], text: t('keyboard.next_annotation') }
+      { keys: ['.'], text: t('keyboard.next_annotation') },
+      { keys: ['Shift', 'Mouse Drag'], text: t('keyboard.scrub_anywhere') },
+      { keys: ['Shift', 'Tab'], text: t('keyboard.focus_comment') }
     ]
   },
   {

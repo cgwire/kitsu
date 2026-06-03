@@ -318,7 +318,9 @@
       "play_pause_typing": "پخش / توقف (حتی هنگام تایپ کردن یک نظر)",
       "player": "پخش‌کننده",
       "previous_annotation": "حاشیه نویسی قبلی",
-      "previous_frame": "فریم قبلی"
+      "previous_frame": "فریم قبلی",
+      "scrub_anywhere": "اسکراب کردن خط زمانی از هر جای پخش‌کننده",
+      "focus_comment": "تغییر فوکوس بین پخش‌کننده و کادر نظر"
     },
     "login": {
       "back_to_login": "به صفحه ورود برگردید",

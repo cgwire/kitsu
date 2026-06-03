@@ -318,7 +318,9 @@
       "play_pause_typing": "Afspelen / pauzeren (ook tijdens het typen van een opmerking)",
       "player": "Player",
       "previous_annotation": "Vorige annotatie",
-      "previous_frame": "Vorig frame"
+      "previous_frame": "Vorig frame",
+      "scrub_anywhere": "Scrub de tijdlijn vanaf elke plek in de speler",
+      "focus_comment": "Wissel de focus tussen de speler en het commentaarvak"
     },
     "login": {
       "back_to_login": "Ga terug naar de log-in pagina",
