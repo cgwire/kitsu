@@ -320,7 +320,9 @@
       "previous_annotation": "前の注釈",
       "previous_frame": "前のフレーム",
       "scrub_anywhere": "プレイヤー上のどこからでもタイムラインをスクラブ",
-      "focus_comment": "プレイヤーとコメント欄の間でフォーカスを切り替え"
+      "focus_comment": "プレイヤーとコメント欄の間でフォーカスを切り替え",
+      "first_frame": "最初のフレームへ移動",
+      "last_frame": "最後のフレームへ移動"
     },
     "login": {
       "back_to_login": "ログインページに戻る",

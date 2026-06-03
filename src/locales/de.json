@@ -320,7 +320,9 @@
       "previous_annotation": "Vorherige Anmerkung",
       "previous_frame": "Vorheriges Bild",
       "scrub_anywhere": "Die Zeitleiste von überall im Player durchsuchen",
-      "focus_comment": "Fokus zwischen Player und Kommentarfeld umschalten"
+      "focus_comment": "Fokus zwischen Player und Kommentarfeld umschalten",
+      "first_frame": "Zum ersten Bild gehen",
+      "last_frame": "Zum letzten Bild gehen"
     },
     "login": {
       "back_to_login": "Zurück zum Login",

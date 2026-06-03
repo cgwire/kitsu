@@ -320,7 +320,9 @@
       "previous_annotation": "上一个注解",
       "previous_frame": "上一帧",
       "scrub_anywhere": "在播放器任意位置拖动以浏览时间线",
-      "focus_comment": "在播放器和评论框之间切换焦点"
+      "focus_comment": "在播放器和评论框之间切换焦点",
+      "first_frame": "跳到第一帧",
+      "last_frame": "跳到最后一帧"
     },
     "login": {
       "back_to_login": "返回登录页面",

@@ -628,7 +628,9 @@ export default {
     move_entity_left: 'Move selected entity to the left',
     move_entity_right: 'Move selected entity to the right',
     scrub_anywhere: 'Scrub the timeline from anywhere in the player',
-    focus_comment: 'Toggle focus between the player and the comment box'
+    focus_comment: 'Toggle focus between the player and the comment box',
+    first_frame: 'Go to the first frame',
+    last_frame: 'Go to the last frame'
   },
 
   intro: {

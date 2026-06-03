@@ -320,7 +320,9 @@
       "previous_frame": "Előző képkocka",
       "rotate_hdr": "Környezeti térkép forgatása",
       "scrub_anywhere": "Az idővonal görgetése a lejátszó bármely pontjáról",
-      "focus_comment": "Fókusz váltása a lejátszó és a megjegyzés mező között"
+      "focus_comment": "Fókusz váltása a lejátszó és a megjegyzés mező között",
+      "first_frame": "Ugrás az első képkockára",
+      "last_frame": "Ugrás az utolsó képkockára"
     },
     "login": {
       "back_to_login": "Vissza a belépő oldalra",

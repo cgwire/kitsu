@@ -320,7 +320,9 @@
       "previous_annotation": "Anotação anterior",
       "previous_frame": "Frame anterior",
       "scrub_anywhere": "Percorrer a linha do tempo de qualquer lugar do player",
-      "focus_comment": "Alternar o foco entre o player e a caixa de comentários"
+      "focus_comment": "Alternar o foco entre o player e a caixa de comentários",
+      "first_frame": "Ir para o primeiro frame",
+      "last_frame": "Ir para o último frame"
     },
     "login": {
       "back_to_login": "Voltar para a página de login",

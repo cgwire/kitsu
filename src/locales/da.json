@@ -320,7 +320,9 @@
       "previous_annotation": "Forrige annotering",
       "previous_frame": "Forrige frame",
       "scrub_anywhere": "Scrub tidslinjen fra hvor som helst i afspilleren",
-      "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet"
+      "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet",
+      "first_frame": "Gå til første frame",
+      "last_frame": "Gå til sidste frame"
     },
     "login": {
       "back_to_login": "Gå tilbage til login side",

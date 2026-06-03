@@ -88,6 +88,8 @@ const shortcutGroups = computed(() => [
       { keys: ['Alt', 'p'], text: t('keyboard.play_pause_typing') },
       { keys: ['←'], text: t('keyboard.previous_frame') },
       { keys: ['→'], text: t('keyboard.next_frame') },
+      { keys: ['Home'], text: t('keyboard.first_frame') },
+      { keys: ['End'], text: t('keyboard.last_frame') },
       { keys: [','], text: t('keyboard.previous_annotation') },
       { keys: ['.'], text: t('keyboard.next_annotation') },
       { keys: ['Shift', 'Mouse Drag'], text: t('keyboard.scrub_anywhere') },
