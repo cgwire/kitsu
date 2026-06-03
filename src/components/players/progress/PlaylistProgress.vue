@@ -393,6 +393,11 @@ onBeforeUnmount(() => {
   position: relative;
   overflow: visible;
   transition: height 0.2s ease-in-out;
+  // A horizontal pen / touch drag along the timeline would otherwise
+  // trigger Chrome's two-finger swipe gesture and navigate back / forward,
+  // dropping any unsaved comment text — issue #1700.
+  overscroll-behavior-x: contain;
+  touch-action: pan-y;
 }
 
 .playlist-progress-position {

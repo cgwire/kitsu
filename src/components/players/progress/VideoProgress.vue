@@ -425,6 +425,11 @@ defineExpose({ updateProgressBar })
   flex-shrink: 0;
   height: 28px;
   margin: 0;
+  // A horizontal pen / touch drag along the timeline would otherwise
+  // trigger Chrome's two-finger swipe gesture and navigate back / forward,
+  // dropping any unsaved comment text — issue #1700.
+  overscroll-behavior-x: contain;
+  touch-action: pan-y;
   padding: 0;
   position: relative;
   width: 100%;

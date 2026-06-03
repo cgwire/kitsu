@@ -4504,6 +4504,10 @@ const playerProxy = {
 .video-container {
   overflow: hidden;
   position: relative;
+  // Horizontal drags inside the player (Shift+drag scrub, Alt+drag pan)
+  // would otherwise let Chrome's two-finger swipe navigate back / forward
+  // and drop any unsaved comment — issue #1700.
+  overscroll-behavior-x: contain;
 }
 
 .main-content-anchor,
