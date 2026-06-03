@@ -398,7 +398,7 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
 const pause = () => {
   if (currentPlayer.value) {
     currentPlayer.value.pause()
-    currentPlayer.value.curentTime = roundToFrame(
+    currentPlayer.value.currentTime = roundToFrame(
       currentPlayer.value.currentTime,
       fps.value
     )
@@ -592,7 +592,9 @@ const setPanZoom = (x, y, scale) => {
     panzoomInstance.moveTo(x, y)
     panzoomInstance.setTransformOrigin({ x, y })
     panzoomInstance.zoomTo(x, y, zoomFactor)
-    panzoomInstance.setTransformOrigin({ x: 0, y: 0 })
+    // null restores cursor-relative wheel zoom; {x:0,y:0} would lock the
+    // focal point at the top-left corner.
+    panzoomInstance.setTransformOrigin(null)
   })
   nextTick(() => {
     silent = false
@@ -600,9 +602,8 @@ const setPanZoom = (x, y, scale) => {
 }
 
 const setVolume = volume => {
-  if (!currentPlayer.value) return
-  currentPlayer.value.volume = volume / 100
-  nextPlayer.value.volume = volume / 100
+  if (currentPlayer.value) currentPlayer.value.volume = volume / 100
+  if (nextPlayer.value) nextPlayer.value.volume = volume / 100
 }
 
 const LOADING_HANDLERS = [
