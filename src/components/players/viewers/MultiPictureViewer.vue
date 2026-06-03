@@ -126,15 +126,11 @@ const resetPanZoom = () => {
 }
 
 const pausePanZoom = () => {
-  for (const key in pictureRefs) {
-    pictureRefs[key]?.pausePanZoom()
-  }
+  Object.values(pictureRefs).forEach(viewer => viewer?.pausePanZoom())
 }
 
 const resumePanZoom = () => {
-  for (const key in pictureRefs) {
-    pictureRefs[key]?.resumePanZoom()
-  }
+  Object.values(pictureRefs).forEach(viewer => viewer?.resumePanZoom())
 }
 
 const setPanZoom = (x, y, scale) => {

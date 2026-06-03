@@ -372,11 +372,14 @@ const domEvents = [
   ['touchcancel', stopHandleOutDrag]
 ]
 
+let resizeObserver = null
+
 onMounted(() => {
   domEvents.forEach(([type, listener]) =>
     document.addEventListener(type, listener)
   )
-  new ResizeObserver(onWindowResize).observe(progress.value)
+  resizeObserver = new ResizeObserver(onWindowResize)
+  resizeObserver.observe(progress.value)
   const coords = progress.value.getBoundingClientRect()
   width.value = coords.width
   setTimeout(() => {
@@ -396,6 +399,7 @@ onBeforeUnmount(() => {
   domEvents.forEach(([type, listener]) =>
     document.removeEventListener(type, listener)
   )
+  resizeObserver?.disconnect()
 })
 
 defineExpose({ updateProgressBar })
