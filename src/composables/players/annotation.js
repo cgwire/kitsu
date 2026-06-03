@@ -646,8 +646,6 @@ export const useAnnotation = ({
         psstroke.set('radius', obj.radius)
         psstroke.set('width', obj.width)
         psstroke.set('height', obj.height)
-        psstroke.set('scaleX', obj.scaleX * scale)
-        psstroke.set('scaleY', obj.scaleY * scale)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
         psstroke.set('editable', !isCurrentUserArtist.value)
