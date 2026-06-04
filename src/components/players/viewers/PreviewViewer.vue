@@ -44,6 +44,7 @@
       @duration-changed="duration => $emit('duration-changed', duration)"
       @frame-update="frameNumber => $emit('frame-update', frameNumber)"
       @panzoom-changed="onVideoPanzoomChanged"
+      @panzoom-ready="$emit('panzoom-ready')"
       @play-ended="$emit('play-ended')"
       @size-changed="onVideoSizeChanged"
       @video-end="$emit('video-end')"
@@ -63,6 +64,7 @@
       :preview="preview"
       @loaded="$emit('picture-loaded')"
       @panzoom-changed="onPicturePanzoomChanged"
+      @panzoom-ready="$emit('panzoom-ready')"
       @size-changed="onPictureSizeChanged"
       v-show="isPicture"
     />
@@ -229,6 +231,7 @@ const emit = defineEmits([
   'frame-update',
   'model-loaded',
   'panzoom-changed',
+  'panzoom-ready',
   'picture-loaded',
   'play-ended',
   'size-changed',

@@ -120,6 +120,7 @@ const emit = defineEmits([
   'duration-changed',
   'frame-update',
   'panzoom-changed',
+  'panzoom-ready',
   'play-ended',
   'size-changed',
   'video-end',
@@ -440,6 +441,11 @@ const setupPanZoom = () => {
   panzoomInstance.on('zoom', emitPanZoom)
   panzoomInstance.on('pan', emitPanZoom)
   if (!panzoomActive) panzoomInstance.pause()
+  // Tell the parent that a fresh instance exists so the comparison
+  // sync can re-push the main viewer's transform — without this the
+  // comparison stays at identity after a revision swap and drifts
+  // out of sync with the main viewer.
+  emit('panzoom-ready')
 }
 
 const pausePanZoom = () => {

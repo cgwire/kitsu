@@ -104,6 +104,7 @@
               :style="{
                 opacity: overlayOpacity
               }"
+              @panzoom-ready="onComparisonPanzoomReady"
               @video-loaded="onComparisonVideoLoaded"
               v-show="isComparing && previewToCompare"
             />
@@ -1119,6 +1120,17 @@ const realignComparisonCanvas = () => {
   comparisonViewer.value?.resize()
   comparisonAnnotationCanvas.value?.updateBounds()
   loadComparisonAnnotationAtCurrentFrame()
+}
+
+// Push the main viewer's current transform onto the comparison
+// viewer once its panzoom instance is (re)bound. The comparison
+// binds lazily — on the media's load event after a revision swap —
+// so the panzoomTransform watcher (which only fires on changes) had
+// no chance to sync the fresh instance back to the main viewer.
+const onComparisonPanzoomReady = () => {
+  if (!isComparing.value) return
+  const { x, y, scale } = panzoomTransform.value
+  comparisonViewer.value?.setPanZoom(x, y, scale)
 }
 
 const onComparisonVideoLoaded = () => {
