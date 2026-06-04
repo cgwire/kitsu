@@ -24,8 +24,8 @@
             :is-hd="isHd"
             :is-repeating="isRepeating"
             :muted="isMuted"
-            :movie-url-prefix="movieUrlPrefix"
             :panzoom="true"
+            :url-prefix="sharedApiPrefix"
             @entity-change="onEntityChange"
             @frame-update="onFrameUpdate"
             @max-duration-update="onMaxDurationUpdate"
@@ -44,13 +44,14 @@
             :margin-bottom="0"
             :panzoom="true"
             :preview="currentPreview"
+            :url-prefix="sharedApiPrefix"
             high-quality
             v-show="isPicture && !loading"
           />
 
           <sound-viewer
             ref="soundPlayer"
-            :preview-url="currentPreviewUrl"
+            :preview-url="downloadUrl"
             @play-ended="pause"
             v-if="isSound && !loading"
           />
@@ -128,7 +129,7 @@
       :handle-in="-1"
       :handle-out="-1"
       :preview-id="currentPreview ? currentPreview.id : ''"
-      :url-prefix="sharedApiPrefix || '/api'"
+      :url-prefix="sharedApiPrefix"
       @progress-changed="onProgressChanged"
       v-show="!!currentPreview"
     />
@@ -172,7 +173,7 @@
       :playlist-duration="playlistDuration"
       :playlist-progress="currentPlaylistProgress"
       :playlist-shot-position="playlistShotPosition"
-      :url-prefix="sharedApiPrefix || '/api'"
+      :url-prefix="sharedApiPrefix"
       @progress-playlist-changed="onProgressPlaylistChanged"
       v-if="entityList.length > 1 && playlistDuration > 0"
     />
@@ -197,7 +198,7 @@
           :index="index"
           :is-playing="playingEntityIndex === index"
           :read-only="true"
-          :thumbnail-url-prefix="sharedApiPrefix"
+          :url-prefix="sharedApiPrefix"
           @play-click="selectEntity"
         />
       </div>
@@ -277,6 +278,7 @@ const picturePlayer = ref(null)
 const playingEntityIndex = ref(0)
 const playlistedEntities = ref(null)
 const rawPlayer = ref(null)
+const soundPlayer = ref(null)
 const videoProgressRef = ref(null)
 const volume = ref(100)
 
@@ -294,7 +296,6 @@ const projectName = computed(() => props.playlist?.project_name || '')
 const sharedApiPrefix = computed(() =>
   props.token ? `/api/shared/playlists/${props.token}` : ''
 )
-const movieUrlPrefix = computed(() => sharedApiPrefix.value)
 
 const fps = computed(() => parseFloat(props.playlist?.project_fps) || 25)
 const frameDuration = computed(
@@ -337,14 +338,6 @@ const currentPreview = computed(() => {
     }
   }
   return entity.preview_file_previews?.[currentPreviewIndex.value - 1]
-})
-
-const currentPreviewUrl = computed(() => {
-  if (!currentPreview.value) return ''
-  if (props.token) {
-    return `/api/shared/playlists/${props.token}/movies/originals/preview-files/${currentPreview.value.id}.mp4`
-  }
-  return `/api/pictures/originals/preview-files/${currentPreview.value.id}/download`
 })
 
 const currentAnnotations = computed(
@@ -464,12 +457,14 @@ const entityListForProgress = computed(
 
 const play = () => {
   isPlaying.value = true
-  rawPlayer.value?.play()
+  if (isSound.value) soundPlayer.value?.play()
+  else rawPlayer.value?.play()
 }
 
 const pause = () => {
   isPlaying.value = false
-  rawPlayer.value?.pause()
+  if (isSound.value) soundPlayer.value?.pause()
+  else rawPlayer.value?.pause()
 }
 
 const togglePlay = () => (isPlaying.value ? pause() : play())

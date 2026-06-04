@@ -71,6 +71,10 @@ const props = defineProps({
   preview: {
     type: Object,
     default: () => ({})
+  },
+  urlPrefix: {
+    type: String,
+    default: null
   }
 })
 
@@ -231,23 +235,28 @@ const setPictureEmptyPath = () => {
 const setPictureDlPath = () => {
   if (props.preview && isAvailable.value && isPicture.value) {
     const previewId = props.preview.id
-    pictureDlPath.value = `/api/pictures/originals/preview-files/${previewId}/download`
+    // Shared playlist links serve downloads from a flatter route
+    // (.../<token>/preview-files/<id>/download) than the regular API.
+    pictureDlPath.value = props.urlPrefix
+      ? `${props.urlPrefix}/preview-files/${previewId}/download`
+      : `/api/pictures/originals/preview-files/${previewId}/download`
   } else {
     pictureDlPath.value = null
   }
 }
 
 const setPicturePath = () => {
+  const base = props.urlPrefix || '/api'
   if (isGif.value && isAvailable.value && isPicture.value) {
     const previewId = props.preview.id
-    pictureGifPath.value = `/api/pictures/originals/preview-files/${previewId}.gif`
+    pictureGifPath.value = `${base}/pictures/originals/preview-files/${previewId}.gif`
   } else if (props.preview && isAvailable.value && isPicture.value) {
     const previewId = props.preview.id
-    if (props.highQuality) {
-      picturePath.value = `/api/pictures/originals/preview-files/${previewId}.png`
-    } else {
-      picturePath.value = `/api/pictures/previews/preview-files/${previewId}.png`
-    }
+    // Originals for shared links or high-quality mode; the lighter previews variant otherwise.
+    picturePath.value =
+      props.urlPrefix || props.highQuality
+        ? `${base}/pictures/originals/preview-files/${previewId}.png`
+        : `${base}/pictures/previews/preview-files/${previewId}.png`
   }
   setPictureDlPath()
 }

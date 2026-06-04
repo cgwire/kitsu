@@ -151,6 +151,10 @@ const props = defineProps({
   previewId: {
     default: '',
     type: String
+  },
+  urlPrefix: {
+    default: null,
+    type: String
   }
 })
 
@@ -345,7 +349,8 @@ const getFrameBackgroundStyle = frame => {
   const frameY = Math.floor(frame / 8)
   const frameHeight = 100
   const frameWidth = Math.ceil(frameHeight * videoRatio.value)
-  const tilePath = `/api/movies/tiles/preview-files/${previewId}.png`
+  const base = props.urlPrefix || '/api'
+  const tilePath = `${base}/movies/tiles/preview-files/${previewId}.png`
   return {
     background: `url(${tilePath})`,
     'background-position': `-${frameX * frameWidth}px -${
