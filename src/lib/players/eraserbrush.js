@@ -31,7 +31,8 @@ export class Eraser extends Group {
       // groupInit. Ours must win, so it comes AFTER ...options.
       layoutManager: new LayoutManager(new FixedLayout())
     })
-    this.type = 'eraser'
+    // No instance `this.type =` : v6's type setter is a no-op that logs a
+    // deprecation warning; the static `Eraser.type` governs serialization.
   }
 
   // Draws a solid black rect (the "all visible" mask) then the destination-out
@@ -48,7 +49,14 @@ export class Eraser extends Group {
   // Paths), so we rebuild them directly. FixedLayout keeps them where they
   // are (group-local coords) without recomputing the centre.
   static fromObject(object) {
-    const children = (object.objects || []).map(p => new Path(p.path, p))
+    const children = (object.objects || []).map(p => {
+      // Drop the serialized `type` ('path'): passing it to the Path ctor hits
+      // v6's no-op type setter and logs a deprecation warning per child.
+      const opts = { ...p }
+      delete opts.type
+      delete opts.path
+      return new Path(p.path, opts)
+    })
     const options = { ...object }
     delete options.objects
     return Promise.resolve(new Eraser(children, options))

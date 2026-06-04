@@ -12,7 +12,8 @@ export class Arrow extends Line {
   constructor(points, options = {}) {
     super(points, options)
     this.setOptions(options)
-    this.type = 'arrow'
+    // No instance `this.type =` : v6's type setter is a no-op that logs a
+    // deprecation warning; the static `Arrow.type` governs serialization.
     this.arrowHeadSize = options.arrowHeadSize || 15
     this.arrowHeadWidth = options.arrowHeadWidth || 12
     // Cache the rendering ourselves via _render. fabric's default

@@ -11,6 +11,10 @@ vi.mock('fabric', () => {
       this._objects = objects
       Object.assign(this, opts)
     }
+    // Mirror v6: instance `type` is a getter off the static; the setter is a
+    // deprecated no-op (so `this.type =` / Object.assign({type}) don't throw).
+    get type() { return this.constructor.type }
+    set type(_) {}
     getObjects() { return this._objects }
     add(o) { this._objects.push(o); return this }
     set(props) { Object.assign(this, props); return this }
