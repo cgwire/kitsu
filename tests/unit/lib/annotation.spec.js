@@ -1,4 +1,4 @@
-import { fabric } from 'fabric'
+import { FabricObject } from 'fabric'
 import {
   PENCIL_WIDTHS,
   addSerialization,
@@ -364,9 +364,9 @@ describe('lib/annotation', () => {
   })
 
   describe('eraser object support installation', () => {
-    it('installs eraser support on fabric.Object at import time', () => {
-      expect(fabric.Object.prototype.erasable).toBe(true)
-      expect(typeof fabric.Object.prototype._drawClipPath).toBe('function')
+    it('installs eraser support on FabricObject at import time', () => {
+      expect(FabricObject.prototype.erasable).toBe(true)
+      expect(typeof FabricObject.prototype._drawClipPath).toBe('function')
     })
   })
 

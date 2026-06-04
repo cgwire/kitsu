@@ -1,25 +1,33 @@
-import { fabric } from 'fabric'
+import {
+  FabricObject,
+  FixedLayout,
+  Group,
+  LayoutManager,
+  Path,
+  PencilBrush,
+  classRegistry,
+  util
+} from 'fabric'
 
 // Signature of an "empty" SVG path produced by convertPointsToSVGPath when the
 // gesture is degenerate (a single point). Matches fabric's own internal check.
 const EMPTY_SVG_PATH = 'M 0 0 Q 0 0 0 0 L 0 0'
 
 // An object's eraser: a group of paths in the object's LOCAL coordinates.
-// layout 'fixed' + center origin: its dimensions don't change when paths are
+// FixedLayout + center origin: its dimensions don't change when paths are
 // added; they're realigned onto the object by `_drawClipPath`.
-export class Eraser extends fabric.Group {
-  // `objectsRelativeToGroup` must reach the Group constructor: when true the
-  // layout strategy keeps the child paths where they are instead of shifting
-  // them to a freshly-computed centre. fromObject() passes true on revival —
-  // without it the mask drifts by the centre delta, which scales with the
-  // object and shows up after a resize (fullscreen). origin/layout go through
-  // the options so they're already set when super() runs its initial layout.
-  constructor(objects = [], options = {}, objectsRelativeToGroup) {
-    super(
-      objects,
-      { originX: 'center', originY: 'center', layout: 'fixed', ...options },
-      objectsRelativeToGroup
-    )
+export class Eraser extends Group {
+  // In v6, Group no longer takes an `objectsRelativeToGroup` third argument.
+  // The fixed-layout intent (no recompute on add) is achieved via
+  // `layoutManager: new LayoutManager(new FixedLayout())`. Children passed to
+  // fromObject() are already in group-local coords; FixedLayout preserves them.
+  constructor(objects = [], options = {}) {
+    super(objects, {
+      originX: 'center',
+      originY: 'center',
+      layoutManager: new LayoutManager(new FixedLayout()),
+      ...options
+    })
     this.type = 'eraser'
   }
 
@@ -34,27 +42,23 @@ export class Eraser extends fabric.Group {
   }
 
   // Revival: the children are ALWAYS plain Paths (the eraser only ever adds
-  // Paths), so we rebuild them directly without enlivenObjects (whose
-  // callback/Promise signature is uncertain on the snapshot).
+  // Paths), so we rebuild them directly. FixedLayout keeps them where they
+  // are (group-local coords) without recomputing the centre.
   static fromObject(object) {
-    const children = (object.objects || []).map(p => new fabric.Path(p.path, p))
+    const children = (object.objects || []).map(p => new Path(p.path, p))
     const options = { ...object }
     delete options.objects
-    // true → the children are already in the group's coordinate plane; don't
-    // let the layout re-centre (and thus offset) them.
-    return Promise.resolve(new Eraser(children, options, true))
+    return Promise.resolve(new Eraser(children, options))
   }
 }
 
 // Fabric v6's toObject() serializes `this.constructor.type`; without a static
 // type the mask would be saved as its parent's type ('group'). Assigned on the
 // class (not as a class field — the project's eslint parser rejects those).
-// The v5 snapshot ignores it and still reads the instance `this.type`.
 Eraser.type = 'eraser'
 
-// Register the class on the fabric namespace (like `fabric.Arrow` in
-// arrowshape.js), for consistency and type-based revival if needed.
-fabric.Eraser = Eraser
+// Register Eraser in the classRegistry so deserialisation (revival) works.
+classRegistry.setClass(Eraser, 'eraser')
 
 // Rebuilds the serialized `eraser` mask and attaches it to the reloaded object.
 // No-op if the object has no eraser. The mask is in the object's LOCAL
@@ -73,17 +77,19 @@ export async function reviveObjectEraser(target, serialized) {
 
 let eraserSupportInstalled = false
 
-// Patches fabric.Object.prototype to support the `eraser` mask.
+// Patches FabricObject.prototype to support the `eraser` mask.
 // Idempotent: a second call is a no-op.
 export function installEraserObjectSupport() {
   if (eraserSupportInstalled) return
   eraserSupportInstalled = true
 
-  const proto = fabric.Object.prototype
+  const proto = FabricObject.prototype
   const baseDrawClipPath = proto._drawClipPath
   const baseNeedsCache = proto.needsItsOwnCache
   const baseToObject = proto.toObject
 
+  // v6 removed cacheProperties / stateProperties arrays from the prototype;
+  // guard the push so it doesn't throw on undefined.
   if (proto.cacheProperties && !proto.cacheProperties.includes('eraser')) {
     proto.cacheProperties.push('eraser')
   }
@@ -91,7 +97,7 @@ export function installEraserObjectSupport() {
     proto.stateProperties.push('eraser')
   }
 
-  fabric.util.object.extend(proto, {
+  Object.assign(proto, {
     erasable: true,
     eraser: undefined,
 
@@ -125,7 +131,7 @@ export function installEraserObjectSupport() {
   })
 }
 
-export class EraserBrush extends fabric.PencilBrush {
+export class EraserBrush extends PencilBrush {
   constructor(canvas) {
     super(canvas)
     // The annotation pipeline (PSBrush) reads freeDrawingBrush.pressureManager.
@@ -169,11 +175,11 @@ export class EraserBrush extends fabric.PencilBrush {
       obj.eraser = eraser
     }
     const clone = await path.clone()
-    const desiredTransform = fabric.util.multiplyTransformMatrices(
-      fabric.util.invertTransform(obj.calcTransformMatrix()),
+    const desiredTransform = util.multiplyTransformMatrices(
+      util.invertTransform(obj.calcTransformMatrix()),
       clone.calcTransformMatrix()
     )
-    fabric.util.applyTransformToObject(clone, desiredTransform)
+    util.applyTransformToObject(clone, desiredTransform)
     eraser.add(clone)
     obj.set('dirty', true)
     obj.fire('erasing:end', { path: clone })
@@ -202,7 +208,7 @@ export class EraserBrush extends fabric.PencilBrush {
     // v5-era prototype method); it now uses a private `isEmptySVGPath` helper
     // = `joinPath(pathData) === 'M 0 0 Q 0 0 0 0 L 0 0'`. We mirror it via the
     // exported `fabric.util.joinPath`.
-    if (!pathData || fabric.util.joinPath(pathData) === EMPTY_SVG_PATH) {
+    if (!pathData || util.joinPath(pathData) === EMPTY_SVG_PATH) {
       this.canvas.fire('erasing:end')
       this.canvas.requestRenderAll()
       return

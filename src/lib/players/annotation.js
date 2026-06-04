@@ -12,7 +12,17 @@
  * fabric.Object.prototype with eraser-mask support (both idempotent).
  */
 
-import { fabric } from 'fabric'
+import {
+  Canvas,
+  Circle,
+  Ellipse,
+  Group,
+  Line,
+  Path,
+  Point,
+  Rect,
+  Text
+} from 'fabric'
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -20,10 +30,9 @@ import { normalizeSerializedType, normalizeType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
 import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 
-// Make sure fabric.Arrow is reachable from the global fabric namespace
-// (the deserialiser branches on `obj.type === 'arrow'`).
+// Register Arrow in classRegistry (the deserialiser branches on `obj.type === 'arrow'`).
 registerArrowFabricShape()
-// Patch fabric.Object.prototype with eraser-mask support (idempotent).
+// Patch FabricObject.prototype with eraser-mask support (idempotent).
 installEraserObjectSupport()
 
 /* -------------------------------------------------------------------------
@@ -46,7 +55,7 @@ if (PSStroke) {
   }
   if (!PSStroke.prototype.getRelativeCenterPoint) {
     PSStroke.prototype.getRelativeCenterPoint = function () {
-      return new fabric.Point(0, 0)
+      return new Point(0, 0)
     }
   }
 }
@@ -194,7 +203,7 @@ export const setObjectData = (object, canvas, userId) => {
  * a low pressure and render way thinner than on the studio side.
  */
 export const createAnnotationCanvas = (canvasEl, options = {}) => {
-  const canvas = new fabric.Canvas(canvasEl, {
+  const canvas = new Canvas(canvasEl, {
     enableRetinaScaling: true,
     fireRightClick: true,
     selection: false,
@@ -286,10 +295,10 @@ const buildShape = (tool, startX, startY, color, width) => {
     strokeWidth: width
   }
   if (tool === 'rectangle') {
-    return new fabric.Rect({ ...base, width: 1, height: 1 })
+    return new Rect({ ...base, width: 1, height: 1 })
   }
   if (tool === 'circle') {
-    return new fabric.Circle({ ...base, radius: 1 })
+    return new Circle({ ...base, radius: 1 })
   }
   if (tool === 'arrow') {
     return new Arrow([startX, startY, startX, startY], {
@@ -303,7 +312,7 @@ const buildShape = (tool, startX, startY, color, width) => {
   if (tool === 'whiteboard') {
     // No stroke / strokeWidth: the whiteboard is a fill-only sticker
     // reviewers slap on the image so they can write on top of it.
-    return new fabric.Rect({
+    return new Rect({
       left: startX,
       top: startY,
       width: 1,
@@ -457,7 +466,7 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
         cfg.minPressure
       )
     } else if (cfg.pressureMode === 'distance' && prevPoint) {
-      const dim = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+      const dim = new Point(canvas.getWidth(), canvas.getHeight())
       const p1 = prevPoint.divide(dim)
       const p2 = canvas.getPointer().divide(dim)
       let delta = Math.sqrt(
@@ -666,7 +675,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
   }
 
   if (type === 'path') {
-    const path = new fabric.Path(obj.path, base)
+    const path = new Path(obj.path, base)
     path.set('id', obj.id)
     path.set('canvasWidth', canvasWidth)
     path.set('canvasHeight', canvasHeight)
@@ -700,7 +709,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
   }
 
   if (type === 'i-text' || type === 'text' || type === 'textbox') {
-    const text = new fabric.Text(obj.text || '', {
+    const text = new Text(obj.text || '', {
       ...base,
       backgroundColor: obj.backgroundColor || 'rgba(255, 255, 255, 0.8)',
       erasable: false,
@@ -715,16 +724,13 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return text
   }
 
-  if (type === 'circle') return new fabric.Circle(base)
-  if (type === 'rect') return new fabric.Rect(base)
+  if (type === 'circle') return new Circle(base)
+  if (type === 'rect') return new Rect(base)
   if (type === 'ellipse') {
-    return new fabric.Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
+    return new Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
   }
   if (type === 'line') {
-    return new fabric.Line(
-      [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
-      base
-    )
+    return new Line([obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0], base)
   }
 
   if (type === 'arrow') {
@@ -746,7 +752,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
         obj.objects.map(child => buildReadOnlyShape(annotation, child, canvas))
       )
     ).filter(Boolean)
-    return new fabric.Group(children, base)
+    return new Group(children, base)
   }
 
   return null

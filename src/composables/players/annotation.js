@@ -2,7 +2,15 @@
  * Composable for annotation canvas management. It's aimed at preview widgets.
  * Converted from the annotation mixin for use in Composition API components.
  */
-import { fabric } from 'fabric'
+import {
+  FabricObject,
+  Group,
+  IText,
+  Path,
+  Point,
+  getFabricDocument,
+  util
+} from 'fabric'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
@@ -29,26 +37,20 @@ import localPreferences from '@/lib/preferences'
 
 /* Force scaling / rotation handles to show on grouped selections so a
  * marquee around several annotations stays scalable / rotatable. */
-if (fabric) {
-  fabric.Group.prototype.hasControls = true
-}
+Group.prototype.hasControls = true
 
 /* Monkey patch needed to have text background including the padding. */
-if (fabric) {
-  fabric.Text.prototype.set({
-    _getNonTransformedDimensions() {
-      // Object dimensions
-      return new fabric.Point(this.width, this.height).scalarAdd(this.padding)
-    },
-    _calculateCurrentDimensions() {
-      // Controls dimensions
-      return fabric.util.transformPoint(
-        this._getTransformedDimensions(),
-        this.getViewportTransform(),
-        true
-      )
-    }
-  })
+FabricObject.prototype._getNonTransformedDimensions = function () {
+  // Object dimensions
+  return new Point(this.width, this.height).scalarAdd(this.padding || 0)
+}
+FabricObject.prototype._calculateCurrentDimensions = function () {
+  // Controls dimensions
+  return util.transformPoint(
+    this._getTransformedDimensions(),
+    this.getViewportTransform(),
+    true
+  )
 }
 
 /* Monkey patch _getTransformedDimensions() to return a proper fabric point */
@@ -56,7 +58,7 @@ if (PSStroke) {
   PSStroke.prototype._getTransformedDimensions = function () {
     const width = this.width * this.scaleX
     const height = this.height * this.scaleY
-    const dimensions = new fabric.Point(width, height)
+    const dimensions = new Point(width, height)
     return dimensions
   }
 
@@ -86,7 +88,7 @@ if (PSStroke) {
       if (this.getCenterPoint) {
         return this.getCenterPoint()
       }
-      return new fabric.Point(this.left, this.top)
+      return new Point(this.left, this.top)
     }
   }
 }
@@ -245,7 +247,7 @@ export const useAnnotation = ({
     if (fabricCanvas.value.getHeight() > baseHeight) {
       fontSize = fontSize * (fabricCanvas.value.getHeight() / baseHeight)
     }
-    const fabricText = new fabric.IText('Type...', {
+    const fabricText = new IText('Type...', {
       left: posX,
       top: posY,
       erasable: false,
@@ -266,8 +268,8 @@ export const useAnnotation = ({
   }
 
   const addTypeArea = () => {
-    const originalInitHiddenTextarea = fabric.IText.prototype.initHiddenTextarea
-    fabric.util.object.extend(fabric.IText.prototype, {
+    const originalInitHiddenTextarea = IText.prototype.initHiddenTextarea
+    Object.assign(IText.prototype, {
       initHiddenTextarea: function () {
         originalInitHiddenTextarea.call(this)
         this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
@@ -276,13 +278,11 @@ export const useAnnotation = ({
   }
 
   const removeTypeArea = () => {
-    const originalInitHiddenTextarea = fabric.IText.prototype.initHiddenTextarea
-    fabric.util.object.extend(fabric.IText.prototype, {
+    const originalInitHiddenTextarea = IText.prototype.initHiddenTextarea
+    Object.assign(IText.prototype, {
       initHiddenTextarea: function () {
         originalInitHiddenTextarea.call(this)
-        if (fabric.document) {
-          fabric.document.body.appendChild(this.hiddenTextarea)
-        }
+        getFabricDocument().body.appendChild(this.hiddenTextarea)
       }
     })
   }
@@ -574,7 +574,7 @@ export const useAnnotation = ({
     }
 
     if (type === 'path') {
-      path = new fabric.Path(obj.path, {
+      path = new Path(obj.path, {
         ...base
       })
       path.set('id', obj.id)
@@ -596,7 +596,7 @@ export const useAnnotation = ({
       canvas.add(path)
       silentAnnotation = false
     } else if (type === 'i-text' || type === 'text' || type === 'textbox') {
-      text = new fabric.IText(obj.text, {
+      text = new IText(obj.text, {
         ...base,
         erasable: false,
         fill: obj.fill,
@@ -847,8 +847,8 @@ export const useAnnotation = ({
         const canvasObj = getObjectById(groupObj.id)
         setObjectData(canvasObj)
         const targetObj = canvasObj.serialize()
-        const point = new fabric.Point(groupObj.left, groupObj.top)
-        const transformedPoint = fabric.util.transformPoint(
+        const point = new Point(groupObj.left, groupObj.top)
+        const transformedPoint = util.transformPoint(
           point,
           group.calcTransformMatrix()
         )
@@ -1133,7 +1133,7 @@ export const useAnnotation = ({
     // so a hardcoded width here stuck every freehand stroke at that size.
     _resetPencil()
 
-    fabric.Group.prototype._controlsVisibility = {
+    Group.prototype._controlsVisibility = {
       tl: false,
       tr: false,
       br: !isCurrentUserArtist.value,
@@ -1164,7 +1164,7 @@ export const useAnnotation = ({
   }
 
   const getCanvasRelativePointDrawingDifference = (p1, p2, canvas) => {
-    const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+    const dimensions = new Point(canvas.getWidth(), canvas.getHeight())
     const p1_rel = p1.divide(dimensions)
     const p2_rel = p2.divide(dimensions)
     return Math.sqrt(
@@ -1317,8 +1317,8 @@ export const useAnnotation = ({
 
   const applyGroupChanges = (group, obj) => {
     if (obj.group) {
-      const point = new fabric.Point(obj.left, obj.top)
-      const transformedPoint = fabric.util.transformPoint(
+      const point = new Point(obj.left, obj.top)
+      const transformedPoint = util.transformPoint(
         point,
         group.calcTransformMatrix()
       )
