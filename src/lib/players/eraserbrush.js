@@ -46,6 +46,12 @@ export class Eraser extends fabric.Group {
   }
 }
 
+// Fabric v6's toObject() serializes `this.constructor.type`; without a static
+// type the mask would be saved as its parent's type ('group'). Assigned on the
+// class (not as a class field — the project's eslint parser rejects those).
+// The v5 snapshot ignores it and still reads the instance `this.type`.
+Eraser.type = 'eraser'
+
 // Register the class on the fabric namespace (like `fabric.Arrow` in
 // arrowshape.js), for consistency and type-based revival if needed.
 fabric.Eraser = Eraser

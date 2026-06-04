@@ -57,6 +57,14 @@ vi.mock('fabric', () => {
 const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/players/eraserbrush')
 import { fabric } from 'fabric'
 
+describe('Eraser — class contract', () => {
+  it('exposes a static type so Fabric v6 toObject serializes it as "eraser"', () => {
+    // Without a static type, v6's toObject() would read the parent Group's
+    // static type and serialize the mask as "group".
+    expect(Eraser.type).toBe('eraser')
+  })
+})
+
 describe('EraserBrush — core', () => {
   it('createPath produces a destination-out path', () => {
     const brush = new EraserBrush({})

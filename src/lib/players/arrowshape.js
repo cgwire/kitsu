@@ -212,6 +212,12 @@ export class Arrow extends fabric.Line {
   }
 }
 
+// Fabric v6's toObject() serializes `this.constructor.type`; without a static
+// type an Arrow would be saved as its parent's type ('line'). Assigned on the
+// class (not as a class field — the project's eslint parser rejects those).
+// The v5 snapshot ignores it and still reads the instance `this.type`.
+Arrow.type = 'arrow'
+
 fabric.Arrow = Arrow
 
 export const registerArrowFabricShape = () => {
