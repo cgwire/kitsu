@@ -1,7 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref } from 'vue'
 
-import { PSStroke } from 'fabricjs-psbrush'
+import { Point, Text } from 'fabric'
+import { PSStroke, PSPoint } from 'fabricjs-psbrush'
 
 import { useAnnotation } from '@/composables/players/annotation'
 import { Eraser, EraserBrush } from '@/lib/players/eraserbrush'
@@ -707,7 +708,7 @@ describe('composables/annotation', () => {
       const { api, wrapper } = mountAnnotation({ canvas })
       const spy = vi
         .spyOn(PSStroke, 'fromObject')
-        .mockImplementation((obj, cb) => cb(null))
+        .mockResolvedValue(null)
       const annotation = { width: 800, height: 600 }
       const obj = {
         id: 'ps-bad',
@@ -1053,6 +1054,84 @@ describe('composables/annotation', () => {
       expect(fresh.eraser).toBeDefined()
       expect(fresh.eraser.getObjects()).toHaveLength(1)
       expect(obj.eraser).toBeUndefined() // the stale instance is untouched
+      wrapper.unmount()
+    })
+  })
+
+  describe('Fabric v6 regressions', () => {
+    it('patches the text-dimension override onto Text.prototype, not every object', () => {
+      // Regression: the v6 port put _getNonTransformedDimensions /
+      // _calculateCurrentDimensions on FabricObject.prototype, so EVERY shape
+      // (not just text) used the padding-inflated dimensions and rendered
+      // stretched. The override must live on Text.prototype (IText inherits it).
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          Text.prototype,
+          '_getNonTransformedDimensions'
+        )
+      ).toBe(true)
+    })
+
+    it('serializes a freehand PSStroke with its strokePoints (save side)', () => {
+      const { api, wrapper } = mountAnnotation()
+      const stroke = new PSStroke([new PSPoint(0, 0, 0.5), new PSPoint(10, 10, 0.8)], {
+        stroke: '#f00',
+        strokeWidth: 4,
+        startTime: 1,
+        endTime: 2,
+        canvasWidth: 800,
+        canvasHeight: 600
+      })
+      api.addSerialization(stroke)
+      const out = stroke.serialize()
+      expect(out.type).toBe('PSStroke')
+      expect(out.strokePoints).toHaveLength(2)
+      wrapper.unmount()
+    })
+
+    it('reloads a serialized PSStroke onto the canvas (load side)', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const serialized = {
+        type: 'PSStroke',
+        id: 'ps-1',
+        strokePoints: [
+          { type: 'PSPoint', x: 0, y: 0, pressure: 0.5 },
+          { type: 'PSPoint', x: 10, y: 10, pressure: 0.8 }
+        ],
+        left: 0,
+        top: 0,
+        width: 10,
+        height: 10,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        stroke: '#f00',
+        strokeWidth: 4,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas({ width: 800, height: 600 }, serialized, canvas)
+      expect(canvas._objects.find(o => o.id === 'ps-1')).toBeDefined()
+      wrapper.unmount()
+    })
+
+    it('reads the pointer via getScenePoint(event), never the no-arg getPointer (v6)', () => {
+      // v6's getPointer requires an event; the old no-arg getPointer() crashed
+      // ("can't access property target, t is undefined") while drawing.
+      const canvas = createFakeCanvas({
+        isDrawingMode: true,
+        getScenePoint: vi.fn(() => new Point(5, 5)),
+        getPointer: vi.fn(() => {
+          throw new Error('v6: no-arg getPointer must not be used')
+        })
+      })
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const evt = { e: {} }
+      api.initializeMouseDrawing(evt)
+      expect(() => api.updateMousePressure(evt)).not.toThrow()
+      expect(canvas.getScenePoint).toHaveBeenCalledWith(evt.e)
+      expect(canvas.getPointer).not.toHaveBeenCalled()
       wrapper.unmount()
     })
   })

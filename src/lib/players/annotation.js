@@ -367,7 +367,7 @@ export const attachShapeDrawing = (
   const onMouseDown = e => {
     const tool = getTool?.()
     if (!tool || tool === 'pen') return
-    const pointer = canvas.getPointer(e.e)
+    const pointer = canvas.getScenePoint(e.e)
     startX = pointer.x
     startY = pointer.y
     drawing = buildShape(tool, startX, startY, getColor(), getWidth())
@@ -383,7 +383,7 @@ export const attachShapeDrawing = (
     if (!drawing) return
     const tool = getTool?.()
     if (!tool || tool === 'pen') return
-    const pointer = canvas.getPointer(e.e)
+    const pointer = canvas.getScenePoint(e.e)
     updateShape(drawing, tool, startX, startY, pointer.x, pointer.y)
     drawing.setCoords()
     canvas.requestRenderAll()
@@ -438,18 +438,19 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
   let prevPressure = null
   let dynamicDistanceMult = null
 
-  const onMouseDown = () => {
+  const onMouseDown = opt => {
     if (!canvas?.isDrawingMode || !canvas.freeDrawingBrush) return
     mouseIsDrawing = true
     startTime = Date.now()
-    prevPoint = canvas.getPointer()
+    // v6: getPointer requires an event; use the event's scene point.
+    prevPoint = opt?.e ? canvas.getScenePoint(opt.e) : null
     prevPressure = canvas.freeDrawingBrush.pressureManager
       ? canvas.freeDrawingBrush.pressureManager.fallback
       : cfg.maxPressure
     dynamicDistanceMult = null
   }
 
-  const onMouseMove = () => {
+  const onMouseMove = opt => {
     if (
       !mouseIsDrawing ||
       !canvas.freeDrawingBrush?.pressureManager ||
@@ -457,6 +458,8 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
     ) {
       return
     }
+    // v6: getPointer requires an event; resolve the scene point from it.
+    const pointer = opt?.e ? canvas.getScenePoint(opt.e) : null
     let pressure
     if (cfg.pressureMode === 'fade') {
       const dt = Date.now() - startTime
@@ -465,10 +468,10 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
         (1 - t) * cfg.maxPressure + t * cfg.minPressure,
         cfg.minPressure
       )
-    } else if (cfg.pressureMode === 'distance' && prevPoint) {
+    } else if (cfg.pressureMode === 'distance' && prevPoint && pointer) {
       const dim = new Point(canvas.getWidth(), canvas.getHeight())
       const p1 = prevPoint.divide(dim)
-      const p2 = canvas.getPointer().divide(dim)
+      const p2 = pointer.divide(dim)
       let delta = Math.sqrt(
         Math.pow(Math.abs(p1.x - p2.x), 1) + Math.pow(Math.abs(p1.y - p2.y), 1)
       )
@@ -485,7 +488,7 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
       prevPressure - cfg.maxChangeRate,
       Math.min(pressure, prevPressure + cfg.maxChangeRate)
     )
-    prevPoint = canvas.getPointer()
+    if (pointer) prevPoint = pointer
     prevPressure = clamped
     canvas.freeDrawingBrush.pressureManager.fallback = clamped
   }
@@ -582,10 +585,11 @@ export const removeAddition = (additions, objectId) =>
  * PSStroke deserialisation
  * -----------------------------------------------------------------------*/
 
+// PSStroke.fromObject is Promise-based since the psbrush v6 port (it ignores
+// the old callback arg). Awaiting its result — passing a callback here left the
+// promise unresolved forever, so reloaded strokes never appeared.
 export const deserializePSStroke = obj =>
-  new Promise(resolve => {
-    PSStroke.fromObject(obj, stroke => resolve(stroke || null))
-  })
+  Promise.resolve(PSStroke.fromObject(obj)).then(stroke => stroke || null)
 
 /* -------------------------------------------------------------------------
  * Read-only object rendering

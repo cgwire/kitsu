@@ -116,7 +116,7 @@ export class Arrow extends Line {
   }
 
   _startPointHandler(eventData) {
-    const pointer = this.canvas.getPointer(eventData.e)
+    const pointer = this.canvas.getScenePoint(eventData.e)
     this.set({ x1: pointer.x, y1: pointer.y })
     this.setCoords()
     this.canvas.renderAll()
@@ -124,7 +124,7 @@ export class Arrow extends Line {
   }
 
   _endPointHandler(eventData) {
-    const pointer = this.canvas.getPointer(eventData.e)
+    const pointer = this.canvas.getScenePoint(eventData.e)
     this.set({ x2: pointer.x, y2: pointer.y })
     this.setCoords()
     this.canvas.renderAll()

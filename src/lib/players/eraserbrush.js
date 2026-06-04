@@ -25,8 +25,11 @@ export class Eraser extends Group {
     super(objects, {
       originX: 'center',
       originY: 'center',
-      layoutManager: new LayoutManager(new FixedLayout()),
-      ...options
+      ...options,
+      // Always build a fresh FixedLayout: a serialized eraser carries a plain
+      // layoutManager (no performLayout()), and spreading it over ours crashed
+      // groupInit. Ours must win, so it comes AFTER ...options.
+      layoutManager: new LayoutManager(new FixedLayout())
     })
     this.type = 'eraser'
   }
@@ -106,15 +109,20 @@ export function installEraserObjectSupport() {
     },
 
     // Draws the normal clipPath THEN the eraser as a second clip-mask: that's
-    // what "punches" the object on screen. Called by drawObject().
-    _drawClipPath(ctx, clipPath) {
-      baseDrawClipPath.call(this, ctx, clipPath)
-      if (this.eraser) {
+    // what "punches" the object on screen. Called by drawObject(ctx, forClipping,
+    // context). v6's _drawClipPath(ctx, clipPath, context) needs that third
+    // `context` (the cache layer): createClipPathLayer(clipPath, context) reads
+    // context.width — dropping it crashes rendering. Forward it to both calls.
+    _drawClipPath(ctx, clipPath, context) {
+      baseDrawClipPath.call(this, ctx, clipPath, context)
+      // Only a revived Eraser (a real fabric object) is renderable as a clip.
+      // A reloaded object can briefly carry the plain serialized mask before
+      // reviveObjectEraser swaps in a real Eraser; skip it (no .set) — it
+      // re-renders once revived — instead of crashing.
+      if (this.eraser && typeof this.eraser.set === 'function') {
         const size = this._getNonTransformedDimensions()
-        if (this.eraser.type === 'eraser') {
-          this.eraser.set({ width: size.x, height: size.y })
-        }
-        baseDrawClipPath.call(this, ctx, this.eraser)
+        this.eraser.set({ width: size.x, height: size.y })
+        baseDrawClipPath.call(this, ctx, this.eraser, context)
       }
     },
 

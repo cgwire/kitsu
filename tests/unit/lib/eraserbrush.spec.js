@@ -32,7 +32,7 @@ vi.mock('fabric', () => {
     decimatePoints(points) { return points }
   }
   const ObjectProto = {
-    _drawClipPath(ctx, clipPath) { this._lastClip = clipPath },
+    _drawClipPath(ctx, clipPath, s) { (this._clipCalls ||= []).push({ ctx, clipPath, s }); this._lastClip = clipPath },
     needsItsOwnCache() { return false },
     toObject(extra = []) { return { type: 'mock', extra } },
     _getNonTransformedDimensions() { return { x: 10, y: 20 } },
@@ -64,7 +64,7 @@ vi.mock('fabric', () => {
 })
 
 const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/players/eraserbrush')
-import { FabricObject } from 'fabric'
+import { FabricObject, FixedLayout } from 'fabric'
 
 describe('Eraser — class contract', () => {
   it('exposes a static type so Fabric v6 toObject serializes it as "eraser"', () => {
@@ -121,6 +121,14 @@ describe('Eraser', () => {
     expect(eraser.originY).toBe('center')
     // In v6 the layout is encoded in layoutManager, not a `layout` string
     expect(eraser.layoutManager).toBeDefined()
+  })
+
+  it('ignores a serialized layoutManager and builds its own FixedLayout one', () => {
+    // The serialized eraser carries a plain layoutManager (no performLayout);
+    // spreading it over our real one crashed groupInit. Ours must win.
+    const eraser = new Eraser([], { layoutManager: { bogus: true } })
+    expect(eraser.layoutManager.bogus).toBeUndefined()
+    expect(eraser.layoutManager.strategy).toBeInstanceOf(FixedLayout)
   })
 
   it('fromObject revives child paths directly as Path (no enlivenObjects)', async () => {
@@ -303,6 +311,31 @@ describe('installEraserObjectSupport', () => {
     expect(o._eraserSet).toEqual({ width: 30, height: 40 })
     // base _drawClipPath was called twice: last call was for the eraser itself
     expect(o._lastClip).toBe(o.eraser)
+  })
+
+  it('skips a plain (non-revived) eraser mask instead of crashing on .set', () => {
+    // A reloaded object can briefly carry the plain serialized eraser
+    // ({type:'eraser', ...}) before reviveObjectEraser swaps in a real Eraser.
+    // A plain mask has no .set and is not renderable, so _drawClipPath must
+    // skip it (it re-renders once revived) rather than throw.
+    const o = Object.create(FabricObject.prototype)
+    o._getNonTransformedDimensions = () => ({ x: 10, y: 10 })
+    o.eraser = { type: 'eraser', objects: [] } // plain, no .set
+    expect(() => o._drawClipPath({ tag: 'ctx' }, null, {})).not.toThrow()
+    expect(o._clipCalls.some(c => c.clipPath === o.eraser)).toBe(false)
+  })
+
+  it('forwards the v6 cache-context (3rd arg) to base _drawClipPath for clip and eraser', () => {
+    // v6 _drawClipPath(ctx, clipPath, s) needs `s` (the cache layer context):
+    // createClipPathLayer(clipPath, s) reads s.width. Dropping it crashed
+    // rendering with "can't access property width, t is undefined".
+    const o = Object.create(FabricObject.prototype)
+    o._getNonTransformedDimensions = () => ({ x: 10, y: 10 })
+    o.eraser = { type: 'eraser', set: () => {} }
+    const s = { width: 100, height: 80 }
+    o._drawClipPath({ tag: 'ctx' }, { tag: 'clip' }, s)
+    expect(o._clipCalls).toHaveLength(2)
+    expect(o._clipCalls.every(c => c.s === s)).toBe(true)
   })
 
   it('is idempotent (double install does not double-wrap)', () => {

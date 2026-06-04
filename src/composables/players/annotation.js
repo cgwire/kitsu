@@ -3,11 +3,11 @@
  * Converted from the annotation mixin for use in Composition API components.
  */
 import {
-  FabricObject,
   Group,
   IText,
   Path,
   Point,
+  Text,
   getFabricDocument,
   util
 } from 'fabric'
@@ -39,12 +39,15 @@ import localPreferences from '@/lib/preferences'
  * marquee around several annotations stays scalable / rotatable. */
 Group.prototype.hasControls = true
 
-/* Monkey patch needed to have text background including the padding. */
-FabricObject.prototype._getNonTransformedDimensions = function () {
+/* Monkey patch needed to have text background including the padding.
+ * MUST stay on Text.prototype (IText inherits it) — putting it on
+ * FabricObject.prototype applied the padding-inflated dimensions to every
+ * shape and rendered them stretched. */
+Text.prototype._getNonTransformedDimensions = function () {
   // Object dimensions
   return new Point(this.width, this.height).scalarAdd(this.padding || 0)
 }
-FabricObject.prototype._calculateCurrentDimensions = function () {
+Text.prototype._calculateCurrentDimensions = function () {
   // Controls dimensions
   return util.transformPoint(
     this._getTransformedDimensions(),
@@ -1148,7 +1151,7 @@ export const useAnnotation = ({
 
   // Mouse pressure
 
-  const initializeMouseDrawing = () => {
+  const initializeMouseDrawing = opt => {
     if (
       mouseIsDrawing.value === false &&
       fabricCanvas.value?.isDrawingMode &&
@@ -1156,7 +1159,10 @@ export const useAnnotation = ({
     ) {
       mouseIsDrawing.value = true
       mouseDrawingStartTime.value = Date.now()
-      mouseDrawingPrevPoint.value = fabricCanvas.value.getPointer()
+      // v6: getPointer requires an event; use the move/down event's scene point.
+      mouseDrawingPrevPoint.value = opt?.e
+        ? fabricCanvas.value.getScenePoint(opt.e)
+        : null
       mouseDrawingPrevPressure.value = fabricCanvas.value.freeDrawingBrush
         ? fabricCanvas.value.freeDrawingBrush.pressureManager.fallback
         : mouseDrawingMaxPressure.value
@@ -1173,12 +1179,14 @@ export const useAnnotation = ({
     )
   }
 
-  const updateMousePressure = () => {
+  const updateMousePressure = opt => {
     if (
       fabricCanvas.value?.isDrawingMode &&
       fabricCanvas.value.freeDrawingBrush &&
       mouseIsDrawing.value
     ) {
+      // v6: getPointer requires an event; resolve the scene point from it.
+      const pointer = opt?.e ? fabricCanvas.value.getScenePoint(opt.e) : null
       let pressure
       if (mouseDrawingPressureMode.value === 'fade') {
         const delta_time = Date.now() - mouseDrawingStartTime.value
@@ -1190,11 +1198,12 @@ export const useAnnotation = ({
         )
       } else if (
         mouseDrawingPressureMode.value === 'distance' &&
-        mouseDrawingPrevPoint.value
+        mouseDrawingPrevPoint.value &&
+        pointer
       ) {
         let delta_dist = getCanvasRelativePointDrawingDifference(
           mouseDrawingPrevPoint.value,
-          fabricCanvas.value.getPointer(),
+          pointer,
           fabricCanvas.value
         )
         delta_dist *= 50
@@ -1223,7 +1232,7 @@ export const useAnnotation = ({
           mouseDrawingPrevPressure.value + mouseDrawingMaxChangeRate.value
         )
       )
-      mouseDrawingPrevPoint.value = fabricCanvas.value.getPointer()
+      if (pointer) mouseDrawingPrevPoint.value = pointer
       mouseDrawingPrevPressure.value = clamped_pressure
       fabricCanvas.value.freeDrawingBrush.pressureManager.fallback =
         clamped_pressure
