@@ -1,6 +1,8 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref } from 'vue'
 
+import { PSStroke } from 'fabricjs-psbrush'
+
 import { useAnnotation } from '@/composables/players/annotation'
 import { Eraser, EraserBrush } from '@/lib/eraserbrush'
 
@@ -675,6 +677,30 @@ describe('composables/annotation', () => {
       const added = canvas._objects.find(o => o.id === 'path-load-1')
       expect(added).toBeDefined()
       expect(added.erasable).not.toBe(false)
+      wrapper.unmount()
+    })
+
+    it('skips a PSStroke that fails to deserialize instead of throwing', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const spy = vi
+        .spyOn(PSStroke, 'fromObject')
+        .mockImplementation((obj, cb) => cb(null))
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'ps-bad',
+        type: 'PSStroke',
+        left: 0,
+        top: 0,
+        scaleX: 1,
+        scaleY: 1,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      const built = await api.addObjectToCanvas(annotation, obj, canvas)
+      expect(built).toBeUndefined()
+      expect(canvas._objects.find(o => o.id === 'ps-bad')).toBeUndefined()
+      spy.mockRestore()
       wrapper.unmount()
     })
 

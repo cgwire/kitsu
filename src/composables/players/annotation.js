@@ -13,6 +13,7 @@ import {
   addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
+  deserializePSStroke,
   getAnnotationContainMapping,
   lockBrushToFirstPointer
 } from '@/lib/annotation'
@@ -621,8 +622,12 @@ export const useAnnotation = ({
       canvas.add(text)
       silentAnnotation = false
     } else if (obj.type === 'PSStroke') {
+      // deserializePSStroke resolves null on a failed revival (corrupt data);
+      // skip it gracefully rather than aborting the whole frame's load.
       if (obj.canvasWidth) {
-        psstroke = await deserializePSBrush(obj)
+        psstroke = await deserializePSStroke(obj)
+      }
+      if (psstroke) {
         psstroke.set('id', obj.id)
         psstroke.set('strokeWidth', obj.strokeWidth)
         psstroke.set('strokeLineCap', 'round')
@@ -694,18 +699,6 @@ export const useAnnotation = ({
     const built = path || text || psstroke || shape
     if (built) await reviveObjectEraser(built, obj)
     return built
-  }
-
-  const deserializePSBrush = obj => {
-    return new Promise((resolve, reject) => {
-      PSStroke.fromObject(obj, function (psstroke) {
-        if (psstroke) {
-          resolve(psstroke)
-        } else {
-          reject(new Error('Failed to deserialize PSStroke'))
-        }
-      })
-    })
   }
 
   // Events
