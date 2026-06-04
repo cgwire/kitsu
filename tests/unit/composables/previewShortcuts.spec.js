@@ -109,6 +109,16 @@ describe('composables/previewShortcuts', () => {
       wrapper.unmount()
     })
 
+    it('keeps stepping frames on auto-repeat so holding an arrow scrubs the video', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      dispatchKeydown({ key: 'ArrowRight', repeat: true })
+      dispatchKeydown({ key: 'ArrowRight', repeat: true })
+      dispatchKeydown({ key: 'ArrowLeft', repeat: true })
+      expect(handlers.onNextFrame).toHaveBeenCalledTimes(2)
+      expect(handlers.onPrevFrame).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
     it('Home and End jump to the first / last frame and suppress page scroll', () => {
       const { handlers, wrapper } = mountShortcuts()
       const home = dispatchKeydown({ key: 'Home' })
