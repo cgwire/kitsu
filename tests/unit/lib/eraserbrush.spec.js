@@ -54,7 +54,7 @@ vi.mock('fabric', () => {
   }
 })
 
-const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/eraserbrush')
+const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/players/eraserbrush')
 import { fabric } from 'fabric'
 
 describe('EraserBrush — core', () => {

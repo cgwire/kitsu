@@ -10,8 +10,8 @@ import {
   pushAddition,
   removeAddition,
   setObjectData
-} from '@/lib/annotation'
-import { Eraser } from '@/lib/eraserbrush'
+} from '@/lib/players/annotation'
+import { Eraser } from '@/lib/players/eraserbrush'
 
 const createCanvas = () => ({
   width: 800,

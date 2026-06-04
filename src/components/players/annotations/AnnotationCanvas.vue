@@ -19,7 +19,7 @@ import { fabric } from 'fabric'
 import { PSBrush } from 'fabricjs-psbrush'
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-import { lockBrushToFirstPointer } from '@/lib/annotation'
+import { lockBrushToFirstPointer } from '@/lib/players/annotation'
 
 const props = defineProps({
   canvasId: { type: String, required: true },

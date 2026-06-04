@@ -84,7 +84,10 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useSharedAnnotationCanvas } from '@/composables/players/sharedAnnotation'
-import { buildReadOnlyShape, findAnnotationAtTime } from '@/lib/annotation'
+import {
+  buildReadOnlyShape,
+  findAnnotationAtTime
+} from '@/lib/players/annotation'
 
 const store = useStore()
 

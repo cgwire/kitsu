@@ -16,8 +16,12 @@ import {
   deserializePSStroke,
   getAnnotationContainMapping,
   lockBrushToFirstPointer
-} from '@/lib/annotation'
-import { Eraser, EraserBrush, reviveObjectEraser } from '@/lib/eraserbrush'
+} from '@/lib/players/annotation'
+import {
+  Eraser,
+  EraserBrush,
+  reviveObjectEraser
+} from '@/lib/players/eraserbrush'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'

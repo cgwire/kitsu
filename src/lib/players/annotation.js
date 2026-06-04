@@ -1,9 +1,15 @@
 /*
- * Pure helpers extracted from `src/components/mixins/annotation.js` so they
- * can be reused outside of the Options-API mixin (composables, shared
- * playlist player, …). The mixin can be refactored to delegate here
- * without behavioural change so the studio-side and guest-side drawings
- * stay byte-for-byte compatible.
+ * Pure, stateless annotation helpers shared across every annotation
+ * surface: the editable studio canvas (useAnnotation), the shared playlist
+ * player and the read-only overlays.
+ *
+ * Covers canvas creation, brush/pencil configuration, freehand and shape
+ * drawing, (de)serialization of saved annotations, the read-only shape
+ * builder and the additions/deletions diff helpers. Holds no reactive
+ * state — consumers own that.
+ *
+ * On import it registers the custom Arrow shape and patches
+ * fabric.Object.prototype with eraser-mask support (both idempotent).
  */
 
 import { fabric } from 'fabric'

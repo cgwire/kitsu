@@ -22,7 +22,7 @@ import {
   pushAddition,
   removeAddition,
   setObjectData
-} from '@/lib/annotation'
+} from '@/lib/players/annotation'
 
 /**
  * Composable that owns a `fabric.Canvas` configured exactly like the

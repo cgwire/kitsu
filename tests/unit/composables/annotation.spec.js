@@ -4,7 +4,7 @@ import { computed, defineComponent, ref } from 'vue'
 import { PSStroke } from 'fabricjs-psbrush'
 
 import { useAnnotation } from '@/composables/players/annotation'
-import { Eraser, EraserBrush } from '@/lib/eraserbrush'
+import { Eraser, EraserBrush } from '@/lib/players/eraserbrush'
 
 /**
  * Build a fake fabric.Canvas-like object good enough for the composable's
