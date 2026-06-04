@@ -143,6 +143,24 @@ describe('lib/annotation', () => {
       addSerialization(obj)
       expect(obj.serialize().eraser).toBeUndefined()
     })
+
+    it('forces nested types to the stored lowercase form (Fabric v6 PascalCase)', () => {
+      const obj = {
+        id: 'g1',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        // Simulate v6's toJSON(): PascalCase types, including group children.
+        toJSON: () => ({
+          type: 'Group',
+          objects: [{ type: 'Rect' }, { type: 'IText' }]
+        })
+      }
+      addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.type).toBe('group')
+      expect(result.objects[0].type).toBe('rect')
+      expect(result.objects[1].type).toBe('i-text')
+    })
   })
 
   describe('setObjectData', () => {

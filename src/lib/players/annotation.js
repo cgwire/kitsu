@@ -16,6 +16,7 @@ import { fabric } from 'fabric'
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
+import { normalizeSerializedType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
 import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 
@@ -151,6 +152,10 @@ export const addSerialization = object => {
     } else {
       delete result.eraser
     }
+    // Force every (nested) type to the stored lowercase form so v6's
+    // PascalCase toObject() output stays byte-compatible with existing
+    // data and the deserializers' lowercase branches keep matching.
+    normalizeSerializedType(result)
     return normalizeSerializedAnnotation(this, result)
   }
   return object
