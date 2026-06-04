@@ -398,6 +398,49 @@ describe('lib/annotation', () => {
       HTMLCanvasElement.prototype.getContext = originalGetContext
     })
 
+    it('builds a shape from a Fabric v6 PascalCase type', async () => {
+      const rect = await buildReadOnlyShape(
+        annotation,
+        {
+          type: 'Rect',
+          left: 0,
+          top: 0,
+          width: 50,
+          height: 50,
+          scaleX: 1,
+          scaleY: 1,
+          angle: 0,
+          canvasWidth: 800,
+          canvasHeight: 600,
+          id: 'v6-rect'
+        },
+        fakeCanvas
+      )
+      expect(rect).not.toBeNull()
+
+      const text = await buildReadOnlyShape(
+        annotation,
+        {
+          type: 'IText',
+          text: 'hi',
+          left: 0,
+          top: 0,
+          width: 10,
+          height: 10,
+          scaleX: 1,
+          scaleY: 1,
+          angle: 0,
+          textAlign: 'left',
+          canvasWidth: 800,
+          canvasHeight: 600,
+          id: 'v6-text'
+        },
+        fakeCanvas
+      )
+      expect(text).not.toBeNull()
+      expect(text.text).toBe('hi')
+    })
+
     it('text shape has erasable === false', async () => {
       const obj = {
         type: 'i-text',

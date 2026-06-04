@@ -16,7 +16,7 @@ import { fabric } from 'fabric'
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
-import { normalizeSerializedType } from './annotationTypes'
+import { normalizeSerializedType, normalizeType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
 import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 
@@ -633,6 +633,9 @@ export const normalizeSerializedAnnotation = (object, result) => {
 
 const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
   if (!obj || !obj.type) return null
+  // Tolerate Fabric v6 PascalCase types ('Rect', 'IText', …) as well as the
+  // stored lowercase form so annotations saved under either revive.
+  const type = normalizeType(obj.type)
 
   const canvasWidth = obj.canvasWidth || annotation?.width
   const canvasHeight = obj.canvasHeight || annotation?.height
@@ -662,7 +665,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     width: obj.width
   }
 
-  if (obj.type === 'path') {
+  if (type === 'path') {
     const path = new fabric.Path(obj.path, base)
     path.set('id', obj.id)
     path.set('canvasWidth', canvasWidth)
@@ -671,7 +674,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return path
   }
 
-  if (obj.type === 'PSStroke') {
+  if (type === 'PSStroke') {
     const stroke = await deserializePSStroke(obj)
     if (!stroke) return null
     stroke.set({
@@ -696,7 +699,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return stroke
   }
 
-  if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
+  if (type === 'i-text' || type === 'text' || type === 'textbox') {
     const text = new fabric.Text(obj.text || '', {
       ...base,
       backgroundColor: obj.backgroundColor || 'rgba(255, 255, 255, 0.8)',
@@ -712,19 +715,19 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return text
   }
 
-  if (obj.type === 'circle') return new fabric.Circle(base)
-  if (obj.type === 'rect') return new fabric.Rect(base)
-  if (obj.type === 'ellipse') {
+  if (type === 'circle') return new fabric.Circle(base)
+  if (type === 'rect') return new fabric.Rect(base)
+  if (type === 'ellipse') {
     return new fabric.Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
   }
-  if (obj.type === 'line') {
+  if (type === 'line') {
     return new fabric.Line(
       [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
       base
     )
   }
 
-  if (obj.type === 'arrow') {
+  if (type === 'arrow') {
     const arrow = new Arrow(
       [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
       {
@@ -737,7 +740,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return arrow
   }
 
-  if (obj.type === 'group' && Array.isArray(obj.objects)) {
+  if (type === 'group' && Array.isArray(obj.objects)) {
     const children = (
       await Promise.all(
         obj.objects.map(child => buildReadOnlyShape(annotation, child, canvas))

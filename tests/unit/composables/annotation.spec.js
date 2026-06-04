@@ -625,6 +625,28 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    it('loads an object saved with a Fabric v6 PascalCase type', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'v6-rect-1',
+        type: 'Rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      expect(canvas._objects.find(o => o.id === 'v6-rect-1')).toBeDefined()
+      wrapper.unmount()
+    })
+
     it('textbox object is loaded as text (kept in sync with the lib deserializer)', async () => {
       const canvas = createFakeCanvas()
       const { api, wrapper } = mountAnnotation({ canvas })

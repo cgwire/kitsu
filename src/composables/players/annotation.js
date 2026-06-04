@@ -17,6 +17,7 @@ import {
   getAnnotationContainMapping,
   lockBrushToFirstPointer
 } from '@/lib/players/annotation'
+import { normalizeType } from '@/lib/players/annotationTypes'
 import {
   Eraser,
   EraserBrush,
@@ -541,6 +542,9 @@ export const useAnnotation = ({
     if (getObjectById(obj.id) && !canvas) return
     if (!canvas) canvas = fabricCanvas.value
     let path, shape, text, psstroke
+    // Tolerate Fabric v6 PascalCase types as well as the stored lowercase
+    // form so annotations saved under either revive on the editable canvas.
+    const type = normalizeType(obj.type)
     const canvasWidth = obj.canvasWidth || annotation?.width
     const canvasHeight = obj.canvasHeight || annotation?.height
     const { scale, offsetX, offsetY } = getAnnotationContainMapping(
@@ -569,7 +573,7 @@ export const useAnnotation = ({
       selectable: !isCurrentUserArtist.value
     }
 
-    if (obj.type === 'path') {
+    if (type === 'path') {
       path = new fabric.Path(obj.path, {
         ...base
       })
@@ -591,11 +595,7 @@ export const useAnnotation = ({
       silentAnnotation = true
       canvas.add(path)
       silentAnnotation = false
-    } else if (
-      obj.type === 'i-text' ||
-      obj.type === 'text' ||
-      obj.type === 'textbox'
-    ) {
+    } else if (type === 'i-text' || type === 'text' || type === 'textbox') {
       text = new fabric.IText(obj.text, {
         ...base,
         erasable: false,
@@ -625,7 +625,7 @@ export const useAnnotation = ({
       silentAnnotation = true
       canvas.add(text)
       silentAnnotation = false
-    } else if (obj.type === 'PSStroke') {
+    } else if (type === 'PSStroke') {
       // deserializePSStroke resolves null on a failed revival (corrupt data);
       // skip it gracefully rather than aborting the whole frame's load.
       if (obj.canvasWidth) {
@@ -665,11 +665,7 @@ export const useAnnotation = ({
         canvas.add(psstroke)
         silentAnnotation = false
       }
-    } else if (
-      obj.type === 'rect' ||
-      obj.type === 'circle' ||
-      obj.type === 'arrow'
-    ) {
+    } else if (type === 'rect' || type === 'circle' || type === 'arrow') {
       // Reuse the shared shape rebuilder for rect / circle / arrow. It
       // returns the shape with selectable/evented off (the read-only
       // shape contract), so we flip them back on to match the path
