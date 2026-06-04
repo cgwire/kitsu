@@ -623,6 +623,34 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    it('textbox object is loaded as text (kept in sync with the lib deserializer)', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'txt-box-1',
+        type: 'textbox',
+        text: 'boxed',
+        left: 10,
+        top: 20,
+        width: 100,
+        height: 30,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        fill: '#00ff00',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      const added = canvas._objects.find(o => o.id === 'txt-box-1')
+      expect(added).toBeDefined()
+      expect(added.text).toBe('boxed')
+      wrapper.unmount()
+    })
+
     it('path object loaded via addObjectToCanvas does NOT have erasable === false', async () => {
       const canvas = createFakeCanvas()
       const { api, wrapper } = mountAnnotation({ canvas })

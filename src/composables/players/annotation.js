@@ -586,7 +586,11 @@ export const useAnnotation = ({
       silentAnnotation = true
       canvas.add(path)
       silentAnnotation = false
-    } else if (obj.type === 'i-text' || obj.type === 'text') {
+    } else if (
+      obj.type === 'i-text' ||
+      obj.type === 'text' ||
+      obj.type === 'textbox'
+    ) {
       text = new fabric.IText(obj.text, {
         ...base,
         erasable: false,
