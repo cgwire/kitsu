@@ -22,10 +22,15 @@ export class Eraser extends Group {
   // `layoutManager: new LayoutManager(new FixedLayout())`. Children passed to
   // fromObject() are already in group-local coords; FixedLayout preserves them.
   constructor(objects = [], options = {}) {
+    // Drop a serialized `type`: passing it through super()/setOptions hits v6's
+    // deprecated no-op type setter, which warns on every revival. The static
+    // Eraser.type governs.
+    const opts = { ...options }
+    delete opts.type
     super(objects, {
       originX: 'center',
       originY: 'center',
-      ...options,
+      ...opts,
       // Always build a fresh FixedLayout: a serialized eraser carries a plain
       // layoutManager (no performLayout()), and spreading it over ours crashed
       // groupInit. Ours must win, so it comes AFTER ...options.

@@ -10,10 +10,13 @@ import { Control, Line, Point, classRegistry } from 'fabric'
  */
 export class Arrow extends Line {
   constructor(points, options = {}) {
-    super(points, options)
-    this.setOptions(options)
-    // No instance `this.type =` : v6's type setter is a no-op that logs a
-    // deprecation warning; the static `Arrow.type` governs serialization.
+    // Drop a serialized `type`: passing it through super()/setOptions hits v6's
+    // deprecated no-op type setter, which warns on every revival. The static
+    // Arrow.type governs serialization.
+    const opts = { ...options }
+    delete opts.type
+    super(points, opts)
+    this.setOptions(opts)
     this.arrowHeadSize = options.arrowHeadSize || 15
     this.arrowHeadWidth = options.arrowHeadWidth || 12
     // Cache the rendering ourselves via _render. fabric's default
