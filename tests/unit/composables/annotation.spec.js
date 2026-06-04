@@ -231,6 +231,27 @@ describe('composables/annotation', () => {
     })
   })
 
+  describe('addSerialization', () => {
+    it('persists the eraser mask even when toJSON omits it (PSStroke case)', () => {
+      const { api, wrapper } = mountAnnotation()
+      const obj = {
+        id: 'stroke-1',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        // toJSON drops the eraser (mirrors PSStroke's custom toObject).
+        toJSON: () => ({ type: 'PSStroke' }),
+        eraser: { toObject: () => ({ type: 'eraser', objects: [{ path: 'M 0 0' }] }) }
+      }
+      api.addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.eraser).toEqual({
+        type: 'eraser',
+        objects: [{ path: 'M 0 0' }]
+      })
+      wrapper.unmount()
+    })
+  })
+
   describe('clearModifications', () => {
     it('clears additions, updates and deletions', () => {
       const { api, wrapper } = mountAnnotation()
@@ -888,11 +909,30 @@ describe('composables/annotation', () => {
   })
 
   describe('eraser undo/redo', () => {
+    // Mask paths model real fabric children: serialize() now reaches the
+    // eraser, and a real Eraser.toObject() recurses into each child's
+    // toObject() — so the fake children must expose one too.
+    const makeMaskPath = (pathData = 'M 0 0 L 5 5') => ({
+      path: pathData,
+      toObject() {
+        return { path: this.path }
+      }
+    })
+
     const makeErasable = (id, pathData = 'M 0 0 L 5 5') => {
       const eraser = {
-        _objects: [{ path: pathData }],
+        _objects: [makeMaskPath(pathData)],
         getObjects() {
           return this._objects
+        },
+        // The real Eraser (a fabric.Group subclass) exposes toObject();
+        // serialize() now persists the mask through it, so the fake must
+        // honour the same contract.
+        toObject() {
+          return {
+            type: 'eraser',
+            objects: this._objects.map(o => o.toObject())
+          }
         }
       }
       return createSerializableObject({ id, eraser })

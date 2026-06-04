@@ -10,11 +10,11 @@ import { markRaw, ref, watch } from 'vue'
 
 import {
   SHAPE_WIDTHS,
+  addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
   getAnnotationContainMapping,
-  lockBrushToFirstPointer,
-  normalizeSerializedAnnotation
+  lockBrushToFirstPointer
 } from '@/lib/annotation'
 import { Eraser, EraserBrush, reviveObjectEraser } from '@/lib/eraserbrush'
 import clipboard from '@/lib/clipboard'
@@ -187,20 +187,6 @@ export const useAnnotation = ({
   const getObjectById = objectId => {
     if (!fabricCanvas.value) return null
     return fabricCanvas.value.getObjects().find(obj => obj.id === objectId)
-  }
-
-  const addSerialization = object => {
-    object.serialize = function () {
-      const result = object.toJSON()
-      result.id = this.id
-      result.canvasWidth = this.canvasWidth
-      result.canvasHeight = this.canvasHeight
-      result.angle = this.angle
-      result.scale = this.scale
-      result.createdBy = this.createdBy
-      return normalizeSerializedAnnotation(this, result)
-    }
-    return object
   }
 
   const setObjectData = object => {
