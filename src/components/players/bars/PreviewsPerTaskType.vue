@@ -32,6 +32,7 @@ import { firstBy } from 'thenby'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
+import { formatRevision } from '@/lib/preview'
 import editStore from '@/store/modules/edits'
 
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -54,6 +55,7 @@ const emit = defineEmits(['preview-changed'])
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const currentProduction = computed(() => store.getters.currentProduction)
 
 const taskTypeId = ref(null)
 const previewFileId = ref(props.entity.preview_file_id)
@@ -73,7 +75,7 @@ const taskTypeOptions = computed(() => {
 const previewFileOptions = computed(() => {
   const previewFiles = props.entity.preview_files[taskTypeId.value] || []
   return previewFiles.map(previewFile => ({
-    label: `v${previewFile.revision}`,
+    label: formatRevision(previewFile.revision, currentProduction.value),
     value: previewFile.id
   }))
 })

@@ -95,6 +95,8 @@ import { firstBy } from 'thenby'
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import { formatRevision } from '@/lib/preview'
+
 import Combobox from '@/components/widgets/Combobox.vue'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -143,12 +145,13 @@ const playlistEntryMap = computed(() => store.getters.playlistEntryMap)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const currentProduction = computed(() => store.getters.currentProduction)
 
 const previewFileOptions = computed(() => {
   if (props.readOnly) return []
   const files = previewFiles.value[taskTypeId.value] || []
   return files.map(previewFile => ({
-    label: `v${previewFile.revision}`,
+    label: formatRevision(previewFile.revision, currentProduction.value),
     value: previewFile.id
   }))
 })

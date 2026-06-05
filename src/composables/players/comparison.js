@@ -10,10 +10,13 @@
  */
 import { computed, nextTick, ref } from 'vue'
 
+import { formatRevision } from '@/lib/preview'
+
 export const useComparison = ({
   entityPreviewFiles,
   currentPreview,
   taskTypeMap,
+  currentProduction,
   t
 }) => {
   // State
@@ -90,7 +93,7 @@ export const useComparison = ({
     const files = entityPreviewFiles.value?.[taskTypeId.value]
     if (!files || files.length === 0) return []
     return files.map(file => ({
-      label: `v${file.revision}`,
+      label: formatRevision(file.revision, currentProduction?.value),
       value: file.id
     }))
   })

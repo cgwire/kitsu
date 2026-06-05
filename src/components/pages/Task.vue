@@ -422,6 +422,7 @@ import { mapGetters, mapActions } from 'vuex'
 
 import drafts from '@/lib/drafts'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
+import { formatRevision } from '@/lib/preview'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { sortPeople } from '@/lib/sorting'
 
@@ -615,7 +616,7 @@ export default {
         .sort((a, b) => b.revision - a.revision)
         .map(preview => {
           return {
-            label: `v${preview.revision}`,
+            label: formatRevision(preview.revision, this.currentProduction),
             value: preview.id
           }
         })

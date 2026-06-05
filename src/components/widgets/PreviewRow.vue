@@ -13,6 +13,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useStore } from 'vuex'
+
+import { formatRevision } from '@/lib/preview'
 
 import ButtonLink from '@/components/widgets/ButtonLink.vue'
 
@@ -31,10 +34,11 @@ const props = defineProps({
   }
 })
 
-const label = computed(() => {
-  const label = `v${props.preview.revision}`
-  return label
-})
+const store = useStore()
+
+const label = computed(() =>
+  formatRevision(props.preview.revision, store.getters.currentProduction)
+)
 </script>
 
 <style lang="scss" scoped>
