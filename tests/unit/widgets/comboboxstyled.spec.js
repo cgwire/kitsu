@@ -59,11 +59,11 @@ describe('ComboboxStyled', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
   })
 
-  it('emits update:modelValue and change when an option is selected', async () => {
+  it('emits update:model-value and change when an option is selected', async () => {
     await wrapper.find('.combo').trigger('click')
     const optionLines = wrapper.findAll('.option-line')
     await optionLines[1].trigger('click')
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['v2'])
+    expect(wrapper.emitted('update:model-value')[0]).toEqual(['v2'])
     expect(wrapper.emitted('change')[0]).toEqual(['v2'])
   })
 

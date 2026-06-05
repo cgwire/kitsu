@@ -37,7 +37,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const id = ref(null)
 
@@ -46,7 +46,7 @@ onMounted(() => {
 })
 
 const onChange = event => {
-  emit('update:modelValue', event.target.checked)
+  emit('update:model-value', event.target.checked)
   emit('change', event.target.checked)
 }
 </script>

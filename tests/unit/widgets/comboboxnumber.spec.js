@@ -30,11 +30,11 @@ describe('ComboboxNumber', () => {
     expect(optionEls).toHaveLength(3)
   })
 
-  it('emits update:modelValue as integer on change', async () => {
+  it('emits update:model-value as integer on change', async () => {
     const select = wrapper.find('select')
     select.element.value = '5'
     await select.trigger('change')
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual([5])
+    expect(wrapper.emitted('update:model-value')[0]).toEqual([5])
   })
 
   it('emits enter event as integer on keyup.enter', async () => {

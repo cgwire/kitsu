@@ -43,7 +43,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'keyup', 'update:modelValue'])
+const emit = defineEmits(['enter', 'keyup', 'update:model-value'])
 
 const inputRef = ref(null)
 
@@ -52,7 +52,7 @@ const emitEnter = () => {
 }
 
 const updateValue = () => {
-  emit('update:modelValue', inputRef.value.value)
+  emit('update:model-value', inputRef.value.value)
 }
 
 const emitKeyup = event => {

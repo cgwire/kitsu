@@ -98,7 +98,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const selectRef = ref(null)
 const touched = ref(false)
@@ -118,7 +118,7 @@ const updateValue = () => {
       value = option.value
     }
   })
-  emit('update:modelValue', value)
+  emit('update:model-value', value)
 }
 
 const emitEnter = () => {

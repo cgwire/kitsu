@@ -8,7 +8,7 @@ export const useCombobox = emit => {
   }
 
   const select = item => {
-    emit('update:modelValue', item.id)
+    emit('update:model-value', item.id)
     showList.value = false
   }
 

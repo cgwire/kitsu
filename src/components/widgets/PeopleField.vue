@@ -87,7 +87,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['select', 'update:modelValue'])
+const emit = defineEmits(['select', 'update:model-value'])
 
 const multiselectRef = ref(null)
 const index = ref(null)
@@ -112,7 +112,7 @@ const onSearchChange = s => {
 }
 
 const onSelect = () => {
-  emit('update:modelValue', item.value)
+  emit('update:model-value', item.value)
   emit('select', item.value)
 }
 

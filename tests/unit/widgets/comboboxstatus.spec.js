@@ -82,12 +82,12 @@ describe('ComboboxStatus', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
   })
 
-  it('emits update:modelValue when a status is selected', async () => {
+  it('emits update:model-value when a status is selected', async () => {
     await wrapper.find('.flexrow').trigger('click')
     const statusLines = wrapper.findAll('.status-line')
     await statusLines[2].trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['status-3'])
+    expect(wrapper.emitted('update:model-value')).toBeTruthy()
+    expect(wrapper.emitted('update:model-value')[0]).toEqual(['status-3'])
   })
 
   it('shows placeholder when no modelValue and addPlaceholder is true', () => {

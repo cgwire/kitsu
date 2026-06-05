@@ -66,10 +66,10 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:model-value'])
 
 const colorChanged = (color, index) => {
-  emit('update:modelValue', color)
+  emit('update:model-value', color)
 }
 </script>
 

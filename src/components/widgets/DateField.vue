@@ -82,7 +82,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'change'])
+const emit = defineEmits(['update:model-value', 'change'])
 
 const localValue = computed({
   get() {
@@ -92,7 +92,7 @@ const localValue = computed({
     if (value?.setHours) {
       value.setHours(0, 0, 0, 0)
     }
-    emit('update:modelValue', value)
+    emit('update:model-value', value)
     emit('change', value)
   }
 })

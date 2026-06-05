@@ -104,7 +104,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:model-value'])
 
 const combobox = ref(null)
 const showDepartmentList = ref(false)
@@ -201,7 +201,7 @@ const listStyle = computed(() => {
 })
 
 const selectDepartment = department => {
-  emit('update:modelValue', department.id)
+  emit('update:model-value', department.id)
   showDepartmentList.value = false
 }
 

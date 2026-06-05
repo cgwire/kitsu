@@ -38,11 +38,11 @@ describe('ComboboxSimple', () => {
     expect(choices[1].classes()).not.toContain('selected')
   })
 
-  it('emits update:modelValue when an option is clicked', async () => {
+  it('emits update:model-value when an option is clicked', async () => {
     const choices = wrapper.findAll('.choice')
     await choices[1].trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['month'])
+    expect(wrapper.emitted('update:model-value')).toBeTruthy()
+    expect(wrapper.emitted('update:model-value')[0]).toEqual(['month'])
   })
 
   it('updates selected state after clicking an option', async () => {

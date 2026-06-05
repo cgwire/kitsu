@@ -108,7 +108,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const {
   getDescriptorChecklistValues,
@@ -161,7 +161,7 @@ const getMetadataFieldValue = (descriptor, entity) => {
 }
 
 const updateValue = value => {
-  emit('update:modelValue', value)
+  emit('update:model-value', value)
 }
 
 const onEnter = () => {

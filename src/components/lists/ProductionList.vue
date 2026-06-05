@@ -67,7 +67,7 @@
                 namespace="all-productions"
                 v-model:is-open="columnSelectorDisplayed"
                 @update:model-value="
-                  $emit('update:metadataDisplayHeaders', $event)
+                  $emit('update:metadata-display-headers', $event)
                 "
               />
               <button-simple
@@ -277,7 +277,7 @@ const emit = defineEmits([
   'edit-clicked',
   'edit-metadata',
   'metadata-changed',
-  'update:metadataDisplayHeaders'
+  'update:metadata-display-headers'
 ])
 
 const store = useStore()

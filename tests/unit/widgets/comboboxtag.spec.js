@@ -52,7 +52,7 @@ describe('ComboboxTag', () => {
     expect(checked).toHaveLength(2)
   })
 
-  it('emits update:modelValue when an unchecked option is clicked', async () => {
+  it('emits update:model-value when an unchecked option is clicked', async () => {
     await wrapper.find('.flexrow').trigger('click')
     const optionLines = wrapper.findAll('.option-line')
     // options are sorted by value: apple, banana, cherry
@@ -60,22 +60,22 @@ describe('ComboboxTag', () => {
       o => o.text().trim().includes('Banana')
     )
     await bananaOption.trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    const emittedValue = wrapper.emitted('update:modelValue')[0][0]
+    expect(wrapper.emitted('update:model-value')).toBeTruthy()
+    const emittedValue = wrapper.emitted('update:model-value')[0][0]
     expect(emittedValue).toContain('banana')
     expect(emittedValue).toContain('apple')
     expect(emittedValue).toContain('cherry')
   })
 
-  it('emits update:modelValue removing a checked option on click', async () => {
+  it('emits update:model-value removing a checked option on click', async () => {
     await wrapper.find('.flexrow').trigger('click')
     const optionLines = wrapper.findAll('.option-line')
     const appleOption = optionLines.find(
       o => o.text().trim().includes('Apple')
     )
     await appleOption.trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    const emittedValue = wrapper.emitted('update:modelValue')[0][0]
+    expect(wrapper.emitted('update:model-value')).toBeTruthy()
+    const emittedValue = wrapper.emitted('update:model-value')[0][0]
     expect(emittedValue).not.toContain('apple')
     expect(emittedValue).toContain('cherry')
   })
@@ -92,7 +92,7 @@ describe('ComboboxTag', () => {
     await wrapper.find('.flexrow').trigger('click')
     const optionLines = wrapper.findAll('.option-line')
     await optionLines[0].trigger('click')
-    expect(wrapper.emitted('update:modelValue')).toBeFalsy()
+    expect(wrapper.emitted('update:model-value')).toBeFalsy()
   })
 
   it('renders label when provided', async () => {
