@@ -36,6 +36,10 @@ const props = defineProps({
   defaultHeight: {
     type: Number,
     default: 600
+  },
+  urlPrefix: {
+    type: String,
+    default: null
   }
 })
 
@@ -59,7 +63,11 @@ const loadContent = async () => {
   isLoading.value = true
   hasError.value = false
   try {
-    rawContent.value = await filesApi.getPreviewFileText(props.preview.id, 'md')
+    rawContent.value = await filesApi.getPreviewFileText(
+      props.preview.id,
+      'md',
+      props.urlPrefix
+    )
   } catch (err) {
     console.error('Failed to load markdown preview', err)
     hasError.value = true

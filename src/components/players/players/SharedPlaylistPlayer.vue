@@ -56,6 +56,29 @@
             v-if="isSound && !loading"
           />
 
+          <object-viewer :preview-url="modelUrl" v-if="isModel && !loading" />
+
+          <pdf-viewer
+            :default-height="0"
+            :preview="currentPreview"
+            :url-prefix="sharedApiPrefix"
+            v-if="isPdf && !loading"
+          />
+
+          <markdown-viewer
+            :default-height="0"
+            :preview="currentPreview"
+            :url-prefix="sharedApiPrefix"
+            v-if="isMarkdown && !loading"
+          />
+
+          <diff-viewer
+            :default-height="0"
+            :preview="currentPreview"
+            :url-prefix="sharedApiPrefix"
+            v-if="isDiff && !loading"
+          />
+
           <div
             class="other-file"
             v-if="isOtherFile && !loading && currentPreview"
@@ -221,7 +244,15 @@ import { useStore } from 'vuex'
 
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
-import { isMoviePreview, isPicturePreview, isSoundPreview } from '@/lib/preview'
+import {
+  isDiffPreview,
+  isMarkdownPreview,
+  isModelPreview,
+  isMoviePreview,
+  isPdfPreview,
+  isPicturePreview,
+  isSoundPreview
+} from '@/lib/preview'
 import { floorToFrame, formatTime } from '@/lib/video'
 
 import SharedAnnotationOverlay from '@/components/players/annotations/SharedAnnotationOverlay.vue'
@@ -231,7 +262,11 @@ import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
 import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
 import VideoProgress from '@/components/players/progress/VideoProgress.vue'
 import SharedCommentsPanel from '@/components/players/sides/SharedCommentsPanel.vue'
+import DiffViewer from '@/components/players/viewers/DiffViewer.vue'
+import MarkdownViewer from '@/components/players/viewers/MarkdownViewer.vue'
 import MultiVideoViewer from '@/components/players/viewers/MultiVideoViewer.vue'
+import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
+import PdfViewer from '@/components/players/viewers/PdfViewer.vue'
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 import SoundViewer from '@/components/players/viewers/SoundViewer.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -348,12 +383,20 @@ const extension = computed(() => currentPreview.value?.extension || '')
 const isMovie = computed(() => isMoviePreview(extension.value))
 const isPicture = computed(() => isPicturePreview(extension.value))
 const isSound = computed(() => isSoundPreview(extension.value))
+const isModel = computed(() => isModelPreview(extension.value))
+const isPdf = computed(() => isPdfPreview(extension.value))
+const isMarkdown = computed(() => isMarkdownPreview(extension.value))
+const isDiff = computed(() => isDiffPreview(extension.value))
 const isOtherFile = computed(
   () =>
     !!currentPreview.value &&
     !isMovie.value &&
     !isPicture.value &&
-    !isSound.value
+    !isSound.value &&
+    !isModel.value &&
+    !isPdf.value &&
+    !isMarkdown.value &&
+    !isDiff.value
 )
 
 const downloadUrl = computed(() => {
@@ -367,6 +410,12 @@ const downloadUrl = computed(() => {
 const downloadFileName = computed(() => {
   const entityName = currentEntity.value?.name || 'preview'
   return extension.value ? `${entityName}.${extension.value}` : entityName
+})
+
+const modelUrl = computed(() => {
+  if (!currentPreview.value) return ''
+  const base = sharedApiPrefix.value || '/api'
+  return `${base}/pictures/originals/preview-files/${currentPreview.value.id}.${extension.value}`
 })
 
 const overlayDimensions = computed(() => {
