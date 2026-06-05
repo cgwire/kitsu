@@ -32,7 +32,8 @@ import { computed, ref } from 'vue'
 
 const props = defineProps({
   color: {
-    type: String
+    type: String,
+    default: ''
   },
   modelValue: {
     // When the parent passes a Boolean here, the picker is

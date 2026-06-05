@@ -57,6 +57,7 @@
         }"
         @mouseenter="isFrameNumberVisible = true"
         @mouseleave="isFrameNumberVisible = false"
+        @mousedown="startProgressDrag"
         @touchstart="isFrameNumberVisible = true"
         @touchend="isFrameNumberVisible = false"
         @touchcancel="isFrameNumberVisible = false"
@@ -289,10 +290,11 @@ const getMouseFrame = (event, annotation) => {
   let position = getClientX(event) - left
   if (position > width.value) position = width.value - 1
   const ratio = position / width.value
-  let duration =
-    annotation && frameSize.value < 3
-      ? annotation.time
-      : videoDuration.value * ratio
+  // Clicking an annotation marker must land on that annotation's exact
+  // frame so the annotation loads — not the pixel the cursor hit, which can
+  // be a frame off and make the annotation lookup miss. Bar clicks (no
+  // annotation) still map to the click position.
+  let duration = annotation ? annotation.time : videoDuration.value * ratio
   if (duration < 0) duration = 0
 
   const isChromium = !!window.chrome
@@ -377,11 +379,14 @@ const domEvents = [
   ['touchcancel', stopHandleOutDrag]
 ]
 
+let resizeObserver = null
+
 onMounted(() => {
   domEvents.forEach(([type, listener]) =>
     document.addEventListener(type, listener)
   )
-  new ResizeObserver(onWindowResize).observe(progress.value)
+  resizeObserver = new ResizeObserver(onWindowResize)
+  resizeObserver.observe(progress.value)
   const coords = progress.value.getBoundingClientRect()
   width.value = coords.width
   setTimeout(() => {
@@ -401,6 +406,7 @@ onBeforeUnmount(() => {
   domEvents.forEach(([type, listener]) =>
     document.removeEventListener(type, listener)
   )
+  resizeObserver?.disconnect()
 })
 
 defineExpose({ updateProgressBar })

@@ -1,4 +1,4 @@
-import { fabric } from 'fabric'
+import { FabricObject } from 'fabric'
 import {
   PENCIL_WIDTHS,
   addSerialization,
@@ -10,8 +10,8 @@ import {
   pushAddition,
   removeAddition,
   setObjectData
-} from '@/lib/annotation'
-import { Eraser } from '@/lib/eraserbrush'
+} from '@/lib/players/annotation'
+import { Eraser } from '@/lib/players/eraserbrush'
 
 const createCanvas = () => ({
   width: 800,
@@ -142,6 +142,24 @@ describe('lib/annotation', () => {
       }
       addSerialization(obj)
       expect(obj.serialize().eraser).toBeUndefined()
+    })
+
+    it('forces nested types to the stored lowercase form (Fabric v6 PascalCase)', () => {
+      const obj = {
+        id: 'g1',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        // Simulate v6's toJSON(): PascalCase types, including group children.
+        toJSON: () => ({
+          type: 'Group',
+          objects: [{ type: 'Rect' }, { type: 'IText' }]
+        })
+      }
+      addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.type).toBe('group')
+      expect(result.objects[0].type).toBe('rect')
+      expect(result.objects[1].type).toBe('i-text')
     })
   })
 
@@ -346,9 +364,9 @@ describe('lib/annotation', () => {
   })
 
   describe('eraser object support installation', () => {
-    it('installs eraser support on fabric.Object at import time', () => {
-      expect(fabric.Object.prototype.erasable).toBe(true)
-      expect(typeof fabric.Object.prototype._drawClipPath).toBe('function')
+    it('installs eraser support on FabricObject at import time', () => {
+      expect(FabricObject.prototype.erasable).toBe(true)
+      expect(typeof FabricObject.prototype._drawClipPath).toBe('function')
     })
   })
 
@@ -378,6 +396,49 @@ describe('lib/annotation', () => {
     })
     afterAll(() => {
       HTMLCanvasElement.prototype.getContext = originalGetContext
+    })
+
+    it('builds a shape from a Fabric v6 PascalCase type', async () => {
+      const rect = await buildReadOnlyShape(
+        annotation,
+        {
+          type: 'Rect',
+          left: 0,
+          top: 0,
+          width: 50,
+          height: 50,
+          scaleX: 1,
+          scaleY: 1,
+          angle: 0,
+          canvasWidth: 800,
+          canvasHeight: 600,
+          id: 'v6-rect'
+        },
+        fakeCanvas
+      )
+      expect(rect).not.toBeNull()
+
+      const text = await buildReadOnlyShape(
+        annotation,
+        {
+          type: 'IText',
+          text: 'hi',
+          left: 0,
+          top: 0,
+          width: 10,
+          height: 10,
+          scaleX: 1,
+          scaleY: 1,
+          angle: 0,
+          textAlign: 'left',
+          canvasWidth: 800,
+          canvasHeight: 600,
+          id: 'v6-text'
+        },
+        fakeCanvas
+      )
+      expect(text).not.toBeNull()
+      expect(text.text).toBe('hi')
     })
 
     it('text shape has erasable === false', async () => {

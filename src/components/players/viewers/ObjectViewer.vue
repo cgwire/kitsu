@@ -345,6 +345,6 @@ defineExpose({ getAnimations, play, pause })
   height: 100%;
   width: 100%;
   background-color: #333;
-  --progress-bar-color: $grey;
+  --progress-bar-color: #{$grey};
 }
 </style>

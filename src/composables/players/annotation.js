@@ -2,7 +2,15 @@
  * Composable for annotation canvas management. It's aimed at preview widgets.
  * Converted from the annotation mixin for use in Composition API components.
  */
-import { fabric } from 'fabric'
+import {
+  Group,
+  IText,
+  Path,
+  Point,
+  Text,
+  getFabricDocument,
+  util
+} from 'fabric'
 import { PSStroke, PSBrush } from 'fabricjs-psbrush'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
@@ -10,39 +18,42 @@ import { markRaw, ref, watch } from 'vue'
 
 import {
   SHAPE_WIDTHS,
+  addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
+  deserializePSStroke,
   getAnnotationContainMapping,
-  lockBrushToFirstPointer,
-  normalizeSerializedAnnotation
-} from '@/lib/annotation'
-import { Eraser, EraserBrush, reviveObjectEraser } from '@/lib/eraserbrush'
+  lockBrushToFirstPointer
+} from '@/lib/players/annotation'
+import { normalizeType } from '@/lib/players/annotationTypes'
+import {
+  Eraser,
+  EraserBrush,
+  reviveObjectEraser
+} from '@/lib/players/eraserbrush'
 import clipboard from '@/lib/clipboard'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
 
 /* Force scaling / rotation handles to show on grouped selections so a
  * marquee around several annotations stays scalable / rotatable. */
-if (fabric) {
-  fabric.Group.prototype.hasControls = true
-}
+Group.prototype.hasControls = true
 
-/* Monkey patch needed to have text background including the padding. */
-if (fabric) {
-  fabric.Text.prototype.set({
-    _getNonTransformedDimensions() {
-      // Object dimensions
-      return new fabric.Point(this.width, this.height).scalarAdd(this.padding)
-    },
-    _calculateCurrentDimensions() {
-      // Controls dimensions
-      return fabric.util.transformPoint(
-        this._getTransformedDimensions(),
-        this.getViewportTransform(),
-        true
-      )
-    }
-  })
+/* Monkey patch needed to have text background including the padding.
+ * MUST stay on Text.prototype (IText inherits it) — putting it on
+ * FabricObject.prototype applied the padding-inflated dimensions to every
+ * shape and rendered them stretched. */
+Text.prototype._getNonTransformedDimensions = function () {
+  // Object dimensions
+  return new Point(this.width, this.height).scalarAdd(this.padding || 0)
+}
+Text.prototype._calculateCurrentDimensions = function () {
+  // Controls dimensions
+  return util.transformPoint(
+    this._getTransformedDimensions(),
+    this.getViewportTransform(),
+    true
+  )
 }
 
 /* Monkey patch _getTransformedDimensions() to return a proper fabric point */
@@ -50,7 +61,7 @@ if (PSStroke) {
   PSStroke.prototype._getTransformedDimensions = function () {
     const width = this.width * this.scaleX
     const height = this.height * this.scaleY
-    const dimensions = new fabric.Point(width, height)
+    const dimensions = new Point(width, height)
     return dimensions
   }
 
@@ -80,7 +91,7 @@ if (PSStroke) {
       if (this.getCenterPoint) {
         return this.getCenterPoint()
       }
-      return new fabric.Point(this.left, this.top)
+      return new Point(this.left, this.top)
     }
   }
 }
@@ -189,20 +200,6 @@ export const useAnnotation = ({
     return fabricCanvas.value.getObjects().find(obj => obj.id === objectId)
   }
 
-  const addSerialization = object => {
-    object.serialize = function () {
-      const result = object.toJSON()
-      result.id = this.id
-      result.canvasWidth = this.canvasWidth
-      result.canvasHeight = this.canvasHeight
-      result.angle = this.angle
-      result.scale = this.scale
-      result.createdBy = this.createdBy
-      return normalizeSerializedAnnotation(this, result)
-    }
-    return object
-  }
-
   const setObjectData = object => {
     // canvasWidth / canvasHeight are the dimensions the object's left /
     // top were authored against — never refresh them, or a later save
@@ -253,7 +250,7 @@ export const useAnnotation = ({
     if (fabricCanvas.value.getHeight() > baseHeight) {
       fontSize = fontSize * (fabricCanvas.value.getHeight() / baseHeight)
     }
-    const fabricText = new fabric.IText('Type...', {
+    const fabricText = new IText('Type...', {
       left: posX,
       top: posY,
       erasable: false,
@@ -274,8 +271,8 @@ export const useAnnotation = ({
   }
 
   const addTypeArea = () => {
-    const originalInitHiddenTextarea = fabric.IText.prototype.initHiddenTextarea
-    fabric.util.object.extend(fabric.IText.prototype, {
+    const originalInitHiddenTextarea = IText.prototype.initHiddenTextarea
+    Object.assign(IText.prototype, {
       initHiddenTextarea: function () {
         originalInitHiddenTextarea.call(this)
         this.canvas.wrapperEl.appendChild(this.hiddenTextarea)
@@ -284,13 +281,11 @@ export const useAnnotation = ({
   }
 
   const removeTypeArea = () => {
-    const originalInitHiddenTextarea = fabric.IText.prototype.initHiddenTextarea
-    fabric.util.object.extend(fabric.IText.prototype, {
+    const originalInitHiddenTextarea = IText.prototype.initHiddenTextarea
+    Object.assign(IText.prototype, {
       initHiddenTextarea: function () {
         originalInitHiddenTextarea.call(this)
-        if (fabric.document) {
-          fabric.document.body.appendChild(this.hiddenTextarea)
-        }
+        getFabricDocument().body.appendChild(this.hiddenTextarea)
       }
     })
   }
@@ -550,6 +545,9 @@ export const useAnnotation = ({
     if (getObjectById(obj.id) && !canvas) return
     if (!canvas) canvas = fabricCanvas.value
     let path, shape, text, psstroke
+    // Tolerate Fabric v6 PascalCase types as well as the stored lowercase
+    // form so annotations saved under either revive on the editable canvas.
+    const type = normalizeType(obj.type)
     const canvasWidth = obj.canvasWidth || annotation?.width
     const canvasHeight = obj.canvasHeight || annotation?.height
     const { scale, offsetX, offsetY } = getAnnotationContainMapping(
@@ -578,8 +576,8 @@ export const useAnnotation = ({
       selectable: !isCurrentUserArtist.value
     }
 
-    if (obj.type === 'path') {
-      path = new fabric.Path(obj.path, {
+    if (type === 'path') {
+      path = new Path(obj.path, {
         ...base
       })
       path.set('id', obj.id)
@@ -600,8 +598,8 @@ export const useAnnotation = ({
       silentAnnotation = true
       canvas.add(path)
       silentAnnotation = false
-    } else if (obj.type === 'i-text' || obj.type === 'text') {
-      text = new fabric.IText(obj.text, {
+    } else if (type === 'i-text' || type === 'text' || type === 'textbox') {
+      text = new IText(obj.text, {
         ...base,
         erasable: false,
         fill: obj.fill,
@@ -630,9 +628,13 @@ export const useAnnotation = ({
       silentAnnotation = true
       canvas.add(text)
       silentAnnotation = false
-    } else if (obj.type === 'PSStroke') {
+    } else if (type === 'PSStroke') {
+      // deserializePSStroke resolves null on a failed revival (corrupt data);
+      // skip it gracefully rather than aborting the whole frame's load.
       if (obj.canvasWidth) {
-        psstroke = await deserializePSBrush(obj)
+        psstroke = await deserializePSStroke(obj)
+      }
+      if (psstroke) {
         psstroke.set('id', obj.id)
         psstroke.set('strokeWidth', obj.strokeWidth)
         psstroke.set('strokeLineCap', 'round')
@@ -646,8 +648,6 @@ export const useAnnotation = ({
         psstroke.set('radius', obj.radius)
         psstroke.set('width', obj.width)
         psstroke.set('height', obj.height)
-        psstroke.set('scaleX', obj.scaleX * scale)
-        psstroke.set('scaleY', obj.scaleY * scale)
         psstroke.set('angle', obj.angle)
         psstroke.set('scale', obj.scale)
         psstroke.set('editable', !isCurrentUserArtist.value)
@@ -668,11 +668,7 @@ export const useAnnotation = ({
         canvas.add(psstroke)
         silentAnnotation = false
       }
-    } else if (
-      obj.type === 'rect' ||
-      obj.type === 'circle' ||
-      obj.type === 'arrow'
-    ) {
+    } else if (type === 'rect' || type === 'circle' || type === 'arrow') {
       // Reuse the shared shape rebuilder for rect / circle / arrow. It
       // returns the shape with selectable/evented off (the read-only
       // shape contract), so we flip them back on to match the path
@@ -706,18 +702,6 @@ export const useAnnotation = ({
     const built = path || text || psstroke || shape
     if (built) await reviveObjectEraser(built, obj)
     return built
-  }
-
-  const deserializePSBrush = obj => {
-    return new Promise((resolve, reject) => {
-      PSStroke.fromObject(obj, function (psstroke) {
-        if (psstroke) {
-          resolve(psstroke)
-        } else {
-          reject(new Error('Failed to deserialize PSStroke'))
-        }
-      })
-    })
   }
 
   // Events
@@ -866,8 +850,8 @@ export const useAnnotation = ({
         const canvasObj = getObjectById(groupObj.id)
         setObjectData(canvasObj)
         const targetObj = canvasObj.serialize()
-        const point = new fabric.Point(groupObj.left, groupObj.top)
-        const transformedPoint = fabric.util.transformPoint(
+        const point = new Point(groupObj.left, groupObj.top)
+        const transformedPoint = util.transformPoint(
           point,
           group.calcTransformMatrix()
         )
@@ -1152,7 +1136,7 @@ export const useAnnotation = ({
     // so a hardcoded width here stuck every freehand stroke at that size.
     _resetPencil()
 
-    fabric.Group.prototype._controlsVisibility = {
+    Group.prototype._controlsVisibility = {
       tl: false,
       tr: false,
       br: !isCurrentUserArtist.value,
@@ -1167,7 +1151,7 @@ export const useAnnotation = ({
 
   // Mouse pressure
 
-  const initializeMouseDrawing = () => {
+  const initializeMouseDrawing = opt => {
     if (
       mouseIsDrawing.value === false &&
       fabricCanvas.value?.isDrawingMode &&
@@ -1175,7 +1159,10 @@ export const useAnnotation = ({
     ) {
       mouseIsDrawing.value = true
       mouseDrawingStartTime.value = Date.now()
-      mouseDrawingPrevPoint.value = fabricCanvas.value.getPointer()
+      // v6: getPointer requires an event; use the move/down event's scene point.
+      mouseDrawingPrevPoint.value = opt?.e
+        ? fabricCanvas.value.getScenePoint(opt.e)
+        : null
       mouseDrawingPrevPressure.value = fabricCanvas.value.freeDrawingBrush
         ? fabricCanvas.value.freeDrawingBrush.pressureManager.fallback
         : mouseDrawingMaxPressure.value
@@ -1183,7 +1170,7 @@ export const useAnnotation = ({
   }
 
   const getCanvasRelativePointDrawingDifference = (p1, p2, canvas) => {
-    const dimensions = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+    const dimensions = new Point(canvas.getWidth(), canvas.getHeight())
     const p1_rel = p1.divide(dimensions)
     const p2_rel = p2.divide(dimensions)
     return Math.sqrt(
@@ -1192,12 +1179,14 @@ export const useAnnotation = ({
     )
   }
 
-  const updateMousePressure = () => {
+  const updateMousePressure = opt => {
     if (
       fabricCanvas.value?.isDrawingMode &&
       fabricCanvas.value.freeDrawingBrush &&
       mouseIsDrawing.value
     ) {
+      // v6: getPointer requires an event; resolve the scene point from it.
+      const pointer = opt?.e ? fabricCanvas.value.getScenePoint(opt.e) : null
       let pressure
       if (mouseDrawingPressureMode.value === 'fade') {
         const delta_time = Date.now() - mouseDrawingStartTime.value
@@ -1209,11 +1198,12 @@ export const useAnnotation = ({
         )
       } else if (
         mouseDrawingPressureMode.value === 'distance' &&
-        mouseDrawingPrevPoint.value
+        mouseDrawingPrevPoint.value &&
+        pointer
       ) {
         let delta_dist = getCanvasRelativePointDrawingDifference(
           mouseDrawingPrevPoint.value,
-          fabricCanvas.value.getPointer(),
+          pointer,
           fabricCanvas.value
         )
         delta_dist *= 50
@@ -1242,7 +1232,7 @@ export const useAnnotation = ({
           mouseDrawingPrevPressure.value + mouseDrawingMaxChangeRate.value
         )
       )
-      mouseDrawingPrevPoint.value = fabricCanvas.value.getPointer()
+      if (pointer) mouseDrawingPrevPoint.value = pointer
       mouseDrawingPrevPressure.value = clamped_pressure
       fabricCanvas.value.freeDrawingBrush.pressureManager.fallback =
         clamped_pressure
@@ -1336,8 +1326,8 @@ export const useAnnotation = ({
 
   const applyGroupChanges = (group, obj) => {
     if (obj.group) {
-      const point = new fabric.Point(obj.left, obj.top)
-      const transformedPoint = fabric.util.transformPoint(
+      const point = new Point(obj.left, obj.top)
+      const transformedPoint = util.transformPoint(
         point,
         group.calcTransformMatrix()
       )

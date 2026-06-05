@@ -1,4 +1,4 @@
-import { fabric } from 'fabric'
+import { Control, Line, Point, classRegistry } from 'fabric'
 
 /**
  * Custom Fabric.js Arrow object — line body + triangular arrowhead.
@@ -8,11 +8,15 @@ import { fabric } from 'fabric'
  * this version keeps the rendering, serialisation, custom controls and
  * SVG export and drops the unused bits.
  */
-export class Arrow extends fabric.Line {
+export class Arrow extends Line {
   constructor(points, options = {}) {
-    super(points, options)
-    this.setOptions(options)
-    this.type = 'arrow'
+    // Drop a serialized `type`: passing it through super()/setOptions hits v6's
+    // deprecated no-op type setter, which warns on every revival. The static
+    // Arrow.type governs serialization.
+    const opts = { ...options }
+    delete opts.type
+    super(points, opts)
+    this.setOptions(opts)
     this.arrowHeadSize = options.arrowHeadSize || 15
     this.arrowHeadWidth = options.arrowHeadWidth || 12
     // Cache the rendering ourselves via _render. fabric's default
@@ -42,7 +46,7 @@ export class Arrow extends fabric.Line {
    */
   _setupControls() {
     const controls = (this.controls = {})
-    controls.start = new fabric.Control({
+    controls.start = new Control({
       x: 0,
       y: 0,
       offsetX: 0,
@@ -54,7 +58,7 @@ export class Arrow extends fabric.Line {
       render: this._renderStartControl.bind(this),
       positionHandler: this._startControlPosition.bind(this)
     })
-    controls.end = new fabric.Control({
+    controls.end = new Control({
       x: 0,
       y: 0,
       offsetX: 0,
@@ -80,13 +84,13 @@ export class Arrow extends fabric.Line {
   }
 
   _startControlPosition() {
-    return new fabric.Point(this.x1, this.y1)
+    return new Point(this.x1, this.y1)
   }
 
   _endControlPosition() {
     const x = this.x1 > this.x2 ? this.left : this.left + this.width
     const y = this.y1 > this.y2 ? this.top : this.top + this.height
-    return new fabric.Point(x, y)
+    return new Point(x, y)
   }
 
   _renderStartControl(ctx, left, top) {
@@ -116,7 +120,7 @@ export class Arrow extends fabric.Line {
   }
 
   _startPointHandler(eventData) {
-    const pointer = this.canvas.getPointer(eventData.e)
+    const pointer = this.canvas.getScenePoint(eventData.e)
     this.set({ x1: pointer.x, y1: pointer.y })
     this.setCoords()
     this.canvas.renderAll()
@@ -124,7 +128,7 @@ export class Arrow extends fabric.Line {
   }
 
   _endPointHandler(eventData) {
-    const pointer = this.canvas.getPointer(eventData.e)
+    const pointer = this.canvas.getScenePoint(eventData.e)
     this.set({ x2: pointer.x, y2: pointer.y })
     this.setCoords()
     this.canvas.renderAll()
@@ -163,7 +167,7 @@ export class Arrow extends fabric.Line {
   }
 
   toObject(propertiesToInclude = []) {
-    return fabric.util.object.extend(super.toObject(propertiesToInclude), {
+    return Object.assign(super.toObject(propertiesToInclude), {
       x1: this.x1,
       y1: this.y1,
       x2: this.x2,
@@ -212,12 +216,16 @@ export class Arrow extends fabric.Line {
   }
 }
 
-fabric.Arrow = Arrow
+// Fabric v6's toObject() serializes `this.constructor.type`; without a static
+// type an Arrow would be saved as its parent's type ('line'). Assigned on the
+// class (not as a class field — the project's eslint parser rejects those).
+Arrow.type = 'arrow'
+
+// Register Arrow in the classRegistry so deserialisation (revival) works.
+classRegistry.setClass(Arrow, 'arrow')
 
 export const registerArrowFabricShape = () => {
-  if (!fabric.Arrow) {
-    fabric.Arrow = Arrow
-  }
+  classRegistry.setClass(Arrow, 'arrow')
 }
 
 export default Arrow

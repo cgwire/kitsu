@@ -405,8 +405,6 @@
 
     <!-- used only for picture saving purpose, it is not displayed -->
     <canvas id="annotation-snapshot" ref="annotation-snapshot"> </canvas>
-    <canvas id="resize-annotation-canvas" ref="resize-annotation-canvas">
-    </canvas>
     <!-- end -->
   </div>
 </template>
@@ -2480,7 +2478,6 @@ defineExpose({
   }
 }
 
-#resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
 }

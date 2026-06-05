@@ -843,14 +843,6 @@ onBeforeUnmount(() => {
 
 // Layout & containers
 
-.entity-name {
-  color: var(--text-muted);
-  font-size: 0.9em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .loading-background {
   align-items: center;
   background: black;
@@ -858,10 +850,6 @@ onBeforeUnmount(() => {
   height: 100%;
   justify-content: center;
   width: 100%;
-}
-
-.mr1 {
-  margin-right: 1em;
 }
 
 .no-preview {

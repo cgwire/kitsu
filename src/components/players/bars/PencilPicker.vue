@@ -25,7 +25,8 @@ import { computed, ref } from 'vue'
 
 const props = defineProps({
   pencil: {
-    type: String
+    type: String,
+    default: ''
   },
   modelValue: {
     // When the parent passes a Boolean here, the picker is
@@ -36,7 +37,8 @@ const props = defineProps({
     default: undefined
   },
   sizes: {
-    type: Array
+    type: Array,
+    default: () => []
   }
 })
 

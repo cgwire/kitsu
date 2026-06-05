@@ -1,22 +1,38 @@
 /*
- * Pure helpers extracted from `src/components/mixins/annotation.js` so they
- * can be reused outside of the Options-API mixin (composables, shared
- * playlist player, …). The mixin can be refactored to delegate here
- * without behavioural change so the studio-side and guest-side drawings
- * stay byte-for-byte compatible.
+ * Pure, stateless annotation helpers shared across every annotation
+ * surface: the editable studio canvas (useAnnotation), the shared playlist
+ * player and the read-only overlays.
+ *
+ * Covers canvas creation, brush/pencil configuration, freehand and shape
+ * drawing, (de)serialization of saved annotations, the read-only shape
+ * builder and the additions/deletions diff helpers. Holds no reactive
+ * state — consumers own that.
+ *
+ * On import it registers the custom Arrow shape and patches
+ * fabric.Object.prototype with eraser-mask support (both idempotent).
  */
 
-import { fabric } from 'fabric'
+import {
+  Canvas,
+  Circle,
+  Ellipse,
+  Group,
+  Line,
+  Path,
+  Point,
+  Rect,
+  Text
+} from 'fabric'
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
+import { normalizeSerializedType, normalizeType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
 import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 
-// Make sure fabric.Arrow is reachable from the global fabric namespace
-// (the deserialiser branches on `obj.type === 'arrow'`).
+// Register Arrow in classRegistry (the deserialiser branches on `obj.type === 'arrow'`).
 registerArrowFabricShape()
-// Patch fabric.Object.prototype with eraser-mask support (idempotent).
+// Patch FabricObject.prototype with eraser-mask support (idempotent).
 installEraserObjectSupport()
 
 /* -------------------------------------------------------------------------
@@ -39,7 +55,7 @@ if (PSStroke) {
   }
   if (!PSStroke.prototype.getRelativeCenterPoint) {
     PSStroke.prototype.getRelativeCenterPoint = function () {
-      return new fabric.Point(0, 0)
+      return new Point(0, 0)
     }
   }
 }
@@ -145,6 +161,10 @@ export const addSerialization = object => {
     } else {
       delete result.eraser
     }
+    // Force every (nested) type to the stored lowercase form so v6's
+    // PascalCase toObject() output stays byte-compatible with existing
+    // data and the deserializers' lowercase branches keep matching.
+    normalizeSerializedType(result)
     return normalizeSerializedAnnotation(this, result)
   }
   return object
@@ -183,7 +203,7 @@ export const setObjectData = (object, canvas, userId) => {
  * a low pressure and render way thinner than on the studio side.
  */
 export const createAnnotationCanvas = (canvasEl, options = {}) => {
-  const canvas = new fabric.Canvas(canvasEl, {
+  const canvas = new Canvas(canvasEl, {
     enableRetinaScaling: true,
     fireRightClick: true,
     selection: false,
@@ -275,10 +295,10 @@ const buildShape = (tool, startX, startY, color, width) => {
     strokeWidth: width
   }
   if (tool === 'rectangle') {
-    return new fabric.Rect({ ...base, width: 1, height: 1 })
+    return new Rect({ ...base, width: 1, height: 1 })
   }
   if (tool === 'circle') {
-    return new fabric.Circle({ ...base, radius: 1 })
+    return new Circle({ ...base, radius: 1 })
   }
   if (tool === 'arrow') {
     return new Arrow([startX, startY, startX, startY], {
@@ -292,7 +312,7 @@ const buildShape = (tool, startX, startY, color, width) => {
   if (tool === 'whiteboard') {
     // No stroke / strokeWidth: the whiteboard is a fill-only sticker
     // reviewers slap on the image so they can write on top of it.
-    return new fabric.Rect({
+    return new Rect({
       left: startX,
       top: startY,
       width: 1,
@@ -347,7 +367,7 @@ export const attachShapeDrawing = (
   const onMouseDown = e => {
     const tool = getTool?.()
     if (!tool || tool === 'pen') return
-    const pointer = canvas.getPointer(e.e)
+    const pointer = canvas.getScenePoint(e.e)
     startX = pointer.x
     startY = pointer.y
     drawing = buildShape(tool, startX, startY, getColor(), getWidth())
@@ -363,7 +383,7 @@ export const attachShapeDrawing = (
     if (!drawing) return
     const tool = getTool?.()
     if (!tool || tool === 'pen') return
-    const pointer = canvas.getPointer(e.e)
+    const pointer = canvas.getScenePoint(e.e)
     updateShape(drawing, tool, startX, startY, pointer.x, pointer.y)
     drawing.setCoords()
     canvas.requestRenderAll()
@@ -418,18 +438,19 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
   let prevPressure = null
   let dynamicDistanceMult = null
 
-  const onMouseDown = () => {
+  const onMouseDown = opt => {
     if (!canvas?.isDrawingMode || !canvas.freeDrawingBrush) return
     mouseIsDrawing = true
     startTime = Date.now()
-    prevPoint = canvas.getPointer()
+    // v6: getPointer requires an event; use the event's scene point.
+    prevPoint = opt?.e ? canvas.getScenePoint(opt.e) : null
     prevPressure = canvas.freeDrawingBrush.pressureManager
       ? canvas.freeDrawingBrush.pressureManager.fallback
       : cfg.maxPressure
     dynamicDistanceMult = null
   }
 
-  const onMouseMove = () => {
+  const onMouseMove = opt => {
     if (
       !mouseIsDrawing ||
       !canvas.freeDrawingBrush?.pressureManager ||
@@ -437,6 +458,8 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
     ) {
       return
     }
+    // v6: getPointer requires an event; resolve the scene point from it.
+    const pointer = opt?.e ? canvas.getScenePoint(opt.e) : null
     let pressure
     if (cfg.pressureMode === 'fade') {
       const dt = Date.now() - startTime
@@ -445,10 +468,10 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
         (1 - t) * cfg.maxPressure + t * cfg.minPressure,
         cfg.minPressure
       )
-    } else if (cfg.pressureMode === 'distance' && prevPoint) {
-      const dim = new fabric.Point(canvas.getWidth(), canvas.getHeight())
+    } else if (cfg.pressureMode === 'distance' && prevPoint && pointer) {
+      const dim = new Point(canvas.getWidth(), canvas.getHeight())
       const p1 = prevPoint.divide(dim)
-      const p2 = canvas.getPointer().divide(dim)
+      const p2 = pointer.divide(dim)
       let delta = Math.sqrt(
         Math.pow(Math.abs(p1.x - p2.x), 1) + Math.pow(Math.abs(p1.y - p2.y), 1)
       )
@@ -465,7 +488,7 @@ export const attachMousePressureSimulation = (canvas, options = {}) => {
       prevPressure - cfg.maxChangeRate,
       Math.min(pressure, prevPressure + cfg.maxChangeRate)
     )
-    prevPoint = canvas.getPointer()
+    if (pointer) prevPoint = pointer
     prevPressure = clamped
     canvas.freeDrawingBrush.pressureManager.fallback = clamped
   }
@@ -562,10 +585,11 @@ export const removeAddition = (additions, objectId) =>
  * PSStroke deserialisation
  * -----------------------------------------------------------------------*/
 
+// PSStroke.fromObject is Promise-based since the psbrush v6 port (it ignores
+// the old callback arg). Awaiting its result — passing a callback here left the
+// promise unresolved forever, so reloaded strokes never appeared.
 export const deserializePSStroke = obj =>
-  new Promise(resolve => {
-    PSStroke.fromObject(obj, stroke => resolve(stroke || null))
-  })
+  Promise.resolve(PSStroke.fromObject(obj)).then(stroke => stroke || null)
 
 /* -------------------------------------------------------------------------
  * Read-only object rendering
@@ -622,6 +646,9 @@ export const normalizeSerializedAnnotation = (object, result) => {
 
 const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
   if (!obj || !obj.type) return null
+  // Tolerate Fabric v6 PascalCase types ('Rect', 'IText', …) as well as the
+  // stored lowercase form so annotations saved under either revive.
+  const type = normalizeType(obj.type)
 
   const canvasWidth = obj.canvasWidth || annotation?.width
   const canvasHeight = obj.canvasHeight || annotation?.height
@@ -651,8 +678,8 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     width: obj.width
   }
 
-  if (obj.type === 'path') {
-    const path = new fabric.Path(obj.path, base)
+  if (type === 'path') {
+    const path = new Path(obj.path, base)
     path.set('id', obj.id)
     path.set('canvasWidth', canvasWidth)
     path.set('canvasHeight', canvasHeight)
@@ -660,7 +687,7 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return path
   }
 
-  if (obj.type === 'PSStroke') {
+  if (type === 'PSStroke') {
     const stroke = await deserializePSStroke(obj)
     if (!stroke) return null
     stroke.set({
@@ -685,8 +712,8 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return stroke
   }
 
-  if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
-    const text = new fabric.Text(obj.text || '', {
+  if (type === 'i-text' || type === 'text' || type === 'textbox') {
+    const text = new Text(obj.text || '', {
       ...base,
       backgroundColor: obj.backgroundColor || 'rgba(255, 255, 255, 0.8)',
       erasable: false,
@@ -701,19 +728,16 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return text
   }
 
-  if (obj.type === 'circle') return new fabric.Circle(base)
-  if (obj.type === 'rect') return new fabric.Rect(base)
-  if (obj.type === 'ellipse') {
-    return new fabric.Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
+  if (type === 'circle') return new Circle(base)
+  if (type === 'rect') return new Rect(base)
+  if (type === 'ellipse') {
+    return new Ellipse({ ...base, rx: obj.rx, ry: obj.ry })
   }
-  if (obj.type === 'line') {
-    return new fabric.Line(
-      [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
-      base
-    )
+  if (type === 'line') {
+    return new Line([obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0], base)
   }
 
-  if (obj.type === 'arrow') {
+  if (type === 'arrow') {
     const arrow = new Arrow(
       [obj.x1 || 0, obj.y1 || 0, obj.x2 || 0, obj.y2 || 0],
       {
@@ -726,13 +750,13 @@ const buildReadOnlyShapeInner = async (annotation, obj, canvas) => {
     return arrow
   }
 
-  if (obj.type === 'group' && Array.isArray(obj.objects)) {
+  if (type === 'group' && Array.isArray(obj.objects)) {
     const children = (
       await Promise.all(
         obj.objects.map(child => buildReadOnlyShape(annotation, child, canvas))
       )
     ).filter(Boolean)
-    return new fabric.Group(children, base)
+    return new Group(children, base)
   }
 
   return null

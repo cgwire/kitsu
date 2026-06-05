@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 
 vi.mock('fabric', () => {
+  class FakeLayoutManager {
+    constructor(strategy) { this.strategy = strategy }
+    subscribeTargets() {}
+  }
+  class FakeFixedLayout {}
   class FakeGroup {
-    constructor(objects = [], opts = {}, objectsRelativeToGroup) {
+    constructor(objects = [], opts = {}) {
       this._objects = objects
-      this.objectsRelativeToGroup = objectsRelativeToGroup
       Object.assign(this, opts)
     }
+    // Mirror v6: instance `type` is a getter off the static; the setter is a
+    // deprecated no-op (so `this.type =` / Object.assign({type}) don't throw).
+    get type() { return this.constructor.type }
+    set type(_) {}
     getObjects() { return this._objects }
     add(o) { this._objects.push(o); return this }
     set(props) { Object.assign(this, props); return this }
@@ -28,7 +36,7 @@ vi.mock('fabric', () => {
     decimatePoints(points) { return points }
   }
   const ObjectProto = {
-    _drawClipPath(ctx, clipPath) { this._lastClip = clipPath },
+    _drawClipPath(ctx, clipPath, s) { (this._clipCalls ||= []).push({ ctx, clipPath, s }); this._lastClip = clipPath },
     needsItsOwnCache() { return false },
     toObject(extra = []) { return { type: 'mock', extra } },
     _getNonTransformedDimensions() { return { x: 10, y: 20 } },
@@ -37,25 +45,38 @@ vi.mock('fabric', () => {
   }
   function FakeObject() {}
   FakeObject.prototype = ObjectProto
+  const fakeUtil = {
+    joinPath: d => d,
+    invertTransform: (m) => m,
+    multiplyTransformMatrices: () => [1, 0, 0, 1, 0, 0],
+    applyTransformToObject: () => {}
+  }
+  const fakeClassRegistry = {
+    setClass: () => {}
+  }
   return {
-    fabric: {
-      Group: FakeGroup, Path: FakePath, PencilBrush: FakePencilBrush,
-      Object: FakeObject,
-      util: {
-        object: { extend: (proto, props) => Object.assign(proto, props) },
-        // The snapshot has no _isEmptySVGPath method; emptiness is checked via
-        // the standalone util.joinPath (mirrors fabric's private isEmptySVGPath).
-        joinPath: d => d,
-        invertTransform: (m) => m,
-        multiplyTransformMatrices: () => [1, 0, 0, 1, 0, 0],
-        applyTransformToObject: () => {}
-      }
-    }
+    // Named exports (v6 style)
+    FabricObject: FakeObject,
+    Group: FakeGroup,
+    Path: FakePath,
+    PencilBrush: FakePencilBrush,
+    FixedLayout: FakeFixedLayout,
+    LayoutManager: FakeLayoutManager,
+    util: fakeUtil,
+    classRegistry: fakeClassRegistry
   }
 })
 
-const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/eraserbrush')
-import { fabric } from 'fabric'
+const { Eraser, EraserBrush, installEraserObjectSupport } = await import('@/lib/players/eraserbrush')
+import { FabricObject, FixedLayout } from 'fabric'
+
+describe('Eraser — class contract', () => {
+  it('exposes a static type so Fabric v6 toObject serializes it as "eraser"', () => {
+    // Without a static type, v6's toObject() would read the parent Group's
+    // static type and serialize the mask as "group".
+    expect(Eraser.type).toBe('eraser')
+  })
+})
 
 describe('EraserBrush — core', () => {
   it('createPath produces a destination-out path', () => {
@@ -102,10 +123,19 @@ describe('Eraser', () => {
     expect(eraser.type).toBe('eraser')
     expect(eraser.originX).toBe('center')
     expect(eraser.originY).toBe('center')
-    expect(eraser.layout).toBe('fixed')
+    // In v6 the layout is encoded in layoutManager, not a `layout` string
+    expect(eraser.layoutManager).toBeDefined()
   })
 
-  it('fromObject revives child paths directly as fabric.Path (no enlivenObjects)', async () => {
+  it('ignores a serialized layoutManager and builds its own FixedLayout one', () => {
+    // The serialized eraser carries a plain layoutManager (no performLayout);
+    // spreading it over our real one crashed groupInit. Ours must win.
+    const eraser = new Eraser([], { layoutManager: { bogus: true } })
+    expect(eraser.layoutManager.bogus).toBeUndefined()
+    expect(eraser.layoutManager.strategy).toBeInstanceOf(FixedLayout)
+  })
+
+  it('fromObject revives child paths directly as Path (no enlivenObjects)', async () => {
     const obj = { width: 100, height: 50, objects: [{ path: 'M 0 0 L 5 5', stroke: '#000' }] }
     const eraser = await Eraser.fromObject(obj)
     expect(eraser.getObjects()).toHaveLength(1)
@@ -113,15 +143,17 @@ describe('Eraser', () => {
     expect(eraser.width).toBe(100)
   })
 
-  it('fromObject keeps children relative to the group (no re-centering)', async () => {
-    // Without objectsRelativeToGroup=true the layout shifts the paths by the
-    // centre delta, which scales with the object and drifts after a resize.
+  it('fromObject passes children with FixedLayout so they stay in group coords', async () => {
+    // FixedLayout preserves child positions (no re-centring), replacing the
+    // v5 objectsRelativeToGroup=true mechanism.
     const eraser = await Eraser.fromObject({
       width: 100,
       height: 50,
       objects: [{ path: 'M 0 0 L 5 5' }]
     })
-    expect(eraser.objectsRelativeToGroup).toBe(true)
+    // FixedLayout is set on the layoutManager
+    expect(eraser.layoutManager).toBeDefined()
+    expect(eraser.getObjects()).toHaveLength(1)
   })
 
   it('drawObject fills a centered black rect covering the eraser bounds', () => {
@@ -252,30 +284,30 @@ describe('installEraserObjectSupport', () => {
   beforeAll(() => installEraserObjectSupport())
 
   it('defaults erasable=true and eraser=undefined on the prototype', () => {
-    expect(fabric.Object.prototype.erasable).toBe(true)
-    expect(fabric.Object.prototype.eraser).toBeUndefined()
+    expect(FabricObject.prototype.erasable).toBe(true)
+    expect(FabricObject.prototype.eraser).toBeUndefined()
   })
 
   it('needsItsOwnCache becomes true when an eraser is present', () => {
-    const o = Object.create(fabric.Object.prototype)
+    const o = Object.create(FabricObject.prototype)
     expect(o.needsItsOwnCache()).toBe(false)
     o.eraser = {}
     expect(o.needsItsOwnCache()).toBe(true)
   })
 
   it('toObject includes the serialized eraser when present', () => {
-    const o = Object.create(fabric.Object.prototype)
+    const o = Object.create(FabricObject.prototype)
     o.eraser = { toObject: () => ({ type: 'eraser', objects: [] }) }
     expect(o.toObject().eraser).toEqual({ type: 'eraser', objects: [] })
   })
 
   it('toObject omits eraser when absent', () => {
-    const o = Object.create(fabric.Object.prototype)
+    const o = Object.create(FabricObject.prototype)
     expect(o.toObject().eraser).toBeUndefined()
   })
 
   it('_drawClipPath syncs eraser dimensions and delegates to base _drawClipPath', () => {
-    const o = Object.create(fabric.Object.prototype)
+    const o = Object.create(FabricObject.prototype)
     o._getNonTransformedDimensions = () => ({ x: 30, y: 40 })
     o.eraser = { type: 'eraser', set: props => { o._eraserSet = props } }
     o._drawClipPath({ tag: 'ctx' }, { tag: 'normalClip' })
@@ -285,11 +317,36 @@ describe('installEraserObjectSupport', () => {
     expect(o._lastClip).toBe(o.eraser)
   })
 
+  it('skips a plain (non-revived) eraser mask instead of crashing on .set', () => {
+    // A reloaded object can briefly carry the plain serialized eraser
+    // ({type:'eraser', ...}) before reviveObjectEraser swaps in a real Eraser.
+    // A plain mask has no .set and is not renderable, so _drawClipPath must
+    // skip it (it re-renders once revived) rather than throw.
+    const o = Object.create(FabricObject.prototype)
+    o._getNonTransformedDimensions = () => ({ x: 10, y: 10 })
+    o.eraser = { type: 'eraser', objects: [] } // plain, no .set
+    expect(() => o._drawClipPath({ tag: 'ctx' }, null, {})).not.toThrow()
+    expect(o._clipCalls.some(c => c.clipPath === o.eraser)).toBe(false)
+  })
+
+  it('forwards the v6 cache-context (3rd arg) to base _drawClipPath for clip and eraser', () => {
+    // v6 _drawClipPath(ctx, clipPath, s) needs `s` (the cache layer context):
+    // createClipPathLayer(clipPath, s) reads s.width. Dropping it crashed
+    // rendering with "can't access property width, t is undefined".
+    const o = Object.create(FabricObject.prototype)
+    o._getNonTransformedDimensions = () => ({ x: 10, y: 10 })
+    o.eraser = { type: 'eraser', set: () => {} }
+    const s = { width: 100, height: 80 }
+    o._drawClipPath({ tag: 'ctx' }, { tag: 'clip' }, s)
+    expect(o._clipCalls).toHaveLength(2)
+    expect(o._clipCalls.every(c => c.s === s)).toBe(true)
+  })
+
   it('is idempotent (double install does not double-wrap)', () => {
     installEraserObjectSupport()
-    const o = Object.create(fabric.Object.prototype)
+    const o = Object.create(FabricObject.prototype)
     o.eraser = { toObject: () => ({ ok: true }) }
     expect(o.toObject().eraser).toEqual({ ok: true })
-    expect(fabric.Object.prototype.cacheProperties.filter(p => p === 'eraser')).toHaveLength(1)
+    expect(FabricObject.prototype.cacheProperties.filter(p => p === 'eraser')).toHaveLength(1)
   })
 })

@@ -1,8 +1,11 @@
 import { mount } from '@vue/test-utils'
 import { computed, defineComponent, ref } from 'vue'
 
+import { Point, Text } from 'fabric'
+import { PSStroke, PSPoint } from 'fabricjs-psbrush'
+
 import { useAnnotation } from '@/composables/players/annotation'
-import { Eraser, EraserBrush } from '@/lib/eraserbrush'
+import { Eraser, EraserBrush } from '@/lib/players/eraserbrush'
 
 /**
  * Build a fake fabric.Canvas-like object good enough for the composable's
@@ -227,6 +230,27 @@ describe('composables/annotation', () => {
     it('returns null when there is no canvas', () => {
       const { api, wrapper } = mountAnnotation({ skipCanvas: true })
       expect(api.getObjectById('anything')).toBeNull()
+      wrapper.unmount()
+    })
+  })
+
+  describe('addSerialization', () => {
+    it('persists the eraser mask even when toJSON omits it (PSStroke case)', () => {
+      const { api, wrapper } = mountAnnotation()
+      const obj = {
+        id: 'stroke-1',
+        canvasWidth: 800,
+        canvasHeight: 600,
+        // toJSON drops the eraser (mirrors PSStroke's custom toObject).
+        toJSON: () => ({ type: 'PSStroke' }),
+        eraser: { toObject: () => ({ type: 'eraser', objects: [{ path: 'M 0 0' }] }) }
+      }
+      api.addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.eraser).toEqual({
+        type: 'eraser',
+        objects: [{ path: 'M 0 0' }]
+      })
       wrapper.unmount()
     })
   })
@@ -602,6 +626,56 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    it('loads an object saved with a Fabric v6 PascalCase type', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'v6-rect-1',
+        type: 'Rect',
+        left: 0,
+        top: 0,
+        width: 50,
+        height: 50,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      expect(canvas._objects.find(o => o.id === 'v6-rect-1')).toBeDefined()
+      wrapper.unmount()
+    })
+
+    it('textbox object is loaded as text (kept in sync with the lib deserializer)', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'txt-box-1',
+        type: 'textbox',
+        text: 'boxed',
+        left: 10,
+        top: 20,
+        width: 100,
+        height: 30,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        fill: '#00ff00',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas(annotation, obj, canvas)
+      const added = canvas._objects.find(o => o.id === 'txt-box-1')
+      expect(added).toBeDefined()
+      expect(added.text).toBe('boxed')
+      wrapper.unmount()
+    })
+
     it('path object loaded via addObjectToCanvas does NOT have erasable === false', async () => {
       const canvas = createFakeCanvas()
       const { api, wrapper } = mountAnnotation({ canvas })
@@ -626,6 +700,30 @@ describe('composables/annotation', () => {
       const added = canvas._objects.find(o => o.id === 'path-load-1')
       expect(added).toBeDefined()
       expect(added.erasable).not.toBe(false)
+      wrapper.unmount()
+    })
+
+    it('skips a PSStroke that fails to deserialize instead of throwing', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const spy = vi
+        .spyOn(PSStroke, 'fromObject')
+        .mockResolvedValue(null)
+      const annotation = { width: 800, height: 600 }
+      const obj = {
+        id: 'ps-bad',
+        type: 'PSStroke',
+        left: 0,
+        top: 0,
+        scaleX: 1,
+        scaleY: 1,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      const built = await api.addObjectToCanvas(annotation, obj, canvas)
+      expect(built).toBeUndefined()
+      expect(canvas._objects.find(o => o.id === 'ps-bad')).toBeUndefined()
+      spy.mockRestore()
       wrapper.unmount()
     })
 
@@ -888,11 +986,30 @@ describe('composables/annotation', () => {
   })
 
   describe('eraser undo/redo', () => {
+    // Mask paths model real fabric children: serialize() now reaches the
+    // eraser, and a real Eraser.toObject() recurses into each child's
+    // toObject() — so the fake children must expose one too.
+    const makeMaskPath = (pathData = 'M 0 0 L 5 5') => ({
+      path: pathData,
+      toObject() {
+        return { path: this.path }
+      }
+    })
+
     const makeErasable = (id, pathData = 'M 0 0 L 5 5') => {
       const eraser = {
-        _objects: [{ path: pathData }],
+        _objects: [makeMaskPath(pathData)],
         getObjects() {
           return this._objects
+        },
+        // The real Eraser (a fabric.Group subclass) exposes toObject();
+        // serialize() now persists the mask through it, so the fake must
+        // honour the same contract.
+        toObject() {
+          return {
+            type: 'eraser',
+            objects: this._objects.map(o => o.toObject())
+          }
         }
       }
       return createSerializableObject({ id, eraser })
@@ -937,6 +1054,84 @@ describe('composables/annotation', () => {
       expect(fresh.eraser).toBeDefined()
       expect(fresh.eraser.getObjects()).toHaveLength(1)
       expect(obj.eraser).toBeUndefined() // the stale instance is untouched
+      wrapper.unmount()
+    })
+  })
+
+  describe('Fabric v6 regressions', () => {
+    it('patches the text-dimension override onto Text.prototype, not every object', () => {
+      // Regression: the v6 port put _getNonTransformedDimensions /
+      // _calculateCurrentDimensions on FabricObject.prototype, so EVERY shape
+      // (not just text) used the padding-inflated dimensions and rendered
+      // stretched. The override must live on Text.prototype (IText inherits it).
+      expect(
+        Object.prototype.hasOwnProperty.call(
+          Text.prototype,
+          '_getNonTransformedDimensions'
+        )
+      ).toBe(true)
+    })
+
+    it('serializes a freehand PSStroke with its strokePoints (save side)', () => {
+      const { api, wrapper } = mountAnnotation()
+      const stroke = new PSStroke([new PSPoint(0, 0, 0.5), new PSPoint(10, 10, 0.8)], {
+        stroke: '#f00',
+        strokeWidth: 4,
+        startTime: 1,
+        endTime: 2,
+        canvasWidth: 800,
+        canvasHeight: 600
+      })
+      api.addSerialization(stroke)
+      const out = stroke.serialize()
+      expect(out.type).toBe('PSStroke')
+      expect(out.strokePoints).toHaveLength(2)
+      wrapper.unmount()
+    })
+
+    it('reloads a serialized PSStroke onto the canvas (load side)', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const serialized = {
+        type: 'PSStroke',
+        id: 'ps-1',
+        strokePoints: [
+          { type: 'PSPoint', x: 0, y: 0, pressure: 0.5 },
+          { type: 'PSPoint', x: 10, y: 10, pressure: 0.8 }
+        ],
+        left: 0,
+        top: 0,
+        width: 10,
+        height: 10,
+        scaleX: 1,
+        scaleY: 1,
+        angle: 0,
+        stroke: '#f00',
+        strokeWidth: 4,
+        canvasWidth: 800,
+        canvasHeight: 600
+      }
+      await api.addObjectToCanvas({ width: 800, height: 600 }, serialized, canvas)
+      expect(canvas._objects.find(o => o.id === 'ps-1')).toBeDefined()
+      wrapper.unmount()
+    })
+
+    it('reads the pointer via getScenePoint(event), never the no-arg getPointer (v6)', () => {
+      // v6's getPointer requires an event; the old no-arg getPointer() crashed
+      // ("can't access property target, t is undefined") while drawing.
+      const canvas = createFakeCanvas({
+        isDrawingMode: true,
+        getScenePoint: vi.fn(() => new Point(5, 5)),
+        getPointer: vi.fn(() => {
+          throw new Error('v6: no-arg getPointer must not be used')
+        })
+      })
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const evt = { e: {} }
+      api.initializeMouseDrawing(evt)
+      expect(() => api.updateMousePressure(evt)).not.toThrow()
+      expect(canvas.getScenePoint).toHaveBeenCalledWith(evt.e)
+      expect(canvas.getPointer).not.toHaveBeenCalled()
       wrapper.unmount()
     })
   })

@@ -15,11 +15,11 @@
 </template>
 
 <script setup>
-import { fabric } from 'fabric'
+import { Canvas, StaticCanvas } from 'fabric'
 import { PSBrush } from 'fabricjs-psbrush'
 import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-import { lockBrushToFirstPointer } from '@/lib/annotation'
+import { lockBrushToFirstPointer } from '@/lib/players/annotation'
 
 const props = defineProps({
   canvasId: { type: String, required: true },
@@ -108,8 +108,8 @@ const createFabric = () => {
   // would silently bind both fabric instances to the first match.
   if (!canvasEl.value) return
   const canvas = props.static
-    ? new fabric.StaticCanvas(canvasEl.value)
-    : new fabric.Canvas(canvasEl.value, {
+    ? new StaticCanvas(canvasEl.value)
+    : new Canvas(canvasEl.value, {
         fireRightClick: true,
         enablePointerEvents: true,
         // Marquee must fully contain an annotation to pick it up.

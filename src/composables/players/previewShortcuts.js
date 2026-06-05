@@ -40,14 +40,17 @@ const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
  * @param {Function} [handlers.onPaste]
  * @param {Function} [handlers.onToggleOverlay]
  */
+// Keys that should keep firing while held: stepping arrows scrub the video
+// frame by frame. Every other shortcut is a one-shot toggle (draw `d`,
+// eraser `e`, undo, …) that would flip twice on a held key, so their
+// auto-repeat keydowns are ignored.
+const REPEATABLE_KEYS = ['ArrowLeft', 'ArrowRight']
+
 export const usePreviewShortcuts = handlers => {
   const isAltHeld = ref(false)
 
   const onKeyDown = event => {
-    // Ignore auto-repeat keydowns from a held key: toggles (draw `d`, eraser
-    // `e`) would otherwise flip twice and appear to do nothing every other
-    // press, depending on how long the key was held.
-    if (event.repeat) return
+    if (event.repeat && !REPEATABLE_KEYS.includes(event.key)) return
     // Alt+P plays/pauses even when an <input> / <textarea> has focus,
     // so users can pause / resume while typing a comment without
     // leaving the field. All other shortcuts stay blocked inside text

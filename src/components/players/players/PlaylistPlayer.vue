@@ -877,8 +877,6 @@
 
     <!-- used only for picture saving purpose, it is not displayed -->
     <canvas id="annotation-snapshot" ref="annotation-snapshot"> </canvas>
-    <canvas id="resize-annotation-canvas" ref="resize-annotation-canvas">
-    </canvas>
     <!-- end -->
   </div>
 </template>
@@ -1134,8 +1132,7 @@ const loading = ref({
 })
 const errors = ref({
   deletePlaylist: false,
-  notifyClients: false,
-  playlists: false
+  notifyClients: false
 })
 const success = ref({
   notifyClients: false
@@ -3851,14 +3848,12 @@ const onKeyDown = event => {
   displayBars()
   if (['INPUT', 'TEXTAREA'].includes(event.target?.tagName)) return
 
-  const HOMEKEY = 36
-  const ENDKEY = 35
-  const LEFTKEY = 37
-  const RIGHTKEY = 39
-
-  if ((event.keyCode === 46 || event.keyCode === 8) && fabricCanvas.value) {
+  if (
+    (event.code === 'Delete' || event.code === 'Backspace') &&
+    fabricCanvas.value
+  ) {
     deleteSelection()
-  } else if (event.keyCode === LEFTKEY) {
+  } else if (event.code === 'ArrowLeft') {
     event.preventDefault()
     event.stopPropagation()
     if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
@@ -3883,7 +3878,7 @@ const onKeyDown = event => {
     } else {
       onPreviousFrameClicked()
     }
-  } else if (event.keyCode === RIGHTKEY) {
+  } else if (event.code === 'ArrowRight') {
     event.preventDefault()
     event.stopPropagation()
     if ((event.ctrlKey || event.metaKey) && event.shiftKey) {
@@ -3896,24 +3891,24 @@ const onKeyDown = event => {
     } else {
       onNextFrameClicked()
     }
-  } else if (event.altKey && event.keyCode === 74) {
+  } else if (event.altKey && event.code === 'KeyJ') {
     event.preventDefault()
     event.stopPropagation()
     onPlayPreviousEntityClicked()
-  } else if (event.altKey && event.keyCode === 75) {
+  } else if (event.altKey && event.code === 'KeyK') {
     event.preventDefault()
     event.stopPropagation()
     onPlayNextEntityClicked()
-  } else if (event.keyCode === 68) {
+  } else if (event.code === 'KeyD') {
     onAnnotateClicked()
-  } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 90) {
+  } else if ((event.ctrlKey || event.metaKey) && event.code === 'KeyZ') {
     event.preventDefault()
     undoLastAction()
-  } else if (event.altKey && event.keyCode === 82) {
+  } else if (event.altKey && event.code === 'KeyR') {
     redoLastAction()
-  } else if (event.keyCode === HOMEKEY) {
+  } else if (event.code === 'Home') {
     rawPlayer.value?.setCurrentFrame(0)
-  } else if (event.keyCode === ENDKEY) {
+  } else if (event.code === 'End') {
     rawPlayer.value?.setCurrentFrame(nbFrames.value - 1)
   }
 }
@@ -4735,7 +4730,6 @@ const playerProxy = {
   color: $grey;
 }
 
-#resize-annotation-canvas,
 #annotation-snapshot {
   display: none;
 }
