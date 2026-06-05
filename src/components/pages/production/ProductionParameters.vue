@@ -147,6 +147,16 @@
           v-model="form.max_retakes"
           v-if="currentProduction && currentProduction.id"
         />
+        <text-field
+          type="number"
+          :step="1"
+          :min="0"
+          :max="8"
+          :label="$t('productions.fields.revision_padding')"
+          @enter="runConfirmation"
+          v-model="form.revision_padding"
+          v-if="currentProduction && currentProduction.id"
+        />
         <div v-if="currentProduction && currentProduction.id">
           <label class="label">{{ $t('productions.picture') }}</label>
           <file-upload
@@ -215,6 +225,7 @@ const emptyForm = () => ({
   nb_episodes: 0,
   episode_span: 0,
   max_retakes: 0,
+  revision_padding: 0,
   is_clients_isolated: 'false',
   is_preview_download_allowed: 'false',
   is_set_preview_automated: 'false',
@@ -269,6 +280,7 @@ const resetForm = () => {
       episode_span: production.episode_span,
       fps: production.fps,
       max_retakes: production.max_retakes,
+      revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
       is_clients_isolated: production.is_clients_isolated ? 'true' : 'false',
       is_preview_download_allowed: production.is_preview_download_allowed

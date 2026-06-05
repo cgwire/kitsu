@@ -379,6 +379,7 @@ import {
   getTaskPath
 } from '@/lib/path'
 import preferences from '@/lib/preferences'
+import { formatRevision } from '@/lib/preview'
 import { getTaskTypeStyle } from '@/lib/render'
 import { sortPeople, sortTaskNames } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -912,7 +913,7 @@ export default {
         .sort((a, b) => b.revision - a.revision)
         .map(preview => ({
           value: preview.id,
-          label: `v${preview.revision}`,
+          label: formatRevision(preview.revision, this.currentProduction),
           validation_status: preview.validation_status
         }))
     },
@@ -1472,7 +1473,7 @@ export default {
                   const checked = item.checked ? 'x' : ' '
                   const revision =
                     item.revision > -1
-                      ? `(v${item.revision} - ${formatFrame(item.frame)}) `
+                      ? `(${formatRevision(item.revision, this.currentProduction)} - ${formatFrame(item.frame)}) `
                       : ''
                   return `[${checked}] ${revision}${item.text}`
                 })

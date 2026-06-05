@@ -1395,6 +1395,7 @@ export default {
       homepage: 'Homepage (first page displayed)',
       ratio: 'Ratio',
       resolution: 'Resolution',
+      revision_padding: 'Revision number padding (0 = no padding)',
       start_date: 'Start date',
       status: 'Status',
       style: 'Style',

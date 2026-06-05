@@ -438,6 +438,7 @@ import {
   buildAnnotationSnapshotFilename,
   buildAnnotationSnapshotTitle,
   drawSnapshotTitle,
+  formatRevision,
   isModelPreview,
   isMoviePreview,
   isPicturePreview,
@@ -748,6 +749,9 @@ const {
   entityPreviewFiles: computed(() => props.entityPreviewFiles),
   currentPreview,
   taskTypeMap: computed(() => props.taskTypeMap),
+  currentProduction: computed(() =>
+    productionMap.value.get(props.task.project_id)
+  ),
   t
 })
 
@@ -859,7 +863,7 @@ const lastPreviewFileOptions = computed(() => {
     .sort((a, b) => b.revision - a.revision)
     .map(preview => ({
       value: preview.id,
-      label: `v${preview.revision}`,
+      label: formatRevision(preview.revision, currentProduction.value),
       validation_status: preview.validation_status
     }))
 })

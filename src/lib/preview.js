@@ -33,6 +33,18 @@ export const isFilePreview = extension =>
   !isMarkdownPreview(extension) &&
   !isDiffPreview(extension)
 
+// Format a preview revision for display, applying the project's
+// revision padding (a display-only setting; Zou stores the bare
+// integer). `revision_padding` is the minimum number of digits:
+// 0 (default) means no padding, 3 turns 0 -> "v000", 42 -> "v042",
+// while a wider number is never truncated (1001 -> "v1001"). A missing
+// revision yields an empty string.
+export const formatRevision = (revision, project) => {
+  if (revision == null || revision === '') return ''
+  const padding = project?.revision_padding || 0
+  return `v${String(revision).padStart(padding, '0')}`
+}
+
 // Build the .png filename for an exported annotation snapshot from a
 // task context. Sanitises each part so it's safe across filesystems,
 // lowercases the result and joins parts with underscores:
