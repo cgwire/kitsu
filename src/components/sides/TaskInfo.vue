@@ -1034,7 +1034,6 @@ export default {
         this.setOtherPreviews()
         this.currentPreviewPath = this.getOriginalPath()
         this.currentPreviewDlPath = this.getOriginalDlPath()
-        this.resetDraft()
         this.$nextTick(() => {
           this.$refs['preview-player']?.focus()
         })
