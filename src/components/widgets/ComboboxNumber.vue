@@ -84,12 +84,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const selectRef = ref(null)
 
 const updateValue = () => {
-  emit('update:modelValue', parseInt(selectRef.value.value))
+  emit('update:model-value', parseInt(selectRef.value.value))
 }
 
 const emitEnter = () => {

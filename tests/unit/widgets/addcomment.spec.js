@@ -1,4 +1,3 @@
-/* global FormData, Blob */
 import { reactive } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'

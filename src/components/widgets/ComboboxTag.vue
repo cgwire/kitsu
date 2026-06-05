@@ -94,7 +94,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const showList = ref(false)
 const selectRef = ref(null)
@@ -131,7 +131,7 @@ const selectOption = option => {
       .map(oldOption => oldOption.value)
   }
   const value = values.join(',')
-  emit('update:modelValue', value)
+  emit('update:model-value', value)
   emit('change', value)
 }
 

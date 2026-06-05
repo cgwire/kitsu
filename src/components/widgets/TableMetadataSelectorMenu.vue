@@ -106,7 +106,7 @@ const props = defineProps({
   isOpen: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['update:modelValue', 'update:isOpen'])
+const emit = defineEmits(['update:model-value', 'update:is-open'])
 
 // State
 
@@ -170,7 +170,7 @@ const positionMenu = () => {
   menuStyle.value = { top: `${topPx}px`, right: `${rightPx}px` }
 }
 
-const closeMenu = () => emit('update:isOpen', false)
+const closeMenu = () => emit('update:is-open', false)
 
 const onKeyEscape = event => {
   if (event.key === 'Escape' && props.isOpen) closeMenu()
@@ -182,7 +182,7 @@ const setMetadataDisplayValue = (metadataName, isSelected) => {
     `metadataDisplayHeaders:${props.namespace}`,
     JSON.stringify(headers)
   )
-  emit('update:modelValue', headers)
+  emit('update:model-value', headers)
 }
 
 const onDragEnd = () => {
@@ -215,7 +215,7 @@ props.descriptors.forEach(descriptor => {
     initialHeaders[descriptor.field_name] = true
   }
 })
-emit('update:modelValue', initialHeaders)
+emit('update:model-value', initialHeaders)
 sortedMetadataDescriptors.value = [...filteredMetadataDescriptors.value]
 
 // Watchers

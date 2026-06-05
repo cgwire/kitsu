@@ -5,7 +5,7 @@
       role="switch"
       class="toggle-button"
       :class="{ 'is-active': modelValue }"
-      @click="$emit('update:modelValue', !modelValue)"
+      @click="$emit('update:model-value', !modelValue)"
       :aria-checked="modelValue"
     >
       <span class="toggle-slider"></span>
@@ -26,7 +26,7 @@ defineProps({
   }
 })
 
-defineEmits(['update:modelValue'])
+defineEmits(['update:model-value'])
 </script>
 
 <style lang="scss" scoped>

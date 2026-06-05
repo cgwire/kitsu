@@ -45,7 +45,7 @@ import { ChevronDownIcon } from 'lucide-vue-next'
 
 import ToggleButton from '@/components/widgets/ToggleButton.vue'
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const props = defineProps({
   isReversed: {
@@ -97,7 +97,7 @@ const toggleList = () => {
 
 const onUpdateValue = key => {
   const value = !props.modelValue[key]
-  emit('update:modelValue', {
+  emit('update:model-value', {
     ...props.modelValue,
     [key]: value
   })

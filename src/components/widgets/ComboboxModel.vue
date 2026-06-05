@@ -36,7 +36,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const currentModelId = ref('')
 const modelMap = ref({})
@@ -45,7 +45,7 @@ const modelOptions = ref([])
 const emitValue = value => {
   currentModelId.value = value
   const model = modelMap.value[currentModelId.value]
-  emit('update:modelValue', model)
+  emit('update:model-value', model)
 }
 
 const emitEnter = value => {

@@ -46,10 +46,10 @@ describe('ComboboxBoolean', () => {
     expect(combobox.props('modelValue')).toBe('true')
   })
 
-  it('emits update:modelValue when inner combobox changes', async () => {
+  it('emits update:model-value when inner combobox changes', async () => {
     const combobox = wrapper.findComponent({ name: 'Combobox' })
-    await combobox.vm.$emit('update:modelValue', 'false')
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['false'])
+    await combobox.vm.$emit('update:model-value', 'false')
+    expect(wrapper.emitted('update:model-value')[0]).toEqual(['false'])
   })
 
   it('emits enter event when inner combobox emits enter', async () => {

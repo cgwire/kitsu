@@ -38,12 +38,12 @@ describe('Combobox', () => {
     expect(optionEls[1].element.selected).toBe(false)
   })
 
-  it('emits update:modelValue on change', async () => {
+  it('emits update:model-value on change', async () => {
     const select = wrapper.find('select')
     select.element.value = 'Option B'
     await select.trigger('change')
-    expect(wrapper.emitted('update:modelValue')).toBeTruthy()
-    expect(wrapper.emitted('update:modelValue')[0]).toEqual(['b'])
+    expect(wrapper.emitted('update:model-value')).toBeTruthy()
+    expect(wrapper.emitted('update:model-value')[0]).toEqual(['b'])
   })
 
   it('emits enter event on keyup.enter', async () => {

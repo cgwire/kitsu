@@ -122,7 +122,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const inputRef = ref(null)
 
@@ -143,7 +143,7 @@ const emitEnter = () => {
 }
 
 const updateValue = () => {
-  emit('update:modelValue', getInputValue())
+  emit('update:model-value', getInputValue())
 }
 
 const focus = () => {

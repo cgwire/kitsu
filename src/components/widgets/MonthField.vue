@@ -32,7 +32,7 @@ const props = defineProps({
   modelValue: {}
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:model-value'])
 
 const selectedMonth = ref(null)
 const selectedYear = ref(null)
@@ -110,7 +110,7 @@ watch(
 watch(selectedMonth, newMonth => {
   if (silent.value) return
   const date = moment(new Date(selectedYear.value, newMonth, 1, 0, 0, 0, 0))
-  emit('update:modelValue', date.startOf('month').toDate())
+  emit('update:model-value', date.startOf('month').toDate())
 })
 
 watch(selectedYear, newYear => {
@@ -118,7 +118,7 @@ watch(selectedYear, newYear => {
   nextTick(() => {
     selectedMonth.value = availableMonths.value[0].value
     const date = moment(new Date(newYear, selectedMonth.value, 1, 0, 0, 0, 0))
-    emit('update:modelValue', date.startOf('month').toDate())
+    emit('update:model-value', date.startOf('month').toDate())
   })
 })
 </script>

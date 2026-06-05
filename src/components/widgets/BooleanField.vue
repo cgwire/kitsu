@@ -58,12 +58,12 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['click', 'update:modelValue'])
+const emit = defineEmits(['click', 'update:model-value'])
 
 const localValue = ref(false)
 
 const emitValue = () => {
-  emit('update:modelValue', localValue.value ? 'true' : 'false')
+  emit('update:model-value', localValue.value ? 'true' : 'false')
 }
 
 const onClick = () => {

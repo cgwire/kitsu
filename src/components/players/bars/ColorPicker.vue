@@ -36,7 +36,7 @@ const props = defineProps({
   },
   modelValue: {
     // When the parent passes a Boolean here, the picker is
-    // controlled — open/close decisions go through update:modelValue
+    // controlled — open/close decisions go through update:model-value
     // so siblings can be coordinated (one panel open at a time).
     // Leaving it undefined falls back to internal state.
     type: Boolean,
@@ -65,7 +65,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const internalOpen = ref(false)
 const isControlled = () => props.modelValue !== undefined
@@ -74,7 +74,7 @@ const isOpen = computed(() =>
 )
 
 const setOpen = value => {
-  if (isControlled()) emit('update:modelValue', value)
+  if (isControlled()) emit('update:model-value', value)
   else internalOpen.value = value
 }
 

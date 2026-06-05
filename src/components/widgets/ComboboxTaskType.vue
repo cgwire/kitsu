@@ -82,7 +82,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const showTaskTypeList = ref(false)
 const tooltipPosition = ref({ top: 0, left: 0 })
@@ -116,7 +116,7 @@ const tooltipStyle = computed(() => {
 })
 
 const selectTaskType = taskType => {
-  emit('update:modelValue', taskType.id)
+  emit('update:model-value', taskType.id)
   emit('change', taskType.id)
   showTaskTypeList.value = false
 }

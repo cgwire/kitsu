@@ -34,7 +34,7 @@ defineProps({
   }
 })
 
-const emit = defineEmits(['enter', 'update:modelValue'])
+const emit = defineEmits(['enter', 'update:model-value'])
 
 const booleanOptions = computed(() => [
   { label: t('main.yes'), value: 'true' },
@@ -42,7 +42,7 @@ const booleanOptions = computed(() => [
 ])
 
 const emitValue = value => {
-  emit('update:modelValue', value)
+  emit('update:model-value', value)
 }
 
 const emitEnter = value => {

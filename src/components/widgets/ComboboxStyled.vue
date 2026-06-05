@@ -128,7 +128,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change', 'update:modelValue'])
+const emit = defineEmits(['change', 'update:model-value'])
 
 const select = ref(null)
 const selectedOption = ref({
@@ -163,7 +163,7 @@ const openRoute = option => {
 }
 
 const selectOption = option => {
-  emit('update:modelValue', option.value)
+  emit('update:model-value', option.value)
   emit('change', option.value)
   selectedOption.value = option
 }
