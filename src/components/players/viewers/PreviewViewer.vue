@@ -284,7 +284,9 @@ const isFile = computed(
     !isMovie.value &&
     !is3DModel.value &&
     !isSound.value &&
-    !isPdf.value
+    !isPdf.value &&
+    !isMarkdown.value &&
+    !isDiff.value
 )
 
 const originalPath = computed(() => {
