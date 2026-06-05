@@ -711,7 +711,8 @@ const mutations = {
     cache.peopleIndex = buildPeopleIndex(cache.people)
     if (state.peopleSearchText) {
       const keywords = getKeyWords(state.peopleSearchText)
-      state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
+      state.displayedPeople =
+        indexSearch(cache.peopleIndex, keywords) || cache.people
     } else {
       state.displayedPeople = cache.people
     }
@@ -742,7 +743,8 @@ const mutations = {
         cache.peopleIndex = buildPeopleIndex(cache.people)
         if (state.peopleSearchText) {
           const keywords = getKeyWords(state.peopleSearchText)
-          state.displayedPeople = indexSearch(cache.peopleIndex, keywords)
+          state.displayedPeople =
+            indexSearch(cache.peopleIndex, keywords) || cache.people
         } else {
           state.displayedPeople = cache.people
         }
