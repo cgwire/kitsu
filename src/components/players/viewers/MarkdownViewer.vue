@@ -83,7 +83,7 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
 .markdown-wrapper {
   flex: 1;
   overflow-y: auto;
-  padding: 2em;
+  padding: 1em;
   background: var(--background);
   color: var(--text);
   width: 100%;
