@@ -1821,7 +1821,16 @@ const onContainerMouseDown = event => {
   // focused textarea — Shift+Tab then thinks the user is "in the
   // comment block" and ping-pongs them back to the player.
   if (event.button === 0) container.value?.focus()
-  if (!isMovie.value || !event.shiftKey || event.button !== 0) return
+  const isDrawingTool =
+    isDrawing.value || isShapeMode.value || isEraserModeOn.value
+  if (
+    !isMovie.value ||
+    !event.shiftKey ||
+    event.button !== 0 ||
+    isDrawingTool
+  ) {
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   scrubbing = true
