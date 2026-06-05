@@ -82,17 +82,18 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
 
 <style lang="scss" scoped>
 .diff-viewer {
-  position: absolute;
-  inset: 0;
+  position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .diff-wrapper {
+  position: absolute;
+  inset: 0;
   overflow: auto;
+  padding: 1em;
   background: var(--background);
   color: var(--text);
-  height: 100%;
-  width: 100%;
 }
 
 .diff-content {
