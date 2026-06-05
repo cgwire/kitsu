@@ -128,6 +128,10 @@ const props = defineProps({
   previewId: {
     default: '',
     type: String
+  },
+  urlPrefix: {
+    default: null,
+    type: String
   }
 })
 
@@ -152,7 +156,8 @@ const getClientX = event =>
   event.clientX
 
 const tilePath = computed(
-  () => `/api/movies/tiles/preview-files/${props.previewId}.png`
+  () =>
+    `${props.urlPrefix || '/api'}/movies/tiles/preview-files/${props.previewId}.png`
 )
 
 const frameNumberStyle = computed(() => {
@@ -259,9 +264,10 @@ const getFrameBackgroundStyle = frame => {
   const frameX = frame % 8
   const frameY = Math.floor(frame / 8)
   const frameHeight = 100
+  const base = props.urlPrefix || '/api'
 
   if (extension === 'png') {
-    const tp = `/api/pictures/thumbnails/preview-files/${id}.png`
+    const tp = `${base}/pictures/thumbnails/preview-files/${id}.png`
     return {
       background: `url(${tp})`,
       'background-position': '0 0',
@@ -270,7 +276,7 @@ const getFrameBackgroundStyle = frame => {
   } else if (extension === 'mp4') {
     const ratio = pw / ph
     const frameWidth = Math.ceil(frameHeight * ratio)
-    const tp = `/api/movies/tiles/preview-files/${id}.png`
+    const tp = `${base}/movies/tiles/preview-files/${id}.png`
     return {
       background: `url(${tp})`,
       'background-position': `-${frameX * frameWidth}px -${

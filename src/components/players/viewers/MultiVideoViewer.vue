@@ -83,10 +83,6 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  movieUrlPrefix: {
-    type: String,
-    default: null
-  },
   muted: {
     type: Boolean,
     default: false
@@ -99,6 +95,10 @@ const props = defineProps({
   panzoom: {
     type: Boolean,
     default: false
+  },
+  urlPrefix: {
+    type: String,
+    default: null
   }
 })
 
@@ -269,12 +269,12 @@ const getMoviePath = entity => {
     } else {
       previewId = entity.preview_file_previews[props.currentPreviewIndex - 1].id
     }
-    if (props.movieUrlPrefix) {
-      return `${props.movieUrlPrefix}/movies/originals/preview-files/${previewId}.mp4`
-    } else if (props.isHd) {
-      return `/api/movies/originals/preview-files/${previewId}.mp4`
+    const base = props.urlPrefix || '/api'
+    // Originals for shared links or HD mode; the lighter low variant otherwise
+    if (props.urlPrefix || props.isHd) {
+      return `${base}/movies/originals/preview-files/${previewId}.mp4`
     } else {
-      return `/api/movies/low/preview-files/${previewId}.mp4`
+      return `${base}/movies/low/preview-files/${previewId}.mp4`
     }
   } else {
     return ''

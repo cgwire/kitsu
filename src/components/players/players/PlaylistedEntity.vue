@@ -20,7 +20,7 @@
           height="103px"
           :extension="entity.preview_file_extension"
           :preview-file-id="previewFileId"
-          :url-prefix="thumbnailUrlPrefix"
+          :url-prefix="urlPrefix"
         />
       </div>
 
@@ -118,7 +118,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  thumbnailUrlPrefix: {
+  urlPrefix: {
     type: String,
     default: ''
   }

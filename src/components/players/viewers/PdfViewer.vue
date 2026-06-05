@@ -39,6 +39,10 @@ const props = defineProps({
   defaultHeight: {
     type: Number,
     default: 600
+  },
+  urlPrefix: {
+    type: String,
+    default: null
   }
 })
 
@@ -47,11 +51,11 @@ const emit = defineEmits(['pdf-error', 'pdf-loaded'])
 const hasError = ref(false)
 const isLoading = ref(true)
 
-const pdfUrl = computed(() =>
-  props.preview?.id
-    ? `/api/pictures/originals/preview-files/${props.preview.id}.pdf#view=Fit`
-    : ''
-)
+const pdfUrl = computed(() => {
+  if (!props.preview?.id) return ''
+  const base = props.urlPrefix || '/api'
+  return `${base}/pictures/originals/preview-files/${props.preview.id}.pdf#view=Fit`
+})
 
 const onPdfLoad = () => {
   isLoading.value = false

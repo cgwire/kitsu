@@ -13,9 +13,10 @@ export default {
     return client.pget(`/api/data/entities/${entityId}/output-files`)
   },
 
-  getPreviewFileText(previewFileId, extension) {
+  getPreviewFileText(previewFileId, extension, urlPrefix) {
+    const base = urlPrefix || '/api'
     return client.getText(
-      `/api/pictures/originals/preview-files/${previewFileId}.${extension}`
+      `${base}/pictures/originals/preview-files/${previewFileId}.${extension}`
     )
   }
 }

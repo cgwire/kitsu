@@ -302,6 +302,18 @@
           v-if="isCurrentPreviewPdf && !isLoading"
         />
 
+        <markdown-viewer
+          :preview="currentPreview"
+          :default-height="pictureDefaultHeight"
+          v-if="isCurrentPreviewMarkdown && !isLoading"
+        />
+
+        <diff-viewer
+          :preview="currentPreview"
+          :default-height="pictureDefaultHeight"
+          v-if="isCurrentPreviewDiff && !isLoading"
+        />
+
         <p
           :style="{ width: '100%' }"
           class="preview-standard-file has-text-centered"
@@ -907,6 +919,8 @@ import {
   buildAnnotationSnapshotFilename,
   buildAnnotationSnapshotTitle,
   drawSnapshotTitle,
+  isDiffPreview,
+  isMarkdownPreview,
   isModelPreview,
   isMoviePreview,
   isPdfPreview,
@@ -934,6 +948,8 @@ import PlaylistedEntity from '@/components/players/players/PlaylistedEntity.vue'
 // eslint-disable-next-line no-unused-vars -- shadowed by setPlaylistProgress / playlistProgressRef in script
 import PlaylistProgress from '@/components/players/progress/PlaylistProgress.vue'
 import VideoProgress from '@/components/players/progress/VideoProgress.vue'
+import DiffViewer from '@/components/players/viewers/DiffViewer.vue'
+import MarkdownViewer from '@/components/players/viewers/MarkdownViewer.vue'
 import MultiPictureViewer from '@/components/players/viewers/MultiPictureViewer.vue'
 import MultiVideoViewer from '@/components/players/viewers/MultiVideoViewer.vue'
 import ObjectViewer from '@/components/players/viewers/ObjectViewer.vue'
@@ -1174,13 +1190,19 @@ const isCurrentPreviewPicture = computed(() =>
 const isCurrentPreviewModel = computed(() => isModelPreview(extension.value))
 const isCurrentPreviewSound = computed(() => isSoundPreview(extension.value))
 const isCurrentPreviewPdf = computed(() => isPdfPreview(extension.value))
+const isCurrentPreviewMarkdown = computed(() =>
+  isMarkdownPreview(extension.value)
+)
+const isCurrentPreviewDiff = computed(() => isDiffPreview(extension.value))
 const isCurrentPreviewFile = computed(
   () =>
     !isCurrentPreviewMovie.value &&
     !isCurrentPreviewPicture.value &&
     !isCurrentPreviewSound.value &&
     !isCurrentPreviewModel.value &&
-    !isCurrentPreviewPdf.value
+    !isCurrentPreviewPdf.value &&
+    !isCurrentPreviewMarkdown.value &&
+    !isCurrentPreviewDiff.value
 )
 
 // Computed — entity & preview state

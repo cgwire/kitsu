@@ -36,6 +36,10 @@ const props = defineProps({
   defaultHeight: {
     type: Number,
     default: 600
+  },
+  urlPrefix: {
+    type: String,
+    default: null
   }
 })
 
@@ -66,7 +70,8 @@ const loadContent = async () => {
   try {
     rawContent.value = await filesApi.getPreviewFileText(
       props.preview.id,
-      'diff'
+      'diff',
+      props.urlPrefix
     )
   } catch (err) {
     console.error('Failed to load diff preview', err)
@@ -82,17 +87,18 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
 
 <style lang="scss" scoped>
 .diff-viewer {
-  position: absolute;
-  inset: 0;
+  position: relative;
   overflow: hidden;
+  width: 100%;
 }
 
 .diff-wrapper {
+  position: absolute;
+  inset: 0;
   overflow: auto;
+  padding: 1em;
   background: var(--background);
   color: var(--text);
-  height: 100%;
-  width: 100%;
 }
 
 .diff-content {
