@@ -377,6 +377,18 @@
           :class="{ 'side-by-side': isSideBySideComparison }"
         >
           <annotation-canvas
+            ref="onion-annotation-canvas"
+            canvas-id="playlist-annotation-canvas-onion"
+            :media-element="mainContentAnchorEl"
+            :panzoom-transform="panzoomTransform"
+            :interactive="false"
+            :static="true"
+            @resized="refreshOnionSkin"
+            v-show="
+              isCurrentPreviewMovie && isAnnotationsDisplayed && isOnionSkinOn
+            "
+          />
+          <annotation-canvas
             ref="main-annotation-canvas"
             canvas-id="playlist-annotation-canvas"
             :cursor="annotationCursor"
@@ -653,6 +665,8 @@
         v-model:is-environment-skybox="isEnvironmentSkybox"
         v-model:is-eraser-mode-on="isEraserModeOn"
         v-model:is-laser-mode-on="isLaserModeOn"
+        v-model:is-onion-skin-on="isOnionSkinOn"
+        v-model:onion-skin-frames="onionSkinFrames"
         v-model:is-shape-mode="isShapeMode"
         v-model:is-wireframe="isWireframe"
         @annotation-displayed-clicked="
@@ -909,6 +923,7 @@ import { useFullScreen } from '@/composables/fullScreen'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
+import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePreviewRoom } from '@/composables/previewRoom'
@@ -1031,6 +1046,7 @@ const header = useTemplateRef('header')
 const buttonBar = useTemplateRef('button-bar')
 const videoContainer = useTemplateRef('video-container')
 const mainAnnotationCanvas = useTemplateRef('main-annotation-canvas')
+const onionAnnotationCanvas = useTemplateRef('onion-annotation-canvas')
 const mainContentAnchor = useTemplateRef('main-content-anchor')
 // canvasWrapper points to the AnnotationCanvas's overlay div so the
 // composable's legacy paths (addText, showCanvas) keep working with the
@@ -1533,6 +1549,7 @@ const { postAnnotationAddition, postAnnotationDeletion, postAnnotationUpdate } =
 const annotation = useAnnotation({
   mainCanvasComponent: mainAnnotationCanvas,
   comparisonCanvasComponent: comparisonAnnotationCanvas,
+  onionCanvasComponent: onionAnnotationCanvas,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -1571,6 +1588,8 @@ const {
   loadSingleAnnotation,
   loadSingleAnnotationComparison,
   clearComparisonCanvas,
+  loadOnionSkin,
+  clearOnionCanvas,
   currentShape,
   isShapeMode,
   isEraserModeOn,
@@ -1598,6 +1617,21 @@ const {
   copyAnnotationCanvas,
   compositeLiveAnnotationsOntoCanvas
 } = annotation
+
+// Onion skin: ghost the annotations of nearby frames. Persisted like the
+// other player preferences.
+const isOnionSkinOn = ref(
+  preferences.getBoolPreference('player:onionSkinEnabled')
+)
+const onionSkinFrames = ref(
+  Number(preferences.getPreference('player:onionSkinFrames')) || 2
+)
+watch(isOnionSkinOn, value =>
+  preferences.setPreference('player:onionSkinEnabled', value)
+)
+watch(onionSkinFrames, value =>
+  preferences.setPreference('player:onionSkinFrames', value)
+)
 
 // FullScreen composable
 
@@ -2789,6 +2823,23 @@ const getAnnotation = time => {
   annotations.value = []
   return null
 }
+
+// frameNumber is round(currentTimeRaw / frameDuration) - 1, but the
+// annotation lookup (getAnnotation(frame * frameDuration)) works on the raw
+// frame index — so the onion must be centred one frame higher, matching the
+// frame the current annotation actually sits on.
+const onionCurrentFrame = computed(() => frameNumber.value + 1)
+
+const { refresh: refreshOnionSkin } = useOnionSkin({
+  isOn: isOnionSkinOn,
+  frames: onionSkinFrames,
+  currentFrame: onionCurrentFrame,
+  nbFrames,
+  annotations,
+  getAnnotationAtFrame: frame => getAnnotation(frame * frameDuration.value),
+  loadOnionSkin,
+  clearOnionCanvas
+})
 
 const onMetadataLoaded = () => {
   nextTick(() => {
