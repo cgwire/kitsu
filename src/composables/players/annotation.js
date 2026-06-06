@@ -125,6 +125,7 @@ if (PSStroke) {
 export const useAnnotation = ({
   mainCanvasComponent,
   comparisonCanvasComponent,
+  onionCanvasComponent,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -148,6 +149,7 @@ export const useAnnotation = ({
   // writable refs.
   const fabricCanvas = ref(null)
   const fabricCanvasComparison = ref(null)
+  const fabricCanvasOnion = ref(null)
   const lastAnnotationTime = ref('')
   const additions = ref([])
   const deletions = ref([])
@@ -177,6 +179,7 @@ export const useAnnotation = ({
   // Bumped on every comparison-canvas clear so an in-flight async load can tell
   // it was superseded and stop repopulating a canvas meant to be cleared.
   let comparisonLoadToken = 0
+  let onionLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
@@ -1286,6 +1289,34 @@ export const useAnnotation = ({
     }
   }
 
+  const clearOnionCanvas = () => {
+    onionLoadToken++
+    if (isFabricReady(fabricCanvasOnion.value)) {
+      fabricCanvasOnion.value.clear()
+    }
+  }
+
+  // Render ghost annotations onto the read-only onion canvas. `ghosts` is an
+  // array of { annotation, opacity }. Objects are built sequentially (creation
+  // is async); a newer load or a clear bumps onionLoadToken and aborts the
+  // in-flight one so late adds never repopulate a cleared canvas.
+  const loadOnionSkin = async ghosts => {
+    const canvas = fabricCanvasOnion.value
+    if (!canvas || !canvas.width || !canvas.height) return
+    onionLoadToken++
+    const token = onionLoadToken
+    canvas.clear()
+    for (const { annotation, opacity } of ghosts) {
+      for (const obj of annotation.drawing.objects) {
+        if (token !== onionLoadToken) return
+        const built = await addObjectToCanvas(annotation, obj, canvas)
+        if (built) built.set('opacity', opacity)
+      }
+    }
+    if (token !== onionLoadToken) return
+    if (isFabricReady(canvas)) canvas.requestRenderAll()
+  }
+
   // Clipboard
 
   const copyAnnotations = () => {
@@ -1507,11 +1538,21 @@ export const useAnnotation = ({
       { immediate: true, flush: 'sync' }
     )
   }
+  if (onionCanvasComponent) {
+    watch(
+      () => onionCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvasOnion.value = canvas
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
 
   return {
     // State
     fabricCanvas,
     fabricCanvasComparison,
+    fabricCanvasOnion,
     lastAnnotationTime,
     additions,
     deletions,
@@ -1601,6 +1642,8 @@ export const useAnnotation = ({
     isEmptyCanvas,
     clearCanvas,
     clearComparisonCanvas,
+    loadOnionSkin,
+    clearOnionCanvas,
     copyAnnotations,
     pasteAnnotations,
     applyGroupChanges,
