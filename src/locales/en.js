@@ -251,6 +251,14 @@ export default {
     pin: 'Pin',
     pinned: 'Pinned',
     pinned_revision: 'Pinned revision',
+    player: {
+      play: 'Play',
+      pause: 'Pause',
+      mute: 'Mute',
+      unmute: 'Unmute',
+      fullscreen: 'Fullscreen',
+      download: 'Download'
+    },
     post_status: 'Post comment',
     previews: 'Preview files to publish as a new revision',
     retake: 'Retake',
