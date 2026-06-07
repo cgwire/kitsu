@@ -1296,25 +1296,33 @@ export const useAnnotation = ({
     }
   }
 
-  // Render ghost annotations onto the read-only onion canvas. `ghosts` is an
-  // array of { annotation, opacity }. Objects are built sequentially (creation
-  // is async); a newer load or a clear bumps onionLoadToken and aborts the
-  // in-flight one so late adds never repopulate a cleared canvas.
+  // Add one ghost annotation's objects at the given opacity. Sequential
+  // because object creation is async and addObjectToCanvas mutates shared
+  // state (so it can't run in parallel).
+  const renderOnionGhost = async (canvas, { annotation, opacity }) => {
+    for (const obj of annotation.drawing.objects) {
+      const built = await addObjectToCanvas(annotation, obj, canvas)
+      built?.set('opacity', opacity)
+    }
+  }
+
+  // Paint the ghosts (each { annotation, opacity }) onto the read-only onion
+  // canvas. Newest load wins: ghosts are skipped once a fresher load or a
+  // clear has bumped onionLoadToken, so a superseded load never repopulates a
+  // canvas meant for another frame.
   const loadOnionSkin = async ghosts => {
     const canvas = fabricCanvasOnion.value
+    // A 0×0 canvas (not laid out yet) would scale every object to nothing.
     if (!canvas || !canvas.width || !canvas.height) return
-    onionLoadToken++
-    const token = onionLoadToken
+    const token = ++onionLoadToken
     canvas.clear()
-    for (const { annotation, opacity } of ghosts) {
-      for (const obj of annotation.drawing.objects) {
-        if (token !== onionLoadToken) return
-        const built = await addObjectToCanvas(annotation, obj, canvas)
-        if (built) built.set('opacity', opacity)
-      }
+    for (const ghost of ghosts) {
+      if (token !== onionLoadToken) return
+      await renderOnionGhost(canvas, ghost)
     }
-    if (token !== onionLoadToken) return
-    if (isFabricReady(canvas)) canvas.requestRenderAll()
+    if (token === onionLoadToken && isFabricReady(canvas)) {
+      canvas.requestRenderAll()
+    }
   }
 
   // Clipboard
