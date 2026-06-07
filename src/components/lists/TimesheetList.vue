@@ -6,7 +6,6 @@
           :can-delete="false"
           :min-date="disabledDates.to"
           :max-date="disabledDates.from"
-          utc
           :with-margin="false"
           v-model="selectedDate"
         />
