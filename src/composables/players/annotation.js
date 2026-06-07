@@ -125,6 +125,7 @@ if (PSStroke) {
 export const useAnnotation = ({
   mainCanvasComponent,
   comparisonCanvasComponent,
+  onionCanvasComponent,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -148,6 +149,7 @@ export const useAnnotation = ({
   // writable refs.
   const fabricCanvas = ref(null)
   const fabricCanvasComparison = ref(null)
+  const fabricCanvasOnion = ref(null)
   const lastAnnotationTime = ref('')
   const additions = ref([])
   const deletions = ref([])
@@ -177,6 +179,7 @@ export const useAnnotation = ({
   // Bumped on every comparison-canvas clear so an in-flight async load can tell
   // it was superseded and stop repopulating a canvas meant to be cleared.
   let comparisonLoadToken = 0
+  let onionLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
   let pendingSave = null
@@ -1286,6 +1289,42 @@ export const useAnnotation = ({
     }
   }
 
+  const clearOnionCanvas = () => {
+    onionLoadToken++
+    if (isFabricReady(fabricCanvasOnion.value)) {
+      fabricCanvasOnion.value.clear()
+    }
+  }
+
+  // Add one ghost annotation's objects at the given opacity. Sequential
+  // because object creation is async and addObjectToCanvas mutates shared
+  // state (so it can't run in parallel).
+  const renderOnionGhost = async (canvas, { annotation, opacity }) => {
+    for (const obj of annotation.drawing.objects) {
+      const built = await addObjectToCanvas(annotation, obj, canvas)
+      built?.set('opacity', opacity)
+    }
+  }
+
+  // Paint the ghosts (each { annotation, opacity }) onto the read-only onion
+  // canvas. Newest load wins: ghosts are skipped once a fresher load or a
+  // clear has bumped onionLoadToken, so a superseded load never repopulates a
+  // canvas meant for another frame.
+  const loadOnionSkin = async ghosts => {
+    const canvas = fabricCanvasOnion.value
+    // A 0×0 canvas (not laid out yet) would scale every object to nothing.
+    if (!canvas || !canvas.width || !canvas.height) return
+    const token = ++onionLoadToken
+    canvas.clear()
+    for (const ghost of ghosts) {
+      if (token !== onionLoadToken) return
+      await renderOnionGhost(canvas, ghost)
+    }
+    if (token === onionLoadToken && isFabricReady(canvas)) {
+      canvas.requestRenderAll()
+    }
+  }
+
   // Clipboard
 
   const copyAnnotations = () => {
@@ -1507,11 +1546,21 @@ export const useAnnotation = ({
       { immediate: true, flush: 'sync' }
     )
   }
+  if (onionCanvasComponent) {
+    watch(
+      () => onionCanvasComponent.value?.canvas || null,
+      canvas => {
+        fabricCanvasOnion.value = canvas
+      },
+      { immediate: true, flush: 'sync' }
+    )
+  }
 
   return {
     // State
     fabricCanvas,
     fabricCanvasComparison,
+    fabricCanvasOnion,
     lastAnnotationTime,
     additions,
     deletions,
@@ -1601,6 +1650,8 @@ export const useAnnotation = ({
     isEmptyCanvas,
     clearCanvas,
     clearComparisonCanvas,
+    loadOnionSkin,
+    clearOnionCanvas,
     copyAnnotations,
     pasteAnnotations,
     applyGroupChanges,

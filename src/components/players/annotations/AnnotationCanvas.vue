@@ -97,6 +97,18 @@ const updateBounds = () => {
   canvas?.calcOffset()
 }
 
+// Opening the dev console moves the media without resizing the observed
+// elements (the ResizeObserver stays silent). resize fires, but the media's
+// final rect settles a frame later, so recompute now AND after the next frame.
+// Opening the dev console moves the media without resizing the observed
+// elements, so the ResizeObserver stays silent. window / visualViewport resize
+// do fire, but the media's final rect only settles after the dock animation,
+// so recompute immediately and once more after it has settled.
+const onViewportResize = () => {
+  updateBounds()
+  setTimeout(updateBounds, 250)
+}
+
 const observe = el => el && resizeObserver?.observe(el)
 const unobserve = el => el && resizeObserver?.unobserve(el)
 
@@ -164,10 +176,14 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(updateBounds)
   observe(props.mediaElement)
   observe(clip.value?.parentElement)
+  window.addEventListener('resize', onViewportResize)
+  window.visualViewport?.addEventListener('resize', onViewportResize)
   updateBounds()
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', onViewportResize)
+  window.visualViewport?.removeEventListener('resize', onViewportResize)
   resizeObserver?.disconnect()
   resizeObserver = null
   fabricCanvas.value?.dispose()

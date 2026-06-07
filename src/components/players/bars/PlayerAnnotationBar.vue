@@ -33,6 +33,14 @@
       v-if="(!light || fullScreen) && !isConcept"
     />
 
+    <onion-skin-picker
+      v-bind="pickerState('onion')"
+      :is-on="isOnionSkinOn"
+      :frames="onionSkinFrames"
+      @change="onOnionChange"
+      v-if="isMovie && (!light || fullScreen) && !isConcept"
+    />
+
     <transition name="slide">
       <div class="annotation-tools" v-show="isTyping && (!light || fullScreen)">
         <color-picker
@@ -222,6 +230,7 @@ import { ref } from 'vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ColorPicker from '@/components/players/bars/ColorPicker.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import OnionSkinPicker from '@/components/players/bars/OnionSkinPicker.vue'
 import PencilPicker from '@/components/players/bars/PencilPicker.vue'
 import ShapePicker from '@/components/players/bars/ShapePicker.vue'
 
@@ -339,6 +348,15 @@ const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
 const isEraserModeOn = defineModel('isEraserModeOn', { default: undefined })
 const isShapeMode = defineModel('isShapeMode', { default: undefined })
 const currentShape = defineModel('currentShape', { default: undefined })
+const isOnionSkinOn = defineModel('isOnionSkinOn', { default: false })
+const onionSkinFrames = defineModel('onionSkinFrames', { default: 2 })
+
+// The picker emits a combined { enabled, frames } so the on/off state and
+// the span stay in sync (picking a number turns it on, "Off" disables it).
+const onOnionChange = ({ enabled, frames }) => {
+  isOnionSkinOn.value = enabled
+  onionSkinFrames.value = frames
+}
 
 // Tracks which picker dropdown is currently open. Each picker is
 // driven through v-model so opening one closes the others — only

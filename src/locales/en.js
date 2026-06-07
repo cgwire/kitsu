@@ -1265,6 +1265,8 @@ export default {
       annotation_small: 'Small',
       annotation_tiny: 'Tiny',
       annotation_zoom_pan: 'Reset zoom',
+      onion_skin: 'Onion skin frames',
+      onion_skin_off: 'Off',
       change_task_type: 'Change task type',
       current_time: 'Position in the video',
       comments: 'Show/Hide comments',

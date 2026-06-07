@@ -12,6 +12,21 @@
             :class="{ 'side-by-side': isSideBySideComparison }"
           >
             <annotation-canvas
+              ref="onion-annotation-canvas"
+              :canvas-id="`${canvasId}-onion`"
+              :media-element="mainMediaElement"
+              :panzoom-transform="panzoomTransform"
+              :interactive="false"
+              :static="true"
+              v-show="
+                isAnnotationsDisplayed &&
+                isOnionSkinOn &&
+                isMovie &&
+                mainMediaElement
+              "
+              @resized="refreshOnionSkin"
+            />
+            <annotation-canvas
               ref="main-annotation-canvas"
               :canvas-id="canvasId"
               :cursor="annotationCursor"
@@ -231,6 +246,8 @@
             v-model:current-shape="currentShape"
             v-model:is-environment-skybox="isEnvironmentSkybox"
             v-model:is-eraser-mode-on="isEraserModeOn"
+            v-model:is-onion-skin-on="isOnionSkinOn"
+            v-model:onion-skin-frames="onionSkinFrames"
             v-model:is-shape-mode="isShapeMode"
             v-model:is-wireframe="isWireframe"
             @annotation-displayed-clicked="onAnnotationDisplayedClicked"
@@ -429,6 +446,7 @@ import { usePanzoomSync } from '@/composables/panzoom'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { useComparison } from '@/composables/players/comparison'
+import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
 import localPreferences from '@/lib/preferences'
@@ -555,6 +573,7 @@ const mainAnnotationCanvas = useTemplateRef('main-annotation-canvas')
 const comparisonAnnotationCanvas = useTemplateRef(
   'comparison-annotation-canvas'
 )
+const onionAnnotationCanvas = useTemplateRef('onion-annotation-canvas')
 const previewViewer = useTemplateRef('preview-viewer')
 const comparisonViewer = useTemplateRef('comparison-preview-viewer')
 const previewContainer = useTemplateRef('preview-container')
@@ -643,6 +662,7 @@ const isOverlayInteractive = computed(() => !isAltHeld.value)
 const annotation = useAnnotation({
   mainCanvasComponent: mainAnnotationCanvas,
   comparisonCanvasComponent: comparisonAnnotationCanvas,
+  onionCanvasComponent: onionAnnotationCanvas,
   canvasWrapper,
   annotations,
   isCurrentUserArtist,
@@ -683,6 +703,8 @@ const {
   redoLastAction,
   clearCanvas,
   clearComparisonCanvas,
+  loadOnionSkin,
+  clearOnionCanvas,
   copyAnnotations,
   copyAnnotationCanvas,
   compositeLiveAnnotationsOntoCanvas,
@@ -695,6 +717,21 @@ const {
   restoreFailedAnnotations,
   toggleShapeMode
 } = annotation
+
+// Onion skin: ghost the annotations of nearby frames. Persisted like the
+// other player preferences.
+const isOnionSkinOn = ref(
+  localPreferences.getBoolPreference('player:onionSkinEnabled')
+)
+const onionSkinFrames = ref(
+  Number(localPreferences.getPreference('player:onionSkinFrames')) || 2
+)
+watch(isOnionSkinOn, value =>
+  localPreferences.setPreference('player:onionSkinEnabled', value)
+)
+watch(onionSkinFrames, value =>
+  localPreferences.setPreference('player:onionSkinFrames', value)
+)
 
 // Computed
 
@@ -1349,6 +1386,17 @@ const getAnnotation = time => {
   }
 }
 
+const { refresh: refreshOnionSkin } = useOnionSkin({
+  isOn: isOnionSkinOn,
+  frames: onionSkinFrames,
+  currentFrame,
+  nbFrames,
+  annotations,
+  getAnnotationAtFrame: frame => getAnnotation(frame * frameDuration.value),
+  loadOnionSkin,
+  clearOnionCanvas
+})
+
 const getSortedAnnotations = () => {
   const anns = annotations.value
   anns.sort((a, b) => a.time - b.time)
@@ -1821,7 +1869,16 @@ const onContainerMouseDown = event => {
   // focused textarea — Shift+Tab then thinks the user is "in the
   // comment block" and ping-pongs them back to the player.
   if (event.button === 0) container.value?.focus()
-  if (!isMovie.value || !event.shiftKey || event.button !== 0) return
+  const isDrawingTool =
+    isDrawing.value || isShapeMode.value || isEraserModeOn.value
+  if (
+    !isMovie.value ||
+    !event.shiftKey ||
+    event.button !== 0 ||
+    isDrawingTool
+  ) {
+    return
+  }
   event.preventDefault()
   event.stopPropagation()
   scrubbing = true
