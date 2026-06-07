@@ -60,6 +60,24 @@
           </button>
         </div>
 
+        <div class="record-actions" v-if="allowRecording && !recordingMode">
+          <button class="button record-audio" @click="startRecording('audio')">
+            <mic-icon :size="16" />
+            <span>{{ $t('main.record_audio') }}</span>
+          </button>
+          <button class="button record-video" @click="startRecording('video')">
+            <video-icon :size="16" />
+            <span>{{ $t('main.record_video') }}</span>
+          </button>
+        </div>
+
+        <media-recorder-panel
+          :mode="recordingMode"
+          v-if="recordingMode"
+          @recorded="onRecorded"
+          @cancel="recordingMode = null"
+        />
+
         <h3 class="subtitle has-text-centered" v-if="forms.length > 0">
           {{ $t('comments.selected_files') }}
         </h3>
@@ -78,6 +96,12 @@
               muted
               :src="getURL(form)"
               v-else-if="isVideo(form)"
+            />
+            <audio
+              class="is-fullwidth"
+              controls
+              :src="getURL(form)"
+              v-else-if="isAudio(form)"
             />
             <iframe
               class="is-fullwidth"
@@ -110,15 +134,18 @@
 </template>
 
 <script setup>
+import { MicIcon, VideoIcon } from 'lucide-vue-next'
 import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
 import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
+import MediaRecorderPanel from '@/components/widgets/MediaRecorderPanel.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
+  allowRecording: { type: Boolean, default: true },
   extensions: { type: String, default: files.ALL_EXTENSIONS_STRING },
   isEditing: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
@@ -143,9 +170,21 @@ const forms = ref([])
 // 'standard', 'label', or null when idle.
 const snapshotLoading = ref(null)
 const isDraggingFile = ref(false)
+const recordingMode = ref(null)
 
 const onFileSelected = newForms => {
   forms.value = forms.value.concat(newForms)
+}
+
+const startRecording = mode => {
+  recordingMode.value = mode
+}
+
+const onRecorded = file => {
+  const formData = new FormData()
+  formData.append('file', file, file.name)
+  forms.value.push(formData)
+  recordingMode.value = null
 }
 
 const confirm = () => {
@@ -155,6 +194,7 @@ const confirm = () => {
 const reset = () => {
   fileField.value?.reset()
   forms.value = []
+  recordingMode.value = null
 }
 
 const addFiles = fileList => {
@@ -171,6 +211,7 @@ const getURL = form => window.URL.createObjectURL(form.get('file'))
 
 const isImage = form => form.get('file').type.startsWith('image')
 const isVideo = form => form.get('file').type.startsWith('video')
+const isAudio = form => form.get('file').type.startsWith('audio')
 const isPdf = form => form.get('file').type.indexOf('pdf') > 0
 
 const removeAttachment = form => {
@@ -287,6 +328,21 @@ h3.subtitle {
 
 .snapshot-button {
   width: 100%;
+  margin-left: 0;
+}
+
+.record-actions {
+  display: flex;
+  gap: 0.5em;
+  margin-bottom: 1em;
+}
+
+.record-actions .button {
+  align-items: center;
+  display: inline-flex;
+  flex: 1;
+  gap: 0.4em;
+  justify-content: center;
   margin-left: 0;
 }
 
