@@ -4645,44 +4645,58 @@ const playerProxy = {
   width: max-content;
 }
 
+// Menu items styled like the drawing-option docks' entries (see
+// ShapePicker .shape-option): transparent, borderless, subtle white
+// hover. They stretch to the flex column width of .build-options.
 .dl-button {
-  background: $dark-grey;
-  border: 1px solid $dark-grey;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
   color: $white;
-  display: inline-block;
-  width: 190px;
-  padding: 8px;
   cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
 
-  &:hover {
-    background: $dark-grey-light;
+  &:not(.disabled):hover {
+    background-color: rgba(255, 255, 255, 0.12);
   }
 }
 
+// Same look as the drawing-option docks (PencilPicker/ColorPicker/…
+// .*-palette): $dark-grey-light fill, soft 5px radius, no border, padded,
+// stacked with a small gap, and above the annotation overlay
+// (.annotation-clip, z-index 500).
 .build-options {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  background: $dark-grey;
-  border: 1px solid $dark-grey-light;
+  background-color: $dark-grey-light;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem;
   position: absolute;
   width: 200px;
-  left: -120px;
+  left: -135px;
   top: -280px;
   height: 160px;
-  z-index: 300;
+  z-index: 900;
 }
 
 .build-list {
   background: $dark-grey-stronger;
   border: 1px solid $dark-grey-light;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   position: absolute;
   width: 200px;
-  left: -120px;
+  left: -135px;
   top: -121px;
   height: 120px;
   overflow-y: auto;
   padding: 8px;
-  z-index: 300;
+  // Above the annotation overlay (.annotation-clip, z-index 500).
+  z-index: 900;
 }
 
 .build-title {
