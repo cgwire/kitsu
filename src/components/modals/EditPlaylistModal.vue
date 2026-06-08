@@ -31,23 +31,31 @@
     </form>
 
     <modal-footer
+      v-if="!isSuccess"
       :error-text="$t('playlists.edit_error')"
       :is-error="isError"
       :is-loading="isLoading"
-      :is-success="isSuccess"
-      :success-text="successText || $t('playlists.created')"
       @confirm="runConfirmation"
       @cancel="$emit('cancel')"
     />
-    <p class="has-text-right mt1" v-if="isSuccess">
-      <a class="button is-primary" @click="$emit('view')">
+    <div class="success-footer flexrow mt1" v-else>
+      <span class="success flexrow-item">
+        <check-icon :size="18" />
+        {{ successText || $t('playlists.created') }}
+      </span>
+      <div class="filler"></div>
+      <a class="button is-primary flexrow-item" @click="$emit('view')">
         {{ $t('playlists.view_created') }}
       </a>
-    </p>
+      <button class="button is-link flexrow-item" @click="$emit('cancel')">
+        {{ $t('main.close') }}
+      </button>
+    </div>
   </base-modal>
 </template>
 
 <script setup>
+import { CheckIcon } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
@@ -192,5 +200,17 @@ watch(
 <style lang="scss" scoped>
 .button {
   border-radius: 5px;
+}
+
+.success-footer {
+  align-items: center;
+  margin-top: 3em;
+}
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  color: $green;
 }
 </style>
