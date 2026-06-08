@@ -2760,11 +2760,13 @@ const saveAnnotations = () => {
   }
   if (currentPreviewIndex.value > 0) {
     const index = currentPreviewIndex.value - 1
-    const previewFile = currentEntity.value.preview_file_previews[index]
-    preview = {
-      id: previewFile.id,
-      task_id: entity.preview_file_task_id,
-      annotations: previewFile.annotations || []
+    const previewFile = currentEntity.value?.preview_file_previews?.[index]
+    if (previewFile) {
+      preview = {
+        id: previewFile.id,
+        task_id: entity.preview_file_task_id,
+        annotations: previewFile.annotations || []
+      }
     }
   }
 
