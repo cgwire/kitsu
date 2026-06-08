@@ -22,6 +22,12 @@ beforeEach(() => {
   state.error = ref(null)
   state.isSupported = true
   state.listAudioInputs = vi.fn(async () => [])
+  state.arm = vi.fn(async () => {
+    state.status.value = 'ready'
+  })
+  state.record = vi.fn(() => {
+    state.status.value = 'recording'
+  })
   state.start = vi.fn(async () => {
     state.status.value = 'recording'
   })
@@ -65,6 +71,18 @@ describe('widgets/MediaRecorderPanel', () => {
     expect(state.start).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('main.recording.webcam')
     expect(wrapper.text()).toContain('main.recording.screen')
+  })
+
+  it('video arms on source choice and waits for an explicit Start', async () => {
+    const wrapper = mountPanel('video')
+    await wrapper.findAll('.recorder-sources button')[0].trigger('click')
+    expect(state.arm).toHaveBeenCalledWith('webcam')
+    expect(state.record).not.toHaveBeenCalled()
+    await flushPromises()
+    const startButton = wrapper.find('.start-button')
+    expect(startButton.exists()).toBe(true)
+    await startButton.trigger('click')
+    expect(state.record).toHaveBeenCalled()
   })
 
   it('emits recorded(file) when stopping', async () => {

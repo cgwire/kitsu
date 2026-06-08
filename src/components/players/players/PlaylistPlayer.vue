@@ -261,6 +261,7 @@
           :panzoom="true"
           @entity-change="onPlayerPlayingEntityChange"
           @frame-update="onRawPlayerFrameUpdate"
+          @time-update="onRawPlayerTimeUpdate"
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
           @panzoom-changed="onPanZoomChanged"
@@ -3158,10 +3159,9 @@ const getFileFromCanvas = (canvas, filename) => {
 const updateProgressBar = f => {
   const frame = f !== undefined ? f : frameNumber.value
   if (progress.value) progress.value.updateProgressBar(frame + 1)
-  if (playlistDuration.value && !isFullMode.value && currentEntity.value) {
-    playlistProgress.value =
-      currentEntity.value.start_duration + frame / fps.value
-  }
+  // The playlist playhead position is driven by the continuous time-update
+  // channel (onRawPlayerTimeUpdate) so it stays smooth, not by the rounded
+  // frame here.
 }
 
 // Player previews navigation
@@ -3724,6 +3724,13 @@ const resetPlaylistFrameData = () => {
 
 const onRawPlayerFrameUpdate = frame => {
   if (!isFullMode.value) onFrameUpdate(frame)
+}
+
+// Continuous player time → smooth playlist playhead (the frame channel above
+// keeps driving frame-quantised logic: counter, annotations, end detection).
+const onRawPlayerTimeUpdate = time => {
+  if (isFullMode.value || !currentEntity.value) return
+  playlistProgress.value = currentEntity.value.start_duration + time
 }
 
 const onEntityDragStart = (event, entity) => {

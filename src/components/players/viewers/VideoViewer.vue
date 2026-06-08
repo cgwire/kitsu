@@ -304,11 +304,11 @@ const configureVideo = () => {
 
 const getFrameFromPlayer = () => {
   const raw = video.value ? video.value.currentTime : 0
-  // The frame actually displayed at time `raw` is floor(raw / frameDuration);
-  // this is the clean inverse of frameToTime, so reported frame == displayed
-  // frame and pausing (frameToTime(currentFrame)) doesn't jump.
-  const frame = Math.floor(raw / frameDuration.value)
-  return Math.max(0, Math.min(frame, props.nbFrames - 1))
+  if (raw === 0) return 0
+  let frame = Math.ceil(raw / frameDuration.value) + 1
+  frame = Number(frame.toPrecision(4))
+  frame = Math.min(frame, props.nbFrames)
+  return frame
 }
 
 const runEmitTimeUpdateLoop = () => {

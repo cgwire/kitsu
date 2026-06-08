@@ -71,6 +71,7 @@ export const useMediaRecorder = () => {
   let timer = null
   let counter = 0
   let generation = 0
+  let armedMimeType = '' // chosen at arm(), used by record()
   let audioContext = null // analyser context, live during audio recording
 
   // Functions
@@ -152,7 +153,9 @@ export const useMediaRecorder = () => {
     ])
   }
 
-  const start = async (source, deviceId) => {
+  // Acquire the stream and show a preview without recording yet (status
+  // 'ready'); the user then presses Start to actually record.
+  const arm = async (source, deviceId) => {
     if (!isSupported) {
       error.value = 'not_supported'
       status.value = 'error'
@@ -169,18 +172,8 @@ export const useMediaRecorder = () => {
       }
       previewStream.value = stream
       if (source === 'audio') openAudioAnalysis(stream)
-      const mimeType = pickMimeType(source)
-      recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
-      chunks = []
-      recorder.ondataavailable = event => {
-        if (event.data && event.data.size > 0) chunks.push(event.data)
-      }
-      recorder.start()
-      status.value = 'recording'
-      elapsed.value = 0
-      timer = setInterval(() => {
-        elapsed.value += 1
-      }, 1000)
+      armedMimeType = pickMimeType(source)
+      status.value = 'ready'
     } catch (err) {
       stopTracks()
       closeAudioAnalysis()
@@ -188,6 +181,31 @@ export const useMediaRecorder = () => {
       // A cancelled screen-picker is not a hard error: return to idle.
       status.value = error.value === 'aborted' ? 'idle' : 'error'
     }
+  }
+
+  const record = () => {
+    const stream = previewStream.value
+    if (status.value !== 'ready' || !stream) return
+    recorder = new MediaRecorder(
+      stream,
+      armedMimeType ? { mimeType: armedMimeType } : undefined
+    )
+    chunks = []
+    recorder.ondataavailable = event => {
+      if (event.data && event.data.size > 0) chunks.push(event.data)
+    }
+    recorder.start()
+    status.value = 'recording'
+    elapsed.value = 0
+    timer = setInterval(() => {
+      elapsed.value += 1
+    }, 1000)
+  }
+
+  // Convenience: acquire and start in one step (used by the audio one-click).
+  const start = async (source, deviceId) => {
+    await arm(source, deviceId)
+    if (status.value === 'ready') record()
   }
 
   const stop = () =>
@@ -255,6 +273,8 @@ export const useMediaRecorder = () => {
     error,
     isSupported,
     listAudioInputs,
+    arm,
+    record,
     start,
     stop,
     cancel

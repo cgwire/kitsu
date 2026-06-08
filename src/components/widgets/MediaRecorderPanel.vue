@@ -36,11 +36,11 @@
 
     <!-- Video: pick a source first. -->
     <div class="recorder-sources" v-else-if="needsStart">
-      <button class="button" @click="begin('webcam')">
+      <button class="button" @click="armVideo('webcam')">
         <video-icon :size="16" />
         <span>{{ $t('main.recording.webcam') }}</span>
       </button>
-      <button class="button" @click="begin('screen')">
+      <button class="button" @click="armVideo('screen')">
         <monitor-icon :size="16" />
         <span>{{ $t('main.recording.screen') }}</span>
       </button>
@@ -49,7 +49,7 @@
       </button>
     </div>
 
-    <!-- Recording. -->
+    <!-- Armed / recording: a single preview element, controls depend on state. -->
     <template v-else>
       <video
         class="recorder-preview"
@@ -61,7 +61,26 @@
       />
       <canvas class="recorder-meter" ref="meterEl" v-else />
 
-      <div class="recorder-controls">
+      <!-- Video armed: wait for the user to start recording. -->
+      <div
+        class="recorder-controls"
+        v-if="mode === 'video' && status !== 'recording'"
+      >
+        <button
+          class="button is-primary start-button"
+          :disabled="status !== 'ready'"
+          @click="onStartRecording"
+        >
+          <video-icon :size="16" />
+          <span>{{ $t('main.recording.start') }}</span>
+        </button>
+        <button class="button cancel-button" @click="onCancel">
+          {{ $t('main.recording.cancel') }}
+        </button>
+      </div>
+
+      <!-- Recording (or audio). -->
+      <div class="recorder-controls" v-else>
         <span class="recorder-timer">
           <span class="recorder-dot" v-if="status === 'recording'"></span>
           {{ formattedElapsed }}
@@ -100,6 +119,8 @@ const {
   analyser,
   error,
   listAudioInputs,
+  arm,
+  record,
   start,
   stop,
   cancel
@@ -120,12 +141,19 @@ const formattedElapsed = computed(() => {
   return `${minutes}:${seconds}`
 })
 
-const begin = async (source, deviceId) => {
+const beginAudio = () => {
   started.value = true
-  await start(source, deviceId)
+  start('audio', selectedDeviceId.value || undefined)
 }
 
-const beginAudio = () => begin('audio', selectedDeviceId.value || undefined)
+// Video: acquire the stream and show a preview, then wait for the user to
+// press Start (record()) instead of recording immediately.
+const armVideo = source => {
+  started.value = true
+  arm(source)
+}
+
+const onStartRecording = () => record()
 
 const loadDevices = async () => {
   devices.value = await listAudioInputs()

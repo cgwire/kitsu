@@ -108,6 +108,25 @@ describe('composables/useMediaRecorder', () => {
     expect(status.value).toBe('recording')
   })
 
+  it('arm() acquires the stream and goes ready without recording', async () => {
+    const getUserMedia = vi.fn(async () => makeStream())
+    setupMediaApis({ getUserMedia })
+    const { arm, status, previewStream } = useMediaRecorder()
+    await arm('webcam')
+    expect(status.value).toBe('ready')
+    expect(previewStream.value).toBeTruthy()
+  })
+
+  it('record() starts recording only after arm()', async () => {
+    setupMediaApis({ getUserMedia: vi.fn(async () => makeStream()) })
+    const { arm, record, status } = useMediaRecorder()
+    record() // no-op before arming
+    expect(status.value).toBe('idle')
+    await arm('webcam')
+    record()
+    expect(status.value).toBe('recording')
+  })
+
   it('exposes an analyser and resumes the context while recording audio', async () => {
     setupMediaApis({ getUserMedia: vi.fn(async () => makeStream()) })
     const audio = setupAudioContext()

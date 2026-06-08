@@ -44,7 +44,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
-import { floorToFrame } from '@/lib/video'
+import { floorToFrame, roundToFrame } from '@/lib/video'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -400,9 +400,7 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
 const pause = () => {
   if (currentPlayer.value) {
     currentPlayer.value.pause()
-    // Snap to the frame currently displayed (floor), not the nearest one, so
-    // the image doesn't jump forward a frame when pausing mid-frame.
-    currentPlayer.value.currentTime = floorToFrame(
+    currentPlayer.value.currentTime = roundToFrame(
       currentPlayer.value.currentTime,
       fps.value
     )
@@ -551,10 +549,8 @@ const updateTime = time => {
   if (props.name !== 'main') return
   // Continuous time drives the smooth playlist playhead.
   emit('time-update', time)
-  // The integer frame drives frame-based logic; only emit on change. Use floor
-  // (the displayed frame) so it matches the floorToFrame snap done on pause and
-  // when stepping — otherwise the counter recedes a frame when pausing.
-  const frameNumber = Math.floor(time / frameDuration.value)
+  // The integer frame drives frame-based logic; only emit on change.
+  const frameNumber = Math.round(time / frameDuration.value)
   if (frameNumber !== lastEmittedFrame) {
     lastEmittedFrame = frameNumber
     emit('frame-update', frameNumber)

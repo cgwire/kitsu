@@ -865,6 +865,7 @@ export default {
       webcam: 'Webcam',
       screen: 'Screen',
       microphone: 'Microphone',
+      start: 'Start',
       stop: 'Stop',
       cancel: 'Cancel',
       recording: 'Recording',
