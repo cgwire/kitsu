@@ -396,7 +396,6 @@
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
             :wheel-target="mainMediaElement"
-            @click="onCanvasClicked"
             @resized="onMainCanvasResized"
             v-show="
               !isCurrentPreviewFile &&
@@ -927,6 +926,7 @@ import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePreviewRoom } from '@/composables/previewRoom'
+import { scrubFrame } from '@/lib/players/scrub'
 import preferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,
@@ -1070,8 +1070,9 @@ const comparisonContentAnchor = useTemplateRef('comparison-content-anchor')
 
 // — Non-reactive (instance state)
 let isMounted = false
-let scrubbing = false
 let scrubStartX = 0
+let scrubStartFrame = 0
+let scrubWidth = 0
 let isRoomSilent = false
 let silentMode = false
 let isWaveformSeekingSilent = false
@@ -1559,8 +1560,12 @@ const annotation = useAnnotation({
   getCurrentTime: () => getCurrentTime(),
   getCurrentFrame: () => getCurrentFrame(),
   saveAnnotationsCb: () => saveAnnotations(),
-  onCanvasMouseMovedCb: event => onCanvasMouseMoved(event),
-  onCanvasReleasedCb: event => onCanvasReleased(event),
+  // The fabric-canvas mouse:move / mouse:up scrub path was retired in
+  // favour of the document-level Shift+drag scrub (onShiftScrubMove /
+  // onShiftScrubEnd). These Cbs stay as no-ops only because useAnnotation
+  // binds them to fabric unconditionally.
+  onCanvasMouseMovedCb: () => {},
+  onCanvasReleasedCb: () => {},
   isLaserModeOn,
   postAnnotationAddition,
   postAnnotationDeletion,
@@ -1744,11 +1749,21 @@ const { isAltHeld } = usePreviewShortcuts({
   onToggleOverlay: () => toggleFullOverlayComparison()
 })
 
+// True while a Shift+drag scrub is in progress. Used to make the
+// annotation overlay non-interactive so fabric (v6, mouse events on its
+// upper-canvas) never sees the gesture — otherwise its per-move hover
+// re-render fights the video seek (jerky scrub) and a stray click lands
+// on the canvas.
+const isScrubbing = ref(false)
+
 // Holding Alt makes the overlay transparent to pointer events so the
 // user can pan/drag the underlying media (panzoom captures the events
-// directly). Shift stays free for fabric's straight-line constraint,
+// directly). The overlay is also made transparent while scrubbing (see
+// isScrubbing). Shift stays free for fabric's straight-line constraint,
 // and wheel always reaches the media via wheel-target.
-const isOverlayInteractive = computed(() => !isAltHeld.value)
+const isOverlayInteractive = computed(
+  () => !isAltHeld.value && !isScrubbing.value
+)
 
 const { cursor: annotationCursor } = useAnnotationCursor({
   isAltHeld,
@@ -1765,11 +1780,6 @@ const { cursor: annotationCursor } = useAnnotationCursor({
 const clearFocus = () => {
   document.activeElement?.blur()
 }
-
-const getClientX = event =>
-  event.touches?.[0]?.clientX ??
-  event.changedTouches?.[0]?.clientX ??
-  event.clientX
 
 // Helpers
 
@@ -2879,54 +2889,36 @@ const resetPictureCanvas = async () => {
   }
 }
 
-// Scrubbing
-const onCanvasMouseMoved = event => {
-  if (isCurrentPreviewMovie.value && scrubbing) {
-    const x = getClientX(event.e)
-    if (x - scrubStartX < 0) goPreviousFrame()
-    else goNextFrame()
-    scrubStartX = x
-  }
-}
-
-const onCanvasClicked = event => {
-  if (event.button > 1 && isCurrentPreviewMovie.value) {
-    scrubbing = true
-    scrubStartX = getClientX(event)
-  }
-  return false
-}
-
-const onCanvasReleased = () => {
-  if (isCurrentPreviewMovie.value && scrubbing) scrubbing = false
-  return false
-}
-
-// Shift+drag scrub. Mousedown is captured on the video-container so
-// fabric / panzoom never see the gesture (no stray marquee / pan).
-// Move / up listen on the document so the drag survives a cursor
-// that leaves the player area. Advances 1 frame per pixel of
-// horizontal movement (per-event, not per goNextFrame call) so fast
-// drags scrub proportionally instead of crawling at one frame per
-// mouse event.
+// Shift+drag scrub. We listen on *pointer* events, not mouse events:
+// fabric runs with enablePointerEvents (for stylus pressure), so it
+// reacts to pointerdown — which the browser dispatches before mousedown.
+// Intercepting pointerdown in the capture phase on the video-container
+// lets stopPropagation actually reach fabric before it starts a marquee
+// / selection. Move / up listen on the document so the drag survives a
+// cursor that leaves the player area. Positional-relative mapping: the
+// full video width spans the whole clip, anchored on the frame where the
+// drag started (see scrubFrame), so the gesture means the same thing on
+// a 24-frame and a 2000-frame clip — no more "too fast / too slow".
 const onShiftScrubMove = event => {
-  if (!scrubbing) return
-  const x = event.clientX
-  const delta = x - scrubStartX
-  if (delta === 0) return
-  const cur = parseInt(currentFrame.value)
-  const newFrame = Math.max(0, Math.min(nbFrames.value - 1, cur + delta))
-  if (newFrame !== cur) rawPlayer.value?.setCurrentFrame(newFrame)
-  scrubStartX = x
+  if (!isScrubbing.value) return
+  const newFrame = scrubFrame({
+    startFrame: scrubStartFrame,
+    deltaPx: event.clientX - scrubStartX,
+    width: scrubWidth,
+    frameCount: nbFrames.value
+  })
+  if (newFrame !== parseInt(currentFrame.value)) {
+    rawPlayer.value?.setCurrentFrame(newFrame)
+  }
 }
 
 const onShiftScrubEnd = () => {
-  scrubbing = false
-  document.removeEventListener('mousemove', onShiftScrubMove)
-  document.removeEventListener('mouseup', onShiftScrubEnd)
+  isScrubbing.value = false
+  document.removeEventListener('pointermove', onShiftScrubMove)
+  document.removeEventListener('pointerup', onShiftScrubEnd)
 }
 
-const onContainerMouseDown = event => {
+const onContainerPointerDown = event => {
   // A click anywhere in the player area pulls focus to the root
   // (tabindex=-1). Canvas / video aren't focusable by default, so
   // without this nudge the activeElement stays on the previously
@@ -2945,10 +2937,12 @@ const onContainerMouseDown = event => {
   }
   event.preventDefault()
   event.stopPropagation()
-  scrubbing = true
+  isScrubbing.value = true
   scrubStartX = event.clientX
-  document.addEventListener('mousemove', onShiftScrubMove)
-  document.addEventListener('mouseup', onShiftScrubEnd)
+  scrubStartFrame = parseInt(currentFrame.value) || 0
+  scrubWidth = videoContainer.value?.clientWidth || 0
+  document.addEventListener('pointermove', onShiftScrubMove)
+  document.addEventListener('pointerup', onShiftScrubEnd)
 }
 
 // Shift+Tab toggles focus between the player area and the comment
@@ -4328,7 +4322,7 @@ watch(speed, () => {
 
 onMounted(() => {
   if (isMounted) return
-  scrubbing = false
+  isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
   isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
@@ -4348,9 +4342,13 @@ onMounted(() => {
     configureWaveForm()
     configureFullPlayer()
     resumePanZoom()
-    videoContainer.value?.addEventListener('mousedown', onContainerMouseDown, {
-      capture: true
-    })
+    videoContainer.value?.addEventListener(
+      'pointerdown',
+      onContainerPointerDown,
+      {
+        capture: true
+      }
+    )
     // Capture phase so Shift+Tab is intercepted before the textarea's
     // own keydown handlers can stop propagation and swallow it.
     document.addEventListener('keydown', onFocusToggle, true)
@@ -4378,11 +4376,15 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)
   if (container.value) container.value.onmousemove = null
-  videoContainer.value?.removeEventListener('mousedown', onContainerMouseDown, {
-    capture: true
-  })
-  document.removeEventListener('mousemove', onShiftScrubMove)
-  document.removeEventListener('mouseup', onShiftScrubEnd)
+  videoContainer.value?.removeEventListener(
+    'pointerdown',
+    onContainerPointerDown,
+    {
+      capture: true
+    }
+  )
+  document.removeEventListener('pointermove', onShiftScrubMove)
+  document.removeEventListener('pointerup', onShiftScrubEnd)
   document.removeEventListener('keydown', onFocusToggle, true)
   leaveRoom()
   $socket.off('preview-file:annotation-update', onPreviewFileAnnotationUpdate)
