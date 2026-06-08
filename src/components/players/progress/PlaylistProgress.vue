@@ -336,7 +336,7 @@ watch(
   () => {
     if (props.previewId) {
       const preview = props.playlistShotPosition[hoverFrame.value]
-      if (preview.extension === 'mp4') {
+      if (preview?.extension === 'mp4') {
         isTileLoading.value = true
         const img = new Image()
         img.src = tilePath.value
