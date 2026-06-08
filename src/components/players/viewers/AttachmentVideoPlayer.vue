@@ -79,9 +79,12 @@
         </div>
       </template>
     </div>
-    <span class="attachment-name" :title="name" v-if="!hasError">{{
-      name
-    }}</span>
+    <span
+      class="attachment-name"
+      :title="name"
+      v-if="showName && name && !hasError"
+      >{{ name }}</span
+    >
   </div>
 </template>
 
@@ -102,7 +105,8 @@ import { useMediaPlayer } from '@/composables/players/mediaPlayer'
 defineProps({
   src: { type: String, required: true },
   name: { type: String, default: '' },
-  downloadHref: { type: String, default: '' }
+  downloadHref: { type: String, default: '' },
+  showName: { type: Boolean, default: true }
 })
 
 const mediaEl = ref(null)

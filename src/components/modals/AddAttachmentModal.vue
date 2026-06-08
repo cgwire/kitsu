@@ -88,19 +88,18 @@
               <span @click="removeAttachment(form)">x</span>
             </p>
             <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
-            <video
-              class="is-fullwidth"
-              preload="auto"
-              controls
-              loop
-              muted
+            <attachment-video-player
               :src="getURL(form)"
+              :name="form.get('file').name"
+              :download-href="getURL(form)"
+              :show-name="false"
               v-else-if="isVideo(form)"
             />
-            <audio
-              class="is-fullwidth"
-              controls
+            <attachment-audio-player
               :src="getURL(form)"
+              :name="form.get('file').name"
+              :download-href="getURL(form)"
+              :show-name="false"
               v-else-if="isAudio(form)"
             />
             <iframe
@@ -140,6 +139,8 @@ import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useModal } from '@/composables/modal'
 import files from '@/lib/files'
 
+import AttachmentAudioPlayer from '@/components/players/viewers/AttachmentAudioPlayer.vue'
+import AttachmentVideoPlayer from '@/components/players/viewers/AttachmentVideoPlayer.vue'
 import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 import MediaRecorderPanel from '@/components/widgets/MediaRecorderPanel.vue'
 
@@ -285,6 +286,13 @@ defineExpose({
 
 .upload-attachments {
   text-align: center;
+}
+
+// The audio player root is block-level; centre it in the preview like the
+// (inline-block) video player.
+.upload-attachments :deep(.attachment-audio-player) {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .subtitle {
