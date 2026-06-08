@@ -28,10 +28,39 @@ export const useMediaPlayer = mediaRef => {
     () => `${formatTime(currentTime.value)} / ${formatTime(duration.value)}`
   )
 
+  // `timeupdate` only fires ~4x/second, which makes the progress bar choppy.
+  // While playing we sample currentTime every animation frame instead.
+  let rafId = null
+  const tick = () => {
+    const el = mediaRef.value
+    if (el) currentTime.value = el.currentTime
+    rafId = requestAnimationFrame(tick)
+  }
+  const startTick = () => {
+    if (rafId == null && typeof requestAnimationFrame !== 'undefined') {
+      rafId = requestAnimationFrame(tick)
+    }
+  }
+  const stopTick = () => {
+    if (rafId != null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
+    }
+  }
+
   // Event handlers
-  const onPlay = () => (isPlaying.value = true)
-  const onPause = () => (isPlaying.value = false)
-  const onEnded = () => (isPlaying.value = false)
+  const onPlay = () => {
+    isPlaying.value = true
+    startTick()
+  }
+  const onPause = () => {
+    isPlaying.value = false
+    stopTick()
+  }
+  const onEnded = () => {
+    isPlaying.value = false
+    stopTick()
+  }
   const onTimeUpdate = () => {
     currentTime.value = mediaRef.value?.currentTime || 0
   }
@@ -78,6 +107,7 @@ export const useMediaPlayer = mediaRef => {
   }
 
   const unbind = () => {
+    stopTick()
     const el = mediaRef.value
     if (!el) return
     el.removeEventListener('play', onPlay)

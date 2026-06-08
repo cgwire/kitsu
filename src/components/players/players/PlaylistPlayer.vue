@@ -1982,21 +1982,25 @@ const _setCurrentTimeOnHandleIn = () => {
 }
 
 const _runPlaylistProgressUpdateLoop = () => {
-  clearInterval(playLoop)
-  playLoop = setInterval(() => {
-    setPlaylistProgress(fullPlaylistPlayer.value.currentTime)
+  cancelAnimationFrame(playLoop)
+  // Sample the real player time each animation frame so the progress bar stays
+  // smooth, instead of a coarse setInterval(1000 / fps) tick.
+  const update = () => {
+    const player = fullPlaylistPlayer.value
+    if (!player) return
+    setPlaylistProgress(player.currentTime)
     if (currentEntity.value) {
-      const entityTime =
-        fullPlaylistPlayer.value.currentTime -
-        currentEntity.value.start_duration
+      const entityTime = player.currentTime - currentEntity.value.start_duration
       const frame = entityTime * fps.value
-      progress.value.updateProgressBar(frame)
+      progress.value?.updateProgressBar(frame)
     }
-  }, 1000 / fps.value)
+    playLoop = requestAnimationFrame(update)
+  }
+  playLoop = requestAnimationFrame(update)
 }
 
 const _stopPlaylistProgressUpdateLoop = () => {
-  clearInterval(playLoop)
+  cancelAnimationFrame(playLoop)
 }
 
 const pause = () => {

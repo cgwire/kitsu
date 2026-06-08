@@ -111,6 +111,7 @@ const emit = defineEmits([
   'panzoom-ready',
   'play-next',
   'repeat',
+  'time-update',
   'video-loaded'
 ])
 
@@ -132,6 +133,7 @@ let currentTimeRaw = 0
 let firstPanZoom = null
 let panzoomInstances = []
 let playLoop = null
+let lastEmittedFrame = null
 let rate = 1
 let secondPanZoom = null
 let silent = false
@@ -407,7 +409,7 @@ const pause = () => {
       currentPlayer.value.currentTime / frameDuration.value
     )
     emit('frame-update', frameNumber)
-    clearInterval(playLoop)
+    cancelAnimationFrame(playLoop)
   }
   isPlaying.value = false
 }
@@ -430,10 +432,15 @@ const play = () => {
 }
 
 const runEmitTimeUpdateLoop = () => {
-  clearInterval(playLoop)
-  playLoop = setInterval(() => {
-    updateTime(currentPlayer.value.currentTime)
-  }, 1000 / fps.value)
+  cancelAnimationFrame(playLoop)
+  lastEmittedFrame = null
+  // requestAnimationFrame (not setInterval) so the emitted time is smooth and
+  // tab-throttle friendly; frame-update is deduplicated to the frame value.
+  const update = () => {
+    if (currentPlayer.value) updateTime(currentPlayer.value.currentTime)
+    playLoop = requestAnimationFrame(update)
+  }
+  playLoop = requestAnimationFrame(update)
 }
 
 const playNext = handleIn => {
@@ -539,8 +546,13 @@ const switchPlayers = () => {
 }
 
 const updateTime = time => {
+  if (props.name !== 'main') return
+  // Continuous time drives the smooth playlist playhead.
+  emit('time-update', time)
+  // The integer frame drives frame-based logic; only emit on change.
   const frameNumber = Math.round(time / frameDuration.value)
-  if (props.name === 'main') {
+  if (frameNumber !== lastEmittedFrame) {
+    lastEmittedFrame = frameNumber
     emit('frame-update', frameNumber)
   }
 }
@@ -694,7 +706,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  clearInterval(playLoop)
+  cancelAnimationFrame(playLoop)
   window.removeEventListener('resize', resetHeight)
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
