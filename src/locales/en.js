@@ -1198,6 +1198,7 @@ export default {
     comparing_missing_plan: 'Entity missing for current type',
     create_for_selection: 'Generate a playlist from selected tasks',
     create_title: 'Create playlist',
+    created: 'Playlist “{name}” created.',
     created_at: 'Created at:',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this playlist.',
@@ -1263,6 +1264,7 @@ export default {
     unmute: 'Unmute',
     updated_at: 'Updated at:',
     remove: 'remove',
+    view_created: 'View playlist',
     volume_level: 'Volume: {level}%',
     fields: {
       name: 'Name',

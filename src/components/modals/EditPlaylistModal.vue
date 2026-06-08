@@ -34,9 +34,16 @@
       :error-text="$t('playlists.edit_error')"
       :is-error="isError"
       :is-loading="isLoading"
+      :is-success="isSuccess"
+      :success-text="successText || $t('playlists.created')"
       @confirm="runConfirmation"
       @cancel="$emit('cancel')"
     />
+    <p class="has-text-right mt1" v-if="isSuccess">
+      <a class="button is-primary" @click="$emit('view')">
+        {{ $t('playlists.view_created') }}
+      </a>
+    </p>
   </base-modal>
 </template>
 
@@ -60,12 +67,14 @@ const props = defineProps({
   active: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  isSuccess: { type: Boolean, default: false },
   playlistToEdit: { type: Object, default: () => ({}) },
+  successText: { type: String, default: '' },
   taskTypeId: { type: String, default: '' },
   typeDisabled: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['cancel', 'confirm'])
+const emit = defineEmits(['cancel', 'confirm', 'view'])
 
 const form = ref({
   name: props.playlistToEdit.name,
@@ -179,3 +188,9 @@ watch(
   }
 )
 </script>
+
+<style lang="scss" scoped>
+.button {
+  border-radius: 5px;
+}
+</style>
