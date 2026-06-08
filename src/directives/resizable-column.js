@@ -19,27 +19,40 @@ export default {
 
         const setListeners = (item, div) => {
           let pageX, curCol, curColWidth
-          div.addEventListener('mousedown', function (e) {
+
+          const onMouseMove = e => {
+            if (curCol) {
+              const diffX = e.pageX - pageX
+              const newWidth = curColWidth + diffX + 'px'
+              curCol.style.minWidth = newWidth
+              curCol.style.width = newWidth
+              localStorage.setItem(`${el.id}-${item.textContent}`, newWidth)
+            }
+          }
+
+          const onMouseDown = e => {
             curCol = e.target.parentElement
             pageX = e.pageX
             curColWidth = curCol.offsetWidth
+            document.addEventListener('mousemove', onMouseMove)
+          }
 
-            document.addEventListener('mousemove', function (e) {
-              if (curCol) {
-                const diffX = e.pageX - pageX
-                const newWidth = curColWidth + diffX + 'px'
-                curCol.style.minWidth = newWidth
-                curCol.style.width = newWidth
-                localStorage.setItem(`${el.id}-${item.textContent}`, newWidth)
-              }
-            })
-          })
-
-          document.addEventListener('mouseup', function (e) {
+          const onMouseUp = () => {
             curCol = undefined
             pageX = undefined
             curColWidth = undefined
-            document.onmousemove = null
+            document.removeEventListener('mousemove', onMouseMove)
+          }
+
+          div.addEventListener('mousedown', onMouseDown)
+          document.addEventListener('mouseup', onMouseUp)
+
+          // The directive re-runs for each new thead, so track the
+          // document-level listeners and let the unmounted hook detach them.
+          el._columnResizeCleanups = el._columnResizeCleanups || []
+          el._columnResizeCleanups.push(() => {
+            document.removeEventListener('mousemove', onMouseMove)
+            document.removeEventListener('mouseup', onMouseUp)
           })
         }
 
@@ -56,6 +69,12 @@ export default {
             item.style.width = width
           }
         })
+      },
+      unmounted(el) {
+        if (el._columnResizeCleanups) {
+          el._columnResizeCleanups.forEach(cleanup => cleanup())
+          el._columnResizeCleanups = null
+        }
       }
     })
   }

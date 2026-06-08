@@ -150,6 +150,8 @@ const playlistProgressWidget = ref(null)
 const progressDragging = ref(false)
 const width = ref(0)
 
+let playlistResizeObserver = null
+
 const getClientX = event =>
   event.touches?.[0]?.clientX ??
   event.changedTouches?.[0]?.clientX ??
@@ -356,7 +358,8 @@ onMounted(() => {
   domEvents.forEach(([type, listener]) =>
     document.addEventListener(type, listener)
   )
-  new ResizeObserver(resetWidth).observe(playlistProgressWidget.value)
+  playlistResizeObserver = new ResizeObserver(resetWidth)
+  playlistResizeObserver.observe(playlistProgressWidget.value)
   resetWidth()
 })
 
@@ -364,6 +367,8 @@ onBeforeUnmount(() => {
   domEvents.forEach(([type, listener]) =>
     document.removeEventListener(type, listener)
   )
+  playlistResizeObserver?.disconnect()
+  playlistResizeObserver = null
 })
 </script>
 

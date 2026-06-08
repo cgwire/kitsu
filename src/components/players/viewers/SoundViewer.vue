@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import WaveSurfer from 'wavesurfer.js'
 
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -83,6 +83,11 @@ watch(
     }
   }
 )
+
+onBeforeUnmount(() => {
+  wavesurfer?.destroy()
+  wavesurfer = null
+})
 
 defineExpose({ play, pause })
 </script>

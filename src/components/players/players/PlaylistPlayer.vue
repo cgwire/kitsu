@@ -4375,6 +4375,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   endAnnotationSaving()
+  _stopPlaylistProgressUpdateLoop()
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)

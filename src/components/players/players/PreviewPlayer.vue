@@ -594,6 +594,7 @@ const revisionPreviews = useTemplateRef('revision-previews')
 let lastIndex = 1
 let scrubbing = false
 let scrubStartX = 0
+let containerResizeObserver = null
 
 // — Reactive
 
@@ -2189,10 +2190,11 @@ onMounted(() => {
   // viewer's transform through the panzoom-changed sync.
   previewViewer.value?.resumeZoom()
 
-  new ResizeObserver(() => {
+  containerResizeObserver = new ResizeObserver(() => {
     resetPlayerPositions()
     if (isPicture.value || isMovie.value) loadAnnotation()
-  }).observe(container.value)
+  })
+  containerResizeObserver.observe(container.value)
 
   window.addEventListener('resize', onWindowResize)
   // Capture phase so Shift+Tab is intercepted before the textarea's
@@ -2216,6 +2218,8 @@ onBeforeUnmount(() => {
   )
   document.removeEventListener('mousemove', onScrubMove)
   document.removeEventListener('mouseup', onScrubEnd)
+  containerResizeObserver?.disconnect()
+  containerResizeObserver = null
 })
 
 // Player API (passed to TaskInfo via :player prop)
