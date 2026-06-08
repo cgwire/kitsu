@@ -133,8 +133,7 @@ watch(
       : null
     items.value = props.people
     index.value = buildNameIndex(props.people)
-  },
-  { deep: true }
+  }
 )
 
 watch(

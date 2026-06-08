@@ -1090,11 +1090,8 @@ export default {
   },
 
   watch: {
-    displayedAssets: {
-      deep: true,
-      handler() {
-        this.$options.lineIndex = {}
-      }
+    displayedAssets() {
+      this.$options.lineIndex = {}
     },
 
     validationColumns: {

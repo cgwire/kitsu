@@ -34,7 +34,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       })
       membersForAts['#'] = taskTypeOptions
     },
-    { deep: true, immediate: true }
+    { immediate: true }
   )
 
   watch(
@@ -68,7 +68,7 @@ export const useAtMentionsMembers = (teamGetter, taskTypesGetter) => {
       })
       membersForAts['@'] = teamOptions
     },
-    { deep: true, immediate: true }
+    { immediate: true }
   )
 
   return { membersForAts, atOptionsFilter }

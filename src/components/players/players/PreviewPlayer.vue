@@ -2133,19 +2133,15 @@ watch(isComparisonOverlay, () => {
 // Drive the comparison viewer's underlying panzoom from the main one so
 // both stay visually synced. The annotation canvases pick up the
 // transform directly via their panzoom-transform prop.
-watch(
-  panzoomTransform,
-  transform => {
-    if (isComparing.value) {
-      comparisonViewer.value?.setPanZoom(
-        transform.x,
-        transform.y,
-        transform.scale
-      )
-    }
-  },
-  { deep: true }
-)
+watch(panzoomTransform, transform => {
+  if (isComparing.value) {
+    comparisonViewer.value?.setPanZoom(
+      transform.x,
+      transform.y,
+      transform.scale
+    )
+  }
+})
 
 watch(speed, () => {
   const rates = [0.25, 0.5, 1, 1.5, 2]

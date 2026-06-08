@@ -430,14 +430,11 @@ export default {
   },
 
   watch: {
-    entries: {
-      deep: true,
-      handler() {
-        this.entries.forEach(e => {
-          const value = this.expanded[e.id] || false
-          this.expanded[e.id] = value
-        })
-      }
+    entries() {
+      this.entries.forEach(e => {
+        const value = this.expanded[e.id] || false
+        this.expanded[e.id] = value
+      })
     },
 
     isRetakes() {

@@ -4186,13 +4186,9 @@ watch(comparisonMode, () => {
 // its panzoom-transform prop. setComparisonPanZoom runs in silent mode
 // inside MultiVideoViewer, so the resulting panzoom-changed event is
 // suppressed and we don't get a feedback loop.
-watch(
-  panzoomTransform,
-  ({ x, y, scale }) => {
-    if (isComparing.value) setComparisonPanZoom(x, y, scale)
-  },
-  { deep: true }
-)
+watch(panzoomTransform, ({ x, y, scale }) => {
+  if (isComparing.value) setComparisonPanZoom(x, y, scale)
+})
 
 // Preserve the current entity across an entities rebuild. A task-type
 // change rebuilds the list with the same entities (the parent does it via

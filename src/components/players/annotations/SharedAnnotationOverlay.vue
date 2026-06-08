@@ -279,12 +279,11 @@ watch(
     () => props.isPicture,
     () => props.isPlaying
   ],
-  render,
-  { deep: true }
+  render
 )
 
-watch(() => props.movieDimensions, fitCanvasToBounds, { deep: true })
-watch(() => props.panzoomTransform, applyPanzoomTransform, { deep: true })
+watch(() => props.movieDimensions, fitCanvasToBounds)
+watch(() => props.panzoomTransform, applyPanzoomTransform)
 
 // Lifecycle
 
