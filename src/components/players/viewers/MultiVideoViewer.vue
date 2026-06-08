@@ -264,6 +264,7 @@ const getMoviePath = entity => {
     let previewId
     if (
       props.currentPreviewIndex === 0 ||
+      !entity.preview_file_previews ||
       props.currentPreviewIndex > entity.preview_file_previews.length
     ) {
       previewId = entity.preview_file_id
