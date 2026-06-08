@@ -129,6 +129,7 @@ const nextPlayer = shallowRef(undefined)
 // Non-reactive locals (instance-private state previously stashed on $options)
 let containerResizeObserver = null
 let currentTimeRaw = 0
+let isSeeking = false
 let firstPanZoom = null
 let panzoomInstances = []
 let playLoop = null
@@ -507,10 +508,18 @@ const _setCurrentTime = newTime => {
 }
 
 const runSetCurrentTime = currentTime => {
+  // onTimeUpdate emits frame-update, which PlaylistPlayer can answer with
+  // another seek: ignore those re-entrant calls so the loop can't recurse.
+  if (isSeeking) return
   if (currentPlayer.value && currentPlayer.value.currentTime !== currentTime) {
-    // tweaks needed because the html video player is messy with frames
-    currentPlayer.value.currentTime = currentTime + 0.001
-    onTimeUpdate()
+    isSeeking = true
+    try {
+      // tweaks needed because the html video player is messy with frames
+      currentPlayer.value.currentTime = currentTime + 0.001
+      onTimeUpdate()
+    } finally {
+      isSeeking = false
+    }
   }
 }
 
