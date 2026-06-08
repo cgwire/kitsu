@@ -1722,13 +1722,23 @@ const {
 } = previewRoom
 
 // Keyboard shortcuts (common subset; PlaylistPlayer-specific keys are
-// handled below in onKeyDown).
+// handled below in onKeyDown). Letter-based shortcuts must go through
+// this composable: it matches on event.key (the typed character) so they
+// work on non-QWERTY layouts. The onKeyDown below matches on event.code
+// (physical position) and is reserved for keys where that's correct
+// (arrows, Home/End, Delete) plus the playlist-specific entity logic.
 
 const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
   onPlayPause: () => togglePlayPause(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
+  onAnnotate: () => onAnnotateClicked(),
+  onErase: () => onEraseClicked(),
+  onUndo: () => undoLastAction(),
+  onRedo: () => redoLastAction(),
+  onPrevPreview: () => onPlayPreviousEntityClicked(),
+  onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),
   onPaste: () => pasteAnnotations(),
   onToggleOverlay: () => toggleFullOverlayComparison()
@@ -3954,21 +3964,6 @@ const onKeyDown = event => {
     } else {
       onNextFrameClicked()
     }
-  } else if (event.altKey && event.code === 'KeyJ') {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayPreviousEntityClicked()
-  } else if (event.altKey && event.code === 'KeyK') {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayNextEntityClicked()
-  } else if (event.code === 'KeyD') {
-    onAnnotateClicked()
-  } else if ((event.ctrlKey || event.metaKey) && event.code === 'KeyZ') {
-    event.preventDefault()
-    undoLastAction()
-  } else if (event.altKey && event.code === 'KeyR') {
-    redoLastAction()
   } else if (event.code === 'Home') {
     rawPlayer.value?.setCurrentFrame(0)
   } else if (event.code === 'End') {
