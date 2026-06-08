@@ -123,6 +123,7 @@ const emit = defineEmits([
   'panzoom-ready',
   'play-ended',
   'size-changed',
+  'time-update',
   'video-end',
   'video-loaded'
 ])
@@ -146,6 +147,7 @@ let panzoomSilent = false
 let panzoomActive = false
 let currentTimeCalls = []
 let playLoop = null
+let lastEmittedFrame = null
 let isPlaying = false
 let previousDimensions = null
 
@@ -302,21 +304,29 @@ const configureVideo = () => {
 
 const getFrameFromPlayer = () => {
   const raw = video.value ? video.value.currentTime : 0
-  if (raw === 0) return 0
-  let frame = Math.ceil(raw / frameDuration.value) + 1
-  frame = Number(frame.toPrecision(4))
-  frame = Math.min(frame, props.nbFrames)
-  return frame
-}
-
-const emitFrameChange = () => {
-  const frame = getFrameFromPlayer()
-  emit('frame-update', frame)
+  // The frame actually displayed at time `raw` is floor(raw / frameDuration);
+  // this is the clean inverse of frameToTime, so reported frame == displayed
+  // frame and pausing (frameToTime(currentFrame)) doesn't jump.
+  const frame = Math.floor(raw / frameDuration.value)
+  return Math.max(0, Math.min(frame, props.nbFrames - 1))
 }
 
 const runEmitTimeUpdateLoop = () => {
-  clearInterval(playLoop)
-  playLoop = setInterval(emitFrameChange, frameDuration.value)
+  cancelAnimationFrame(playLoop)
+  lastEmittedFrame = null
+  // requestAnimationFrame for a smooth time signal; frame-update is deduped.
+  const update = () => {
+    if (video.value) {
+      emit('time-update', video.value.currentTime)
+      const frame = getFrameFromPlayer()
+      if (frame !== lastEmittedFrame) {
+        lastEmittedFrame = frame
+        emit('frame-update', frame)
+      }
+    }
+    playLoop = requestAnimationFrame(update)
+  }
+  playLoop = requestAnimationFrame(update)
 }
 
 const play = () => {
@@ -335,7 +345,7 @@ const play = () => {
 
 const pause = () => {
   video.value.pause()
-  clearInterval(playLoop)
+  cancelAnimationFrame(playLoop)
   video.value.currentTime = frameToTime(props.currentFrame)
   emit('frame-update', props.currentFrame)
 }
@@ -362,7 +372,7 @@ const goNextFrame = () => {
 
 const onVideoEnd = () => {
   isPlaying = false
-  clearInterval(playLoop)
+  cancelAnimationFrame(playLoop)
   if (props.isRepeating) {
     emit('video-end')
     video.value.currentTime = 0

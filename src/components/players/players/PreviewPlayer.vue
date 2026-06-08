@@ -92,6 +92,7 @@
               }"
               @duration-changed="changeMaxDuration"
               @frame-update="setVideoFrameContext"
+              @time-update="onVideoTimeUpdate"
               @model-loaded="onModelLoaded"
               @panzoom-changed="onPanzoomChanged"
               @picture-loaded="onPreviewLoaded"
@@ -963,13 +964,23 @@ const setVideoFrameContext = frame => {
     currentFrame.value = frame
     currentTimeRaw.value = time
     currentTime.value = formatTime(time, fps.value)
-    progress.value.updateProgressBar(frame)
+    // While playing, the bar is driven smoothly by onVideoTimeUpdate; here we
+    // only move it for paused stepping/seeking (avoids a per-frame jerk).
+    if (!isPlaying.value) progress.value.updateProgressBar(frame)
     emit('frame-updated', frame)
     if (!isPlaying.value) {
       syncComparisonViewer()
     }
     if (!isPlaying.value) loadAnnotation()
   }
+}
+
+// Continuous player time → smooth progress bar during playback, using the same
+// floor(time / frameDuration) convention as getFrameFromPlayer so the bar is
+// consistent with the paused frame.
+const onVideoTimeUpdate = time => {
+  if (!isPlaying.value) return
+  progress.value?.updateProgressBar(time / frameDuration.value)
 }
 
 const onSubPreviewsWheel = event => {
